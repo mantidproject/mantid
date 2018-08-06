@@ -15,8 +15,7 @@ class MANTID_GEOMETRY_DLL DetectorInfoItem {
 public:
   
   DetectorInfoItem(const DetectorInfoItem &copy)
-      : m_detectorInfo(copy.m_detectorInfo) {
-    this->m_index = copy.m_index;
+      : m_detectorInfo(copy.m_detectorInfo), m_index(copy.m_index) {
   }
 
   DetectorInfoItem& operator=(const DetectorInfoItem &rhs) {
@@ -63,7 +62,7 @@ private:
 
   // Variables to hold data
   const DetectorInfo &m_detectorInfo;
-  size_t m_index = 0;
+  size_t m_index;
 };
 
 } // namespace Geometry

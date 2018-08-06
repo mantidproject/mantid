@@ -68,8 +68,8 @@ public:
       compInfo->detectorsInSubtree(instrumentIndex),
       std::vector<size_t>{detectorIndex});
 
-    auto iter = detInfo.begin();
-    TS_ASSERT(iter != hist.end());
+    //auto iter = detInfo.begin();
+    //TS_ASSERT(iter != hist.end());
   }
 
 

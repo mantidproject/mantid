@@ -20,7 +20,10 @@ class MANTID_GEOMETRY_DLL DetectorInfoIterator
 
 public:
   DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
-      : m_item(detectorInfo, index) {}
+    : m_item(detectorInfo, index), m_detectorInfo(detectorInfo), m_index(index) {}
+
+  DetectorInfoIterator(const DetectorInfoIterator&detInfoIterator) : 
+    m_index(detInfoIterator.m_index), m_detectorInfo(detInfoIterator.m_detectorInfo), m_item(detInfoIterator.m_detectorInfo, detInfoIterator.m_index) {}
 
 private:
   friend class boost::iterator_core_access;
@@ -43,6 +46,8 @@ private:
   }
 
   DetectorInfoItem m_item;
+  DetectorInfo m_detectorInfo;
+  size_t m_index;
 };
 
 } // namespace Geometry
