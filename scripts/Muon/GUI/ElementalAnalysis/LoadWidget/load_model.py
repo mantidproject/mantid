@@ -1,18 +1,19 @@
 from __future__ import print_function
-import os
-import glob
 
 import mantid.simpleapi as mantid
-from mantid import config
 
 from six import iteritems
+
+from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
 
 class LoadModel(object):
     def __init__(self):
         self.alg = None
+        self.co_load_ws = None
+        self.loaded_runs = {}
+        self.co_runs = []
         self.run = 0
-        self._type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 
     def cancel(self):
         if self.alg is not None:
@@ -22,74 +23,56 @@ class LoadModel(object):
         return
 
     def execute(self):
-        to_load = self.search_user_dirs(self.run)
-        if to_load:
-            self.load_sequential(to_load)
+        if self.run not in self.loaded_runs:
+            self.load_run()
+        current_ws = self.loaded_runs[self.run]
+        if self.co_runs:
+            if self.co_load_ws:
+                self.co_load_run(current_ws)
+            else:
+                self.co_load_ws = current_ws
 
-    def set_run(self, run):
-        self.run = run
+    def load_run(self):
+        to_load = lutils.search_user_dirs(self.run)
+        if not to_load:
+            try:
+                self.co_runs.remove(self.run)
+            except ValueError:
+                pass
+            return
+        workspaces = {f: lutils.get_filename(
+            f) for f in to_load if lutils.get_filename(f) is not None}
+        self._load(workspaces)
+        self.loaded_runs[self.run] = lutils.group_by_detector(
+            self.run, workspaces.values())
 
-    # Pads run number: i.e. 123 -> 00123; 2695- > 02695
-    def pad_run(self, run):
-        return str(run).zfill(5)
+    def co_load_run(self, workspace):
+        to_add = []
+        for l, r in zip(lutils.flatten_run_data(
+                self.co_load_ws), lutils.flatten_run_data(workspace)):
+            out = "{}_co_add".format(l)
+            mantid.Plus(l, r, OutputWorkspace=out)
+            to_add.append(out)
+        self.co_load_ws = lutils.group_by_detector(
+            lutils.hyphenise(self.co_runs), to_add)
 
-    def search_user_dirs(self, run):
-        files = []
-        for user_dir in config["datasearch.directories"].split(";"):
-            path = os.path.join(user_dir,
-                                "ral{}.rooth*.dat".format(self.pad_run(run)))
-            for g in glob.iglob(path):
-                files.append(g)
-        return files
-
-    def load_sequential(self, files):
+    # inputs is a dict mapping filepaths to output names
+    def _load(self, inputs):
         if self.alg is not None:
             raise RuntimeError("Loading already in progress")
         self.alg = mantid.AlgorithmManager.create("LoadAscii")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
-        workspaces = [(f, self.get_filename(f))
-                      for f in files if self.get_filename(f) is not None]
-        print(workspaces)
-        for f, n in workspaces:
-            self.alg.setProperty("Filename", f)
-            self.alg.setProperty("OutputWorkspace", n)
+        for path, output in iteritems(inputs):
+            self.alg.setProperty("Filename", path)
+            self.alg.setProperty("OutputWorkspace", output)
             self.alg.execute()
             mantid.AnalysisDataService.addOrReplace(
-                n, self.alg.getProperty("OutputWorkspace").value)
-        self.group_by_detector(workspaces)
+                output, self.alg.getProperty("OutputWorkspace").value)
         self.alg = None
 
-    def get_filename(self, name):
-        s = name.rsplit(".")[1]
-        num, end = s[-2:], s[-9:]
-        try:
-            return "{}_{}_{}".format(self.run, self._type_keys[num], end)
-        except KeyError:
-            return None
-
-    def group_by_detector(self, workspaces):
-        d_string = "Run {}; Detector {}"
-        detectors = {d_string.format(self.run, x): [] for x in range(1, 5)}
-        for w, name in workspaces:
-            detector_number = int(w.rsplit(".", 2)[1][5]) - 1
-            detectors[d_string.format(self.run, detector_number)].append(name)
-        for d, v in iteritems(detectors):
-            mantid.GroupWorkspaces(v, OutputWorkspace=str(d))
-
-    def load_concurrent(self, output, files):
-        if self.alg is not None:
-            raise RuntimeError("Loading already in progress")
-        self.alg = mantid.AlgorithmManager.create("Load")
-        self.alg.initialize()
-        self.alg.setAlwaysStoreInADS(False)
-        load_string = "+".join(files)
-        self.alg.setProperty("Filename", load_string)
-        self.alg.setProperty("OutputWorkspace", output)
-        self.alg.execute()
-        mantid.AnalysisDataService.addOrReplace(
-            load_string, self.alg.getProperty("OutputWorkspace").value)
-        self.alg = None
+    def set_run(self, run):
+        self.run = run
 
     def loadData(self, inputs):
         pass
