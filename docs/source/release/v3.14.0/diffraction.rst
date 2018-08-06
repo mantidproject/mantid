@@ -12,8 +12,11 @@ Diffraction Changes
 Powder Diffraction
 ------------------
  Improvements
+ 
 ############
 - Focusing in texture mode for Gem now properly saves
   .gda files.
+  
+  
 
 :ref:`Release 3.14.0 <v3.14.0>`
