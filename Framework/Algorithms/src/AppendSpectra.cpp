@@ -86,15 +86,16 @@ void AppendSpectra::exec() {
   const int number = getProperty("Number");
 
   if (event_ws1 && event_ws2) {
-    // Both are event workspaces. Use the special method
-    MatrixWorkspace_sptr output = this->execEvent(*event_ws1, *event_ws2);
-    if (number > 1)
-      g_log.warning("Number property is ignored for event workspaces");
-    if (mergeLogs)
-      combineLogs(ws1->run(), ws2->run(), output->mutableRun());
-    // Set the output workspace
-    setProperty("OutputWorkspace", output);
-    return;
+      // Both are event workspaces. Use the special method
+      DataObjects::EventWorkspace_sptr output = this->execEvent(*event_ws1, *event_ws2);
+      for (int i = 1; i < number; i++) {
+          output = this->execEvent(*output, *event_ws2);
+      }
+      if (mergeLogs)
+          combineLogs(ws1->run(), ws2->run(), output->mutableRun());
+      // Set the output workspace
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(output));
+      return;
   }
   // So it is a workspace 2D.
 
