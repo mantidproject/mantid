@@ -178,7 +178,7 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  void doTest(bool event, bool combineLogs=false, int number=1) {
+  void doTest(bool event, bool combineLogs = false, int number = 1) {
     MatrixWorkspace_sptr ws1, ws2, out;
     int numBins = 20;
 
@@ -247,7 +247,7 @@ public:
 
   void test_events() { doTest(true); }
 
-  void test_number_events() {doTest(true, true, 3);}
+  void test_number_events() { doTest(true, true, 3); }
 
   void test_2D() { doTest(false); }
 
