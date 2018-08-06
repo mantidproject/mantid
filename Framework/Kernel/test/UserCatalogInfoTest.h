@@ -19,7 +19,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
   return out;
 }
 }
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 using namespace Mantid::Kernel;
 class MockCatalogConfigService : public CatalogConfigService {
 public:
@@ -37,7 +37,7 @@ public:
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 // Adaptee
 struct UserType {
   std::string getString(const std::string &) const { return "my_value"; }

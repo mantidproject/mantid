@@ -27,7 +27,12 @@ Install the following:
     * Universal Windows App Development Kits -> Tools and Windows 10 SDK
     * Windows 8.1 and Windows Phone 8.0/8.1 Tools -> Tools and Windows SDKs
 
-* `Git <https://git-scm.com/>`_. After installation open Git Bash and run ``git lfs install``.
+* `Git <https://git-scm.com/>`_.
+
+  * install the latest version and ensure that Git LFS is checked to be included
+  * when the install has completed create a directory for storage of the LFS objects, e.g. ``C:\GitLFSStorage``
+  * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
+ 
 * `CMake <https://cmake.org/download/>`_
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 

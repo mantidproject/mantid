@@ -25,7 +25,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace {
 /*------------------------------------------------------------
@@ -197,6 +197,6 @@ public:
 };
 }
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif

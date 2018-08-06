@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <algorithm>
 #include <array>
@@ -14,12 +15,9 @@ namespace Functions {
 
 namespace {
 
-#ifdef __clang__
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
+GNU_DIAG_OFF("missing-braces")
 
 // Get a complex conjugate of the value returned by
 // ComplexMatrix::operator(i,j)
@@ -636,9 +634,7 @@ void diagonalise(const ComplexFortranMatrix &hamiltonian,
   eigenvalues += -eshift;
 }
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_OFF("missing-braces")
 
 } // anonymous namespace
 

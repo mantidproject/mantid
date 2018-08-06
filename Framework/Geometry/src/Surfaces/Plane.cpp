@@ -17,19 +17,15 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <gp_Pln.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {

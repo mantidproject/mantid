@@ -101,7 +101,6 @@ public:
     auto &Azimuthal = tws->getColVector<double>("Azimuthal");
     auto &detDir = tws->getColVector<Kernel::V3D>("DetDirections");
 
-    TS_ASSERT(&detDir[0]);
     TS_ASSERT_EQUALS(nVal, detDir.size());
 
     for (size_t i = 0; i < nVal; i++) {
