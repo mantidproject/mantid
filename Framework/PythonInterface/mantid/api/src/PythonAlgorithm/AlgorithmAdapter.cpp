@@ -3,6 +3,7 @@
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/SerialAlgorithm.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
@@ -145,19 +146,24 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     return SuperClass::isRunning();
   } else {
     Environment::GlobalInterpreterLock gil;
+
+    GNU_DIAG_OFF("parentheses-equality")
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       throw Environment::PythonException();
     if (PyBool_Check(result)) {
+
 #if PY_MAJOR_VERSION >= 3
       return static_cast<bool>(PyLong_AsLong(result));
 #else
       return static_cast<bool>(PyInt_AsLong(result));
 #endif
+
     } else
       throw std::runtime_error(
           "Algorithm.isRunning - Expected bool return type.");
   }
+  GNU_DIAG_ON("parentheses-equality")
 }
 
 /**

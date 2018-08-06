@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace Crystal {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
@@ -32,10 +32,8 @@ public:
 
 class MockICluster : public ICluster {
 public:
-  MOCK_CONST_METHOD1(
-      integrate,
-      ClusterIntegratedValues(
-          boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws));
+  MOCK_CONST_METHOD1(integrate, ClusterIntegratedValues(boost::shared_ptr<
+                                    const Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD1(
       writeTo, void(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD0(getLabel, size_t());
@@ -51,8 +49,8 @@ public:
   }
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
-} // namespace Crystal
-} // namespace Mantid
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+}
+}
 
 #endif /* MOCKOBJECTS_H_ */

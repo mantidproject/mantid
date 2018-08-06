@@ -97,21 +97,16 @@ Statistics getStatisticsNumpy(const NumPy::NdArray &data,
   }
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
                                 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 //============================ Z score
 //============================================
 
@@ -160,21 +155,16 @@ std::vector<double> getModifiedZscoreNumpy(const NumPy::NdArray &data,
   }
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads,
                                 getModifiedZscoreNumpy, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 //============================ getMoments
 //============================================
@@ -225,21 +215,15 @@ std::vector<double> getMomentsAboutOriginNumpy(const NumPy::NdArray &indep,
   return getMomentsNumpyImpl(&getMomentsAboutOrigin, indep, depend, maxMoment);
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads,
                                 getMomentsAboutOriginNumpy, 2, 3)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 /**
  * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept
  * numpy arrays
@@ -251,21 +235,15 @@ std::vector<double> getMomentsAboutMeanNumpy(const NumPy::NdArray &indep,
   return getMomentsNumpyImpl(&getMomentsAboutMean, indep, depend, maxMoment);
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads,
                                 getMomentsAboutMeanNumpy, 2, 3)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 ///@endcond
 } // namespace

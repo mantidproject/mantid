@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindSXPeaksHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <gmock/gmock.h>
 
 #include <string>
@@ -16,15 +16,15 @@ using namespace testing;
 
 namespace {
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
-} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
+}
 
 class FindSXPeaksHelperTest : public CxxTest::TestSuite {
 public:

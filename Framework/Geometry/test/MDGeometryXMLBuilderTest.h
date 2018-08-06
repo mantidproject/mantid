@@ -34,7 +34,7 @@ private:
   /// dependency.
   class MockIMDDimension : public Mantid::Geometry::IMDDimension {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_CONST_METHOD0(getUnits, const Mantid::Kernel::UnitLabel());
     MOCK_CONST_METHOD0(getDimensionId, const std::string &());
@@ -48,7 +48,7 @@ private:
     MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
     MOCK_CONST_METHOD0(getMDUnits, const Kernel::MDUnit &());
     MOCK_CONST_METHOD0(getMDFrame, const Geometry::MDFrame &());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   static std::string createDimensionXMLString(unsigned int nbins, int min,

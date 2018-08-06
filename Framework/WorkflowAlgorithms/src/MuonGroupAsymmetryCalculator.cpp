@@ -130,7 +130,6 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
     table->addColumn("double", "norm");
     table->addColumn("str", "name");
     table->addColumn("str", "method");
-    table->removeRow(0);
   }
 
   MatrixWorkspace_sptr outWS;

@@ -1,15 +1,16 @@
 #ifndef TCP_EVENT_STREAM_DEFS_H
 #define TCP_EVENT_STREAM_DEFS_H
 
+#include "MantidKernel/WarningSuppressions.h"
+
 #include <cstdint>
 #include <cstring>
 #include <ctime>
 #include <vector>
 
 // to ignore warnings when comparing header versions
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-#pragma GCC diagnostic ignored "-Wtype-limits"
-#elif defined(_WIN32)
+GNU_DIAG_OFF("type-limits")
+#if defined(_WIN32)
 #pragma warning(disable : 4296)
 #endif
 
@@ -49,10 +50,8 @@ struct TCPStreamEventHeader {
   TCPStreamEventHeader(uint32_t type_)
       : marker1(marker), marker2(marker), version(current_version),
         length(sizeof(TCPStreamEventHeader)), type(type_) {}
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wtautological-compare"
-#endif
+
+  GNU_DIAG_OFF("tautological-compare")
   bool isValid() const {
     return marker1 == marker && marker2 == marker &&
            length >= sizeof(TCPStreamEventHeader) &&
@@ -60,9 +59,8 @@ struct TCPStreamEventHeader {
            minorVersion() >= TCPStreamEventHeader::minor_version &&
            type != InvalidStream;
   }
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+  GNU_DIAG_ON("tautological-compare")
+
   static const uint32_t major_version =
       1; ///< starts at 1, then incremented whenever layout of this or further
   /// packets changes in a non backward compatible way
@@ -190,4 +188,6 @@ struct TCPStreamEventDataSE {
 };
 } // namespace LiveData
 } // namespace Mantid
+
+GNU_DIAG_ON("type-limits")
 #endif /* TCP_EVENT_STREAM_DEFS_H */

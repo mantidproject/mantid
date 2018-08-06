@@ -58,13 +58,13 @@ private:
 
   // Helper type, representing some concrete workspace type.
   class MockWorkspace : public Mantid::API::Workspace {
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(name, const std::string());
     MOCK_CONST_METHOD0(threadSafe, bool());
     MOCK_CONST_METHOD0(toString, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   private:
     MockWorkspace *doClone() const override {
       throw std::runtime_error("Cloning of MockWorkspace is not implemented.");

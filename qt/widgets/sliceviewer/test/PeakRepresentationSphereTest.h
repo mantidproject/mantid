@@ -34,7 +34,7 @@ public:
                                   outerBackgroundRadius);
 
     // Act + Assert
-    TSM_ASSERT(radius, peak.getEffectiveRadius());
+    TS_ASSERT_EQUALS(radius, peak.getEffectiveRadius());
   }
 
   void test_getRadius_gets_outer_background_radius_if_background_is_shown() {
@@ -49,7 +49,7 @@ public:
     peak.showBackgroundRadius(true);
 
     // Act + Assert
-    TSM_ASSERT(outerBackgroundRadius, peak.getEffectiveRadius());
+    TS_ASSERT_EQUALS(outerBackgroundRadius, peak.getEffectiveRadius());
   }
 
   void test_handle_outer_background_radius_zero() {

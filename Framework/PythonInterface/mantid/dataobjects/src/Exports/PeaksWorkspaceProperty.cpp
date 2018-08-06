@@ -7,7 +7,7 @@ using Mantid::DataObjects::PeaksWorkspace;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<PeaksWorkspace>)
 
-void export_IPeaksWorkspaceProperty() {
+void export_PeaksWorkspaceProperty() {
   using Mantid::PythonInterface::WorkspacePropertyExporter;
   WorkspacePropertyExporter<PeaksWorkspace>::define("PeaksWorkspaceProperty");
 }

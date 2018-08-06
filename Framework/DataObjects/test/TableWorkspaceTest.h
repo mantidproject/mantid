@@ -112,7 +112,7 @@ public:
     TS_ASSERT_EQUALS(tw.getColumn("Name"), strCol);
     TS_ASSERT_EQUALS(tw.getColumn("Position"), v3dCol);
     // Test trying to add existing column returns null pointer
-    TS_ASSERT(!tw.addColumn("int", "Number"))
+    TS_ASSERT_THROWS(tw.addColumn("int", "Number"), std::invalid_argument);
 
     tw.getRef<int>("Number", 1) = 17;
     tw.cell<std::string>(2, 1) = "STRiNG";

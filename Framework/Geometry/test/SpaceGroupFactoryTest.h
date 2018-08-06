@@ -398,9 +398,9 @@ private:
     MockSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                             const std::string &generatorInformation)
         : AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation) {}
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(generateGroup, Group_const_sptr());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   /* Testing TransformationSpaceGroupGenerator is a bit hard in the sense that

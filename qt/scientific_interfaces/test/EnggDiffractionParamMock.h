@@ -6,7 +6,7 @@
 
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -20,6 +20,6 @@ public:
                      std::string(const std::vector<RunLabel> &runLabels));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONPARAMMOCK_H_

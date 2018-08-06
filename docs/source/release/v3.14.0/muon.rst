@@ -27,4 +27,27 @@ Improvements
 Bugfixes
 ########
 
+  
+Interface
+---------
+
+Improvements
+############
+
+Bugfixes
+########
+- Results table now includes all logs that are common to all of the loaded files.
+
+Algorithms
+----------
+
+New
+###
+
+Improvements
+############
+
+Bugfixes
+########
+	
 :ref:`Release 3.14.0 <v3.14.0>`

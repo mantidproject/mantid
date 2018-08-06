@@ -145,12 +145,52 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
 
   for (uint16_t i = 0; i < nExperiments; i++) {
     uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
+    experimentInfoNo.push_back(nWSexperiments);
     for (uint16_t j = 0; j < nWSexperiments; j++) {
       API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(
           m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
       out->addExperimentInfo(ei);
     }
   }
+
+  // Cumulative sum of number of experimentInfo and reverse order
+  std::partial_sum(experimentInfoNo.begin(), experimentInfoNo.end(),
+                   experimentInfoNo.begin());
+  std::reverse(std::begin(experimentInfoNo), std::end(experimentInfoNo));
+}
+
+//----------------------------------------------------------------------------------------------
+/** Copy the extra data (not signal, error or coordinates) from one event to
+ * another with different numbers of dimensions
+ *
+ * @param srcEvent :: the source event, being copied
+ * @param newEvent :: the destination event
+ * @param runIndexOffset :: offset to be added to the runIndex
+*/
+template <size_t nd, size_t ond>
+inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
+                      MDLeanEvent<ond> &newEvent,
+                      const uint16_t runIndexOffset) {
+  // Nothing extra copy - this is no-op
+  UNUSED_ARG(srcEvent);
+  UNUSED_ARG(newEvent);
+  UNUSED_ARG(runIndexOffset);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Copy the extra data (not signal, error or coordinates) from one event to
+ * another with different numbers of dimensions
+ *
+ * @param srcEvent :: the source event, being copied
+ * @param newEvent :: the destination event
+ * @param runIndexOffset :: offset to be added to the runIndex
+ */
+template <size_t nd, size_t ond>
+inline void copyEvent(const MDEvent<nd> &srcEvent, MDEvent<ond> &newEvent,
+                      const uint16_t runIndexOffset) {
+  newEvent.setDetectorId(srcEvent.getDetectorID());
+  newEvent.setRunIndex(
+      static_cast<uint16_t>(srcEvent.getRunIndex() + runIndexOffset));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -169,6 +209,9 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
 
   MDBoxBase<MDE, nd> *box1 = ws1->getBox();
   MDBoxBase<MDE, nd> *box2 = ws2->getBox();
+
+  uint16_t runIndexOffset = experimentInfoNo.back();
+  experimentInfoNo.pop_back();
 
   // How many events you started with
   size_t initial_numEvents = ws1->getNPoints();
@@ -194,7 +237,15 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
         // Copy the events from WS2 and add them into WS1
         const std::vector<MDE> &events = box->getConstEvents();
         // Add events, with bounds checking
-        box1->addEvents(events);
+
+        for (auto it = events.cbegin(); it != events.cend(); ++it) {
+          // Create the event
+          MDE newEvent(it->getSignal(), it->getErrorSquared(), it->getCenter());
+          // Copy extra data, if any
+          copyEvent(*it, newEvent, runIndexOffset);
+          // Add it to the workspace
+          box1->addEvent(newEvent);
+        }
         if (fileBasedSource)
           box->clear();
         else

@@ -340,13 +340,13 @@ public:
     // of its columns when they are deleted
     const auto table = []() {
       auto tab = WorkspaceFactory::Instance().createTable();
-      /*auto col = */ tab->addColumn("str", "Run");
-      /*auto col = */ tab->addColumn("double", "A0");
-      /*auto col = */ tab->addColumn("double", "A0Error");
-      /*auto col = */ tab->addColumn("double", "A1");
-      /*auto col = */ tab->addColumn("double", "A1Error");
-      /*auto col = */ tab->addColumn("double", "Cost function");
-      /*auto col = */ tab->addColumn("double", "Cost function Error");
+      tab->addColumn("str", "Run");
+      tab->addColumn("double", "A0");
+      tab->addColumn("double", "A0Error");
+      tab->addColumn("double", "A1");
+      tab->addColumn("double", "A1Error");
+      tab->addColumn("double", "Cost function");
+      tab->addColumn("double", "Cost function Error");
 
       TableRow row1 = tab->appendRow();
       TableRow row2 = tab->appendRow();

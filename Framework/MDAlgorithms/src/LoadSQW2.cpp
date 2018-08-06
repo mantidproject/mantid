@@ -17,6 +17,7 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 
 namespace Mantid {
@@ -482,12 +483,9 @@ std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
   return dimLimits;
 }
 
-#ifdef __clang__
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
+GNU_DIAG_OFF("missing-braces")
 /**
  * Create the Q MDHistoDimension for the output frame and given information
  * from the file
@@ -540,9 +538,8 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
 
   return builder.create();
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+
+GNU_DIAG_ON("missing-braces")
 
 /**
  * Create an energy dimension
