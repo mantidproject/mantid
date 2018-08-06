@@ -960,14 +960,12 @@ void ConfigDialog::initMantidOptionsTab() {
       new QCheckBox("Re-use plot instances for different types of plots");
   m_reusePlotInstances->setChecked(false);
   grid->addWidget(m_reusePlotInstances, 0, 0);
-  QString setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "MantidOptions.ReusePlotInstances"));
-  if (!setting.compare("On")) {
-    m_reusePlotInstances->setChecked(true);
-  } else if (!setting.compare("Off")) {
-    m_reusePlotInstances->setChecked(false);
-  }
+
+  bool setting = Mantid::Kernel::ConfigService::Instance()
+                     .getValue<bool>("MantidOptions.ReusePlotInstances")
+                     .get_value_or(false);
+
+  m_reusePlotInstances->setChecked(setting);
   m_reusePlotInstances->setToolTip("If on, the same plot instance will be "
                                    "re-used for every of the different plots "
                                    "available in the workspaces window "
@@ -978,14 +976,12 @@ void ConfigDialog::initMantidOptionsTab() {
   m_invisibleWorkspaces->setChecked(false);
   grid->addWidget(m_invisibleWorkspaces, 1, 0);
 
-  setting = QString::fromStdString(
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "MantidOptions.InvisibleWorkspaces"));
-  if (!setting.compare("1")) {
-    m_invisibleWorkspaces->setChecked(true);
-  } else if (!setting.compare("0")) {
-    m_invisibleWorkspaces->setChecked(false);
-  }
+  bool invisibleWsSetting =
+      Mantid::Kernel::ConfigService::Instance()
+          .getValue<bool>("MantidOptions.InvisibleWorkspaces")
+          .get_value_or(false);
+
+  m_invisibleWorkspaces->setChecked(invisibleWsSetting);
 
   // categories tree widget
   treeCategories = new QTreeWidget(frame);
@@ -1003,15 +999,12 @@ void ConfigDialog::initMantidOptionsTab() {
   m_useOpenGL->setChecked(true);
   grid->addWidget(m_useOpenGL, 4, 0);
 
-  setting = QString::fromStdString(
-                Mantid::Kernel::ConfigService::Instance().getString(
-                    "MantidOptions.InstrumentView.UseOpenGL"))
-                .toUpper();
-  if (setting == "ON") {
-    m_useOpenGL->setChecked(true);
-  } else {
-    m_useOpenGL->setChecked(false);
-  }
+  bool openglSetting =
+      Mantid::Kernel::ConfigService::Instance()
+          .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
+          .get_value_or(false);
+
+  m_useOpenGL->setChecked(openglSetting);
 }
 
 void ConfigDialog::initSendToProgramTab() {

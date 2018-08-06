@@ -1628,9 +1628,8 @@ void Algorithm::setLoggingOffset(const int value) {
   if (m_communicator->rank() == 0)
     g_log.setLevelOffset(value);
   else {
-    int offset{1};
-    ConfigService::Instance().getValue("mpi.loggingOffset", offset);
-    g_log.setLevelOffset(value + offset);
+    auto offset = ConfigService::Instance().getValue<int>("mpi.loggingOffset");
+    g_log.setLevelOffset(value + offset.get_value_or(1));
   }
 }
 

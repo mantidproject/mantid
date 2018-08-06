@@ -41,25 +41,11 @@ Mantid::Kernel::Logger g_log("ProjectRecovery");
 // Config helper methods
 template <typename T>
 boost::optional<T> getConfigValue(const std::string &key) {
-  T returnedValue;
-
-  int valueIsGood =
-      Mantid::Kernel::ConfigService::Instance().getValue<T>(key, returnedValue);
-
-  if (valueIsGood != 1) {
-    return boost::optional<T>{};
-  }
-
-  return boost::optional<T>{returnedValue};
+  return Mantid::Kernel::ConfigService::Instance().getValue<T>(key);
 }
 
 boost::optional<bool> getConfigBool(const std::string &key) {
-  auto returnedValue = getConfigValue<std::string>(key);
-  if (!returnedValue.is_initialized()) {
-    return boost::optional<bool>{};
-  }
-
-  return returnedValue->find("true") != std::string::npos;
+  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
 }
 
 /// Returns a string to the current top level recovery folder

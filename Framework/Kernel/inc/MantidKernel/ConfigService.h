@@ -6,14 +6,16 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
-#include "MantidKernel/SingletonHolder.h"
+
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
+
+#include <boost/optional/optional.hpp>
+
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <Poco/Notification.h>
-#include <Poco/NotificationCenter.h>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -150,7 +152,7 @@ public:
   /// Sets a configuration property
   void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
-  template <typename T> int getValue(const std::string &keyName, T &out);
+  template <typename T> boost::optional<T> getValue(const std::string &keyName);
   /// Return the local properties filename.
   std::string getLocalFilename() const;
   /// Return the user properties filename
