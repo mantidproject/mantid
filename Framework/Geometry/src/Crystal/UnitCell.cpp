@@ -624,17 +624,6 @@ void UnitCell::recalculate() {
   calculateB();
 }
 
-/// Private function to calculate #G matrix
-
-/*
-        void UnitCell::calculateModVec()
-        {
-            ModVec1(ModHKL[0][0],ModHKL[1][0],ModHKL[2][0]);
-            ModVec1(ModHKL[0][1],ModHKL[1][1],ModHKL[2][1]);
-            ModVec1(ModHKL[0][2],ModHKL[1][2],ModHKL[2][2]);
-        }
- */
-
 void UnitCell::calculateG() {
   G[0][0] = da[0] * da[0];
   G[1][1] = da[1] * da[1];

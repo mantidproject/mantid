@@ -215,7 +215,6 @@ protected:
   void calculateGstar();
   void calculateReciprocalLattice();
   void calculateB();
-  //            void calculateModVec();
 
   virtual void recalculate();
 };

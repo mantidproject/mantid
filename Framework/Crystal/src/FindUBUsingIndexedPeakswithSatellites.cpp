@@ -73,8 +73,8 @@ void FindUBUsingIndexedPeakswithSatellites::exec() {
     // just check for (0,0,0,0,0,0)
     {
       q_vectors.push_back(peaks[i].getQSampleFrame());
-      hkl_vectors.emplace_back(hkl[0], hkl[1], hkl[2]);
-      mnp_vectors.emplace_back(mnp[0], mnp[1], mnp[2]);
+      hkl_vectors.emplace_back(hkl);
+      mnp_vectors.emplace_back(mnp);
       indexed_count++;
     }
   }

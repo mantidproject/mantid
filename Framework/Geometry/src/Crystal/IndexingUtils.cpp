@@ -815,7 +815,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
                                     std::vector<double> &sigabc,
                                     std::vector<double> &sigq) {
 
-  if (ModDim != 1 && ModDim != 2 && ModDim != 3)
+  if (ModDim <= 0 || ModDim > 3)
     throw std::invalid_argument("invalid Value for Modulation Dimension");
 
   double result = 0;
@@ -981,7 +981,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
                                 "of q_vectors");
   }
 
-  if (ModDim != 1 && ModDim != 2 && ModDim != 3)
+  if (ModDim <= 0 || ModDim > 3)
     throw std::invalid_argument("invalid Value for Modulation Dimension");
 
   gsl_matrix *H_transpose = gsl_matrix_alloc(hkl_vectors.size(), ModDim + 3);
@@ -2936,10 +2936,7 @@ bool IndexingUtils::GetModulationVector(const DblMatrix &UB,
 
   ModVec = o_lattice.getModVec(j);
 
-  if (ModVec[0] != 0.0 || ModVec[1] != 0.0 || ModVec[2] != 0.0)
-    return true;
-  else
-    return false;
+  return (ModVec[0] != 0.0 || ModVec[1] != 0.0 || ModVec[2] != 0.0);
 }
 
 /**

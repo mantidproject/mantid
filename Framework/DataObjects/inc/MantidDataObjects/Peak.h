@@ -253,14 +253,8 @@ private:
   int m_peakNumber;
   Mantid::Kernel::V3D m_modStru;
 
-  /// integer H of the peak
-  int m_intH;
-
-  /// integer K of the peak
-  int m_intK;
-
-  /// integer L of the peak
-  int m_intL;
+  /// integer HKL of the peak
+  std::array<int, 3> m_intHKL;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
