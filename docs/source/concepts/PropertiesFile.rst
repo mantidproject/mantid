@@ -209,7 +209,7 @@ ScriptRepository Properties
 Project Recovery
 ****************
 
-Details of :ref:`project recovery <Project Recovery>` are elsewhere.
+See :ref:`project recovery <Project Recovery>` for more details.
 
 +-----------------------------------------+-----------------------------------------------+------------------+
 |Property                                 |Description                                    |Example value     |
