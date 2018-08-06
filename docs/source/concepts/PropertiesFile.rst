@@ -12,6 +12,12 @@ The Mantid framework is configured using up to three simple text ``*.properties`
 2. ``/etc/mantid.local.properties`` is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the ``default.facility``, ``default.instrument``, and ``datasearch.searcharchive`` properties.
 3. Home directory ``Mantid.user.properties`` is where users may override any property setting in Mantid. Any Property setting in this file will override anything set in the ``Mantid.properties`` file. Simply either enter the property you wish to override in this file together with it's new value. The change will take effect the next time Mantid is started. Subsequent installs or upgrades of Mantid will never alter this file.
 
+The user properties file, ``Mantid.user.properties``, can be found
+
+* windows: ``$MantidInstallDirectory\bin\Mantid.user.properties``
+* linux and mac-os: ``$HOME/.mantid/Mantid.user.properties``
+
+
 The Properties
 --------------
 
@@ -198,6 +204,22 @@ ScriptRepository Properties
 | ``ScriptRepositoryIgnore`` |CSV patterns for paths that should not be      | ``*pyc;``                                                            |
 |                            |listed at ScriptRepository.                    |                                                                      |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
+
+
+Project Recovery
+****************
+
+Details of :ref:`project recovery <Project Recovery>` are elsewhere.
+
++-----------------------------------------+-----------------------------------------------+------------------+
+|Property                                 |Description                                    |Example value     |
++=========================================+===============================================+==================+
+| ``projectRecovery.enabled``             |Whether project recovery is enabled            |  ``On``, ``Off`` |
++-----------------------------------------+-----------------------------------------------+------------------+
+| ``projectRecovery.numberOfCheckpoints`` |How many checkpoints/backups to keep           | ``5``            |
++-----------------------------------------+-----------------------------------------------+------------------+
+| ``projectRecovery.secondsBetween``      |How often to save checkpoints in seconds       | ``60``           |
++-----------------------------------------+-----------------------------------------------+------------------+
 
 
 Getting access to Mantid properties
