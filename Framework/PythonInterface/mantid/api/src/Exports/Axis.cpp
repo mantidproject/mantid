@@ -78,7 +78,7 @@ PyObject *extractAxisValues(Axis &self) {
   }
   return array;
 }
-}
+} // namespace
 
 void export_Axis() {
   register_ptr_to_python<Axis *>();

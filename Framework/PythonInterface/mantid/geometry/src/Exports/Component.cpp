@@ -44,7 +44,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
-}
+} // namespace
 void export_Component() {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
       .def("getParameterNames", &Component::getParameterNames,

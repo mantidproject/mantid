@@ -31,7 +31,7 @@ GNU_DIAG_ON("unused-local-typedef")
 void setR(Goniometer &self, const object &data) {
   self.setR(Converters::PyObjectToMatrix(data)());
 }
-}
+} // namespace
 
 void export_Goniometer() {
 

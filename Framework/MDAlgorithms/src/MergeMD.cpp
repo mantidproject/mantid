@@ -166,7 +166,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
  * @param srcEvent :: the source event, being copied
  * @param newEvent :: the destination event
  * @param runIndexOffset :: offset to be added to the runIndex
-*/
+ */
 template <size_t nd, size_t ond>
 inline void copyEvent(const MDLeanEvent<nd> &srcEvent,
                       MDLeanEvent<ond> &newEvent,

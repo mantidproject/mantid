@@ -8,11 +8,11 @@ GNU_DIAG_ON("literal-suffix")
 
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>

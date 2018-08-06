@@ -19,10 +19,10 @@
 #include "MantidKernel/WarningSuppressions.h"
 GNU_DIAG_OFF("conversion")
 GNU_DIAG_OFF("cast-qual")
-#include <BRepPrimAPI_MakeBox.hxx>
-#include <BRepBuilderAPI_MakeFace.hxx>
-#include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepAlgoAPI_Common.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <gp_Pln.hxx>
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")

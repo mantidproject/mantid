@@ -4,13 +4,13 @@
 #if GCC_VERSION >= 40800 // 4.8.0
 GNU_DIAG_OFF("literal-suffix")
 #endif
-#include "MantidICat/ICat3/ICat3Helper.h"
-#include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidKernel/Logger.h"
-#include <iomanip>
-#include <ctime>
 #include <boost/lexical_cast.hpp>
+#include <ctime>
+#include <iomanip>
 
 namespace Mantid {
 namespace ICat {
