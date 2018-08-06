@@ -2211,7 +2211,6 @@ void FitPropertyBrowser::addConstraint(int f, bool lo, bool up) {
   if (!h)
     return;
 
-  // double x = m_doubleManager->value(parProp);
   double x = parProp->valueText().toDouble();
   double loBound = x * (1 - 0.01 * f);
   double upBound = x * (1 + 0.01 * f);
@@ -2791,8 +2790,8 @@ void FitPropertyBrowser::setupMultifit() {
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" +
-                   QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) +
+                   ",EndX=" + QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {
