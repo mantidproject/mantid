@@ -2211,7 +2211,7 @@ void FitPropertyBrowser::addConstraint(int f, bool lo, bool up) {
   if (!h)
     return;
 
-  //double x = m_doubleManager->value(parProp);
+  // double x = m_doubleManager->value(parProp);
   double x = parProp->valueText().toDouble();
   double loBound = x * (1 - 0.01 * f);
   double upBound = x * (1 + 0.01 * f);
