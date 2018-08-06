@@ -113,7 +113,9 @@ class DetectorInfoTest(unittest.TestCase):
         for a in info:
             #self.assertEquals(type(a), DetectorInfoItem)
             #self.assertEquals(info.position(0), "")
-            self.assertEquals(a.position, 100)
+            #self.assertEquals(a.position, 100)
+            print(a)
+        self.fail()
 
 
 

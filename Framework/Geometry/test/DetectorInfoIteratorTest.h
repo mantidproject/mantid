@@ -152,11 +152,33 @@ public:
     auto detectorInfo = create_detector_info_object();
     auto iter = detectorInfo.begin();
 
+    for (int i = 0; i < 11; i++) {
+      TS_ASSERT_EQUALS(iter->position(), i);
+      ++iter;
+    }
+  }
+
+  void test_copy_iterator() {
+    // Get the DetectorInfo object
+    auto detectorInfo = create_detector_info_object();
+    auto iter = detectorInfo.begin();
+
+    auto iterCopy = DetectorInfoIterator(iter);
+    
+    TS_ASSERT_EQUALS(iter->getIndex(), 0);
+    TS_ASSERT_EQUALS(iterCopy->getIndex(), 0);
+
     TS_ASSERT_EQUALS(iter->position(), 0);
+    TS_ASSERT_EQUALS(iterCopy->position(), 0);
+
     ++iter;
+    ++iterCopy;
+
+    TS_ASSERT_EQUALS(iter->getIndex(), 1);
+    TS_ASSERT_EQUALS(iterCopy->getIndex(), 1);
 
     TS_ASSERT_EQUALS(iter->position(), 1);
-    ++iter;
+    TS_ASSERT_EQUALS(iterCopy->position(),1);
   }
 };
 
