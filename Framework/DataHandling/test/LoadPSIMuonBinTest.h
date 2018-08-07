@@ -44,6 +44,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));
+  }
+
+  void test_workspaceParticulars(){
+    LoadPSIMuonBin alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("ws"));
