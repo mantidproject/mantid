@@ -31,7 +31,7 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
 
     # Prepend the properties used for creating a van spline so we can fingerprint the file
-    new_splined_list = [splined_name_list] if splined_name_list else []
+    new_splined_list = splined_name_list if splined_name_list else []
     new_splined_list.append(os.path.basename(offset_file_name))
 
     splined_van_name = common.generate_splined_name(vanadium_string, new_splined_list)
