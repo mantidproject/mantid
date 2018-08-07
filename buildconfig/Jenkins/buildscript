@@ -14,6 +14,7 @@ SCRIPT_DIR=$(dirname "$0")
 ###############################################################################
 # System discovery
 ###############################################################################
+USE_CORE_DUMPS=true
 if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
   ON_RHEL7=true
 fi
@@ -22,7 +23,19 @@ if [[ ${NODE_LABELS} == *ubuntu* ]]; then
 fi
 if [[ ${NODE_LABELS} == *osx* ]]; then
   ON_MACOS=true
+  USE_CORE_DUMPS=false
 fi
+
+###############################################################################
+# Script cleanup
+###############################################################################
+ULIMIT_CORE_ORIG=$(ulimit -c)
+function onexit {
+  if [[ ${USE_CORE_DUMPS} == true ]]; then
+    ulimit -c $ULIMIT_CORE_ORIG
+  fi
+}
+trap onexit INT TERM EXIT
 
 ###############################################################################
 # All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
@@ -319,6 +332,11 @@ fi
 ###############################################################################
 # Run the unit tests
 ###############################################################################
+# Activate core dumps. They are deactivated by the registered EXIT function
+# at the top of this script
+if [[ ${USE_CORE_DUMPS} == true ]]; then
+  ulimit -c unlimited
+fi
 # Prevent race conditions when creating the user config directory
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
