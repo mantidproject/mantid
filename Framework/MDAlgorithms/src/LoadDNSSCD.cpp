@@ -6,22 +6,24 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -36,10 +38,6 @@
 #include <iomanip>
 #include <iterator>
 #include <map>
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDEventInserter.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
 
 //========================
 // helper functions
@@ -96,7 +94,7 @@ DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 LoadDNSSCD::LoadDNSSCD() : m_columnSep("\t, ;"), m_nDims(4) {}
 
 /**
@@ -565,22 +563,22 @@ void LoadDNSSCD::fillOutputWorkspace(double wavelength) {
           double dE = 0.0;
           if (nchannels > 1) {
             double v2 = 1e+06 * l2 / tof2;
-            dE = Ei -
-                 0.5 * PhysicalConstants::NeutronMass * v2 * v2 /
-                     PhysicalConstants::meV;
+            dE = Ei - 0.5 * PhysicalConstants::NeutronMass * v2 * v2 /
+                          PhysicalConstants::meV;
           }
           if (dE > dEmin) {
-            double kf = std::sqrt(
-                ki * ki -
-                2.0e-20 * PhysicalConstants::NeutronMass * dE *
-                    PhysicalConstants::meV /
-                    (PhysicalConstants::h_bar * PhysicalConstants::h_bar));
+            double kf =
+                std::sqrt(ki * ki - 2.0e-20 * PhysicalConstants::NeutronMass *
+                                        dE * PhysicalConstants::meV /
+                                        (PhysicalConstants::h_bar *
+                                         PhysicalConstants::h_bar));
             double tlab =
                 std::atan2(ki - kf * cos(2.0 * theta), kf * sin(2.0 * theta));
             double omega = (ds.huber - ds.deterota) * deg2rad - tlab;
             V3D uphi(-cos(omega), 0, -sin(omega));
-            double qabs = 0.5 * std::sqrt(ki * ki + kf * kf -
-                                          2.0 * ki * kf * cos(2.0 * theta)) /
+            double qabs = 0.5 *
+                          std::sqrt(ki * ki + kf * kf -
+                                    2.0 * ki * kf * cos(2.0 * theta)) /
                           M_PI;
             V3D hphi = uphi * qabs; // qabs = ki * sin(theta), for elastic case;
             V3D hkl = ub_inv * hphi;
