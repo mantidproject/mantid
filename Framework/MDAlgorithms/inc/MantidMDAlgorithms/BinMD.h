@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 // Forward declaration
 class MDImplicitFunction;
-}
+} // namespace Geometry
 namespace MDAlgorithms {
 
 /** Take a MDEventWorkspace and bin it to a dense histogram
@@ -86,7 +86,7 @@ private:
   bool m_accumulate{false};
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_BINMD_H_ */

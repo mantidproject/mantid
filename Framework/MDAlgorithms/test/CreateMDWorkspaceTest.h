@@ -3,9 +3,9 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 

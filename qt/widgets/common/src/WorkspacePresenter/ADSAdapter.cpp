@@ -127,5 +127,5 @@ void ADSAdapter::handleWorkspaceGroupUpdate(
       WorkspaceProviderNotifiable::Flag::WorkspaceGroupUpdated);
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

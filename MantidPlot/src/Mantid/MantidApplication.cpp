@@ -17,7 +17,7 @@
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidApplication");
-}
+} // namespace
 
 /// Constructor
 MantidApplication::MantidApplication(int &argc, char **argv)
@@ -29,7 +29,8 @@ MantidApplication::MantidApplication(int &argc, char **argv)
                      "is probably a sign that this Mantid is not fully or "
                      "correctly set up. "
                      "Error details: " +
-                         std::string(rexc.what()) << '\n';
+                         std::string(rexc.what())
+                  << '\n';
   }
 }
 
@@ -86,7 +87,8 @@ bool MantidApplication::notify(QObject *receiver, QEvent *event) {
                        "ErrorReporterPresenter"
                        "\nfrom ErrorReporter.errorreport import CrashReportPage"
                        "\npage = CrashReportPage(show_continue_terminate=True)"
-                       "\npresenter = ErrorReporterPresenter(page, '')");
+                       "\npresenter = ErrorReporterPresenter(page, '')"
+                       "\npresenter.show_view()");
 
     emit runAsPythonScript(pythonCode);
   } else if (error) {

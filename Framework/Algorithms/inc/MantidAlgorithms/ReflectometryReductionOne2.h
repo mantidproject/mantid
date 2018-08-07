@@ -15,7 +15,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
@@ -71,6 +71,8 @@ private:
   void exec() override;
   // Validate inputs
   std::map<std::string, std::string> validateInputs() override;
+  // Set default names for output workspaces
+  void setDefaultOutputWorkspaceNames();
   // Create a direct beam workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeDirectBeamWS(Mantid::API::MatrixWorkspace_sptr inputWS);

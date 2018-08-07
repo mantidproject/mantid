@@ -1,14 +1,14 @@
 #ifndef MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 #define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/GaussianComptonProfile.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FunctionDomain1D.h"
 #include "ComptonProfileTestHelpers.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
-using Mantid::CurveFitting::Functions::GaussianComptonProfile;
 using Mantid::CurveFitting::Functions::ComptonProfile;
+using Mantid::CurveFitting::Functions::GaussianComptonProfile;
 
 class GaussianComptonProfileTest : public CxxTest::TestSuite {
 public:

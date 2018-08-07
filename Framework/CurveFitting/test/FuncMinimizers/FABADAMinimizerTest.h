@@ -5,12 +5,12 @@
 
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
@@ -145,7 +145,7 @@ void doTestExpDecay(MatrixWorkspace_sptr ws2) {
   TS_ASSERT(Ptable->Double(0, 1) == fun->getParameter("Height"));
   TS_ASSERT(Ptable->Double(1, 1) == fun->getParameter("Lifetime"));
 }
-}
+} // namespace
 class FABADAMinimizerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

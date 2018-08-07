@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidLiveData/ADARA/ADARAParser.h"
-#include <boost/shared_ptr.hpp>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h> // for parsing the XML device descriptions
 #include <Poco/DOM/Document.h>
-#include <Poco/AutoPtr.h>
+#include <boost/shared_ptr.hpp>
 
 // All of the sample packets that we need to run the tests are defined in the
 // following

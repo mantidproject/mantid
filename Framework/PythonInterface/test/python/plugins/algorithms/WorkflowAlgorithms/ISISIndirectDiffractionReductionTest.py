@@ -9,6 +9,16 @@ from mantid.kernel import config
 
 
 class ISISIndirectDiffractionReductionTest(unittest.TestCase):
+
+    def setUp(self):
+        self._oldFacility = config['default.facility']
+        if self._oldFacility.strip() == '':
+            self._oldFacility = 'TEST_LIVE'
+        config.setFacility('ISIS')
+
+    def tearDown(self):
+        config.setFacility(self._oldFacility)
+
     def test_basic_reduction_completes(self):
         """
         Sanity test to ensure the most basic reduction actually completes.
@@ -198,7 +208,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        wks = ISISIndirectDiffractionReduction(InputFiles=['15289'],
+        wks = ISISIndirectDiffractionReduction(InputFiles=['29244'],
                                                InstrumentParFile='IP0005.dat',
                                                Instrument='VESUVIO',
                                                mode='diffspec',
@@ -206,7 +216,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], 'vesuvio15289_diffspec_red')
+        self.assertEqual(wks.getNames()[0], 'vesuvio29244_diffspec_red')
 
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
@@ -217,7 +227,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         Test setting individual grouping, one spectrum per detector.
         """
 
-        wks = ISISIndirectDiffractionReduction(InputFiles=['15289'],
+        wks = ISISIndirectDiffractionReduction(InputFiles=['29244'],
                                                GroupingPolicy='Individual',
                                                InstrumentParFile='IP0005.dat',
                                                Instrument='VESUVIO',

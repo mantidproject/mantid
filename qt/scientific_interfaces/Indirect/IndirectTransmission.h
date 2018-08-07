@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_
 
 #include "IndirectDataReductionTab.h"
-#include "ui_IndirectTransmission.h"
 #include "MantidKernel/System.h"
+#include "ui_IndirectTransmission.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -62,6 +62,6 @@ private:
 };
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_ */

@@ -1,15 +1,15 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "DllConfig.h"
 #include "IEnggDiffractionCalibration.h"
 #include "IEnggDiffractionParam.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
 #include "IEnggVanadiumCorrectionsModel.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <boost/scoped_ptr.hpp>
 

@@ -39,12 +39,12 @@ template <typename A>
 std::vector<std::string>
 toStdStringVector(std::vector<QString, A> const &inVec) {
   std::vector<std::string> outVec;
-  std::transform(inVec.begin(), inVec.end(), std::back_inserter(outVec),
-                 [](QString const &in)
-                     -> std::string { return in.toStdString(); });
+  std::transform(
+      inVec.begin(), inVec.end(), std::back_inserter(outVec),
+      [](QString const &in) -> std::string { return in.toStdString(); });
   return outVec;
 }
-}
+} // namespace
 
 /**
 Create string of comma separated list of items from a vector
@@ -83,7 +83,7 @@ QString vectorParamString(const QString &param_name,
   param_vector_string += "'";
   return param_vector_string;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H

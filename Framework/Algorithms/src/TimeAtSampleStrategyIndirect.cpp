@@ -1,16 +1,16 @@
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include <cmath>
 #include <boost/shared_ptr.hpp>
+#include <cmath>
 #include <sstream>
 
 using namespace Mantid::Kernel;

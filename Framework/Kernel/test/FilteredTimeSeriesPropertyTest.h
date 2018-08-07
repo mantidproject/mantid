@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_FILTEREDTIMESERIESPROPERTYTEST_H_
 #define MANTID_KERNEL_FILTEREDTIMESERIESPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
 

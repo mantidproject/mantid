@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_REBINBYTIMEBASE_H_
 #define MANTID_ALGORITHMS_REBINBYTIMEBASE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
-#include "MantidKernel/cow_ptr.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -2,9 +2,9 @@
 
 #include <vtkIdList.h>
 #include <vtkPoints.h>
-#include <vtkVertex.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkVertex.h>
 namespace Mantid {
 namespace VATES {
 
@@ -41,5 +41,5 @@ vtkUnstructuredGrid *vtkNullUnstructuredGrid::createNullData() {
 
   return dataSet;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

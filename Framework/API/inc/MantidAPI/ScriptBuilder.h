@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/HistoryView.h"
-#include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/PropertyHistory.h"
 
@@ -60,11 +60,10 @@ private:
   void buildChildren(std::ostringstream &os,
                      std::vector<HistoryItem>::const_iterator &iter,
                      int depth = 1);
-  const std::string buildCommentString(AlgorithmHistory_const_sptr algHistory);
+  const std::string buildCommentString(const AlgorithmHistory &algHistory);
+  const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
   const std::string
-  buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
-  const std::string
-  buildPropertyString(Mantid::Kernel::PropertyHistory_const_sptr propHistory);
+  buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;

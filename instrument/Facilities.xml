@@ -22,6 +22,8 @@
     </filelocation>
   </catalog>
 
+   <timezone>Europe/London</timezone>
+
   <instrument name="ALF">
     <technique>Single Crystal Diffraction</technique>
     <livedata>
@@ -376,6 +378,8 @@
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
 
+   <timezone>US/Eastern</timezone>
+
    <instrument name="HB1">
       <technique>Triple Axis Spectroscopy</technique>
    </instrument>
@@ -452,6 +456,8 @@
        <mac replacement=""></mac>
      </filelocation>
    </catalog>
+
+   <timezone>US/Eastern</timezone>
 
    <instrument name="DAS">
       <technique>technique</technique>
@@ -602,12 +608,16 @@
 </facility>
 
 <facility name="NCNR" FileExtensions=".dat,.xml">
+   <timezone>US/Eastern</timezone>
+
    <instrument name="NGSANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
 </facility>
 
 <facility name="LENS" FileExtensions=".nxs,.dat,.xml">
+   <timezone>US/Eastern</timezone>
+
    <instrument name="SANS">
       <technique>Small Angle Scattering</technique>
    </instrument>
@@ -615,6 +625,7 @@
 </facility>
 
 <facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True" multifilelimit="1000">
+  <timezone>Europe/Paris</timezone>
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>
@@ -693,6 +704,7 @@
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
+  <timezone>Europe/Zurich</timezone>
 
   <instrument name="HRPT">
     <technique>Neutron Diffraction</technique>
@@ -767,6 +779,7 @@
 </facility>
 
 <facility name="SmuS" FileExtensions=".nxs,.xml">
+  <timezone>Europe/Zurich</timezone>
 
   <instrument name="GPD">
     <zeropadding size="3"/>
@@ -782,6 +795,8 @@
 
 <!--  Reactor Orphee (France) -->
 <facility name="LLB" FileExtensions=".nxs,.hdf">
+  <timezone>Europe/Paris</timezone>
+
   <instrument name="MIBEMOL">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
@@ -790,7 +805,17 @@
 
 <!--  Facility MLZ (FRMII) (Germany) -->
 <facility name="MLZ" FileExtensions=".nxs,.d_dat,.001,.mtxt,.mdat">
+ <timezone>Europe/Berlin</timezone>
+
   <instrument name="DNS">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="DNS-PSD">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
@@ -816,6 +841,8 @@
 
 <!-- ANSTO -->
 <facility name="ANSTO" FileExtensions=".nxs,.tar">
+  <timezone>Australia/Sydney</timezone>
+
   <instrument name="Bilby">
     <technique>Small Angle Scattering</technique>
   </instrument>
@@ -823,6 +850,8 @@
 
 <!-- HZB -->
 <facility name="HZB" FileExtensions=".nxs">
+   <timezone>Europe/Berlin</timezone>
+
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Single Crystal Diffraction</technique>
@@ -840,6 +869,8 @@
 
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
+  <timezone>UTC</timezone>
+
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>
     <livedata>

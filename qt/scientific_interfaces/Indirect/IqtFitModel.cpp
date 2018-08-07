@@ -2,6 +2,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MultiDomainFunction.h"
+
+#include <boost/algorithm/string/predicate.hpp>
 
 using namespace Mantid::API;
 
@@ -126,6 +130,47 @@ std::string getFitString(MatrixWorkspace_sptr workspace) {
     return "Fit";
   return "_IqtFit";
 }
+
+boost::optional<std::string> findFullParameterName(IFunction_sptr function,
+                                                   const std::string &name) {
+  for (auto i = 0u; i < function->nParams(); ++i) {
+    const auto fullName = function->parameterName(i);
+    if (boost::algorithm::ends_with(fullName, name))
+      return fullName;
+  }
+  return boost::none;
+}
+
+std::vector<std::string> constructGlobalTies(const std::string &parameter,
+                                             std::size_t nDomains) {
+  if (nDomains <= 1)
+    return std::vector<std::string>();
+
+  std::string firstParameter = "f0." + parameter;
+  std::vector<std::string> ties;
+  for (auto i = 1u; i < nDomains; ++i)
+    ties.emplace_back("f" + std::to_string(i) + "." + parameter + "=" +
+                      firstParameter);
+  return ties;
+}
+
+void addGlobalTie(CompositeFunction &composite, const std::string &parameter) {
+  if (composite.nFunctions() == 0)
+    return;
+
+  const auto fullName =
+      findFullParameterName(composite.getFunction(0), parameter);
+
+  if (fullName) {
+    const auto ties = constructGlobalTies(*fullName, composite.nFunctions());
+    composite.addTies(boost::algorithm::join(ties, ","));
+  }
+}
+
+IFunction_sptr createFunction(const std::string &functionString) {
+  return FunctionFactory::Instance().createInitialized(functionString);
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -133,7 +178,20 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFitModel::IqtFitModel()
-    : IndirectFittingModel(), m_constrainIntensities(false) {}
+    : IndirectFittingModel(), m_makeBetaGlobal(false),
+      m_constrainIntensities(false) {}
+
+CompositeFunction_sptr IqtFitModel::getMultiDomainFunction() const {
+  if (m_makeBetaGlobal)
+    return createFunctionWithGlobalBeta(getFittingFunction());
+  return IndirectFittingModel::getMultiDomainFunction();
+}
+
+IAlgorithm_sptr IqtFitModel::getFittingAlgorithm() const {
+  if (m_makeBetaGlobal)
+    return createSimultaneousFitWithEqualRange(getMultiDomainFunction());
+  return IndirectFittingModel::getFittingAlgorithm();
+}
 
 IAlgorithm_sptr IqtFitModel::sequentialFitAlgorithm() const {
   auto algorithm = AlgorithmManager::Instance().create("IqtFitSequential");
@@ -149,7 +207,7 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiIqtFit_" + m_fitType;
+    return "MultiIqtFit_" + m_fitType + "_Result";
   auto fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
                           0);
@@ -157,7 +215,7 @@ std::string IqtFitModel::sequentialFitOutputName() const {
 
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
-    return "MultiSimultaneousIqtFit_" + m_fitType;
+    return "MultiSimultaneousIqtFit_" + m_fitType + "_Result";
   auto fitString = getFitString(getWorkspace(0));
   return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
                           "_to_", 0);
@@ -194,6 +252,8 @@ bool IqtFitModel::setConstrainIntensities(bool constrain) {
   return true;
 }
 
+void IqtFitModel::setBetaIsGlobal(bool global) { m_makeBetaGlobal = global; }
+
 std::unordered_map<std::string, ParameterValue>
 IqtFitModel::createDefaultParameters(std::size_t index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
@@ -207,6 +267,23 @@ IqtFitModel::createDefaultParameters(std::size_t index) const {
   parameters["Stretching"] = ParameterValue(1.0);
   parameters["A0"] = ParameterValue(0.0);
   return parameters;
+}
+
+CompositeFunction_sptr
+IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
+  boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
+      new MultiDomainFunction);
+  const auto functionString = function->asString();
+  for (auto i = 0u; i < numberOfWorkspaces(); ++i) {
+    auto addDomains = [&](std::size_t) {
+      const auto index = multiDomainFunction->nFunctions();
+      multiDomainFunction->addFunction(createFunction(functionString));
+      multiDomainFunction->setDomainIndex(index, index);
+    };
+    applySpectra(i, addDomains);
+  }
+  addGlobalTie(*multiDomainFunction, "Stretching");
+  return multiDomainFunction;
 }
 
 } // namespace IDA

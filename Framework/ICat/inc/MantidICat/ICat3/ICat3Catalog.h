@@ -3,9 +3,9 @@
 
 #include "MantidAPI/ICatalog.h"
 #include "MantidAPI/ICatalogInfoService.h"
+#include "MantidICat/CatalogSearchParam.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidICat/ICat3/ICat3Helper.h"
-#include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid {
 namespace ICat {
@@ -87,7 +87,7 @@ private:
   /// The helper class that accesses ICAT functionality.
   CICatHelper *m_helper;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 
 #endif

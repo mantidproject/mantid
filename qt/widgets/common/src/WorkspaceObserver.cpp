@@ -78,19 +78,21 @@ void WorkspaceObserver::observePreDelete(bool turnOn) {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
         m_preDeleteObserver);
     m_proxy->connect(
-        m_proxy, SIGNAL(preDeleteRequested(const std::string &,
-                                           Mantid::API::Workspace_sptr)),
+        m_proxy,
+        SIGNAL(preDeleteRequested(const std::string &,
+                                  Mantid::API::Workspace_sptr)),
         SLOT(handlePreDelete(const std::string &, Mantid::API::Workspace_sptr)),
         Qt::QueuedConnection);
   } else if (!turnOn && m_predel_observed) // Turning it off
   {
     Mantid::API::AnalysisDataService::Instance()
         .notificationCenter.removeObserver(m_preDeleteObserver);
-    m_proxy->disconnect(
-        m_proxy, SIGNAL(preDeleteRequested(const std::string &,
-                                           Mantid::API::Workspace_sptr)),
-        m_proxy, SLOT(handlePreDelete(const std::string &,
-                                      Mantid::API::Workspace_sptr)));
+    m_proxy->disconnect(m_proxy,
+                        SIGNAL(preDeleteRequested(const std::string &,
+                                                  Mantid::API::Workspace_sptr)),
+                        m_proxy,
+                        SLOT(handlePreDelete(const std::string &,
+                                             Mantid::API::Workspace_sptr)));
   } else {
   }
   m_predel_observed = turnOn;
@@ -122,10 +124,10 @@ void WorkspaceObserver::observePostDelete(bool turnOn) {
 }
 
 /**
-* Turn on observations of workspace replacement notifications from the ADS
-* @param turnOn :: If true observe the notifications, otherwise disable
-* observation [default=true]
-*/
+ * Turn on observations of workspace replacement notifications from the ADS
+ * @param turnOn :: If true observe the notifications, otherwise disable
+ * observation [default=true]
+ */
 void WorkspaceObserver::observeAfterReplace(bool turnOn) {
   if (turnOn && !m_repl_observed) {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -142,17 +144,18 @@ void WorkspaceObserver::observeAfterReplace(bool turnOn) {
     m_proxy->disconnect(
         m_proxy,
         SIGNAL(afterReplaced(const std::string &, Mantid::API::Workspace_sptr)),
-        m_proxy, SLOT(handleAfterReplace(const std::string &,
-                                         Mantid::API::Workspace_sptr)));
+        m_proxy,
+        SLOT(handleAfterReplace(const std::string &,
+                                Mantid::API::Workspace_sptr)));
   }
   m_repl_observed = turnOn;
 }
 
 /**
-* Turn on observations of workspace renaming notifications from the ADS
-* @param turnOn :: If true observe the notifications, otherwise disable
-* observation [default=true]
-*/
+ * Turn on observations of workspace renaming notifications from the ADS
+ * @param turnOn :: If true observe the notifications, otherwise disable
+ * observation [default=true]
+ */
 void WorkspaceObserver::observeRename(bool turnOn) {
   if (turnOn && !m_rename_observed) {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -172,10 +175,10 @@ void WorkspaceObserver::observeRename(bool turnOn) {
 }
 
 /**
-* Turn on observations of workspace add notifications from the ADS
-* @param turnOn :: If true observe the notifications, otherwise disable
-* observation [default=true]
-*/
+ * Turn on observations of workspace add notifications from the ADS
+ * @param turnOn :: If true observe the notifications, otherwise disable
+ * observation [default=true]
+ */
 void WorkspaceObserver::observeAdd(bool turnOn) {
   if (turnOn && !m_add_observed) {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -198,10 +201,10 @@ void WorkspaceObserver::observeAdd(bool turnOn) {
 }
 
 /**
-* Turn on observations of workspace clear notifications from the ADS
-* @param turnOn :: If true observe the notifications, otherwise disable
-* observation [default=true]
-*/
+ * Turn on observations of workspace clear notifications from the ADS
+ * @param turnOn :: If true observe the notifications, otherwise disable
+ * observation [default=true]
+ */
 void WorkspaceObserver::observeADSClear(bool turnOn) {
   if (turnOn && !m_clr_observed) {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(
@@ -217,5 +220,5 @@ void WorkspaceObserver::observeADSClear(bool turnOn) {
   m_clr_observed = turnOn;
 }
 
-} // MantidQt
-} // API
+} // namespace API
+} // namespace MantidQt

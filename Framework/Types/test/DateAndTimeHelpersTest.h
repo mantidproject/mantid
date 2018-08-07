@@ -1,8 +1,8 @@
 #ifndef MANTID_TYPES_CORE_DATEANDTIMEHELPERSTEST_H_
 #define MANTID_TYPES_CORE_DATEANDTIMEHELPERSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Types::Core::DateAndTimeHelpers;
 

@@ -22,7 +22,7 @@ import functools
 # third-party library imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger
-from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
+from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
@@ -116,7 +116,7 @@ class WorkspaceWidget(PluginWidget):
                 return
 
         try:
-            selection = get_plot_selection(_workspaces_from_names(names), self)
+            selection = get_spectra_selection(_workspaces_from_names(names), self)
             if selection is not None:
                 plot(selection.workspaces, spectrum_nums=selection.spectra,
                      wksp_indices=selection.wksp_indices,

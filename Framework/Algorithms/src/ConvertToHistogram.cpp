@@ -55,5 +55,5 @@ Kernel::cow_ptr<HistogramData::HistogramX> ConvertToHistogram::calculateXPoints(
   return HistogramData::BinEdges(HistogramData::Points(std::move(inputX)))
       .cowData();
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

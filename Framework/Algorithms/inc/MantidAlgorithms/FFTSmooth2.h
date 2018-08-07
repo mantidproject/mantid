@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHM_FFTSMOOTH2_H_
 #define MANTID_ALGORITHM_FFTSMOOTH2_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -64,7 +64,7 @@ private:
                    API::MatrixWorkspace_sptr &filteredWS);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_FFTSMOOTH2_H_*/

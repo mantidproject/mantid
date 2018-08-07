@@ -70,7 +70,7 @@ private:
                                        std::string &parent_name,
                                        std::string &parent_class, int level);
 };
-}
+} // namespace DataHandling
 // namespace DataHandling
 } // namespace Mantid
 

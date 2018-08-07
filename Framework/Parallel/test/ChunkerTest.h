@@ -17,9 +17,9 @@ bool operator==(const Chunker::LoadRange &a, const Chunker::LoadRange &b) {
   return a.bankIndex == b.bankIndex && a.eventOffset == b.eventOffset &&
          a.eventCount == b.eventCount;
 }
-}
-}
-}
+} // namespace IO
+} // namespace Parallel
+} // namespace Mantid
 
 class ChunkerTest : public CxxTest::TestSuite {
 public:
@@ -179,16 +179,16 @@ public:
         // The following bank sizes come from actual files which have cause
         // trouble so this also servers as a regression test.
         for (const auto &bankSizes :
-             {std::vector<size_t>{2091281, 520340, 841355, 912704, 1435110,
-                                  567885, 1850044, 1333453, 1507522, 1396560,
-                                  1699092, 1484645, 515805, 474417, 633111,
-                                  600780, 638784, 572031, 741562, 593741,
-                                  546107, 552800, 556607},
+             {std::vector<size_t>{2091281, 520340,  841355,  912704,  1435110,
+                                  567885,  1850044, 1333453, 1507522, 1396560,
+                                  1699092, 1484645, 515805,  474417,  633111,
+                                  600780,  638784,  572031,  741562,  593741,
+                                  546107,  552800,  556607},
               std::vector<size_t>{
-                  5158050, 5566070, 5528000, 5461070, 5937410, 7415620, 5720310,
-                  6387840, 6007800, 6331110, 4744170, 20912810, 14846450,
-                  16990920, 13965600, 15075220, 13334530, 18500440, 5678850,
-                  14351100, 9127040, 8413550, 5203400}}) {
+                  5158050,  5566070,  5528000,  5461070,  5937410,  7415620,
+                  5720310,  6387840,  6007800,  6331110,  4744170,  20912810,
+                  14846450, 16990920, 13965600, 15075220, 13334530, 18500440,
+                  5678850,  14351100, 9127040,  8413550,  5203400}}) {
           const size_t chunkSize = 1024 * 1024;
           TS_ASSERT_THROWS_NOTHING(
               Chunker chunker(workers, worker, bankSizes, chunkSize));

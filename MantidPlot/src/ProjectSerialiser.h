@@ -2,21 +2,21 @@
 #define PROJECT_SERIALISER_H
 
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
+#include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QStringList>
-#include <QDir>
-#include <QApplication>
 
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include "qstring.h"
 #include "Graph3D.h"
 #include "Mantid/MantidMatrix.h"
+#include "qstring.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
@@ -71,7 +71,7 @@ public:
   bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
-  void load(std::string filepath, const int fileVersion,
+  bool load(std::string filepath, const int fileVersion,
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
@@ -161,7 +161,7 @@ private:
 
   groupNameToWsNamesT parseWsNames(const std::string &wsNames);
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // PROJECT_SERIALISER_H

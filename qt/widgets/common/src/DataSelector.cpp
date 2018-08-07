@@ -1,14 +1,14 @@
+#include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
-#include "MantidQtWidgets/Common/DataSelector.h"
 
 #include <QFileInfo>
 
+#include <QDebug>
 #include <QDropEvent>
 #include <QMimeData>
-#include <QDebug>
 #include <QUrl>
 
 namespace MantidQt {
@@ -39,15 +39,15 @@ DataSelector::DataSelector(QWidget *parent)
 DataSelector::~DataSelector() {}
 
 /**
-* Return whether empty input is allowed
-* @return :: Flag if is optional
-*/
+ * Return whether empty input is allowed
+ * @return :: Flag if is optional
+ */
 bool DataSelector::isOptional() const { return m_isOptional; }
 
 /**
-* Sets if the text field is optional
-* @param optional :: Set the optional status of the text field
-*/
+ * Sets if the text field is optional
+ * @param optional :: Set the optional status of the text field
+ */
 void DataSelector::isOptional(bool optional) {
   m_isOptional = optional;
   m_uiForm.rfFileInput->isOptional(optional);
@@ -144,9 +144,9 @@ bool DataSelector::isValid() {
 }
 
 /**
-* Return the error.
-* @returns A string explaining the error.
-*/
+ * Return the error.
+ * @returns A string explaining the error.
+ */
 QString DataSelector::getProblem() const {
   using namespace Mantid::API;
 
@@ -337,17 +337,17 @@ void DataSelector::setLoadBtnText(const QString &text) {
 }
 
 /**
-* Read settings from the given group
-* @param group :: The name of the group key to retrieve data from
-*/
+ * Read settings from the given group
+ * @param group :: The name of the group key to retrieve data from
+ */
 void DataSelector::readSettings(const QString &group) {
   m_uiForm.rfFileInput->readSettings(group);
 }
 
 /**
-* Save settings to the given group
-* @param group :: The name of the group key to save to
-*/
+ * Save settings to the given group
+ * @param group :: The name of the group key to save to
+ */
 void DataSelector::saveSettings(const QString &group) {
   m_uiForm.rfFileInput->saveSettings(group);
 }

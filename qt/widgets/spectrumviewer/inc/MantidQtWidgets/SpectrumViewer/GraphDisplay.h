@@ -5,8 +5,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 
 /**
     @class GraphDisplay

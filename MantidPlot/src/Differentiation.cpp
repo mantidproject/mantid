@@ -27,8 +27,8 @@
  *                                                                         *
  ***************************************************************************/
 #include "Differentiation.h"
-#include "MultiLayer.h"
 #include "LegendWidget.h"
+#include "MultiLayer.h"
 
 #include <QLocale>
 

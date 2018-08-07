@@ -1,8 +1,8 @@
 #ifndef FILTERING_UPDATE_PROGRESS_ACTION_TEST
 #define FILTERING_UPDATE_PROGRESS_ACTION_TEST
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include <cxxtest/TestSuite.h>
 
 class FilteringUpdateProgressActionTest : public CxxTest::TestSuite {
 

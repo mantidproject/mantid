@@ -83,9 +83,9 @@ void SetGoniometer::exec() {
         // If axisName is a number, add a new log value
         double angle = 0;
         if (Strings::convert(axisName, angle)) {
-          g_log.information() << "Axis " << i
-                              << " - create a new log value GoniometerAxis" << i
-                              << "_FixedValue\n";
+          g_log.information()
+              << "Axis " << i << " - create a new log value GoniometerAxis" << i
+              << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
             Types::Core::DateAndTime now =
@@ -140,5 +140,5 @@ void SetGoniometer::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

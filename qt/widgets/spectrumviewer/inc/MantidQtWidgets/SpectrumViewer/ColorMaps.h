@@ -1,9 +1,9 @@
 #ifndef COLOR_MAPS_H
 #define COLOR_MAPS_H
 
-#include <vector>
-#include <QColor>
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include <QColor>
+#include <vector>
 
 /**
     @class ColorMaps
