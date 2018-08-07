@@ -96,17 +96,6 @@ void terminateHandler() {
   exit(1);
 }
 
-/**
- * Designed as a SIGSEGV handler for detecting segfaults
- * and printing a backtrace to std::cerr. It exits with
- * code -1
- */
-void sigsegvHandler(int) {
-  std::cerr << "\n********* SEGMENTATION FAULT *********\n";
-  backtraceToStream(std::cerr);
-  exit(-1);
-}
-
 #endif
 
 /// Default constructor
@@ -117,7 +106,6 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 {
 #ifdef __linux__
   std::set_terminate(terminateHandler);
-  std::signal(SIGSEGV, sigsegvHandler);
 #endif
   setGlobalNumericLocaleToC();
   Kernel::MemoryOptions::initAllocatorOptions();
