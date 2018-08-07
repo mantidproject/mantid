@@ -55,8 +55,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 
-    calibrated_spectra = _apply_vanadium_corrections(instrument=instrument, run_number=run_number,
-                                                     input_workspace=focused_ws,
+    calibrated_spectra = _apply_vanadium_corrections(input_workspace=focused_ws,
                                                      perform_vanadium_norm=perform_vanadium_norm,
                                                      vanadium_splines=vanadium_path)
 
@@ -83,14 +82,13 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     return d_spacing_group
 
 
-def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform_vanadium_norm, vanadium_splines):
-    run_details = instrument._get_run_details(run_number_string=run_number)
+def _apply_vanadium_corrections(input_workspace, perform_vanadium_norm, vanadium_splines):
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
     split_data_spectra = common.extract_ws_spectra(input_workspace)
 
     if perform_vanadium_norm:
         processed_spectra = _divide_by_vanadium_splines(spectra_list=split_data_spectra,
-                                                       vanadium_splines=vanadium_splines)
+                                                        vanadium_splines=vanadium_splines)
     else:
         processed_spectra = split_data_spectra
 
@@ -100,7 +98,6 @@ def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform
 def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
-    run_numbers = common.generate_run_numbers(run_number_string=run_number_string)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
     vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
     output = None
