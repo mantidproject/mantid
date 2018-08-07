@@ -79,10 +79,10 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
   } else {
     m_action = action;
   }
-  std::string allowMultiFileLoading =
-      Kernel::ConfigService::Instance().getString("loading.multifile");
 
-  m_multiFileLoadingEnabled = boost::iequals(allowMultiFileLoading, "On");
+  m_multiFileLoadingEnabled = Kernel::ConfigService::Instance()
+                                  .getValue<bool>("loading.multifile")
+                                  .get_value_or(false);
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))

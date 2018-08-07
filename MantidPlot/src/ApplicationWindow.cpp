@@ -5021,8 +5021,8 @@ void ApplicationWindow::readSettings() {
     settings.remove("/AutoDistribution1D");
   }
   // Pull default from config service
-  const std::string propStr = cfgSvc.getString("graph1d.autodistribution");
-  autoDistribution1D = (propStr == "On");
+  autoDistribution1D =
+      cfgSvc.getValue<bool>("graph1d.autodistribution").get_value_or(false);
 
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();

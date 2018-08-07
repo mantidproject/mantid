@@ -1,3 +1,5 @@
+#ifndef SCOPEDFILEHELPER_H_
+#define SCOPEDFILEHELPER_H_
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -39,3 +41,4 @@ private:
   void operator delete[](void *);
 };
 } // namespace ScopedFileHelper
+#endif
