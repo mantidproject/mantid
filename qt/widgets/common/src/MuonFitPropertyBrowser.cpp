@@ -872,7 +872,6 @@ void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   * @param ws :: The workspace
   */
 bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
-  auto fsad = ws->getName();
   QString workspaceName(QString::fromStdString(ws->getName()));
 
   if ((workspaceName.contains("_Raw")) ||
@@ -944,6 +943,12 @@ void MuonFitPropertyBrowser::finishHandleTF(const IAlgorithm *alg) {
   std::vector<std::string> wsList =
       alg->getProperty("UnNormalizedWorkspaceList");
   emit fittingDone(QString::fromStdString(wsList[0]));
+  double quality = alg->getProperty("ChiSquared");
+  //std::string costFunction = 
+ 
+  emit changeWindowTitle(QString("Fit Function (") +
+	  "Chi-sq " + " = " +
+	  QString::number(quality) + ", " + status + ")");
   if (nWorkspaces == 1) {
     emit algorithmFinished(QString::fromStdString(wsList[0] + "_workspace"));
   }
@@ -1170,7 +1175,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
         boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
     QStringList globals;
 
-    if (enabled && m_isMultiFittingMode) {
+    if ( m_isMultiFittingMode) {
       // manually set the function values
       old = m_functionBrowser->getGlobalFunction();
       globals = m_functionBrowser->getGlobalParameters();
@@ -1210,6 +1215,9 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       } else {
         for (auto global : globals) {
           newGlobals << global.remove(0, 9);
+		  auto fasfd = global.remove(0, 9);
+		  auto ssss = fasfd.toStdString();
+		  auto fasdsdadfs = 1;
         }
       }
       m_functionBrowser->updateMultiDatasetParameters(*func);
