@@ -1380,20 +1380,39 @@ class CWSCDReductionControl(object):
 
         return vec_x, vec_y
 
-    def get_peak_integration_parameters(self, xlabel='2theta', ylabel='sigma'):
+    def get_peak_integration_parameters(self, xlabel='2theta', ylabel='sigma', with_error=True):
         """
         get the parameters from peak integration
-        :param xlabel:
-        :param ylabel:
+        :param xlabel: parameter name for x value
+        :param ylabel: parameter name for y value
+        :param with_error: If true, then output error
         :return:
         """
         xye_list = list()
+
+        if isinstance(ylabel, str):
+            ylabel = [ylabel]
+
         for (exp_number, scan_number) in self._myPeakInfoDict.keys():
             peak_int_info = self._myPeakInfoDict[exp_number, scan_number]
-            x_value = peak_int_info.get_parameter(xlabel)[0]
-            y_value, e_value = peak_int_info.get_parameter(ylabel)
 
-            xye_list.append([x_value, y_value, e_value])
+            # x value
+            x_value = peak_int_info.get_parameter(xlabel)[0]
+
+            # set up
+            scan_i = [x_value]
+
+            for param_name in ylabel:
+                if param_name.lower() == 'scan':
+                    y_value = scan_number
+                    scan_i.append(y_value)
+                else:
+                    y_value, e_value = peak_int_info.get_parameter(ylabel)
+                    scan_i.append(y_value)
+                    if with_error:
+                        scan_i.append(e_value)
+
+            xye_list.append(scan_i)
         # END-FOR
 
         if len(xye_list) == 0:

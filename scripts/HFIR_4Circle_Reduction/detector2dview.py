@@ -79,7 +79,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         assert isinstance(roi_state, bool), 'ROI mode state {} must be a boolean but not a {}.' \
-                                        ''.format(roi_state, type(roi_state))
+                                            ''.format(roi_state, type(roi_state))
 
         # set
         self._roiSelectMode = roi_state

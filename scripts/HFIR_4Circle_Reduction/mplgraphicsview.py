@@ -399,14 +399,6 @@ class MplGraphicsView(QtGui.QWidget):
 
         return
 
-    @property
-    def canvas(self):
-        """
-        provide reference to Canvas
-        :return:
-        """
-        return self._myCanvas
-
     def add_arrow(self, start_x, start_y, stop_x, stop_y):
         """
 
@@ -621,8 +613,10 @@ class MplGraphicsView(QtGui.QWidget):
 
         return
 
+    @property
     def canvas(self):
-        """ Get the canvas
+        """
+        provide reference to Canvas
         :return:
         """
         return self._myCanvas

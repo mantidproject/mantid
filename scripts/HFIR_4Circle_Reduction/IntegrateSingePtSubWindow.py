@@ -215,9 +215,12 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get scan number
-        # TODO TODO TODO - 20180801 - Start from here
-        # TODO  - 20180801 - If line edit empty, then use the first scan in the table
-        scan_number = int(self.ui.lineEdit_Scan.text())
+        scan_num_str = str(self.ui.lineEdit_Scan.text()).strip()
+        if len(scan_num_str) == 0:
+            scan_number = self.ui.tableView_summary.get_scan_number(0)
+            self.ui.lineEdit_Scan.setText('{}'.format(scan_number))
+        else:
+            scan_number = int(scan_num_str)
         roi_name = str(self.ui.comboBox_roiList.currentText())
         direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
 
@@ -228,9 +231,11 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='integrated counts',
                                                                  update_plot=False)
-        # TODO - 20180801 - Model might be an option
-        self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
-                                                            update_plot=show_plot)
+
+        if self.ui.checkBox_fitPeaks.isChecked:
+            self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
+                                                                update_plot=show_plot)
+
         # title
         self.ui.graphicsView_integration1DView.set_title('Scan {} Pt {} {} Integration.'
                                                          ''.format(scan_number, 1, direction))

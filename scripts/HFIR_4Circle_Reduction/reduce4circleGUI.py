@@ -328,12 +328,11 @@ class MainWindow(QtGui.QMainWindow):
                      self.menu_download_data)
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
-        # TODO - 20180801 - Implement: actionSort_by_Pt_with_Max_Counts (sort by Pt)
+        self.ui.actionSort_by_Pt_with_Max_Counts.clicked.connect(self.menu_sort_by_pt_number)
 
         #  pop out a general figure plot window
         self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
-        # TODO - 20180727 - Implement... refer to menu_pop_2theta_sigma_window: save sorted 2theta/scan/FWHM
-        # self.ui.actionSave_2theta_Sigma.connect(self.menu_save_2theta_sigma)
+        self.ui.actionSave_2theta_Sigma.connect(self.menu_save_2theta_sigma)
 
         # Validator ... (NEXT)
         # blabla... ...
@@ -1246,10 +1245,6 @@ class MainWindow(QtGui.QMainWindow):
         # save file
         self._myControl.save_roi_to_file(None, None, mask_name, roi_file_name)
 
-        # TODO - 20180727 - Save these values to a file with proper file format
-        # ... ... ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
-
-
         return
 
     def do_export_detector_views_to_movie(self):
@@ -1959,8 +1954,12 @@ class MainWindow(QtGui.QMainWindow):
             return
         roi_name = str(roi_name)
 
-        # TODO : It is better to warn user if the given ROI is used already
-        pass
+        # check whether this ROI name is used or not. If it is, warn user if the given ROI is used already
+        current_roi_names = [str(self.ui.comboBox_maskNames1.itemText(i))
+                             for i in range(self.ui.comboBox_maskNames1.count())]
+        if roi_name in current_roi_names:
+            self.pop_one_button_dialog('[Warning] ROI name {} is used before.  The previous ROI '
+                                       'will be overwritten by the new defined.'.format(roi_name))
 
         # get current ROI
         ll_corner, ur_corner = self.ui.graphicsView_detector2dPlot.get_roi()
@@ -3784,6 +3783,42 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def menu_save_2theta_sigma(self):
+        """
+        save 2theta - sigma - scan number to a csv file
+        :return:
+        """
+        # get file name
+        out_file_name = QtGui.QFileDialog.getSaveFileName(self, caption='Select a file to save 2theta-Sigma-Scan',
+                                                          directory=self._myControl.get_working_directory(),
+                                                          filter='Data Files (*.dat);;All File (*.*)')
+        out_file_name = str(out_file_name)
+        if len(out_file_name) == 0:
+            # cancelled
+            return
+
+        # construct the table
+        try:
+            vec_2theta, vec_sigma, vec_sigma_error, vec_scan_number\
+                = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'],
+                                                                  with_error=True)
+        except RuntimeError as run_err:
+            self.pop_one_button_dialog(str(run_err))
+            return
+
+        # write to the output file
+        wbuf = '# 2theta\tsigam\terror\tscan number\n'
+        for index in range(len(vec_2theta)):
+            wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(vec_2theta[index], vec_sigma[index], vec_sigma_error[index],
+                                                        vec_scan_number[index])
+        # END-FOR
+
+        out_file = open(out_file_name, 'w')
+        out_file.write(wbuf)
+        out_file.close()
+
+        return
+
     def menu_quit(self):
         """
 
@@ -3847,6 +3882,18 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
                                                         min_counts=0., max_counts=10000000000.,
                                                         sort_by_column='2theta', sort_order=0)
+
+        return
+
+    # TESTME - recently implemented
+    def menu_sort_by_pt_number(self):
+        """
+        sort survey table by pt number (with the maximum counts in the scan)
+        :return:
+        """
+        self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
+                                                        min_counts=0., max_counts=10000000000.,
+                                                        sort_by_column='pt', sort_order=0)
 
         return
 
