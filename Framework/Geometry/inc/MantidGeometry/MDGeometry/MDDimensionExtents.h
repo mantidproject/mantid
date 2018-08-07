@@ -40,7 +40,7 @@ public:
   MDDimensionExtents() : min(1e30f), max(-1e30f), m_size(0.0f) {}
   T getSize() const { return m_size; }
   T getCentre() const { return static_cast<T>(0.5 * (max + min)); }
-  bool outside(T x) const { return ((x < min) || (x >= max)); }
+  bool outside(T x) const { return ((x < min) || (x > max)); }
   bool isUndefined() const { return (min > max); }
   //
   std::string extentsStr() const {
