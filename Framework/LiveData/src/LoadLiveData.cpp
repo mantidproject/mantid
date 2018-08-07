@@ -222,17 +222,9 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
   WriteLock _lock1(*m_accumWS);
   ReadLock _lock2(*chunkWS);
 
-  // Choose the appropriate algorithm to add chunks
-  std::string algoName = "PlusMD";
-  MatrixWorkspace_sptr mws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
   // ISIS multi-period data come in workspace groups
-  WorkspaceGroup_sptr gws =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
-  if (mws || gws)
-    algoName = "Plus";
-
-  if (gws) {
+  if (WorkspaceGroup_sptr gws =
+          boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS)) {
     WorkspaceGroup_sptr accum_gws =
         boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
     if (!accum_gws) {
@@ -246,11 +238,15 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
     // one by one
     for (size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries());
          ++i) {
-      addMatrixWSChunk(algoName, accum_gws->getItem(i), gws->getItem(i));
+      addMatrixWSChunk(accum_gws->getItem(i), gws->getItem(i));
     }
+  } else if (MatrixWorkspace_sptr mws =
+                 boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
+    // If workspace is a Matrix workspace just add the chunk
+    addMatrixWSChunk(m_accumWS, chunkWS);
   } else {
-    // just add the chunk
-    addMatrixWSChunk(algoName, m_accumWS, chunkWS);
+    // Assume MD Workspace
+    addMDWSChunk(m_accumWS, chunkWS);
   }
 }
 
@@ -262,8 +258,7 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
  * @param accumWS :: accumulation matrix workspace
  * @param chunkWS :: processed live data chunk matrix workspace
  */
-void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
-                                    Workspace_sptr accumWS,
+void LoadLiveData::addMatrixWSChunk(Workspace_sptr accumWS,
                                     Workspace_sptr chunkWS) {
   // Handle the addition of the internal monitor workspace, if present
   auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
@@ -277,7 +272,7 @@ void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
   }
 
   // Now do the main workspace
-  IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
+  IAlgorithm_sptr alg = this->createChildAlgorithm("Plus");
   alg->setProperty("LHSWorkspace", accumWS);
   alg->setProperty("RHSWorkspace", chunkWS);
   alg->setProperty("OutputWorkspace", accumWS);
@@ -285,10 +280,41 @@ void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
   if (!alg->isExecuted()) {
     throw std::runtime_error("Error when calling " + alg->name() +
                              " to add the chunk of live data. See log.");
+  }
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * Add a matrix workspace to the accumulation workspace.
+ *
+ * @param algoName :: Name of algorithm which will be adding the workspaces.
+ * @param accumWS :: accumulation matrix workspace
+ * @param chunkWS :: processed live data chunk matrix workspace
+ */
+void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
+                                const Workspace_sptr &chunkWS) {
+  // Need to add chunk to ADS for MergeMD
+  std::string chunkName = "__anonymous_livedata_addmdws_" +
+                          this->getPropertyValue("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(chunkName, chunkWS);
+
+  std::string ws_names_to_merge = accumWS->getName();
+  ws_names_to_merge.append(", ");
+  ws_names_to_merge.append(chunkName);
+
+  IAlgorithm_sptr alg = this->createChildAlgorithm("MergeMD");
+  alg->setPropertyValue("InputWorkspaces", ws_names_to_merge);
+  alg->executeAsChildAlg();
+
+  // No longer needed in ADS
+  AnalysisDataService::Instance().remove(chunkName);
+
+  if (!alg->isExecuted()) {
+    throw std::runtime_error("Error when calling " + alg->name() +
+                             " to add the chunk of live data. See log.");
   } else {
     // Get the output as the generic Workspace type
     // This step is necessary for when we are operating on MD workspaces
-    // (PlusMD)
     Property *prop = alg->getProperty("OutputWorkspace");
     IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (!wsProp)
