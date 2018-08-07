@@ -211,6 +211,7 @@ void FakeISISEventDAE::exec() {
   // will generate another CancelException
   histoDAE->cancel();
   histoDAEHandle.wait();
+  server.stop();
   socket.close();
 }
 
