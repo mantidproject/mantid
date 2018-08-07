@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.api
-import tempfile
 import os
 import random
 import string
+import tempfile
 import unittest
 import warnings
 
