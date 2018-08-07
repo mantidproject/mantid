@@ -24,3 +24,9 @@ Improvements
 ############
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+
+Bugfixes
+########
+
+- :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
+
