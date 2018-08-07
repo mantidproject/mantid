@@ -35,7 +35,7 @@ function onexit {
     ulimit -c $ULIMIT_CORE_ORIG
   fi
 }
-trap onexit EXIT
+trap onexit INT TERM EXIT
 
 ###############################################################################
 # All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
