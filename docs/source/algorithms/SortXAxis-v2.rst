@@ -37,14 +37,14 @@ Usage
     print(ws.readE(0))
 
     # Sort the X Axis in a Descending fashion
-    ws = SortXAxis(InputWorkspace='ws', Ordering='Descending', Version=2)
+    ws = SortXAxis(InputWorkspace='ws', Ordering='Descending')
     print("In order print: Descending")
     print(ws.readX(0))
     print(ws.readY(0))
     print(ws.readE(0))
 
     # Sort the X Axis in a Ascending fashion
-    ws = SortXAxis(InputWorkspace='ws', Ordering='Ascending', Version=2)
+    ws = SortXAxis(InputWorkspace='ws', Ordering='Ascending')
     print("In order print: Ascending")
     print(ws.readX(0))
     print(ws.readY(0))
