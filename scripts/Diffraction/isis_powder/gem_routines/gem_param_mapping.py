@@ -29,7 +29,7 @@ attr_mapping = \
      ParamMapEntry(ext_name="save_maud",                 int_name="save_maud"),
      ParamMapEntry(ext_name="spline_coefficient",        int_name="spline_coeff"),
      ParamMapEntry(ext_name="suffix",                    int_name="suffix",         optional=True),
-     ParamMapEntry(ext_name="texture_mode",              int_name="texture_mode"),
+     ParamMapEntry(ext_name="texture_mode",              int_name="texture_mode",         optional=True),
      ParamMapEntry(ext_name="output_directory",          int_name="output_dir"),
      ParamMapEntry(ext_name="unit_to_keep",              int_name="unit_to_keep",
                    enum_class=WORKSPACE_UNITS,           optional=True),
