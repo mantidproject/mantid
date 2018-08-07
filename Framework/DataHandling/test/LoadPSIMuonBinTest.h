@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadPSIMuonBin.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/LoadPSIMuonBin.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileDescriptor.h"
 
@@ -47,7 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ws"));
   }
 
-  void test_workspaceParticulars(){
+  void test_workspaceParticulars() {
     LoadPSIMuonBin alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
