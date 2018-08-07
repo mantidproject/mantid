@@ -253,9 +253,9 @@ void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
 }
 
 /**
-* Sets the stop-monitor enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the stop-monitor enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
 
   ui.buttonStopMonitor->setEnabled(enabled);

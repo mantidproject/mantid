@@ -81,9 +81,7 @@ std::string getRunErrorMessage(
 
 // This namespace contains functions that return python source code
 namespace PythonSrc {
-void increaseIndent(std::string &indent) {
-  indent += "  ";
-}
+void increaseIndent(std::string &indent) { indent += "  "; }
 
 void decreaseIndent(std::string &indent) {
   if (indent.length() >= 2)
@@ -118,19 +116,21 @@ void closeTryWithExceptThatRaisesError(std::ostringstream &result,
 }
 
 void cloneWorkspace(std::ostringstream &result, const std::string &indent) {
-  result << indent << "CloneWorkspace(InputWorkspace=input,OutputWorkspace=output)\n";
+  result << indent
+         << "CloneWorkspace(InputWorkspace=input,OutputWorkspace=output)\n";
 }
 
 void loadInstrument(std::ostringstream &result, const std::string &indent,
                     const std::string &instrument) {
-  result << indent << "LoadInstrument(Workspace=output,RewriteSpectraMap=True,"
-            "InstrumentName='" << instrument << "')\n";
+  result << indent
+         << "LoadInstrument(Workspace=output,RewriteSpectraMap=True,"
+            "InstrumentName='"
+         << instrument << "')\n";
 }
 
 // Get a block variable from epics. The block name is the same as the sample
 // log name
-void getLiveDataVariable(std::ostringstream &result,
-                         const std::string &indent,
+void getLiveDataVariable(std::ostringstream &result, const std::string &indent,
                          const std::string &instrument,
                          const std::string &logName) {
   result << indent << logName << " = caget('IN:" << instrument
@@ -148,15 +148,15 @@ void validateLiveDataVariables(std::ostringstream &result,
 }
 
 void addSampleLog(std::ostringstream &result, const std::string &indent,
-                  const std::string &logNames,
-                  const std::string &variableNames,
+                  const std::string &logNames, const std::string &variableNames,
                   const std::string &logUnits) {
-  result << indent << "AddSampleLogMultiple(Workspace=output,LogNames="
-         << logNames << ",LogValues=" << variableNames << ",LogUnits="
-         << logUnits << ")\n";
+  result << indent
+         << "AddSampleLogMultiple(Workspace=output,LogNames=" << logNames
+         << ",LogValues=" << variableNames << ",LogUnits=" << logUnits << ")\n";
 }
 
-void setInstrumentParameter(std::ostringstream &result, const std::string &indent,
+void setInstrumentParameter(std::ostringstream &result,
+                            const std::string &indent,
                             const std::string &variable,
                             const std::string &component) {
   result << indent << "try:\n"
@@ -182,9 +182,10 @@ void postProcessingAlgorithm(std::ostringstream &result,
   result << indent
          << "ReflectometryReductionOneAuto(InputWorkspace=output,"
             "OutputWorkspaceBinned=output,ThetaLogName='"
-            "Theta'," << optionsString << ")\n";
+            "Theta',"
+         << optionsString << ")\n";
 }
-} //namespace PythonSrc
+} // namespace PythonSrc
 
 /** Constructor
  * @param mainView :: [input] The view we're managing
@@ -945,7 +946,8 @@ std::string ReflRunsTabPresenter::setupMonitorPostProcessingScript() {
   PythonSrc::openTryStatement(script, indent);
   PythonSrc::setInstrumentParameter(script, indent, "s1vg", "slit1");
   PythonSrc::setInstrumentParameter(script, indent, "s2vg", "slit2");
-  PythonSrc::closeTryWithExceptThatPrintsError(script, indent, "Live data error");
+  PythonSrc::closeTryWithExceptThatPrintsError(script, indent,
+                                               "Live data error");
   // Set up the reduction algorithm, getting the properties from the settings
   // tab. It's not ideal but we don't have a group associated with live data so
   // just use the first group.
