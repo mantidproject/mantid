@@ -93,8 +93,8 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the CentroidPeaksMD2 with the given peak radius param */
-  void doRun(V3D startPos, double PeakRadius, double binCount, V3D expectedResult,
-             std::string message,
+  void doRun(V3D startPos, double PeakRadius, double binCount,
+             V3D expectedResult, std::string message,
              std::string OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst =
@@ -173,7 +173,8 @@ public:
       doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.),
             "Start at the center, get the center");
 
-      doRun(V3D(0.2, 0.2, 0.2), 1.8, 1000., V3D(0., 0., 0.), "Somewhat off center");
+      doRun(V3D(0.2, 0.2, 0.2), 1.8, 1000., V3D(0., 0., 0.),
+            "Somewhat off center");
     } else if (CoordinatesToUse == "Q (lab frame)") {
       mdews->setCoordinateSystem(Mantid::Kernel::QLab);
     } else if (CoordinatesToUse == "Q (sample frame)") {
@@ -191,7 +192,8 @@ public:
     doRun(V3D(8.0, 0.0, 1.0), 1.0, 0., V3D(8.0, 0.0, 1.0),
           "Include no events, get no change");
 
-    doRun(V3D(6., 6., 6.), 0.1, 0., V3D(6., 6., 6.), "Small radius still works");
+    doRun(V3D(6., 6., 6.), 0.1, 0., V3D(6., 6., 6.),
+          "Small radius still works");
 
     AnalysisDataService::Instance().remove("CentroidPeaksMD2Test_MDEWS");
   }
