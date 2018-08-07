@@ -1,14 +1,14 @@
 #ifndef MANTID_ALGORITHMS_GENERATEPEAKS_H_
 #define MANTID_ALGORITHMS_GENERATEPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -73,8 +73,8 @@ private:
   void processTableColumnNames();
 
   void importPeaksFromTable(
-      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
-          functionmap);
+      std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
+          &functionmap);
 
   /// Import peak and background function parameters from vector
   void importPeakFromVector(
@@ -83,8 +83,8 @@ private:
   /// Generate peaks in output data workspaces
   void generatePeaks(
       const std::map<specnum_t,
-                     std::vector<std::pair<double, API::IFunction_sptr>>> &
-          functionmap,
+                     std::vector<std::pair<double, API::IFunction_sptr>>>
+          &functionmap,
       API::MatrixWorkspace_sptr dataWS);
 
   /// Check whether function has a certain parameter

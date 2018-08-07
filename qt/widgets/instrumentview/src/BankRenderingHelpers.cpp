@@ -7,8 +7,8 @@
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Quat.h"
 
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 namespace {
 struct Corners {
   V3D bottomLeft;

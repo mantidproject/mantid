@@ -14,7 +14,7 @@ namespace Poco {
 namespace DOM {
 class Element;
 }
-}
+} // namespace Poco
 namespace Mantid {
 namespace MDAlgorithms {
 /**
@@ -100,7 +100,7 @@ void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

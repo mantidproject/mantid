@@ -46,13 +46,13 @@
 
 #ifndef QTCOLORPICKER_H
 #define QTCOLORPICKER_H
-#include <QtGui/QPushButton>
 #include <QtCore/QString>
 #include <QtGui/QColor>
+#include <QtGui/QPushButton>
 
-#include <QtGui/QLabel>
 #include <QtCore/QEvent>
 #include <QtGui/QFocusEvent>
+#include <QtGui/QLabel>
 
 #if defined(Q_WS_WIN)
 #if !defined(QT_QTCOLORPICKER_EXPORT) && !defined(QT_QTCOLORPICKER_IMPORT)
@@ -76,8 +76,8 @@ class ColorPickerPopup;
 class QT_QTCOLORPICKER_EXPORT QtColorPicker : public QPushButton {
   Q_OBJECT
 
-  Q_PROPERTY(bool colorDialog READ colorDialogEnabled WRITE
-                 setColorDialogEnabled)
+  Q_PROPERTY(
+      bool colorDialog READ colorDialogEnabled WRITE setColorDialogEnabled)
 
 public:
   QtColorPicker(QWidget *parent = nullptr, int columns = -1,

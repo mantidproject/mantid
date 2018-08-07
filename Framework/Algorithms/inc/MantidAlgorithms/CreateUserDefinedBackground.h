@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUND_H_
 #define MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUND_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 namespace Mantid {
 namespace Kernel {

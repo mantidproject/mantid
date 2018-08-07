@@ -1,8 +1,8 @@
 #ifndef MANTID_ICAT_CATALOGSEARCHPARAM_H_
 #define MANTID_ICAT_CATALOGSEARCHPARAM_H_
 
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "MantidICat/DllConfig.h"
 
@@ -122,6 +122,6 @@ private:
   /// investigation id
   std::string m_investigationId;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 #endif

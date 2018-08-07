@@ -1,17 +1,17 @@
 #ifndef TIMESERIESPROPERTYTEST_H_
 #define TIMESERIESPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
-#include <cmath>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -619,14 +619,6 @@ public:
     const double intMean = intLog->timeAverageValue();
     TS_ASSERT_DELTA(intMean, 2.5, .0001);
 
-    // average is unchanged, standard deviation within tolerance
-    const auto dblPair = dblLog->timeAverageValueAndStdDev();
-    TS_ASSERT_EQUALS(dblPair.first, dblMean);
-    TS_ASSERT_DELTA(dblPair.second, 1.8156, .0001);
-    const auto intPair = intLog->timeAverageValueAndStdDev();
-    TS_ASSERT_EQUALS(intPair.first, intMean);
-    TS_ASSERT_DELTA(intPair.second, 1.1180, .0001);
-
     // Clean up
     delete dblLog;
     delete intLog;
@@ -1055,6 +1047,8 @@ public:
     TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
 
     delete log;
   }
@@ -1068,6 +1062,8 @@ public:
     TS_ASSERT(std::isnan(stats.median));
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.time_mean));
+    TS_ASSERT(std::isnan(stats.time_standard_deviation));
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;
@@ -1971,9 +1967,9 @@ public:
   }
 
   /*
-    * Test filterWith() on different boundary conditions
-    * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
-    */
+   * Test filterWith() on different boundary conditions
+   * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
+   */
   void test_filterBoundary2() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
@@ -2023,9 +2019,9 @@ public:
   }
 
   /*
-    * Test filterWith() on different boundary conditions
-    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
-    */
+   * Test filterWith() on different boundary conditions
+   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
+   */
   void test_filterBoundary3() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
@@ -2085,7 +2081,7 @@ public:
   /*
    * Test filterWith() on different boundary conditions
    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
-  */
+   */
 
   void test_filterBoundary4() {
     // 1. Create a base property
@@ -2259,7 +2255,7 @@ public:
   //----------------------------------------------------------------------------
 
   /** A test for filter nothing
-    */
+   */
   void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 

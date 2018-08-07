@@ -17,23 +17,23 @@ namespace Kernel {
 namespace {
 
 /**
-  * Read a value from the stream based on the template type
-  * @param stream The open stream on which to perform the read
-  * @param value An object of type T to fill with the value from the file
-  */
+ * Read a value from the stream based on the template type
+ * @param stream The open stream on which to perform the read
+ * @param value An object of type T to fill with the value from the file
+ */
 template <typename T>
 inline void readFromStream(std::istream &stream, T &value) {
   stream.read(reinterpret_cast<char *>(&value), sizeof(T));
 }
 
 /**
-  * Overload to read an array of values from the stream based on the template
-  * type for the element of the array.
-  * @param stream The open stream on which to perform the read
-  * @param value An object of type std::vector<T> to fill with the value from
-  * the file
-  * @param nvals The number of values to read
-  */
+ * Overload to read an array of values from the stream based on the template
+ * type for the element of the array.
+ * @param stream The open stream on which to perform the read
+ * @param value An object of type std::vector<T> to fill with the value from
+ * the file
+ * @param nvals The number of values to read
+ */
 template <typename T>
 inline void readFromStream(std::istream &stream, std::vector<T> &value,
                            size_t nvals) {
@@ -77,7 +77,7 @@ inline void readFromStream(std::istream &stream, Matrix<T> &value,
     }
   }
 }
-}
+} // namespace
 
 //------------------------------------------------------------------------------
 // Public members

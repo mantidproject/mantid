@@ -9,7 +9,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace API {
 class SpectrumInfo;
 }
@@ -105,7 +105,7 @@ private:
   bool m_interpolate; ///< Whether removed bins should be interpolated
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REMOVEBINS_H_*/

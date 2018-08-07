@@ -4,12 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidBeamline/SpectrumInfo.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -24,7 +24,7 @@ constexpr size_t GroupOfDets1And2 = 1;
 constexpr size_t GroupOfDets1And4 = 2;
 constexpr size_t GroupOfDets4And5 = 3;
 constexpr size_t GroupOfAllDets = 4;
-}
+} // namespace
 
 class SpectrumInfoTest : public CxxTest::TestSuite {
 public:

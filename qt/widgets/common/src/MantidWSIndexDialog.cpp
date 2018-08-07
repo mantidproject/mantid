@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <QMessageBox>
 #include <QPalette>
@@ -112,9 +112,9 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
 }
 
 /**
-* Returns the workspace index to be plotted
-* @returns Workspace index to be plotted
-*/
+ * Returns the workspace index to be plotted
+ * @returns Workspace index to be plotted
+ */
 int MantidWSIndexWidget::getPlotIndex() const {
   int spectrumIndex = 0; // default to 0
   const auto userInput = getPlots();
@@ -132,9 +132,9 @@ int MantidWSIndexWidget::getPlotIndex() const {
 }
 
 /**
-* Displays a message box with the supplied error string.
-* @param message :: [input] Error message to display
-*/
+ * Displays a message box with the supplied error string.
+ * @param message :: [input] Error message to display
+ */
 void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
   if (!message.isEmpty()) {
     QMessageBox errorMessage;
@@ -145,12 +145,12 @@ void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
 }
 
 /**
-* If "Custom" is selected as log, returns the list of values the user has input
-* into the edit box, otherwise returns an empty set.
-* Note that the set is ordered by definition, and values are only added if they
-* are successfully converted to a double.
-* @returns Set of numerical log values
-*/
+ * If "Custom" is selected as log, returns the list of values the user has input
+ * into the edit box, otherwise returns an empty set.
+ * Note that the set is ordered by definition, and values are only added if they
+ * are successfully converted to a double.
+ * @returns Set of numerical log values
+ */
 const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
   std::set<double> logValues;
   if (m_logSelector->currentText() == CUSTOM) {
@@ -167,17 +167,17 @@ const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
 }
 
 /**
-* Gets the name that the user gave for the Y axis of the surface plot
-* @returns Name input by user for axis
-*/
+ * Gets the name that the user gave for the Y axis of the surface plot
+ * @returns Name input by user for axis
+ */
 const QString MantidWSIndexWidget::getAxisName() const {
   return m_axisNameEdit->lineEdit()->text();
 }
 
 /**
-* Gets the log that user selected to plot against
-* @returns Name of log, or "Workspace index"
-*/
+ * Gets the log that user selected to plot against
+ * @returns Name of log, or "Workspace index"
+ */
 const QString MantidWSIndexWidget::getLogName() const {
   return m_logSelector->currentText();
 }
@@ -231,9 +231,9 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
 }
 
 /**
-* Whether the user selected "1D plot"
-* @returns True if 1D plot selected
-*/
+ * Whether the user selected "1D plot"
+ * @returns True if 1D plot selected
+ */
 bool MantidWSIndexWidget::is1DPlotSelected() const {
   return (m_plotOptions->currentText() == SIMPLE_PLOT);
 }
@@ -255,25 +255,25 @@ bool MantidWSIndexWidget::isTiledPlotSelected() const {
 }
 
 /**
-* Whether the user selected surface plot
-* @returns True if surfarce plot selected
-*/
+ * Whether the user selected surface plot
+ * @returns True if surfarce plot selected
+ */
 bool MantidWSIndexWidget::isSurfacePlotSelected() const {
   return (m_plotOptions->currentText() == SURFACE_PLOT);
 }
 
 /**
-* Whether the user selected contour plot
-* @returns True if surfarce plot selected
-*/
+ * Whether the user selected contour plot
+ * @returns True if surfarce plot selected
+ */
 bool MantidWSIndexWidget::isContourPlotSelected() const {
   return (m_plotOptions->currentText() == CONTOUR_PLOT);
 }
 
 /**
-* Whether the user has selected plot with error bars
-* @returns True if error bars are selected
-*/
+ * Whether the user has selected plot with error bars
+ * @returns True if error bars are selected
+ */
 bool MantidWSIndexWidget::isErrorBarsSelected() const {
   return m_showErrorBars->checkState();
 }
@@ -573,12 +573,12 @@ void MantidWSIndexWidget::initLogs() {
 }
 
 /**
-* Called when log selection changed
-* If "Custom" selected, enable the custom log input box.
-* Otherwise, it is read-only.
-* Also put the log name into the axis name box as a default choice.
-* @param logName :: [input] Text selected in combo box
-*/
+ * Called when log selection changed
+ * If "Custom" selected, enable the custom log input box.
+ * Otherwise, it is read-only.
+ * Also put the log name into the axis name box as a default choice.
+ * @param logName :: [input] Text selected in combo box
+ */
 void MantidWSIndexWidget::onLogSelected(const QString &logName) {
   m_logValues->setEnabled(logName == CUSTOM);
   m_logValues->lineEdit()->clear();
@@ -586,9 +586,9 @@ void MantidWSIndexWidget::onLogSelected(const QString &logName) {
 }
 
 /**
-* Called when plot option is changed
-* @param plotOption :: [input] New plot option
-*/
+ * Called when plot option is changed
+ * @param plotOption :: [input] New plot option
+ */
 void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   auto useLogNames = m_advanced && isSuitableForLogValues(plotOption);
   auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
@@ -614,10 +614,10 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
 }
 
 /**
-* Populate the log combo box with all log names that
-* have single numeric value per workspace (and occur
-* in every workspace)
-*/
+ * Populate the log combo box with all log names that
+ * have single numeric value per workspace (and occur
+ * in every workspace)
+ */
 void MantidWSIndexWidget::populateLogComboBox() {
   // First item should be "Workspace index"
   m_logSelector->addItem(WORKSPACE_NAME);
@@ -677,10 +677,10 @@ bool MantidWSIndexWidget::isSuitableForLogValues(
 }
 
 /**
-* Check to see if *all* workspaces have a spectrum axis.
-* If even one does not have a spectra axis, then we wont
-* ask the user to enter spectra Numberss - only workspace indices.
-*/
+ * Check to see if *all* workspaces have a spectrum axis.
+ * If even one does not have a spectra axis, then we wont
+ * ask the user to enter spectra Numberss - only workspace indices.
+ */
 void MantidWSIndexWidget::checkForSpectraAxes() {
   QList<QString>::const_iterator it = m_wsNames.constBegin();
   m_spectra = true;
@@ -820,9 +820,9 @@ QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
 }
 
 /**
-* Whether the user selected the simple 1D plot
-* @returns True if waterfall plot selected
-*/
+ * Whether the user selected the simple 1D plot
+ * @returns True if waterfall plot selected
+ */
 bool MantidWSIndexDialog::is1DPlotSelected() const {
   return m_widget.is1DPlotSelected();
 }
@@ -844,25 +844,25 @@ bool MantidWSIndexDialog::isTiledPlotSelected() const {
 }
 
 /**
-* Whether the user selected the surface plot
-* @returns True if surface plot selected
-*/
+ * Whether the user selected the surface plot
+ * @returns True if surface plot selected
+ */
 bool MantidWSIndexDialog::isSurfacePlotSelected() const {
   return m_widget.isSurfacePlotSelected();
 }
 
 /**
-* Whether the user selected the surface plot
-* @returns True if surface plot selected
-*/
+ * Whether the user selected the surface plot
+ * @returns True if surface plot selected
+ */
 bool MantidWSIndexDialog::isContourPlotSelected() const {
   return m_widget.isContourPlotSelected();
 }
 
 /**
-* Whether the user selected error bars
-* @returns True if error bars selected
-*/
+ * Whether the user selected error bars
+ * @returns True if error bars selected
+ */
 bool MantidWSIndexDialog::isErrorBarsSelected() const {
   return m_widget.isErrorBarsSelected();
 }
@@ -1316,5 +1316,5 @@ void MantidWSIndexWidget::QLineEditWithErrorMark::setError(QString error) {
     m_validLbl->setToolTip(error.trimmed());
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

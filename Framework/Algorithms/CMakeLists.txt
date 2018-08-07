@@ -856,6 +856,7 @@ set ( TEST_FILES
 	MostLikelyMeanTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h
+	MuonWorkspaceCreationHelperTest.h
 	NRCalculateSlitResolutionTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h

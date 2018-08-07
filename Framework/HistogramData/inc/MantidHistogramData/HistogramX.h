@@ -14,7 +14,7 @@ class HistogramX;
 namespace detail {
 template <class BinEdges, class HistogramX> class VectorOf;
 template <class Points, class HistogramX> class VectorOf;
-}
+} // namespace detail
 
 /** HistogramX
 
@@ -60,8 +60,8 @@ public:
   // the using declaration above, so we need them here explicitly.
   HistogramX(const HistogramX &) = default;
   HistogramX(HistogramX &&) = default;
-  HistogramX &operator=(const HistogramX &)& = default;
-  HistogramX &operator=(HistogramX &&)& = default;
+  HistogramX &operator=(const HistogramX &) & = default;
+  HistogramX &operator=(HistogramX &&) & = default;
 
   // These classes are friends, such that they can modify the length.
   friend class Histogram;

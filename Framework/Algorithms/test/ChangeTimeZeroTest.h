@@ -1,19 +1,19 @@
 #ifndef CHANGETIMEZEROTEST_H_
 #define CHANGETIMEZEROTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ChangeTimeZero.h"
 #include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -153,7 +153,7 @@ MatrixWorkspace_sptr execute_change_time(MatrixWorkspace_sptr in_ws,
   auto out_ws = alg.getProperty("OutputWorkspace");
   return out_ws;
 }
-}
+} // namespace
 
 class ChangeTimeZeroTest : public CxxTest::TestSuite {
 public:
@@ -400,12 +400,12 @@ public:
   }
 
   /**
- * Test that the algorithm can handle a WorkspaceGroup as input without
- * crashing
- * We have to use the ADS to test WorkspaceGroups
- *
- * Need to use absolute time to test this part of validateInputs
- */
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   *
+   * Need to use absolute time to test this part of validateInputs
+   */
   void testValidateInputsWithWSGroup() {
     const double timeShiftDouble = 1000;
     DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;

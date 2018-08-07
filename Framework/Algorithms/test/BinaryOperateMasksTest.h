@@ -2,12 +2,12 @@
 #define MANTID_ALGORITHMS_BINARYOPERATEMASKSTEST_H_
 
 #include "MantidAlgorithms/BinaryOperateMasks.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

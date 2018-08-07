@@ -40,5 +40,5 @@ void NotMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   out->operatorNot();
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

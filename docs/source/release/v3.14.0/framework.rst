@@ -12,10 +12,10 @@ Framework Changes
 Logging
 -------
 
-- We have changed the logging in Mantid to stop writing the a high level version of the log to a file.  This had been causing numerous problems including inconsistent behaviour with multiple instances of Mantid, performance problems when logging at detailed levels, and excessive network usage in some scenarios.  This does not change the rest of the logging that you see in the message display in Mantidplot or the console window.  
+- We have changed the logging in Mantid to stop writing the a high level version of the log to a file.  This had been causing numerous problems including inconsistent behaviour with multiple instances of Mantid, performance problems when logging at detailed levels, and excessive network usage in some scenarios.  This does not change the rest of the logging that you see in the message display in Mantidplot or the console window. A warning message will appear if configuration for the removed componets of logging is found.
 
   - Associated with this we have also simplified the python methods used to control logging.
-  
+
     .. code-block:: python
 
 	  	# The two methods
@@ -36,7 +36,7 @@ Algorithms
 
 
 New Algorithms
-**************
+##############
 
 
 
@@ -59,10 +59,12 @@ New
 Improvements
 ############
 
-
+- :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
 
 Bugfixes
 ########
 
 
 :ref:`Release 3.14.0 <v3.14.0>`
+
+

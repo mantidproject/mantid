@@ -31,9 +31,9 @@
 #define SCALE_ENGINE_H
 
 #include "MantidQtWidgets/LegacyQwt/DllOption.h"
+#include <float.h>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
-#include <float.h>
 
 class ScaleEngine;
 

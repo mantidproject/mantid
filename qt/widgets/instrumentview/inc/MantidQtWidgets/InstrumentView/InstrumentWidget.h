@@ -21,7 +21,7 @@ namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 // Qt forward declarations
 class QPushButton;
@@ -314,7 +314,7 @@ private:
   std::string saveTabs() const;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGET_H_*/

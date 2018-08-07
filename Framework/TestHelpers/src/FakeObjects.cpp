@@ -1,8 +1,8 @@
 #include "MantidTestHelpers/FakeObjects.h"
 
 // Property implementations
-#include "MantidKernel/PropertyWithValue.tcc"
 #include "MantidAPI/WorkspaceProperty.tcc"
+#include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
 namespace Kernel {

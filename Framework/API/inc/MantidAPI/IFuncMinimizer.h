@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/ICostFunction.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace API {

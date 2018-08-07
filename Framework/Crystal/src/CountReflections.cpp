@@ -6,12 +6,12 @@
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -134,7 +134,8 @@ void CountReflections::exec() {
     g_log.information() << "There are " << (peaks.size() - totalReflections)
                         << " peaks in the input workspace that fall outside "
                            "the resolution limit and are not considered for "
-                           "the calculations." << std::endl;
+                           "the calculations."
+                        << std::endl;
   }
 
   double multiplyObservedReflections =

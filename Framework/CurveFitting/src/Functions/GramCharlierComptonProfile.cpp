@@ -65,7 +65,7 @@ struct InY {
   bool operator()(Point const &a, Point const &b) { return a.y < b.y; }
 };
 ///@endcond
-}
+} // namespace
 
 /**
  */

@@ -38,7 +38,7 @@ ComplexType v33{33, 0.33};
 #define TS_ASSERT_COMPLEX_DELTA_2(v1, v2, d)                                   \
   TS_ASSERT_DELTA(ComplexType(v1).real(), ComplexType(v2).real(), d);          \
   TS_ASSERT_DELTA(ComplexType(v1).imag(), ComplexType(v2).imag(), d);
-}
+} // namespace
 
 class ComplexMatrixTest : public CxxTest::TestSuite {
 public:

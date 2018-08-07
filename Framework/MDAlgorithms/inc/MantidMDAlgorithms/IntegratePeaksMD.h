@@ -51,7 +51,7 @@ private:
   Geometry::Instrument_const_sptr inst;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

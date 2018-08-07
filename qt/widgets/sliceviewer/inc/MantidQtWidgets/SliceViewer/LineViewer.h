@@ -2,17 +2,17 @@
 #define LINEVIEWER_H
 
 #include "DllOption.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
-#include "ui_LineViewer.h"
-#include <QWidget>
-#include <qwt_plot_curve.h>
-#include <qwt_plot.h>
-#include <qwt_painter.h>
-#include "MantidAPI/CoordTransform.h"
+#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "ui_LineViewer.h"
+#include <QWidget>
+#include <qwt_painter.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -175,6 +175,6 @@ private:
   double m_binWidth;
 };
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif // LINEVIEWER_H

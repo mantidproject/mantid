@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Column.h"
-#include "MantidAPI/Run.h"
-#include "MantidMuon/CalMuonDeadTime.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Column.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/CalMuonDeadTime.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;

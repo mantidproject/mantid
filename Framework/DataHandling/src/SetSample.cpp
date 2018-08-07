@@ -15,9 +15,9 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
+#include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,19 +39,19 @@ const std::string GEOMETRY("Geometry");
 const std::string MATERIAL("Material");
 /// Environment property name
 const std::string ENVIRONMENT("Environment");
-}
+} // namespace PropertyNames
 /// Private namespace storing sample environment args
 namespace SEArgs {
 /// Static Name string
 const std::string NAME("Name");
 /// Static Container string
 const std::string CONTAINER("Container");
-}
+} // namespace SEArgs
 /// Provate namespace storing geometry args
 namespace GeometryArgs {
 /// Static Shape string
 const std::string SHAPE("Shape");
-}
+} // namespace GeometryArgs
 
 /// Private namespace storing sample environment args
 namespace ShapeArgs {
@@ -77,15 +77,15 @@ const std::string RADIUS("Radius");
 const std::string INNER_RADIUS("InnerRadius");
 /// Static OuterRadius string
 const std::string OUTER_RADIUS("OuterRadius");
-}
+} // namespace ShapeArgs
 
 /**
-  * Return the centre coordinates of the base of a cylinder given the
-  * coordinates of the centre of the cylinder
-  * @param cylCentre Coordinates of centre of the cylinder (X,Y,Z) (in metres)
-  * @param height Height of the cylinder (in metres)
-  * @param axis The index of the height-axis of the cylinder
-  */
+ * Return the centre coordinates of the base of a cylinder given the
+ * coordinates of the centre of the cylinder
+ * @param cylCentre Coordinates of centre of the cylinder (X,Y,Z) (in metres)
+ * @param height Height of the cylinder (in metres)
+ * @param axis The index of the height-axis of the cylinder
+ */
 V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
                   unsigned axisIdx) {
   const V3D halfHeight = [&]() {
@@ -120,7 +120,7 @@ std::string axisXML(unsigned axisIdx) {
     return "";
   }
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetSample)
@@ -145,25 +145,25 @@ std::map<std::string, std::string> SetSample::validateInputs() {
   using Kernel::PropertyManager_const_sptr;
   std::map<std::string, std::string> errors;
 
-  auto existsAndNotEmptyString =
-      [](const PropertyManager &pm, const std::string &name) {
-        if (pm.existsProperty(name)) {
-          const auto value = pm.getPropertyValue(name);
-          return !value.empty();
-        }
-        return false;
-      };
+  auto existsAndNotEmptyString = [](const PropertyManager &pm,
+                                    const std::string &name) {
+    if (pm.existsProperty(name)) {
+      const auto value = pm.getPropertyValue(name);
+      return !value.empty();
+    }
+    return false;
+  };
 
-  auto existsAndNegative =
-      [](const PropertyManager &pm, const std::string &name) {
-        if (pm.existsProperty(name)) {
-          const double value = pm.getProperty(name);
-          if (value < 0.0) {
-            return true;
-          }
-        }
-        return false;
-      };
+  auto existsAndNegative = [](const PropertyManager &pm,
+                              const std::string &name) {
+    if (pm.existsProperty(name)) {
+      const double value = pm.getProperty(name);
+      if (value < 0.0) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   // Validate Environment
   const PropertyManager_const_sptr environArgs =
@@ -264,8 +264,8 @@ void SetSample::exec() {
 const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
     API::MatrixWorkspace_sptr &workspace,
     const Kernel::PropertyManager_const_sptr &args) {
-  using Geometry::SampleEnvironmentSpecFileFinder;
   using Geometry::SampleEnvironmentFactory;
+  using Geometry::SampleEnvironmentSpecFileFinder;
   using Kernel::ConfigService;
 
   const std::string envName = args->getPropertyValue(SEArgs::NAME);

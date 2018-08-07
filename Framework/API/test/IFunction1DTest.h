@@ -1,10 +1,10 @@
 #ifndef IFUNCTION1DTEST_H_
 #define IFUNCTION1DTEST_H_
 
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 
 #include <cxxtest/TestSuite.h>
 

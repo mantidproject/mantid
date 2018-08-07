@@ -6,9 +6,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;

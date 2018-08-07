@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOID_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOID_H_
 
+#include "MantidDataObjects/PeakShapeBase.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidDataObjects/PeakShapeBase.h"
 
 namespace Mantid {
 namespace DataObjects {
