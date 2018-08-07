@@ -339,11 +339,11 @@ void LoadCalFile::readCalFile(const std::string &calFileName,
         << " errors (invalid Detector ID's) found when reading .cal file '"
         << calFileName << "'.\n";
   if (doGroup && (!hasGrouped))
-    Logger("LoadCalFile").warning() << "'" << calFileName
-                                    << "' has no spectra grouped\n";
+    Logger("LoadCalFile").warning()
+        << "'" << calFileName << "' has no spectra grouped\n";
   if (doMask && (!hasUnmasked))
-    Logger("LoadCalFile").warning() << "'" << calFileName
-                                    << "' masks all spectra\n";
+    Logger("LoadCalFile").warning()
+        << "'" << calFileName << "' masks all spectra\n";
 }
 
 /**
@@ -369,5 +369,5 @@ Parallel::ExecutionMode LoadCalFile::getParallelExecutionMode(
   return Parallel::ExecutionMode::Identical;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

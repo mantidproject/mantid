@@ -45,7 +45,6 @@ if EXIST %WORKSPACE%\external\src\ThirdParty\.git (
   cd %WORKSPACE%
 )
 
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Set up the location for local object store outside of the build and source
 :: tree, which can be shared by multiple builds.
@@ -59,7 +58,7 @@ if NOT DEFINED MANTID_DATA_STORE (
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check job requirements from the name
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
@@ -85,18 +84,23 @@ if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
 :: For a clean build the entire thing is removed to guarantee it is clean. All
 :: other build types are assumed to be incremental and the following items
 :: are removed to ensure stale build objects don't interfere with each other:
+::   - those removed by git clean -fdx --exclude=build
 ::   - build/bin: if libraries are removed from cmake they are not deleted
 ::                   from bin and can cause random failures
 ::   - build/ExternalData/**: data files will change over time and removing
 ::                            the links helps keep it fresh
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set BUILD_DIR=%WORKSPACE%\build
+set BUILD_DIR_REL=build
+set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
+call %~dp0setupcompiler.bat %BUILD_DIR%
 
 if "!CLEANBUILD!" == "yes" (
+  echo Removing build directory for a clean build
   rmdir /S /Q %BUILD_DIR%
 )
 
 if EXIST %BUILD_DIR% (
+  git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
   for /f %%F in ('dir /b /a-d /S "TEST-*.xml"') do del /Q %%F >/nul
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (

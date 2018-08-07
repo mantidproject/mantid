@@ -1,8 +1,8 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "LoadRaw/isisraw2.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 
 #include <Poco/Path.h>
@@ -25,7 +25,7 @@ const char *DELAY_PARAM = "DelayTime";
 const char *PRESSURE_PARAM = "TubePressure";
 // Name of wall thickness parameter
 const char *THICKNESS_PARAM = "TubeThickness";
-}
+} // namespace
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadDetectorInfo)
@@ -52,9 +52,10 @@ void LoadDetectorInfo::init() {
       "workspace. The description of **dat** and **nxs** file format is "
       "provided below.");
 
-  declareProperty("RelocateDets", false, "If true, the detectors are moved to "
-                                         "the positions specified in the file "
-                                         "defined by the field above.",
+  declareProperty("RelocateDets", false,
+                  "If true, the detectors are moved to "
+                  "the positions specified in the file "
+                  "defined by the field above.",
                   Direction::Input);
 }
 
@@ -426,5 +427,5 @@ void LoadDetectorInfo::updateParameterMap(Geometry::DetectorInfo &detectorInfo,
     detectorInfo.setPosition(detIndex, newPos);
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

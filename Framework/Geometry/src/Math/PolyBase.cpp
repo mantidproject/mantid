@@ -1,13 +1,13 @@
+#include <algorithm>
 #include <cmath>
 #include <complex>
-#include <vector>
-#include <algorithm>
-#include <iterator>
 #include <functional>
 #include <gsl/gsl_poly.h>
+#include <iterator>
+#include <vector>
 
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Math/PolyBase.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 

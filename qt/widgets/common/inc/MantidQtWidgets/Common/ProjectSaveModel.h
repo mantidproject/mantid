@@ -82,7 +82,7 @@ private:
   std::vector<MantidQt::API::IProjectSerialisable *> m_unattachedWindows;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODEL_H

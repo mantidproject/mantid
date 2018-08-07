@@ -40,7 +40,7 @@
  *
  * @sa
  * vtkImplicitFunction vtkClipPolyData
-*/
+ */
 
 #ifndef AlignedCutter_h
 #define AlignedCutter_h

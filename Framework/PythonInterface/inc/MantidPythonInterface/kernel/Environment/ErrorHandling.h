@@ -53,8 +53,8 @@ class DLLExport PythonRuntimeError : public std::runtime_error {
 public:
   PythonRuntimeError(bool withTrace = true);
 };
-}
-}
-}
+} // namespace Environment
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_ERRORHANDLING_H_ */

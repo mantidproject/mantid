@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_
 #define MANTID_DATAHANDLING_LOADSPICEXML2DDET_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

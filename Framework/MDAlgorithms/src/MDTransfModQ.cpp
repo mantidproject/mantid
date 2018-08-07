@@ -83,15 +83,15 @@ bool MDTransfModQ::calcMatrixCoord(const double &x, std::vector<coord_t> &Coord,
 }
 
 /** Method fills-in all additional properties requested by user and not defined
-*by matrix workspace itself.
-*  it fills in [nd - (1 or 2 -- depending on emode)] values into Coord vector;
-*
-*@param Coord -- input-output vector of MD-coordinates
-*@param nd    -- number of current dimensions
-*
-*@returns     -- Coord vector with nd-(1 or 2, depending on emode) values of MD
-*coordinates
-*/
+ *by matrix workspace itself.
+ *  it fills in [nd - (1 or 2 -- depending on emode)] values into Coord vector;
+ *
+ *@param Coord -- input-output vector of MD-coordinates
+ *@param nd    -- number of current dimensions
+ *
+ *@returns     -- Coord vector with nd-(1 or 2, depending on emode) values of MD
+ *coordinates
+ */
 bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord,
                                         size_t nd) {
   // sanity check. If fails, something went fundamentally wrong
@@ -120,13 +120,13 @@ bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord,
 }
 
 /**
-* Method updates the value of pre-processed detector coordinates in Q-space,
-* used by other functions
-* @param Coord
-* @param i -- index of the detector, which corresponds to the spectra to
-* process.
-* @return FALSE if spectra should be excluded (if masked)
-*/
+ * Method updates the value of pre-processed detector coordinates in Q-space,
+ * used by other functions
+ * @param Coord
+ * @param i -- index of the detector, which corresponds to the spectra to
+ * process.
+ * @return FALSE if spectra should be excluded (if masked)
+ */
 bool MDTransfModQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   UNUSED_ARG(Coord);
   m_ex = (m_DetDirecton + i)->X();
@@ -377,10 +377,10 @@ MDTransfModQ::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
 }
 
 /**function returns units ID-s which this transformation produces its output.
-* @param dEmode   -- energy conversion mode
-* @param inWS -- Input Matrix workspace
-*
-* It is Momentum and DelteE in inelastic modes   */
+ * @param dEmode   -- energy conversion mode
+ * @param inWS -- Input Matrix workspace
+ *
+ * It is Momentum and DelteE in inelastic modes   */
 std::vector<std::string>
 MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode,
                            API::MatrixWorkspace_const_sptr inWS) const {
@@ -421,5 +421,5 @@ void MDTransfModQ::setDisplayNormalization(
   setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);
 }
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid

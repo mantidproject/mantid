@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRawHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -123,6 +123,6 @@ private:
   /// time channel vector
   std::vector<boost::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif

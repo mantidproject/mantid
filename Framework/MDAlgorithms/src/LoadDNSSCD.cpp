@@ -1,45 +1,45 @@
-#include <map>
-#include <iterator>
-#include <iomanip>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/regex.hpp>
-#include <boost/exception/diagnostic_information.hpp>
-#include <boost/exception_ptr.hpp>
-#include <Poco/DateTime.h>
-#include <Poco/DateTimeFormat.h>
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include "MantidMDAlgorithms/LoadDNSSCD.h"
-#include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
+#include "MantidKernel/VectorHelper.h"
+#include <Poco/DateTime.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/exception_ptr.hpp>
+#include <boost/regex.hpp>
+#include <iomanip>
+#include <iterator>
+#include <map>
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 //========================
 // helper functions
@@ -100,11 +100,11 @@ DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 LoadDNSSCD::LoadDNSSCD() : m_columnSep("\t, ;"), m_nDims(4) {}
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadDNSSCD::confidence(Kernel::FileDescriptor &descriptor) const {
   // DNS data acquisition writes ascii files with .d_dat extension
   int confidence(0);

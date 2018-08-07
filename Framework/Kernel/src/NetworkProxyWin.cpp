@@ -5,8 +5,8 @@
 // std
 #include <sstream>
 // windows
-#include <windows.h>
 #include <Winhttp.h>
+#include <windows.h>
 
 namespace Mantid {
 namespace Kernel {

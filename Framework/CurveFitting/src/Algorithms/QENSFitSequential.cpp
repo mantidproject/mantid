@@ -239,8 +239,9 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
   Progress renamerProg(qensFit, 0.98, 1.0, outputGroup->size() + 1);
   renamerProg.report("Renaming group workspaces...");
 
-  auto getName =
-      [&](std::size_t i) { return outputBase + "_" + getNameSuffix(i); };
+  auto getName = [&](std::size_t i) {
+    return outputBase + "_" + getNameSuffix(i);
+  };
 
   auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
     renameWorkspace(renameAlgorithm, workspace, name);
@@ -359,16 +360,19 @@ void QENSFitSequential::init() {
   declareProperty(
       make_unique<FunctionProperty>("Function", Direction::InOut),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "", "Name of the log value to plot the "
-                                  "parameters against. Default: use spectra "
-                                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("LogValue", "",
+                  "Name of the log value to plot the "
+                  "parameters against. Default: use spectra "
+                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   declareProperty("PassWSIndexToFunction", false,
                   "For each spectrum in Input pass its workspace index to all "

@@ -40,6 +40,6 @@ public:
   vtkPolyData *createSinglePeakMarker(double x, double y, double z,
                                       double radius);
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

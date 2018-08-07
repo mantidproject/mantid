@@ -1,9 +1,9 @@
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <boost/variant/get.hpp>
 
@@ -69,7 +69,7 @@ const std::string typeFromName(const std::string &name) {
         "Peak column names/types must be explicitly marked in PeakColumn.cpp");
   }
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -135,7 +135,7 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
  */
 void PeakColumn::print(size_t index, std::ostream &s) const {
   Peak &peak = m_peaks[index];
-
+  s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
@@ -346,5 +346,5 @@ void PeakColumn::setPeakHKLOrRunNumber(const size_t index, const double val) {
     throw std::runtime_error("Unexpected column " + m_name + " being set.");
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

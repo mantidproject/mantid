@@ -1,8 +1,8 @@
 #ifndef MANTID_PARALLEL_EVENTLOADERTEST_H_
 #define MANTID_PARALLEL_EVENTLOADERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/ParallelRunner.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventLoader.h"
@@ -23,10 +23,10 @@ template <> void load<uint32_t>() { throw std::runtime_error("uint32_t"); }
 template <> void load<uint64_t>() { throw std::runtime_error("uint64_t"); }
 template <> void load<float>() { throw std::runtime_error("float"); }
 template <> void load<double>() { throw std::runtime_error("double"); }
-}
-}
-}
-}
+} // namespace EventLoader
+} // namespace IO
+} // namespace Parallel
+} // namespace Mantid
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 
@@ -42,7 +42,9 @@ public:
   std::unique_ptr<AbstractEventDataPartitioner<int32_t>>
   setBankIndex(const size_t bank) override {
     m_bank = bank;
-    auto index = std::vector<int64_t>{0, 100, 100,
+    auto index = std::vector<int64_t>{0,
+                                      100,
+                                      100,
                                       300 * static_cast<int64_t>(m_bank + 1),
                                       500 * static_cast<int64_t>(m_bank + 1),
                                       700 * static_cast<int64_t>(m_bank + 1)};
@@ -144,7 +146,7 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
     }
   }
 }
-}
+} // namespace
 
 class EventLoaderTest : public CxxTest::TestSuite {
 public:

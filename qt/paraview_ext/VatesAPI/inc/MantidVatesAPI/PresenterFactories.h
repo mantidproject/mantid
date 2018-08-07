@@ -26,12 +26,12 @@ protected:
 };
 
 /**
-* This templated function sets up an in memory loading presenter.
-* @param view: the loading view type
-* @param wsName: the name of the workspace which is to be displayed
-* @param worksapceProvider: a worksapce provider
-* @returns a new in memory loading presenter.
-*/
+ * This templated function sets up an in memory loading presenter.
+ * @param view: the loading view type
+ * @param wsName: the name of the workspace which is to be displayed
+ * @param worksapceProvider: a worksapce provider
+ * @returns a new in memory loading presenter.
+ */
 template <class Presenter, class WorkspaceNamePolicy>
 class DLLExport InMemoryPresenterFactory : private WorkspaceNamePolicy {
   using WorkspaceNamePolicy::getWorkspaceName;
@@ -46,6 +46,6 @@ public:
                                                   getWorkspaceName(*workspace));
   }
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

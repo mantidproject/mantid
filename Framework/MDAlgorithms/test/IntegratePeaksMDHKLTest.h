@@ -2,18 +2,18 @@
 #define MANTID_MDAGORITHMS_INTEGRATEPEAKSMDHKLTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>

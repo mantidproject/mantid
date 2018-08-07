@@ -1,15 +1,15 @@
 /*
-* OptimizeCrystalPlacement.h
-*
-*  Created on: Jan 26, 2013
-*      Author: ruth
-*/
+ * OptimizeCrystalPlacement.h
+ *
+ *  Created on: Jan 26, 2013
+ *      Author: ruth
+ */
 
 #ifndef OPTIMIZECRYSTALPLACEMENT_H_
 #define OPTIMIZECRYSTALPLACEMENT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -68,7 +68,7 @@ private:
 
   void exec() override;
 };
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* OPTIMIZECRYSTALPLACEMENT_H_ */

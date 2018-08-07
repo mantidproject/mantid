@@ -1,12 +1,12 @@
 #include "MantidCrystal/TransformHKL.h"
+#include "MantidAPI/Sample.h"
+#include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidCrystal/SelectCellWithForm.h"
-#include "MantidAPI/Sample.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -156,5 +156,5 @@ void TransformHKL::exec() {
   this->setProperty("AverageError", average_error);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

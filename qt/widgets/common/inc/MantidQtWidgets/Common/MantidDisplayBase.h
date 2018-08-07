@@ -6,12 +6,12 @@
 #include <MantidAPI/IAlgorithm_fwd.h>
 #include <MantidQtWidgets/Common/DistributionOptions.h>
 #include <MantidQtWidgets/Common/GraphOptions.h>
+#include <QStringList>
 #include <map>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <QStringList>
 
 template <class Key, class T> class QHash;
 template <class Key, class T> class QMultiMap;
@@ -143,6 +143,6 @@ public:
   virtual bool doesVatesSupportOpenGL() = 0;
 #endif
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTID_MANTIDWIDGETS_MANTIDDISPLAYBASE_H_

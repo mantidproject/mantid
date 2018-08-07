@@ -25,12 +25,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
 #define MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
-#include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/Batch/Row.h"
+#include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
-#include <QStandardItemModel>
 #include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -103,7 +103,7 @@ modelItemFromIndex(QStandardItemModel &model,
 EXPORT_OPT_MANTIDQT_COMMON QStandardItem const *
 modelItemFromIndex(QStandardItemModel const &model,
                    QModelIndexForMainModel const &index);
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_

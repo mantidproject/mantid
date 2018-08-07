@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 using namespace Mantid::Poldi;
 using ::testing::Return;

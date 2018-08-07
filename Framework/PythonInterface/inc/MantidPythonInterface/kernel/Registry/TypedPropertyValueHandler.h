@@ -23,15 +23,15 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
+#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 
-#include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/call_method.hpp>
+#include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -158,8 +158,8 @@ struct DLLExport TypedPropertyValueHandler<
     return valueProp;
   }
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_ */

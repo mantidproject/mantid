@@ -14,10 +14,10 @@
 #include <gmock/gmock.h>
 #include <json/json.h>
 
-#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidKernel/VMD.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/VMD.h"
 #include "MockObjects.h"
 
 using namespace Mantid::DataObjects;

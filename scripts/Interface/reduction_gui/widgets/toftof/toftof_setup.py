@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #pylint: disable = too-many-instance-attributes, too-many-branches, too-many-public-methods
 #pylint: disable = W0622
 """
@@ -76,7 +77,7 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_chkSofTW = ''
     TIP_chkNxspe = 'Save for MSlice'
     TIP_chkNexus = 'Save for Mantid'
-    TIP_chkAscii = 'Will be available soon'
+    TIP_chkAscii = 'Save as text'
 
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
@@ -109,6 +110,14 @@ class TOFTOFSetupWidget(BaseWidget):
                 widget.setToolTip(text)
             return widget
 
+        def setEnabled(widget, *widgets):
+            """enables widget, when value of all widgets evaluates to true"""
+            def setEnabled():
+                widget.setEnabled(all(w.isChecked() for w in widgets))
+            for w in widgets:
+                w.toggled.connect(setEnabled)
+            return widget
+
         def DoubleEdit():
             edit = SmallQLineEdit()
             edit.setValidator(QDoubleValidator())
@@ -130,18 +139,18 @@ class TOFTOFSetupWidget(BaseWidget):
         set_spin(self.ecFactor, 0, 1)
 
         self.binEon    = tip(QCheckBox(),      self.TIP_binEon)
-        self.binEstart = tip(QDoubleSpinBox(), self.TIP_binEstart)
-        self.binEstep  = tip(QDoubleSpinBox(), self.TIP_binEstep)
-        self.binEend   = tip(QDoubleSpinBox(), self.TIP_binEend)
+        self.binEstart = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEstart), self.binEon)
+        self.binEstep  = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEstep),  self.binEon)
+        self.binEend   = setEnabled(tip(QDoubleSpinBox(), self.TIP_binEend),   self.binEon)
 
         set_spin(self.binEstart)
         set_spin(self.binEstep, decimals = 4)
         set_spin(self.binEend)
 
-        self.binQon    = tip(QCheckBox(),      self.TIP_binQon)
-        self.binQstart = tip(QDoubleSpinBox(), self.TIP_binQstart)
-        self.binQstep  = tip(QDoubleSpinBox(), self.TIP_binQstep)
-        self.binQend   = tip(QDoubleSpinBox(), self.TIP_binQend)
+        self.binQon    = setEnabled(tip(QCheckBox(),      self.TIP_binQon),    self.binEon)
+        self.binQstart = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQstart), self.binEon, self.binQon)
+        self.binQstep  = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQstep),  self.binEon, self.binQon)
+        self.binQend   = setEnabled(tip(QDoubleSpinBox(), self.TIP_binQend),   self.binEon, self.binQon)
 
         set_spin(self.binQstart)
         set_spin(self.binQstep)
@@ -160,15 +169,17 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs)
-        self.chkCreateDiff       = tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff)
+        self.chkReplaceNaNs      = setEnabled(tip(QCheckBox(u'Replace special values in S(Q, ω) with 0'), self.TIP_chkReplaceNaNs),
+                                              self.binEon)
+        self.chkCreateDiff       = setEnabled(tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff), self.binEon)
         self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
 
-        self.chkSofQW            = tip(QCheckBox('S(Q,W)'), self.TIP_chkSofQW)
-        self.chkSofTW            = tip(QCheckBox('S(2theta,W)'), self.TIP_chkSofTW)
-        self.chkNxspe            = tip(QCheckBox('NXSPE'), self.TIP_chkNxspe)
-        self.chkNexus            = tip(QCheckBox('NeXus'), self.TIP_chkNexus)
-        self.chkAscii            = tip(QCheckBox('Ascii'), self.TIP_chkAscii)
+        self.chkSofTWNxspe       = setEnabled(tip(QCheckBox('NXSPE'), self.TIP_chkNxspe), self.binEon)
+        self.chkSofTWNexus       = tip(QCheckBox('NeXus'), self.TIP_chkNexus)
+        self.chkSofTWAscii       = tip(QCheckBox('Ascii'), self.TIP_chkAscii)
+
+        self.chkSofQWNexus       = setEnabled(tip(QCheckBox('NeXus'), self.TIP_chkNexus), self.binEon, self.binQon)
+        self.chkSofQWAscii       = setEnabled(tip(QCheckBox('Ascii'), self.TIP_chkAscii), self.binEon, self.binQon)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
@@ -202,10 +213,12 @@ class TOFTOFSetupWidget(BaseWidget):
                 label.setToolTip(tip)
             return label
 
+        self.gbSave = QGroupBox('Save reduced data')
+        self.gbSave.setCheckable(True)
+
         gbDataDir = QGroupBox('Data search directory')
         gbPrefix  = QGroupBox('Workspace prefix')
         gbOptions = QGroupBox('Options')
-        gbSave    = QGroupBox('Save reduced data')
         gbInputs  = QGroupBox('Inputs')
         gbBinning = QGroupBox('Binning')
         gbData    = QGroupBox('Data')
@@ -213,7 +226,7 @@ class TOFTOFSetupWidget(BaseWidget):
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
-        box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, gbSave)))
+        box.addLayout(hbox(vbox(gbDataDir, gbInputs, gbBinning, gbOptions, 1), vbox(gbPrefix, gbData, self.gbSave)))
 
         gbDataDir.setLayout(hbox(self.dataDir, self.btnDataDir))
         gbPrefix.setLayout(hbox(self.prefix,))
@@ -286,25 +299,23 @@ class TOFTOFSetupWidget(BaseWidget):
         gbData.setLayout(hbox(self.dataRunsView))
 
         grid = QGridLayout()
-        grid.addWidget(QLabel('Workspaces'),  0, 0)
-        grid.addWidget(self.chkSofQW,         1, 0)
-        grid.addWidget(self.chkSofTW,         1, 1)
-        grid.addWidget(QLabel('Format'),      2, 0)
-        grid.addWidget(self.chkNxspe,         3, 0)
-        grid.addWidget(self.chkNexus,         3, 1)
-        grid.addWidget(self.chkAscii,         3, 2)
-        grid.setColumnStretch(3, 1)
+        saveDirGroup = hbox(self.saveDir, self.btnSaveDir)
+        grid.addWidget(QLabel('Directory'),   0, 0)
+        grid.addLayout(saveDirGroup,          0, 1, 1, 4)
+        grid.addWidget(setEnabled(QLabel(u'S(Q, ω):'), self.binEon),   1, 0)
+        grid.addWidget(self.chkSofQWNexus,    1, 1)
+        grid.addWidget(self.chkSofQWAscii,    1, 2)
+        grid.addItem(QSpacerItem(5, 5, hPolicy=QSizePolicy.Expanding),    1, 4)
+        grid.addWidget(QLabel(u'S(2θ, ω):'),   2, 0)
+        grid.addWidget(self.chkSofTWNexus,    2, 1)
+        grid.addWidget(self.chkSofTWAscii,    2, 2)
+        grid.addWidget(self.chkSofTWNxspe,    2, 3)
 
-        # disable save Ascii, it is not available for the moment
-        self.chkAscii.setEnabled(False)
-
-        gbSave.setLayout(vbox(label('Directory',''), hbox(self.saveDir, self.btnSaveDir), grid))
+        self.gbSave.setLayout(grid)
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataDir)
         self.btnSaveDir.clicked.connect(self._onSaveDir)
-        self.binEon.clicked.connect(self._onBinEon)
-        self.binQon.clicked.connect(self._onBinQon)
         self.runDataModel.selectCell.connect(self._onSelectedCell)
 
     def _onDataDir(self):
@@ -317,19 +328,6 @@ class TOFTOFSetupWidget(BaseWidget):
         if dirname:
             self.saveDir.setText(dirname)
 
-    def _onBinEon(self, onVal):
-        if not onVal:
-            self.chkNxspe.setChecked(False)
-            self.chkReplaceNaNs.setChecked(False)
-            self.binQon.setChecked(False)
-        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff, self.chkNxspe, self.binQon,
-                       self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs, self.chkSofQW):
-            widget.setEnabled(onVal)
-
-    def _onBinQon(self, onVal):
-        for widget in (self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs, self.chkSofQW):
-            widget.setEnabled(onVal)
-
     def _onSelectedCell(self, index):
         self.dataRunsView.setCurrentIndex(index)
         self.dataRunsView.setFocus()
@@ -340,45 +338,48 @@ class TOFTOFSetupWidget(BaseWidget):
         def line_text(lineEdit):
             return lineEdit.text().strip()
 
+        def is_checked(checkBox):
+            return checkBox.isChecked() and checkBox.isEnabled()
+
         elem.facility_name   = self._settings.facility_name
         elem.instrument_name = self._settings.instrument_name
 
-        elem.prefix        = line_text(self.prefix)
-        elem.dataDir       = line_text(self.dataDir)
+        elem.prefix         = line_text(self.prefix)
+        elem.dataDir        = line_text(self.dataDir)
 
-        elem.vanRuns       = line_text(self.vanRuns)
-        elem.vanCmnt       = line_text(self.vanCmnt)
-        elem.vanTemp       = OptionalFloat(line_text(self.vanTemp))
+        elem.vanRuns        = line_text(self.vanRuns)
+        elem.vanCmnt        = line_text(self.vanCmnt)
+        elem.vanTemp        = OptionalFloat(line_text(self.vanTemp))
 
-        elem.ecRuns        = line_text(self.ecRuns)
-        elem.ecTemp        = OptionalFloat(line_text(self.ecTemp))
-        elem.ecFactor      = self.ecFactor.value()
+        elem.ecRuns         = line_text(self.ecRuns)
+        elem.ecTemp         = OptionalFloat(line_text(self.ecTemp))
+        elem.ecFactor       = self.ecFactor.value()
 
-        elem.dataRuns      = self.runDataModel.tableData
+        elem.dataRuns       = self.runDataModel.tableData
 
-        elem.binEon        = self.binEon.isChecked()
-        elem.binEstart     = self.binEstart.value()
-        elem.binEstep      = self.binEstep.value()
-        elem.binEend       = self.binEend.value()
+        elem.binEon         = is_checked(self.binEon)
+        elem.binEstart      = self.binEstart.value()
+        elem.binEstep       = self.binEstep.value()
+        elem.binEend        = self.binEend.value()
 
-        elem.binQon        = self.binQon.isChecked()
-        elem.binQstart     = self.binQstart.value()
-        elem.binQstep      = self.binQstep.value()
-        elem.binQend       = self.binQend.value()
+        elem.binQon         = is_checked(self.binQon)
+        elem.binQstart      = self.binQstart.value()
+        elem.binQstep       = self.binQstep.value()
+        elem.binQend        = self.binQend.value()
 
-        elem.maskDetectors = line_text(self.maskDetectors)
+        elem.maskDetectors  = line_text(self.maskDetectors)
 
-        elem.subtractECVan = self.chkSubtractECVan.isChecked()
-        elem.replaceNaNs   = self.chkReplaceNaNs.isChecked()
-        elem.createDiff    = self.chkCreateDiff.isChecked()
-        elem.keepSteps     = self.chkKeepSteps.isChecked()
+        elem.subtractECVan  = is_checked(self.chkSubtractECVan)
+        elem.replaceNaNs    = is_checked(self.chkReplaceNaNs)
+        elem.createDiff     = is_checked(self.chkCreateDiff)
+        elem.keepSteps      = is_checked(self.chkKeepSteps)
 
-        elem.saveDir       = line_text(self.saveDir)
-        elem.saveSofQW     = self.chkSofQW.isChecked()
-        elem.saveSofTW     = self.chkSofTW.isChecked()
-        elem.saveNXSPE     = self.chkNxspe.isChecked()
-        elem.saveNexus     = self.chkNexus.isChecked()
-        elem.saveAscii     = self.chkAscii.isChecked()
+        elem.saveDir        = line_text(self.saveDir)
+        elem.saveSofTWNxspe = is_checked(self.chkSofTWNxspe)
+        elem.saveSofTWNexus = is_checked(self.chkSofTWNexus)
+        elem.saveSofTWAscii = is_checked(self.chkSofTWAscii)
+        elem.saveSofQWNexus = is_checked(self.chkSofQWNexus)
+        elem.saveSofQWAscii = is_checked(self.chkSofQWAscii)
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
@@ -408,14 +409,12 @@ class TOFTOFSetupWidget(BaseWidget):
         self.runDataModel.reset()
 
         self.binEon.setChecked(elem.binEon)
-        self._onBinEon(elem.binEon)
 
         self.binEstart.setValue(elem.binEstart)
         self.binEstep.setValue(elem.binEstep)
         self.binEend.setValue(elem.binEend)
 
         self.binQon.setChecked(elem.binQon)
-        self._onBinQon(elem.binQon)
 
         self.binQstart.setValue(elem.binQstart)
         self.binQstep.setValue(elem.binQstep)
@@ -429,11 +428,15 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkKeepSteps.setChecked(elem.keepSteps)
 
         self.saveDir.setText(elem.saveDir)
-        self.chkSofQW.setChecked(elem.saveSofQW)
-        self.chkSofTW.setChecked(elem.saveSofTW)
-        self.chkNxspe.setChecked(elem.saveNXSPE)
-        self.chkNexus.setChecked(elem.saveNexus)
-        self.chkAscii.setChecked(elem.saveAscii)
+        self.chkSofTWNxspe.setChecked(elem.saveSofTWNxspe)
+        self.chkSofTWNexus.setChecked(elem.saveSofTWNexus)
+        self.chkSofTWAscii.setChecked(elem.saveSofTWAscii)
+        self.chkSofQWNexus.setChecked(elem.saveSofQWNexus)
+        self.chkSofQWAscii.setChecked(elem.saveSofQWAscii)
+        self.gbSave.setChecked(
+            any((elem.saveSofTWNxspe, elem.saveSofTWNexus,
+                 elem.saveSofTWAscii, elem.saveSofQWNexus,
+                 elem.saveSofQWAscii)))
 
         if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)

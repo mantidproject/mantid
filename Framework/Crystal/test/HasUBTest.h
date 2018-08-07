@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCrystal/HasUB.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidCrystal/HasUB.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;

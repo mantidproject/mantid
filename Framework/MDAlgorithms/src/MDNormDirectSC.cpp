@@ -19,8 +19,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,7 +31,7 @@ bool compareMomentum(const std::array<double, 4> &v1,
                      const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormDirectSC)
@@ -65,8 +65,8 @@ const std::string MDNormDirectSC::summary() const {
 const std::string MDNormDirectSC::name() const { return "MDNormDirectSC"; }
 
 /**
-  * Initialize the algorithm's properties.
-  */
+ * Initialize the algorithm's properties.
+ */
 void MDNormDirectSC::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -528,7 +528,9 @@ for (int64_t i = 0; i < ndets; i++) {
     // Average between two intersections for final position
     std::transform(curIntSec.data(), curIntSec.data() + vmdDims,
                    prevIntSec.data(), pos.begin(),
-                   VectorHelper::SimpleAverage<coord_t>());
+                   [](const double rhs, const double lhs) {
+                     return static_cast<coord_t>(0.5 * (rhs + lhs));
+                   });
 
     // transform kf to energy transfer
     pos[3] = static_cast<coord_t>(m_Ei - pos[3] * pos[3] / energyToK);

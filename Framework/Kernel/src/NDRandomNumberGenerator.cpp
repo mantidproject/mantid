@@ -44,5 +44,5 @@ void NDRandomNumberGenerator::cacheNextPoint(
   assert(nextPoint.size() == m_ndims);
   m_nextPoint = nextPoint;
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

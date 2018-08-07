@@ -109,7 +109,7 @@ public:
 #endif
 };
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid
 

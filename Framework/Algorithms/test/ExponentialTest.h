@@ -1,12 +1,12 @@
 #ifndef EXPONENTIALTEST_H_
 #define EXPONENTIALTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/Exponential.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/Exponential.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

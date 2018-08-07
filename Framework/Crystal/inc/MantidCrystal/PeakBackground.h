@@ -1,12 +1,12 @@
 #ifndef MANTID_CRYSTAL_PEAKBACKGROUND_H_
 #define MANTID_CRYSTAL_PEAKBACKGROUND_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include <boost/function.hpp>
 
 namespace Mantid {

@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_PROPERTYWITHVALUE_H_
 #define MANTID_KERNEL_PROPERTYWITHVALUE_H_
 
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/Property.h"
 
 #include <vector>
 

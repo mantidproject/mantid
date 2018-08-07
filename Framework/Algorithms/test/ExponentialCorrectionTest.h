@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ExponentialCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/ExponentialCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

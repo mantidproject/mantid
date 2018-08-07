@@ -5,17 +5,17 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "../ISISReflectometry/ReflSaveTabPresenter.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidAPI/Run.h"
-#include "ReflMockObjects.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
+#include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;

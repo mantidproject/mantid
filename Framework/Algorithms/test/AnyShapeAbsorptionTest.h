@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/AnyShapeAbsorption.h"
-#include "MantidAlgorithms/FlatPlateAbsorption.h"
-#include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/AnyShapeAbsorption.h"
+#include "MantidAlgorithms/CylinderAbsorption.h"
+#include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

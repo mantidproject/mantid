@@ -22,14 +22,14 @@ namespace Beamline {
 class ComponentInfo;
 class DetectorInfo;
 class SpectrumInfo;
-}
+} // namespace Beamline
 namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
 class IDetector;
 class ParameterMap;
 class XMLInstrumentParameter;
-}
+} // namespace Geometry
 
 namespace API {
 class ChopperModel;
@@ -242,7 +242,7 @@ using ExperimentInfo_sptr = boost::shared_ptr<ExperimentInfo>;
 /// Shared pointer to const ExperimentInfo
 using ExperimentInfo_const_sptr = boost::shared_ptr<const ExperimentInfo>;
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_EXPERIMENTINFO_H_ */

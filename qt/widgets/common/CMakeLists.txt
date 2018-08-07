@@ -535,7 +535,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     @loader_path/../MacOS
     @loader_path/../Libraries
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../../${LIB_DIR}"
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 ###########################################################################

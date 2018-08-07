@@ -1,13 +1,13 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveIsawUB.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Sample.h"
 
 #include <fstream>
 #include <iomanip>
 
-using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::DblMatrix;
 
 namespace Mantid {
 namespace Crystal {
@@ -150,5 +150,5 @@ void SaveIsawUB::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
