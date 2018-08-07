@@ -223,8 +223,9 @@ bool isItSorted(Comparator const &compare,
        specNum++) {
     if (!std::is_sorted(inputWorkspace.x(specNum).begin(),
                         inputWorkspace.x(specNum).end(),
-                        [&](double lhs, double rhs)
-                            -> bool { return compare(lhs, rhs); })) {
+                        [&](double lhs, double rhs) -> bool {
+                          return compare(lhs, rhs);
+                        })) {
       return false;
     }
   }

@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_SORTXAXISTEST_H_
 #define MANTID_ALGORITHMS_SORTXAXISTEST_H_
 
-#include "MantidAlgorithms/SortXAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/SortXAxis.h"
 #include "MantidKernel/Workspace.h"
 #include <cxxtest/TestSuite.h>
 
@@ -26,15 +26,15 @@ MatrixWorkspace_sptr createWorkspace(const HistogramX &xData,
 }
 
 class SortXAxisTest : public CxxTest::TestSuite {
-    // This pair of boilerplate methods prevent the suite being created statically
+  // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static SortXAxisTest *createSuite() { return new SortXAxisTest(); }
   static void destroySuite(SortXAxisTest *suite) { delete suite; }
 
-  void testXAscending(){
-    std::vector<double> xData = {1,2,3};
-    std::vector<double> yData = {1,2,3};
-    std::vector<double> eData = {1,2,3};
+  void testXAscending() {
+    std::vector<double> xData = {1, 2, 3};
+    std::vector<double> yData = {1, 2, 3};
+    std::vector<double> eData = {1, 2, 3};
 
     MatrixWorkspace_sptr unsortedws = createWorkspace(xData, yData, eData);
 
@@ -42,26 +42,24 @@ class SortXAxisTest : public CxxTest::TestSuite {
     alg.setProperty("InputWorkspacd", "unsortedws");
     alg.setProperty("OutputWorkspace", "sortedws");
     alg.execute();
-    MatrixWorkspace_sptr sortedws = 
-
+    MatrixWorkspace_sptr sortedws =
   }
 
-  void testXDescending(){}
+  void testXDescending() {}
 
-  void testOnMultipleSpectrum(){}
+  void testOnMultipleSpectrum() {}
 
-  void testSortsXHistogramAscending(){}
+  void testSortsXHistogramAscending() {}
 
-  void testSortsXHistogramDescending(){}
+  void testSortsXHistogramDescending() {}
 
-  void testSortXWorksChild(){}
+  void testSortXWorksChild() {}
 
-  void testDxMultipleSpectrum(){}
+  void testDxMultipleSpectrum() {}
 
-  void testDxHistogramAscending(){}
+  void testDxHistogramAscending() {}
 
-  void testSortDescending(){}
+  void testSortDescending() {}
 };
-
 
 #endif /*MANTID_ALGORITHMS_SORTXAXISTEST_H_*/
