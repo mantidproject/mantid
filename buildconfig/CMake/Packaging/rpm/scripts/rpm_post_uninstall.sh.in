@@ -40,6 +40,10 @@ if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh  ]; then
     if [ -L $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
         rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
     fi
+
+    if [ -L /usr/bin/mantidworkbench@CPACK_PACKAGE_SUFFIX@ ]; then
+        rm /usr/bin/mantidworkbench@CPACK_PACKAGE_SUFFIX@
+    fi
 fi
 
 # If the install prefix contains mantid then prune empty directories.

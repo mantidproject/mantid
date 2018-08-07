@@ -14,18 +14,32 @@ LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi
-if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
-    TCM_RELEASE=10000
-else
-    TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
+
+# define where the executable and libraries are
+LOCAL_LD_LIBRARY=${INSTALLDIR}/lib:${INSTALLDIR}/lib/paraview-5.4
+if [ -n "${LD_LIBRARY_PATH}" ]; then
+  LOCAL_LD_LIBRARY=${LOCAL_LD_LIBRARY}:${LD_LIBRARY_PATH}
+fi
+# define where python libraries are
+LOCAL_PYTHONPATH=$INSTALLDIR/lib/:$INSTALLDIR/plugins/:$INSTALLDIR/plugins/python/:$INSTALLDIR/lib/mantidqt:${INSTALLDIR}@PARAVIEW_PYTHON_PATHS@
+if [ -n "${PYTHONPATH}" ]; then
+    LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
+# whether or not to use vglrun
 if [ -n "${NXSESSIONID}" ]; then
   command -v vglrun >/dev/null 2>&1 || { echo >&2 "MantidPlot requires VirtualGL but it's not installed.  Aborting."; exit 1; }
   VGLRUN="vglrun"
 elif [ -n "${TLSESSIONDATA}" ]; then
   command -v vglrun >/dev/null 2>&1 || { echo >&2 "MantidPlot requires VirtualGL but it's not installed.  Aborting."; exit 1; }
   VGLRUN="vglrun"
+fi
+
+# tcmalloc parameters
+if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
+    TCM_RELEASE=10000
+else
+    TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
 fi
 
 # Define when to report large memory allocation
@@ -48,8 +62,7 @@ if [ -n "$1" ] && [ "$1" = "--debug" ]; then
     GDB="gdb --args"
 fi
 
-
-# Launch
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} QT_API=pyqt \
-    @WRAPPER_PREFIX@$VGLRUN $GDB $INSTALLDIR/bin/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@ || @PYTHON_EXECUTABLE@ @SCRIPTSDIR@/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR/bin
+    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
+    LD_LIBRARY_PATH=${LOCAL_LD_LIBRARY} PYTHONPATH=${LOCAL_PYTHONPATH} \
+    @WRAPPER_PREFIX@$VGLRUN $GDB @PYTHON_EXECUTABLE@ $INSTALLDIR/bin/@MANTIDWORKBENCH_EXEC@ $*@WRAPPER_POSTFIX@ || @PYTHON_EXECUTABLE@ @SCRIPTSDIR@/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR

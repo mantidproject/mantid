@@ -3,6 +3,9 @@
 #
 # It provides:
 #  - launch_mantidplot.sh
+#  - launch_mantidworkbench.sh
+#  - mantid.sh <- for stable releases
+#  - mantid.csh <- for stable releases
 #
 ###########################################################################
 
@@ -147,15 +150,25 @@ else ()
   set ( PARAVIEW_PYTHON_PATHS "" )
 endif ()
 
+set ( SCRIPTSDIR ${CMAKE_HOME_DIRECTORY}/scripts)
+
+# used by mantidplot and mantidworkbench
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot )
-  set ( SCRIPTSDIR ${CMAKE_HOME_DIRECTORY}/scripts)
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
   # Needs to be executable
   execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                     OUTPUT_QUIET ERROR_QUIET )
 endif ()
+if (ENABLE_WORKBENCH)
+  set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
+                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidworkbench.sh @ONLY )
+  # Needs to be executable
+  execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidworkbench.sh"
+                    OUTPUT_QUIET ERROR_QUIET )
+endif()
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 # Needs to be executable
@@ -176,23 +189,24 @@ else ()
   set ( PARAVIEW_PYTHON_PATHS "" )
 endif ()
 
+# used by mantidplot and mantidworkbench
+set ( SCRIPTSDIR "\${INSTALLDIR}/scripts")
+
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot_exe )
-  set ( SCRIPTSDIR "\${INSTALLDIR}/../scripts")
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                    ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
-  install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
-            DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
-            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-            GROUP_EXECUTE GROUP_READ
-            WORLD_EXECUTE WORLD_READ
-  )
+  install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
+            DESTINATION ${BIN_DIR} RENAME mantidplot )
 endif ()
+if (ENABLE_WORKBENCH)
+  set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install @ONLY )
+  install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install
+            DESTINATION ${BIN_DIR} RENAME mantidworkbench )
+endif()
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
-          DESTINATION ${BIN_DIR} RENAME mantidpython
-          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-          GROUP_EXECUTE GROUP_READ
-          WORLD_EXECUTE WORLD_READ
-)
+install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
+          DESTINATION ${BIN_DIR} RENAME mantidpython )

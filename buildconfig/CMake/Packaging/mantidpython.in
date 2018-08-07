@@ -6,7 +6,7 @@
 
 # Find out where we are
 SCRIPTFILE=$(readlink -f "$0")
-INSTALLDIR=${SCRIPTFILE%/*}
+INSTALLDIR=$(dirname $SCRIPTFILE) # directory of executable
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
