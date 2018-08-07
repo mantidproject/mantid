@@ -76,9 +76,9 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 /// Set the new rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer.
-void Goniometer::setR(Kernel::DblMatrix rot) { 
+void Goniometer::setR(Kernel::DblMatrix rot) {
   R = rot;
-  initFromR = true; 
+  initFromR = true;
 }
 
 /// Function reports if the goniometer is defined
