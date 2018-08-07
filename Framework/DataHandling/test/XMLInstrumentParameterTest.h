@@ -59,7 +59,7 @@ public:
     TS_ASSERT_EQUALS(static_cast<int>(ret1.size()), 0);
     TS_ASSERT_DELTA(pos1.Z(), 12.113, 0.0001);
     TS_ASSERT_DELTA(pos1.X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(pos1.Y(), 0.0081, 0.0001);
+    TS_ASSERT_DELTA(pos1.Y(), 0.0162, 0.0001);
     // linear-detector is composite, i.e., not a detector and thus not stored in
     // DetectorInfo but in ComponentInfo
     const auto &componentInfo = output1->componentInfo();
