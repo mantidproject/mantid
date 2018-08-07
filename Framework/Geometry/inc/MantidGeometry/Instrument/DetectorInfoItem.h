@@ -1,10 +1,11 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITEM_H_
 #define MANTID_GEOMETRY_DETECTORINFOITEM_H_
 
+#include <utility>
+
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/V3D.h"
 
-#include <utility>
 using Mantid::Kernel::V3D;
 
 namespace Mantid {

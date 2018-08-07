@@ -107,8 +107,8 @@ class DetectorInfoTest(unittest.TestCase):
     """
 
     def test_iteration(self):
-        import time
-        time.sleep(20)
+        #import time
+        #time.sleep(20)
         info = self._ws.detectorInfo()
         #self.assertEquals(len(info), 0)
         #self.assertEquals(info.size(), 0)

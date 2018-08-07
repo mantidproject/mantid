@@ -15,7 +15,7 @@ class DetectorInfo;
 class MANTID_GEOMETRY_DLL DetectorInfoIterator
     : public boost::iterator_facade<DetectorInfoIterator,
                                     const DetectorInfoItem &,
-                                    boost::bidirectional_traversal_tag> {
+                                    boost::forward_traversal_tag> {
 
 public:
   DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
