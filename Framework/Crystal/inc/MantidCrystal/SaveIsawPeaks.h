@@ -48,6 +48,7 @@ private:
                  double &ysize);
   bool bankMasked(Geometry::IComponent_const_sptr parent,
                   const Geometry::DetectorInfo &detectorInfo);
+  void writeOffsets(std::ofstream &out, double qSign, std::vector<double> offset);
   Geometry::Instrument_const_sptr inst;
 };
 

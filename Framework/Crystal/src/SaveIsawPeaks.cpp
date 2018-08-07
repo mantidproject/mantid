@@ -279,24 +279,11 @@ void SaveIsawPeaks::exec() {
     offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
     offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
     out << "9  MODVECTOR ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset1[0] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset1[1] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset1[2] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset2[0] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset2[1] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset2[2] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset3[0] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset3[1] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset3[2] << "\n";
+    writeOffsets(out, qSign, offset1);
+    writeOffsets(out, qSign, offset2);
+    writeOffsets(out, qSign, offset3);
+    out << "\n";
+
   }
   int maxPeakNumb = 0;
   int appendPeakNumb = 0;
@@ -550,6 +537,11 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     ysize = first->getDistance(*last);
   }
 }
-
+void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign, std::vector<double> offset) {
+  for (size_t i = 0; i < 3; i++) {
+    out << std::setw(12) << std::fixed << std::setprecision(6)
+        << qSign * offset[i] << " ";
+  }
+}
 } // namespace Crystal
 } // namespace Mantid

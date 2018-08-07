@@ -154,7 +154,7 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setIntMNP(const Mantid::Kernel::V3D m_modStru) override;
+  void setIntMNP(const Mantid::Kernel::V3D modulatedStructure) override;
   Mantid::Kernel::V3D getIntMNP() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
@@ -251,7 +251,7 @@ private:
 
   // keep peak number
   int m_peakNumber;
-  Mantid::Kernel::V3D m_modStru;
+  Mantid::Kernel::V3D m_modulatedStructure;
 
   /// integer HKL of the peak
   std::array<int, 3> m_intHKL;

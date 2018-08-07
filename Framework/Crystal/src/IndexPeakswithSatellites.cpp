@@ -97,12 +97,17 @@ void IndexPeakswithSatellites::init() {
       make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
                                              Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
+
+  declareProperty(make_unique<PropertyWithValue<bool>>(
+                      "CrossTerms", false, Direction::Input),
+                  "Include cross terms (false)");
+
 }
 
 /** Execute the algorithm.
  */
 void IndexPeakswithSatellites::exec() {
-  bool CrossTerms = false;
+  bool crossTerms = getProperty("CrossTerms");
   PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
@@ -170,11 +175,10 @@ void IndexPeakswithSatellites::exec() {
   // index the peaks for each run separately, using a UB matrix optimized for
   // that run
 
-  for (size_t run_index = 0; run_index < run_numbers.size(); run_index++) {
+  for (int run : run_numbers) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
-    int run = run_numbers[run_index];
     for (size_t i = 0; i < n_peaks; i++) {
       if (peaks[i].getRunNumber() == run)
         q_vectors.push_back(peaks[i].getQSampleFrame());
@@ -268,7 +272,7 @@ void IndexPeakswithSatellites::exec() {
           k_error = fabs(round(hkl[1]) - hkl[1]);
           l_error = fabs(round(hkl[2]) - hkl[2]);
           main_error += h_error + k_error + l_error;
-        } else if (!CrossTerms) {
+        } else if (!crossTerms) {
           for (int order = -maxOrder; order <= maxOrder; order++) {
             if (order == 0)
               continue; // exclude order 0
@@ -368,6 +372,8 @@ void IndexPeakswithSatellites::exec() {
                  << main_error << '\n';
   g_log.notice() << "Average error in h,k,l for indexed satellite peaks =  "
                  << satellite_error << '\n';
+  // Show the lattice parameters
+  g_log.notice() << o_lattice << "\n";
 
   // Save output properties
   setProperty("TotalNumIndexed", total_indexed);
@@ -375,8 +381,6 @@ void IndexPeakswithSatellites::exec() {
   setProperty("SateNumIndexed", sate_indexed);
   setProperty("MainError", main_error);
   setProperty("SatelliteError", satellite_error);
-  // Show the lattice parameters
-  g_log.notice() << o_lattice << "\n";
 }
 
 } // namespace Mantid

@@ -379,9 +379,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   Peak peak(outWS->getInstrument(), pixelID, wl);
   peak.setHKL(h, k, l);
   peak.setIntHKL(intHKL);
-  if (m_isModulatedStructure) {
-    peak.setIntMNP(mod);
-  }
+  peak.setIntMNP(mod);
   peak.setIntensity(Inti);
   peak.setSigmaIntensity(SigI);
   peak.setBinCount(IPK);
@@ -495,7 +493,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
   // Read the header, load the instrument
   double T0;
-  std::string s = readHeader(outWS, in, T0, qSign);
+  auto s = readHeader(outWS, in, T0, qSign);
   // set T0 in the run parameters
   API::Run &m_run = outWS->mutableRun();
   m_run.addProperty<double>("T0", T0, true);
