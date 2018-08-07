@@ -55,9 +55,23 @@ Python
 New
 ###
 
+- As part of the initiative to move towards ``Instrument 2.0`` new objects have been exposed to Python and are now available via workspaces. The newly exposed classes include:
+ * :class:`mantid.geometry.ComponentInfo`
+ * :class:`mantid.geometry.DetectorInfo`
+ * :class:`mantid.api.SpectrumInfo`
+
+- :class:`mantid.geometry.ComponentInfo` is exposed to allow the user to access geometric information about the components which are part of a beamline. The full documentation can be found at docs/source/api/python/mantid/geometry/ComponentInfo.rst (hyperlink to be added).
+
+- :class:`mantid.geometry.DetectorInfo` offers the user the ability to access geometric information about the detector(s) which are part of a beamline. ``DetectorInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops - this is also helpful for abstraction. The full documentation can be found at docs/source/api/python/mantid/geometry/DetectorInfo.rst (hyperlink to be added).
+
+- :class:`mantid.api.SpectrumInfo` allows the user to access information about the spectra being used in a beamline. In addition to this ``SpectrumDefinition`` objects can also be accessed via a :class:`mantid.api.SpectrumInfo` object. The full documentation can be found at docs/source/api/python/mantid/api/SpectrumInfo.rst (hyperlink to be added).
+
+
 
 Improvements
 ############
+
+SpectrumInfo now has more methods exposed to Python meaning users can access more information about the beamline that they are using.
 
 - :ref:`ChudleyElliot <func-ChudleyElliot>` includes hbar in the definition
 
