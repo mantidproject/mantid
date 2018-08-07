@@ -21,13 +21,16 @@ def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vana
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     # Get empty and vanadium
-
     mode_run_numbers = _get_current_mode_dictionary(run_number_string, inst_settings)
 
     empty_runs = _get_run_numbers_for_key(current_mode_run_numbers=mode_run_numbers, key="empty_run_numbers")
     vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=mode_run_numbers, key="vanadium_run_numbers")
-
     grouping_file_name = inst_settings.grouping_file_name
+    if inst_settings.texture_mode:
+        return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
+                                         is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
+                                         grouping_file_name=grouping_file_name, vanadium_string=vanadium_runs,
+                                         splined_name_list=["texture_mode"])
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, empty_run_number=empty_runs,
