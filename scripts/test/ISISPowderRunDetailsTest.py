@@ -71,7 +71,6 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         run_number_string = "17-18"
         expected_vanadium_runs = "11-12"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
         run_number2 = common.get_first_run_number(run_number_string=run_number_string)
         cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
                                                           file_path=mock_inst.cal_mapping_path)
@@ -88,46 +87,10 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         self.assertEqual(output_obj.vanadium_run_numbers, output_obj.run_number)
         self.assertEqual(expected_vanadium_runs, output_obj.output_run_string)
 
-    # Callable params no longer in function
-    # def test_callable_params_are_used(self):
-    #     # These attributes are based on a custom YAML file at the specified path
-    #     expected_label = "16_4"
-    #     expected_vanadium_runs = "11-12"
-    #     expected_empty_runs = "13-14"
-    #     expected_grouping_file_name = "grouping_file"
-    #     run_number_string = "17-18"
-    #     mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTestCallable.yaml")
-    #
-    #     # Get the YAML file as a dict first
-    #     wrapped_funcs = run_details.RunDetailsWrappedCommonFuncs
-    #
-    #     yaml_callable = run_details.CustomFuncForRunDetails(user_function=wrapped_funcs.get_cal_mapping_dict,
-    #                                                         run_number_string=run_number_string,
-    #                                                         inst_settings=mock_inst)
-    #
-    #     empty_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
-    #                                                      key="custom_empty_run_numbers")
-    #     vanadium_callable = yaml_callable.add_to_func_chain(user_function=wrapped_funcs.cal_dictionary_key_helper,
-    #                                                         key="custom_vanadium_run_numbers")
-    #     grouping_callable = run_details.CustomFuncForRunDetails(user_function=lambda: expected_grouping_file_name)
-    #   output_obj = run_details.create_run_details_object(run_number_string=run_number_string, inst_settings=mock_inst,
-    #                                                        is_vanadium_run=True, empty_run_call=empty_callable,
-    #                                                        vanadium_run_call=vanadium_callable,
-    #                                                        grouping_file_name_call=grouping_callable)
-    #
-    #     self.assertEqual(output_obj.label, expected_label)
-    #     self.assertEqual(output_obj.empty_runs, expected_empty_runs)
-    #     self.assertEqual(output_obj.grouping_file_path,
-    #                      os.path.join(mock_inst.calibration_dir, expected_grouping_file_name))
-    #     self.assertEqual(output_obj.vanadium_run_numbers, expected_vanadium_runs)
-    #     self.assertEqual(output_obj.run_number, expected_vanadium_runs)
-
     def test_run_details_splined_name_list_is_used(self):
         expected_vanadium_runs = "11-12"
-        expected_offset_file_name = "offset_file_name"
         splined_name_list = ["bar", "bang", "baz"]
         run_number_string = "10"
-        mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
         run_number2 = common.get_first_run_number(run_number_string=run_number_string)
         cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
@@ -147,8 +110,6 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         expected_output_name += ".nxs"
         expected_path = os.path.join(mock_inst.calibration_dir, output_obj.label, expected_output_name)
         self.assertEqual(expected_path, output_obj.splined_vanadium_file_path)
-
-
 
 
 class MockInstSettings(object):
