@@ -342,6 +342,7 @@ set ( TEST_FILES
 	IndexingUtilsTest.h
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
+	InstrumentRayTracer2Test.h
 	InstrumentTest.h
 	InstrumentVisitorTest.h
 	IsotropicAtomBraggScattererTest.h
