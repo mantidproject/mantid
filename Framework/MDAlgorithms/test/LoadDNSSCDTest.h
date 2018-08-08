@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_LOADDNSSCDEWTEST_H_
 #define MANTID_MDALGORITHMS_LOADDNSSCDEWTEST_H_
 
+#include "LoadDNSSCDTestReference.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -18,7 +19,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/LoadDNSSCD.h"
 #include <cxxtest/TestSuite.h>
-#include "LoadDNSSCDTestReference.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
