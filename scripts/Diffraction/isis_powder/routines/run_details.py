@@ -27,7 +27,6 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     # Get names of files we will be using
     calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
     label = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="label")
-    print(cal_map_dict)
     offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
 
     # Prepend the properties used for creating a van spline so we can fingerprint the file

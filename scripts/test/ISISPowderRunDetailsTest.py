@@ -40,8 +40,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         expected_offset_file_name = "offset_file_name"
         run_number_string = "17-18"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        run_number2 = common.get_first_run_number(run_number_string=run_number_string)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
+        run_number = common.get_first_run_number(run_number_string=run_number_string)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
                                                           file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = mock_inst.grouping_file_name
@@ -71,8 +71,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         run_number_string = "17-18"
         expected_vanadium_runs = "11-12"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        run_number2 = common.get_first_run_number(run_number_string=run_number_string)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
+        run_number = common.get_first_run_number(run_number_string=run_number_string)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
                                                           file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = mock_inst.grouping_file_name
@@ -92,8 +92,8 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         splined_name_list = ["bar", "bang", "baz"]
         run_number_string = "10"
         mock_inst = self.setup_mock_inst_settings(yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        run_number2 = common.get_first_run_number(run_number_string=run_number_string)
-        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
+        run_number = common.get_first_run_number(run_number_string=run_number_string)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
                                                           file_path=mock_inst.cal_mapping_path)
 
         grouping_filename = mock_inst.grouping_file_name
