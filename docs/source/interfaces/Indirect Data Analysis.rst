@@ -123,8 +123,9 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
-The Peters model[1] reduces to a Gaussian at large (towards infinity) beta. The Yi[2] model
-reduces to a Gaussian at sigma equal to zero.
+The Peters model :cite:`peters2013` reduces to a Gaussian at large
+(towards infinity) beta. The Yi model :cite:`yi2012` reduces to a
+Gaussian at sigma equal to zero.
 
 .. interface:: Data Analysis
   :width: 450
@@ -562,9 +563,6 @@ formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 :math:`T` is the temperature in Kelvin.
 
 **References**
-
-1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
-2. Yi et al, J Phys Chem B 116, 5028 (2012)
 
 .. rubric:: References
 
