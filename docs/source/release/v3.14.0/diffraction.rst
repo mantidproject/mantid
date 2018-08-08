@@ -9,8 +9,13 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-Improvements
-############
+Powder Diffraction
+------------------
+
+
+- :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` will always set the value of
+  Phi to 0 when writing MAUD headers. This resolves an issue where data was not
+  displayed with a value of -90.0
 
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
 
