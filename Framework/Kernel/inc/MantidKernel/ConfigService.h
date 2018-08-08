@@ -5,15 +5,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/ProxyInfo.h"
+#include "MantidKernel/SingletonHolder.h"
+
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
+
+#include <boost/optional/optional.hpp>
+
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <Poco/Notification.h>
-#include <Poco/NotificationCenter.h>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -26,8 +29,8 @@ template <class C> class AutoPtr;
 namespace Util {
 class PropertyFileConfiguration;
 class SystemConfiguration;
-}
-}
+} // namespace Util
+} // namespace Poco
 /// @endcond
 
 namespace Mantid {
@@ -77,10 +80,10 @@ class InstrumentInfo;
 class MANTID_KERNEL_DLL ConfigServiceImpl final {
 public:
   /**
-  * This is the base class for POCO Notifications sent out from the Config
-  * Service.
-  * It does nothing.
-  */
+   * This is the base class for POCO Notifications sent out from the Config
+   * Service.
+   * It does nothing.
+   */
   class ConfigServiceNotification : public Poco::Notification {
   public:
     /// Empty constructor for ConfigServiceNotification Base Class
@@ -88,17 +91,17 @@ public:
   };
 
   /**
-  * This is the class for the notification that is to be sent when a value has
-  * been changed in
-  * config service.
-  */
+   * This is the class for the notification that is to be sent when a value has
+   * been changed in
+   * config service.
+   */
   class ValueChanged : public ConfigServiceNotification {
   public:
     /** Creates the Notification object with the required values
-    *   @param name :: property that has been changed
-    *   @param newvalue :: new value of property
-    *   @param prevvalue :: previous value of property
-    */
+     *   @param name :: property that has been changed
+     *   @param newvalue :: new value of property
+     *   @param prevvalue :: previous value of property
+     */
     ValueChanged(const std::string &name, const std::string &newvalue,
                  const std::string &prevvalue)
         : ConfigServiceNotification(), m_name(name), m_value(newvalue),
@@ -150,7 +153,7 @@ public:
   /// Sets a configuration property
   void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
-  template <typename T> int getValue(const std::string &keyName, T &out);
+  template <typename T> boost::optional<T> getValue(const std::string &keyName);
   /// Return the local properties filename.
   std::string getLocalFilename() const;
   /// Return the user properties filename

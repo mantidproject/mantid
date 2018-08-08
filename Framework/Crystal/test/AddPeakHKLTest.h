@@ -1,16 +1,16 @@
 #ifndef MANTID_CRYSTAL_ADDPEAKHKLTEST_H_
 #define MANTID_CRYSTAL_ADDPEAKHKLTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCrystal/AddPeakHKL.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/AddPeakHKL.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::AddPeakHKL;
 using Mantid::Geometry::IPeak;

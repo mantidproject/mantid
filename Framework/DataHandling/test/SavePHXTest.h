@@ -7,8 +7,8 @@
 #include "MantidDataHandling/SavePHX.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"

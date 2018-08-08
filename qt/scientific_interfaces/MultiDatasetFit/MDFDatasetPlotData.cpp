@@ -171,6 +171,6 @@ QwtDoubleRect DatasetPlotData::boundingRect() const {
 /// Toggle the error bars on the data curve.
 void DatasetPlotData::showDataErrorBars(bool on) { m_showDataErrorBars = on; }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -1,9 +1,9 @@
 #ifndef MANTID_API_WORKSPACEPROPERTY_H_
 #define MANTID_API_WORKSPACEPROPERTY_H_
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <string>
 

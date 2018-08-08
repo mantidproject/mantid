@@ -221,7 +221,7 @@ public:
 protected:
   QSpinBox *m_maxSize;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOM_DIALOGS_FITDIALOG_H

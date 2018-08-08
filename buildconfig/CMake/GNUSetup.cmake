@@ -96,10 +96,7 @@ if(WITH_UBSAN)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SAN_FLAGS}" )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED 11)
-
-# XCode isn't picking up the standard set above.
+# XCode isn't picking up the c++ standard by CMAKE_CXX_STANDARD
 if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${GNUFLAGS} -Woverloaded-virtual -fno-operator-names")
   set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")

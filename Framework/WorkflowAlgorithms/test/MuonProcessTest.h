@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/MuonProcess.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-using Mantid::WorkflowAlgorithms::MuonProcess;
 using Mantid::DataHandling::LoadMuonNexus2;
+using Mantid::WorkflowAlgorithms::MuonProcess;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -622,9 +622,9 @@ private:
   std::unique_ptr<LoadedData> loadEMU() { return loadData("emu00006473.nxs"); }
 
   /**
-  * Use LoadMuonNexus to load data from MUSR file
-  * @returns LoadedData struct
-  */
+   * Use LoadMuonNexus to load data from MUSR file
+   * @returns LoadedData struct
+   */
   std::unique_ptr<LoadedData> loadMUSR() {
     return loadData("MUSR00015189.nxs");
   }

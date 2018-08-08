@@ -8,7 +8,7 @@
 using namespace MantidQt::MantidWidgets;
 
 namespace // anonymous
-    {
+{
 template <typename T> void sortPair(std::pair<T, T> &pair) {
   if (pair.first > pair.second) {
     T temp = pair.first;

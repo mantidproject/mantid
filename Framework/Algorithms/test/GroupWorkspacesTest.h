@@ -1,10 +1,10 @@
 #ifndef GROUPWORKSPACESTEST_H_
 #define GROUPWORKSPACESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 class GroupWorkspacesTest : public CxxTest::TestSuite {
 public:
@@ -29,9 +29,9 @@ public:
   }
 
   void testInit() {
-    using Mantid::Algorithms::GroupWorkspaces;
-    using Mantid::API::WorkspaceProperty;
     using Mantid::API::WorkspaceGroup;
+    using Mantid::API::WorkspaceProperty;
+    using Mantid::Algorithms::GroupWorkspaces;
 
     GroupWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

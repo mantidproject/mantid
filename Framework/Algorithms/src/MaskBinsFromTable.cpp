@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/MaskBinsFromTable.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -46,7 +46,7 @@ void MaskBinsFromTable::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void MaskBinsFromTable::exec() {
   // Process input properties
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -60,8 +60,8 @@ void MaskBinsFromTable::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Call MaskBins
-  * @param dataws :: MatrixWorkspace to mask bins for
-  */
+ * @param dataws :: MatrixWorkspace to mask bins for
+ */
 void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
   bool firstloop = true;
   API::MatrixWorkspace_sptr outputws;
@@ -123,10 +123,10 @@ void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
 
 //----------------------------------------------------------------------------------------------
 /** Process input Mask bin TableWorkspace.
-  * It will convert detector IDs list to spectra list
-  * @param masktblws :: TableWorkspace for mask bins
-  * @param dataws :: MatrixWorkspace to mask
-  */
+ * It will convert detector IDs list to spectra list
+ * @param masktblws :: TableWorkspace for mask bins
+ * @param dataws :: MatrixWorkspace to mask
+ */
 void MaskBinsFromTable::processMaskBinWorkspace(
     TableWorkspace_sptr masktblws, API::MatrixWorkspace_sptr dataws) {
   // Check input
@@ -202,10 +202,10 @@ void MaskBinsFromTable::processMaskBinWorkspace(
 //----------------------------------------------------------------------------------------------
 /** Convert a list of detector IDs list (string) to a list of spectra/workspace
  * indexes list
-  * @param dataws :: MatrixWorkspace to mask
-  * @param detidliststr :: list of detector IDs in string format
-  * @return :: list of spectra/workspace index IDs in string format
-  */
+ * @param dataws :: MatrixWorkspace to mask
+ * @param detidliststr :: list of detector IDs in string format
+ * @return :: list of spectra/workspace index IDs in string format
+ */
 std::string
 MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
                                         std::string detidliststr) {
@@ -276,5 +276,5 @@ MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
   return spectraliststr;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

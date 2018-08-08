@@ -40,11 +40,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 /// attribute.
 bool DLLExport typeHasAttribute(PyObject *obj, const char *attr);
 /// An overload for the above taking a wrapper reference
-bool DLLExport
-typeHasAttribute(const boost::python::detail::wrapper_base &wrapper,
-                 const char *attr);
-}
-}
-}
+bool DLLExport typeHasAttribute(
+    const boost::python::detail::wrapper_base &wrapper, const char *attr);
+} // namespace Environment
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_WRAPPERHELPERS_H_

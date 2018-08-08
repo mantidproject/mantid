@@ -29,23 +29,23 @@
 
 #include "ImportASCIIDialog.h"
 #include "ApplicationWindow.h"
-#include "Table.h"
 #include "Matrix.h"
 #include "MatrixModel.h"
+#include "Table.h"
 
+#include <QApplication>
 #include <QCloseEvent>
 #include <QColorGroup>
-#include <QLayout>
 #include <QGroupBox>
+#include <QHeaderView>
+#include <QLayout>
+#include <QMessageBox>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QRegExp>
-#include <QMessageBox>
-#include <QTextStream>
-#include <QApplication>
-#include <QProgressDialog>
-#include <QStackedWidget>
-#include <QHeaderView>
 #include <QSplitter>
+#include <QStackedWidget>
+#include <QTextStream>
 
 #include <gsl/gsl_math.h>
 

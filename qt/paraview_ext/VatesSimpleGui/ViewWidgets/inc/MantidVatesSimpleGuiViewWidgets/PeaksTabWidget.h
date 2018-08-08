@@ -1,16 +1,16 @@
 #ifndef VSI_PEAKSTABWIDGET_H
 #define VSI_PEAKSTABWIDGET_H
 
-#include "ui_PeaksTabWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_PeaksTabWidget.h"
 
-#include <QWidget>
-#include <QTabWidget>
 #include <QTabBar>
+#include <QTabWidget>
+#include <QWidget>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace Mantid {
 namespace Vates {
@@ -62,7 +62,7 @@ private:
   /// Custom peaks tab widget
   PeakCustomTabWidget *m_tabWidget;
 };
-} // namespace
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif // PEAKSWORKSPACEWIDGET_H

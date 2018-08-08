@@ -63,7 +63,7 @@ public:
 
   size_t operator()(double time) const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

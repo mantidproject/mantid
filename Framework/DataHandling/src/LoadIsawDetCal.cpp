@@ -1,10 +1,10 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -37,7 +37,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 /** Initialisation method
-*/
+ */
 void LoadIsawDetCal::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::InOut,
@@ -85,7 +85,7 @@ std::string getInstName(API::Workspace_const_sptr wksp) {
 
   throw std::runtime_error("Failed to determine instrument name");
 }
-}
+} // namespace
 
 std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
   std::map<std::string, std::string> result;
@@ -109,9 +109,9 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
 }
 
 /** Executes the algorithm
-*
-*  @throw runtime_error Thrown if algorithm cannot execute
-*/
+ *
+ *  @throw runtime_error Thrown if algorithm cannot execute
+ */
 void LoadIsawDetCal::exec() {
   // Get the input workspace
   Workspace_sptr ws = getProperty("InputWorkspace");
@@ -487,5 +487,5 @@ void LoadIsawDetCal::applyScalings(
   }
 }
 
-} // namespace Algorithm
+} // namespace DataHandling
 } // namespace Mantid

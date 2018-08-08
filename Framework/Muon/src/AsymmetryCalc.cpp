@@ -167,5 +167,5 @@ void AsymmetryCalc::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

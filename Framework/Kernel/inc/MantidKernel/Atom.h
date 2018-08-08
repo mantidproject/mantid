@@ -1,10 +1,10 @@
 #ifndef ATOM_H_
 #define ATOM_H_
 
-#include <ostream>
-#include <string>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
+#include <ostream>
+#include <string>
 
 namespace Mantid {
 namespace PhysicalConstants {
@@ -59,10 +59,10 @@ MANTID_KERNEL_DLL bool operator==(const Atom &left, const Atom &right);
 MANTID_KERNEL_DLL bool operator!=(const Atom &left, const Atom &right);
 /// Stream operator overload
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out, const Atom &atom);
-MANTID_KERNEL_DLL Atom
-getAtom(const uint16_t z_number, const uint16_t a_number = 0);
-MANTID_KERNEL_DLL Atom
-getAtom(const std::string &symbol, const uint16_t a_number = 0);
+MANTID_KERNEL_DLL Atom getAtom(const uint16_t z_number,
+                               const uint16_t a_number = 0);
+MANTID_KERNEL_DLL Atom getAtom(const std::string &symbol,
+                               const uint16_t a_number = 0);
 
 } // namespace PhysicalConstants
 } // namespace Mantid

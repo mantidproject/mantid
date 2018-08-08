@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include <gsl/gsl_blas.h>
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
+#include <gsl/gsl_blas.h>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -54,7 +54,7 @@ public:
   //---------------------------------------------------------------
   static std::string functionName() { return "NullImplicitFunction"; }
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

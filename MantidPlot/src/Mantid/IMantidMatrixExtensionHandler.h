@@ -1,8 +1,8 @@
 #ifndef MANTIDPLOT_IMANTIDMATRIXEXTENSIONHANDLER_H
 #define MANTIDPLOT_IMANTIDMATRIXEXTENSIONHANDLER_H
 
-#include "MantidMatrixTabExtension.h"
 #include "MantidKernel/Chainable.h"
+#include "MantidMatrixTabExtension.h"
 #include "boost/shared_ptr.hpp"
 
 class IMantidMatrixExtensionHandler

@@ -257,5 +257,5 @@ void QueryMDWorkspace::exec() {
   CALL_MDEVENT_FUNCTION(this->getBoxData, input);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

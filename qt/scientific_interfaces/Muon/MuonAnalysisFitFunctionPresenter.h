@@ -2,9 +2,9 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITFUNCTIONPRESENTER_H_
 
 #include "DllConfig.h"
-#include "MuonAnalysisHelper.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
+#include "MuonAnalysisHelper.h"
 #include <QObject>
 
 namespace MantidQt {

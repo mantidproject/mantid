@@ -2790,8 +2790,8 @@ void FitPropertyBrowser::setupMultifit() {
           }
         }
         QString wsParam = ",WSParam=(WorkspaceIndex=" + QString::number(i);
-        wsParam += ",StartX=" + QString::number(startX()) + ",EndX=" +
-                   QString::number(endX()) + ")";
+        wsParam += ",StartX=" + QString::number(startX()) +
+                   ",EndX=" + QString::number(endX()) + ")";
         funIni += fun1Ini + ",Workspace=" + wsName + wsParam + ";";
       }
       if (!tieStr.isEmpty()) {

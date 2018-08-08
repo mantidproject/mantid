@@ -1,21 +1,21 @@
 #ifndef BINARYOPERATIONTEST_H_
 #define BINARYOPERATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/Timer.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -163,7 +163,7 @@ void run_parallel_AllowDifferentNumberSpectra_fail(
     TS_ASSERT_EQUALS(out->storageMode(), storageMode);
   }
 }
-}
+} // namespace
 
 class BinaryOperationTest : public CxxTest::TestSuite {
 public:
@@ -346,8 +346,8 @@ public:
 
   void test_buildBinaryOperationTable_groupedLHS_by_groupedRHS() {
     // two detectors per pixel in lhs
-    std::vector<std::vector<int>> lhs{
-        {0, 1}, {2, 3}, {4, 5}, {6, 7}, {8, 9}, {10, 11}, {12, 13}, {14, 15}};
+    std::vector<std::vector<int>> lhs{{0, 1}, {2, 3},   {4, 5},   {6, 7},
+                                      {8, 9}, {10, 11}, {12, 13}, {14, 15}};
     // 4 detectors in each on the rhs
     std::vector<std::vector<int>> rhs{
         {0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
@@ -360,12 +360,9 @@ public:
   void
   test_buildBinaryOperationTable_groupedLHS_by_groupedRHS_bad_overlap_throws() {
     // 4 detectors per pixel in lhs
-    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},
-                                      {4, 5, 6, 7},
-                                      {8, 9, 10, 11},
-                                      {12, 13, 14, 15},
-                                      {16, 17, 18, 19},
-                                      {20, 21, 22, 23}};
+    std::vector<std::vector<int>> lhs{{0, 1, 2, 3},     {4, 5, 6, 7},
+                                      {8, 9, 10, 11},   {12, 13, 14, 15},
+                                      {16, 17, 18, 19}, {20, 21, 22, 23}};
     // 6 detectors in each on the rhs
     std::vector<std::vector<int>> rhs{{0, 1, 2, 3, 4, 5},
                                       {6, 7, 8, 9, 10, 11},

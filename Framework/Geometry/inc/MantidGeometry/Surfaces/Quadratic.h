@@ -68,6 +68,6 @@ public:
 
 } // NAMESPACE Geometry
 
-} // NAMESPACE Geometry
+} // namespace Mantid
 
 #endif

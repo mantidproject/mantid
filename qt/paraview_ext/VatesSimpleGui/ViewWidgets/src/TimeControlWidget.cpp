@@ -55,6 +55,6 @@ void TimeControlWidget::updateAnimationControls(double timeStart,
 void TimeControlWidget::enableAnimationControls(bool state) {
   this->setEnabled(state);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

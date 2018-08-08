@@ -6,9 +6,9 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param group :: [input] The group on the parent tab this belongs to
-* @param parent :: [input] The parent of this widget
-*/
+ * @param group :: [input] The group on the parent tab this belongs to
+ * @param parent :: [input] The parent of this widget
+ */
 QtReflEventView::QtReflEventView(int group, QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
@@ -57,8 +57,8 @@ void QtReflEventView::initLogValueSliceTypeLayout() {
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflEventPresenter *QtReflEventView::getPresenter() const {
   return m_presenter.get();
 }
@@ -175,4 +175,4 @@ void QtReflEventView::registerEventWidgets() {
   connectSettingsChange(*m_ui.logValueTypeEdit);
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

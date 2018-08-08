@@ -27,8 +27,8 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <QObject>
 #include "Plot.h"
+#include <QObject>
 
 class Graph;
 class ArrowMarker;
@@ -52,7 +52,7 @@ public:
 
   //! Disable editing of #d_editing_marker on a TAB-key event.
   /**\brief Called by Graph::focusNextPrevChild ()
-  */
+   */
   void disableEditing();
 
 private:

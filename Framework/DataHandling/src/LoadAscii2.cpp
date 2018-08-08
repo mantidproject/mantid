@@ -1,21 +1,21 @@
 #include "MantidDataHandling/LoadAscii2.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include <MantidKernel/StringTokenizer.h>
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include <MantidKernel/StringTokenizer.h>
 
 // String utilities
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <fstream>
 
@@ -33,11 +33,11 @@ LoadAscii2::LoadAscii2()
       m_spectrumIDcount(0), m_lineNo(0), m_spectra(), m_curSpectra(nullptr) {}
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadAscii2::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filePath = descriptor.filename();
   const size_t filenameLength = filePath.size();
@@ -59,12 +59,12 @@ int LoadAscii2::confidence(Kernel::FileDescriptor &descriptor) const {
 //--------------------------------------------------------------------------
 
 /**
-* Reads the data from the file. It is assumed that the provided file stream has
-* its position
-* set such that the first call to getline will be give the first line of data
-* @param file :: A reference to a file stream
-* @returns A pointer to a new workspace
-*/
+ * Reads the data from the file. It is assumed that the provided file stream has
+ * its position
+ * set such that the first call to getline will be give the first line of data
+ * @param file :: A reference to a file stream
+ * @returns A pointer to a new workspace
+ */
 API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   // it's probably more stirct versus version 1, but then this is a format
   // change and we don't want any bad data getting into the workspace
@@ -110,7 +110,8 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   } catch (std::exception &e) {
     std::ostringstream msg;
     msg << "Failed to create a Workspace2D from the data found in this file. "
-           "Error: " << e.what();
+           "Error: "
+        << e.what();
     throw std::runtime_error(msg.str());
   }
 
@@ -127,11 +128,11 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
 }
 
 /**
-* Check the start of the file for the first data set, then set the number of
-* columns that hsould be expected thereafter
-* @param[in] line : The current line of data
-* @param[in] columns : the columns of values in the current line of data
-*/
+ * Check the start of the file for the first data set, then set the number of
+ * columns that hsould be expected thereafter
+ * @param[in] line : The current line of data
+ * @param[in] columns : the columns of values in the current line of data
+ */
 void LoadAscii2::parseLine(const std::string &line,
                            std::list<std::string> &columns) {
   if (std::isdigit(line.at(0)) || line.at(0) == '-' || line.at(0) == '+') {
@@ -190,10 +191,10 @@ void LoadAscii2::parseLine(const std::string &line,
 }
 
 /**
-* Construct the workspace
-* @param[out] localWorkspace : the workspace beign constructed
-* @param[in] numSpectra : The number of spectra found in the file
-*/
+ * Construct the workspace
+ * @param[out] localWorkspace : the workspace beign constructed
+ * @param[in] numSpectra : The number of spectra found in the file
+ */
 void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
                                   const size_t &numSpectra) const {
   try {
@@ -214,24 +215,24 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
     // DX could be NULL
     localWorkspace->setSharedDx(i, m_spectra[i].sharedDx());
     if (m_spectrumIDcount != 0) {
-      localWorkspace->getSpectrum(i)
-          .setSpectrumNo(m_spectra[i].getSpectrumNo());
+      localWorkspace->getSpectrum(i).setSpectrumNo(
+          m_spectra[i].getSpectrumNo());
     } else {
-      localWorkspace->getSpectrum(i)
-          .setSpectrumNo(static_cast<specnum_t>(i) + 1);
+      localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) +
+                                                   1);
     }
   }
 }
 
 /**
-* Check the start of the file for the first data set, then set the number of
-* columns that should be expected thereafter
-* This will also place the file marker at the first spectrum No or data line,
-* ignoring any header information at the moment.
-* @param[in] file : The file stream
-* @param[in] line : The current line of data
-* @param[in] columns : the columns of values in the current line of data
-*/
+ * Check the start of the file for the first data set, then set the number of
+ * columns that should be expected thereafter
+ * This will also place the file marker at the first spectrum No or data line,
+ * ignoring any header information at the moment.
+ * @param[in] file : The file stream
+ * @param[in] line : The current line of data
+ * @param[in] columns : the columns of values in the current line of data
+ */
 void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
                             std::list<std::string> &columns) {
   m_lineNo = 0;
@@ -290,9 +291,9 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line,
 }
 
 /**
-* Process the header information. This implementation just skips it entirely.
-* @param file :: A reference to the file stream
-*/
+ * Process the header information. This implementation just skips it entirely.
+ * @param file :: A reference to the file stream
+ */
 void LoadAscii2::processHeader(std::ifstream &file) {
   // Most files will have some sort of header. If we've haven't been told how
   // many lines to
@@ -425,9 +426,9 @@ void LoadAscii2::processHeader(std::ifstream &file) {
 }
 
 /**
-* Check if the file has been found to inconsistently include spectra IDs
-* @param[in] columns : the columns of values in the current line of data
-*/
+ * Check if the file has been found to inconsistently include spectra IDs
+ * @param[in] columns : the columns of values in the current line of data
+ */
 void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   std::vector<double> values(m_baseCols, 0.);
   m_spectraStart = false;
@@ -460,9 +461,9 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
 }
 
 /**
-* Check if the file has been found to inconsistently include spectra IDs
-* @param[in] cols : the number of columns in the current line of data
-*/
+ * Check if the file has been found to inconsistently include spectra IDs
+ * @param[in] cols : the number of columns in the current line of data
+ */
 void LoadAscii2::checkLineColumns(const size_t &cols) const {
   // a size of 2, 3 or 4 is a valid data set, but first see if it's the same as
   // the first observed one
@@ -473,8 +474,8 @@ void LoadAscii2::checkLineColumns(const size_t &cols) const {
 }
 
 /**
-* Check if the file has been found to incosistantly include spectra IDs
-*/
+ * Check if the file has been found to incosistantly include spectra IDs
+ */
 void LoadAscii2::inconsistantIDCheck() const {
   // we need to do a check regarding spectra ids before doing anything else
   // is this the first bin in the spectra? if not this check has already been
@@ -493,8 +494,8 @@ void LoadAscii2::inconsistantIDCheck() const {
 }
 
 /**
-* Check if the file has been found to incosistantly include spectra IDs
-*/
+ * Check if the file has been found to incosistantly include spectra IDs
+ */
 void LoadAscii2::newSpectra() {
   if (!m_spectraStart) {
     if (m_lastBins == 0) {
@@ -526,11 +527,11 @@ void LoadAscii2::newSpectra() {
 }
 
 /**
-* Return true if the line is to be skipped.
-* @param[in] line :: The line to be checked
-* @param[in] header :: Flag for if this is header material
-* @return True if the line should be skipped
-*/
+ * Return true if the line is to be skipped.
+ * @param[in] line :: The line to be checked
+ * @param[in] header :: Flag for if this is header material
+ * @return True if the line should be skipped
+ */
 bool LoadAscii2::skipLine(const std::string &line, bool header) const {
   // Comments are skipped, Empty actually means something and shouldn't be
   // skipped
@@ -540,10 +541,10 @@ bool LoadAscii2::skipLine(const std::string &line, bool header) const {
 }
 
 /**
-* Return true if the line doesn't start with a valid character.
-* @param[in] line :: The line to be checked
-* @return :: True if the line doesn't start with a valid character.
-*/
+ * Return true if the line doesn't start with a valid character.
+ * @param[in] line :: The line to be checked
+ * @return :: True if the line doesn't start with a valid character.
+ */
 bool LoadAscii2::badLine(const std::string &line) const {
   // Empty or comment
   return (
@@ -552,11 +553,11 @@ bool LoadAscii2::badLine(const std::string &line) const {
 }
 
 /**
-* Split the data into columns based on the input separator
-* @param[out] columns :: A reference to a list to store the column data
-* @param[in] str :: The input string
-* @returns The number of columns
-*/
+ * Split the data into columns based on the input separator
+ * @param[out] columns :: A reference to a list to store the column data
+ * @param[in] str :: The input string
+ * @returns The number of columns
+ */
 int LoadAscii2::splitIntoColumns(std::list<std::string> &columns,
                                  const std::string &str) const {
   boost::split(columns, str, boost::is_any_of(m_columnSep),
@@ -565,10 +566,10 @@ int LoadAscii2::splitIntoColumns(std::list<std::string> &columns,
 }
 
 /**
-* Fill the given vector with the data values. Its size is assumed to be correct
-* @param[out] values :: The data vector fill
-* @param[in] columns :: The list of strings denoting columns
-*/
+ * Fill the given vector with the data values. Its size is assumed to be correct
+ * @param[out] values :: The data vector fill
+ * @param[in] columns :: The list of strings denoting columns
+ */
 void LoadAscii2::fillInputValues(std::vector<double> &values,
                                  const std::list<std::string> &columns) const {
   values.resize(columns.size());
@@ -641,9 +642,10 @@ void LoadAscii2::init() {
                       make_unique<VisibleWhenProperty>("Separator", IS_EQUAL_TO,
                                                        "UserDefined"));
 
-  declareProperty("CommentIndicator", "#", "Character(s) found front of "
-                                           "comment lines. Cannot contain "
-                                           "numeric characters");
+  declareProperty("CommentIndicator", "#",
+                  "Character(s) found front of "
+                  "comment lines. Cannot contain "
+                  "numeric characters");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "Dimensionless");
@@ -660,8 +662,8 @@ void LoadAscii2::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void LoadAscii2::exec() {
   m_lineNo = 0;
   std::string filename = getProperty("Filename");

@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_COPYSAMPLE_H_
 #define MANTID_ALGORITHMS_COPYSAMPLE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
