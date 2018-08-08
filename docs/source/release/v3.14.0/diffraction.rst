@@ -13,6 +13,7 @@ Improvements
 ############
 
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+- Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
