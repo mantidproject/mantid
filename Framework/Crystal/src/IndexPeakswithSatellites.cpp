@@ -308,7 +308,7 @@ void IndexPeakswithSatellites::exec() {
             }
           }
         } else {
-          DblMatrix offsetsMat(3,3);
+          DblMatrix offsetsMat(3, 3);
           offsetsMat.setRow(0, offsets1);
           offsetsMat.setRow(1, offsets2);
           offsetsMat.setRow(2, offsets3);
@@ -324,11 +324,12 @@ void IndexPeakswithSatellites::exec() {
                   peaks[i].setIntHKL(hkl1);
                   peaks[i].setIntMNP(V3D(m, n, p));
                   sate_indexed++;
-                  
+
                   V3D intHkl = hkl1;
                   intHkl.round();
                   hkl1 = intHkl - hkl1;
-                  satellite_error += fabs(hkl1[0]) + fabs(hkl1[1]) + fabs(hkl1[2]);
+                  satellite_error +=
+                      fabs(hkl1[0]) + fabs(hkl1[1]) + fabs(hkl1[2]);
                 }
               }
         }
