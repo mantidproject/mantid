@@ -14,7 +14,7 @@ def get_instrument_directory(instrument):
             instrument_directory = "NDW1030"
         return instrument_directory
     else:
-        return None
+        return ""
 
 
 def get_current_run_filename(instrument):
@@ -38,3 +38,12 @@ def get_current_run_filename(instrument):
     else:
         psudoDAE = "\\\\" + instrument_directory + "\\data\\" + autosave_points_to
     return psudoDAE
+
+
+def format_run_for_file(run):
+    return "{0:08d}".format(run)
+
+def file_path_for_instrument_and_run(instrument, run):
+    base_dir = "\\\\" +get_instrument_directory(instrument) + "\\data"
+    file_name = instrument + format_run_for_file(run) + ".nxs"
+    return base_dir.lower() + "\\" + file_name
