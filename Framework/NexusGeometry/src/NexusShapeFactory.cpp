@@ -4,15 +4,18 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
+#include <iterator>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -22,15 +25,17 @@ using namespace Eigen;
 namespace {
 
 /// Finalise shape
-std::unique_ptr<const Geometry::IObject>
-createShape(const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
-            const std::string &algebra, std::vector<double> &boundingBox) {
+std::unique_ptr<const Geometry::IObject> createCylinderShape(
+    const std::map<int, boost::shared_ptr<Geometry::Surface>> &surfaces,
+    const std::string &algebra, std::vector<double> &boundingBox,
+    Geometry::detail::ShapeInfo &&shapeInfo) {
   auto shape = Mantid::Kernel::make_unique<Geometry::CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(surfaces);
   // Boundingbox x,y,z:max; x,y,z:min
   shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
                            boundingBox[1], boundingBox[3], boundingBox[5]);
+  shape->getGeometryHandler()->setShapeInfo(std::move(shapeInfo));
   return Mantid::Kernel::make_unique<const Geometry::CSGObject>(*shape);
 }
 
@@ -84,6 +89,7 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   // Calculate cylinder parameters
   auto centre = (pointsDef.col(2) + pointsDef.col(0)) / 2;
   auto axisVector = pointsDef.col(2) - pointsDef.col(0);
+  auto height = axisVector.norm();
   auto axisUnitVector = axisVector.normalized();
   auto radiusVector = pointsDef.col(1) - pointsDef.col(0);
   double radius = radiusVector.norm();
@@ -91,7 +97,8 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
       Kernel::V3D(axisUnitVector(0), axisUnitVector(1), axisUnitVector(2));
 
   auto cylinder = boost::make_shared<Geometry::Cylinder>();
-  cylinder->setCentre(Kernel::V3D(centre(0), centre(1), centre(2)));
+  auto vCenter = Kernel::V3D(centre(0), centre(1), centre(2));
+  cylinder->setCentre(vCenter);
   cylinder->setNorm(normVec);
   cylinder->setRadius(radius);
 
@@ -129,7 +136,10 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   }
 
   std::string algebra = "(-1 -2 3)";
-  return createShape(surfaceShapes, algebra, boundingBoxSimplified);
+  Geometry::detail::ShapeInfo shapeInfo;
+  shapeInfo.setCylinder(vCenter, normVec, radius, height);
+  return createCylinderShape(surfaceShapes, algebra, boundingBoxSimplified,
+                             std::move(shapeInfo));
 }
 
 std::unique_ptr<const Geometry::IObject>

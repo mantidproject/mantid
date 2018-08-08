@@ -136,7 +136,7 @@ void GeometryTriangulator::OCAnalyzeObject() {
   if (m_csgObj != nullptr) // If object exists
   {
     // Get the top rule tree in Obj
-    const Rule *top = m_csgObj->topRule();
+    const auto *top = m_csgObj->topRule();
     if (top == nullptr) {
       m_objSurface.reset(new TopoDS_Shape());
       return;
