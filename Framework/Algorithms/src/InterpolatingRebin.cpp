@@ -23,8 +23,8 @@ using namespace API;
 using namespace HistogramData;
 
 /** Only calls its parent's (Rebin) init()
-*
-*/
+ *
+ */
 void InterpolatingRebin::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
@@ -50,10 +50,10 @@ void InterpolatingRebin::init() {
 }
 
 /** Executes the rebin algorithm
-*
-*  @throw runtime_error Thrown if the bin range does not intersect the range of
-*the input workspace
-*/
+ *
+ *  @throw runtime_error Thrown if the bin range does not intersect the range of
+ *the input workspace
+ */
 void InterpolatingRebin::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
@@ -127,11 +127,11 @@ void InterpolatingRebin::exec() {
   setProperty("OutputWorkspace", outputW);
 }
 /** Calls the interpolation function for each histogram in the workspace
-*  @param[in] inputW workspace with un-interpolated data
-*  @param[in] XValues_new new x-values to interpolated to
-*  @param[out] outputW this will contain the interpolated data, the lengths of
-* the histograms must corrospond with the number of x-values in XValues_new
-*/
+ *  @param[in] inputW workspace with un-interpolated data
+ *  @param[in] XValues_new new x-values to interpolated to
+ *  @param[out] outputW this will contain the interpolated data, the lengths of
+ * the histograms must corrospond with the number of x-values in XValues_new
+ */
 void InterpolatingRebin::outputYandEValues(
     API::MatrixWorkspace_const_sptr inputW,
     const HistogramData::BinEdges &XValues_new,
@@ -165,31 +165,31 @@ void InterpolatingRebin::outputYandEValues(
 }
 
 /**Uses cubic splines to interpolate the mean rate of change of the integral
-*  over the inputed data bins to that for the user supplied bins.
-*  Note that this algorithm was implemented to provide a little more resolution
-*  on high count rate data. Whether it is more accurate than the standard rebin
-*  for all, or your, application needs more thought.
-*  The input data must be a distribution (proportional to the rate of change
-*e.g.
-*  raw_counts/bin_widths) but note that these mean rate of counts data
-*  are integrals not (instanteously) sampled data. The error values on each
-*point
-*  are a weighted mean of the error values from the surrounding input data. This
-*  makes sense if the interpolation error is low compared to the statistical
-*  errors on each input data point. The weighting is inversely proportional to
-*  the distance from the original data point to the new interpolated one.
-*
-*  @param[in] oldHistogram :: the histogram of the output workspace that will
-*be interpolated
-*  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
-*  @return Histogram :: A new Histogram containing the BinEdges xNew and
-*the calculated HistogramY and HistogramE
-*  @throw runtime_error :: if there is a problem executing one of the GSL
-*functions
-*  @throw invalid_argument :: if any output x-values are outside the range of
-*input
-*x-values
-**/
+ *  over the inputed data bins to that for the user supplied bins.
+ *  Note that this algorithm was implemented to provide a little more resolution
+ *  on high count rate data. Whether it is more accurate than the standard rebin
+ *  for all, or your, application needs more thought.
+ *  The input data must be a distribution (proportional to the rate of change
+ *e.g.
+ *  raw_counts/bin_widths) but note that these mean rate of counts data
+ *  are integrals not (instanteously) sampled data. The error values on each
+ *point
+ *  are a weighted mean of the error values from the surrounding input data.
+ *This makes sense if the interpolation error is low compared to the statistical
+ *  errors on each input data point. The weighting is inversely proportional to
+ *  the distance from the original data point to the new interpolated one.
+ *
+ *  @param[in] oldHistogram :: the histogram of the output workspace that will
+ *be interpolated
+ *  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
+ *  @return Histogram :: A new Histogram containing the BinEdges xNew and
+ *the calculated HistogramY and HistogramE
+ *  @throw runtime_error :: if there is a problem executing one of the GSL
+ *functions
+ *  @throw invalid_argument :: if any output x-values are outside the range of
+ *input
+ *x-values
+ **/
 Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
                                                  const BinEdges &xNew) const {
   const auto &yOld = oldHistogram.y();
@@ -337,14 +337,14 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
   return newHistogram;
 }
 /** This can be used whenever the original spectrum is filled with only one
-* value. It is intended allow
-*  some spectra with null like values, for example all zeros
-*  @param[in] oldHistogram :: the histogram of the output workspace that will
-*be interpolated
-*  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
-*  @return Histogram :: A new Histogram containing the BinEdges xNew and
-*the calculated HistogramY and HistogramE
-*/
+ * value. It is intended allow
+ *  some spectra with null like values, for example all zeros
+ *  @param[in] oldHistogram :: the histogram of the output workspace that will
+ *be interpolated
+ *  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
+ *  @return Histogram :: A new Histogram containing the BinEdges xNew and
+ *the calculated HistogramY and HistogramE
+ */
 Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
                                               const BinEdges &xNew) const {
   Histogram newHistogram{xNew, Frequencies(xNew.size() - 1)};
@@ -363,17 +363,16 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
   return newHistogram;
 }
 /**Estimates the error on each interpolated point by assuming it is similar to
-* the errors in
-*  near by input data points. Output points with the same x-value as an input
-* point have the
-*  same error as the input point. Points between input points have a error value
-* that is a
-*  weighted mean of the closest input points
-*  @param[in] xsOld x-values of the input data around the point of interested
-*  @param[in] esOld error values for the same points in the input data as xsOld
-*  @param[in] xNew the value of x for at the point of interest
-*  @return the estimated error at that point
-*/
+ * the errors in
+ *  near by input data points. Output points with the same x-value as an input
+ * point have the
+ *  same error as the input point. Points between input points have a error
+ * value that is a weighted mean of the closest input points
+ *  @param[in] xsOld x-values of the input data around the point of interested
+ *  @param[in] esOld error values for the same points in the input data as xsOld
+ *  @param[in] xNew the value of x for at the point of interest
+ *  @return the estimated error at that point
+ */
 double InterpolatingRebin::estimateError(const Points &xsOld,
                                          const HistogramE &esOld,
                                          const double xNew) const {
@@ -422,5 +421,5 @@ double InterpolatingRebin::estimateError(const Points &xsOld,
   return (weight1 * error1 + weight2 * error2) / (weight1 + weight2);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

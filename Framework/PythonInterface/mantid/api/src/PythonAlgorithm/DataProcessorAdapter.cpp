@@ -18,5 +18,5 @@ template class DataProcessorAdapter<API::Algorithm>;
 template class DataProcessorAdapter<API::SerialAlgorithm>;
 template class DataProcessorAdapter<API::ParallelAlgorithm>;
 template class DataProcessorAdapter<API::DistributedAlgorithm>;
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

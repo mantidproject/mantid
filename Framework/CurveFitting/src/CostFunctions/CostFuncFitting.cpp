@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
-#include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidKernel/Exception.h"
 
 #include <gsl/gsl_multifit_nlin.h>
@@ -112,8 +112,8 @@ void CostFuncFitting::checkValidity() const {
 }
 
 /**
-  * Calculates covariance matrix for fitting function's active parameters.
-  */
+ * Calculates covariance matrix for fitting function's active parameters.
+ */
 void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
                                                 double epsrel) {
   // construct the jacobian
@@ -130,10 +130,10 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
 }
 
 /** Calculates covariance matrix
-  *
-  * @param covar :: Returned covariance matrix
-  * @param epsrel :: Is used to remove linear-dependent columns
-  */
+ *
+ * @param covar :: Returned covariance matrix
+ * @param epsrel :: Is used to remove linear-dependent columns
+ */
 void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
   checkValidity();
   GSLMatrix c;

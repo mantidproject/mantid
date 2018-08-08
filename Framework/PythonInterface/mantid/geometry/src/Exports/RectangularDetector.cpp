@@ -1,7 +1,7 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 

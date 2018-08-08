@@ -397,8 +397,10 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
                   projectName.toStdString());
     } else {
       QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                         window->tr("The file: <br><b>%1</b> is opened in "
-                                    "read-only mode").arg(projectName));
+                         window
+                             ->tr("The file: <br><b>%1</b> is opened in "
+                                  "read-only mode")
+                             .arg(projectName));
     }
     return false;
   }
@@ -656,9 +658,10 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
         fileHandle->close();
       int choice = QMessageBox::warning(
           window, window->tr("MantidPlot - File backup error"), // Mantid
-          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                     "you ignore "
-                     "this, you run the risk of <b>data loss</b>.")
+          window
+              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                   "you ignore "
+                   "this, you run the risk of <b>data loss</b>.")
               .arg(projectName)
               .arg(projectName + "~"),
           QMessageBox::Retry | QMessageBox::Default,

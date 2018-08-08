@@ -1,14 +1,14 @@
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidWorkflowAlgorithms/HFIRInstrument.h"
 
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
@@ -283,8 +283,8 @@ void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
   // 255, 511, 767..
   for (int row = 0; row < high; row++) {
     for (int i = component->idstep() + component->idstart() - row - 1;
-         i < component->nelements() * component->idstep() +
-                 component->idstart();
+         i <
+         component->nelements() * component->idstep() + component->idstart();
          i += component->idstep()) {
       IDs.push_back(i);
     }

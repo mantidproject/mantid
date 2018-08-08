@@ -23,7 +23,7 @@
 namespace {
 // Track number of attachments to generate a unique channel name
 int ATTACH_COUNT = 0;
-}
+} // namespace
 
 using Mantid::Kernel::ConfigService;
 
@@ -362,5 +362,5 @@ void MessageDisplay::setupTextArea() {
 QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

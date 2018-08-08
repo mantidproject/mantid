@@ -41,25 +41,11 @@ Mantid::Kernel::Logger g_log("ProjectRecovery");
 // Config helper methods
 template <typename T>
 boost::optional<T> getConfigValue(const std::string &key) {
-  T returnedValue;
-
-  int valueIsGood =
-      Mantid::Kernel::ConfigService::Instance().getValue<T>(key, returnedValue);
-
-  if (valueIsGood != 1) {
-    return boost::optional<T>{};
-  }
-
-  return boost::optional<T>{returnedValue};
+  return Mantid::Kernel::ConfigService::Instance().getValue<T>(key);
 }
 
 boost::optional<bool> getConfigBool(const std::string &key) {
-  auto returnedValue = getConfigValue<std::string>(key);
-  if (!returnedValue.is_initialized()) {
-    return boost::optional<bool>{};
-  }
-
-  return returnedValue->find("true") != std::string::npos;
+  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
 }
 
 /// Returns a string to the current top level recovery folder
@@ -338,14 +324,14 @@ void ProjectRecovery::stopProjectSaving() {
 }
 
 /**
-  * Asynchronously loads a recovery checkpoint by opening
-  * a scripting window to the ordered workspace
-  * history file, then execute it. When this finishes the
-  * project loading mechanism is invoked in the main GUI thread
-  * to recreate all Qt objects / widgets
-  *
-  * @param recoveryFolder : The checkpoint folder
-  */
+ * Asynchronously loads a recovery checkpoint by opening
+ * a scripting window to the ordered workspace
+ * history file, then execute it. When this finishes the
+ * project loading mechanism is invoked in the main GUI thread
+ * to recreate all Qt objects / widgets
+ *
+ * @param recoveryFolder : The checkpoint folder
+ */
 void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
   if (!scriptWindow) {
@@ -390,13 +376,13 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
 }
 
 /**
-  * Compiles the project recovery script from a given checkpoint
-  * folder and opens this in the script editor
-  *
-  * @param inputFolder : The folder containing the checkpoint to recover
-  * @param historyDest : Where to save the ordered history
-  * @throws If a handle to the scripting window cannot be obtained
-  */
+ * Compiles the project recovery script from a given checkpoint
+ * folder and opens this in the script editor
+ *
+ * @param inputFolder : The folder containing the checkpoint to recover
+ * @param historyDest : Where to save the ordered history
+ * @throws If a handle to the scripting window cannot be obtained
+ */
 void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
                                    const Poco::Path &historyDest) {
   compileRecoveryScript(inputFolder, historyDest);

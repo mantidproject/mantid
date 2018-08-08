@@ -416,7 +416,7 @@ set ( SIP_SRC_AUTO sip_qtipart0.cpp )
 
 # We need to manually add all the headers that are in qti.sip
 # so that the dependencies are known to CMake
-set ( SIP_HDRS src/MdiSubWindow.h
+set ( QTI_SIP_HDRS src/MdiSubWindow.h
                src/Table.h
                src/Matrix.h
                src/ArrowMarker.h
@@ -455,7 +455,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                           -I ${PYQT4_SIP_DIR} ${MANTIDQTPYTHON_SIP_INCLUDES}  ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
-                     DEPENDS src/qti.sip ${SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
+                     DEPENDS ${SIP_INCLUDE_DIRECTORY}/sip.h src/qti.sip ${QTI_SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
                      COMMENT "Generating python bindings using sip"
 )
 

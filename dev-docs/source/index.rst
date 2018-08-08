@@ -27,6 +27,7 @@ Guides
    BuildingWithCMake
    BuildingVATES
    Standards/index
+   Testing/index
    DoxygenSetup
    Python3
 
@@ -38,6 +39,9 @@ Guides
 
 :doc:`Standards <Standards/index>`
    Details of coding and documentation standards for the project. Includes specifics regarding algorithms.
+
+:doc:`Testing <Testing/index>`
+   Details of unscripted and acceptance testing.
 
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
@@ -104,6 +108,7 @@ Tools
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
+   GettingStartedWithPyCharm
    Eclipse
 
 :doc:`ToolsOverview`
@@ -118,6 +123,9 @@ Tools
 :doc:`VisualStudioBuildImpact`
    Provides a script to reduce the impact of Visual Studio on machine performance.
 
+:doc:`GettingStartedWithPyCharm`
+   Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
+   
 :doc:`Eclipse`
    Guide to setting up Eclipse on Ubuntu
 

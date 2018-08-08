@@ -84,7 +84,7 @@ private:
   double m_startX{0.0}; ///< The range start point
   double m_endX{0.0};   ///< The range end point
   Indexing::SpectrumIndexSet
-      indexSet; ///<the list of Spectra (workspace index) to load
+      indexSet; ///< the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms

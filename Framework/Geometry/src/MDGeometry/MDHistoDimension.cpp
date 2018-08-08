@@ -98,5 +98,5 @@ std::string MDHistoDimension::toXMLString() const {
 
   return xmlstream.str();
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

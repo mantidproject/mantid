@@ -3,15 +3,15 @@
 //--------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LOQScriptInputDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(LOQScriptInputDialog)
 }
-}
+} // namespace MantidQt
 
 // Just to save writing this everywhere
 using namespace MantidQt::CustomDialogs;
@@ -100,8 +100,8 @@ void LOQScriptInputDialog::parseInput() {
 }
 
 /**
-  * A slot for the browse button "clicked" signal
-  */
+ * A slot for the browse button "clicked" signal
+ */
 void LOQScriptInputDialog::browseClicked() {
   if (!m_uiForm.effFileBox->text().isEmpty()) {
     QString dir = QFileInfo(m_uiForm.effFileBox->text()).absoluteDir().path();

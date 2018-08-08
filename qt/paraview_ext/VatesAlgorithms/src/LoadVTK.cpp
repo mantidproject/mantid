@@ -58,22 +58,22 @@ LoadVTK(Filename='fly.vtk',SignalArrayName='volume_scalars',AdaptiveBinned=False
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/MultiThreaded.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Memory.h"
-#include <boost/make_shared.hpp>
-#include <vtkStructuredPointsReader.h>
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidVatesAPI/vtkStructuredPoints_Silent.h"
-#include <vtkPointData.h>
+#include <algorithm>
+#include <boost/make_shared.hpp>
 #include <vtkDataArray.h>
+#include <vtkPointData.h>
+#include <vtkSmartPointer.h>
+#include <vtkStructuredPointsReader.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnsignedShortArray.h>
-#include <algorithm>
-#include <vtkSmartPointer.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -124,9 +124,10 @@ void LoadVTK::init() {
   this->declareProperty("SignalArrayName", "", manditorySignalArrayName,
                         "Point data array name to import as signal/intesity "
                         "values in the MD workspace.");
-  this->declareProperty("ErrorSQArrayName", "", "Point data array name to "
-                                                "import as error squared "
-                                                "values in the MD workspace.");
+  this->declareProperty("ErrorSQArrayName", "",
+                        "Point data array name to "
+                        "import as error squared "
+                        "values in the MD workspace.");
 
   this->declareProperty("AdaptiveBinned", true,
                         "What type of output workspace to produce. If selected "
@@ -358,5 +359,5 @@ void LoadVTK::exec() {
     execMDHisto(signals, errorsSQ, dimX, dimY, dimZ, prog, nPoints, frequency);
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

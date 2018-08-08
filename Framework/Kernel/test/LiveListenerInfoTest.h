@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/LiveListenerInfo.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/LiveListenerInfo.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -157,9 +157,10 @@ private:
         "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">"
         "    <instrument name=\"INST\">"
         "      <technique>Technique</technique>" +
-        livedataXml + "    </instrument>"
-                      "  </facility>"
-                      "</facilities>";
+        livedataXml +
+        "    </instrument>"
+        "  </facility>"
+        "</facilities>";
 
     return createFacility(xmlStr);
   }

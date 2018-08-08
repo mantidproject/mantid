@@ -31,7 +31,7 @@ namespace Kernel {
 // Forward declaration
 //----------------------------------------------------------------------
 class ProgressBase;
-}
+} // namespace Kernel
 namespace API {
 class Workspace;
 class MatrixWorkspace;

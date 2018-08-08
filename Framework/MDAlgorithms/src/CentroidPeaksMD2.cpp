@@ -1,11 +1,11 @@
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -157,5 +157,5 @@ void CentroidPeaksMD2::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

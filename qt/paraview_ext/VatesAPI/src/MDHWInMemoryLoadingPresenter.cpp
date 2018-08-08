@@ -164,5 +164,5 @@ std::vector<int> MDHWInMemoryLoadingPresenter::getExtents() {
       static_cast<int>(m_cachedVisualHistoWs->getZDimension()->getNBins());
   return extents;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

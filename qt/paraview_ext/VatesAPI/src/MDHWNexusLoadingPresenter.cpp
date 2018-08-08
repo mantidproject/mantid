@@ -174,5 +174,5 @@ void MDHWNexusLoadingPresenter::loadWorkspace(
   m_histoWs = AnalysisDataService::Instance()
                   .retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

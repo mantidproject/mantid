@@ -44,11 +44,11 @@ std::vector<double> PoldiDGrid::grid() {
 }
 
 /** Computes a d-range from the limits set by the detector and expresses it as
-  *multiples of a step size given in Angstrom.
-  *
-  * @return Pair of integers containing the lower and upper d-limit, divided by
-  *deltaD.
-  */
+ *multiples of a step size given in Angstrom.
+ *
+ * @return Pair of integers containing the lower and upper d-limit, divided by
+ *deltaD.
+ */
 std::pair<int, int> PoldiDGrid::calculateDRange() {
   std::pair<double, double> qLimits =
       m_detector->qLimits(m_wavelengthRange.first, m_wavelengthRange.second);
@@ -59,17 +59,17 @@ std::pair<int, int> PoldiDGrid::calculateDRange() {
 }
 
 /** Computes the resolution limit of the POLDI experiment defined by the current
-  *instrument, in Angstrom, given the size of one time bin.
-  *
-  * Since this calculation is based on the time of flight, this value may be
-  *different for each point
-  * of the detector, depending on the geometry. In the current implementation
-  *this is not taken into account,
-  * instead the value for the center of the detector is calculated and assumed
-  *constant for the whole detector.
-  *
-  * @return Resolution in Angstrom corresponding to
-  */
+ *instrument, in Angstrom, given the size of one time bin.
+ *
+ * Since this calculation is based on the time of flight, this value may be
+ *different for each point
+ * of the detector, depending on the geometry. In the current implementation
+ *this is not taken into account,
+ * instead the value for the center of the detector is calculated and assumed
+ *constant for the whole detector.
+ *
+ * @return Resolution in Angstrom corresponding to
+ */
 double PoldiDGrid::calculateDeltaD() {
   int centralElement = static_cast<int>(m_detector->centralElement());
 
@@ -80,9 +80,9 @@ double PoldiDGrid::calculateDeltaD() {
 }
 
 /** Generates an equidistant grid of d-values with a given step size. The result
-  *depends on the assigned detector, chopper, wavelength and timing.
-  *
-  */
+ *depends on the assigned detector, chopper, wavelength and timing.
+ *
+ */
 void PoldiDGrid::createGrid() {
   if (!m_detector) {
     throw std::runtime_error(
@@ -118,5 +118,5 @@ void PoldiDGrid::createGrid() {
 
   m_hasCachedCalculation = true;
 }
-}
-}
+} // namespace Poldi
+} // namespace Mantid

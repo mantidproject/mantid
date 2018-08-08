@@ -152,5 +152,5 @@ CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
   return outWS;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -4,9 +4,9 @@
 #include "ui_PreviewPlot.h"
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -209,7 +209,7 @@ private:
 
   friend class DisplayCurveFit;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_PREVIEWPLOT_H_

@@ -1,33 +1,33 @@
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace API {
 
 /** Constructor
-  *
-  * @param unitID :: The name of the unit that the workspace must have. If
-  * left empty, the validator will simply check that the workspace is not
-  * unitless.
-  */
+ *
+ * @param unitID :: The name of the unit that the workspace must have. If
+ * left empty, the validator will simply check that the workspace is not
+ * unitless.
+ */
 WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string &unitID)
     : MatrixWorkspaceValidator(), m_unitID(unitID) {}
 
 /**
-  * Clone the current state
-  */
+ * Clone the current state
+ */
 Kernel::IValidator_sptr WorkspaceUnitValidator::clone() const {
   return boost::make_shared<WorkspaceUnitValidator>(*this);
 }
 
 /** Checks that the units of the workspace data are declared match any
-  * required units
-  *
-  * @param value :: The workspace to test
-  * @return A user level description of the error or "" for no error
-  */
+ * required units
+ *
+ * @param value :: The workspace to test
+ * @return A user level description of the error or "" for no error
+ */
 std::string
 WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   // This effectively checks for single-valued workspaces

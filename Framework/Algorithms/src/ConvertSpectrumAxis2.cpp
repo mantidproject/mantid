@@ -67,8 +67,9 @@ void ConvertSpectrumAxis2::init() {
                   "Value of fixed energy in meV : EI (EMode=Direct) or EF "
                   "(EMode=Indirect))");
 
-  declareProperty("OrderAxis", true, "Whether or not to sort the resulting"
-                                     " spectrum axis.");
+  declareProperty("OrderAxis", true,
+                  "Whether or not to sort the resulting"
+                  " spectrum axis.");
 }
 
 void ConvertSpectrumAxis2::exec() {
@@ -110,10 +111,10 @@ void ConvertSpectrumAxis2::exec() {
 }
 
 /** Converts X axis to theta representation
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input Workspace
-*/
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input Workspace
+ */
 void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
                                           API::MatrixWorkspace_sptr &inputWS) {
@@ -150,10 +151,10 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
 }
 
 /** Convert X axis to Elastic Q representation
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input workspace
-*/
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input workspace
+ */
 void ConvertSpectrumAxis2::createElasticQMap(
     API::Progress &progress, const std::string &targetUnit,
     API::MatrixWorkspace_sptr &inputWS) {
@@ -210,12 +211,12 @@ void ConvertSpectrumAxis2::createElasticQMap(
 }
 
 /** Create the final output workspace after converting the X axis
-* @returns the final output workspace
-*
-* @param progress :: Progress indicator
-* @param targetUnit :: Target conversion unit
-* @param inputWS :: Input workspace
-*/
+ * @returns the final output workspace
+ *
+ * @param progress :: Progress indicator
+ * @param targetUnit :: Target conversion unit
+ * @param inputWS :: Input workspace
+ */
 MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::Progress &progress, const std::string &targetUnit,
     API::MatrixWorkspace_sptr &inputWS) {
@@ -312,9 +313,9 @@ double ConvertSpectrumAxis2::getEfixed(
 }
 
 /** Emplaces inside the ordered or unordered index registry
-* @param value :: value to insert
-* @param wsIndex :: workspace index
-*/
+ * @param value :: value to insert
+ * @param wsIndex :: workspace index
+ */
 void ConvertSpectrumAxis2::emplaceIndexMap(double value, size_t wsIndex) {
   if (m_toOrder) {
     m_indexMap.emplace(value, wsIndex);

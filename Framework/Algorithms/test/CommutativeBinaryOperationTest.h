@@ -1,12 +1,12 @@
 #ifndef COMMUTATIVEBINARYOPERATIONTEST_H_
 #define COMMUTATIVEBINARYOPERATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidKernel/System.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

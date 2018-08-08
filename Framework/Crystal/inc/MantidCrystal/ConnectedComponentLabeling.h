@@ -1,13 +1,13 @@
 #ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 #define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/optional.hpp>
 #include <map>
 #include <unordered_set>
 
@@ -32,7 +32,7 @@ using ClusterMap =
     std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>;
 using ClusterTuple =
     boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>;
-}
+} // namespace ConnectedComponentMappingTypes
 
 class BackgroundStrategy;
 

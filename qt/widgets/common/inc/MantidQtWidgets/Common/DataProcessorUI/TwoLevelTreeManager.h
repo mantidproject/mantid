@@ -142,7 +142,7 @@ private:
                      size_t whitelistColumns) const;
   TreeData constructTreeData(ChildItems rows);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H*/

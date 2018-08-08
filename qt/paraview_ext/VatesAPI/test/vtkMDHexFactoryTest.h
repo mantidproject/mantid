@@ -3,20 +3,20 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <vtkCellData.h>
 #include <vtkDataArray.h>
-#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 #include <vtkSmartPointer.h>
 
 using namespace Mantid;

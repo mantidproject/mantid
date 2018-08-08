@@ -1,14 +1,14 @@
 #ifndef MANTID_API_SPECTRUMDETECTORMAPPING_H_
 #define MANTID_API_SPECTRUMDETECTORMAPPING_H_
 
-#include <vector>
 #include <set>
+#include <vector>
 #ifndef Q_MOC_RUN
 #include <unordered_map>
 #endif
 
-#include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace API {

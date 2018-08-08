@@ -13,7 +13,7 @@ class FunctionDomain;
 class FunctionValues;
 class Workspace;
 class IFuncMinimizer;
-}
+} // namespace API
 
 namespace CurveFitting {
 namespace Algorithms {

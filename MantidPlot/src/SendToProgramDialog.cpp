@@ -23,8 +23,8 @@
 using namespace MantidQt::API;
 
 /**
-* Constructor when adding a new program to the send to list
-*/
+ * Constructor when adding a new program to the send to list
+ */
 SendToProgramDialog::SendToProgramDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), validName(false), validTarget(false),
       validSaveUsing(false) {
@@ -52,8 +52,8 @@ SendToProgramDialog::SendToProgramDialog(QWidget *parent, Qt::WFlags fl)
 }
 
 /**
-* Constructor when editing a program settings
-*/
+ * Constructor when editing a program settings
+ */
 SendToProgramDialog::SendToProgramDialog(
     QWidget *parent, QString programName,
     std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
@@ -108,8 +108,8 @@ SendToProgramDialog::SendToProgramDialog(
 }
 
 /**
-* Open up a new file browsing window
-*/
+ * Open up a new file browsing window
+ */
 void SendToProgramDialog::browse() {
   // (*) Will let all files be selected
   QFileDialog *dialog = new QFileDialog;
@@ -122,8 +122,8 @@ void SendToProgramDialog::browse() {
 }
 
 /**
-* See whether anything has been entered as a program name.
-*/
+ * See whether anything has been entered as a program name.
+ */
 void SendToProgramDialog::validateName() {
   if (m_uiform.nameText->text() == "") {
     m_uiform.validateName->setVisible(true);
@@ -136,8 +136,8 @@ void SendToProgramDialog::validateName() {
 }
 
 /**
-* Make sure the user specified target program is executable.
-*/
+ * Make sure the user specified target program is executable.
+ */
 void SendToProgramDialog::validateTarget() {
   QString filePath = m_uiform.targetText->text();
   filePath.replace(QString("\\"), QString("/"));
@@ -159,8 +159,8 @@ void SendToProgramDialog::validateTarget() {
 }
 
 /**
-* Make sure the user specified save algorithm exists.
-*/
+ * Make sure the user specified save algorithm exists.
+ */
 void SendToProgramDialog::validateSaveUsing() {
   validSaveUsing = Mantid::API::AlgorithmFactory::Instance().exists(
       m_uiform.saveUsingText->text().toStdString());
@@ -170,9 +170,9 @@ void SendToProgramDialog::validateSaveUsing() {
 }
 
 /**
-* If a validation passes or fails then a validation of the entire
-* dialog needs to be done to enable or disable the save button.
-*/
+ * If a validation passes or fails then a validation of the entire
+ * dialog needs to be done to enable or disable the save button.
+ */
 void SendToProgramDialog::validateAll() {
   // If validation passes on name, target and the save algorithm the save button
   // becomes available for the user to press.
@@ -183,8 +183,8 @@ void SendToProgramDialog::validateAll() {
 }
 
 /**
-* Save the new program or changes to a program
-*/
+ * Save the new program or changes to a program
+ */
 void SendToProgramDialog::save() {
   // Collect mandatory information and then check to see if it has been
   // collected (visible will always be true or false and is therefore not
@@ -221,10 +221,10 @@ void SendToProgramDialog::save() {
 }
 
 /**
-* Get the settings
-*
-* @return m_settings :: Key and detail of what is to go in the config service
-*/
+ * Get the settings
+ *
+ * @return m_settings :: Key and detail of what is to go in the config service
+ */
 std::pair<std::string, std::map<std::string, std::string>>
 SendToProgramDialog::getSettings() const {
   return m_settings;

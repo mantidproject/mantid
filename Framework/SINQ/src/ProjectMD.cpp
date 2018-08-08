@@ -1,7 +1,7 @@
 #include "MantidSINQ/ProjectMD.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/ListValidator.h"
 
 #define MAXDIM 10
 

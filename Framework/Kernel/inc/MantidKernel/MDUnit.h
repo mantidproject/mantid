@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
-#include <string>
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
