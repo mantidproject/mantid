@@ -340,9 +340,9 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
   auto RunNumber = peak1.getRunNumber();
   Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
   DblMatrix offsetsMat(3, 3);
-  offsetsMat.setRow(0, offsets1);
-  offsetsMat.setRow(1, offsets2);
-  offsetsMat.setRow(2, offsets3);
+  offsetsMat.setColumn(0, offsets1);
+  offsetsMat.setColumn(1, offsets2);
+  offsetsMat.setColumn(2, offsets3);
   for (int m = -maxOrder; m <= maxOrder; m++)
     for (int n = -maxOrder; n <= maxOrder; n++)
       for (int p = -maxOrder; p <= maxOrder; p++) {
