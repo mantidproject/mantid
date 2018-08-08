@@ -137,5 +137,5 @@ def hyphenise(vals):
             out.append("-".join([a, b]) if a != b else a)
             a = vals[i + 1]
         b = vals[i + 1]
-    out.append("-".join([a, b]) if a != b else vals[i + 1])
+    out.append("-".join([a, b]) if a != b else vals[-1])
     return ", ".join(out)
