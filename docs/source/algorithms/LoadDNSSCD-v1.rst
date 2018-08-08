@@ -40,7 +40,7 @@ Restrictions
 
 
 Data replication
-________________
+----------------
 
 For standard data (vanadium, NiCr, background) the sample rotation angle is assumed to be not important. These data are typically measured only for one sample rotation angle. The algorithm can replicate these data for the same sample rotation angles as a single crystal sample has been measured. For this purpose optional input fields *SaveHuberTo* and *LoadHuberFrom* can be used.
 
