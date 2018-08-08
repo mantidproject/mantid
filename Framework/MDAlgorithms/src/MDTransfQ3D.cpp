@@ -144,25 +144,25 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
   std::vector<coord_t> dim_min;
   std::vector<coord_t> dim_max;
   for (auto &v : m_DimMin) {
-    dim_min.push_back(static_cast<coord_t>(v) - 4 * FLT_EPSILON);
+    dim_min.push_back(static_cast<coord_t>(v));
   }
   for (auto &v : m_DimMax) {
-    dim_max.push_back(static_cast<coord_t>(v) + 4 * FLT_EPSILON);
+    dim_max.push_back(static_cast<coord_t>(v));
   }
 
   Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
                                   m_RotMat[2] * qz);
-  if (Coord[0] < dim_min[0] || Coord[0] > dim_max[0])
+  if (Coord[0] < dim_min[0] || Coord[0] >= dim_max[0])
     return false;
 
   Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
                                   m_RotMat[5] * qz);
-  if (Coord[1] < dim_min[1] || Coord[1] > dim_max[1])
+  if (Coord[1] < dim_min[1] || Coord[1] >= dim_max[1])
     return false;
 
   Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
                                   m_RotMat[8] * qz);
-  if (Coord[2] < dim_min[2] || Coord[2] > dim_max[2])
+  if (Coord[2] < dim_min[2] || Coord[2] >= dim_max[2])
     return false;
 
   if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
