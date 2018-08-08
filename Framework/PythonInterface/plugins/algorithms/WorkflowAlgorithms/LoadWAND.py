@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, UnitConversion, Elastic, Property, IntArrayProperty
-from mantid.simpleapi import (LoadEventNexus, Integration, mtd, SetGoniometer, DeleteWorkspace, AddSampleLog,
-                              MaskBTP, RenameWorkspace, GroupWorkspaces)
+from mantid.simpleapi import (mtd, SetGoniometer, AddSampleLog, MaskBTP, RenameWorkspace, GroupWorkspaces,
+                              CreateWorkspace, LoadNexusLogs, LoadInstrument)
 from six.moves import range
+import numpy as np
+import h5py
 
 
 class LoadWAND(DataProcessorAlgorithm):
@@ -45,10 +47,23 @@ class LoadWAND(DataProcessorAlgorithm):
         group_names = []
 
         for i, run in enumerate(runs):
-            LoadEventNexus(Filename=run, OutputWorkspace='__tmp_load', LoadMonitors=True, EnableLogging=False,
-                           startProgress=i/len(runs), endProgress=(i+0.8)/len(runs))
-            Integration(InputWorkspace='__tmp_load', OutputWorkspace='__tmp_load', EnableLogging=False,
-                        startProgress=(i+0.8)/len(runs), endProgress=(i+1)/len(runs))
+            data = np.zeros((512*480*8),dtype=np.int64)
+            with h5py.File(run, 'r') as f:
+                monitor_count = f['/entry/monitor1/total_counts'].value[0]
+                run_number = f['/entry/run_number'].value[0]
+                for b in range(8):
+                    data += np.bincount(f['/entry/bank'+str(b+1)+'_events/event_id'].value,minlength=512*480*8)
+            data = data.reshape((480*8, 512))
+
+            CreateWorkspace(DataX=[wavelength-0.001, wavelength+0.001],
+                            DataY=data,
+                            DataE=np.sqrt(data),
+                            UnitX='Wavelength',
+                            YUnitLabel='Counts',
+                            NSpec=1966080,
+                            OutputWorkspace='__tmp_load', EnableLogging=False)
+            LoadNexusLogs('__tmp_load', Filename=run, EnableLogging=False)
+            LoadInstrument('__tmp_load', InstrumentName='WAND', RewriteSpectraMap=True, EnableLogging=False)
 
             if self.getProperty("ApplyMask").value:
                 MaskBTP('__tmp_load', Pixel='1,2,511,512', EnableLogging=False)
@@ -58,20 +73,16 @@ class LoadWAND(DataProcessorAlgorithm):
                 else:
                     MaskBTP('__tmp_load', Bank='8', Tube='475-480', EnableLogging=False)
 
-            mtd['__tmp_load'].getAxis(0).setUnit("Wavelength")
-            w = [wavelength-0.001, wavelength+0.001]
-            for idx in range(mtd['__tmp_load'].getNumberHistograms()):
-                mtd['__tmp_load'].setX(idx, w)
-
             SetGoniometer('__tmp_load', Axis0="HB2C:Mot:s1,0,1,0,1", EnableLogging=False)
+            AddSampleLog('__tmp_load', LogName="monitor_count", LogType='Number', NumberType='Double',
+                         LogText=str(monitor_count), EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="gd_prtn_chrg", LogType='Number', NumberType='Double',
-                         LogText=str(mtd['__tmp_load'+'_monitors'].getNumberEvents()), EnableLogging=False)
-            DeleteWorkspace('__tmp_load'+'_monitors', EnableLogging=False)
-
+                         LogText=str(monitor_count), EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="Wavelength", LogType='Number', NumberType='Double',
                          LogText=str(wavelength), EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="Ei", LogType='Number', NumberType='Double',
                          LogText=str(UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)), EnableLogging=False)
+            AddSampleLog('__tmp_load', LogName="run_number", LogText=run_number, EnableLogging=False)
             if len(runs) == 1:
                 RenameWorkspace('__tmp_load', outWS, EnableLogging=False)
             else:
