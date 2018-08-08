@@ -8,6 +8,7 @@ import csv
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
+from HFIR_4Circle_Reduction.fourcircle_utility import *
 
 
 def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
@@ -213,13 +214,14 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     return [x0, est_sigma, est_a, est_background]
 
 
-def fit_gaussian_linear_backgroud_mtd(matrix_ws_name):
+# TODO TODO - 20180809 - this is the last several core part!
+def fit_gaussian_linear_background_mtd(matrix_ws_name):
     """
     fit Gaussian with linear background by calling Mantid's FitPeaks
     :param matrix_ws_name:
     :return:
     """
-    # check!
+    # check input workspace
     check_string('MatrixWorkspace name', matrix_ws_name)
     if not AnalysisDataService.doesExist(matrix_ws_name):
         raise RuntimeError('Workspace {} does not exist in Mantid ADS.'.format(matrix_ws_name))
@@ -227,12 +229,23 @@ def fit_gaussian_linear_backgroud_mtd(matrix_ws_name):
     # fit peaks
     out_ws_name = '{}_fit_positions'.format(matrix_ws_name)
     fit_param_table_name = '{}_params_table'.format(matrix_ws_name)
-    # TODO - usually peak center shall be around the center of ROI
-    mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
-                          PeakFunction='Gaussian',
-                          BackgroundType='Linear',
-                          OutputWorkspace=out_ws_name,
-                          ParameterWorkspace=fit_param_table_name)
+    # TODO - 20180809 - usually peak center shall be around the center of ROI
+
+    mantidsimple.FitPeaks(InputWorkspace='Exp668_Scan320_430_roi322_vertical',
+                          OutputWorkspace='fittedpeaks',
+                          PeakCenters='120',  # FIXME
+                          FitWindowBoundaryList='60,160',  # FIXME
+                          FitFromRight=False,
+                          Minimizer='Levenberg-MarquardtMD',
+                          HighBackground=False,
+                          ConstrainPeakPositions=False,
+                          FittedPeaksWorkspace='voigtmodel',
+                          OutputPeakParametersWorkspace='voigtparams')
+    # mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
+    #                       PeakFunction='Gaussian',
+    #                       BackgroundType='Linear',
+    #                       OutputWorkspace=out_ws_name,
+    #                       ParameterWorkspace=fit_param_table_name)
 
     # TODO - 20180801 - Fix issue by following example
     """
@@ -240,10 +253,14 @@ def fit_gaussian_linear_backgroud_mtd(matrix_ws_name):
         PeakCenters='120', FitWindowBoundaryList='60,160', FitFromRight=False,
         Minimizer='Levenberg-MarquardtMD', HighBackground=False, ConstrainPeakPositions=False,
         FittedPeaksWorkspace='voigtmodel', OutputPeakParametersWorkspace='voigtparams')
-
     """
 
     # process output and set to a dictionary
+    # voigtparams = mtd["voigtparams"]
+    #
+    # voigtparams.getColumnNames()
+    # Out[2]: ['wsindex', 'peakindex', 'Height', 'PeakCentre', 'Sigma', 'A0', 'A1', 'chi2']
+    # bad chi2 : 1.7976931348623157e+308
 
     return
 

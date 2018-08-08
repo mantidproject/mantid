@@ -122,6 +122,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_user_wave_length)
         self.connect(self.ui.pushButton_applyDetectorSize, QtCore.SIGNAL('clicked()'),
                      self.do_set_detector_size)
+        self.ui.pushButton_applyAllCalibrationSetup.clicked.connect(self.do_set_all_calibration)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -328,11 +329,11 @@ class MainWindow(QtGui.QMainWindow):
                      self.menu_download_data)
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
-        self.ui.actionSort_by_Pt_with_Max_Counts.clicked.connect(self.menu_sort_by_pt_number)
+        self.ui.actionSort_By_Pt.triggered.connect(self.menu_sort_by_pt_number)
 
         #  pop out a general figure plot window
         self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
-        self.ui.actionSave_2theta_Sigma.connect(self.menu_save_2theta_sigma)
+        self.ui.actionSave_2theta_Sigma.triggered.connect(self.menu_save_2theta_sigma)
 
         # Validator ... (NEXT)
         # blabla... ...
@@ -2564,6 +2565,18 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_set_all_calibration(self):
+        """
+        set up all the calibration parameters
+        :return:
+        """
+        self.do_set_user_detector_center()
+        self.do_set_user_detector_distance()
+        self.do_set_user_wave_length()
+        self.do_set_detector_size()
+
+        return
+
     def do_set_detector_size(self):
         """
         set the detector size to controller
@@ -3893,7 +3906,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.ui.tableWidget_surveyTable.filter_and_sort(start_scan=0, end_scan=100000,
                                                         min_counts=0., max_counts=10000000000.,
-                                                        sort_by_column='pt', sort_order=0)
+                                                        sort_by_column='Max Counts Pt', sort_order=0)
 
         return
 

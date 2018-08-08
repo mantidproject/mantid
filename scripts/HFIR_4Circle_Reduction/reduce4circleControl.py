@@ -453,8 +453,31 @@ class CWSCDReductionControl(object):
 
         return peak_intensity
 
+    def get_single_scan_pt_model(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+        """ get a single-pt scan summed 1D data either vertically or horizontally with model data
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param roi_name:
+        :param integration_direction:
+        :return:
+        """
+        # original summed data
+        integration_record = self.get_single_pt_info(exp_number, scan_number, pt_number, roi_name,
+                                                     integration_direction)
+
+        vec_x, vec_y = integration_record.get_vec_x_y()
+
+        # calculate model
+        x0, sigma, gaussian_a, linear_b = integration_record.get_gaussian_parameters()
+        model_y = peak_integration_utility.gaussian_linear_background(vec_x, x0, sigma, gaussian_a, linear_b)
+
+        # print ('[DB...BAT] Calculated Gaussian: {0}'.format(model_y))
+
+        return vec_x, vec_y, model_y
+
     # TESTME - newly improved
-    def get_single_scan_pt_result(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
+    def get_single_scan_pt_summed(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
         """ get a single scan Pt. 's on-detector in-roi integration result
         :param exp_number:
         :param scan_number:
@@ -467,13 +490,8 @@ class CWSCDReductionControl(object):
                                                      integration_direction)
 
         vec_x, vec_y = integration_record.get_vec_x_y()
-        # calculate model
-        x0, sigma, gaussian_a, linear_b = integration_record.get_gaussian_parameters()
 
-        model_y = peak_integration_utility.gaussian_linear_background(vec_x, x0, sigma, gaussian_a, linear_b)
-        # print ('[DB...BAT] Calculated guassian: {0}'.format(model_y))
-
-        return vec_x, vec_y, model_y
+        return vec_x, vec_y
 
     def get_single_pt_info(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
         """ get the integrated single-pt scan data
@@ -1842,14 +1860,20 @@ class CWSCDReductionControl(object):
             # it does exist.  get the workspace name
             ws_record = self._single_pt_matrix_dict[ws_record_key]
             out_ws_name = ws_record.get_workspace()
+            print ('[DB...TRACE] workspace key {} does exist'.format(ws_record_key))
         else:
             # it does not exist.  sum over all the scans and create the workspace
+            out_ws_name = 'Exp{}_Scan{}_{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1],
+                                                         roi_name, integration_direction)
+
+            print('[DB...TRACE] workspace key {} does not exist. Integrate and generate workspace {}.'
+                  ''.format(ws_record_key, out_ws_name))
+
             # initialize the vectors to form a Mantid Workspace2D
             appended_vec_x = None
             appended_vec_y = None
             appended_vec_e = None
 
-            peak_height_dict = dict()
             scan_spectrum_map = dict()
             spectrum_scan_map = dict()
 
@@ -1859,10 +1883,9 @@ class CWSCDReductionControl(object):
                 spectrum_scan_map[ws_index] = scan_number
 
                 pt_number = 1
-                peak_height = self.integrate_detector_image(exp_number, scan_number, pt_number, roi_name,
-                                                            integration_direction=integration_direction,
-                                                            fit_gaussian=fit_gaussian)
-                peak_height_dict[scan_number] = peak_height
+                self.integrate_detector_image(exp_number, scan_number, pt_number, roi_name,
+                                              integration_direction=integration_direction,
+                                              fit_gaussian=fit_gaussian)
 
                 # create a workspace
                 det_integration_info = \
@@ -1881,8 +1904,6 @@ class CWSCDReductionControl(object):
             # END-FOR
 
             # create workspace
-            out_ws_name = 'Exp{}_Scan{}_{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1],
-                                                         roi_name, integration_direction)
             mantidsimple.CreateWorkspace(DataX=appended_vec_x, DataY=appended_vec_y,
                                          DataE=appended_vec_e, NSpec=len(scan_number_list),
                                          OutputWorkspace=out_ws_name)
@@ -1892,10 +1913,9 @@ class CWSCDReductionControl(object):
                                                      scan_spectrum_map, spectrum_scan_map)
 
             self._single_pt_matrix_dict[ws_record_key] = ws_record
-
         # END-IF-ELSE
 
-        # about result
+        # about result: peak height
         peak_height_dict = dict()
         for scan_number in scan_number_list:
             peak_height_dict[scan_number] = 0.

@@ -50,6 +50,10 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_plot.clicked.connect(self.do_plot_integrated_pt)
         self.ui.pushButton_exportToMovie.clicked.connect(self.do_export_to_movie)
 
+        # TODO - 20180809 - Implement the following...calling change_scan_number
+        # pushButton_rewindPlot
+        # pushButton_forwardPlot
+
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
         self.ui.actionSelect_All.triggered.connect(self.menu_table_select_all)
@@ -110,7 +114,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             # get run number and set to plot
             scan_number = self.ui.tableView_summary.get_scan_number(i_row)
             self.ui.lineEdit_Scan.setText('{}'.format(scan_number))
-            png_file_name = os.path.join(movie_dir, 'Scan{0:04d}_ROI{1}_{2}.png'.format(scan_number, roi_name, direction))
+            png_file_name = os.path.join(movie_dir,
+                                         'Scan{0:04d}_ROI{1}_{2}.png'.format(scan_number, roi_name, direction))
             self.do_plot_integrated_pt(show_plot=False, save_plot_to=png_file_name)
             file_list_str += '{}\n'.format(png_file_name)
         # END-IF
@@ -119,6 +124,11 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         png_list_file = open(os.path.join(movie_dir, 'MoviePNGList.txt'), 'w')
         png_list_file.write(file_list_str)
         png_list_file.close()
+
+        # prompt how to make a movie
+        # TODO - 20180809 - Make the message output work!
+        # TODO - continue - Run ffmpeg
+        # command_linux = 'ffmpeg -framerate 8 -pattern_type glob -i "*.png" -r 30 test.mp4'
 
         return
 
@@ -214,6 +224,27 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         Summed Single Pt. Counts (vertical) from comboBox_plotType
         :return:
         """
+        plot_type = str(self.ui.comboBox_plotType.currentText())
+
+        # reset the canvas
+        self.ui.graphicsView_integration1DView.clear_all_lines()
+
+        if plot_type == '2-theta FWHM Model':
+            self.plot_2theta_fwhm_model()
+        else:
+            # plot summed single pt scan
+            self.plot_summed_single_pt_scan_counts(is_vertical_summed=plot_type.lower().count('vertical'),
+                                                   figure_file=save_plot_to)
+
+        return
+
+    def plot_summed_single_pt_scan_counts(self, is_vertical_summed, figure_file=None):
+        """
+        plot single pt scanned counts
+        :param is_vertical_summed:
+        :param figure_file:
+        :return:
+        """
         # get scan number
         scan_num_str = str(self.ui.lineEdit_Scan.text()).strip()
         if len(scan_num_str) == 0:
@@ -222,29 +253,46 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         else:
             scan_number = int(scan_num_str)
         roi_name = str(self.ui.comboBox_roiList.currentText())
-        direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
+        if is_vertical_summed:
+            direction = 'vertical'
+        else:
+            direction = 'horizontal'
 
         # get data: pt number is always 1 as it is a single Pt. measurement
-        vec_x, vec_y, model_y = self._controller.get_single_scan_pt_result(self._exp_number, scan_number,
-                                                                           pt_number=1, roi_name=roi_name,
-                                                                           integration_direction=direction)
+        if self.ui.checkBox_fitPeaks.isChecked():
+            vec_x, vec_y, model_y = self._controller.get_single_scan_pt_model(self._exp_number, scan_number,
+                                                                              pt_number=1, roi_name=roi_name,
+                                                                              integration_direction=direction)
+        else:
+            vec_x, vec_y = self._controller.get_single_scan_pt_summed(self._exp_number, scan_number,
+                                                                      pt_number=1, roi_name=roi_name,
+                                                                      integration_direction=direction)
+            model_y = None
 
+        # plot
         self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='integrated counts',
                                                                  update_plot=False)
-
-        if self.ui.checkBox_fitPeaks.isChecked:
+        if model_y is not None:
             self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
-                                                                update_plot=show_plot)
+                                                                update_plot=True)
 
         # title
         self.ui.graphicsView_integration1DView.set_title('Scan {} Pt {} {} Integration.'
                                                          ''.format(scan_number, 1, direction))
 
         # save plot?
-        if save_plot_to is not None:
-            self.ui.graphicsView_integration1DView.canvas.save_figure(save_plot_to)
+        if figure_file is not None:
+            self.ui.graphicsView_integration1DView.canvas.save_figure(figure_file)
 
         return
+
+    def plot_2theta_fwhm_model(self):
+        """ plot the loaded 2theta-FWHM model
+        :return:
+        """
+        # TODO - 20180808 - Implement
+
+        raise NotImplementedError('Not Implemented Yet!')
 
     def do_refresh_roi(self):
         """
@@ -361,6 +409,9 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         assert isinstance(scan_pt_list, list), 'Scan-Pt-Infos {} must be a list but not a {}.' \
                                                ''.format(scan_pt_list, type(scan_pt_list))
 
+        # sort the scans
+        scan_pt_list = sorted(scan_pt_list)
+
         for scan_pt_info in scan_pt_list:
             scan_number, pt_number, hkl, two_theta = scan_pt_info
             self.ui.tableView_summary.add_scan_pt(scan_number, pt_number, hkl, two_theta)
@@ -379,12 +430,13 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """
         self.ui.tableView_summary.add_scan_pt(scan_number, pt_number, hkl_str, two_theta)
 
-    def change_scan_number(self, incremental):
+    def change_scan_number(self, increment):
         """
         change the scan number in the
-        :param incremental:
+        :param increment:
         :return:
         """
+        # FIXME - 20180809 - This behaviors weird... Need debugging output - TODO
         # get the list of scan number from the table, in future, a real-time updated list shall be used.
         run_number_list = list()
         for irow in range(self.ui.tableView_summary.rowCount()):
@@ -395,7 +447,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         except IndexError:
             curr_scan_index = 0
 
-        next_scan_index = curr_scan_index + incremental
+        next_scan_index = curr_scan_index + increment
         next_scan_index = (next_scan_index + len(run_number_list)) % len(run_number_list)
 
         # set

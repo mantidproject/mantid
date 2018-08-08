@@ -308,7 +308,8 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._rawDataID = self.add_plot_1d(vec_x, vec_y, xlabel=label,  color='blue', update_plot=update_plot)
+        self._rawDataID = self.add_plot_1d(vec_x, vec_y, x_label='pixel', label=label,
+                                           color='blue', update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return
@@ -322,7 +323,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         :param update_plot: flag to update the plot (call draw)
         :return:
         """
-        self._fitDataID = self.add_plot_1d(vec_x, vec_y, xlabel=label, color='red', update_plot=update_plot)
+        self._fitDataID = self.add_plot_1d(vec_x, vec_y, label=label, color='red', update_plot=update_plot)
         self.set_smart_y_limit(vec_y)
 
         return

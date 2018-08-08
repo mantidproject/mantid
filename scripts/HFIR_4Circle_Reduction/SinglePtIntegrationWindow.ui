@@ -51,17 +51,17 @@
         </property>
         <item>
          <property name="text">
-          <string>2-theta FWHM Model</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>Summed Single Pt. Counts (horizontal)</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Summed Single Pt. Counts (vertical)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2-theta FWHM Model</string>
          </property>
         </item>
        </widget>
