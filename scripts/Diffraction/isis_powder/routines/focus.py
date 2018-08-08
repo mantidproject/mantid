@@ -99,7 +99,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
-    vanadium_splines = None;
+    vanadium_splines = None
     if perform_vanadium_norm:
         vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
 
@@ -142,7 +142,7 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
-    vanadium_splines = None;
+    vanadium_splines = None
     if perform_vanadium_norm:
         vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
     output = None
