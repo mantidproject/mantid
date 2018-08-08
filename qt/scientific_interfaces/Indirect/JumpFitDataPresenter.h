@@ -32,14 +32,15 @@ private slots:
   void hideParameterComboBoxes();
   void showParameterComboBoxes();
   void updateAvailableParameters();
-  void updateAvailableParameters(int typeIndex);
+  void updateAvailableParameterTypes();
+  void updateAvailableParameters(const QString &type);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
+  void dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *dialog,
+                                  const std::string &type);
   void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
                                const std::string &workspace);
-  void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
-                               int parameterType);
-  void setActiveParameterType(int type);
+  void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
   void setSingleModelSpectrum(int index);
 
@@ -56,7 +57,7 @@ private:
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
 
-  int m_activeParameterType;
+  std::string m_activeParameterType;
   std::size_t m_dataIndex;
 
   QComboBox *m_cbParameterType;
