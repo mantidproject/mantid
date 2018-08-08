@@ -18,9 +18,6 @@ ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 case "$1" in
     install|upgrade)
 	# Remove stale links if left around
-	if [  -h @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
-	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
-	fi
 	if [  -h @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot ]; then
 	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot
 	fi

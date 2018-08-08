@@ -32,10 +32,7 @@ case "$1" in
     if [ -f @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot ]; then
       mv @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe
       if [ ! -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot ]; then
-        ln -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/launch_mantidplot.sh @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot
-      fi
-      if [ ! -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
-        ln -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/launch_mantidplot.sh @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+        ln -s @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot
       fi
     fi
     # Environment updates if required
