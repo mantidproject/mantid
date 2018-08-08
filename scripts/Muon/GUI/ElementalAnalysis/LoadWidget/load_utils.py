@@ -9,6 +9,52 @@ import mantid.simpleapi as mantid
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 
 
+class LModel(object):
+    def __init__(self):
+        self.run = 0
+        self.loaded_runs = {}
+        self.alg = None
+
+    def _load(self, inputs):
+        """ inputs is a dict mapping filepaths to output names """
+        if self.alg is not None:
+            raise RuntimeError("Loading already in progress")
+        self.alg = mantid.AlgorithmManager.create("LoadAscii")
+        self.alg.initialize()
+        self.alg.setAlwaysStoreInADS(False)
+        for path, output in iteritems(inputs):
+            self.alg.setProperty("Filename", path)
+            self.alg.setProperty("OutputWorkspace", output)
+            self.alg.execute()
+            mantid.AnalysisDataService.addOrReplace(
+                output, self.alg.getProperty("OutputWorkspace").value)
+        self.alg = None
+
+    def load_run(self):
+        to_load = search_user_dirs(self.run)
+        if not to_load:
+            return None
+        workspaces = {f: get_filename(
+            f) for f in to_load if get_filename(f) is not None}
+        self._load(workspaces)
+        self.loaded_runs[self.run] = group_by_detector(
+            self.run, workspaces.values())
+        return self.loaded_runs[self.run]
+
+    def output(self):
+        return
+
+    def cancel(self):
+        if self.alg is not None:
+            self.alg.cancel()
+
+    def loadData(self, inputs):
+        return
+
+    def set_run(self, run):
+        self.run = run
+
+
 def pad_run(run):
     """ Pads run number: i.e. 123 -> 00123; 2695- > 02695 """
     return str(run).zfill(5)
@@ -35,7 +81,17 @@ def group_by_detector(run, workspaces):
         detectors[d_string.format(run, detector_number)].append(w)
     for d, v in iteritems(detectors):
         mantid.GroupWorkspaces(v, OutputWorkspace=str(d))
-    return list(detectors)
+    detector_list = sorted(list(detectors))
+    group_grouped_workspaces(run, detector_list)
+    return detector_list
+
+
+def group_grouped_workspaces(name, workspaces):
+    tmp = mantid.CreateSampleWorkspace()
+    overall = mantid.GroupWorkspaces(tmp, OutputWorkspace=str(name))
+    for w in workspaces:
+        overall.add(w)
+    mantid.AnalysisDataService.remove("tmp")
 
 
 def get_detector_num_from_ws(name):
@@ -62,9 +118,12 @@ def get_filename(path):
         return None
 
 
-def flatten_run_data(workspace):
-    detectors = [mantid.mtd[d] for d in workspace]
-    return sorted([w.getName() for d in detectors for w in d])
+def flatten_run_data(*workspaces):
+    out = []
+    for ws in workspaces:
+        detectors = [mantid.mtd[d] for d in ws]
+        out.append(sorted([w.getName() for d in detectors for w in d]))
+    return out
 
 
 def hyphenise(vals):
@@ -74,7 +133,7 @@ def hyphenise(vals):
     for i in range(1, l):
         last = (i == l - 1)
         if vals[i] - vals[i - 1] != 1:
-            if i == 1:
+            if i == 1 or pos == i - 1:
                 out.append(str(vals[pos]))
             else:
                 out.append("{}-{}".format(vals[pos], vals[i - 1]))
