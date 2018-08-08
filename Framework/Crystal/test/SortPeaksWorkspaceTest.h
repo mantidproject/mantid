@@ -194,9 +194,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    IPeaksWorkspace_sptr temp = alg.getProperty("OutputWorkspace");
-    PeaksWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
+    PeaksWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
     TSM_ASSERT_EQUALS("Sorting should have happened in place. Output and input "
                       "workspaces should be the same.",

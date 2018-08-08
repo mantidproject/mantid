@@ -491,7 +491,9 @@ for (int64_t i = 0; i < ndets; i++) {
     // Average between two intersections for final position
     std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
                    prevIntSec.begin(), pos.begin(),
-                   VectorHelper::SimpleAverage<coord_t>());
+                   [](const double lhs, const double rhs) {
+                     return static_cast<coord_t>(0.5 * (lhs + rhs));
+                   });
     affineTrans.multiplyPoint(pos, posNew);
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))

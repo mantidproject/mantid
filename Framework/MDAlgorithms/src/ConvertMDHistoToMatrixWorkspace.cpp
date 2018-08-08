@@ -6,7 +6,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
@@ -320,8 +320,8 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   outputWorkspace->getAxis(0)->unit() = labelX;
 
   // set the second axis
-  auto yAxis = new NumericAxis(ny);
-  for (size_t i = 0; i < ny; ++i) {
+  auto yAxis = new BinEdgeAxis(ny + 1);
+  for (size_t i = 0; i <= ny; ++i) {
     yAxis->setValue(i, yDim->getX(i));
   }
   auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(

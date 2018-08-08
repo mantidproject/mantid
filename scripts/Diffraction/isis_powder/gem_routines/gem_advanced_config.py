@@ -13,7 +13,6 @@ absorption_correction_params = {
 
 gem_adv_config_params = {
     "raw_tof_cropping_values": (500, 20000),
-    "save_angles": False,
     "spline_coefficient": 30
 }
 
@@ -90,6 +89,8 @@ texture_vanadium_cropping_values = [(75, 34933), (65, 22887), (65, 22230), (73, 
                                     (100, 19993), (100, 20034), (100, 20026), (100, 20033)]
 
 all_adv_variables = {
+    "gsas_calib_filename": "GEM_PF1_PROFILE.IPF",
+    "maud_grouping_scheme": [1] * 3 + [2] * 8 + [3] * 20 + [4] * 42 + [5] * 52 + [6] * 35,
     "raw_tof_cropping_values": gem_adv_config_params
 }
 
@@ -99,12 +100,16 @@ def get_mode_specific_variables(is_texture_mode):
         return {"focused_cropping_values": texture_focused_cropping_values,
                 "vanadium_cropping_values": texture_vanadium_cropping_values,
                 "grouping_file_name": "offsets_xie_test_2.cal",
-                "save_maud": True}
+                "save_angles": True,
+                "save_maud": True,
+                "save_maud_calib": True}
     else:
         return {"focused_cropping_values": focused_cropping_values,
                 "vanadium_cropping_values": vanadium_cropping_values,
                 "grouping_file_name": "GEM_Instrument_grouping.cal",
-                "save_maud": False}
+                "save_angles": False,
+                "save_maud": False,
+                "save_maud_calib": False}
 
 
 def get_all_adv_variables():

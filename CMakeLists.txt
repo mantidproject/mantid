@@ -49,14 +49,15 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
-# Include Eigen as an external project
-###########################################################################
-include ( Eigen )
-
-###########################################################################
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
+
+###########################################################################
+# Configure Eigen early
+###########################################################################
+include ( Eigen )
+
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
@@ -292,8 +293,6 @@ if ( ENABLE_CPACK )
       include ( WindowsNSIS )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
-      # let people know what is coming out the other end
-      message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
@@ -306,7 +305,7 @@ if ( ENABLE_CPACK )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
 
-      if( "${UNIX_CODENAME}" MATCHES "Santiago" )
+      if( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157,python-matplotlib" )
         # On RHEL6 we are using SCL packages for Qt
@@ -317,7 +316,7 @@ if ( ENABLE_CPACK )
       endif()
 
       # Add software collections for RHEL
-      if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
+      if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
       endif()
 
@@ -385,4 +384,6 @@ if ( ENABLE_CPACK )
     ENDIF ()
     # run cpack configuration
     include ( CPack )
+    # let people know what is coming out the other end - must be after cpack generates value for rpm
+    message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 endif ()

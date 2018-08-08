@@ -360,9 +360,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
-        if self._grouping_string is not None:
-            self._grouping_string = self._grouping_string.replace('-', ':')
-
         # Disable sum files if there is only one file
         if len(self._data_files) == 1:
             if self._sum_files:

@@ -317,16 +317,16 @@ void LoadTBL::exec() {
   if (isOld) {
     /**THIS IS ESSENTIALLY THE OLD LoadReflTBL CODE**/
     // create the column headings
-    auto colStitch = ws->addColumn("str", "StitchGroup");
-    auto colRuns = ws->addColumn("str", "Run(s)");
-    auto colTheta = ws->addColumn("str", "ThetaIn");
-    auto colTrans = ws->addColumn("str", "TransRun(s)");
-    auto colQmin = ws->addColumn("str", "Qmin");
-    auto colQmax = ws->addColumn("str", "Qmax");
-    auto colDqq = ws->addColumn("str", "dq/q");
-    auto colScale = ws->addColumn("str", "Scale");
-    auto colOptions = ws->addColumn("str", "Options");
-    auto colHiddenOptions = ws->addColumn("str", "HiddenOptions");
+    ws->addColumn("str", "StitchGroup");
+    ws->addColumn("str", "Run(s)");
+    ws->addColumn("str", "ThetaIn");
+    ws->addColumn("str", "TransRun(s)");
+    ws->addColumn("str", "Qmin");
+    ws->addColumn("str", "Qmax");
+    ws->addColumn("str", "dq/q");
+    ws->addColumn("str", "Scale");
+    ws->addColumn("str", "Options");
+    ws->addColumn("str", "HiddenOptions");
 
     for (size_t i = 0; i < ws->columnCount(); i++) {
       auto col = ws->getColumn(i);

@@ -102,6 +102,9 @@ std::string ErrorReporter::generateErrorMessage() {
   if (m_share) {
     message["email"] = m_email;
     message["name"] = m_name;
+  } else {
+    message["email"] = "";
+    message["name"] = "";
   }
 
   ::Json::FastWriter writer;

@@ -1365,25 +1365,18 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   // set the target workspace
   auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
-  if (!targWS->addColumn("V3D", "DetDirections"))
-    throw(std::runtime_error("Can not add column DetDirectrions"));
+  targWS->addColumn("V3D", "DetDirections");
   // sample-detector distance;
-  if (!targWS->addColumn("double", "L2"))
-    throw(std::runtime_error("Can not add column L2"));
+  targWS->addColumn("double", "L2");
   // Diffraction angle
-  if (!targWS->addColumn("double", "TwoTheta"))
-    throw(std::runtime_error("Can not add column TwoTheta"));
-  if (!targWS->addColumn("double", "Azimuthal"))
-    throw(std::runtime_error("Can not add column Azimuthal"));
+  targWS->addColumn("double", "TwoTheta");
+  targWS->addColumn("double", "Azimuthal");
   // the detector ID;
-  if (!targWS->addColumn("int", "DetectorID"))
-    throw(std::runtime_error("Can not add column DetectorID"));
+  targWS->addColumn("int", "DetectorID");
   // stores spectra index which corresponds to a valid detector index;
-  if (!targWS->addColumn("size_t", "detIDMap"))
-    throw(std::runtime_error("Can not add column detIDMap"));
+  targWS->addColumn("size_t", "detIDMap");
   // stores detector index which corresponds to the workspace index;
-  if (!targWS->addColumn("size_t", "spec2detMap"))
-    throw(std::runtime_error("Can not add column spec2detMap"));
+  targWS->addColumn("size_t", "spec2detMap");
 
   // will see about that
   // sin^2(Theta)
@@ -1396,7 +1389,7 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
 
 /** method does preliminary calculations of the detectors positions to convert
  results into k-dE space ;
- and places the resutls into static cash to be used in subsequent calls to this
+ and places the results into static cash to be used in subsequent calls to this
  algorithm */
 void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
                                DataObjects::TableWorkspace_sptr &targWS,
@@ -1408,7 +1401,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   if ((!source) || (!sample)) {
 
     throw Kernel::Exception::InstrumentDefinitionError(
-        "Instrubment not sufficiently defined: failed to get source and/or "
+        "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
   }
 

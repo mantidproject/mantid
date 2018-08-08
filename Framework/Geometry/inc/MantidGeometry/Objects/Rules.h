@@ -7,7 +7,9 @@
 class TopoDS_Shape;
 
 namespace Mantid {
-
+namespace Kernel {
+class V3D;
+}
 namespace Geometry {
 
 class CSGObject;

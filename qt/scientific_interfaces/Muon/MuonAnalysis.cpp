@@ -455,11 +455,11 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
   std::vector<std::string> wsNames = {wsName, wsRawName};
   // Create workspace and a raw (unbinned) version of it
   auto ws = createAnalysisWorkspace(itemType, tableRow, plotType, wsName);
-  moveUnNormWS(wsName, wsNames);
+  moveUnNormWS(wsName, wsNames, false);
 
   auto wsRaw =
       createAnalysisWorkspace(itemType, tableRow, plotType, wsRawName, true);
-  moveUnNormWS(wsRawName, wsNames);
+  moveUnNormWS(wsName, wsNames, true); // raw
   // Make sure they end up in the ADS
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
@@ -469,9 +469,12 @@ std::string MuonAnalysis::addItem(ItemType itemType, int tableRow,
 }
 
 void MuonAnalysis::moveUnNormWS(const std::string &name,
-                                std::vector<std::string> &wsNames) {
+                                std::vector<std::string> &wsNames, bool raw) {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  const std::string unnorm = "_unNorm";
+  std::string unnorm = "_unNorm";
+  if (raw) {
+    unnorm += "_Raw";
+  }
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", name + unnorm);
     wsNames.push_back(name + unnorm);
@@ -588,7 +591,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.subtractedPeriods = getSubtractedPeriods();
   options.timeZero = timeZero();           // user input
   options.loadedTimeZero = m_dataTimeZero; // from file
-  options.timeLimits.first = startTime();
+  options.timeLimits.first = firstGoodBin();
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
@@ -1985,11 +1988,12 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 /**
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
+ * @param update :: [input] If to update the data selector
  * @param filePath :: [input] Optional path to file that is actually used. This
  * is for "load current run" where the data file has a temporary name like
  * MUSRauto_E.tmp
  */
-void MuonAnalysis::selectMultiPeak(const QString &wsName,
+void MuonAnalysis::selectMultiPeak(const QString &wsName, const bool update,
                                    const boost::optional<QString> &filePath) {
   disableAllTools();
   if (!plotExists(wsName)) {
@@ -2008,10 +2012,11 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
     std::transform(groups.pairNames.begin(), groups.pairNames.end(),
                    std::back_inserter(groupsAndPairs), &QString::fromStdString);
     setGroupsAndPairs();
-
-    // Set the selected run, group/pair and period
-    m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
-    setChosenGroupAndPeriods(wsName);
+    if (update) {
+      // Set the selected run, group/pair and period
+      m_fitDataPresenter->setAssignedFirstRun(wsName, filePath);
+      setChosenGroupAndPeriods(wsName);
+    }
   }
 
   QString code;
@@ -2026,13 +2031,25 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
 }
 
 /**
- * Pass through to selectMultiPeak(wsName, filePath) where filePath is set
+ * Pass through to selectMultiPeak(wsName, update, filePath) where filePath is
+ * set
  * to blank. Enables connection as a slot without Qt understanding
  * boost::optional.
  * @param wsName Name of the selected workspace
  */
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
-  selectMultiPeak(wsName, boost::optional<QString>());
+  selectMultiPeak(wsName, true, boost::optional<QString>());
+}
+
+/**
+* Pass through to selectMultiPeak(wsName, update, filePath) where filePath is
+* set
+* to blank. Enables connection as a slot without Qt understanding
+* boost::optional. This will not update the data selector
+* @param wsName Name of the selected workspace
+*/
+void MuonAnalysis::selectMultiPeakNoUpdate(const QString &wsName) {
+  selectMultiPeak(wsName, false, boost::optional<QString>());
 }
 
 /**
@@ -2266,7 +2283,8 @@ void MuonAnalysis::loadFittings() {
   // Add Function browser widget to the fit tab
   m_functionBrowser = new MuonFunctionBrowser(nullptr, true);
   m_functionBrowser->sizePolicy().setVerticalStretch(10);
-  m_uiForm.fitBrowser->addExtraWidget(m_functionBrowser);
+  m_uiForm.fitBrowser->addFitBrowserWidget(m_functionBrowser,
+                                           m_functionBrowser);
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_dataSelector->sizePolicy().setVerticalStretch(0);
@@ -2620,6 +2638,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     disconnect(m_uiForm.fitBrowser,
                SIGNAL(workspaceNameChanged(const QString &)), this,
                SLOT(selectMultiPeak(const QString &)));
+    disconnect(m_uiForm.fitBrowser, SIGNAL(TFPlot(const QString &)), this,
+               SLOT(selectMultiPeakNoUpdate(const QString &)));
   }
 
   if (newTab == m_uiForm.DataAnalysis) // Entering DA tab
@@ -2650,14 +2670,16 @@ void MuonAnalysis::changeTab(int newTabIndex) {
           m_uiForm.mwRunFiles->getUserInput().toString();
       m_fitDataPresenter->setSelectedWorkspace(m_currentDataName, filePath);
       setChosenGroupAndPeriods(m_currentDataName);
-      selectMultiPeak(m_currentDataName, filePath);
+      selectMultiPeak(m_currentDataName, true, filePath);
     }
 
     // In future, when workspace gets changed, show its plot and attach PP tool
     // to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
-
+    connect(m_uiForm.fitBrowser, SIGNAL(TFPlot(const QString &)), this,
+            SLOT(selectMultiPeakNoUpdate(const QString &)),
+            Qt::QueuedConnection);
     // repeat setting the fitting ranges as the above code can set them to an
     // unwanted default value
     setFittingRanges(xmin, xmax);
@@ -2673,12 +2695,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->updatePeriods();
     }
-    if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
-        isItGroup) {
-      m_uiForm.fitBrowser->setTFAsymm(true);
-    } else {
-      m_uiForm.fitBrowser->setTFAsymm(false);
-    }
+
+    m_uiForm.fitBrowser->setTFAsymm(false);
+
     m_uiForm.fitBrowser->checkFitEnabled();
 
   } else if (newTab == m_uiForm.ResultsTable) {
@@ -3079,7 +3098,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
-    groupAlg->setProperty("xmin", m_dataSelector->getStartTime());
+    // want to remove data before first good data
+    groupAlg->setProperty("xmin", firstGoodBin());
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
     groupAlg->execute();
 
