@@ -832,7 +832,7 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
  */
 void Peak::setIntHKL(const Mantid::Kernel::V3D &HKL) {
   m_intHKL = {{boost::math::iround(HKL.X()), boost::math::iround(HKL.Y()),
-              boost::math::iround(HKL.Z())}};
+               boost::math::iround(HKL.Z())}};
 }
 
 //----------------------------------------------------------------------------------------------
