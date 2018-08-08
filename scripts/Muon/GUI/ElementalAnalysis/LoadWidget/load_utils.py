@@ -65,8 +65,7 @@ def search_user_dirs(run):
     for user_dir in config["datasearch.directories"].split(";"):
         path = os.path.join(user_dir,
                             "ral{}.rooth*.dat".format(pad_run(run)))
-        for g in glob.iglob(path):
-            files.append(g)
+        files.extend([g for g in glob.iglob(path)])
     return files
 
 
