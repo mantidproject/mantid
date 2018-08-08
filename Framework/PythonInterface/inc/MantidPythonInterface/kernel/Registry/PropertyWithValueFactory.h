@@ -26,8 +26,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include <memory>
 #include <boost/python/list.hpp>
+#include <memory>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
