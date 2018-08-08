@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTTRANSFORMFOURIER_H_
 
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 
 namespace Mantid {
 namespace Algorithms {
