@@ -59,5 +59,5 @@ size_t TimeToTimeStep::operator()(double time) const {
                                m_c); // Linear interpolation
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

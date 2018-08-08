@@ -1,9 +1,9 @@
 #ifndef MANTIDPREFERENCES_H
 #define MANTIDPREFERENCES_H
 
-#include <QString>
-#include <QMap>
 #include <QList>
+#include <QMap>
+#include <QString>
 
 /** @class MantidPreferences
 

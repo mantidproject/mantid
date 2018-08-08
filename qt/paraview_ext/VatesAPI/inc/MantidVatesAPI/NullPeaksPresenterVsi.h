@@ -1,11 +1,11 @@
 #ifndef MANTID_VATES_NULL_PEAKS_PRESENTER
 #define MANTID_VATES_NULL_PEAKS_PRESENTER
 
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/ViewFrustum.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 
 #include <vector>
 
@@ -40,7 +40,7 @@ public:
   }
   void sortPeaksWorkspace(const std::string &, const bool) override {}
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

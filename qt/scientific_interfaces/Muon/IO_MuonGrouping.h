@@ -4,9 +4,9 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_MuonAnalysis.h"
-#include "MantidAPI/GroupingLoader.h"
 #include "DllConfig.h"
+#include "MantidAPI/GroupingLoader.h"
+#include "ui_MuonAnalysis.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -69,8 +69,8 @@ private:
   /// Reference to UI
   Ui::MuonAnalysis &m_uiForm;
 };
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_IO_GROUPING_H_

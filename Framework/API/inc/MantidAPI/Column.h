@@ -10,8 +10,8 @@
 #include <boost/shared_ptr.hpp>
 #endif
 #include <cstring>
-#include <string>
 #include <limits>
+#include <string>
 #include <typeinfo>
 #include <vector>
 

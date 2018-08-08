@@ -1,9 +1,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
 
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
-#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 

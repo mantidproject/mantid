@@ -1,17 +1,17 @@
 #include "MantidMDAlgorithms/AccumulateMD.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/HistoryView.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidAPI/HistoryView.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 
 #include <Poco/File.h>
 #include <boost/algorithm/string/classification.hpp>
@@ -37,7 +37,7 @@ namespace MDAlgorithms {
  * source
  * @param efix :: Vector of data source energy values in meV
  * @returns names of data sources which cannot be found
-*/
+ */
 std::string filterToExistingSources(std::vector<std::string> &input_data,
                                     std::vector<double> &psi,
                                     std::vector<double> &gl,
@@ -61,7 +61,7 @@ std::string filterToExistingSources(std::vector<std::string> &input_data,
  * Return true if dataName is an existing workspace or file
  * @param data_name :: Workspace name or file name
  * @returns true if a workspace or file with given name exists
-*/
+ */
 bool dataExists(const std::string &data_name) {
   const std::string filepath =
       Mantid::API::FileFinder::Instance().getFullPath(data_name);
@@ -78,7 +78,7 @@ bool dataExists(const std::string &data_name) {
  * Test if a file with this full path exists
  * @param filename :: full path of a file to test existence of
  * @returns true if the file exists
-*/
+ */
 bool fileExists(const std::string &filename) {
   if (filename.empty())
     return false;
@@ -99,7 +99,7 @@ bool fileExists(const std::string &filename) {
  * source
  * @param efix :: Vector of data source energy values in meV
  * @returns data sources which are already in the workspace
-*/
+ */
 std::string filterToNew(std::vector<std::string> &input_data,
                         std::vector<std::string> &current_data,
                         std::vector<double> &psi, std::vector<double> &gl,
@@ -125,7 +125,7 @@ std::string filterToNew(std::vector<std::string> &input_data,
  * @param current_data :: Vector of data sources previously appended to
  * workspace
  * @returns true if the named data source appears in the vector of current data
-*/
+ */
 bool appearsInCurrentData(const std::string &data_source,
                           std::vector<std::string> &current_data) {
   for (auto reverse_iter = current_data.rbegin();
@@ -143,7 +143,7 @@ bool appearsInCurrentData(const std::string &data_source,
  * @param ws_history :: History of the workspace
  * @returns a vector of the names of data_sources which have previously been
  * appended to the workspace
-*/
+ */
 std::vector<std::string>
 getHistoricalDataSources(const WorkspaceHistory &ws_history,
                          const std::string &create_alg_name,
@@ -181,7 +181,7 @@ getHistoricalDataSources(const WorkspaceHistory &ws_history,
  * @param data_sources :: string from workspace history containing list of data
  * sources
  * @param historical_data_sources :: set of data sources
-*/
+ */
 void insertDataSources(
     const std::string &data_sources,
     std::unordered_set<std::string> &historical_data_sources) {
@@ -217,7 +217,7 @@ const std::string AccumulateMD::summary() const {
 
 /*
  * Initialize the algorithm's properties.
-*/
+ */
 void AccumulateMD::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -305,7 +305,7 @@ void AccumulateMD::init() {
 
 /*
  * Execute the algorithm.
-*/
+ */
 void AccumulateMD::exec() {
 
   IMDEventWorkspace_sptr input_ws = this->getProperty("InputWorkspace");
@@ -421,7 +421,7 @@ void AccumulateMD::exec() {
  * source
  * @param efix :: Vector of data source energy values in meV
  * @returns the newly created workspace
-*/
+ */
 IMDEventWorkspace_sptr AccumulateMD::createMDWorkspace(
     const std::vector<std::string> &data_sources,
     const std::vector<double> &psi, const std::vector<double> &gl,

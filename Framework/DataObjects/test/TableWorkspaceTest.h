@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "PropertyManagerHelper.h"
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <limits>
 #include <vector>
 
@@ -112,7 +112,7 @@ public:
     TS_ASSERT_EQUALS(tw.getColumn("Name"), strCol);
     TS_ASSERT_EQUALS(tw.getColumn("Position"), v3dCol);
     // Test trying to add existing column returns null pointer
-    TS_ASSERT(!tw.addColumn("int", "Number"))
+    TS_ASSERT_THROWS(tw.addColumn("int", "Number"), std::invalid_argument);
 
     tw.getRef<int>("Number", 1) = 17;
     tw.cell<std::string>(2, 1) = "STRiNG";
@@ -677,9 +677,9 @@ public:
   }
 
   /**
-  * Test declaring an input TableWorkspace and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input TableWorkspace and retrieving it as const_sptr
+   * or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     auto wsInput = boost::make_shared<TableWorkspace>();
@@ -709,9 +709,9 @@ public:
   }
 
   /**
-  * Test declaring an input ITableWorkspace and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input ITableWorkspace and retrieving it as const_sptr
+   * or sptr
+   */
   void testGetProperty_ITableWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
     ITableWorkspace_sptr wsInput = boost::make_shared<TableWorkspace>();

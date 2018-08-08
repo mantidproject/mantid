@@ -4,15 +4,15 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidAlgorithms/CarpenterSampleCorrection.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidAlgorithms/CarpenterSampleCorrection.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -134,10 +134,10 @@ public:
     // setup the test workspace
     auto wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
         1, 1, false);
-    wksp->getAxis(0)
-        ->setUnit("Wavelength"); // cheat and set the units to Wavelength
-    wksp->getSpectrum(0)
-        .convertTof(.09, 1.); // convert to be from 1->10 (about)
+    wksp->getAxis(0)->setUnit(
+        "Wavelength"); // cheat and set the units to Wavelength
+    wksp->getSpectrum(0).convertTof(.09,
+                                    1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
 
     AnalysisDataService::Instance().add(outName, wksp);

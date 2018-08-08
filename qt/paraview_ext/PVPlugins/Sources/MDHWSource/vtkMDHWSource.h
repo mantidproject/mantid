@@ -11,7 +11,7 @@ namespace Mantid {
 namespace VATES {
 class MDLoadingPresenter;
 }
-}
+} // namespace Mantid
 
 /*  Source for fetching Multidimensional Workspace out of the Mantid Analysis
    Data Service

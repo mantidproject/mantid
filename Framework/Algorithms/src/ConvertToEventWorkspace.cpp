@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ConvertToEventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/System.h"
 #include <limits>
 
 using namespace Mantid::Kernel;
@@ -75,5 +75,5 @@ void ConvertToEventWorkspace::exec() {
   setProperty("OutputWorkspace", std::move(outWS));
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

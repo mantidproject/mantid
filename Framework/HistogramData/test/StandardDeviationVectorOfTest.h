@@ -6,10 +6,10 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/StandardDeviationVectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::StandardDeviationVectorOf;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class VariancesTester : public VectorOf<VariancesTester, HistogramX>,
                         public Iterable<VariancesTester> {
@@ -25,8 +25,7 @@ public:
   using StandardDeviationVectorOf<StandardDeviationVectorOfTester, HistogramX,
                                   VariancesTester>::StandardDeviationVectorOf;
   using StandardDeviationVectorOf<StandardDeviationVectorOfTester, HistogramX,
-                                  VariancesTester>::
-  operator=;
+                                  VariancesTester>::operator=;
   StandardDeviationVectorOfTester(const StandardDeviationVectorOfTester &) =
       default;
   StandardDeviationVectorOfTester &

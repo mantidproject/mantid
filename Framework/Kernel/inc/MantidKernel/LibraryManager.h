@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LibraryWrapper.h"
@@ -14,7 +15,7 @@
 namespace Poco {
 class File;
 class Path;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {

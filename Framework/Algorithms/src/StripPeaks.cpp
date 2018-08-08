@@ -29,14 +29,16 @@ void StripPeaks::init() {
   auto min = boost::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("FWHM", 7, min, "The number of points covered, on average, "
-                                  "by the fwhm of a peak (default 7).\nPassed "
-                                  "through to [[FindPeaks]].");
+  declareProperty("FWHM", 7, min,
+                  "The number of points covered, on average, "
+                  "by the fwhm of a peak (default 7).\nPassed "
+                  "through to [[FindPeaks]].");
   // The tolerance allowed in meeting the conditions
-  declareProperty("Tolerance", 4, min, "A measure of the strictness desired in "
-                                       "meeting the condition on peak "
-                                       "candidates,\n"
-                                       "Mariscotti recommends 2 (default 4)");
+  declareProperty("Tolerance", 4, min,
+                  "A measure of the strictness desired in "
+                  "meeting the condition on peak "
+                  "candidates,\n"
+                  "Mariscotti recommends 2 (default 4)");
 
   declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
@@ -54,9 +56,10 @@ void StripPeaks::init() {
       boost::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
-  declareProperty("HighBackground", true, "Flag to indicate that the peaks are "
-                                          "relatively weak comparing to "
-                                          "background.");
+  declareProperty("HighBackground", true,
+                  "Flag to indicate that the peaks are "
+                  "relatively weak comparing to "
+                  "background.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
@@ -189,7 +192,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     // Get back the gaussian parameters
     const double height = peakslist->getRef<double>("Height", i);
     const double centre = peakslist->getRef<double>("PeakCentre", i);
-    const double width = peakslist->getRef<double>("Sigma", i);
+    const double sigma = peakslist->getRef<double>("Sigma", i);
     const double chisq = peakslist->getRef<double>("chi2", i);
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
@@ -210,18 +213,25 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     } else if (chisq < 0.) {
       g_log.warning() << "StripPeaks():  Peak Index = " << i
                       << " @ X = " << centre
-                      << ". Error: Peak fit with too wide peak width" << width
+                      << ". Error: Peak fit with too wide peak width" << sigma
                       << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
     {
-      auto left = lower_bound(X.begin(), X.end(), centre);
-      double delta_d = (*left) - (*(left - 1));
-      if ((width / delta_d) < 1.) {
+      // find the bin width at the center of the peak - average of the bins on
+      // either side
+      const auto center_iter = lower_bound(X.begin(), X.end(), centre);
+      const double bin_width = .5 * (*(center_iter + 1) - (*(center_iter - 1)));
+
+      // seek wikipedia if you don't believe the conversion factor
+      const double fwhm = sigma * 2. * std::sqrt(2. * std::log(2.));
+
+      if ((fwhm / bin_width) < 1.5) {
         g_log.warning() << "StripPeaks():  Peak Index = " << i
                         << " @ X = " << centre
-                        << "  Error: Peak fit with too narrow of peak "
-                        << "delta_d = " << delta_d
-                        << " sigma/delta_d = " << (width / delta_d) << "\n";
+                        << "  Error: Peak fit with too narrow of peak"
+                        << " fwhm = " << fwhm << " bin size = " << bin_width
+                        << " num bins in peak = " << 2. * (fwhm / bin_width)
+                        << " <3\n";
         continue;
       }
     }
@@ -229,7 +239,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     g_log.information() << "Subtracting peak " << i << " from spectrum "
                         << peakslist->getRef<int>("spectrum", i)
                         << " at x = " << centre << " h = " << height
-                        << " s = " << width << " chi2 = " << chisq << "\n";
+                        << " s = " << sigma << " chi2 = " << chisq << "\n";
 
     { // log the background function
       double a0 = 0.;
@@ -255,12 +265,12 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     for (int j = 0; j < spectrumLength; ++j) {
       double x = binCenters[j];
       // Skip if not anywhere near this peak
-      if (x < centre - 5.0 * width)
+      if (x < centre - 5.0 * sigma)
         continue;
-      if (x > centre + 5.0 * width)
+      if (x > centre + 5.0 * sigma)
         break;
       // Calculate the value of the Gaussian function at this point
-      const double funcVal = height * exp(-0.5 * pow((x - centre) / width, 2));
+      const double funcVal = height * exp(-0.5 * pow((x - centre) / sigma, 2));
       // Subtract the calculated value from the data
       Y[j] -= funcVal;
     }

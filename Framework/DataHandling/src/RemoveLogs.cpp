@@ -1,25 +1,25 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/RemoveLogs.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Glob.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/algorithm/string.hpp>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
+#include <boost/algorithm/string.hpp>
 
+#include <algorithm>
 #include <fstream> // used to get ifstream
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace DataHandling {

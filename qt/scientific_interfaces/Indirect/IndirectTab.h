@@ -137,39 +137,9 @@ protected:
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
                        QPair<double, double> range);
 
-  /// Extracts a map of column name to value in the specified spectra from the
-  /// specified table workspace
-  QHash<QString, double>
-  extractRowFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                      const QSet<QString> &columnsToExtract, size_t wsIndex);
-
-  /// Extracts the specified columns from the table workspace with the specified
-  /// name, storing them in a map of row index to a map of column name to cell
-  /// value.
-  QHash<size_t, QHash<QString, double>>
-  extractParametersFromTable(const std::string &tableWsName,
-                             const QSet<QString> &columnsToExtract,
-                             size_t minSpectrum, size_t maxSpectrum);
-
-  /// Extracts the specified columns from the table workspace with the specified
-  /// name, storing them in a map of row index to a map of column name to cell
-  /// value.
-  QHash<size_t, QHash<QString, double>>
-  extractParametersFromTable(const std::string &tableWsName,
-                             const QSet<QString> &columnsToExtract,
-                             const std::vector<size_t> &spectraIndices);
-
-  /// Extracts the specified columns from the specified table workspace,
-  /// storing them in a map of row index to a map of column name to cell
-  /// value.
-  QHash<size_t, QHash<QString, double>>
-  extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
-                             const QSet<QString> &columnsToExtract,
-                             const std::vector<size_t> &spectraIndices);
-
   /// Extracts the labels from the axis at the specified index in the
   /// specified workspace.
-  QHash<QString, size_t>
+  std::unordered_map<std::string, size_t>
   extractAxisLabels(Mantid::API::MatrixWorkspace_const_sptr workspace,
                     const size_t &axisIndex) const;
 

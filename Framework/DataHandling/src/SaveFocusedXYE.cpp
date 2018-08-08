@@ -1,17 +1,17 @@
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <fstream>
 #include <cmath>
 #include <exception>
+#include <fstream>
 
 using namespace Mantid::DataHandling;
 
@@ -258,7 +258,9 @@ void SaveFocusedXYE::writeMAUDHeaders(
      << workspace->getRunNumber() << '\n';
   os << "#A  OMEGA      90.00\n";
   os << "#A  CHI         0.00\n";
-  os << "#A  PHI       -90.00\n";
+  // Whilst Phi should be able to change freely, as it is relative
+  // rotation, MAUD will fail to graph the data if it is not 0
+  os << "#A  PHI         0.00\n";
   os << "#A  ETA         0.00\n";
 }
 

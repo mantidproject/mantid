@@ -31,13 +31,13 @@
 #ifndef SINQHMLISTENER_H_
 #define SINQHMLISTENER_H_
 
-#include "MantidSINQ/DllConfig.h"
-#include "MantidAPI/LiveListener.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include <Poco/Net/HTTPResponse.h>
+#include "MantidSINQ/DllConfig.h"
 #include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPResponse.h>
 
 class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::LiveListener {
 public:

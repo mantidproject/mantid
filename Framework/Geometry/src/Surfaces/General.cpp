@@ -115,6 +115,6 @@ void General::getBoundingBox(double &xmax, double &ymax, double &zmax,
   UNUSED_ARG(zmin);
 }
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

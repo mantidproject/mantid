@@ -31,13 +31,13 @@
 
 #include <cmath>
 
-#include <QPainter>
-#include <QMouseEvent>
 #include <QApplication>
+#include <QMouseEvent>
+#include <QPainter>
 
+#include <qwt_painter.h>
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
-#include <qwt_painter.h>
 
 ArrowMarker::ArrowMarker()
     : d_start_arrow(false), d_end_arrow(true), d_fill_head(true),

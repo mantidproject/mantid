@@ -1,25 +1,25 @@
 #ifndef PARAMETERMAPTEST_H_
 #define PARAMETERMAPTEST_H_
 
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/function.hpp>
 #include <boost/make_shared.hpp>
 
+using Mantid::Geometry::IComponent;
+using Mantid::Geometry::IComponent_sptr;
+using Mantid::Geometry::Instrument_sptr;
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::ParameterMap_sptr;
 using Mantid::Geometry::Parameter_sptr;
-using Mantid::Geometry::Instrument_sptr;
-using Mantid::Geometry::IComponent;
-using Mantid::Geometry::IComponent_sptr;
 
 class ParameterMapTest : public CxxTest::TestSuite {
 public:
@@ -192,6 +192,14 @@ public:
     TS_ASSERT_EQUALS(descr, "Short description.");
   }
 
+  void test_add_string_with_spaces() {
+    ParameterMap pmap;
+    auto const comp = m_testInstrument.get();
+    pmap.add("string", comp, "name", std::string("A B C"));
+    auto value = pmap.get(comp, "name");
+    TS_ASSERT_EQUALS(value->value<std::string>(), "A B C");
+  }
+
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In() {
     // Add a parameter for the first component of the instrument
     IComponent_sptr comp = m_testInstrument->getChild(0);
@@ -270,7 +278,8 @@ public:
     // string
     boost::function<void(ParameterMap *, const IComponent *,
                          const std::string &, const std::string &,
-                         const std::string *const)> faddStr;
+                         const std::string *const)>
+        faddStr;
     faddStr = (void (ParameterMap::*)(const IComponent *, const std::string &,
                                       const std::string &,
                                       const std::string *const)) &
@@ -281,7 +290,8 @@ public:
     // V3D
     boost::function<void(ParameterMap *, const IComponent *,
                          const std::string &, const V3D &,
-                         const std::string *const)> faddV3D;
+                         const std::string *const)>
+        faddV3D;
     faddV3D = (void (ParameterMap::*)(const IComponent *, const std::string &,
                                       const V3D &, const std::string *const)) &
               ParameterMap::addV3D;
@@ -291,7 +301,8 @@ public:
     // Quat
     boost::function<void(ParameterMap *, const IComponent *,
                          const std::string &, const Quat &,
-                         const std::string *const)> faddQuat;
+                         const std::string *const)>
+        faddQuat;
     faddQuat =
         (void (ParameterMap::*)(const IComponent *, const std::string &,
                                 const Quat &, const std::string *const)) &
@@ -310,11 +321,10 @@ public:
 
     // double
     AddFuncHelper faddDouble;
-    faddDouble =
-        (void (ParameterMap::*)(const IComponent *, const std::string &,
-                                const std::string &,
-                                const std::string *const)) &
-        ParameterMap::addDouble;
+    faddDouble = (void (ParameterMap::*)(
+                     const IComponent *, const std::string &,
+                     const std::string &, const std::string *const)) &
+                 ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(
         faddDouble, "name", 5.0, 4.0);
 
@@ -630,6 +640,18 @@ public:
     TS_ASSERT_EQUALS(a->value<bool>(), true);
     auto oldA = oldPMap.get(oldComp.get(), "A");
     TS_ASSERT_EQUALS(oldA->value<bool>(), false);
+  }
+
+  void test_asString_for_doubles() {
+    ParameterMap pmap;
+    auto comp = m_testInstrument.get();
+    pmap.addDouble(comp, "d", 0.123456789012345);
+    pmap.addV3D(comp, "v",
+                Mantid::Kernel::V3D(0.123456789012345, 0.123456789012345,
+                                    0.123456789012345));
+    TS_ASSERT_EQUALS(pmap.get(comp, "d")->asString(), "0.123456789012345");
+    TS_ASSERT_EQUALS(pmap.get(comp, "v")->asString(),
+                     "[0.123456789012345,0.123456789012345,0.123456789012345]");
   }
 
 private:

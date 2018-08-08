@@ -15,14 +15,12 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
     const std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
 
 /// Checks if rebin mode is in consistent state
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
-isRebinInConsistentState(Mantid::API::IMDWorkspace *rebinnedWS,
-                         bool useRebinMode);
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER isRebinInConsistentState(
+    Mantid::API::IMDWorkspace *rebinnedWS, bool useRebinMode);
 
 /// Should perform auto color scaling on load
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
-shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen,
-                                    bool isAutoScalingOnLoad);
-}
-}
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
+    bool isFirstWorkspaceOpen, bool isAutoScalingOnLoad);
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

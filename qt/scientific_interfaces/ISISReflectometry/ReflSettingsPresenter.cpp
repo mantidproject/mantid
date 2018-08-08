@@ -1,16 +1,16 @@
 #include "ReflSettingsPresenter.h"
+#include "ExperimentOptionDefaults.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSettingsView.h"
+#include "InstrumentOptionDefaults.h"
+#include "InstrumentParameters.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
-#include "InstrumentParameters.h"
 #include "ValueOr.h"
-#include "ExperimentOptionDefaults.h"
-#include "InstrumentOptionDefaults.h"
 #include <type_traits>
 
 #include <boost/optional.hpp>
@@ -24,10 +24,10 @@ using namespace Mantid::Geometry;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** Constructor
-* @param view :: The view we are handling
-* @param group :: The number of the group this settings presenter's settings
-* correspond to.
-*/
+ * @param view :: The view we are handling
+ * @param group :: The number of the group this settings presenter's settings
+ * correspond to.
+ */
 ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
     : m_view(view), m_group(group) {
 
@@ -36,13 +36,13 @@ ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
 }
 
 /** Destructor
-*/
+ */
 ReflSettingsPresenter::~ReflSettingsPresenter() {}
 
 /** Used by the view to tell the presenter something has changed
-*
-* @param flag :: A flag used by the view to tell the presenter what happened
-*/
+ *
+ * @param flag :: A flag used by the view to tell the presenter what happened
+ */
 void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   switch (flag) {
   case IReflSettingsPresenter::ExpDefaultsFlag:
@@ -89,9 +89,9 @@ void ReflSettingsPresenter::handleSummationTypeChange() {
 }
 
 /** Sets the current instrument name and changes accessibility status of
-* the polarisation corrections option in the view accordingly
-* @param instName :: [input] The name of the instrument to set to
-*/
+ * the polarisation corrections option in the view accordingly
+ * @param instName :: [input] The name of the instrument to set to
+ */
 void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_currentInstrumentName = instName;
   bool enable = instName != "INTER" && instName != "SURF";
@@ -220,12 +220,17 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
   if (m_view->experimentSettingsEnabled()) {
     addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
-    addIfNotEmpty(options, "Rho", m_view->getCRho());
-    addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
-    addIfNotEmpty(options, "Ap", m_view->getCAp());
-    addIfNotEmpty(options, "Pp", m_view->getCPp());
-    addIfNotEmpty(options, "PolarizationAnalysis",
-                  m_view->getPolarisationCorrections());
+    auto const pa = m_view->getPolarisationCorrections();
+    addIfNotEmpty(options, "PolarizationAnalysis", pa);
+    if (pa == "PA") {
+      addIfNotEmpty(options, "Rho", m_view->getCRho());
+      addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    } else if (pa == "PNR") {
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    }
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
@@ -235,6 +240,8 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
 
+    setTransmissionOption(options, "Debug",
+                          asAlgorithmPropertyBool(m_view->getDebugOption()));
     auto const includePartialBins =
         asAlgorithmPropertyBool(m_view->getIncludePartialBins());
     options["IncludePartialBins"] = includePartialBins;
@@ -294,10 +301,10 @@ bool ReflSettingsPresenter::hasPerAngleOptions() const {
 }
 
 /** Gets the default user-specified transmission runs from the view. Default
-* runs are those without an angle (i.e. the angle is blank)
-* @return :: the transmission run(s) as a string of comma-separated values
-* @throws :: if the settings the user entered are invalid
-*/
+ * runs are those without an angle (i.e. the angle is blank)
+ * @return :: the transmission run(s) as a string of comma-separated values
+ * @throws :: if the settings the user entered are invalid
+ */
 OptionsQMap ReflSettingsPresenter::getDefaultOptions() const {
   if (!m_view->experimentSettingsEnabled())
     return OptionsQMap();
@@ -323,9 +330,9 @@ OptionsQMap ReflSettingsPresenter::getDefaultOptions() const {
 }
 
 /** Gets the user-specified transmission runs from the view
-* @param angleToFind :: the run angle that transmission runs are valid for
-* @return :: the transmission run(s) as a string of comma-separated values
-*/
+ * @param angleToFind :: the run angle that transmission runs are valid for
+ * @return :: the transmission run(s) as a string of comma-separated values
+ */
 OptionsQMap
 ReflSettingsPresenter::getOptionsForAngle(const double angleToFind) const {
   OptionsQMap result;
@@ -382,7 +389,7 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
 }
 
 /** Creates hints for 'Stitch1DMany'
-*/
+ */
 void ReflSettingsPresenter::createStitchHints() {
 
   // The algorithm
@@ -394,7 +401,7 @@ void ReflSettingsPresenter::createStitchHints() {
   m_view->createStitchHints(strategy.createHints());
 }
 /** Fills experiment settings with default values
-*/
+ */
 void ReflSettingsPresenter::getExpDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
@@ -455,7 +462,7 @@ void ReflSettingsPresenter::getExpDefaults() {
 }
 
 /** Fills instrument settings with default values
-*/
+ */
 void ReflSettingsPresenter::getInstDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
@@ -493,16 +500,16 @@ void ReflSettingsPresenter::getInstDefaults() {
 }
 
 /** Generates and returns an instance of the ReflectometryReductionOneAuto
-* algorithm
-* @return :: ReflectometryReductionOneAuto algorithm
-*/
+ * algorithm
+ * @return :: ReflectometryReductionOneAuto algorithm
+ */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
   return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 }
 
 /** Creates and returns an example empty instrument given an instrument name
-* @return :: Empty instrument of a name
-*/
+ * @return :: Empty instrument of a name
+ */
 Instrument_const_sptr
 ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {
   IAlgorithm_sptr loadInst =
@@ -514,5 +521,5 @@ ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {
   MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
   return ws->getInstrument();
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

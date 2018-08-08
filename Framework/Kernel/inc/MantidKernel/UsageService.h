@@ -10,8 +10,8 @@
 #include <Poco/ActiveMethod.h>
 #include <Poco/Timer.h>
 
-#include <queue>
 #include <mutex>
+#include <queue>
 
 namespace Mantid {
 namespace Kernel {
@@ -87,6 +87,8 @@ public:
   void shutdown();
   /// gets the uptime of this mantid instance
   Types::Core::time_duration getUpTime();
+  /// Gets the start time of this mantid instance
+  Types::Core::DateAndTime getStartTime() { return m_startTime; }
 
 protected:
   /// Constructor

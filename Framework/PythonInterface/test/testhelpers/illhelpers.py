@@ -17,7 +17,6 @@ def _fillTemplateReflectometryWorkspace(ws):
     """Fill a reflectometry workspace with somewhat sane data."""
     nHistograms = ws.getNumberHistograms()
     binWidth = 57.
-    monitorCounts = 5e8
     templateXs = numpy.array(numpy.arange(-300., 55000., binWidth))
     nBins = len(templateXs) - 1
     xs = numpy.tile(templateXs, nHistograms)
@@ -203,7 +202,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
         'LogName': 'VirtualChopper.chopper1_speed_average',
@@ -213,7 +212,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
         'LogName': 'VirtualChopper.chopper2_phase_average',
@@ -222,7 +221,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
     kwargs = {
         'Workspace': ws,
         'LogName': 'VirtualChopper.open_offset',
@@ -231,7 +230,7 @@ def add_chopper_configuration_D17(ws):
         'NumberType': 'Double',
         'child': True
     }
-    run_algorithm('AddSampleLog', **kwargs)    
+    run_algorithm('AddSampleLog', **kwargs)
 
 
 def add_flipper_configuration_D17(ws, flipper1, flipper2):
@@ -377,11 +376,13 @@ def refl_rotate_detector(ws, angle):
     }
     run_algorithm('RotateInstrumentComponent', **args)
 
+
 def refl_sum_in_lambda(outputWSName, ws):
     args = {
         'InputWorkspace': ws,
         'OutputWorkspace': outputWSName,
-        'SummationType': 'SumInLambda'
+        'SummationType': 'SumInLambda',
+        'WavelengthRange': [0.1]
     }
     alg = create_algorithm('ReflectometryILLSumForeground', **args)
     alg.execute()

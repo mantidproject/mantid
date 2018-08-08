@@ -1,8 +1,8 @@
 #ifndef VATES_API_PRESENTER_UTILITIES_TEST_H_
 #define VATES_API_PRESENTER_UTILITIES_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/FactoryChains.h"
+#include <cxxtest/TestSuite.h>
 
 class PresenterUtilitiesTest : public CxxTest::TestSuite {
 public:

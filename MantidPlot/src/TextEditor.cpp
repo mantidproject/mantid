@@ -33,9 +33,9 @@
 #include <QCloseEvent>
 #include <QTextCursor>
 
+#include <qwt_scale_widget.h>
 #include <qwt_text.h>
 #include <qwt_text_label.h>
-#include <qwt_scale_widget.h>
 
 TextEditor::TextEditor(Graph *g) : QTextEdit(g), d_target(nullptr) {
   setAttribute(Qt::WA_DeleteOnClose);

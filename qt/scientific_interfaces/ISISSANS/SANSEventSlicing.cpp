@@ -1,9 +1,9 @@
 #include "SANSEventSlicing.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "ui_SANSEventSlicing.h"
-#include <QSettings>
-#include <QMessageBox>
 #include <QKeyEvent>
+#include <QMessageBox>
+#include <QSettings>
 #include <QTextStream>
 #include <stdexcept>
 
@@ -15,7 +15,7 @@ using namespace MantidQt::CustomInterfaces;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("SANSEventSlicing");
-}
+} // namespace
 
 SANSEventSlicing::SANSEventSlicing(QWidget *parent) : UserSubWindow(parent) {
   setWindowFlags(windowFlags() | Qt::Dialog); //| Qt::Popup);

@@ -22,34 +22,42 @@ const static std::string BEAM_CENTRE{"BeamCentre"};
 const static std::string INPUT_WS{"InputWorkspace"};
 const static std::string IS_FLAT_SAMPLE{"FlatSample"};
 const static std::string OUTPUT_WS{"OutputWorkspace"};
-const static std::string WAVELENGTH_MAX{"WavelengthMax"};
-const static std::string WAVELENGTH_MIN{"WavelengthMin"};
+const static std::string PARTIAL_BINS{"IncludePartialBins"};
+} // namespace Prop
+
+/**
+ * Project a wavelength to given reference angle by keeping the momentum
+ * transfer constant.
+ * @param wavelength the wavelength to project
+ * @param twoTheta a 2theta angle
+ * @param refAngles the reference angles for the projection
+ * @return a projected wavelength
+ */
+double projectToReference(
+    const double wavelength, const double twoTheta,
+    const Mantid::Algorithms::ReflectometrySumInQ::Angles &refAngles) {
+  return wavelength * std::sin(refAngles.delta) /
+         std::sin(twoTheta - refAngles.horizon);
 }
 
 /**
-* Share the given input counts into the output array bins proportionally
-* according to how much the bins overlap the given lambda range.
-* outputX.size() must equal to outputY.size() + 1
-*
-* @param inputCounts [in] :: the input counts to share out
-* @param inputErr [in] :: the input errors to share out
-* @param lambdaRange [in] :: the width of the input in virtual lambda
-* @param IvsLam [in,out] :: the output workspace
-* @param outputE [in,out] :: the projected E values
-*/
+ * Share the given input counts into the output array bins proportionally
+ * according to how much the bins overlap the given lambda range.
+ * outputX.size() must equal to outputY.size() + 1
+ *
+ * @param inputCounts [in] :: the input counts to share out
+ * @param inputErr [in] :: the input errors to share out
+ * @param lambdaRange [in] :: the width of the input in virtual lambda
+ * @param IvsLam [in,out] :: the output workspace
+ * @param outputE [in,out] :: the projected E values
+ */
 void shareCounts(
     const double inputCounts, const double inputErr,
     const Mantid::Algorithms::ReflectometrySumInQ::MinMax &lambdaRange,
     Mantid::API::MatrixWorkspace &IvsLam, std::vector<double> &outputE) {
   // Check that we have histogram data
-  const auto &outputX = IvsLam.dataX(0);
-  auto &outputY = IvsLam.dataY(0);
-  if (outputX.size() != outputY.size() + 1) {
-    throw std::runtime_error(
-        "Expected output array to be histogram data (got X len=" +
-        std::to_string(outputX.size()) + ", Y len=" +
-        std::to_string(outputY.size()) + ")");
-  }
+  const auto &outputX = IvsLam.x(0);
+  auto &outputY = IvsLam.mutableY(0);
 
   const double totalWidth = lambdaRange.max - lambdaRange.min;
 
@@ -93,12 +101,12 @@ void shareCounts(
 }
 
 /**
-* Return the angular 2theta width of a pixel.
-*
-* @param wsIndex [in] :: a workspace index to spectrumInfo
-* @param spectrumInfo [in] :: a spectrum info structure
-* @return :: the pixel's angular width in radians
-*/
+ * Return the angular 2theta width of a pixel.
+ *
+ * @param wsIndex [in] :: a workspace index to spectrumInfo
+ * @param spectrumInfo [in] :: a spectrum info structure
+ * @return :: the pixel's angular width in radians
+ */
 Mantid::Algorithms::ReflectometrySumInQ::MinMax
 twoThetaWidth(const size_t wsIndex,
               const Mantid::API::SpectrumInfo &spectrumInfo) {
@@ -129,29 +137,28 @@ twoThetaWidth(const size_t wsIndex,
   }
   return range;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
 
 /**
-* Construct a new MinMax object.
-* The minimum of the arguments is assigned to the `min` field and
-* maximum to the `max` field.
-*
-* @param a [in] :: a number
-* @param b [in] :: a number
-**/
+ * Construct a new MinMax object.
+ * The minimum of the arguments is assigned to the `min` field and
+ * maximum to the `max` field.
+ *
+ * @param a [in] :: a number
+ * @param b [in] :: a number
+ **/
 ReflectometrySumInQ::MinMax::MinMax(const double a, const double b) noexcept
-    : min(std::min(a, b)),
-      max(std::max(a, b)) {}
+    : min(std::min(a, b)), max(std::max(a, b)) {}
 
 /**
-* Set the `min` and `max` fields if `a` is smaller than `min` and/or
-* geater than `max`.
-*
-* @param a [in] :: a number
-*/
+ * Set the `min` and `max` fields if `a` is smaller than `min` and/or
+ * geater than `max`.
+ *
+ * @param a [in] :: a number
+ */
 void ReflectometrySumInQ::MinMax::testAndSet(const double a) noexcept {
   if (a < min) {
     min = a;
@@ -159,6 +166,24 @@ void ReflectometrySumInQ::MinMax::testAndSet(const double a) noexcept {
   if (a > max) {
     max = a;
   }
+}
+
+/**
+ * Set the `max` field if `a` is geater than `max`.
+ *
+ * @param a [in] :: a number
+ */
+void ReflectometrySumInQ::MinMax::testAndSetMax(const double a) noexcept {
+  max = std::max(max, a);
+}
+
+/**
+ * Set the `min` field if `a` is smaller than `min`.
+ *
+ * @param a [in] :: a number
+ */
+void ReflectometrySumInQ::MinMax::testAndSetMin(const double a) noexcept {
+  min = std::min(min, a);
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -216,13 +241,12 @@ void ReflectometrySumInQ::init() {
   declareProperty(
       Prop::BEAM_CENTRE, EMPTY_INT(), mandatoryNonnegativeInt,
       "Fractional workspace index of the specular reflection centre.");
-  declareProperty(Prop::WAVELENGTH_MIN, EMPTY_DBL(), mandatoryNonnegativeDouble,
-                  "Minimum wavelength in Angstroms.");
-  declareProperty(Prop::WAVELENGTH_MAX, EMPTY_DBL(), mandatoryNonnegativeDouble,
-                  "Maximum wavelength in Angstroms.");
   declareProperty(Prop::IS_FLAT_SAMPLE, true,
                   "If true, the summation is handled as the standard divergent "
                   "beam case, otherwise as the non-flat sample case.");
+  declareProperty(Prop::PARTIAL_BINS, false,
+                  "If true, use the full projected wavelength range possibly "
+                  "including partially filled bins.");
 }
 
 /** Execute the algorithm.
@@ -242,16 +266,20 @@ void ReflectometrySumInQ::exec() {
 /// Validate the some of the algorithm's input properties.
 std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
   std::map<std::string, std::string> issues;
-  const double wavelengthMin = getProperty(Prop::WAVELENGTH_MIN);
-  const double wavelengthMax = getProperty(Prop::WAVELENGTH_MAX);
-  if (wavelengthMin >= wavelengthMax) {
-    issues[Prop::WAVELENGTH_MIN] =
-        "Mininum wavelength cannot be greater or equal to maximum wavelength";
-  }
   API::MatrixWorkspace_sptr inWS;
   Indexing::SpectrumIndexSet indices;
-  std::tie(inWS, indices) =
-      getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
+
+  // validateInputs is called on the individual workspaces when the algorithm
+  // is executed, it but may get called on a group from AlgorithmDialog. This
+  // isn't handled in getWorkspaceAndIndices. We should fix this properly but
+  // for now skip validation for groups to avoid an exception. See #22933
+  try {
+    std::tie(inWS, indices) =
+        getWorkspaceAndIndices<API::MatrixWorkspace>(Prop::INPUT_WS);
+  } catch (std::runtime_error &) {
+    return issues;
+  }
+
   const auto &spectrumInfo = inWS->spectrumInfo();
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   bool beamCentreFound{false};
@@ -277,13 +305,13 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
 }
 
 /**
-* Construct an "empty" output workspace in virtual-lambda for summation in Q.
-*
-* @param detectorWS [in] :: the input workspace
-* @param indices [in] :: the workspace indices of the foreground histograms
-* @param refAngles [in] :: the reference angles
-* @return :: a 1D workspace where y values are all zero
-*/
+ * Construct an "empty" output workspace in virtual-lambda for summation in Q.
+ *
+ * @param detectorWS [in] :: the input workspace
+ * @param indices [in] :: the workspace indices of the foreground histograms
+ * @param refAngles [in] :: the reference angles
+ * @return :: a 1D workspace where y values are all zero
+ */
 API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
     const API::MatrixWorkspace &detectorWS,
     const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
@@ -309,7 +337,6 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
   const HistogramData::Histogram modelHistogram(std::move(bins),
                                                 std::move(counts));
   // Create the output workspace
-
   API::MatrixWorkspace_sptr outputWS =
       DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1,
                                                     std::move(modelHistogram));
@@ -325,77 +352,71 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(
 }
 
 /**
-* Return the wavelength range of the output histogram.
-* @param detectorWS [in] :: the input workspace
-* @param indices [in] :: the workspace indices of foreground histograms
-* @param refAngles [in] :: the reference angles
-* @return :: the minimum and maximum virtual wavelengths
-*/
+ * Return the wavelength range of the output histogram.
+ * @param detectorWS [in] :: the input workspace
+ * @param indices [in] :: the workspace indices of foreground histograms
+ * @param refAngles [in] :: the reference angles
+ * @return :: the minimum and maximum virtual wavelengths
+ */
 ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
     const API::MatrixWorkspace &detectorWS,
     const Indexing::SpectrumIndexSet &indices, const Angles &refAngles) {
-  const double lambdaMin = getProperty(Prop::WAVELENGTH_MIN);
-  const double lambdaMax = getProperty(Prop::WAVELENGTH_MAX);
   const API::SpectrumInfo &spectrumInfo = detectorWS.spectrumInfo();
   // Get the new max and min X values of the projected (virtual) lambda range
-
+  const bool includePartialBins = getProperty(Prop::PARTIAL_BINS);
   // Find minimum and maximum 2thetas and the corresponding indices.
   // It cannot be assumed that 2theta increases with indices, check for example
   // D17 at ILL
-  std::pair<size_t, double> twoThetaMin{0, std::numeric_limits<double>::max()};
-  std::pair<size_t, double> twoThetaMax{0,
-                                        std::numeric_limits<double>::lowest()};
+  MinMax inputLambdaRange;
+  MinMax inputTwoThetaRange;
   for (const auto i : indices) {
-    const auto twoTheta = spectrumInfo.signedTwoTheta(i);
-    if (twoTheta < twoThetaMin.second) {
-      twoThetaMin.first = i;
-      twoThetaMin.second = twoTheta;
+    const auto twoThetas = twoThetaWidth(i, spectrumInfo);
+    inputTwoThetaRange.testAndSetMin(includePartialBins ? twoThetas.min
+                                                        : twoThetas.max);
+    inputTwoThetaRange.testAndSetMax(includePartialBins ? twoThetas.max
+                                                        : twoThetas.min);
+    const auto &edges = detectorWS.binEdges(i);
+    for (size_t xIndex = 0; xIndex < edges.size(); ++xIndex) {
+      // It is common for the wavelength to have negative values at ILL.
+      const auto x = edges[xIndex + (includePartialBins ? 0 : 1)];
+      if (x > 0.) {
+        inputLambdaRange.testAndSet(x);
+        break;
+      }
     }
-    if (twoTheta > twoThetaMax.second) {
-      twoThetaMax.first = i;
-      twoThetaMax.second = twoTheta;
+    if (includePartialBins) {
+      inputLambdaRange.testAndSet(edges.back());
+    } else {
+      inputLambdaRange.testAndSet(edges[edges.size() - 2]);
     }
   }
 
-  MinMax wavelengthRange;
-  const auto twoThetaMinRange = twoThetaWidth(twoThetaMin.first, spectrumInfo);
-  // For bLambda, use the average bin size for this spectrum
-  const auto minThetaEdges = detectorWS.binEdges(twoThetaMin.first);
-  double bLambda =
-      (minThetaEdges[minThetaEdges.size() - 1] - minThetaEdges[0]) /
-      static_cast<int>(minThetaEdges.size());
-  MinMax lambdaRange(lambdaMax - bLambda / 2., lambdaMax + bLambda / 2.);
-  auto r = projectedLambdaRange(lambdaRange, twoThetaMinRange, refAngles);
-  wavelengthRange.max = r.max;
-  const auto twoThetaMaxRange = twoThetaWidth(twoThetaMax.first, spectrumInfo);
-  const auto maxThetaEdges = detectorWS.binEdges(twoThetaMax.first);
-  bLambda = (maxThetaEdges[maxThetaEdges.size() - 1] - maxThetaEdges[0]) /
-            static_cast<int>(maxThetaEdges.size());
-  lambdaRange.min = lambdaMin - bLambda / 2.;
-  lambdaRange.max = lambdaMin + bLambda / 2.;
-  r = projectedLambdaRange(lambdaRange, twoThetaMaxRange, refAngles);
-  wavelengthRange.min = r.min;
-  if (wavelengthRange.min > wavelengthRange.max) {
+  MinMax outputLambdaRange;
+  outputLambdaRange.min = projectToReference(inputLambdaRange.min,
+                                             inputTwoThetaRange.max, refAngles);
+  outputLambdaRange.max = projectToReference(inputLambdaRange.max,
+                                             inputTwoThetaRange.min, refAngles);
+  if (outputLambdaRange.min > outputLambdaRange.max) {
     throw std::runtime_error(
         "Error projecting lambda range to reference line; projected range (" +
-        std::to_string(wavelengthRange.min) + "," +
-        std::to_string(wavelengthRange.max) + ") is negative.");
+        std::to_string(outputLambdaRange.min) + "," +
+        std::to_string(outputLambdaRange.max) + ") is negative.");
   }
-  return wavelengthRange;
+  return outputLambdaRange;
 }
 
 /**
-* Share counts from an input value onto the projected output in virtual-lambda
-*
-* @param inputIdx [in] :: the index of the input histogram
-* @param twoThetaRange [in] :: the 2theta width of the pixel
-* @param refAngles [in] :: the reference 2theta angles
-* @param inputX [in] :: the input spectrum X values
-* @param inputY [in] :: the input spectrum Y values
-* @param inputE [in] :: the input spectrum E values
-* @param IvsLam [in,out] :: the output workspace
-* @param outputE [in,out] :: the projected E values
-*/
+ * Share counts from an input value onto the projected output in virtual-lambda
+ *
+ * @param inputIdx [in] :: the index of the input histogram
+ * @param twoThetaRange [in] :: the 2theta width of the pixel
+ * @param refAngles [in] :: the reference 2theta angles
+ * @param inputX [in] :: the input spectrum X values
+ * @param inputY [in] :: the input spectrum Y values
+ * @param inputE [in] :: the input spectrum E values
+ * @param IvsLam [in,out] :: the output workspace
+ * @param outputE [in,out] :: the projected E values
+ */
 void ReflectometrySumInQ::processValue(
     const int inputIdx, const MinMax &twoThetaRange, const Angles &refAngles,
     const HistogramData::BinEdges &edges, const HistogramData::Counts &counts,
@@ -404,7 +425,7 @@ void ReflectometrySumInQ::processValue(
 
   // Check whether there are any counts (if not, nothing to share)
   const double inputCounts = counts[inputIdx];
-  if (inputCounts <= 0.0 || std::isnan(inputCounts) ||
+  if (edges[inputIdx] < 0. || inputCounts <= 0.0 || std::isnan(inputCounts) ||
       std::isinf(inputCounts)) {
     return;
   }
@@ -418,20 +439,20 @@ void ReflectometrySumInQ::processValue(
 }
 
 /**
-* Project an input pixel onto an arbitrary reference line at a reference angle.
-* The projection is done along lines of constant Q, which emanate from the
-* horizon angle at wavelength = 0. The top-left and bottom-right corners of
-* the pixel are projected, resulting in an output range in "virtual" lambda.
-*
-* For a description of this projection, see:
-*   R. Cubitt, T. Saerbeck, R.A. Campbell, R. Barker, P. Gutfreund
-*   J. Appl. Crystallogr., 48 (6) (2015)
-*
-* @param wavelengthRange [in] :: the bin edges of the input bin
-* @param twoThetaRange [in] :: the 2theta width of the pixel
-* @param refAngles [in] :: the reference angles
-* @return :: the projected wavelength range
-*/
+ * Project an input pixel onto an arbitrary reference line at a reference angle.
+ * The projection is done along lines of constant Q, which emanate from the
+ * horizon angle at wavelength = 0. The top-left and bottom-right corners of
+ * the pixel are projected, resulting in an output range in "virtual" lambda.
+ *
+ * For a description of this projection, see:
+ *   R. Cubitt, T. Saerbeck, R.A. Campbell, R. Barker, P. Gutfreund
+ *   J. Appl. Crystallogr., 48 (6) (2015)
+ *
+ * @param wavelengthRange [in] :: the bin edges of the input bin
+ * @param twoThetaRange [in] :: the 2theta width of the pixel
+ * @param refAngles [in] :: the reference angles
+ * @return :: the projected wavelength range
+ */
 ReflectometrySumInQ::MinMax
 ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
                                           const MinMax &twoThetaRange,
@@ -440,19 +461,19 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
   // We cannot project pixels below the horizon angle
   if (twoThetaRange.min <= refAngles.horizon) {
     const auto twoTheta = (twoThetaRange.min + twoThetaRange.max) / 2.;
-    throw std::runtime_error("Cannot process twoTheta=" +
-                             std::to_string(twoTheta * 180.0 / M_PI) +
-                             " as it is below the horizon angle=" +
-                             std::to_string(refAngles.horizon * 180.0 / M_PI));
+    throw std::runtime_error(
+        "Cannot process twoTheta=" + std::to_string(twoTheta * 180.0 / M_PI) +
+        " as it is below the horizon angle=" +
+        std::to_string(refAngles.horizon * 180.0 / M_PI));
   }
 
   // Calculate the projected wavelength range
   MinMax range;
   try {
-    const double lambdaTop = wavelengthRange.max * std::sin(refAngles.delta) /
-                             std::sin(twoThetaRange.min - refAngles.horizon);
-    const double lambdaBot = wavelengthRange.min * std::sin(refAngles.delta) /
-                             std::sin(twoThetaRange.max - refAngles.horizon);
+    const double lambdaTop =
+        projectToReference(wavelengthRange.max, twoThetaRange.min, refAngles);
+    const double lambdaBot =
+        projectToReference(wavelengthRange.min, twoThetaRange.max, refAngles);
     range.testAndSet(lambdaBot);
     range.testAndSet(lambdaTop);
   } catch (std::exception &ex) {
@@ -467,17 +488,17 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
 }
 
 /**
-* Return the reference 2theta angle and the corresponding horizon angle.
-*
-* @param spectrumInfo [in] :: a spectrum info of the input workspace.
-* @return :: the reference angle struct
-*/
+ * Return the reference 2theta angle and the corresponding horizon angle.
+ *
+ * @param spectrumInfo [in] :: a spectrum info of the input workspace.
+ * @return :: the reference angle struct
+ */
 ReflectometrySumInQ::Angles
 ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   Angles a;
   const int beamCentre = getProperty(Prop::BEAM_CENTRE);
   const double centreTwoTheta =
-      spectrumInfo.signedTwoTheta(static_cast<size_t>(beamCentre));
+      spectrumInfo.twoTheta(static_cast<size_t>(beamCentre));
   const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
   if (isFlat) {
     a.horizon = centreTwoTheta / 2.;
@@ -490,13 +511,13 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
 }
 
 /**
-* Sum counts from the input workspace in lambda along lines of constant Q by
-* projecting to "virtual lambda" at a reference angle.
-*
-* @param detectorWS [in] :: the input workspace in wavelength
-* @param indices [in] :: an index set defining the foreground histograms
-* @return :: the single histogram output workspace in wavelength
-*/
+ * Sum counts from the input workspace in lambda along lines of constant Q by
+ * projecting to "virtual lambda" at a reference angle.
+ *
+ * @param detectorWS [in] :: the input workspace in wavelength
+ * @param indices [in] :: an index set defining the foreground histograms
+ * @return :: the single histogram output workspace in wavelength
+ */
 API::MatrixWorkspace_sptr
 ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
                             const Indexing::SpectrumIndexSet &indices) {

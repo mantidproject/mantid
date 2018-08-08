@@ -25,5 +25,5 @@ void XorMD::execHistoHisto(
   out->operator^=(*operand);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

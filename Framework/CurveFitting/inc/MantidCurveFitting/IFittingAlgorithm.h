@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
 #define MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 

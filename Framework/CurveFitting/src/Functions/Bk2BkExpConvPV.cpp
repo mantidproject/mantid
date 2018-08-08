@@ -1,8 +1,8 @@
 #include <cmath>
 
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/FunctionFactory.h"
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -20,7 +20,7 @@ using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("Bk2BkExpConvPV");
-}
+} // namespace
 
 DECLARE_FUNCTION(Bk2BkExpConvPV)
 
@@ -41,18 +41,18 @@ void Bk2BkExpConvPV::init() {
 }
 
 /** Set peak height
-  */
+ */
 void Bk2BkExpConvPV::setHeight(const double h) { setParameter("Height", h); }
 
 /** Get peak height
-  */
+ */
 double Bk2BkExpConvPV::height() const {
   double height = this->getParameter("Height");
   return height;
 }
 
 /** Get peak's FWHM
-  */
+ */
 double Bk2BkExpConvPV::fwhm() const {
   double sigma2 = this->getParameter("Sigma2");
   double gamma = this->getParameter("Gamma");
@@ -63,19 +63,19 @@ double Bk2BkExpConvPV::fwhm() const {
 }
 
 /** Set FWHM
-  * It is an illegal operation of this type of peak
-  */
+ * It is an illegal operation of this type of peak
+ */
 void Bk2BkExpConvPV::setFwhm(const double w) {
   UNUSED_ARG(w);
   throw std::invalid_argument("Bk2BkExpConvPV is not allowed to set FWHM.");
 }
 
 /** Set peak center
-  */
+ */
 void Bk2BkExpConvPV::setCentre(const double c) { setParameter("TOF_h", c); }
 
 /** Center
-  */
+ */
 double Bk2BkExpConvPV::centre() const {
   double tofh = getParameter("TOF_h");
 
@@ -118,7 +118,7 @@ void Bk2BkExpConvPV::functionLocal(double *out, const double *xValues,
 }
 
 /** Local derivative
-  */
+ */
 void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian *, const double *,
                                         const size_t) {
   throw Mantid::Kernel::Exception::NotImplementedError(
@@ -126,7 +126,7 @@ void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian *, const double *,
 }
 
 /** Numerical derivative
-  */
+ */
 void Bk2BkExpConvPV::functionDeriv(const API::FunctionDomain &domain,
                                    API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
@@ -239,6 +239,6 @@ void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double &H,
   }
 }
 
-} // namespace Mantid
 } // namespace Functions
 } // namespace CurveFitting
+} // namespace Mantid

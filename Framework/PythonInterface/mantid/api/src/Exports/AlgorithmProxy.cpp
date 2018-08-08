@@ -3,8 +3,8 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>

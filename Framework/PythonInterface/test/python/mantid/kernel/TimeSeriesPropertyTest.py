@@ -95,5 +95,15 @@ class TimeSeriesPropertyTest(unittest.TestCase):
         self.assertTrue(isinstance(values, values_type))
         self.assertEquals(log.size(), len(values))
 
+        # check the statistics
+        stats = log.getStatistics()
+        self.assertTrue(hasattr(stats, 'mean'))
+        self.assertTrue(hasattr(stats, 'median'))
+        self.assertTrue(hasattr(stats, 'minimum'))
+        self.assertTrue(hasattr(stats, 'maximum'))
+        self.assertTrue(hasattr(stats, 'standard_deviation'))
+        self.assertTrue(hasattr(stats, 'time_mean'))
+        self.assertTrue(hasattr(stats, 'time_standard_deviation'))
+
 if __name__ == '__main__':
     unittest.main()

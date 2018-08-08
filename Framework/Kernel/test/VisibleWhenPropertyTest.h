@@ -1,12 +1,12 @@
 #ifndef MANTID_KERNEL_VISIBLEWHENPROPERTYTEST_H_
 #define MANTID_KERNEL_VISIBLEWHENPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/PropertyManagerOwner.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

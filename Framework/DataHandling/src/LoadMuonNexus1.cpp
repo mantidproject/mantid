@@ -23,8 +23,10 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/shared_ptr.hpp>
@@ -52,12 +54,12 @@ using HistogramData::Counts;
 LoadMuonNexus1::LoadMuonNexus1() : LoadMuonNexus() {}
 
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw Exception::FileError If the Nexus file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *  the output workspace
+ *
+ *  @throw Exception::FileError If the Nexus file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadMuonNexus1::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -498,8 +500,9 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
         } else {
           // User selected an entry number
           for (auto &spec : specToLoad) {
-            int index = spec - 1 + static_cast<int>((m_entrynumber - 1) *
-                                                    m_numberOfSpectra);
+            int index =
+                spec - 1 +
+                static_cast<int>((m_entrynumber - 1) * m_numberOfSpectra);
             grouping.emplace_back(groupingData[index]);
           }
         }
@@ -641,14 +644,14 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
 }
 
 /** Load in a single spectrum taken from a NeXus file
-*  @param hist ::     The workspace index
-*  @param i ::        The spectrum number
-*  @param specNo ::   The spectrum number
-*  @param nxload ::   A reference to the MuonNeXusReader object
-*  @param lengthIn :: The number of elements in a spectrum
-*  @param localWorkspace :: A pointer to the workspace in which the data will be
-* stored
-*/
+ *  @param hist ::     The workspace index
+ *  @param i ::        The spectrum number
+ *  @param specNo ::   The spectrum number
+ *  @param nxload ::   A reference to the MuonNeXusReader object
+ *  @param lengthIn :: The number of elements in a spectrum
+ *  @param localWorkspace :: A pointer to the workspace in which the data will
+ * be stored
+ */
 void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
                               MuonNexusReader &nxload, const int64_t lengthIn,
                               DataObjects::Workspace2D_sptr localWorkspace) {
@@ -675,8 +678,8 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
 }
 
 /**  Log the run details from the file
-* @param localWorkspace :: The workspace details to use
-*/
+ * @param localWorkspace :: The workspace details to use
+ */
 void LoadMuonNexus1::loadRunDetails(
     DataObjects::Workspace2D_sptr localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();

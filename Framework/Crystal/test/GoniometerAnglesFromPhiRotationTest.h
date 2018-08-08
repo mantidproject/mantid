@@ -10,26 +10,26 @@
 
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
+#include "GoniometerAnglesFromPhiRotationTest.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "GoniometerAnglesFromPhiRotationTest.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
-using Mantid::Crystal::LoadIsawPeaks;
-using Mantid::DataObjects::PeaksWorkspace_sptr;
-using Mantid::API::AlgorithmFactory;
 using Mantid::API::Algorithm;
+using Mantid::API::AlgorithmFactory;
 using Mantid::API::FrameworkManager;
 using Mantid::Crystal::GoniometerAnglesFromPhiRotation;
+using Mantid::Crystal::LoadIsawPeaks;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 class GoniometerAnglesFromPhiRotationTest : public CxxTest::TestSuite {
 public:

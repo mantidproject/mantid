@@ -1,8 +1,9 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidKernel/V3D.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
 #include <boost/shared_ptr.hpp>
 
@@ -10,12 +11,12 @@ namespace Mantid {
 namespace Geometry {
 // Forward dec.
 class IPeak;
-}
+} // namespace Geometry
 namespace API {
 // Forward dec.
 class IPeaksWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -61,11 +62,12 @@ public:
   /// Same factory settings for a different peaks workspace
   virtual void swapPeaksWorkspace(
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) = 0;
+  virtual void getNonOrthogonalInfo(NonOrthogonalAxis &info) = 0;
 };
 
 /// Factory Shared Pointer typedef.
 using PeakOverlayViewFactory_sptr = boost::shared_ptr<PeakOverlayViewFactory>;
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_ */

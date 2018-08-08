@@ -6,8 +6,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 
-#include <QWidget>
 #include <QMap>
+#include <QWidget>
 
 #include <boost/optional.hpp>
 
@@ -38,8 +38,8 @@ namespace API {
 class CompositeFunction;
 class Workspace;
 class ParameterTie;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -120,6 +120,7 @@ public:
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
+  void setGlobalParameters(QStringList &globals);
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets
@@ -441,8 +442,8 @@ protected:
   friend class SetAttributeFromProperty;
 };
 
-} // MantidWidgets
+} // namespace MantidWidgets
 
-} // MantidQt
+} // namespace MantidQt
 
 #endif /*MANTIDWIDGETS_FUNCTIONBROWSER_H_*/

@@ -18,8 +18,8 @@ enum ScaleType { Linear = 0, Log10, Power };
 enum Axis { Left, Right, Bottom, Top };
 
 /**
-* Graph curve type
-*/
+ * Graph curve type
+ */
 enum CurveType {
   Unspecified = -1,
   Line,
@@ -46,6 +46,6 @@ enum CurveType {
   ImagePlot,
   User
 };
-}
+} // namespace GraphOptions
 
 #endif // MANTIDSCALETYPE_H_

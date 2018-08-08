@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_IMPORTMDHISTOWORKSPACEBASE_H_
 #define MANTID_MDALGORITHMS_IMPORTMDHISTOWORKSPACEBASE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {

@@ -93,7 +93,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_INTEGRATION_H_*/

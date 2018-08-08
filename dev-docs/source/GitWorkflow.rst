@@ -85,7 +85,7 @@ When creating a pull request you should:
 
   - The title should **not** contain the issue number
 - `Reference the issue which the pull request is closing  <https://github.com/blog/1506-closing-issues-via-pull-requests>`_, using one of `these <https://help.github.com/articles/closing-issues-via-commit-messages>`_ keywords
-- State the user and facility (if relevant) who initiated the original issue, if they are named in the issue. Please do not put full email addresses on the Pull Request, as it is publicly accessible. 
+- State the user and facility (if relevant) who initiated the original issue, if they are named in the issue. Please do not put full email addresses on the Pull Request, as it is publicly accessible.
   If the user would not be easily identified by someone picking up the ticket, be prepared to act as a point of contact with the reporter.
 - Ensure the description follows the format described by the `PR
   template
@@ -128,8 +128,7 @@ Code Freeze
 ^^^^^^^^^^^
 
 At the start of a *code freeze* before a major release there will be a
-release branch created with the name ``release-vX.Y``, where ``X.Y``
-are the major and minor version numbers, respectively. At this point
+release branch created named ``release-next``. At this point
 only bugfixes should be applied to this release branch so that it can
 be stabilized for the release. The release branch will be merged to
 ``master`` periodically so bugfixes do not need to be separately
@@ -143,15 +142,15 @@ created from the correct base branch depending on the scope of the
 changes:
 
 - ``master``: maintenance fixes, new features. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/master``
-- ``release-vX.Y``: bugfixes. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/release-X.Y``
+- ``release-next``: bugfixes. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/release-next``
 
 Pull Requests
 -------------
 
-Open pull requests as normal to ask to merge your branch with its
-intended target.
+To merge code with the release branch open a pull request as usual but instead of using the
+default merge target select ``release-next``:
 
-.. image:: images/CodeFreezePR.png
+.. image:: images/release-branch-new-pr.png
 
 Fixing a PR with an Incorrect Base Branch
 -----------------------------------------
@@ -168,14 +167,14 @@ been based off the ``master`` branch as follows::
       |           \
       |            o---o---o  topic
        \
-        o---o---o---o---o  release
+        o---o---o---o---o  release-next
 
-where we actually want the ``topic`` branch based off ``release``
+where we actually want the ``topic`` branch based off ``release-next``
 instead i.e. ::
 
    o---o---o---o---o  master
        \
-        o---o---o---o---o  release
+        o---o---o---o---o  release-next
                                 \
                                  o'---o'---o'  topic
 
@@ -185,4 +184,4 @@ To fix this situation we use the ``rebase`` command, providing the
 .. code-block:: bash
 
     git fetch
-    git rebase --onto origin/release origin/master topic
+    git rebase --onto origin/release-next origin/master topic

@@ -1,6 +1,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
+#include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
@@ -10,6 +10,7 @@
 #include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <boost/python/tuple.hpp>
 
 using Mantid::Kernel::Property;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -76,22 +77,24 @@ template <> std::string dtype(TimeSeriesProperty<std::string> &self) {
       #Prefix "TimeSeriesProperty",                                            \
       init<const std::string &>((arg("self"), arg("value"))))                  \
       .add_property(                                                           \
-           "value",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,      \
-               return_value_policy<VectorToNumpy>()))                          \
+          "value",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector,       \
+              return_value_policy<VectorToNumpy>()))                           \
       .add_property(                                                           \
-           "times",                                                            \
-           make_function(                                                      \
-               &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,       \
-               return_value_policy<VectorToNumpy>()))                          \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const DateAndTime &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+          "times",                                                             \
+          make_function(                                                       \
+              &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector,        \
+              return_value_policy<VectorToNumpy>()))                           \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
-      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(                    \
-                           const std::string &, const TYPE)) &                 \
-                           TimeSeriesProperty<TYPE>::addValue,                 \
+      .def("addValue",                                                         \
+           (void (TimeSeriesProperty<TYPE>::*)(const std::string &,            \
+                                               const TYPE)) &                  \
+               TimeSeriesProperty<TYPE>::addValue,                             \
            (arg("self"), arg("time"), arg("value")))                           \
       .def("addValue", &addPyTimeValue<TYPE>,                                  \
            (arg("self"), arg("time"), arg("value")))                           \
@@ -147,8 +150,13 @@ void export_TimeSeriesPropertyStatistics() {
       .add_property("median",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::median)
       .add_property(
-           "standard_deviation",
-           &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+          "standard_deviation",
+          &Mantid::Kernel::TimeSeriesPropertyStatistics::standard_deviation)
+      .add_property("time_mean",
+                    &Mantid::Kernel::TimeSeriesPropertyStatistics::time_mean)
+      .add_property("time_standard_deviation",
+                    &Mantid::Kernel::TimeSeriesPropertyStatistics::
+                        time_standard_deviation)
       .add_property("duration",
                     &Mantid::Kernel::TimeSeriesPropertyStatistics::duration);
 }

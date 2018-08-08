@@ -103,15 +103,18 @@ Usage
    reflectivity = ReflectometrySumInQ(
        InputWorkspace=reflected,
        InputWorkspaceIndexSet=[4, 5],
-       BeamCentre=4,
-       WavelengthMin=0.1,
-       WavelengthMax=19.)
+       BeamCentre=4)
+
+   reflectivity = CropWorkspace(
+       reflectivity,
+       XMin=0.1, XMax=19.)
 
    fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
    axes.plot(reflectivity)
    axes.set_ylabel('"Reflectivity"')
    # Uncomment to show the plot window.
    #fig.show()
+   mtd.clear()
 
 References
 ----------

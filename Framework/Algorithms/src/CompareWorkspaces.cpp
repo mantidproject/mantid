@@ -44,8 +44,9 @@ void CompareWorkspaces::init() {
       "Tolerance", 0.0,
       "The maximum amount by which values may differ between the workspaces.");
 
-  declareProperty("CheckType", true, "Whether to check that the data types "
-                                     "(Workspace2D vs EventWorkspace) match.");
+  declareProperty("CheckType", true,
+                  "Whether to check that the data types "
+                  "(Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes", true, "Whether to check that the axes match.");
   declareProperty("CheckSpectraMap", true,
                   "Whether to check that the spectra-detector maps match. ");
@@ -358,7 +359,7 @@ void CompareWorkspaces::doComparison() {
 
 //------------------------------------------------------------------------------------------------
 /** Check whether 2 event lists are identical
-  */
+ */
 bool CompareWorkspaces::compareEventWorkspaces(
     const DataObjects::EventWorkspace &ews1,
     const DataObjects::EventWorkspace &ews2) {
@@ -424,9 +425,9 @@ bool CompareWorkspaces::compareEventWorkspaces(
       const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
-        g_log.information() << "Spectrum " << i
-                            << " is set to print out in details. "
-                            << "\n";
+        g_log.information()
+            << "Spectrum " << i << " is set to print out in details. "
+            << "\n";
       }
 
       if (!el1.equals(el2, toleranceTOF, toleranceWeight, tolerancePulse)) {
@@ -805,8 +806,8 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
                                     const API::Sample &sample2) {
   if (sample1.getName() != sample2.getName()) {
-    g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
-    g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
+    g_log.debug() << "WS1 sample name: \"" << sample1.getName() << "\"\n";
+    g_log.debug() << "WS2 sample name: \"" << sample2.getName() << "\"\n";
     recordMismatch("Sample name mismatch");
     return false;
   }
