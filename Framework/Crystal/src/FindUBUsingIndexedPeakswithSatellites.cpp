@@ -101,8 +101,8 @@ void FindUBUsingIndexedPeakswithSatellites::exec() {
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
+    for (const auto peak : peaks) {
+      q_vectors.push_back(peak.getQSampleFrame());
     }
     double tolerance = getProperty("Tolerance");
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);

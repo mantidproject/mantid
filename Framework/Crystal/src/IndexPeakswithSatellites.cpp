@@ -308,15 +308,18 @@ void IndexPeakswithSatellites::exec() {
             }
           }
         } else {
+          DblMatrix offsetsMat(3,3);
+          offsetsMat.setRow(0, offsets1);
+          offsetsMat.setRow(1, offsets2);
+          offsetsMat.setRow(2, offsets3);
           for (int m = -maxOrder; m <= maxOrder; m++)
             for (int n = -maxOrder; n <= maxOrder; n++)
               for (int p = -maxOrder; p <= maxOrder; p++) {
                 if (m == 0 && n == 0 && p == 0)
                   continue; // exclude 0,0,0
                 V3D hkl1(hkl);
-                hkl1[0] -= m * offsets1[0] + n * offsets2[0] + p * offsets3[0];
-                hkl1[1] -= m * offsets1[1] + n * offsets2[1] + p * offsets3[1];
-                hkl1[2] -= m * offsets1[2] + n * offsets2[2] + p * offsets3[2];
+                V3D mnp = V3D(m, n, p);
+                hkl1 -= offsetsMat * mnp;
                 if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                   peaks[i].setIntHKL(hkl1);
                   peaks[i].setIntMNP(V3D(m, n, p));
