@@ -266,6 +266,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
+	inc/MantidGeometry/Objects/InstrumentRayTracer2.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
 	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
