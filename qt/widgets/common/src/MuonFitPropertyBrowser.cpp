@@ -1215,9 +1215,6 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
       } else {
         for (auto global : globals) {
           newGlobals << global.remove(0, 9);
-		  auto fasfd = global.remove(0, 9);
-		  auto ssss = fasfd.toStdString();
-		  auto fasdsdadfs = 1;
         }
       }
       m_functionBrowser->updateMultiDatasetParameters(*func);
