@@ -216,8 +216,7 @@ class RunTabPresenter(object):
             # 5. Update the views.
             self._update_view_from_state_model()
             self._beam_centre_presenter.update_centre_positions(self._state_model)
-            import pydevd
-            pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
+
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
             self._beam_centre_presenter.on_update_rows()
@@ -424,7 +423,7 @@ class RunTabPresenter(object):
         """
         global_options = {}
 
-        # Check if should be used
+        # Check if optimizations should be used
         global_options['UseOptimizations'] = "1" if self._view.use_optimizations else "0"
 
         # Get the output mode
