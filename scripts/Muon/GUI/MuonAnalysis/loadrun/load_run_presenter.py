@@ -12,6 +12,8 @@ class LoadRunWidgetPresenter(object):
         self._model = model
         self._load_thread = None
 
+        self._load_multiple_runs = False
+
         # TODO : Replace lines below with code to get the instrument
         self._instrument = "EMU"
         self._view.set_current_instrument(self._instrument)
@@ -46,28 +48,50 @@ class LoadRunWidgetPresenter(object):
         # TODO : load the selected runs...
 
     def handle_load_current_run(self):
-
+        self._view.disable_loading()
         print("Loading current run")
         # TODO : Add instrument directory to config service
 
         current_run_file = fileUtils.get_current_run_filename(self.get_current_instrument())
 
         self._load_thread = self.create_load_thread(self._model)
-        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
-        self._load_thread.loadData(current_run_file)
+        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished_current_run)
+        self._load_thread.loadData([current_run_file])
+        self.clear_loaded_data()
         self._load_thread.start()
 
-    def handle_load_thread_finished(self):
-        self.enable_loading()
+    def handle_load_thread_finished_current_run(self):
+        self._view.enable_loading()
 
-        run = int(self._model._workspace.getRunNumber())
+        run = self._model.get_run_list()[0]
         self._model.set_loaded_runs([run])
         self.set_run_edit_from_list([run])
         self._model.current_run = run
 
+        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished_current_run)
+        self._load_thread.deleteLater()
+        self._load_thread = None
+
+    def handle_load_thread_start(self, filenames):
+        self._view.disable_loading()
+
+        self._load_thread = self.create_load_thread(self._model)
+        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
+        print("Got to here 1")
+        self._load_thread.loadData(filenames)
+        self._load_thread.start()
+
+    def handle_load_thread_finished(self):
+        self._view.enable_loading()
+
         self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
+
+        run_list = self._model.get_run_list()
+        print("Got to here 2")
+        self._model.set_loaded_runs(run_list)
+        self.set_run_edit_from_list(run_list)
 
     def disable_loading(self):
         self._view.disable_load_buttons()
@@ -91,8 +115,16 @@ class LoadRunWidgetPresenter(object):
             run_list = [runUtils.increment_run(run_list[0])]
         else:
             run_list = runUtils.increment_run_list(run_list)
+
         # TODO : implement loading of new run
-        self.set_run_edit_from_list(run_list)
+        new_run = max(run_list)
+
+        if self._load_multiple_runs == False:
+            self.clear_loaded_data()
+
+        file_name = fileUtils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+        print(file_name)
+        self.handle_load_thread_start([file_name])
 
     def handle_decrement_run(self):
         run_list = self.get_current_runs()
@@ -102,9 +134,25 @@ class LoadRunWidgetPresenter(object):
             run_list = [runUtils.decrement_run(run_list[0])]
         else:
             run_list = runUtils.decrement_run_list(run_list)
+
         # TODO : implement loading of new run
-        self.set_run_edit_from_list(run_list)
+        new_run = min(run_list)
+
+        if self._load_multiple_runs == False:
+            self.clear_loaded_data()
+
+        instr = self.get_current_instrument()
+        file_name = fileUtils.file_path_for_instrument_and_run(instr, new_run)
+        print(file_name)
+        self.handle_load_thread_start([file_name])
 
     def set_new_instrument(self):
         # TODO : implement
         pass
+
+    def clear_loaded_data(self):
+        self._view.set_run_edit_text("")
+        self._model.clear_loaded_data()
+
+    def enable_multiple_files(self, enabled):
+        self._load_multiple_runs = enabled

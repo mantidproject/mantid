@@ -1,11 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtCore, QtGui, QtWidgets
+from qtpy.QtCore import Signal
 
 import Muon.GUI.Common.run_string_utils as runUtils
 
 
 class LoadRunWidgetView(QtWidgets.QWidget):
+
+    # signals for parent widgets
+    loadingStarted = Signal()
+    loadingFinished = Signal()
 
     def __init__(self, parent=None):
         super(LoadRunWidgetView, self).__init__(parent)
@@ -68,6 +73,14 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         regex = QtCore.QRegExp(runUtils.run_string_regex)  # "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
         validator = QtGui.QRegExpValidator(regex)
         self.runEdit.setValidator(validator)
+
+    def disable_loading(self):
+        self.disable_load_buttons()
+        self.loadingStarted.emit()
+
+    def enable_loading(self):
+        self.enable_load_buttons()
+        self.loadingFinished.emit()
 
     def disable_load_buttons(self):
         self.loadCurrentRunButton.setEnabled(False)
