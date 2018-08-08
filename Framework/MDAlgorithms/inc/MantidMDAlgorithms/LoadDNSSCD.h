@@ -59,6 +59,10 @@ public:
     return "MDAlgorithms\\DataHandling";
   }
 
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadDNSLegacy", "LoadWANDSCD", "ConvertWANDSCDtoQ"};
+  }
+
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 

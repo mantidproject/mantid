@@ -17,8 +17,6 @@ This algorithm loads a list  of DNS `.d_dat` data files into a `MDEventWorkspace
 
 This algorithm is meant to replace the :ref:`algm-LoadDNSLegacy` for single crystal diffraction data.
 
-.. seealso:: :ref:`LoadDNSLegacy <algm-LoadDNSLegacy>`, :ref:`LoadWANDSCD <algm-LoadWANDSCD>` and :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ>`.
-
 **Output**
 
 As a result, two workspaces are created:
