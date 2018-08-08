@@ -304,6 +304,9 @@ if ( ENABLE_CPACK )
       # scipy
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
+      if (ENABLE_WORKBENCH)
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-qt5" )
+      endif()
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
@@ -371,6 +374,13 @@ if ( ENABLE_CPACK )
           list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3),")
           string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
           string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
+          if (ENABLE_WORKBENCH)
+            set ( APPEND DEPENDS_LIST ",python3-qt5" )
+          endif()
+        else()
+          if (ENABLE_WORKBENCH)
+            set ( APPEND DEPENDS_LIST ",pyqt5" )
+          endif()
         endif ()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
