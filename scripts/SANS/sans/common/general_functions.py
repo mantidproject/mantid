@@ -662,7 +662,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
     mask = state.mask
     if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
         if mask.phi_min and mask.phi_max and (abs(mask.phi_max - mask.phi_min) != 180.0):
-            phi_limits_as_string = 'Phi' + str(mask.phi_min) + '_' + str(mask.phi_max)
+            phi_limits_as_string = '_Phi' + str(mask.phi_min) + '_' + str(mask.phi_max)
         else:
             phi_limits_as_string = ""
     else:
@@ -721,40 +721,15 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
     user_specified_output_name_group = user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
     use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
+    # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
+    if (
+            state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
+            and user_specified_output_name:
+        use_reduction_mode_as_suffix = True
 
     # Get the standard workspace name
     workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode)
 
-    # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
-    if (state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
-            and user_specified_output_name:
-        use_reduction_mode_as_suffix = True
-
-    if multi_reduction_type and user_specified_output_name:
-        if multi_reduction_type["period"]:
-            period = state.data.sample_scatter_period
-            period_as_string = "p" + str(period)
-            user_specified_output_name = user_specified_output_name + period_as_string
-
-        if multi_reduction_type["event_slice"]:
-            slice_state = state.slice
-            start_time = slice_state.start_time
-            end_time = slice_state.end_time
-            if start_time and end_time:
-                start_time_as_string = '_t%.2f' % start_time[0]
-                end_time_as_string = '_T%.2f' % end_time[0]
-            else:
-                start_time_as_string = ""
-                end_time_as_string = ""
-            user_specified_output_name = user_specified_output_name + start_time_as_string + end_time_as_string
-
-        if multi_reduction_type["wavelength_range"]:
-            wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
-            user_specified_output_name = user_specified_output_name + wavelength_range_string
-
-    # An output name requires special attention when the workspace is part of a multi-period reduction
-    # or slice event scan
     # If user specified output name is not none then we use it for the base name
     if user_specified_output_name and not is_group:
         # Deal with single period data which has a user-specified name
@@ -782,6 +757,30 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
         elif reduction_mode is ISISReductionMode.Merged:
             output_name += "_merged"
             output_base_name += "_merged"
+
+    if multi_reduction_type and user_specified_output_name:
+        if multi_reduction_type["period"]:
+            period = state.data.sample_scatter_period
+            period_as_string = "_p" + str(period)
+            output_name += period_as_string
+
+        if multi_reduction_type["event_slice"]:
+            slice_state = state.slice
+            start_time = slice_state.start_time
+            end_time = slice_state.end_time
+            if start_time and end_time:
+                start_time_as_string = '_t%.2f' % start_time[0]
+                end_time_as_string = '_T%.2f' % end_time[0]
+            else:
+                start_time_as_string = ""
+                end_time_as_string = ""
+            output_name += start_time_as_string + end_time_as_string
+
+        if multi_reduction_type["wavelength_range"]:
+            wavelength = state.wavelength
+            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(
+                wavelength.wavelength_high[0])
+            output_name += wavelength_range_string
 
     # Add a suffix if the user has specified one
     if user_specified_output_name_suffix:
