@@ -6,16 +6,16 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
 
 using Mantid::Algorithms::MaxentSpaceComplex;
+using Mantid::Algorithms::MaxentSpaceComplex_sptr;
 using Mantid::Algorithms::MaxentSpaceReal;
+using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentTransformFourier;
 using Mantid::Algorithms::MaxentTransformMultiFourier;
-using Mantid::Algorithms::MaxentSpaceComplex_sptr;
-using Mantid::Algorithms::MaxentSpace_sptr;
 
 class MaxentTransformMultiFourierTest : public CxxTest::TestSuite {
 public:
@@ -149,8 +149,9 @@ public:
     if (result.size() == 3 * resultF.size()) {
       size_t n = resultF.size();
       for (size_t i = 0; i < n; i++) {
-        TS_ASSERT_DELTA(result[i], linearAdjustments[i - i % 2] * resultF[i] +
-                                       constAdjustments[i],
+        TS_ASSERT_DELTA(result[i],
+                        linearAdjustments[i - i % 2] * resultF[i] +
+                            constAdjustments[i],
                         1e-4);
         TS_ASSERT_DELTA(result[i + n],
                         linearAdjustments[i + n - i % 2] * resultF[i] +
@@ -212,8 +213,9 @@ public:
                               constAdjustments[i + 2 * n],
                           1e-4);
         } else { // Imaginary part
-          TS_ASSERT_DELTA(result[i], linearAdjustments[i] * resultF[i - 1] +
-                                         constAdjustments[i],
+          TS_ASSERT_DELTA(result[i],
+                          linearAdjustments[i] * resultF[i - 1] +
+                              constAdjustments[i],
                           1e-4);
           TS_ASSERT_DELTA(result[i + n],
                           linearAdjustments[i + n] * resultF[i - 1] +

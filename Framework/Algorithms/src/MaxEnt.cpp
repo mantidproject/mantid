@@ -511,8 +511,8 @@ void MaxEnt::exec() {
           (currAngle < angle)) {
 
         // it + 1 iterations have been done because we count from zero
-        g_log.information() << "Converged after " << it + 1 << " iterations"
-                            << std::endl;
+        g_log.information()
+            << "Converged after " << it + 1 << " iterations" << std::endl;
         iterationCounts.push_back(it + 1);
         converged = true;
         break;
@@ -564,14 +564,14 @@ void MaxEnt::exec() {
 //----------------------------------------------------------------------------------------------
 
 /** Returns a given spectrum or sum of spectra as a complex number
-* @param inWS :: [input] The input workspace containing all the spectra
-* @param spec :: [input] The spectrum of interest
-* @param errors :: [input] If true, returns the errors, otherwise returns the
-* counts
-* @param concatSpec :: [input] If true, use concatenation of all spectra
-* (ignoring spec)
-* @return : Spectrum 'spec' as a complex vector
-*/
+ * @param inWS :: [input] The input workspace containing all the spectra
+ * @param spec :: [input] The spectrum of interest
+ * @param errors :: [input] If true, returns the errors, otherwise returns the
+ * counts
+ * @param concatSpec :: [input] If true, use concatenation of all spectra
+ * (ignoring spec)
+ * @return : Spectrum 'spec' as a complex vector
+ */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       size_t spec, bool errors,
                                       bool concatSpec) {
@@ -835,16 +835,16 @@ MaxEnt::updateImage(const std::vector<double> &image,
 }
 
 /** Populates the image output workspace
-* @param inWS :: [input] The input workspace
-* @param spec :: [input] The current spectrum being analyzed
-* @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The image to be written in the output workspace (can
-* be real or complex vector)
-* @param complex :: [input] True if the result is a complex vector, false
-* otherwise
-* @param outWS :: [input] The output workspace to populate
-* @param autoShift :: [input] Whether or not to correct the phase shift
-*/
+ * @param inWS :: [input] The input workspace
+ * @param spec :: [input] The current spectrum being analyzed
+ * @param nspec :: [input] The total number of histograms in the input workspace
+ * @param result :: [input] The image to be written in the output workspace (can
+ * be real or complex vector)
+ * @param complex :: [input] True if the result is a complex vector, false
+ * otherwise
+ * @param outWS :: [input] The output workspace to populate
+ * @param autoShift :: [input] Whether or not to correct the phase shift
+ */
 void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                              size_t nspec, const std::vector<double> &result,
                              bool complex, MatrixWorkspace_sptr &outWS,
@@ -926,16 +926,16 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
 }
 
 /** Populates the data output workspace
-* @param inWS :: [input] The input workspace
-* @param spec :: [input] The current spectrum being analyzed
-* @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The reconstructed data to be written in the output
-* workspace (can be a real or complex vector)
-* @param complex :: [input] True if result is a complex vector, false otherwise
-* @param concatenated :: [input] True if result is concatenated spectra,
-* then all spectra are analyzed and spec must be 0.
-* @param outWS :: [input] The output workspace to populate
-*/
+ * @param inWS :: [input] The input workspace
+ * @param spec :: [input] The current spectrum being analyzed
+ * @param nspec :: [input] The total number of histograms in the input workspace
+ * @param result :: [input] The reconstructed data to be written in the output
+ * workspace (can be a real or complex vector)
+ * @param complex :: [input] True if result is a complex vector, false otherwise
+ * @param concatenated :: [input] True if result is concatenated spectra,
+ * then all spectra are analyzed and spec must be 0.
+ * @param outWS :: [input] The output workspace to populate
+ */
 void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
                             bool concatenated, bool complex,

@@ -11,8 +11,8 @@
 
 using Mantid::Algorithms::MaxentSpaceComplex;
 using Mantid::Algorithms::MaxentSpaceReal;
-using Mantid::Algorithms::MaxentTransformFourier;
 using Mantid::Algorithms::MaxentSpace_sptr;
+using Mantid::Algorithms::MaxentTransformFourier;
 
 class MaxentTransformFourierTest : public CxxTest::TestSuite {
 public:

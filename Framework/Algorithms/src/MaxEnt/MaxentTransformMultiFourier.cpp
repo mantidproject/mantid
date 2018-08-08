@@ -24,7 +24,7 @@ MaxentTransformMultiFourier::MaxentTransformMultiFourier(
  * followed by imaginary part of each individual value.
  * @param image : [input] Image as a vector
  * @return : The vector in the data space of concatenated spectra
-*/
+ */
 std::vector<double>
 MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 
@@ -76,17 +76,17 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
 }
 
 /**
-* Transforms a 1D signal from data space to image space, performing a forward
-* Fast MexentTransformFourier on the sum of the spectra.
-* Input is assumed real or complex according to the type of data space
-* given to the constructor.
-* Return value is real or complex according to the type of image space
-* given to the constructor.
-* If complex, input & return vectors consist of real part immediately
-* followed by imaginary part of each individual value.
-* @param data : [input] Data as a vector of concatenated spectra
-* @return : The vector in the image space
-*/
+ * Transforms a 1D signal from data space to image space, performing a forward
+ * Fast MexentTransformFourier on the sum of the spectra.
+ * Input is assumed real or complex according to the type of data space
+ * given to the constructor.
+ * Return value is real or complex according to the type of image space
+ * given to the constructor.
+ * If complex, input & return vectors consist of real part immediately
+ * followed by imaginary part of each individual value.
+ * @param data : [input] Data as a vector of concatenated spectra
+ * @return : The vector in the image space
+ */
 std::vector<double>
 MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 
@@ -109,12 +109,12 @@ MaxentTransformMultiFourier::dataToImage(const std::vector<double> &data) {
 }
 
 /**
-* Sets the adjustments to be applied to the data when converted from image.
-* @param linAdj : [input] Linear adjustments as complex numbers for all spectra
-* concatenated
-* @param constAdj: [input] Constant adjustments as complex numbers for all
-* spectra concatenated
-*/
+ * Sets the adjustments to be applied to the data when converted from image.
+ * @param linAdj : [input] Linear adjustments as complex numbers for all spectra
+ * concatenated
+ * @param constAdj: [input] Constant adjustments as complex numbers for all
+ * spectra concatenated
+ */
 void MaxentTransformMultiFourier::setAdjustments(
     const std::vector<double> &linAdj, const std::vector<double> &constAdj) {
   m_linearAdjustments = linAdj;

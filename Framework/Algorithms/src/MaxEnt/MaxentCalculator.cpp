@@ -142,16 +142,16 @@ MaxentCalculator::calculateImage(const std::vector<double> &data) const {
 }
 
 /**
-* Performs an iteration and calculates everything: search directions (SB. 21),
-* quadratic coefficients (SB. 22), angle between the gradient of chi-square and
-* the gradient of the entropy, and chi-sqr
-* @param data : [input] The experimental data as a vector (real or complex)
-* @param errors : [input] The experimental errors as a vector (real or complex)
-* @param image : [input] The image as a vector (real or complex)
-* @param background : [input] The background
-* @param linearAdjustments: [input] Optional linear adjustments (complex)
-* @param constAdjustments: [input] Optional constant adjustments (complex)
-*/
+ * Performs an iteration and calculates everything: search directions (SB. 21),
+ * quadratic coefficients (SB. 22), angle between the gradient of chi-square and
+ * the gradient of the entropy, and chi-sqr
+ * @param data : [input] The experimental data as a vector (real or complex)
+ * @param errors : [input] The experimental errors as a vector (real or complex)
+ * @param image : [input] The image as a vector (real or complex)
+ * @param background : [input] The background
+ * @param linearAdjustments: [input] Optional linear adjustments (complex)
+ * @param constAdjustments: [input] Optional constant adjustments (complex)
+ */
 void MaxentCalculator::iterate(const std::vector<double> &data,
                                const std::vector<double> &errors,
                                const std::vector<double> &image,
