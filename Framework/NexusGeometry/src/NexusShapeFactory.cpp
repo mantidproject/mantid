@@ -84,6 +84,12 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
 } // namespace
 
+/** Refer to NX_Cylinder definition here
+ * http://download.nexusformat.org/doc/html/classes/base_classes/NXcylindrical_geometry.html?highlight=nxcylindrical_geometry
+ * @param pointsDef Eigen matrix which contains which contains vertices A
+ * (pointsDef.col(0)), B (pointsDef.col(1)), C(pointDef.col(2)) which define our
+ * nexus cylinder.
+ */
 std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   // Calculate cylinder parameters
