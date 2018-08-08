@@ -1,30 +1,26 @@
 #include "MantidCrystal/IndexPeakswithSatellites.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include <algorithm>
-#include <cmath>
-#include <boost/math/special_functions/round.hpp>
-#include <boost/numeric/conversion/cast.hpp>
-#include <stdexcept>
-#include <Eigen/Geometry>
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Quat.h"
+#include <Eigen/Geometry>
+#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
+#include <boost/numeric/conversion/cast.hpp>
+#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 using namespace Mantid::DataObjects;
@@ -98,10 +94,9 @@ void IndexPeakswithSatellites::init() {
                                              Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
 
-  declareProperty(make_unique<PropertyWithValue<bool>>(
-                      "CrossTerms", false, Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,
+                                                       Direction::Input),
                   "Include cross terms (false)");
-
 }
 
 /** Execute the algorithm.
@@ -153,11 +148,11 @@ void IndexPeakswithSatellites::exec() {
 
   double total_error = 0;
   // get list of run numbers in this peaks workspace
-      std::unordered_set<int> run_numbers;
+  std::unordered_set<int> run_numbers;
 
-    for (Peak peak : peaks) {
-      run_numbers.insert(peak.getRunNumber());
-    }
+  for (Peak peak : peaks) {
+    run_numbers.insert(peak.getRunNumber());
+  }
 
   // index the peaks for each run separately, using a UB matrix optimized for
   // that run
@@ -233,7 +228,7 @@ void IndexPeakswithSatellites::exec() {
     }
 
     size_t miller_index_counter = 0;
-   
+
     for (Peak peak : peaks) {
       if (peak.getRunNumber() == run) {
         peak.setHKL(miller_indices[miller_index_counter]);
@@ -371,5 +366,5 @@ void IndexPeakswithSatellites::exec() {
   setProperty("SatelliteError", satellite_error);
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

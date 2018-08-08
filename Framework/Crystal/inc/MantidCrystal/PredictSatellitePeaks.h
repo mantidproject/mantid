@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_PREDICTSATELLITEPEAKS_H_
 #define MANTID_CRYSTAL_PREDICTSATELLITEPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

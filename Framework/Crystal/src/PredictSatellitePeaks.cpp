@@ -1,21 +1,21 @@
 /*
-* PredictSatellitePeaks.cpp
-*
-*  Created on: July 15, 2018
-*      Author: Vickie Lynch
-*/
+ * PredictSatellitePeaks.cpp
+ *
+ *  Created on: July 15, 2018
+ *      Author: Vickie Lynch
+ */
 #include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
@@ -57,9 +57,10 @@ void PredictSatellitePeaks::init() {
       "IncludeIntegerHKL", true,
       "If false order 0 peaks are not included in workspace (integer HKL)");
 
-  declareProperty("IncludeAllPeaksInRange", false, "If false only offsets from "
-                                                   "peaks from Peaks workspace "
-                                                   "in input are used");
+  declareProperty("IncludeAllPeaksInRange", false,
+                  "If false only offsets from "
+                  "peaks from Peaks workspace "
+                  "in input are used");
 
   declareProperty(make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
                                                          Direction::Input),

@@ -8,22 +8,22 @@
 #ifndef FINDUBUSINGINDEXEDPEAKSWITHSATELLITESTEST_H_
 #define FINDUBUSINGINDEXEDPEAKSWITHSATELLITESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidCrystal/PredictSatellitePeaks.h"
-#include "MantidCrystal/FindUBUsingIndexedPeakswithSatellites.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidCrystal/FindUBUsingIndexedPeaks.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidCrystal/CalculateUMatrix.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidCrystal/FindUBUsingIndexedPeaks.h"
+#include "MantidCrystal/FindUBUsingIndexedPeakswithSatellites.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
