@@ -107,7 +107,9 @@ function ( mtd_add_sip_module )
     endif ()
   endif ()
 
-  if (PARSED_INSTALL_DIR)
+  # TODO The check for win32 should go away. It is temporarily disabled to
+  #      get the linux workbench installation working.
+  if (PARSED_INSTALL_DIR AND NOT WIN32 )
     install ( TARGETS ${PARSED_TARGET_NAME} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PARSED_INSTALL_DIR} )
   endif ()
 
