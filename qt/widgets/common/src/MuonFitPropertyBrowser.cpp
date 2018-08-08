@@ -944,11 +944,10 @@ void MuonFitPropertyBrowser::finishHandleTF(const IAlgorithm *alg) {
       alg->getProperty("UnNormalizedWorkspaceList");
   emit fittingDone(QString::fromStdString(wsList[0]));
   double quality = alg->getProperty("ChiSquared");
-  //std::string costFunction = 
- 
-  emit changeWindowTitle(QString("Fit Function (") +
-	  "Chi-sq " + " = " +
-	  QString::number(quality) + ", " + status + ")");
+  // std::string costFunction =
+
+  emit changeWindowTitle(QString("Fit Function (") + "Chi-sq " + " = " +
+                         QString::number(quality) + ", " + status + ")");
   if (nWorkspaces == 1) {
     emit algorithmFinished(QString::fromStdString(wsList[0] + "_workspace"));
   }
@@ -1175,7 +1174,7 @@ void MuonFitPropertyBrowser::ConvertFitFunctionForMuonTFAsymmetry(
         boost::dynamic_pointer_cast<IFunction>(m_compositeFunction);
     QStringList globals;
 
-    if ( m_isMultiFittingMode) {
+    if (m_isMultiFittingMode) {
       // manually set the function values
       old = m_functionBrowser->getGlobalFunction();
       globals = m_functionBrowser->getGlobalParameters();
