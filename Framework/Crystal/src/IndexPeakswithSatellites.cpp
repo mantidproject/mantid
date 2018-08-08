@@ -324,10 +324,11 @@ void IndexPeakswithSatellites::exec() {
                   peaks[i].setIntHKL(hkl1);
                   peaks[i].setIntMNP(V3D(m, n, p));
                   sate_indexed++;
-                  h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                  k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                  l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                  satellite_error += h_error + k_error + l_error;
+                  
+                  V3D intHkl = hkl1;
+                  intHkl.round();
+                  hkl1 = intHkl - hkl1;
+                  satellite_error += fabs(hkl1[0]) + fabs(hkl1[1]) + fabs(hkl1[2]);
                 }
               }
         }
