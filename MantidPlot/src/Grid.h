@@ -35,7 +35,7 @@
 
 class Grid : public QObject,
              public QwtPlotGrid // Made a QObject just for our python proxies
-             {
+{
   Q_OBJECT
 public:
   Grid();

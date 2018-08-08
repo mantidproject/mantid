@@ -30,7 +30,7 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakNumber(0), m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
@@ -52,7 +52,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -80,7 +80,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -104,7 +104,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -127,7 +127,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -152,7 +152,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
       m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakNumber(0),
-      m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -176,7 +176,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_modStru(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
+      m_peakNumber(0), m_modulatedStructure(V3D(0, 0, 0)), m_intHKL{{0, 0, 0}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
@@ -206,8 +206,8 @@ Peak::Peak(const Peak &other)
       samplePos(other.samplePos), detPos(other.detPos),
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
       m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
-      m_modStru(other.m_modStru), m_intH(other.m_intH), m_intK(other.m_intK),
-      m_intL(other.m_intL), m_detIDs(other.m_detIDs),
+      m_modulatedStructure(other.m_modulatedStructure),
+      m_intHKL(other.m_intHKL), m_detIDs(other.m_detIDs),
       m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
@@ -228,9 +228,11 @@ Peak::Peak(const Geometry::IPeak &ipeak)
       m_runNumber(ipeak.getRunNumber()),
       m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
       m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
-      m_peakNumber(ipeak.getPeakNumber()), m_modStru(ipeak.getIntMNP()),
-      m_intH(int(ipeak.getIntHKL().X())), m_intK(int(ipeak.getIntHKL().Y())),
-      m_intL(int(ipeak.getIntHKL().Z())),
+      m_peakNumber(ipeak.getPeakNumber()),
+      m_modulatedStructure(ipeak.getIntMNP()),
+      m_intHKL{{static_cast<int>(ipeak.getIntHKL()[0]),
+                static_cast<int>(ipeak.getIntHKL()[1]),
+                static_cast<int>(ipeak.getIntHKL()[2])}},
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
@@ -763,7 +765,7 @@ Mantid::Kernel::V3D Peak::getHKL() const { return V3D(m_H, m_K, m_L); }
 
 /** Return the int HKL vector */
 Mantid::Kernel::V3D Peak::getIntHKL() const {
-  return V3D(m_intH, m_intK, m_intL);
+  return V3D(m_intHKL[0], m_intHKL[1], m_intHKL[2]);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -795,6 +797,7 @@ void Peak::setHKL(double H, double K, double L) {
   m_H = H;
   m_K = K;
   m_L = L;
+  setIntHKL(V3D(m_H, m_K, m_L));
 }
 
 /** Reset all three H,K,L indices of the peak to values before setHKL */
@@ -804,6 +807,7 @@ void Peak::resetHKL() {
   m_H = m_orig_H;
   m_K = m_orig_K;
   m_L = m_orig_L;
+  setIntHKL(V3D(m_H, m_K, m_L));
 }
 
 /** Set all HKL
@@ -819,6 +823,7 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
   m_H = HKL.X();
   m_K = HKL.Y();
   m_L = HKL.Z();
+  setIntHKL(HKL);
 }
 
 /** Set int HKL
@@ -826,9 +831,8 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
  * @param HKL :: vector with integer x,y,z -> h,k,l
  */
 void Peak::setIntHKL(const Mantid::Kernel::V3D &HKL) {
-  m_intH = boost::math::iround(HKL.X());
-  m_intK = boost::math::iround(HKL.Y());
-  m_intL = boost::math::iround(HKL.Z());
+  m_intHKL = {{boost::math::iround(HKL.X()), boost::math::iround(HKL.Y()),
+               boost::math::iround(HKL.Z())}};
 }
 
 //----------------------------------------------------------------------------------------------
@@ -923,7 +927,7 @@ int Peak::getPeakNumber() const { return m_peakNumber; }
 // -------------------------------------------------------------------------------------
 /**Returns the unique peak number
  * Returns -1 if it could not find it. */
-V3D Peak::getIntMNP() const { return m_modStru; }
+V3D Peak::getIntMNP() const { return m_modulatedStructure; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, sets the row (y) of the pixel of the
@@ -946,8 +950,10 @@ void Peak::setPeakNumber(int m_peakNumber) {
 
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
- * @param m_modStru :: modulated peak structure value   */
-void Peak::setIntMNP(V3D m_modStru) { this->m_modStru = m_modStru; }
+ * @param modulatedStructure :: modulated peak structure value   */
+void Peak::setIntMNP(V3D modulatedStructure) {
+  this->m_modulatedStructure = modulatedStructure;
+}
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */

@@ -1,8 +1,8 @@
 #ifndef MANTID_MDGEOMETRY_MDPLANEIMPLICITFUNCTION_H_
 #define MANTID_MDGEOMETRY_MDPLANEIMPLICITFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Geometry {

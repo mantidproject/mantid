@@ -3,11 +3,11 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
-    MultipleFileProperty, PropertyMode, WorkspaceProperty
+    MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
     ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
     Divide, EditInstrumentGeometry, GetIPTS, Load, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
-    LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
+    MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
     RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
     SaveGSS, SaveNexusProcessed, mtd
 import os
@@ -130,6 +130,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                              doc="The type of conversion to d_spacing to be used.")
 
         self.declareProperty(FileProperty(name="CalibrationFilename", defaultValue="",
+                                          extensions=['.h5', '.cal'],
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The calibration file to convert to d_spacing.")
@@ -354,15 +355,20 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         maskWSname = self._getMaskWSname()
 
+        progress = Progress(self, 0., .25, 3)
+
         # either type of file-based calibration is stored in the same variable
         calib = self.getProperty("Calibration").value
         if calib == "Calibration File":
             cal_File = self.getProperty("CalibrationFilename").value
+            progress.report('loaded calibration')
         elif calib == 'DetCal File':
             cal_File = self.getProperty('DetCalFilename').value
             cal_File = ','.join(cal_File)
+            progress.report('loaded detcal')
         else:
             cal_File = None
+            progress.report('')
 
         params = self.getProperty("Binning").value
         norm = self.getProperty("Normalization").value
@@ -371,10 +377,13 @@ class SNAPReduce(DataProcessorAlgorithm):
             norm_File = self.getProperty("NormalizationFilename").value
             LoadNexusProcessed(Filename=norm_File, OutputWorkspace='normWS')
             normWS = 'normWS'
+            progress.report('loaded normalization')
         elif norm == "From Workspace":
             normWS = str(self.getProperty("NormalizationWorkspace").value)
+            progress.report('')
         else:
             normWS = None
+            progress.report('')
 
         group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4Grouping'}
         group = self.getProperty('GroupDetectorsBy').value
@@ -385,6 +394,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 group = '2_4_Grouping'
             CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
                                     OutputWorkspace=group)
+            progress.report('create grouping')
 
         Process_Mode = self.getProperty("ProcessingMode").value
 
@@ -393,25 +403,38 @@ class SNAPReduce(DataProcessorAlgorithm):
         # --------------------------- REDUCE DATA -----------------------------
 
         Tag = 'SNAP'
+
+        progStart = .25
+        progDelta = (1.-progStart)/len(in_Runs)
         for r in in_Runs:
+            progress = Progress(self, progStart, progStart+progDelta, 7)
+
             self.log().notice("processing run %s" % r)
             self.log().information(str(self.get_IPTS_Local(r)))
             if self.getProperty("LiveData").value:
                 Tag = 'Live'
-                LoadPreNexusLive(Instrument='SNAP', OutputWorkspace='WS')
+                raise RuntimeError('Live data is not currently supported')
             else:
                 Load(Filename='SNAP' + str(r), OutputWorkspace='WS')
                 NormaliseByCurrent(InputWorkspace='WS', OutputWorkspace='WS')
+            progress.report('loaded data')
 
             CompressEvents(InputWorkspace='WS', OutputWorkspace='WS')
+            progress.report('compressed')
             CropWorkspace(InputWorkspace='WS', OutputWorkspace='WS', XMax=50000)
+            progress.report('cropped in tof')
             RemovePromptPulse(InputWorkspace='WS', OutputWorkspace='WS',
-                              Width='1600', Frequency='60.4')
+                              Width='1600', Frequency='60.4') # TODO don't declare frequency
+            progress.report('remove prompt pulse')
 
             if maskWSname is not None:
                 MaskDetectors(Workspace='WS', MaskedWorkspace=maskWSname)
+                progress.report('masked detectors')
+            else:
+                progress.report('')
 
             self._alignAndFocus(params, calib, cal_File, group)
+            progress.report('align and focus')
 
             normWS = self._generateNormalization('WS_red', norm, normWS)
             WS_nor = None
@@ -423,6 +446,9 @@ class SNAPReduce(DataProcessorAlgorithm):
                                      OutputWorkspace='WS_nor',
                                      NaNValue='0', NaNError='0',
                                      InfinityValue='0', InfinityError='0')
+                progress.report('normalized')
+            else:
+                progress.report()
 
             new_Tag = Tag
             if len(prefix) > 0:
@@ -439,6 +465,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 EditInstrumentGeometry(Workspace='WS_nor', L2=det_table.column('L2'),
                                        Polar=polar, Azimuthal=azi)
             mtd.remove('__SNAP_det_table')
+            progress.report('simplify geometry')
 
             # Save requested formats
             basename = '%s_%s_%s' % (new_Tag, r, group)
@@ -462,20 +489,27 @@ class SNAPReduce(DataProcessorAlgorithm):
                 RenameWorkspace(Inputworkspace='peak_clip_WS',
                                 OutputWorkspace='%s_%s_normalizer' % (new_Tag, r))
 
+            # set workspace as an output so it gets history
+            propertyName = 'OutputWorkspace_'+str(outputWksp)
+            self.declareProperty(WorkspaceProperty(
+                propertyName, outputWksp, Direction.Output))
+            self.setProperty(propertyName, outputWksp)
+
             # delte some things in production
             if Process_Mode == "Production":
                 DeleteWorkspace(Workspace='%s_%s_d' % (new_Tag, r)) # was 'WS_d'
 
                 if norm != "None":
                     DeleteWorkspace(Workspace=basename + '_red') # was 'WS_red'
-
-                if norm == "Extracted from Data":
+                elif norm == "Extracted from Data":
                     DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, r)) # was 'peak_clip_WS'
-
-            propertyName = 'OutputWorkspace_'+str(outputWksp)
-            self.declareProperty(WorkspaceProperty(
-                propertyName, outputWksp, Direction.Output))
-            self.setProperty(propertyName, outputWksp)
+            else: # TODO set them as workspace properties
+                propNames = ['OuputWorkspace_'+str(it) for it in ['d', 'norm', 'normalizer']]
+                wkspNames = ['%s_%s_d' % (new_Tag, r), basename + '_red', '%s_%s_normalizer' % (new_Tag, r)]
+                for (propName, wkspName) in zip(propNames, wkspNames):
+                    self.declareProperty(WorkspaceProperty(
+                        propName, wkspName, Direction.Output))
+                    self.setProperty(propName, wkspName)
 
 
 AlgorithmFactory.subscribe(SNAPReduce)

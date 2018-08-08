@@ -8,19 +8,19 @@
 #ifndef PREDICTSATELLITEPEAKSTEST_H_
 #define PREDICTSATELLITEPEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidCrystal/CalculateUMatrix.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidCrystal/IndexPeaks.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;

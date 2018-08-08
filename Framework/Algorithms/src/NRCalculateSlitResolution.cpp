@@ -40,7 +40,7 @@ const std::string NRCalculateSlitResolution::summary() const {
 }
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void NRCalculateSlitResolution::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
@@ -64,7 +64,7 @@ void NRCalculateSlitResolution::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void NRCalculateSlitResolution::exec() {
   const MatrixWorkspace_sptr ws = getProperty("Workspace");
   double twoTheta = getProperty("TwoTheta");

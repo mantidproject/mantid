@@ -8,18 +8,18 @@
 #ifndef INDEXPEAKSWITHSATELLITESTEST_H_
 #define INDEXPEAKSWITHSATELLITESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidCrystal/PredictSatellitePeaks.h"
-#include "MantidCrystal/IndexPeakswithSatellites.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidCrystal/CalculateUMatrix.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidCrystal/IndexPeakswithSatellites.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -92,14 +92,14 @@ public:
     TS_ASSERT_EQUALS(SatellitePeaks->getNumberPeaks(), 5);
 
     auto &peak0 = SatellitePeaks->getPeak(0);
-    TS_ASSERT_DELTA(peak0.getH(), 0.1628, .0001);
-    TS_ASSERT_DELTA(peak0.getK(), -0.7437, .0001);
-    TS_ASSERT_DELTA(peak0.getL(), 0.4002, .0001);
+    TS_ASSERT_DELTA(peak0.getH(), 0.5, .0001);
+    TS_ASSERT_DELTA(peak0.getK(), 0., .0001);
+    TS_ASSERT_DELTA(peak0.getL(), -0.2, .0001);
 
     auto &peak3 = SatellitePeaks->getPeak(3);
-    TS_ASSERT_DELTA(peak3.getH(), 3.3214, .0001);
-    TS_ASSERT_DELTA(peak3.getK(), -1.1091, .0001);
-    TS_ASSERT_DELTA(peak3.getL(), 0.1608, .0001);
+    TS_ASSERT_DELTA(peak3.getH(), 2.5, .0001);
+    TS_ASSERT_DELTA(peak3.getK(), 0., .0001);
+    TS_ASSERT_DELTA(peak3.getL(), 0.2, .0001);
 
     AnalysisDataService::Instance().remove(WSName);
   }

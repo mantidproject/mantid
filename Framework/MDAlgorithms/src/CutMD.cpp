@@ -7,14 +7,14 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/BoundedValidator.h"
 
+#include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -259,10 +259,11 @@ void CutMD::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output cut workspace");
-  declareProperty("NoPix", false, "If False creates a full MDEventWorkspaces "
-                                  "as output. True to create an "
-                                  "MDHistoWorkspace as output. This is DND "
-                                  "only in Horace terminology.");
+  declareProperty("NoPix", false,
+                  "If False creates a full MDEventWorkspaces "
+                  "as output. True to create an "
+                  "MDHistoWorkspace as output. This is DND "
+                  "only in Horace terminology.");
 
   auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
   mustBePositiveInteger->setLower(0);
@@ -274,13 +275,14 @@ void CutMD::init() {
   std::vector<std::string> propOptions{AutoMethod, RLUMethod,
                                        InvAngstromMethod};
   char buffer[1024];
-  std::sprintf(
-      buffer, "How will the Q units of the input workspace be interpreted? "
-              "This property will disappear in future versions of Mantid\n"
-              "%s : Figure it out based on the label units\n"
-              "%s : Force them to be rlu\n"
-              "%s : Force them to be inverse angstroms",
-      AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
+  std::sprintf(buffer,
+               "How will the Q units of the input workspace be interpreted? "
+               "This property will disappear in future versions of Mantid\n"
+               "%s : Figure it out based on the label units\n"
+               "%s : Force them to be rlu\n"
+               "%s : Force them to be inverse angstroms",
+               AutoMethod.c_str(), RLUMethod.c_str(),
+               InvAngstromMethod.c_str());
 
   std::string help(buffer);
   boost::algorithm::trim(help);
@@ -491,5 +493,5 @@ void CutMD::exec() {
   setProperty("OutputWorkspace", sliceWS);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

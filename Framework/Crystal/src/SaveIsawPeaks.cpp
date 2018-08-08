@@ -1,17 +1,17 @@
+#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <fstream>
 #include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -32,8 +32,9 @@ void SaveIsawPeaks::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
 
-  declareProperty("AppendFile", false, "Append to file if true.\n"
-                                       "If false, new file (default).");
+  declareProperty("AppendFile", false,
+                  "Append to file if true.\n"
+                  "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
@@ -278,24 +279,10 @@ void SaveIsawPeaks::exec() {
     offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
     offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
     out << "9  MODVECTOR ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset1[0] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset1[1] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset1[2] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset2[0] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset2[1] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset2[2] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset3[0] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset3[1] << " ";
-    out << std::setw(12) << std::fixed << std::setprecision(6)
-        << qSign * offset3[2] << "\n";
+    writeOffsets(out, qSign, offset1);
+    writeOffsets(out, qSign, offset2);
+    writeOffsets(out, qSign, offset3);
+    out << "\n";
   }
   int maxPeakNumb = 0;
   int appendPeakNumb = 0;
@@ -549,6 +536,12 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     ysize = first->getDistance(*last);
   }
 }
-
-} // namespace Mantid
+void SaveIsawPeaks::writeOffsets(std::ofstream &out, double qSign,
+                                 std::vector<double> offset) {
+  for (size_t i = 0; i < 3; i++) {
+    out << std::setw(12) << std::fixed << std::setprecision(6)
+        << qSign * offset[i] << " ";
+  }
+}
 } // namespace Crystal
+} // namespace Mantid

@@ -22,7 +22,7 @@ find_library ( POCO_LIB_NETSSL_DEBUG NAMES PocoNetSSLd )
 function( add_poco_lib POCO_LIB_MODULE POCO_DEBUG_LIB_MODULE )
   # Add poco library to list and also the corresponding debug library if it is available
 
-  if ( POCO_DEBUG_LIB_MODULE )
+  if ( EXISTS "${POCO_DEBUG_LIB_MODULE}" )
     set ( POCO_LIBRARIES ${POCO_LIBRARIES}
         optimized ${POCO_LIB_MODULE}
         debug ${POCO_DEBUG_LIB_MODULE}

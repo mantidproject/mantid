@@ -1,21 +1,21 @@
 /*
-* PredictSatellitePeaks.cpp
-*
-*  Created on: July 15, 2018
-*      Author: Vickie Lynch
-*/
+ * PredictSatellitePeaks.cpp
+ *
+ *  Created on: July 15, 2018
+ *      Author: Vickie Lynch
+ */
 #include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
@@ -53,13 +53,18 @@ void PredictSatellitePeaks::init() {
       make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply ModVectors. Default = 0");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,
+                                                       Direction::Input),
+                  "Include cross terms (false)");
+
   declareProperty(
       "IncludeIntegerHKL", true,
       "If false order 0 peaks are not included in workspace (integer HKL)");
 
-  declareProperty("IncludeAllPeaksInRange", false, "If false only offsets from "
-                                                   "peaks from Peaks workspace "
-                                                   "in input are used");
+  declareProperty("IncludeAllPeaksInRange", false,
+                  "If false only offsets from "
+                  "peaks from Peaks workspace "
+                  "in input are used");
 
   declareProperty(make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
                                                          Direction::Input),
@@ -112,6 +117,7 @@ void PredictSatellitePeaks::exec() {
   V3D offsets2 = getOffsetVector("ModVector2");
   V3D offsets3 = getOffsetVector("ModVector3");
   int maxOrder = getProperty("MaxOrder");
+  bool crossTerms = getProperty("CrossTerms");
 
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
 
@@ -175,15 +181,22 @@ void PredictSatellitePeaks::exec() {
                                                           true);
   for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
     V3D hkl = *it;
-    predictOffsets(Peaks, OutPeaks, offsets1, maxOrder, hkl, lambdaFilter,
-                   includePeaksInRange, includeOrderZero, seqNum,
-                   AlreadyDonePeaks);
-    predictOffsets(Peaks, OutPeaks, offsets2, maxOrder, hkl, lambdaFilter,
-                   includePeaksInRange, includeOrderZero, seqNum,
-                   AlreadyDonePeaks);
-    predictOffsets(Peaks, OutPeaks, offsets3, maxOrder, hkl, lambdaFilter,
-                   includePeaksInRange, includeOrderZero, seqNum,
-                   AlreadyDonePeaks);
+    if (crossTerms) {
+      predictOffsetsWithCrossTerms(Peaks, OutPeaks, offsets1, offsets2,
+                                   offsets3, maxOrder, hkl, lambdaFilter,
+                                   includePeaksInRange, includeOrderZero,
+                                   seqNum, AlreadyDonePeaks);
+    } else {
+      predictOffsets(Peaks, OutPeaks, 0, offsets1, maxOrder, hkl, lambdaFilter,
+                     includePeaksInRange, includeOrderZero, seqNum,
+                     AlreadyDonePeaks);
+      predictOffsets(Peaks, OutPeaks, 1, offsets2, maxOrder, hkl, lambdaFilter,
+                     includePeaksInRange, includeOrderZero, seqNum,
+                     AlreadyDonePeaks);
+      predictOffsets(Peaks, OutPeaks, 2, offsets3, maxOrder, hkl, lambdaFilter,
+                     includePeaksInRange, includeOrderZero, seqNum,
+                     AlreadyDonePeaks);
+    }
   }
   setProperty("SatellitePeaks", OutPeaks);
 }
@@ -198,6 +211,7 @@ void PredictSatellitePeaks::exec_peaks() {
   V3D offsets2 = getOffsetVector("ModVector2");
   V3D offsets3 = getOffsetVector("ModVector3");
   int maxOrder = getProperty("MaxOrder");
+  bool crossTerms = getProperty("CrossTerms");
 
   bool includePeaksInRange = false;
   bool includeOrderZero = getProperty("IncludeIntegerHKL");
@@ -231,23 +245,30 @@ void PredictSatellitePeaks::exec_peaks() {
   for (auto it = peaks.begin(); it != peaks.end(); ++it) {
     auto peak = *it;
     V3D hkl = peak.getHKL();
-    predictOffsets(Peaks, OutPeaks, offsets1, maxOrder, hkl, lambdaFilter,
-                   includePeaksInRange, includeOrderZero, seqNum,
-                   AlreadyDonePeaks);
-    predictOffsets(Peaks, OutPeaks, offsets2, maxOrder, hkl, lambdaFilter,
-                   includePeaksInRange, includeOrderZero, seqNum,
-                   AlreadyDonePeaks);
-    predictOffsets(Peaks, OutPeaks, offsets3, maxOrder, hkl, lambdaFilter,
-                   includePeaksInRange, includeOrderZero, seqNum,
-                   AlreadyDonePeaks);
+    if (crossTerms) {
+      predictOffsetsWithCrossTerms(Peaks, OutPeaks, offsets1, offsets2,
+                                   offsets3, maxOrder, hkl, lambdaFilter,
+                                   includePeaksInRange, includeOrderZero,
+                                   seqNum, AlreadyDonePeaks);
+    } else {
+      predictOffsets(Peaks, OutPeaks, 0, offsets1, maxOrder, hkl, lambdaFilter,
+                     includePeaksInRange, includeOrderZero, seqNum,
+                     AlreadyDonePeaks);
+      predictOffsets(Peaks, OutPeaks, 1, offsets2, maxOrder, hkl, lambdaFilter,
+                     includePeaksInRange, includeOrderZero, seqNum,
+                     AlreadyDonePeaks);
+      predictOffsets(Peaks, OutPeaks, 2, offsets3, maxOrder, hkl, lambdaFilter,
+                     includePeaksInRange, includeOrderZero, seqNum,
+                     AlreadyDonePeaks);
+    }
   }
   setProperty("SatellitePeaks", OutPeaks);
 }
 
 void PredictSatellitePeaks::predictOffsets(
     DataObjects::PeaksWorkspace_sptr Peaks,
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks, V3D offsets,
-    int &maxOrder, V3D &hkl, HKLFilterWavelength &lambdaFilter,
+    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks, int iVector,
+    V3D offsets, int &maxOrder, V3D &hkl, HKLFilterWavelength &lambdaFilter,
     bool &includePeaksInRange, bool &includeOrderZero, int &seqNum,
     vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets == V3D(0, 0, 0))
@@ -296,9 +317,77 @@ void PredictSatellitePeaks::predictOffsets(
     peak->setPeakNumber(seqNum);
     seqNum++;
     peak->setRunNumber(RunNumber);
-    peak->setIntMNP(V3D(order, 0, 0));
+    V3D mnp;
+    mnp[iVector] = order;
+    peak->setIntMNP(mnp);
     OutPeaks->addPeak(*peak);
   }
+}
+
+void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
+    DataObjects::PeaksWorkspace_sptr Peaks,
+    boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks, V3D offsets1,
+    V3D offsets2, V3D offsets3, int &maxOrder, V3D &hkl,
+    HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
+    bool &includeOrderZero, int &seqNum,
+    vector<vector<int>> &AlreadyDonePeaks) {
+  if (offsets1 == V3D(0, 0, 0) && offsets2 == V3D(0, 0, 0) &&
+      offsets3 == V3D(0, 0, 0))
+    return;
+  const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
+  IPeak &peak1 = Peaks->getPeak(0);
+  Kernel::Matrix<double> goniometer = peak1.getGoniometerMatrix();
+  auto RunNumber = peak1.getRunNumber();
+  Geometry::InstrumentRayTracer tracer(Peaks->getInstrument());
+  DblMatrix offsetsMat(3, 3);
+  offsetsMat.setRow(0, offsets1);
+  offsetsMat.setRow(1, offsets2);
+  offsetsMat.setRow(2, offsets3);
+  for (int m = -maxOrder; m <= maxOrder; m++)
+    for (int n = -maxOrder; n <= maxOrder; n++)
+      for (int p = -maxOrder; p <= maxOrder; p++) {
+        if (m == 0 && n == 0 && p == 0 && !includeOrderZero)
+          continue; // exclude 0,0,0
+        V3D satelliteHKL(hkl);
+        V3D mnp = V3D(m, n, p);
+        satelliteHKL -= offsetsMat * mnp;
+        if (!lambdaFilter.isAllowed(satelliteHKL) && includePeaksInRange)
+          continue;
+
+        Kernel::V3D Qs = goniometer * UB * satelliteHKL * 2.0 * M_PI;
+
+        // Check if Q is non-physical
+        if (Qs[2] <= 0)
+          continue;
+
+        auto peak(Peaks->createPeak(Qs, 1));
+
+        peak->setGoniometerMatrix(goniometer);
+
+        if (!peak->findDetector(tracer))
+          continue;
+        vector<int> SavPk{RunNumber,
+                          boost::math::iround(1000.0 * satelliteHKL[0]),
+                          boost::math::iround(1000.0 * satelliteHKL[1]),
+                          boost::math::iround(1000.0 * satelliteHKL[2])};
+
+        bool foundPeak = binary_search(AlreadyDonePeaks.begin(),
+                                       AlreadyDonePeaks.end(), SavPk);
+
+        if (!foundPeak) {
+          AlreadyDonePeaks.push_back(SavPk);
+        } else {
+          continue;
+        }
+
+        peak->setHKL(satelliteHKL);
+        peak->setIntHKL(hkl);
+        peak->setPeakNumber(seqNum);
+        seqNum++;
+        peak->setRunNumber(RunNumber);
+        peak->setIntMNP(V3D(m, n, p));
+        OutPeaks->addPeak(*peak);
+      }
 }
 
 V3D PredictSatellitePeaks::getOffsetVector(const std::string &label) {

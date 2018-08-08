@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
 #define MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
 #include "MantidKernel/Exception.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -19,9 +19,9 @@ public:
   PeakColumnTestHelper(std::vector<Peak> &peaks, const std::string &name)
       : PeakColumn(peaks, name) {}
 
-  using PeakColumn::resize;
   using PeakColumn::insert;
   using PeakColumn::remove;
+  using PeakColumn::resize;
 };
 
 class PeakColumnTest : public CxxTest::TestSuite {
@@ -119,7 +119,7 @@ public:
 
   void test_read_locale_awerness() {
     const std::vector<std::string> columnNames{"h", "k", "l", "RunNumber"};
-    const std::vector<double> columnValues{-2.0, 5.0, 12.0, 0.0};
+    const std::vector<double> columnValues{-2.0, 5.0, 12.0, 143290.0};
     TestingNumpunctFacet numpunct;
     const std::locale testLocale(std::locale::classic(), &numpunct);
     for (size_t i = 0; i < columnNames.size(); ++i) {

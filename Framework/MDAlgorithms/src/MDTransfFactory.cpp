@@ -4,12 +4,12 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 /** Returns an instance of the class with the given name. Overrides the base
-* class method.
-*  If an instance already exists, a pointer to it is returned, otherwise
-*  a new instance is created by the DynamicFactory::create method.
-*  @param className :: The name of the class to be created
-*  @return A shared pointer to the instance of the requested MDtransformation
-*/
+ * class method.
+ *  If an instance already exists, a pointer to it is returned, otherwise
+ *  a new instance is created by the DynamicFactory::create method.
+ *  @param className :: The name of the class to be created
+ *  @return A shared pointer to the instance of the requested MDtransformation
+ */
 boost::shared_ptr<MDTransfInterface>
 MDTransfFactoryImpl::create(const std::string &className) const {
   std::map<std::string, boost::shared_ptr<MDTransfInterface>>::const_iterator

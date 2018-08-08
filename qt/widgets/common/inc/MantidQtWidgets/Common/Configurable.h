@@ -43,7 +43,7 @@ public:
   virtual void readSettings(const QSettings &) = 0;
   virtual void writeSettings(QSettings *) = 0;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQT_MANTIDWIDGETS_CONFIGURABLE_H

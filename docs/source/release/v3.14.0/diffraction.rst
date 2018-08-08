@@ -9,6 +9,11 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Improvements
+############
+
+- :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+
 :ref:`Release 3.14.0 <v3.14.0>`
 
 Single Crystal Diffraction
@@ -31,4 +36,3 @@ Improvements
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks with the offset vectors in the header and the order of each satellite by the hkl of the nuclear peak.
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
->>>>>>> origin/master

@@ -12,7 +12,7 @@
 
 using namespace MantidQt::MantidWidgets;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockMantidDisplayBase;
 
@@ -103,6 +103,6 @@ public:
   MOCK_METHOD1(notifyFromWorkspaceProvider, void(Flag flag));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H

@@ -1,21 +1,21 @@
 #ifndef LOADGSSTEST_H_
 #define LOADGSSTEST_H_
 
-#include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/LoadGSS.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidDataHandling/LoadGSS.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "cxxtest/TestSuite.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::LoadGSS;
-using ScopedFileHelper::ScopedFile;
 using Mantid::Kernel::V3D;
+using ScopedFileHelper::ScopedFile;
 
 class LoadGSSTest : public CxxTest::TestSuite {
 public:
@@ -103,7 +103,7 @@ public:
   }
 
   /** Test LoadGSS with setting spectrum No as bank ID
-    */
+   */
   void test_load_gss_use_spec() {
     // Set property and execute
     LoadGSS loader;

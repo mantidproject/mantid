@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_SAVEISAWPEAKS_H_
 #define MANTID_CRYSTAL_SAVEISAWPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -48,10 +48,12 @@ private:
                  double &ysize);
   bool bankMasked(Geometry::IComponent_const_sptr parent,
                   const Geometry::DetectorInfo &detectorInfo);
+  void writeOffsets(std::ofstream &out, double qSign,
+                    std::vector<double> offset);
   Geometry::Instrument_const_sptr inst;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_SAVEISAWPEAKS_H_ */

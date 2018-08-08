@@ -43,7 +43,7 @@ public:
   virtual void raiseModified() = 0;
   virtual Mantid::VATES::BinDisplay getBinDisplayMode() const = 0;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

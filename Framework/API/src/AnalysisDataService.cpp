@@ -28,12 +28,12 @@ AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
 // Public methods
 //-------------------------------------------------------------------------
 /**
-* Is the given name a valid name for an object in the ADS
-* @param name A string containing a possible name for an object in the ADS
-* @return An empty string if the name is valid or an error message stating the
-* problem
-* if the name is unacceptable.
-*/
+ * Is the given name a valid name for an object in the ADS
+ * @param name A string containing a possible name for an object in the ADS
+ * @return An empty string if the name is valid or an error message stating the
+ * problem
+ * if the name is unacceptable.
+ */
 const std::string
 AnalysisDataServiceImpl::isValid(const std::string &name) const {
   std::string error;
@@ -94,13 +94,13 @@ void AnalysisDataServiceImpl::add(
 }
 
 /**
-  * Overwridden addOrReplace member to attach the name to the workspace when a
+ * Overwridden addOrReplace member to attach the name to the workspace when a
  * workspace object is added to the service.
-  * This will overwrite one of the same name. If the workspace is group adds or
+ * This will overwrite one of the same name. If the workspace is group adds or
  * replaces its members.
-  * @param name The name of the object
-  * @param workspace The shared pointer to the workspace to store
-  */
+ * @param name The name of the object
+ * @param workspace The shared pointer to the workspace to store
+ */
 void AnalysisDataServiceImpl::addOrReplace(
     const std::string &name,
     const boost::shared_ptr<API::Workspace> &workspace) {

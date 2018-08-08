@@ -1,30 +1,26 @@
 #include "MantidCrystal/IndexPeakswithSatellites.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include <algorithm>
-#include <cmath>
-#include <boost/math/special_functions/round.hpp>
-#include <boost/numeric/conversion/cast.hpp>
-#include <stdexcept>
-#include <Eigen/Geometry>
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Quat.h"
+#include <Eigen/Geometry>
+#include <algorithm>
 #include <boost/math/special_functions/round.hpp>
+#include <boost/numeric/conversion/cast.hpp>
+#include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 using namespace Mantid::DataObjects;
@@ -97,12 +93,16 @@ void IndexPeakswithSatellites::init() {
       make_unique<PropertyWithValue<double>>("SatelliteError", 0.0,
                                              Direction::Output),
       "Gets set with the average HKL indexing error of Satellite Peaks.");
+
+  declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,
+                                                       Direction::Input),
+                  "Include cross terms (false)");
 }
 
 /** Execute the algorithm.
  */
 void IndexPeakswithSatellites::exec() {
-  bool CrossTerms = false;
+  bool crossTerms = getProperty("CrossTerms");
   PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   if (!ws) {
     throw std::runtime_error("Could not read the peaks workspace");
@@ -130,54 +130,40 @@ void IndexPeakswithSatellites::exec() {
   vector<double> offsets2 = getProperty("ModVector2");
   vector<double> offsets3 = getProperty("ModVector3");
   int maxOrder = getProperty("MaxOrder");
+  std::vector<double> zeroes(3, 0.);
   if (offsets1.empty()) {
-    offsets1.push_back(0.0);
-    offsets1.push_back(0.0);
-    offsets1.push_back(0.0);
+    offsets1 = zeroes;
   }
   if (offsets2.empty()) {
-    offsets2.push_back(0.0);
-    offsets2.push_back(0.0);
-    offsets2.push_back(0.0);
+    offsets2 = zeroes;
   }
   if (offsets3.empty()) {
-    offsets3.push_back(0.0);
-    offsets3.push_back(0.0);
-    offsets3.push_back(0.0);
+    offsets3 = zeroes;
   }
 
-  ws->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
-  ws->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
-  ws->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
+  auto run = ws->mutableRun();
+  run.addProperty<std::vector<double>>("Offset1", offsets1, true);
+  run.addProperty<std::vector<double>>("Offset2", offsets2, true);
+  run.addProperty<std::vector<double>>("Offset3", offsets3, true);
 
   double total_error = 0;
   // get list of run numbers in this peaks workspace
-  std::vector<int> run_numbers;
-  for (size_t i = 0; i < n_peaks; i++) {
-    int run = peaks[i].getRunNumber();
-    bool found = false;
-    size_t k = 0;
-    while (k < run_numbers.size() && !found) {
-      if (run == run_numbers[k])
-        found = true;
-      else
-        k++;
-    }
-    if (!found)
-      run_numbers.push_back(run);
+  std::unordered_set<int> run_numbers;
+
+  for (Peak peak : peaks) {
+    run_numbers.insert(peak.getRunNumber());
   }
 
   // index the peaks for each run separately, using a UB matrix optimized for
   // that run
 
-  for (size_t run_index = 0; run_index < run_numbers.size(); run_index++) {
+  for (int run : run_numbers) {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
-    int run = run_numbers[run_index];
-    for (size_t i = 0; i < n_peaks; i++) {
-      if (peaks[i].getRunNumber() == run)
-        q_vectors.push_back(peaks[i].getQSampleFrame());
+    for (Peak peak : peaks) {
+      if (peak.getRunNumber() == run)
+        q_vectors.push_back(peak.getQSampleFrame());
     }
 
     Matrix<double> tempUB(UB);
@@ -242,9 +228,10 @@ void IndexPeakswithSatellites::exec() {
     }
 
     size_t miller_index_counter = 0;
-    for (size_t i = 0; i < n_peaks; i++) {
-      if (peaks[i].getRunNumber() == run) {
-        peaks[i].setHKL(miller_indices[miller_index_counter]);
+
+    for (Peak peak : peaks) {
+      if (peak.getRunNumber() == run) {
+        peak.setHKL(miller_indices[miller_index_counter]);
         miller_index_counter++;
       }
     }
@@ -268,7 +255,7 @@ void IndexPeakswithSatellites::exec() {
           k_error = fabs(round(hkl[1]) - hkl[1]);
           l_error = fabs(round(hkl[2]) - hkl[2]);
           main_error += h_error + k_error + l_error;
-        } else if (!CrossTerms) {
+        } else if (!crossTerms) {
           for (int order = -maxOrder; order <= maxOrder; order++) {
             if (order == 0)
               continue; // exclude order 0
@@ -321,23 +308,28 @@ void IndexPeakswithSatellites::exec() {
             }
           }
         } else {
+          DblMatrix offsetsMat(3, 3);
+          offsetsMat.setRow(0, offsets1);
+          offsetsMat.setRow(1, offsets2);
+          offsetsMat.setRow(2, offsets3);
           for (int m = -maxOrder; m <= maxOrder; m++)
             for (int n = -maxOrder; n <= maxOrder; n++)
               for (int p = -maxOrder; p <= maxOrder; p++) {
                 if (m == 0 && n == 0 && p == 0)
                   continue; // exclude 0,0,0
                 V3D hkl1(hkl);
-                hkl1[0] -= m * offsets1[0] + n * offsets2[0] + p * offsets3[0];
-                hkl1[1] -= m * offsets1[1] + n * offsets2[1] + p * offsets3[1];
-                hkl1[2] -= m * offsets1[2] + n * offsets2[2] + p * offsets3[2];
+                V3D mnp = V3D(m, n, p);
+                hkl1 -= offsetsMat * mnp;
                 if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
                   peaks[i].setIntHKL(hkl1);
                   peaks[i].setIntMNP(V3D(m, n, p));
                   sate_indexed++;
-                  h_error = fabs(round(hkl1[0]) - hkl1[0]);
-                  k_error = fabs(round(hkl1[1]) - hkl1[1]);
-                  l_error = fabs(round(hkl1[2]) - hkl1[2]);
-                  satellite_error += h_error + k_error + l_error;
+
+                  V3D intHkl = hkl1;
+                  intHkl.round();
+                  hkl1 = intHkl - hkl1;
+                  satellite_error +=
+                      fabs(hkl1[0]) + fabs(hkl1[1]) + fabs(hkl1[2]);
                 }
               }
         }
@@ -368,6 +360,8 @@ void IndexPeakswithSatellites::exec() {
                  << main_error << '\n';
   g_log.notice() << "Average error in h,k,l for indexed satellite peaks =  "
                  << satellite_error << '\n';
+  // Show the lattice parameters
+  g_log.notice() << o_lattice << "\n";
 
   // Save output properties
   setProperty("TotalNumIndexed", total_indexed);
@@ -375,9 +369,7 @@ void IndexPeakswithSatellites::exec() {
   setProperty("SateNumIndexed", sate_indexed);
   setProperty("MainError", main_error);
   setProperty("SatelliteError", satellite_error);
-  // Show the lattice parameters
-  g_log.notice() << o_lattice << "\n";
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

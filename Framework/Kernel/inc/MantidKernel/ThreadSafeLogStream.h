@@ -10,10 +10,10 @@
 #include <Poco/Message.h>
 #include <Poco/Thread.h>
 
-#include <map>
-#include <string>
 #include <iosfwd>
+#include <map>
 #include <mutex>
+#include <string>
 
 // Forward Declare
 namespace Poco {
@@ -160,7 +160,7 @@ public:
   /// Sets the priority for log messages.
   ThreadSafeLogStream &priority(Poco::Message::Priority priority);
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // MANTID_KERNEL_THREADSAFELOGSTREAM

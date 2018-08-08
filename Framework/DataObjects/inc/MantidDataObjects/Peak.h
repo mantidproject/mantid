@@ -51,16 +51,16 @@ public:
   /// Copy constructor
   Peak(const Peak &other);
 
-// MSVC 2015/17 can build with noexcept = default however
-// intellisense still incorrectly reports this as an error despite compiling.
-// https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
-// For that reason we still use the supplied default which should be noexcept
-// once the above is fixed we can remove this workaround
+  // MSVC 2015/17 can build with noexcept = default however
+  // intellisense still incorrectly reports this as an error despite compiling.
+  // https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
+  // For that reason we still use the supplied default which should be noexcept
+  // once the above is fixed we can remove this workaround
 
 #if defined(_MSC_VER) && _MSC_VER <= 1910
   Peak(Peak &&) = default;
   Peak &operator=(Peak &&) = default;
-#elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
+#elif ((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
   // The noexcept default declaration was fixed in GCC 4.9.0
   // so for versions 4.8.x and below use default only
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
@@ -154,7 +154,7 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setIntMNP(const Mantid::Kernel::V3D m_modStru) override;
+  void setIntMNP(const Mantid::Kernel::V3D modulatedStructure) override;
   Mantid::Kernel::V3D getIntMNP() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
@@ -251,16 +251,10 @@ private:
 
   // keep peak number
   int m_peakNumber;
-  Mantid::Kernel::V3D m_modStru;
+  Mantid::Kernel::V3D m_modulatedStructure;
 
-  /// integer H of the peak
-  int m_intH;
-
-  /// integer K of the peak
-  int m_intK;
-
-  /// integer L of the peak
-  int m_intL;
+  /// integer HKL of the peak
+  std::array<int, 3> m_intHKL;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

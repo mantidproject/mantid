@@ -8,12 +8,12 @@
 //
 
 #include "MantidCrystal/FindUBUsingIndexedPeakswithSatellites.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -58,23 +58,18 @@ void FindUBUsingIndexedPeakswithSatellites::exec() {
   mnp_vectors.reserve(n_peaks);
 
   size_t indexed_count = 0;
-  for (size_t i = 0; i < n_peaks; i++) {
-    V3D hkl(peaks[i].getIntHKL()); // ##### KEEP
-    V3D mnp(peaks[i].getIntMNP());
-    if (mnp[0] != 0 && ModDim == 0)
-      ModDim = 1;
-    if (mnp[1] != 0 && ModDim == 1)
-      ModDim = 2;
-    if (mnp[2] != 0 && ModDim == 2)
-      ModDim = 3;
+  for (const auto peak : peaks) {
+    V3D hkl(peak.getIntHKL()); // ##### KEEP
+    V3D mnp(peak.getIntMNP());
+    ModDim = std::max(ModDim, getModulationDimension(mnp));
 
     if (IndexingUtils::ValidIndex(hkl, 1.0) ||
         IndexingUtils::ValidIndex(mnp, 1.0)) // use tolerance == 1 to
     // just check for (0,0,0,0,0,0)
     {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-      hkl_vectors.emplace_back(hkl[0], hkl[1], hkl[2]);
-      mnp_vectors.emplace_back(mnp[0], mnp[1], mnp[2]);
+      q_vectors.push_back(peak.getQSampleFrame());
+      hkl_vectors.emplace_back(hkl);
+      mnp_vectors.emplace_back(mnp);
       indexed_count++;
     }
   }
@@ -85,90 +80,69 @@ void FindUBUsingIndexedPeakswithSatellites::exec() {
                              "FindUBUsingIndexedPeaks");
   }
 
-  //            g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
-
   if (indexed_count < 4) {
     throw std::runtime_error(
         "At least four linearly independent indexed peaks are needed.");
   }
 
   Matrix<double> UB(3, 3, false);
-  Matrix<double> ModUB(3, 3, false);
+  Matrix<double> modUB(3, 3, false);
   std::vector<double> sigabc(7);
   std::vector<double> sigq(9);
 
-  IndexingUtils::Optimize_6dUB(UB, ModUB, hkl_vectors, mnp_vectors, ModDim,
+  IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors, ModDim,
                                q_vectors, sigabc, sigq);
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {
-    g_log.notice(std::string(
-        "Found Invalid UB...peaks used might not be linearly independent"));
-    g_log.notice(std::string("UB NOT SAVED."));
+    throw std::runtime_error(
+        "Found Invalid UB...peaks used might not be linearly independent");
   } else               // tell user how many would be indexed
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
+    for (const auto peak : peaks) {
+      q_vectors.push_back(peak.getQSampleFrame());
     }
     double tolerance = getProperty("Tolerance");
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
 
-    char logInfo[200];
-    sprintf(
-        logInfo,
-        std::string(
-            "New UB will index %1d main Peaks out of %1d with tolerance %5.3f")
-            .c_str(),
-        num_indexed, n_peaks, tolerance);
-    g_log.notice(std::string(logInfo));
+    std::stringstream stream;
+    stream << "New UB will index " << num_indexed << " main Peaks out of "
+           << n_peaks << " with tolerance " << tolerance << "\n";
+    g_log.notice(stream.str());
 
     OrientedLattice o_lattice;
     o_lattice.setUB(UB);
-    o_lattice.setModUB(ModUB);
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
-    o_lattice.setErrorModHKL(sigq[0], sigq[1], sigq[2], sigq[3], sigq[4],
-                             sigq[5], sigq[6], sigq[7], sigq[8]);
+    o_lattice.setModUB(modUB);
+    o_lattice.setError(sigabc);
+    o_lattice.setErrorModHKL(sigq);
 
-    // Show the modified lattice parameters
-    g_log.notice() << o_lattice << "\n";
-    g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
-
-    if (ModDim == 1) {
-      g_log.notice() << "Modulation Vector 1: " << o_lattice.getModVec(1)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 1 error: " << o_lattice.getVecErr(1)
-                     << "\n";
-    }
-    if (ModDim == 2) {
-      g_log.notice() << "Modulation Vector 1: " << o_lattice.getModVec(1)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 1 error: " << o_lattice.getVecErr(1)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 2: " << o_lattice.getModVec(2)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 2 error: " << o_lattice.getVecErr(2)
-                     << "\n";
-    }
-    if (ModDim == 3) {
-      g_log.notice() << "Modulation Vector 1: " << o_lattice.getModVec(1)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 1 error: " << o_lattice.getVecErr(1)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 2: " << o_lattice.getModVec(2)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 2 error: " << o_lattice.getVecErr(2)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 3: " << o_lattice.getModVec(3)
-                     << "\n";
-      g_log.notice() << "Modulation Vector 3 error: " << o_lattice.getVecErr(3)
-                     << "\n";
-    }
+    logLattice(o_lattice, ModDim);
 
     ws->mutableSample().setOrientedLattice(&o_lattice);
   }
 }
-} // namespace Mantid
+void FindUBUsingIndexedPeakswithSatellites::logLattice(
+    OrientedLattice &o_lattice, int &ModDim) {
+  // Show the modified lattice parameters
+  g_log.notice() << o_lattice << "\n";
+  g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
+  for (int i = 0; i < ModDim; i++) {
+    g_log.notice() << "Modulation Vector 1: " << o_lattice.getModVec(i) << "\n";
+    g_log.notice() << "Modulation Vector 1 error: " << o_lattice.getVecErr(i)
+                   << "\n";
+  }
+}
+int FindUBUsingIndexedPeakswithSatellites::getModulationDimension(V3D &mnp) {
+  int ModDim = 0;
+  if (mnp[0] != 0 && ModDim == 0)
+    ModDim = 1;
+  if (mnp[1] != 0 && ModDim == 1)
+    ModDim = 2;
+  if (mnp[2] != 0 && ModDim == 2)
+    ModDim = 3;
+  return ModDim;
+}
 } // namespace Crystal
+} // namespace Mantid

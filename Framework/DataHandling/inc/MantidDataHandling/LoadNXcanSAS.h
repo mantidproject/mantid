@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADNXCANSAS_H_
 #define MANTID_DATAHANDLING_LOADNXCANSAS_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace H5 {
 class Group;

@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_PREDICTSATELLITEPEAKS_H_
 #define MANTID_CRYSTAL_PREDICTSATELLITEPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -68,11 +68,20 @@ private:
   Kernel::V3D getOffsetVector(const std::string &label);
   void predictOffsets(DataObjects::PeaksWorkspace_sptr Peaks,
                       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
-                      Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl,
+                      int iVector, Kernel::V3D offsets, int &maxOrder,
+                      Kernel::V3D &hkl,
                       Geometry::HKLFilterWavelength &lambdaFilter,
                       bool &includePeaksInRange, bool &includeOrderZero,
                       int &seqNum,
                       std::vector<std::vector<int>> &AlreadyDonePeaks);
+  void predictOffsetsWithCrossTerms(
+      DataObjects::PeaksWorkspace_sptr Peaks,
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
+      Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3,
+      int &maxOrder, Kernel::V3D &hkl,
+      Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
+      bool &includeOrderZero, int &seqNum,
+      std::vector<std::vector<int>> &AlreadyDonePeaks);
 };
 
 } // namespace Crystal

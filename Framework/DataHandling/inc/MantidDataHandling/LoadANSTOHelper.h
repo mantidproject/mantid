@@ -6,8 +6,8 @@
 //---------------------------------------------------
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses.h"
 
 #define TarTypeFlag_NormalFile '0'
@@ -256,9 +256,9 @@ public:
                      const void *buffer, size_t size);
 };
 
-} // Tar
-} // ANSTO
-} // DataHandling
-} // Mantid
+} // namespace Tar
+} // namespace ANSTO
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // DATAHANDING_ANSTO_H_

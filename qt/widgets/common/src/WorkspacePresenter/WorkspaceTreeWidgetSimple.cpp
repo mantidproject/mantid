@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include <MantidQtWidgets/Common/MantidTreeWidget.h>
 #include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
-#include "MantidQtWidgets/Common/MantidTreeModel.h"
 
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/FileProperty.h>

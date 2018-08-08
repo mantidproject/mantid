@@ -1,19 +1,19 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
-#include <stdexcept>
+#include "MantidKernel/V3D.h"
+#include <cfloat>
 #include <iomanip>
 #include <ios>
-#include <cfloat>
+#include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Geometry {
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 /** Default constructor.
  \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
@@ -338,6 +338,8 @@ void UnitCell::setError(double _aerr, double _berr, double _cerr,
   }
 }
 
+void UnitCell::setError(std::vector<double> &err) { errorda = err; }
+
 void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
                          double _dk2, double _dl2, double _dh3, double _dk3,
                          double _dl3) {
@@ -427,59 +429,26 @@ void UnitCell::setModerr3(double _dh3err, double _dk3err, double _dl3err) {
 }
 
 const Kernel::V3D UnitCell::getModVec(int j) const {
-  return V3D(getdh(j), getdk(j), getdl(j));
+  return V3D(getDh(j), getDk(j), getDl(j));
 }
 
 const Kernel::V3D UnitCell::getVecErr(int j) const {
-  return V3D(getdherr(j), getdkerr(j), getdlerr(j));
+  return V3D(getDhErr(j), getDkErr(j), getDlErr(j));
 }
-
-/*
-const Kernel::V3D &UnitCell::getModVec2() const
-{
-    return V3D (getdh2(),getdk2(),getdl2());
-}
-
-const Kernel::V3D &UnitCell::getModVec3() const
-{
-    return V3D (getdh3(),getdk3(),getdl3());
-}
-*/
 
 const Kernel::DblMatrix &UnitCell::getModHKL() const { return ModHKL; }
 
-double UnitCell::getdh(int j) const { return ModHKL[0][j - 1]; }
+double UnitCell::getDh(int j) const { return ModHKL[0][j - 1]; }
 
-double UnitCell::getdk(int j) const { return ModHKL[1][j - 1]; }
+double UnitCell::getDk(int j) const { return ModHKL[1][j - 1]; }
 
-double UnitCell::getdl(int j) const { return ModHKL[2][j - 1]; }
+double UnitCell::getDl(int j) const { return ModHKL[2][j - 1]; }
 
-double UnitCell::getdherr(int j) const { return errorModHKL[0][j - 1]; }
+double UnitCell::getDhErr(int j) const { return errorModHKL[0][j - 1]; }
 
-double UnitCell::getdkerr(int j) const { return errorModHKL[1][j - 1]; }
+double UnitCell::getDkErr(int j) const { return errorModHKL[1][j - 1]; }
 
-double UnitCell::getdlerr(int j) const { return errorModHKL[2][j - 1]; }
-
-/*
-int UnitCell::getModDim()
-{
-    if (getdh(1)==0 && getdk(1)==0 && getdl(1)==0)
-}
-*/
-
-/*
-double UnitCell::getdh2() const { return ModHKL[0][1]; }
-
-double UnitCell::getdk2() const { return ModHKL[1][1]; }
-
-double UnitCell::getdl2() const { return ModHKL[2][1]; }
-
-double UnitCell::getdh3() const { return ModHKL[0][2]; }
-
-double UnitCell::getdk3() const { return ModHKL[1][2]; }
-
-double UnitCell::getdl3() const { return ModHKL[2][2]; }
-*/
+double UnitCell::getDlErr(int j) const { return errorModHKL[2][j - 1]; }
 
 /** Set lattice parameter
  @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
@@ -657,17 +626,6 @@ void UnitCell::recalculate() {
   calculateB();
 }
 
-/// Private function to calculate #G matrix
-
-/*
-        void UnitCell::calculateModVec()
-        {
-            ModVec1(ModHKL[0][0],ModHKL[1][0],ModHKL[2][0]);
-            ModVec1(ModHKL[0][1],ModHKL[1][1],ModHKL[2][1]);
-            ModVec1(ModHKL[0][2],ModHKL[1][2],ModHKL[2][2]);
-        }
- */
-
 void UnitCell::calculateG() {
   G[0][0] = da[0] * da[0];
   G[1][1] = da[1] * da[1];
@@ -731,7 +689,8 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
   if (NewGstar.numRows() != 3 || NewGstar.numCols() != 3) {
     std::ostringstream msg;
     msg << "UnitCell::recalculateFromGstar - Expected a 3x3 matrix but was "
-           "given a " << NewGstar.numRows() << "x" << NewGstar.numCols();
+           "given a "
+        << NewGstar.numRows() << "x" << NewGstar.numCols();
     throw std::invalid_argument(msg.str());
   }
 
@@ -813,5 +772,5 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
   }
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

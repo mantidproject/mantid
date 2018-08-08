@@ -1,14 +1,14 @@
 #ifndef MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 #define MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 
-#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "DllOption.h"
-#include <QHash>
-#include <QSignalMapper>
-#include <QGridLayout>
-#include <QListWidget>
-#include <QLineEdit>
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include <QCheckBox>
+#include <QGridLayout>
+#include <QHash>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QSignalMapper>
 #include <QString>
 
 #include "MantidAPI/FrameworkManager.h"
@@ -100,7 +100,7 @@ private slots:
   void setFileName(int row);
   void saveFileBrowse();
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_

@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_UNITCELL_H_
 #define MANTID_GEOMETRY_UNITCELL_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
@@ -119,22 +119,14 @@ public:
 
   const Kernel::V3D getModVec(int j) const;
   const Kernel::V3D getVecErr(int j) const;
-  //            const Kernel::V3D &getModVec2() const;
-  //            const Kernel::V3D &getModVec3() const;
   const Kernel::DblMatrix &getModHKL() const;
-  double getdh(int j) const;
-  double getdk(int j) const;
-  double getdl(int j) const;
+  double getDh(int j) const;
+  double getDk(int j) const;
+  double getDl(int j) const;
 
-  double getdherr(int j) const;
-  double getdkerr(int j) const;
-  double getdlerr(int j) const;
-  //            double getdh2() const;
-  //            double getdk2() const;
-  //            double getdl2() const;
-  //            double getdh3() const;
-  //            double getdk3() const;
-  //            double getdl3() const;
+  double getDhErr(int j) const;
+  double getDkErr(int j) const;
+  double getDlErr(int j) const;
 
   void set(double _a, double _b, double _c, double _alpha, double _beta,
            double _gamma, const int angleunit = angDegrees);
@@ -148,6 +140,7 @@ public:
   void setError(double _aerr, double _berr, double _cerr, double _alphaerr,
                 double _betaerr, double _gammaerr,
                 const int angleunit = angDegrees);
+  void setError(std::vector<double> &err);
   void setErrora(double _aerr);
   void setErrorb(double _berr);
   void setErrorc(double _cerr);
@@ -223,7 +216,6 @@ protected:
   void calculateGstar();
   void calculateReciprocalLattice();
   void calculateB();
-  //            void calculateModVec();
 
   virtual void recalculate();
 };
@@ -234,7 +226,7 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &out,
 MANTID_GEOMETRY_DLL UnitCell strToUnitCell(const std::string &unitCellString);
 MANTID_GEOMETRY_DLL std::string unitCellToStr(const UnitCell &unitCell);
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_UNITCELL_H_ */

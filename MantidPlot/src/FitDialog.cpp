@@ -775,8 +775,8 @@ void FitDialog::showFitPage() {
   int aux = parameters;
   if (aux > 7)
     aux = 7;
-  boxParams->setMinimumHeight(
-      4 + (aux + 1) * boxParams->horizontalHeader()->height());
+  boxParams->setMinimumHeight(4 + (aux + 1) *
+                                      boxParams->horizontalHeader()->height());
 
   // QLocale locale = app->locale();
   int prec = boxPrecision->value();

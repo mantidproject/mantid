@@ -1,7 +1,7 @@
 #include "MantidICat/CatalogLogout.h"
-#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/CatalogManager.h"
 
 namespace Mantid {
 namespace ICat {
@@ -39,5 +39,5 @@ void CatalogLogout::exec() {
     }
   }
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

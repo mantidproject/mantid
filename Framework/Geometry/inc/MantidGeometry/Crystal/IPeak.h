@@ -1,12 +1,12 @@
 #ifndef MANTID_API_IPEAK_H_
 #define MANTID_API_IPEAK_H_
 
+#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -102,7 +102,7 @@ public:
   virtual const Mantid::Geometry::PeakShape &getPeakShape() const = 0;
 };
 
+} // namespace Geometry
 } // namespace Mantid
-} // namespace API
 
 #endif /* MANTID_API_IPEAK_H_ */

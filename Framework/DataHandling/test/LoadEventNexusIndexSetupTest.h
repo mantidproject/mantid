@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
 #define MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/WorkspaceCreation.h"

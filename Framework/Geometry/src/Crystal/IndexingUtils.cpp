@@ -1,33 +1,33 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
-#include "MantidKernel/Quat.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Quat.h"
+#include <Eigen/Geometry>
 #include <algorithm>
-#include <cmath>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/cast.hpp>
+#include <cmath>
 #include <stdexcept>
-#include <Eigen/Geometry>
 
 extern "C" {
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_real.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_sys.h>
 #include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_fft_real.h>
 }
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Matrix;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 namespace {
 const constexpr double DEG_TO_RAD = M_PI / 180.;
 const constexpr double RAD_TO_DEG = 180. / M_PI;
-}
+} // namespace
 
 /**
   STATIC method Find_UB: Calculates the matrix that most nearly indexes
@@ -815,7 +815,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
                                     std::vector<double> &sigabc,
                                     std::vector<double> &sigq) {
 
-  if (ModDim != 1 && ModDim != 2 && ModDim != 3)
+  if (ModDim <= 0 || ModDim > 3)
     throw std::invalid_argument("invalid Value for Modulation Dimension");
 
   double result = 0;
@@ -871,39 +871,36 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
   UBinv.Invert();
 
   if (ModDim == 1) {
-    sigq[0] = sqrt(delta) * latOrig[0];
-    sigq[1] = sqrt(delta) * latOrig[1];
-    sigq[2] = sqrt(delta) * latOrig[2];
-    sigq[3] = 0;
-    sigq[4] = 0;
-    sigq[5] = 0;
-    sigq[6] = 0;
-    sigq[7] = 0;
-    sigq[8] = 0;
+    for (size_t i = 0; i < 3; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i];
+    }
+    for (size_t i = 3; i < 9; i++) {
+      sigq[i] = 0;
+    }
   }
 
   if (ModDim == 2) {
-    sigq[0] = sqrt(delta) * latOrig[0];
-    sigq[1] = sqrt(delta) * latOrig[1];
-    sigq[2] = sqrt(delta) * latOrig[2];
-    sigq[3] = sqrt(delta) * latOrig[0];
-    sigq[4] = sqrt(delta) * latOrig[1];
-    sigq[5] = sqrt(delta) * latOrig[2];
-    sigq[6] = 0;
-    sigq[7] = 0;
-    sigq[8] = 0;
+    for (size_t i = 0; i < 3; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i];
+    }
+    for (size_t i = 3; i < 6; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i - 3];
+    }
+    for (size_t i = 6; i < 9; i++) {
+      sigq[i] = 0;
+    }
   }
 
   if (ModDim == 3) {
-    sigq[0] = sqrt(delta) * latOrig[0];
-    sigq[1] = sqrt(delta) * latOrig[1];
-    sigq[2] = sqrt(delta) * latOrig[2];
-    sigq[3] = sqrt(delta) * latOrig[0];
-    sigq[4] = sqrt(delta) * latOrig[1];
-    sigq[5] = sqrt(delta) * latOrig[2];
-    sigq[6] = sqrt(delta) * latOrig[0];
-    sigq[7] = sqrt(delta) * latOrig[1];
-    sigq[8] = sqrt(delta) * latOrig[2];
+    for (size_t i = 0; i < 3; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i];
+    }
+    for (size_t i = 3; i < 6; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i - 3];
+    }
+    for (size_t i = 6; i < 9; i++) {
+      sigq[i] = sqrt(delta) * latOrig[i - 6];
+    }
   }
 
   return delta;
@@ -984,7 +981,7 @@ double IndexingUtils::Optimize_6dUB(DblMatrix &UB, DblMatrix &ModUB,
                                 "of q_vectors");
   }
 
-  if (ModDim != 1 && ModDim != 2 && ModDim != 3)
+  if (ModDim <= 0 || ModDim > 3)
     throw std::invalid_argument("invalid Value for Modulation Dimension");
 
   gsl_matrix *H_transpose = gsl_matrix_alloc(hkl_vectors.size(), ModDim + 3);
@@ -2917,14 +2914,14 @@ int IndexingUtils::GetModulationVectors(const DblMatrix &UB,
   ModVec3 = o_lattice.getModVec(3);
 
   int ModDim = 0;
-  if (o_lattice.getdh(1) != 0.0 || o_lattice.getdk(1) != 0.0 ||
-      o_lattice.getdl(1) != 0.0)
+  if (o_lattice.getDh(1) != 0.0 || o_lattice.getDk(1) != 0.0 ||
+      o_lattice.getDl(1) != 0.0)
     ModDim = 1;
-  if (o_lattice.getdh(2) != 0.0 || o_lattice.getdk(2) != 0.0 ||
-      o_lattice.getdl(2) != 0.0)
+  if (o_lattice.getDh(2) != 0.0 || o_lattice.getDk(2) != 0.0 ||
+      o_lattice.getDl(2) != 0.0)
     ModDim = 2;
-  if (o_lattice.getdh(3) != 0.0 || o_lattice.getdk(3) != 0.0 ||
-      o_lattice.getdl(3) != 0.0)
+  if (o_lattice.getDh(3) != 0.0 || o_lattice.getDk(3) != 0.0 ||
+      o_lattice.getDl(3) != 0.0)
     ModDim = 3;
 
   return ModDim;
@@ -2939,10 +2936,7 @@ bool IndexingUtils::GetModulationVector(const DblMatrix &UB,
 
   ModVec = o_lattice.getModVec(j);
 
-  if (ModVec[0] != 0.0 || ModVec[1] != 0.0 || ModVec[2] != 0.0)
-    return true;
-  else
-    return false;
+  return (ModVec[0] != 0.0 || ModVec[1] != 0.0 || ModVec[2] != 0.0);
 }
 
 /**
