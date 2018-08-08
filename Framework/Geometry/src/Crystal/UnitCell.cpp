@@ -338,6 +338,8 @@ void UnitCell::setError(double _aerr, double _berr, double _cerr,
   }
 }
 
+void UnitCell::setError(std::vector<double> &err) { errorda = err; }
+
 void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
                          double _dk2, double _dl2, double _dh3, double _dk3,
                          double _dl3) {

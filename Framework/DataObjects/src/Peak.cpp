@@ -794,6 +794,7 @@ void Peak::setHKL(double H, double K, double L) {
   m_H = H;
   m_K = K;
   m_L = L;
+  setIntHKL(V3D(m_H, m_K, m_L));
 }
 
 /** Reset all three H,K,L indices of the peak to values before setHKL */
@@ -803,6 +804,7 @@ void Peak::resetHKL() {
   m_H = m_orig_H;
   m_K = m_orig_K;
   m_L = m_orig_L;
+  setIntHKL(V3D(m_H, m_K, m_L));
 }
 
 /** Set all HKL
@@ -818,6 +820,7 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
   m_H = HKL.X();
   m_K = HKL.Y();
   m_L = HKL.Z();
+  setIntHKL(HKL);
 }
 
 /** Set int HKL

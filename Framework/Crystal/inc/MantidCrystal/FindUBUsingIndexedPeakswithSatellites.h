@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -63,6 +64,8 @@ private:
 
   /// Run the algorithm
   void exec() override;
+  void logLattice(Geometry::OrientedLattice &o_lattice, int& ModDim);
+  int getModulationDimension(Kernel::V3D &mnp);
 };
 
 } // namespace Crystal

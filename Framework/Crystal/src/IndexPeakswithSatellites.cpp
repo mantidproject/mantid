@@ -135,42 +135,29 @@ void IndexPeakswithSatellites::exec() {
   vector<double> offsets2 = getProperty("ModVector2");
   vector<double> offsets3 = getProperty("ModVector3");
   int maxOrder = getProperty("MaxOrder");
+  std::vector<double> zeroes(3, 0.);
   if (offsets1.empty()) {
-    offsets1.push_back(0.0);
-    offsets1.push_back(0.0);
-    offsets1.push_back(0.0);
+    offsets1 = zeroes;
   }
   if (offsets2.empty()) {
-    offsets2.push_back(0.0);
-    offsets2.push_back(0.0);
-    offsets2.push_back(0.0);
+    offsets2 = zeroes;
   }
   if (offsets3.empty()) {
-    offsets3.push_back(0.0);
-    offsets3.push_back(0.0);
-    offsets3.push_back(0.0);
+    offsets3 = zeroes;
   }
 
-  ws->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
-  ws->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
-  ws->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
+  auto run = ws->mutableRun();
+  run.addProperty<std::vector<double>>("Offset1", offsets1, true);
+  run.addProperty<std::vector<double>>("Offset2", offsets2, true);
+  run.addProperty<std::vector<double>>("Offset3", offsets3, true);
 
   double total_error = 0;
   // get list of run numbers in this peaks workspace
-  std::vector<int> run_numbers;
-  for (size_t i = 0; i < n_peaks; i++) {
-    int run = peaks[i].getRunNumber();
-    bool found = false;
-    size_t k = 0;
-    while (k < run_numbers.size() && !found) {
-      if (run == run_numbers[k])
-        found = true;
-      else
-        k++;
+      std::unordered_set<int> run_numbers;
+
+    for (Peak peak : peaks) {
+      run_numbers.insert(peak.getRunNumber());
     }
-    if (!found)
-      run_numbers.push_back(run);
-  }
 
   // index the peaks for each run separately, using a UB matrix optimized for
   // that run
@@ -179,9 +166,9 @@ void IndexPeakswithSatellites::exec() {
     std::vector<V3D> miller_indices;
     std::vector<V3D> q_vectors;
 
-    for (size_t i = 0; i < n_peaks; i++) {
-      if (peaks[i].getRunNumber() == run)
-        q_vectors.push_back(peaks[i].getQSampleFrame());
+    for (Peak peak : peaks) {
+      if (peak.getRunNumber() == run)
+        q_vectors.push_back(peak.getQSampleFrame());
     }
 
     Matrix<double> tempUB(UB);
@@ -246,9 +233,10 @@ void IndexPeakswithSatellites::exec() {
     }
 
     size_t miller_index_counter = 0;
-    for (size_t i = 0; i < n_peaks; i++) {
-      if (peaks[i].getRunNumber() == run) {
-        peaks[i].setHKL(miller_indices[miller_index_counter]);
+   
+    for (Peak peak : peaks) {
+      if (peak.getRunNumber() == run) {
+        peak.setHKL(miller_indices[miller_index_counter]);
         miller_index_counter++;
       }
     }

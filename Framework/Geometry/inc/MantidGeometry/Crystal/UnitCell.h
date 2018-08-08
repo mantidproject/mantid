@@ -140,6 +140,7 @@ public:
   void setError(double _aerr, double _berr, double _cerr, double _alphaerr,
                 double _betaerr, double _gammaerr,
                 const int angleunit = angDegrees);
+  void setError(std::vector<double> &err);
   void setErrora(double _aerr);
   void setErrorb(double _berr);
   void setErrorc(double _cerr);
