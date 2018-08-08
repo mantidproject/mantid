@@ -17,13 +17,6 @@ list ( APPEND common_link_libs
   ${PYTHON_LIBRARIES}
 )
 
-# TODO - Should the macro below do this? There is only one ui
-#        file shared between qt4/qt5
-set (UI_FILES dialogs/spectraselectordialog.ui)
-
-install ( FILES ${UI_FILES}
-          DESTINATION     ${LIB_DIR}/mantidqt/dialogs )
-
 # Wrapper module linked against Qt4
 mtd_add_sip_module (
   MODULE_NAME _commonqt4

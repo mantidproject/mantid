@@ -25,5 +25,6 @@ setup(
     name='mantidqt', # must match what is required by workbench setup.py
     version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
     packages=find_packages(exclude=['*.test']),
+    package_data={'mantidqt': ['dialogs/*.ui']},
     @SETUPTOOLS_BUILD_COMMANDS_USE@
 )
