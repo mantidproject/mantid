@@ -2,7 +2,6 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
