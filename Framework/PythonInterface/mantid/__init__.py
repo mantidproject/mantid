@@ -70,12 +70,41 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
 ###############################################################################
 # Ensure the sub package C libraries are loaded
 ###############################################################################
-import mantid.kernel as kernel
-import mantid.geometry as geometry
-import mantid.api as api
-import mantid.dataobjects as dataobjects
-import mantid._plugins as _plugins
-import mantid.plots as plots
+import contextlib as _context
+
+@_context.contextmanager
+def _shared_cextension():
+    """Our extensions need to shared symbols amongst them due to:
+      - the static boost python type registry
+      - static singleton instances marked as weak symbols by clang
+    gcc uses an extension to mark these attributes as globally unique
+    but clang marks them as weak and without RTLD_GLOBAL each shared
+    library has its own copy of each singleton.
+
+    See https://docs.python.org/3/library/sys.html#sys.setdlopenflags
+    """
+    import sys
+    if not sys.platform.startswith('linux'):
+        yield
+        return
+
+    import six
+    if six.PY2:
+        import DLFCN as dl
+    else:
+        import os as dl
+    flags_orig = sys.getdlopenflags()
+    sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
+    yield
+    sys.setdlopenflags(flags_orig)
+
+with _shared_cextension():
+    import mantid.kernel as kernel
+    import mantid.geometry as geometry
+    import mantid.api as api
+    import mantid.dataobjects as dataobjects
+    import mantid._plugins as _plugins
+    import mantid.plots as plots
 
 ###############################################################################
 # Make the aliases from each module accessible in a the mantid namspace
@@ -133,3 +162,6 @@ new_attrs = _simpleapi._translate()
 _plugins.sync_attrs(_simpleapi, new_attrs, plugin_modules)
 
 ################################################################################
+
+from .fitfunctions import _attach_wrappers
+_attach_wrappers(_simpleapi)

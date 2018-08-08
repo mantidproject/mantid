@@ -100,5 +100,5 @@ const API::IFunctionMD &MDResolutionConvolution::getFittingFunction() const {
 //-------------------------------------------------------------------------
 // Private members
 //-------------------------------------------------------------------------
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

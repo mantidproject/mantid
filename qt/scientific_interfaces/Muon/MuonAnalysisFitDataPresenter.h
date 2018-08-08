@@ -2,11 +2,11 @@
 #define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
 
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
+#include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 #include "MuonAnalysisDataLoader.h"
 #include "MuonAnalysisHelper.h"
 #include "MuonAnalysisOptionTab.h"
-#include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
-#include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 #include <QObject>
 #include <boost/optional/optional.hpp>
 
@@ -19,7 +19,7 @@ namespace Mantid {
 namespace API {
 class Grouping;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,7 +33,7 @@ public:
   int run;          // run number
   QString filePath; // path to file - may be a temp file
 };
-}
+} // namespace Muon
 
 /** MuonAnalysisFitDataPresenter : Updates fit browser from data widget
 
@@ -121,7 +121,7 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
-  void storeNormalization(std::string wsName, bool addToTable) const;
+
 signals:
   void setChosenGroupSignal(const QString &group);
   void setChosenPeriodSignal(const QString &period);
@@ -199,6 +199,6 @@ private:
   boost::optional<Muon::CurrentRun> m_currentRun;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_ */

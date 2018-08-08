@@ -1,28 +1,28 @@
+#include "MuonAnalysisFitDataPresenter.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MuonAnalysisFitDataPresenter.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include "MuonAnalysisHelper.h"
 #include "MuonSequentialFitDialog.h"
-#include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
 #include <boost/lexical_cast.hpp>
 
 #include "MantidAPI/ITableWorkspace.h"
 
-using MantidQt::MantidWidgets::IMuonFitDataModel;
-using MantidQt::MantidWidgets::IMuonFitDataSelector;
-using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
 using Mantid::API::WorkspaceGroup;
+using MantidQt::MantidWidgets::IMuonFitDataModel;
+using MantidQt::MantidWidgets::IMuonFitDataSelector;
+using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using RebinType =
     MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType;
 
@@ -40,9 +40,8 @@ const size_t RAW_SUFFIX_LENGTH(4);
 bool isRawData(const std::string &name) {
   const size_t nameLength = name.length();
   if (nameLength > RAW_SUFFIX_LENGTH) {
-    return 0 ==
-           name.compare(nameLength - RAW_SUFFIX_LENGTH, RAW_SUFFIX_LENGTH,
-                        RAW_DATA_SUFFIX);
+    return 0 == name.compare(nameLength - RAW_SUFFIX_LENGTH, RAW_SUFFIX_LENGTH,
+                             RAW_DATA_SUFFIX);
   } else {
     return false;
   }
@@ -56,7 +55,7 @@ std::string removeRawSuffix(const std::string &name) {
     return name;
   }
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -235,6 +234,22 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
         AnalysisDataService::Instance().add(name, ws);
         if (!groupLabel.empty()) {
           MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
+          if (Mantid::API::AnalysisDataService::Instance().doesExist(
+                  "tmp_unNorm")) {
+            const std::string unnorm = "_unNorm";
+            std::string wsName = name;
+            auto raw = wsName.find("_Raw");
+
+            if (raw == std::string::npos) {
+              wsName += unnorm;
+            } else {
+              wsName.insert(raw, unnorm);
+            }
+
+            Mantid::API::AnalysisDataService::Instance().rename("tmp_unNorm",
+                                                                wsName);
+            MuonAnalysisHelper::groupWorkspaces(groupLabel, {wsName});
+          }
         }
       }
     }
@@ -381,60 +396,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 
   return workspaceNames;
 }
-/**
-* Stores the normalization into the table WS
-* If the workspace is already in the table
-* do nothing.
-* @param name :: the name of the workspace to add.
-* @param addToTable :: if to add the normalization data
-* to the MuonAnalysisTFNormalizations table
-*/
-void MuonAnalysisFitDataPresenter::storeNormalization(std::string name,
-                                                      bool addToTable) const {
-  if (addToTable) {
-    if (!Mantid::API::AnalysisDataService::Instance().doesExist(
-            "MuonAnalysisTFNormalizations")) {
-      Mantid::API::ITableWorkspace_sptr table =
-          Mantid::API::WorkspaceFactory::Instance().createTable();
-      AnalysisDataService::Instance().addOrReplace(
-          "MuonAnalysisTFNormalizations", table);
-      table->addColumn("double", "norm");
-      table->addColumn("str", "name");
-      table->addColumn("str", "method");
-    }
 
-    Mantid::API::ITableWorkspace_sptr table =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                "MuonAnalysisTFNormalizations"));
-    auto colName = table->getColumn("name");
-    if (table->rowCount() > 1) {
-      std::string tmp = name;
-      // stored with ; instead of spaces
-      std::replace(tmp.begin(), tmp.end(), ' ', ';');
-      for (size_t j = 0; j < table->rowCount(); j++) {
-        if (colName->cell<std::string>(j) == tmp) { // already exists
-          return;
-        }
-      }
-    }
-
-    Mantid::API::TableRow row = table->appendRow();
-    std::string tmp = name;
-    // spaces stop the string being written
-    std::replace(tmp.begin(), tmp.end(), ' ', ';');
-    // get data
-    if (Mantid::API::AnalysisDataService::Instance().doesExist("__norm__")) {
-      Mantid::API::ITableWorkspace_sptr tmpNorm =
-          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve(
-                  "__norm__"));
-      auto colNorm = tmpNorm->getColumn("norm");
-      // saves data
-      row << (*colNorm)[0] << tmp << "Estimate";
-    }
-  }
-}
 /**
  * Create an analysis workspace given the required name.
  * @param name :: [input] Name of workspace to create (in format INST0001234;
@@ -457,9 +419,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     if (m_currentRun && m_currentRun->run == run) {
       filenames.append(m_currentRun->filePath);
     } else {
-      filenames.append(
-          QString::fromStdString(MuonAnalysisHelper::getRunLabel(
-                                     params.instrument, {run})).append(".nxs"));
+      filenames.append(QString::fromStdString(MuonAnalysisHelper::getRunLabel(
+                                                  params.instrument, {run}))
+                           .append(".nxs"));
     }
   }
   try {
@@ -494,6 +456,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     analysisOptions.timeLimits.second = m_dataSelector->getEndTime();
     analysisOptions.groupPairName = params.itemName;
     analysisOptions.plotType = params.plotType;
+    analysisOptions.wsName = name;
     outputWS =
         m_dataLoader.createAnalysisWorkspace(correctedData, analysisOptions);
 
@@ -501,13 +464,6 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     std::ostringstream err;
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
-  }
-  const auto grouping = m_grouping;
-  auto groupName = params.itemName;
-  if (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
-                groupName) != grouping.groupNames.end()) {
-
-    storeNormalization(name, true);
   }
 
   return outputWS;
@@ -581,7 +537,8 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
     } catch (const Mantid::Kernel::Exception::NotFoundError &notFound) {
       g_log.error()
           << "Failed to process fitted workspaces as they could not be found ("
-          << groupName << ").\n" << notFound.what();
+          << groupName << ").\n"
+          << notFound.what();
     }
   }
 }

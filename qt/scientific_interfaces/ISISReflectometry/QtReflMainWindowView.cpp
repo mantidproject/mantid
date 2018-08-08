@@ -1,12 +1,12 @@
 #include "QtReflMainWindowView.h"
+#include "MantidKernel/make_unique.h"
 #include "QtReflEventTabView.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
 #include "QtReflSettingsTabView.h"
-#include "ReflSaveTabPresenter.h"
-#include "ReflMainWindowPresenter.h"
 #include "ReflAsciiSaver.h"
-#include "MantidKernel/make_unique.h"
+#include "ReflMainWindowPresenter.h"
+#include "ReflSaveTabPresenter.h"
 
 #include <QMessageBox>
 
@@ -17,13 +17,13 @@ DECLARE_SUBWINDOW(QtReflMainWindowView)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
     : UserSubWindow(parent) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 QtReflMainWindowView::~QtReflMainWindowView() {}
 
 /**
@@ -51,8 +51,8 @@ void QtReflMainWindowView::helpPressed() {
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter
-* @return :: A pointer to the presenter managing the 'Runs' tab
-*/
+ * @return :: A pointer to the presenter managing the 'Runs' tab
+ */
 IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
 
   QtReflRunsTabView *runsTab = new QtReflRunsTabView(this);
@@ -64,8 +64,8 @@ IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
 }
 
 /** Creates the 'Event Handling' tab and returns a pointer to its presenter
-* @return :: A pointer to the presenter managing the 'Event Handling' tab
-*/
+ * @return :: A pointer to the presenter managing the 'Event Handling' tab
+ */
 IReflEventTabPresenter *QtReflMainWindowView::createEventTab() {
 
   QtReflEventTabView *eventTab = new QtReflEventTabView(this);
@@ -75,8 +75,8 @@ IReflEventTabPresenter *QtReflMainWindowView::createEventTab() {
 }
 
 /** Creates the 'Settings' tab and returns a pointer to its presenter
-* @return :: A pointer to the presenter managing the 'Settings' tab
-*/
+ * @return :: A pointer to the presenter managing the 'Settings' tab
+ */
 IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 
   QtReflSettingsTabView *settingsTab = new QtReflSettingsTabView(this);
@@ -86,8 +86,8 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 }
 
 /** Creates the 'Save ASCII' tab and returns a pointer to its presenter
-* @return :: A pointer to the presenter managing the 'Save ASCII' tab
-*/
+ * @return :: A pointer to the presenter managing the 'Save ASCII' tab
+ */
 std::unique_ptr<IReflSaveTabPresenter> QtReflMainWindowView::createSaveTab() {
   auto saveTabView = Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
   m_ui.mainTab->addTab(saveTabView.get(), QString("Save ASCII"));
@@ -140,11 +140,11 @@ Handles attempt to close main window
 void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
 
   // Close only if reduction has been paused
-  if (!m_presenter->checkIfProcessing()) {
+  if (!m_presenter->isProcessing()) {
     event->accept();
   } else {
     event->ignore();
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

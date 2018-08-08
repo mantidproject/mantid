@@ -89,9 +89,9 @@
 #define QTPROPERTYBROWSER_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <QWidget>
 #include <QMap>
 #include <QSet>
+#include <QWidget>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -153,7 +153,6 @@ public:
   void propertyRemoved(QtProperty *property, QtProperty *parentProperty) const;
   void propertyInserted(QtProperty *property, QtProperty *parentProperty,
                         QtProperty *afterProperty) const;
-
   QSet<QtProperty *> m_properties;
 };
 
@@ -165,6 +164,7 @@ public:
 
   QSet<QtProperty *> properties() const;
   void clear() const;
+  bool hasProperty(QtProperty *const prop) const;
 
   QtProperty *addProperty(const QString &name = QString());
 Q_SIGNALS:

@@ -29,6 +29,27 @@
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="1000" />
 		</parameter>
+		<parameter name="enable_flat_background_subtraction" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_background_diagnostics" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="elastic_peak_diagnostics_low_threshold" type="number">
+			<value val="0.45" />
+		</parameter>
+		<parameter name="enable_incident_energy_calibration" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_peak_fitting" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_channel_fitting" type="bool">
+			<value val="true" />
+		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="Detector.detsum, duration, monitor1.monsum" />
@@ -43,10 +64,10 @@
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string">
-			<value val="monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2" />
+			<value val="monitor1.time_of_flight_0, monitor1.time_of_flight_1, monitor1.time_of_flight_2, wavelength, Fermi.rotation_speed, Supressor.rotation_speed" />
 		</parameter>
 		<parameter name="sample_logs_fail_tolerances" type="string">
-			<value val="0, 0, 0" />
+			<value val="0, 0, 0, 0.02, 5, 5" />
 		</parameter>
 
 	</component-link>

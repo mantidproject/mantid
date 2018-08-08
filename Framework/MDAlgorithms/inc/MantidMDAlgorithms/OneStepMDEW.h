@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_ONESTEPMDEW_H_
 #define MANTID_MDALGORITHMS_ONESTEPMDEW_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -39,7 +39,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_ONESTEPMDEW_H_ */

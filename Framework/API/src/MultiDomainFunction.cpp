@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/CompositeDomain.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lexical_cast.hpp>
 #include <set>
@@ -13,6 +13,10 @@ namespace Mantid {
 namespace API {
 
 DECLARE_FUNCTION(MultiDomainFunction)
+
+MultiDomainFunction::MultiDomainFunction() : m_nDomains(0), m_maxIndex(0) {
+  setAttributeValue("NumDeriv", true);
+}
 
 /**
  * Associate a member function and a domain. The function will only be applied

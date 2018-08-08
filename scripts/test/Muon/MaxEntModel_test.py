@@ -1,6 +1,6 @@
 import sys
 
-from Muon import maxent_model
+from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 import unittest
 

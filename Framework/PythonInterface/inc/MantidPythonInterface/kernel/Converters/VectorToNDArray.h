@@ -52,8 +52,8 @@ struct VectorToNDArray {
     return policy::create1D(cdata);
   }
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_ */

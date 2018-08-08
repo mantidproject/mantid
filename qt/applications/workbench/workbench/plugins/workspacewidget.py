@@ -22,15 +22,14 @@ import functools
 # third-party library imports
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.kernel import Logger
-from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
-from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
+from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from qtpy.QtWidgets import QVBoxLayout
+from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import pcolormesh, plot
-
+from workbench.plotting.figuretype import figure_type, FigureType
+from workbench.plotting.functions import current_figure_or_none, pcolormesh, plot
 
 LOGGER = Logger(b"workspacewidget")
 
@@ -72,18 +71,21 @@ class WorkspaceWidget(PluginWidget):
         super(WorkspaceWidget, self).__init__(parent)
 
         # layout
-        workspacewidget = WorkspaceTreeWidget(MantidTreeModel())
-        self.workspacewidget = workspacewidget
+        self.workspacewidget = WorkspaceTreeWidget()
         layout = QVBoxLayout()
         layout.addWidget(self.workspacewidget)
         self.setLayout(layout)
 
         # behaviour
-        workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                      errors=False))
-        workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                errors=True))
-        workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                           errors=False, overplot=False))
+        self.workspacewidget.overplotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                               errors=False, overplot=True))
+        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                     errors=True, overplot=False))
+        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                         errors=True, overplot=True))
+        self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
 
     # ----------------- Plugin API --------------------
 
@@ -98,19 +100,27 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
-    def _do_plot_spectrum(self, names, errors):
+    def _do_plot_spectrum(self, names, errors, overplot):
         """
         Plot spectra from the selected workspaces
 
         :param names: A list of workspace names
         :param errors: If true then error bars will be plotted on the points
+        :param overplot: If true then the add to the current figure if one
+                         exists and it is a compatible figure
         """
+        if overplot:
+            compatible, error_msg = self._can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+
         try:
-            selection = get_plot_selection(_workspaces_from_names(names), self)
+            selection = get_spectra_selection(_workspaces_from_names(names), self)
             if selection is not None:
                 plot(selection.workspaces, spectrum_nums=selection.spectra,
                      wksp_indices=selection.wksp_indices,
-                     errors=errors)
+                     errors=errors, overplot=overplot)
         except BaseException:
             import traceback
             traceback.print_exc()
@@ -126,3 +136,22 @@ class WorkspaceWidget(PluginWidget):
         except BaseException:
             import traceback
             traceback.print_exc()
+
+    def _can_overplot(self):
+        """
+        Checks if overplotting can proceed with the given options
+
+        :return: A 2-tuple of boolean indicating compatability and
+        a string containing an error message if the current figure is not
+        compatible.
+        """
+        compatible = False
+        msg = "Unable to overplot on currently active plot type.\n" \
+              "Please select another plot."
+        fig = current_figure_or_none()
+        if fig is not None:
+            figtype = figure_type(fig)
+            if figtype is FigureType.Line or figtype is FigureType.Errorbar:
+                compatible, msg = True, None
+
+        return compatible, msg

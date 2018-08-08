@@ -72,13 +72,11 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping{"", "All", "Group", "2_4Grouping", "Column",
-                                    "bank"};
-  declareProperty(
-      "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
-      "Only used if GroupNames is empty: All detectors as one group, Groups "
-      "(Group or East,West for SNAP), 2_4Grouping (SNAP), Columns, detector "
-      "banks");
+  std::vector<std::string> grouping{"",       "All", "Group", "2_4Grouping",
+                                    "Column", "bank"};
+  declareProperty("GroupDetectorsBy", "",
+                  boost::make_shared<StringListValidator>(grouping),
+                  "Only used if GroupNames is empty");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
@@ -86,8 +84,9 @@ void CreateGroupingWorkspace::init() {
                   boost::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
-  declareProperty("ComponentName", "", "Specify the instrument component to "
-                                       "group into a fixed number of groups");
+  declareProperty("ComponentName", "",
+                  "Specify the instrument component to "
+                  "group into a fixed number of groups");
 
   declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -110,6 +109,54 @@ void CreateGroupingWorkspace::init() {
                   "The number of spectra in groups", Direction::Output);
   declareProperty("NumberGroupsResult", EMPTY_INT(), "The number of groups",
                   Direction::Output);
+}
+
+std::map<std::string, std::string> CreateGroupingWorkspace::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  // only allow specifying the instrument in one way
+  int numInstrument = 0;
+  if (!isDefault("InputWorkspace"))
+    numInstrument += 1;
+  if (!isDefault("InstrumentName"))
+    numInstrument += 1;
+  if (!isDefault("InstrumentFilename"))
+    numInstrument += 1;
+  if (numInstrument == 0) {
+    std::string msg("Must supply an instrument");
+    result["InputWorkspace"] = msg;
+    result["InstrumentName"] = msg;
+    result["InstrumentFilename"] = msg;
+  } else if (numInstrument > 1) {
+    std::string msg("Must supply an instrument only one way");
+
+    if (!isDefault("InputWorkspace"))
+      result["InputWorkspace"] = msg;
+    if (!isDefault("InstrumentName"))
+      result["InstrumentName"] = msg;
+    if (!isDefault("InstrumentFilename"))
+      result["InstrumentFilename"] = msg;
+  }
+
+  // only allow specifying the grouping one way
+  int numGroupings = 0;
+  if (!isDefault("GroupNames"))
+    numGroupings += 1;
+  if (!isDefault("GroupDetectorsBy"))
+    numGroupings += 1;
+  if (!isDefault("ComponentName"))
+    numGroupings += 1;
+  if (numGroupings != 1) {
+    std::string msg("Must supply grouping only one way");
+    if (!isDefault("GroupNames"))
+      result["GroupNames"] = msg;
+    if (!isDefault("GroupDetectorsBy"))
+      result["GroupDetectorsBy"] = msg;
+    if (!isDefault("ComponentName"))
+      result["ComponentName"] = msg;
+  }
+
+  return result;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -370,6 +417,8 @@ void CreateGroupingWorkspace::exec() {
       GroupNames = inst->getName();
     } else if (inst->getName() == "SNAP" && grouping == "Group") {
       GroupNames = "East,West";
+    } else if (inst->getName() == "POWGEN" && grouping == "Group") {
+      GroupNames = "South,North";
     } else if (inst->getName() == "SNAP" && grouping == "2_4Grouping") {
       GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
@@ -456,5 +505,5 @@ void CreateGroupingWorkspace::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

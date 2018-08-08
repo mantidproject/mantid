@@ -3,17 +3,20 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
 // forward declarations
+namespace HistogramData {
+class Points;
+}
 namespace Geometry {
 class IDetector;
 class IObject;
 class ParameterMap;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /**
@@ -87,6 +90,11 @@ private:
   void exec() override;
   void execEvent();
 
+  /// Calculates the efficiency correction from the points
+  void computeEfficiencyCorrection(std::vector<double> &effCorrection,
+                                   const HistogramData::Points &wavelength,
+                                   const double expConstant,
+                                   const double scale) const;
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex,
                             const API::SpectrumInfo &spectrumInfo);
@@ -111,21 +119,21 @@ private:
                               const Geometry::IDetector &idet);
 
   /// The user selected (input) workspace
-  API::MatrixWorkspace_const_sptr inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
-  API::MatrixWorkspace_sptr outputWS;
+  API::MatrixWorkspace_sptr m_outputWS;
   /// Map that stores additional properties for detectors
-  const Geometry::ParameterMap *paraMap;
+  const Geometry::ParameterMap *m_paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
   std::map<const Geometry::IObject *, std::pair<double, Kernel::V3D>>
-      shapeCache;
+      m_shapeCache;
   /// Sample position
-  Kernel::V3D samplePos;
+  Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped
-  std::vector<specnum_t> spectraSkipped;
+  std::vector<specnum_t> m_spectraSkipped;
   /// Algorithm progress keeper
-  API::Progress *progress;
+  API::Progress *m_progress;
 };
 
 } // namespace Algorithms

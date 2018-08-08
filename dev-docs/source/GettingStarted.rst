@@ -27,7 +27,12 @@ Install the following:
     * Universal Windows App Development Kits -> Tools and Windows 10 SDK
     * Windows 8.1 and Windows Phone 8.0/8.1 Tools -> Tools and Windows SDKs
 
-* `Git <https://git-scm.com/>`_. After installation open Git Bash and run ``git lfs install``.
+* `Git <https://git-scm.com/>`_.
+
+  * install the latest version and ensure that Git LFS is checked to be included
+  * when the install has completed create a directory for storage of the LFS objects, e.g. ``C:\GitLFSStorage``
+  * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
+ 
 * `CMake <https://cmake.org/download/>`_
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
@@ -50,12 +55,20 @@ Linux
 
 Red Hat/Cent OS/Fedora
 ~~~~~~~~~~~~~~~~~~~~~~
-Follow the `Red Hat instructions <http://download.mantidproject.org/redhat.html>`_ to add the
-stable release yum repository and then install the ``mantid-developer`` package:
+* Follow the `instructions here <https://fedoraproject.org/wiki/EPEL>`_ to enable the EPEL repository
+  for RHEL7
+* Run the following to install the mantid-developer package
 
 .. code-block:: sh
 
-   yum install mantid-developer
+  # Install copr plugin
+  yum install yum-plugin-copr
+
+  # Enable the mantid repo from copr
+  yum copr enable mantid/mantid
+
+  # Install dependencies 
+  yum install mantid-developer
 
 Ubuntu
 ~~~~~~
@@ -70,6 +83,8 @@ package and install it:
    apt install ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
+
+if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
 
 OSX
 ---
@@ -95,3 +110,21 @@ See :ref:`BuildingWithCMake` for information about building Mantid.
 Building VATES
 ##############
 See :ref:`BuildingVATES` for infromation about building VATES.
+
+Archive access
+##############
+
+It is very convenient to be able to access the data archive directly.
+At ISIS, this is automatically done on the Windows machines, however OSX
+requires some extra setup.
+
+OSX
+---
+
+* In Finder "command"+k opens a mounting dialogue
+* For `Server address` enter `smb://isisdatar80/inst$/` hit Connect
+* This should prompt you for federal ID `clrc\....` and password
+* After completing this the drive is now mounted
+* It can be found at `/Volumes/inst$`
+
+**NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.

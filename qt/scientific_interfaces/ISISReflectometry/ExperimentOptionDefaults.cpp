@@ -17,6 +17,7 @@ bool operator==(const ExperimentOptionDefaults &lhs,
          lhs.ScaleFactor == rhs.ScaleFactor &&
          lhs.ProcessingInstructions == rhs.ProcessingInstructions &&
          lhs.ReductionType == rhs.ReductionType &&
+         lhs.IncludePartialBins == rhs.IncludePartialBins &&
          lhs.SummationType == rhs.SummationType &&
          lhs.StitchParams == rhs.StitchParams;
 }
@@ -25,10 +26,11 @@ std::ostream &operator<<(std::ostream &os,
                          ExperimentOptionDefaults const &defaults) {
   os << "ExperimentOptionDefaults: { AnalysisMode: '" << defaults.AnalysisMode
      << ", \nPolarizationAnalysis: '" << defaults.PolarizationAnalysis
-     << "',\nCRho: '" << defaults.CRho << "',\nCAlpha: '" << defaults.CAlpha
-     << "',\nCAp: '" << defaults.CAp << "', \nCPp: '" << defaults.CPp
+     << "',\nRho: '" << defaults.CRho << "',\nAlpha: '" << defaults.CAlpha
+     << "',\nAp: '" << defaults.CAp << "', \nPp: '" << defaults.CPp
      << "',\nSummationType: '" << defaults.SummationType
-     << "', \nReductionType: '" << defaults.ReductionType;
+     << "', \nReductionType: '" << defaults.ReductionType
+     << "', \nIncludePartialBins: '" << defaults.IncludePartialBins;
   if (defaults.TransRunStartOverlap)
     os << "',\nTransRunStartOverlap: " << defaults.TransRunStartOverlap.get();
   if (defaults.TransRunEndOverlap)
@@ -48,5 +50,5 @@ std::ostream &operator<<(std::ostream &os,
   os << "' }" << std::endl;
   return os;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

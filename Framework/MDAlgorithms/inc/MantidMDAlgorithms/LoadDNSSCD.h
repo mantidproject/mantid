@@ -1,14 +1,14 @@
 #ifndef MANTID_MDALGORITHMS_LOADDNSSCD_H_
 #define MANTID_MDALGORITHMS_LOADDNSSCD_H_
 
-#include <vector>
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include <vector>
 
 namespace Mantid {
 namespace MDAlgorithms {

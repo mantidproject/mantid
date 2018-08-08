@@ -13,7 +13,7 @@ from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARM
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType)
+                               SANSInstrument, SANSFacility, DataType, TransmissionType)
 # -------------------------------------------
 # Constants
 # -------------------------------------------
@@ -632,19 +632,20 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         period_as_string = ""
 
     # 3. Detector name
-    move = state.move
-    detectors = move.detectors
-    if reduction_data_type is ISISReductionMode.Merged:
-        detector_name_short = "merged"
-    elif reduction_data_type is ISISReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
-        detector_name_short = det_name if det_name is not None else "hab"
-    elif reduction_data_type is ISISReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
-        detector_name_short = det_name if det_name is not None else "lab"
-    else:
-        raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
-                           "create an output name".format(reduction_data_type))
+    if not transmission:
+        move = state.move
+        detectors = move.detectors
+        if reduction_data_type is ISISReductionMode.Merged:
+            detector_name_short = "merged"
+        elif reduction_data_type is ISISReductionMode.HAB:
+            det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+            detector_name_short = det_name if det_name is not None else "hab"
+        elif reduction_data_type is ISISReductionMode.LAB:
+            det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+            detector_name_short = det_name if det_name is not None else "lab"
+        else:
+            raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
+                               "create an output name".format(reduction_data_type))
 
     # 4. Dimensionality
     reduction = state.reduction
@@ -655,7 +656,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
 
     # 5. Wavelength range
     wavelength = state.wavelength
-    wavelength_range_string = "_" + str(wavelength.wavelength_low) + "_" + str(wavelength.wavelength_high)
+    wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
 
     # 6. Phi Limits
     mask = state.mask
@@ -686,32 +687,71 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
                                  dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
                                  start_time_as_string + end_time_as_string)
-        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string +
-                                      wavelength_range_string + phi_limits_as_string)
+        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
+                                      + phi_limits_as_string)
     else:
         output_workspace_name = (short_run_number_as_string + period_as_string + transmission_name +
                                  wavelength_range_string + phi_limits_as_string + start_time_as_string
                                  + end_time_as_string)
         output_workspace_base_name = (short_run_number_as_string + transmission_name +
-                                      wavelength_range_string + phi_limits_as_string)
+                                      phi_limits_as_string)
     return output_workspace_name, output_workspace_base_name
 
 
-def get_output_name(state, reduction_mode, is_group, suffix=""):
-
+def get_transmission_output_name(state, reduction_mode):
+    user_specified_output_name = state.save.user_specified_output_name
     # Get the standard workspace name
-    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode)
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
+                                                                             transmission=True)
 
+    if user_specified_output_name:
+        output_name = user_specified_output_name + "_trans"
+        output_base_name = output_name
+    else:
+        output_name = workspace_name
+        output_base_name = workspace_base_name
+
+    return output_name, output_base_name
+
+
+def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
+    user_specified_output_name_group = user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
     use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
+
+    # Get the standard workspace name
+    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode)
 
     # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
     if (state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
             and user_specified_output_name:
         use_reduction_mode_as_suffix = True
+
+    if multi_reduction_type and user_specified_output_name:
+        if multi_reduction_type["period"]:
+            period = state.data.sample_scatter_period
+            period_as_string = "p" + str(period)
+            user_specified_output_name = user_specified_output_name + period_as_string
+
+        if multi_reduction_type["event_slice"]:
+            slice_state = state.slice
+            start_time = slice_state.start_time
+            end_time = slice_state.end_time
+            if start_time and end_time:
+                start_time_as_string = '_t%.2f' % start_time[0]
+                end_time_as_string = '_T%.2f' % end_time[0]
+            else:
+                start_time_as_string = ""
+                end_time_as_string = ""
+            user_specified_output_name = user_specified_output_name + start_time_as_string + end_time_as_string
+
+        if multi_reduction_type["wavelength_range"]:
+            wavelength = state.wavelength
+            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(wavelength.wavelength_high[0])
+            user_specified_output_name = user_specified_output_name + wavelength_range_string
 
     # An output name requires special attention when the workspace is part of a multi-period reduction
     # or slice event scan
@@ -722,8 +762,8 @@ def get_output_name(state, reduction_mode, is_group, suffix=""):
         output_base_name = user_specified_output_name
     elif user_specified_output_name and is_group:
         # Deal with data which requires special attention and which has a user-specified name
-        output_name = workspace_name
-        output_base_name = user_specified_output_name
+        output_name = user_specified_output_name
+        output_base_name = user_specified_output_name_group
     elif not user_specified_output_name and is_group:
         output_name = workspace_name
         output_base_name = workspace_base_name
@@ -738,10 +778,10 @@ def get_output_name(state, reduction_mode, is_group, suffix=""):
             output_base_name += "_rear"
         elif reduction_mode is ISISReductionMode.HAB:
             output_name += "_front"
-            output_base_name += "_rear"
+            output_base_name += "_front"
         elif reduction_mode is ISISReductionMode.Merged:
             output_name += "_merged"
-            output_base_name += "_rear"
+            output_base_name += "_merged"
 
     # Add a suffix if the user has specified one
     if user_specified_output_name_suffix:
@@ -872,6 +912,10 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_string += "counts"
     elif partial_type is OutputParts.Norm:
         state_string += "norm"
+    elif partial_type is TransmissionType.Calculated:
+        state_string += "calculated_transmission"
+    elif partial_type is TransmissionType.Unfitted:
+        state_string += "unfitted_transmission"
     return str(get_hash_value(state_string))
 
 
@@ -901,6 +945,21 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
         hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Norm)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
+
+
+def get_transmission_workspaces_from_ads(state, reduction_mode):
+    """
+        Get the reduced can transmission workspace from the ADS if it exists else nothing
+
+        :param state: a SANSState object.
+        :param reduction_mode: the reduction mode which at this point is either HAB or LAB
+        :return: a reduced transmission can object or None.
+        """
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
+    calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)
+    unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
+    return calculated_transmission, unfitted_transmission
 
 
 def write_hash_into_reduced_can_workspace(state, workspace, reduction_mode, partial_type=None):

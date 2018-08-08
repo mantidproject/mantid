@@ -1,11 +1,11 @@
 #include "MantidCrystal/FindClusterFaces.h"
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -16,6 +16,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using Mantid::DataObjects::PeaksWorkspace;
+using Mantid::DataObjects::PeaksWorkspace_sptr;
 
 namespace {
 using namespace Mantid::Crystal;
@@ -25,14 +27,14 @@ using LabelMap = std::map<int, int>;
 using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
 
 /**
-* Create an optional label set for filtering.
-* @param dimensionality : Dimensionality of the workspace.
-* @param emptyLabelId : Label id corresponding to empty.
-* @param filterWorkspace : Peaks workspace to act as filter.
-* @param clusterImage : Image
-* @return (optional) Map of labels to inspect for to the Peaks Index in the
-* peaks workspace which matches the cluster id.
-*/
+ * Create an optional label set for filtering.
+ * @param dimensionality : Dimensionality of the workspace.
+ * @param emptyLabelId : Label id corresponding to empty.
+ * @param filterWorkspace : Peaks workspace to act as filter.
+ * @param clusterImage : Image
+ * @return (optional) Map of labels to inspect for to the Peaks Index in the
+ * peaks workspace which matches the cluster id.
+ */
 OptionalLabelPeakIndexMap
 createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
                           IPeaksWorkspace_sptr filterWorkspace,
@@ -199,7 +201,7 @@ processing.
 void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
                      Progress &progress, IMDHistoWorkspace_sptr &clusterImage,
                      const std::vector<size_t> &imageShape,
-                     IPeaksWorkspace_sptr &filterWorkspace,
+                     PeaksWorkspace_sptr &filterWorkspace,
                      const OptionalLabelPeakIndexMap &optionalAllowedLabels) {
   const int emptyLabelId = 0;
   PeakClusterProjection projection(clusterImage);
@@ -237,7 +239,7 @@ void executeFiltered(IMDIterator *mdIterator, ClusterFaces &localClusterFaces,
 
   } while (mdIterator->next());
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -261,14 +263,14 @@ const std::string FindClusterFaces::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void FindClusterFaces::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input image workspace consisting of cluster ids.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "FilterWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional filtering peaks workspace. Used to restrict face finding to "
       "clusters in image which correspond to peaks in the workspace.");
@@ -296,7 +298,7 @@ void FindClusterFaces::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void FindClusterFaces::exec() {
   IMDHistoWorkspace_sptr clusterImage = getProperty("InputWorkspace");
   const int emptyLabelId = 0;
@@ -308,7 +310,7 @@ void FindClusterFaces::exec() {
   }
 
   // Get the peaks workspace
-  IPeaksWorkspace_sptr filterWorkspace = this->getProperty("FilterWorkspace");
+  PeaksWorkspace_sptr filterWorkspace = this->getProperty("FilterWorkspace");
 
   // Use the peaks workspace to filter to labels of interest
   OptionalLabelPeakIndexMap optionalAllowedLabels = createOptionalLabelFilter(
@@ -375,8 +377,8 @@ void FindClusterFaces::exec() {
     truncatedOutput = true;
     std::stringstream buffer;
     buffer << "More faces found than can be reported given the MaximumRows "
-              "limit. Row limit at: " << maxRows
-           << " Total faces available: " << totalFaces;
+              "limit. Row limit at: "
+           << maxRows << " Total faces available: " << totalFaces;
     g_log.warning(buffer.str());
   }
 

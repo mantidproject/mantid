@@ -46,7 +46,7 @@ public:
 
       // If it's not in the blacklist, add the property to our hints
       if (m_blacklist.find(name) == m_blacklist.end())
-        hints[name] = (*it)->briefDocumentation();
+        hints[name] = (*it)->documentation();
     }
 
     return hints;
@@ -56,7 +56,7 @@ private:
   Mantid::API::IAlgorithm_sptr m_algorithm;
   std::set<std::string> m_blacklist;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGY_H */

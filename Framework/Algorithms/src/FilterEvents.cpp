@@ -14,7 +14,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
@@ -93,9 +92,10 @@ void FilterEvents::init() {
                   "environment log.  This option can make execution of "
                   "algorithm faster.  But it lowers precision.");
 
-  declareProperty("GroupWorkspaces", false, "Option to group all the output "
-                                            "workspaces.  Group name will be "
-                                            "OutputWorkspaceBaseName.");
+  declareProperty("GroupWorkspaces", false,
+                  "Option to group all the output "
+                  "workspaces.  Group name will be "
+                  "OutputWorkspaceBaseName.");
 
   declareProperty("OutputWorkspaceIndexedFrom1", false,
                   "If selected, the minimum output workspace is indexed from 1 "
@@ -396,7 +396,8 @@ void FilterEvents::processAlgorithmProperties() {
   if (m_toGroupWS && (m_outputWSNameBase == m_eventWS->getName())) {
     std::stringstream errss;
     errss << "It is not allowed to group output workspaces into the same name "
-             "(i..e, OutputWorkspaceBaseName = " << m_outputWSNameBase
+             "(i..e, OutputWorkspaceBaseName = "
+          << m_outputWSNameBase
           << ") as the input workspace to filter events from.";
     throw std::invalid_argument(errss.str());
   }
@@ -493,7 +494,6 @@ void FilterEvents::groupOutputWorkspace() {
   std::string groupname = m_outputWSNameBase;
   API::IAlgorithm_sptr groupws =
       createChildAlgorithm("GroupWorkspaces", 0.95, 1.00, true);
-  // groupws->initialize();
   groupws->setAlwaysStoreInADS(true);
   groupws->setProperty("InputWorkspaces", m_wsNames);
   groupws->setProperty("OutputWorkspace", groupname);
@@ -615,7 +615,7 @@ void FilterEvents::copyNoneSplitLogs(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Split all the TimeSeriesProperty sample logs to all the output workspace
+/** Split ALL the TimeSeriesProperty sample logs to all the output workspace
  * @brief FilterEvents::splitTimeSeriesLogs
  * @param int_tsp_vector
  * @param dbl_tsp_vector
@@ -688,6 +688,12 @@ void FilterEvents::splitTimeSeriesLogs(
 }
 
 //----------------------------------------------------------------------------------------------
+/** split one single time-series property (template)
+ * @brief FilterEvents::splitTimeSeriesProperty
+ * @param tsp :: a time series property instance
+ * @param split_datetime_vec :: splitter
+ * @param max_target_index :: maximum number of separated time series
+ */
 template <typename TYPE>
 void FilterEvents::splitTimeSeriesProperty(
     Kernel::TimeSeriesProperty<TYPE> *tsp,
@@ -1188,7 +1194,6 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // workspace name
     std::stringstream wsname;
     if (wsgroup > 0) {
-      //  std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
       int target_name = m_wsGroupdYMap[wsgroup];
       wsname << m_outputWSNameBase << "_" << target_name;
     } else {
@@ -1202,9 +1207,6 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
-
-    // TODO/ISSUE/NOW - How about comment and info similar to
-    // createOutputWorkspaces()?
 
     // add to output workspace property
     std::stringstream propertynamess;
@@ -1238,9 +1240,8 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
     }
 
     // Update progress report
-    m_progress =
-        0.1 +
-        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    m_progress = 0.1 + 0.1 * static_cast<double>(wsgindex) /
+                           static_cast<double>(numoutputws);
     progress(m_progress, "Creating output workspace");
     wsgindex += 1;
   } // END-FOR (wsgroup)
@@ -1330,9 +1331,8 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     }
 
     // Update progress report
-    m_progress =
-        0.1 +
-        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    m_progress = 0.1 + 0.1 * static_cast<double>(wsgindex) /
+                           static_cast<double>(numoutputws);
     progress(m_progress, "Creating output workspace");
     wsgindex += 1;
   } // END-FOR (wsgroup)
@@ -1345,11 +1345,11 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
 }
 
 /** Set up neutron event's TOF correction.
-  * It can be (1) parsed from TOF-correction table workspace to vectors,
-  * (2) created according to detector's position in instrument;
-  * (3) or no correction,i.e., correction value is equal to 1.
-  * Offset should be as F*TOF + B
-  */
+ * It can be (1) parsed from TOF-correction table workspace to vectors,
+ * (2) created according to detector's position in instrument;
+ * (3) or no correction,i.e., correction value is equal to 1.
+ * Offset should be as F*TOF + B
+ */
 void FilterEvents::setupDetectorTOFCalibration() {
   // Set output correction workspace and set to output
   const size_t numhist = m_eventWS->getNumberHistograms();
@@ -1420,12 +1420,12 @@ TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
 }
 
 /** Set up corrections with customized TOF correction input
-  * The first column must be either DetectorID or Spectrum (from 0... as
+ * The first column must be either DetectorID or Spectrum (from 0... as
  * workspace index)
-  * The second column must be Correction or CorrectFactor, a number between 0
+ * The second column must be Correction or CorrectFactor, a number between 0
  * and 1, i.e, [0, 1]
-  * The third column is optional as shift in unit of second
-  */
+ * The third column is optional as shift in unit of second
+ */
 void FilterEvents::setupCustomizedTOFCorrection() {
   // Check input workspace
   vector<string> colnames = m_detCorrectWorkspace->getColumnNames();
@@ -1568,7 +1568,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
 }
 
 /** Main filtering method
-  * Structure: per spectrum --> per workspace
+ * Structure: per spectrum --> per workspace
  */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
@@ -1620,7 +1620,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 }
 
 /** Split events by splitters represented by vector
-  */
+ */
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   // FIXME : consider to use vector to index workspace and event list
@@ -1628,8 +1628,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
   g_log.notice() << "Filter by vector splitters: Number of spectra in "
-                    "input/source EventWorkspace = " << numberOfSpectra
-                 << ".\n";
+                    "input/source EventWorkspace = "
+                 << numberOfSpectra << ".\n";
 
   // check for option FilterByTime
   if (m_filterByPulseTime) {
@@ -1640,9 +1640,11 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       std::stringstream errmsg;
       errmsg << "It is not proper to split fast event 'By PulseTime'', when "
                 "there are "
-                "more splitters (" << m_vecSplitterTime.size()
+                "more splitters ("
+             << m_vecSplitterTime.size()
              << ") than pulse time "
-                "log entries (" << num_proton_charges << ")";
+                "log entries ("
+             << num_proton_charges << ")";
       throw runtime_error(errmsg.str());
     } else
       g_log.warning("User should understand the inaccurancy to filter events "
@@ -1902,5 +1904,5 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
   return lognames;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

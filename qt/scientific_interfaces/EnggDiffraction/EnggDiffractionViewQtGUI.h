@@ -1,13 +1,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "DllConfig.h"
 #include "EnggDiffFittingViewQtWidget.h"
 #include "EnggDiffGSASFittingViewQtWidget.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
@@ -123,8 +123,6 @@ public:
 
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
-  std::string focusingDir() const override;
-
   std::vector<std::string> focusingRunNo() const override;
 
   std::vector<std::string> focusingCroppedRunNo() const override;
@@ -192,7 +190,7 @@ private slots:
   void browseInputDirRaw();
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
-  void browseDirFocusing();
+  void forceRecalculateStateChanged();
 
   // slots for the focusing options
   void browseTextureDetGroupingFile();

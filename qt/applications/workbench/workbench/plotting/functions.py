@@ -19,11 +19,13 @@ our custom window.
 """
 
 # std imports
+import collections
 import math
 
 # 3rd party imports
 from mantid.api import MatrixWorkspace
 import matplotlib.pyplot as plt
+from mantidqt.py3compat import is_text_string
 
 # local imports
 
@@ -68,7 +70,41 @@ def _validate_pcolormesh_inputs(workspaces):
         raise_if_not_sequence(workspaces, 'Workspaces')
 
 
-def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
+def current_figure_or_none():
+    """If an active figure exists then return it otherwise return None
+
+    :return: An active figure or None
+    """
+    if len(plt.get_fignums()) > 0:
+        return plt.gcf()
+    else:
+        return None
+
+
+def figure_title(workspaces, fig_num):
+    """Create a default figure title from a single workspace, list of workspaces or
+    workspace names and a figure number. The name of the first workspace in the list
+    is concatenated with the figure number.
+
+    :param workspaces: A single workspace, list of workspaces or workspace name/list of workspace names
+    :param fig_num: An integer denoting the figure number
+    :return: A title for the figure
+    """
+    def wsname(w):
+        return w.name() if hasattr(w, 'name') else w
+
+    if is_text_string(workspaces) or not isinstance(workspaces, collections.Sequence):
+        # assume a single workspace
+        first = workspaces
+    else:
+        assert len(workspaces) > 0
+        first = workspaces[0]
+
+    return wsname(first) + '-' + str(fig_num)
+
+
+def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
+         overplot=False):
     """
     Create a figure with a single subplot and for each workspace/index add a
     line plot to the new axes. show() is called before returning the figure instance. A legend
@@ -78,6 +114,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
     :param spectrum_nums: A list of spectrum number identifiers (general start from 1)
     :param wksp_indices: A list of workspace indexes (starts from 0)
     :param errors: If true then error bars are added for each plot
+    :param overplot: If true then overplot over the current figure if one exists
     :returns: The figure containing the plots
     """
     # check inputs
@@ -86,17 +123,26 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False):
         kw, nums = 'specNum', spectrum_nums
     else:
         kw, nums = 'wkspIndex', wksp_indices
-    # create figure
-    fig = plt.figure()
-    fig.clf()
-    ax = fig.add_subplot(111, projection=PROJECTION)
+
+    # get/create the axes to hold the plot
+    if overplot:
+        ax = plt.gca(projection=PROJECTION)
+        fig = ax.figure
+    else:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection=PROJECTION)
+
+    # do the plotting
     plot_fn = ax.errorbar if errors else ax.plot
     for ws in workspaces:
         for num in nums:
             plot_fn(ws, **{kw: num})
 
     ax.legend()
-    ax.set_title(workspaces[0].name())
+    if not overplot:
+        title = workspaces[0].name()
+        ax.set_title(title)
+        fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     fig.canvas.draw()
     fig.show()
     return fig
@@ -150,6 +196,7 @@ def pcolormesh(workspaces):
     # Adjust locations to ensure the plots don't overlap
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
     fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
+    fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     fig.canvas.draw()
     fig.show()
     return fig

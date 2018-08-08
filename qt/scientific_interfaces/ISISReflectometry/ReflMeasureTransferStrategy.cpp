@@ -41,7 +41,9 @@ ReflMeasureTransferStrategy::~ReflMeasureTransferStrategy() {}
 
 TransferResults
 MantidQt::CustomInterfaces::ReflMeasureTransferStrategy::transferRuns(
-    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
+    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress,
+    const TransferMatch matchType) {
+  UNUSED_ARG(matchType);
 
   using VecSameMeasurement = std::vector<MeasurementItem>;
   using MapGroupedMeasurement =
@@ -158,4 +160,4 @@ bool ReflMeasureTransferStrategy::knownFileType(
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

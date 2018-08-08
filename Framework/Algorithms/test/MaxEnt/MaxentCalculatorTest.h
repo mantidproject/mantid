@@ -13,7 +13,7 @@ using namespace Mantid::Algorithms;
 using namespace testing;
 
 class MockEntropy : public MaxentEntropy {
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 public:
   MOCK_METHOD2(derivative,
                std::vector<double>(const std::vector<double> &, double));

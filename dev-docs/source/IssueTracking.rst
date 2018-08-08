@@ -1,3 +1,5 @@
+.. _issue_tracking:
+
 =====================
 Mantid Issue Tracking
 =====================
@@ -90,7 +92,16 @@ to refer to either an issue or a PR on this page*)
 
   - **Priority: High** - use this if your ticket needs picking up
     right away, for instance if it relates to a bug which affects a
-    large number of users
+    large number of users. If you are unsure about an issue that could
+    be high priority, discuss with a senior developer. Issues marked
+    high priority must also have a justification for the priority 
+    stated in the ticket
+  - **No priority set** - use this for tickets of intermediate priority
+    this will probably be your default setting, most issues will fall 
+    into this category
+  - **Priority: Low** - use this for the "nice to have" tickets
+    this means that they are not necessarily urgent but can be
+    worked on if there is spare time
 - **Patch candidate** - following a release, low-risk tickets with
   high impact on users will be considered for a follow-up (or *patch*
   release). If your ticket matches this description, consider

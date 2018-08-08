@@ -3,9 +3,9 @@
 #include "DPDFInputDataControl.h"
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 // 3rd party library headers
 // System #includes
 
@@ -201,6 +201,6 @@ void InputDataControl::updateDomain() {
   int second = static_cast<int>(std::distance(y.begin(), it));
   m_domain.at(m_selectedWorkspaceIndex) = std::pair<int, int>(first, second);
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

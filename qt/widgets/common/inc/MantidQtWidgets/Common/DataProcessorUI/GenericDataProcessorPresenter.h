@@ -169,6 +169,11 @@ public:
 
   void skipProcessing() override;
 
+  // Sets whether to prompt user when getting selected runs
+  void setPromptUser(bool allowPrompt) override;
+
+  void confirmReductionPaused() override;
+
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
   // The table view we're managing
@@ -182,7 +187,13 @@ protected:
   // Loader
   QString m_loader;
   // The list of selected items to reduce
-  TreeData m_selectedData;
+  TreeData m_itemsToProcess;
+
+  // Pause reduction
+  void pause();
+  // A boolean indicating whether data reduction is confirmed paused
+  bool m_reductionPaused;
+
   // Get the processing options for this row
   virtual OptionsMap getProcessingOptions(RowData_sptr data) {
     UNUSED_ARG(data);
@@ -214,13 +225,11 @@ protected:
   // Finds a run in the AnalysisDataService
   QString findRunInADS(const QString &run, const QString &prefix,
                        bool &runFound);
-  // Sets whether to prompt user when getting selected runs
-  void setPromptUser(bool allowPrompt);
 
   // Set up data required for processing a row
   bool initRowForProcessing(RowData_sptr rowData);
-  // Process selected rows
-  virtual void process();
+  // Process rows
+  virtual void process(TreeData itemsToProcess);
   // Plotting
   virtual void plotRow();
   virtual void plotGroup();
@@ -234,8 +243,9 @@ protected:
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(
       const GroupData &groupData,
-      boost::optional<size_t> sliceIndex = boost::optional<size_t>());
-  bool rowOutputExists(RowItem const &row) const;
+      boost::optional<size_t> sliceIndex = boost::optional<size_t>()) const;
+  // process the next group/row
+  void processNextItem();
   // Refl GUI Group.
   int m_group;
   // The whitelist
@@ -244,15 +254,40 @@ protected:
   ProcessingAlgorithm m_processor;
   // Save as ipython notebook
   void saveNotebook(const TreeData &data);
+  // Thread to run reducer worker in
+  std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
+  // The progress reporter
+  ProgressPresenter *m_progressReporter;
+  // A boolean that can be set to pause reduction of the current item
+  bool m_pauseReduction;
+  // resume reduction
+  void resume();
+  bool promptUser() const { return m_promptUser; }
+  void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
+  void setGroupError(const int groupIndex, const std::string &error);
+  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
+  void setRowError(RowData_sptr rowData, const std::string &error);
+  bool rowNeedsProcessing(RowData_sptr rowData) const;
+  bool groupNeedsProcessing(const int groupIndex) const;
+  void resetProcessedState(const int groupIndex);
+  void resetProcessedState(RowData_sptr rowData);
+  void resetProcessedState(const std::string &workspaceName);
+  void resetProcessedState();
+  void updateWidgetEnabledState(const bool isProcessing) const;
+  virtual void setReductionPaused();
+  virtual bool workspaceIsOutputOfGroup(const GroupData &groupData,
+                                        const std::string &workspaceName) const;
+
 protected slots:
-  void reductionError(QString ex);
+  void reductionError(const QString &ex);
+  void reductionError(const std::string &ex);
+  virtual void threadFinished(const int exitCode);
   void groupThreadFinished(const int exitCode);
   void rowThreadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
 
 private:
-  void threadFinished(const int exitCode);
   void applyDefaultOptions(std::map<QString, QVariant> &options);
   void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
                                        const std::string &hiddenOptions,
@@ -260,31 +295,17 @@ private:
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
-
-  // The current queue of groups to be reduced
-  GroupQueue m_group_queue;
   // The current group we are reducing row data for
-  GroupData m_groupData;
+  int m_currentGroupIndex;
+  GroupData m_currentGroupData;
   // The current row item being reduced
-  RowItem m_rowItem;
-  // The progress reporter
-  ProgressPresenter *m_progressReporter;
+  RowData_sptr m_currentRowData;
   // A boolean indicating whether to prompt the user when getting selected runs
   bool m_promptUser;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<QString, QVariant> m_options;
-  // Thread to run reducer worker in
-  std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
-  // A boolean that can be set to pause reduction of the current item
-  bool m_pauseReduction;
-  // A boolean indicating whether data reduction is confirmed paused
-  bool m_reductionPaused;
-  // Enumeration of the reduction actions that can be taken
-  enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
-  // A flag of the next action due to be carried out
-  ReductionFlag m_nextActionFlag;
   // load a run into the ADS, or re-use one in the ADS if possible
   Mantid::API::Workspace_sptr
   getRun(const QString &run, const QString &instrument, const QString &prefix);
@@ -295,6 +316,10 @@ private:
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const QString &run, const PreprocessingAlgorithm &alg,
                       const OptionsMap &optionsMap);
+  // Process selected items
+  void processSelection();
+  // Process all items
+  void processAll();
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
@@ -303,6 +328,8 @@ private:
   void deleteRow();
   // delete group(s) from the model
   void deleteGroup();
+  // delete all rows and groups from the model
+  void deleteAll();
   // clear selected row(s) in the model
   void clearSelected();
   // copy selected rows to clipboard
@@ -313,6 +340,8 @@ private:
   void pasteSelected();
   // group selected rows together
   void groupRows();
+  // Handle when the table has been updated
+  void tableUpdated();
   // expand selection to group
   void expandSelection();
   // expand all groups
@@ -336,30 +365,18 @@ private:
   // actions/commands
   void addCommands();
 
-  // decide between processing next row or group
-  void doNextAction();
-
-  // process next row/group
-  void nextRow();
-  void nextGroup();
-
-  // start thread for performing reduction on current row/group asynchronously
-  virtual void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex);
+  // start thread for performing reduction on a row/group asynchronously
+  virtual void startAsyncRowReduceThread(RowData_sptr rowData,
+                                         const int rowIndex,
+                                         const int groupIndex);
   virtual void startAsyncGroupReduceThread(GroupData &groupData,
                                            int groupIndex);
 
   // end reduction
-  void endReduction();
+  virtual void endReduction(const bool success);
 
-  // pause/resume reduction
-  void pause();
-  void resume();
-  void updateWidgetEnabledState(const bool isProcessing) const;
-
-  // Check if run has been processed
-  bool isProcessed(int position) const;
-  bool isProcessed(int position, int parent) const;
   bool m_forceProcessing = false;
+  bool m_forceProcessingFailed = false;
   bool m_skipProcessing = false;
 
   // List of workspaces the user can open
@@ -382,8 +399,14 @@ private:
                       int parentColumn) override;
   int getNumberOfRows() override;
   void clearTable() override;
+  bool workspaceIsOutputOfRow(RowData_sptr rowData,
+                              const std::string &workspaceName) const;
+  bool workspaceIsBeingReduced(const std::string &workspaceName) const;
+  void handleWorkspaceRemoved(const std::string &workspaceName,
+                              const std::string &action);
+  void handleAllWorkspacesRemoved(const std::string &action);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H*/

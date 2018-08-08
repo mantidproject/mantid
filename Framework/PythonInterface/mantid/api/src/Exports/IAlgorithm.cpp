@@ -9,14 +9,14 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
-#include <Poco/Thread.h>
 #include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
 
 #include <boost/python/arg_from_python.hpp>
 #include <boost/python/bases.hpp>
@@ -27,15 +27,15 @@
 
 #include <unordered_map>
 
-using Mantid::Kernel::IPropertyManager;
-using Mantid::Kernel::Property;
-using Mantid::Kernel::Direction;
 using Mantid::API::AlgorithmID;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::Kernel::Direction;
+using Mantid::Kernel::IPropertyManager;
+using Mantid::Kernel::Property;
 using Mantid::PythonInterface::AlgorithmIDProxy;
-using Mantid::PythonInterface::isNone;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
+using Mantid::PythonInterface::isNone;
 namespace Environment = Mantid::PythonInterface::Environment;
 using namespace boost::python;
 
@@ -139,12 +139,12 @@ object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
 }
 
 /**
-* Returns a list of input property names that is ordered such that the
-* mandatory properties are first followed by the optional ones. The list
-* also includes InOut properties.
-* @param self :: A pointer to the python object wrapping and Algorithm.
-* @return A Python list of strings
-*/
+ * Returns a list of input property names that is ordered such that the
+ * mandatory properties are first followed by the optional ones. The list
+ * also includes InOut properties.
+ * @param self :: A pointer to the python object wrapping and Algorithm.
+ * @return A Python list of strings
+ */
 object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
@@ -227,8 +227,9 @@ std::string createDocString(IAlgorithm &self) {
     if (!prop->documentation().empty() || !allowed.empty()) {
       buffer << "      " << prop->documentation();
       if (!allowed.empty()) {
-        buffer << "[" << Mantid::Kernel::Strings::join(allowed.begin(),
-                                                       allowed.end(), ", ");
+        buffer << "["
+               << Mantid::Kernel::Strings::join(allowed.begin(), allowed.end(),
+                                                ", ");
         buffer << "]";
       }
       buffer << EOL;
@@ -352,7 +353,7 @@ boost::python::object validateInputs(IAlgorithm &self) {
                                                              std::string>;
   return MapToPyDictionary(map)();
 }
-}
+} // namespace
 
 void export_ialgorithm() {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init).def(self == self);
@@ -447,9 +448,10 @@ void export_ialgorithm() {
       .def("setLogging", &IAlgorithm::setLogging, (arg("self"), arg("value")),
            "Toggle logging on/off.")
       .def("setRethrows", &IAlgorithm::setRethrows,
-           (arg("self"), arg("rethrow")), "To query whether an algorithm "
-                                          "should rethrow exceptions when "
-                                          "executing.")
+           (arg("self"), arg("rethrow")),
+           "To query whether an algorithm "
+           "should rethrow exceptions when "
+           "executing.")
       .def("initialize", &IAlgorithm::initialize, arg("self"),
            "Initializes the algorithm")
       .def("validateInputs", &validateInputs, arg("self"),

@@ -123,18 +123,39 @@ void EnggDiffFittingModel::enggFitPeaks(const RunLabel &runLabel,
   addFitResults(runLabel, fitResultsTable);
 }
 
-void EnggDiffFittingModel::saveDiffFittingAscii(
-    const RunLabel &runLabel, const std::string &filename) const {
-  const auto ws = getFitResults(runLabel);
-  auto saveAlg =
-      Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
+void EnggDiffFittingModel::saveFitResultsToHDF5(
+    const std::vector<RunLabel> &runLabels, const std::string &filename) const {
+  std::vector<std::string> inputWorkspaces;
+  inputWorkspaces.reserve(runLabels.size());
+  std::vector<long> runNumbers;
+  runNumbers.reserve(runLabels.size());
+  std::vector<long> bankIDs;
+  bankIDs.reserve(runLabels.size());
+
+  for (const auto &runLabel : runLabels) {
+    const auto ws = getFitResults(runLabel);
+    const auto clonedWSName = "enggggui_fit_params_" +
+                              std::to_string(runLabel.runNumber) + "_" +
+                              std::to_string(runLabel.bank);
+    cloneWorkspace(ws, clonedWSName);
+    inputWorkspaces.emplace_back(clonedWSName);
+    runNumbers.emplace_back(runLabel.runNumber);
+    bankIDs.emplace_back(static_cast<long>(runLabel.bank));
+  }
+
+  auto saveAlg = Mantid::API::AlgorithmManager::Instance().create(
+      "EnggSaveSinglePeakFitResultsToHDF5");
   saveAlg->initialize();
-  saveAlg->setProperty("InputWorkspace", ws);
-  saveAlg->setProperty("RunNumber", std::to_string(runLabel.runNumber));
-  saveAlg->setProperty("Bank", std::to_string(runLabel.bank));
-  saveAlg->setProperty("OutMode", "AppendToExistingFile");
+  saveAlg->setProperty("InputWorkspaces", inputWorkspaces);
+  saveAlg->setProperty("RunNumbers", runNumbers);
+  saveAlg->setProperty("BankIDs", bankIDs);
   saveAlg->setProperty("Filename", filename);
   saveAlg->execute();
+
+  auto &ADS = API::AnalysisDataService::Instance();
+  for (const auto &wsName : inputWorkspaces) {
+    ADS.remove(wsName);
+  }
 }
 
 void EnggDiffFittingModel::createFittedPeaksWS(const RunLabel &runLabel) {
@@ -254,6 +275,17 @@ void EnggDiffFittingModel::rebinToFocusedWorkspace(
 
 void EnggDiffFittingModel::cloneWorkspace(
     const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
+    const std::string &outputWSName) const {
+  auto cloneWSAlg =
+      Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
+  cloneWSAlg->initialize();
+  cloneWSAlg->setProperty("InputWorkspace", inputWorkspace);
+  cloneWSAlg->setProperty("OutputWorkspace", outputWSName);
+  cloneWSAlg->execute();
+}
+
+void EnggDiffFittingModel::cloneWorkspace(
+    const Mantid::API::ITableWorkspace_sptr inputWorkspace,
     const std::string &outputWSName) const {
   auto cloneWSAlg =
       Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
@@ -444,7 +476,7 @@ std::string stripWSNameFromFilename(const std::string &fullyQualifiedFilename) {
   boost::split(filenameSegments, filename, boost::is_any_of("."));
   return filenameSegments[0];
 }
-}
+} // namespace
 
 void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
   std::vector<std::string> filenames;
@@ -532,10 +564,10 @@ std::string EnggDiffFittingModel::createFunctionString(
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
       ",A1=" + boost::lexical_cast<std::string>(A1) +
       ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
-      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
-      boost::lexical_cast<std::string>(B) + ",X0=" +
-      boost::lexical_cast<std::string>(X0) + ",S=" +
-      boost::lexical_cast<std::string>(S);
+      ",A=" + boost::lexical_cast<std::string>(A) +
+      ",B=" + boost::lexical_cast<std::string>(B) +
+      ",X0=" + boost::lexical_cast<std::string>(X0) +
+      ",S=" + boost::lexical_cast<std::string>(S);
   return function;
 }
 
@@ -564,4 +596,4 @@ const double EnggDiffFittingModel::DEFAULT_DIFC = 18400.0;
 const double EnggDiffFittingModel::DEFAULT_TZERO = 4.0;
 
 } // namespace CustomInterfaces
-} // namespace MantidQT
+} // namespace MantidQt

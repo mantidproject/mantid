@@ -14,8 +14,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include <gsl/gsl_linalg.h>
 #include <algorithm>
+#include <gsl/gsl_linalg.h>
 #include <numeric>
 
 namespace Mantid {
@@ -53,12 +53,12 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 const double THRESHOLD = 1E-6;
 
 /** removes zeros from converged results
-* @param ws :: [input] The input workspace with zeros
-* @param itCount [input] The number of iterations this alg used for each
-* spectrum
-* @param yLabel :: [input] y-label to use for returned ws
-* @return : ws cut down in lenght to maxIt
-*/
+ * @param ws :: [input] The input workspace with zeros
+ * @param itCount [input] The number of iterations this alg used for each
+ * spectrum
+ * @param yLabel :: [input] y-label to use for returned ws
+ * @return : ws cut down in lenght to maxIt
+ */
 MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
                                  const std::vector<size_t> &itCount,
                                  const std::string &yLabel) {
@@ -84,7 +84,7 @@ MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
   }
   return ws;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -249,7 +249,7 @@ void MaxEnt::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Validate the input properties.
-*/
+ */
 std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   std::map<std::string, std::string> result;
@@ -606,14 +606,14 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 }
 
 /** Bisection method to move delta one step closer towards the solution
-* @param coeffs :: [input] The current quadratic coefficients
-* @param ChiTargetOverN :: [input] The requested Chi target over N
-* (data points)
-* @param chiEps :: [input] Precision required for Chi target
-* @param alphaIter :: [input] Maximum number of iterations in the bisection
-* method (alpha chop)
-* @return : The increment length to be added to the current image
-*/
+ * @param coeffs :: [input] The current quadratic coefficients
+ * @param ChiTargetOverN :: [input] The requested Chi target over N
+ * (data points)
+ * @param chiEps :: [input] Precision required for Chi target
+ * @param alphaIter :: [input] Maximum number of iterations in the bisection
+ * method (alpha chop)
+ * @return : The increment length to be added to the current image
+ */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
                                  double ChiTargetOverN, double chiEps,
                                  size_t alphaIter) {
@@ -682,12 +682,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 }
 
 /** Calculates Chi given the quadratic coefficients and an alpha value by
-* solving the matrix equation A*b = B
-* @param coeffs :: [input] The quadratic coefficients
-* @param a :: [input] The alpha value
-* @param b :: [output] The solution
-* @return :: The calculated chi-square
-*/
+ * solving the matrix equation A*b = B
+ * @param coeffs :: [input] The quadratic coefficients
+ * @param a :: [input] The alpha value
+ * @param b :: [output] The solution
+ * @return :: The calculated chi-square
+ */
 double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
                             std::vector<double> &b) {
 
@@ -730,10 +730,10 @@ double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
 }
 
 /** Solves A*x = B using SVD
-* @param A :: [input] The matrix A
-* @param B :: [input] The vector B
-* @return :: The solution x
-*/
+ * @param A :: [input] The matrix A
+ * @param B :: [input] The vector B
+ * @return :: The solution x
+ */
 std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   size_t dim = A.size().first;
@@ -770,13 +770,13 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 }
 
 /** Applies a distance penalty
-* @param delta :: [input] The current increment
-* @param coeffs :: [input] The quadratic coefficients
-* @param image :: [input] The current image
-* @param background :: [input] The background
-* @param distEps :: [input] The distance constraint
-* @return :: The new increment
-*/
+ * @param delta :: [input] The current increment
+ * @param coeffs :: [input] The quadratic coefficients
+ * @param image :: [input] The current image
+ * @param background :: [input] The background
+ * @param distEps :: [input] The distance constraint
+ * @return :: The new increment
+ */
 std::vector<double> MaxEnt::applyDistancePenalty(
     const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
     const std::vector<double> &image, double background, double distEps) {
@@ -807,13 +807,13 @@ std::vector<double> MaxEnt::applyDistancePenalty(
 }
 
 /**
-* Updates the image according to an increment delta
-* @param image : [input] The current image as a vector (can be real or complex)
-* @param delta : [input] The increment delta as a vector (can be real or
-* complex)
-* @param dirs : [input] The search directions
-* @return : The new image
-*/
+ * Updates the image according to an increment delta
+ * @param image : [input] The current image as a vector (can be real or complex)
+ * @param delta : [input] The increment delta as a vector (can be real or
+ * complex)
+ * @param dirs : [input] The search directions
+ * @return : The new image
+ */
 std::vector<double>
 MaxEnt::updateImage(const std::vector<double> &image,
                     const std::vector<double> &delta,

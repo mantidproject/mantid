@@ -1,28 +1,28 @@
 #include <QApplication>
-#include <QSplashScreen>
-#include <QMessageBox>
 #include <QDir>
+#include <QMessageBox>
+#include <QSplashScreen>
 #include <QThread>
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include "qmainwindow.h"
-#include "MantidQtSliceViewer/SliceViewer.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
+#include "qmainwindow.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 ;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
-using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDHistoDimension;
+using Mantid::Geometry::MDHistoDimension_sptr;
 using MantidQt::SliceViewer::SliceViewer;
 
 /** Demo application for quickly testing the SliceViewer GUI.

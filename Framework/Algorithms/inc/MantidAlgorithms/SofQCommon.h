@@ -47,7 +47,7 @@ private:
                                               const double minE,
                                               const double maxE) const;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif

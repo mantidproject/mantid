@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
 
 #include <boost/algorithm/string/join.hpp>
 
@@ -36,6 +37,15 @@ std::string refinementMethodToString(
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+EnggDiffGSASFittingModel::EnggDiffGSASFittingModel() {
+  qRegisterMetaType<
+      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
+      "GSASIIRefineFitPeaksOutputProperties");
+  qRegisterMetaType<Mantid::API::IAlgorithm_sptr>("IAlgorithm_sptr");
+  qRegisterMetaType<std::vector<GSASIIRefineFitPeaksOutputProperties>>(
+      "std::vector<GSASIIRefineFitPeaksOutputProperties>");
+}
 
 EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() {
   if (m_workerThread) {
@@ -85,9 +95,9 @@ std::string generateLatticeParamsName(const RunLabel &runLabel) {
   return std::to_string(runLabel.runNumber) + "_" +
          std::to_string(runLabel.bank) + "_lattice_params";
 }
-}
+} // namespace
 
-GSASIIRefineFitPeaksOutputProperties
+std::pair<API::IAlgorithm_sptr, GSASIIRefineFitPeaksOutputProperties>
 EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
     const GSASIIRefineFitPeaksParameters &params) {
   auto gsasAlg =
@@ -131,8 +141,9 @@ EnggDiffGSASFittingModel::doGSASRefinementAlgorithm(
   const auto fittedPeaks = ADS.retrieveWS<API::MatrixWorkspace>(outputWSName);
   const auto latticeParams =
       ADS.retrieveWS<API::ITableWorkspace>(latticeParamsName);
-  return GSASIIRefineFitPeaksOutputProperties(rwp, sigma, gamma, fittedPeaks,
-                                              latticeParams, params.runLabel);
+  return std::make_pair(gsasAlg, GSASIIRefineFitPeaksOutputProperties(
+                                     rwp, sigma, gamma, fittedPeaks,
+                                     latticeParams, params.runLabel));
 }
 
 void EnggDiffGSASFittingModel::doRefinements(
@@ -142,18 +153,23 @@ void EnggDiffGSASFittingModel::doRefinements(
       new EnggDiffGSASFittingWorker(this, params);
   worker->moveToThread(m_workerThread.get());
 
-  qRegisterMetaType<
-      MantidQt::CustomInterfaces::GSASIIRefineFitPeaksOutputProperties>(
-      "GSASIIRefineFitPeaksOutputProperties");
-
   connect(m_workerThread.get(), SIGNAL(started()), worker,
           SLOT(doRefinements()));
   connect(worker,
-          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
-          this, SLOT(processRefinementSuccessful(
-                    const GSASIIRefineFitPeaksOutputProperties &)));
-  connect(worker, SIGNAL(refinementsComplete()), this,
-          SLOT(processRefinementsComplete()));
+          SIGNAL(refinementSuccessful(Mantid::API::IAlgorithm_sptr,
+                                      GSASIIRefineFitPeaksOutputProperties)),
+          this,
+          SLOT(processRefinementSuccessful(
+              Mantid::API::IAlgorithm_sptr,
+              const GSASIIRefineFitPeaksOutputProperties &)));
+  connect(worker,
+          SIGNAL(refinementsComplete(
+              Mantid::API::IAlgorithm_sptr,
+              std::vector<GSASIIRefineFitPeaksOutputProperties>)),
+          this,
+          SLOT(processRefinementsComplete(
+              Mantid::API::IAlgorithm_sptr,
+              const std::vector<GSASIIRefineFitPeaksOutputProperties> &)));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), this,
           SLOT(processRefinementFailed(const std::string &)));
   connect(worker, SIGNAL(refinementCancelled()), this,
@@ -161,7 +177,8 @@ void EnggDiffGSASFittingModel::doRefinements(
   connect(m_workerThread.get(), SIGNAL(finished()), m_workerThread.get(),
           SLOT(deleteLater()));
   connect(worker,
-          SIGNAL(refinementSuccessful(GSASIIRefineFitPeaksOutputProperties)),
+          SIGNAL(refinementSuccessful(Mantid::API::IAlgorithm_sptr,
+                                      GSASIIRefineFitPeaksOutputProperties)),
           worker, SLOT(deleteLater()));
   connect(worker, SIGNAL(refinementFailed(const std::string &)), worker,
           SLOT(deleteLater()));
@@ -208,8 +225,11 @@ EnggDiffGSASFittingModel::loadFocusedRun(const std::string &filename) const {
   return ws;
 }
 
-void EnggDiffGSASFittingModel::processRefinementsComplete() {
-  m_observer->notifyRefinementsComplete();
+void EnggDiffGSASFittingModel::processRefinementsComplete(
+    Mantid::API::IAlgorithm_sptr alg,
+    const std::vector<GSASIIRefineFitPeaksOutputProperties>
+        &refinementResultSets) {
+  m_observer->notifyRefinementsComplete(alg, refinementResultSets);
 }
 
 void EnggDiffGSASFittingModel::processRefinementFailed(
@@ -220,12 +240,14 @@ void EnggDiffGSASFittingModel::processRefinementFailed(
 }
 
 void EnggDiffGSASFittingModel::processRefinementSuccessful(
+    API::IAlgorithm_sptr successfulAlgorithm,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   addFitResultsToMaps(refinementResults.runLabel, refinementResults.rwp,
                       refinementResults.sigma, refinementResults.gamma,
                       refinementResults.latticeParamsWS);
   if (m_observer) {
-    m_observer->notifyRefinementSuccessful(refinementResults);
+    m_observer->notifyRefinementSuccessful(successfulAlgorithm,
+                                           refinementResults);
   }
 }
 
@@ -235,10 +257,85 @@ void EnggDiffGSASFittingModel::processRefinementCancelled() {
   }
 }
 
+void EnggDiffGSASFittingModel::saveRefinementResultsToHDF5(
+    const Mantid::API::IAlgorithm_sptr successfulAlg,
+    const std::vector<GSASIIRefineFitPeaksOutputProperties>
+        &refinementResultSets,
+    const std::string &filename) const {
+  auto saveAlg = API::AlgorithmManager::Instance().create(
+      "EnggSaveGSASIIFitResultsToHDF5");
+
+  const auto numRuns = refinementResultSets.size();
+  std::vector<std::string> latticeParamWSNames;
+  latticeParamWSNames.reserve(numRuns);
+  std::vector<long> runNumbers;
+  runNumbers.reserve(numRuns);
+  std::vector<long> bankIDs;
+  bankIDs.reserve(numRuns);
+  std::vector<double> sigmas;
+  sigmas.reserve(numRuns);
+  std::vector<double> gammas;
+  gammas.reserve(numRuns);
+  std::vector<double> rwps;
+  rwps.reserve(numRuns);
+
+  const bool refineSigma = successfulAlg->getProperty("RefineSigma");
+  saveAlg->setProperty("RefineSigma", refineSigma);
+  const bool refineGamma = successfulAlg->getProperty("RefineGamma");
+  saveAlg->setProperty("RefineGamma", refineGamma);
+
+  for (const auto &refinementResults : refinementResultSets) {
+    const auto &runLabel = refinementResults.runLabel;
+    const auto latticeParams = *getLatticeParams(runLabel);
+
+    latticeParamWSNames.emplace_back(latticeParams->getName());
+    runNumbers.emplace_back(runLabel.runNumber);
+    bankIDs.emplace_back(static_cast<long>(runLabel.bank));
+    rwps.emplace_back(refinementResults.rwp);
+
+    if (refineSigma) {
+      sigmas.emplace_back(refinementResults.sigma);
+    }
+    if (refineGamma) {
+      gammas.emplace_back(refinementResults.gamma);
+    }
+  }
+
+  saveAlg->setProperty("LatticeParamWorkspaces", latticeParamWSNames);
+  saveAlg->setProperty("BankIDs", bankIDs);
+  saveAlg->setProperty("RunNumbers", runNumbers);
+
+  const std::string refinementMethod =
+      successfulAlg->getProperty("RefinementMethod");
+  saveAlg->setProperty("RefinementMethod", refinementMethod);
+  saveAlg->setProperty("XMin", successfulAlg->getPropertyValue("XMin"));
+  saveAlg->setProperty("XMax", successfulAlg->getPropertyValue("XMax"));
+
+  if (refinementMethod == "Pawley refinement") {
+    saveAlg->setProperty("PawleyDMin",
+                         successfulAlg->getPropertyValue("PawleyDMin"));
+    saveAlg->setProperty(
+        "PawleyNegativeWeight",
+        successfulAlg->getPropertyValue("PawleyNegativeWeight"));
+  }
+
+  if (refineSigma) {
+    saveAlg->setProperty("Sigma", sigmas);
+  }
+
+  if (refineGamma) {
+    saveAlg->setProperty("Gamma", gammas);
+  }
+
+  saveAlg->setProperty("Rwp", rwps);
+  saveAlg->setProperty("Filename", filename);
+  saveAlg->execute();
+}
+
 void EnggDiffGSASFittingModel::setObserver(
     boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) {
   m_observer = observer;
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

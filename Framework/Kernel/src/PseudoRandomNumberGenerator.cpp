@@ -17,5 +17,5 @@ PseudoRandomNumberGenerator::PseudoRandomNumberGenerator()
 void PseudoRandomNumberGenerator::generateNextPoint() {
   cacheGeneratedValue(0, this->nextValue());
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

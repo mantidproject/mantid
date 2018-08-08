@@ -1,10 +1,10 @@
 #include "MantidDataHandling/FindDetectorsInShape.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

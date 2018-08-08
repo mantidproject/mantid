@@ -2,10 +2,10 @@
 #define MANTIDQT_API_USERSUBWINDOW_H_
 
 /* Used to register classes into the factory. Creates a global object in an
-* anonymous namespace. The object itself does nothing, but the comma operator
-* is used in the call to its constructor to effect a call to the factory's
-* subscribe method.
-*/
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
 #define DECLARE_SUBWINDOW(classname)                                           \
   namespace {                                                                  \
   Mantid::Kernel::RegistrationHelper register_subwindow_##classname(           \
@@ -21,10 +21,10 @@
 #include "InterfaceFactory.h"
 #include "PythonRunner.h"
 
-#include <QWidget>
+#include <QLabel>
 #include <QMainWindow>
 #include <QStringList>
-#include <QLabel>
+#include <QWidget>
 #include <set>
 
 //----------------------------------
@@ -145,7 +145,7 @@ private:
   /// Python executor
   PythonRunner m_pythonRunner;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQT_API_USERSUBWINDOW_H_

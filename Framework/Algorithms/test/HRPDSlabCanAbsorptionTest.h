@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -97,15 +97,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
-    TS_ASSERT_DELTA(result->readY(0).front(), 0.7423, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0)[1], 0.7244, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.5964, 0.0001);
-    TS_ASSERT_DELTA(result->readY(1).front(), 0.7033, 0.0001);
-    TS_ASSERT_DELTA(result->readY(1)[5], 0.5939, 0.0001);
-    TS_ASSERT_DELTA(result->readY(1).back(), 0.5192, 0.0001);
-    TS_ASSERT_DELTA(result->readY(2).front(), 0.7337, 0.0001);
-    TS_ASSERT_DELTA(result->readY(2)[5], 0.6404, 0.0001);
-    TS_ASSERT_DELTA(result->readY(2).back(), 0.5741, 0.0001);
+    TS_ASSERT_DELTA(result->y(0).front(), 0.7423, 0.0001);
+    TS_ASSERT_DELTA(result->y(0)[1], 0.7244, 0.0001);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.5964, 0.0001);
+    TS_ASSERT_DELTA(result->y(1).front(), 0.7033, 0.0001);
+    TS_ASSERT_DELTA(result->y(1)[5], 0.5939, 0.0001);
+    TS_ASSERT_DELTA(result->y(1).back(), 0.5192, 0.0001);
+    TS_ASSERT_DELTA(result->y(2).front(), 0.7337, 0.0001);
+    TS_ASSERT_DELTA(result->y(2)[5], 0.6404, 0.0001);
+    TS_ASSERT_DELTA(result->y(2).back(), 0.5741, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

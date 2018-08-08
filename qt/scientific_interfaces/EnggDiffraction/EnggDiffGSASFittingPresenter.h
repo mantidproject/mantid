@@ -7,6 +7,7 @@
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
 #include "IEnggDiffMultiRunFittingWidgetPresenter.h"
+#include "IEnggDiffractionParam.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -24,8 +25,8 @@ public:
   EnggDiffGSASFittingPresenter(
       std::unique_ptr<IEnggDiffGSASFittingModel> model,
       IEnggDiffGSASFittingView *view,
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter>
-          multiRunWidget);
+      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
@@ -36,9 +37,13 @@ public:
 
   void notify(IEnggDiffGSASFittingPresenter::Notification notif) override;
 
-  void notifyRefinementsComplete() override;
+  void notifyRefinementsComplete(
+      Mantid::API::IAlgorithm_sptr alg,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets) override;
 
   void notifyRefinementSuccessful(
+      const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults) override;
 
   void notifyRefinementFailed(const std::string &failureMessage) override;
@@ -78,6 +83,8 @@ private:
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
   boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
+
+  boost::shared_ptr<IEnggDiffractionParam> m_mainSettings;
 
   IEnggDiffGSASFittingView *m_view;
 

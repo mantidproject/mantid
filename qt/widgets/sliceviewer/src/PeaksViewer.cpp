@@ -75,18 +75,22 @@ void PeaksViewer::setPresenter(
     connect(widget,
             SIGNAL(peakColorchanged(Mantid::API::IPeaksWorkspace_const_sptr,
                                     PeakViewColor)),
-            this, SLOT(onPeakColorChanged(
-                      Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
+            this,
+            SLOT(onPeakColorChanged(Mantid::API::IPeaksWorkspace_const_sptr,
+                                    PeakViewColor)));
     connect(widget,
             SIGNAL(backgroundColorChanged(
                 Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)),
-            this, SLOT(onBackgroundColorChanged(
-                      Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
+            this,
+            SLOT(onBackgroundColorChanged(
+                Mantid::API::IPeaksWorkspace_const_sptr, PeakViewColor)));
 
-    connect(widget, SIGNAL(backgroundRadiusShown(
-                        Mantid::API::IPeaksWorkspace_const_sptr, bool)),
-            this, SLOT(onBackgroundRadiusShown(
-                      Mantid::API::IPeaksWorkspace_const_sptr, bool)));
+    connect(widget,
+            SIGNAL(backgroundRadiusShown(
+                Mantid::API::IPeaksWorkspace_const_sptr, bool)),
+            this,
+            SLOT(onBackgroundRadiusShown(
+                Mantid::API::IPeaksWorkspace_const_sptr, bool)));
     connect(widget,
             SIGNAL(removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr)),
             this,
@@ -442,7 +446,7 @@ void PeaksViewer::updatePeaksWorkspace(
    *
    * Alternately, if the name is the same, but the workspace has changed, then
    *we need to replace the workspace first.
-  */
+   */
 
   // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
   QList<PeaksWorkspaceWidget *> children =
@@ -613,5 +617,5 @@ PeaksViewer::getPeaksWorkspace(const std::string &name) const {
   return nullptr;
 }
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt

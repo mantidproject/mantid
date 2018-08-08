@@ -22,8 +22,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include <boost/python/object.hpp>
 
 namespace Mantid {
@@ -46,8 +46,8 @@ private:
   /// Is the object a wrapped instance of Matrix<double>
   bool m_alreadyMatrix;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINERFACE_PYOBJECTTOMATRIX_H_ */

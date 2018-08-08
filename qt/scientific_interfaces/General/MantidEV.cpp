@@ -1,15 +1,15 @@
 
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QSettings>
-#include <QDesktopWidget>
-#include <QThreadPool>
 #include <Poco/Path.h>
+#include <QDesktopWidget>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QThreadPool>
 
-#include "MantidEV.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidEV.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 
 namespace MantidQt {
 using MantidQt::API::HelpWindow;

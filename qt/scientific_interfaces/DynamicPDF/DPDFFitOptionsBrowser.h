@@ -4,8 +4,8 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 // 3rd party library headers
 // System headers
 
@@ -58,8 +58,8 @@ private:
 
 }; // class DPDFFitOptionsBrowser
 
-} // DynamicPDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DPDFFITOPTIONSBROWSER_H_

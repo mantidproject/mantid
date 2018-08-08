@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1211</width>
-    <height>898</height>
+    <height>832</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -291,7 +291,7 @@ QGroupBox::title {
                         <string>Memor&amp;y</string>
                        </property>
                        <property name="checked">
-                        <bool>true</bool>
+                        <bool>false</bool>
                        </property>
                       </widget>
                      </item>
@@ -312,6 +312,9 @@ QGroupBox::title {
                        </property>
                        <property name="text">
                         <string>Both</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
                        </property>
                       </widget>
                      </item>
@@ -356,16 +359,6 @@ QGroupBox::title {
                        </property>
                        <property name="text">
                         <string>RKH (1D/2D)</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QCheckBox" name="nist_qxy_checkbox">
-                       <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save file formats. Note that different formats are suitable for different reduction dimensionalities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                       <property name="text">
-                        <string>Nist Qxy (2D)</string>
                        </property>
                       </widget>
                      </item>
@@ -636,7 +629,7 @@ QGroupBox::title {
                   <item>
                    <widget class="QGroupBox" name="slice_event_group_box">
                     <property name="toolTip">
-                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slcie from teh start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                     </property>
                     <property name="title">
                      <string>Event Slice</string>
@@ -922,7 +915,7 @@ QGroupBox::title {
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
-                        <string>Incidient monitor</string>
+                        <string>Incident monitor</string>
                        </property>
                       </widget>
                      </item>
@@ -1064,7 +1057,7 @@ QGroupBox::title {
                      <item row="4" column="2">
                       <widget class="QLineEdit" name="transmission_mn_shift_line_edit">
                        <property name="toolTip">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                       </widget>
                      </item>
@@ -1569,58 +1562,121 @@ QGroupBox::title {
                   </layout>
                  </widget>
                 </item>
-                <item>
+                <item alignment="Qt::AlignTop">
                  <widget class="QGroupBox" name="groupBox">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when dat a is transformed from time-of-flight to wavlength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings concerning the wavelength binning when data is transformed from time-of-flight to wavelength units.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                   </property>
                   <property name="title">
                    <string>Wavelength</string>
                   </property>
-                  <layout class="QGridLayout" name="gridLayout_6">
-                   <item row="1" column="0">
-                    <layout class="QGridLayout" name="gridLayout_3">
-                     <item row="0" column="2">
-                      <widget class="QLabel" name="wavelength_step_label">
-                       <property name="text">
-                        <string>Step  [Å]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="1">
-                      <widget class="QLabel" name="wavelength_max_label">
-                       <property name="text">
-                        <string>Max  [Å]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="3">
-                      <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
-                     </item>
-                     <item row="0" column="0">
-                      <widget class="QLabel" name="wavelength_min_label">
-                       <property name="text">
-                        <string>Min [Å]</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="0" column="3">
-                      <widget class="QLabel" name="wavelength_step_type_label">
-                       <property name="text">
-                        <string>Step Type</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="2">
-                      <widget class="QLineEdit" name="wavelength_step_line_edit"/>
-                     </item>
-                     <item row="1" column="1">
-                      <widget class="QLineEdit" name="wavelength_max_line_edit"/>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="QLineEdit" name="wavelength_min_line_edit"/>
-                     </item>
-                    </layout>
+                  <layout class="QHBoxLayout" name="horizontalLayout_10">
+                   <item>
+                    <widget class="QStackedWidget" name="wavelength_stacked_widget">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>66</height>
+                      </size>
+                     </property>
+                     <property name="lineWidth">
+                      <number>0</number>
+                     </property>
+                     <property name="currentIndex">
+                      <number>1</number>
+                     </property>
+                     <widget class="QWidget" name="page">
+                      <layout class="QGridLayout" name="gridLayout_3">
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="wavelength_min_label">
+                         <property name="text">
+                          <string>Min [Å]</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="wavelength_max_label">
+                         <property name="text">
+                          <string>Max  [Å]</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLineEdit" name="wavelength_min_line_edit"/>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QLineEdit" name="wavelength_max_line_edit"/>
+                       </item>
+                      </layout>
+                     </widget>
+                     <widget class="QWidget" name="page_2">
+                      <layout class="QGridLayout" name="gridLayout_6">
+                       <item row="2" column="0">
+                        <widget class="QLineEdit" name="wavelength_slices_line_edit"/>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="label_7">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications useing comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Ranges  [Å]</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QWidget" name="widget" native="true">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>16777215</width>
+                       <height>66</height>
+                      </size>
+                     </property>
+                     <layout class="QGridLayout" name="gridLayout_14">
+                      <item row="0" column="0">
+                       <widget class="QLabel" name="wavelength_step_label">
+                        <property name="text">
+                         <string>Step  [Å]</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="1">
+                       <widget class="QLabel" name="wavelength_step_type_label">
+                        <property name="text">
+                         <string>Step Type</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0">
+                       <widget class="QLineEdit" name="wavelength_step_line_edit"/>
+                      </item>
+                      <item row="1" column="1">
+                       <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
+                      </item>
+                     </layout>
+                    </widget>
                    </item>
                   </layout>
                  </widget>
@@ -1826,12 +1882,12 @@ QGroupBox::title {
                      </property>
                      <item>
                       <property name="text">
-                       <string>Circular</string>
+                       <string>Pinhole</string>
                       </property>
                      </item>
                      <item>
                       <property name="text">
-                       <string>Rectangular</string>
+                       <string>Slit</string>
                       </property>
                      </item>
                     </widget>
@@ -1846,7 +1902,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="4">
+                   <item row="3" column="2">
                     <widget class="QLabel" name="q_resolution_sample_a_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1863,7 +1919,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="4">
+                   <item row="2" column="2">
                     <widget class="QLabel" name="q_resolution_sample_w_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1873,14 +1929,14 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="5">
+                   <item row="2" column="3">
                     <widget class="QLineEdit" name="q_resolution_sample_w_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="0">
+                   <item row="5" column="0">
                     <widget class="QLabel" name="q_resolution_collimation_length_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The collimation length.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1890,7 +1946,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="4">
+                   <item row="5" column="2">
                     <widget class="QLabel" name="q_resolution_delta_r_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delta r.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1900,21 +1956,21 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="1" colspan="4">
+                   <item row="6" column="1" colspan="2">
                     <widget class="QLineEdit" name="q_resolution_moderator_file_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Path to the moderator file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="5">
+                   <item row="6" column="3">
                     <widget class="QPushButton" name="q_resolution_moderator_file_push_button">
                      <property name="text">
                       <string>Browse</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="7" column="0">
+                   <item row="6" column="0">
                     <widget class="QLabel" name="q_resolution_moderator_file_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Path to the moderator file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1924,24 +1980,24 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="1">
+                   <item row="5" column="1">
                     <widget class="QLineEdit" name="q_resolution_collimation_length_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The collimation length.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="6" column="5">
+                   <item row="5" column="3">
                     <widget class="QLineEdit" name="q_resolution_delta_r_line_edit">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delta r.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="5" column="0" colspan="6">
-                    <widget class="Line" name="line_6">
-                     <property name="orientation">
-                      <enum>Qt::Horizontal</enum>
+                   <item row="3" column="3">
+                    <widget class="QLineEdit" name="q_resolution_sample_a_line_edit">
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -1952,10 +2008,10 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="5">
-                    <widget class="QLineEdit" name="q_resolution_sample_a_line_edit">
+                   <item row="2" column="1">
+                    <widget class="QLineEdit" name="q_resolution_source_w_line_edit">
                      <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -1969,10 +2025,10 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="2" column="1">
-                    <widget class="QLineEdit" name="q_resolution_source_w_line_edit">
+                   <item row="1" column="3">
+                    <widget class="QLineEdit" name="q_resolution_sample_h_line_edit">
                      <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                     </widget>
                    </item>
@@ -1986,14 +2042,7 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="5">
-                    <widget class="QLineEdit" name="q_resolution_sample_h_line_edit">
-                     <property name="toolTip">
-                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="4">
+                   <item row="1" column="2">
                     <widget class="QLabel" name="q_resolution_sample_h_label">
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -2003,28 +2052,8 @@ QGroupBox::title {
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="2" rowspan="3">
-                    <widget class="Line" name="line_7">
-                     <property name="orientation">
-                      <enum>Qt::Vertical</enum>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </widget>
-                </item>
-                <item>
-                 <spacer name="verticalSpacer">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                 </spacer>
                 </item>
                </layout>
               </item>
@@ -2050,6 +2079,17 @@ QGroupBox::title {
      </layout>
     </item>
    </layout>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>100</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_9"/>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -2107,11 +2147,12 @@ QGroupBox::title {
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tab_choice_list</tabstop>
-  <tabstop>batch_button</tabstop>
+  <tabstop>instrument_combo_box</tabstop>
+  <tabstop>manage_directories_button</tabstop>
   <tabstop>user_file_button</tabstop>
-  <tabstop>batch_line_edit</tabstop>
-  <tabstop>user_file_line_edit</tabstop>
+  <tabstop>batch_button</tabstop>
+  <tabstop>process_button</tabstop>
+  <tabstop>multi_period_check_box</tabstop>
   <tabstop>reduction_dimensionality_1D</tabstop>
   <tabstop>reduction_dimensionality_2D</tabstop>
   <tabstop>output_mode_memory_radio_button</tabstop>
@@ -2120,10 +2161,10 @@ QGroupBox::title {
   <tabstop>can_sas_checkbox</tabstop>
   <tabstop>nx_can_sas_checkbox</tabstop>
   <tabstop>rkh_checkbox</tabstop>
-  <tabstop>nist_qxy_checkbox</tabstop>
   <tabstop>save_zero_error_free</tabstop>
   <tabstop>use_optimizations_checkbox</tabstop>
-  <tabstop>settings_tab_widget</tabstop>
+  <tabstop>plot_results_checkbox</tabstop>
+  <tabstop>help_button</tabstop>
   <tabstop>reduction_mode_combo_box</tabstop>
   <tabstop>merged_scale_line_edit</tabstop>
   <tabstop>merged_shift_line_edit</tabstop>
@@ -2137,21 +2178,12 @@ QGroupBox::title {
   <tabstop>slice_event_line_edit</tabstop>
   <tabstop>event_binning_group_box</tabstop>
   <tabstop>event_binning_line_edit</tabstop>
-  <tabstop>wavelength_min_line_edit</tabstop>
-  <tabstop>wavelength_max_line_edit</tabstop>
-  <tabstop>wavelength_step_line_edit</tabstop>
-  <tabstop>wavelength_step_type_combo_box</tabstop>
   <tabstop>absolute_scale_line_edit</tabstop>
   <tabstop>geometry_combo_box</tabstop>
   <tabstop>height_line_edit</tabstop>
   <tabstop>width_line_edit</tabstop>
   <tabstop>thickness_line_edit</tabstop>
   <tabstop>z_offset_line_edit</tabstop>
-  <tabstop>phi_limit_min_line_edit</tabstop>
-  <tabstop>phi_limit_max_line_edit</tabstop>
-  <tabstop>phi_limit_use_mirror_check_box</tabstop>
-  <tabstop>radius_limit_min_line_edit</tabstop>
-  <tabstop>radius_limit_max_line_edit</tabstop>
   <tabstop>mask_file_input_line_edit</tabstop>
   <tabstop>mask_file_browse_push_button</tabstop>
   <tabstop>mask_file_add_push_button</tabstop>
@@ -2174,6 +2206,7 @@ QGroupBox::title {
   <tabstop>fit_sample_wavelength_combo_box</tabstop>
   <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
   <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
+  <tabstop>show_transmission_view</tabstop>
   <tabstop>fit_can_use_fit_check_box</tabstop>
   <tabstop>fit_can_fit_type_combo_box</tabstop>
   <tabstop>fit_can_polynomial_order_spin_box</tabstop>
@@ -2181,13 +2214,25 @@ QGroupBox::title {
   <tabstop>fit_can_wavelength_min_line_edit</tabstop>
   <tabstop>fit_can_wavelength_max_line_edit</tabstop>
   <tabstop>pixel_adjustment_det_1_line_edit</tabstop>
-  <tabstop>pixel_adjustment_det_2_line_edit</tabstop>
   <tabstop>pixel_adjustment_det_1_push_button</tabstop>
+  <tabstop>pixel_adjustment_det_2_line_edit</tabstop>
   <tabstop>pixel_adjustment_det_2_push_button</tabstop>
   <tabstop>wavelength_adjustment_det_1_line_edit</tabstop>
-  <tabstop>wavelength_adjustment_det_2_line_edit</tabstop>
   <tabstop>wavelength_adjustment_det_1_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_2_line_edit</tabstop>
   <tabstop>wavelength_adjustment_det_2_push_button</tabstop>
+  <tabstop>radius_limit_min_line_edit</tabstop>
+  <tabstop>radius_limit_max_line_edit</tabstop>
+  <tabstop>phi_limit_min_line_edit</tabstop>
+  <tabstop>phi_limit_max_line_edit</tabstop>
+  <tabstop>phi_limit_use_mirror_check_box</tabstop>
+  <tabstop>wavelength_min_line_edit</tabstop>
+  <tabstop>wavelength_max_line_edit</tabstop>
+  <tabstop>wavelength_slices_line_edit</tabstop>
+  <tabstop>wavelength_step_line_edit</tabstop>
+  <tabstop>wavelength_step_type_combo_box</tabstop>
+  <tabstop>r_cut_line_edit</tabstop>
+  <tabstop>w_cut_line_edit</tabstop>
   <tabstop>q_1d_min_line_edit</tabstop>
   <tabstop>q_1d_max_line_edit</tabstop>
   <tabstop>q_1d_step_line_edit</tabstop>
@@ -2197,8 +2242,8 @@ QGroupBox::title {
   <tabstop>q_xy_step_type_combo_box</tabstop>
   <tabstop>gravity_group_box</tabstop>
   <tabstop>gravity_extra_length_line_edit</tabstop>
-  <tabstop>q_resolution_shape_combo_box</tabstop>
   <tabstop>q_resolution_group_box</tabstop>
+  <tabstop>q_resolution_shape_combo_box</tabstop>
   <tabstop>q_resolution_source_h_line_edit</tabstop>
   <tabstop>q_resolution_source_w_line_edit</tabstop>
   <tabstop>q_resolution_source_a_line_edit</tabstop>
@@ -2209,6 +2254,10 @@ QGroupBox::title {
   <tabstop>q_resolution_delta_r_line_edit</tabstop>
   <tabstop>q_resolution_moderator_file_line_edit</tabstop>
   <tabstop>q_resolution_moderator_file_push_button</tabstop>
+  <tabstop>settings_tab_widget</tabstop>
+  <tabstop>user_file_line_edit</tabstop>
+  <tabstop>tab_choice_list</tabstop>
+  <tabstop>batch_line_edit</tabstop>
  </tabstops>
  <resources/>
  <connections/>

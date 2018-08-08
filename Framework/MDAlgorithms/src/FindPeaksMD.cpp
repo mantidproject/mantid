@@ -197,7 +197,8 @@ void FindPeaksMD::init() {
   auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
-                  "Wavelength to use when calculating goniometer angle");
+                  "Wavelength to use when calculating goniometer angle. If not"
+                  "set will use the wavelength parameter on the instrument.");
 
   setPropertySettings("Wavelength",
                       make_unique<EnabledWhenProperty>(
@@ -296,6 +297,16 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
     if (calcGoniometer) {
       // Calculate Q lab from Q sample and wavelength
       double wavelength = getProperty("Wavelength");
+      if (wavelength == DBL_MAX) {
+        if (inst->hasParameter("wavelength")) {
+          wavelength = inst->getNumberParameter("wavelength").at(0);
+        } else {
+          throw std::runtime_error(
+              "Could not get wavelength, neither Wavelength algorithm property "
+              "set nor instrument wavelength parameter");
+        }
+      }
+
       Geometry::Goniometer goniometer;
       goniometer.calcFromQSampleAndWavelength(Q, wavelength);
       g_log.information() << "Found goniometer rotation to be "
@@ -483,13 +494,14 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (nexp > 1) {
         MDBox<MDE, nd> *mdbox = dynamic_cast<MDBox<MDE, nd> *>(box);
         typename std::vector<MDE> &events = mdbox->getEvents();
-        if (std::none_of(events.cbegin(), events.cend(), [&iexp, &nexp](
-                                                             MDE event) {
-              return event.getRunIndex() == iexp || event.getRunIndex() >= nexp;
-            }))
+        if (std::none_of(events.cbegin(), events.cend(),
+                         [&iexp, &nexp](MDE event) {
+                           return event.getRunIndex() == iexp ||
+                                  event.getRunIndex() >= nexp;
+                         }))
           continue;
       }
-// The center of the box = Q in the lab frame
+        // The center of the box = Q in the lab frame
 
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
@@ -756,11 +768,6 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
                                     "can only be used with an MDEventWorkspace "
                                     "as the input.";
   }
-
-  double wavelength = getProperty("Wavelength");
-  if (getProperty("CalculateGoniometerForCW") && wavelength == DBL_MAX)
-    result["Wavelength"] =
-        "Must set wavelength when using CalculateGoniometerForCW option";
 
   return result;
 }

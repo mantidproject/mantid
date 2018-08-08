@@ -1,19 +1,21 @@
 #include "MantidAlgorithms/ReflectometryReductionOne2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
@@ -30,29 +32,32 @@ namespace Algorithms {
 /*Anonomous namespace */
 namespace {
 
+std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
+std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
+
 /** Get the twoTheta angle for the centre of the detector associated with the
-* given spectrum
-*
-* @param spectrumInfo : the spectrum info
-* @param spectrumIdx : the workspace index of the spectrum
-* @return : the twoTheta angle in radians
-*/
+ * given spectrum
+ *
+ * @param spectrumInfo : the spectrum info
+ * @param spectrumIdx : the workspace index of the spectrum
+ * @return : the twoTheta angle in radians
+ */
 double getDetectorTwoTheta(const SpectrumInfo *spectrumInfo,
                            const size_t spectrumIdx) {
   return spectrumInfo->signedTwoTheta(spectrumIdx);
 }
 
 /** Get the start/end of the lambda range for the detector associated
-* with the given spectrum
-*
-* @return : the lambda range
-*/
+ * with the given spectrum
+ *
+ * @return : the lambda range
+ */
 double getLambdaRange(const HistogramX &xValues, const int xIdx) {
   // The lambda range is the bin width from the given index to the next.
   if (xIdx < 0 || xIdx + 1 >= static_cast<int>(xValues.size())) {
     throw std::runtime_error("Error accessing X values out of range (index=" +
-                             std::to_string(xIdx + 1) + ", size=" +
-                             std::to_string(xValues.size()));
+                             std::to_string(xIdx + 1) +
+                             ", size=" + std::to_string(xValues.size()));
   }
 
   double result = xValues[xIdx + 1] - xValues[xIdx];
@@ -60,141 +65,28 @@ double getLambdaRange(const HistogramX &xValues, const int xIdx) {
 }
 
 /** Get the lambda value at the centre of the detector associated
-* with the given spectrum
-*
-* @return : the lambda range
-*/
+ * with the given spectrum
+ *
+ * @return : the lambda range
+ */
 double getLambda(const HistogramX &xValues, const int xIdx) {
   if (xIdx < 0 || xIdx >= static_cast<int>(xValues.size())) {
-    throw std::runtime_error("Error accessing X values out of range (index=" +
-                             std::to_string(xIdx) + ", size=" +
-                             std::to_string(xValues.size()));
+    throw std::runtime_error(
+        "Error accessing X values out of range (index=" + std::to_string(xIdx) +
+        ", size=" + std::to_string(xValues.size()));
   }
 
   // The centre of the bin is the lower bin edge plus half the width
   return xValues[xIdx] + getLambdaRange(xValues, xIdx) / 2.0;
 }
 
-/** @todo The following translation functions are duplicates of code in
-* GroupDetectors2.cpp. Longer term, we should move them to a common location if
-* possible */
-
-/* The following functions are used to translate single operators into
-* groups, just like the ones this algorithm loads from .map files.
-*
-* Each function takes a string, such as "3+4", or "6:10" and then adds
-* the resulting groups of spectra to outGroups.
-*/
-
-// An add operation, i.e. "3+4" -> [3+4]
-void translateAdd(const std::string &instructions,
-                  std::vector<std::vector<size_t>> &outGroups) {
-  auto spectra = Kernel::StringTokenizer(
-      instructions, "+", Kernel::StringTokenizer::TOK_TRIM |
-                             Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-
-  std::vector<size_t> outSpectra;
-  outSpectra.reserve(spectra.count());
-  for (const auto &spectrum : spectra) {
-    // add this spectrum to the group we're about to add
-    outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
-  }
-  outGroups.push_back(std::move(outSpectra));
-}
-
-// A range summation, i.e. "3-6" -> [3+4+5+6]
-void translateSumRange(const std::string &instructions,
-                       std::vector<std::vector<size_t>> &outGroups) {
-  // add a group with the sum of the spectra in the range
-  auto spectra = Kernel::StringTokenizer(instructions, "-");
-  if (spectra.count() != 2)
-    throw std::runtime_error("Malformed range (-) operation.");
-  // fetch the start and stop spectra
-  size_t first = boost::lexical_cast<size_t>(spectra[0]);
-  size_t last = boost::lexical_cast<size_t>(spectra[1]);
-  // swap if they're back to front
-  if (first > last)
-    std::swap(first, last);
-
-  // add all the spectra in the range to the output group
-  std::vector<size_t> outSpectra;
-  outSpectra.reserve(last - first + 1);
-  for (size_t i = first; i <= last; ++i)
-    outSpectra.push_back(i);
-  if (!outSpectra.empty())
-    outGroups.push_back(std::move(outSpectra));
-}
-
-// A range insertion, i.e. "3:6" -> [3,4,5,6]
-void translateRange(const std::string &instructions,
-                    std::vector<std::vector<size_t>> &outGroups) {
-  // add a group per spectra
-  auto spectra = Kernel::StringTokenizer(
-      instructions, ":", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  if (spectra.count() != 2)
-    throw std::runtime_error("Malformed range (:) operation.");
-  // fetch the start and stop spectra
-  size_t first = boost::lexical_cast<size_t>(spectra[0]);
-  size_t last = boost::lexical_cast<size_t>(spectra[1]);
-  // swap if they're back to front
-  if (first > last)
-    std::swap(first, last);
-
-  // add all the spectra in the range to separate output groups
-  for (size_t i = first; i <= last; ++i) {
-    // create group of size 1 with the spectrum and add it to output
-    outGroups.emplace_back(1, i);
-  }
-}
-
 /**
-* Translate the processing instructions into a vector of groups of indices
-*
-* @param instructions : Instructions to translate
-* @return : A vector of groups, each group being a vector of its 0-based
-* spectrum indices
-*/
-std::vector<std::vector<size_t>>
-translateInstructions(const std::string &instructions) {
-  std::vector<std::vector<size_t>> outGroups;
-
-  try {
-    // split into comma separated groups, each group potentially containing
-    // an operation (+-:) that produces even more groups.
-    auto groups = Kernel::StringTokenizer(
-        instructions, ",",
-        StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
-    for (const auto &groupStr : groups) {
-      // Look for the various operators in the string. If one is found then
-      // do the necessary translation into groupings.
-      if (groupStr.find('+') != std::string::npos) {
-        // add a group with the given spectra
-        translateAdd(groupStr, outGroups);
-      } else if (groupStr.find('-') != std::string::npos) {
-        translateSumRange(groupStr, outGroups);
-      } else if (groupStr.find(':') != std::string::npos) {
-        translateRange(groupStr, outGroups);
-      } else if (!groupStr.empty()) {
-        // contains no instructions, just add this spectrum as a new group
-        // create group of size 1 with the spectrum in it and add it to output
-        outGroups.emplace_back(1, boost::lexical_cast<size_t>(groupStr));
-      }
-    }
-  } catch (boost::bad_lexical_cast &) {
-    throw std::runtime_error("Invalid processing instructions: " +
-                             instructions);
-  }
-
-  return outGroups;
-}
-
-/**
-* Map a spectrum index from the given map to the given workspace
-* @param originWS : the original workspace
-* @param mapIdx : the index in the original workspace
-* @param destWS : the destination workspace
-* @return : the index in the destination workspace
-*/
+ * Map a spectrum index from the given map to the given workspace
+ * @param originWS : the original workspace
+ * @param mapIdx : the index in the original workspace
+ * @param destWS : the destination workspace
+ * @return : the index in the destination workspace
+ */
 size_t mapSpectrumIndexToWorkspace(MatrixWorkspace_const_sptr originWS,
                                    const size_t originIdx,
                                    MatrixWorkspace_const_sptr destWS) {
@@ -206,15 +98,15 @@ size_t mapSpectrumIndexToWorkspace(MatrixWorkspace_const_sptr originWS,
 }
 
 /**
-* @param originWS : Origin workspace, which provides the original workspace
-* index to spectrum number mapping.
-* @param hostWS : Workspace onto which the resulting workspace indexes will be
-* hosted
-* @throws :: If the specId are not found to exist on the host end-point
-*workspace.
-* @return :: Remapped workspace indexes applicable for the host workspace,
-*as a vector of groups of vectors of spectrum indices
-*/
+ * @param originWS : Origin workspace, which provides the original workspace
+ * index to spectrum number mapping.
+ * @param hostWS : Workspace onto which the resulting workspace indexes will be
+ * hosted
+ * @throws :: If the specId are not found to exist on the host end-point
+ *workspace.
+ * @return :: Remapped workspace indexes applicable for the host workspace,
+ *as a vector of groups of vectors of spectrum indices
+ */
 std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
     MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
     const std::vector<std::vector<size_t>> &detectorGroups) {
@@ -234,19 +126,19 @@ std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
 }
 
 /**
-* Translate all the workspace indexes in an origin workspace into workspace
-* indexes of a host end-point workspace. This is done using spectrum numbers as
-* the intermediate.
-*
-* @param originWS : Origin workspace, which provides the original workspace
-* index to spectrum number mapping.
-* @param hostWS : Workspace onto which the resulting workspace indexes will be
-* hosted
-* @throws :: If the specId are not found to exist on the host end-point
-*workspace.
-* @return :: Remapped workspace indexes applicable for the host workspace,
-*as comma separated string.
-*/
+ * Translate all the workspace indexes in an origin workspace into workspace
+ * indexes of a host end-point workspace. This is done using spectrum numbers as
+ * the intermediate.
+ *
+ * @param originWS : Origin workspace, which provides the original workspace
+ * index to spectrum number mapping.
+ * @param hostWS : Workspace onto which the resulting workspace indexes will be
+ * hosted
+ * @throws :: If the specId are not found to exist on the host end-point
+ *workspace.
+ * @return :: Remapped workspace indexes applicable for the host workspace,
+ *as comma separated string.
+ */
 std::string createProcessingCommandsFromDetectorWS(
     MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
     const std::vector<std::vector<size_t>> &detectorGroups) {
@@ -314,12 +206,12 @@ std::string createProcessingCommandsFromDetectorWS(
 }
 
 /**
-* Get the topbottom extent of a detector for the given axis
-*
-* @param axis [in] : the axis to get the extent for
-* @param top [in] : if true, get the max extent, or min otherwise
-* @return : the max/min extent on the given axis
-*/
+ * Get the topbottom extent of a detector for the given axis
+ *
+ * @param axis [in] : the axis to get the extent for
+ * @param top [in] : if true, get the max extent, or min otherwise
+ * @return : the max/min extent on the given axis
+ */
 double getBoundingBoxExtent(const BoundingBox &boundingBox,
                             const PointingAlong axis, const bool top) {
 
@@ -340,14 +232,14 @@ double getBoundingBoxExtent(const BoundingBox &boundingBox,
   }
   return result;
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOne2)
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void ReflectometryReductionOne2::init() {
 
   // Input workspace
@@ -400,7 +292,8 @@ void ReflectometryReductionOne2::init() {
   initDebugProperties();
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+                                                   Direction::Output,
+                                                   PropertyMode::Optional),
                   "Output Workspace IvsQ.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
@@ -410,7 +303,7 @@ void ReflectometryReductionOne2::init() {
 }
 
 /** Validate inputs
-*/
+ */
 std::map<std::string, std::string>
 ReflectometryReductionOne2::validateInputs() {
 
@@ -428,9 +321,26 @@ ReflectometryReductionOne2::validateInputs() {
   return results;
 }
 
+// Set default names for output workspaces
+void ReflectometryReductionOne2::setDefaultOutputWorkspaceNames() {
+  bool const isDebug = getProperty("Debug");
+  MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+  auto const runNumber = getRunNumber(*ws);
+  if (isDefault("OutputWorkspace")) {
+    setPropertyValue("OutputWorkspace",
+                     OUTPUT_WORKSPACE_DEFAULT_PREFIX + runNumber);
+  }
+  if (isDebug && isDefault("OutputWorkspaceWavelength")) {
+    setPropertyValue("OutputWorkspaceWavelength",
+                     OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX + runNumber);
+  }
+}
+
 /** Execute the algorithm.
-*/
+ */
 void ReflectometryReductionOne2::exec() {
+  setDefaultOutputWorkspaceNames();
+
   // Get input properties
   m_runWS = getProperty("InputWorkspace");
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
@@ -444,6 +354,7 @@ void ReflectometryReductionOne2::exec() {
   m_spectrumInfo = &m_runWS->spectrumInfo();
   auto instrument = m_runWS->getInstrument();
   m_refFrame = instrument->getReferenceFrame();
+  m_partialBins = getProperty("IncludePartialBins");
 
   // Find and cache detector groups and theta0
   findDetectorGroups();
@@ -468,16 +379,18 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
-  setProperty("OutputWorkspaceWavelength", IvsLam);
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
+    setProperty("OutputWorkspaceWavelength", IvsLam);
+  }
   setProperty("OutputWorkspace", IvsQ);
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
-* with the given spectrum
-*
-* @param spectrumIdx : the workspace index of the spectrum
-* @return : the twoTheta range in radians
-*/
+ * with the given spectrum
+ *
+ * @param spectrumIdx : the workspace index of the spectrum
+ * @return : the twoTheta range in radians
+ */
 double
 ReflectometryReductionOne2::getDetectorTwoThetaRange(const size_t spectrumIdx) {
 
@@ -511,12 +424,12 @@ ReflectometryReductionOne2::getDetectorTwoThetaRange(const size_t spectrumIdx) {
 }
 
 /**
-* Utility function to create a unique workspace name for diagnostic outputs
-* based on a given input workspace name
-*
-* @param inputName [in] : the input name
-* @return : the output name
-*/
+ * Utility function to create a unique workspace name for diagnostic outputs
+ * based on a given input workspace name
+ *
+ * @param inputName [in] : the input name
+ * @return : the output name
+ */
 std::string ReflectometryReductionOne2::createDebugWorkspaceName(
     const std::string &inputName) {
   std::string result = inputName;
@@ -534,17 +447,17 @@ std::string ReflectometryReductionOne2::createDebugWorkspaceName(
 }
 
 /**
-* Utility function to add the given workspace to the ADS if debugging is
-* enabled.
-*
-* @param ws [in] : the workspace to add to the ADS
-* @param wsName [in] : the name to output the workspace as
-* @param wsSuffix [in] : a suffix to apply to the wsName
-* @param debug [in] : true if the workspace should be added to the ADS (the
-* function does nothing if this is false)
-* @param step [inout] : the current step number, which is added to the wsSuffix
-* and is incremented after the workspace is output
-*/
+ * Utility function to add the given workspace to the ADS if debugging is
+ * enabled.
+ *
+ * @param ws [in] : the workspace to add to the ADS
+ * @param wsName [in] : the name to output the workspace as
+ * @param wsSuffix [in] : a suffix to apply to the wsName
+ * @param debug [in] : true if the workspace should be added to the ADS (the
+ * function does nothing if this is false)
+ * @param step [inout] : the current step number, which is added to the wsSuffix
+ * and is incremented after the workspace is output
+ */
 void ReflectometryReductionOne2::outputDebugWorkspace(
     MatrixWorkspace_sptr ws, const std::string &wsName,
     const std::string &wsSuffix, const bool debug, int &step) {
@@ -560,13 +473,13 @@ void ReflectometryReductionOne2::outputDebugWorkspace(
 }
 
 /**
-* Creates the output 1D array in wavelength from an input 2D workspace in
-* TOF. Summation is done over lambda or over lines of constant Q depending on
-* the type of reduction. For the latter, the output is projected to "virtual
-* lambda" at a reference angle twoThetaR.
-*
-* @return :: the output workspace in wavelength
-*/
+ * Creates the output 1D array in wavelength from an input 2D workspace in
+ * TOF. Summation is done over lambda or over lines of constant Q depending on
+ * the type of reduction. For the latter, the output is projected to "virtual
+ * lambda" at a reference angle twoThetaR.
+ *
+ * @return :: the output workspace in wavelength
+ */
 MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   MatrixWorkspace_sptr result = m_runWS;
 
@@ -579,7 +492,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     if (m_convertUnits) {
       g_log.debug("Converting input workspace to wavelength\n");
       result = convertToWavelength(result);
-      findWavelengthMinMax(result);
       outputDebugWorkspace(result, wsName, "_lambda", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -631,12 +543,12 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
 }
 
 /**
-* Normalize by monitors (only if I0MonitorIndex, MonitorBackgroundWavelengthMin
-* and MonitorBackgroundWavelengthMax have been given)
-*
-* @param detectorWS :: the detector workspace to normalise, in lambda
-* @return :: the normalized workspace in lambda
-*/
+ * Normalize by monitors (only if I0MonitorIndex, MonitorBackgroundWavelengthMin
+ * and MonitorBackgroundWavelengthMax have been given)
+ *
+ * @param detectorWS :: the detector workspace to normalise, in lambda
+ * @return :: the normalized workspace in lambda
+ */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   MatrixWorkspace_sptr IvsLam;
@@ -644,11 +556,16 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   Property *backgroundMinProperty =
       getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
-      getProperty("MonitorBackgroundWavelengthMin");
+      getProperty("MonitorBackgroundWavelengthMax");
   if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
       !backgroundMaxProperty->isDefault()) {
     const bool integratedMonitors =
         getProperty("NormalizeByIntegratedMonitors");
+    int index = getProperty("I0MonitorIndex");
+    if (!m_spectrumInfo->isMonitor(index)) {
+      throw std::invalid_argument("A monitor is expected at spectrum index " +
+                                  std::to_string(index));
+    }
     const auto monitorWS = makeMonitorWS(m_runWS, integratedMonitors);
     if (!integratedMonitors)
       detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
@@ -661,13 +578,13 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
 }
 
 /**
-* Perform either transmission or algorithmic correction according to the
-* settings.
-* @param detectorWS : workspace in wavelength which is to be normalized
-* @param detectorWSReduced:: whether the input detector workspace has been
-* reduced
-* @return : corrected workspace
-*/
+ * Perform either transmission or algorithmic correction according to the
+ * settings.
+ * @param detectorWS : workspace in wavelength which is to be normalized
+ * @param detectorWSReduced:: whether the input detector workspace has been
+ * reduced
+ * @return : corrected workspace
+ */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
     MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
@@ -685,12 +602,12 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
 }
 
 /** Perform transmission correction by running 'CreateTransmissionWorkspace' on
-* the input workspace
-* @param detectorWS :: the input workspace
-* @param detectorWSReduced:: whether the input detector workspace has been
-* reduced
-* @return :: the input workspace normalized by transmission
-*/
+ * the input workspace
+ * @param detectorWS :: the input workspace
+ * @param detectorWSReduced:: whether the input detector workspace has been
+ * reduced
+ * @return :: the input workspace normalized by transmission
+ */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
@@ -739,6 +656,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("MonitorIntegrationWavelengthMax",
                           getPropertyValue("MonitorIntegrationWavelengthMax"));
     alg->setProperty("ProcessingInstructions", transmissionCommands);
+    alg->setPropertyValue("Debug", getPropertyValue("Debug"));
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
   }
@@ -762,11 +680,11 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
 }
 
 /**
-* Perform transmission correction using alternative correction algorithms
-* @param detectorWS : workspace in wavelength which is to be normalized by the
-* results of the transmission corrections.
-* @return : corrected workspace
-*/
+ * Perform transmission correction using alternative correction algorithms
+ * @param detectorWS : workspace in wavelength which is to be normalized by the
+ * results of the transmission corrections.
+ * @return : corrected workspace
+ */
 MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
     MatrixWorkspace_sptr detectorWS) {
 
@@ -791,10 +709,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
 }
 
 /** Convert a workspace to Q
-*
-* @param inputWS : The input workspace (in wavelength) to convert to Q
-* @return : output workspace in Q
-*/
+ *
+ * @param inputWS : The input workspace (in wavelength) to convert to Q
+ * @return : output workspace in Q
+ */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
   bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
@@ -835,11 +753,11 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
 }
 
 /**
-* Determine whether the reduction should sum along lines of constant
-* Q or in the default lambda.
-*
-* @return : true if the reduction should sum in Q; false otherwise
-*/
+ * Determine whether the reduction should sum along lines of constant
+ * Q or in the default lambda.
+ *
+ * @return : true if the reduction should sum in Q; false otherwise
+ */
 bool ReflectometryReductionOne2::summingInQ() {
   bool result = false;
   const std::string summationType = getProperty("SummationType");
@@ -852,12 +770,12 @@ bool ReflectometryReductionOne2::summingInQ() {
 }
 
 /**
-* Find and cache the indicies of the detectors of interest
-*/
+ * Find and cache the indicies of the detectors of interest
+ */
 void ReflectometryReductionOne2::findDetectorGroups() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
 
-  m_detectorGroups = translateInstructions(instructions);
+  m_detectorGroups = Kernel::Strings::parseGroups<size_t>(instructions);
 
   // Sort the groups by the first spectrum number in the group (to give the same
   // output order as GroupDetectors)
@@ -872,6 +790,11 @@ void ReflectometryReductionOne2::findDetectorGroups() {
 
   for (const auto &group : m_detectorGroups) {
     for (const auto &spIdx : group) {
+      if (m_spectrumInfo->isMonitor(spIdx)) {
+        throw std::invalid_argument("A detector is expected at spectrum " +
+                                    std::to_string(spIdx) +
+                                    ", found a monitor");
+      }
       if (spIdx > m_spectrumInfo->size() - 1) {
         throw std::runtime_error(
             "ProcessingInstructions contains an out-of-range index: " +
@@ -882,8 +805,8 @@ void ReflectometryReductionOne2::findDetectorGroups() {
 }
 
 /**
-* Find and cache the angle theta0 from which lines of constant Q emanate
-*/
+ * Find and cache the angle theta0 from which lines of constant Q emanate
+ */
 void ReflectometryReductionOne2::findTheta0() {
   // Only requried if summing in Q
   if (!summingInQ()) {
@@ -921,12 +844,12 @@ void ReflectometryReductionOne2::findTheta0() {
 }
 
 /**
-* Get the (arbitrary) reference angle twoThetaR for use for summation
-* in Q
-*
-* @return : the angle twoThetaR in radians
-* @throws : if the angle could not be found
-*/
+ * Get the (arbitrary) reference angle twoThetaR for use for summation
+ * in Q
+ *
+ * @return : the angle twoThetaR in radians
+ * @throws : if the angle could not be found
+ */
 double
 ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
   // Get the twoTheta value for the destinaion pixel that we're projecting onto
@@ -944,9 +867,9 @@ ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
 }
 
 /**
-* Get the spectrum index which defines the twoThetaR reference angle
-* @return : the spectrum index
-*/
+ * Get the spectrum index which defines the twoThetaR reference angle
+ * @return : the spectrum index
+ */
 size_t ReflectometryReductionOne2::twoThetaRDetectorIdx(
     const std::vector<size_t> &detectors) {
   // Get the mid-point of the area of interest
@@ -993,42 +916,95 @@ void ReflectometryReductionOne2::findWavelengthMinMax(
   }
 }
 
+/** Return the spectrum index of the detector to use in the projection for the
+ * start of the virtual IvsLam range when summing in Q
+ */
+size_t ReflectometryReductionOne2::findIvsLamRangeMinDetector(
+    const std::vector<size_t> &detectors) {
+  // If we're including partial bins, we use the full input range, which means
+  // we project the top left and bottom right corner. For the start of the
+  // range we therefore use the highest theta, i.e. max detector index. If
+  // excluding partial bins we use the bottom left and top right corner so use
+  // the min detector for the start of the range.
+  if (m_partialBins)
+    return detectors.back();
+  else
+    return detectors.front();
+}
+
+/** Return the spectrum index of the detector to use in the projection for the
+ * end of the virtual IvsLam range when summing in Q
+ */
+size_t ReflectometryReductionOne2::findIvsLamRangeMaxDetector(
+    const std::vector<size_t> &detectors) {
+  // If we're including partial bins, we use the full input range, which means
+  // we project the top left and bottom right corner. For the end (max) of the
+  // range we therefore use the lowest theta, i.e. min detector index. If
+  // excluding partial bins we use the bottom left and top right corner so use
+  // the max detector for the end of the range.
+  if (m_partialBins)
+    return detectors.front();
+  else
+    return detectors.back();
+}
+
+double ReflectometryReductionOne2::findIvsLamRangeMin(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
+    const double lambda) {
+  double projectedMin = 0.0;
+
+  const size_t spIdx = findIvsLamRangeMinDetector(detectors);
+  const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
+  const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
+
+  // For bLambda, use the average bin size for this spectrum
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
+  double dummy = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors,
+                          projectedMin, dummy, m_partialBins);
+  return projectedMin;
+}
+
+double ReflectometryReductionOne2::findIvsLamRangeMax(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
+    const double lambda) {
+  double projectedMax = 0.0;
+
+  const size_t spIdx = findIvsLamRangeMaxDetector(detectors);
+  const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
+  const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
+
+  // For bLambda, use the average bin size for this spectrum
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
+                   static_cast<int>(xValues.size());
+
+  double dummy = 0.0;
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, detectors,
+                          dummy, projectedMax, m_partialBins);
+  return projectedMax;
+}
+
 /**
-* Find the range of the projected lambda range when summing in Q
-*
-* @param detectorWS [in] : the workspace containing the values to project
-* @param detectors [in] : the workspace indices of the detectors of interest
-* @param lambdaMin [in] : the start of the range to project
-* @param lambdaMax [in] : the end of the range to project
-* @param projectedMin [out] : the start of the resulting projected range
-* @param projectedMax [out] : the end of the resulting projected range
-*/
+ * Find the range of the projected lambda range when summing in Q
+ *
+ * @param detectorWS [in] : the workspace containing the values to project
+ * @param detectors [in] : the workspace indices of the detectors of interest
+ * @param lambdaMin [in] : the start of the range to project
+ * @param lambdaMax [in] : the end of the range to project
+ * @param projectedMin [out] : the start of the resulting projected range
+ * @param projectedMax [out] : the end of the resulting projected range
+ */
 void ReflectometryReductionOne2::findIvsLamRange(
     MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
     const double lambdaMin, const double lambdaMax, double &projectedMin,
     double &projectedMax) {
 
   // Get the new max and min X values of the projected (virtual) lambda range
-  double dummy = 0.0;
-
-  const size_t spIdxMin = detectors.front();
-  const double twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spIdxMin);
-  const double bTwoThetaMin = getDetectorTwoThetaRange(spIdxMin);
-  // For bLambda, use the average bin size for this spectrum
-  auto xValues = detectorWS->x(spIdxMin);
-  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
-                   static_cast<int>(xValues.size());
-  getProjectedLambdaRange(lambdaMax, twoThetaMin, bLambda, bTwoThetaMin,
-                          detectors, dummy, projectedMax);
-
-  const size_t spIdxMax = detectors.back();
-  const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
-  const double bTwoThetaMax = getDetectorTwoThetaRange(spIdxMax);
-  xValues = detectorWS->x(spIdxMax);
-  bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
-            static_cast<int>(xValues.size());
-  getProjectedLambdaRange(lambdaMin, twoThetaMax, bLambda, bTwoThetaMax,
-                          detectors, projectedMin, dummy);
+  projectedMin = findIvsLamRangeMin(detectorWS, detectors, lambdaMin);
+  projectedMax = findIvsLamRangeMax(detectorWS, detectors, lambdaMax);
 
   if (projectedMin > projectedMax) {
     throw std::runtime_error(
@@ -1040,12 +1016,12 @@ void ReflectometryReductionOne2::findIvsLamRange(
 }
 
 /**
-* Construct an "empty" output workspace in virtual-lambda for summation in Q.
-* The workspace will have the same x values as the input workspace but the y
-* values will all be zero.
-*
-* @return : a 1D workspace where y values are all zero
-*/
+ * Construct an "empty" output workspace in virtual-lambda for summation in Q.
+ * The workspace will have the same x values as the input workspace but the y
+ * values will all be zero.
+ *
+ * @return : a 1D workspace where y values are all zero
+ */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 
@@ -1088,12 +1064,12 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 }
 
 /**
-* Sum counts from the input workspace in lambda along lines of constant Q by
-* projecting to "virtual lambda" at a reference angle twoThetaR.
-*
-* @param detectorWS [in] :: the input workspace in wavelength
-* @return :: the output workspace in wavelength
-*/
+ * Sum counts from the input workspace in lambda along lines of constant Q by
+ * projecting to "virtual lambda" at a reference angle twoThetaR.
+ *
+ * @param detectorWS [in] :: the input workspace in wavelength
+ * @return :: the output workspace in wavelength
+ */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 
@@ -1119,8 +1095,8 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       if (inputX.size() != inputY.size() + 1) {
         throw std::runtime_error(
             "Expected input workspace to be histogram data (got X len=" +
-            std::to_string(inputX.size()) + ", Y len=" +
-            std::to_string(inputY.size()) + ")");
+            std::to_string(inputX.size()) +
+            ", Y len=" + std::to_string(inputY.size()) + ")");
       }
 
       // Create a vector for the projected errors for this spectrum.
@@ -1155,19 +1131,19 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 }
 
 /**
-* Share counts from an input value onto the projected output in virtual-lambda
-*
-* @param inputIdx [in] :: the index into the input arrays
-* @param twoTheta [in] :: the value of twotTheta for this spectrum
-* @param bTwoTheta [in] :: the size of the pixel in twoTheta
-* @param inputX [in] :: the input spectrum X values
-* @param inputY [in] :: the input spectrum Y values
-* @param inputE [in] :: the input spectrum E values
-* @param detectors [in] :: spectrum indices of the detectors of interest
-* @param outSpecIdx [in] :: the output spectrum index
-* @param IvsLam [in,out] :: the output workspace
-* @param outputE [in,out] :: the projected E values
-*/
+ * Share counts from an input value onto the projected output in virtual-lambda
+ *
+ * @param inputIdx [in] :: the index into the input arrays
+ * @param twoTheta [in] :: the value of twotTheta for this spectrum
+ * @param bTwoTheta [in] :: the size of the pixel in twoTheta
+ * @param inputX [in] :: the input spectrum X values
+ * @param inputY [in] :: the input spectrum Y values
+ * @param inputE [in] :: the input spectrum E values
+ * @param detectors [in] :: spectrum indices of the detectors of interest
+ * @param outSpecIdx [in] :: the output spectrum index
+ * @param IvsLam [in,out] :: the output workspace
+ * @param outputE [in,out] :: the projected E values
+ */
 void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double twoTheta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
@@ -1219,8 +1195,8 @@ void ReflectometryReductionOne2::sumInQShareCounts(
   if (outputX.size() != outputY.size() + 1) {
     throw std::runtime_error(
         "Expected output array to be histogram data (got X len=" +
-        std::to_string(outputX.size()) + ", Y len=" +
-        std::to_string(outputY.size()) + ")");
+        std::to_string(outputX.size()) +
+        ", Y len=" + std::to_string(outputY.size()) + ")");
   }
 
   const double totalWidth = lambdaMax - lambdaMin;
@@ -1263,56 +1239,60 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 }
 
 /**
-* Project an input pixel onto an arbitrary reference line at twoThetaR. The
-* projection is done along lines of constant Q, which emanate from theta0. The
-* top-left and bottom-right corners of the pixel are projected, resulting in an
-* output range in "virtual" lambda (lambdaV).
-*
-* For a description of this projection, see:
-*   R. Cubitt, T. Saerbeck, R.A. Campbell, R. Barker, P. Gutfreund
-*   J. Appl. Crystallogr., 48 (6) (2015)
-*
-* @param lambda [in] :: the lambda coord of the centre of the pixel to project
-* @param twoTheta [in] :: the twoTheta coord of the centre of the pixel to
-*project
-* @param bLambda [in] :: the pixel size in lambda
-* @param bTwoTheta [in] :: the pixel size in twoTheta
-* @param detectors [in] :: spectrum indices of the detectors of interest
-* @param lambdaVMin [out] :: the projected range start
-* @param lambdaVMax [out] :: the projected range end
-*/
+ * Project an input pixel onto an arbitrary reference line at twoThetaR. The
+ * projection is done along lines of constant Q, which emanate from theta0. The
+ * top-left and bottom-right corners of the pixel are projected, resulting in an
+ * output range in "virtual" lambda (lambdaV).
+ *
+ * For a description of this projection, see:
+ *   R. Cubitt, T. Saerbeck, R.A. Campbell, R. Barker, P. Gutfreund
+ *   J. Appl. Crystallogr., 48 (6) (2015)
+ *
+ * @param lambda [in] :: the lambda coord of the centre of the pixel to project
+ * @param twoTheta [in] :: the twoTheta coord of the centre of the pixel to
+ *project
+ * @param bLambda [in] :: the pixel size in lambda
+ * @param bTwoTheta [in] :: the pixel size in twoTheta
+ * @param detectors [in] :: spectrum indices of the detectors of interest
+ * @param lambdaVMin [out] :: the projected range start
+ * @param lambdaVMax [out] :: the projected range end
+ * @param outerCorners [in] :: true to project from top-left and bottom-right
+ * corners of the pixel; false to use bottom-left and top-right
+ */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
     const double bTwoTheta, const std::vector<size_t> &detectors,
-    double &lambdaVMin, double &lambdaVMax) {
+    double &lambdaVMin, double &lambdaVMax, const bool outerCorners) {
 
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
-    throw std::runtime_error("Cannot process twoTheta=" +
-                             std::to_string(twoTheta * 180.0 / M_PI) +
-                             " as it is below the horizon angle=" +
-                             std::to_string(theta0() * 180.0 / M_PI));
+    throw std::runtime_error(
+        "Cannot process twoTheta=" + std::to_string(twoTheta * 180.0 / M_PI) +
+        " as it is below the horizon angle=" +
+        std::to_string(theta0() * 180.0 / M_PI));
   }
 
   // Get the angle from twoThetaR to this detector
   const double twoThetaRVal = twoThetaR(detectors);
-  // Get the distance from the pixel to twoThetaR
-  const double gamma = twoTheta - twoThetaRVal;
   // Get the angle from the horizon to the reference angle
-  const double horizonThetaR = twoThetaRVal - theta0();
+  const double delta = twoThetaRVal - theta0();
+  // For outer corners use top left, bottom right; otherwise bottom left, top
+  // right
+  const double lambda1 = lambda - bLambda / 2.0;
+  const double lambda2 = lambda + bLambda / 2.0;
+  double twoTheta1 = twoTheta + bTwoTheta / 2.0;
+  double twoTheta2 = twoTheta - bTwoTheta / 2.0;
+  if (!outerCorners)
+    std::swap(twoTheta1, twoTheta2);
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop =
-        (lambda + bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma - bTwoTheta / 2.0));
-    const double lambdaBot =
-        (lambda - bLambda / 2.0) *
-        (std::sin(horizonThetaR) /
-         std::sin(horizonThetaR + gamma + bTwoTheta / 2.0));
-    lambdaVMin = std::min(lambdaTop, lambdaBot);
-    lambdaVMax = std::max(lambdaTop, lambdaBot);
+    const double lambdaV1 =
+        lambda1 * (std::sin(delta) / std::sin(twoTheta1 - theta0()));
+    const double lambdaV2 =
+        lambda2 * (std::sin(delta) / std::sin(twoTheta2 - theta0()));
+    lambdaVMin = std::min(lambdaV1, lambdaV2);
+    lambdaVMax = std::max(lambdaV1, lambdaV2);
   } catch (std::exception &ex) {
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +

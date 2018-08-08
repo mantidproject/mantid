@@ -241,7 +241,6 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
     Note: the return is the pcolor, pcolormesh, or pcolorfast of the last spectrum
     '''
     (x, y, z) = get_uneven_data(workspace, distribution)
-    pcolortype = kwargs.pop('pcolortype', '')
     mini = numpy.min([numpy.min(i) for i in z])
     maxi = numpy.max([numpy.max(i) for i in z])
     if 'vmin' in kwargs:
@@ -255,14 +254,20 @@ def _pcolorpieces(axes, workspace, distribution, *args, **kwargs):
             kwargs['norm'].vmin = mini
         if kwargs['norm'].vmax is None:
             kwargs['norm'].vmax = maxi
+
+    # setup the particular pcolor to use
+    pcolortype = kwargs.pop('pcolortype', '').lower()
+    if 'mesh' in pcolortype:
+        pcolor = axes.pcolormesh
+    elif 'fast' in pcolortype:
+        pcolor = axes.pcolorfast
+    else:
+        pcolor = axes.pcolor
+
     for xi, yi, zi in zip(x, y, z):
         XX, YY = numpy.meshgrid(xi, yi, indexing='ij')
-        if 'mesh' in pcolortype.lower():
-            cm = axes.pcolormesh(XX, YY, zi.reshape(-1, 1), **kwargs)
-        elif 'fast' in pcolortype.lower():
-            cm = axes.pcolorfast(XX, YY, zi.reshape(-1, 1), **kwargs)
-        else:
-            cm = axes.pcolor(XX, YY, zi.reshape(-1, 1), **kwargs)
+        cm = pcolor(XX, YY, zi.reshape(-1, 1), **kwargs)
+
     return cm
 
 
@@ -466,4 +471,3 @@ def tricontourf(axes, workspace, *args, **kwargs):
     y = y[condition]
     z = z[condition]
     return axes.tricontourf(x, y, z, *args, **kwargs)
-

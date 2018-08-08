@@ -23,8 +23,8 @@
 #include <QScrollBar>
 
 #include <algorithm>
-#include <limits>
 #include <cmath>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -83,7 +83,7 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
     return 0;
   }
 }
-}
+} // namespace
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
                            QWidget *parent, const QString &label,
@@ -183,8 +183,8 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e) {
 }
 
 /** Called when switching between tabs
-*  @param index :: The index of the new active tab
-*/
+ *  @param index :: The index of the new active tab
+ */
 void MantidMatrix::viewChanged(int index) {
   // get the previous view and selection model
   QTableView *prevView = (QTableView *)m_tabs->widget(m_PrevIndex);
@@ -375,7 +375,7 @@ int MantidMatrix::columnsWidth(int i) {
 }
 
 /**  Return the pointer to the active table view.
-*/
+ */
 QTableView *MantidMatrix::activeView() {
   auto currentIndex = m_tabs->currentIndex();
   switch (currentIndex) {
@@ -392,7 +392,7 @@ QTableView *MantidMatrix::activeView() {
 }
 
 /**  Returns the pointer to the active model.
-*/
+ */
 MantidMatrixModel *MantidMatrix::activeModel() {
   auto currentIndex = m_tabs->currentIndex();
   switch (currentIndex) {
@@ -410,13 +410,18 @@ MantidMatrixModel *MantidMatrix::activeModel() {
 
 /**  Copies the current selection in the active table view into the system
  * clipboard.
-*/
+ */
 void MantidMatrix::copySelection() {
   QItemSelectionModel *selModel = activeView()->selectionModel();
   QString s = "";
   QString eol = applicationWindow()->endOfLine();
   if (!selModel->hasSelection()) {
     QModelIndex index = selModel->currentIndex();
+    if (!index.isValid()) {
+      // No text boxes were selected. So we cannot copy anything
+      return;
+    }
+
     s = text(index.row(), index.column());
   } else {
     QItemSelection sel = selModel->selection();
@@ -458,7 +463,7 @@ void MantidMatrix::range(double *min, double *max) {
 }
 
 /**  Sets new minimum and maximum Y-values which can be displayed in a 2D graph
-*/
+ */
 void MantidMatrix::setRange(double min, double max) {
   m_min = min;
   m_max = max;
@@ -468,9 +473,9 @@ void MantidMatrix::setRange(double min, double max) {
 double **MantidMatrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
-    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                       tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
 
@@ -481,9 +486,9 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                         tr("Memory Allocation Error"),
-                            tr("Not enough memory, operation aborted!"));
+      QMessageBox::critical(
+          nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+          tr("Not enough memory, operation aborted!"));
       return nullptr;
     }
   }
@@ -659,15 +664,17 @@ QwtDoubleRect MantidMatrix::boundingRect() {
                                 ? numCols()
                                 : defaultNumberSpectroGramColumns;
       }
-      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
-                                     qMin(y_start, y_end) - 0.5 * dy,
-                                     fabs(x_end - x_start) + dx,
-                                     fabs(y_end - y_start) + dy).normalized();
+      m_boundingRect =
+          QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                        qMin(y_start, y_end) - 0.5 * dy,
+                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
+              .normalized();
 
     } else {
       m_spectrogramCols = 0;
       m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy).normalized();
+                                     fabs(y_end - y_start) + dy)
+                           .normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;
@@ -821,9 +828,9 @@ const QList<int> &MantidMatrix::getSelectedRows() const {
 }
 
 /**
-* Sets the internal cache of selected rows.
-* @return True if rows are selected, false otherwise
-*/
+ * Sets the internal cache of selected rows.
+ * @return True if rows are selected, false otherwise
+ */
 bool MantidMatrix::setSelectedRows() {
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
@@ -846,9 +853,9 @@ const QList<int> &MantidMatrix::getSelectedColumns() const {
 }
 
 /**
-* Sets the internal cache of selected columns.
-* @return True if columns are selected, false otherwise
-*/
+ * Sets the internal cache of selected columns.
+ * @return True if columns are selected, false otherwise
+ */
 bool MantidMatrix::setSelectedColumns() {
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
@@ -1155,7 +1162,7 @@ void MantidMatrix::goToTab(const QString &name) {
 }
 
 /**  returns the workspace name
-*/
+ */
 const std::string &MantidMatrix::getWorkspaceName() { return m_strName; }
 
 void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {

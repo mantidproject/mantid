@@ -5,6 +5,7 @@
 #include "EnggDiffMultiRunFittingQtWidget.h"
 #include "IEnggDiffGSASFittingPresenter.h"
 #include "IEnggDiffGSASFittingView.h"
+#include "IEnggDiffractionParam.h"
 #include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionUserMsg.h"
 
@@ -25,7 +26,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffGSASFittingViewQtWidget
 public:
   EnggDiffGSASFittingViewQtWidget(
       boost::shared_ptr<IEnggDiffractionUserMsg> userMessageProvider,
-      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner);
+      boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner,
+      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   ~EnggDiffGSASFittingViewQtWidget() override;
 
@@ -107,7 +109,7 @@ private:
   void setupUI();
 };
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGVIEWQTWIDGET_H_

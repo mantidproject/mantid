@@ -1,9 +1,10 @@
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +20,7 @@ using namespace Mantid::DataObjects;
  */
 void CreatePeaksWorkspace::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+      make_unique<WorkspaceProperty<Workspace>>(
           "InstrumentWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional input workspace containing the default instrument for peaks "
       "in this workspace.");
@@ -33,18 +34,36 @@ void CreatePeaksWorkspace::init() {
 /** Execute the algorithm.
  */
 void CreatePeaksWorkspace::exec() {
-  MatrixWorkspace_sptr instWS = getProperty("InstrumentWorkspace");
+  Workspace_sptr instWS = this->getProperty("InstrumentWorkspace");
+
+  MultipleExperimentInfos_sptr instMDWS =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(instWS);
+
+  ExperimentInfo_sptr ei;
 
   auto out = boost::make_shared<PeaksWorkspace>();
   setProperty("OutputWorkspace", out);
   int NumberOfPeaks = getProperty("NumberOfPeaks");
 
-  if (instWS) {
+  if (instMDWS != nullptr) {
+    if (instMDWS->getNumExperimentInfo() > 0) {
+      out->setInstrument(instMDWS->getExperimentInfo(0)->getInstrument());
+      out->mutableRun().setGoniometer(
+          instMDWS->getExperimentInfo(0)->run().getGoniometer().getR(), false);
+    } else {
+      throw std::invalid_argument("InstrumentWorkspace has no ExperimentInfo");
+    }
+  } else {
+    ei = boost::dynamic_pointer_cast<ExperimentInfo>(instWS);
+    if (ei) {
+      out->setInstrument(ei->getInstrument());
+      out->mutableRun().setGoniometer(ei->run().getGoniometer().getR(), false);
+    }
+  }
+
+  if (instMDWS || ei) {
     Progress progress(this, 0.0, 1.0, NumberOfPeaks);
 
-    out->setInstrument(instWS->getInstrument());
-    out->mutableRun().setGoniometer(instWS->run().getGoniometer().getR(),
-                                    false);
     // Create some default peaks
     for (int i = 0; i < NumberOfPeaks; i++) {
       out->addPeak(Peak(out->getInstrument(),
@@ -54,5 +73,5 @@ void CreatePeaksWorkspace::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

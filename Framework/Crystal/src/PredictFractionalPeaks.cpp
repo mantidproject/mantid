@@ -1,17 +1,17 @@
 /*
-* PredictFractionalPeaks.cpp
-*
-*  Created on: Dec 5, 2012
-*      Author: ruth
-*/
+ * PredictFractionalPeaks.cpp
+ *
+ *  Created on: Dec 5, 2012
+ *      Author: ruth
+ */
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
 #include <boost/math/special_functions/round.hpp>
@@ -29,14 +29,14 @@ DECLARE_ALGORITHM(PredictFractionalPeaks)
 /// Initialise the properties
 void PredictFractionalPeaks::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<IPeaksWorkspace>>("Peaks", "",
-                                                      Direction::Input),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("Peaks", "",
+                                                     Direction::Input),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
-      make_unique<WorkspaceProperty<IPeaksWorkspace>>("FracPeaks", "",
-                                                      Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("FracPeaks", "",
+                                                     Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       string("HOffset"), "-0.5,0.0,0.5"),
@@ -95,11 +95,10 @@ void PredictFractionalPeaks::init() {
 
 /// Run the algorithm
 void PredictFractionalPeaks::exec() {
-  IPeaksWorkspace_sptr ipeaks = getProperty("Peaks");
-  auto Peaks = boost::dynamic_pointer_cast<PeaksWorkspace>(ipeaks);
+  PeaksWorkspace_sptr Peaks = getProperty("Peaks");
   if (!Peaks)
     throw std::invalid_argument(
-        "Input workspace is not a PeaksWorkspace. Type=" + ipeaks->id());
+        "Input workspace is not a PeaksWorkspace. Type=" + Peaks->id());
 
   vector<double> hOffsets = getProperty("HOffset");
   vector<double> kOffsets = getProperty("KOffset");
@@ -124,8 +123,8 @@ void PredictFractionalPeaks::exec() {
 
   Geometry::Instrument_const_sptr Instr = Peaks->getInstrument();
 
-  boost::shared_ptr<IPeaksWorkspace> OutPeaks =
-      WorkspaceFactory::Instance().createPeaks();
+  auto OutPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+      WorkspaceFactory::Instance().createPeaks());
   OutPeaks->setInstrument(Instr);
 
   V3D hkl;

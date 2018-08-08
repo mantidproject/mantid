@@ -1,10 +1,12 @@
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
+#include "MantidKernel/Logger.h"
 
 #include <sstream>
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace API {
@@ -12,13 +14,13 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("FileBackedExperimentInfo");
-}
+} // namespace
 
 /**
-  * Create an object based on a NeXus file and path
-  * @param filename The full path to the file
-  * @param nxpath Path to the location of the experiment information
-  */
+ * Create an object based on a NeXus file and path
+ * @param filename The full path to the file
+ * @param nxpath Path to the location of the experiment information
+ */
 FileBackedExperimentInfo::FileBackedExperimentInfo(const std::string &filename,
                                                    const std::string &nxpath)
     : ExperimentInfo(), m_loaded(false), m_filename(filename),
@@ -56,10 +58,10 @@ void FileBackedExperimentInfo::populateFromFile() const {
     m_loaded = true;
 
     std::string parameterStr;
-    const_cast<FileBackedExperimentInfo *>(this)
-        ->loadExperimentInfoNexus(m_filename, &nxFile, parameterStr);
-    const_cast<FileBackedExperimentInfo *>(this)
-        ->readParameterMap(parameterStr);
+    const_cast<FileBackedExperimentInfo *>(this)->loadExperimentInfoNexus(
+        m_filename, &nxFile, parameterStr);
+    const_cast<FileBackedExperimentInfo *>(this)->readParameterMap(
+        parameterStr);
   } catch (::NeXus::Exception &exc) {
     std::ostringstream os;
     os << "Unable to load experiment information from NeXus file: "

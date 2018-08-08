@@ -71,7 +71,7 @@ void getTofRange(MatrixWorkspace_const_sptr wksp, double &tmin, double &tmax) {
     eventWksp->getEventXMinMax(tmin, tmax);
   }
 }
-} // anonymous namespace end
+} // namespace
 
 /** Execute the algorithm.
  */
@@ -109,7 +109,8 @@ void RemovePromptPulse::exec() {
       this->calculatePulseTimes(tmin, tmax, period);
   if (pulseTimes.empty()) {
     g_log.notice() << "Not applying filter since prompt pulse is not in data "
-                      "range (period = " << period << ")\n";
+                      "range (period = "
+                   << period << ")\n";
     setProperty("OutputWorkspace",
                 boost::const_pointer_cast<MatrixWorkspace>(inputWS));
     return;
@@ -196,5 +197,5 @@ RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax,
 
   return times;
 }
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

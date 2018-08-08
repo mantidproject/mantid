@@ -1,27 +1,27 @@
 #ifndef MANTID_CRYSTAL_PREDICTPEAKSTEST_H_
 #define MANTID_CRYSTAL_PREDICTPEAKSTEST_H_
 
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 class PredictPeaksTest : public CxxTest::TestSuite {
 public:
@@ -244,6 +244,52 @@ public:
   }
   void test_edge() {
     do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
+  }
+
+  void test_exec_with_CalculateGoniometerForCW() {
+    // Name of the output workspace.
+    std::string outWSName("PredictPeaksTest_OutputWS");
+
+    // Make the fake input workspace
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+    inWS->setInstrument(inst);
+
+    // Set ub and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    PeaksWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(
+            outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(ws->getNumberPeaks(), 1);
+    TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), V3D(1, 0, 0));
+    TS_ASSERT_DELTA(ws->getPeak(0).getWavelength(), 1.5, 1e-6);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 };
 

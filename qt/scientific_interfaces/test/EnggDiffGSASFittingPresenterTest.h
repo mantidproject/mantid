@@ -5,6 +5,7 @@
 #include "EnggDiffGSASFittingModelMock.h"
 #include "EnggDiffGSASFittingViewMock.h"
 #include "EnggDiffMultiRunFittingWidgetPresenterMock.h"
+#include "EnggDiffractionParamMock.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
@@ -54,7 +55,8 @@ public:
         .WillOnce(Throw(std::runtime_error("Failure reason")));
 
     EXPECT_CALL(*m_mockViewPtr,
-                userWarning("Could not load file", "Failure reason")).Times(1);
+                userWarning("Could not load file", "Failure reason"))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::LoadRun);
     assertMocksUsedCorrectly();
@@ -71,9 +73,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr,
-                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
-                    {params}))).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -90,9 +93,10 @@ public:
     setRefinementParamsExpectations(params);
 
     EXPECT_CALL(*m_mockViewPtr, setEnabled(false)).Times(1);
-    EXPECT_CALL(*m_mockModelPtr,
-                doRefinements(std::vector<GSASIIRefineFitPeaksParameters>(
-                    {params}))).Times(1);
+    EXPECT_CALL(
+        *m_mockModelPtr,
+        doRefinements(std::vector<GSASIIRefineFitPeaksParameters>({params})))
+        .Times(1);
 
     presenter->notify(IEnggDiffGSASFittingPresenter::DoRefinement);
     assertMocksUsedCorrectly();
@@ -184,7 +188,31 @@ public:
     auto presenter = setUpPresenter();
     EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
     EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
-    presenter->notifyRefinementsComplete();
+
+    const Mantid::API::MatrixWorkspace_sptr fittedPeaks(
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 100));
+    const auto latticeParams =
+        Mantid::API::WorkspaceFactory::Instance().createTable();
+    const RunLabel runLabel1(123, 1);
+    const GSASIIRefineFitPeaksOutputProperties refinementResults1(
+        1, 2, 3, fittedPeaks, latticeParams, runLabel1);
+    const RunLabel runLabel2(125, 1);
+    const std::vector<RunLabel> runLabels({runLabel1, runLabel2});
+    const GSASIIRefineFitPeaksOutputProperties refinementResults2(
+        1, 2, 3, fittedPeaks, latticeParams, runLabel2);
+    const std::vector<GSASIIRefineFitPeaksOutputProperties> refinementResultSet(
+        {refinementResults1, refinementResults2});
+    const Mantid::API::IAlgorithm_sptr alg(nullptr);
+
+    const std::string outputFilename("/some/dir/Runs/123_125.hdf5");
+    EXPECT_CALL(*m_mockParamPtr, userHDFMultiRunFilename(runLabels))
+        .Times(1)
+        .WillOnce(Return(outputFilename));
+
+    EXPECT_CALL(*m_mockModelPtr, saveRefinementResultsToHDF5(
+                                     alg, refinementResultSet, outputFilename));
+    presenter->notifyRefinementsComplete(alg, refinementResultSet);
+
     assertMocksUsedCorrectly();
   }
 
@@ -197,9 +225,24 @@ public:
     const RunLabel runLabel(123, 1);
     const GSASIIRefineFitPeaksOutputProperties refinementResults(
         1, 2, 3, fittedPeaks, latticeParams, runLabel);
+    const Mantid::API::IAlgorithm_sptr alg(nullptr);
+
+    const std::string hdfFilename = "directory/path/run.hdf5";
+    ON_CALL(*m_mockParamPtr, userHDFRunFilename(testing::_))
+        .WillByDefault(Return(hdfFilename));
 
     EXPECT_CALL(*m_mockMultiRunWidgetPtr,
                 addFittedPeaks(runLabel, fittedPeaks));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Saving refinement results"));
+
+    EXPECT_CALL(*m_mockModelPtr,
+                saveRefinementResultsToHDF5(
+                    alg,
+                    std::vector<GSASIIRefineFitPeaksOutputProperties>(
+                        {refinementResults}),
+                    hdfFilename));
+    EXPECT_CALL(*m_mockViewPtr, setEnabled(true));
+    EXPECT_CALL(*m_mockViewPtr, showStatus("Ready"));
 
     // make sure displayFitResults(runLabel) is getting called
     EXPECT_CALL(*m_mockModelPtr, getLatticeParams(runLabel))
@@ -209,7 +252,7 @@ public:
     ON_CALL(*m_mockModelPtr, getSigma(runLabel)).WillByDefault(Return(1));
     ON_CALL(*m_mockModelPtr, getGamma(runLabel)).WillByDefault(Return(1));
 
-    presenter->notifyRefinementSuccessful(refinementResults);
+    presenter->notifyRefinementSuccessful(alg, refinementResults);
     assertMocksUsedCorrectly();
   }
 
@@ -304,6 +347,7 @@ private:
   MockEnggDiffGSASFittingModel *m_mockModelPtr;
   MockEnggDiffGSASFittingView *m_mockViewPtr;
   MockEnggDiffMultiRunFittingWidgetPresenter *m_mockMultiRunWidgetPtr;
+  MockEnggDiffractionParam *m_mockParamPtr;
 
   std::unique_ptr<EnggDiffGSASFittingPresenter> setUpPresenter() {
     auto mockModel = Mantid::Kernel::make_unique<
@@ -316,8 +360,13 @@ private:
         testing::NiceMock<MockEnggDiffMultiRunFittingWidgetPresenter>>();
     m_mockMultiRunWidgetPtr = mockMultiRunWidgetPresenter_sptr.get();
 
+    auto mockParam_sptr =
+        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+    m_mockParamPtr = mockParam_sptr.get();
+
     auto pres_uptr = Mantid::Kernel::make_unique<EnggDiffGSASFittingPresenter>(
-        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr);
+        std::move(mockModel), m_mockViewPtr, mockMultiRunWidgetPresenter_sptr,
+        mockParam_sptr);
     return pres_uptr;
   }
 

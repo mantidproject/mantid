@@ -7,6 +7,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IReflMainWindowPresenter;
+class IReflEventTabPresenter;
 
 /** @class IReflEventPresenter
 
@@ -46,10 +47,12 @@ public:
   /// Time-slicing type
   virtual std::string getTimeSlicingType() const = 0;
 
+  virtual void acceptTabPresenter(IReflEventTabPresenter *tabPresenter) = 0;
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
+  virtual void notifySettingsChanged() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */

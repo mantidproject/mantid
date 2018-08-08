@@ -1,5 +1,7 @@
-from sans.common.enums import (SANSInstrument, FindDirectionEnum)
+from sans.common.enums import (SANSInstrument, FindDirectionEnum, DetectorType)
 from mantid.kernel import (Logger)
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
 class BeamCentreModel(object):
@@ -11,13 +13,22 @@ class BeamCentreModel(object):
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def reset_to_defaults_for_instrument(self, instrument = None):
+    def reset_to_defaults_for_instrument(self, state_data = None):
+        r_range = {}
+        instrument = None
+
+        if state_data:
+            instrument_file_path = get_instrument_paths_for_sans_file(state_data.sample_scatter)
+            r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
+                                                       ["beam_centre_radius_min", "beam_centre_radius_max"], float)
+            instrument = state_data.instrument
+
         self._max_iterations = 10
-        self._r_min = 60
-        self._r_max = 280
+        self._r_min = r_range["beam_centre_radius_min"] if "beam_centre_radius_min" in r_range else 60
+        self._r_max = r_range["beam_centre_radius_max"] if "beam_centre_radius_max" in r_range else 280
         self._left_right = True
         self._up_down = True
-        self._tolerance = 0.000125
+        self._tolerance = 0.0001251
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
@@ -28,9 +39,9 @@ class BeamCentreModel(object):
         self.verbose = False
         self.q_min = 0.01
         self.q_max = 0.1
-
-        if instrument == SANSInstrument.LOQ:
-            self.r_max = 200
+        self._component = DetectorType.LAB
+        self.update_lab = True
+        self.update_hab = True
 
         if instrument == SANSInstrument.LARMOR:
             self.scale_1 = 1.0
@@ -62,30 +73,25 @@ class BeamCentreModel(object):
             logger.notice("Have chosen no find direction exiting early")
             return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
 
-        if self.q_min:
-            state.convert_to_q.q_min = self.q_min
-        if self.q_max:
-            state.convert_to_q.q_max = self.q_max
-
         if self.COM:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
                                    max_iter=self.max_iterations,
                                    x_start=self.lab_pos_1, y_start=self.lab_pos_2,
                                    tolerance=self.tolerance,
-                                   find_direction=find_direction, reduction_method=False)
+                                   find_direction=find_direction, reduction_method=False, component=self.component)
 
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
                                    max_iter=self.max_iterations,
                                    x_start=centre['pos1'], y_start=centre['pos2'],
                                    tolerance=self.tolerance,
                                    find_direction=find_direction, reduction_method=True,
-                                   verbose=self.verbose)
+                                   verbose=self.verbose, component=self.component)
         else:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
                                    max_iter=self.max_iterations, x_start=self.lab_pos_1,
                                    y_start=self.lab_pos_2, tolerance=self.tolerance,
                                    find_direction=find_direction, reduction_method=True,
-                                   verbose=self.verbose)
+                                   verbose=self.verbose, component=self.component)
         return centre
 
     @property
@@ -199,3 +205,27 @@ class BeamCentreModel(object):
     @hab_pos_2.setter
     def hab_pos_2(self, value):
         self._hab_pos_2 = value
+
+    @property
+    def component(self):
+        return self._component
+
+    @component.setter
+    def component(self, value):
+        self._component = value
+
+    @property
+    def update_hab(self):
+        return self._update_hab
+
+    @update_hab.setter
+    def update_hab(self, value):
+        self._update_hab = value
+
+    @property
+    def update_lab(self):
+        return self._update_lab
+
+    @update_lab.setter
+    def update_lab(self, value):
+        self._update_lab = value

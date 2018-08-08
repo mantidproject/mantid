@@ -3,6 +3,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -34,7 +35,7 @@ namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
 static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinXRuns)
@@ -154,9 +155,9 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       // check if all the others are compatible with the first one
       std::string compatible = combHelper.checkCompatibility(ws, true);
       if (!compatible.empty()) {
-        issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() +
-                                            " is not compatible: " +
-                                            compatible + "\n";
+        issues[INPUT_WORKSPACE_PROPERTY] +=
+            "Workspace " + ws->getName() + " is not compatible: " + compatible +
+            "\n";
       }
       // if the log entry is given, validate it
       const std::string logValid = checkLogEntry(ws);
@@ -174,10 +175,10 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
 
 //----------------------------------------------------------------------------------------------
 /** Check if the log entry is valid
-* @param ws : input workspace to test
-* @return : empty if the log exists, is numeric, and matches the size of the
-* workspace, error message otherwise
-*/
+ * @param ws : input workspace to test
+ * @return : empty if the log exists, is numeric, and matches the size of the
+ * workspace, error message otherwise
+ */
 std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
   std::string result;
   if (!m_logEntry.empty()) {
@@ -227,9 +228,9 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
 //----------------------------------------------------------------------------------------------
 /** Return the to-be axis of the workspace dependent on the log entry
-* @param ws : the input workspace
-* @return : the x-axis to use for the output workspace
-*/
+ * @param ws : the input workspace
+ * @return : the x-axis to use for the output workspace
+ */
 std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
@@ -261,7 +262,7 @@ std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
 //----------------------------------------------------------------------------------------------
 /** Makes up the correct history of the output workspace
-*/
+ */
 void ConjoinXRuns::fillHistory() {
   // If this is not a child algorithm add the history
   if (!isChild()) {
@@ -281,8 +282,8 @@ void ConjoinXRuns::fillHistory() {
 
 //----------------------------------------------------------------------------------------------
 /** Joins the given spectrum for the list of workspaces
-* @param wsIndex : the workspace index
-*/
+ * @param wsIndex : the workspace index
+ */
 void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;

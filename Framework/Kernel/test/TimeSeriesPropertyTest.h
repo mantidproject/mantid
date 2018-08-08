@@ -1,17 +1,17 @@
 #ifndef TIMESERIESPROPERTYTEST_H_
 #define TIMESERIESPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
-#include <cmath>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -613,8 +613,11 @@ public:
     auto dblLog = createDoubleTSP();
     auto intLog = createIntegerTSP(5);
 
-    TS_ASSERT_DELTA(dblLog->timeAverageValue(), 7.6966, .0001);
-    TS_ASSERT_DELTA(intLog->timeAverageValue(), 2.5, .0001);
+    // average values
+    const double dblMean = dblLog->timeAverageValue();
+    TS_ASSERT_DELTA(dblMean, 7.6966, .0001);
+    const double intMean = intLog->timeAverageValue();
+    TS_ASSERT_DELTA(intMean, 2.5, .0001);
 
     // Clean up
     delete dblLog;
@@ -624,6 +627,8 @@ public:
   void test_averageValueInFilter_throws_for_string_property() {
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(sProp->averageValueInFilter(splitter),
+                     Exception::NotImplementedError);
+    TS_ASSERT_THROWS(sProp->averageAndStdDevInFilter(splitter),
                      Exception::NotImplementedError);
   }
 
@@ -893,7 +898,7 @@ public:
     // check
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
-      TS_ASSERT_EQUALS(out_i->size(), 0);
+      TS_ASSERT_EQUALS(out_i->size(), 1);
     }
   }
 
@@ -972,6 +977,51 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  /** Extreme case 1: the last entry of time series property is before the first
+   * splitter.  The test case is extracted from issue #21836, in which
+   * the last entry is before the first splitter
+   * @brief test_SplitByTimeExtremeCase1.
+   */
+  void test_SplitByTimeExtremeCase1() {
+    // create test log
+    TimeSeriesProperty<int> int_log("test int log 21836");
+    int_log.addValue(DateAndTime("2017-11-10T03:12:06"), 1);
+    int_log.addValue(DateAndTime("2017-11-10T03:12:31"), 3);
+    int_log.addValue(DateAndTime("2017-11-10T03:12:40"), 2);
+
+    TimeSeriesProperty<double> dbl_log("test double log 21836");
+    dbl_log.addValue(DateAndTime("2017-11-10T03:12:06"), 1.0);
+    dbl_log.addValue(DateAndTime("2017-11-10T03:12:31"), 3.0);
+    dbl_log.addValue(DateAndTime("2017-11-10T03:12:40"), 2.0);
+
+    // create the splitters
+    std::vector<DateAndTime> split_time_vec;
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:13:06.814538624"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:14:07.764311936"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:15:07.697312000"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:16:08.827971840"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:17:08.745746688"));
+    split_time_vec.push_back(DateAndTime("2017-11-10T03:20:10.757950208"));
+
+    // create the target vector
+    std::vector<int> split_target_vec(5);
+    for (size_t i = 0; i < 5; ++i)
+      split_target_vec[i] = (i + 1) % 2;
+
+    // Initialze the 2 splitters
+    std::vector<TimeSeriesProperty<int> *> outputs;
+    for (int itarget = 0; itarget < 2; ++itarget) {
+      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
+      outputs.push_back(tsp);
+    }
+
+    // split
+    int_log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------
   void test_statistics() {
     TimeSeriesProperty<double> *log =
         new TimeSeriesProperty<double>("MydoubleLog");
@@ -997,6 +1047,8 @@ public:
     TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
 
     delete log;
   }
@@ -1010,6 +1062,8 @@ public:
     TS_ASSERT(std::isnan(stats.median));
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.time_mean));
+    TS_ASSERT(std::isnan(stats.time_standard_deviation));
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;
@@ -1913,9 +1967,9 @@ public:
   }
 
   /*
-    * Test filterWith() on different boundary conditions
-    * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
-    */
+   * Test filterWith() on different boundary conditions
+   * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
+   */
   void test_filterBoundary2() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
@@ -1965,9 +2019,9 @@ public:
   }
 
   /*
-    * Test filterWith() on different boundary conditions
-    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
-    */
+   * Test filterWith() on different boundary conditions
+   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
+   */
   void test_filterBoundary3() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
@@ -2027,7 +2081,7 @@ public:
   /*
    * Test filterWith() on different boundary conditions
    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
-  */
+   */
 
   void test_filterBoundary4() {
     // 1. Create a base property
@@ -2201,7 +2255,7 @@ public:
   //----------------------------------------------------------------------------
 
   /** A test for filter nothing
-    */
+   */
   void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 

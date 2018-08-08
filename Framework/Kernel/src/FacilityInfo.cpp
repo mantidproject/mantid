@@ -3,18 +3,19 @@
 //----------------------------------------------------------------------
 #include <algorithm>
 
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 
+#include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <MantidKernel/StringTokenizer.h>
+#include <Poco/DOM/Text.h>
 
 using Poco::XML::Element;
 
@@ -24,16 +25,17 @@ namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("FacilityInfo");
-}
+} // namespace
 
 /** Constructor.
-  * @param elem :: The Poco::XML::Element to read the data from
-  * @throw std::runtime_error if name or file extensions are not defined
-  */
+ * @param elem :: The Poco::XML::Element to read the data from
+ * @throw std::runtime_error if name or file extensions are not defined
+ */
 FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
-    : m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0),
-      m_delimiter(), m_extensions(), m_archiveSearch(), m_instruments(),
-      m_noFilePrefix(), m_multiFileLimit(100), m_computeResources() {
+    : m_catalogs(elem), m_name(elem->getAttribute("name")), m_timezone(),
+      m_zeroPadding(0), m_delimiter(), m_extensions(), m_archiveSearch(),
+      m_instruments(), m_noFilePrefix(), m_multiFileLimit(100),
+      m_computeResources() {
   if (m_name.empty()) {
     g_log.error("Facility name is not defined");
     throw std::runtime_error("Facility name is not defined");
@@ -44,6 +46,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
   fillDelimiter(elem);
   fillExtensions(elem);
   fillArchiveNames(elem);
+  fillTimezone(elem);
   fillComputeResources(elem);
   fillNoFilePrefix(elem);
   fillMultiFileLimit(elem);
@@ -99,9 +102,9 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
 }
 
 /**
-  * Add new extension. Adds both a lowercase and uppercase version
-  * @param ext :: File extension, including the dot, e.g. ".nxs" or ".raw"
-  */
+ * Add new extension. Adds both a lowercase and uppercase version
+ * @param ext :: File extension, including the dot, e.g. ".nxs" or ".raw"
+ */
 void FacilityInfo::addExtension(const std::string &ext) {
   auto it = std::find(m_extensions.begin(), m_extensions.end(), ext);
   if (it == m_extensions.end())
@@ -126,6 +129,25 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
         m_archiveSearch.push_back(plugin);
       }
     }
+  }
+}
+
+void FacilityInfo::fillTimezone(const Poco::XML::Element *elem) {
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_timezones =
+      elem->getElementsByTagName("timezone");
+  if (pNL_timezones->length() == 0) {
+    g_log.notice() << "No timezone specified for " << m_name
+                   << " in Facilities.xml\n";
+  } else if (pNL_timezones->length() == 1) {
+    pNL_timezones = pNL_timezones->item(0)->childNodes();
+    if (pNL_timezones->length() > 0) {
+      Poco::XML::Text *txt =
+          dynamic_cast<Poco::XML::Text *>(pNL_timezones->item(0));
+      m_timezone = txt->getData();
+    }
+  } else {
+    throw std::runtime_error("Facility " + m_name +
+                             " has more than one timezone specified");
   }
 }
 
@@ -183,11 +205,11 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
 }
 
 /**
-  * Returns instrument with given name
-  * @param  iName Instrument name
-  * @return the instrument information object
-  * @throw NotFoundError if iName was not found
-  */
+ * Returns instrument with given name
+ * @param  iName Instrument name
+ * @return the instrument information object
+ * @throw NotFoundError if iName was not found
+ */
 const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
   if (iName.empty()) {
     iName = ConfigService::Instance().getString("default.instrument");
@@ -223,18 +245,18 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
 }
 
 /**
-  * Get the vector of available compute resources
-  * @return vector of ComputeResourInfo for the current facility
-  */
+ * Get the vector of available compute resources
+ * @return vector of ComputeResourInfo for the current facility
+ */
 std::vector<ComputeResourceInfo> FacilityInfo::computeResInfos() const {
   return m_computeResInfos;
 }
 
 /**
-* Returns a list of instruments of given technique
-* @param tech :: Technique name
-* @return a list of instrument information objects
-*/
+ * Returns a list of instruments of given technique
+ * @param tech :: Technique name
+ * @return a list of instrument information objects
+ */
 std::vector<InstrumentInfo>
 FacilityInfo::instruments(const std::string &tech) const {
   std::vector<InstrumentInfo> out;
@@ -248,9 +270,9 @@ FacilityInfo::instruments(const std::string &tech) const {
 }
 
 /**
-  * Returns a vector of the names of the available compute resources
-  * @return vector of strings of the compute resource names
-  */
+ * Returns a vector of the names of the available compute resources
+ * @return vector of strings of the compute resource names
+ */
 std::vector<std::string> FacilityInfo::computeResources() const {
   std::vector<std::string> names;
   auto it = m_computeResources.begin();
@@ -299,11 +321,11 @@ FacilityInfo::computeResource(const std::string &name) const {
 }
 
 /**
-  * Returns a reference to the requested remote job manager
-  * @param name :: Name of the cluster we want to submit jobs to
-  * @return a shared pointer to the RemoteJobManager instance (or
-  * Null if the name wasn't recognized)
-  */
+ * Returns a reference to the requested remote job manager
+ * @param name :: Name of the cluster we want to submit jobs to
+ * @return a shared pointer to the RemoteJobManager instance (or
+ * Null if the name wasn't recognized)
+ */
 boost::shared_ptr<RemoteJobManager>
 FacilityInfo::getRemoteJobManager(const std::string &name) const {
   auto it = m_computeResources.find(name);

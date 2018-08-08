@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
 
-#include "ui_IndirectMolDyn.h"
 #include "IndirectSimulationTab.h"
+#include "ui_IndirectMolDyn.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

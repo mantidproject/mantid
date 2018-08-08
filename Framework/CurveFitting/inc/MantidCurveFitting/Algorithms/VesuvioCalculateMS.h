@@ -89,7 +89,7 @@ public:
 
   const std::vector<std::string> seeAlso() const override {
     return {"MayersSampleCorrection", "MonteCarloAbsorption",
-            "MultipleScatteringCylinderAbsorption"};
+            "CarpenterSampleCorrection"};
   }
 
 private:

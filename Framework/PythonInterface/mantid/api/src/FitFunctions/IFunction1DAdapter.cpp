@@ -10,7 +10,6 @@
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethod;
 using Environment::callMethodNoCheck;
 using namespace boost::python;
 

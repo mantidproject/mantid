@@ -1,12 +1,12 @@
 #ifndef GETINVESTIGATION_H_
 #define GETINVESTIGATION_H_
 
-#include <cxxtest/TestSuite.h>
+#include "ICatTestHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogSearch.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "ICatTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;

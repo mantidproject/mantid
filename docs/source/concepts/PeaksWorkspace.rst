@@ -53,14 +53,15 @@ Calculate Goniometer For Constant Wavelength
 --------------------------------------------
 
 If you set the `wavelength` (in Å) or `energy` (in meV) property on a
-PeaksWorkspace when the createPeak method is used the goniometer
-rotation with be calculated. This allows you to use one instrument
-definition for multiple goniometer rotations, for example adding peaks
-in Slice Viewer from multiple combined MD workspaces. It only works
-for a constant wavelength source and only for Q sample workspaces. It
-also assumes the goniometer rotation is around the y-axis only. For
-details on the calculation see "Calculate Goniometer For Constant
-Wavelength" at :ref:`FindPeaksMD <algm-FindPeaksMD>`.
+PeaksWorkspace, or if the instrument on the PeaksWorkspace has the
+`wavelength` parameter, the goniometer rotation will be calculated
+when the createPeak method is used. This allows you to use one
+instrument definition for multiple goniometer rotations, for example
+adding peaks in Slice Viewer from multiple combined MD workspaces. It
+only works for a constant wavelength source and only for Q sample
+workspaces. It also assumes the goniometer rotation is around the
+y-axis only. For details on the calculation see "Calculate Goniometer
+For Constant Wavelength" at :ref:`FindPeaksMD <algm-FindPeaksMD>`.
 
 .. code-block:: python
 

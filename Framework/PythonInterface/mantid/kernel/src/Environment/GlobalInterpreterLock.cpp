@@ -39,6 +39,6 @@ GlobalInterpreterLock::GlobalInterpreterLock() : m_state(this->acquire()) {}
  * this object was created.
  */
 GlobalInterpreterLock::~GlobalInterpreterLock() { this->release(m_state); }
-}
-}
-}
+} // namespace Environment
+} // namespace PythonInterface
+} // namespace Mantid

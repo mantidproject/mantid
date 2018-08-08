@@ -4,7 +4,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
-from mantid.kernel import (Direction, PropertyManagerProperty)
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
@@ -43,6 +43,12 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
         self.declareProperty('Iterations', 10, direction=Direction.Input)
 
+        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
+                                                 DetectorType.to_string(DetectorType.HAB)])
+        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+                             validator=allowed_detectors, direction=Direction.Input,
+                             doc="The component of the instrument which is to be reduced.")
+
     def PyExec(self):
         # --------
         # Clone the input workspaces
@@ -58,15 +64,17 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         if state.mask.phi_max:
             state.mask.phi_max = 0.0
 
+        component = self.getProperty("Component").value
+        component_as_string = DetectorType.to_string(component)
+
         # Set test centre
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = self.getProperty(
+        state.move.detectors[component_as_string].sample_centre_pos1 = self.getProperty(
             "Centre1").value
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = self.getProperty(
+        state.move.detectors[component_as_string].sample_centre_pos2 = self.getProperty(
             "Centre2").value
 
         state_serialized = state.property_manager
 
-        component_as_string = 'LAB'
         progress = self._get_progress()
 
         # --------------------------------------------------------------------------------------------------------------

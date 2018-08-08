@@ -3,7 +3,11 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import sys
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.common.enums import FindDirectionEnum, SANSInstrument
+from sans.common.enums import FindDirectionEnum, SANSInstrument, DetectorType, SANSFacility
+from sans.test_helper.test_director import TestDirector
+from sans.state.data import get_data_builder
+from sans.test_helper.file_information_mock import SANSFileInformationMock
+
 
 if sys.version_info.major == 3:
     from unittest import mock
@@ -25,7 +29,7 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.r_max, 280)
         self.assertEqual(self.beam_centre_model.left_right, True)
         self.assertEqual(self.beam_centre_model.up_down, True)
-        self.assertEqual(self.beam_centre_model.tolerance, 0.000125)
+        self.assertEqual(self.beam_centre_model.tolerance, 0.0001251)
         self.assertEqual(self.beam_centre_model.lab_pos_1, '')
         self.assertEqual(self.beam_centre_model.lab_pos_2, '')
         self.assertEqual(self.beam_centre_model.hab_pos_2, '')
@@ -36,6 +40,9 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.verbose, False)
         self.assertEqual(self.beam_centre_model.q_min, 0.01)
         self.assertEqual(self.beam_centre_model.q_max, 0.1)
+        self.assertEqual(self.beam_centre_model.component, DetectorType.LAB)
+        self.assertTrue(self.beam_centre_model.update_lab)
+        self.assertTrue(self.beam_centre_model.update_hab)
 
     def test_that_can_update_model_values(self):
         self.beam_centre_model.scale_2 = 1.0
@@ -43,12 +50,26 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.scale_2, 1.0)
 
     def test_that_correct_values_are_set_for_LARMOR(self):
-        self.beam_centre_model.reset_to_defaults_for_instrument(SANSInstrument.LARMOR)
+        facility = SANSFacility.ISIS
+        file_information = SANSFileInformationMock(run_number=2260, instrument=SANSInstrument.LARMOR)
+
+        data_builder = get_data_builder(facility, file_information)
+        data_builder.set_sample_scatter("LARMOR00002260")
+        data_state = data_builder.build()
+
+        self.beam_centre_model.reset_to_defaults_for_instrument(data_state)
 
         self.assertEqual(self.beam_centre_model.scale_1, 1.0)
 
     def test_that_correct_values_are_set_for_LOQ(self):
-        self.beam_centre_model.reset_to_defaults_for_instrument(SANSInstrument.LOQ)
+        facility = SANSFacility.ISIS
+        file_information = SANSFileInformationMock(run_number=74044, instrument=SANSInstrument.LOQ)
+
+        data_builder = get_data_builder(facility, file_information)
+        data_builder.set_sample_scatter("LOQ74044")
+        data_state = data_builder.build()
+
+        self.beam_centre_model.reset_to_defaults_for_instrument(data_state)
 
         self.assertEqual(self.beam_centre_model.r_max, 200)
 
@@ -65,10 +86,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                                    tolerance=self.beam_centre_model.tolerance,
                                                                    find_direction=FindDirectionEnum.All,
                                                                    reduction_method=True,
-                                                                   verbose=False)
-
-        self.assertEqual(state.convert_to_q.q_min, self.beam_centre_model.q_min)
-        self.assertEqual(state.convert_to_q.q_max, self.beam_centre_model.q_max)
+                                                                   verbose=False, component=DetectorType.LAB)
 
     def test_that_find_beam_centre_calls_centre_finder_twice_when_COM_is_TRUE(self):
         state = mock.MagicMock()
@@ -86,7 +104,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                               tolerance=self.beam_centre_model.tolerance,
                                                               find_direction=FindDirectionEnum.All,
                                                               reduction_method=True,
-                                                              verbose=False)
+                                                              verbose=False, component=DetectorType.LAB)
 
         self.SANSCentreFinder.return_value.assert_any_call(state, r_min=self.beam_centre_model.r_min,
                                                            r_max=self.beam_centre_model.r_max,
@@ -95,7 +113,7 @@ class BeamCentreModelTest(unittest.TestCase):
                                                            y_start=self.beam_centre_model.lab_pos_2,
                                                            tolerance=self.beam_centre_model.tolerance,
                                                            find_direction=FindDirectionEnum.All,
-                                                           reduction_method=False)
+                                                           reduction_method=False, component=DetectorType.LAB)
 
 
 if __name__ == '__main__':

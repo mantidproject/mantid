@@ -86,10 +86,10 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h"
-#include <QSet>
 #include <QGridLayout>
-#include <QLabel>
 #include <QGroupBox>
+#include <QLabel>
+#include <QSet>
 #include <QTimer>
 
 #if QT_VERSION >= 0x040400

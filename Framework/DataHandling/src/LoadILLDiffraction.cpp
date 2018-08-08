@@ -19,6 +19,7 @@
 #include <H5Cpp.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/round.hpp>
 #include <nexus/napi.h>
 #include <numeric>
 
@@ -47,7 +48,9 @@ constexpr double D20_PIXEL_SIZE = 0.1;
 constexpr double RAD_TO_DEG = 180. / M_PI;
 // A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
 constexpr double WAVE_TO_E = 81.8;
-}
+// Number of pixels in the tubes for D2B
+constexpr size_t D2B_NUMBER_PIXELS_IN_TUBES = 128;
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
@@ -141,8 +144,8 @@ void LoadILLDiffraction::exec() {
 }
 
 /**
-* Loads the scanned detector data
-*/
+ * Loads the scanned detector data
+ */
 void LoadILLDiffraction::loadDataScan() {
 
   // open the root entry
@@ -203,8 +206,11 @@ void LoadILLDiffraction::loadDataScan() {
   resolveInstrument();
   computeThetaOffset();
 
+  std::string start_time = firstEntry.getString("start_time");
+  start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
+
   if (m_scanType == DetectorScan) {
-    initMovingWorkspace(scan);
+    initMovingWorkspace(scan, start_time);
     fillMovingInstrumentScan(data, scan);
   } else {
     initStaticWorkspace();
@@ -219,8 +225,8 @@ void LoadILLDiffraction::loadDataScan() {
 }
 
 /**
-* Dumps the metadata from the whole file to SampleLogs
-*/
+ * Dumps the metadata from the whole file to SampleLogs
+ */
 void LoadILLDiffraction::loadMetaData() {
 
   auto &mutableRun = m_outWorkspace->mutableRun();
@@ -264,14 +270,93 @@ void LoadILLDiffraction::initStaticWorkspace() {
  * Use the ScanningWorkspaceBuilder to create a time indexed workspace.
  *
  * @param scan : scan data
+ * @param start_time : start time in ISO format string
  */
-void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
+void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
+                                             const std::string &start_time) {
   const size_t nTimeIndexes = m_numberScanPoints;
   const size_t nBins = 1;
   const bool isPointData = true;
 
-  const auto instrumentWorkspace = loadEmptyInstrument();
+  const auto instrumentWorkspace = loadEmptyInstrument(start_time);
   const auto &instrument = instrumentWorkspace->getInstrument();
+  auto &params = instrumentWorkspace->instrumentParameters();
+
+  const auto &referenceComponentPosition =
+      getReferenceComponentPosition(instrumentWorkspace);
+
+  double refR, refTheta, refPhi;
+  referenceComponentPosition.getSpherical(refR, refTheta, refPhi);
+
+  if (m_instName == "D2B") {
+    auto &compInfo = instrumentWorkspace->mutableComponentInfo();
+
+    Geometry::IComponent_const_sptr detectors =
+        instrument->getComponentByName("detectors");
+    const auto detCompIndex = compInfo.indexOf(detectors->getComponentID());
+    const auto tubes = compInfo.children(detCompIndex);
+    const size_t nTubes = tubes.size();
+    Geometry::IComponent_const_sptr tube1 =
+        instrument->getComponentByName("tube_1");
+    const auto tube1CompIndex = compInfo.indexOf(tube1->getComponentID());
+    const auto pixels = compInfo.children(tube1CompIndex);
+    const size_t nPixels = pixels.size();
+
+    Geometry::IComponent_const_sptr pixel =
+        instrument->getComponentByName("standard_pixel");
+    Geometry::BoundingBox bb;
+    pixel->getBoundingBox(bb);
+    m_pixelHeight = bb.yMax() - bb.yMin();
+
+    const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
+    if (!tubeAnglesStr.empty()) {
+      std::vector<std::string> tubeAngles;
+      boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
+      const double ref = -refTheta;
+      for (size_t i = 1; i <= nTubes; ++i) {
+        const std::string compName = "tube_" + std::to_string(i);
+        Geometry::IComponent_const_sptr component =
+            instrument->getComponentByName(compName);
+        double r, theta, phi;
+        V3D oldPos = component->getPos();
+        oldPos.getSpherical(r, theta, phi);
+        V3D newPos;
+        const double angle = std::stod(tubeAngles[i - 1]);
+        const double finalAngle = fabs(ref - angle);
+        g_log.debug() << "Rotating " << compName << "to " << finalAngle
+                      << "rad\n";
+        newPos.spherical(r, finalAngle, phi);
+        const auto componentIndex =
+            compInfo.indexOf(component->getComponentID());
+        compInfo.setPosition(componentIndex, newPos);
+      }
+    }
+
+    const auto tubeCentersStr = params.getString("D2B", "tube_centers");
+    if (!tubeCentersStr.empty()) {
+      std::vector<std::string> tubeCenters;
+      double maxYOffset = 0.;
+      boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
+      for (size_t i = 1; i <= nTubes; ++i) {
+        const std::string compName = "tube_" + std::to_string(i);
+        Geometry::IComponent_const_sptr component =
+            instrument->getComponentByName(compName);
+        const double offset =
+            std::stod(tubeCenters[i - 1]) - (double(nPixels) / 2 - 0.5);
+        const double y = -offset * m_pixelHeight;
+        V3D translation(0, y, 0);
+        if (std::fabs(y) > maxYOffset) {
+          maxYOffset = std::fabs(y);
+        }
+        g_log.debug() << "Moving " << compName << " to " << y << "\n";
+        V3D pos = component->getPos() + translation;
+        const auto componentIndex =
+            compInfo.indexOf(component->getComponentID());
+        compInfo.setPosition(componentIndex, pos);
+      }
+      m_maxHeight = double(nPixels + 1) * m_pixelHeight / 2 + maxYOffset;
+    }
+  }
 
   auto scanningWorkspaceBuilder = DataObjects::ScanningWorkspaceBuilder(
       instrument, nTimeIndexes, nBins, isPointData);
@@ -286,14 +371,12 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String() << "\n";
+                       .toISO8601String()
+                << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
       getScannedVaribleByPropertyName(scan, "Position");
-
-  const auto &referenceComponentPosition =
-      getReferenceComponentPosition(instrumentWorkspace);
 
   // Convert the tube positions to relative rotations for all detectors
   calculateRelativeRotations(tubeAngles, referenceComponentPosition);
@@ -394,7 +477,10 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
        i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-      const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+      auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+      if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+        pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+      }
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
       const auto wsIndex = j + i * m_numberScanPoints;
@@ -433,7 +519,10 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
-    const auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+    auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
+    if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+      pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+    }
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
@@ -665,8 +754,8 @@ void LoadILLDiffraction::resolveInstrument() {
 }
 
 /**
-* Runs LoadInstrument as child to link the non-moving instrument to workspace
-*/
+ * Runs LoadInstrument as child to link the non-moving instrument to workspace
+ */
 void LoadILLDiffraction::loadStaticInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
@@ -676,23 +765,28 @@ void LoadILLDiffraction::loadStaticInstrument() {
 }
 
 /**
- * Runs LoadEmptyInstrument and returns a workspace with the instrument, to be
+ * Runs LoadInstrument and returns a workspace with the instrument, to be
  *used in the ScanningWorkspaceBuilder.
- *
+ * @param start_time : start time in ISO formatted string
  * @return A MatrixWorkspace containing the correct instrument
  */
-MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument() {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadEmptyInstrument");
+MatrixWorkspace_sptr
+LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", m_instName);
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  auto &run = ws->mutableRun();
+  run.addProperty("run_start", start_time);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
+  loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();
-
-  return loadInst->getProperty("OutputWorkspace");
+  return loadInst->getProperty("Workspace");
 }
 
 /**
-* Rotates the detector to the 2theta0 read from the file
-* @param twoTheta0Read : 2theta0 read from the file
-*/
+ * Rotates the detector to the 2theta0 read from the file
+ * @param twoTheta0Read : 2theta0 read from the file
+ */
 void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
@@ -709,11 +803,11 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
 }
 
 /**
-* Makes up the full path of the relevant IDF dependent on resolution mode
-* @param instName : the name of the instrument (including the resolution mode
-* suffix)
-* @return : the full path to the corresponding IDF
-*/
+ * Makes up the full path of the relevant IDF dependent on resolution mode
+ * @param instName : the name of the instrument (including the resolution mode
+ * suffix)
+ * @return : the full path to the corresponding IDF
+ */
 std::string
 LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 
@@ -724,7 +818,7 @@ LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 }
 
 /** Adds some sample logs needed later by reduction
-*/
+ */
 void LoadILLDiffraction::setSampleLogs() {
   Run &run = m_outWorkspace->mutableRun();
   std::string scanTypeStr = "NoScan";
@@ -754,6 +848,13 @@ void LoadILLDiffraction::setSampleLogs() {
   run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
   run.addLogData(new PropertyWithValue<size_t>("NumberOfDetectors",
                                                m_numberDetectorsActual));
+
+  if (m_pixelHeight != 0.) {
+    run.addLogData(new PropertyWithValue<double>("PixelHeight", m_pixelHeight));
+  }
+  if (m_maxHeight != 0.) {
+    run.addLogData(new PropertyWithValue<double>("MaxHeight", m_maxHeight));
+  }
 }
 
 /**

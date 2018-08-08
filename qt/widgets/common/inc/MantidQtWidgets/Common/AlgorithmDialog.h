@@ -2,10 +2,10 @@
 #define MANTIDQT_API_ALGORITHMDIALOG_H_
 
 /* Used to register classes into the factory. creates a global object in an
-* anonymous namespace. The object itself does nothing, but the comma operator
-* is used in the call to its constructor to effect a call to the factory's
-* subscribe method.
-*/
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
 
 #define DECLARE_DIALOG(classname)                                              \
   namespace {                                                                  \
@@ -23,13 +23,13 @@
 
 // Could have forward declared this but it makes it easier to use from
 // inheriting classes if it is included here
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include <QDialog>
+#include <QHash>
 #include <QString>
 #include <QTimer>
-#include <QHash>
 #include <QVBoxLayout>
 
 //----------------------------------
@@ -51,7 +51,7 @@ namespace Mantid {
 namespace Kernel {
 class Property;
 }
-}
+} // namespace Mantid
 
 // Top-level namespace for this library
 namespace MantidQt {
@@ -352,6 +352,6 @@ protected:
   bool m_statusTracked;
   //@}
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 #endif // MANTIDQT_API_ALGORITHMDIALOG_H_

@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <Poco/NObserver.h>
 #include <iterator>
@@ -62,8 +62,8 @@ public:
   /// Returns a formatted string detailing the contents of the group
   const std::string toString() const override;
 
-  /// The collection itself is considered to take up no space
-  size_t getMemorySize() const override { return 0; }
+  /// Return the memory size of all workspaces in this group and subgroups
+  size_t getMemorySize() const override;
   /// Sort the internal data structure according to member name
   void sortMembersByName();
   /// Adds a workspace to the group.
@@ -108,7 +108,7 @@ public:
   /// @name Wrapped ADS calls
   //@{
 
-  /// Invokes the ADS to sort group members by orkspace name
+  /// Invokes the ADS to sort group members by workspace name
   void sortByName() {
     AnalysisDataService::Instance().sortGroupByName(this->getName());
   }

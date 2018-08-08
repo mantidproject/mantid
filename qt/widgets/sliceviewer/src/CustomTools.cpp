@@ -36,5 +36,5 @@ void CustomMagnifier::rescale(double factor) {
     emit rescaled(factor);
   }
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
