@@ -831,8 +831,8 @@ void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
  * @param HKL :: vector with integer x,y,z -> h,k,l
  */
 void Peak::setIntHKL(const Mantid::Kernel::V3D &HKL) {
-  m_intHKL = {boost::math::iround(HKL.X()), boost::math::iround(HKL.Y()),
-              boost::math::iround(HKL.Z())};
+  m_intHKL = {{boost::math::iround(HKL.X()), boost::math::iround(HKL.Y()),
+              boost::math::iround(HKL.Z())}};
 }
 
 //----------------------------------------------------------------------------------------------
@@ -950,7 +950,7 @@ void Peak::setPeakNumber(int m_peakNumber) {
 
 // -------------------------------------------------------------------------------------
 /** Sets the modulated peak structure number
- * @param m_modulatedStructure :: modulated peak structure value   */
+ * @param modulatedStructure :: modulated peak structure value   */
 void Peak::setIntMNP(V3D modulatedStructure) {
   this->m_modulatedStructure = modulatedStructure;
 }
