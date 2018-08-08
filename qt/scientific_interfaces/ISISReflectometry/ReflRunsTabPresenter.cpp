@@ -79,114 +79,6 @@ std::string getRunErrorMessage(
 }
 } // unnamed namespace
 
-// This namespace contains functions that return python source code
-namespace PythonSrc {
-void increaseIndent(std::string &indent) { indent += "  "; }
-
-void decreaseIndent(std::string &indent) {
-  if (indent.length() >= 2)
-    indent = indent.substr(2);
-}
-
-// Import modules required for lie data
-void importLiveDataDependencies(std::ostringstream &result,
-                                const std::string &indent) {
-  result << indent << "from epics import caget\n";
-}
-
-void openTryStatement(std::ostringstream &result, std::string &indent) {
-  result << indent << "try:\n";
-  increaseIndent(indent);
-}
-
-void closeTryWithExceptThatPrintsError(std::ostringstream &result,
-                                       std::string &indent,
-                                       const std::string &message) {
-  decreaseIndent(indent);
-  result << "except Exception, e:\n"
-         << "  print('" << message << ": ' + str(e))\n";
-}
-
-void closeTryWithExceptThatRaisesError(std::ostringstream &result,
-                                       std::string &indent,
-                                       const std::string &message) {
-  decreaseIndent(indent);
-  result << indent << "except:\n"
-         << indent << "  raise RuntimeError('" << message << "')\n";
-}
-
-void cloneWorkspace(std::ostringstream &result, const std::string &indent) {
-  result << indent
-         << "CloneWorkspace(InputWorkspace=input,OutputWorkspace=output)\n";
-}
-
-void loadInstrument(std::ostringstream &result, const std::string &indent,
-                    const std::string &instrument) {
-  result << indent
-         << "LoadInstrument(Workspace=output,RewriteSpectraMap=True,"
-            "InstrumentName='"
-         << instrument << "')\n";
-}
-
-// Get a block variable from epics. The block name is the same as the sample
-// log name
-void getLiveDataVariable(std::ostringstream &result, const std::string &indent,
-                         const std::string &instrument,
-                         const std::string &logName) {
-  result << indent << logName << " = caget('IN:" << instrument
-         << ":CS:SB:" << logName << "',as_string=True)\n";
-}
-
-void validateLiveDataVariables(std::ostringstream &result,
-                               const std::string &indent,
-                               const std::string &variableNames) {
-  result << indent << "for value in " << variableNames << ":\n"
-         << "  if value == None:\n"
-         << "    raise RuntimeError(value + 'was not found')\n"
-         << indent << "if float(Theta) <= " << Tolerance << ":\n"
-         << "  raise RuntimeError('Theta must be greater than zero')\n";
-}
-
-void addSampleLog(std::ostringstream &result, const std::string &indent,
-                  const std::string &logNames, const std::string &variableNames,
-                  const std::string &logUnits) {
-  result << indent
-         << "AddSampleLogMultiple(Workspace=output,LogNames=" << logNames
-         << ",LogValues=" << variableNames << ",LogUnits=" << logUnits << ")\n";
-}
-
-void setInstrumentParameter(std::ostringstream &result,
-                            const std::string &indent,
-                            const std::string &variable,
-                            const std::string &component) {
-  result << indent << "try:\n"
-         << indent << "  SetInstrumentParameter(Workspace=output"
-         << ",ParameterName='vertical gap'"
-         << ",ParameterType='Number'"
-         << ",ComponentName='" << component << "'"
-         << ",Value=" << variable << ")\n"
-         << indent << "except:\n"
-         << indent << "  for ws in mtd[output]:\n"
-         << indent << "    SetInstrumentParameter(Workspace=ws"
-         << ",ParameterName='vertical gap'"
-         << ",ParameterType='Number'"
-         << ",ComponentName='" << component << "'"
-         << ",Value=" << variable << ")\n";
-}
-
-void postProcessingAlgorithm(std::ostringstream &result,
-                             const std::string &indent, OptionsMap &options) {
-
-  // Append the algorithm name and properties string to the result
-  auto const optionsString = convertMapToString(options).toStdString();
-  result << indent
-         << "ReflectometryReductionOneAuto(InputWorkspace=output,"
-            "OutputWorkspaceBinned=output,ThetaLogName='"
-            "Theta',"
-         << optionsString << ")\n";
-}
-} // namespace PythonSrc
-
 /** Constructor
  * @param mainView :: [input] The view we're managing
  * @param progressableView :: [input] The view reporting progress
@@ -923,43 +815,22 @@ void ReflRunsTabPresenter::handleError(const std::string &message) {
   m_mainPresenter->giveUserCritical(message, "Error");
 }
 
-std::string ReflRunsTabPresenter::setupMonitorPostProcessingScript() {
-  std::ostringstream script;
-  auto instrument = m_view->getSearchInstrument();
-  std::string indent;
-
-  PythonSrc::importLiveDataDependencies(script, indent);
-  // Set up the instrument
-  PythonSrc::cloneWorkspace(script, indent);
-  PythonSrc::loadInstrument(script, indent, instrument);
-  // Set up sample logs
-  std::vector<std::string> logNameList = {"Theta", "s1vg", "s2vg"};
-  std::string logNames = "['Theta', 's1vg', 's2vg']";
-  std::string variableNames = "[Theta, s1vg, s2vg]";
-  std::string logUnits = "['deg', 'm', 'm']";
-  for (auto &logName : logNameList)
-    PythonSrc::getLiveDataVariable(script, indent, instrument, logName);
-  PythonSrc::validateLiveDataVariables(script, indent, variableNames);
-  PythonSrc::addSampleLog(script, indent, logNames, variableNames, logUnits);
-  // Link slits to vertical gap params. Don't throw if there's an error because
-  // slits are not mandatory
-  PythonSrc::openTryStatement(script, indent);
-  PythonSrc::setInstrumentParameter(script, indent, "s1vg", "slit1");
-  PythonSrc::setInstrumentParameter(script, indent, "s2vg", "slit2");
-  PythonSrc::closeTryWithExceptThatPrintsError(script, indent,
-                                               "Live data error");
-  // Set up the reduction algorithm, getting the properties from the settings
-  // tab. It's not ideal but we don't have a group associated with live data so
-  // just use the first group.
-  int const group = 0;
-  auto options = convertOptionsFromQMap(getProcessingOptions(group));
-  PythonSrc::postProcessingAlgorithm(script, indent, options);
-
-  return script.str();
+std::string ReflRunsTabPresenter::liveDataReductionAlgorithm() {
+  return "ReflectometryReductionOneLiveData";
 }
 
-IAlgorithm_sptr ReflRunsTabPresenter::setupMonitorAlgorithm(
-    const std::string &postProcessingScript) {
+std::string ReflRunsTabPresenter::liveDataReductionOptions() {
+  // Get the properties for the reduction algorithm from the settings tab. We
+  // don't have a group associated with live data. This is not ideal but for
+  // now just use the first group.
+  int const group = 0;
+  auto options = convertOptionsFromQMap(getProcessingOptions(group));
+  auto const optionsString =
+      convertMapToString(options, ';', false).toStdString();
+  return optionsString;
+}
+
+IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
   auto alg = AlgorithmManager::Instance().create("StartLiveData");
   alg->initialize();
   alg->setChild(true);
@@ -967,10 +838,11 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupMonitorAlgorithm(
   auto instrument = m_view->getSearchInstrument();
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
-  alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("AccumulationWorkspace", "TOF_live");
+  alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", "10");
-  alg->setProperty("PostProcessingScript", postProcessingScript);
+  alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
+  alg->setProperty("PostProcessingProperties", liveDataReductionOptions());
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {
@@ -1002,8 +874,7 @@ void ReflRunsTabPresenter::updateViewWhenMonitorStopped() {
  */
 void ReflRunsTabPresenter::startMonitor() {
   try {
-    auto script = setupMonitorPostProcessingScript();
-    auto alg = setupMonitorAlgorithm(script);
+    auto alg = setupLiveDataMonitorAlgorithm();
     if (!alg)
       return;
     auto algRunner = m_view->getMonitorAlgorithmRunner();
