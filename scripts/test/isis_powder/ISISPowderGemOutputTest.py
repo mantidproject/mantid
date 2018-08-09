@@ -53,7 +53,8 @@ class ISISPowderGemOutputTest(unittest.TestCase):
         gem_output.save_gda(d_spacing_group=gem_output_test_ws_group,
                             gsas_calib_filename=path_to_ipf,
                             grouping_scheme=self.GROUPING_SCHEME,
-                            output_path=temp_file_path + '\\test.gda')
+                            output_path=temp_file_path + '\\test.gda',
+                            raise_warning=False)
 
         self._find_file_or_die(temp_file_path + '\\test.gda')
 
