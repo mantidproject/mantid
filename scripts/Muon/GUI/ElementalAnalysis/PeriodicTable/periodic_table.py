@@ -496,6 +496,12 @@ class PeriodicTable(qt.QWidget):
             self.__addElement(elmt)
         self.elements = elements
 
+    def silentSetElementSelected(self, symbol, state):
+        """
+        Identical to setElementSelected, but doesn't emit sigSelectionChanged
+        """
+        self._eltButtons[symbol].setSelected(state)
+
     def enableElementButton(self, element):
         try:
             self._eltButtons[element].setEnabled(True)

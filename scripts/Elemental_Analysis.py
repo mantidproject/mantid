@@ -38,15 +38,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     def table_changed(self, items):
         print("Table Changed: {}".format([i.symbol for i in items]))
 
-    def spinbox_changed(self, val):
-        print("SpinBox Value Changed: {}".format(val))
-
-    def spinbox_submit(self, val):
-        print("SpinBox Submitted: {}".format(val))
-
     def select_data_file(self):
         filename = str(QtGui.QFileDialog.getOpenFileName())
-        print(filename)
         if filename != "":
             self.ptable.set_peak_datafile(str(filename))
 
