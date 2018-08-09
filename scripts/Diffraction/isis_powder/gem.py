@@ -78,7 +78,7 @@ class Gem(AbstractInst):
             out_file_names["maud_calib_filename"] = maud_calib_filename
 
         if self._inst_settings.save_gda:
-            gda_filename = filename_stub +".gda"
+            gda_filename = filename_stub + ".gda"
             out_file_names["gda_filename"] = gda_filename
 
         return out_file_names
@@ -114,26 +114,18 @@ class Gem(AbstractInst):
         if not os.path.exists(gsas_calib_file_path):
             raise_warning = True
         if "maud_calib_filename" in output_paths:
+            gem_output.save_maud_calib(d_spacing_group=d_spacing_group,
+                                       output_path=output_paths["maud_calib_filename"],
+                                       gsas_calib_filename=gsas_calib_file_path,
+                                       grouping_scheme=self._inst_settings.maud_grouping_scheme,
+                                       raise_warning=raise_warning)
 
-            if raise_warning:
-                raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found."
-                                     " It should be present at " + gsas_calib_file_path)
-                return
-            else:
-                gem_output.save_maud_calib(d_spacing_group=d_spacing_group,
-                                           output_path=output_paths["maud_calib_filename"],
-                                           gsas_calib_filename=gsas_calib_file_path,
-                                           grouping_scheme=self._inst_settings.maud_grouping_scheme)
         if "gda_filename" in output_paths:
-
-            if raise_warning:
-                raise RuntimeWarning("Could not save gda file, as GSAS calibration file was not found. "
-                                     "It should be present at " + gsas_calib_file_path)
-            else:
-                gem_output.save_gda(d_spacing_group=d_spacing_group,
-                                    output_path=output_paths["gda_filename"],
-                                    gsas_calib_filename=gsas_calib_file_path,
-                                    grouping_scheme=self._inst_settings.maud_grouping_scheme)
+            gem_output.save_gda(d_spacing_group=d_spacing_group,
+                                output_path=output_paths["gda_filename"],
+                                gsas_calib_filename=gsas_calib_file_path,
+                                grouping_scheme=self._inst_settings.maud_grouping_scheme,
+                                raise_warning=raise_warning)
 
     @staticmethod
     def _generate_input_file_name(run_number):

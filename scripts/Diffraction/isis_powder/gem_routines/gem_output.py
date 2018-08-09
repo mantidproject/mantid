@@ -3,7 +3,11 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 
-def save_gda(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme):
+def save_gda(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme,raise_warning):
+    if raise_warning:
+        raise RuntimeWarning("Could not save gda file, as GSAS calibration file was not found. "
+                             "It should be present at " + gsas_calib_filename)
+        return
     input_ws = mantid.CropWorkspace(InputWorkspace=d_spacing_group,
                                     XMax=10,
                                     StoreInADS=False)
@@ -23,7 +27,11 @@ def save_angles(d_spacing_group, output_path):
     mantid.SaveBankScatteringAngles(InputWorkspace=d_spacing_group, Filename=output_path)
 
 
-def save_maud_calib(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme):
+def save_maud_calib(d_spacing_group, output_path, gsas_calib_filename, grouping_scheme,raise_warning):
+    if raise_warning:
+        raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found. "
+                             "It should be present at " + gsas_calib_filename)
+        return
     mantid.SaveGEMMAUDParamFile(InputWorkspace=d_spacing_group,
                                 GSASParamFile=gsas_calib_filename,
                                 GroupingScheme=grouping_scheme,
