@@ -344,11 +344,14 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
   offsetsMat.setColumn(1, offsets2);
   offsetsMat.setColumn(2, offsets3);
   int maxOrder1 = maxOrder;
-  if (offsets1 == V3D(0, 0, 0)) maxOrder1 = 0;
+  if (offsets1 == V3D(0, 0, 0))
+    maxOrder1 = 0;
   int maxOrder2 = maxOrder;
-  if (offsets2 == V3D(0, 0, 0)) maxOrder2 = 0;
+  if (offsets2 == V3D(0, 0, 0))
+    maxOrder2 = 0;
   int maxOrder3 = maxOrder;
-  if (offsets3 == V3D(0, 0, 0)) maxOrder3 = 0;
+  if (offsets3 == V3D(0, 0, 0))
+    maxOrder3 = 0;
   for (int m = -maxOrder1; m <= maxOrder1; m++)
     for (int n = -maxOrder2; n <= maxOrder2; n++)
       for (int p = -maxOrder3; p <= maxOrder3; p++) {

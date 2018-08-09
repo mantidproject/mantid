@@ -2,9 +2,9 @@
 #define MANTID_CRYSTAL_INDEX_PEAKS_WITH_SATELLITES_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidDataObjects/Peak.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -63,14 +63,15 @@ private:
 
   /// Run the algorithm
   void exec() override;
-void predictOffsets(
-    DataObjects::Peak &peak, int &sate_indexed,
-    double &satetolerance, double &satellite_error,
-    Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl);
-void predictOffsetsWithCrossTerms(
-    DataObjects::Peak &peak, int &sate_indexed,
-    double &satetolerance, double &satellite_error,
-    Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3, int &maxOrder, Kernel::V3D &hkl);
+  void predictOffsets(DataObjects::Peak &peak, int &sate_indexed,
+                      double &satetolerance, double &satellite_error,
+                      Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl);
+  void predictOffsetsWithCrossTerms(DataObjects::Peak &peak, int &sate_indexed,
+                                    double &satetolerance,
+                                    double &satellite_error,
+                                    Kernel::V3D offsets1, Kernel::V3D offsets2,
+                                    Kernel::V3D offsets3, int &maxOrder,
+                                    Kernel::V3D &hkl);
   Kernel::V3D getOffsetVector(const std::string &label);
 };
 

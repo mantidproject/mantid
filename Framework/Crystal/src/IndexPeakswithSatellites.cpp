@@ -246,11 +246,16 @@ void IndexPeakswithSatellites::exec() {
           l_error = fabs(round(hkl[2]) - hkl[2]);
           main_error += h_error + k_error + l_error;
         } else if (!crossTerms) {
-        predictOffsets(peak, sate_indexed, satetolerance, satellite_error, offsets1, maxOrder, hkl);
-        predictOffsets(peak, sate_indexed, satetolerance, satellite_error, offsets2, maxOrder, hkl);
-        predictOffsets(peak, sate_indexed, satetolerance, satellite_error, offsets3, maxOrder, hkl);
+          predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
+                         offsets1, maxOrder, hkl);
+          predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
+                         offsets2, maxOrder, hkl);
+          predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
+                         offsets3, maxOrder, hkl);
         } else {
-        predictOffsetsWithCrossTerms(peak, sate_indexed, satetolerance, satellite_error, offsets1, offsets2, offsets3, maxOrder, hkl);
+          predictOffsetsWithCrossTerms(peak, sate_indexed, satetolerance,
+                                       satellite_error, offsets1, offsets2,
+                                       offsets3, maxOrder, hkl);
         }
       }
     }
@@ -289,64 +294,67 @@ void IndexPeakswithSatellites::exec() {
   setProperty("MainError", main_error);
   setProperty("SatelliteError", satellite_error);
 }
-void IndexPeakswithSatellites::predictOffsets(
-    Peak &peak, int &sate_indexed,
-    double &satetolerance, double &satellite_error,
-    V3D offsets, int &maxOrder, V3D &hkl) {
-          if (offsets != V3D(0,0,0)) {
-          for (int order = -maxOrder; order <= maxOrder; order++) {
-            if (order == 0)
-              continue; // exclude order 0
-            V3D hkl1(hkl);
-            hkl1[0] -= order * offsets[0];
-            hkl1[1] -= order * offsets[1];
-            hkl1[2] -= order * offsets[2];
-            if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-              peak.setIntHKL(hkl1);
-              peak.setIntMNP(V3D(order, 0, 0));
-              sate_indexed++;
-              double h_error = fabs(round(hkl1[0]) - hkl1[0]);
-              double k_error = fabs(round(hkl1[1]) - hkl1[1]);
-              double l_error = fabs(round(hkl1[2]) - hkl1[2]);
-              satellite_error += h_error + k_error + l_error;
-            }
-          }
-          }
+void IndexPeakswithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
+                                              double &satetolerance,
+                                              double &satellite_error,
+                                              V3D offsets, int &maxOrder,
+                                              V3D &hkl) {
+  if (offsets != V3D(0, 0, 0)) {
+    for (int order = -maxOrder; order <= maxOrder; order++) {
+      if (order == 0)
+        continue; // exclude order 0
+      V3D hkl1(hkl);
+      hkl1[0] -= order * offsets[0];
+      hkl1[1] -= order * offsets[1];
+      hkl1[2] -= order * offsets[2];
+      if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
+        peak.setIntHKL(hkl1);
+        peak.setIntMNP(V3D(order, 0, 0));
+        sate_indexed++;
+        double h_error = fabs(round(hkl1[0]) - hkl1[0]);
+        double k_error = fabs(round(hkl1[1]) - hkl1[1]);
+        double l_error = fabs(round(hkl1[2]) - hkl1[2]);
+        satellite_error += h_error + k_error + l_error;
+      }
+    }
+  }
 }
 void IndexPeakswithSatellites::predictOffsetsWithCrossTerms(
-    Peak &peak, int &sate_indexed,
-    double &satetolerance, double &satellite_error,
-    V3D offsets1, V3D offsets2, V3D offsets3, int &maxOrder, V3D &hkl) {
-          DblMatrix offsetsMat(3, 3);
-          offsetsMat.setColumn(0, offsets1);
-          offsetsMat.setColumn(1, offsets2);
-          offsetsMat.setColumn(2, offsets3);
-          int maxOrder1 = maxOrder;
-          if (offsets1 == V3D(0, 0, 0)) maxOrder1 = 0;
-          int maxOrder2 = maxOrder;
-          if (offsets2 == V3D(0, 0, 0)) maxOrder2 = 0;
-          int maxOrder3 = maxOrder;
-          if (offsets3 == V3D(0, 0, 0)) maxOrder3 = 0;
-          for (int m = -maxOrder1; m <= maxOrder1; m++)
-            for (int n = -maxOrder2; n <= maxOrder2; n++)
-              for (int p = -maxOrder3; p <= maxOrder3; p++) {
-                if (m == 0 && n == 0 && p == 0)
-                  continue; // exclude 0,0,0
-                V3D hkl1(hkl);
-                V3D mnp = V3D(m, n, p);
-                hkl1 -= offsetsMat * mnp;
-                if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
-                  peak.setIntHKL(hkl1);
-                  peak.setIntMNP(V3D(m, n, p));
-                  sate_indexed++;
+    Peak &peak, int &sate_indexed, double &satetolerance,
+    double &satellite_error, V3D offsets1, V3D offsets2, V3D offsets3,
+    int &maxOrder, V3D &hkl) {
+  DblMatrix offsetsMat(3, 3);
+  offsetsMat.setColumn(0, offsets1);
+  offsetsMat.setColumn(1, offsets2);
+  offsetsMat.setColumn(2, offsets3);
+  int maxOrder1 = maxOrder;
+  if (offsets1 == V3D(0, 0, 0))
+    maxOrder1 = 0;
+  int maxOrder2 = maxOrder;
+  if (offsets2 == V3D(0, 0, 0))
+    maxOrder2 = 0;
+  int maxOrder3 = maxOrder;
+  if (offsets3 == V3D(0, 0, 0))
+    maxOrder3 = 0;
+  for (int m = -maxOrder1; m <= maxOrder1; m++)
+    for (int n = -maxOrder2; n <= maxOrder2; n++)
+      for (int p = -maxOrder3; p <= maxOrder3; p++) {
+        if (m == 0 && n == 0 && p == 0)
+          continue; // exclude 0,0,0
+        V3D hkl1(hkl);
+        V3D mnp = V3D(m, n, p);
+        hkl1 -= offsetsMat * mnp;
+        if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
+          peak.setIntHKL(hkl1);
+          peak.setIntMNP(V3D(m, n, p));
+          sate_indexed++;
 
-                  V3D intHkl = hkl1;
-                  intHkl.round();
-                  hkl1 = intHkl - hkl1;
-                  satellite_error +=
-                      fabs(hkl1[0]) + fabs(hkl1[1]) + fabs(hkl1[2]);
-                }
-              }
+          V3D intHkl = hkl1;
+          intHkl.round();
+          hkl1 = intHkl - hkl1;
+          satellite_error += fabs(hkl1[0]) + fabs(hkl1[1]) + fabs(hkl1[2]);
+        }
+      }
 }
 V3D IndexPeakswithSatellites::getOffsetVector(const std::string &label) {
   vector<double> offsets = getProperty(label);
