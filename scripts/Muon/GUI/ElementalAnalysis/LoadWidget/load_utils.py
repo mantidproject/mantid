@@ -114,16 +114,15 @@ def flatten_run_data(*workspaces):
 
 
 def hyphenise(vals):
-    if not len(vals):
-        return ""
-    vals = [str(s) for s in sorted(list(set(vals)))]
-    diffs = [int(vals[i + 1]) - int(vals[i]) for i in range(len(vals) - 1)]
-    a = b = vals[0]
     out = []
-    for i, d in enumerate(diffs):
-        if d != 1:
-            out.append("-".join([a, b]) if a != b else a)
-            a = vals[i + 1]
-        b = vals[i + 1]
-    out.append("-".join([a, b]) if a != b else vals[-1])
+    if vals:
+        vals = [str(s) for s in sorted(list(set(vals)))]
+        diffs = [int(vals[i + 1]) - int(vals[i]) for i in range(len(vals) - 1)]
+        a = b = vals[0]
+        for i, d in enumerate(diffs):
+            if d != 1:
+                out.append("-".join([a, b]) if a != b else a)
+                a = vals[i + 1]
+            b = vals[i + 1]
+        out.append("-".join([a, b]) if a != b else vals[-1])
     return ", ".join(out)
