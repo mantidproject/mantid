@@ -82,7 +82,6 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        self._view.enable_loading()
 
         self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
@@ -92,6 +91,8 @@ class LoadRunWidgetPresenter(object):
         print("Got to here 2")
         self._model.set_loaded_runs(run_list)
         self.set_run_edit_from_list(run_list)
+
+        self._view.enable_loading()
 
     def disable_loading(self):
         self._view.disable_load_buttons()
@@ -156,3 +157,19 @@ class LoadRunWidgetPresenter(object):
 
     def enable_multiple_files(self, enabled):
         self._load_multiple_runs = enabled
+
+    def get_loaded_filenames(self):
+        return self._model.loaded_filenames
+
+    @property
+    def workspaces(self):
+        return self._model.loaded_workspaces
+
+    @property
+    def runs(self):
+        return self._model.loaded_runs
+
+    def update_model_and_view(self, run_list):
+        print("ARG!")
+        self.clear_loaded_data()
+        self.set_run_edit_from_list(run_list)

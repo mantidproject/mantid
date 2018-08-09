@@ -11,6 +11,7 @@ class LoadRunWidgetView(QtWidgets.QWidget):
     # signals for parent widgets
     loadingStarted = Signal()
     loadingFinished = Signal()
+    dataChanged = Signal()
 
     def __init__(self, parent=None):
         super(LoadRunWidgetView, self).__init__(parent)
@@ -81,6 +82,7 @@ class LoadRunWidgetView(QtWidgets.QWidget):
     def enable_loading(self):
         self.enable_load_buttons()
         self.loadingFinished.emit()
+        self.dataChanged.emit()
 
     def disable_load_buttons(self):
         self.loadCurrentRunButton.setEnabled(False)

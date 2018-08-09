@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal
 
 
@@ -8,12 +8,16 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
     # signals for parent widgets
     loadingStarted = Signal()
     loadingFinished = Signal()
+    dataChanged = Signal()
 
     def __init__(self, parent=None):
         super(BrowseFileWidgetView, self).__init__(parent)
         self.setupUi(self)
 
         self.copyButton.clicked.connect(self.copy_line_edit_to_clipboard)
+
+        self._store_edit_text = False
+        self._stored_edit_text = ""
 
     def setupUi(self, BrowseFileWidget):
         BrowseFileWidget.setObjectName("BrowseFileWidget")
@@ -52,10 +56,9 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.copyButton.setMinimumSize(QtCore.QSize(25, 25))
         self.copyButton.setToolTip("Copy current files to clipboard")
         self.copyButton.setText("...")
-
-        icon = QtGui.QIcon.fromTheme("copy.png")
-        self.copyButton.setIcon(icon)
+        self.copyButton.setIcon(QtGui.QIcon(":/copy.png"))
         self.copyButton.setObjectName("copyButton")
+
         self.horizontalLayout.addWidget(self.copyButton)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
 
@@ -78,7 +81,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
             return [str(chosen_file) for chosen_file in chosen_files]
         else:
             chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", default_directory,
-                                                                    file_filter)
+                                                                   file_filter)
             return [str(chosen_file)]
 
     def disable_loading(self):
@@ -88,6 +91,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
     def enable_loading(self):
         self.enable_load_buttons()
         self.loadingFinished.emit()
+        self.dataChanged.emit()
 
     def disable_load_buttons(self):
         self.browseButton.setEnabled(False)
@@ -98,10 +102,20 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.filePathEdit.setEnabled(True)
 
     def get_file_edit_text(self):
-        return self.filePathEdit.text()
+        if self._store_edit_text:
+            return self._stored_edit_text
+        else:
+            return self.filePathEdit.text()
 
-    def set_file_edit(self, text):
-        self.filePathEdit.setText(text)
+    def set_file_edit(self, text, store=False):
+        print("Setting file edit : " + text)
+        if store:
+            self._store_edit_text = True
+            self._stored_edit_text = text
+            self.filePathEdit.setText("(... more than 10 files, use copy button)")
+        else:
+            self.filePathEdit.setText(text)
 
     def clear(self):
+        print("Clearing file widget")
         self.set_file_edit("")

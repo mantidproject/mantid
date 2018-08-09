@@ -53,13 +53,15 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        self._view.enable_loading()
         self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
 
         file_list = self._model.loaded_filenames
-        self._view.set_file_edit(";".join(file_list))
+        self.set_file_edit(file_list)
+        self._view.enable_loading()
+
+        self._model.add_directories_to_config_service(file_list)
 
     def clear_loaded_data(self):
         self._view.clear()
@@ -73,3 +75,24 @@ class BrowseFileWidgetPresenter(object):
 
     def enable_multiple_files(self, enabled):
         self._multiple_files = enabled
+
+    def get_loaded_filenames(self):
+        return self._model.loaded_filenames
+
+    @property
+    def workspaces(self):
+        return self._model.loaded_workspaces
+
+    @property
+    def runs(self):
+        return self._model.loaded_runs
+
+    def update_model_and_view(self, file_list):
+        self.clear_loaded_data()
+        print("updating file widget : " + ";".join(file_list))
+        self.set_file_edit(file_list)
+
+
+    def set_file_edit(self, file_list):
+        display_text = len(file_list) > 10
+        self._view.set_file_edit(";".join(file_list), display_text)
