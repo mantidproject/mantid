@@ -45,14 +45,10 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             value = self.getPropertyValue(prop.name)
             alg.setPropertyValue(prop.name, value)
 
-    def isGroup(self, ws):
-        try:
-            in_ws.getNumberOfEntries()
-            return True
-        except:
-            return False
 
-    def setupSlitsForSingleWorkspace(self, ws, s1, s2):
+    def setupSlits(self, ws, liveValues):
+        s1 = liveValues['s1vg'].value
+        s2 = liveValues['s2vg'].value
         SetInstrumentParameter(Workspace=ws,
                                ParameterName='vertical gap',
                                ParameterType='Number',
@@ -63,18 +59,6 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                                ParameterType='Number',
                                ComponentName='slit2',
                                Value=str(s2))
-
-    def setupSlits(self, ws, liveValues):
-        s1 = liveValues['s1vg'].value
-        s2 = liveValues['s2vg'].value
-        # SetIntrumentParameter doesn't work for a group
-        if self.isGroup(ws):
-            print("Setting up slits for all workspaces in group")
-            for ws in in_ws:
-                self.setupSlitsForSingleWorkspace(ws, s1, s2)
-        else:
-            print("Setting up slits")
-            self.setupSlitsForSingleWorkspace(ws, s1, s2)
 
     def validateLiveValues(self, liveValues):
         for key in liveValues:
