@@ -1,13 +1,15 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITEM_H_
 #define MANTID_GEOMETRY_DETECTORINFOITEM_H_
 
-#include <utility>
-
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
-using Mantid::Kernel::V3D;
+#include <utility>
+
 using Mantid::Geometry::DetectorInfo;
+using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 namespace Mantid {
 namespace Geometry {
@@ -20,8 +22,18 @@ public:
   DetectorInfoItem(DetectorInfoItem &&other) = default;
   DetectorInfoItem &operator=(DetectorInfoItem &&rhs) = default;
 
+  bool isMonitor() const { return m_detectorInfo->isMonitor(m_index); }
+
+  bool isMasked() const { return m_detectorInfo->isMasked(m_index); }
+
+  double twoTheta() const { return m_detectorInfo->twoTheta(m_index); }
+
   Mantid::Kernel::V3D position() const {
-    return m_detectorInfo->position(m_index); 
+    return m_detectorInfo->position(m_index);
+  }
+
+  Mantid::Kernel::Quat rotation() const {
+    return m_detectorInfo->rotation(m_index);
   }
 
   void advance(int64_t delta) {
@@ -54,8 +66,8 @@ private:
   DetectorInfoItem(const DetectorInfo &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
 
-  // Non-owning pointer. A reference makes the class unable to define assignment
-  // operator that we need.
+  // Non-owning pointer. A reference makes the class unable to define an
+  // assignment operator that we need.
   const DetectorInfo *m_detectorInfo;
   size_t m_index;
 };

@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 
+#include "MantidGeometry/Instrument/DetectorInfoItem.h"
+
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
-
-#include "MantidGeometry/Instrument/DetectorInfoItem.h"
 
 using Mantid::Geometry::DetectorInfoItem;
 
@@ -17,7 +17,8 @@ class MANTID_GEOMETRY_DLL DetectorInfoIterator
                                     boost::bidirectional_traversal_tag> {
 
 public:
-  DetectorInfoIterator(const DetectorInfo& owner, const size_t index) : m_item(owner, index) {}
+  DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
+      : m_item(detectorInfo, index) {}
 
 private:
   friend class boost::iterator_core_access;

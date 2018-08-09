@@ -1,6 +1,10 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfoItem.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+#include "MantidGeometry/Instrument/DetectorInfoPythonIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -9,11 +13,6 @@
 #include <boost/python/return_by_value.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <iterator>
-
-
-#include "MantidGeometry/Instrument/DetectorInfoItem.h"
-#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
-#include "MantidGeometry/Instrument/DetectorInfoPythonIterator.h"
 
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::DetectorInfoItem;
@@ -24,10 +23,12 @@ using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
 
-DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &source) {
-  return DetectorInfoPythonIterator(source);
+// Helper method to make the python iterator
+DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &detectorInfo) {
+  return DetectorInfoPythonIterator(detectorInfo);
 };
 
+// Export DetectorInfo
 void export_DetectorInfo() {
 
   // Function pointers to distinguish between overloaded versions

@@ -389,10 +389,12 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   return m_lastDetector[thread];
 }
 
+// Begin method for iterator
 DetectorInfoIterator DetectorInfo::begin() const {
   return DetectorInfoIterator(*this, 0);
 }
 
+// End method for iterator
 DetectorInfoIterator DetectorInfo::end() const {
   return DetectorInfoIterator(*this, size());
 }
