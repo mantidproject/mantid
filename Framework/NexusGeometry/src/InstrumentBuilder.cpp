@@ -67,6 +67,26 @@ InstrumentBuilder::addComponent(const std::string &compName,
   return component;
 }
 
+void InstrumentBuilder::addObjComponentAssembly(
+    const std::string &compName, const Eigen::Vector3d &position,
+    boost::shared_ptr<const Mantid::Geometry::IObject> shape,
+    boost::shared_ptr<const Mantid::Geometry::IObject> detShape,
+    std::vector<Eigen::Vector3d> detPositions, std::vector<int> detIDs) {
+  verifyMutable();
+  auto *objComp(new Geometry::ObjCompAssembly(compName));
+  objComp->setPos(position(0), position(1), position(2));
+  objComp->setOutline(shape);
+  for (size_t i = 0; i < detPositions.size(); ++i) {
+    auto detName = compName + "_" + std::to_string(i);
+    auto *detector = new Geometry::Detector(detName, detIDs[i], objComp);
+    detector->translate(Mantid::Kernel::toV3D(detPositions[i]));
+    detector->setShape(detShape);
+    objComp->add(detector);
+    m_instrument->markAsDetectorIncomplete(detector);
+  }
+  m_lastBank->add(objComp);
+}
+
 void InstrumentBuilder::addDetectorToLastBank(
     const std::string &detName, int detId,
     const Eigen::Vector3d &relativeOffset,

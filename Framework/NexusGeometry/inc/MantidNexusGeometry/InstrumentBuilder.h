@@ -48,6 +48,12 @@ public:
   /// Adds component to instrument
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);
+
+  void addObjComponentAssembly(
+      const std::string &compName, const Eigen::Vector3d &position,
+      boost::shared_ptr<const Mantid::Geometry::IObject> shape,
+      boost::shared_ptr<const Mantid::Geometry::IObject> detShape,
+      std::vector<Eigen::Vector3d> detPositions, std::vector<int> detIDs);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(
       const std::string &detName, int detId, const Eigen::Vector3d &position,

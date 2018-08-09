@@ -2,9 +2,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <H5Cpp.h>
@@ -518,10 +521,12 @@ void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
 
 /// Choose what shape type to parse
 boost::shared_ptr<const Geometry::IObject>
-parseNexusShape(const Group &detectorGroup) {
+parseNexusShape(const Group &detectorGroup, bool &searchTubes) {
+  bool isGroup = false;
   Group shapeGroup;
   try {
     shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
+    isGroup = true;
   } catch (H5::Exception &) {
     // TODO. Current assumption. Can we have pixels without specifying a
     // shape?
@@ -543,6 +548,7 @@ parseNexusShape(const Group &detectorGroup) {
   }
   // Give shape group to correct shape parser
   if (shapeType == NX_CYLINDER) {
+    searchTubes = isGroup;
     return parseNexusCylinder(shapeGroup);
   } else if (shapeType == NX_OFF) {
     return parseNexusMesh(shapeGroup);
@@ -585,14 +591,118 @@ void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
       std::vector<Group> monitorGroups = openSubGroups(inst, NX_MONITOR);
       for (auto &monitor : monitorGroups) {
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
+        bool proxy = false;
         boost::shared_ptr<const Geometry::IObject> monitorShape =
-            parseNexusShape(monitor);
+            parseNexusShape(monitor, proxy);
         builder.addMonitor(std::to_string(detectorId),
                            static_cast<int32_t>(detectorId),
                            Eigen::Vector3d{0, 0, 0}, monitorShape);
       }
     }
   }
+}
+
+class Tube {
+private:
+  Eigen::Vector3d axis;
+  double height = 0;
+  double radius;
+  std::vector<Eigen::Vector3d> m_positions;
+  std::vector<int> m_detIDs;
+  Eigen::Vector3d p1;
+  Eigen::Vector3d p2;
+
+public:
+  const Eigen::Vector3d &location() const { return m_positions[0]; }
+  const std::vector<Eigen::Vector3d> &positions() const { return m_positions; }
+  const std::vector<int> &detIDs() const { return m_detIDs; }
+
+  boost::shared_ptr<const Mantid::Geometry::IObject> shape() {
+    Eigen::Matrix<double, 3, 3> points;
+    // Centre shape about (0, 0, 0)
+    auto p1 = m_positions.front();
+    auto p2 = m_positions.back();
+    auto centre = (p1 + p2) / 2;
+
+    points.col(0) = p1 - centre;
+    points.col(2) = p2 - centre;
+
+    // Find point on outer circle
+    auto norm = axis.norm();
+    auto factor = radius / norm;
+    auto pointOnCircle = (axis * factor) + (p1 - centre);
+    points.col(1) = pointOnCircle;
+
+    return NexusShapeFactory::createCylinder(points);
+  }
+
+  Tube(Eigen::Vector3d axis, double radius, Eigen::Vector3d pos, int detID) {
+    this->axis = axis;
+    this->radius = radius;
+    m_positions.push_back(pos);
+    m_detIDs.push_back(detID);
+
+    p1 = axis + pos;
+    p2 = pos;
+  }
+
+  bool addIfCoLinear(const Eigen::Vector3d &pos, int detID) {
+    if (checkCoLinear(pos)) {
+      m_positions.push_back(pos);
+      m_detIDs.push_back(detID);
+
+      auto dist = m_positions[0] - pos;
+      if (dist.norm() > height)
+        height = dist.norm();
+      return true;
+    }
+
+    return false;
+  }
+
+private:
+  bool checkCoLinear(const Eigen::Vector3d &pos) const {
+    auto temp = pos + axis; // unecessary
+    auto numVec = ((p2 - p1).cross(p1 - temp));
+    auto denomVec = (p2 - p1);
+    auto num = numVec.norm();
+
+    if (num == 0)
+      return true;
+
+    auto denom = denomVec.norm();
+    auto d = num / denom;
+
+    return d == 0.0;
+  }
+};
+
+std::vector<Tube> findTubes(const Mantid::Geometry::IObject &shape,
+                            const Pixels &positions,
+                            const std::vector<int> detIDs) {
+  auto axis =
+      Kernel::toVector3d(shape.getGeometryHandler()->shapeInfo().points()[1]);
+  auto radius = shape.getGeometryHandler()->shapeInfo().radius();
+  std::vector<Tube> tubes;
+
+  tubes.emplace_back(Tube(axis, radius, positions.col(0), detIDs[0]));
+  bool newEntry;
+
+  for (size_t i = 1; i < detIDs.size(); ++i) {
+    newEntry = true;
+    for (auto t = tubes.rbegin(); t != tubes.rend(); ++t) {
+      auto &tube = (*t);
+      if (tube.addIfCoLinear(positions.col(i), detIDs[i])) {
+        newEntry = false;
+        break;
+      }
+    }
+
+    if (newEntry)
+      tubes.push_back(Tube(axis, radius, positions.col(i), detIDs[i]));
+  }
+
+  return tubes;
 }
 
 std::unique_ptr<const Mantid::Geometry::Instrument>
@@ -625,16 +735,29 @@ extractInstrument(const H5File &file, const Group &root) {
     Pixels pixelOffsets = getPixelOffsets(detectorGroup);
     // Calculate pixel relative positions
     Pixels detectorPixels = Eigen::Affine3d::Identity() * pixelOffsets;
+    bool searchTubes = false;
     // Extract shape
-    auto shape = parseNexusShape(detectorGroup);
+    auto shape = parseNexusShape(detectorGroup, searchTubes);
 
-    for (size_t i = 0; i < detectorIds.size(); ++i) {
-      auto index = static_cast<int>(i);
-      std::string name = bankName + "_" + std::to_string(index);
+    std::vector<Tube> tubes;
+    if (searchTubes) {
+      tubes = findTubes(*shape, pixelOffsets, detectorIds);
+      for (size_t i = 0; i < tubes.size(); ++i) {
+        auto name = bankName + "_tube_" + std::to_string(i);
+        auto &tube = tubes[i];
+        builder.addObjComponentAssembly(name, tube.location(), tube.shape(),
+                                        shape, tube.positions(), tube.detIDs());
+      }
+    }
+    else {
+      for (size_t i = 0; i < detectorIds.size(); ++i) {
+        auto index = static_cast<int>(i);
+        std::string name = bankName + "_" + std::to_string(index);
 
-      Eigen::Vector3d relativePos = detectorPixels.col(index);
-      builder.addDetectorToLastBank(name, detectorIds[index], relativePos,
-                                    shape);
+        Eigen::Vector3d relativePos = detectorPixels.col(index);
+        builder.addDetectorToLastBank(name, detectorIds[index], relativePos,
+          shape);
+      }
     }
   }
   // Sort the detectors
