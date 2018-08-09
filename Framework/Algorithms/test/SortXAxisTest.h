@@ -315,7 +315,6 @@ public:
     std::vector<double> xData = {1, 2, 3, 4};
     std::vector<double> yData = {1, 2, 3};
     std::vector<double> dxData = {1, 2, 3};
-    std::vector<double> reverseDxData = {3, 2, 1};
 
     MatrixWorkspace_sptr unsortedws =
         createHistoWorkspaceDx(xData, yData, dxData, 2);
@@ -333,9 +332,7 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    HistogramDx wsDxData = sortedws->dx(0);
-
-    TS_ASSERT_EQUALS(reverseDxData, wsDxData);
+    TS_ASSERT_EQUALS(dxData, sortedws->dx(0));
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -373,6 +370,5 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("sortedws"));
   }
-}
 };
 #endif /*MANTID_ALGORITHMS_SORTXAXISTEST_H_*/
