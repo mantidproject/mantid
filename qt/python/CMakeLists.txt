@@ -1,6 +1,7 @@
 # This file manages building/installation of the mantidqt and mantidqtpython
 # Python wrappers.
 #
+include ( PythonPackageTargetFunctions )
 
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )

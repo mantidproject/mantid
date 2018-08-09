@@ -3,7 +3,7 @@
 # of .sip definitions
 include ( QtTargetFunctions )
 
-#
+
 # brief: Add a module target to generate Python bindings
 # for a set of sip sources. The sources list should be a list of filenames
 # without a path. The .sip module is generated in the CMAKE_CURRENT_BINARY_DIR
@@ -107,10 +107,8 @@ function ( mtd_add_sip_module )
     endif ()
   endif ()
 
-  # TODO The check for win32 should go away. It is temporarily disabled to
-  #      get the linux workbench installation working.
-  if (PARSED_INSTALL_DIR AND NOT WIN32 )
-    install ( TARGETS ${PARSED_TARGET_NAME} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PARSED_INSTALL_DIR} )
+  if ( PARSED_INSTALL_DIR )
+    mtd_install_qt_library ( ${PARSED_PYQT_VERSION} ${PARSED_TARGET_NAME} "" ${PARSED_INSTALL_DIR} )
   endif ()
 
   if ( WIN32 )

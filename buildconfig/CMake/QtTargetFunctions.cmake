@@ -217,8 +217,8 @@ function (mtd_add_qt_target)
       set ( _install_dir "" )
       message ( FATAL_ERROR "Target: ${_target} is configured to build but has no install destination" )
     endif()
-    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
-  endif()
+    mtd_install_qt_library ( ${PARSED_QT_VERSION} ${_target} ${SYSTEM_PACKAGE_TARGET} ${_install_dir} )
+  endif ()
 
   # Group into folder for VS
   set_target_properties ( ${_target} PROPERTIES FOLDER "Qt${PARSED_QT_VERSION}" )
@@ -231,6 +231,17 @@ function (mtd_add_qt_target)
   endif()
 
 endfunction()
+
+# Create an install rule for a Qt target
+#  - qt_version The version of Qt targeted
+#  - target The name of the target
+#  - install_target_type The type of target that should be installed. See https://cmake.org/cmake/help/latest/command/install.html?highlight=install
+#  - install_dir A relative directory to install_prefix
+function (mtd_install_qt_library qt_version target install_target_type install_dir )
+    if ( qt_version EQUAL 4 OR (qt_version EQUAL 5 AND ${PACKAGE_WORKBENCH}) )
+      install ( TARGETS ${target} ${install_target_type} DESTINATION ${install_dir} )
+    endif ()
+endfunction ()
 
 function (mtd_add_qt_tests)
   _qt_versions(_qt_vers ${ARGN})

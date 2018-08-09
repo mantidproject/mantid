@@ -17,7 +17,8 @@ list ( APPEND common_link_libs
   ${PYTHON_LIBRARIES}
 )
 
-# Wrapper module linked against Qt4
+# Wrapper module linked against Qt4 - not currently installed until required for backward compatability
+# with MantidPlot
 mtd_add_sip_module (
   MODULE_NAME _commonqt4
   TARGET_NAME mantidqt_commonqt4
@@ -33,8 +34,6 @@ mtd_add_sip_module (
     ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     API
-  INSTALL_DIR
-    ${LIB_DIR}/mantidqt
   FOLDER Qt4
 )
 
