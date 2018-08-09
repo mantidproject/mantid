@@ -24,10 +24,16 @@ class LoadPresenterTest(unittest.TestCase):
 
         self.view = self.presenter.view
 
-    # checks if subsequent function is called on func()
-    def check_second_func_called(self, func, sub_func):
-        func(mock.Mock())
-        assert sub_func.call_count == 1
+    def test_equalise_loaded_runs(self):
+        self.presenter.co_model.loaded_runs = 5
+        self.presenter.load_model.loaded_runs = 10
+        self.presenter.equalise_loaded_runs()
+        assert self.presenter.co_model.loaded_runs == 10
+
+    # # checks if subsequent function is called on func()
+    # def check_second_func_called(self, func, sub_func):
+    #     func(mock.Mock())
+    #     assert sub_func.call_count == 1
 
 
 if __name__ == "__main__":

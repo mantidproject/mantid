@@ -4,11 +4,6 @@ from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
 from six import iteritems
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 
 class LoadUtilsTest(unittest.TestCase):
     def setUp(self):
@@ -40,7 +35,6 @@ class LoadUtilsTest(unittest.TestCase):
             lutils.get_run_type(self.bad_path)
 
     def test_get_filename(self):
-        print(lutils.get_filename(self.test_path))
         assert lutils.get_filename(self.test_path) == self.test_ws_name
 
     def test_hyphenise(self):
