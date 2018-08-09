@@ -12,6 +12,5 @@ void export_DetectorInfoItem() {
 
   // Export to Python
   class_<DetectorInfoItem>("DetectorInfoItem", no_init)
-      .add_property("position", &DetectorInfoItem::position);
-  //.def("position", &DetectorInfoItem::position, arg("self"));
+    .add_property("position", &DetectorInfoItem::position);
 }

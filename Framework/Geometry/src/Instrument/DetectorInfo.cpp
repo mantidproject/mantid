@@ -11,7 +11,6 @@
 
 namespace Mantid {
 namespace Geometry {
-
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument

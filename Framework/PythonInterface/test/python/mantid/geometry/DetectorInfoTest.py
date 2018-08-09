@@ -106,19 +106,10 @@ class DetectorInfoTest(unittest.TestCase):
     ---------------
     """
 
-    def test_iteration(self):
-        #import time
-        #time.sleep(20)
+    def test_iteration_for_position(self):
         info = self._ws.detectorInfo()
-        #self.assertEquals(len(info), 0)
-        #self.assertEquals(info.size(), 0)
-        for a in info:
-            #self.assertEquals(type(a), DetectorInfoItem)
-            #self.assertEquals(info.position(0), "")
-            print(a.position)
-            #print(a)
-        self.fail()
-
+        for detInfo in info:
+            self.assertEquals(type(detInfo.position), V3D)
 
 
     """

@@ -1,4 +1,3 @@
-
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATOR_H_
 
@@ -7,25 +6,18 @@
 
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 
+using Mantid::Geometry::DetectorInfoItem;
+
 namespace Mantid {
 namespace Geometry {
-
-class DetectorInfo;
 
 class MANTID_GEOMETRY_DLL DetectorInfoIterator
     : public boost::iterator_facade<DetectorInfoIterator,
                                     const DetectorInfoItem &,
-                                    boost::forward_traversal_tag> {
+                                    boost::bidirectional_traversal_tag> {
 
 public:
-  DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)
-      : m_item(detectorInfo, index) {
-  } // m_detectorInfo(detectorInfo), m_index(index) {}
-
-  DetectorInfoIterator(const DetectorInfoIterator &detInfoIterator)
-      : m_item(detInfoIterator.m_item) {
-  } // m_detectorInfo(detInfoIterator.m_detectorInfo),
-    // m_item(detInfoIterator.m_detectorInfo, detInfoIterator.m_index) {}
+  DetectorInfoIterator(const DetectorInfo& owner, const size_t index) : m_item(owner, index) {}
 
 private:
   friend class boost::iterator_core_access;
@@ -48,8 +40,6 @@ private:
   }
 
   DetectorInfoItem m_item;
-  // DetectorInfo m_detectorInfo;
-  // size_t m_index;
 };
 
 } // namespace Geometry

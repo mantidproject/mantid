@@ -10,15 +10,23 @@
 #include <boost/python/return_value_policy.hpp>
 #include <iterator>
 
+
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
+#include "MantidGeometry/Instrument/DetectorInfoPythonIterator.h"
 
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::DetectorInfoItem;
 using Mantid::Geometry::DetectorInfoIterator;
+using Mantid::Geometry::DetectorInfoPythonIterator;
+
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
+
+DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &source) {
+  return DetectorInfoPythonIterator(source);
+};
 
 void export_DetectorInfo() {
 
@@ -40,20 +48,10 @@ void export_DetectorInfo() {
   void (DetectorInfo::*setMasked)(const size_t, bool) =
       &DetectorInfo::setMasked;
 
-  /*
-  Mantid::Geometry::DetectorInfoIterator group_begin(DetectorInfo &self) {
-    return self.begin();
-  }
-
-  Mantid::Geometry::DetectorInfoIterator group_end(DetectorInfo &self) {
-    return self.end();
-  }*/
-
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
 
-      .def("__iter__", range<return_value_policy<copy_const_reference>>(
-                           &DetectorInfo::begin, &DetectorInfo::end))
+      .def("__iter__", make_pyiterator)
 
       .def("__len__", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
