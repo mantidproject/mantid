@@ -217,7 +217,7 @@ function (mtd_add_qt_target)
       set ( _install_dir "" )
       message ( FATAL_ERROR "Target: ${_target} is configured to build but has no install destination" )
     endif()
-    mtd_install_qt_library ( ${PARSED_QT_VERSION} ${_target} ${SYSTEM_PACKAGE_TARGET} ${_install_dir} )
+    mtd_install_qt_library ( ${PARSED_QT_VERSION} ${_target} "${SYSTEM_PACKAGE_TARGET}" ${_install_dir} )
   endif ()
 
   # Group into folder for VS
