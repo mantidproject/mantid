@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFileProperty, FileAction, WorkspaceProperty
-from mantid.kernel import Direction, UnitConversion, Elastic, Property, IntArrayProperty
+from mantid.kernel import Direction, UnitConversion, Elastic, Property, IntArrayProperty, StringListValidator
 from mantid.simpleapi import (mtd, SetGoniometer, AddSampleLog, MaskBTP, RenameWorkspace, GroupWorkspaces,
                               CreateWorkspace, LoadNexusLogs, LoadInstrument)
 from six.moves import range
@@ -24,6 +24,7 @@ class LoadWAND(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty("RunNumbers", []), 'Run numbers to load')
         self.declareProperty("Wavelength", 1.488, doc="Wavelength to set the workspace")
         self.declareProperty("ApplyMask", True, "If True standard masking will be applied to the workspace")
+        self.declareProperty("Grouping", 'None', StringListValidator(['None', '2x2', '4x4']), "Group pixels")
         self.declareProperty(WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output))
 
     def validateInputs(self):
@@ -46,6 +47,12 @@ class LoadWAND(DataProcessorAlgorithm):
         outWS = self.getPropertyValue("OutputWorkspace")
         group_names = []
 
+        grouping = self.getProperty("Grouping").value
+        if grouping == 'None':
+            grouping = 1
+        else:
+            grouping = 2 if grouping == '2x2' else 4
+
         for i, run in enumerate(runs):
             data = np.zeros((512*480*8),dtype=np.int64)
             with h5py.File(run, 'r') as f:
@@ -54,26 +61,22 @@ class LoadWAND(DataProcessorAlgorithm):
                 for b in range(8):
                     data += np.bincount(f['/entry/bank'+str(b+1)+'_events/event_id'].value,minlength=512*480*8)
             data = data.reshape((480*8, 512))
+            if grouping == 2:
+                data = data[::2,::2] + data[1::2,::2] + data[::2,1::2] + data[1::2,1::2]
+            elif grouping == 4:
+                data = (data[::4,::4]    + data[1::4,::4]  + data[2::4,::4]  + data[3::4,::4]
+                        + data[::4,1::4] + data[1::4,1::4] + data[2::4,1::4] + data[3::4,1::4]
+                        + data[::4,2::4] + data[1::4,2::4] + data[2::4,2::4] + data[3::4,2::4]
+                        + data[::4,3::4] + data[1::4,3::4] + data[2::4,3::4] + data[3::4,3::4])
 
             CreateWorkspace(DataX=[wavelength-0.001, wavelength+0.001],
                             DataY=data,
                             DataE=np.sqrt(data),
                             UnitX='Wavelength',
                             YUnitLabel='Counts',
-                            NSpec=1966080,
+                            NSpec=1966080//grouping**2,
                             OutputWorkspace='__tmp_load', EnableLogging=False)
             LoadNexusLogs('__tmp_load', Filename=run, EnableLogging=False)
-            LoadInstrument('__tmp_load', InstrumentName='WAND', RewriteSpectraMap=True, EnableLogging=False)
-
-            if self.getProperty("ApplyMask").value:
-                MaskBTP('__tmp_load', Pixel='1,2,511,512', EnableLogging=False)
-                if mtd['__tmp_load'].getRunNumber() > 26600: # They changed pixel mapping and bank name order here
-                    MaskBTP('__tmp_load', Bank='1', Tube='479-480', EnableLogging=False)
-                    MaskBTP('__tmp_load', Bank='8', Tube='1-2', EnableLogging=False)
-                else:
-                    MaskBTP('__tmp_load', Bank='8', Tube='475-480', EnableLogging=False)
-
-            SetGoniometer('__tmp_load', Axis0="HB2C:Mot:s1,0,1,0,1", EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="monitor_count", LogType='Number', NumberType='Double',
                          LogText=str(monitor_count), EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="gd_prtn_chrg", LogType='Number', NumberType='Double',
@@ -83,6 +86,29 @@ class LoadWAND(DataProcessorAlgorithm):
             AddSampleLog('__tmp_load', LogName="Ei", LogType='Number', NumberType='Double',
                          LogText=str(UnitConversion.run('Wavelength', 'Energy', wavelength, 0, 0, 0, Elastic, 0)), EnableLogging=False)
             AddSampleLog('__tmp_load', LogName="run_number", LogText=run_number, EnableLogging=False)
+
+            if grouping > 1: # Fix detector IDs per spectrum before loading instrument
+                __tmp_load = mtd['__tmp_load']
+                for n in range(__tmp_load.getNumberHistograms()):
+                    s=__tmp_load.getSpectrum(n)
+                    for i in range(grouping):
+                        for j in range(grouping):
+                            s.addDetectorID(int(n*grouping%512 + n//(512/grouping)*512*grouping + j + i*512))
+
+                LoadInstrument('__tmp_load', InstrumentName='WAND', RewriteSpectraMap=False, EnableLogging=False)
+            else:
+                LoadInstrument('__tmp_load', InstrumentName='WAND', RewriteSpectraMap=True, EnableLogging=False)
+
+            SetGoniometer('__tmp_load', Axis0="HB2C:Mot:s1,0,1,0,1", EnableLogging=False)
+
+            if self.getProperty("ApplyMask").value:
+                MaskBTP('__tmp_load', Pixel='1,2,511,512', EnableLogging=False)
+                if mtd['__tmp_load'].getRunNumber() > 26600: # They changed pixel mapping and bank name order here
+                    MaskBTP('__tmp_load', Bank='1', Tube='479-480', EnableLogging=False)
+                    MaskBTP('__tmp_load', Bank='8', Tube='1-2', EnableLogging=False)
+                else:
+                    MaskBTP('__tmp_load', Bank='8', Tube='475-480', EnableLogging=False)
+
             if len(runs) == 1:
                 RenameWorkspace('__tmp_load', outWS, EnableLogging=False)
             else:
