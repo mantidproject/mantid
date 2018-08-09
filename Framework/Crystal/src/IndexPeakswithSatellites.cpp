@@ -52,7 +52,7 @@ void IndexPeakswithSatellites::init() {
                   "Main Indexing Tolerance (0.15)");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance for Satellite", 0.15,
+      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
                                              mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
@@ -124,22 +124,12 @@ void IndexPeakswithSatellites::exec() {
   double main_error = 0.;
   double satellite_error = 0.;
   double tolerance = getProperty("Tolerance");
-  double satetolerance = getProperty("Tolerance for Satellite");
+  double satetolerance = getProperty("ToleranceForSatellite");
 
-  vector<double> offsets1 = getProperty("ModVector1");
-  vector<double> offsets2 = getProperty("ModVector2");
-  vector<double> offsets3 = getProperty("ModVector3");
+  V3D offsets1 = getOffsetVector("ModVector1");
+  V3D offsets2 = getOffsetVector("ModVector2");
+  V3D offsets3 = getOffsetVector("ModVector3");
   int maxOrder = getProperty("MaxOrder");
-  std::vector<double> zeroes(3, 0.);
-  if (offsets1.empty()) {
-    offsets1 = zeroes;
-  }
-  if (offsets2.empty()) {
-    offsets2 = zeroes;
-  }
-  if (offsets3.empty()) {
-    offsets3 = zeroes;
-  }
 
   auto run = ws->mutableRun();
   run.addProperty<std::vector<double>>("Offset1", offsets1, true);
@@ -256,6 +246,7 @@ void IndexPeakswithSatellites::exec() {
           l_error = fabs(round(hkl[2]) - hkl[2]);
           main_error += h_error + k_error + l_error;
         } else if (!crossTerms) {
+          if (offsets1 != V3D(0,0,0)) {
           for (int order = -maxOrder; order <= maxOrder; order++) {
             if (order == 0)
               continue; // exclude order 0
@@ -273,6 +264,8 @@ void IndexPeakswithSatellites::exec() {
               satellite_error += h_error + k_error + l_error;
             }
           }
+          }
+          if (offsets2 != V3D(0,0,0)) {
           for (int order = -maxOrder; order <= maxOrder; order++) {
             if (order == 0)
               continue; // exclude order 0
@@ -290,6 +283,8 @@ void IndexPeakswithSatellites::exec() {
               satellite_error += h_error + k_error + l_error;
             }
           }
+          }
+          if (offsets3 != V3D(0,0,0)) {
           for (int order = -maxOrder; order <= maxOrder; order++) {
             if (order == 0)
               continue; // exclude order 0
@@ -307,14 +302,21 @@ void IndexPeakswithSatellites::exec() {
               satellite_error += h_error + k_error + l_error;
             }
           }
+          }
         } else {
           DblMatrix offsetsMat(3, 3);
           offsetsMat.setColumn(0, offsets1);
           offsetsMat.setColumn(1, offsets2);
           offsetsMat.setColumn(2, offsets3);
-          for (int m = -maxOrder; m <= maxOrder; m++)
-            for (int n = -maxOrder; n <= maxOrder; n++)
-              for (int p = -maxOrder; p <= maxOrder; p++) {
+          int maxOrder1 = maxOrder;
+          if (offsets1 == V3D(0, 0, 0)) maxOrder1 = 0;
+          int maxOrder2 = maxOrder;
+          if (offsets2 == V3D(0, 0, 0)) maxOrder2 = 0;
+          int maxOrder3 = maxOrder;
+          if (offsets3 == V3D(0, 0, 0)) maxOrder3 = 0;
+          for (int m = -maxOrder1; m <= maxOrder1; m++)
+            for (int n = -maxOrder2; n <= maxOrder2; n++)
+              for (int p = -maxOrder3; p <= maxOrder3; p++) {
                 if (m == 0 && n == 0 && p == 0)
                   continue; // exclude 0,0,0
                 V3D hkl1(hkl);
@@ -369,6 +371,16 @@ void IndexPeakswithSatellites::exec() {
   setProperty("SateNumIndexed", sate_indexed);
   setProperty("MainError", main_error);
   setProperty("SatelliteError", satellite_error);
+}
+V3D IndexPeakswithSatellites::getOffsetVector(const std::string &label) {
+  vector<double> offsets = getProperty(label);
+  if (offsets.empty()) {
+    offsets.push_back(0.0);
+    offsets.push_back(0.0);
+    offsets.push_back(0.0);
+  }
+  V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
+  return offsets1;
 }
 
 } // namespace Crystal

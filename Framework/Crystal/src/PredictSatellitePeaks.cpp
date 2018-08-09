@@ -343,9 +343,15 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
   offsetsMat.setColumn(0, offsets1);
   offsetsMat.setColumn(1, offsets2);
   offsetsMat.setColumn(2, offsets3);
-  for (int m = -maxOrder; m <= maxOrder; m++)
-    for (int n = -maxOrder; n <= maxOrder; n++)
-      for (int p = -maxOrder; p <= maxOrder; p++) {
+  int maxOrder1 = maxOrder;
+  if (offsets1 == V3D(0, 0, 0)) maxOrder1 = 0;
+  int maxOrder2 = maxOrder;
+  if (offsets2 == V3D(0, 0, 0)) maxOrder2 = 0;
+  int maxOrder3 = maxOrder;
+  if (offsets3 == V3D(0, 0, 0)) maxOrder3 = 0;
+  for (int m = -maxOrder1; m <= maxOrder1; m++)
+    for (int n = -maxOrder2; n <= maxOrder2; n++)
+      for (int p = -maxOrder3; p <= maxOrder3; p++) {
         if (m == 0 && n == 0 && p == 0 && !includeOrderZero)
           continue; // exclude 0,0,0
         V3D satelliteHKL(hkl);

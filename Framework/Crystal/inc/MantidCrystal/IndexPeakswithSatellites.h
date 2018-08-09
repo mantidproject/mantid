@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -61,6 +62,7 @@ private:
 
   /// Run the algorithm
   void exec() override;
+  Kernel::V3D getOffsetVector(const std::string &label);
 };
 
 } // namespace Crystal
