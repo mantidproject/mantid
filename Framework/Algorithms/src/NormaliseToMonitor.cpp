@@ -816,5 +816,5 @@ void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

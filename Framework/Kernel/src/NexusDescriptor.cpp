@@ -77,7 +77,7 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   std::rewind(fileHandle);
   return result;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------------------------------------------------
 // static NexusDescriptor methods

@@ -1,8 +1,8 @@
 #ifndef COLORUPDATER_H_
 #define COLORUPDATER_H_
 
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include <QPair>
 
 class pqColorMapModel;
@@ -120,8 +120,8 @@ private:
   AutoScaleRangeGenerator
       m_autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // COLORUPDATER_H_

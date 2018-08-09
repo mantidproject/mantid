@@ -1,18 +1,18 @@
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
-#include "MantidCrystal/GSLFunctions.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Crystal/ReducedCell.h"
+#include "MantidCrystal/GSLFunctions.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ReducedCell.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VectorHelper.h"
 #include <fstream>
 
 using namespace Mantid::Geometry;
@@ -236,5 +236,5 @@ OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
   return latticeFunction;
 }
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid

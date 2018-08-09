@@ -43,6 +43,6 @@ bool FilteredTreeModel::filterAcceptsRow(int row,
     return false;
   }
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -27,8 +27,8 @@
 //----------------------------------------------------------------------
 
 #include "bd_tree.h"  // bd-tree declarations
-#include "kd_util.h"  // kd-tree utilities
 #include "kd_split.h" // kd-tree splitting rules
+#include "kd_util.h"  // kd-tree utilities
 
 #include "MantidKernel/ANN/ANNperf.h" // performance evaluation
 

@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_CALCULATECOVERAGEDGS_H_
 #define MANTID_MDALGORITHMS_CALCULATECOVERAGEDGS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 namespace Mantid {
 namespace MDAlgorithms {
 

@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/TableRow.h"
-#include "MantidMuon/MuonGroupDetectors.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidMuon/MuonGroupDetectors.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::MuonGroupDetectors;

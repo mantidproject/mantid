@@ -1,6 +1,6 @@
 
-#include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
@@ -280,9 +280,9 @@ void CoordTransformAffine::apply(const coord_t *inputVector,
 
 //----------------------------------------------------------------------------------------------
 /** Serialize the coordinate transform
-*
-* @return The coordinate transform in its serialized form.
-*/
+ *
+ * @return The coordinate transform in its serialized form.
+ */
 std::string CoordTransformAffine::toXMLString() const {
   using namespace Poco::XML;
 
@@ -389,5 +389,5 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
   return out;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

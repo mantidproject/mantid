@@ -2,11 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RenameWorkspaces.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,9 +47,9 @@ void RenameWorkspaces::init() {
 }
 
 /**
-  * Validates that the output names do not already exist
-  * @return A map of the workspace property and error message
-  */
+ * Validates that the output names do not already exist
+ * @return A map of the workspace property and error message
+ */
 std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
   using namespace std;
   map<string, string> errorList;

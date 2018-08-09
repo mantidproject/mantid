@@ -74,7 +74,7 @@ private:
   double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_*/

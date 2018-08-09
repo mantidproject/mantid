@@ -1,7 +1,7 @@
 #include "MantidSINQ/SINQTranspose3D.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/ListValidator.h"
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SINQTranspose3D)

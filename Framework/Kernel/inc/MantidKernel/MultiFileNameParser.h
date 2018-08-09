@@ -8,9 +8,9 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <set>
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 /**
   Copyright &copy; 2010-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -53,7 +53,7 @@ extern const std::string COMMA, PLUS, MINUS, COLON;
 extern const std::string SINGLE, RANGE, STEP_RANGE, ADD_LIST, ADD_RANGE,
     ADD_STEP_RANGE;
 extern const std::string ANY, LIST;
-}
+} // namespace Regexs
 
 /**
  * Comparator for set that holds instrument names in Parser.

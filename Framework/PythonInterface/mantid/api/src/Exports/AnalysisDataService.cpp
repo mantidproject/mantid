@@ -14,8 +14,9 @@ void export_AnalysisDataService() {
   using ADSExporter =
       DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
-  pythonClass.def("Instance", &AnalysisDataService::Instance,
-                  return_value_policy<reference_existing_object>(),
-                  "Return a reference to the singleton instance")
+  pythonClass
+      .def("Instance", &AnalysisDataService::Instance,
+           return_value_policy<reference_existing_object>(),
+           "Return a reference to the singleton instance")
       .staticmethod("Instance");
 }

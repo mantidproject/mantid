@@ -22,8 +22,8 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/register_ptr_to_python.hpp>
@@ -53,8 +53,8 @@ template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
     TypeRegistry::subscribe<TypedPropertyValueHandler<IType_sptr>>();
   }
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_ */

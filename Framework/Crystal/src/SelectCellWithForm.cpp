@@ -1,9 +1,9 @@
 #include "MantidCrystal/SelectCellWithForm.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/ScalarUtils.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ScalarUtils.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -179,5 +179,5 @@ void SelectCellWithForm::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

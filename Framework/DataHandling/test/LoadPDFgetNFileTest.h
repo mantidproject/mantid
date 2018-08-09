@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::DataHandling::LoadPDFgetNFile;
 using namespace Mantid;
@@ -22,7 +22,7 @@ public:
   static void destroySuite(LoadPDFgetNFileTest *suite) { delete suite; }
 
   /** Test to load .sq file
-    */
+   */
   void test_LoadSqFile() {
     // 1. Init
     LoadPDFgetNFile loader;
@@ -52,7 +52,7 @@ public:
   }
 
   /** Test to load .sq file
-    */
+   */
   void test_LoadGrFile() {
     // 1. Init
     LoadPDFgetNFile loader;
@@ -80,8 +80,8 @@ public:
   }
 
   /** Test to load .bsmo file.
-    * .bsmo and .braw file record Q in descending order.
-    */
+   * .bsmo and .braw file record Q in descending order.
+   */
   void test_LoadBackgroundFile() {
     // 1. Init
     LoadPDFgetNFile loader;

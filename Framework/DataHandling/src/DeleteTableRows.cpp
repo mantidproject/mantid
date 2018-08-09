@@ -2,13 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DeleteTableRows.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <set>
 #include <functional>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,8 +29,8 @@ void DeleteTableRows::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void DeleteTableRows::exec() {
   API::ITableWorkspace_sptr tw = getProperty("TableWorkspace");
   API::IPeaksWorkspace_sptr pw =

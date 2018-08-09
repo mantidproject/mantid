@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include <string>
 #include "MantidKernel/V3D.h"
+#include <string>
 
 namespace Mantid {
 namespace Geometry {

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -114,9 +114,9 @@ public:
 
 private:
   Mantid::Geometry::ReferenceFrame createTestFrame() {
-    using Mantid::Geometry::ReferenceFrame;
-    using Mantid::Geometry::PointingAlong;
     using Mantid::Geometry::Handedness;
+    using Mantid::Geometry::PointingAlong;
+    using Mantid::Geometry::ReferenceFrame;
     // up = Z, beam = X
     return ReferenceFrame(PointingAlong::Z, PointingAlong::X, Handedness::Right,
                           "source");

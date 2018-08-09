@@ -64,7 +64,7 @@ private:
   Geometry::Instrument_const_sptr getInstrument3Ways(Algorithm *alg);
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LoadIsawSpectrum_H_ */

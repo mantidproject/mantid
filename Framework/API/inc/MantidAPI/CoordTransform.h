@@ -64,7 +64,7 @@ using CoordTransform_sptr = boost::shared_ptr<CoordTransform>;
 // Helper typdef for a const shared pointer of this type.
 using CoordTransform_const_sptr = boost::shared_ptr<const CoordTransform>;
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_MDEVENTS_COORDTRANSFORM_H_ */

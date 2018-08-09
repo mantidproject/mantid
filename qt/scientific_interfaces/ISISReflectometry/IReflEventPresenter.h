@@ -53,6 +53,6 @@ public:
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
   virtual void notifySettingsChanged() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTPRESENTER_H */

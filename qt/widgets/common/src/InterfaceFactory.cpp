@@ -2,8 +2,8 @@
 // Includes
 //-----------------------------------------------
 #include "MantidQtWidgets/Common/InterfaceFactory.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include <sstream>
 
 using namespace MantidQt::API;
@@ -11,7 +11,7 @@ using namespace MantidQt::API;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("UserSubWindowFactoryImpl");
-}
+} // namespace
 
 //*********************************************************
 //                 UserSubWindow
@@ -45,8 +45,9 @@ UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
     g_log.error() << "UserSubWindowFactory: \"" + name +
                          "\" is not registered as an interface name.\n";
     throw Mantid::Kernel::Exception::NotFoundError(
-        "UserSubWindowFactory:" + name + " is not registered or recognised as "
-                                         "an alias of a known interface.\n",
+        "UserSubWindowFactory:" + name +
+            " is not registered or recognised as "
+            "an alias of a known interface.\n",
         name);
   }
   return window;

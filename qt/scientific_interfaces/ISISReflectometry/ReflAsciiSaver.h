@@ -1,10 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLASCIISAVER_H
 #define MANTID_ISISREFLECTOMETRY_REFLASCIISAVER_H
-#include <vector>
-#include <string>
+#include "IReflAsciiSaver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "IReflAsciiSaver.h"
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,6 +34,6 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   workspace(std::string const &workspaceName) const;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_REFLASCIISAVER_H

@@ -114,5 +114,5 @@ PeakTransform::transformBack(const Mantid::Kernel::V3D &transformed) const {
   originalPeakPosition.setZ(transformed[m_indexOfPeakZ]);
   return originalPeakPosition;
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

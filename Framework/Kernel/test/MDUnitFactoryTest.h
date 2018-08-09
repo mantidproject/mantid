@@ -14,7 +14,7 @@ using namespace testing;
 /**
  * Helper Mock MDUnit
  */
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockMDUnit : public MDUnit {
 public:
   MOCK_CONST_METHOD0(getUnitLabel, UnitLabel());
@@ -31,7 +31,7 @@ public:
   MOCK_CONST_METHOD1(createRaw, MDUnit *(const std::string &));
   MOCK_CONST_METHOD1(canInterpret, bool(const std::string &));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 class MDUnitFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

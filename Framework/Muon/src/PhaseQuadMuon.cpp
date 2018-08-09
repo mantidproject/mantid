@@ -2,8 +2,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
@@ -29,7 +29,7 @@ int findName(const T1 &patterns, const T2 &names) {
   return -1;
 }
 double ASYMM_ERROR = 999.0;
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -83,7 +83,7 @@ void PhaseQuadMuon::exec() {
 /** Checks that the input workspace and table have compatible dimensions
  * @return a map where: Key = string name of the the property; Value = string
  * describing the problem with the property.
-*/
+ */
 std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 
   std::map<std::string, std::string> result;
@@ -155,11 +155,11 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 
 //----------------------------------------------------------------------------------------------
 /** Calculates the normalization constant for the exponential decay
-* @param ws :: [input] Workspace containing the spectra to remove exponential
-* from
-* @return :: Vector containing the normalization constants, N0, for each
-* spectrum
-*/
+ * @param ws :: [input] Workspace containing the spectra to remove exponential
+ * from
+ * @return :: Vector containing the normalization constants, N0, for each
+ * spectrum
+ */
 std::vector<double>
 PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
@@ -195,11 +195,11 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
 //----------------------------------------------------------------------------------------------
 /** Forms the quadrature phase signal (squashogram)
-* @param ws :: [input] workspace containing the measured spectra
-* @param phase :: [input] table workspace containing the detector phases
-* @param n0 :: [input] vector containing the normalization constants
-* @return :: workspace containing the quadrature phase signal
-*/
+ * @param ws :: [input] workspace containing the measured spectra
+ * @param phase :: [input] table workspace containing the detector phases
+ * @param n0 :: [input] vector containing the normalization constants
+ * @return :: workspace containing the quadrature phase signal
+ */
 API::MatrixWorkspace_sptr
 PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
                       const API::ITableWorkspace_sptr &phase,
@@ -337,5 +337,5 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
   return ows;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

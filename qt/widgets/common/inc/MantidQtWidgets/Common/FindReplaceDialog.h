@@ -4,8 +4,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <QDialog>
 #include "DllOption.h"
+#include <QDialog>
 
 //----------------------------------
 // Forward declarations

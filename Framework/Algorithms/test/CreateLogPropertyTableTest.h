@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAlgorithms/CreateLogPropertyTable.h"
 #include "MantidDataHandling/Load.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 #include <vector>

@@ -8,8 +8,8 @@
 #include <QFile>
 #elif defined(Q_OS_WIN)
 #define WIN32_LEAN_AND_MEAN
-#include <Psapi.h>
 #include "MantidQtWidgets/Common/QStringUtils.h"
+#include <Psapi.h>
 #elif defined(Q_OS_MAC)
 #include <cstdlib>
 #include <libproc.h>
@@ -36,11 +36,11 @@ bool isOtherInstance(int64_t otherPID, QString otherExeName) {
 namespace Process {
 
 /**
-  * Returns true is another instance of Mantid is running
-  * on this machine
-  * @return True if another instance is running
-  * @throws std::runtime_error if this cannot be determined
-  */
+ * Returns true is another instance of Mantid is running
+ * on this machine
+ * @return True if another instance is running
+ * @throws std::runtime_error if this cannot be determined
+ */
 #ifdef Q_OS_LINUX
 bool isAnotherInstanceRunning() {
   // Inspired by psutil._pslinux.Process.exe:
