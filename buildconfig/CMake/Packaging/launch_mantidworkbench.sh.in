@@ -16,7 +16,7 @@ if [ -n "${LD_PRELOAD}" ]; then
 fi
 
 # define where the executable and libraries are
-LOCAL_LD_LIBRARY=${INSTALLDIR}/lib:${INSTALLDIR}/lib/paraview-5.4
+LOCAL_LD_LIBRARY=${INSTALLDIR}/lib
 if [ -n "${LD_LIBRARY_PATH}" ]; then
   LOCAL_LD_LIBRARY=${LOCAL_LD_LIBRARY}:${LD_LIBRARY_PATH}
 fi
