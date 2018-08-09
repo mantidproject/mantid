@@ -151,31 +151,38 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
   } else {
 
     // Allocate vector space
-    std::vector<std::ostringstream> output(nmaxThreads);
+    std::vector<std::string> output(nmaxThreads);
+    size_t stream_size = 0;
 
     // Actual number of threads in the current region
     int nThreads = 1;
-#pragma omp parallel
+#pragma omp parallel reduction(+ : stream_size)
     {
       nThreads = static_cast<int>(PARALLEL_NUMBER_OF_THREADS);
       int idThread = static_cast<int>(PARALLEL_THREAD_NUMBER);
       ITERATOR_TYPE it;
 
+      // Initialise ostringstream
+      std::ostringstream thread_stream;
 #pragma omp for
       for (int i = 0; i < dist; i++) {
-        // Write to stringstream
-        output[idThread] << separator << *(begin + i);
+        // Write to ostringstream
+        thread_stream << separator << *(begin + i);
       }
+      output[idThread] = thread_stream.str();
+      stream_size += output[idThread].length();
     }
 
-    // Flush all buffers into the first one
+    // Reserve space in memory for output string
+    std::string master_string = output[0].erase(0, separator.length());
+    master_string.reserve(stream_size - separator.length());
+
+    // Concatenate the contributions from the remaning threads
     for (int i = 1; i < nThreads; i++) {
-      output[0] << output[i].str();
+      master_string += output[i];
     }
 
-    // Return the stringstream converted to a string, minus the separator at
-    // the start of the string.
-    return output[0].str().erase(0, separator.length());
+    return master_string;
   }
 }
 
