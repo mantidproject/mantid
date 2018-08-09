@@ -220,7 +220,7 @@ auto getTextAxisValueReader(std::size_t axisIndex) {
 
 template <typename T, typename GetValue>
 void addValuesToColumn(
-    Column_sptr column, const std::vector<MatrixWorkspace_sptr> workspaces,
+    Column_sptr column, const std::vector<MatrixWorkspace_sptr> &workspaces,
     const Mantid::Kernel::PropertyManagerOwner &indexProperties,
     const GetValue &getValue) {
   const std::string prefix = "WorkspaceIndex";
