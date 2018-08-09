@@ -45,7 +45,3 @@ def _get_current_mode_dictionary(run_number_string, inst_settings):
     mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
     # Get the current mode "Rietveld" or "PDF" run numbers
     return common.cal_map_dictionary_key_helper(mapping_dict, inst_settings.mode)
-
-
-
-
