@@ -930,6 +930,7 @@ set ( TEST_FILES
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
+	SortXAxisTest.h
 	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateTheta2Test.h

@@ -62,7 +62,9 @@ public:
   HistogramX(HistogramX &&) = default;
   HistogramX &operator=(const HistogramX &) & = default;
   HistogramX &operator=(HistogramX &&) & = default;
-
+  bool operator==(const HistogramX &rhs) const {
+    return this->rawData() == rhs.rawData();
+  }
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<BinEdges, HistogramX>;

@@ -5,9 +5,13 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/make_unique.h"
-
-using namespace Mantid::Kernel;
+#include "MantidHistogramData/Histogram.h"
+using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {

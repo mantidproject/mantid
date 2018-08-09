@@ -50,7 +50,9 @@ public:
   HistogramDx(HistogramDx &&) = default;
   HistogramDx &operator=(const HistogramDx &) & = default;
   HistogramDx &operator=(HistogramDx &&) & = default;
-
+  bool operator==(const HistogramDx &rhs) const {
+    return this->rawData() == rhs.rawData();
+  }
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<PointVariances, HistogramDx>;
