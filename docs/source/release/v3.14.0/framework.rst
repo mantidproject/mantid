@@ -47,6 +47,8 @@ Improvements
 Bugfixes
 ########
 - :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
+  
+- Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
 
 
 Python
