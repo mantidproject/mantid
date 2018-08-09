@@ -1,11 +1,6 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATORTEST_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATORTEST_H_
 
-#include <algorithm>
-#include <boost/make_shared.hpp>
-#include <cxxtest/TestSuite.h>
-#include <set>
-
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -17,10 +12,15 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-using namespace Mantid::Geometry;
+#include <algorithm>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
+#include <set>
+
+using Mantid::detid_t;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
-using Mantid::detid_t;
+using namespace Mantid::Geometry;
 
 class DetectorInfoIteratorTest : public CxxTest::TestSuite {
 public:
@@ -147,38 +147,25 @@ public:
     TS_ASSERT(iter == detectorInfo.begin());
   }
 
-  void test_iterator_position() {
-    // Get the DetectorInfo object
-    auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.begin();
-
-    for (int i = 0; i < 11; i++) {
-      TS_ASSERT_EQUALS(iter->position(), i);
-      ++iter;
-    }
-  }
-
   void test_copy_iterator() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
     auto iter = detectorInfo.begin();
 
+    // Create a copy
     auto iterCopy = DetectorInfoIterator(iter);
 
+    // Check
     TS_ASSERT_EQUALS(iter->getIndex(), 0);
     TS_ASSERT_EQUALS(iterCopy->getIndex(), 0);
 
-    TS_ASSERT_EQUALS(iter->position(), 0);
-    TS_ASSERT_EQUALS(iterCopy->position(), 0);
-
+    // Increment
     ++iter;
     ++iterCopy;
 
+    // Check again
     TS_ASSERT_EQUALS(iter->getIndex(), 1);
     TS_ASSERT_EQUALS(iterCopy->getIndex(), 1);
-
-    TS_ASSERT_EQUALS(iter->position(), 1);
-    TS_ASSERT_EQUALS(iterCopy->position(), 1);
   }
 };
 
