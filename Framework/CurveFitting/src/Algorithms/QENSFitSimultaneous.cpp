@@ -165,7 +165,8 @@ WorkspaceGroup_sptr makeGroup(Workspace_sptr workspace) {
 }
 
 ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
-                                       IFunction_sptr function, const std::string &yAxisType) {
+                                       IFunction_sptr function,
+                                       const std::string &yAxisType) {
   auto transposed = WorkspaceFactory::Instance().createTable();
   transposed->addColumn(yAxisType, "axis-1");
 
@@ -193,46 +194,46 @@ std::string getAxisType(MatrixWorkspace_sptr workspace, std::size_t axisIndex) {
 }
 
 NumericAxis *getNumericAxis(MatrixWorkspace_sptr workspace,
-	std::size_t axisIndex) {
+                            std::size_t axisIndex) {
   return dynamic_cast<NumericAxis *>(workspace->getAxis(axisIndex));
 }
 
-TextAxis *getTextAxis(MatrixWorkspace_sptr workspace,
-	std::size_t axisIndex) {
-	return dynamic_cast<TextAxis *>(workspace->getAxis(axisIndex));
+TextAxis *getTextAxis(MatrixWorkspace_sptr workspace, std::size_t axisIndex) {
+  return dynamic_cast<TextAxis *>(workspace->getAxis(axisIndex));
 }
 
 auto getNumericAxisValueReader(std::size_t axisIndex) {
-	return [axisIndex](MatrixWorkspace_sptr workspace, std::size_t index) {
-		if (auto const axis = getNumericAxis(workspace, axisIndex))
-			return axis->getValue(index);
-		return 0.0;
-	};
+  return [axisIndex](MatrixWorkspace_sptr workspace, std::size_t index) {
+    if (auto const axis = getNumericAxis(workspace, axisIndex))
+      return axis->getValue(index);
+    return 0.0;
+  };
 }
 
 auto getTextAxisValueReader(std::size_t axisIndex) {
-	return [axisIndex](MatrixWorkspace_sptr workspace, std::size_t index) {
-		if (auto const axis = getTextAxis(workspace, axisIndex))
-		  return axis->label(index);
-		return std::string();
-	};
+  return [axisIndex](MatrixWorkspace_sptr workspace, std::size_t index) {
+    if (auto const axis = getTextAxis(workspace, axisIndex))
+      return axis->label(index);
+    return std::string();
+  };
 }
 
 template <typename T, typename GetValue>
-void addValuesToColumn(Column_sptr column, const std::vector<MatrixWorkspace_sptr> workspaces,
-	const Mantid::Kernel::PropertyManagerOwner &indexProperties, const GetValue &getValue) {
-	const std::string prefix = "WorkspaceIndex";
+void addValuesToColumn(
+    Column_sptr column, const std::vector<MatrixWorkspace_sptr> workspaces,
+    const Mantid::Kernel::PropertyManagerOwner &indexProperties,
+    const GetValue &getValue) {
+  const std::string prefix = "WorkspaceIndex";
 
-	int index = indexProperties.getProperty(prefix);
-	column->cell<T>(0) = getValue(
-		workspaces[0], static_cast<std::size_t>(index));
-	
-	for (auto i = 1u; i < workspaces.size(); ++i) {
-		const auto indexName = prefix + "_" + std::to_string(i);
-		index = indexProperties.getProperty(indexName);
-		column->cell<T>(i) = getValue(
-			workspaces[i], static_cast<std::size_t>(index));
-	}
+  int index = indexProperties.getProperty(prefix);
+  column->cell<T>(0) = getValue(workspaces[0], static_cast<std::size_t>(index));
+
+  for (auto i = 1u; i < workspaces.size(); ++i) {
+    const auto indexName = prefix + "_" + std::to_string(i);
+    index = indexProperties.getProperty(indexName);
+    column->cell<T>(i) =
+        getValue(workspaces[i], static_cast<std::size_t>(index));
+  }
 }
 
 void addValuesToTableColumn(
@@ -244,9 +245,11 @@ void addValuesToTableColumn(
 
   const auto column = table.getColumn(columnIndex);
   if (auto numericAxis = getNumericAxis(workspaces.front(), 1))
-	  addValuesToColumn<double>(column, workspaces, indexProperties, getNumericAxisValueReader(1));
+    addValuesToColumn<double>(column, workspaces, indexProperties,
+                              getNumericAxisValueReader(1));
   else if (auto textAxis = getTextAxis(workspaces.front(), 1))
-	  addValuesToColumn<std::string>(column, workspaces, indexProperties, getTextAxisValueReader(1));
+    addValuesToColumn<std::string>(column, workspaces, indexProperties,
+                                   getTextAxisValueReader(1));
 }
 
 std::vector<std::size_t>
