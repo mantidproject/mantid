@@ -37,13 +37,15 @@ class CoLoadModel(lutils.LModel):
             else:
                 self.workspace = self.loaded_runs[self.run]
 
-    def add_runs(self, l, r):
-        out = "{}_co_add".format(l)
+    def add_runs(self, l, r, suffix):
+        # prevent new suffix being appended to old one
+        l = l[:l.rfind("_")] if l.endswith(")") else l
+        out = "{}_({})".format(l, suffix)
         mantid.Plus(l, r, OutputWorkspace=out)
         return out
 
     def co_load_run(self, workspace):
-        to_add = [self.add_runs(l, r) for l, r in zip(*lutils.flatten_run_data(
+        run = lutils.hyphenise(self.co_runs)
+        to_add = [self.add_runs(l, r, run) for l, r in zip(*lutils.flatten_run_data(
             self.workspace, workspace))]
-        self.workspace = lutils.group_by_detector(
-            lutils.hyphenise(self.co_runs), to_add)
+        self.workspace = lutils.group_by_detector(run, to_add)
