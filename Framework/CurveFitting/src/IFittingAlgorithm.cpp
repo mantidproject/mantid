@@ -55,7 +55,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   }
   return creator;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 

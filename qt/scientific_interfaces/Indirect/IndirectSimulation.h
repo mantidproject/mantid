@@ -4,10 +4,10 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectSimulation.h"
+#include "IndirectSimulationTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "IndirectSimulationTab.h"
+#include "ui_IndirectSimulation.h"
 
 #include <Poco/NObserver.h>
 
@@ -84,11 +84,12 @@ private:
   std::map<unsigned int, IndirectSimulationTab *> m_simulationTabs;
   /// Change Observer for ConfigService (monitors user directories)
   Poco::NObserver<IndirectSimulation,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
   /// Main interface window
   Ui::IndirectSimulation m_uiForm;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

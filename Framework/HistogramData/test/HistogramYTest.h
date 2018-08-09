@@ -6,8 +6,8 @@
 #include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Multipliable.h"
+#include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Scalable.h"
 
 using namespace Mantid;

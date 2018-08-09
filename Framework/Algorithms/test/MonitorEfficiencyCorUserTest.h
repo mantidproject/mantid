@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::MonitorEfficiencyCorUser;
 

@@ -1,6 +1,5 @@
 #include "ReflLegacyTransferStrategy.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Tolerance.h"
 #include "ReflTableSchema.h"
 #include <algorithm>
@@ -60,7 +59,7 @@ void validateRow(std::map<std::string, std::string> &row,
     break;
   };
 }
-}
+} // namespace
 
 /** Transfer runs from the search results table to the data processor table.
  * @param searchResults : the search results
@@ -171,5 +170,5 @@ bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

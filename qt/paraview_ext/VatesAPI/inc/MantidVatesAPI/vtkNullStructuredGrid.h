@@ -44,6 +44,6 @@ public:
 
   vtkStructuredGrid *createNullData();
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

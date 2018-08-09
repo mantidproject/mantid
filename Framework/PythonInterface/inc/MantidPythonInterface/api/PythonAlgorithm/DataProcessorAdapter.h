@@ -142,7 +142,7 @@ public:
   int getNThreadsProxy() { return this->getNThreads(); }
   // ------------------------------------------------------------------------
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHON_INTERFACE_DATAPROCESSORADAPTER_H

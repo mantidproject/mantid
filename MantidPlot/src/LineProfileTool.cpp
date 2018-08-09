@@ -30,10 +30,10 @@
  *                                                                         *
  ***************************************************************************/
 #include "LineProfileTool.h"
-#include "ImageMarker.h"
+#include "ApplicationWindow.h"
 #include "ArrowMarker.h"
 #include "Graph.h"
-#include "ApplicationWindow.h"
+#include "ImageMarker.h"
 #include "MultiLayer.h"
 
 #include <QMessageBox>

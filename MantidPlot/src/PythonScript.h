@@ -33,11 +33,11 @@
 #include "MantidQtWidgets/Common/PythonSystemHeader.h"
 #include "MantidQtWidgets/Common/PythonThreading.h"
 
-#include "Script.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "Script.h"
 
-#include <QFileInfo>
 #include <QDir>
+#include <QFileInfo>
 
 class ScriptingEnv;
 class PythonScripting;

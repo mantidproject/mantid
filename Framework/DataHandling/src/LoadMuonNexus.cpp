@@ -16,12 +16,12 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
-#include <limits>
-#include <cmath>
-#include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <limits>
 // clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -57,11 +57,13 @@ void LoadMuonNexus::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int64_t>>();
   mustBePositive->setLower(1);
   declareProperty("SpectrumMin", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive, "Index number of the first spectrum to read\n"
-                                  "(default 1)");
+                  mustBePositive,
+                  "Index number of the first spectrum to read\n"
+                  "(default 1)");
   declareProperty("SpectrumMax", static_cast<int64_t>(EMPTY_INT()),
-                  mustBePositive, "Index of last spectrum to read\n"
-                                  "(default the last spectrum)");
+                  mustBePositive,
+                  "Index of last spectrum to read\n"
+                  "(default the last spectrum)");
 
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"

@@ -59,6 +59,9 @@ private:
   /// Vector of input MDWorkspaces
   std::vector<Mantid::API::IMDEventWorkspace_sptr> m_workspaces;
 
+  /// Vector of number of experimentalInfos for each input workspace
+  std::vector<uint16_t> experimentInfoNo = {0};
+
   /// Output MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr out;
 };

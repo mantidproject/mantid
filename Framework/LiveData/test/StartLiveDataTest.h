@@ -1,16 +1,16 @@
 #ifndef MANTID_LIVEDATA_STARTLIVEDATATEST_H_
 #define MANTID_LIVEDATA_STARTLIVEDATATEST_H_
 
-#include "MantidLiveData/StartLiveData.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidLiveData/StartLiveData.h"
 #include "MantidTestHelpers/FacilityHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>

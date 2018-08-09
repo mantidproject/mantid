@@ -51,7 +51,7 @@ std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
   globalConf->set("default_topic_conf", conf.get(), errorMsg);
   return conf;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -222,7 +222,8 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
                        << ", looked up offset as: " << partition->offset()
                        << ", current high watermark is: "
                        << getCurrentOffset(partition->topic(),
-                                           partition->partition()) << std::endl;
+                                           partition->partition())
+                       << std::endl;
     }
   }
 
@@ -508,5 +509,5 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
 
   return partitionOffsetMap;
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

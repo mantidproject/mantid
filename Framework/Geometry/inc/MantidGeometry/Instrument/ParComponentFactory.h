@@ -7,8 +7,8 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {

@@ -1,12 +1,12 @@
+#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DllOpen.h"
-#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/Logger.h"
 
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <Poco/DirectoryIterator.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 
 namespace Mantid {
@@ -14,7 +14,7 @@ namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("LibraryManager");
-}
+} // namespace
 
 /// Constructor
 LibraryManagerImpl::LibraryManagerImpl() : m_openedLibs() {
@@ -132,11 +132,11 @@ bool LibraryManagerImpl::isExcluded(
 }
 
 /**
-* Load a library
-* @param filepath :: A Poco::File The full path to a library as a string
-* @param cacheKey :: An identifier for the cache if loading is successful
-* @return 1 if the file loaded successfully, 0 otherwise
-*/
+ * Load a library
+ * @param filepath :: A Poco::File The full path to a library as a string
+ * @param cacheKey :: An identifier for the cache if loading is successful
+ * @return 1 if the file loaded successfully, 0 otherwise
+ */
 int LibraryManagerImpl::openLibrary(const Poco::File &filepath,
                                     const std::string &cacheKey) {
   // Try to open the library. The wrapper will unload the library when it

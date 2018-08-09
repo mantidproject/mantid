@@ -32,7 +32,7 @@ public:
   }
 
   /** Test init
-    */
+   */
   void test_Init() {
     EstimateResolutionDiffraction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -40,7 +40,7 @@ public:
   }
 
   /** Test POWGEN
-    */
+   */
   void test_EmptyPG3() {
     // Create an empty PG3 workspace
     MatrixWorkspace_sptr ws = createInstrument();
@@ -75,7 +75,7 @@ public:
   }
 
   /** Create an instrument
-    */
+   */
   API::MatrixWorkspace_sptr createInstrument() {
     // Create empty workspace
     LoadEmptyInstrument loader;

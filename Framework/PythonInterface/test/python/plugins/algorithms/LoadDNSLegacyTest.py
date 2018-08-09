@@ -161,7 +161,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         filename = "dnstof.d_dat"
         tof1 = 424.668     # must be changed if L1 will change
         alg_test = run_algorithm("LoadDNSLegacy", Filename=filename, Normalization='no',
-                                 OutputWorkspace=outputWorkspaceName)
+                                 ElasticChannel=65, OutputWorkspace=outputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
 
         # Verify some values
@@ -170,7 +170,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(24, ws.getNumberHistograms())
         self.assertEqual(100,  ws.getNumberBins())
         # data array
-        self.assertEqual(8, ws.readY(19)[37])       # must be changed after comissioning will be finished
+        self.assertEqual(8, ws.readY(19)[23])
         self.assertAlmostEqual(tof1, ws.readX(0)[0], 3)
         self.assertAlmostEqual(tof1+40.1*100, ws.readX(0)[100], 3)
         # sample logs
@@ -179,7 +179,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(100, run.getProperty('tof_channels').value)
         self.assertEqual(51428, run.getProperty('mon_sum').value)
         self.assertEqual('z', run.getProperty('polarisation').value)
-        self.assertEqual(33, run.getProperty('EPP').value)  # check that EPP is taken from file
+        self.assertEqual(65, run.getProperty('EPP').value)  # check that EPP is not taken from file
         self.assertEqual('7', str(run.getProperty('polarisation_comment').value))
         self.assertEqual('no', run.getProperty('normalized').value)
         # check whether detector bank is rotated

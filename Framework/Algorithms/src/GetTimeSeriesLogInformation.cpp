@@ -1,15 +1,15 @@
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
 #include <fstream>
-#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -231,8 +231,8 @@ void GetTimeSeriesLogInformation::processTimeRange() {
 
 /** Convert a value in nanosecond to DateAndTime.  The value is treated as an
  * absolute time from
-  * 1990.01.01
-  */
+ * 1990.01.01
+ */
 Types::Core::DateAndTime
 GetTimeSeriesLogInformation::getAbsoluteTime(double abstimens) {
   DateAndTime temptime(static_cast<int64_t>(abstimens));
@@ -241,8 +241,8 @@ GetTimeSeriesLogInformation::getAbsoluteTime(double abstimens) {
 }
 
 /** Calculate the time from a given relative time from run start
-  * @param deltatime :: double as a relative time to run start time in second
-  */
+ * @param deltatime :: double as a relative time to run start time in second
+ */
 Types::Core::DateAndTime
 GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
   int64_t totaltime =
@@ -253,7 +253,7 @@ GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
 }
 
 /** Generate statistic information table workspace
-  */
+ */
 TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
   auto tablews = boost::make_shared<TableWorkspace>();
 
@@ -334,11 +334,11 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
 }
 
 /** Output distributions in order for a better understanding of the log
-  * Result is written to a Workspace2D
-  *
-  * @param timevec  :: a vector of time stamps
-  * @param stepsize :: resolution of the delta time count bin
-  */
+ * Result is written to a Workspace2D
+ *
+ * @param timevec  :: a vector of time stamps
+ * @param stepsize :: resolution of the delta time count bin
+ */
 Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
     std::vector<Types::Core::DateAndTime> timevec, double stepsize) {
   // 1. Get a vector of delta T (in unit of seconds)
@@ -562,5 +562,5 @@ void GetTimeSeriesLogInformation::checkLogValueChanging(
   g_log.debug() << ss.str();
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

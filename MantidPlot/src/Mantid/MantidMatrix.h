@@ -45,12 +45,12 @@ class UpdateDAEThread;
 class ProjectData;
 
 /**
-* Find the minimum and maximum Y values in a matrix workspace.
-*
-* @param ws :: A matrix workspace.
-* @param miny :: Variable to receive the minimum value.
-* @param maxy :: Variable to receive the maximum value.
-*/
+ * Find the minimum and maximum Y values in a matrix workspace.
+ *
+ * @param ws :: A matrix workspace.
+ * @param miny :: Variable to receive the minimum value.
+ * @param maxy :: Variable to receive the maximum value.
+ */
 void findYRange(Mantid::API::MatrixWorkspace_const_sptr ws, double &miny,
                 double &maxy);
 

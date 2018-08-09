@@ -15,9 +15,9 @@
 #include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MockObjects.h"
 
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"

@@ -5,8 +5,8 @@
 
 #include "MantidAlgorithms/SofQCommon.h"
 
-#include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -229,9 +229,9 @@ public:
 private:
   static double k(const double E) {
     using namespace Mantid;
+    using PhysicalConstants::NeutronMass;
     using PhysicalConstants::h_bar;
     using PhysicalConstants::meV;
-    using PhysicalConstants::NeutronMass;
     return std::sqrt(2 * NeutronMass * E * meV) / h_bar * 1e-10;
   }
 

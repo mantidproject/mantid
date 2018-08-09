@@ -104,6 +104,6 @@ makeFileBackedMDEWwithMDFrame(const std::string &wsName, bool fileBacked,
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
 }
 
-} // namespace
-}
-}
+} // namespace MDAlgorithmsTestHelper
+} // namespace MDAlgorithms
+} // namespace Mantid

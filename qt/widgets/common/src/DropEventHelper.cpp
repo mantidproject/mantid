@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
-#include <QMimeData>
 #include <QFileInfo>
+#include <QMimeData>
 #include <QStringList>
 #include <QUrl>
 
@@ -33,7 +33,7 @@ QUrl fixupURL(const QUrl &url) {
     CFURLRef relCFURL = CFURLCreateWithFileSystemPath(
         kCFAllocatorDefault, relCFStringRef, kCFURLPOSIXPathStyle,
         false // isDirectory
-        );
+    );
     CFErrorRef error = nullptr;
     CFURLRef absCFURL =
         CFURLCreateFilePathURL(kCFAllocatorDefault, relCFURL, &error);

@@ -1,5 +1,5 @@
-#include <QThread>
 #include "MantidQtWidgets/SpectrumViewer/SpectrumPlotItem.h"
+#include <QThread>
 
 namespace MantidQt {
 namespace SpectrumView {
