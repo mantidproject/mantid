@@ -8,11 +8,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-using MantidQt::API::FindFilesThreadPoolManager;
+using MantidQt::API::FakeFindFilesThread;
+using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
-using MantidQt::API::FakeMWRunFiles;
-using MantidQt::API::FakeFindFilesThread;
+using MantidQt::API::FindFilesThreadPoolManager;
 
 class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:

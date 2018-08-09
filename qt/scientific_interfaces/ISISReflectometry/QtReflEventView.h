@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
 #include "IReflEventView.h"
-#include "ui_ReflEventWidget.h"
 #include "QWidgetGroup.h"
+#include "ui_ReflEventWidget.h"
 #include <memory>
 
 namespace MantidQt {
@@ -90,7 +90,7 @@ private:
   std::unique_ptr<IReflEventPresenter> m_presenter;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_ */

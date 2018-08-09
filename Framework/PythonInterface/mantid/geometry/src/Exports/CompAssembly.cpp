@@ -2,8 +2,8 @@
 #include <boost/python/class.hpp>
 
 using Mantid::Geometry::CompAssembly;
-using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::Component;
+using Mantid::Geometry::ICompAssembly;
 using namespace boost::python;
 
 /**

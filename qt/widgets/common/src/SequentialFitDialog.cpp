@@ -1,20 +1,19 @@
 #include "MantidQtWidgets/Common/SequentialFitDialog.h"
-#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
-#include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
 #include <Poco/ActiveResult.h>
 
-#include <QInputDialog>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QUrl>
 
@@ -55,8 +54,9 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
 
   // When a fit is completed finishHandle is called which emits needShowPlot
   connect(
-      this, SIGNAL(needShowPlot(Ui::SequentialFitDialog *,
-                                MantidQt::MantidWidgets::FitPropertyBrowser *)),
+      this,
+      SIGNAL(needShowPlot(Ui::SequentialFitDialog *,
+                          MantidQt::MantidWidgets::FitPropertyBrowser *)),
       mantidui,
       SLOT(showSequentialPlot(Ui::SequentialFitDialog *,
                               MantidQt::MantidWidgets::FitPropertyBrowser *)));
@@ -234,10 +234,10 @@ bool SequentialFitDialog::isFile(int row) const {
 }
 
 /**
-  * Returns index for the data source in row row to be used in "Input" property
+ * Returns index for the data source in row row to be used in "Input" property
  * of PlotPeakByLogValue.
-  * Index includes the prefix "sp", "i", or "v"
-  */
+ * Index includes the prefix "sp", "i", or "v"
+ */
 QString SequentialFitDialog::getIndex(int row) const {
   QString index;
   QString spectrum = ui.tWorkspaces->model()
@@ -289,10 +289,9 @@ void SequentialFitDialog::accept() {
                        .toString();
     QString parStr = name + "," + getIndex(i);
     if (isFile(i)) { // add the period
-      parStr += QString(",") +
-                ui.tWorkspaces->model()
-                    ->data(ui.tWorkspaces->model()->index(i, 1))
-                    .toString();
+      parStr += QString(",") + ui.tWorkspaces->model()
+                                   ->data(ui.tWorkspaces->model()->index(i, 1))
+                                   .toString();
     }
     inputStr << parStr;
   }
@@ -364,12 +363,12 @@ void SequentialFitDialog::helpClicked() {
 }
 
 /**
-  * Slot. Called in response to QTableWidget's cellChanged signal.
-  * If the cell contains spectra or workspace index of a workspace
-  * make them consistent.
-  * @param row :: Row index of the modified cell
-  * @param col :: Column index of the modified cell
-  */
+ * Slot. Called in response to QTableWidget's cellChanged signal.
+ * If the cell contains spectra or workspace index of a workspace
+ * make them consistent.
+ * @param row :: Row index of the modified cell
+ * @param col :: Column index of the modified cell
+ */
 void SequentialFitDialog::spectraChanged(int row, int col) {
   if (!ui.ckbLogPlot->isChecked())
     return;
@@ -504,5 +503,5 @@ void SequentialFitDialog::plotAgainstLog(bool yes) {
 void SequentialFitDialog::selectionChanged() {
   ui.btnDelete->setEnabled(ui.tWorkspaces->selectionModel()->hasSelection());
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

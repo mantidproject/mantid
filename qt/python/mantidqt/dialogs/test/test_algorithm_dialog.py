@@ -21,9 +21,9 @@ from qtpy.QtWidgets import QWidget, QLineEdit
 from mantid.api import AlgorithmManager, AlgorithmFactory, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty
 from mantidqt.utils.qt.testing import requires_qapp
-from mantidqt.widgets.algorithmdialog import AlgorithmDialog
-from mantidqt.widgets.genericdialog import GenericDialog
-from mantidqt.widgets.interfacemanager import InterfaceManager
+from mantidqt.dialogs.algorithmdialog import AlgorithmDialog
+from mantidqt.dialogs.genericdialog import GenericDialog
+from mantidqt.interfacemanager import InterfaceManager
 
 
 class AlgorithmDialogMockAlgorithm(PythonAlgorithm):

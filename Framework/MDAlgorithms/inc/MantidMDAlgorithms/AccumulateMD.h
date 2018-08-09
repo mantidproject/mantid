@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_ACCUMULATEMD_H_
 #define MANTID_MDALGORITHMS_ACCUMULATEMD_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <set>
 
 namespace {}
@@ -57,9 +57,8 @@ insertDataSources(const std::string &data_sources,
 bool fileExists(const std::string &filename);
 
 /// Pad vector of parameters to given length
-extern void MANTID_MDALGORITHMS_DLL
-padParameterVector(std::vector<double> &param_vector,
-                   const size_t grow_to_size);
+extern void MANTID_MDALGORITHMS_DLL padParameterVector(
+    std::vector<double> &param_vector, const size_t grow_to_size);
 
 /** AccumulateMD : Algorithm for appending new data to a MDHistoWorkspace
 

@@ -46,8 +46,8 @@ void AbstractAlgorithmInputHistory::storeNewValue(
 }
 
 /**
-  * Clear all stored values associated with a particular algorithm
-  */
+ * Clear all stored values associated with a particular algorithm
+ */
 void AbstractAlgorithmInputHistory::clearAlgorithmInput(
     const QString &algName) {
   if (m_lastInput.contains(algName))
@@ -72,11 +72,11 @@ AbstractAlgorithmInputHistory::previousInput(const QString &algName,
 }
 
 /**
-  * Set the directory that was accessed when the previous open file dialog was
+ * Set the directory that was accessed when the previous open file dialog was
  * used
-  * @param lastdir :: A QString giving the path of the directory that was last
+ * @param lastdir :: A QString giving the path of the directory that was last
  * accessed with a file dialog
-  */
+ */
 void AbstractAlgorithmInputHistory::setPreviousDirectory(
     const QString &lastdir) {
   m_previousDirectory = lastdir;
@@ -89,8 +89,8 @@ const QString &AbstractAlgorithmInputHistory::getPreviousDirectory() const {
 }
 
 /**
-  * Save the stored information to persistent storage
-  */
+ * Save the stored information to persistent storage
+ */
 void AbstractAlgorithmInputHistory::save() const {
   QSettings settings;
   settings.beginGroup(m_algorithmsGroup);
@@ -120,9 +120,9 @@ void AbstractAlgorithmInputHistory::save() const {
 //----------------------------------
 
 /**
-  * Load any values that are available from persistent storage. Note: this
+ * Load any values that are available from persistent storage. Note: this
  * clears all currently values stored
-  */
+ */
 void AbstractAlgorithmInputHistory::load() {
   m_lastInput.clear();
   QSettings settings;

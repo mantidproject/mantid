@@ -55,7 +55,7 @@ std::vector<double> getFsSquared(ReflectionGenerator &self,
 
   return self.getFsSquared(converter());
 }
-}
+} // namespace
 
 void export_ReflectionGenerator() {
   enum_<ReflectionConditionFilter>("ReflectionConditionFilter")

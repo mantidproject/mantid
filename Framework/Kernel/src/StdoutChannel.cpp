@@ -3,4 +3,4 @@
 
 namespace Poco {
 StdoutChannel::StdoutChannel() : ConsoleChannel(std::cout) {}
-}
+} // namespace Poco

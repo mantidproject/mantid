@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
 #define MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
@@ -13,7 +13,7 @@ using namespace Mantid::Kernel;
  * be a type replacment enum->object, but while that has not been done,
  * a santiy check (these tests) on the enum ordering will prevent unintentional
  * reordering.
-*/
+ */
 class SpecialCoordinateSystemTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

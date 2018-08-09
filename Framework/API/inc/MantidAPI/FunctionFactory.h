@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <vector>
 
 #include <mutex>
 
@@ -158,7 +158,7 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /**
  * Macro for declaring a new type of function to be used with the

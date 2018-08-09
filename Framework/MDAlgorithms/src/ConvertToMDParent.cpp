@@ -11,8 +11,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -27,7 +27,7 @@ const std::string ConvertToMDParent::category() const {
 }
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void ConvertToMDParent::init() {
   auto ws_valid = boost::make_shared<CompositeValidator>();
   //
@@ -189,18 +189,18 @@ void ConvertToMDParent::init() {
       "views to remove noise. ");
 }
 /**The method responsible for analyzing input workspace parameters and
-*preprocessing detectors positions into reciprocal space
-*
-* @param InWS2D -- input Matrix workspace with defined instrument
-* @param dEModeRequested -- energy conversion mode (direct/indirect/elastic)
-* @param updateMasks  --  if full detector positions calculations or just update
-*masking requested
-* @param OutWSName    -- the name for the preprocessed detectors workspace to
-*have in the analysis data service
-*
-* @return          shared pointer to the workspace with preprocessed detectors
-*information.
-*/
+ *preprocessing detectors positions into reciprocal space
+ *
+ * @param InWS2D -- input Matrix workspace with defined instrument
+ * @param dEModeRequested -- energy conversion mode (direct/indirect/elastic)
+ * @param updateMasks  --  if full detector positions calculations or just
+ *update masking requested
+ * @param OutWSName    -- the name for the preprocessed detectors workspace to
+ *have in the analysis data service
+ *
+ * @return          shared pointer to the workspace with preprocessed detectors
+ *information.
+ */
 DataObjects::TableWorkspace_const_sptr
 ConvertToMDParent::preprocessDetectorsPositions(
     const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
@@ -375,5 +375,5 @@ ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(
   return TargTableWS;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

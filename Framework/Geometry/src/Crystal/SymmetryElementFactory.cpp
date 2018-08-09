@@ -1,9 +1,9 @@
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include <boost/lexical_cast.hpp>
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_complex_math.h>
-#include <stdexcept>
 #include <boost/math/special_functions/round.hpp>
+#include <gsl/gsl_complex_math.h>
+#include <gsl/gsl_eigen.h>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Geometry {
@@ -261,18 +261,10 @@ std::string SymmetryElementRotationGenerator::determineSymbol(
 }
 
 std::map<V3R, std::string> SymmetryElementMirrorGenerator::g_glideSymbolMap = {
-    {V3R(0, 0, 0), "m"},
-    {V3R(1, 0, 0) / 2, "a"},
-    {V3R(0, 1, 0) / 2, "b"},
-    {V3R(0, 0, 1) / 2, "c"},
-    {V3R(1, 1, 0) / 2, "n"},
-    {V3R(1, 0, 1) / 2, "n"},
-    {V3R(0, 1, 1) / 2, "n"},
-    {V3R(1, 1, 1) / 2, "n"},
-    {V3R(1, 1, 0) / 4, "d"},
-    {V3R(1, 0, 1) / 4, "d"},
-    {V3R(0, 1, 1) / 4, "d"},
-    {V3R(1, 1, 1) / 4, "d"}};
+    {V3R(0, 0, 0), "m"},     {V3R(1, 0, 0) / 2, "a"}, {V3R(0, 1, 0) / 2, "b"},
+    {V3R(0, 0, 1) / 2, "c"}, {V3R(1, 1, 0) / 2, "n"}, {V3R(1, 0, 1) / 2, "n"},
+    {V3R(0, 1, 1) / 2, "n"}, {V3R(1, 1, 1) / 2, "n"}, {V3R(1, 1, 0) / 4, "d"},
+    {V3R(1, 0, 1) / 4, "d"}, {V3R(0, 1, 1) / 4, "d"}, {V3R(1, 1, 1) / 4, "d"}};
 
 /// Generates an instance of SymmetryElementMirror with the corresponding
 /// symbol, axis and translation vector.

@@ -42,8 +42,8 @@ public:
   /// where n is the Bose-Einstein distribution
   static double np1Eps(const double energy, const double temperature);
 };
-}
-}
-}
+} // namespace Math
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_BOSEEINSTEINDISTRIBUTION_H_ */

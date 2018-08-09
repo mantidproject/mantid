@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/MaskMD.h"
-#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <algorithm>
@@ -258,5 +258,5 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   return validation_output;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

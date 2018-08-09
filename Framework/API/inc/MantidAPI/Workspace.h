@@ -1,8 +1,8 @@
 #ifndef MANTID_API_WORKSPACE_H_
 #define MANTID_API_WORKSPACE_H_
 
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
 #include "MantidParallel/StorageMode.h"

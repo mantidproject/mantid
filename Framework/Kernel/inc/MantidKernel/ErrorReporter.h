@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_ERRORSERVICE_H_
 #define MANTID_KERNEL_ERRORSERVICE_H_
 
-#include <string>
 #include <Poco/ActiveMethod.h>
+#include <string>
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"

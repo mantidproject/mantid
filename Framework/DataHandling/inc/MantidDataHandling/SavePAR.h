@@ -42,20 +42,20 @@ namespace DataHandling {
  *
  */
 /*!
-*    an ASCII Tobyfit par file format:
-*
-*     par(6,ndet)         contents of array
-*
-*         1st column      sample-detector distance \n
-*         2nd  &quot;          scattering angle (deg) \n
-*         3rd  &quot;          azimuthal angle (deg) \n
-*                     (west bank = 0 deg, north bank = -90 deg etc.)
-*                     (Note the reversed sign convention cf .phx files) \n
-*         4th  &quot;          width (m) \n
-*         5th  &quot;          height (m) \n
-*         6th  &quot;          DetID (m) \n
-*-----------------------------------------------------------------------
-*/
+ *    an ASCII Tobyfit par file format:
+ *
+ *     par(6,ndet)         contents of array
+ *
+ *         1st column      sample-detector distance \n
+ *         2nd  &quot;          scattering angle (deg) \n
+ *         3rd  &quot;          azimuthal angle (deg) \n
+ *                     (west bank = 0 deg, north bank = -90 deg etc.)
+ *                     (Note the reversed sign convention cf .phx files) \n
+ *         4th  &quot;          width (m) \n
+ *         5th  &quot;          height (m) \n
+ *         6th  &quot;          DetID (m) \n
+ *-----------------------------------------------------------------------
+ */
 class DLLExport SavePAR : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name

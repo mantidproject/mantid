@@ -87,7 +87,7 @@ private:
   void setPeakHKLOrRunNumber(const size_t index, const double val);
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_PEAKCOLUMN_H_ */

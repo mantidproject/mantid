@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_MODQ_TRANSF_H
 #define MANTID_MDALGORITHMS_MODQ_TRANSF_H
 //
-#include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
 //
 namespace Mantid {
 namespace MDAlgorithms {
@@ -50,7 +50,7 @@ public:
   /// list)
   const std::string transfID() const override; // {return "ModQ"; }
   /** energy conversion modes supported by this class;
-    * The class supports three standard energy conversion modes */
+   * The class supports three standard energy conversion modes */
   std::vector<std::string> getEmodes() const override;
 
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
@@ -144,7 +144,7 @@ private:
                                        std::vector<coord_t> &Coord) const;
 };
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

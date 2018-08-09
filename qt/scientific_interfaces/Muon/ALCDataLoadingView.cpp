@@ -1,8 +1,8 @@
 #include "ALCDataLoadingView.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
+#include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 
 #include <QMessageBox>
 

@@ -4,15 +4,20 @@
 #ifdef ERROR
 #undef ERROR
 #endif
+// Moving this to the bottom of the include stack causes a compilation error
+// under Visual Studio.
+// clang-format off
 #include "ui_MdViewerWidget.h"
+// clang-format on
+
 #include "MantidQtWidgets/Common/MdConstants.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidVatesAPI/ColorScaleGuard.h"
 
 #include "vtkSmartPointer.h"
 
@@ -43,33 +48,26 @@ class ViewBase;
 class RebinDialog;
 class ColorMapEditorPanel;
 /**
- *
-  This class represents the central widget for handling VATES visualization
-  operations for 3D and 4D datasets.
-
-  @date 11/08/2011
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
+*
+This class represents the central widget for handling VATES visualization
+operations for 3D and 4D datasets.
+@date 11/08/2011
+Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+This file is part of Mantid.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS MdViewerWidget
     : public MantidQt::API::VatesViewerInterface,
       MantidQt::API::WorkspaceObserver {
@@ -168,24 +166,24 @@ private:
   pqSaveScreenshotReaction *screenShot; ///< Holder for the screen shot reaction
   Ui::MdViewerWidgetClass ui;           ///< The MD viewer's UI form
   QHBoxLayout *viewLayout;              ///< Layout manager for the view widget
-  pqApplicationSettingsReaction *
-      viewSettings; ///< Holder for the view settings reaction
+  pqApplicationSettingsReaction
+      *viewSettings; ///< Holder for the view settings reaction
   bool useCurrentColorSettings;
   ModeControlWidget::Views initialView; ///< Holds the initial view
   MantidQt::API::MdSettings
-      mdSettings; ///<Holds the MD settings which are used to persist data
+      mdSettings; ///< Holds the MD settings which are used to persist data
   MantidQt::API::MdConstants mdConstants; /// < Holds the MD constants
-  RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides
-  /// dialogs to
-  /// execute rebin
-  /// algorithms
+  RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///< Provides
+                                                               /// dialogs to
+                                                               /// execute rebin
+                                                               /// algorithms
   RebinnedSourcesManager
-      m_rebinnedSourcesManager;          ///<Holds the rebinned sources manager
+      m_rebinnedSourcesManager;          ///< Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary
-  /// workspaces
-  ColorMapEditorPanel *
-      m_colorMapEditorPanel; ///< Holder for the color map editor panel.
-  bool m_gridAxesStartUpOn;  /// flag for the initial grid axes setting
+                                         /// workspaces
+  ColorMapEditorPanel
+      *m_colorMapEditorPanel; ///< Holder for the color map editor panel.
+  bool m_gridAxesStartUpOn;   /// flag for the initial grid axes setting
   Mantid::VATES::ColorScaleLock
       m_colorScaleLock; ///< Holds a color scale lock object
 
@@ -293,8 +291,8 @@ private:
   void setActiveObjects(pqView *view, pqPipelineSource *source);
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // MDVIEWERWIDGET_H_

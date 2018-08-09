@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Unit.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/Unit.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
 namespace Mantid {
@@ -48,7 +48,7 @@ enum ConvertUnits {
   ConvertByTOF,  //< conversion possible via TOF
   ConvertFromTOF //< Input workspace units are the TOF
 };
-}
+} // namespace CnvrtToMD
 class DLLExport UnitsConversionHelper {
   // variables for units conversion:
   // pointer to input workspace units
@@ -94,7 +94,7 @@ protected: // for testing
                                                  bool forceViaTOF = false);
 };
 
-} // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

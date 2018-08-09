@@ -131,7 +131,7 @@ private:
   /// Flag if the derivateive method is overridden (avoids multiple checks)
   bool m_derivOveridden;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_IFUNCTIONADAPTER_H_ */

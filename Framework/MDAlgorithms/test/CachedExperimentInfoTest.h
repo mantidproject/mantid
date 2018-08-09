@@ -1,20 +1,20 @@
 #ifndef OBSERVATIONTEST_H_
 #define OBSERVATIONTEST_H_
 
-#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
-#include "MantidKernel/DeltaEMode.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
-using Mantid::MDAlgorithms::CachedExperimentInfo;
 using Mantid::Kernel::DeltaEMode;
 using Mantid::Kernel::V3D;
+using Mantid::MDAlgorithms::CachedExperimentInfo;
 
 class CachedExperimentInfoTest : public CxxTest::TestSuite {
 

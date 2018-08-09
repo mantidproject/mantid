@@ -3,17 +3,17 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidKernel/UnitLabelTypes.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -93,8 +93,8 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the CentroidPeaksMD2 with the given peak radius param */
-  void doRun(V3D startPos, double PeakRadius, V3D expectedResult,
-             std::string message,
+  void doRun(V3D startPos, double PeakRadius, double binCount,
+             V3D expectedResult, std::string message,
              std::string OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst =
@@ -145,6 +145,7 @@ public:
       result = p.getQSampleFrame();
     } else if (CoordinatesToUse == "HKL")
       result = p.getHKL();
+    TSM_ASSERT_DELTA(message, p.getBinCount(), binCount, 0.05);
 
     for (size_t i = 0; i < 3; i++)
       TSM_ASSERT_DELTA(message, result[i], expectedResult[i], 0.05);
@@ -169,28 +170,30 @@ public:
 
     if (CoordinatesToUse == "HKL") {
       mdews->setCoordinateSystem(Mantid::Kernel::HKL);
-      doRun(V3D(0., 0., 0.), 1.0, V3D(0., 0., 0.),
+      doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.),
             "Start at the center, get the center");
 
-      doRun(V3D(0.2, 0.2, 0.2), 1.8, V3D(0., 0., 0.), "Somewhat off center");
+      doRun(V3D(0.2, 0.2, 0.2), 1.8, 1000., V3D(0., 0., 0.),
+            "Somewhat off center");
     } else if (CoordinatesToUse == "Q (lab frame)") {
       mdews->setCoordinateSystem(Mantid::Kernel::QLab);
     } else if (CoordinatesToUse == "Q (sample frame)") {
       mdews->setCoordinateSystem(Mantid::Kernel::QSample);
     }
 
-    doRun(V3D(2., 3., 4.), 1.0, V3D(2., 3., 4.),
+    doRun(V3D(2., 3., 4.), 1.0, 1000., V3D(2., 3., 4.),
           "Start at the center, get the center");
 
-    doRun(V3D(1.5, 2.5, 3.5), 3.0, V3D(2., 3., 4.), "Pretty far off");
+    doRun(V3D(1.5, 2.5, 3.5), 3.0, 1000., V3D(2., 3., 4.), "Pretty far off");
 
-    doRun(V3D(1.0, 1.5, 2.0), 4.0, V3D(1.0, 1.5, 2.0),
+    doRun(V3D(1.0, 1.5, 2.0), 4.0, 2000., V3D(1.0, 1.5, 2.0),
           "Include two peaks, get the centroid of the two");
 
-    doRun(V3D(8.0, 0.0, 1.0), 1.0, V3D(8.0, 0.0, 1.0),
+    doRun(V3D(8.0, 0.0, 1.0), 1.0, 0., V3D(8.0, 0.0, 1.0),
           "Include no events, get no change");
 
-    doRun(V3D(6., 6., 6.), 0.1, V3D(6., 6., 6.), "Small radius still works");
+    doRun(V3D(6., 6., 6.), 0.1, 0., V3D(6., 6., 6.),
+          "Small radius still works");
 
     AnalysisDataService::Instance().remove("CentroidPeaksMD2Test_MDEWS");
   }
@@ -214,7 +217,7 @@ public:
     CoordinatesToUse = "HKL";
     createMDEW(CoordinatesToUse);
     addPeak(1000, 0, 0., 0., 1.0);
-    doRun(V3D(0., 0., 0.), 1.0, V3D(0., 0., 0.),
+    doRun(V3D(0., 0., 0.), 1.0, 1000., V3D(0., 0., 0.),
           "Start at the center, get the center",
           "CentroidPeaksMD2Test_MDEWS_outputCopy");
   }

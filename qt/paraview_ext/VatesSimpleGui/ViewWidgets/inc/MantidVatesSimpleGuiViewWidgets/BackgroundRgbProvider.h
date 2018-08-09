@@ -1,11 +1,11 @@
 #ifndef BACKGROUNDRGB_PROVIDER_H_
 #define BACKGROUNDRGB_PROVIDER_H_
 
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
-#include <vector>
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include <map>
 #include <string>
+#include <vector>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning disable 1170
@@ -77,12 +77,12 @@ public:
 
 private:
   /**
-  * Get the Rgb values for the color of the view's background from the user
-  * setting.
-  * @param useCurrentBackgroundColor Is this the initial loading or were the
-  * views switched?
-  * @returns A vector with the RGB values
-  */
+   * Get the Rgb values for the color of the view's background from the user
+   * setting.
+   * @param useCurrentBackgroundColor Is this the initial loading or were the
+   * views switched?
+   * @returns A vector with the RGB values
+   */
   std::vector<double> getRgbFromSetting(bool useCurrentBackgroundColor);
 
   /**
@@ -110,7 +110,7 @@ private:
 
   MantidQt::API::MdSettings m_mdSettings;
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif

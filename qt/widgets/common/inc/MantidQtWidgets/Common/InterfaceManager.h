@@ -8,9 +8,9 @@
 //#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 
+#include <QHash>
 #include <QString>
 #include <QStringList>
-#include <QHash>
 
 //----------------------------------
 // Qt Forward declarations
@@ -24,7 +24,7 @@ namespace Mantid {
 namespace API {
 class IAlgorithm;
 }
-}
+} // namespace Mantid
 
 // Top level namespace for this library
 namespace MantidQt {
@@ -152,14 +152,14 @@ public:
 
 private:
   /// Handle to the Vates simple user interface factory
-  static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *
-      m_vatesGuiFactory;
+  static Mantid::Kernel::AbstractInstantiator<VatesViewerInterface>
+      *m_vatesGuiFactory;
   /// Handle to the help window factory
-  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *
-      m_helpViewer;
+  static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
+      *m_helpViewer;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 /*
  * Used to register Vates GUI

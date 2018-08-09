@@ -1,20 +1,20 @@
 #ifndef LOADSNSNEXUSTEST_H_
 #define LOADSNSNEXUSTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidNexus/LoadSNSNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/LoadSNSNexus.h"
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::NeXus;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceGroup.h"
+#include <cxxtest/TestSuite.h>
 
 class LoadSNSNexusTest : public CxxTest::TestSuite {
 public:

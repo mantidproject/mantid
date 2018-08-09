@@ -1,30 +1,30 @@
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
-#include "MantidVatesAPI/Common.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/scoped_ptr.hpp>
 
-#include <vtkPVChangeOfBasisHelper.h>
-#include <vtkFieldData.h>
 #include <vtkDataSet.h>
+#include <vtkFieldData.h>
+#include <vtkPVChangeOfBasisHelper.h>
 
 namespace {
 Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
@@ -299,5 +299,5 @@ std::string MDHWLoadingPresenter::getTimeStepLabel() const {
 const std::string &MDHWLoadingPresenter::getInstrument() {
   return m_metadataJsonManager->getInstrument();
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

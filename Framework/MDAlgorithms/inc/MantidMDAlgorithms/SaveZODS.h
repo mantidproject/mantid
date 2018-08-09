@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_SAVEZODS_H_
 #define MANTID_MDALGORITHMS_SAVEZODS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

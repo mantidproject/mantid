@@ -1,5 +1,5 @@
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/ExtractMonitorWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {

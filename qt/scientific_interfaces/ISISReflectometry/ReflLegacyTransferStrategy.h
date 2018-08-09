@@ -45,7 +45,7 @@ public:
 private:
   ReflLegacyTransferStrategy *doClone() const override;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

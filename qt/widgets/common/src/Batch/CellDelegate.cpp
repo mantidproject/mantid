@@ -37,6 +37,6 @@ void CellDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
   painter->drawRect(option.rect.adjusted(1, 1, -1, -1));
   painter->restore();
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

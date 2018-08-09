@@ -5,25 +5,25 @@ namespace Mantid {
 namespace Kernel {
 
 /** Constructor
-* @param otherPropName :: Name of the OTHER property that we will check.
-* @param when :: Criterion to evaluate
-* @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
-* (as string) to check for
-*/
+ * @param otherPropName :: Name of the OTHER property that we will check.
+ * @param when :: Criterion to evaluate
+ * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
+ * (as string) to check for
+ */
 VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
                                          ePropertyCriterion when,
                                          std::string value)
     : EnabledWhenProperty(otherPropName, when, value) {}
 
 /** Multiple conditions constructor - takes two  VisibleWhenProperty
-* objects and returns the product of them with the specified logic operator.
-*
-* @param conditionOne :: First VisibleWhenProperty object to use
-* @param conditionTwo :: Second VisibleWhenProperty object to use
-* @param logicOperator :: The logic operator to apply across both
-*conditions
-*
-*/
+ * objects and returns the product of them with the specified logic operator.
+ *
+ * @param conditionOne :: First VisibleWhenProperty object to use
+ * @param conditionTwo :: Second VisibleWhenProperty object to use
+ * @param logicOperator :: The logic operator to apply across both
+ *conditions
+ *
+ */
 VisibleWhenProperty::VisibleWhenProperty(
     const VisibleWhenProperty &conditionOne,
     const VisibleWhenProperty &conditionTwo, eLogicOperator logicOperator)
@@ -34,15 +34,15 @@ VisibleWhenProperty::VisibleWhenProperty(
                           logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to
-* VisibleWhenProperty objects and returns the product of them
-* with the specified logic operator.
-*
-* @param conditionOne :: First VisibleWhenProperty object to use
-* @param conditionTwo :: Second VisibleWhenProperty object to use
-* @param logicOperator :: The logic operator to apply across both
-*conditions
-*
-*/
+ * VisibleWhenProperty objects and returns the product of them
+ * with the specified logic operator.
+ *
+ * @param conditionOne :: First VisibleWhenProperty object to use
+ * @param conditionTwo :: Second VisibleWhenProperty object to use
+ * @param logicOperator :: The logic operator to apply across both
+ *conditions
+ *
+ */
 VisibleWhenProperty::VisibleWhenProperty(
     std::shared_ptr<VisibleWhenProperty> &&conditionOne,
     std::shared_ptr<VisibleWhenProperty> &&conditionTwo,
@@ -54,13 +54,13 @@ VisibleWhenProperty::VisibleWhenProperty(
                                                      logicOperator})} {}
 
 /**
-* Checks if the user specified combination of visible criterion
-* returns a true or false value
-*
-* @param algo :: Pointer to the algorithm containing the property
-* @return true if user specified combination was true.
-* @throw If any problems was found
-*/
+ * Checks if the user specified combination of visible criterion
+ * returns a true or false value
+ *
+ * @param algo :: Pointer to the algorithm containing the property
+ * @return true if user specified combination was true.
+ * @throw If any problems was found
+ */
 bool VisibleWhenProperty::checkComparison(const IPropertyManager *algo) const {
   const auto &comparison = m_comparisonDetails;
   const auto &objectOne = comparison->conditionOne;
@@ -82,25 +82,25 @@ bool VisibleWhenProperty::checkComparison(const IPropertyManager *algo) const {
 }
 
 /**
-  * Returns true always in VisibleWhenProperty as we only consider
-  * visibility case
-  *
-  * @param algo :: The pointer to the algorithm containing this property
-  * @return :: True - Property is always enabled
-  */
+ * Returns true always in VisibleWhenProperty as we only consider
+ * visibility case
+ *
+ * @param algo :: The pointer to the algorithm containing this property
+ * @return :: True - Property is always enabled
+ */
 bool VisibleWhenProperty::isEnabled(const IPropertyManager *algo) const {
   UNUSED_ARG(algo);
   return true;
 }
 
 /**
-  * Returns true or false depending on whether the property
-  * or combination of properties specified satisfies the criterion
-  *
-  * @param algo :: Pointer to the algorithm containing the property
-  * @return :: True if conditions satisfied else false
-  * @throw :: On an error condition such as property not being found
-  */
+ * Returns true or false depending on whether the property
+ * or combination of properties specified satisfies the criterion
+ *
+ * @param algo :: Pointer to the algorithm containing the property
+ * @return :: True if conditions satisfied else false
+ * @throw :: On an error condition such as property not being found
+ */
 bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
   if (m_propertyDetails) {
     return checkCriterion(algo);
@@ -113,15 +113,15 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
 }
 
 /**
-  * Clones the current VisibleWhenProperty object and returns
-  * a pointer to the new object. The caller is responsible
-  * for deleting this pointer when finished
-  *
-  * @return Pointer to cloned VisisbleWhenProperty object
-  */
+ * Clones the current VisibleWhenProperty object and returns
+ * a pointer to the new object. The caller is responsible
+ * for deleting this pointer when finished
+ *
+ * @return Pointer to cloned VisisbleWhenProperty object
+ */
 IPropertySettings *VisibleWhenProperty::clone() const {
   return new VisibleWhenProperty(*this);
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

@@ -126,7 +126,7 @@ protected: // for testing, otherwise private:
   void setupTopLevelSplitting(Mantid::API::BoxController_sptr bc);
 };
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

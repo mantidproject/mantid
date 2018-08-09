@@ -11,7 +11,7 @@
 namespace Poco {
 class AbstractObserver;
 template <class T> class ActiveResult;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace API {

@@ -18,7 +18,7 @@ namespace Kernel {
 namespace {
 // Static logger object
 Logger g_log("DllOpen");
-}
+} // namespace
 
 // -----------------------------------------------------------------------------
 // Windows-specific implementations

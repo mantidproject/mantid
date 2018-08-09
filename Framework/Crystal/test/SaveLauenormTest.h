@@ -1,18 +1,18 @@
 #ifndef MANTID_CRYSTAL_SAVELauenormTEST_H_
 #define MANTID_CRYSTAL_SAVELauenormTEST_H_
 
-#include "MantidCrystal/SaveLauenorm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SaveLauenorm.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

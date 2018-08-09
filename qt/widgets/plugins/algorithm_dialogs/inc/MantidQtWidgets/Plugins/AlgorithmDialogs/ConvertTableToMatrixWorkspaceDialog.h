@@ -69,7 +69,7 @@ private:
   /// Form
   Ui::ConvertTableToMatrixWorkspaceDialog m_form;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOM_DIALOGS_CONVERTTABLETOMATRIXWORKSPACEDIALOG_H
