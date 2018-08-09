@@ -13,22 +13,11 @@ class LModel(object):
     def __init__(self):
         self.run = 0
         self.loaded_runs = {}
-        self.alg = None
 
     def _load(self, inputs):
         """ inputs is a dict mapping filepaths to output names """
-        if self.alg is not None:
-            raise RuntimeError("Loading already in progress")
-        self.alg = mantid.AlgorithmManager.create("LoadAscii")
-        self.alg.initialize()
-        self.alg.setAlwaysStoreInADS(False)
         for path, output in iteritems(inputs):
-            self.alg.setProperty("Filename", path)
-            self.alg.setProperty("OutputWorkspace", output)
-            self.alg.execute()
-            mantid.AnalysisDataService.addOrReplace(
-                output, self.alg.getProperty("OutputWorkspace").value)
-        self.alg = None
+            mantid.LoadAscii(path, OutputWorkspace=output)
 
     def load_run(self):
         to_load = search_user_dirs(self.run)
@@ -45,8 +34,7 @@ class LModel(object):
         return
 
     def cancel(self):
-        if self.alg is not None:
-            self.alg.cancel()
+        return
 
     def loadData(self, inputs):
         return
