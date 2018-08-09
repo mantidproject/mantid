@@ -63,7 +63,9 @@ void LoadEmptyNexusGeometry::init() {
  */
 void LoadEmptyNexusGeometry::exec() {
   std::string fileName = getProperty("Filename");
+  Progress prog(this, 0.0, 1.0, 10);
 
+  prog.reportIncrement(0, "Loading geometry from file");
   auto instrument =
       NexusGeometry::NexusGeometryParser::createInstrument(fileName);
 
@@ -77,17 +79,20 @@ void LoadEmptyNexusGeometry::exec() {
         "No detectors found in instrument");
   }
 
+  prog.reportIncrement(3, "Building in-memory cache");
   std::vector<Mantid::Indexing::SpectrumNumber> spectrumNumbers(number_spectra);
   std::iota(spectrumNumbers.begin(), spectrumNumbers.end(),
             0 /*starting spectrum number*/);
   Indexing::IndexInfo indexInfo(spectrumNumbers);
 
+  prog.reportIncrement(7, "Building spectrum definitions");
   size_t detIndex = 0;
   std::vector<SpectrumDefinition> spectrumDefinitions(number_spectra);
   std::generate(spectrumDefinitions.begin(), spectrumDefinitions.end(),
                 [&]() { return SpectrumDefinition(detIndex++); });
   indexInfo.setSpectrumDefinitions(spectrumDefinitions);
 
+  prog.reportIncrement(9, "Creating empty workspace.");
   auto workspace = create<Workspace2D>(
       std::move(instrument), indexInfo,
       Histogram(BinEdges{0.0, 1.0}, Counts{}, CountStandardDeviations{}));
