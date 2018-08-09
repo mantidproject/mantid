@@ -12,6 +12,12 @@ The Mantid framework is configured using up to three simple text ``*.properties`
 2. ``/etc/mantid.local.properties`` is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the ``default.facility``, ``default.instrument``, and ``datasearch.searcharchive`` properties.
 3. Home directory ``Mantid.user.properties`` is where users may override any property setting in Mantid. Any Property setting in this file will override anything set in the ``Mantid.properties`` file. Simply either enter the property you wish to override in this file together with it's new value. The change will take effect the next time Mantid is started. Subsequent installs or upgrades of Mantid will never alter this file.
 
+The user properties file, ``Mantid.user.properties``, can be found
+
+* windows: ``$MantidInstallDirectory\bin\Mantid.user.properties``
+* linux and mac-os: ``$HOME/.mantid/Mantid.user.properties``
+
+
 The Properties
 --------------
 
@@ -116,36 +122,22 @@ you may want to alter and those properties are detailed below.
 +-------------------------------------------------+---------------------------------------------------+-----------------------------+
 |Property                                         |Description                                        |Example value                |
 +=================================================+===================================================+=============================+
-| ``logging.loggers.root.level``                  |Defines the lowest level of messages to be output  | ``debug``, ``information``, |
-|                                                 |by the system, and will override lower settings in | ``notice``, ``warning``,    |
-|                                                 |filterChannels. The default is information, but    | ``error``, ``critical``     |
+| ``logging.loggers.root.level``                  |Defines the level of messages to be output         | ``debug``, ``information``, |
+|                                                 |by the system.                                     | ``notice``, ``warning``,    |
+|                                                 |The default is information, but                    | ``error``, ``critical``     |
 |                                                 |this can be lowered to debug for more detailed     | or ``fatal``                |
 |                                                 |feedback.                                          |                             |
 |                                                 |                                                   |                             |
 +-------------------------------------------------+---------------------------------------------------+-----------------------------+
-| ``logging.channels.fileFilterChannel.level``    | The lowest level messages to output to the log    | ``debug``, ``information``, |
-|                                                 | file. The default is warning, but this can be     | ``notice``, ``warning``,    |
-|                                                 | lowered to debug for more detailed feedback. The  | ``error``, ``critical``     |
-|                                                 | higher level of this and                          | or ``fatal``                |
-|                                                 | ``logging.loggers.root.level`` will apply.        |                             |
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
-| ``logging.channels.consoleFilterChannel.level`` | The lowest level messages to output to the        | ``debug``, ``information``, |
-|                                                 | console. The default is warning, but this can be  | ``notice``, ``warning``,    |
-|                                                 | lowered to debug for more detailed feedback. The  | ``error``, ``critical``     |
-|                                                 | higher level of this and                          | or ``fatal``                |
-|                                                 | ``logging.loggers.root.level`` will apply.        |                             |
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
-| ``logging.channels.fileChannel.path``           | The Path to the log file.                         | ``../logs/mantid.log``      |
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
 
-The logging priority levels for the file logging and console logging can also be adjusted in python using the commands:
+The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
 
 .. testcode:: LoggingConfigExample
 
-  #Set the console to log at debug level on above (7=debug)
-  ConfigService.setConsoleLogLevel(7)
-  #Set the file to only log at critical level (2=critical)
-  ConfigService.setConsoleLogLevel(2)
+  #Set the log to debug level or above (7=debug)
+  ConfigService.setLogLevel(7)
+  #Set the log to critical level (2=critical)
+  ConfigService.setLogLevel(2)
 
 
 
@@ -212,6 +204,22 @@ ScriptRepository Properties
 | ``ScriptRepositoryIgnore`` |CSV patterns for paths that should not be      | ``*pyc;``                                                            |
 |                            |listed at ScriptRepository.                    |                                                                      |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
+
+
+Project Recovery
+****************
+
+See :ref:`project recovery <Project Recovery>` for more details.
+
++-----------------------------------------+-----------------------------------------------+------------------+
+|Property                                 |Description                                    |Example value     |
++=========================================+===============================================+==================+
+| ``projectRecovery.enabled``             |Whether project recovery is enabled            |  ``On``, ``Off`` |
++-----------------------------------------+-----------------------------------------------+------------------+
+| ``projectRecovery.numberOfCheckpoints`` |How many checkpoints/backups to keep           | ``5``            |
++-----------------------------------------+-----------------------------------------------+------------------+
+| ``projectRecovery.secondsBetween``      |How often to save checkpoints in seconds       | ``60``           |
++-----------------------------------------+-----------------------------------------------+------------------+
 
 
 Getting access to Mantid properties

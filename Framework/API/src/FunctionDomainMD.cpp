@@ -10,11 +10,11 @@ namespace Mantid {
 namespace API {
 
 /**
-  * Create a domain form a IMDWorkspace.
-  * @param ws :: Pointer to a workspace.
-  * @param start :: Index of the first iterator in this domain.
-  * @param length :: Size of this domain. If 0 use all workspace.
-  */
+ * Create a domain form a IMDWorkspace.
+ * @param ws :: Pointer to a workspace.
+ * @param start :: Index of the first iterator in this domain.
+ * @param length :: Size of this domain. If 0 use all workspace.
+ */
 FunctionDomainMD::FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start,
                                    size_t length)
     : m_iterator(ws->createIterator()), m_startIndex(start), m_currentIndex(0),

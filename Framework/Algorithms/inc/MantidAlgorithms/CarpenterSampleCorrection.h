@@ -42,9 +42,12 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"CalculateCarpenterSampleCorrection", "CylinderAbsorption",
-            "MonteCarloAbsorption", "MayersSampleCorrection",
-            "PearlMCAbsorption", "VesuvioCalculateMS"};
+    return {"CalculateCarpenterSampleCorrection",
+            "CylinderAbsorption",
+            "MonteCarloAbsorption",
+            "MayersSampleCorrection",
+            "PearlMCAbsorption",
+            "VesuvioCalculateMS"};
   }
 
   /// Algorithm's category for identification overriding a virtual method
@@ -77,7 +80,7 @@ private:
                                   const API::MatrixWorkspace_sptr rhsWS);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_*/

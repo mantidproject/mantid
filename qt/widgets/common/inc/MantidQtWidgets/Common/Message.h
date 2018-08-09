@@ -50,8 +50,8 @@ private:
   QString m_text;
   Priority m_priority;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 /// Required to operate in signals/slots
 Q_DECLARE_METATYPE(MantidQt::MantidWidgets::Message)

@@ -1,20 +1,20 @@
 #ifndef DIFFRACTIONFOCUSSING2TEST_H_
 #define DIFFRACTIONFOCUSSING2TEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidAlgorithms/Rebin.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/cow_ptr.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

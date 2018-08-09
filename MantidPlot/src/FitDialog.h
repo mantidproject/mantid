@@ -30,8 +30,8 @@
 #define FITDIALOG_H
 
 #include "Graph.h"
-#include <QDoubleSpinBox>
 #include <QCheckBox>
+#include <QDoubleSpinBox>
 
 class QPushButton;
 class QLineEdit;

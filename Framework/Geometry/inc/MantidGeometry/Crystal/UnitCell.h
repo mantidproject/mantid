@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_UNITCELL_H_
 #define MANTID_GEOMETRY_UNITCELL_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
@@ -192,7 +192,7 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &out,
 MANTID_GEOMETRY_DLL UnitCell strToUnitCell(const std::string &unitCellString);
 MANTID_GEOMETRY_DLL std::string unitCellToStr(const UnitCell &unitCell);
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_UNITCELL_H_ */

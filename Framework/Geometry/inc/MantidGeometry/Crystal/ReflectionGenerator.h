@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_REFLECTIONGENERATOR_H_
 #define MANTID_GEOMETRY_REFLECTIONGENERATOR_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
-#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 #include "MantidGeometry/Crystal/HKLFilter.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {

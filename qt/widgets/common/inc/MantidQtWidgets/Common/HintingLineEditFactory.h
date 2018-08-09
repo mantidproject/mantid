@@ -1,12 +1,12 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 
-#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace MantidQt {
@@ -64,7 +64,7 @@ public:
 protected:
   boost::scoped_ptr<HintStrategy> m_strategy;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H */

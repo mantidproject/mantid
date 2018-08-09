@@ -1,10 +1,10 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_LOGVALUESELECTOR_H_
 #define MANTIDQT_MANTIDWIDGETS_LOGVALUESELECTOR_H_
 
-#include "ui_LogValueSelector.h"
 #include "DllOption.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "ui_LogValueSelector.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -11,7 +11,7 @@ namespace API {
 class IFunction;
 class FunctionDomain1D;
 class FunctionValues;
-}
+} // namespace API
 
 namespace CurveFitting {
 namespace ParameterEstimator {

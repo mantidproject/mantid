@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 #include <QComboBox>
 #include <QLabel>
 
@@ -69,5 +69,5 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
   if (index >= 0)
     m_combo->setCurrentIndex(index);
 }
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

@@ -48,5 +48,5 @@ void PowerMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   out->power(exponent);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

@@ -1,11 +1,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_ALCBASELINEMODELLINGMODEL_H_
 #define MANTID_CUSTOMINTERFACES_ALCBASELINEMODELLINGMODEL_H_
 
-#include "MantidKernel/System.h"
 #include "DllConfig.h"
+#include "MantidKernel/System.h"
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "IALCBaselineModellingModel.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

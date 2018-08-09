@@ -1,9 +1,9 @@
 #ifndef SOFQWCENTRETEST_H_
 #define SOFQWCENTRETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQWCentre.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/SofQWCentre.h"
+#include <cxxtest/TestSuite.h>
 
 #include "SofQWTest.h"
 

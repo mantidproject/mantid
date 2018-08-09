@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>

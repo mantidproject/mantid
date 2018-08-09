@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/Resolution.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Functions/Resolution.h"
 #include <Poco/File.h>
 
 #include <fstream>

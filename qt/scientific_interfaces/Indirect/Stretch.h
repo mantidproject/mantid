@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_STRETCH_H_
 #define MANTIDQTCUSTOMINTERFACES_STRETCH_H_
 
-#include "ui_Stretch.h"
 #include "IndirectBayesTab.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "ui_Stretch.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

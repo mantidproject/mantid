@@ -3,8 +3,8 @@
 namespace Mantid {
 namespace API {
 /**
-* Default constructor
-*/
+ * Default constructor
+ */
 InstrumentDataServiceImpl::InstrumentDataServiceImpl()
     : Mantid::Kernel::DataService<Mantid::Geometry::Instrument>(
           "InstrumentDataService") {}

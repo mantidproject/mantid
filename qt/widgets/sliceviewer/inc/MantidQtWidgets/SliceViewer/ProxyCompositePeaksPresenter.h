@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
-#include <boost/shared_ptr.hpp>
 #include <QObject>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -99,7 +99,7 @@ private:
   /// Register an assoicated view.
   UpdateableOnDemand *m_updateableView;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

@@ -19,7 +19,7 @@ using namespace Mantid::Geometry;
 namespace {
 const double OFFSET = .1;
 const int NUM_SPEC = 3;
-}
+} // namespace
 
 class CalculateDIFCTest : public CxxTest::TestSuite {
 public:

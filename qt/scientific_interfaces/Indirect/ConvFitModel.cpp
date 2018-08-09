@@ -302,7 +302,7 @@ IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
 }
 
 struct AddSampleLogRunner {
-  AddSampleLogRunner(MatrixWorkspace_sptr resultWorkspace,
+  AddSampleLogRunner(Workspace_sptr resultWorkspace,
                      WorkspaceGroup_sptr resultGroup)
       : m_resultWorkspace(resultWorkspace), m_resultGroup(resultGroup) {}
 
@@ -313,13 +313,13 @@ struct AddSampleLogRunner {
   }
 
 private:
-  MatrixWorkspace_sptr m_resultWorkspace;
+  Workspace_sptr m_resultWorkspace;
   WorkspaceGroup_sptr m_resultGroup;
 };
 
 std::vector<std::string>
-getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>> &
-             workspaces) {
+getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
+             &workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size());
   std::transform(workspaces.begin(), workspaces.end(),
@@ -405,7 +405,7 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString;
+    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Result";
   return createOutputName(
       "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", 0);
 }
@@ -584,7 +584,7 @@ void ConvFitModel::addSampleLogs() {
 
 IndirectFitOutput ConvFitModel::createFitOutput(
     WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    MatrixWorkspace_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
+    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
     const FitDataIterator &fitDataEnd) const {
   auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
                                   fitDataBegin, fitDataEnd);
@@ -595,7 +595,7 @@ IndirectFitOutput ConvFitModel::createFitOutput(
 IndirectFitOutput
 ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
                               Mantid::API::ITableWorkspace_sptr parameterTable,
-                              Mantid::API::MatrixWorkspace_sptr resultWorkspace,
+                              Mantid::API::WorkspaceGroup_sptr resultWorkspace,
                               IndirectFitData *fitData,
                               std::size_t spectrum) const {
   auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
@@ -612,7 +612,7 @@ void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
-                             MatrixWorkspace_sptr resultWorkspace,
+                             WorkspaceGroup_sptr resultWorkspace,
                              const FitDataIterator &fitDataBegin,
                              const FitDataIterator &fitDataEnd) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
@@ -624,7 +624,7 @@ void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
 void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
                              WorkspaceGroup_sptr resultGroup,
                              ITableWorkspace_sptr parameterTable,
-                             MatrixWorkspace_sptr resultWorkspace,
+                             WorkspaceGroup_sptr resultWorkspace,
                              IndirectFitData *fitData,
                              std::size_t spectrum) const {
   fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,

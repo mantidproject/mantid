@@ -3,18 +3,18 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 
-using Mantid::PythonInterface::Registry::createPropertyManager;
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::PropertyManager;
 using Mantid::Kernel::PropertyManager_sptr;
+using Mantid::PythonInterface::Registry::createPropertyManager;
 
 using namespace boost::python;
 

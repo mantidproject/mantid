@@ -210,20 +210,40 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
     TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(1)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[3], 0.0, 1e-14);
 
     TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(2)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(3)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[3], 0.0, 1e-14);
   }
 
   void test_Wildes() {
@@ -261,20 +281,111 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
     TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
     TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(1)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[3], 0.0, 1e-14);
 
     TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
     TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
 
+    TS_ASSERT_DELTA(outWS->e(2)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[3], 0.0, 1e-14);
+
     TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
     TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(3)[0], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[1], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[2], 0.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[3], 0.0, 1e-14);
+  }
+
+  void test_Wildes_errors() {
+    auto workspace = createInputWorkspace("Wildes", "1 2 3 4", false, true);
+
+    ExtractPolarizationEfficiencies alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "dummy");
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 4);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Wavelength");
+
+    auto axis1 = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(axis1->label(0), "P1");
+    TS_ASSERT_EQUALS(axis1->label(1), "P2");
+    TS_ASSERT_EQUALS(axis1->label(2), "F1");
+    TS_ASSERT_EQUALS(axis1->label(3), "F2");
+
+    TS_ASSERT(!outWS->isHistogramData());
+
+    TS_ASSERT_DELTA(outWS->x(0)[0], 1.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[1], 2.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[2], 3.0, 1e-14);
+    TS_ASSERT_DELTA(outWS->x(0)[3], 4.0, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.991, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[1], 0.992, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[2], 0.993, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(0)[3], 0.994, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.1, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[1], 0.2, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[2], 0.3, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(0)[3], 0.4, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(1)[0], 0.981, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[1], 0.982, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[2], 0.983, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(1)[3], 0.984, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(1)[0], 0.11, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[1], 0.21, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[2], 0.31, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(1)[3], 0.41, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(2)[0], 0.971, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[1], 0.972, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[2], 0.973, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(2)[3], 0.974, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(2)[0], 0.12, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[1], 0.22, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[2], 0.32, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(2)[3], 0.42, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->y(3)[0], 0.961, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[1], 0.962, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[2], 0.963, 1e-14);
+    TS_ASSERT_DELTA(outWS->y(3)[3], 0.964, 1e-14);
+
+    TS_ASSERT_DELTA(outWS->e(3)[0], 0.13, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[1], 0.23, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[2], 0.33, 1e-14);
+    TS_ASSERT_DELTA(outWS->e(3)[3], 0.43, 1e-14);
   }
 
   void test_loading_from_file() {
@@ -392,7 +503,7 @@ public:
     alg.setProperty("OutputWorkspace", "dummy");
     TS_ASSERT_THROWS_EQUALS(
         alg.execute(), std::runtime_error & e, std::string(e.what()),
-        "Instrument vector parameter \"P1\" is expeced to be the same size as "
+        "Instrument vector parameter \"P1\" is expected to be the same size as "
         "\"efficiency_lambda\" but 4 != 3");
   }
 
@@ -410,7 +521,7 @@ private:
   MatrixWorkspace_sptr
   createInputWorkspace(std::string const &method,
                        std::string const &lambda = "1 2 3 4",
-                       bool skipP1 = false) {
+                       bool skipP1 = false, bool loadErrors = false) {
     auto workspace = createPointWS(1, 0, 10);
     auto pmap = boost::make_shared<ParameterMap>();
     auto instrument = boost::make_shared<Instrument>();
@@ -430,10 +541,18 @@ private:
                       "00,01,10,11");
       if (!skipP1) {
         pmap->addString(instrument.get(), "P1", "0.991 0.992 0.993 0.994");
+        if (loadErrors) {
+          pmap->addString(instrument.get(), "P1_Errors", "0.1 0.2 0.3 0.4");
+        }
       }
       pmap->addString(instrument.get(), "P2", "0.981 0.982 0.983 0.984");
       pmap->addString(instrument.get(), "F1", "0.971 0.972 0.973 0.974");
       pmap->addString(instrument.get(), "F2", "0.961 0.962 0.963 0.964");
+      if (loadErrors) {
+        pmap->addString(instrument.get(), "P2_Errors", "0.11 0.21 0.31 0.41");
+        pmap->addString(instrument.get(), "F1_Errors", "0.12 0.22 0.32 0.42");
+        pmap->addString(instrument.get(), "F2_Errors", "0.13 0.23 0.33 0.43");
+      }
     }
 
     instrument = boost::make_shared<Instrument>(instrument, pmap);

@@ -80,7 +80,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsLegacyQwt
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../../${LIB_DIR}"
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 ###########################################################################
