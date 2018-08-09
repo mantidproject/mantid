@@ -5,9 +5,11 @@ import mantid
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines.instrument_settings import InstrumentSettings
 from isis_powder.routines.param_map_entry import ParamMapEntry
-from isis_powder.routines import run_details
+from isis_powder.routines import  common, run_details, yaml_parser
 
 import os
+import random
+import string
 import tempfile
 import unittest
 import warnings
@@ -30,11 +32,13 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
             self.fail("Could not find file \"{}\"".format(name))
         return full_path
 
-    def _setup_mock_inst(self, calibration_dir, output_dir, suffix=None):
+    def _setup_mock_inst(self, yaml_file_path, calibration_dir, output_dir, suffix=None):
         calib_file_path = self._find_file_or_die(self.CALIB_FILE_NAME)
         grouping_file_path = self._find_file_or_die(self.GROUPING_FILE_NAME)
-
-        return _MockInst(group_file=grouping_file_path, cal_dir=calibration_dir,
+        test_configuration_path = mantid.api.FileFinder.getFullPath(yaml_file_path)
+        if not test_configuration_path or len(test_configuration_path) <= 0:
+            self.fail("Could not find the unit test input file called: " + str(yaml_file_path))
+        return _MockInst(cal_file_path=test_configuration_path, group_file=grouping_file_path, cal_dir=calibration_dir,
                          out_dir=output_dir, cal_map=calib_file_path, suffix=suffix)
 
     def tearDown(self):
@@ -49,11 +53,24 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         cal_dir = self._create_temp_dir()
         out_dir = self._create_temp_dir()
 
-        mock_inst = self._setup_mock_inst(suffix="-suf", calibration_dir=cal_dir, output_dir=out_dir)
+        mock_inst = self._setup_mock_inst(suffix="-suf", yaml_file_path="ISISPowderRunDetailsTest.yaml",
+                                          calibration_dir=cal_dir, output_dir=out_dir)
         run_number = 15
+        run_number2 = common.get_first_run_number(run_number_string=run_number)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number2,
+                                                          file_path=mock_inst.cal_mapping_path)
+
+        grouping_filename = _gen_random_string()
+        empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="empty_run_numbers")
+        vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_mapping_dict, key="vanadium_run_numbers")
+
         run_details_obj = run_details.create_run_details_object(run_number_string=run_number,
                                                                 inst_settings=mock_inst._inst_settings,
-                                                                is_vanadium_run=False)
+                                                                is_vanadium_run=False,
+                                                                grouping_file_name=grouping_filename,
+                                                                empty_run_number=empty_runs,
+                                                                vanadium_string=vanadium_runs)
+
         output_paths = mock_inst._generate_out_file_paths(run_details=run_details_obj)
 
         expected_nxs_filename = os.path.join(out_dir,
@@ -66,7 +83,9 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         # Setup basic instrument mock
         cal_dir = self._create_temp_dir()
         out_dir = self._create_temp_dir()
-        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir)
+        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir,
+                                          yaml_file_path="ISISPowderRunDetailsTest.yaml"
+                                          )
 
         # Test valid parameters are retained
         mock_inst.set_beam_parameters(height=1.234, width=2)
@@ -77,7 +96,8 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         # Setup basic instrument mock
         cal_dir = self._create_temp_dir()
         out_dir = self._create_temp_dir()
-        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir)
+        mock_inst = self._setup_mock_inst(calibration_dir=cal_dir, output_dir=out_dir,
+                                          yaml_file_path="ISISPowderRunDetailsTest.yaml")
 
         # Test combination of positive / negative raise exceptions
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=1.234, width=-2)
@@ -87,6 +107,10 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         # Test non-numerical input
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height='height', width=-2)
         self.assertRaises(ValueError, mock_inst.set_beam_parameters, height=-1.234, width=True)
+
+
+def _gen_random_string():
+    return ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
 
 
 class _MockInst(AbstractInst):
@@ -103,10 +127,11 @@ class _MockInst(AbstractInst):
     _advanced_config = {"user_name": "ISISPowderAbstractInstrumentTest"}
     INST_PREFIX = "MOCK"
 
-    def __init__(self, **kwargs):
+    def __init__(self, cal_file_path, **kwargs):
         self._inst_settings = InstrumentSettings(param_map=self._param_map,
                                                  adv_conf_dict=self._advanced_config,
                                                  kwargs=kwargs)
+        self.cal_mapping_path = cal_file_path
 
         super(_MockInst, self).__init__(user_name=self._inst_settings.user_name,
                                         calibration_dir=self._inst_settings.calibration_dir,
