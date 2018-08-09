@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from Muon.GUI.Common import message_box
+
 
 class PeriodicTablePresenter(object):
     def __init__(self, view, model):
@@ -57,5 +59,8 @@ class PeriodicTablePresenter(object):
         self.view.unreg_on_table_rclicked(slot)
 
     def set_peak_datafile(self, filename):
-        self.model.peak_data_file = filename
-        self.set_buttons()
+        try:
+            self.model.peak_data_file = filename
+            self.set_buttons()
+        except Exception as error:
+            message_box.warning(error)
