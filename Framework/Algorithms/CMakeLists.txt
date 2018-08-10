@@ -740,7 +740,6 @@ set ( TEST_FILES
 	CreateDummyCalFileTest.h
 	CreateEPPTest.h
 	CreateFlatEventWorkspaceTest.h
-	CreateFloodWorkspaceTest.h
 	CreateGroupingWorkspaceTest.h
 	CreateLogPropertyTableTest.h
 	CreateLogTimeCorrectionTest.h
