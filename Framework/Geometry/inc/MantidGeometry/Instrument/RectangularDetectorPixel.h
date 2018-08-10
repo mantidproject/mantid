@@ -1,10 +1,8 @@
 #ifndef MANTID_GEOMETRY_RECTANGULARDETECTORPIXEL_H_
 #define MANTID_GEOMETRY_RECTANGULARDETECTORPIXEL_H_
 
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -13,7 +11,7 @@ namespace Geometry {
 // Forward declaration
 class RectangularDetector;
 
-/** RectangularDetectorPixel: a sub-class of Detector
+/** RectangularDetectorPixel: a sub-class of GridDetectorPixel
   that is one pixel inside a RectangularDetector.
 
   The position of the pixel is calculated on the fly from the row/column
@@ -42,7 +40,7 @@ class RectangularDetector;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport RectangularDetectorPixel : public Detector {
+class DLLExport RectangularDetectorPixel : public GridDetectorPixel {
   friend class RectangularDetector;
 
 public:
@@ -53,15 +51,11 @@ public:
                            boost::shared_ptr<IObject> shape, IComponent *parent,
                            RectangularDetector *panel, size_t row, size_t col);
 
-  RectangularDetectorPixel();
-
   /// Create a cloned instance with a parameter map applied
   RectangularDetectorPixel *
   cloneParameterized(const ParameterMap *map) const override {
     return new RectangularDetectorPixel(this, map);
   }
-
-  Kernel::V3D getRelativePos() const override;
 
 private:
   /// RectangularDetector that is the parent of this pixel.

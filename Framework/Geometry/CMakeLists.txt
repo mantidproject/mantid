@@ -54,6 +54,8 @@ set ( SRC_FILES
 	src/Instrument/DetectorInfo.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
+	src/Instrument/GridDetector.cpp
+	src/Instrument/GridDetectorPixel.cpp
 	src/Instrument/IDFObject.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/InstrumentVisitor.cpp
@@ -200,6 +202,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorInfo.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+        inc/MantidGeometry/Instrument/GridDetector.h
+	inc/MantidGeometry/Instrument/GridDetectorPixel.h
 	inc/MantidGeometry/Instrument/IDFObject.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
 	inc/MantidGeometry/Instrument/InstrumentVisitor.h
@@ -314,6 +318,8 @@ set ( TEST_FILES
 	GeneralFrameTest.h
 	GeneralTest.h
 	GoniometerTest.h
+        GridDetectorTest.h
+	GridDetectorPixelTest.h
 	GroupTest.h
 	GroupTransformationTest.h
 	HKLFilterTest.h
