@@ -43,7 +43,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::map<std::string, std::string> validateInputs() override;
   API::MatrixWorkspace_sptr getInputWorkspace();
   API::MatrixWorkspace_sptr integrate(API::MatrixWorkspace_sptr ws);
   API::MatrixWorkspace_sptr transpose(API::MatrixWorkspace_sptr ws);

@@ -13,7 +13,6 @@ using namespace Mantid::API;
 namespace {
 namespace Prop {
 static std::string const FILENAME("Filename");
-static std::string const INPUT_WORKSPACE("InputWorkspace");
 static std::string const OUTPUT_WORKSPACE("OutputWorkspace");
 static std::string const START_X("StartSpectrumIndex");
 static std::string const END_X("EndSpectrumIndex");
@@ -53,14 +52,9 @@ void CreateFloodWorkspace::init() {
   std::vector<std::string> exts = defaultFacility.extensions();
 
   declareProperty(make_unique<MultipleFileProperty>(
-                      Prop::FILENAME, FileProperty::OptionalLoad, exts),
+                      Prop::FILENAME, exts),
                   "The name of the fllod run file(s) to read. Multiple runs "
                   "can be loaded and added together, e.g. INST10+11+12+13.ext");
-
-  declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          Prop::INPUT_WORKSPACE, "", Direction::Input, PropertyMode::Optional),
-      "The flood correction workspace.");
 
   declareProperty(Prop::START_X, EMPTY_DBL(), "Start value of the fitting interval");
   declareProperty(Prop::END_X, EMPTY_DBL(), "End value of the fitting interval");
@@ -70,33 +64,15 @@ void CreateFloodWorkspace::init() {
                   "The flood correction workspace.");
 }
 
-std::map<std::string, std::string> CreateFloodWorkspace::validateInputs() {
-  std::map<std::string, std::string> issues;
-  bool const isFilenameDefault = isDefault(Prop::FILENAME);
-  bool const isInputWorkspaceDefault = isDefault(Prop::INPUT_WORKSPACE);
-  if (isFilenameDefault && isInputWorkspaceDefault) {
-    issues[Prop::FILENAME] = "Either " + Prop::FILENAME + " or " +
-                             Prop::INPUT_WORKSPACE + " must be set.";
-  } else if (!isFilenameDefault && !isInputWorkspaceDefault) {
-    issues[Prop::FILENAME] = "Either " + Prop::FILENAME + " or " +
-                             Prop::INPUT_WORKSPACE +
-                             " can be set but not both.";
-  }
-  return issues;
-}
-
 MatrixWorkspace_sptr CreateFloodWorkspace::getInputWorkspace() {
-  if (!isDefault(Prop::FILENAME)) {
-    std::string fileName = getProperty(Prop::FILENAME);
-    auto alg = createChildAlgorithm("Load");
-    alg->setProperty("Filename", fileName);
-    alg->setProperty("LoadMonitors", false);
-    alg->setProperty("OutputWorkspace", "dummy");
-    alg->execute();
-    Workspace_sptr ws = alg->getProperty("OutputWorkspace");
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  }
-  return getProperty(Prop::INPUT_WORKSPACE);
+  std::string fileName = getProperty(Prop::FILENAME);
+  auto alg = createChildAlgorithm("Load");
+  alg->setProperty("Filename", fileName);
+  alg->setProperty("LoadMonitors", false);
+  alg->setProperty("OutputWorkspace", "dummy");
+  alg->execute();
+  Workspace_sptr ws = alg->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 }
 
 MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
