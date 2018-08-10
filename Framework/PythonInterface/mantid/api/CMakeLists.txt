@@ -14,7 +14,6 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
   src/Exports/CatalogSession.cpp
-  src/Exports/DetectorInfo.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
