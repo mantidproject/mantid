@@ -825,7 +825,7 @@ const Kernel::Material GridDetector::material() const {
 
 size_t
 GridDetector::registerContents(ComponentVisitor &componentVisitor) const {
-  return 0; // componentVisitor.register3DGridBank(*this);
+  return componentVisitor.registerGridBank(*this);
 }
 
 //-------------------------------------------------------------------------------------------------
