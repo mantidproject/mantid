@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -59,6 +60,8 @@ private:
   /// Execution code
   void exec() override;
   void execEvent();
+
+  double calculateSolidAngleCorrection(int, const API::SpectrumInfo &);
 };
 
 } // namespace WorkflowAlgorithms

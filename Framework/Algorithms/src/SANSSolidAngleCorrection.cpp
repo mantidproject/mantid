@@ -53,9 +53,7 @@ void SANSSolidAngleCorrection::init() {
   declareProperty("DetectorWing", false,
                   "If true, the algorithm will assume "
                   "that the detector is curved around the sample. E.g. BIOSANS "
-                  "Wing detector.");
-  declareProperty("OutputMessage", "", Direction::Output);
-  
+                  "Wing detector.");  
 }
 
 void SANSSolidAngleCorrection::exec() {
@@ -104,24 +102,7 @@ void SANSSolidAngleCorrection::exec() {
     auto &YOut = outputWS->mutableY(i);
     auto &EOut = outputWS->mutableE(i);
 
-    // Compute solid angle correction factor
-    const bool is_tube = getProperty("DetectorTubes");
-    const bool is_wing = getProperty("DetectorWing");
-
-    const double tanTheta = tan(spectrumInfo.twoTheta(i));
-    const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
-    double corr;
-    if (is_tube || is_wing) {
-      const double tanAlpha = tan(getYTubeAngle(spectrumInfo, i));
-      const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
-      if (is_tube)
-        corr = alpha_term * theta_term * theta_term;
-      else { // is_wing
-        corr = alpha_term * alpha_term * alpha_term;
-      }
-    } else {
-      corr = theta_term * theta_term * theta_term;
-    }
+    double corr = calculateSolidAngleCorrection(i, spectrumInfo);
 
     // Correct data for all X bins
     for (int j = 0; j < xLength; j++) {
@@ -132,7 +113,6 @@ void SANSSolidAngleCorrection::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  setProperty("OutputMessage", "Solid angle correction applied");
 }
 
 void SANSSolidAngleCorrection::execEvent() {
@@ -166,27 +146,44 @@ void SANSSolidAngleCorrection::execEvent() {
     if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
-    // Compute solid angle correction factor
-    const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(spectrumInfo.twoTheta(i));
-    const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
-    double corr;
-    if (is_tube) {
-      const double tanAlpha = tan(getYTubeAngle(spectrumInfo, i));
-      const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
-      corr = alpha_term * theta_term * theta_term;
-    } else {
-      corr = theta_term * theta_term * theta_term;
-    }
+    double corr = calculateSolidAngleCorrection(i, spectrumInfo);
+
     EventList &el = outputEventWS->getSpectrum(i);
     el *= corr;
     progress.report("Solid Angle Correction");
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  setProperty("OutputMessage", "Solid angle correction applied");
 }
+
+
+  double SANSSolidAngleCorrection::calculateSolidAngleCorrection(
+    int histogramIndex, const SpectrumInfo &spectrumInfo){
+
+    // Compute solid angle correction factor
+
+    const bool is_tube = getProperty("DetectorTubes");
+    const bool is_wing = getProperty("DetectorWing");
+
+    const double tanTheta = tan(spectrumInfo.twoTheta(histogramIndex));
+    const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
+    double corr;
+    if (is_tube || is_wing) {
+      const double tanAlpha = tan(getYTubeAngle(spectrumInfo, histogramIndex));
+      const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
+      if (is_tube)
+        corr = alpha_term * theta_term * theta_term;
+      else { // is_wing
+        corr = alpha_term * alpha_term * alpha_term;
+      }
+    } else {
+      corr = theta_term * theta_term * theta_term;
+    }
+
+    return corr;
+  }
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
+
+
