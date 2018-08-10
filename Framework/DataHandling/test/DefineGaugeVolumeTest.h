@@ -1,8 +1,8 @@
 #ifndef DEFINEGAUGEVOLUMETEST_H_
 #define DEFINEGAUGEVOLUMETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/DefineGaugeVolume.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"

@@ -26,9 +26,9 @@
 #pragma warning enable 1170
 #endif
 
-#include <cfloat>
-#include <QPair>
 #include "MantidQtWidgets/Common/MdSettings.h"
+#include <QPair>
+#include <cfloat>
 
 namespace Mantid {
 namespace Vates {
@@ -55,10 +55,10 @@ bool AutoScaleRangeGenerator::getLogScale() {
     break;
 
   case (TECHNIQUEDEPENDENT):
-  // Implement technique-dependence here
+    // Implement technique-dependence here
 
   case (OFFSET):
-  // Implement color scale which accounts for noise floor here.
+    // Implement color scale which accounts for noise floor here.
 
   default:
     logScale = false;
@@ -218,6 +218,6 @@ void AutoScaleRangeGenerator::initializeColorScale() {
 void AutoScaleRangeGenerator::updateLogScaleSetting(bool logScale) {
   m_mdSettings.setLastSessionLogScale(logScale);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

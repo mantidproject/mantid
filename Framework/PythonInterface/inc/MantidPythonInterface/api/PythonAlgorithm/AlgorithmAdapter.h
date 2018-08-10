@@ -143,7 +143,7 @@ private:
   /// Here for deprecated setWikiSummary method
   std::string m_wikiSummary;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_ALGORITHMADAPTER_H_ */

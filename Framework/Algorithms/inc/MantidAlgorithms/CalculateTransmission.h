@@ -118,7 +118,7 @@ private:
                        API::MatrixWorkspace_sptr directWS, size_t index);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_*/

@@ -30,9 +30,7 @@
 #if __GNUC__ > 4 ||                                                            \
     (__GNUC__ == 4 &&                                                          \
      (__GNUC_MINOR__ > 4 || (__GNUC_MINOR__ == 4 && __GNUC_PATCHLEVEL__ > 0)))
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 #endif
 
 namespace Mantid {

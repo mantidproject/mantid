@@ -1,9 +1,9 @@
 #ifndef LOGINTEST_H_
 #define LOGINTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidICat/CatalogLogin.h"
 #include "ICatTestHelper.h"
+#include "MantidICat/CatalogLogin.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::ICat;
 class CatalogLoginTest : public CxxTest::TestSuite {

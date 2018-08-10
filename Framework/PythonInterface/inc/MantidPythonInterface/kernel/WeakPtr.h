@@ -51,6 +51,6 @@ inline HeldType *get_pointer(const boost::weak_ptr<HeldType> &dataItem) {
     throw std::runtime_error("Variable invalidated, data has been deleted.");
   }
 }
-}
+} // namespace boost
 
 #endif /* MANTID_PYTHONINTERFACE_WEAKPTR_H_ */

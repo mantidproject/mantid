@@ -1,11 +1,11 @@
 #ifndef MYDATASEARCH_H_
 #define MYDATASEARCH_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidICat/CatalogMyDataSearch.h"
-#include "MantidICat/CatalogLogin.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "ICatTestHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidICat/CatalogLogin.h"
+#include "MantidICat/CatalogMyDataSearch.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;

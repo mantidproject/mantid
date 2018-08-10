@@ -26,8 +26,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 
 namespace {
 
@@ -77,7 +77,7 @@ void run_rebin_params_only_bin_width(const Parallel::Communicator &comm,
     TS_ASSERT_EQUALS(ws, nullptr);
   }
 }
-}
+} // namespace
 
 class RebinTest : public CxxTest::TestSuite {
 public:

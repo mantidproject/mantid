@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -65,7 +65,7 @@ private:
                         double &center_y);
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_HFIRLOAD_H_*/

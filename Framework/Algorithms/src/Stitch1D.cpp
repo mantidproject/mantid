@@ -1,10 +1,10 @@
-#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidHistogramData/HistogramE.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -14,18 +14,15 @@
 #include "MantidKernel/RebinParamsValidator.h"
 
 #include <algorithm>
-#include <boost/tuple/tuple.hpp>
 #include <boost/format.hpp>
 #include <boost/math/special_functions.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <map>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramE;
-using Mantid::HistogramData::HistogramDx;
-using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::Points;
 
 namespace {
 /// Returns a tuple holding the first and last x value of the first spectrum and
@@ -71,7 +68,7 @@ void sortXAxis(MatrixWorkspace_sptr &ws) {
     }
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -235,8 +232,9 @@ double Stitch1D::getStartOverlap(const double intesectionMin,
   if (startOverlapProp->isDefault() || startOverlapBeyondRange) {
     if (!startOverlapProp->isDefault() && startOverlapBeyondRange) {
       char message[200];
-      std::sprintf(message, "StartOverlap is outside range at %0.4f, Min is "
-                            "%0.4f, Max is %0.4f . Forced to be: %0.4f",
+      std::sprintf(message,
+                   "StartOverlap is outside range at %0.4f, Min is "
+                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
                    startOverlapVal, intesectionMin, intesectionMax,
                    intesectionMin);
       g_log.warning(std::string(message));
@@ -266,8 +264,9 @@ double Stitch1D::getEndOverlap(const double intesectionMin,
   if (endOverlapProp->isDefault() || endOverlapBeyondRange) {
     if (!endOverlapProp->isDefault() && endOverlapBeyondRange) {
       char message[200];
-      std::sprintf(message, "EndOverlap is outside range at %0.4f, Min is "
-                            "%0.4f, Max is %0.4f . Forced to be: %0.4f",
+      std::sprintf(message,
+                   "EndOverlap is outside range at %0.4f, Min is "
+                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
                    endOverlapVal, intesectionMin, intesectionMax,
                    intesectionMax);
       g_log.warning(std::string(message));

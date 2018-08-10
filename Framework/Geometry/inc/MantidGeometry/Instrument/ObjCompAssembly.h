@@ -1,10 +1,10 @@
 #ifndef OBJCOMPONENT_ASSEMBLY_
 #define OBJCOMPONENT_ASSEMBLY_
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)

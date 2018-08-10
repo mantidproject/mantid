@@ -2,12 +2,12 @@
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADER_H_
 
 #include "DllConfig.h"
-#include "MuonAnalysisHelper.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MuonAnalysisHelper.h"
 #include <QMap>
 #include <QRegExp>
 #include <QStringList>

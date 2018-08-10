@@ -8,40 +8,40 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
 
-#include <QMenu>
 #include <QFileInfo>
 #include <QHeaderView>
-#include <QTreeWidget>
-#include <QPushButton>
 #include <QLabel>
-#include <QSpinBox>
-#include <QLineEdit>
 #include <QLayout>
+#include <QLineEdit>
+#include <QMenu>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QTreeWidget>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 /** Default constructor, initialises the variables but does not initialise
-* any widgets on the window. Child classes must provide their own constructor.
-*
-* This is done in order to avoid confusion and provide full control
-* over the initialisation order and placement of the widgets inside
-* the window.
-*
-*	@param wsname :: The name of the workspace for which the logs will be
-*		displayed
-*	@param parentContainer :: The parent container relative to
-*		which the window will be centered. Also
-*		delegates the parentContainer to
-*		the QDialog(QWidget, flags) constructor.
-*	@param flags :: Flags for QDialog
-*	@param experimentInfoIndex :: Index into the ExperimentInfo list.
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*
-*/
+ * any widgets on the window. Child classes must provide their own constructor.
+ *
+ * This is done in order to avoid confusion and provide full control
+ * over the initialisation order and placement of the widgets inside
+ * the window.
+ *
+ *	@param wsname :: The name of the workspace for which the logs will be
+ *		displayed
+ *	@param parentContainer :: The parent container relative to
+ *		which the window will be centered. Also
+ *		delegates the parentContainer to
+ *		the QDialog(QWidget, flags) constructor.
+ *	@param flags :: Flags for QDialog
+ *	@param experimentInfoIndex :: Index into the ExperimentInfo list.
+ *
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ *
+ */
 SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
                                          QWidget *parentContainer,
                                          Qt::WFlags flags,
@@ -64,11 +64,11 @@ SampleLogDialogBase::~SampleLogDialogBase() {}
 // Protected methods
 //----------------------------------
 /**
-* Plot the selected log entries (TimeSeriesProperty or PropertyWithValue)
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*/
+ * Plot the selected log entries (TimeSeriesProperty or PropertyWithValue)
+ *
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ */
 void SampleLogDialogBase::importSelectedLogs() {
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
   QListIterator<QTreeWidgetItem *> pItr(items);
@@ -78,11 +78,11 @@ void SampleLogDialogBase::importSelectedLogs() {
 }
 
 /**
-* Show Log Statistics when a line is selected
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*/
+ * Show Log Statistics when a line is selected
+ *
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ */
 void SampleLogDialogBase::showLogStatistics() {
 
   const auto &filter = this->getFilterType();
@@ -97,15 +97,15 @@ void SampleLogDialogBase::showLogStatistics() {
 
 //------------------------------------------------------------------------------------------------
 /**
-* Show the stats of the log for the selected item
-*
-*	@param item :: The item to be imported
-* @param filter :: Type of filtering (default none)
-*	@throw invalid_argument if format identifier for the item is wrong
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*/
+ * Show the stats of the log for the selected item
+ *
+ *	@param item :: The item to be imported
+ * @param filter :: Type of filtering (default none)
+ *	@throw invalid_argument if format identifier for the item is wrong
+ *
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ */
 void SampleLogDialogBase::showLogStatisticsOfItem(
     QTreeWidgetItem *item, const LogFilterGenerator::FilterType filter) {
   // Assume that you can't show the stats
@@ -138,17 +138,14 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
         dynamic_cast<TimeSeriesProperty<double> *>(logData);
     Mantid::Kernel::TimeSeriesProperty<int> *tspi =
         dynamic_cast<TimeSeriesProperty<int> *>(logData);
-    double timeAvg = 0.;
     LogFilterGenerator generator(filter, m_ei->run());
     const auto &logFilter = generator.generateFilter(logName);
     if (tspd) {
       ScopedFilter<double> applyFilter(tspd, std::move(logFilter));
       stats = tspd->getStatistics();
-      timeAvg = tspd->timeAverageValue();
     } else if (tspi) {
       ScopedFilter<int> applyFilter(tspi, std::move(logFilter));
       stats = tspi->getStatistics();
-      timeAvg = tspi->timeAverageValue();
     } else
       return;
 
@@ -156,10 +153,11 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
     statValues[0]->setText(QString::number(stats.minimum));
     statValues[1]->setText(QString::number(stats.maximum));
     statValues[2]->setText(QString::number(stats.mean));
-    statValues[3]->setText(QString::number(timeAvg));
-    statValues[4]->setText(QString::number(stats.median));
-    statValues[5]->setText(QString::number(stats.standard_deviation));
-    statValues[6]->setText(QString::number(stats.duration));
+    statValues[3]->setText(QString::number(stats.median));
+    statValues[4]->setText(QString::number(stats.standard_deviation));
+    statValues[5]->setText(QString::number(stats.time_mean));
+    statValues[6]->setText(QString::number(stats.time_standard_deviation));
+    statValues[7]->setText(QString::number(stats.duration));
     return;
     break;
   }
@@ -168,11 +166,11 @@ void SampleLogDialogBase::showLogStatisticsOfItem(
 
 //------------------------------------------------------------------------------------------------
 /**
-* Popup a custom context menu
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*/
+ * Popup a custom context menu
+ *
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ */
 void SampleLogDialogBase::popupMenu(const QPoint &pos) {
   if (!m_tree->itemAt(pos)) {
     m_tree->selectionModel()->clear();
@@ -190,10 +188,10 @@ void SampleLogDialogBase::popupMenu(const QPoint &pos) {
 
 //------------------------------------------------------------------------------------------------
 /** Slot called when selecting a different experiment info number
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*/
+ *
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ */
 void SampleLogDialogBase::selectExpInfoNumber(int num) {
   m_experimentInfoIndex = size_t(num);
   m_tree->blockSignals(true);
@@ -203,11 +201,11 @@ void SampleLogDialogBase::selectExpInfoNumber(int num) {
 
 //------------------------------------------------------------------------------------------------
 /**
-* Initialize everything in the tree. Must be called after a QTreeWidget
-*initialisation
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
-*/
+ * Initialize everything in the tree. Must be called after a QTreeWidget
+ *initialisation
+ *	@author Martyn Gigg, Tessella Support Services plc
+ *	@date 05/11/2009
+ */
 void SampleLogDialogBase::init() {
   m_tree->clear();
 
@@ -333,9 +331,8 @@ void SampleLogDialogBase::init() {
                dynamic_cast<
                    Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(
                    *pItr) ||
-               dynamic_cast<
-                   Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(
-                   *pItr)) {
+               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>>
+                                *>(*pItr)) {
       treeItem->setText(1, "numeric array");
       treeItem->setData(
           1, Qt::UserRole,
@@ -363,8 +360,8 @@ void SampleLogDialogBase::init() {
 
 //------------------------------------------------------------------------------------------------
 /** Sets the Sample Log Dialog window title
-*	@param wsname The workspace name
-*/
+ *	@param wsname The workspace name
+ */
 void SampleLogDialogBase::setDialogWindowTitle(const QString &wsname) {
   std::stringstream ss;
   ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
@@ -373,7 +370,7 @@ void SampleLogDialogBase::setDialogWindowTitle(const QString &wsname) {
 
 //------------------------------------------------------------------------------------------------
 /** Sets the member QTreeWidget column names
-*/
+ */
 void SampleLogDialogBase::setTreeWidgetColumnNames() {
   QStringList titles;
   titles << "Name"
@@ -389,9 +386,9 @@ void SampleLogDialogBase::setTreeWidgetColumnNames() {
 
 //------------------------------------------------------------------------------------------------
 /** Adds the import and close buttons to the parameter layout
-*	@param qLayout The Layout to which the import and close buttons will be
-*					added
-*/
+ *	@param qLayout The Layout to which the import and close buttons will be
+ *					added
+ */
 void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
   // -------------- The Import/Close buttons ------------------------
   QHBoxLayout *topButtons = new QHBoxLayout;
@@ -411,9 +408,9 @@ void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
 }
 //------------------------------------------------------------------------------------------------
 /** Adds the Experiment Info Selector to the paramenter layout
-*	@param qLayout The Layout to which the experiment info selector labels
-*					will be added
-*/
+ *	@param qLayout The Layout to which the experiment info selector labels
+ *					will be added
+ */
 void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
   // -------------- The ExperimentInfo selector------------------------
   boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
@@ -440,7 +437,7 @@ void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
 
 //------------------------------------------------------------------------------------------------
 /** Sets up the QTreeWidget Qt connections for necessary functionality
-*/
+ */
 void SampleLogDialogBase::setUpTreeWidgetConnections() {
   // want a custom context menu
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);

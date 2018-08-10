@@ -25,5 +25,5 @@ void InvalidParameterParser::setSuccessorParser(
   UNUSED_ARG(parser);
   // Do nothing. No successor allowed.
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

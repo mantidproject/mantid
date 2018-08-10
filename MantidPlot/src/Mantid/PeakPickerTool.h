@@ -7,9 +7,9 @@
 
 #include "../PlotToolInterface.h"
 #include "IFunctionWrapper.h"
+#include <Qt>
 #include <qwt_plot_marker.h>
 #include <qwt_plot_picker.h>
-#include <Qt>
 
 #include "../Graph.h"
 #include "qwt_plot_item.h"
@@ -30,16 +30,16 @@ namespace MantidWidgets {
 class FitPropertyBrowser;
 class PropertyHandler;
 class MuonFitPropertyBrowser;
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 namespace Mantid {
 namespace API {
 class IFunction;
 class CompositeFunction;
 class MatrixWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 /**
     This class is for selecting peaks on a graph for subsequent fitting.

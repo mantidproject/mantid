@@ -13,7 +13,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffFittingModel : public IEnggDiffFittingModel {
 
@@ -61,6 +61,6 @@ public:
   MOCK_METHOD1(removeRun, void(const RunLabel &runLabel));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H

@@ -16,7 +16,7 @@ namespace Geometry {
 class IDetector;
 class IObject;
 class ParameterMap;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 /**

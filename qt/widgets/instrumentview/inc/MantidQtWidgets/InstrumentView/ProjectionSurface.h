@@ -1,22 +1,22 @@
 #ifndef PROJECTIONSURFACE_H
 #define PROJECTIONSURFACE_H
 
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 
 #include "InstrumentActor.h"
-#include "Shape2DCollection.h"
 #include "PeakOverlay.h"
 #include "RectF.h"
+#include "Shape2DCollection.h"
 
+#include <QColor>
 #include <QImage>
 #include <QList>
 #include <QMap>
 #include <QStack>
-#include <QColor>
 
 #include <boost/shared_ptr.hpp>
 
@@ -27,12 +27,12 @@ class IDetector;
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 namespace MantidQt {
 namespace MantidWidgets {
 class InputController;
 }
-}
+} // namespace MantidQt
 
 class GLColor;
 
@@ -353,7 +353,8 @@ protected:
   std::pair<Mantid::Geometry::IPeak *, QPointF> m_selectedAlignmentPeak;
 
   std::pair<std::vector<Mantid::Geometry::IPeak *>,
-            std::vector<Mantid::Geometry::IPeak *>> m_selectedPeaks;
+            std::vector<Mantid::Geometry::IPeak *>>
+      m_selectedPeaks;
   std::pair<QPointF, QPointF> m_selectedMarkers;
 
 private:
@@ -383,7 +384,7 @@ private:
 
 using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // PROJECTIONSURFACE_H

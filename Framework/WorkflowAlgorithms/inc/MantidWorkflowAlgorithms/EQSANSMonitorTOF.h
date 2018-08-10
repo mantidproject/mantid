@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -73,7 +72,7 @@ private:
                       bool frame_skipping, double source_to_monitor);
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_EQSANSMONITORTOF_H_*/

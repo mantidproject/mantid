@@ -31,5 +31,5 @@ SessionException::SessionException(const std::string &error)
     : std::runtime_error(error), m_error(error) {}
 
 const char *SessionException::what() const noexcept { return m_error.c_str(); }
-}
-}
+} // namespace ICat
+} // namespace Mantid

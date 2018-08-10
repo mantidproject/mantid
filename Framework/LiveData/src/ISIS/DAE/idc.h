@@ -22,8 +22,8 @@
 #include "isisds_command.h"
 
 /**
-* holds information about the DAE connection - defined fully in idc.c
-*/
+ * holds information about the DAE connection - defined fully in idc.c
+ */
 struct idc_info;
 using idc_handle_t = struct idc_info *;
 
@@ -111,7 +111,7 @@ int IDCsetreportfunc(idc_error_report_t report_func);
 
 /** Used to report an error by the IDC routines - it calls the function
  * specified by IDCsetreportfunc()
-  * to do the actual reporting */
+ * to do the actual reporting */
 int IDCreport(int status, int code, const char *format, ...);
 
 ///@endcond

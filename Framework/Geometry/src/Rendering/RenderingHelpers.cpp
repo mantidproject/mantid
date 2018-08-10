@@ -28,23 +28,20 @@
 #endif
 #endif
 
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
-#include <gp_Pnt.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
+
 #include <BRep_Tool.hxx>
-#include <TopExp_Explorer.hxx>
 #include <Poly_Array1OfTriangle.hxx>
-#include <TColgp_Array1OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+#include <TColgp_Array1OfPnt.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <gp_Pnt.hxx>
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191

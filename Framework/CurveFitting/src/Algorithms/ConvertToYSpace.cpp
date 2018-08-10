@@ -28,10 +28,10 @@ namespace {
 /// Conversion constant
 const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
-}
+} // namespace
 
 /** Constructor
-*/
+ */
 ConvertToYSpace::ConvertToYSpace()
     : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
       m_outputWS(), m_qOutputWS() {}
@@ -48,10 +48,10 @@ const std::string ConvertToYSpace::category() const {
 }
 
 /**
-* @param ws The workspace with attached instrument
-* @param index Index of the spectrum
-* @return DetectorParams structure containing the relevant parameters
-*/
+ * @param ws The workspace with attached instrument
+ * @param index Index of the spectrum
+ * @return DetectorParams structure containing the relevant parameters
+ */
 DetectorParams ConvertToYSpace::getDetectorParameters(
     const API::MatrixWorkspace_const_sptr &ws, const size_t index) {
   auto inst = ws->getInstrument();
@@ -82,14 +82,14 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
 }
 
 /**
-* If a DetectorGroup is encountered then the parameters are averaged over the
-* group
-* @param comp A pointer to the component that should contain the parameter
-* @param pmap A reference to the ParameterMap that stores the parameters
-* @param name The name of the parameter
-* @returns The value of the parameter if it exists
-* @throws A std::invalid_argument error if the parameter does not exist
-*/
+ * If a DetectorGroup is encountered then the parameters are averaged over the
+ * group
+ * @param comp A pointer to the component that should contain the parameter
+ * @param pmap A reference to the ParameterMap that stores the parameters
+ * @param name The name of the parameter
+ * @returns The value of the parameter if it exists
+ * @throws A std::invalid_argument error if the parameter does not exist
+ */
 double
 ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
                                        const Geometry::ParameterMap &pmap,
@@ -124,17 +124,17 @@ ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
 //----------------------------------------------------------------------------------------------
 
 /**
-* @param yspace Output yspace value
-* @param qspace Output qspace value
-* @param ei Output incident energy value
-* @param mass Mass value for the transformation
-* @param tsec Time-of-flight in seconds
-* @param k1 Modulus of wavevector for final energy (sqrt(efixed/massToMeV)),
-* avoids repeated calculation
-* @param v1 Velocity of neutron for final energy (sqrt(efixed/massToMeV)),
-* avoids repeated calculation
-* @param detpar Struct defining Detector parameters @see ComptonProfile
-*/
+ * @param yspace Output yspace value
+ * @param qspace Output qspace value
+ * @param ei Output incident energy value
+ * @param mass Mass value for the transformation
+ * @param tsec Time-of-flight in seconds
+ * @param k1 Modulus of wavevector for final energy (sqrt(efixed/massToMeV)),
+ * avoids repeated calculation
+ * @param v1 Velocity of neutron for final energy (sqrt(efixed/massToMeV)),
+ * avoids repeated calculation
+ * @param detpar Struct defining Detector parameters @see ComptonProfile
+ */
 void ConvertToYSpace::calculateY(double &yspace, double &qspace, double &ei,
                                  const double mass, const double tsec,
                                  const double k1, const double v1,
@@ -154,7 +154,7 @@ void ConvertToYSpace::calculateY(double &yspace, double &qspace, double &ei,
 //----------------------------------------------------------------------------------------------
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void ConvertToYSpace::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<HistogramValidator>(false); // point data
@@ -183,7 +183,7 @@ void ConvertToYSpace::init() {
 //----------------------------------------------------------------------------------------------
 
 /** Execute the algorithm.
-*/
+ */
 void ConvertToYSpace::exec() {
   retrieveInputs();
   createOutputWorkspace();
@@ -225,11 +225,11 @@ void ConvertToYSpace::exec() {
 }
 
 /**
-* Convert the spectrum at the given index on the input workspace
-* and place the output in the pre-allocated output workspace
-* @param index Index on the input & output workspaces giving the spectrum to
-* convert
-*/
+ * Convert the spectrum at the given index on the input workspace
+ * and place the output in the pre-allocated output workspace
+ * @param index Index on the input & output workspaces giving the spectrum to
+ * convert
+ */
 bool ConvertToYSpace::convert(const size_t index) {
   try {
     DetectorParams detPar = getDetectorParameters(m_inputWS, index);
@@ -268,8 +268,8 @@ bool ConvertToYSpace::convert(const size_t index) {
 }
 
 /**
-* Caches input details for the peak information
-*/
+ * Caches input details for the peak information
+ */
 void ConvertToYSpace::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_mass = getProperty("Mass");
@@ -277,8 +277,8 @@ void ConvertToYSpace::retrieveInputs() {
 }
 
 /**
-* Create & cache output workspaces
-*/
+ * Create & cache output workspaces
+ */
 void ConvertToYSpace::createOutputWorkspace() {
   // y-Space output workspace
   m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
@@ -299,7 +299,7 @@ void ConvertToYSpace::createOutputWorkspace() {
 }
 
 /**
-*/
+ */
 void ConvertToYSpace::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto source = inst->getSource();

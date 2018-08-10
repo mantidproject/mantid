@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADMCSTAS_H_
 #define MANTID_DATAHANDLING_LOADMCSTAS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/System.h"
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 

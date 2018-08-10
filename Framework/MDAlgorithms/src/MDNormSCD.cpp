@@ -19,8 +19,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,7 +31,7 @@ bool compareMomentum(const std::array<double, 4> &v1,
                      const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormSCD)
@@ -64,8 +64,8 @@ const std::string MDNormSCD::summary() const {
 const std::string MDNormSCD::name() const { return "MDNormSCD"; }
 
 /**
-  * Initialize the algorithm's properties.
-  */
+ * Initialize the algorithm's properties.
+ */
 void MDNormSCD::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -491,7 +491,9 @@ for (int64_t i = 0; i < ndets; i++) {
     // Average between two intersections for final position
     std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
                    prevIntSec.begin(), pos.begin(),
-                   VectorHelper::SimpleAverage<coord_t>());
+                   [](const double lhs, const double rhs) {
+                     return static_cast<coord_t>(0.5 * (lhs + rhs));
+                   });
     affineTrans.multiplyPoint(pos, posNew);
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))

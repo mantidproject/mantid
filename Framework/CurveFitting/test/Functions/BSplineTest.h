@@ -1,8 +1,8 @@
 #ifndef BSPLINETEST_H_
 #define BSPLINETEST_H_
 
-#include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Functions/BSpline.h"
 
 #include <cxxtest/TestSuite.h>
 

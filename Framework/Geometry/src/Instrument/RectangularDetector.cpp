@@ -2,29 +2,29 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Matrix.h"
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
-#include <boost/regex.hpp>
-#include <boost/make_shared.hpp>
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace {
 /**
-* Return the number of pixels to make a texture in, given the
-* desired pixel size. A texture has to have 2^n pixels per side.
-* @param desired :: the requested pixel size
-* @return number of pixels for texture
-*/
+ * Return the number of pixels to make a texture in, given the
+ * desired pixel size. A texture has to have 2^n pixels per side.
+ * @param desired :: the requested pixel size
+ * @return number of pixels for texture
+ */
 int getOneTextureSize(int desired) {
   int size = 2;
   while (desired > size) {
@@ -37,8 +37,8 @@ int getOneTextureSize(int desired) {
 namespace Mantid {
 namespace Geometry {
 
-using Kernel::V3D;
 using Kernel::Matrix;
+using Kernel::V3D;
 
 /** Empty constructor
  */
@@ -457,7 +457,7 @@ void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the minimum detector id
-  * @return minimum detector id
+ * @return minimum detector id
  */
 int RectangularDetector::minDetectorID() {
   if (m_map)
@@ -467,7 +467,7 @@ int RectangularDetector::minDetectorID() {
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the maximum detector id
-  * @return maximum detector id
+ * @return maximum detector id
  */
 int RectangularDetector::maxDetectorID() {
   if (m_map)
