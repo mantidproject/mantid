@@ -34,16 +34,25 @@ class LoadView(QtGui.QWidget):
         self.load_button.clicked.connect(slot)
 
     def unreg_on_load_clicked(self, slot):
-        self.load_button.clicked.disconnect(slot)
+        try:
+            self.load_button.clicked.disconnect(slot)
+        except TypeError:
+            return
 
     def on_co_add_clicked(self, slot):
         self.co_button.clicked.connect(slot)
 
     def unreg_on_co_add_clicked(self, slot):
-        self.co_button.clicked.disconnect(slot)
+        try:
+            self.co_button.clicked.disconnect(slot)
+        except TypeError:
+            return
 
     def on_spinbox_changed(self, slot):
         self.spinbox.valueChanged.connect(slot)
 
     def unreg_on_spinbox_changed(self, slot):
-        self.spinbox.valueChanged.disconnect(slot)
+        try:
+            self.spinbox.valueChanged.disconnect(slot)
+        except TypeError:
+            return
