@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
+import os
 
+allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
+allowed_extensions =["nxs"]
 
 def get_instrument_directory(instrument):
     """
@@ -113,3 +115,17 @@ def parse_run_list_to_filenames(runList, instrument):
     #
     # runList = parse_run_string("1234-1250")
     # print(parse_run_list_to_filenames(runList, "EMU"))
+
+
+def parse_user_input_to_files(input_text, allowed_extensions=[".nxs"]):
+    input_list = input_text.split(";")
+    filenames = []
+    for text in input_list:
+        if os.path.isfile(text):
+            print("is a file!")
+            print(os.path.splitext(text)[-1].lower())
+            # remove whitespace
+            if os.path.splitext(text)[-1].lower() in allowed_extensions:
+
+                filenames += [text]
+    return filenames

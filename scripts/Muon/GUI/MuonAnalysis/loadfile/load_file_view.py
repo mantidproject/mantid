@@ -18,6 +18,9 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
         self._store_edit_text = False
         self._stored_edit_text = ""
+        self._cached_text = ""
+
+        self._stored_text = ""
 
     def setupUi(self, BrowseFileWidget):
         BrowseFileWidget.setObjectName("BrowseFileWidget")
@@ -109,13 +112,25 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
     def set_file_edit(self, text, store=False):
         print("Setting file edit : " + text)
+        self._stored_text = text
         if store:
             self._store_edit_text = True
             self._stored_edit_text = text
             self.filePathEdit.setText("(... more than 10 files, use copy button)")
         else:
             self.filePathEdit.setText(text)
+        self._cached_text = self.get_file_edit_text()
 
     def clear(self):
         print("Clearing file widget")
         self.set_file_edit("")
+        self._store_edit_text = False
+
+    def on_file_edit_changed(self, slot):
+        self.filePathEdit.editingFinished.connect(slot)
+
+    def reset_edit_to_cached_value(self):
+        tmp = self._cached_text
+        print("reset to cache : " + tmp)
+        self.set_file_edit(tmp)
+        self._cached_text = tmp

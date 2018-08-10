@@ -13,11 +13,10 @@ class BrowseFileWidgetModel(object):
         # Temporary list of filenames used for load thread
         self._filenames = []
 
-        self._loading = False
         self._loaded_filenames = []
         self._loaded_workspaces = []
-
         self._loaded_runs = []
+
         self._current_run = None
 
     @property
@@ -38,14 +37,25 @@ class BrowseFileWidgetModel(object):
 
     # Used with load thread
     def execute(self):
-        #QThread.msleep(1000)
+        failed_files = []
         for file in self._filenames:
-            ws = self.load_workspace_from_filename(file)
+            try:
+                ws, run = self.load_workspace_from_filename(file)
+            except:
+                failed_files += [file]
+                continue
             if ws:
                 self._loaded_workspaces += [ws]
                 # TODO : handle exception (not loading data)
-                self._loaded_runs += [int(ws[0].getRunNumber())]
+                self._loaded_runs += [run]
                 self._loaded_filenames += [file]
+        if failed_files:
+            message = self.exception_message_for_failed_files(failed_files)
+            raise ValueError(message)
+
+    def exception_message_for_failed_files(self, failed_file_list):
+        print("Exception in execute!")
+        return "Could not load the following files : " + ",\n".join(failed_file_list)
 
     # Used with load thread
     def output(self):
@@ -56,19 +66,12 @@ class BrowseFileWidgetModel(object):
         pass
 
     def load_workspace_from_filename(self, filename):
-
-        if self._loading:
-            raise RuntimeError("Loading already in progress")
-
-        self._loading = True
         print("Loading file : ", filename)
         workspace = mantid.Load(Filename=filename)
-        self._loading = False
-
-        return workspace
+        run = int(workspace[0].getRunNumber())
+        return workspace, run
 
     def clear(self):
-        self._loading = False
         self._loaded_filenames = []
         self._loaded_workspaces = []
         self._loaded_runs = []
@@ -80,7 +83,7 @@ class BrowseFileWidgetModel(object):
         dirs = list(set(dirs))
         if dirs:
             for dir in dirs:
-                ConfigService.Instance().appendDataSearchDir(dir)
+                ConfigService.Instance().appendDataSearchDir(dir.encode('ascii', 'ignore'))
 
         print("Dirs : ", dirs)
         print("Data search : ", ConfigService.Instance().getDataSearchDirs())
