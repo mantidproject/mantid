@@ -44,7 +44,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QTimer, QCoreApplication)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -92,11 +92,8 @@ QApplication.processEvents(QEventLoop.AllEvents)
 # -----------------------------------------------------------------------------
 # Utilities/Widgets
 # -----------------------------------------------------------------------------
-from mantidqt.py3compat import qbytearray_to_str  # noqa
 from mantidqt.utils.qt import add_actions, create_action  # noqa
 from mantidqt.widgets.manageuserdirectories import ManageUserDirectories  # noqa
-from workbench.config.main import CONF  # noqa
-from workbench.external.mantid import prepare_mantid_env  # noqa
 
 # -----------------------------------------------------------------------------
 # MainWindow
