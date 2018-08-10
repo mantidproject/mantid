@@ -5,8 +5,8 @@
 # Script is configured by CMake
 
 # Find out where we are
-SCRIPTFILE=$(readlink -f "$0")
-INSTALLDIR=$(dirname $SCRIPTFILE) # directory of executable
+THISFILE=$(readlink -f "$0")
+INSTALLDIR=$(dirname $THISFILE)   # directory of executable
 INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
 
 @MTD_PATH_DEFINITION@
@@ -21,8 +21,8 @@ fi
 # Define paraview information
 PV_PLUGIN_PATH="${INSTALLDIR}/plugins/paraview/qt4"
 
-# Define extra libraries for python
-LOCAL_PYTHONPATH=@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
+# Define where python libraries are
+LOCAL_PYTHONPATH=${INSTALLDIR}/bin:@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
@@ -40,7 +40,9 @@ else
 fi
 
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-  TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
-  PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
-  LD_LIBRARY_PATH=${LOCAL_LDPATH} PYTHONPATH=${LOCAL_PYTHONPATH} \
-  exec "$@"
+    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
+    LD_LIBRARY_PATH=${LOCAL_LDPATH} \
+    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+    exec "$@"
+#

@@ -15,7 +15,7 @@ INSTALLDIR=$(dirname $INSTALLDIR) # root install directory
 
 @VIRTUAL_GL_WRAPPER@
 
-# define where python libraries are
+# Define where python libraries are
 LOCAL_PYTHONPATH=@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
