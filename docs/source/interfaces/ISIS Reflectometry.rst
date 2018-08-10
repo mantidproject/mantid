@@ -487,18 +487,20 @@ cancelling the algorithm from the *Algorithm progress* dialog. If you close the
 interface, monitoring will continue running in the backgroud. You can cancel
 the `MonitorLiveData` algorithm from the *Algorithm progress* dialog.
 
-Note that the `MonitorLiveData` may stop if it encounters an error, e.g. due to
-a change in the data size, and will need to be manually re-started from the
-GUI.
+Note that if `MonitorLiveData` stops for any reason other than being terminated
+by the user, it will be automatically re-started by the Interface. Note that if
+anything has changed on the Settings tab then the new values will be used.
+
+Note that if you close and re-open the Interface, the link to any running
+monitor algorithm will be lost. Stop the algorithm from the *Algorithm process*
+dialog and re-start it from the new instance of the Interface to re-link it.
 
 Live data monitoring has some additional requirements:
 
-- EPICS support must be installed in Mantid. Tthis is included by default on
-Windows but see the instructions `here<http://https://www.mantidproject.org/PyEpics_In_Mantid/>`_
-for other platforms.
+- EPICS support must be installed in Mantid. This is included by default on Windows but see the instructions `here <http://https://www.mantidproject.org/PyEpics_In_Mantid/>`_ for other platforms.
+- The instrument must be on IBEX or have additional processes installed to supply the EPICS values.
 
-- The instrument must be on IBEX or have additional processes installed to
-  supply the EPICS values.
+
 
 Event Handling tab
 ~~~~~~~~~~~~~~~~~~
