@@ -7,7 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Algorithms {
 /**
 
     Performs a solid angle correction on a 2D SANS data set to correct
