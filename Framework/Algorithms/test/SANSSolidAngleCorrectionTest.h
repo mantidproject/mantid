@@ -7,13 +7,13 @@
 #ifndef SANSSOLIDANGLECORRECTIONTEST_H_
 #define SANSSOLIDANGLECORRECTIONTEST_H_
 
+#include <cxxtest/TestSuite.h>
+#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidKernel/Unit.h"
-#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
-#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -95,9 +95,9 @@ public:
     // Get the coordinate of the detector pixel
     double iy = (i - nmon) % 192;
     double ix = (int)((i - nmon) / 192);
-    double r =
-        sqrt(1.0 + 5.15 * 5.15 / 6000 / 6000 *
-                       ((ix - 16.0) * (ix - 16.0) + (iy - 95.0) * (iy - 95.0)));
+    double r = sqrt(1.0 +
+                    5.15 * 5.15 / 6000 / 6000 * ((ix - 16.0) * (ix - 16.0) +
+                                                 (iy - 95.0) * (iy - 95.0)));
     double corr = r * r * r;
     double ratio =
         ws2d_out->dataY(130 + nmon)[0] / ws2d_in->dataY(130 + nmon)[0];
@@ -110,7 +110,7 @@ public:
   }
 
 private:
-  Mantid::WorkflowAlgorithms::SANSSolidAngleCorrection correction;
+  Mantid::Algorithms::SANSSolidAngleCorrection correction;
   std::string inputWS;
 };
 
