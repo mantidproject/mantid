@@ -112,18 +112,6 @@ MatrixWorkspace_sptr createHistoWorkspace(const std::vector<double> xData,
   }
   return outputWorkspace;
 }
-
-bool operator==(const std::vector<double> &lhs, const HistogramX &rhs) {
-  return lhs == rhs.rawData();
-}
-
-bool operator==(const std::vector<double> &lhs, const HistogramY &rhs) {
-  return lhs == rhs.rawData();
-}
-
-bool operator==(const std::vector<double> &lhs, const HistogramDx &rhs) {
-  return lhs == rhs.rawData();
-}
 } // namespace
 
 class SortXAxisTest : public CxxTest::TestSuite {
