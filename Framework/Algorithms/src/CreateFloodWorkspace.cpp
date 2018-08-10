@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -16,7 +17,10 @@ static std::string const FILENAME("Filename");
 static std::string const OUTPUT_WORKSPACE("OutputWorkspace");
 static std::string const START_X("StartSpectrumIndex");
 static std::string const END_X("EndSpectrumIndex");
+static std::string const EXCLUDE("Exclude");
 } // namespace Prop
+
+double const VERY_BIG_VALUE = 10000.0;
 
 } // namespace
 
@@ -51,13 +55,17 @@ void CreateFloodWorkspace::init() {
   const FacilityInfo &defaultFacility = ConfigService::Instance().getFacility();
   std::vector<std::string> exts = defaultFacility.extensions();
 
-  declareProperty(make_unique<MultipleFileProperty>(
-                      Prop::FILENAME, exts),
+  declareProperty(make_unique<MultipleFileProperty>(Prop::FILENAME, exts),
                   "The name of the fllod run file(s) to read. Multiple runs "
                   "can be loaded and added together, e.g. INST10+11+12+13.ext");
 
-  declareProperty(Prop::START_X, EMPTY_DBL(), "Start value of the fitting interval");
-  declareProperty(Prop::END_X, EMPTY_DBL(), "End value of the fitting interval");
+  declareProperty(Prop::START_X, EMPTY_DBL(),
+                  "Start value of the fitting interval");
+  declareProperty(Prop::END_X, EMPTY_DBL(),
+                  "End value of the fitting interval");
+
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
+                  "Spectra to exclude");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::OUTPUT_WORKSPACE, "", Direction::Output),
@@ -91,49 +99,67 @@ MatrixWorkspace_sptr CreateFloodWorkspace::transpose(MatrixWorkspace_sptr ws) {
   return alg->getProperty("OutputWorkspace");
 }
 
-API::MatrixWorkspace_sptr CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws){
-  double startX = getProperty(Prop::START_X);
-  double endX = getProperty(Prop::END_X);
-
+API::MatrixWorkspace_sptr
+CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   auto fitWS = transpose(ws);
   auto const &x = fitWS->x(0);
+
+  // Define the fitting interval
+  double startX = getProperty(Prop::START_X);
+  double endX = getProperty(Prop::END_X);
+  std::vector<double> excludeFromFit;
   if (isDefault(Prop::START_X)) {
     startX = x.front();
+  } else {
+    excludeFromFit.push_back(x.front());
+    excludeFromFit.push_back(startX);
   }
   if (isDefault(Prop::END_X)) {
     endX = x.back();
+  } else {
+    excludeFromFit.push_back(endX);
+    excludeFromFit.push_back(x.back());
   }
+
+  // Exclude any bad detectors.
+  std::vector<double> const exclude = getProperty(Prop::EXCLUDE);
+  for (auto i : exclude) {
+    excludeFromFit.push_back(i);
+    excludeFromFit.push_back(i);
+  }
+  auto isExcluded = [&exclude](double xVal) {
+    return std::find(exclude.begin(), exclude.end(), xVal) != exclude.end();
+  };
 
   std::string const functionStr("name=LinearBackground");
 
+  // Fit the data to determine unwanted background
   auto alg = createChildAlgorithm("Fit");
   alg->setProperty("Function", functionStr);
   alg->setProperty("InputWorkspace", fitWS);
   alg->setProperty("WorkspaceIndex", 0);
-  alg->setProperty("StartX", startX);
-  alg->setProperty("EndX", endX);
+  if (!excludeFromFit.empty()) {
+    alg->setProperty("Exclude", excludeFromFit);
+  }
+  alg->setProperty("Output", "fit");
   alg->execute();
 
-  IFunction_sptr fun = alg->getProperty("Function");
-
-  alg = createChildAlgorithm("EvaluateFunction");
-  alg->setProperty("Function", fun);
-  alg->setProperty("InputWorkspace", fitWS);
-  alg->setProperty("WorkspaceIndex", 0);
-  alg->setProperty("OutputWorkspace", "dummy");
-  alg->execute();
-
-  Workspace_sptr tmpWS = alg->getProperty("OutputWorkspace");
-  auto bkgWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
+  // Divide the workspace by the fitted curve to remove the background
+  // and scale to values around 1
+  MatrixWorkspace_sptr bkgWS = alg->getProperty("OutputWorkspace");
   auto const &bkg = bkgWS->y(1);
-
   auto const nHisto = ws->getNumberHistograms();
-  for(size_t i = 0; i < nHisto; ++i) {
+  for (size_t i = 0; i < nHisto; ++i) {
     auto const xVal = x[i];
-    if (xVal >= startX && xVal <= endX) {
+    if (isExcluded(xVal)) {
+      ws->mutableY(i)[0] = VERY_BIG_VALUE;
+      ws->mutableE(i)[0] = 0.0;
+    } else if (xVal >= startX && xVal <= endX) {
       auto const background = bkg[i];
       if (background <= 0.0) {
-        throw std::runtime_error("Background is expected to be positive, found value " + std::to_string(background));
+        throw std::runtime_error(
+            "Background is expected to be positive, found value " +
+            std::to_string(background));
       }
       ws->mutableY(i)[0] /= background;
       ws->mutableE(i)[0] /= background;
@@ -143,11 +169,11 @@ API::MatrixWorkspace_sptr CreateFloodWorkspace::removeBackground(API::MatrixWork
     }
   }
 
+  // Remove the logs
   ws->setSharedRun(make_cow<Run>());
 
   return ws;
 }
-
 
 /** Execute the algorithm.
  */
