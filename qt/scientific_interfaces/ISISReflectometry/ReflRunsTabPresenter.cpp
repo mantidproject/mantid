@@ -8,7 +8,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/Tolerance.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
@@ -130,6 +129,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     for (const auto &presenter : m_tablePresenters)
       presenter->setInstrumentList(fromStdStringVector(instruments), "INTER");
   }
+
+  updateViewWhenMonitorStopped();
 }
 
 ReflRunsTabPresenter::~ReflRunsTabPresenter() {
