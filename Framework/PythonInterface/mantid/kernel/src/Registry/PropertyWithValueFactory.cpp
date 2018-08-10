@@ -4,10 +4,10 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
-#include "Mantidkernel/WarningSuppressions.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/python.hpp>
