@@ -766,17 +766,17 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     #-------------------------------------------------------------------------------------------------------------------
     if state.adjustment.show_transmission:
         sample_calculated_transmission,\
-        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
-                                                                      multi_reduction_type, True)
+            sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                               multi_reduction_type, True)
         can_calculated_transmission,\
-        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
-                                                                      multi_reduction_type, True)
+            can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                            multi_reduction_type, True)
         sample_unfitted_transmission,\
-        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
-                                                                      multi_reduction_type, False)
+            sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                             multi_reduction_type, False)
         can_unfitted_transmission,\
-        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
-                                                                      multi_reduction_type, False)
+            can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                          multi_reduction_type, False)
 
         _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",
                                      sample_calculated_transmission, sample_calculated_transmission_base

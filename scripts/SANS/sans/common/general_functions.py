@@ -677,9 +677,6 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
         start_time_as_string = ""
         end_time_as_string = ""
 
-    # 8. Transmission name
-    transmission_name = "_trans_" + data_type
-
     # Piece it all together
     output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
                              dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
