@@ -18,6 +18,8 @@ include ( QtTargetFunctions )
 # keyword: PYQT_VERSION A single value indicating the version of PyQt
 #                       to compile against
 # keyword: INSTALL_DIR The target location for installing this library
+# keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
+# keyword: LINUX_INSTALL_RPATH Install path for CMAKE_SYSTEM_NAME == Linux
 function ( mtd_add_sip_module )
   find_file ( _sipmodule_template_path NAME sipqtmodule_template.sip.in
     PATHS ${CMAKE_MODULE_PATH} )

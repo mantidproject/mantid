@@ -61,5 +61,7 @@ mtd_add_sip_module (
     API
   INSTALL_DIR
     ${LIB_DIR}/mantidqt
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/.."
   FOLDER Qt5
 )
