@@ -9,6 +9,7 @@ import PyQt4.QtCore as QtCore
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 
+muonGUI = None
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
@@ -41,12 +42,36 @@ def qapp():
     return _app
 
 
-app = qapp()
-try:
-    ex = MuonAnalysis2Gui()
-    ex.resize(700, 700)
-    ex.show()
-    app.exec_()
-except RuntimeError as error:
-    ex = QtGui.QWidget()
-    QtGui.QMessageBox.warning(ex, "Muon Analysis version 2", str(error))
+def main():
+    app = qapp()
+    try:
+        muonGUI = MuonAnalysis2Gui()
+        muonGUI.resize(700, 700)
+        muonGUI.show()
+        app.exec_()
+        return muonGUI
+    except RuntimeError as error:
+        muonGUI = QtGui.QWidget()
+        QtGui.QMessageBox.warning(muonGUI, "Muon Analysis version 2", str(error))
+        return muonGUI
+
+def saveToProject():
+    if muonGUI is None:
+        return ""
+    project = "test"
+    return project	
+
+def loadFromProject(project):
+    muonGUI = main()
+    muonGUI.dockWidget.loadFromProject(project)
+    return muonGUI
+
+if __name__ == '__main__':
+    muonGUI = main()
+    #test 2
+	#muonGUI = loadFromProject("Test basic load")
+	#test 3
+    #muonGUI = main()
+    #print("test 3: ",saveToProject())
+    #test 4
+    #print("test 4: ",saveToProject())

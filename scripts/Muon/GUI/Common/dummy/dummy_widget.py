@@ -11,16 +11,16 @@ class DummyWidget(object):
     def __init__(self,name,parent=None):
         view=DummyView(name,parent)
         model=None
-        self.presenter = DummyPresenter(view,model)
+        self._presenter = DummyPresenter(view,model)
 
     @property
     def presenter(self):
-        return self.presenter
+        return self._presenter
 
     @property
     def widget(self):
-        return self.presenter.widget
+        return self._presenter.widget
 
     def setButtonConnection(self,slot):
-        view=self.presenter.widget
+        view=self._presenter.widget
         view.buttonSignal.connect(slot)
