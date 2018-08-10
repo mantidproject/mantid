@@ -899,7 +899,7 @@ set ( TEST_FILES
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h
-        MergeLogsTest.h
+    MergeLogsTest.h
 	MergeRunsTest.h
 	MinusTest.h
 	ModeratorTzeroLinearTest.h
