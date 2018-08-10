@@ -54,9 +54,10 @@ void export_DetectorInfo() {
            "Sets all mask flags to false (unmasked).")
 
       .def("isEquivalent", &DetectorInfo::isEquivalent,
-           (arg("self"), arg("other")), "Returns True if the content of this "
-                                        "detector is equivalent to the content "
-                                        "of the other detector.")
+           (arg("self"), arg("other")),
+           "Returns True if the content of this "
+           "detector is equivalent to the content "
+           "of the other detector.")
 
       .def("twoTheta", twoTheta, (arg("self"), arg("index")),
            "Returns 2 theta (scattering angle w.r.t beam direction).")
