@@ -54,6 +54,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceValidators.cpp
   src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
+  src/Exports/OrientedLatticeValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
