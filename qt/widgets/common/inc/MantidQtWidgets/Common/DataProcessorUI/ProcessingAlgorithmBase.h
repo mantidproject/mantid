@@ -89,7 +89,7 @@ protected:
   // Converts a string to a set of strings
   static std::set<QString> convertStringToSet(const QString &text);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORALGORITHMBASE_H*/

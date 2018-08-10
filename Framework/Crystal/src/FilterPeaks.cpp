@@ -1,8 +1,8 @@
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace {
 
@@ -28,7 +28,7 @@ double QMOD(const Mantid::Geometry::IPeak &p) {
 double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {

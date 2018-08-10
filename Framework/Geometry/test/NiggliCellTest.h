@@ -1,16 +1,16 @@
 #ifndef MANTID_GEOMETRY_NiggliCellTEST_H_
 #define MANTID_GEOMETRY_NiggliCellTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class NiggliCellTest : public CxxTest::TestSuite {
 public:

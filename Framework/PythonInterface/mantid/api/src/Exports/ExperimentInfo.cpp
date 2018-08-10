@@ -1,9 +1,9 @@
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
@@ -18,21 +18,15 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(ExperimentInfo)
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 /// Overload generator for getInstrumentFilename
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload,
                                 ExperimentInfo::getInstrumentFilename, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 void export_ExperimentInfo() {
   register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();
@@ -81,7 +75,8 @@ void export_ExperimentInfo() {
 
       .def("detectorInfo", &ExperimentInfo::detectorInfo,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.DetectorInfo` "
+           "Return a const reference to the "
+           ":class:`~mantid.geometry.DetectorInfo` "
            "object.")
       .def("spectrumInfo", &ExperimentInfo::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),

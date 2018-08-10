@@ -1,10 +1,10 @@
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
-#include "MantidVatesAPI/PeaksPresenterVsi.h"
-#include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <vector>
+#include "MantidVatesAPI/PeaksPresenterVsi.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 #include <map>
+#include <vector>
 namespace Mantid {
 namespace VATES {
 
@@ -20,9 +20,9 @@ void CompositePeaksPresenterVsi::updateViewFrustum(
 }
 
 /**
-*Get the viewable peaks. Essentially copied from the slice viewer.
-*@returns A vector indicating which of the peaks are viewable.
-*/
+ *Get the viewable peaks. Essentially copied from the slice viewer.
+ *@returns A vector indicating which of the peaks are viewable.
+ */
 std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const {
   return std::vector<bool>();
 }
@@ -169,5 +169,5 @@ void CompositePeaksPresenterVsi::sortPeaksWorkspace(
     }
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Factory/WidgetFactory.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 
 using namespace MantidQt::SliceViewer;
 
@@ -131,5 +131,5 @@ WidgetFactory::createSliceViewer(const QString &wsName) {
   return slicer;
 }
 
-} // namespace Mantid
 } // namespace Factory
+} // namespace MantidQt

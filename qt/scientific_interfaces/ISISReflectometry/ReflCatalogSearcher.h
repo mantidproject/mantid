@@ -36,6 +36,6 @@ public:
   ~ReflCatalogSearcher() override{};
   Mantid::API::ITableWorkspace_sptr search(const std::string &text) override;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif

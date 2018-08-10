@@ -59,6 +59,6 @@ public:
   virtual bool isProcessing(int group) const = 0;
   virtual bool isProcessing() const = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H */

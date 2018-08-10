@@ -9,14 +9,14 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <QLabel>
-#include <QPushButton>
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QGroupBox>
-#include <QRegExp>
 #include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QRegExp>
 #include <QVBoxLayout>
 
 /**

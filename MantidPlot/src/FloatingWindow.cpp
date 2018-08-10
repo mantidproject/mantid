@@ -1,19 +1,19 @@
 #include "FloatingWindow.h"
-#include "MdiSubWindow.h"
 #include "ApplicationWindow.h"
+#include "MdiSubWindow.h"
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QEvent>
 #include <QCloseEvent>
-#include <QString>
 #include <QDateTime>
-#include <QMenu>
-#include <QTextStream>
-#include <QTemporaryFile>
-#include <QMdiArea>
-#include <QSize>
 #include <QDrag>
+#include <QEvent>
+#include <QMdiArea>
+#include <QMenu>
+#include <QMessageBox>
+#include <QSize>
+#include <QString>
+#include <QTemporaryFile>
+#include <QTextStream>
 
 /**
  * Constructor.
@@ -55,15 +55,15 @@ FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f)
 FloatingWindow::~FloatingWindow() {}
 
 /**
-  * Returns the inner MdiSubWindow.
-  */
+ * Returns the inner MdiSubWindow.
+ */
 MdiSubWindow *FloatingWindow::mdiSubWindow() const {
   return static_cast<MdiSubWindow *>(widget());
 }
 
 /**
-  * Returns the inner MdiSubWindow as a QWidget.(?)
-  */
+ * Returns the inner MdiSubWindow as a QWidget.(?)
+ */
 QWidget *FloatingWindow::widget() const {
   return static_cast<MdiSubWindowParent_t *>(centralWidget())->widget();
 }
@@ -153,8 +153,8 @@ void FloatingWindow::moveEvent(QMoveEvent *ev) {
 }
 
 /**
-  * Make this window stay on top
-  */
+ * Make this window stay on top
+ */
 void FloatingWindow::setStaysOnTopFlag() {
   Qt::WindowFlags flags = windowFlags();
   Qt::WindowFlags new_flags = flags | Qt::WindowStaysOnTopHint;
@@ -165,8 +165,8 @@ void FloatingWindow::setStaysOnTopFlag() {
 }
 
 /**
-  * Make this window not stay on top
-  */
+ * Make this window not stay on top
+ */
 void FloatingWindow::removeStaysOnTopFlag() {
   Qt::WindowFlags flags = windowFlags();
   Qt::WindowFlags new_flags = flags ^ Qt::WindowStaysOnTopHint;

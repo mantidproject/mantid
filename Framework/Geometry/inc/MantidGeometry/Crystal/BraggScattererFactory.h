@@ -96,7 +96,7 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #define DECLARE_BRAGGSCATTERER(classname)                                      \
   namespace {                                                                  \

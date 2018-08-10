@@ -145,14 +145,14 @@ class WidgetTest(unittest.TestCase):
         self.assertEqual(widget.search_box.currentText(), 'abc')
 
     def test_execute_on_click(self):
-        with patch('mantidqt.widgets.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+        with patch('mantidqt.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             widget.execute_button.click()
             createDialog.assert_called_once_with('DoStuff', 2)
 
     def test_execute_on_return_press(self):
-        with patch('mantidqt.widgets.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
+        with patch('mantidqt.interfacemanager.InterfaceManager.createDialogFromName') as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)

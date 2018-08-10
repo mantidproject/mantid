@@ -1,11 +1,11 @@
 #ifndef MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
 #define MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
 
-#include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
 #include "FunctionAdapterTestCommon.h"
-#include <cxxtest/TestSuite.h>
+#include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
 #include <algorithm>
 #include <array>
+#include <cxxtest/TestSuite.h>
 #include <numeric>
 
 class IFunction1DAdapterTest : public CxxTest::TestSuite {
@@ -72,8 +72,8 @@ public:
 
   void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
     using Mantid::API::IFunction1D_sptr;
-    using Mantid::PythonInterface::createTestFunction;
     using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    using Mantid::PythonInterface::createTestFunction;
     IFunction1D_sptr noDerivFunc1D;
     TS_ASSERT_THROWS_NOTHING(
         noDerivFunc1D = createTestFunction<IFunction1D_sptr::element_type>(
@@ -91,8 +91,8 @@ public:
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IFunction1D_sptr;
-    using Mantid::PythonInterface::createTestFunction;
     using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    using Mantid::PythonInterface::createTestFunction;
     IFunction1D_sptr func1DWithDeriv;
     TS_ASSERT_THROWS_NOTHING(
         func1DWithDeriv = createTestFunction<IFunction1D_sptr::element_type>(

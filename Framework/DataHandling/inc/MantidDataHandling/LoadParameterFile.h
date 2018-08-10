@@ -8,7 +8,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 /// @endcond
 
 namespace Mantid {
@@ -21,7 +21,7 @@ class Component;
 class CSGObject;
 class ObjComponent;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /** @class LoadParameterFile LoadParameterFile.h

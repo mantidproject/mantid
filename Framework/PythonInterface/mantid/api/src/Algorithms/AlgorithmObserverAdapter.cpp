@@ -3,8 +3,8 @@
 
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethod;
 using Environment::UndefinedAttributeError;
+using Environment::callMethod;
 
 AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
     : API::AlgorithmObserver(), m_self(self) {}

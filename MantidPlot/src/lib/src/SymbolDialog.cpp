@@ -29,14 +29,14 @@
  *                                                                         *
  ***************************************************************************/
 #include "SymbolDialog.h"
-#include <QPushButton>
-#include <QSizePolicy>
-#include <QGroupBox>
-#include <QShortcut>
-#include <QHBoxLayout>
 #include <QButtonGroup>
-#include <QTextCodec>
 #include <QFontDatabase>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QShortcut>
+#include <QSizePolicy>
+#include <QTextCodec>
 
 SymbolDialog::SymbolDialog(CharSet charSet, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {

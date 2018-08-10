@@ -14,8 +14,8 @@
 #include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include <algorithm> // for transform() function
-#include <sstream>
 #include <map>
+#include <sstream>
 using namespace std;
 
 JSONValue::JSONValue() : m_type(JSONValue::NULLTYPE) {}

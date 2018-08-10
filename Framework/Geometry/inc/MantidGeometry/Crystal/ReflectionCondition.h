@@ -7,8 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #endif
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -179,7 +179,7 @@ getReflectionConditionByName(const std::string &name);
 MANTID_GEOMETRY_DLL ReflectionCondition_sptr
 getReflectionConditionBySymbol(const std::string &symbol);
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_REFLECTIONCONDITION_H_ */

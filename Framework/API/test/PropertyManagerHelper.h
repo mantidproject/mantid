@@ -4,16 +4,16 @@
 #include "MantidKernel/PropertyManager.h"
 
 /**
-* Helper class to use IPropertyManager methods in the DataObjects tests
-*/
+ * Helper class to use IPropertyManager methods in the DataObjects tests
+ */
 class PropertyManagerHelper : public Mantid::Kernel::PropertyManager {
 public:
   PropertyManagerHelper() : PropertyManager() {}
 
-  using PropertyManager::declareProperty;
-  using PropertyManager::setProperty;
   using IPropertyManager::TypedValue;
   using IPropertyManager::getValue;
+  using PropertyManager::declareProperty;
+  using PropertyManager::setProperty;
 };
 
 #endif

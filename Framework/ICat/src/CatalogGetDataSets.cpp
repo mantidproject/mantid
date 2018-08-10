@@ -1,9 +1,9 @@
 #include "MantidICat/CatalogGetDataSets.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace ICat {
@@ -31,5 +31,5 @@ void CatalogGetDataSets::exec() {
       ->getDataSets(getProperty("InvestigationId"), workspace);
   setProperty("OutputWorkspace", workspace);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

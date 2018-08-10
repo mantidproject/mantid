@@ -1,10 +1,10 @@
 #ifndef MANTIDQT_API_PLOTAXISLABEL_H_
 #define MANTIDQT_API_PLOTAXISLABEL_H_
 
-#include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>
 #include <string>

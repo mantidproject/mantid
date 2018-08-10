@@ -85,7 +85,7 @@ private:
   /// Storage the next point to return
   std::vector<double> m_nextPoint;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

@@ -1,11 +1,11 @@
 #ifndef SPLATTERPLOTVIEW_H_
 #define SPLATTERPLOTVIEW_H_
 
-#include "ui_SplatterPlotView.h"
-#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_SplatterPlotView.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QList>
@@ -172,16 +172,16 @@ private:
   Ui::SplatterPlotView m_ui;     ///< The splatter plot view'a UI form
   QPointer<pqRenderView> m_view; ///< The main view area
   boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
-  PeaksTableControllerVsi *
-      m_peaksTableController; ///< The peaks table controller
-  QAction *m_allPeaksAction;  ///<The action for showing all peaks in the table.
-  QAction *m_removePeaksAction; ///<The action for removing the peaks table.
+  PeaksTableControllerVsi
+      *m_peaksTableController; ///< The peaks table controller
+  QAction *m_allPeaksAction; ///< The action for showing all peaks in the table.
+  QAction *m_removePeaksAction; ///< The action for removing the peaks table.
   std::string
-      m_peaksWorkspaceNameDelimiter; ///<Delimiter for peaks workspace strings.
+      m_peaksWorkspaceNameDelimiter; ///< Delimiter for peaks workspace strings.
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // SPLATTERPLOTVIEW_H_

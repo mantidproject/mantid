@@ -2,7 +2,7 @@
  SpectrumInfo
 ==============
 
-This a python binding to the C++ class Mantid::API::SpectrumInfo.
+This is a python binding to the C++ class Mantid::API::SpectrumInfo.
 
 *bases:* :py:obj:`mantid.api.SpectrumInfo`
 

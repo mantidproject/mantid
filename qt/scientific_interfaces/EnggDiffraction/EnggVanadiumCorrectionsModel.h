@@ -74,7 +74,7 @@ private:
   std::string m_currentInstrument;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODEL_H_

@@ -120,6 +120,6 @@ using QOneLevelTreeModel_sptr = boost::shared_ptr<QOneLevelTreeModel>;
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_ */

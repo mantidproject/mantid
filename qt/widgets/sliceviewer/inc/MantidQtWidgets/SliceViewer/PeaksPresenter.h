@@ -2,10 +2,10 @@
 #define MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
 
 #include "DllOption.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakEditMode.h"
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include <boost/shared_ptr.hpp>
 
 #include <QObject>
 #include <array>
@@ -15,17 +15,17 @@ namespace Mantid {
 namespace Kernel {
 // Forward dec
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 // Forward dec.
 class PeakTransform;
-}
+} // namespace Geometry
 namespace API {
 // Forward dec.
 class IPeaksWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -83,7 +83,7 @@ public:
 
 using PeaksPresenter_sptr = boost::shared_ptr<PeaksPresenter>;
 using PeaksPresenter_const_sptr = boost::shared_ptr<const PeaksPresenter>;
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_PEAKSPRESENTER_H_ */

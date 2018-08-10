@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_
 #define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -73,7 +73,7 @@ create(const CrystalStructure &crystalStructure) {
 
   return calculator;
 }
-}
+} // namespace StructureFactorCalculatorFactory
 
 } // namespace Geometry
 } // namespace Mantid

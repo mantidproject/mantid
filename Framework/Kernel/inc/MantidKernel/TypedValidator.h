@@ -161,8 +161,8 @@ private:
 template <typename T>
 const std::type_info &TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID =
     typeid(boost::shared_ptr<DataItem>);
-}
+} // namespace Kernel
 /// @endcond
-}
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_TYPEDVALIDATOR_H_ */

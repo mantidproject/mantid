@@ -33,5 +33,5 @@ DataItem::~DataItem() {
  */
 Poco::RWLock *DataItem::getLock() const { return m_lock; }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

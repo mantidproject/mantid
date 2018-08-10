@@ -27,5 +27,5 @@ void MDImplicitFunction::addPlane(const MDPlane &plane) {
   m_numPlanes = m_planes.size();
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

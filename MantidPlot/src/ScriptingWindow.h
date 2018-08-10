@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "Script.h"
 
-#include <boost/optional.hpp>
 #include <QMainWindow>
+#include <boost/optional.hpp>
 
 //----------------------------------------------------------
 // Forward declarations

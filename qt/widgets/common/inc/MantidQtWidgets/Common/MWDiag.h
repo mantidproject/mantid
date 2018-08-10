@@ -1,12 +1,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_MWDIAG_H_
 #define MANTIDQTCUSTOMINTERFACES_MWDIAG_H_
 
-#include "ui_MWDiag.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "ui_MWDiag.h"
+#include <QComboBox>
 #include <QSettings>
 #include <QStringList>
-#include <QComboBox>
 #include <boost/shared_ptr.hpp>
 
 //-----------------------------------------------
@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Geometry {
 class Instrument;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -94,7 +94,7 @@ private slots:
   void TOFUpd();
   void noDispDialog() { m_dispDialog = nullptr; }
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MWDIAG_H_

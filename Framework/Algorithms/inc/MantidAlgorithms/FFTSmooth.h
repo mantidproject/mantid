@@ -74,7 +74,7 @@ private:
   API::MatrixWorkspace_sptr m_filteredWS;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_FFTSMOOTH_H_*/
