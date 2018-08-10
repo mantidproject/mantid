@@ -47,7 +47,7 @@ public:
   convSelector(API::MatrixWorkspace_sptr inputWS,
                boost::shared_ptr<ConvToMDBase> &currentSolver) const;
 };
-} // end MDAlgorithms Namespace
-} // end Mantid Namespace
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

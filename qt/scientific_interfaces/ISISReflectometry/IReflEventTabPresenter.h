@@ -47,6 +47,6 @@ public:
   virtual void onReductionPaused(int group) = 0;
   virtual void onReductionResumed(int group) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLEVENTTABPRESENTER_H */

@@ -1,13 +1,13 @@
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -103,5 +103,5 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
 
   return IComponent_sptr();
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

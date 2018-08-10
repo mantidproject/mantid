@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
         src/ConvertFitFunctionForMuonTFAsymmetry.cpp
+        src/LoadAndApplyMuonDetectorGrouping.cpp
 	src/EstimateMuonAsymmetryFromCounts.cpp
         src/MuonAlgorithmHelper.cpp
 	src/MuonAsymmetryHelper.cpp
@@ -28,6 +29,7 @@ set ( INC_FILES
 	inc/MantidMuon/CalMuonDeadTime.h
 	inc/MantidMuon/CalMuonDetectorPhases.h
         inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
+        inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h
 	inc/MantidMuon/EstimateMuonAsymmetryFromCounts.h
         inc/MantidMuon/MuonAlgorithmHelper.h
 	inc/MantidMuon/MuonAsymmetryHelper.h
@@ -48,8 +50,9 @@ set ( TEST_FILES
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
         ConvertFitFunctionForMuonTFAsymmetryTest.h
-	EstimateMuonAsymmetryFromCountsTest.h
+        LoadAndApplyMuonDetectorGroupingTest.h
         MuonAlgorithmHelperTest.h
+	EstimateMuonAsymmetryFromCountsTest.h
 	MuonGroupDetectorsTest.h
 	PhaseQuadMuonTest.h
 	PlotAsymmetryByLogValueTest.h

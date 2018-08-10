@@ -1,8 +1,8 @@
 #ifndef DATAHANDLING_FIND_DETPAR_H_
 #define DATAHANDLING_FIND_DETPAR_H_
 
-#include <fstream>
 #include <float.h>
+#include <fstream>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"
@@ -272,6 +272,6 @@ public:
 };
 
 } // end namespace DataHandling
-} // end namespace Mandid
+} // namespace Mantid
 
 #endif

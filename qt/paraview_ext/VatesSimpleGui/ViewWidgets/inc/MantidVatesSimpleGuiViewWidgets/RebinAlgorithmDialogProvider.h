@@ -3,11 +3,11 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 
 namespace Mantid {
 namespace Vates {
@@ -79,8 +79,8 @@ private:
   QWidget *m_parent;
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif

@@ -12,7 +12,7 @@ class Sample;
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
-}
+} // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
 

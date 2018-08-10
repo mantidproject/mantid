@@ -1,16 +1,16 @@
 #ifndef REF_IV_CONNECTIONS_H
 #define REF_IV_CONNECTIONS_H
 
-#include <QWidget>
 #include <QActionGroup>
+#include <QWidget>
 
-#include "ui_RefImageView.h"
-#include "MantidQtWidgets/RefDetectorView/RefImageView.h"
-#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
-#include "MantidQtWidgets/RefDetectorView/RefImageDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageDisplay.h"
+#include "MantidQtWidgets/RefDetectorView/RefImageView.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
+#include "ui_RefImageView.h"
 
 /**
     @class RefIVConnections

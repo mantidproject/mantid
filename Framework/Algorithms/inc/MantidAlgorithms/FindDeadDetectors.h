@@ -89,7 +89,7 @@ private:
   API::MatrixWorkspace_sptr integrateWorkspace();
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_FINDDEADDETECTORS_H_*/

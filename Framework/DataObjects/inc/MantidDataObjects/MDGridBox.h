@@ -2,15 +2,14 @@
 #define MDGRIDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidDataObjects/MDLeanEvent.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -39,11 +38,11 @@ TMDE_CLASS
 class DLLExport MDGridBox : public MDBoxBase<MDE, nd> {
 public:
   MDGridBox(boost::shared_ptr<API::BoxController> &bc, const uint32_t depth,
-            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-                extentsVector);
+            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+                &extentsVector);
   MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,
-            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> &
-                extentsVector);
+            const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
+                &extentsVector);
 
   MDGridBox(MDBox<MDE, nd> *box);
 
@@ -54,12 +53,12 @@ public:
   // ----------------------------- ISaveable Methods
   // ------------------------------------------------------
   /**get object responsible for saving the box to a file.
-    *@return the const pointer to the object. The GridBox is not saveable at the
-    *moment so it is always NULL */
+   *@return the const pointer to the object. The GridBox is not saveable at the
+   *moment so it is always NULL */
   Kernel::ISaveable *getISaveable() override { return nullptr; }
   /**get const object responsible for saving the box to a file.
-    *@return the const pointer the const object. The GridBox is not saveable at
-    *the moment so it is always NULL */
+   *@return the const pointer the const object. The GridBox is not saveable at
+   *the moment so it is always NULL */
   Kernel::ISaveable *getISaveable() const override { return nullptr; }
   /**Recursively make all underlaying boxes file-backed*/
   void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
@@ -87,7 +86,7 @@ public:
   //-------------------------------------------------------------------------------------------------------
 
   /** Uses the cached value of points stored in the grid box
-    *  @return the total number of points (events) in this box  (in memory and
+   *  @return the total number of points (events) in this box  (in memory and
    * in file if present)     */
   uint64_t getNPoints() const override { return nPoints; }
   /// @return the amount of memory that the object's data ocupy. Currently uses
@@ -95,7 +94,7 @@ public:
   uint64_t getTotalDataSize() const override { return nPoints; }
   /**  @return the number of points (events) this box keeps in memory. May be
    * different from total number of points for
-     * file based workspaces/boxes.   Calculates recursively from child boxes */
+   * file based workspaces/boxes.   Calculates recursively from child boxes */
   size_t getDataInMemorySize() const override;
 
   size_t getNumDims() const override;

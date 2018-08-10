@@ -54,7 +54,7 @@ void ConvertToDiffractionMDWorkspace3::init() {
  *
  * @return minVal and maxVal -- two vectors with minimal and maximal values of
  *the momentums in the target workspace.
-*/
+ */
 void ConvertToDiffractionMDWorkspace3::convertExtents(
     const std::vector<double> &Extents, std::vector<double> &minVal,
     std::vector<double> &maxVal) {
@@ -116,5 +116,5 @@ void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
   std::replace(maxVal.begin(), maxVal.end(), -MAX_DBL, DEFAULT_BOUND);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

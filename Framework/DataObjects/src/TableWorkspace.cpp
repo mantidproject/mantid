@@ -1,7 +1,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 
 #include <queue>
 
@@ -19,7 +19,7 @@ struct SortIterationRecord {
   size_t iStart;   // start row to sort
   size_t iEnd;     // end row to sort (one past last)
 };
-}
+} // namespace
 
 DECLARE_WORKSPACE(TableWorkspace)
 
@@ -59,18 +59,20 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
                                            const std::string &name) {
   API::Column_sptr c;
   if (type.empty()) {
-    g_log.error("Empty string passed as type argument of createColumn.");
-    return c;
+    throw std::invalid_argument(
+        "Empty string passed as type argument of addColumn.");
   }
   if (name.empty()) {
-    g_log.error("Empty string passed as name argument of createColumn.");
+    throw std::invalid_argument(
+        "Empty string passed as name argument of addColumn.");
     return c;
   }
   // Check that there is no column with the same name.
   auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
   if (ci != m_columns.end()) {
-    g_log.error() << "Column with name " << name << " already exists.\n";
-    return c;
+    std::stringstream ss;
+    ss << "Column with name " << name << " already exists.\n";
+    throw std::invalid_argument(ss.str());
   }
   try {
     c = API::ColumnFactory::Instance().create(type);
@@ -78,10 +80,11 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
     c->setName(name);
     resizeColumn(c.get(), rowCount());
   } catch (Kernel::Exception::NotFoundError &e) {
-    g_log.error() << "Column of type " << type << " and name " << name
-                  << " has not been created.\n";
-    g_log.error() << e.what() << '\n';
-    return c;
+    std::stringstream ss;
+    ss << "Column of type " << type << " and name " << name
+       << " has not been added.\n";
+    ss << e.what() << '\n';
+    throw std::invalid_argument(ss.str());
   }
   return c;
 }
@@ -104,7 +107,6 @@ API::Column_sptr TableWorkspace::getColumn(const std::string &name) {
   auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
   if (ci == m_columns.end()) {
     std::string str = "Column " + name + " does not exist.\n";
-    g_log.error(str);
     throw std::runtime_error(str);
   }
   return *ci;
@@ -118,16 +120,16 @@ TableWorkspace::getColumn(const std::string &name) const {
     }
   }
   std::string str = "Column " + name + " does not exist.\n";
-  g_log.error(str);
   throw std::runtime_error(str);
 }
 
 /// Gets the shared pointer to a column.
 API::Column_sptr TableWorkspace::getColumn(size_t index) {
   if (index >= columnCount()) {
-    std::string str = "Column index is out of range";
-    g_log.error() << str << ": " << index << "(" << columnCount() << ")\n";
-    throw std::range_error(str);
+    std::stringstream ss;
+    ss << "Column index is out of range: " << index << "(" << columnCount()
+       << ")\n";
+    throw std::range_error(ss.str());
   }
   return m_columns[index];
 }
@@ -135,9 +137,10 @@ API::Column_sptr TableWorkspace::getColumn(size_t index) {
 /// Gets the shared pointer to a column.
 API::Column_const_sptr TableWorkspace::getColumn(size_t index) const {
   if (index >= columnCount()) {
-    std::string str = "Column index is out of range";
-    g_log.error() << str << ": " << index << "(" << columnCount() << ")\n";
-    throw std::range_error(str);
+    std::stringstream ss;
+    ss << "Column index is out of range: " << index << "(" << columnCount()
+       << ")\n";
+    throw std::range_error(ss.str());
   }
   return m_columns[index];
 }
@@ -165,11 +168,12 @@ size_t TableWorkspace::insertRow(size_t index) {
 }
 
 /** @param index :: Row to delete.
-*/
+ */
 void TableWorkspace::removeRow(size_t index) {
   if (index >= rowCount()) {
-    g_log.error() << "Attempt to delete a non-existing row (" << index << ")\n";
-    return;
+    std::stringstream ss;
+    ss << "Attempt to delete a non-existing row (" << index << ")\n";
+    throw std::range_error(ss.str());
   }
   for (auto &column : m_columns)
     removeFromColumn(column.get(), index);
@@ -184,17 +188,16 @@ std::vector<std::string> TableWorkspace::getColumnNames() const {
   return nameList;
 }
 
-bool TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
+void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
   auto ci = std::find_if(m_columns.begin(), m_columns.end(),
                          FindName(column->name()));
   if (ci != m_columns.end()) {
-    g_log.error() << "Column with name " << column->name()
-                  << " already exists.\n";
-    return false;
+    std::stringstream ss;
+    ss << "Column with name " << column->name() << " already exists.\n";
+    throw std::invalid_argument(ss.str());
   } else {
     m_columns.push_back(column);
   }
-  return true;
 }
 
 /**

@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidAPI/IArchiveSearch.h"
+#include "MantidKernel/System.h"
 
 #include <string>
 
@@ -50,7 +50,7 @@ private:
   /// Queries the archive & returns the path to a single file.
   std::string getPath(const std::string &fName) const;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_ISISDATAARCHIVE_H_

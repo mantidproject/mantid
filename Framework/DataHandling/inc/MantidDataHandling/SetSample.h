@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_SETSAMPLE_H_
 #define MANTID_DATAHANDLING_SETSAMPLE_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/PropertyManager_fwd.h"
 
 namespace Mantid {
 namespace Geometry {
 class ReferenceFrame;
 class SampleEnvironment;
-}
+} // namespace Geometry
 namespace DataHandling {
 
 /**

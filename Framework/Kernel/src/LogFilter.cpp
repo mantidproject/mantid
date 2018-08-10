@@ -147,7 +147,7 @@ template <> struct ConvertToTimeSeriesDouble<double> {
     return doubleSeries->clone();
   }
 };
-}
+} // namespace
 
 /**
  * Converts the given property to a TimeSeriesProperty<double>, throws if

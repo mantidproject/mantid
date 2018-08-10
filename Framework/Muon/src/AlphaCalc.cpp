@@ -144,5 +144,5 @@ void AlphaCalc::exec() {
   setProperty("Alpha", sumForward / sumBackward);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

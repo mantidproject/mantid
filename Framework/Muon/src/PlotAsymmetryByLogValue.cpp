@@ -9,19 +9,19 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidMuon/PlotAsymmetryByLogValue.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidMuon/PlotAsymmetryByLogValue.h"
 #include "Poco/File.h"
 #include <MantidAPI/FileFinder.h>
-#include "MantidAPI/WorkspaceGroup.h"
 
 namespace // anonymous
-    {
+{
 
 /**
  * Convert a log property to a double value.
@@ -58,7 +58,7 @@ bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value,
   return false;
 }
 
-} // anonymous
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -80,8 +80,8 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
       m_firstStart_ns(0) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void PlotAsymmetryByLogValue::init() {
   std::string nexusExt(".nxs");
 
@@ -146,8 +146,8 @@ void PlotAsymmetryByLogValue::init() {
 }
 
 /**
-*   Executes the algorithm
-*/
+ *   Executes the algorithm
+ */
 void PlotAsymmetryByLogValue::exec() {
 
   // Check input properties to decide whether or not we can reuse previous
@@ -185,7 +185,7 @@ void PlotAsymmetryByLogValue::exec() {
       nplots,  //  the number of plots
       npoints, //  the number of data points on a plot
       npoints  //  it's not a histogram
-      );
+  );
   // Populate output workspace with data
   populateOutputWorkspace(outWS, nplots);
   // Assign the result to the output workspace property
@@ -198,9 +198,9 @@ void PlotAsymmetryByLogValue::exec() {
 }
 
 /**  Checks input properties and compares them to previous values
-*   @param is :: [output] Number of the first run
-*   @param ie :: [output] Number of the last run
-*/
+ *   @param is :: [output] Number of the first run
+ *   @param ie :: [output] Number of the last run
+ */
 void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 
   // Log Value
@@ -302,10 +302,10 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 }
 
 /**  Loads one run and applies dead-time corrections and detector grouping if
-* required
-*   @param runNumber :: [input] Run number specifying run to load
-*   @return :: Loaded workspace
-*/
+ * required
+ *   @param runNumber :: [input] Run number specifying run to load
+ *   @return :: Loaded workspace
+ */
 Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
 
   // Get complete run name
@@ -364,9 +364,9 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
 }
 
 /**  Load dead-time corrections from specified file
-*   @param deadTimeFile :: [input] File to read corrections from
-*   @return :: Deadtime corrections loaded from file
-*/
+ *   @param deadTimeFile :: [input] File to read corrections from
+ *   @return :: Deadtime corrections loaded from file
+ */
 Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
     const std::string &deadTimeFile) {
 
@@ -379,9 +379,9 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 }
 
 /**  Populate output workspace with results
-*   @param outWS :: [input/output] Output workspace to populate
-*   @param nplots :: [input] Number of histograms
-*/
+ *   @param outWS :: [input/output] Output workspace to populate
+ *   @param nplots :: [input] Number of histograms
+ */
 void PlotAsymmetryByLogValue::populateOutputWorkspace(
     MatrixWorkspace_sptr &outWS, int nplots) {
 
@@ -424,9 +424,9 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
 }
 
 /**  Populate output workspace with results
-*   @param outWS :: [input/output] Output workspace to populate
-*   @param nplots :: [input] Number of histograms
-*/
+ *   @param outWS :: [input/output] Output workspace to populate
+ *   @param nplots :: [input] Number of histograms
+ */
 void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
                                                int nplots) {
 
@@ -469,12 +469,12 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS,
 }
 
 /**  Parse run names
-*   @param firstFN :: [input/output] First run's name
-*   @param lastFN :: [input/output] Last run's name
-*   @param fnBase :: [output] Runs base name
-*   @param fnExt :: [output] Runs extension
-*   @param fnZeros :: [output] Number of zeros in run's name
-*/
+ *   @param firstFN :: [input/output] First run's name
+ *   @param lastFN :: [input/output] Last run's name
+ *   @param fnBase :: [output] Runs base name
+ *   @param fnExt :: [output] Runs extension
+ *   @param fnZeros :: [output] Number of zeros in run's name
+ */
 void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
                                             std::string &lastFN,
                                             std::string &fnBase,
@@ -550,10 +550,10 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
 }
 
 /**  Apply dead-time corrections. The calculation is done by ApplyDeadTimeCorr
-* algorithm
-*   @param loadedWs :: [input/output] Workspace to apply corrections to
-*   @param deadTimes :: [input] Corrections to apply
-*/
+ * algorithm
+ *   @param loadedWs :: [input/output] Workspace to apply corrections to
+ *   @param deadTimes :: [input] Corrections to apply
+ */
 void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
                                                 Workspace_sptr deadTimes) {
   ScopedWorkspace ws(loadedWs);
@@ -574,10 +574,10 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
 }
 
 /** Creates grouping table from supplied forward and backward spectra
-* @param fwd :: [Input] Forward spectra
-* @param bwd :: [Input] Backward spectra
-* @return :: Workspace containing custom grouping
-*/
+ * @param fwd :: [Input] Forward spectra
+ * @param bwd :: [Input] Backward spectra
+ * @return :: Workspace containing custom grouping
+ */
 Workspace_sptr
 PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
                                               const std::vector<int> &bwd) {
@@ -594,9 +594,9 @@ PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
 }
 
 /**  Group detectors from table
-*   @param loadedWs :: [input/output] Workspace to apply grouping to
-*   @param grouping :: [input] Workspace containing grouping to apply
-*/
+ *   @param loadedWs :: [input/output] Workspace to apply grouping to
+ *   @param grouping :: [input] Workspace containing grouping to apply
+ */
 void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
                                              Workspace_sptr grouping) {
 
@@ -616,9 +616,9 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
 }
 
 /**  Performs asymmetry analysis on a loaded workspace
-*   @param loadedWs :: [input] Workspace to apply analysis to
-*   @param index :: [input] Vector index where results will be stored
-*/
+ *   @param loadedWs :: [input] Workspace to apply analysis to
+ *   @param index :: [input] Vector index where results will be stored
+ */
 void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
                                          size_t index) {
 
@@ -684,11 +684,11 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 }
 
 /**  Calculate the integral asymmetry for a workspace.
-*   The calculation is done by AsymmetryCalc and Integration algorithms.
-*   @param ws :: The workspace
-*   @param Y :: Reference to a variable receiving the value of asymmetry
-*   @param E :: Reference to a variable receiving the value of the error
-*/
+ *   The calculation is done by AsymmetryCalc and Integration algorithms.
+ *   @param ws :: The workspace
+ *   @param Y :: Reference to a variable receiving the value of asymmetry
+ *   @param E :: Reference to a variable receiving the value of the error
+ */
 void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
                                                double &Y, double &E) {
 
@@ -732,11 +732,11 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
 }
 
 /**  Calculate the integral asymmetry for a pair of workspaces (red & green).
-*   @param ws_red :: The red workspace
-*   @param ws_green :: The green workspace
-*   @param Y :: Reference to a variable receiving the value of asymmetry
-*   @param E :: Reference to a variable receiving the value of the error
-*/
+ *   @param ws_red :: The red workspace
+ *   @param ws_green :: The green workspace
+ *   @param Y :: Reference to a variable receiving the value of asymmetry
+ *   @param E :: Reference to a variable receiving the value of the error
+ */
 void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
                                                MatrixWorkspace_sptr ws_green,
                                                double &Y, double &E) {
@@ -870,5 +870,5 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
                               " cannot be converted to a double type.");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

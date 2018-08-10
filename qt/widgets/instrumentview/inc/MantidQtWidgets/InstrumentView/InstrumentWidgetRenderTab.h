@@ -25,8 +25,8 @@ class BinDialog;
 class ColorMapWidget;
 
 /**
-* Implements the Render tab in InstrumentWidget.
-*/
+ * Implements the Render tab in InstrumentWidget.
+ */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetRenderTab
     : public InstrumentWidgetTab {
   Q_OBJECT
@@ -120,6 +120,6 @@ private:
 
   friend class InstrumentWidget;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*INSTRUMENTWIDGETRENDERTAB_H_*/

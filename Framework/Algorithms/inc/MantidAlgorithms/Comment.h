@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_COMMENT_H_
 #define MANTID_ALGORITHMS_COMMENT_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 

@@ -41,8 +41,8 @@ namespace ApodizationFunctions {
 double lorentz(double time, double decayConstant);
 double gaussian(const double time, const double decayConstant);
 double none(const double, const double);
-}
-}
-}
+} // namespace ApodizationFunctions
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /*MANTID_APODIZATIONFUNCTIONS_H_*/

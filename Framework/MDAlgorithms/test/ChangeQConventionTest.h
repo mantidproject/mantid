@@ -1,8 +1,8 @@
 #ifndef MANTID_MDEVENTS_ChangeQConventionTEST_H_
 #define MANTID_MDEVENTS_ChangeQConventionTEST_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/ChangeQConvention.h"

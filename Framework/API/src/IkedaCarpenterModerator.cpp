@@ -5,15 +5,15 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <gsl/gsl_roots.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_roots.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 
+#include <cassert>
 #include <cmath>
 #include <sstream>
-#include <cassert>
 
 namespace Mantid {
 namespace API {
@@ -26,7 +26,7 @@ const char *TILT_ANGLE_NAME = "TiltAngle";
 const char *TAU_F_NAME = "TauF";
 const char *TAU_S_NAME = "TauS";
 const char *R_NAME = "R";
-}
+} // namespace
 
 /// Default constructor required by the factory
 IkedaCarpenterModerator::IkedaCarpenterModerator()
@@ -112,7 +112,8 @@ double IkedaCarpenterModerator::sampleTimeDistribution(
   } else {
     std::ostringstream os;
     os << "IkedaCarpenterModerator::sampleTimeDistribution - Random number "
-          "must be flat between [0,1]. Current value=" << flatRandomNo;
+          "must be flat between [0,1]. Current value="
+       << flatRandomNo;
     throw std::invalid_argument(os.str());
   }
 }
@@ -470,5 +471,5 @@ double IkedaCarpenterModerator::area(const double x) const {
   }
   return (0.);
 }
-}
-}
+} // namespace API
+} // namespace Mantid

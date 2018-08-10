@@ -42,7 +42,8 @@ class DPDFreduction(api.PythonAlgorithm):
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
         self.setPropertyGroup("RunNumbers", titleInputOptions)
         self.declareProperty(api.FileProperty(name='Vanadium', defaultValue='',
-                                              action=api.FileAction.OptionalLoad, extensions=['.nxs']),
+                                              action=api.FileAction.OptionalLoad,
+                                              extensions=['.nxs']),
                              'Preprocessed white-beam vanadium file.')
         self.setPropertyGroup("Vanadium", titleInputOptions)
         self.declareProperty('EmptyCanRunNumbers', '', 'Empty can run numbers')
@@ -50,25 +51,35 @@ class DPDFreduction(api.PythonAlgorithm):
 
         # Configuration parameters
         titleConfigurationOptions = "Configuration"
+
         e_validator = kapi.FloatArrayLengthValidator(1,3)
-        self.declareProperty(kapi.FloatArrayProperty('EnergyBins', [1.5,] ,validator=e_validator),
+        self.declareProperty(kapi.FloatArrayProperty('EnergyBins', [1.5],
+                                                     validator=e_validator),
                              'Energy transfer binning scheme (in meV)')
         self.setPropertyGroup("EnergyBins", titleConfigurationOptions)
+
         q_validator = kapi.FloatArrayLengthValidator(0, 3)
-        self.declareProperty(kapi.FloatArrayProperty('MomentumTransferBins', list(), validator=q_validator),
+        self.declareProperty(kapi.FloatArrayProperty('MomentumTransferBins',
+                                                     list(),
+                                                     validator=q_validator),
                              'Momentum transfer binning scheme (in inverse Angstroms)')
         self.setPropertyGroup("MomentumTransferBins", titleConfigurationOptions)
+
         self.declareProperty('NormalizeSlices', False,
-                             'Do we normalize each slice?', direction=kapi.Direction.Input)
+                             'Do we normalize each slice?',
+                             direction=kapi.Direction.Input)
         self.setPropertyGroup("NormalizeSlices", titleConfigurationOptions)
 
         # Ouptut parameters
         titleOuptutOptions = "Output"
         self.declareProperty('CleanWorkspaces', True,
-                             'Do we clean intermediate steps?', direction=kapi.Direction.Input)
+                             'Do we clean intermediate steps?',
+                             direction=kapi.Direction.Input)
         self.setPropertyGroup("CleanWorkspaces", titleOuptutOptions)
-        self.declareProperty(api.MatrixWorkspaceProperty('OutputWorkspace', 'S_Q_E_sliced',
-                                                         kapi.Direction.Output), "Output workspace")
+        self.declareProperty(api.MatrixWorkspaceProperty('OutputWorkspace',
+                                                         'S_Q_E_sliced',
+                                                         kapi.Direction.Output),
+                             "Output workspace")
         self.setPropertyGroup("OutputWorkspace", titleOuptutOptions)
 
     def validateInputs(self):
@@ -86,7 +97,8 @@ class DPDFreduction(api.PythonAlgorithm):
             elif re.compile(r'^\s*\d+\s*-\s*\d+\s*$').match(runs_string):
                 first, second = [int(x) for x in runs_string.split('-')]
                 if first >= second:
-                    issues[runs_property_name] = runs_property_name + ' should be increasing'
+                    issues[runs_property_name] = runs_property_name +\
+                                                 ' should be increasing'
 
         # check syntax for RunNumbers
         checkrunnumbers('RunNumbers')
@@ -94,13 +106,14 @@ class DPDFreduction(api.PythonAlgorithm):
         if self.getPropertyValue('EmptyCanRunNumbers'):
             checkrunnumbers('EmptyCanRunNumbers')
         # check energy bins
-        ebins = self.getPropertyValue('EnergyBins')
+        ebins = self.getProperty('EnergyBins').value
         if len(ebins) not in (1, 3):
             issues['EnergyBins'] = 'Energy bins is a list of either one or three values'
         # check momentum transfer bins
-        qbins = self.getPropertyValue('MomentumTransferBins')
+        qbins = self.getProperty('MomentumTransferBins').value
         if len(qbins) not in (0, 1, 3):
-            issues['MomentumTransferBins'] = 'Momentum transfer bins is a list of zero, one, or three values'
+            issues['MomentumTransferBins'] =\
+                'Momentum transfer bins is a list of zero (empty list), one, or three values'
         return issues
 
     #pylint: disable=too-many-locals, too-many-branches

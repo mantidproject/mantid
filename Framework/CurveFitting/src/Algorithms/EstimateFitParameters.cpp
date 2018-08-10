@@ -322,9 +322,10 @@ void EstimateFitParameters::initConcrete() {
                   "Additional constraints on tied parameters.");
   declareProperty("Type", "Monte Carlo",
                   R"(Type of the algorithm: "Monte Carlo" or "Cross Entropy")");
-  declareProperty("NOutputs", 10, "Number of parameter sets to output to "
-                                  "OutputWorkspace. Unused if OutputWorkspace "
-                                  "isn't set. (Monte Carlo only)");
+  declareProperty("NOutputs", 10,
+                  "Number of parameter sets to output to "
+                  "OutputWorkspace. Unused if OutputWorkspace "
+                  "isn't set. (Monte Carlo only)");
   declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output,
                       Mantid::API::PropertyMode::Optional),
@@ -332,16 +333,19 @@ void EstimateFitParameters::initConcrete() {
                   "the smallest values of cost function. (Monte Carlo only)");
   declareProperty("NIterations", 10,
                   "Number of iterations of the Cross Entropy algorithm.");
-  declareProperty("Selection", 10, "Size of the selection in the Cross Entropy "
-                                   "algorithm from which to estimate new "
-                                   "distribution parameters for the next "
-                                   "iteration.");
-  declareProperty("FixBadParameters", false, "If true try to estimate which "
-                                             "parameters may cause problems "
-                                             "for fitting and fix them.");
-  declareProperty("Seed", 0, "A seed value for the random number generator. "
-                             "The default value (0) makes the generator use a "
-                             "random seed.");
+  declareProperty("Selection", 10,
+                  "Size of the selection in the Cross Entropy "
+                  "algorithm from which to estimate new "
+                  "distribution parameters for the next "
+                  "iteration.");
+  declareProperty("FixBadParameters", false,
+                  "If true try to estimate which "
+                  "parameters may cause problems "
+                  "for fitting and fix them.");
+  declareProperty("Seed", 0,
+                  "A seed value for the random number generator. "
+                  "The default value (0) makes the generator use a "
+                  "random seed.");
 }
 
 //----------------------------------------------------------------------------------------------

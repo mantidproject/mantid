@@ -1,10 +1,10 @@
 #include "MantidVatesAPI/vtkNullStructuredGrid.h"
 
-#include <vtkNew.h>
-#include <vtkIdList.h>
-#include <vtkPoints.h>
-#include <vtkPointData.h>
 #include <vtkFloatArray.h>
+#include <vtkIdList.h>
+#include <vtkNew.h>
+#include <vtkPointData.h>
+#include <vtkPoints.h>
 #include <vtkSmartPointer.h>
 #include <vtkStructuredGrid.h>
 
@@ -39,5 +39,5 @@ vtkStructuredGrid *vtkNullStructuredGrid::createNullData() {
 
   return dataSet;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

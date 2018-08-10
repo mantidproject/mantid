@@ -6,13 +6,13 @@
 
 #include "MantidKernel/Matrix.h"
 
-#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
 
-#include <vector>
-#include <stdexcept>
 #include <iomanip>
+#include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace CurveFitting {

@@ -26,6 +26,6 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 #endif // CHANGELOGTIME_H

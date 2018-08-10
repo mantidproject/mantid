@@ -263,5 +263,5 @@ std::vector<SaveGDA::CalibrationParams> SaveGDA::parseParamsFile() const {
   return calibParams;
 }
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid

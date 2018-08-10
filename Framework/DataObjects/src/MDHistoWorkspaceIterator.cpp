@@ -60,7 +60,7 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin,
   }
   return dExact;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataObjects {
@@ -741,5 +741,5 @@ size_t MDHistoWorkspaceIterator::permutationCacheSize() const {
   return m_permutationsVertexTouchingMap.size();
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

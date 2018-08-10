@@ -8,15 +8,15 @@
 #ifndef PANELHKLERRORSTEST_H_
 #define PANELHKLERRORSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidCrystal/IndexPeaks.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidCrystal/IndexPeaks.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidCrystal/PeakHKLErrors.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include <cxxtest/TestSuite.h>
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 using namespace Mantid;
 using namespace Crystal;

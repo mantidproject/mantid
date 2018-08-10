@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/BoxInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -54,9 +54,7 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  // clang-format off
-  GCC_DIAG_OFF(strict-aliasing)
-  // clang-format on
+  GNU_DIAG_OFF("strict-aliasing")
   void test_initial_recursion_depth_is_1_for_MD_Event_w_split() {
     // Arrange
     const std::string wsName = "MD_EVENT_WS_WITH_SPLITTING";

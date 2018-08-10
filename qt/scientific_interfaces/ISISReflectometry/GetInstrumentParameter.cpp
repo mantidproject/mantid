@@ -63,5 +63,5 @@ std::string const &InstrumentParameterTypeMissmatch::expectedType() const {
 std::string const &InstrumentParameterTypeMissmatch::originalMessage() const {
   return m_originalMessage;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

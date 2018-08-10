@@ -194,7 +194,7 @@ void setCell(IPeaksWorkspace &self, const object &col_or_row,
   PeakWorkspaceTableAdaptor tableMap{self};
   tableMap.setProperty(columnName, rowIndex, value);
 }
-}
+} // namespace
 
 void export_IPeaksWorkspace() {
   // IPeaksWorkspace class
@@ -228,8 +228,9 @@ void export_IPeaksWorkspace() {
       .def("peakInfoNumber", &IPeaksWorkspace::peakInfoNumber,
            (arg("self"), arg("qlab_frame"), arg("lab_coordinate")),
            "Peak info number at Q vector for this workspace")
-      .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
-                                 arg("column_or_row"), arg("value")),
+      .def("setCell", &setCell,
+           (arg("self"), arg("row_or_column"), arg("column_or_row"),
+            arg("value")),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.");

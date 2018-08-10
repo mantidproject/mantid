@@ -3,16 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FilterEvents.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -49,7 +48,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test initialization
-    */
+   */
   void test_Initialization() {
     FilterEvents alg;
     alg.initialize();
@@ -59,14 +58,14 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test create event workspace and splitters
-    * In all the tests below:
-    * (1) 10 detectors
-    * (2) Run starts @ 20000000000 seconds
-    * (3) Pulse length = 100*1000*1000 seconds
-    * (4) Within one pulse, two consecutive events/neutrons is apart for
+   * In all the tests below:
+   * (1) 10 detectors
+   * (2) Run starts @ 20000000000 seconds
+   * (3) Pulse length = 100*1000*1000 seconds
+   * (4) Within one pulse, two consecutive events/neutrons is apart for
    * 10*1000*1000 seconds
-    * (5) "Experiment": 5 pulse times.  10 events in each pulse
-    */
+   * (5) "Experiment": 5 pulse times.  10 events in each pulse
+   */
   void test_CreatedEventWorskpaceAndSplitter() {
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -91,15 +90,15 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /**  Filter events without any correction
-    *  Event workspace:
-    * (1) 10 detectors
-    * (2) Run starts @ 20000000000 seconds
-    * (3) Pulse length = 100*1000*1000 seconds
-    * (4) Within one pulse, two consecutive events/neutrons is apart for
+   *  Event workspace:
+   * (1) 10 detectors
+   * (2) Run starts @ 20000000000 seconds
+   * (3) Pulse length = 100*1000*1000 seconds
+   * (4) Within one pulse, two consecutive events/neutrons is apart for
    *10*1000*1000 seconds
-    * (5) "Experiment": 5 pulse times.  10 events in each pulse
-    *
-    * In this test
+   * (5) "Experiment": 5 pulse times.  10 events in each pulse
+   *
+   * In this test
    *  (1) Leave correction table workspace empty
    *  (2) Count events in each output including "-1", the excluded/unselected
    *      events
@@ -264,15 +263,15 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter events without any correction and test for user-specified
    *workspace starting value
-    *  Event workspace:
-    * (1) 10 detectors
-    * (2) Run starts @ 20000000000 seconds
-    * (3) Pulse length = 100*1000*1000 seconds
-    * (4) Within one pulse, two consecutive events/neutrons is apart for
+   *  Event workspace:
+   * (1) 10 detectors
+   * (2) Run starts @ 20000000000 seconds
+   * (3) Pulse length = 100*1000*1000 seconds
+   * (4) Within one pulse, two consecutive events/neutrons is apart for
    *10*1000*1000 seconds
-    * (5) "Experiment": 5 pulse times.  10 events in each pulse
-    *
-    * In this test
+   * (5) "Experiment": 5 pulse times.  10 events in each pulse
+   *
+   * In this test
    *  (1) Leave correction table workspace empty
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
@@ -359,7 +358,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
-    */
+   */
   void test_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
@@ -443,7 +442,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
-    */
+   */
   void test_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
@@ -501,7 +500,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
-    */
+   */
   void test_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
@@ -552,7 +551,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
-    */
+   */
   void test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
@@ -1141,12 +1140,12 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
-    * @param runstart_i64 : absolute run start time in int64_t format with unit
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
    * nanosecond
-    * @param pulsedt : pulse length in int64_t format with unit nanosecond
-    * @param todft : time interval between 2 adjacent event in same pulse in
+   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * @param todft : time interval between 2 adjacent event in same pulse in
    * int64_t format of unit nanosecond
-    * @param numpulses : number of pulses in the event workspace
+   * @param numpulses : number of pulses in the event workspace
    */
   EventWorkspace_sptr createEventWorkspace(int64_t runstart_i64,
                                            int64_t pulsedt, int64_t tofdt,
@@ -1221,12 +1220,12 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
-    * This workspace will have the same neutron events as the test case in
-    *EventList
-    *
-    * @param runstart_i64 : absolute run start time in int64_t format with unit
-    *nanosecond
-    * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * This workspace will have the same neutron events as the test case in
+   *EventList
+   *
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
+   *nanosecond
+   * @param pulsedt : pulse length in int64_t format with unit nanosecond
    */
   EventWorkspace_sptr createEventWorkspaceDirect(int64_t runstart_i64,
                                                  int64_t pulsedt) {
@@ -1275,10 +1274,10 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace to mimic direct inelastic scattering insturment.
    * This workspace has
-    * @param runstart_i64 : absolute run start time in int64_t format with unit
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
    * nanosecond
-    * @param pulsedt : pulse length in int64_t format with unit nanosecond
-    */
+   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   */
   EventWorkspace_sptr createEventWorkspaceInDirect(int64_t runstart_i64,
                                                    int64_t pulsedt) {
     // Create an EventWorkspace with 10 banks with 1 detector each.  No events
@@ -1363,12 +1362,12 @@ public:
    * 1: pulse 0: 3+ ~ pulse 1: 9+
    * 2: from pulse 2: 0 ~ 6+
    * -1: from pulse 2: 6+ ~ 9+
-    * @param runstart_i64 : absolute run start time in int64_t format with unit
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
    * nanosecond
-    * @param pulsedt : pulse length in int64_t format with unit nanosecond
-    * @param todft : time interval between 2 adjacent event in same pulse in
+   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * @param todft : time interval between 2 adjacent event in same pulse in
    * int64_t format of unit nanosecond
-    * @param numpulses : number of pulses in the event workspace
+   * @param numpulses : number of pulses in the event workspace
    */
   SplittersWorkspace_sptr createSplittersWorkspace(int64_t runstart_i64,
                                                    int64_t pulsedt,
@@ -1529,17 +1528,17 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create a Splitter for fast fequency log for output
-    * The splitter is within every pulse.  2 groups of splitters are created.
-    *In each pulse
-    * 1. group 0: 0.2 dT ~ 0.4 dT    dT = pulsedt
-    * 2. group 1: 0.6 dT ~ 0.8 dT
-    *
-    * @param runstart_i64 : absolute run start time in int64_t format with unit
-    *nanosecond
-    * @param pulsedt : pulse length in int64_t format with unit nanosecond
-    * @param todft : time interval between 2 adjacent event in same pulse in
-    *int64_t format of unit nanosecond
-    * @param numpulses : number of pulses in the event workspace
+   * The splitter is within every pulse.  2 groups of splitters are created.
+   *In each pulse
+   * 1. group 0: 0.2 dT ~ 0.4 dT    dT = pulsedt
+   * 2. group 1: 0.6 dT ~ 0.8 dT
+   *
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
+   *nanosecond
+   * @param pulsedt : pulse length in int64_t format with unit nanosecond
+   * @param todft : time interval between 2 adjacent event in same pulse in
+   *int64_t format of unit nanosecond
+   * @param numpulses : number of pulses in the event workspace
    */
   SplittersWorkspace_sptr createFastFreqLogSplitter(int64_t runstart_i64,
                                                     int64_t pulsedt,
@@ -1575,7 +1574,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create the time correction table
-    */
+   */
   TableWorkspace_sptr createTimeCorrectionTable(MatrixWorkspace_sptr inpws) {
     // 1. Generate an empty table
     auto corrtable = boost::make_shared<TableWorkspace>();
@@ -1596,9 +1595,9 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Fake uniform time data more close to SNS case
-    * A list of 1000 events
-    * Pulse length: 1000000 * nano-second
-    */
+   * A list of 1000 events
+   * Pulse length: 1000000 * nano-second
+   */
   EventList fake_uniform_time_sns_data(int64_t runstart, int64_t pulselength) {
     // Clear the list
     EventList el = EventList();

@@ -146,11 +146,11 @@ template <class Archive>
 inline void load_construct_data(Archive &ar,
                                 Mantid::DataObjects::EventList *elist,
                                 const unsigned int /*file_version*/
-                                ) {
+) {
   // default just uses the default constructor to initialize
   // previously allocated memory.
   new (elist) Mantid::DataObjects::EventList();
 }
-}
-}
+} // namespace serialization
+} // namespace boost
 #endif

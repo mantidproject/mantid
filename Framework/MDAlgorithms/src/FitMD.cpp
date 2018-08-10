@@ -2,15 +2,15 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -348,5 +348,5 @@ size_t FitMD::getDomainSize() const {
   return n;
 }
 
-} // namespace Algorithm
+} // namespace MDAlgorithms
 } // namespace Mantid
