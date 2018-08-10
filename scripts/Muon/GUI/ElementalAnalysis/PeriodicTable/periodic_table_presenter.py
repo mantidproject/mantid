@@ -44,19 +44,28 @@ class PeriodicTablePresenter(object):
         self.view.on_table_changed(slot)
 
     def unregister_table_changed(self, slot):
-        self.view.unreg_on_table_changed(slot)
+        try:
+            self.view.unreg_on_table_changed(slot)
+        except TypeError:
+            return
 
     def register_table_lclicked(self, slot):
         self.view.on_table_lclicked(slot)
 
     def unregister_table_lclicked(self, slot):
-        self.view.unreg_on_table_lclicked(slot)
+        try:
+            self.view.unreg_on_table_lclicked(slot)
+        except TypeError:
+            return
 
     def register_table_rclicked(self, slot):
         self.view.on_table_rclicked(slot)
 
     def unregister_table_rclicked(self, slot):
-        self.view.unreg_on_table_rclicked(slot)
+        try:
+            self.view.unreg_on_table_rclicked(slot)
+        except TypeError:
+            return
 
     def set_peak_datafile(self, filename):
         try:

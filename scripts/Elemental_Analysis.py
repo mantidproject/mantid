@@ -40,8 +40,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def select_data_file(self):
         filename = str(QtGui.QFileDialog.getOpenFileName())
-        if filename != "":
-            self.ptable.set_peak_datafile(str(filename))
+        if filename:
+            self.ptable.set_peak_datafile(filename)
 
 
 def qapp():
