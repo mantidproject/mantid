@@ -4,7 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
+#include "MantidAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -17,7 +17,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 
 namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -61,29 +61,10 @@ void SANSSolidAngleCorrection::init() {
                   "that the detector is curved around the sample. E.g. BIOSANS "
                   "Wing detector.");
   declareProperty("OutputMessage", "", Direction::Output);
-  declareProperty("ReductionProperties", "__sans_reduction_properties",
-                  Direction::Input);
+  
 }
 
 void SANSSolidAngleCorrection::exec() {
-  // Reduction property manager
-  const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
-  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-  } else {
-    reductionManager = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
-                                                        reductionManager);
-  }
-
-  // If the solid angle algorithm isn't in the reduction properties, add it
-  if (!reductionManager->existsProperty("SANSSolidAngleCorrection")) {
-    auto algProp = make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
-    algProp->setValue(toString());
-    reductionManager->declareProperty(std::move(algProp));
-  }
 
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   DataObjects::EventWorkspace_const_sptr inputEventWS =
