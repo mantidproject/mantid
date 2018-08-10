@@ -11,6 +11,7 @@ from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
 
 muonGUI = None
 
+
 class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
@@ -55,11 +56,13 @@ def main():
         QtGui.QMessageBox.warning(muonGUI, "Muon Analysis version 2", str(error))
         return muonGUI
 
+
 def saveToProject():
     if muonGUI is None:
         return ""
     project = "test"
-    return project	
+    return project
+
 
 def loadFromProject(project):
     muonGUI = main()
@@ -69,8 +72,8 @@ def loadFromProject(project):
 if __name__ == '__main__':
     muonGUI = main()
     #test 2
-	#muonGUI = loadFromProject("Test basic load")
-	#test 3
+    #muonGUI = loadFromProject("Test basic load")
+    #test 3
     #muonGUI = main()
     #print("test 3: ",saveToProject())
     #test 4
