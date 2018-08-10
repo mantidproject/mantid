@@ -2,6 +2,8 @@ set ( SRC_FILES
     src/InstrumentBuilder.cpp
     src/NexusGeometryParser.cpp
     src/NexusShapeFactory.cpp
+    src/Tube.cpp
+    src/TubeHelpers.cpp
         )
 
 set ( INC_FILES
@@ -9,12 +11,16 @@ set ( INC_FILES
     inc/MantidNexusGeometry/InstrumentBuilder.h
     inc/MantidNexusGeometry/NexusGeometryParser.h
     inc/MantidNexusGeometry/NexusShapeFactory.h
-        )
+    inc/MantidNexusGeometry/Tube.h
+    inc/MantidNexusGeometry/TubeHelpers.h        
+      )
 
 set ( TEST_FILES
     InstrumentBuilderTest.h
     NexusGeometryParserTest.h
     NexusShapeFactoryTest.h
+    TubeTest.h
+    TubeHelpersTest.h
         )
 
 if (COVERALLS)

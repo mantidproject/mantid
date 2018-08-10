@@ -1,12 +1,13 @@
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidNexusGeometry/InstrumentBuilder.h"
-#include "MantidNexusGeometry/NexusShapeFactory.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidNexusGeometry/NexusShapeFactory.h"
+#include "MantidNexusGeometry/Tube.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -67,19 +68,24 @@ InstrumentBuilder::addComponent(const std::string &compName,
   return component;
 }
 
+/** Add a tube to the last bank
+@param compName Tube name
+@param tube Tube to be added to bank
+@param detShape Shape of each detector within the tube
+*/
 void InstrumentBuilder::addObjComponentAssembly(
-    const std::string &compName, const Eigen::Vector3d &position,
-    boost::shared_ptr<const Mantid::Geometry::IObject> shape,
-    boost::shared_ptr<const Mantid::Geometry::IObject> detShape,
-    std::vector<Eigen::Vector3d> detPositions, std::vector<int> detIDs) {
+    const std::string &compName, const detail::Tube &tube,
+    boost::shared_ptr<const Mantid::Geometry::IObject> detShape) {
   verifyMutable();
   auto *objComp(new Geometry::ObjCompAssembly(compName));
-  objComp->setPos(position(0), position(1), position(2));
-  objComp->setOutline(shape);
-  for (size_t i = 0; i < detPositions.size(); ++i) {
-    auto detName = compName + "_" + std::to_string(i);
-    auto *detector = new Geometry::Detector(detName, detIDs[i], objComp);
-    detector->translate(Mantid::Kernel::toV3D(detPositions[i]));
+  const auto &pos = tube.position();
+  objComp->setPos(pos(0), pos(1), pos(2));
+  objComp->setOutline(tube.shape());
+  auto baseName = compName + "_";
+  for (size_t i = 0; i < tube.detPositions().size(); ++i) {
+    auto *detector = new Geometry::Detector(baseName + std::to_string(i),
+                                            tube.detIDs()[i], objComp);
+    detector->translate(Mantid::Kernel::toV3D(tube.detPositions()[i]));
     detector->setShape(detShape);
     objComp->add(detector);
     m_instrument->markAsDetectorIncomplete(detector);

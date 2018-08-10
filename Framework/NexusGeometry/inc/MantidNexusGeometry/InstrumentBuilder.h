@@ -15,6 +15,9 @@ class IComponent;
 class ICompAssembly;
 }
 namespace NexusGeometry {
+namespace detail {
+class Tube;
+}
 
 /** InstrumentBuilder : Builder for wrapping the creating of a Mantid
   Instrument. Provides some useful abstractions over the full-blown Instrument
@@ -50,10 +53,8 @@ public:
                                      const Eigen::Vector3d &position);
 
   void addObjComponentAssembly(
-      const std::string &compName, const Eigen::Vector3d &position,
-      boost::shared_ptr<const Mantid::Geometry::IObject> shape,
-      boost::shared_ptr<const Mantid::Geometry::IObject> detShape,
-      std::vector<Eigen::Vector3d> detPositions, std::vector<int> detIDs);
+      const std::string &compName, const detail::Tube &tube,
+      boost::shared_ptr<const Mantid::Geometry::IObject> detShape);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(
       const std::string &detName, int detId, const Eigen::Vector3d &position,
