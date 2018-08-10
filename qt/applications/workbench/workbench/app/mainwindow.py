@@ -21,7 +21,9 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 import atexit
+import imp
 import importlib
+import os
 import sys
 
 # -----------------------------------------------------------------------------
@@ -413,12 +415,19 @@ def start_workbench(app):
 
 def main():
     """Main entry point for the application"""
-    # Prepare for mantid import
-    prepare_mantid_env()
+    # Mantid needs to be able to find its .properties file. It looks
+    # in the application directory by default but this is
+    # the directory of python[.exe] and not guaranteed to be where
+    # the properties files is located. MANTIDPATH overrides this.
+    # If we allow a user to override MANTIDPATH then we could end up
+    # loading the wrong properties file and plugins built against
+    # a different version of Mantid and this would likely result in
+    # segfault.
+    _, pkgpath, _ = imp.find_module('mantid')
+    os.environ['MANTIDPATH'] = os.path.dirname(pkgpath)
 
     # todo: parse command arguments
 
-    # general initialization
     app = initialize()
     # the default sys check interval leads to long lags
     # when request scripts to be aborted
