@@ -10,19 +10,7 @@ using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using namespace boost::python;
 
-// Helper function to create and return a list of all the spectrum definitions
-boost::python::list getSpectrumDefinitionList(const SpectrumInfo &self) {
-  // Create the list
-  boost::python::list spectrumDefinitionList;
-
-  // Get all the spectrum definitions
-  for (size_t i = 0; i < self.size(); i++) {
-    spectrumDefinitionList.append(self.spectrumDefinition(i));
-  }
-
-  return spectrumDefinitionList;
-}
-
+// Export SpectrumInfo
 void export_SpectrumInfo() {
   class_<SpectrumInfo, boost::noncopyable>("SpectrumInfo", no_init)
       .def("__len__", &SpectrumInfo::size, arg("self"),
@@ -77,6 +65,8 @@ void export_SpectrumInfo() {
       .def("samplePosition", &SpectrumInfo::samplePosition, arg("self"),
            "Returns the absolute sample position.")
 
-      .def("getAllSpectrumDefinitions", &getSpectrumDefinitionList, arg("self"),
-           "Returns all of the SpectrumDefinitions as a list.");
+      .def("getSpectrumDefinition", &SpectrumInfo::spectrumDefinition,
+           return_value_policy<return_by_value>(), (arg("self"), arg("index")),
+           "Returns the SpectrumDefinition of the spectrum with the given "
+           "index.");
 }

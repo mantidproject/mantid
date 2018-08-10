@@ -96,8 +96,8 @@ The return value is a float.
 The ``sourcePosition()`` method does not take any parameters and returns the absolute source position. 
 The return value is a ``V3D`` object which is a point in 3D space.
 
-The ``getAllSpectrumDefinitions()`` method does not take in any parameters and returns a list of ``SpectrumDefinition``s. 
-The returned list can then be indexed into to obtain specific ``SpectrumDefinition`` objects.
+The ``getSpectrumDefinition()`` method takes in an integer ``index`` parameter and returns a ``SpectrumDefinition`` object. 
+The returned object can then be used to call other methods that belong to ``SpectrumDefinition``.
 
 .. testcode:: CallMethods
 	
@@ -113,10 +113,9 @@ The returned list can then be indexed into to obtain specific ``SpectrumDefiniti
 	# Call sourcePosition
 	print(info.sourcePosition())
 
-	# Get the SpectrumDefinition objects
-	allSpectrumDefinitions = info.getAllSpectrumDefinitions()
-	print(len(allSpectrumDefinitions))
-	print(type(allSpectrumDefinitions[0]))
+	# Get a SpectrumDefinition object
+	spectrumDefinition = info.getSpectrumDefinition(0)
+	print(type(spectrumDefinition))
 
 Output:
 
@@ -124,7 +123,6 @@ Output:
 
 	10.0
 	[0,0,-10]
-	200
 	<class 'mantid.api._api.SpectrumDefinition'>
 
 
