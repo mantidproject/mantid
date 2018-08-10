@@ -31,6 +31,6 @@ private:
   std::string m_searchString;
   bool m_searchResultsExist;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLAUTOREDUCTION_H */

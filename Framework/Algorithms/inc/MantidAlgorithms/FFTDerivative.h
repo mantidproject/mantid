@@ -10,7 +10,7 @@ namespace HistogramData {
 class Histogram;
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -54,8 +54,8 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"ExtractFFTSpectrum", "FFT", "MaxEnt", "RealFFT", "SassenaFFT",
-            "FFTSmooth"};
+    return {"ExtractFFTSpectrum", "FFT",      "MaxEnt", "RealFFT",
+            "SassenaFFT",         "FFTSmooth"};
   }
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic\\FFT"; }
@@ -75,7 +75,7 @@ private:
                          HistogramData::HistogramY &im);
 };
 
-} // FFT
-} // Mandid
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /*DERIVATIVE_H_*/

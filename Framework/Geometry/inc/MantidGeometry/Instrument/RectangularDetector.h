@@ -1,13 +1,13 @@
 #ifndef RECTANGULAR_DETECTOR_H
 #define RECTANGULAR_DETECTOR_H
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Geometry {

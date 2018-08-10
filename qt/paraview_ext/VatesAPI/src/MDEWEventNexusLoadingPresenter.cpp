@@ -150,5 +150,5 @@ Getter for the workspace type name.
 std::string MDEWEventNexusLoadingPresenter::getWorkspaceTypeName() {
   return m_wsTypeName;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

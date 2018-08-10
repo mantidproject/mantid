@@ -1,17 +1,17 @@
 #ifndef MANTID_TESTREGEXSUPPORT__
 #define MANTID_TESTREGEXSUPPORT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <sstream>
+#include <vector>
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
-#include <boost/regex.hpp>
 #include "MantidKernel/RegexStrings.h"
+#include <boost/regex.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel::Strings;

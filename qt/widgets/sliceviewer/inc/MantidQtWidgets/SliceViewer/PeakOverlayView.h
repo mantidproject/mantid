@@ -99,7 +99,7 @@ public:
 
 using PeakOverlayView_const_sptr = boost::shared_ptr<const PeakOverlayView>;
 using PeakOverlayView_sptr = boost::shared_ptr<PeakOverlayView>;
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_ */

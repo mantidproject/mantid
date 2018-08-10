@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_SETINSTRUMENTPARAMETER_H_
 #define MANTID_ALGORITHMS_SETINSTRUMENTPARAMETER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
 namespace Geometry {
 class ParameterMap;
 class IComponent;
-}
+} // namespace Geometry
 
 namespace Algorithms {
 

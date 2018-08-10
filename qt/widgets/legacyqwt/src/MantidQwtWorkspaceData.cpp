@@ -9,7 +9,7 @@ constexpr double MIN_POSITIVE = 1e-3;
 constexpr double MAX_POSITIVE = 1e30;
 /// Arbitrary multiplier between min/max if they are equal
 constexpr double MIN_MAX_DELTA = 1.001;
-}
+} // namespace
 
 MantidQwtWorkspaceData::MantidQwtWorkspaceData(bool logScaleY)
     : m_logScaleY(logScaleY), m_minY(0), m_minPositive(0), m_maxY(0),

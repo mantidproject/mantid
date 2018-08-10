@@ -34,7 +34,7 @@ namespace API {
 class ChopperModel;
 class ExperimentInfo;
 class ModeratorModel;
-}
+} // namespace API
 
 namespace MDAlgorithms {
 class CachedExperimentInfo;
@@ -78,7 +78,7 @@ private:
   /// ChopperModel-sample distance
   double m_chopSampleDist;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_MODERATORCHOPPERRESOLUTION_H_ */

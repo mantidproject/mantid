@@ -16,8 +16,8 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 using Types::Core::DateAndTime;
 
 void FilterByTime::init() {

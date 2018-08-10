@@ -2,19 +2,19 @@
 #ifndef LOADMCSTASTEST_H_
 #define LOADMCSTASTEST_H_
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMcStas.h"
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
 

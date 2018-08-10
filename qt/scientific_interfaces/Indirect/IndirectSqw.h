@@ -3,8 +3,8 @@
 
 #include "IndirectDataReductionTab.h"
 
-#include "ui_IndirectSqw.h"
 #include "MantidKernel/System.h"
+#include "ui_IndirectSqw.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -55,6 +55,6 @@ private:
   Ui::IndirectSqw m_uiForm;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_INDIRECTSQW_H_

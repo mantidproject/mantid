@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -16,14 +16,14 @@
 #include <boost/function.hpp>
 
 #include <algorithm>
-#include <numeric>
 #include <cfloat>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -62,8 +62,9 @@ void ConvertUnitsUsingDetectorTable::init() {
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace, can be the same as the input");
-  declareProperty("Target", "", boost::make_shared<StringListValidator>(
-                                    UnitFactory::Instance().getKeys()),
+  declareProperty("Target", "",
+                  boost::make_shared<StringListValidator>(
+                      UnitFactory::Instance().getKeys()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
@@ -88,8 +89,8 @@ void ConvertUnitsUsingDetectorTable::init() {
 }
 
 /** This implementation does NOT stores the emode in the provided workspace
-*  @param outputWS The workspace
-*/
+ *  @param outputWS The workspace
+ */
 void ConvertUnitsUsingDetectorTable::storeEModeOnWorkspace(
     API::MatrixWorkspace_sptr outputWS) {
   // do nothing here - don't store this value
@@ -97,11 +98,11 @@ void ConvertUnitsUsingDetectorTable::storeEModeOnWorkspace(
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
-* conversion
-* @param fromUnit :: The unit of the input workspace
-* @param inputWS :: The input workspace
-* @returns A shared pointer to the output workspace
-*/
+ * conversion
+ * @param fromUnit :: The unit of the input workspace
+ * @param inputWS :: The input workspace
+ * @returns A shared pointer to the output workspace
+ */
 MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
     Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_const_sptr inputWS) {
   using namespace Geometry;
@@ -238,8 +239,8 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
-          eventWS->getSpectrum(wsid)
-              .convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
+          eventWS->getSpectrum(wsid).convertUnitsViaTof(localFromUnit.get(),
+                                                        localOutputUnit.get());
         }
 
       } else {

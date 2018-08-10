@@ -45,7 +45,8 @@ PyObjectToMatrix::PyObjectToMatrix(const boost::python::object &p)
   if (ndim != 2) {
     std::ostringstream msg;
     msg << "Error converting numpy array to Matrix. Expected ndim=2, found "
-           "ndim=" << ndim << " dimensions.";
+           "ndim="
+        << ndim << " dimensions.";
     throw std::invalid_argument(msg.str());
   }
 }
@@ -74,6 +75,6 @@ Kernel::Matrix<double> PyObjectToMatrix::operator()() {
   }
   return matrix;
 }
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

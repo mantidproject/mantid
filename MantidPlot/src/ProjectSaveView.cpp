@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
-#include "MantidQtWidgets/Common/WindowIcons.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
+#include "MantidQtWidgets/Common/WindowIcons.h"
 
 #include "ProjectSaveView.h"
 
@@ -410,5 +410,5 @@ void ProjectSaveView::updateWorkspaceListCheckState(QTreeWidgetItem *item) {
 
   blockSignals(false);
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

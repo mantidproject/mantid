@@ -49,7 +49,7 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool
 operator!=(const GSASIIRefineFitPeaksParameters &lhs,
            const GSASIIRefineFitPeaksParameters &rhs);
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSPARAMETERS_H_

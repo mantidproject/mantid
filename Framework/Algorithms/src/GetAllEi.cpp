@@ -8,17 +8,17 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include <string>
 
@@ -140,11 +140,11 @@ void GetAllEi::init() {
 namespace {
 
 /**Simple template function to remove invalid data from vector
-*@param guessValid -- boolean vector of indicating if each particular guess is
-*valid
-*@param guess      -- vector guess values at input and values with removing
-*                     invalid parameters at output
-*/
+ *@param guessValid -- boolean vector of indicating if each particular guess is
+ *valid
+ *@param guess      -- vector guess values at input and values with removing
+ *                     invalid parameters at output
+ */
 template <class T>
 void removeInvalidValues(const std::vector<bool> &guessValid,
                          std::vector<T> &guess) {
@@ -173,7 +173,7 @@ struct peakKeeper {
   bool operator<(const peakKeeper &str) const { return (energy > str.energy); }
 };
 
-} // END unnamed namespace for auxiliary file-based compilation units
+} // namespace
 
 /** Executes the algorithm -- found all existing monitor peaks. */
 void GetAllEi::exec() {
@@ -396,14 +396,14 @@ void GetAllEi::exec() {
   setProperty("OutputWorkspace", result_ws);
 }
 /**Auxiliary method to print guess chopper energies in debug mode
-*
-* @param guess_opening -- vector witgh chopper opening times values
-* @param TOF_range     -- pair describing time interval the instrument
-*                         is recording the results
-* @param destUnit      -- pointer to initialized class, converting TOF
-*                         to energy in elastic mode using instrument
-*                         parameters.
-*/
+ *
+ * @param guess_opening -- vector witgh chopper opening times values
+ * @param TOF_range     -- pair describing time interval the instrument
+ *                         is recording the results
+ * @param destUnit      -- pointer to initialized class, converting TOF
+ *                         to energy in elastic mode using instrument
+ *                         parameters.
+ */
 void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
                                   const std::pair<double, double> &TOF_range,
                                   boost::shared_ptr<Kernel::Unit> &destUnit) {
@@ -457,20 +457,20 @@ void GetAllEi::setFilterLog(const API::MatrixWorkspace_sptr &inputWS) {
   }
 }
 /**Former lambda to identify guess values for a peak at given index
-* and set up these parameters as input for fitting algorithm
-*
-*@param inputWS -- the workspace to process
-*@param index -- the number of the workspace spectra to process
-*@param Ei           -- incident energy
-*@param monsRangeMin -- vector of left boundaries for the subintervals to look
-*for peak
-*@param monsRangeMax -- vector of right boundaries for the subintervals to look
-*for peak
-*
-*@param peakPos      -- output energy of the peak
-*@param peakHeight   -- output height of the peak assuming Gaussian shape
-*@param peakTwoSigma -- output width of the peak assuming Gaussian shape
-*/
+ * and set up these parameters as input for fitting algorithm
+ *
+ *@param inputWS -- the workspace to process
+ *@param index -- the number of the workspace spectra to process
+ *@param Ei           -- incident energy
+ *@param monsRangeMin -- vector of left boundaries for the subintervals to look
+ *for peak
+ *@param monsRangeMax -- vector of right boundaries for the subintervals to look
+ *for peak
+ *
+ *@param peakPos      -- output energy of the peak
+ *@param peakHeight   -- output height of the peak assuming Gaussian shape
+ *@param peakTwoSigma -- output width of the peak assuming Gaussian shape
+ */
 bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
                          double Ei, const std::vector<size_t> &monsRangeMin,
                          const std::vector<size_t> &monsRangeMax,
@@ -569,7 +569,8 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
                                " smoothing iterations at still_count: " +
                                std::to_string(stay_still_count) +
                                " Wrong energy or noisy peak at Ei=" +
-                               boost::lexical_cast<std::string>(Ei) << '\n';
+                               boost::lexical_cast<std::string>(Ei)
+                        << '\n';
   }
   g_log.debug() << "*Performed: " + std::to_string(ic) +
                        " averages for spectra " + std::to_string(index) +
@@ -605,17 +606,17 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
 }
 
 /**Get energy of monitor peak if one is present
-*@param inputWS -- the workspace to process
-*@param Ei           -- incident energy
-*@param monsRangeMin -- vector of indexes of left boundaries
-*                       for the subintervals to look for peak
-*@param monsRangeMax -- vector of indexes of right boundaries
-*                       for the subintervals to look for peak
-*
-*@param position     -- output energy of the peak center.
-*@param height       -- output height of the peak assuming Gaussian shape
-*@param twoSigma     -- output width of the peak assuming Gaussian shape
-*/
+ *@param inputWS -- the workspace to process
+ *@param Ei           -- incident energy
+ *@param monsRangeMin -- vector of indexes of left boundaries
+ *                       for the subintervals to look for peak
+ *@param monsRangeMax -- vector of indexes of right boundaries
+ *                       for the subintervals to look for peak
+ *
+ *@param position     -- output energy of the peak center.
+ *@param height       -- output height of the peak assuming Gaussian shape
+ *@param twoSigma     -- output width of the peak assuming Gaussian shape
+ */
 bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                                double Ei,
                                const std::vector<size_t> &monsRangeMin,
@@ -662,8 +663,9 @@ bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
                  " and 2*Sigma: " +
                  boost::lexical_cast<std::string>(peak1TwoSigma) +
                  "\n and Peak at mon2: Ei= " +
-                 boost::lexical_cast<std::string>(peak2Pos) + "and height: " +
-                 boost::lexical_cast<std::string>(peak1Height) << '\n';
+                 boost::lexical_cast<std::string>(peak2Pos) +
+                 "and height: " + boost::lexical_cast<std::string>(peak1Height)
+          << '\n';
 
       return false;
     }
@@ -687,7 +689,7 @@ bool signChanged(double val, int &prevSign) {
   prevSign = curSign;
   return changed;
 }
-}
+} // namespace
 
 /**Bare-bone function to calculate numerical derivative, and estimate number of
 * zeros this derivative has. The function is assumed to be defined on the
@@ -791,20 +793,20 @@ struct peakKeeper2 {
   peakKeeper2() : left_rng(.0), right_rng(.0){};
   peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
 };
-}
+} // namespace
 
 /**Find indexes of each expected peak intervals from monotonous array of ranges.
-*@param eBins   -- bin ranges to look through
-*@param signal  -- vector of signal in the bins
-*@param guess_energy -- vector of guess energies to look for
-*@param  eResolution -- instrument resolution in energy units
-*@param irangeMin  -- start indexes of energy intervals in the guess_energies
-*                     vector.
-*@param irangeMax  -- final indexes of energy intervals in the guess_energies
-*                     vector.
-*@param guessValid -- output boolean vector, which specifies if guess energies
-*                     in guess_energy vector are valid or not
-*/
+ *@param eBins   -- bin ranges to look through
+ *@param signal  -- vector of signal in the bins
+ *@param guess_energy -- vector of guess energies to look for
+ *@param  eResolution -- instrument resolution in energy units
+ *@param irangeMin  -- start indexes of energy intervals in the guess_energies
+ *                     vector.
+ *@param irangeMax  -- final indexes of energy intervals in the guess_energies
+ *                     vector.
+ *@param guessValid -- output boolean vector, which specifies if guess energies
+ *                     in guess_energy vector are valid or not
+ */
 void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
                              const std::vector<double> &guess_energy,
                              double eResolution, std::vector<size_t> &irangeMin,
@@ -844,11 +846,12 @@ void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
                 guess_peak[nGuess].right_rng, ind_min, ind_max);
 
     if (refineEGuess(eBins, signal, eGuess, ind_min, ind_max)) {
-      getBinRange(eBins, std::max(guess_peak[nGuess].left_rng,
-                                  eGuess * (1 - 3 * eResolution)),
-                  std::max(guess_peak[nGuess].right_rng,
-                           eGuess * (1 + 3 * eResolution)),
-                  ind_min, ind_max);
+      getBinRange(
+          eBins,
+          std::max(guess_peak[nGuess].left_rng, eGuess * (1 - 3 * eResolution)),
+          std::max(guess_peak[nGuess].right_rng,
+                   eGuess * (1 + 3 * eResolution)),
+          ind_min, ind_max);
       irangeMin.push_back(ind_min);
       irangeMax.push_back(ind_max);
       guessValid[nGuess] = true;
@@ -869,12 +872,12 @@ void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
 }
 
 /**Build 2-spectra workspace in units of energy, used as source
-*to identify actual monitors spectra
-*@param inputWS shared pointer to initial workspace
-*@param wsIndex0 -- returns workspace index for first detector.
-*@return shared pointer to intermediate workspace, in units of energy
-*        used to fit monitor's spectra.
-*/
+ *to identify actual monitors spectra
+ *@param inputWS shared pointer to initial workspace
+ *@param wsIndex0 -- returns workspace index for first detector.
+ *@return shared pointer to intermediate workspace, in units of energy
+ *        used to fit monitor's spectra.
+ */
 API::MatrixWorkspace_sptr
 GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
                               size_t &wsIndex0) {
@@ -890,8 +893,9 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // assuming equally binned ws.
   boost::shared_ptr<API::HistoWorkspace> working_ws =
       DataObjects::create<API::HistoWorkspace>(
-          *inputWS, Indexing::extract(inputWS->indexInfo(),
-                                      std::vector<size_t>{wsIndex0, wsIndex1}),
+          *inputWS,
+          Indexing::extract(inputWS->indexInfo(),
+                            std::vector<size_t>{wsIndex0, wsIndex1}),
           inputWS->histogram(wsIndex0));
 
   // signal 1
@@ -957,12 +961,12 @@ void GetAllEi::findGuessOpeningTimes(const std::pair<double, double> &TOF_range,
   }
 }
 /**Finds pointer to log value for the property with the name provided
-*
-*@param inputWS      -- workspace with logs attached
-*@param propertyName -- name of the property to find log for
-*
-*@return -- pointer to property which contain the log requested or nullptr if
-*           no log found or other errors identified.  */
+ *
+ *@param inputWS      -- workspace with logs attached
+ *@param propertyName -- name of the property to find log for
+ *
+ *@return -- pointer to property which contain the log requested or nullptr if
+ *           no log found or other errors identified.  */
 Kernel::Property *
 GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
                              const std::string &propertyName) {
@@ -980,13 +984,13 @@ GetAllEi::getPLogForProperty(const API::MatrixWorkspace_sptr &inputWS,
 }
 
 /**Return average time series log value for the appropriately filtered log
-* @param inputWS      -- shared pointer to the input workspace containing
-*                        the log to process
-* @param propertyName -- log name
-* @param splitter     -- array of Kernel::splittingInterval data, used to
-*                        filter input events or empty array to use
-*                        experiment start/end times.
-*/
+ * @param inputWS      -- shared pointer to the input workspace containing
+ *                        the log to process
+ * @param propertyName -- log name
+ * @param splitter     -- array of Kernel::splittingInterval data, used to
+ *                        filter input events or empty array to use
+ *                        experiment start/end times.
+ */
 double
 GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
                           const std::string &propertyName,
@@ -1023,19 +1027,19 @@ GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
 namespace { // former lambda function for findChopSpeedAndDelay
 
 /**Select time interval on the basis of previous time interval
-* selection and check if current value gets in the selection
-*
-* @param t_beg -- initial time for current time interval
-* @param t_end -- final time for current time interval
-* @param inSelection -- the boolean indicating if previous interval
-*                       was selected on input and current selected on
-*                       output
-* @param startTime -- total selection time start moment
-* @param endTime   -- total selection time final moments
-*
-*@return true if selection interval is completed
-*        (current interval is not selected) and false otherwise
-*/
+ * selection and check if current value gets in the selection
+ *
+ * @param t_beg -- initial time for current time interval
+ * @param t_end -- final time for current time interval
+ * @param inSelection -- the boolean indicating if previous interval
+ *                       was selected on input and current selected on
+ *                       output
+ * @param startTime -- total selection time start moment
+ * @param endTime   -- total selection time final moments
+ *
+ *@return true if selection interval is completed
+ *        (current interval is not selected) and false otherwise
+ */
 bool SelectInterval(const Types::Core::DateAndTime &t_beg,
                     const Types::Core::DateAndTime &t_end, double value,
                     bool &inSelection, Types::Core::DateAndTime &startTime,
@@ -1056,7 +1060,7 @@ bool SelectInterval(const Types::Core::DateAndTime &t_beg,
   endTime = t_end;
   return false;
 }
-}
+} // namespace
 /**Analyze chopper logs and identify chopper speed and delay
 @param  inputWS    -- sp to workspace with attached logs.
 @param chop_speed -- output value for chopper speed in uSec
@@ -1205,7 +1209,7 @@ bool check_time_series_property(
   }
   return false;
 }
-}
+} // namespace
 
 /**Validates if input workspace contains all necessary logs and if all
 *  these logs are the logs of appropriate type
@@ -1251,16 +1255,16 @@ std::map<std::string, std::string> GetAllEi::validateInputs() {
     return result;
   }
 
-  check_time_series_property(this, inputWS, m_chopper, "ChopperSpeedLog",
-                             "chopper speed log with name: ",
-                             "chopper speed log ", true, result);
+  check_time_series_property(
+      this, inputWS, m_chopper, "ChopperSpeedLog",
+      "chopper speed log with name: ", "chopper speed log ", true, result);
   check_time_series_property(
       this, inputWS, m_chopper, "ChopperDelayLog",
       "property related to chopper delay log with name: ", "chopper delay log ",
       true, result);
   bool failed = check_time_series_property(
-      this, inputWS, m_chopper, "FilterBaseLog", "filter base log named: ",
-      "filter base log: ", false, result);
+      this, inputWS, m_chopper, "FilterBaseLog",
+      "filter base log named: ", "filter base log: ", false, result);
   if (failed) {
     g_log.warning()
         << " Can not find a log to identify good DAE operations.\n"

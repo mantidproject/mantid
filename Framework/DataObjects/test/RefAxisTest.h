@@ -8,10 +8,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/RefAxis.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Exception.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

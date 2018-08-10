@@ -14,7 +14,7 @@ using namespace API;
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
-*/
+ */
 void WorkspaceAlgorithm::init() {
 
   // Declare a 1D workspace property.
@@ -51,5 +51,5 @@ void WorkspaceAlgorithm::exec() {
     }
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

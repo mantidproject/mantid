@@ -1,22 +1,23 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
 
-#include "MantidPythonInterface/kernel/NdArray.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
 
-#include <boost/python/make_constructor.hpp>
 #include <boost/python/default_call_policies.hpp>
+#include <boost/python/make_constructor.hpp>
 
 using Mantid::Kernel::ArrayProperty;
-using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::IValidator_sptr;
 using Mantid::Kernel::NullValidator;
+using Mantid::Kernel::PropertyWithValue;
 namespace Converters = Mantid::PythonInterface::Converters;
 namespace NumPy = Mantid::PythonInterface::NumPy;
 namespace Policies = Mantid::PythonInterface::Policies;
@@ -26,6 +27,11 @@ namespace {
 /// return_value_policy for cloned numpy array
 using return_cloned_numpy =
     return_value_policy<Policies::VectorRefToNumpy<Converters::Clone>>;
+
+// Call the dtype helper function
+template <typename type> std::string dtype(ArrayProperty<type> &self) {
+  return Converters::dtype(self);
+}
 
 #define EXPORT_ARRAY_PROP(type, prefix)                                        \
   class_<ArrayProperty<type>, bases<PropertyWithValue<std::vector<type>>>,     \
@@ -58,6 +64,7 @@ using return_cloned_numpy =
                (arg("name"), arg("values"),                                    \
                 arg("validator") = IValidator_sptr(new NullValidator),         \
                 arg("direction") = Direction::Input)))                         \
+      .def("dtype", &dtype<type>, arg("self"))                                 \
       .add_property("value", make_function(&ArrayProperty<type>::operator(),   \
                                            return_cloned_numpy()));
 
@@ -79,14 +86,14 @@ ArrayProperty<T> *createArrayPropertyFromList(const std::string &name,
 }
 
 /**
-  * Factory function to allow the initial values to be specified as a numpy
+ * Factory function to allow the initial values to be specified as a numpy
  * array
-  * @param name :: The name of the property
-  * @param vec :: A boost python array of initial values
-  * @param validator :: A validator object
-  * @param direction :: A direction
-  * @return
-  */
+ * @param name :: The name of the property
+ * @param vec :: A boost python array of initial values
+ * @param validator :: A validator object
+ * @param direction :: A direction
+ * @return
+ */
 template <typename T>
 ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
                                                  const NumPy::NdArray &values,
@@ -95,7 +102,7 @@ ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
   return new ArrayProperty<T>(name, Converters::NDArrayToVector<T>(values)(),
                               validator, direction);
 }
-}
+} // namespace
 
 void export_ArrayProperty() {
   // Match the python names to their C types

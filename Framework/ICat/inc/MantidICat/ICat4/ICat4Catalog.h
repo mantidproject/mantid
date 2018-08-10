@@ -133,7 +133,7 @@ private:
     }
   }
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 
 #endif

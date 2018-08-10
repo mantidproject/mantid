@@ -1,18 +1,18 @@
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidKernel/System.h"
 
-#include <set>
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
+#include <set>
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
 using Kernel::IntMatrix;
+using Kernel::V3D;
 
 /**
  * Returns all equivalent reflections for the supplied hkl.
@@ -335,5 +335,5 @@ std::ostream &operator<<(std::ostream &stream, const PointGroup &self) {
   return stream;
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

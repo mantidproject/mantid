@@ -47,12 +47,12 @@ private:
     MockMDBox()
         : MDBox<MDLeanEvent<1>, 1>(new API::BoxController(1)),
           pBC(MDBox<MDLeanEvent<1>, 1>::getBoxController()) {}
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(getIsMasked, bool());
     MOCK_METHOD0(mask, void());
     MOCK_METHOD0(unmask, void());
     ~MockMDBox() override { delete pBC; }
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // the sp to a box controller used as general reference to all tested
@@ -1155,8 +1155,9 @@ public:
     doTestMDBin2(b, "Bin that holds one entire MDBox (going off both edge)",
                  -0.2, 1.2, -0.2, 1.2, 2.0);
 
-    doTestMDBin2(b, "Bin that holds one entire MDBox and a fraction of at "
-                    "least one more with something",
+    doTestMDBin2(b,
+                 "Bin that holds one entire MDBox and a fraction of at "
+                 "least one more with something",
                  0.8, 2.7, 1.9, 3.12, 4.0);
 
     doTestMDBin2(b, "Bin that holds four entire MDBoxes", 0.8, 3.1, 0.9, 3.2,
@@ -1169,12 +1170,14 @@ public:
         b, "Bin that fits all within a single MDBox, and contains the center",
         0.2, 0.8, 0.2, 0.8, 2.0);
 
-    doTestMDBin2(b, "Bin that fits all within a single MDBox, and DOES NOT "
-                    "contain anything",
+    doTestMDBin2(b,
+                 "Bin that fits all within a single MDBox, and DOES NOT "
+                 "contain anything",
                  0.2, 0.3, 0.1, 0.2, 0.0);
 
-    doTestMDBin2(b, "Bin that fits partially in two MDBox'es, and DOES NOT "
-                    "contain anything",
+    doTestMDBin2(b,
+                 "Bin that fits partially in two MDBox'es, and DOES NOT "
+                 "contain anything",
                  0.8, 1.2, 0.1, 0.2, 0.0);
 
     doTestMDBin2(

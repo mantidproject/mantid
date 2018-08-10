@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
 #include "MantidAPI/ICostFunction.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
 
 #include <sstream>
 

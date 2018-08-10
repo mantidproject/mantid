@@ -80,7 +80,7 @@ class SampleId(object):
 
 
 # --- SET
-@serializable_enum("scales", "centre")
+@serializable_enum("scales", "centre", "centre_HAB")
 class SetId(object):
     pass
 

@@ -39,7 +39,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_EQSANSQ2D_H_*/

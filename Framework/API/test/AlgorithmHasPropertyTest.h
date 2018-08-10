@@ -1,10 +1,10 @@
 #ifndef MANTID_API_ALGORITHMHASPROPERTYTEST_H_
 #define MANTID_API_ALGORITHMHASPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/AlgorithmHasProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmHasProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 

@@ -1,10 +1,10 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Axis.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -88,4 +88,4 @@ void addFullInstrumentToWorkspace(MatrixWorkspace &workspace,
   instrument->add(chop_pos);
   workspace.setInstrument(instrument);
 }
-}
+} // namespace InstrumentCreationHelper

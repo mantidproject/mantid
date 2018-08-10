@@ -16,7 +16,6 @@ using namespace Kernel;
 using namespace API;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
-using std::vector;
 using namespace Geometry;
 
 const std::string CarpenterSampleCorrection::name() const {
@@ -153,5 +152,5 @@ CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
   return outWS;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -336,10 +336,14 @@ public:
 
     // check shortening does not happen for floating point types
     const std::vector<std::string> inputListFloat{
-        "1.0,2.0,3.0", "1.0,1.5,2.0,3.0", "-1,0,1",
+        "1.0,2.0,3.0",
+        "1.0,1.5,2.0,3.0",
+        "-1,0,1",
     };
     const std::vector<std::string> resultListFloat{
-        "1,2,3", "1,1.5,2,3", "-1,0,1",
+        "1,2,3",
+        "1,1.5,2,3",
+        "-1,0,1",
     };
     TSM_ASSERT("Test Failed for vectors of float",
                listShorteningwithType<float>(inputListFloat, resultListFloat));

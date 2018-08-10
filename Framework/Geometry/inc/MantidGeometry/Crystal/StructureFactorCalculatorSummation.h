@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORSUMMATION_H_
 #define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORSUMMATION_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
