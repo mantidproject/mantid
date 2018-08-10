@@ -86,7 +86,7 @@ void CreateFloodWorkspace::init() {
 
 MatrixWorkspace_sptr CreateFloodWorkspace::getInputWorkspace() {
   std::string fileName = getProperty(Prop::FILENAME);
-  auto alg = createChildAlgorithm("Load");
+  auto alg = createChildAlgorithm("Load", 0, 0.8);
   alg->setProperty("Filename", fileName);
   alg->setProperty("LoadMonitors", false);
   alg->setProperty("OutputWorkspace", "dummy");
@@ -150,7 +150,7 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   std::string const function = getBackgroundFunction();
 
   // Fit the data to determine unwanted background
-  auto alg = createChildAlgorithm("Fit");
+  auto alg = createChildAlgorithm("Fit", 0.9, 0.99);
   alg->setProperty("Function", function);
   alg->setProperty("InputWorkspace", fitWS);
   alg->setProperty("WorkspaceIndex", 0);
@@ -194,9 +194,12 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
 /** Execute the algorithm.
  */
 void CreateFloodWorkspace::exec() {
+  progress(0.0);
   auto ws = getInputWorkspace();
   ws = integrate(ws);
+  progress(0.9);
   ws = removeBackground(ws);
+  progress(1.0);
   setProperty(Prop::OUTPUT_WORKSPACE, ws);
 }
 
