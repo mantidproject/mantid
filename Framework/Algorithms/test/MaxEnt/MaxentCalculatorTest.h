@@ -29,7 +29,7 @@ public:
   MOCK_METHOD1(imageToData, std::vector<double>(const std::vector<double> &));
   MOCK_METHOD1(dataToImage, std::vector<double>(const std::vector<double> &));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE;
 using MockEntropy_sptr = boost::shared_ptr<MockEntropy>;
 
 class MaxentCalculatorTest : public CxxTest::TestSuite {
