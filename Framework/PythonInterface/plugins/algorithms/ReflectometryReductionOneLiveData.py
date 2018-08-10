@@ -45,7 +45,6 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             value = self.getPropertyValue(prop.name)
             alg.setPropertyValue(prop.name, value)
 
-
     def setupSlits(self, ws, liveValues):
         s1 = liveValues['s1vg'].value
         s2 = liveValues['s2vg'].value
