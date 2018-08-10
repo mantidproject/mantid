@@ -233,17 +233,14 @@ void IndexPeakswithSatellites::exec() {
         hkl[0] = peak.getH();
         hkl[1] = peak.getK();
         hkl[2] = peak.getL();
-        double h_error;
-        double k_error;
-        double l_error;
 
         if (IndexingUtils::ValidIndex(hkl, tolerance)) {
           peak.setIntHKL(hkl);
           peak.setIntMNP(V3D(0, 0, 0));
           main_indexed++;
-          h_error = fabs(round(hkl[0]) - hkl[0]);
-          k_error = fabs(round(hkl[1]) - hkl[1]);
-          l_error = fabs(round(hkl[2]) - hkl[2]);
+          double h_error = fabs(round(hkl[0]) - hkl[0]);
+          double k_error = fabs(round(hkl[1]) - hkl[1]);
+          double l_error = fabs(round(hkl[2]) - hkl[2]);
           main_error += h_error + k_error + l_error;
         } else if (!crossTerms) {
           predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
