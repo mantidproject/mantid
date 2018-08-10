@@ -94,7 +94,10 @@ variables = {
 
 def get_mode_specific_dict(mode):
     if mode is None:
-        raise RuntimeError("Failed to supply chopper mode")
+        err_text = "The parameter with name: 'mode' is required but "
+        err_text += "was not set or passed.\n"
+        err_text += "Acceptable values for this parameter are: PDF, Rietveld."
+        raise RuntimeError(err_text)
 
     mode = mode.lower()
     if mode == "pdf":
