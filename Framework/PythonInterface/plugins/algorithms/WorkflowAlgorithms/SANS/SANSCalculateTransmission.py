@@ -281,8 +281,10 @@ class SANSCalculateTransmission(ParallelDataProcessorAlgorithm):
             wavelength_low = calculate_transmission_state.wavelength_full_range_low
             wavelength_high = calculate_transmission_state.wavelength_full_range_high
         else:
-            wavelength_low = calculate_transmission_state.wavelength_low[0]
-            wavelength_high = calculate_transmission_state.wavelength_high[0]
+            data_type_string = self.getProperty("DataType").value
+            fit_state = calculate_transmission_state.fit[data_type_string]
+            wavelength_low = fit_state.wavelength_low
+            wavelength_high = fit_state.wavelength_high
 
         wavelength_step = calculate_transmission_state.wavelength_step
         rebin_type = calculate_transmission_state.rebin_type

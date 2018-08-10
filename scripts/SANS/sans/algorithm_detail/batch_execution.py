@@ -3,7 +3,7 @@ from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
                                            get_output_name, get_base_name_from_multi_period_name, get_transmission_output_name)
-from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode)
+from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode, DataType)
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
                                    HAB_CAN_SUFFIX, HAB_CAN_COUNT_SUFFIX, HAB_CAN_NORM_SUFFIX,
@@ -323,6 +323,13 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
 
     workspaces = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_name)
     monitors = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_monitor)
+
+    for key, workspace_type in workspaces.items():
+        for workspace in workspace_type:
+            add_to_group(workspace, 'sans_interface_raw_data')
+    for key, monitor_workspace_type in monitors.items():
+        for monitor_workspace in monitor_workspace_type:
+            add_to_group(monitor_workspace, 'sans_interface_raw_data')
     return workspaces, monitors
 
 
@@ -637,7 +644,8 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
             _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
                                                         multi_reduction_type=multi_reduction_type)
         else:
-            _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode)
+            _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode
+                                                                     , multi_reduction_type=multi_reduction_type)
 
         if _suffix is not None:
             _out_name += _suffix
@@ -646,6 +654,12 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         _reduction_alg.setProperty(_property_name, _out_name)
         setattr(_reduction_package, _attr_out_name, _out_name)
         setattr(_reduction_package, _atrr_out_name_base, _out_name_base)
+
+    def _set_output_name_from_string(reduction_alg, reduction_package, algorithm_property_name, workspace_name,
+                                     workspace_name_base ,package_attribute_name, package_attribute_name_base):
+        reduction_alg.setProperty(algorithm_property_name, workspace_name)
+        setattr(reduction_package, package_attribute_name, workspace_name)
+        setattr(reduction_package, package_attribute_name_base, workspace_name_base)
 
     def _set_lab(_reduction_alg, _reduction_package, _is_group):
         _set_output_name(_reduction_alg, _reduction_package, _is_group, ISISReductionMode.LAB,
@@ -751,19 +765,34 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     # Set the output workspaces for the calculated and unfitted transmission
     #-------------------------------------------------------------------------------------------------------------------
     if state.adjustment.show_transmission:
-        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
-                         "OutputWorkspaceCalculatedTransmission", "calculated_transmission_name",
-                         "calculated_transmission_base_name",multi_reduction_type, transmission=True)
-        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
-                         "OutputWorkspaceUnfittedTransmission", "unfitted_transmission_name",
-                         "unfitted_transmission_base_name",multi_reduction_type, transmission=True, _suffix="_unfitted")
-        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
-                         "OutputWorkspaceCalculatedTransmissionCan", "calculated_transmission_can_name",
-                         "calculated_transmission_can_base_name", multi_reduction_type, transmission=True, _suffix="_can")
-        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
-                         "OutputWorkspaceUnfittedTransmissionCan", "unfitted_transmission_can_name",
-                         "unfitted_transmission_can_base_name", multi_reduction_type, transmission=True,
-                         _suffix="_unfitted_can")
+        sample_calculated_transmission,\
+        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                      multi_reduction_type, True)
+        can_calculated_transmission,\
+        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                      multi_reduction_type, True)
+        sample_unfitted_transmission,\
+        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Sample,
+                                                                      multi_reduction_type, False)
+        can_unfitted_transmission,\
+        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state, DataType.Can,
+                                                                      multi_reduction_type, False)
+
+        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmission",
+                                     sample_calculated_transmission, sample_calculated_transmission_base
+                                     ,"calculated_transmission_name", "calculated_transmission_base_name")
+
+        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmission",
+                                     sample_unfitted_transmission, sample_unfitted_transmission_base
+                                     , "unfitted_transmission_name", "unfitted_transmission_base_name")
+
+        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceCalculatedTransmissionCan",
+                                     can_calculated_transmission, can_calculated_transmission_base
+                                     , "calculated_transmission_can_name", "calculated_transmission_can_base_name")
+
+        _set_output_name_from_string(reduction_alg, reduction_package, "OutputWorkspaceUnfittedTransmissionCan",
+                                     can_unfitted_transmission, can_unfitted_transmission_base
+                                     , "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
@@ -832,6 +861,13 @@ def group_workspaces_if_required(reduction_package):
     add_to_group(reduction_package.reduced_hab_can, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
     add_to_group(reduction_package.reduced_hab_can_count, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
     add_to_group(reduction_package.reduced_hab_can_norm, REDUCED_CAN_AND_PARTIAL_CAN_FOR_OPTIMIZATION)
+
+    if reduction_package.state.adjustment.show_transmission:
+        add_to_group(reduction_package.calculated_transmission, reduction_package.calculated_transmission_base_name)
+        add_to_group(reduction_package.calculated_transmission_can,
+                     reduction_package.calculated_transmission_can_base_name)
+        add_to_group(reduction_package.unfitted_transmission, reduction_package.unfitted_transmission_base_name)
+        add_to_group(reduction_package.unfitted_transmission_can, reduction_package.unfitted_transmission_can_base_name)
 
 
 def add_to_group(workspace, name_of_group_workspace):

@@ -11,7 +11,7 @@ from sans.common.general_functions import (quaternion_to_angle_and_axis, create_
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name, get_output_name)
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
-                               SANSInstrument, DetectorType, SANSFacility)
+                               SANSInstrument, DetectorType, SANSFacility, DataType)
 from sans.test_helper.test_director import TestDirector
 from sans.state.data import StateData
 from sans.state.save import get_save_builder
@@ -174,31 +174,103 @@ class SANSFunctionsTest(unittest.TestCase):
         # Assert
         self.assertTrue("12345rear_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37" == output_workspace)
 
-    def test_that_creates_correct_transmission_workspace_name(self):
-        # Arrange
-        state = SANSFunctionsTest._get_state()
-        # Act
-        output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB, data_type = 'Sample', transmission = True)
-        # Assert
-        self.assertTrue("12345_trans_Sample_12.0_34.0_Phi12.0_56.0_t4.57_T12.37" == output_workspace)
-
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = "test_output"
         # Act
-        output_workspace, _ = get_transmission_output_name(state, ISISReductionMode.LAB)
+        output_workspace, group_output_name = get_transmission_output_name(state)
         # Assert
-        self.assertEqual(output_workspace, "test_output_trans")
+        self.assertEqual(output_workspace, "test_output_trans_Sample")
+        self.assertEqual(group_output_name, 'test_output_trans')
 
     def test_that_get_transmission_output_name_returns_correct_name(self):
         # Arrange
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = ''
         # Act
-        output_workspace, _ = get_transmission_output_name(state, ISISReductionMode.LAB)
+        output_workspace, group_output_name = get_transmission_output_name(state)
         # Assert
-        self.assertEqual(output_workspace, "12345_trans_Sample_12.0_34.0_Phi12.0_56.0_t4.57_T12.37")
+        self.assertEqual(output_workspace, "12345_trans_Sample_1.0_10.0")
+        self.assertEqual(group_output_name, "12345_trans_1.0_10.0")
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_with_user_specified(self):
+        state = self._get_state()
+        state.save.user_specified_output_name = 'user_output_name'
+        state.reduction.reduction_mode = ISISReductionMode.Merged
+        multi_reduction_type = {"period": False,
+                                "event_slice": False,
+                                "wavelength_range": True}
+
+        output_name, group_output_name = get_transmission_output_name(state, multi_reduction_type=multi_reduction_type)
+
+        self.assertEqual(output_name, 'user_output_name_trans_Sample_12.0_34.0')
+        self.assertEqual(group_output_name, 'user_output_name_trans')
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices(self):
+        state = self._get_state()
+        state.save.user_specified_output_name = ''
+        state.reduction.reduction_mode = ISISReductionMode.Merged
+        multi_reduction_type = {"period": False,
+                                "event_slice": False,
+                                "wavelength_range": True}
+
+        output_name, group_output_name = get_transmission_output_name(state, multi_reduction_type=multi_reduction_type)
+
+        self.assertEqual(output_name, '12345_trans_Sample_1.0_10.0_12.0_34.0')
+        self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace_for_CAN(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        state.save.user_specified_output_name = "test_output"
+        # Act
+        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.Can)
+        # Assert
+        self.assertEqual(output_workspace, "test_output_trans_Can")
+        self.assertEqual(group_output_name, 'test_output_trans')
+
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_CAN(self):
+        # Arrange
+        state = SANSFunctionsTest._get_state()
+        state.save.user_specified_output_name = ''
+        # Act
+        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.Can)
+        # Assert
+        self.assertEqual(output_workspace, "12345_trans_Can_1.0_10.0")
+        self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
+
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_for_CAN(self):
+        state = self._get_state()
+        state.save.user_specified_output_name = ''
+        state.reduction.reduction_mode = ISISReductionMode.Merged
+        multi_reduction_type = {"period": False,
+                                "event_slice": False,
+                                "wavelength_range": True}
+
+        output_name, group_output_name = get_transmission_output_name(state,
+                                                                      multi_reduction_type=multi_reduction_type,
+                                                                      data_type=DataType.Can)
+
+        self.assertEqual(output_name, '12345_trans_Can_1.0_10.0_12.0_34.0')
+        self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
+
+    def test_that_get_transmission_output_name_returns_correct_name_for_wavelength_slices_for_CAN_unfitted(self):
+        state = self._get_state()
+        state.save.user_specified_output_name = ''
+        state.reduction.reduction_mode = ISISReductionMode.Merged
+        multi_reduction_type = {"period": False,
+                                "event_slice": False,
+                                "wavelength_range": True}
+
+        output_name, group_output_name = get_transmission_output_name(state,
+                                                                      multi_reduction_type=multi_reduction_type,
+                                                                      data_type=DataType.Can, fitted=False)
+
+        self.assertEqual(output_name, '12345_trans_Can_unfitted_1.0_10.0')
+        self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
 
     def test_that_sanitises_instrument_names(self):
         name1 = sanitise_instrument_name("LOQ_trans")

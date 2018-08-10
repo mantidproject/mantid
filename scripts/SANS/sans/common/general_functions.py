@@ -601,8 +601,7 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type, transmission = False,
-                                       data_type = DataType.to_string(DataType.Sample)):
+def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.to_string(DataType.Sample)):
     """
     Creates the name of the output workspace from a state object.
 
@@ -632,20 +631,19 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
         period_as_string = ""
 
     # 3. Detector name
-    if not transmission:
-        move = state.move
-        detectors = move.detectors
-        if reduction_data_type is ISISReductionMode.Merged:
-            detector_name_short = "merged"
-        elif reduction_data_type is ISISReductionMode.HAB:
-            det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
-            detector_name_short = det_name if det_name is not None else "hab"
-        elif reduction_data_type is ISISReductionMode.LAB:
-            det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
-            detector_name_short = det_name if det_name is not None else "lab"
-        else:
-            raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
-                               "create an output name".format(reduction_data_type))
+    move = state.move
+    detectors = move.detectors
+    if reduction_data_type is ISISReductionMode.Merged:
+        detector_name_short = "merged"
+    elif reduction_data_type is ISISReductionMode.HAB:
+        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+        detector_name_short = det_name if det_name is not None else "hab"
+    elif reduction_data_type is ISISReductionMode.LAB:
+        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+        detector_name_short = det_name if det_name is not None else "lab"
+    else:
+        raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
+                           "create an output name".format(reduction_data_type))
 
     # 4. Dimensionality
     reduction = state.reduction
@@ -683,33 +681,42 @@ def get_standard_output_workspace_name(state, reduction_data_type, transmission 
     transmission_name = "_trans_" + data_type
 
     # Piece it all together
-    if not transmission:
-        output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
-                                 dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
-                                 start_time_as_string + end_time_as_string)
-        output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
-                                      + phi_limits_as_string)
-    else:
-        output_workspace_name = (short_run_number_as_string + period_as_string + transmission_name +
-                                 wavelength_range_string + phi_limits_as_string + start_time_as_string
-                                 + end_time_as_string)
-        output_workspace_base_name = (short_run_number_as_string + transmission_name +
-                                      phi_limits_as_string)
+    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
+                             dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
+                             start_time_as_string + end_time_as_string)
+    output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
+                                  + phi_limits_as_string)
+
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, reduction_mode):
+def get_transmission_output_name(state, data_type=DataType.Sample, multi_reduction_type=None, fitted=True):
     user_specified_output_name = state.save.user_specified_output_name
-    # Get the standard workspace name
-    workspace_name, workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                             transmission=True)
+
+    data = state.data
+    short_run_number = data.sample_scatter_run_number
+    short_run_number_as_string = str(short_run_number)
+
+    calculated_transmission_state = state.adjustment.calculate_transmission
+    fit = calculated_transmission_state.fit[DataType.to_string(DataType.Sample)]
+    wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
+
+    trans_suffix = "_trans_Sample" if data_type == DataType.Sample else "_trans_Can"
+    trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
 
     if user_specified_output_name:
-        output_name = user_specified_output_name + "_trans"
-        output_base_name = output_name
+        output_name = user_specified_output_name + trans_suffix
+        output_base_name = user_specified_output_name + '_trans'
     else:
-        output_name = workspace_name
-        output_base_name = workspace_base_name
+        output_name = short_run_number_as_string + trans_suffix + wavelength_range_string
+        output_base_name = short_run_number_as_string + '_trans' + wavelength_range_string
+
+    if multi_reduction_type and fitted:
+        if multi_reduction_type["wavelength_range"]:
+            wavelength = state.wavelength
+            wavelength_range_string = "_" + str(wavelength.wavelength_low[0]) + "_" + str(
+                wavelength.wavelength_high[0])
+            output_name += wavelength_range_string
 
     return output_name, output_base_name
 
