@@ -350,7 +350,7 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(dxData, sortedws->dx(0));
+    TS_ASSERT_EQUALS(sortedws->dx(0), dxData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -380,8 +380,8 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(reverseXData, sortedws->x(0));
-    TS_ASSERT_EQUALS(reverseYData, sortedws->y(0));
+    TS_ASSERT_EQUALS(sortedws->x(0), reverseXData);
+    TS_ASSERT_EQUALS(sortedws->y(0), reverseYData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
