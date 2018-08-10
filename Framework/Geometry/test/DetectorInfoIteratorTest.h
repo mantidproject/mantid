@@ -1,26 +1,47 @@
 #ifndef MANTID_GEOMETRY_DETECTORINFOITERATORTEST_H_
 #define MANTID_GEOMETRY_DETECTORINFOITERATORTEST_H_
 
-#include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <algorithm>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <set>
 
-using Mantid::detid_t;
-using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
 using namespace Mantid::Geometry;
+
+/** DetectorInfoIteratorTest
+
+Test class for testing the iterator behaviour for DetectorInfoIterator.
+
+@author Bhuvan Bezawada, STFC
+@date 2018
+
+Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 class DetectorInfoIteratorTest : public CxxTest::TestSuite {
 public:
@@ -33,7 +54,8 @@ public:
 
   DetectorInfoIteratorTest(){};
 
-  Mantid::Geometry::DetectorInfo create_detector_info_object() {
+  std::unique_ptr<Mantid::Geometry::DetectorInfo>
+  create_detector_info_object() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0),   // Source position
@@ -54,48 +76,35 @@ public:
     // Create the instrument visitor
     InstrumentVisitor visitor(visitee);
 
-    // Visit everything
-    visitor.walkInstrument();
-
-    // Create the Beamline DetectorInfo
-    auto detInfo = visitor.detectorInfo();
-
-    // Get details from DetectorInfo
-    auto detIds = visitor.detectorIds();
-    auto detMap = visitor.detectorIdToIndexMap();
-
-    // Create the Geometry DetectorInfo
-    Mantid::Geometry::DetectorInfo detectorInfo{visitor.detectorInfo(), visitee,
-                                                detIds, detMap};
-
-    return detectorInfo;
+    // Return the DetectorInfo object
+    return InstrumentVisitor::makeWrappers(*visitee, nullptr).second;
   }
 
   void test_iterator_begin() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.begin();
+    auto iter = detectorInfo->begin();
 
     // Check we start at the correct place
-    TS_ASSERT(iter != detectorInfo.end());
+    TS_ASSERT(iter != detectorInfo->end());
   }
 
   void test_iterator_end() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.end();
+    auto iter = detectorInfo->end();
 
     // Check we start at the correct place
-    TS_ASSERT(iter != detectorInfo.begin());
+    TS_ASSERT(iter != detectorInfo->begin());
   }
 
   void test_iterator_increment() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.begin();
+    auto iter = detectorInfo->begin();
 
     // Check that we start at the beginning
-    TS_ASSERT(iter == detectorInfo.begin());
+    TS_ASSERT(iter == detectorInfo->begin());
 
     // Increment and check index
     for (int i = 0; i < 11; ++i) {
@@ -104,16 +113,16 @@ public:
     }
 
     // Check we've reached the end
-    TS_ASSERT(iter == detectorInfo.end());
+    TS_ASSERT(iter == detectorInfo->end());
   }
 
   void test_iterator_decrement() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.end();
+    auto iter = detectorInfo->end();
 
     // Check that we start at the end
-    TS_ASSERT(iter == detectorInfo.end());
+    TS_ASSERT(iter == detectorInfo->end());
 
     // Decrement and check index
     for (int i = 11; i > 0; --i) {
@@ -122,13 +131,13 @@ public:
     }
 
     // Check we've reached the beginning
-    TS_ASSERT(iter == detectorInfo.begin());
+    TS_ASSERT(iter == detectorInfo->begin());
   }
 
   void test_iterator_advance() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.begin();
+    auto iter = detectorInfo->begin();
 
     // Advance 6 places
     std::advance(iter, 6);
@@ -136,7 +145,7 @@ public:
 
     // Go past end of valid range
     std::advance(iter, 8);
-    TS_ASSERT(iter == detectorInfo.end());
+    TS_ASSERT(iter == detectorInfo->end());
 
     // Go backwards
     std::advance(iter, -2);
@@ -144,13 +153,13 @@ public:
 
     // Go past the start
     std::advance(iter, -100);
-    TS_ASSERT(iter == detectorInfo.begin());
+    TS_ASSERT(iter == detectorInfo->begin());
   }
 
   void test_copy_iterator() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
-    auto iter = detectorInfo.begin();
+    auto iter = detectorInfo->begin();
 
     // Create a copy
     auto iterCopy = DetectorInfoIterator(iter);

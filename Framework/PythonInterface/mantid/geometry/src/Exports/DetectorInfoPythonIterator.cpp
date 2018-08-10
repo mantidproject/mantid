@@ -2,10 +2,8 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/def.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/module.hpp>
-#include <boost/python/reference_existing_object.hpp>
 
 using Mantid::Geometry::DetectorInfoPythonIterator;
 using namespace boost::python;

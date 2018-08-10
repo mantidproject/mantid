@@ -5,12 +5,7 @@
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 
-#include <boost/python/class.hpp>
-#include <boost/python/copy_const_reference.hpp>
-#include <boost/python/def.hpp>
 #include <boost/python/iterator.hpp>
-#include <boost/python/module.hpp>
-#include <boost/python/reference_existing_object.hpp>
 
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::DetectorInfoItem;
@@ -20,10 +15,47 @@ using namespace boost::python;
 namespace Mantid {
 namespace Geometry {
 
+/** DetectorInfoPythonIterator
+
+DetectorInfoPythonIterator is used to expose DetectorInfoIterator to the Python
+side. From Python the user will be able to use more pythonic loop syntax to
+access data such as:
+- isMonitor()
+- isMaksed()
+- twoTheta()
+- position()
+- rotation()
+without the need for indexes.
+@author Bhuvan Bezawada, STFC
+@date 2018
+
+Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+
 class DetectorInfoPythonIterator {
 public:
   explicit DetectorInfoPythonIterator(const DetectorInfo &detectorInfo)
-      : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()), m_current(*m_begin) {}
+      : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
+        m_current(*m_begin) {}
 
   const DetectorInfoItem &next() {
     if (m_begin == m_end) {
