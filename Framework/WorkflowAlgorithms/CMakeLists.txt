@@ -32,7 +32,6 @@ set ( SRC_FILES
 	src/SANSBeamFinder.cpp
 	src/SANSBeamFluxCorrection.cpp
 	src/SANSSensitivityCorrection.cpp
-	src/SANSSolidAngleCorrection.cpp
 	src/SetupEQSANSReduction.cpp
 	src/SetupHFIRReduction.cpp
 	src/SofTwoThetaTOF.cpp
@@ -77,7 +76,6 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
-	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
 	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
 	inc/MantidWorkflowAlgorithms/SofTwoThetaTOF.h
