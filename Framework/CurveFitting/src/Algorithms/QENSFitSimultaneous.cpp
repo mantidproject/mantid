@@ -8,8 +8,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
@@ -164,6 +164,19 @@ WorkspaceGroup_sptr makeGroup(Workspace_sptr workspace) {
   return group;
 }
 
+IAlgorithm_sptr createProcessIndirectFitParametersAlgorithm(
+    ITableWorkspace_sptr parameterWorkspace, const std::string &xAxisUnit,
+    const std::vector<std::string> &parameterNames) {
+  auto pifp =
+      AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
+  pifp->setAlwaysStoreInADS(false);
+  pifp->setProperty("InputWorkspace", parameterWorkspace);
+  pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("XAxisUnit", xAxisUnit);
+  pifp->setProperty("ParameterNames", parameterNames);
+  return pifp;
+}
+
 ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
                                        IFunction_sptr function,
                                        const std::string &yAxisType) {
@@ -189,21 +202,23 @@ ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
   return transposed;
 }
 
-std::string getAxisType(MatrixWorkspace_sptr workspace, std::size_t axisIndex) {
-  return workspace->getAxis(axisIndex)->isNumeric() ? "double" : "str";
+std::string getAxisType(const MatrixWorkspace &workspace,
+                        std::size_t axisIndex) {
+  return workspace.getAxis(axisIndex)->isNumeric() ? "double" : "str";
 }
 
-NumericAxis *getNumericAxis(MatrixWorkspace_sptr workspace,
+NumericAxis const *getNumericAxis(const MatrixWorkspace &workspace,
+                                  std::size_t axisIndex) {
+  return dynamic_cast<NumericAxis const *>(workspace.getAxis(axisIndex));
+}
+
+TextAxis const *getTextAxis(const MatrixWorkspace &workspace,
                             std::size_t axisIndex) {
-  return dynamic_cast<NumericAxis *>(workspace->getAxis(axisIndex));
-}
-
-TextAxis *getTextAxis(MatrixWorkspace_sptr workspace, std::size_t axisIndex) {
-  return dynamic_cast<TextAxis *>(workspace->getAxis(axisIndex));
+  return dynamic_cast<TextAxis const *>(workspace.getAxis(axisIndex));
 }
 
 auto getNumericAxisValueReader(std::size_t axisIndex) {
-  return [axisIndex](MatrixWorkspace_sptr workspace, std::size_t index) {
+  return [axisIndex](const MatrixWorkspace &workspace, std::size_t index) {
     if (auto const axis = getNumericAxis(workspace, axisIndex))
       return axis->getValue(index);
     return 0.0;
@@ -211,7 +226,7 @@ auto getNumericAxisValueReader(std::size_t axisIndex) {
 }
 
 auto getTextAxisValueReader(std::size_t axisIndex) {
-  return [axisIndex](MatrixWorkspace_sptr workspace, std::size_t index) {
+  return [axisIndex](const MatrixWorkspace &workspace, std::size_t index) {
     if (auto const axis = getTextAxis(workspace, axisIndex))
       return axis->label(index);
     return std::string();
@@ -220,19 +235,20 @@ auto getTextAxisValueReader(std::size_t axisIndex) {
 
 template <typename T, typename GetValue>
 void addValuesToColumn(
-    Column_sptr column, const std::vector<MatrixWorkspace_sptr> &workspaces,
+    Column &column, const std::vector<MatrixWorkspace_sptr> &workspaces,
     const Mantid::Kernel::PropertyManagerOwner &indexProperties,
     const GetValue &getValue) {
   const std::string prefix = "WorkspaceIndex";
 
   int index = indexProperties.getProperty(prefix);
-  column->cell<T>(0) = getValue(workspaces[0], static_cast<std::size_t>(index));
+  column.cell<T>(0) =
+      getValue(*workspaces.front(), static_cast<std::size_t>(index));
 
   for (auto i = 1u; i < workspaces.size(); ++i) {
     const auto indexName = prefix + "_" + std::to_string(i);
     index = indexProperties.getProperty(indexName);
-    column->cell<T>(i) =
-        getValue(workspaces[i], static_cast<std::size_t>(index));
+    column.cell<T>(i) =
+        getValue(*workspaces[i], static_cast<std::size_t>(index));
   }
 }
 
@@ -244,11 +260,11 @@ void addValuesToTableColumn(
     return;
 
   const auto column = table.getColumn(columnIndex);
-  if (auto numericAxis = getNumericAxis(workspaces.front(), 1))
-    addValuesToColumn<double>(column, workspaces, indexProperties,
+  if (getNumericAxis(*workspaces.front(), 1))
+    addValuesToColumn<double>(*column, workspaces, indexProperties,
                               getNumericAxisValueReader(1));
-  else if (auto textAxis = getTextAxis(workspaces.front(), 1))
-    addValuesToColumn<std::string>(column, workspaces, indexProperties,
+  else if (getTextAxis(*workspaces.front(), 1))
+    addValuesToColumn<std::string>(*column, workspaces, indexProperties,
                                    getTextAxisValueReader(1));
 }
 
@@ -270,6 +286,23 @@ createGroup(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   for (auto &&workspace : workspaces)
     group->addWorkspace(workspace);
   return group;
+}
+
+WorkspaceGroup_sptr
+runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
+                                   const std::vector<std::size_t> &grouping) {
+  std::vector<MatrixWorkspace_sptr> results;
+  results.reserve(grouping.size() - 1);
+  for (auto i = 0u; i < grouping.size() - 1; ++i) {
+    processingAlgorithm.setProperty("StartRowIndex",
+                                    static_cast<int>(grouping[i]));
+    processingAlgorithm.setProperty("EndRowIndex",
+                                    static_cast<int>(grouping[i + 1]) - 1);
+    processingAlgorithm.setProperty("OutputWorkspace", "__Result");
+    processingAlgorithm.execute();
+    results.push_back(processingAlgorithm.getProperty("OutputWorkspace"));
+  }
+  return createGroup(results);
 }
 } // namespace
 
@@ -394,7 +427,7 @@ void QENSFitSimultaneous::execConcrete() {
       convertToSingleDomain(getProperty("Function"));
 
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
-  const auto yAxisType = getAxisType(inputWorkspaces.front(), 1);
+  const auto yAxisType = getAxisType(*workspaces.front(), 1);
   auto transposedTable =
       transposeFitTable(fitResult.first, singleDomainFunction, yAxisType);
   addValuesToTableColumn(*transposedTable, workspaces, *this, 0);
@@ -457,23 +490,15 @@ QENSFitSimultaneous::performFit(
 WorkspaceGroup_sptr QENSFitSimultaneous::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
-  auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, true);
-  pifp->setProperty("InputWorkspace", parameterWorkspace);
-  pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("XAxisUnit", "MomentumTransfer");
-  pifp->setProperty("ParameterNames", getFitParameterNames());
+  Progress logAdderProg(this, 0.91, 0.95, 1);
 
-  std::vector<MatrixWorkspace_sptr> results;
-  results.reserve(grouping.size() - 1);
-  for (auto i = 0u; i < grouping.size() - 1; ++i) {
-    pifp->setProperty("StartRowIndex", static_cast<int>(grouping[i]));
-    pifp->setProperty("EndRowIndex", static_cast<int>(grouping[i + 1]) - 1);
-    pifp->setProperty("OutputWorkspace", "__Result");
-    pifp->executeAsChildAlg();
-    results.push_back(pifp->getProperty("OutputWorkspace"));
-  }
-  return createGroup(results);
+  auto const xAxisUnit =
+      parameterWorkspace->getColumn(0)->isNumber() ? "MomentumTransfer" : "";
+  auto pifp = createProcessIndirectFitParametersAlgorithm(
+      parameterWorkspace, xAxisUnit, getFitParameterNames());
+  auto group = runParameterProcessingWithGrouping(*pifp, grouping);
+  logAdderProg.report("Result workspace created.");
+  return group;
 }
 
 void QENSFitSimultaneous::copyLogs(
