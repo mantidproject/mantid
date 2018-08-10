@@ -7,20 +7,24 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace {
 namespace Prop {
-static std::string const FILENAME("Filename");
-static std::string const OUTPUT_WORKSPACE("OutputWorkspace");
-static std::string const START_X("StartSpectrumIndex");
-static std::string const END_X("EndSpectrumIndex");
-static std::string const EXCLUDE("Exclude");
+std::string const FILENAME("Filename");
+std::string const OUTPUT_WORKSPACE("OutputWorkspace");
+std::string const START_X("StartSpectrumIndex");
+std::string const END_X("EndSpectrumIndex");
+std::string const EXCLUDE("Exclude");
+std::string const BACKGROUND("Background");
 } // namespace Prop
 
 double const VERY_BIG_VALUE = 10000.0;
+std::map<std::string, std::string> const funMap{
+    {"Linear", "name=LinearBackground"}, {"Quadratic", "name=Quadratic"}};
 
 } // namespace
 
@@ -67,6 +71,14 @@ void CreateFloodWorkspace::init() {
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
                   "Spectra to exclude");
 
+  std::vector<std::string> allowedValues;
+  for (auto i : funMap)
+    allowedValues.push_back(i.first);
+  auto backgroundValidator =
+      boost::make_shared<ListValidator<std::string>>(allowedValues);
+  declareProperty(Prop::BACKGROUND, "Linear", backgroundValidator,
+                  "Background function.");
+
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       Prop::OUTPUT_WORKSPACE, "", Direction::Output),
                   "The flood correction workspace.");
@@ -81,6 +93,10 @@ MatrixWorkspace_sptr CreateFloodWorkspace::getInputWorkspace() {
   alg->execute();
   Workspace_sptr ws = alg->getProperty("OutputWorkspace");
   return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+}
+
+std::string CreateFloodWorkspace::getBackgroundFunction() {
+  return funMap.at(getPropertyValue(Prop::BACKGROUND));
 }
 
 MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
@@ -131,11 +147,11 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
     return std::find(exclude.begin(), exclude.end(), xVal) != exclude.end();
   };
 
-  std::string const functionStr("name=LinearBackground");
+  std::string const function = getBackgroundFunction();
 
   // Fit the data to determine unwanted background
   auto alg = createChildAlgorithm("Fit");
-  alg->setProperty("Function", functionStr);
+  alg->setProperty("Function", function);
   alg->setProperty("InputWorkspace", fitWS);
   alg->setProperty("WorkspaceIndex", 0);
   if (!excludeFromFit.empty()) {

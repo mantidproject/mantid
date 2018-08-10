@@ -44,6 +44,7 @@ private:
   void init() override;
   void exec() override;
   API::MatrixWorkspace_sptr getInputWorkspace();
+  std::string getBackgroundFunction();
   API::MatrixWorkspace_sptr integrate(API::MatrixWorkspace_sptr ws);
   API::MatrixWorkspace_sptr transpose(API::MatrixWorkspace_sptr ws);
   API::MatrixWorkspace_sptr removeBackground(API::MatrixWorkspace_sptr ws);
