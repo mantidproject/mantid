@@ -12,8 +12,8 @@ class LoadUtilsTest(unittest.TestCase):
         self.test_path = r"test\path\to\ral012345.rooth2020.dat"
         self.bad_path = r"test\path\to\ral012345.rooth2042"
         self.test_run = 5
-        self.test_ws_name = "1_Delayed_rooth2020_{}".format(self.test_run)
-        self.var_ws_name = "{}_Delayed_rooth2020_{}"
+        self.var_ws_name = "{}_Delayed_{}"
+        self.test_ws_name = self.var_ws_name.format(1, self.test_run)
         self.test_ws_names = [
             self.var_ws_name.format(
                 x, self.test_run) for x in range(
@@ -27,10 +27,10 @@ class LoadUtilsTest(unittest.TestCase):
             assert lutils.pad_run(i) == s
 
     def test_get_detector_num_from_ws(self):
-        assert lutils.get_detector_num_from_ws(self.test_ws_name) == 1
+        assert lutils.get_detector_num_from_ws(self.test_ws_name) == "1"
 
     def test_get_detectors_num(self):
-        assert lutils.get_detectors_num(self.test_path) == 1
+        assert lutils.get_detectors_num(self.test_path) == "1"
 
     def test_get_end_num(self):
         assert lutils.get_end_num(self.test_path) == "rooth2020"

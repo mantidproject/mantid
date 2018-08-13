@@ -86,14 +86,14 @@ def get_detector_num_from_ws(name):
     Gets the detector number from the workspace name:
         i.e the first character
     """
-    return int(name[0])
+    return name[0]
 
 
 def get_detectors_num(path):
     """
     Gets the detector number from the filepath
     """
-    return int(path.rsplit(".", 2)[1][5]) - 1
+    return str(int(path.rsplit(".", 2)[1][5]) - 1)
 
 
 def get_end_num(path):
@@ -115,15 +115,15 @@ def get_filename(path, run):
     Returns the overall workspace name
     """
     try:
-        return "{}_{}_{}_{}".format(get_detectors_num(
-            path), get_run_type(path), get_end_num(path), run)
+        return "_".join([get_detectors_num(
+            path), get_run_type(path), str(run)])
     except KeyError:
         return None
 
 
 def replace_workspace_name_suffix(name, suffix):
-    detector, run_type, end = name.split("_", 3)[:3]
-    return "_".join([detector, run_type, end, suffix])
+    detector, run_type = name.split("_", 2)[:2]
+    return "_".join([detector, run_type, suffix])
 
 
 def flatten_run_data(*workspaces):

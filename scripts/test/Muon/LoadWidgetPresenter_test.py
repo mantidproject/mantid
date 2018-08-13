@@ -21,7 +21,6 @@ class LoadPresenterTest(unittest.TestCase):
         self._co_model = mock.create_autospec(CoLoadModel)
         self.presenter = LoadPresenter(
             self._view, self._load_model, self._co_model)
-
         self.view = self.presenter.view
 
     def test_equalise_loaded_runs(self):
