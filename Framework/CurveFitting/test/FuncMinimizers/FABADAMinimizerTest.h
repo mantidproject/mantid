@@ -178,7 +178,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT(fit.isExecuted());
 
-    TS_ASSERT_DELTA(fun->getParameter("Height"), 10.0, 0.02);
+    TS_ASSERT_DELTA(fun->getParameter("Height"), 10.0, 0.1);
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 0.5, 0.01);
     TS_ASSERT_DELTA(fun->getError(0), 0.7, 1e-1);
     TS_ASSERT_DELTA(fun->getError(1), 0.06, 1e-2);
@@ -194,7 +194,7 @@ public:
     TS_ASSERT_EQUALS(PDF->x(0).size(), 21);
     TS_ASSERT_EQUALS(PDF->y(0).size(), 20);
     TS_ASSERT_DELTA(PDF->y(0)[7], 0.41, 0.3);
-    TS_ASSERT_DELTA(PDF->y(1)[8], 5.24, 1.0);
+    TS_ASSERT_DELTA(PDF->y(1)[8], 3.5, 1.0);
     TS_ASSERT_DELTA(PDF->y(2)[0], 0.44, 0.3);
 
     //  Test CostFunction table

@@ -258,9 +258,7 @@ void SaveFocusedXYE::writeMAUDHeaders(
      << workspace->getRunNumber() << '\n';
   os << "#A  OMEGA      90.00\n";
   os << "#A  CHI         0.00\n";
-  // Whilst Phi should be able to change freely, as it is relative
-  // rotation, MAUD will fail to graph the data if it is not 0
-  os << "#A  PHI         0.00\n";
+  os << "#A  PHI       -90.00\n";
   os << "#A  ETA         0.00\n";
 }
 

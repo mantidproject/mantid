@@ -455,7 +455,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                           -I ${PYQT4_SIP_DIR} ${MANTIDQTPYTHON_SIP_INCLUDES}  ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o
                           ${SIP_SPEC}
-                     DEPENDS ${SIP_INCLUDE_DIRECTORY}/sip.h src/qti.sip ${QTI_SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
+                     DEPENDS ${SIP_INCLUDE_DIR}/sip.h src/qti.sip ${QTI_SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
                      COMMENT "Generating python bindings using sip"
 )
 

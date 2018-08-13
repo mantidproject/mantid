@@ -55,6 +55,8 @@ Python
 New
 ###
 
+ - New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
+
 
 Improvements
 ############
