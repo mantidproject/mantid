@@ -17,8 +17,6 @@ class BrowseFileWidgetModel(object):
         self._loaded_workspaces = []
         self._loaded_runs = []
 
-        self._current_run = None
-
     @property
     def loaded_filenames(self):
         return self._loaded_filenames
@@ -32,30 +30,28 @@ class BrowseFileWidgetModel(object):
         return self._loaded_runs
 
     # Used with load thread
-    def loadData(self, filenames):
-        self._filenames = filenames
+    def loadData(self, filename_list):
+        self._filenames = filename_list
 
     # Used with load thread
     def execute(self):
         failed_files = []
-        for file in self._filenames:
+        for filename in self._filenames:
             try:
-                ws, run = self.load_workspace_from_filename(file)
-            except:
-                failed_files += [file]
+                ws, run = self.load_workspace_from_filename(filename)
+            except ValueError:
+                failed_files += [filename]
                 continue
-            if ws:
-                self._loaded_workspaces += [ws]
-                # TODO : handle exception (not loading data)
-                self._loaded_runs += [run]
-                self._loaded_filenames += [file]
+            self._loaded_workspaces += [ws]
+            self._loaded_runs += [run]
+            self._loaded_filenames += [filename]
         if failed_files:
             message = self.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
 
     def exception_message_for_failed_files(self, failed_file_list):
         print("Exception in execute!")
-        return "Could not load the following files : " + ",\n".join(failed_file_list)
+        return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
 
     # Used with load thread
     def output(self):
@@ -67,8 +63,11 @@ class BrowseFileWidgetModel(object):
 
     def load_workspace_from_filename(self, filename):
         print("Loading file : ", filename)
-        workspace = mantid.Load(Filename=filename)
-        run = int(workspace[0].getRunNumber())
+        try:
+            workspace = mantid.Load(Filename=filename)
+            run = int(workspace[0].getRunNumber())
+        except ValueError as e:
+            raise ValueError(e.args)
         return workspace, run
 
     def clear(self):
