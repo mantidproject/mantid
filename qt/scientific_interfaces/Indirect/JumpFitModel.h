@@ -42,7 +42,6 @@ public:
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override;
 
-
 private:
   std::string constructOutputName() const;
   bool allWorkspacesEqual(Mantid::API::MatrixWorkspace_sptr workspace) const;

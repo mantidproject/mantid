@@ -379,9 +379,9 @@ void QENSFitSequential::init() {
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
   unitOptions.emplace_back("");
   declareProperty("ResultXAxisUnit", "MomentumTransfer",
-	  boost::make_shared<StringListValidator>(unitOptions),
-	  "The unit to assign to the X Axis of the result workspace, "
-	  "defaults to MomentumTransfer");
+                  boost::make_shared<StringListValidator>(unitOptions),
+                  "The unit to assign to the X Axis of the result workspace, "
+                  "defaults to MomentumTransfer");
 
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
