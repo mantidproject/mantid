@@ -130,10 +130,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   bufferWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("TOF");
   bufferWorkspace->setYUnit("Counts");
-  bufferWorkspace->updateSpectraUsing(
-      SpectrumDetectorMapping(m_specIDs, m_detIDs));
 
-  // Only run the loading of instrument once
   runLoadInstrument(bufferWorkspace, getString("NAME"));
 
   return true;
@@ -210,6 +207,9 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
   auto localWorkspace = WorkspaceFactory::Instance().create(
       bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
       m_numberOfBins[m_timeRegime]);
+
+  localWorkspace->updateSpectraUsing(
+      SpectrumDetectorMapping(m_specIDs, m_detIDs));
 
   // cut the spectra numbers into chunks
   std::vector<int> index, count;
