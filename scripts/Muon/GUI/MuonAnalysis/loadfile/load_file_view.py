@@ -5,7 +5,7 @@ from qtpy.QtCore import Signal
 
 
 class BrowseFileWidgetView(QtWidgets.QWidget):
-    # signals for parent widgets
+    # signals for use by parent widgets
     loadingStarted = Signal()
     loadingFinished = Signal()
     dataChanged = Signal()
@@ -19,8 +19,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self._store_edit_text = False
         self._stored_edit_text = ""
         self._cached_text = ""
-
-        self._stored_text = ""
 
     def setupUi(self, BrowseFileWidget):
         BrowseFileWidget.setObjectName("BrowseFileWidget")
@@ -64,20 +62,21 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
         self.horizontalLayout.addWidget(self.copyButton)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
+        # QtCore.QMetaObject.connectSlotsByName(BrowseFileWidget)
 
-        QtCore.QMetaObject.connectSlotsByName(BrowseFileWidget)
+    def on_browse_clicked(self, slot):
+        self.browseButton.clicked.connect(slot)
+
+    def on_file_edit_changed(self, slot):
+        self.filePathEdit.editingFinished.connect(slot)
 
     def copy_line_edit_to_clipboard(self):
         cb = QtWidgets.QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
         cb.setText(self.get_file_edit_text(), mode=cb.Clipboard)
 
-    def on_browse_clicked(self, slot):
-        self.browseButton.clicked.connect(slot)
-
     def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
-
         if multiple_files:
             chosen_files, _ = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
                                                                      file_filter)
@@ -111,8 +110,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
             return self.filePathEdit.text()
 
     def set_file_edit(self, text, store=False):
-        print("Setting file edit : " + text)
-        self._stored_text = text
         if store:
             self._store_edit_text = True
             self._stored_edit_text = text
@@ -122,15 +119,11 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self._cached_text = self.get_file_edit_text()
 
     def clear(self):
-        print("Clearing file widget")
         self.set_file_edit("")
         self._store_edit_text = False
-
-    def on_file_edit_changed(self, slot):
-        self.filePathEdit.editingFinished.connect(slot)
+        self._cached_text = ""
 
     def reset_edit_to_cached_value(self):
         tmp = self._cached_text
-        print("reset to cache : " + tmp)
         self.set_file_edit(tmp)
         self._cached_text = tmp
