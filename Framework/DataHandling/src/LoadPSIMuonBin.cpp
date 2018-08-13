@@ -430,8 +430,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
        i < sizeof(m_header.firstGood) / sizeof(*m_header.firstGood); ++i) {
     if (m_header.firstGood[i] != 0) {
       logAlg->setProperty("LogType", "String");
-      logAlg->setProperty("LogName", "Spectra" + std::to_string(i) +
-                                         "first and last good");
+      logAlg->setProperty("LogName", "First and Last good for Spectra #" +
+                                         std::to_string(i));
       logAlg->setProperty("LogText", std::to_string(m_header.firstGood[i]) +
                                          " - " +
                                          std::to_string(m_header.lastGood[i]));
@@ -444,6 +444,85 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   logAlg->setProperty("LogName", "Total Number of Events");
   logAlg->setProperty("LogText", std::to_string(m_header.totalEvents));
   logAlg->executeAsChildAlg();
+
+  // tdcResolution
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "TDC Resolution");
+  logAlg->setProperty("LogText", std::to_string(m_header.tdcResolution));
+  logAlg->executeAsChildAlg();
+
+  // tdcOverflow
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "TDC Overflow");
+  logAlg->setProperty("LogText", std::to_string(m_header.tdcOverflow));
+  logAlg->executeAsChildAlg();
+
+  // Length of spectra
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Spectra Length");
+  logAlg->setProperty("LogText", std::to_string(m_header.lengthOfHistograms));
+  logAlg->executeAsChildAlg();
+
+  // Number of Spectra
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Number of Spectra");
+  logAlg->setProperty("LogText", std::to_string(m_header.numberOfHistograms));
+  logAlg->executeAsChildAlg();
+
+  // monNumber of events
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Mon number of events");
+  logAlg->setProperty("LogText", std::to_string(m_header.monNumberOfevents));
+  logAlg->executeAsChildAlg();
+
+  // Mon Period
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Mon Period");
+  logAlg->setProperty("LogText", std::to_string(m_header.periodOfMon));
+  logAlg->executeAsChildAlg();
+
+  if (m_header.monLow[0] == 0 && m_header.monHigh[0] == 0) {
+    logAlg->setProperty("LogType", "String");
+    logAlg->setProperty("LogName", "Mon Low");
+    logAlg->setProperty("LogText", "0");
+    logAlg->executeAsChildAlg();
+
+    logAlg->setProperty("LogType", "String");
+    logAlg->setProperty("LogName", "Mon High");
+    logAlg->setProperty("LogText", "0");
+    logAlg->executeAsChildAlg();
+  } else {
+    for (auto i = 0u; i < 4; ++i) {
+      if (m_header.monLow[i] == 0 || m_header.monHigh[i] == 0)
+        break;
+      logAlg->setProperty("LogType", "String");
+      logAlg->setProperty("LogName", "Mon Low" + i);
+      logAlg->setProperty("LogText", std::to_string(m_header.monLow[i]));
+      logAlg->executeAsChildAlg();
+
+      logAlg->setProperty("LogType", "String");
+      logAlg->setProperty("LogName", "Mon High + i");
+      logAlg->setProperty("LogText", std::to_string(m_header.monHigh[i]));
+      logAlg->executeAsChildAlg();
+    }
+  }
+
+  // Mon Deviation
+  logAlg->setProperty("LogType", "String");
+  logAlg->setProperty("LogName", "Mon Deviation");
+  logAlg->setProperty("LogText", m_header.monDeviation);
+  logAlg->executeAsChildAlg();
+
+  if (m_header.realT0[0] != 0) {
+    for (auto i = 0u; i < 16; ++i) {
+      if (m_header.realT0[i] == 0)
+        break;
+      logAlg->setProperty("LogType", "String");
+      logAlg->setProperty("LogName", "realT0 + i");
+      logAlg->setProperty("LogText", std::to_string(m_header.realT0[i]));
+      logAlg->executeAsChildAlg();
+    }
+  }
 }
 
 } // namespace DataHandling

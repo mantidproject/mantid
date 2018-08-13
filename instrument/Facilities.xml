@@ -778,7 +778,8 @@
 
 </facility>
 
-<facility name="SmuS" FileExtensions=".nxs,.xml">
+<!-- PSI Facility (Switzerland) -->
+<facility name="SmuS" FileExtensions=".nxs,.xml,.bin">
   <timezone>Europe/Zurich</timezone>
 
   <instrument name="GPD">
@@ -791,6 +792,17 @@
     <technique>Muon spectroscopy</technique>
   </instrument>
 
+  <instrument name="DOLLY">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+
+  <instrument name="LEM">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+
+  <instrument name="LTF">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
 </facility>
 
 <!--  Reactor Orphee (France) -->
