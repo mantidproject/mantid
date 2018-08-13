@@ -129,8 +129,8 @@ private:
   /// Time regime to load
   int m_timeRegime;
 
-  /// Buffer workspace to store instrument data (or not only instrument in the future),
-  /// prevents loading for every chank of data
+  /// Buffer workspace to store instrument data (or not only instrument in the
+  /// future), prevents loading for every chank of data
   API::MatrixWorkspace_sptr bufferWorkspace;
 
   /// reporter function called when the IDC reading routines raise an error

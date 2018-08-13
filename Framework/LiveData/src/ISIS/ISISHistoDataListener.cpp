@@ -125,8 +125,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   loadTimeRegimes();
 
   // Create dummy workspace to store instrument data
-  bufferWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", 1,1,1);
+  bufferWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
   bufferWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("TOF");
