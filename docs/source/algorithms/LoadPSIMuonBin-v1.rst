@@ -26,8 +26,7 @@ Child Algorithms used
 
 The ChildAlgorithms used by LoadMuonNexus are:
 
-* :ref:`algm-AddSampleLog-v1` - It adds to the Sample Log of the 
-workspace
+* :ref:`algm-AddSampleLog-v1` - It adds to the Sample Log of the workspace
 
 .. categories::
 

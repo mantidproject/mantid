@@ -496,7 +496,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
       if (m_header.monLow[i] == 0 || m_header.monHigh[i] == 0)
         break;
       logAlg->setProperty("LogType", "String");
-      logAlg->setProperty("LogName", "Mon Low" + i);
+      logAlg->setProperty("LogName", "Mon Low" + std::to_string(i));
       logAlg->setProperty("LogText", std::to_string(m_header.monLow[i]));
       logAlg->executeAsChildAlg();
 
