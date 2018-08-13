@@ -13,7 +13,7 @@ class LoadUtilsTest(unittest.TestCase):
         self.bad_path = r"test\path\to\ral012345.rooth2042"
         self.test_run = 5
         self.test_ws_name = "1_Delayed_rooth2020_{}".format(self.test_run)
-        self.var_ws_name = "{}_Total_rooth2020_{}"
+        self.var_ws_name = "{}_Delayed_rooth2020_{}"
         self.test_ws_names = [
             self.var_ws_name.format(
                 x, self.test_run) for x in range(
@@ -68,6 +68,13 @@ class LoadUtilsTest(unittest.TestCase):
                 self.test_workspaces[x:x + 2], OutputWorkspace=name)
             workspaces.append(name)
         assert lutils.flatten_run_data(workspaces) == [self.test_ws_names]
+
+    def test_replace_workspace_name_suffix(self):
+        tests = {self.test_ws_name: "suffix", "_".join(
+            [self.test_ws_name, "test"]): "suffix"}
+        for w, suffix in iteritems(tests):
+            assert lutils.replace_workspace_name_suffix(
+                w, suffix) == self.var_ws_name.format(1, suffix)
 
 
 if __name__ == "__main__":

@@ -39,8 +39,7 @@ class CoLoadModel(lutils.LModel):
 
     def add_runs(self, l, r, suffix):
         # prevent new suffix being appended to old one
-        l = l[:l.rfind("_")] if l.endswith(")") else l
-        out = "{}_({})".format(l, suffix)
+        out = lutils.replace_workspace_name_suffix(l, suffix)
         mantid.Plus(l, r, OutputWorkspace=out)
         return out
 

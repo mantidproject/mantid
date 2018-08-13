@@ -121,6 +121,11 @@ def get_filename(path, run):
         return None
 
 
+def replace_workspace_name_suffix(name, suffix):
+    detector, run_type, end = name.split("_", 3)[:3]
+    return "_".join([detector, run_type, end, suffix])
+
+
 def flatten_run_data(*workspaces):
     out = []
     for ws in workspaces:
