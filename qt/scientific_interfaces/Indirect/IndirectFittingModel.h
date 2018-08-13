@@ -161,7 +161,11 @@ private:
   virtual std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(std::size_t index) const;
 
+  virtual std::string getResultXAxisUnit() const;
+
   bool isPreviousModelSelected() const;
+
+  void addFitProperties(Mantid::API::IAlgorithm &algorithm) const;
 
   virtual IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,

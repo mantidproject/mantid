@@ -42,6 +42,7 @@ public:
   std::string singleFitOutputName(std::size_t index,
                                   std::size_t spectrum) const override;
 
+
 private:
   std::string constructOutputName() const;
   bool allWorkspacesEqual(Mantid::API::MatrixWorkspace_sptr workspace) const;
@@ -50,6 +51,7 @@ private:
                        const std::string &hwhmName);
   std::unordered_map<std::string, JumpFitParameters>::const_iterator
   findJumpFitParameters(std::size_t dataIndex) const;
+  std::string getResultXAxisUnit() const override;
 
   std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;

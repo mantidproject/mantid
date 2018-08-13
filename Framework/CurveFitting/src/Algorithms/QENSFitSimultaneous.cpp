@@ -14,6 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/join.hpp>
 
@@ -374,6 +375,13 @@ void QENSFitSimultaneous::initConcrete() {
                   "Convolution are output convolved\n"
                   "with corresponding resolution");
 
+  std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
+  unitOptions.emplace_back("");
+  declareProperty("ResultXAxisUnit", "MomentumTransfer",
+                  boost::make_shared<StringListValidator>(unitOptions),
+                  "The unit to assign to the X Axis of the result workspace, "
+                  "defaults to MomentumTransfer");
+
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output result workspace(s)");
@@ -492,8 +500,7 @@ WorkspaceGroup_sptr QENSFitSimultaneous::processIndirectFitParameters(
     const std::vector<std::size_t> &grouping) {
   Progress logAdderProg(this, 0.91, 0.95, 1);
 
-  auto const xAxisUnit =
-      parameterWorkspace->getColumn(0)->isNumber() ? "MomentumTransfer" : "";
+  std::string const xAxisUnit = getProperty("ResultXAxisUnit");
   auto pifp = createProcessIndirectFitParametersAlgorithm(
       parameterWorkspace, xAxisUnit, getFitParameterNames());
   auto group = runParameterProcessingWithGrouping(*pifp, grouping);
