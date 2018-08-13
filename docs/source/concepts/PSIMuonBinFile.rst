@@ -1,7 +1,7 @@
 .. _PSIMuonBin file:
 
 PSI Muon Bin File
-==========
+=================
 
 A PSI Muon Bin file is a data file used by multiple instruments at PSI, and is now able to
 be used by MantidPlot. The format is just binary bytes, consisting of two main part of the
@@ -13,10 +13,11 @@ Structure
 ---------
 
 The general structure for the header of PSI bin files is:
+
 .. figure:: ../images/PSIMuonBinHeader.png
-    :class: screenshot
-    :align: centre
-    :figwidth: 100%%
+   :class: screenshot
+   :align: center
+   :figwidth: 100%%
 
 Here are some specific details, following the header are the histograms, using the data from
 the header the algorithm will load the data from the histograms.
