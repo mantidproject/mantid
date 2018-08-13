@@ -14,7 +14,7 @@ using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 namespace //<unnamed>
-    {
+{
 ///@cond
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
@@ -31,7 +31,7 @@ GNU_DIAG_ON("unused-local-typedef")
 void setR(Goniometer &self, const object &data) {
   self.setR(Converters::PyObjectToMatrix(data)());
 }
-}
+} // namespace
 
 void export_Goniometer() {
 

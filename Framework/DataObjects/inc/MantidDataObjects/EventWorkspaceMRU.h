@@ -1,12 +1,12 @@
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACEMRU_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACEMRU_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/MRUList.h"
-#include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramY.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MRUList.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "Poco/RWLock.h"
 

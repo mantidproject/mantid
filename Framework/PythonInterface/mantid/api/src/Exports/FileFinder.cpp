@@ -18,7 +18,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2)
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
-}
+} // namespace
 
 void export_FileFinder() {
   class_<FileFinderImpl, boost::noncopyable>("FileFinderImpl", no_init)

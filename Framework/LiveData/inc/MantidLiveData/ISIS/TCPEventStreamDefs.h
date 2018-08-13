@@ -186,8 +186,8 @@ struct TCPStreamEventDataSE {
   /// and the number of neutron events in this packet
   TCPStreamEventHeaderSE head_s;
 };
-}
-}
+} // namespace LiveData
+} // namespace Mantid
 
 GNU_DIAG_ON("type-limits")
 #endif /* TCP_EVENT_STREAM_DEFS_H */

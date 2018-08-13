@@ -69,7 +69,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
-}
+} // namespace
 
 void export_AlgorithmManager() {
 

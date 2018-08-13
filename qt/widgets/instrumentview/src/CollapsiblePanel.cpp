@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
-#include <QVBoxLayout>
+#include <QFontMetrics>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QFontMetrics>
 #include <QPolygon>
+#include <QVBoxLayout>
 
 #include <stdexcept>
 
@@ -109,9 +109,9 @@ CollapsibleStack::CollapsibleStack(QWidget *parent) : QWidget(parent) {
 }
 
 /**
-* Add a new panel to the bottom of the stack and set its caption and the inner
-* widget
-*/
+ * Add a new panel to the bottom of the stack and set its caption and the inner
+ * widget
+ */
 CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption,
                                              QWidget *widget) {
   CollapsiblePanel *panel = new CollapsiblePanel(caption, this);
@@ -153,5 +153,5 @@ void CollapsibleStack::updateStretch() {
     }
   }
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,15 +1,15 @@
 /* File: ScalarUtils.cpp */
 
-#include <stdexcept>
 #include "MantidGeometry/Crystal/ScalarUtils.h"
-#include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ReducedCell.h"
+#include <stdexcept>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 static const std::string BRAVAIS_TYPE[15] = {
     ReducedCell::CUBIC(), // F
@@ -403,12 +403,10 @@ std::vector<DblMatrix> ScalarUtils::GetRelatedUBs(const DblMatrix &UB,
       m_b_temp = b_temp * (-1.0);
       m_c_temp = c_temp * (-1.0);
 
-      V3D permutations[6][3] = {{a_temp, b_temp, c_temp},
-                                {m_a_temp, c_temp, b_temp},
-                                {b_temp, c_temp, a_temp},
-                                {m_b_temp, a_temp, c_temp},
-                                {c_temp, a_temp, b_temp},
-                                {m_c_temp, b_temp, a_temp}};
+      V3D permutations[6][3] = {
+          {a_temp, b_temp, c_temp}, {m_a_temp, c_temp, b_temp},
+          {b_temp, c_temp, a_temp}, {m_b_temp, a_temp, c_temp},
+          {c_temp, a_temp, b_temp}, {m_c_temp, b_temp, a_temp}};
 
       for (auto &permutation : permutations) {
         a = permutation[0];

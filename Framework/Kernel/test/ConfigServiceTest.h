@@ -4,22 +4,22 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/FacilityInfo.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <boost/shared_ptr.hpp>
-#include <string>
 #include <fstream>
+#include <string>
 
-#include <Poco/NObserver.h>
-#include <Poco/SplitterChannel.h>
-#include <Poco/Logger.h>
 #include <Poco/Environment.h>
 #include <Poco/File.h>
+#include <Poco/Logger.h>
+#include <Poco/NObserver.h>
+#include <Poco/SplitterChannel.h>
 
 using namespace Mantid::Kernel;
 using Mantid::TestChannel;
@@ -56,7 +56,7 @@ public:
         log1.debug() << "A debug message from the stream operators " << 5684568
                      << '\n';
 
-        );
+    );
 
     // checking the level - this is set above
     TS_ASSERT(log1.is(Poco::Message::PRIO_DEBUG) == false);       // debug
@@ -318,10 +318,12 @@ public:
 
   void TestCustomPropertyAsValue() {
     // Mantid.legs is defined in the properties script as 6
-    int value = 0;
-    ConfigService::Instance().getValue("algorithms.retained", value);
-    double dblValue = 0;
-    ConfigService::Instance().getValue("algorithms.retained", dblValue);
+    int value = ConfigService::Instance()
+                    .getValue<int>("algorithms.retained")
+                    .get_value_or(0);
+    double dblValue = ConfigService::Instance()
+                          .getValue<double>("algorithms.retained")
+                          .get_value_or(0);
 
     TS_ASSERT_EQUALS(value, 50);
     TS_ASSERT_EQUALS(dblValue, 50.0);
@@ -669,8 +671,9 @@ protected:
   std::string m_key;
   std::string m_preValue;
   std::string m_curValue;
-  void handleConfigChange(const Poco::AutoPtr<
-      Mantid::Kernel::ConfigServiceImpl::ValueChanged> &pNf) {
+  void handleConfigChange(
+      const Poco::AutoPtr<Mantid::Kernel::ConfigServiceImpl::ValueChanged>
+          &pNf) {
     m_valueChangedSent = true;
     m_key = pNf->key();
     m_preValue = pNf->preValue();

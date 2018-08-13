@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
 

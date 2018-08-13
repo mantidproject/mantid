@@ -114,7 +114,7 @@ private:
   /// Set the visible peak list.
   void setVisiblePeaks(const std::vector<size_t> &indexes);
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_ */

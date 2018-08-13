@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/SliceViewer/LineOverlay.h"
 #include "MantidKernel/Utils.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include <QPainter>
 #include <QRect>
 #include <QShowEvent>
-#include <QPainter>
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 
@@ -597,5 +597,5 @@ void LineOverlay::mouseReleaseEvent(QMouseEvent *event) {
     event->ignore();
 }
 
-} // namespace Mantid
 } // namespace SliceViewer
+} // namespace MantidQt

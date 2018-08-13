@@ -32,8 +32,10 @@ public:
 
 class MockICluster : public ICluster {
 public:
-  MOCK_CONST_METHOD1(integrate, ClusterIntegratedValues(boost::shared_ptr<
-                                    const Mantid::API::IMDHistoWorkspace> ws));
+  MOCK_CONST_METHOD1(
+      integrate,
+      ClusterIntegratedValues(
+          boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD1(
       writeTo, void(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws));
   MOCK_CONST_METHOD0(getLabel, size_t());
@@ -50,7 +52,7 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* MOCKOBJECTS_H_ */

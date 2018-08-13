@@ -10,8 +10,8 @@
 #include <QRegExpValidator>
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::Spectra;
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
+using MantidQt::CustomInterfaces::IDA::Spectra;
 
 namespace Regexes {
 const QString EMPTY = "^$";
@@ -255,8 +255,9 @@ void IndirectDataTablePresenter::addNewData(std::size_t index) {
   MantidQt::API::SignalBlocker<QObject> blocker(m_dataTable);
   const auto start = m_dataTable->rowCount();
 
-  const auto addRow =
-      [&](std::size_t spectrum) { addTableEntry(index, spectrum); };
+  const auto addRow = [&](std::size_t spectrum) {
+    addTableEntry(index, spectrum);
+  };
   m_model->applySpectra(index, addRow);
 
   if (m_model->numberOfWorkspaces() > m_dataPositions.size())

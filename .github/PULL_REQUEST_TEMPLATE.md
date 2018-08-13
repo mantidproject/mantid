@@ -8,7 +8,7 @@
 
 Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 <!-- alternative
-*There is no associated issue.
+*There is no associated issue.*
 -->
 
 <!-- delete this if you added release notes

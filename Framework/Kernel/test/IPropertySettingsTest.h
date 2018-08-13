@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_IPROPERTYSETTINGSTEST_H_
 #define MANTID_KERNEL_IPROPERTYSETTINGSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

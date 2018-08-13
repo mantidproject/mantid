@@ -1,8 +1,8 @@
 #ifndef MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_
 #define MANTID_MDGEOMETRY_MDIMPLICITFUNCTIONTEST_H_
 
-#include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;

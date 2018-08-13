@@ -122,5 +122,5 @@ void MultiplyMD::execHistoScalar(
   out->multiply(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

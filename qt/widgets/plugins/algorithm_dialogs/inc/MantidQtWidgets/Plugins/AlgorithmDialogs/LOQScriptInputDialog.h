@@ -4,8 +4,8 @@
 //---------------------------
 // Includes
 //--------------------------
-#include "ui_LOQScriptInputDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "ui_LOQScriptInputDialog.h"
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -60,7 +60,7 @@ private:
   // The form generated with Qt Designer
   Ui::LOQScriptInputDialog m_uiForm;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMDIALOGS_LOQSCRIPTINPUTDIALOG_H_

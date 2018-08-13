@@ -1,15 +1,15 @@
 #include <stdexcept>
 
-#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidVatesAPI/ColorScaleGuard.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidVatesAPI/BoxInfo.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 
 #include <QVTKWidget.h>
 #include <pqActiveObjects.h>
@@ -42,8 +42,8 @@
 
 #include <QHBoxLayout>
 #include <QPointer>
-#include <QThread>
 #include <QSet>
+#include <QThread>
 
 #include <typeinfo>
 
@@ -677,8 +677,9 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name) {
   QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
   foreach (pqPipelineSource *source, sources) {
-    QString wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName",
-                                       true).GetAsString());
+    QString wsName(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
+            .GetAsString());
     if (!wsName.isEmpty()) {
       if (wsName == name) {
         return source;
@@ -702,8 +703,9 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName) {
       smModel->findItems<pqPipelineSource *>(server);
   bool hasWsType = false;
   foreach (pqPipelineSource *source, sources) {
-    QString wsType(vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName",
-                                       true).GetAsString());
+    QString wsType(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true)
+            .GetAsString());
 
     if (wsType.isEmpty()) {
       wsType = source->getSMName();

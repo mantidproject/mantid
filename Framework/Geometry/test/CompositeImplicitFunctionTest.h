@@ -1,10 +1,10 @@
 #ifndef COMPOSITE_IMPLICIT_FUNCTION_TEST_H_
 #define COMPOSITE_IMPLICIT_FUNCTION_TEST_H_
 
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
-#include <cmath>
 #include <typeinfo>
 
 #include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"

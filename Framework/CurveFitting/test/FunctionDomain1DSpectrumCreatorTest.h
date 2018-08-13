@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

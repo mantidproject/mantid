@@ -120,6 +120,6 @@ public:
   MOCK_CONST_METHOD0(getDetectorPositionNoCheck, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getPeakShape, const Mantid::Geometry::PeakShape &());
 };
-}
+} // namespace
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

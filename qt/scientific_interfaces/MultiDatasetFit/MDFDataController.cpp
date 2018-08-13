@@ -17,7 +17,7 @@ const int startXColumn = 2;
 const int endXColumn = 3;
 
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -235,6 +235,6 @@ MultiDatasetFit *DataController::owner() const {
   return static_cast<MultiDatasetFit *>(parent());
 }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

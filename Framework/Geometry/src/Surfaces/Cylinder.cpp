@@ -443,6 +443,6 @@ TopoDS_Shape Cylinder::createShape() {
   return BRepPrimAPI_MakeCylinder(gpA, Radius, 1000.0, 2.0 * M_PI).Solid();
 }
 #endif
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

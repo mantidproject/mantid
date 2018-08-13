@@ -91,7 +91,8 @@ public:
 
   // Calls we don't care about
   void showTable(boost::shared_ptr<
-      MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>) override{};
+                 MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>)
+      override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};

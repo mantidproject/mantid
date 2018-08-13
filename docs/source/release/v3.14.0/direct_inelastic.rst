@@ -24,7 +24,13 @@ New features
 Improvements
 ############
 
-- improved ``Save``-section of the TOFTOF reduction dialog.
+- Improved ``Save``-section of the TOFTOF reduction dialog.
+- Behavior of the :ref:`LoadDNSLegacy <algm-LoadDNSLegacy>` for TOF data has been changed: the algorithm does not try to guess elastic channel any more, but asks for the user input.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
+
+Improvements
+############
+
+- :ref:`LoadDNSSCD <algm-LoadDNSSCD>` has been improved to be able to load TOF data.

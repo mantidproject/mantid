@@ -423,7 +423,7 @@ private:
     TS_ASSERT(appendSpectra->isExecuted());
   }
   /** Creates a 2D workspace with 5 histograms
-  */
+   */
   void createWorkspaceWithAxisAndLabel(const std::string outputName,
                                        const std::string &axisType,
                                        const std::string axisValue) {

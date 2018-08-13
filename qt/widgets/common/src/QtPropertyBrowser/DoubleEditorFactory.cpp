@@ -4,8 +4,8 @@
 #include <QDoubleValidator>
 
 #include <cfloat>
-#include <sstream>
 #include <cmath>
+#include <sstream>
 #include <stdexcept>
 
 DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent)

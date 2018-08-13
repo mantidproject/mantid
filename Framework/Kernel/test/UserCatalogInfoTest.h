@@ -18,7 +18,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
     out << maybe;
   return out;
 }
-}
+} // namespace boost
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 using namespace Mantid::Kernel;
 class MockCatalogConfigService : public CatalogConfigService {

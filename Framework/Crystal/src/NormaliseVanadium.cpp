@@ -5,8 +5,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/Fast_Exponential.h"
+#include "MantidKernel/Unit.h"
 
 /*  Following A.J.Schultz's anvred, scaling the vanadium spectra:
  */

@@ -26,18 +26,18 @@
 GNU_DIAG_OFF("conversion")
 GNU_DIAG_OFF("cast-qual")
 
-#include <gp_Trsf.hxx>
-#include <gp_Pnt.hxx>
-#include <gp_Pln.hxx>
-#include <StdFail_NotDone.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopExp_Explorer.hxx>
-#include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
+#include <StdFail_NotDone.hxx>
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Shape.hxx>
+#include <gp_Pln.hxx>
+#include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 

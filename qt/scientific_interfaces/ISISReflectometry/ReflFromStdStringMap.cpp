@@ -9,10 +9,9 @@ fromStdStringMap(std::map<std::string, std::string> const &inMap) {
   std::transform(inMap.begin(), inMap.end(), std::inserter(out, out.begin()),
                  [](std::pair<std::string, std::string> const &kvp)
                      -> std::pair<QString, QString> {
-                       return std::make_pair(
-                           QString::fromStdString(kvp.first),
-                           QString::fromStdString(kvp.second));
-                     });
+                   return std::make_pair(QString::fromStdString(kvp.first),
+                                         QString::fromStdString(kvp.second));
+                 });
   return out;
 }
 

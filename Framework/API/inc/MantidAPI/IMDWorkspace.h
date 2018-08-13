@@ -86,10 +86,10 @@ public:
   /// the number of bins.
   virtual uint64_t getNPoints() const = 0;
   /*** Get the number of events, associated with the workspace
-     * For MDEvenWorkspace it is equal to the number of points
-     * For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace),
+   * For MDEvenWorkspace it is equal to the number of points
+   * For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace),
    * it is the number of contributed non-zero events.
-  */
+   */
   virtual uint64_t getNEvents() const = 0;
 
   /// Creates a new iterator pointing to the first cell in the workspace
@@ -179,6 +179,6 @@ private:
 using IMDWorkspace_sptr = boost::shared_ptr<IMDWorkspace>;
 /// Shared pointer to the IMDWorkspace base class (const version)
 using IMDWorkspace_const_sptr = boost::shared_ptr<const IMDWorkspace>;
-}
-}
+} // namespace API
+} // namespace Mantid
 #endif // MANTID_API_IMDWORKSPACE_H_

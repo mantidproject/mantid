@@ -1,30 +1,30 @@
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::Workspace_sptr;
+using Mantid::API::AlgorithmManager;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ITableWorkspace_sptr;
-using Mantid::API::AlgorithmManager;
+using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceFactory;
+using Mantid::API::Workspace_sptr;
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param inputWS :: [input] Input workspace group
-* @param summedPeriods :: [input] Vector of period indexes to be summed
-* @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
-* from summed periods
-* @param start is the start time
-* @param end is the end time
-* @param groupIndex :: [input] Workspace index of the group to analyse
-* @param wsName :: the name of the workspace (for normalization table)
+ * @param inputWS :: [input] Input workspace group
+ * @param summedPeriods :: [input] Vector of period indexes to be summed
+ * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
+ * from summed periods
+ * @param start is the start time
+ * @param end is the end time
+ * @param groupIndex :: [input] Workspace index of the group to analyse
+ * @param wsName :: the name of the workspace (for normalization table)
  */
 MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
     const Mantid::API::WorkspaceGroup_sptr inputWS,
@@ -38,10 +38,10 @@ MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
 }
 
 /**
-* Calculates asymmetry between given group (specified via group index) and Muon
-* exponential decay
-* @returns Workspace containing result of calculation
-*/
+ * Calculates asymmetry between given group (specified via group index) and Muon
+ * exponential decay
+ * @returns Workspace containing result of calculation
+ */
 MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
   // The output workspace
 
@@ -81,12 +81,12 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
 }
 
 /**
-* Removes exponential decay from the given workspace.
-* @param inputWS :: [input] Workspace to remove decay from
-* @param index :: [input] GroupIndex (fit only the requested spectrum): use -1
-* for "unset"
-* @returns Result of the removal
-*/
+ * Removes exponential decay from the given workspace.
+ * @param inputWS :: [input] Workspace to remove decay from
+ * @param index :: [input] GroupIndex (fit only the requested spectrum): use -1
+ * for "unset"
+ * @returns Result of the removal
+ */
 MatrixWorkspace_sptr
 MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
                                              const int index) const {
@@ -111,12 +111,12 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
   return outWS;
 }
 /**
-* Estimate the asymmetrey for the given workspace (TF data).
-* @param inputWS :: [input] Workspace to calculate asymmetry for
-* @param index :: [input] GroupIndex (fit only the requested spectrum): use -1
-* for "unset"
-* @returns Result of the removal
-*/
+ * Estimate the asymmetrey for the given workspace (TF data).
+ * @param inputWS :: [input] Workspace to calculate asymmetry for
+ * @param index :: [input] GroupIndex (fit only the requested spectrum): use -1
+ * for "unset"
+ * @returns Result of the removal
+ */
 MatrixWorkspace_sptr
 MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
                                                 const int index) const {
@@ -164,10 +164,10 @@ MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
   return outWS;
 }
 /*
-* Reads in the stored normalization
-* if >0 then it is used instead of
-* estimating the norm.
-*/
+ * Reads in the stored normalization
+ * if >0 then it is used instead of
+ * estimating the norm.
+ */
 double getStoredNorm() {
   if (!API::AnalysisDataService::Instance().doesExist("__keepNorm__")) {
     return 0.0;

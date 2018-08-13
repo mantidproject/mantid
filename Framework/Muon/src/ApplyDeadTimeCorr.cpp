@@ -23,7 +23,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ApplyDeadTimeCorr)
 
 /** Initialize the algorithm's properties.
-   */
+ */
 void ApplyDeadTimeCorr::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
@@ -42,7 +42,7 @@ void ApplyDeadTimeCorr::init() {
 }
 
 /** Execute the algorithm.
-   */
+ */
 void ApplyDeadTimeCorr::exec() {
   // Get pointers to the workspace and dead time table
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
@@ -87,15 +87,14 @@ void ApplyDeadTimeCorr::exec() {
             const auto &yIn = inputWs->y(index);
             auto &yOut = outputWs->mutableY(index);
             for (size_t j = 0; j < yIn.size(); ++j) {
-              const double temp(1 -
-                                yIn[j] * (deadTimeRow.Double(1) /
-                                          (timeBinWidth * numGoodFrames)));
+              const double temp(1 - yIn[j] * (deadTimeRow.Double(1) /
+                                              (timeBinWidth * numGoodFrames)));
               if (temp != 0) {
                 yOut[j] = yIn[j] / temp;
               } else {
                 g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
-                                 "is currently (" << temp
-                              << "). Can't divide by this amount.\n";
+                                 "is currently ("
+                              << temp << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }
@@ -130,5 +129,5 @@ void ApplyDeadTimeCorr::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

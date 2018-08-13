@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
+#include "MantidKernel/Exception.h"
 
 #include <algorithm>
 

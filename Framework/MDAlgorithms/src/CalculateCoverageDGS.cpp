@@ -1,19 +1,19 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/lexical_cast.hpp>
@@ -32,7 +32,7 @@ bool compareMomentum(const Mantid::Kernel::VMD &v1,
                      const Mantid::Kernel::VMD &v2) {
   return (v1[3] < v2[3]);
 }
-}
+} // namespace
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateCoverageDGS)
 
@@ -66,8 +66,8 @@ const std::string CalculateCoverageDGS::summary() const {
 }
 
 /**
-*Stores the X values from each H,K,L dimension as member variables
-*/
+ *Stores the X values from each H,K,L dimension as member variables
+ */
 void CalculateCoverageDGS::cacheDimensionXValues() {
   const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
                            PhysicalConstants::meV * 1e-20 /
@@ -443,13 +443,13 @@ void CalculateCoverageDGS::exec() {
 }
 
 /**
-*Calculate the points of intersection for the given detector with cuboid
-* surrounding the
-*detector position in HKL
-*@param theta Polar angle withd detector
-*@param phi Azimuthal angle with detector
-*@return A list of intersections in HKL+kf space
-*/
+ *Calculate the points of intersection for the given detector with cuboid
+ * surrounding the
+ *detector position in HKL
+ *@param theta Polar angle withd detector
+ *@param phi Azimuthal angle with detector
+ *@return A list of intersections in HKL+kf space
+ */
 std::vector<Kernel::VMD>
 CalculateCoverageDGS::calculateIntersections(const double theta,
                                              const double phi) {

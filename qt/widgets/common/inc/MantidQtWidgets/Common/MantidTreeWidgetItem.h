@@ -1,6 +1,7 @@
 #ifndef MANTIDTREEWIDGETITEM_H
 #define MANTIDTREEWIDGETITEM_H
 
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include <MantidKernel/DateAndTime.h>
@@ -12,8 +13,8 @@ namespace MantidWidgets {
 class MantidTreeWidget;
 
 /**A class derived from QTreeWidgetItem, to accomodate
-* sorting on the items in a MantidTreeWidget.
-*/
+ * sorting on the items in a MantidTreeWidget.
+ */
 class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidgetItem : public QTreeWidgetItem {
 public:
   explicit MantidTreeWidgetItem(MantidTreeWidget *);
@@ -30,6 +31,6 @@ private:
   std::size_t getMemorySize() const;
   int m_sortPos;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDTREEWIDGETITEM_H

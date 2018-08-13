@@ -1,8 +1,8 @@
-#include <exception>
-#include <iostream>
-#include <cstdio>
 #include "isisraw2.h"
 #include "byte_rel_comp.h"
+#include <cstdio>
+#include <exception>
+#include <iostream>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -11,30 +11,34 @@
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ISISRAW2");
-}
+} // namespace
 
 /// No arg Constructor
 ISISRAW2::ISISRAW2()
     : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_bufferSize(0) {
   // Determine the size of the output buffer to create from the config service.
   g_log.debug("Determining ioRaw buffer size\n");
-  if (Mantid::Kernel::ConfigService::Instance().getValue(
-          "loadraw.readbuffer.size", m_bufferSize) == 0) {
+  auto bufferSizeConfigVal =
+      Mantid::Kernel::ConfigService::Instance().getValue<int>(
+          "loadraw.readbuffer.size");
+
+  if (!bufferSizeConfigVal.is_initialized()) {
     m_bufferSize = 200000;
     g_log.debug() << "loadraw.readbuffer.size not found, setting to "
                   << m_bufferSize << "\n";
   } else {
+    m_bufferSize = bufferSizeConfigVal.get();
     g_log.debug() << "loadraw.readbuffer.size set to " << m_bufferSize << "\n";
   }
 }
 
 /** Loads the headers of the file, leaves the file pointer at a specific
-*position
-*   @param file :: The file handle to use
-*   @param from_file :: Whether to read from or write to a file
-*   @param read_data :: Whether to go on to read the data
-*   @return file readin exit code, 0 is OK
-**/
+ *position
+ *   @param file :: The file handle to use
+ *   @param from_file :: Whether to read from or write to a file
+ *   @param read_data :: Whether to go on to read the data
+ *   @return file readin exit code, 0 is OK
+ **/
 int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
   (void)read_data; // Avoid compiler warning
 
@@ -99,8 +103,9 @@ int ISISRAW2::ioRAW(FILE *file, bool from_file, bool read_data) {
     if (u_len < 0 || (add.ad_data < add.ad_user + 2)) {
       // this will/would be used for memory allocation
       g_log.error() << "Error in u_len value read from file, it would be "
-                    << u_len << "; where it is calculated as "
-                                "u_len = ad_data - ad_user - 2, where ad_data: "
+                    << u_len
+                    << "; where it is calculated as "
+                       "u_len = ad_data - ad_user - 2, where ad_data: "
                     << add.ad_data << ", ad_user: " << add.ad_user << "\n";
       throw std::runtime_error("Inconsistent value for the field u_len found");
     }

@@ -1,9 +1,9 @@
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
@@ -75,7 +75,8 @@ void export_ExperimentInfo() {
 
       .def("detectorInfo", &ExperimentInfo::detectorInfo,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the :class:`~mantid.api.DetectorInfo` "
+           "Return a const reference to the "
+           ":class:`~mantid.geometry.DetectorInfo` "
            "object.")
       .def("spectrumInfo", &ExperimentInfo::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),

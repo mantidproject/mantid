@@ -1,15 +1,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/def.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/reference_existing_object.hpp>
 
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
@@ -44,7 +44,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
 
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
-}
+} // namespace
 
 void export_ConfigService() {
   using Mantid::PythonInterface::std_vector_exporter;
@@ -84,14 +84,15 @@ void export_ConfigService() {
       .def("getFacilities", &ConfigServiceImpl::getFacilities, arg("self"),
            "Returns the default facility")
 
-      .def("getFacility", (const FacilityInfo &(ConfigServiceImpl::*)() const) &
-                              ConfigServiceImpl::getFacility,
+      .def("getFacility",
+           (const FacilityInfo &(ConfigServiceImpl::*)() const) &
+               ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Returns the default facility")
 
       .def("getFacility",
-           (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
-                const) &
+           (const FacilityInfo &(
+               ConfigServiceImpl::*)(const std::string &)const) &
                ConfigServiceImpl::getFacility,
            (arg("self"), arg("facilityName")),
            return_value_policy<reference_existing_object>(),

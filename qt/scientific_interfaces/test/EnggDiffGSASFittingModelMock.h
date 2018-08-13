@@ -36,8 +36,8 @@ public:
   MOCK_CONST_METHOD3(
       saveRefinementResultsToHDF5,
       void(Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-           const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-               refinementResultSets,
+           const std::vector<GSASIIRefineFitPeaksOutputProperties>
+               &refinementResultSets,
            const std::string &filename));
 
   MOCK_METHOD1(setObserver,

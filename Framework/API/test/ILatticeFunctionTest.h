@@ -2,8 +2,8 @@
 #define MANTID_API_ILATTICEFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidAPI/ILatticeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -13,9 +13,9 @@ using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 
-using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::_;
 
 class ILatticeFunctionTest : public CxxTest::TestSuite {
 public:

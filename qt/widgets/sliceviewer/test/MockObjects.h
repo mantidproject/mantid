@@ -195,7 +195,7 @@ public:
   MOCK_CONST_METHOD1(getX, coord_t(size_t ind));
   MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
 };
-}
+} // namespace
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
