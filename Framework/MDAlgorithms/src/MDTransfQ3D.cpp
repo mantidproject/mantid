@@ -138,9 +138,8 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
     qz = -qz;
   }
 
-  // Dimension limits have to be converted to coord_t, and given a slight
-  // margin, otherwise floating point error will cause valid events to be
-  // discarded.
+  // Dimension limits have to be converted to coord_t, otherwise floating point
+  // error will cause valid events to be discarded.
   std::vector<coord_t> dim_min;
   std::vector<coord_t> dim_max;
   for (auto &v : m_DimMin) {
