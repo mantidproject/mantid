@@ -1,8 +1,12 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
+#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/handle.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
 
@@ -10,19 +14,18 @@ using Mantid::Geometry::ComponentInfo;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
+namespace Converters = Mantid::PythonInterface::Converters;
 
-// Helper function for converting std::vector<size_t> to a Python list
+// Helper function to call a converter for std::vector<size_t> to a Python list
 boost::python::list createList(std::vector<size_t> items) {
-  // Create the result list
-  boost::python::list result;
+  // Create a list to populate
+  boost::python::list dataAsList;
 
-  // Populate the Python list
-  std::vector<size_t>::iterator it;
-  for (it = items.begin(); it != items.end(); ++it) {
-    result.append(*it);
-  }
+  // Store the data
+  dataAsList.append(object(handle<>(
+      Converters::VectorToNDArray<size_t, Converters::WrapReadOnly>()(items))));
 
-  return result;
+  return dataAsList;
 }
 
 // Helper function to call the detectorsInSubtree method
@@ -56,11 +59,9 @@ void (ComponentInfo::*setPosition)(const size_t, const Mantid::Kernel::V3D &) =
 void (ComponentInfo::*setRotation)(const size_t, const Mantid::Kernel::Quat &) =
     &ComponentInfo::setRotation;
 
+// Export ComponentInfo
 void export_ComponentInfo() {
-  // WARNING ComponentInfo is work in progress and not ready for exposing more
-  // of its functionality to Python, and should not yet be used in user scripts.
-  // DO NOT ADD EXPORTS TO OTHER METHODS without contacting the team working on
-  // Instrument-2.0.
+
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
 
       .def("__len__", &ComponentInfo::size, arg("self"),

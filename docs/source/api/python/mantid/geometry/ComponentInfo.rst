@@ -22,10 +22,10 @@ The other two are:
 ---------
 Indexing 
 ---------
-The ``ComponentInfo`` object is accessed by an index going from 0 to the number of components N. 
+The ``ComponentInfo`` object is accessed by an index going from 0 to N-1 where N is the number of components. 
 The component index for a detector is EQUAL to the detector index. In other words, a detector with a detector index of 5 when working with a ``DetectorInfo`` object and will have a component index of 5 when working with a ``ComponentInfo`` object. 
 
-Another way to think about this is that the first 0 - n components referenced in ``ComponentInfo`` are detectors, where n is the total number of detectors.
+Another way to think about this is that the first 0 to n-1 components referenced in ``ComponentInfo`` are detectors, where n is the total number of detectors.
 
 -------
 Usage
