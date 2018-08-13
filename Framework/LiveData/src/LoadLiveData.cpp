@@ -277,10 +277,6 @@ void LoadLiveData::addMatrixWSChunk(Workspace_sptr accumWS,
   alg->setProperty("RHSWorkspace", chunkWS);
   alg->setProperty("OutputWorkspace", accumWS);
   alg->execute();
-  if (!alg->isExecuted()) {
-    throw std::runtime_error("Error when calling " + alg->name() +
-                             " to add the chunk of live data. See log.");
-  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -303,9 +299,9 @@ void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("MergeMD");
   alg->setPropertyValue("InputWorkspaces", ws_names_to_merge);
-  alg->executeAsChildAlg();
+  alg->execute();
 
-  // No longer needed in ADS
+  // Chunk no longer needed in ADS
   AnalysisDataService::Instance().remove(chunkName);
 
   if (!alg->isExecuted()) {
