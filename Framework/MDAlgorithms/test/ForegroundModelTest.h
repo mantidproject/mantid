@@ -1,9 +1,9 @@
 #ifndef FOREGROUNDMODELTEST_H_
 #define FOREGROUNDMODELTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MDFittingTestHelpers.h"
+#include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
+#include <cxxtest/TestSuite.h>
 
 class ForegroundModelTest : public CxxTest::TestSuite {
 public:

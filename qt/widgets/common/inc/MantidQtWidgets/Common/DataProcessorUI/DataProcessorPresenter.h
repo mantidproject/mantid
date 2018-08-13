@@ -120,7 +120,7 @@ public:
   virtual void setPromptUser(bool allowPrompt) = 0;
   virtual void confirmReductionPaused() {}
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H*/

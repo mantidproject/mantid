@@ -16,82 +16,25 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
 
-# std imports
-import sys
-
 # 3rdparty imports
 import matplotlib
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg, backend_version, draw_if_interactive, show)  # noqa
 from matplotlib._pylab_helpers import Gcf
-from qtpy.QtCore import Qt, QEvent, QMetaObject, QObject, QThread, Signal, Slot
+from qtpy.QtCore import Qt, QEvent, QObject, Signal
 from qtpy.QtWidgets import QApplication, QLabel, QMainWindow
-from six import reraise, text_type
+from six import text_type
 
 # local imports
-from workbench.plotting.propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
-from workbench.plotting.toolbar import WorkbenchNavigationToolbar
-
-
-qApp = QApplication.instance()
-
-
-class QAppThreadCall(QObject):
-    """
-    Wraps a callable object and forces any calls made to it to be executed
-    on the same thread as the qApp object.
-    """
-
-    def __init__(self, callee):
-        QObject.__init__(self)
-        self.moveToThread(qApp.thread())
-        self.callee = callee
-        # Help should then give the correct doc
-        self.__call__.__func__.__doc__ = callee.__doc__
-        self._args = None
-        self._kwargs = None
-        self._result = None
-        self._exc_info = None
-
-    def __call__(self, *args, **kwargs):
-        """
-        If the current thread is the qApp thread then this
-        performs a straight call to the wrapped callable_obj. Otherwise
-        it invokes the do_call method as a slot via a
-        BlockingQueuedConnection.
-        """
-        if QThread.currentThread() == qApp.thread():
-            return self.callee(*args, **kwargs)
-        else:
-            self._store_function_args(*args, **kwargs)
-            QMetaObject.invokeMethod(self, "on_call",
-                                     Qt.BlockingQueuedConnection)
-            if self._exc_info is not None:
-                reraise(*self._exc_info)
-            return self._result
-
-    @Slot()
-    def on_call(self):
-        """Perform a call to a GUI function across a
-        thread and return the result
-        """
-        try:
-            self._result = \
-                self.callee(*self._args, **self._kwargs)
-        except Exception: # pylint: disable=broad-except
-            self._exc_info = sys.exc_info()
-
-    def _store_function_args(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-        # Reset return value and exception
-        self._result = None
-        self._exc_info = None
+from .propertiesdialog import LabelEditor, XAxisEditor, YAxisEditor
+from .toolbar import WorkbenchNavigationToolbar
+from .qappthreadcall import QAppThreadCall
 
 
 class MainWindow(QMainWindow):
     activated = Signal()
     closing = Signal()
+    visibility_changed = Signal()
 
     def event(self, event):
         if event.type() == QEvent.WindowActivate:
@@ -101,6 +44,14 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         self.closing.emit()
         QMainWindow.closeEvent(self, event)
+
+    def hideEvent(self, event):
+        self.visibility_changed.emit()
+        QMainWindow.hideEvent(self, event)
+
+    def showEvent(self, event):
+        self.visibility_changed.emit()
+        QMainWindow.showEvent(self, event)
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -126,14 +77,24 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.destroy = QAppThreadCall(self._destroy_orig)
         self._show_orig = self.show
         self.show = QAppThreadCall(self._show_orig)
+        self._window_activated_orig = self._window_activated
+        self._window_activated = QAppThreadCall(self._window_activated_orig)
+        self._widgetclosed_orig = self._widgetclosed
+        self._widgetclosed = QAppThreadCall(self._widgetclosed_orig)
+        self.set_window_title_orig = self.set_window_title
+        self.set_window_title = QAppThreadCall(self.set_window_title_orig)
+        self.fig_visibility_changed_orig = self.fig_visibility_changed
+        self.fig_visibility_changed = QAppThreadCall(self.fig_visibility_changed_orig)
 
         self.canvas = canvas
         self.window = MainWindow()
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self._widgetclosed)
+        self.window.visibility_changed.connect(self.fig_visibility_changed)
 
         self.window.setWindowTitle("Figure %d" % num)
+        self.canvas.figure.set_label("Figure %d" % num)
 
         # Give the keyboard focus to the figure instead of the
         # manager; StrongFocus accepts both tab and click to focus and
@@ -219,6 +180,16 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
+        if self.window.windowState() & Qt.WindowMinimized:
+            # windowState() stores a combination of window state enums
+            # and multiple window states can be valid. On Windows
+            # a window can be both minimized and maximized at the
+            # same time, so we make a check here. For more info see:
+            # http://doc.qt.io/qt-5/qt.html#WindowState-enum
+            if self.window.windowState() & Qt.WindowMaximized:
+                self.window.setWindowState(Qt.WindowMaximized)
+            else:
+                self.window.setWindowState(Qt.WindowNoState)
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
@@ -256,6 +227,22 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)
+        # We need to add a call to the figure manager here to call
+        # notify methods when a figure is renamed, to update our
+        # plot list.
+        Gcf.figure_title_changed(self.num)
+
+        # For the workbench we also keep the label in sync, this is
+        # to allow getting a handle as plt.figure('Figure Name')
+        self.canvas.figure.set_label(title)
+
+    def fig_visibility_changed(self):
+        """
+        Make a notification in the global figure manager that
+        plot visibility was changed. This method is added to this
+        class so that it can be wrapped in a QAppThreadCall.
+        """
+        Gcf.figure_visibility_changed(self.num)
 
     # ------------------------ Interaction events --------------------
     def on_button_press(self, event):

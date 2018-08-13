@@ -1,9 +1,9 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTINGLINEEDIT_H_
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDIT_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "DllOption.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidKernel/System.h"
 
 #include <QLineEdit>
 
@@ -66,6 +66,6 @@ protected slots:
   void hideHints();
 };
 } // namespace MantidWidgets
-} // namepsace MantidQt
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_HINTINGLINEEDIT_H_ */

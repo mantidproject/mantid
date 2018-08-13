@@ -24,5 +24,5 @@ bool operator!=(const GSASIIRefineFitPeaksOutputProperties &lhs,
   return !(lhs == rhs);
 }
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt

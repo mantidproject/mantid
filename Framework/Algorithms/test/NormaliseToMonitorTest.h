@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/NormaliseToMonitor.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/NormaliseToMonitor.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
@@ -141,7 +141,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
     AnalysisDataService::Instance().remove("NormFactor");
   }
 }
-}
+} // namespace
 
 class NormaliseToMonitorTest : public CxxTest::TestSuite {
 public:

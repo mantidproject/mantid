@@ -3,8 +3,8 @@
 
 #include "../PlotCurve.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtWorkspaceData.h"
 
 class Graph;
 class ErrorBarSettings;

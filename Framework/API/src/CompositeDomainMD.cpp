@@ -11,10 +11,10 @@ namespace Mantid {
 namespace API {
 
 /**
-  * Create a composite domain from a IMDWorkspace.
-  * @param ws :: Pointer to a workspace.
-  * @param maxDomainSize :: The maximum size each domain can have.
-  */
+ * Create a composite domain from a IMDWorkspace.
+ * @param ws :: Pointer to a workspace.
+ * @param maxDomainSize :: The maximum size each domain can have.
+ */
 CompositeDomainMD::CompositeDomainMD(IMDWorkspace_const_sptr ws,
                                      size_t maxDomainSize)
     : m_iterator(ws->createIterator()) {

@@ -128,9 +128,13 @@ Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
           SLOT(cellEdited(int, int)));
   connect(d_table, SIGNAL(itemSelectionChanged()), this,
           SLOT(recordSelection()));
+  connect(d_table->horizontalHeader(), SIGNAL(sectionDoubleClicked(int)), this,
+          SLOT(onColumnHeaderDoubleClick()));
 
   setAutoUpdateValues(applicationWindow()->autoUpdateTableValues());
 }
+
+void Table::onColumnHeaderDoubleClick() { emit optionsDialog(); }
 
 void Table::setAutoUpdateValues(bool on) {
   if (on) {

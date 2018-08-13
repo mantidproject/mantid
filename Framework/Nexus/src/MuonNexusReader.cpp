@@ -1,9 +1,9 @@
-#include <vector>
-#include <sstream>
-#include "MantidKernel/System.h"
 #include "MantidNexus/MuonNexusReader.h"
+#include "MantidKernel/System.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusException.hpp>
+#include <sstream>
+#include <vector>
 
 using std::string;
 
@@ -19,7 +19,7 @@ const string START_TIME("start_time");
 
 /// logger
 Mantid::Kernel::Logger g_log("MuonNexusReader");
-}
+} // namespace
 
 using namespace Mantid;
 

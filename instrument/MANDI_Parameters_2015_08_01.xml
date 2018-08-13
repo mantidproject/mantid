@@ -6,6 +6,66 @@
 <parameter name="T0">
  <value val="-0.904000"/>
 </parameter>
-</component-link>
 
+<!-- Need to fill in gaps for peak profile fitting -->
+<parameter name="fitConvolvedPeak" type="bool">
+ <value val="true"/>
+</parameter>
+
+<!-- Multiplier for profile fitting for BVG polar angle -->
+<parameter name="sigX0Scale">
+ <value val="2." />
+</parameter>
+
+<!-- Multiplier for profile fitting for BVG azimuthal angle -->
+<parameter name="sigY0Scale">
+ <value val="2." />
+</parameter>
+
+<!-- Number of rows between detector gaps for profile fitting -->
+<parameter name="numDetRows" type="int">
+ <value val="255" />
+</parameter>
+
+<!-- Number of cols between detector gaps for profile fitting -->
+<parameter name="numDetCols" type="int">
+ <value val="255" />
+</parameter>
+
+<!-- Number of polar bins for BVG histogramming when profile fitting -->
+<parameter name="numBinsTheta" type="int">
+ <value val="50" />
+</parameter>
+
+<!-- Number of azimuthal bins for BVG histogramming when profile fitting -->
+<parameter name="numBinsPhi" type="int">
+ <value val="50" />
+</parameter>
+
+<!-- Fraction along (h,k,l) to use for profile fitting. 0.5 is the next peak. -->
+<parameter name="fracHKL">
+ <value val="0.4" />
+</parameter>
+
+<!-- Side length of each voxel for fitting in units of angstrom^-1 -->
+<parameter name="dQPixel">
+ <value val="0.003" />
+</parameter>
+
+<!-- Minimum spacing for profile fitting the TOF profile. Units of microseconds -->
+<parameter name="mindtBinWidth">
+ <value val="15" />
+</parameter>
+
+<!-- Maximum spacing for profile fitting the TOF profile. Units of microseconds -->
+<parameter name="maxdtBinWidth">
+ <value val="50" />
+</parameter>
+
+<!-- Size of peak mask for background calculation in units of dQPixel -->
+<parameter name="peakMaskSize" type="int">
+ <value val="5" />
+</parameter>
+
+</component-link>
 </parameter-file>

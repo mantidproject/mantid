@@ -16,9 +16,9 @@ public:
   bool readData(FILE *file, int i);
   void clear();
 
-  int ndes; ///<ndes
+  int ndes; ///< ndes
 private:
-  char *outbuff; ///<output buffer
+  char *outbuff; ///< output buffer
   int m_bufferSize;
 };
 

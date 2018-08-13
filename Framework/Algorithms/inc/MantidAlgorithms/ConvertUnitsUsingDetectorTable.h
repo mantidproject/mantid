@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CONVERTUNITSUSINGDETECTORTABLE_H_
 #define MANTID_ALGORITHMS_CONVERTUNITSUSINGDETECTORTABLE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {

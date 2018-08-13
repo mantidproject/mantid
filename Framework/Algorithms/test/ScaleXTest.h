@@ -1,10 +1,10 @@
 #ifndef SCALEXTEST_H_
 #define SCALEXTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/ScaleX.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ScaleX.h"
 #include "MantidGeometry/Instrument.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

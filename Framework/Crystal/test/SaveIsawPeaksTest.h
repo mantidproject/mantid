@@ -9,8 +9,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

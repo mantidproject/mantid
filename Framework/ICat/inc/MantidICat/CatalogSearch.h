@@ -88,7 +88,7 @@ private:
   /// related parameters.
   void setRunRanges(std::string &runRange, CatalogSearchParam &params);
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 
 #endif

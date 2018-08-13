@@ -1,11 +1,11 @@
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
+#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include "MantidQtWidgets/Common/Batch/CellDelegate.h"
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
-#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include <QKeyEvent>
 #include <QStandardItemModel>
 #include <algorithm>
@@ -78,8 +78,9 @@ boost::optional<std::vector<Subtree>> JobTreeView::selectedSubtrees() const {
 
   std::transform(selected.cbegin(), selected.cend(),
                  std::back_inserter(selectedRows),
-                 [&](RowLocation const &location)
-                     -> Row { return Row(location, cellsAt(location)); });
+                 [&](RowLocation const &location) -> Row {
+                   return Row(location, cellsAt(location));
+                 });
 
   auto extractSubtrees = ExtractSubtrees();
   return extractSubtrees(selectedRows);
@@ -198,8 +199,9 @@ void JobTreeView::closeAnyOpenEditorsOnUneditableCells(
     std::vector<Cell> const &cells) {
   m_adaptedMainModel.enumerateCellsInRow(
       firstCellOnRow, m_mainModel.columnCount(),
-      [&](QModelIndexForMainModel const &cellIndex, int column)
-          -> void { closeEditorIfCellIsUneditable(cellIndex, cells[column]); });
+      [&](QModelIndexForMainModel const &cellIndex, int column) -> void {
+        closeEditorIfCellIsUneditable(cellIndex, cells[column]);
+      });
 }
 
 void JobTreeView::setCellsAt(RowLocation const &location,
@@ -244,7 +246,7 @@ void JobTreeView::replaceRows(std::vector<RowLocation> replacementPoints,
   auto replacement = replacements.cbegin();
 
   for (; replacementPoint != replacementPoints.cend() &&
-             replacement != replacements.cend();
+         replacement != replacements.cend();
        ++replacementPoint, ++replacement) {
     replaceSubtreeAt(*replacementPoint, *replacement);
   }

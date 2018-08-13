@@ -5,9 +5,9 @@
 #include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -15,8 +15,8 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Kernel::Direction;
 using Mantid::API::IndexType;
+using Mantid::Kernel::Direction;
 
 class IndexPropertyTest : public CxxTest::TestSuite {
 public:

@@ -7,8 +7,8 @@
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Geometry::ConvexPolygon;
-using Mantid::Geometry::intersection;
 using Mantid::Geometry::Quadrilateral;
+using Mantid::Geometry::intersection;
 using Mantid::Kernel::V2D;
 
 class PolygonIntersectionTest : public CxxTest::TestSuite {

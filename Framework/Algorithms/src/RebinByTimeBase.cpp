@@ -6,8 +6,8 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/make_shared.hpp>
 

@@ -35,7 +35,7 @@ class DLLExport Updateable {
 public:
   virtual void update() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif

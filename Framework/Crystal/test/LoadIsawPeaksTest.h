@@ -2,6 +2,7 @@
 #define MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -9,7 +10,6 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidAPI/Run.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

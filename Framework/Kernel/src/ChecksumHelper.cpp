@@ -1,9 +1,9 @@
 #include "MantidKernel/ChecksumHelper.h"
 
-#include <boost/regex.hpp>
+#include <Poco/DigestStream.h>
 #include <Poco/MD5Engine.h>
 #include <Poco/SHA1Engine.h>
-#include <Poco/DigestStream.h>
+#include <boost/regex.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -13,7 +13,7 @@ namespace Kernel {
 
 namespace ChecksumHelper {
 namespace // anonymous
-    {
+{
 
 /**
  * Create sha1 out of data and an optional header
@@ -23,8 +23,8 @@ namespace // anonymous
 std::string createSHA1(const std::string &data,
                        const std::string &header = "") {
   using Poco::DigestEngine;
-  using Poco::SHA1Engine;
   using Poco::DigestOutputStream;
+  using Poco::SHA1Engine;
 
   SHA1Engine sha1;
   DigestOutputStream outstr(sha1);
@@ -40,8 +40,8 @@ std::string createSHA1(const std::string &data,
  */
 std::string createMD5(const std::string &data, const std::string &header = "") {
   using Poco::DigestEngine;
-  using Poco::MD5Engine;
   using Poco::DigestOutputStream;
+  using Poco::MD5Engine;
 
   MD5Engine sha1;
   DigestOutputStream outstr(sha1);
@@ -49,29 +49,29 @@ std::string createMD5(const std::string &data, const std::string &header = "") {
   outstr.flush(); // to pass everything to the digest engine
   return DigestEngine::digestToHex(sha1.digest());
 }
-}
+} // namespace
 
 /** Creates a md5 checksum from a string
-* @param input The string to checksum
-* @returns a checksum string
-**/
+ * @param input The string to checksum
+ * @returns a checksum string
+ **/
 std::string md5FromString(const std::string &input) {
   return ChecksumHelper::createMD5(input);
 }
 
 /** Creates a SHA-1 checksum from a string
-* @param input The string to checksum
-* @returns a checksum string
-**/
+ * @param input The string to checksum
+ * @returns a checksum string
+ **/
 std::string sha1FromString(const std::string &input) {
   return ChecksumHelper::createSHA1(input);
 }
 
 /** Creates a SHA-1 checksum from a file
-* @param filepath The path to the file
-* @param unixEOL If true convert all lineendings to Unix-style \n
-* @returns a checksum string
-**/
+ * @param filepath The path to the file
+ * @param unixEOL If true convert all lineendings to Unix-style \n
+ * @returns a checksum string
+ **/
 std::string sha1FromFile(const std::string &filepath,
                          const bool unixEOL = false) {
   if (filepath.empty())
@@ -80,15 +80,15 @@ std::string sha1FromFile(const std::string &filepath,
 }
 
 /** Creates a git checksum from a file (these match the git hash-object
-*command).
-* This works by reading in the file, converting all line endings into linux
-*style endings,
-* then the following is prepended to the file contents "blob
-*<content_length>\0",
-* the result is then ran through a SHA-1 checksum.
-* @param filepath The path to the file
-* @returns a checksum string
-**/
+ *command).
+ * This works by reading in the file, converting all line endings into linux
+ *style endings,
+ * then the following is prepended to the file contents "blob
+ *<content_length>\0",
+ * the result is then ran through a SHA-1 checksum.
+ * @param filepath The path to the file
+ * @returns a checksum string
+ **/
 std::string gitSha1FromFile(const std::string &filepath) {
   if (filepath.empty())
     return "";

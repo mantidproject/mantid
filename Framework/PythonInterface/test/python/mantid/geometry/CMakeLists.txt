@@ -20,6 +20,7 @@ set ( TEST_PY_FILES
   GroupTest.py
   CrystalStructureTest.py
   ReflectionGeneratorTest.py
+  DetectorInfoTest.py
   ComponentInfoTest.py
 )
 

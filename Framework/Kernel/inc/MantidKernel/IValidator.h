@@ -1,16 +1,16 @@
 #ifndef MANTID_KERNEL_IVALIDATOR_H_
 #define MANTID_KERNEL_IVALIDATOR_H_
 
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/DllConfig.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 #endif
-#include <vector>
-#include <string>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -30,7 +30,7 @@ template <class T> struct IsPtrType : public std::is_pointer<T> {};
 template <class T>
 struct IsPtrType<boost::shared_ptr<T>> : public std::true_type {};
 template <> struct IsPtrType<decltype(nullptr)> : public std::true_type {};
-}
+} // namespace
 
 /** IValidator is the basic interface for all validators for properties
 
@@ -101,8 +101,8 @@ public:
   }
 
   /** Is Multiple Selection Allowed
-  *  @return true if multiple selection is allowed
-  */
+   *  @return true if multiple selection is allowed
+   */
   virtual bool isMultipleSelectionAllowed() { return false; };
 
   /**

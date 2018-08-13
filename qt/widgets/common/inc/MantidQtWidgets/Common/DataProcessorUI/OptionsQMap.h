@@ -41,7 +41,7 @@ using OptionsQMap = QVariantMap;
 /// value is an OptionsQMap containing the properties applicable to that
 /// column
 using ColumnOptionsQMap = QVariantMap;
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H

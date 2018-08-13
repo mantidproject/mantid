@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 
-#include <Poco/TemporaryFile.h>
-#include <Poco/Net/HTMLForm.h>
 #include "Poco/Net/PartSource.h"
 #include "Poco/Net/StringPartSource.h"
+#include <Poco/Net/HTMLForm.h>
+#include <Poco/TemporaryFile.h>
 
 #include <fstream>
 #include <sstream>
@@ -39,7 +39,7 @@ protected:
     return 200;
   }
 };
-}
+} // namespace
 
 class InternetHelperTest : public CxxTest::TestSuite {
 public:

@@ -129,12 +129,12 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
     m_function_parameters_vector[ipeak][ipar] = 0.;
   }
 }
-}
+} // namespace FitPeaksAlgorithm
 
 //----------------------------------------------------------------------------------------------
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
-  */
+ */
 size_t findXIndex(const std::vector<double> &vecx, double x) {
   size_t index;
   if (x <= vecx.front()) {
@@ -793,7 +793,8 @@ void FitPeaks::convertParametersNameToIndex() {
       // out-of-range index is thus set to this
       g_log.warning() << "Given peak parameter " << paramName
                       << " is not an allowed parameter of peak "
-                         "function " << m_peakFunction->name() << "\n";
+                         "function "
+                      << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
     }
   }
@@ -888,7 +889,7 @@ double numberCounts(const Histogram &histogram, const double xmin,
     total += std::fabs(histogram.y()[i]);
   return total;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Fit peaks across one single spectrum
@@ -1132,8 +1133,9 @@ void FitPeaks::processSinglePeakFitResult(
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks(std::vector<
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
+void FitPeaks::calculateFittedPeaks(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_results) {
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
@@ -1249,7 +1251,7 @@ vector<double> calculateMomentsAboutMean(const Histogram &histogram,
 
   return vector<double>{zeroth, first, second};
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /**  Estimate background: There are two methods that will be tried.
@@ -1852,8 +1854,9 @@ void FitPeaks::generateCalculatedPeaksWS() {
 
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
-void FitPeaks::processOutputs(std::vector<
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec) {
+void FitPeaks::processOutputs(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional

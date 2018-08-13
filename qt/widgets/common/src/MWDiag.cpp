@@ -1,24 +1,24 @@
 #include "MantidQtWidgets/Common/MWDiag.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Exception.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/DiagResults.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
-#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidGeometry/Instrument.h"
 
-#include <QSignalMapper>
-#include <QFileInfo>
-#include <QFileDialog>
 #include <QDir>
-#include <QStringList>
-#include <QMessageBox>
 #include <QDoubleValidator>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QSignalMapper>
+#include <QStringList>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -91,8 +91,8 @@ void MWDiag::loadSettings() {
 void MWDiag::setSumState(bool checked) { m_sumMono = checked; }
 
 /**
-* Get an instrument pointer for the name instrument
-*/
+ * Get an instrument pointer for the name instrument
+ */
 Instrument_const_sptr MWDiag::getInstrument(const QString &name) {
   std::string ws_name = "__empty_" + name.toStdString();
 
@@ -305,8 +305,8 @@ void MWDiag::setUpValidators() {
 }
 
 /**
-* Returns true if the input on the form is valid, false otherwise
-*/
+ * Returns true if the input on the form is valid, false otherwise
+ */
 bool MWDiag::isInputValid() const {
   bool valid(m_designWidg.maskFileFinder->isValid());
 
@@ -345,8 +345,8 @@ void MWDiag::browseClicked(const QString &buttonDis) {
 }
 
 /**
-* Create a diagnostic script from the given
-*/
+ * Create a diagnostic script from the given
+ */
 QString MWDiag::createDiagnosticScript() const {
   // Be nice and explicit so that this is as easy as possible to read later
   // Pull out the for data first
@@ -398,41 +398,57 @@ QString MWDiag::createDiagnosticScript() const {
 
   if (m_designWidg.ckDoBack->isChecked()) {
     // Do the background check so we need all fields
-    diagCall += whiteBeam + "," + sampleRun + ","
-                                              "samp_zero=" +
-                removeZeroes + ","
-                               "tiny=" +
-                lowCounts + ","
-                            "huge=" +
-                highCounts + ","
-                             "van_lo=" +
-                lowMedian + ","
-                            "van_hi=" +
-                highMedian + ","
-                             "samp_sig=" +
-                significance + ","
-                               "samp_hi=" +
-                acceptance + ","
-                             "bkgd_range=" +
-                bkgdRange + ","
-                            "variation=" +
-                variation + ","
-                            "hard_mask=" +
+    diagCall += whiteBeam + "," + sampleRun +
+                ","
+                "samp_zero=" +
+                removeZeroes +
+                ","
+                "tiny=" +
+                lowCounts +
+                ","
+                "huge=" +
+                highCounts +
+                ","
+                "van_lo=" +
+                lowMedian +
+                ","
+                "van_hi=" +
+                highMedian +
+                ","
+                "samp_sig=" +
+                significance +
+                ","
+                "samp_hi=" +
+                acceptance +
+                ","
+                "bkgd_range=" +
+                bkgdRange +
+                ","
+                "variation=" +
+                variation +
+                ","
+                "hard_mask=" +
                 hard_mask_file;
   } else {
     // No background check so don't need all of the fields
-    diagCall += whiteBeam + ","
-                            "tiny=" +
-                lowCounts + ","
-                            "huge=" +
-                highCounts + ","
-                             "van_lo=" +
-                lowMedian + ","
-                            "van_hi=" +
-                highMedian + ","
-                             "samp_sig=" +
-                significance + ","
-                               "hard_mask=" +
+    diagCall += whiteBeam +
+                ","
+                "tiny=" +
+                lowCounts +
+                ","
+                "huge=" +
+                highCounts +
+                ","
+                "van_lo=" +
+                lowMedian +
+                ","
+                "van_hi=" +
+                highMedian +
+                ","
+                "samp_sig=" +
+                significance +
+                ","
+                "hard_mask=" +
                 hard_mask_file;
   }
 
@@ -440,8 +456,9 @@ QString MWDiag::createDiagnosticScript() const {
   if (m_designWidg.bleed_group->isChecked()) {
     diagCall += ",bleed_test=True,"
                 "bleed_maxrate=" +
-                bleed_maxrate + ","
-                                "bleed_pixels=" +
+                bleed_maxrate +
+                ","
+                "bleed_pixels=" +
                 bleed_pixels;
   } else {
     diagCall += ",bleed_test=False";
@@ -454,8 +471,8 @@ QString MWDiag::createDiagnosticScript() const {
 }
 
 /**
-* Show the test result dialog
-*/
+ * Show the test result dialog
+ */
 void MWDiag::showTestResults(const QString &testSummary) const {
   if (!m_dispDialog) {
     m_dispDialog = new DiagResults(this->parentWidget());
@@ -468,7 +485,7 @@ void MWDiag::showTestResults(const QString &testSummary) const {
 }
 
 /** close the results window, if there is one open
-*/
+ */
 void MWDiag::closeDialog() {
   if (m_dispDialog) {
     m_dispDialog->close();
@@ -476,8 +493,8 @@ void MWDiag::closeDialog() {
 }
 
 /**
-*
-*/
+ *
+ */
 QString MWDiag::openFileDialog(const bool save, const QStringList &exts) {
   QString filter;
   if (!exts.empty()) {
@@ -511,13 +528,13 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts) {
 }
 
 /**raises the window containing the results summary, run the Python scripts that
-*  have been created and, optionally on success, save the values on the form
-*  @param outWS :: the workspace for placing the information in
-*  @param saveSettings :: if the Python executes successfully and this parameter
-* is true the settings are saved
-*  @return this method catches most exceptions and this return is main way that
-* errors are reported
-*/
+ *  have been created and, optionally on success, save the values on the form
+ *  @param outWS :: the workspace for placing the information in
+ *  @param saveSettings :: if the Python executes successfully and this
+ * parameter is true the settings are saved
+ *  @return this method catches most exceptions and this return is main way that
+ * errors are reported
+ */
 QString MWDiag::run(const QString &, const bool) {
   // close any result window that is still there from a previous run, there
   // might be nothing
@@ -546,10 +563,10 @@ QString MWDiag::run(const QString &, const bool) {
 }
 
 /** Called when the user identifies the background region in a different form,
-* it copies the values over
-*  @param start :: the TOF value of the start of the background region
-*  @param end :: the TOF value of the end of the background region
-*/
+ * it copies the values over
+ *  @param start :: the TOF value of the start of the background region
+ *  @param end :: the TOF value of the end of the background region
+ */
 void MWDiag::updateTOFs(
     const double &start,
     const double &end) { // if the user added their own value don't change it
@@ -561,10 +578,10 @@ void MWDiag::updateTOFs(
   }
 }
 /** This slot sets m_monoFiles based on the array that is
-*  passed to it
-*  @param runFileNames :: names of the files that will be used in the background
-* test
-*/
+ *  passed to it
+ *  @param runFileNames :: names of the files that will be used in the
+ * background test
+ */
 void MWDiag::specifyRuns(const QStringList &runFileNames) {
   m_monoFiles = runFileNames;
 }

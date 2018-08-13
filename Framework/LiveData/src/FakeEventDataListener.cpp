@@ -20,17 +20,20 @@ DECLARE_LISTENER(FakeEventDataListener)
 FakeEventDataListener::FakeEventDataListener()
     : LiveListener(), m_buffer(), m_rand(new Kernel::MersenneTwister(5489)),
       m_timer(), m_callbackloop(1), m_numExtractDataCalls(0), m_runNumber(1) {
-  if (!ConfigService::Instance().getValue("fakeeventdatalistener.datarate",
-                                          m_datarate))
-    m_datarate = 200; // Default data rate. Low so that our lowest-powered
-                      // buildserver can cope.
-  // For auto-ending and restarting runs
-  if (!ConfigService::Instance().getValue("fakeeventdatalistener.endrunevery",
-                                          m_endRunEvery))
-    m_endRunEvery = 0;
-  if (!ConfigService::Instance().getValue("fakeeventdatalistener.notyettimes",
-                                          m_notyettimes))
-    m_notyettimes = 0;
+
+  auto datarateConfigVal =
+      ConfigService::Instance().getValue<int>("fakeeventdatalistener.datarate");
+  m_datarate = datarateConfigVal.get_value_or(
+      200); // Default data rate. Low so that our lowest-powered
+            // buildserver can cope.
+            // For auto-ending and restarting runs
+  auto endRunEveryConfigVal = ConfigService::Instance().getValue<int>(
+      "fakeeventdatalistener.endrunevery");
+  m_endRunEvery = endRunEveryConfigVal.get_value_or(0);
+
+  auto notyettimesConfigVal = ConfigService::Instance().getValue<int>(
+      "fakeeventdatalistener.notyettimes");
+  m_notyettimes = notyettimesConfigVal.get_value_or(0);
 }
 
 /// Destructor
@@ -138,10 +141,10 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 void FakeEventDataListener::generateEvents(Poco::Timer &) {
   std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
-    m_buffer->getSpectrum(0)
-        .addEventQuickly(Types::Event::TofEvent(m_rand->nextValue()));
-    m_buffer->getSpectrum(1)
-        .addEventQuickly(Types::Event::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(0).addEventQuickly(
+        Types::Event::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(1).addEventQuickly(
+        Types::Event::TofEvent(m_rand->nextValue()));
   }
 }
 } // namespace LiveData

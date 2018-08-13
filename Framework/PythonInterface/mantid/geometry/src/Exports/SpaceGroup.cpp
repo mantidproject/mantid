@@ -1,15 +1,15 @@
-#include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidGeometry/Crystal/Group.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
-#include <boost/python/scope.hpp>
 #include <boost/python/list.hpp>
-#include <boost/python/self.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/scope.hpp>
+#include <boost/python/self.hpp>
 
 using Mantid::Geometry::Group;
 using Mantid::Geometry::SpaceGroup;
@@ -18,7 +18,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(SpaceGroup)
 
 namespace //<unnamed>
-    {
+{
 using namespace Mantid::PythonInterface;
 
 boost::python::list getEquivalentPositions(SpaceGroup &self,
@@ -57,7 +57,7 @@ std::string __repr__implementation(const SpaceGroup &self) {
   ss << "\")";
   return ss.str();
 }
-}
+} // namespace
 
 void export_SpaceGroup() {
   register_ptr_to_python<boost::shared_ptr<SpaceGroup>>();
@@ -74,8 +74,9 @@ void export_SpaceGroup() {
            "Returns True if the supplied reflection is allowed with respect to "
            "space group symmetry operations.")
       .def("isAllowedUnitCell", &SpaceGroup::isAllowedUnitCell,
-           (arg("self"), arg("cell")), "Returns true if the metric of the cell "
-                                       "is compatible with the space group.")
+           (arg("self"), arg("cell")),
+           "Returns true if the metric of the cell "
+           "is compatible with the space group.")
       .def("getPointGroup", &SpaceGroup::getPointGroup, arg("self"),
            "Returns the point group of the space group.")
       .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,

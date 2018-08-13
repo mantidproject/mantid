@@ -88,7 +88,7 @@ protected:
   double m_phiCenter;
   double m_phiStart;
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // POLDIHELIUMDETECTOR_H

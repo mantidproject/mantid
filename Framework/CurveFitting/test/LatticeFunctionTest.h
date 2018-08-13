@@ -7,9 +7,9 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 using Mantid::CurveFitting::LatticeFunction;
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::unitCellToStr;
+using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
 
@@ -42,8 +42,8 @@ public:
     TS_ASSERT_EQUALS(fn.nParams(), 3);
 
     /* The basic functionality is covered by the tests for
-    * PawleyParameterFunction.
-    */
+     * PawleyParameterFunction.
+     */
   }
 
   void testSetUnitCellString() {

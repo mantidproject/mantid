@@ -9,13 +9,13 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
 
-#include <QTreeView>
-#include <QTreeWidget>
-#include <QStandardItemModel>
 #include <QAbstractListModel>
 #include <QComboBox>
 #include <QGroupBox>
 #include <QPushButton>
+#include <QStandardItemModel>
+#include <QTreeView>
+#include <QTreeWidget>
 
 //------------------------------------------------------------------------------
 // Forward declarations
@@ -33,15 +33,15 @@ namespace Mantid {
 namespace API {
 class Workspace;
 }
-}
+} // namespace Mantid
 
 class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem {
 public:
   AlgHistoryItem(const QStringList &names,
                  Mantid::API::AlgorithmHistory_const_sptr algHistory,
                  AlgHistoryItem *parent = nullptr)
-      : QTreeWidgetItem(parent, names, UserType),
-        Mantid::API::HistoryItem(algHistory) {}
+      : QTreeWidgetItem(parent, names, UserType), Mantid::API::HistoryItem(
+                                                      algHistory) {}
 };
 
 class AlgHistoryTreeWidget : public QTreeWidget {
