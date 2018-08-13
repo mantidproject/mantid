@@ -14,10 +14,8 @@ Structure
 
 The general structure for the header of PSI bin files is:
 
-.. figure:: ../images/PSIMuonBinHeader.png
-   :class: screenshot
+.. image:: ../images/PSIMuonBinHeader.png
    :align: center
-   :figwidth: 100%%
 
 Here are some specific details, following the header are the histograms, using the data from
 the header the algorithm will load the data from the histograms.
