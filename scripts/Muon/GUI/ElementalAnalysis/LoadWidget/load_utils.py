@@ -24,7 +24,7 @@ class LModel(object):
         if not to_load:
             return None
         workspaces = {f: get_filename(
-            f) for f in to_load if get_filename(f) is not None}
+            f, self.run) for f in to_load if get_filename(f, self.run) is not None}
         self._load(workspaces)
         self.loaded_runs[self.run] = group_by_detector(
             self.run, workspaces.values())
@@ -82,25 +82,41 @@ def group_grouped_workspaces(name, workspaces):
 
 
 def get_detector_num_from_ws(name):
+    """
+    Gets the detector number from the workspace name:
+        i.e the first character
+    """
     return int(name[0])
 
 
 def get_detectors_num(path):
+    """
+    Gets the detector number from the filepath
+    """
     return int(path.rsplit(".", 2)[1][5]) - 1
 
 
 def get_end_num(path):
+    """
+    Gets the end numbers (form: roothXXXX) from the filepath
+    """
     return path.rsplit(".")[1][-9:]
 
 
 def get_run_type(path):
+    """
+    Gets the run type (i.e. Total/Delayed/Prompt) from the filepath
+    """
     return type_keys[path.rsplit(".")[1][-2:]]
 
 
-def get_filename(path):
+def get_filename(path, run):
+    """
+    Returns the overall workspace name
+    """
     try:
-        return "{}_{}_{}".format(get_detectors_num(
-            path), get_run_type(path), get_end_num(path))
+        return "{}_{}_{}_{}".format(get_detectors_num(
+            path), get_run_type(path), get_end_num(path), run)
     except KeyError:
         return None
 

@@ -11,12 +11,15 @@ class LoadUtilsTest(unittest.TestCase):
     def setUp(self):
         self.test_path = r"test\path\to\ral012345.rooth2020.dat"
         self.bad_path = r"test\path\to\ral012345.rooth2042"
-        self.test_ws_name = "1_Delayed_rooth2020"
-        self.var_ws_name = "{}_Total_rooth2020"
-        self.test_ws_names = [self.var_ws_name.format(x) for x in range(1, 9)]
+        self.test_run = 5
+        self.test_ws_name = "1_Delayed_rooth2020_{}".format(self.test_run)
+        self.var_ws_name = "{}_Total_rooth2020_{}"
+        self.test_ws_names = [
+            self.var_ws_name.format(
+                x, self.test_run) for x in range(
+                1, 9)]
         self.test_workspaces = [mantid.CreateSampleWorkspace(
             OutputWorkspace=s) for s in self.test_ws_names]
-        self.test_run = 5
 
     def test_pad_run(self):
         tests = {123: "00123", 0: "00000", 12345: "12345", 123456: "123456"}
@@ -38,7 +41,9 @@ class LoadUtilsTest(unittest.TestCase):
             lutils.get_run_type(self.bad_path)
 
     def test_get_filename(self):
-        assert lutils.get_filename(self.test_path) == self.test_ws_name
+        assert lutils.get_filename(
+            self.test_path,
+            self.test_run) == self.test_ws_name
 
     def test_hyphenise(self):
         tests = {"1-5": [1, 2, 3, 4, 5],
@@ -49,7 +54,7 @@ class LoadUtilsTest(unittest.TestCase):
     def test_group_by_detector(self):
         output, workspaces = [], []
         for x in range(1, 5):
-            ws = self.var_ws_name.format(x)
+            ws = self.var_ws_name.format(x, self.test_run)
             workspaces.append(ws)
             mantid.CreateSampleWorkspace(OutputWorkspace=ws).getName()
             output.append("{}; Detector {}".format(self.test_run, x))
