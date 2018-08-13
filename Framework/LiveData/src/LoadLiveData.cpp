@@ -285,11 +285,10 @@ void LoadLiveData::addMatrixWSChunk(Workspace_sptr accumWS,
 
 //----------------------------------------------------------------------------------------------
 /**
- * Add a matrix workspace to the accumulation workspace.
+ * Add an MD Workspace to the accumulation workspace.
  *
- * @param algoName :: Name of algorithm which will be adding the workspaces.
- * @param accumWS :: accumulation matrix workspace
- * @param chunkWS :: processed live data chunk matrix workspace
+ * @param accumWS :: accumulation MD workspace
+ * @param chunkWS :: processed live data chunk MD workspace
  */
 void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
                                 const Workspace_sptr &chunkWS) {
