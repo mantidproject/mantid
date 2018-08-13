@@ -151,8 +151,8 @@ public:
     std::advance(iter, -2);
     TS_ASSERT_EQUALS(iter->getIndex(), 9);
 
-    // Go past the start
-    std::advance(iter, -100);
+    // Go to the start
+    std::advance(iter, -9);
     TS_ASSERT(iter == detectorInfo->begin());
   }
 

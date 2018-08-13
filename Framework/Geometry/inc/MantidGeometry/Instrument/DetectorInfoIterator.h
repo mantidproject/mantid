@@ -45,7 +45,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL DetectorInfoIterator
     : public boost::iterator_facade<DetectorInfoIterator,
                                     const DetectorInfoItem &,
-                                    boost::bidirectional_traversal_tag> {
+                                    boost::random_access_traversal_tag> {
 
 public:
   DetectorInfoIterator(const DetectorInfo &detectorInfo, const size_t index)

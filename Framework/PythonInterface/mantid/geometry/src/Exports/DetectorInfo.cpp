@@ -26,7 +26,7 @@ using namespace boost::python;
 // Helper method to make the python iterator
 DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &detectorInfo) {
   return DetectorInfoPythonIterator(detectorInfo);
-};
+}
 
 // Export DetectorInfo
 void export_DetectorInfo() {
