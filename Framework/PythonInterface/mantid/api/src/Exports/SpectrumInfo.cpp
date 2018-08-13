@@ -6,8 +6,8 @@
 #include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
+using Mantid::SpectrumDefinition;
 using namespace boost::python;
 
 // Export SpectrumInfo
