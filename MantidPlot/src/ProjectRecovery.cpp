@@ -356,12 +356,17 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
   bool loadCompleted = false;
-  if (!QMetaObject::invokeMethod(
-          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
-          Q_RETURN_ARG(bool, loadCompleted),
-          Q_ARG(const std::string, projectFile.toString()))) {
-    throw std::runtime_error(
-        "Project Recovery: Failed to load project windows - Qt binding failed");
+  if (!isSanitised(recoveryFolder)) {
+    if (!QMetaObject::invokeMethod(
+            m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(bool, loadCompleted),
+            Q_ARG(const std::string, projectFile.toString()))) {
+      throw std::runtime_error("Project Recovery: Failed to load project "
+                               "windows - Qt binding failed");
+    }
+  } else {
+    g_log.debug("Recovered workspace name was sanitised");
+    loadCompleted = true;
   }
 
   if (!loadCompleted) {
@@ -373,7 +378,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   // Restart project recovery when the async part finishes
   clearAllCheckpoints();
   startProjectSaving();
-}
+} // namespace MantidQt
 
 /**
  * Compiles the project recovery script from a given checkpoint
@@ -470,8 +475,8 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
                                  Qt::BlockingQueuedConnection,
                                  Q_RETURN_ARG(bool, saveCompleted),
                                  Q_ARG(const std::string, projectDestFile))) {
-    throw std::runtime_error(
-        "Project Recovery: Failed to save project windows - Qt binding failed");
+    throw std::runtime_error("Project Recovery: Failed to save project "
+                             "windows - Qt binding failed");
   }
 
   if (!saveCompleted) {
@@ -522,6 +527,28 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
 
     alg->execute();
   }
+}
+
+/**
+ * Check the OUTPUT_PROJ_NAME file for WorkspaceNames and if any of them have
+ * "#" then return True else False.
+ *
+ */
+bool ProjectRecovery::isSanitised(const Poco::Path &recoveryFolder) {
+  auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
+
+  std::ifstream propFile(projectFile.toString(), std::ios_base::in);
+  std::string processString((std::istreambuf_iterator<char>(propFile)),
+                            std::istreambuf_iterator<char>());
+  propFile.close();
+  auto filePosition = processString.find("WorkspaceNames") + 15;
+  auto endOfPosition = processString.find("</mantidworkspaces>");
+  for (; filePosition < endOfPosition; ++filePosition) {
+    if (processString[filePosition] == char('#')) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace MantidQt

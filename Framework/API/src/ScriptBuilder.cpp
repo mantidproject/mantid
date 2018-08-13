@@ -13,7 +13,9 @@
 #include "MantidKernel/PropertyHistory.h"
 
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/optional.hpp>
 #include <boost/range/algorithm/remove_if.hpp>
+#include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/utility.hpp>
 #include <set>
 
@@ -265,6 +267,9 @@ const std::string ScriptBuilder::buildPropertyString(
 
       prop = propHistory.name() + opener + propHistory.value() + "'";
     }
+    // Sanitise for a comment #
+    std::string blacklistChars{"#"};
+    boost::remove_erase_if(prop, boost::is_any_of(blacklistChars));
   }
 
   return prop;
