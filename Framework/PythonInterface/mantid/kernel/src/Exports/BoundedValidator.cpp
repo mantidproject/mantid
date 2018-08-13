@@ -2,8 +2,8 @@
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/python/default_call_policies.hpp>
+#include <boost/python/make_constructor.hpp>
 #include <boost/python/overloads.hpp>
 
 using Mantid::Kernel::BoundedValidator;
@@ -100,7 +100,7 @@ createExclusiveBoundedValidator(object lower = object(),
       .def("isUpperExclusive",                                                 \
            &BoundedValidator<ElementType>::isUpperExclusive, arg("self"),      \
            "Returns True if the upper bound is exclusive");
-}
+} // namespace
 
 void export_BoundedValidator() {
   EXPORT_BOUNDEDVALIDATOR(double, Float);

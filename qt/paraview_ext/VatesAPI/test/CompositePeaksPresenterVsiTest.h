@@ -1,15 +1,15 @@
 #ifndef COMOPOSITE_PEAKS_PRESENTER_VSI_TEST_H_
 #define COMOPOSITE_PEAKS_PRESENTER_VSI_TEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
 #include "MantidVatesAPI/ViewFrustum.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
 #include "MockObjects.h"

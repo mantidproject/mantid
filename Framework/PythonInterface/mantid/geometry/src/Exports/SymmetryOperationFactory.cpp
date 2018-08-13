@@ -19,7 +19,7 @@ boost::python::list createSymOps(SymmetryOperationFactoryImpl &self,
 
   return pythonOperations;
 }
-}
+} // namespace
 
 void export_SymmetryOperationFactory() {
   class_<SymmetryOperationFactoryImpl, boost::noncopyable>(

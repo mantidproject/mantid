@@ -2,12 +2,12 @@
 #include "MantidAPI/IAlgorithm.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/self.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/self.hpp>
 
-using Mantid::Kernel::PropertyHistory;
 using Mantid::API::IAlgorithm;
+using Mantid::Kernel::PropertyHistory;
 using namespace boost::python;
 
 void export_PropertyHistory() {

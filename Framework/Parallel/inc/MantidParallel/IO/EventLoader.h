@@ -12,7 +12,7 @@ namespace Types {
 namespace Event {
 class TofEvent;
 }
-}
+} // namespace Types
 namespace Parallel {
 class Communicator;
 namespace IO {
@@ -54,7 +54,7 @@ load(const Communicator &communicator, const std::string &filename,
      const std::string &groupName, const std::vector<std::string> &bankNames,
      const std::vector<int32_t> &bankOffsets,
      std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
-}
+} // namespace EventLoader
 
 } // namespace IO
 } // namespace Parallel

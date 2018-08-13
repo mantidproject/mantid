@@ -14,11 +14,11 @@
 #ifndef SIMPLEJSON_H
 #define SIMPLEJSON_H
 
+#include <istream>
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <istream>
-#include <ostream>
 
 class JSONValue;
 using JSONObject = std::map<std::string, JSONValue>;

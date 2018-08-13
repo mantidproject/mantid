@@ -156,4 +156,4 @@ void ALCPeakFittingView::changePlotGuessState(bool plotted) {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

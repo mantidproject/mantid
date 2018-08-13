@@ -3,7 +3,6 @@ System Test for ISIS Reflectometry autoreduction
 Adapted from scripts provided by Max Skoda.
 """
 import re
-import string
 import itertools
 import math
 import stresstesting
@@ -270,7 +269,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
         for item in sample:
             runno = item[0]
             angle = item[1]
-            runnos = string.split(runno, '+')
+            runnos = runno.split('+')
             # check if runs have been added together
             runnos = [int(i) for i in runnos]
 
@@ -290,7 +289,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                 if not mtd.doesExist(runno + '_IvsQ'):
                     th = angle
                     if len(transRun) > 1 and angle > 2.25:
-                        wq, wq_binned, wlam = \
+                        wq, wq_binned = \
                             ReflectometryReductionOneAuto(
                                 InputWorkspace=ws,
                                 FirstTransmissionRun=transRun[1],
@@ -299,7 +298,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                                 OutputWorkspaceWavelength=runno + '_IvsLam',
                                 OutputWorkspaceBinned=runno + '_IvsQ_binned')
                     else:
-                        wq, wqbinned, wlam = \
+                        wq, wqbinned = \
                             ReflectometryReductionOneAuto(
                                 InputWorkspace=ws,
                                 FirstTransmissionRun=transRun[0],
@@ -330,11 +329,9 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
             # print(Qmin, Qmax, dqq)
             # print(overlapHigh)
             if len(wq_list) > 1:
-                outputwksp = string.split(wq_list[0], sep='_')[
-                    0] + '_' + string.split(wq_list[-1], sep='_')[0][3:]
+                outputwksp = wq_list[0].split('_')[0] + '_' + wq_list[-1].split('_')[0][3:]
             else:
-                outputwksp = string.split(
-                    wq_list[0], sep='_')[0] + '_IvsQ_binned'
+                outputwksp = wq_list[0].split('_')[0] + '_IvsQ_binned'
 
             if not mtd.doesExist(outputwksp):
                 combineDataMulti(

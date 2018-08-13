@@ -1,16 +1,16 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 
-#include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 
-#include <boost/python/make_constructor.hpp>
 #include <boost/python/default_call_policies.hpp>
+#include <boost/python/make_constructor.hpp>
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyManagerProperty;

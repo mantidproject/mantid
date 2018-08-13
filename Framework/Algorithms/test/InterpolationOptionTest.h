@@ -6,8 +6,8 @@
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 

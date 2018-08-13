@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_CLONEMDWORKSPACE_H_
 #define MANTID_MDALGORITHMS_CLONEMDWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -62,7 +62,7 @@ private:
   void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_CLONEMDWORKSPACE_H_ */

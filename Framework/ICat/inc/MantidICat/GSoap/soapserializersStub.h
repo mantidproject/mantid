@@ -64,8 +64,8 @@ private:
 struct SOAP_ENV__Code {
 public:
   char *SOAP_ENV__Value; /* optional element of type xsd:QName */
-  struct SOAP_ENV__Code *
-      SOAP_ENV__Subcode; /* optional element of type SOAP-ENV:Code */
+  struct SOAP_ENV__Code
+      *SOAP_ENV__Subcode; /* optional element of type SOAP-ENV:Code */
 public:
   int soap_type() const { return 8; } /* = unique id SOAP_TYPE_SOAP_ENV__Code */
 };
@@ -119,16 +119,16 @@ public:
   char *faultcode;   /* optional element of type xsd:QName */
   char *faultstring; /* optional element of type xsd:string */
   char *faultactor;  /* optional element of type xsd:string */
-  struct SOAP_ENV__Detail *
-      detail; /* optional element of type SOAP-ENV:Detail */
-  struct SOAP_ENV__Code *
-      SOAP_ENV__Code; /* optional element of type SOAP-ENV:Code */
-  struct SOAP_ENV__Reason *
-      SOAP_ENV__Reason; /* optional element of type SOAP-ENV:Reason */
-  char *SOAP_ENV__Node; /* optional element of type xsd:string */
-  char *SOAP_ENV__Role; /* optional element of type xsd:string */
-  struct SOAP_ENV__Detail *
-      SOAP_ENV__Detail; /* optional element of type SOAP-ENV:Detail */
+  struct SOAP_ENV__Detail
+      *detail; /* optional element of type SOAP-ENV:Detail */
+  struct SOAP_ENV__Code
+      *SOAP_ENV__Code; /* optional element of type SOAP-ENV:Code */
+  struct SOAP_ENV__Reason
+      *SOAP_ENV__Reason; /* optional element of type SOAP-ENV:Reason */
+  char *SOAP_ENV__Node;  /* optional element of type xsd:string */
+  char *SOAP_ENV__Role;  /* optional element of type xsd:string */
+  struct SOAP_ENV__Detail
+      *SOAP_ENV__Detail; /* optional element of type SOAP-ENV:Detail */
 public:
   int soap_type() const {
     return 14;

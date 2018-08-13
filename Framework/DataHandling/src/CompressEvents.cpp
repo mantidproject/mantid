@@ -10,8 +10,8 @@
 
 #include "tbb/parallel_for.h"
 
-#include <set>
 #include <numeric>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {

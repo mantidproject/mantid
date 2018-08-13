@@ -1,20 +1,20 @@
 #include "MantidSINQ/PoldiCreatePeaksFromCell.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
-#include "MantidGeometry/Crystal/CrystalStructure.h"
-#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 namespace Mantid {
 namespace Poldi {
 
-using Kernel::Direction;
-using API::WorkspaceProperty;
 using API::ITableWorkspace;
+using API::WorkspaceProperty;
+using Kernel::Direction;
 using namespace Geometry;
 using namespace Kernel;
 
@@ -154,7 +154,7 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-   */
+ */
 void PoldiCreatePeaksFromCell::init() {
   std::vector<std::string> spaceGroups =
       SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols();
@@ -162,8 +162,9 @@ void PoldiCreatePeaksFromCell::init() {
                   boost::make_shared<StringListValidator>(spaceGroups),
                   "SpaceGroup of the crystal structure.");
 
-  declareProperty("Atoms", "", "Atoms in the asymmetric unit. Format: \n"
-                               "Element x y z Occupancy U; ... ");
+  declareProperty("Atoms", "",
+                  "Atoms in the asymmetric unit. Format: \n"
+                  "Element x y z Occupancy U; ... ");
 
   boost::shared_ptr<BoundedValidator<double>> latticeParameterEdgeValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
@@ -199,7 +200,7 @@ void PoldiCreatePeaksFromCell::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-   */
+ */
 void PoldiCreatePeaksFromCell::exec() {
   // Get all user input regarding the unit cell
   SpaceGroup_const_sptr spaceGroup = getSpaceGroup(getProperty("SpaceGroup"));
@@ -228,5 +229,5 @@ void PoldiCreatePeaksFromCell::exec() {
   setProperty("OutputWorkspace", peaks->asTableWorkspace());
 }
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

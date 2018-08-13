@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {

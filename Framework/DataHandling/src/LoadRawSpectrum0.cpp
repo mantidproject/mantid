@@ -1,16 +1,16 @@
 #include "MantidDataHandling/LoadRawSpectrum0.h"
 #include "LoadRaw/isisraw2.h"
-#include "MantidDataHandling/LoadLog.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 
@@ -31,12 +31,12 @@ LoadRawSpectrum0::LoadRawSpectrum0()
 void LoadRawSpectrum0::init() { LoadRawHelper::init(); }
 
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw Exception::FileError If the RAW file cannot be found/opened
-*  @throw std::invalid_argument If the optional properties are set to invalid
-*values
-*/
+ *  the output workspace
+ *
+ *  @throw Exception::FileError If the RAW file cannot be found/opened
+ *  @throw std::invalid_argument If the optional properties are set to invalid
+ *values
+ */
 void LoadRawSpectrum0::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -147,5 +147,5 @@ void LoadRawSpectrum0::exec() {
   reset();
   fclose(file);
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

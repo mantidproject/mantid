@@ -1,4 +1,5 @@
 #include "MantidPythonInterface/kernel/Converters/DateAndTime.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 #include <boost/make_shared.hpp>
 #include <boost/python.hpp>
@@ -8,14 +9,14 @@
 #include <numpy/arrayobject.h>
 #include <numpy/arrayscalars.h>
 
-using Mantid::Types::Core::DateAndTime;
 using Mantid::PythonInterface::Converters::Impl::func_PyArray_Descr;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 // there is a different EPOCH for DateAndTime vs npy_datetime
 const npy_datetime UNIX_EPOCH_NS =
     DateAndTime("1970-01-01T00:00").totalNanoseconds();
-}
+} // namespace
 
 namespace Mantid {
 namespace PythonInterface {
@@ -46,14 +47,9 @@ PyArray_Descr *descr_ns() { return func_PyArray_Descr("M8[ns]"); }
 // internal function that handles raw pointer
 boost::shared_ptr<Types::Core::DateAndTime>
 to_dateandtime(const PyObject *datetime) {
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
-#endif
+  GNU_DIAG_OFF("cast-qual")
   if (!PyArray_IsScalar(datetime, Datetime)) {
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+    GNU_DIAG_ON("cast-qual")
     throw std::runtime_error("Expected datetime64");
   }
 

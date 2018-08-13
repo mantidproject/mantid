@@ -70,7 +70,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /*ALGORITHMSCREATESINGLEVALUEDWORKSPACE_H_*/

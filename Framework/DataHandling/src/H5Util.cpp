@@ -1,6 +1,6 @@
 #include "MantidDataHandling/H5Util.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidKernel/System.h"
 
 #include <H5Cpp.h>
 #include <algorithm>
@@ -20,7 +20,7 @@ Mantid::Kernel::Logger g_log("H5Util");
 
 const std::string NX_ATTR_CLASS("NX_class");
 const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
-}
+} // namespace
 
 // -------------------------------------------------------------------
 // convert primitives to HDF5 enum
@@ -88,7 +88,7 @@ H5::DataSet writeScalarDataSet<std::string>(Group &group,
   return data;
 }
 
-} // anonymous
+} // namespace
 
 // -------------------------------------------------------------------
 // write methods
@@ -335,7 +335,7 @@ OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
   return result;
 }
 
-} // anonymous
+} // namespace
 
 template <typename NumT, typename LocationType>
 NumT readNumAttributeCoerce(LocationType &location,

@@ -62,7 +62,7 @@ public:
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
     return {"ExtractFFTSpectrum", "FFTDerivative", "MaxEnt", "RealFFT",
-            "SassenaFFT", "FFTSmooth"};
+            "SassenaFFT",         "FFTSmooth"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic\\FFT"; }
@@ -107,7 +107,7 @@ private:
   int m_iAbs;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_FFT_H_*/

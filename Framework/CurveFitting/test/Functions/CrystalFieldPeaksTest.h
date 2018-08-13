@@ -10,9 +10,9 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
+#include "MantidCurveFitting/FortranDefs.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidCurveFitting/FortranDefs.h"
 
 using Mantid::CurveFitting::Functions::CrystalFieldPeaks;
 using namespace Mantid::CurveFitting::Algorithms;

@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_OFFSETSWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -24,9 +24,9 @@ public:
   }
 
   /**
-  * Test declaring an input OffsetsWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input OffsetsWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     OffsetsWorkspace_sptr wsInput(new OffsetsWorkspace());

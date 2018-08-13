@@ -13,8 +13,8 @@ namespace Mantid {
 namespace Kernel {
 // Forward dec
 class ICatalogInfo;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {

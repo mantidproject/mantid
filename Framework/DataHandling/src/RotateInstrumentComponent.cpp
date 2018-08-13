@@ -1,8 +1,8 @@
 #include "MantidDataHandling/RotateInstrumentComponent.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,12 +26,14 @@ void RotateInstrumentComponent::init() {
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");
-  declareProperty("ComponentName", "", "The name of the component to rotate. "
-                                       "Component names are defined in the "
-                                       "instrument definition files.");
-  declareProperty("DetectorID", -1, "The ID of the detector to rotate. If both "
-                                    "the component name and the detector ID "
-                                    "are set the latter will be used.");
+  declareProperty("ComponentName", "",
+                  "The name of the component to rotate. "
+                  "Component names are defined in the "
+                  "instrument definition files.");
+  declareProperty("DetectorID", -1,
+                  "The ID of the detector to rotate. If both "
+                  "the component name and the detector ID "
+                  "are set the latter will be used.");
   declareProperty("X", 0.0, "The x-part of the rotation axis.");
   declareProperty("Y", 0.0, "The y-part of the rotation axis.");
   declareProperty("Z", 0.0, "The z-part of the rotation axis.");

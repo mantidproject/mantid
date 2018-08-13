@@ -257,7 +257,7 @@ public slots:
                             int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on
   /// success/failure.
-  bool runPythonScript(const QString &code, bool async = false,
+  bool runPythonScript(const QString &code, bool asynchronous = false,
                        bool quiet = false, bool redirect = true);
 
   QList<MdiSubWindow *> windowsList() const;
@@ -1123,6 +1123,8 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
+  bool loadProjectRecovery(std::string sourceFile);
+
   // The string must be copied from the other thread in saveProjectRecovery
   /// Saves the current project as part of recovery auto saving
   bool saveProjectRecovery(std::string destination);
@@ -1640,6 +1642,8 @@ private:
 
   /// Owns a thread which automatically triggers project recovery for the GUI
   MantidQt::ProjectRecovery m_projectRecovery;
+  /// True if project recovery was started when MantidPlot started
+  bool m_projectRecoveryRunOnStart{false};
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar

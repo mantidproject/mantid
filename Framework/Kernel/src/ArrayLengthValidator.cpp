@@ -192,5 +192,5 @@ template class ArrayLengthValidator<std::string>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class ArrayLengthValidator<long>;
 #endif
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

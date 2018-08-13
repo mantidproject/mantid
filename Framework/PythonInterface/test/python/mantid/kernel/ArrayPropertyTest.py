@@ -129,9 +129,77 @@ class ArrayPropertyTest(unittest.TestCase):
                     FloatArrayProperty("Input", Direction.Input), "Float array")
             def PyExec(self):
                 self._input_values = self.getProperty("Input").value
-    
+
         input_values = range(1, 5)
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
+
+    def test_dtype_function_calls(self):
+        """
+        Tests the dtype() function call for the data types stored in the array.
+        """
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create float array
+        float_input_values = [1.1, 2.5, 5.6, 4.6, 9.0, 6.0]
+        float_arr = FloatArrayProperty("floats", float_input_values, validator, direc)
+
+        # Create int array
+        int_input_values = [1, 2, 5, 4, 9, 6]
+        int_arr = IntArrayProperty("integers", int_input_values, validator, direc)
+
+        # Create string array
+        str_input_values = ["a", "b", "c", "d", "e"]
+        str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
+
+        # Test
+        self.assertEquals(float_arr.dtype(), "f")
+        self.assertEquals(int_arr.dtype(), "i")
+        self.assertEquals(str_arr.dtype(), "S1")
+
+    def test_construct_numpy_array_with_given_dtype_float(self):
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create float array
+        float_input_values = [1.1, 2.5, 5.6, 4.6, 9.0, 6.0]
+        float_arr = FloatArrayProperty("floats", float_input_values, validator, direc)
+
+        # Use the returned dtype() to check it works with numpy arrays
+        x = np.arange(1, 10, dtype=float_arr.dtype())
+        self.assertIsInstance(x, np.ndarray)
+        self.assertEquals(x.dtype, float_arr.dtype())
+
+    def test_construct_numpy_array_with_given_dtype_int(self):
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create int array
+        int_input_values = [1, 2, 5, 4, 9, 6]
+        int_arr = IntArrayProperty("integers", int_input_values, validator, direc)
+
+        # Use the returned dtype() to check it works with numpy arrays
+        x = np.arange(1, 10, dtype=int_arr.dtype())
+        self.assertIsInstance(x, np.ndarray)
+        self.assertEquals(x.dtype, int_arr.dtype())
+
+    def test_construct_numpy_array_with_given_dtype_string(self):
+        # Set up
+        direc = Direction.Output
+        validator = NullValidator()
+
+        # Create string array
+        str_input_values = ["hello", "testing", "word", "another word", "word"]
+        str_arr = StringArrayProperty("letters", str_input_values, validator, direc)
+
+        # Use the returned dtype() to check it works with numpy arrays
+        x = np.array(str_input_values, dtype=str_arr.dtype())
+        self.assertIsInstance(x, np.ndarray)
+        # Expect longest string to be returned
+        self.assertEquals(x.dtype, "S12")
 
     def test_PythonAlgorithm_setProperty_With_Ranges_String(self):
         """

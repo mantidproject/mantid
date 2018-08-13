@@ -8,22 +8,22 @@
 #ifndef EVENTWORKSPACETEST_H_
 #define EVENTWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <string>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
 
 using namespace Mantid;
@@ -32,10 +32,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 using namespace boost::posix_time;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
@@ -616,7 +616,7 @@ public:
    * Test that parallelization is thread-safe
    *
    */
-  void xtestSegFault() ///<Disabled because ~2.5 seconds.
+  void xtestSegFault() ///< Disabled because ~2.5 seconds.
   {
     int numpix = 100000;
     EventWorkspace_const_sptr ew1 =
@@ -678,8 +678,8 @@ public:
   }
 
   /**
-  * Test declaring an input EventWorkspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input EventWorkspace and retrieving as const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     EventWorkspace_sptr wsInput(new EventWorkspace());
@@ -709,8 +709,9 @@ public:
   }
 
   /**
-  * Test declaring an input IEventWorkspace and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input IEventWorkspace and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_IEventWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IEventWorkspace_sptr wsInput(new EventWorkspace());

@@ -51,6 +51,6 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   std::unique_ptr<SaveMDWorkspaceToVTKImpl> saver;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

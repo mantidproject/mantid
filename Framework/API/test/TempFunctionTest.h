@@ -1,9 +1,9 @@
 #ifndef TEMPFUNCTIONTEST_H_
 #define TEMPFUNCTIONTEST_H_
 
-#include "MantidAPI/TempFunction.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/TempFunction.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
-#define MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
+#ifndef MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEFACTORY_H_
+#define MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEFACTORY_H_
 /**
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -26,7 +26,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include <string>
+#include <boost/python/list.hpp>
 #include <memory>
 
 namespace Mantid {
@@ -53,14 +53,18 @@ public:
   create(const std::string &name, const boost::python::object &defaultValue,
          const unsigned int direction);
 
+  static std::unique_ptr<Kernel::Property>
+  createTimeSeries(const std::string &name,
+                   const boost::python::list &defaultValue);
+
 private:
   /// Return a handler that maps the python type to a C++ type
   static const PropertyValueHandler &lookup(PyObject *const object);
   /// Return a string based on the python array type
   static const std::string isArray(PyObject *const object);
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
-#endif // MANTID_PYTHONINTERFACE_PROEPRTYWITHVALUEFACTORY_H_
+#endif // MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEFACTORY_H_

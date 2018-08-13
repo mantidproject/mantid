@@ -4,11 +4,11 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include <boost/make_shared.hpp>
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/XML/XMLException.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -33,8 +33,9 @@ public:
   void test_noURLTag() {
     const std::string crTxt = "<computeResource name=\"foo\">"
                               "<u>" +
-                              fermiURL + "</u>"
-                                         "</computeResource>";
+                              fermiURL +
+                              "</u>"
+                              "</computeResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
                      std::runtime_error);
@@ -44,8 +45,9 @@ public:
   void test_wrongXML() {
     const std::string crTxt = "<computeResource name=\"foo\">"
                               "<u_foo>" +
-                              fermiURL + "</u_bar>"
-                                         "</compResource>";
+                              fermiURL +
+                              "</u_bar>"
+                              "</compResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
                      Poco::XML::XMLException);
@@ -56,8 +58,9 @@ public:
     const std::string fermi = "<computeResource name=\"" + fermiName +
                               "\">"
                               "<baseURL>" +
-                              fermiURL + "</baseURL>"
-                                         "</computeResource>";
+                              fermiURL +
+                              "</baseURL>"
+                              "</computeResource>";
 
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(fermi));
@@ -87,10 +90,12 @@ public:
 
   void test_brokenFermi() {
     // wrong 'baseURL' tag
-    const std::string fermi = "<computeResource name=\"" + fermiName + "\">"
-                                                                       "<URL>" +
-                              fermiURL + "</URL>"
-                                         "</computeResource>";
+    const std::string fermi = "<computeResource name=\"" + fermiName +
+                              "\">"
+                              "<URL>" +
+                              fermiURL +
+                              "</URL>"
+                              "</computeResource>";
 
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi),
@@ -101,10 +106,12 @@ public:
 
   void test_normalSCARF() {
     const std::string scarf = "<computeResource name=\"" + scarfName +
-                              "\" jobmanagertype=\"" + scarfType + "\">"
-                                                                   "<baseURL>" +
-                              scarfURL + "</baseURL>"
-                                         "</computeResource>";
+                              "\" jobmanagertype=\"" + scarfType +
+                              "\">"
+                              "<baseURL>" +
+                              scarfURL +
+                              "</baseURL>"
+                              "</computeResource>";
 
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(scarf));
@@ -135,10 +142,12 @@ public:
   void test_brokenSCARF() {
     const std::string type = "SCARFLSFJobManager";
     const std::string err = "<computeResource foo=\"" + scarfName +
-                            "\" jobmanagertype=\"" + type + "\">"
-                                                            "<URL>" +
-                            scarfURL + "</URL>"
-                                       "</computeResource>";
+                            "\" jobmanagertype=\"" + type +
+                            "\">"
+                            "<URL>" +
+                            scarfURL +
+                            "</URL>"
+                            "</computeResource>";
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(err),
                      std::runtime_error);
@@ -152,26 +161,33 @@ public:
     const std::string rep = "<computeResource name=\"" + fermiName +
                             "\">"
                             "<baseURL>" +
-                            fermiURL + "</baseURL>"
-                                       "</computeResource>"
+                            fermiURL +
+                            "</baseURL>"
+                            "</computeResource>"
 
-                                       "<computeResource name=\"" +
-                            otherName + "\">"
-                                        "<baseURL>" +
-                            otherURL + "</baseURL>"
-                                       "</computeResource>"
+                            "<computeResource name=\"" +
+                            otherName +
+                            "\">"
+                            "<baseURL>" +
+                            otherURL +
+                            "</baseURL>"
+                            "</computeResource>"
 
-                                       "<computeResource name=\"" +
-                            thirdName + "\">"
-                                        "<baseURL>" +
-                            fermiURL + "</baseURL>"
-                                       "</computeResource>"
+                            "<computeResource name=\"" +
+                            thirdName +
+                            "\">"
+                            "<baseURL>" +
+                            fermiURL +
+                            "</baseURL>"
+                            "</computeResource>"
 
-                                       "<computeResource name=\"" +
-                            fermiName + "\">"
-                                        "<baseURL>" +
-                            fermiURL + "</baseURL>"
-                                       "</computeResource>";
+                            "<computeResource name=\"" +
+                            fermiName +
+                            "\">"
+                            "<baseURL>" +
+                            fermiURL +
+                            "</baseURL>"
+                            "</computeResource>";
 
     boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(rep));
@@ -212,8 +228,9 @@ private:
                                "  <facility name=\"" +
                                testFacilityName +
                                R"(" FileExtensions=".xyz">)" + simpleInstStr +
-                               crStr + "  </facility>"
-                                       "</facilities>";
+                               crStr +
+                               "  </facility>"
+                               "</facilities>";
 
     return createFacility(xmlStr);
   }

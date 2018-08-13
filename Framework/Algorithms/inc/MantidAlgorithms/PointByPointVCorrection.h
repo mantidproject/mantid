@@ -66,7 +66,7 @@ private:
                    const int &index) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_POINTBYPOINTVCORRECTION_H_ */

@@ -2,9 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACES_ISISDIAGNOSTICS_H_
 
 #include "IndirectDataReductionTab.h"
-#include "ui_ISISDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
+#include "ui_ISISDiagnostics.h"
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -85,6 +85,6 @@ private:
   Ui::ISISDiagnostics m_uiForm;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ISISDIAGNOSTICS_H_
