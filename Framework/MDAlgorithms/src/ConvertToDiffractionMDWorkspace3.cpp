@@ -117,7 +117,9 @@ void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
 
   // Increases bounds by a small margin and ensures they aren't too close to
   // zero. This is to prevent events from being incorrectly discarded as out
-  // of bounds by calcMatrixCoord functions.
+  // of bounds by calcMatrixCoord functions (or, if fixed there, later causing
+  // further issues in MDGridBox::calculateChildIndex due to events sitting
+  // on maximum boundaries)
   for (size_t i = 0; i < maxVal.size(); ++i) {
     minVal[i] *= (1 - 1.e-5 * boost::math::sign(minVal[i]));
     if (fabs(minVal[i]) < 1.e-5)
