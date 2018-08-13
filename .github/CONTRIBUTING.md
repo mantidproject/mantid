@@ -2,7 +2,7 @@ The [developer documentation](http://developer.mantidproject.org/) has informati
 
  1. [Fork](https://help.github.com/articles/fork-a-repo) the repository. *recommended:* Delete all branches other than `master`. This makes it easier to see what is in your fork later.
  2. Clone the repository with the remotes `origin` pointing at your fork as `origin` and `mantidproject/mantid` as `upstream`. This is a [common setup](https://help.github.com/articles/configuring-a-remote-for-a-fork/).
- 3. Make changes as you see fit. Please still follow the guidelines for [running the unit tests](http://www.mantidproject.org/Running_the_unit_tests) and the [build servers](http://developer.mantidproject.org/AutomatedBuildProcess.html).
+ 3. Make changes as you see fit. Please still follow the guidelines for [running the unit tests](http://developer.mantidproject.org/RunningTheUnitTests.html) and the [build servers](http://developer.mantidproject.org/AutomatedBuildProcess.html).
  4. Submit a [pull request](https://help.github.com/articles/using-pull-requests) to this branch. This is a start to the conversation.
  7. (Optional) email mantid-help@mantidproject.org requests to.
 
