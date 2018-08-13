@@ -131,7 +131,7 @@ private:
 
   /// Buffer workspace to store instrument data (or not only instrument in the
   /// future), prevents loading for every chank of data
-  API::MatrixWorkspace_sptr bufferWorkspace;
+  API::MatrixWorkspace_sptr m_bufferWorkspace;
 
   /// reporter function called when the IDC reading routines raise an error
   static void IDCReporter(int status, int code, const char *message);

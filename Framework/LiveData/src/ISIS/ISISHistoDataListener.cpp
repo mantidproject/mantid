@@ -125,13 +125,13 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   loadTimeRegimes();
 
   // Create dummy workspace to store instrument data
-  bufferWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+  m_bufferWorkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 
-  bufferWorkspace->getAxis(0)->unit() =
+  m_bufferWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("TOF");
-  bufferWorkspace->setYUnit("Counts");
+  m_bufferWorkspace->setYUnit("Counts");
 
-  runLoadInstrument(bufferWorkspace, getString("NAME"));
+  runLoadInstrument(m_bufferWorkspace, getString("NAME"));
 
   return true;
 }
@@ -205,7 +205,7 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
 
   // Create the 2D workspace for the output
   auto localWorkspace = WorkspaceFactory::Instance().create(
-      bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
+      m_bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
       m_numberOfBins[m_timeRegime]);
 
   localWorkspace->updateSpectraUsing(
