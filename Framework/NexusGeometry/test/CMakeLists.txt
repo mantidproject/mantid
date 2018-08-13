@@ -1,6 +1,8 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ../../TestHelpers/inc)
 
+  set ( TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp)
+  
   cxxtest_add_test ( NexusGeometryTest ${TEST_FILES})
 
   target_include_directories( NexusGeometryTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )

@@ -15,9 +15,9 @@ namespace detail {
 class Tube;
 }
 namespace TubeHelpers {
-std::vector<detail::Tube> findTubes(const Mantid::Geometry::IObject &shape,
-                                    const Pixels &positions,
-                                    const std::vector<int> &detIDs);
+MANTID_NEXUSGEOMETRY_DLL std::vector<detail::Tube>
+findTubes(const Mantid::Geometry::IObject &shape, const Pixels &positions,
+          const std::vector<int> &detIDs);
 } // namespace TubeHelpers
 } // namespace NexusGeometry
 } // namespace Mantid

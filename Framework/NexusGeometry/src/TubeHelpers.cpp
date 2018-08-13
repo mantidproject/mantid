@@ -28,6 +28,12 @@ std::vector<detail::Tube> findTubes(const Mantid::Geometry::IObject &shape,
       tubes.emplace_back(shape, positions.col(i), detIDs[i]);
   }
 
+  // Remove "tubes" with only 1 element
+  tubes.erase(
+      std::remove_if(tubes.begin(), tubes.end(),
+                     [](const detail::Tube &tube) { return tube.size() == 1; }),
+      tubes.end());
+
   return tubes;
 }
 } // namespace TubeHelpers
