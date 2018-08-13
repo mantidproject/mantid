@@ -1,9 +1,11 @@
 #include <sstream>
 
 #include "MantidDataHandling/LoadDNSEvent.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
@@ -23,6 +25,8 @@
 #include <ostream>
 
 #include <chrono>
+#include <sstream>
+#include <iostream>
 
 //#define LOG_INFORMATION(a) g_log.notice() << a;
 #define LOG_INFORMATION(a) //g_log.information()##<<##a;
@@ -41,6 +45,8 @@ struct measure
     }
 };
 
+using measureMicroSecs = measure<std::chrono::microseconds>;
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -58,6 +64,15 @@ void LoadDNSEvent::init() {
   declareProperty(Kernel::make_unique<FileProperty>("InputFile", "",
                                                     FileProperty::Load, exts),
                   "The XML or Map file with full path.");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+                      "ChopperPeriod", EMPTY_INT(), Kernel::Direction::Input),
+                  "The Chopper Period");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+                      "MaxDeltaT", EMPTY_INT(), Kernel::Direction::Input),
+                  "The Max Delta T");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+                      "MaxCount", EMPTY_INT(), Kernel::Direction::Input),
+                  "The Max Count");
 
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -78,45 +93,176 @@ void LoadDNSEvent::exec() {
 
 
   try {
-    BitStream file(static_cast<std::string>(getProperty("InputFile")), endian::big, [this]() -> std::ostream& { return g_log.notice(); });
+    ByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big, [this]() -> std::ostream& { return g_log.notice(); });
     //file.exceptions(std::ifstream::eofbit);
 
-    EventAccumulator eventAccumulator(g_log, progress);
-    auto elaapsedTime = measure<std::chrono::microseconds>::execution([&](){ parse_File(file, eventAccumulator); });
-    eventAccumulator.postProcessData();
+    EventAccumulator eventAccumulator(g_log, progress, static_cast<uint>(getProperty("ChopperPeriod")));
+    eventAccumulator.chopperFinder.setChopperCandidate(1);
+    auto elaapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file, eventAccumulator); });
+    auto elaapsedTimeProcessing = measureMicroSecs::execution([&](){ eventAccumulator.postProcessData(outputWS); });
+
+    const uint maxN = static_cast<uint>(getProperty("MaxCount"));
+
+    populate_EventWorkspace(outputWS, eventAccumulator);
 
     progress.doReport();
 
     g_log.notice()
-        << "elaapsedTime = " << elaapsedTime
+        << "elaapsedTime Parsing\t= " << elaapsedTimeParsing
+        << "\nelaapsedTime Processing\t= " << elaapsedTimeProcessing
+        << "\nelaapsedTime Total  \t= " << elaapsedTimeParsing + elaapsedTimeProcessing
         << std::endl;
 
-//    g_log.notice() << " Events found:" << "\n";
-//    size_t k = 0;
-//    for (auto &event : eventAccumulator.events)/**/ {
-//      k++;
-//      if (k >= 2000) {
-//        break;
-//      }
-//      g_log.notice()
-//          << std::setprecision(15) << std::fixed << "N"
-//          << ", " << double(event.timestamp) / 10000.0
-//          << std::endl;
-//    }
 
+
+
+    std::ofstream textfile(static_cast<std::string>(getProperty("InputFile")) + ".txt");
+
+    std::set<int64_t> allDeltaTs;
+    for (const auto &pair1 : eventAccumulator.chopperFinder.dataSourceInfos) {
+      for (const auto &pair2 : pair1.second.deltaTFrequencies ) {
+        allDeltaTs.insert(pair2.first);
+      }
+    }
+    textfile << "\t";
+    int i = 0;
+    for (const auto &deltaT : allDeltaTs ) {
+      i++;
+      if (i > maxN) {
+        break;
+      }
+      textfile << deltaT << "\t";
+    }
+    textfile << "\n";
+
+    for (const auto &pair1 : eventAccumulator.chopperFinder.dataSourceInfos) {
+      logTuple(textfile, pair1.first.mcpdId, pair1.first.dataId, pair1.first.trigId) << "\t";
+      i = 0;
+
+      for (const int64_t &deltaT : allDeltaTs ) {
+        i++;
+        if (i > maxN) {
+          break;
+        }
+
+        if (pair1.second.deltaTFrequencies.find(deltaT) != pair1.second.deltaTFrequencies.end()) {
+          textfile << pair1.second.deltaTFrequencies.at(deltaT) << "\t";
+        } else {
+          textfile << "0\t";
+        }
+      }
+      textfile << "\n";
+    }
+
+
+
+    std::stringstream sbx;
+    int k = 0;
+    for (const auto &event : eventAccumulator.events) {
+
+      if (k++ > maxN) { break; }
+
+      sbx << event.timestamp << "\n";
+
+    }
+    textfile << sbx.str();
+
+    textfile.close();
+
+
+    {
+      g_log.notice() << " Events found (" << eventAccumulator.eventsOut.size() << " of " << eventAccumulator.events.size() << "):" << "\n";
+
+      for (const auto &pair : eventAccumulator.chopperFinder.dataSourceInfos) {
+        logTuple(g_log.notice(), pair.first.mcpdId, pair.first.dataId, pair.first.trigId) << "\t";
+      }
+      g_log.notice() << "\n";
+
+      int maxK = static_cast<uint>(getProperty("MaxCount"));
+      std::stringstream sb;
+      for (const auto &events : eventAccumulator.eventsOut) {
+        maxK--;
+        if (maxK <= 0) {
+          break;
+        }
+        for (const auto &pair : eventAccumulator.chopperFinder.dataSourceInfos) {
+            const auto searchResult = events.find(pair.first);
+            if (searchResult != events.end()) {
+              sb << searchResult->second.timestamp;
+            }
+            sb << "\t";
+        }
+        sb << std::endl;
+      }
+      g_log.notice() << sb.str();
+    }
 
     progress.doReport();
   } catch (std::runtime_error e) {
     g_log.error(e.what());
   }
+  //        g_log.notice()
+  //            << std::setprecision(15) << std::fixed << "T"
+  //            << ", " << double(event.timestamp) / 10000.0
+  //            << std::endl;
 
   setProperty("OutputWorkspace", outputWS);
 }
 
-//void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS, LoadDNSEvent::eventAccumulator_t eventList) {
-//  EventList &eventListl = outputWS->getSpectrum(j);
-//  eventListl.switchTo(TOF);
-//}
+//template<class EventWorkspace_sptr>
+void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS, LoadDNSEvent::EventAccumulator eventAccumulator) {
+  return;
+  std::map<uint64_t, uint32_t> histogram;
+
+  //eventWS->getSpectrum(1).setDetectorID();
+
+  for (auto event : eventAccumulator.tmpEvents) {
+    //const uint16_t channel = event.mcpdId << 8 | event.data.neutron.modId << 5 | event.data.neutron.slotId;
+    //const uint16_t position = event.data.neutron.position;
+    const double tof = double(event.tof);//event.timestamp);
+
+    //eventList.addDetectorID();
+    EventList &eventList = eventWS->getSpectrum(0*event.channel * 960 + event.position);
+    //eventList.switchTo(TOF);
+    eventList.addEventQuickly(Types::Event::TofEvent(tof));
+  }
+
+  for (auto pair : histogram) {
+    g_log.notice() << pair.first << "\t" << pair.second << std::endl;
+  }
+  return;
+
+
+  //eventList.setHistogram()
+  //el.setHistogram(this->m_xbins);
+  //eventList.setBinEdges(); ???
+
+  const auto &xVals = eventWS->x(0);
+  const size_t xSize = xVals.size();
+  auto ax0 = new NumericAxis(xSize);
+  std::cout << "xSize = " << xSize << std::endl;
+  // X-axis is 1 <= wavelength <= 6 Angstrom with step of 0.05
+  ax0->setUnit("Wavelength");
+  for (size_t i = 0; i < xSize; i++) {
+    ax0->setValue(i, 1.0 + 0.05 * xVals[i]);
+  }
+  eventWS->replaceAxis(0, ax0);
+
+  for (Event event : eventAccumulator.events) {
+    if (event.eventId == event_id_e::NEUTRON){
+      const uint16_t position = event.data.neutron.position;
+      const double tof = double(event.timestamp) / 10000.0;
+
+      //eventList.addDetectorID();
+      EventList &eventList = eventWS->getSpectrum(position);
+      eventList.switchTo(TOF);
+      eventList.addEventQuickly(Types::Event::TofEvent(tof));
+    }
+  }
+
+
+}
+
 namespace {
 //std::result_of<decltype(&foo::bar)(foo)>::type
 //decltype(*Iterable::cbegin())
@@ -140,7 +286,7 @@ buildSkipTable(const Iterable &iterable) {
 }
 }
 
-std::vector<uint8_t> LoadDNSEvent::parse_Header(BitStream &file) {
+std::vector<uint8_t> LoadDNSEvent::parse_Header(ByteStream &file) {
   // using Boyer-Moore String Search:
   LOG_INFORMATION("parse_Header...\n")
   static constexpr std::array<uint8_t, 8> header_sep {0x00, 0x00, 0x55, 0x55, 0xAA, 0xAA, 0xFF, 0xFF};
@@ -150,11 +296,10 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(BitStream &file) {
   std::vector<uint8_t> header;
 
   std::array<uint8_t, header_sep.size()> current_window;
-  g_log.notice() << "Hi!" << "\n";
   file.readRaw(current_window);
 
   int j = 0;
-  while (!file.eof() && (j++ < 1024*1)) {
+  while (!file.eof() && (j++ < 1024*8)) {
     if (current_window == header_sep) {
       return header;
     } else {
@@ -166,8 +311,9 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(BitStream &file) {
       const auto win_data = current_window.data();
       std::copy(win_data, win_data + skip_length, header.data() + orig_header_size);
 
-      std::copy(win_data + skip_length, win_data + header_sep.size(), win_data);
-      file.readRaw(current_window, skip_length * 8);
+      const std::array<uint8_t, header_sep.size()> orig_window = current_window;
+      file.readRaw(current_window, skip_length);
+      std::copy(orig_window.data() + skip_length, orig_window.data() + header_sep.size(), win_data);
     }
   }
   //throw std::runtime_error(std::string("STOP!!!! please. (ugh!)"));
@@ -175,7 +321,7 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(BitStream &file) {
 }
 
 /*
-LoadDNSEvent::eventAccumulator_t LoadDNSEvent::parse_FileX(BitStream &file) {
+LoadDNSEvent::eventAccumulator_t LoadDNSEvent::parse_FileX(ByteStream &file) {
   // File := Header Body
   auto header = parse_Header(file);
   g_log.information() << std::string((char*)header.data(), header.size()) << "\n";
@@ -228,36 +374,31 @@ LoadDNSEvent::eventAccumulator_t LoadDNSEvent::parse_FileX(BitStream &file) {
 */
 
 
-void LoadDNSEvent::parse_File(BitStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_File(ByteStream &file, EventAccumulator &eventAccumulator) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
-//  g_log.notice() << std::string((char*)header.data(), header.size()) << "\n";
-//  g_log.notice() <<"---header----- " << header.size() << "\n";
-//  for (auto v : header) {
-//    g_log.notice() << n2hexstr(v) << " ";
-//  }
-//  g_log.notice() <<"\n---header----- " << header.size() << "\n";
 
   parse_BlockList(file, eventAccumulator);
   parse_EndSignature(file);
 }
 
-void LoadDNSEvent::parse_BlockList(BitStream &file, EventAccumulator &eventAccumulator) {
-  LOG_INFORMATION("parse_BlockList...\n")
+void LoadDNSEvent::parse_BlockList(ByteStream &file, EventAccumulator &eventAccumulator) {
+  LOG_INFORMATION("parse_BlockList...\n");
   // BlockList := DataBuffer BlockListTrail
   while (file.peek() != 0xFF) {
     parse_Block(file, eventAccumulator);
   }
 }
 
-void LoadDNSEvent::parse_Block(BitStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_Block(ByteStream &file, EventAccumulator &eventAccumulator) {
   LOG_INFORMATION("parse_Block...\n")
   // Block := DataBufferHeader DataBuffer
   parse_DataBuffer(file, eventAccumulator);
   parse_BlockSeparator(file);
 }
 
-void LoadDNSEvent::parse_BlockSeparator(BitStream &file) {
+void LoadDNSEvent::parse_BlockSeparator(ByteStream &file) {
+  LOG_INFORMATION("parse_BlockSeparator...\n")
   const separator_t block_sep = (0x0000FFFF5555AAAA); // 0xAAAA5555FFFF0000; //
   auto separator = file.read(separator_t());
   if (separator != block_sep) {
@@ -266,95 +407,124 @@ void LoadDNSEvent::parse_BlockSeparator(BitStream &file) {
   }
 }
 
-void LoadDNSEvent::parse_DataBuffer(BitStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_DataBuffer(ByteStream &file, EventAccumulator &eventAccumulator) {
   LOG_INFORMATION("parse_DataBuffer...\n")
   const auto header = parse_DataBufferHeader(file);
-  auto headerId = eventAccumulator.registerDataBuffer(header);
-  LOG_INFORMATION("buffer length: " << header.bufferLength << "\n")
-  parse_EventList(file, eventAccumulator, headerId, uint16_t(header.bufferLength - header.headerLength));
+  eventAccumulator.registerDataBuffer(header);
+  LOG_INFORMATION("buffer length: " << header.bufferLength << "\n");
+  parse_EventList(file, eventAccumulator, uint16_t(header.bufferLength - 21));
 }
 
-LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(BitStream &file) {
-//  uint16_t bufferLength;
-//  uint16_t bufferVersion;
-//  BufferType bufferType;
-//  uint16_t headerLength; //static const uint16_t headerLength = 21;
-//  uint16_t bufferNumber;
-//  uint16_t runId;
-//  uint8_t  mcpdId;
-//  DeviceStatus deviceStatus;
-//  uint64_t timestamp;
+LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(ByteStream &file) {
   LOG_INFORMATION("parse_DataBufferHeader...\n")
   BufferHeader header = {};
-  file
-      .read<16>(header.bufferLength)
-      .read<1>(header.bufferType)
-      .read<15>(header.bufferVersion)
-      .read<16>(header.headerLength)
-      .read<16>(header.bufferNumber)
-      .read<16>(header.runId)
-      .read<8>(header.mcpdId)
-      .skip<6>()
-      .read<2>(header.deviceStatus)
-      .read<48>(header.timestamp)
-      .skip<192>();
-  // g_log.notice() << n2binstr(header.timestamp) << std::endl;
-  // g_log.notice() << n2binstr(header.bufferLength) << std::endl;
+  file.read<2>(header.bufferLength);
+//  file.skip<2>();
+file.extractDataChunk<2>()
+        .readBits<1>(header.bufferType)
+        .readBits<15>(header.bufferVersion);
+  file.read<2>(header.headerLength);
+//  file.skip<4>();
+file.read<2>(header.bufferNumber);
+file.read<2>(header.runId);
+  file.read<1>(header.mcpdId);
+//  file.skip<1>();
+file.extractDataChunk<1>()
+        .skipBits<6>()
+        .readBits<2>(header.deviceStatus);
+  file.read<6>(header.timestamp);
+  file.skip<24>();
   return header;
 
 }
 
-void LoadDNSEvent::parse_EventList(BitStream &file, EventAccumulator &eventAccumulator, const HeaderId &headerId, const uint16_t &dataLength) {
+void LoadDNSEvent::parse_EventList(ByteStream &file, EventAccumulator &eventAccumulator, const uint16_t &dataLength) {
   LOG_INFORMATION("parse_EventList...\n")
   const auto event_count = dataLength / 3;
   LOG_INFORMATION("event_count = " << event_count << "\n")
   for (uint16_t i = 0; i < event_count; i++) {
-    eventAccumulator.addEvent(parse_Event(file, headerId));
-    //
+    Event event = {};
+    const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
+
+    switch (event.eventId) {
+      case event_id_e::TRIGGER: {
+        TriggerEventData eventData = {};
+        dataChunk
+            //.skip<28>()
+            .readBits<3>(eventData.trigId)
+            .readBits<4>(eventData.dataId)
+            .readBits<21>(eventData.data)
+            .readBits<19>(event.timestamp);
+        event.data.trigger = eventData;
+        eventAccumulator.addTriggerEvent(event);
+      } break;
+      case event_id_e::NEUTRON: {
+        NeutronEventData eventData = {};
+        dataChunk
+            //.skip<28>()
+            .readBits<3>(eventData.modId)
+            .skipBits<1>()
+            .readBits<4>(eventData.slotId)
+            .readBits<10>(eventData.amplitude)
+            .readBits<10>(eventData.position)
+            .readBits<19>(event.timestamp);
+        event.data.neutron = eventData;
+        eventAccumulator.addNeutronEvent(event);
+      } break;
+    default:
+      // Panic!!!!
+      g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
+      break;
+    }
   }
 }
 
-LoadDNSEvent::Event LoadDNSEvent::parse_Event(BitStream &file, const HeaderId &headerId) {
+LoadDNSEvent::Event LoadDNSEvent::parse_Event(ByteStream &file, const HeaderId &headerId) {
 
   Event event = {};
-  file.read<1>(event.eventId);
-  uint8_t DUMMY;
-  switch (event.eventId) {
-    case event_id_e::TRIGGER: {
-      TriggerEventData eventData = {};
-      file
-          //.skip<28>()
-          .read<3>(eventData.trigId)
-          .read<4>(eventData.dataId)
-          .read<21>(eventData.data)
-          .read<19>(event.timestamp);
-      event.data.trigger = eventData;
-    } break;
-    case event_id_e::NEUTRON: {
-      NeutronEventData eventData = {};
-      file
-          //.skip<28>()
-          .read<3>(eventData.modId)
-          .read<1>(DUMMY)
-          .read<4>(eventData.slotId)
-          .read<10>(eventData.amplitude)
-          .read<10>(eventData.position)
-          .read<19>(event.timestamp);
-      event.data.neutron = eventData;
-    } break;
-  default:
-    // Panic!!!!
-    g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
-    std::array<uint8_t, 6> dummy;
-    file.readRaw<15+16+16>(dummy);
-    break;
-  }
-
-  event.headerId = headerId;
+  file.extractDataChunk<6>()
+      //.readBits<1>(event.eventId)
+      .skipBits<29>()
+      .readBits<19>(event.timestamp);
   return event;
+
+
+//  const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
+//  switch (event.eventId) {
+//    case event_id_e::TRIGGER: {
+//      TriggerEventData eventData = {};
+//      dataChunk
+//          //.skip<28>()
+//          .readBits<3>(eventData.trigId)
+//          .readBits<4>(eventData.dataId)
+//          .readBits<21>(eventData.data)
+//          .readBits<19>(event.timestamp);
+//      event.data.trigger = eventData;
+//    } break;
+//    case event_id_e::NEUTRON: {
+//      NeutronEventData eventData = {};
+//      dataChunk
+//          //.skip<28>()
+//          .readBits<3>(eventData.modId)
+//          .skipBits<1>()
+//          .readBits<4>(eventData.slotId)
+//          .readBits<10>(eventData.amplitude)
+//          .readBits<10>(eventData.position)
+//          .readBits<19>(event.timestamp);
+//      event.data.neutron = eventData;
+//    } break;
+//  default:
+//    // Panic!!!!
+//    g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
+//    break;
+//  }
+
+//  event.headerId = headerId;
+//  return event;
 }
 
-void LoadDNSEvent::parse_EndSignature(BitStream &file) {
+void LoadDNSEvent::parse_EndSignature(ByteStream &file) {
+  LOG_INFORMATION("parse_EndSignature...\n")
   const separator_t closing_sig = (0xFFFFAAAA55550000); // 0x00005555AAAAFFFF; //
   auto separator = file.read(separator_t());
   if (separator != closing_sig) {
@@ -365,31 +535,5 @@ void LoadDNSEvent::parse_EndSignature(BitStream &file) {
 
 }// namespace Mantid
 }// namespace DataHandling
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

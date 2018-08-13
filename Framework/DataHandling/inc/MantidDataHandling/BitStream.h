@@ -42,7 +42,7 @@
 std::string type_name(std::string tname)
 {
     int status;
-    char *demangled_name = abi::__cxa_demangle(tname.c_str(), NULL, NULL, &status);
+    char *demangled_name = abi::__cxa_demangle(tname.c_str(), nullptr, nullptr, &status);
     if(status == 0) {
         tname = demangled_name;
         std::free(demangled_name);
@@ -55,7 +55,7 @@ std::string n2hexstr(T w) {
   static const char* digits = "0123456789ABCDEF";
   std::string result(sizeof(w)*2, '0');
 
-  uint8_t (*wtmp_p)[sizeof(w)] = (uint8_t (*)[sizeof(w)]) (&w);
+  uint8_t (*wtmp_p)[sizeof(w)] = reinterpret_cast<uint8_t (*)[sizeof(w)]>(&w);
 
   auto wtmp = *wtmp_p;
   for (size_t i = 0; i < sizeof(w); i++) {
@@ -71,7 +71,7 @@ std::string n2binstr(T w) {
   static const char* digits = "01";
   std::string result(sizeof(w)*9, '|');
 
-  uint8_t (*wtmp_p)[sizeof(w)] = (uint8_t (*)[sizeof(w)]) (&w);
+  uint8_t (*wtmp_p)[sizeof(w)] = reinterpret_cast<uint8_t (*)[sizeof(w)]>(&w);
 
   auto wtmp = *wtmp_p;
   for (size_t i = 0; i < sizeof(w); i++) {
@@ -100,7 +100,7 @@ inline uint16_t rotll (T v, S b) {
   const auto mb = b & count_mask;
   const auto unsignedV = UnsignedT(v);
   const auto result = UnsignedT(UnsignedT(unsignedV + 0U) << mb) | UnsignedT(UnsignedT(unsignedV) >> (-mb & count_mask));
-  return *(const T*)&result;
+  return *reinterpret_cast<const T*>(&result);
 }
 
 template <typename T, typename S>
@@ -115,22 +115,23 @@ inline uint16_t rotrr (T v, S b) {
   const auto mb = b & count_mask;
   const auto unsignedV = UnsignedT(v);
   const auto result = UnsignedT(UnsignedT(unsignedV + 0U) >> mb) | UnsignedT(UnsignedT(unsignedV) << (-mb & count_mask));
-  return *(const T*)&result;
+  return *reinterpret_cast<const T*>(&result);
 }
 
+/*
 template <typename T>
-/**
+/ **
  * @brief a shift function, that ignares endianess.
  * @param w
  * @param n
  * @return the result
- */
+ * /
 T shiftMemR(T w, int n) {
-  uint8_t (*wtmp_p)[sizeof(w)] = (uint8_t (*)[sizeof(w)]) (&w);
+  uint8_t (*wtmp_p)[sizeof(w)] = reinterpret_cast<uint8_t (*)[sizeof(w)]>(&w);
   auto wtmp = *wtmp_p;
 
   T r{0};
-  uint8_t (*rtmp_p)[sizeof(r)] = (uint8_t (*)[sizeof(r)]) (&r);
+  uint8_t (*rtmp_p)[sizeof(r)] = reinterpret_cast<uint8_t (*)[sizeof(r)]>(&r);
   auto rtmp = *rtmp_p;
 
   for (size_t i = std::max(0, -n); i < sizeof(w)*8-std::max(0, n); i++) {
@@ -147,9 +148,9 @@ inline T repair_endianness(T value, size_t bitCount) {
   //return value;
   const auto shift = (8 - bitCount % 8) % 8;
   const auto m = bitCount / 8;
-  uint8_t *data8 = (uint8_t*) &value;
+  uint8_t *data8 = reinterpret_cast<uint8_t*>(&value);
   for (auto i = m-1; i <= 0; i--) {
-    uint16_t *window16_ptr = (uint16_t*) &data8[i];
+    uint16_t *window16_ptr = reinterpret_cast<uint16_t*>(&data8[i]);
     uint16_t window16 = *window16_ptr;
     const uint16_t mask = shiftMemR(uint16_t(0xFFFFu), -(8u-shift));
     const uint16_t l = (shiftMemR(window16, shift) & mask);
@@ -159,13 +160,15 @@ inline T repair_endianness(T value, size_t bitCount) {
 
   return value;
 }
+*/
+
 template <typename T>
 inline T convert_endianness(T value, size_t bitCount) {
   //return value;
   repair_endianness(value, bitCount);
 
   const auto n = bitCount / 8 + 1;
-  uint8_t *data = (uint8_t*) &value;
+  uint8_t *data = reinterpret_cast<uint8_t*>(&value);
   for (size_t i = 0; i < n / 2; i++) {
     auto j = n - i - 1;
     // g_log.notice() << "[i] = 0x" << n2hexstr(data[i])<< ", [j] = 0x" << n2hexstr(data[j]) << "\n";
@@ -183,7 +186,7 @@ inline T convert_endianness(T value, size_t bitCount) {
 template <typename T>
 inline T convert_endianness(T value) {
   const auto n = sizeof(value);
-  uint8_t *data = (uint8_t*) &value;
+  uint8_t *data = reinterpret_cast<uint8_t*>(&value);
   for (size_t i = 0; i < n / 2; i++) {
     auto j = n - i - 1;
     // g_log.notice() << "[i] = 0x" << n2hexstr(data[i])<< ", [j] = 0x" << n2hexstr(data[j]) << "\n";
@@ -243,13 +246,134 @@ enum class endian {
     native = __BYTE_ORDER__
 };
 
-static constexpr uint32_t mixInt = 0x0000FFFFu;
-static constexpr std::array<uint8_t, 4> mix = { 0x00u, 0x00u, 0xFFu, 0xFFu };
-    // *(constexpr std::array<uint8_t, 4>*)&mixInt;
-constexpr endian getEndianess() {
-    return (((*(const uint32_t*)&mix) & 0x1u) == 1u) ? endian::big: endian::little;
+namespace  {
+static endian getMachineEndianess() {
+  constexpr const uint32_t mixInt = 0x0000FFFFu;
+  constexpr const std::array<uint8_t, 4> mixArray = { 0x00u, 0x00u, 0xFFu, 0xFFu };
+  const endian machineEndianess = (*reinterpret_cast<const uint32_t *const>(&mixArray) == mixInt) ? endian::big: endian::little;
+  return machineEndianess;
 }
+}
+static const endian MACHINE_ENDIANESS = getMachineEndianess();
 
+template<size_t bytecount, int bitsLeft = bytecount*8>
+struct DataChunk {
+  static_assert(bytecount*8 >= bitsLeft, "bitsLeft must be smaller or equal to bytecount * 8 ");
+  static_assert(bitsLeft >= 0, "bitcount must be greater than zero");
+//private:
+  using Buffer = uint64_t;
+  Buffer buffer;
+
+public:
+  template<std::size_t bitcount, typename T>
+  inline DataChunk<bytecount, bitsLeft-bitcount> readBits (T &result) const {
+    const size_t shiftAmount = sizeof(buffer)*8 - bitcount;
+    const Buffer bufferMask = ~((Buffer(0x1) << shiftAmount) - Buffer(1));
+    const Buffer maskedBuffer = buffer & bufferMask;
+    Buffer shiftedBuffer = maskedBuffer >> shiftAmount;
+    result = *reinterpret_cast<T *const>(&shiftedBuffer);
+    return {buffer << bitcount};
+  }
+
+  template<std::size_t bitcount>
+  inline DataChunk<bytecount, bitsLeft-bitcount> skipBits () const {
+    return {buffer << bitcount};
+  }
+};
+
+template<size_t bytecount>
+struct DataChunk<bytecount, 0> {
+  // empty struct to ensure no further bits are read from this DataChunk.
+//private:
+  using Buffer = uint64_t;
+  Buffer buffer;
+};
+
+class ByteStream {
+public:
+  explicit ByteStream (const std::string &filename, const endian endianess, std::function<std::ostream&(void)> out)
+    : stream(filename, std::ios_base::binary), endianess(endianess), out(out)
+  {
+    stream.exceptions(std::ifstream::eofbit);
+  }
+
+  const endian endianess;
+private:
+  std::ifstream stream;
+  std::function<std::ostream&(void)> out;
+
+  template<typename T>
+  inline char *getResultPointer(T *const result, const std::size_t &bytecount) const {
+    return reinterpret_cast<char*>(result) + sizeof(T)-bytecount;
+  }
+
+ public:
+  template<typename T>
+  inline ByteStream& readRaw (T &result, const std::size_t &bytecount) {
+    stream.read(getResultPointer(&result, bytecount), bytecount);
+    return *this;
+  }
+
+  template<std::size_t bytecount, typename T>
+  inline ByteStream& readRaw (T& result) {
+    static_assert(sizeof(T) >= bytecount, "byte count of result needs to be greater or equal to bytecount");
+    stream.read(getResultPointer(&result, bytecount), bytecount);
+    return *this;
+  }
+
+  template<typename T>
+  inline ByteStream& readRaw (T& result) {
+    return readRaw<sizeof(T)>(result);
+  }
+
+  template<std::size_t bytecount, typename T>
+  inline ByteStream& read (T& result) {
+    readRaw<bytecount>(result);
+    if (endianess != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
+      result = convert_endianness(result);
+    }
+    return *this;
+  }
+
+  template<typename T>
+  inline ByteStream& read (T& result) {
+    return read<sizeof(result)>(result);
+  }
+
+  template<typename T>
+  inline T read (T&& result) {
+    read<sizeof(result)>(result);
+    return result;
+  }
+
+  template<size_t bytecount>
+  const DataChunk<bytecount> extractDataChunk() {
+    DataChunk<bytecount> dc = {};
+    read<bytecount>(dc.buffer);
+    dc.buffer <<= (sizeof(dc.buffer) - bytecount)*8;
+    return dc;
+  }
+
+  inline uint8_t peek () {
+    return static_cast<uint8_t>(stream.peek());
+  }
+
+  bool eof() const { return stream.eof(); }
+
+  template<size_t bytecount>
+  inline ByteStream& skip () {
+    stream.ignore(bytecount);
+    return *this;
+  }
+
+  template<typename T>
+  ByteStream& operator>>(T &val) {
+    return read(val);
+  }
+
+};
+
+/*
 class BitStream {
 public:
   explicit BitStream (const std::string &filename, const endian endianess, std::function<std::ostream&(void)> out)
@@ -267,7 +391,7 @@ private:
   std::ifstream stream;
   //uint_least32_t buffer;
   std::vector<uint8_t> buffer;
-  static constexpr auto bufferSize = /*buffer.size()*/1024*1024 * 8;
+  static constexpr auto bufferSize = / *buffer.size()* /1024*1024 * 8;
 
   std::size_t posInBuffer = bufferSize;
 
@@ -315,7 +439,7 @@ private:
       to[toPos / 8] = leftOver;
     }
 
-    /*
+    / *
     while (bitCountLeft > 0) {
       const uint8_t fromPosMod8 = fromPos % 8u;
       const uint8_t toPosMod8 = toPos % 8u;
@@ -348,7 +472,7 @@ private:
       bitCountLeft -= chunkSize;
 
     }
-    */
+    * /
 
     if (bitCountLeft < 0) {
       throw std::runtime_error("bitCountLeft was < 0 (in copyBits)!!");
@@ -359,7 +483,7 @@ private:
   template<typename T>
   inline BitStream& readRaw (T &result, const std::size_t &bitcount) {
     // array view of result
-    std::array<uint8_t, sizeof(T)> *array = (std::array<uint8_t, sizeof(T)>*)&result;
+    std::array<uint8_t, sizeof(T)> *array = reinterpret_cast<std::array<uint8_t, sizeof(T)>*>(&result);
 
     std::size_t posInArray = sizeof(result) * 8 - bitcount;
     long int bitCountLeft = bitcount;
@@ -397,14 +521,14 @@ private:
       posInArray += chunkSize;
       bitCountLeft -= chunkSize;
 
-      /*
+      / *
       const auto chunkSize = std::min<std::size_t>(bufferSize - posInBuffer, bitCountLeft);
 
       copyBits(buffer, array, chunkSize, posInBuffer, posInArray);
       posInBuffer += chunkSize;
       posInArray += chunkSize;
       bitCountLeft -= chunkSize;
-      */
+      * /
     }
 
     if (bitCountLeft < 0) {
@@ -418,7 +542,7 @@ private:
   inline BitStream& readRaw (T& result) {
     static_assert(sizeof(T)*8 >= bitcount, "bit count of result needs to be greater or equal to bitcount");
     // array view of result
-    std::array<uint8_t, sizeof(T)> *array = (std::array<uint8_t, sizeof(T)>*)&result;
+    std::array<uint8_t, sizeof(T)> *array = reinterpret_cast<std::array<uint8_t, sizeof(T)>*>(&result);
 
     std::size_t posInArray = sizeof(result) * 8 - bitcount;
     long int bitCountLeft = bitcount;
@@ -463,7 +587,7 @@ private:
   template<std::size_t bitcount, typename T>
   inline BitStream& read (T& result) {
     readRaw<bitcount>(result);
-    if (endianess != getEndianess() /*&& endianess != endian::native*/) {
+    if (endianess != MACHINE_ENDIANESS / *&& endianess != endian::native* /) {
       result = convert_endianness(result);
     }
     return *this;
@@ -513,10 +637,12 @@ private:
 
 };
 
+
 template<>
 inline BitStream& BitStream::skip<0> () {
   return *this;
 }
+
 
 class byte_stream : std::ifstream {
 public:
@@ -580,6 +706,6 @@ public:
   }
 
 };
-
+*/
 
 #endif /* MANTID_DATAHANDLING_BIT_STREAM_H_ */
