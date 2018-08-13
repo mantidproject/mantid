@@ -150,9 +150,10 @@ void LoadPSIMuonBin::readSingleVariables(
   streamReader >> m_header.histogramBinWidth;
 
   if (m_header.histogramBinWidth == 0) {
-    m_header.histogramBinWidth = static_cast<float>(
-        (625.E-6) / 8. * pow(static_cast<float>(2.),
-                             static_cast<float>(m_header.tdcResolution)));
+    m_header.histogramBinWidth =
+        static_cast<float>((625.E-6) / 8. *
+                           pow(static_cast<float>(2.),
+                               static_cast<float>(m_header.tdcResolution)));
   }
 
   streamReader.moveStreamToPosition(712);
@@ -330,8 +331,8 @@ void LoadPSIMuonBin::generateUnknownAxis() {
 void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     DataObjects::Workspace2D_sptr &outputWorkspace) {
   // Sort some workspace particulars
-  outputWorkspace->setTitle(m_header.sample + " - Run:" +
-                            std::to_string(m_header.numberOfRuns));
+  outputWorkspace->setTitle(m_header.sample +
+                            " - Run:" + std::to_string(m_header.numberOfRuns));
 
   // Set axis variables
   outputWorkspace->setYUnit("Counts");

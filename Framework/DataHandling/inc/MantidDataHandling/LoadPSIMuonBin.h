@@ -7,7 +7,8 @@
 #include "MantidKernel/BinaryStreamReader.h"
 #include <cstdint>
 
-/** LoadPSIMuonBin : Loads a bin file from the PSI facility for muon spectroscopy
+/** LoadPSIMuonBin : Loads a bin file from the PSI facility for muon
+ spectroscopy
 
  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
