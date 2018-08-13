@@ -198,7 +198,7 @@ def pcolormesh(workspaces, fig=None):
     # create a subplot of the appropriate number of dimensions
     # extend in number of columns if the number of plottables is not a square number
     workspaces_len = len(workspaces)
-    fig, axes, nrows, ncols = _create_subplots(workspaces_len)
+    fig, axes, nrows, ncols = _create_subplots(workspaces_len, fig=fig)
 
     row_idx, col_idx = 0, 0
     for subplot_idx in range(nrows*ncols):

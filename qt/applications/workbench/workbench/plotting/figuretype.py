@@ -19,8 +19,9 @@ Provides facilities to check plot types
 """
 from __future__ import absolute_import
 
+# third party
 from mantidqt.py3compat import Enum
-
+from matplotlib.container import ErrorbarContainer
 
 
 class FigureType(Enum):
@@ -52,7 +53,10 @@ def axes_type(ax):
 
     axtype = FigureType.Other
     if nrows == 1 and ncols == 1:
-        if len(ax.lines) > 0:
+        # an errorbar plot also has len(lines) > 0
+        if len(ax.containers) > 0 and isinstance(ax.containers[0], ErrorbarContainer):
+            axtype = FigureType.Errorbar
+        elif len(ax.lines) > 0:
             axtype = FigureType.Line
         elif len(ax.images) > 0 or len(ax.collections) > 0:
             axtype = FigureType.Image
@@ -67,4 +71,7 @@ def figure_type(fig):
     :param fig: A matplotlib figure instance
     :return: An enumeration defining the plot type
     """
-    return axes_type(fig.gca())
+    if len(fig.get_axes()) == 0:
+        return FigureType.Empty
+    else:
+        return axes_type(fig.gca())
