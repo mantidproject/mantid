@@ -17,13 +17,8 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
     :param row_index: the selected row, if None then all rows are generated
     """
     number_of_rows = table_model.get_number_of_rows()
-    if row_index is not None:
-        # Check if the selected index is valid
-        if row_index >= number_of_rows:
-            return None
-        rows = [row_index]
-    else:
-        rows = range(number_of_rows)
+    rows = [x for x in row_index if x < number_of_rows]
+
     states = {}
 
     gui_state_director = GuiStateDirector(table_model, state_model, facility)
@@ -51,7 +46,7 @@ def __create_row_state(director, row, instrument, file_lookup=True):
 
 def __is_empty_row(row, table):
     for key, value in table._table_entries[row].__dict__.items():
-        if value and key not in ['index', 'options_column_model', 'sample_thickness']:
+        if value and key in ['sample_scatter']:
             return False
     return True
 

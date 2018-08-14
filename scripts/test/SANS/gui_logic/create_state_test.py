@@ -19,45 +19,48 @@ class GuiCommonTest(unittest.TestCase):
     def setUp(self):
         self.table_model = TableModel()
         self.state_gui_model = StateGuiModel({})
-        table_index_model_0 = TableIndexModel(0, 'LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
-        table_index_model_1 = TableIndexModel(1, 'LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
+        table_index_model_0 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
+        table_index_model_1 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(0, table_index_model_0)
         self.table_model.add_table_entry(1, table_index_model_1)
 
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     def test_create_states_returns_correct_number_of_states(self, create_row_state_mock):
-
-        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
+        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[0,1])
 
         self.assertEqual(len(states), 2)
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     def test_create_states_returns_correct_number_of_states_for_specified_row_index(self, create_row_state_mock):
 
-        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS, row_index=1)
+        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[1])
 
         self.assertEqual(len(states), 1)
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     def test_skips_empty_rows(self, create_row_state_mock):
-        table_index_model = TableIndexModel(1, '', '', '', '', '', '', '', '', '', '', '', '')
+        table_index_model = TableIndexModel('', '', '', '', '', '', '', '', '', '', '', '')
         self.table_model.add_table_entry(1, table_index_model)
 
-        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
+        states = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[0,1, 2])
 
-        self.assertEqual(len(states), 1)
+        self.assertEqual(len(states), 2)
 
     @mock.patch('sans.gui_logic.models.create_state.__create_row_state')
     @mock.patch('sans.gui_logic.models.create_state.create_gui_state_from_userfile')
     def test_create_state_from_user_file_if_specified(self, create_gui_state_mock, create_row_state_mock):
         create_gui_state_mock.returns = StateGuiModel({})
-        table_index_model = TableIndexModel(0, 'LOQ74044', '', '', '', '', '', '', '', '', '', '', '',
-                                              user_file='MaskLOQData.txt')
+        table_index_model = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '',
+                                            user_file='MaskLOQData.txt')
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
 
-        states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS)
+        states = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
+                               row_index=[0,1, 2])
 
         self.assertEqual(len(states), 1)
         create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)

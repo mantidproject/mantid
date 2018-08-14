@@ -77,6 +77,7 @@ public:
 
   void removeRowAt(RowLocation const &location);
   void removeRows(std::vector<RowLocation> rowsToRemove);
+  void removeAllRows();
   bool isOnlyChildOfRoot(RowLocation const &index) const;
 
   template <typename InputIterator>

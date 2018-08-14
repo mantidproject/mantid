@@ -75,8 +75,12 @@ public:
   void enumerateCellsInRow(QModelIndexForMainModel const &startIndex,
                            int columns, Action const &action) const;
 
+  void removeAllRows();
+
 private:
   QList<QStandardItem *> rowItemsFromCells(std::vector<Cell> const &cells);
+  QStringList getHeaderData() const;
+  void setHeaderData(QStringList const &headerData);
 
   QStandardItemModel &m_model;
   Cell m_emptyCellStyle;

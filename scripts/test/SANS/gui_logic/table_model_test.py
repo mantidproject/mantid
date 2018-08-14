@@ -14,18 +14,18 @@ class TableModelTest(unittest.TestCase):
 
     def test_that_raises_if_table_index_does_not_exist(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
-                                               "", "", "", "", "", "",)
+        row_entry = [''] * 16
+        table_index_model = TableIndexModel(*row_entry)
         table_model.add_table_entry(0, table_index_model)
-        self.assertRaises(ValueError, table_model.get_table_entry, 1)
+        self.assertRaises(IndexError, table_model.get_table_entry, 1)
 
     def test_that_can_get_table_index_model_for_valid_index(self):
         table_model = TableModel()
-        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
-                                            "", "", "", "", "", "")
+        row_entry = [''] * 16
+        table_index_model = TableIndexModel(*row_entry)
         table_model.add_table_entry(0, table_index_model)
         returned_model = table_model.get_table_entry(0)
-        self.assertTrue(returned_model.index == 0)
+        self.assertTrue(returned_model.sample_scatter == '')
 
     def test_that_can_set_the_options_column_model(self):
         table_index_model = TableIndexModel(0, "", "", "", "", "", "",
@@ -50,18 +50,18 @@ class TableModelTest(unittest.TestCase):
     def test_that_can_retrieve_user_file_from_table_index_model(self):
         table_model = TableModel()
         table_index_model = TableIndexModel(2, "", "", "", "", "", "",
-                                            "", "", "", "", "", "", "", "User_file_name")
+                                            "", "", "", "", "", "", "User_file_name")
         table_model.add_table_entry(2, table_index_model)
-        user_file = table_model.get_row_user_file(2)
+        user_file = table_model.get_row_user_file(0)
         self.assertEqual(user_file,"User_file_name")
 
     def test_that_can_retrieve_sample_thickness_from_table_index_model(self):
         sample_thickness = '8.0'
         table_model = TableModel()
-        table_index_model = TableIndexModel(2, "", "", "", "", "", "",
+        table_index_model = TableIndexModel("", "", "", "", "", "",
                                             "", "", "", "", "", "", sample_thickness=sample_thickness)
         table_model.add_table_entry(2, table_index_model)
-        row_entry = table_model.get_table_entry(2)
+        row_entry = table_model.get_table_entry(0)
         self.assertEqual(row_entry.sample_thickness, sample_thickness)
 
     def test_that_parse_string_returns_correctly(self):
@@ -94,9 +94,6 @@ class TableModelTest(unittest.TestCase):
         except:  # noqa
             has_raised = True
         self.assertFalse(has_raised)
-
-        # Test raises for non-existent file path
-        self.assertRaises(ValueError, func, "/home/testSDFHSNDFG")
 
         # Test that can be set to valid value
         setattr(table_model, prop, __file__)
