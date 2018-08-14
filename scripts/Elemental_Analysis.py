@@ -7,6 +7,7 @@ import sys
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
+from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 from Muon.GUI.Common.load_widget.load_view import LoadView
