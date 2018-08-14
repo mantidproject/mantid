@@ -1,4 +1,7 @@
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/SpectrumInfoItem.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
+#include "MantidAPI/SpectrumInfoPythonIterator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/python/class.hpp>
@@ -7,12 +10,22 @@
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::API::SpectrumInfo;
+using Mantid::API::SpectrumInfoItem;
+using Mantid::API::SpectrumInfoIterator;
+using Mantid::API::SpectrumInfoPythonIterator;
 using Mantid::SpectrumDefinition;
 using namespace boost::python;
+
+// Helper method to make the python iterator
+SpectrumInfoPythonIterator make_pyiterator(const SpectrumInfo &spectrumInfo) {
+  return SpectrumInfoPythonIterator(spectrumInfo);
+}
 
 // Export SpectrumInfo
 void export_SpectrumInfo() {
   class_<SpectrumInfo, boost::noncopyable>("SpectrumInfo", no_init)
+      .def("__iter__", make_pyiterator)
+
       .def("__len__", &SpectrumInfo::size, arg("self"),
            "Returns the number of spectra.")
 
