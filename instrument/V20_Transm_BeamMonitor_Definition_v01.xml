@@ -18,14 +18,14 @@ last-modified="2018-02-09 09:00:00">
     </reference-frame>
     <default-view axis-view="z"/>
   </defaults>
-
+  
   <component type="source-chopper">
-    <location x="0.0" y="0.0" z="-28.9"/>
+    <location x="0.0" y="0.0" z="-25.3"/>
   </component>
   <type name="source-chopper"/>
 
   <component type="wfm-chopper">
-    <location x="0.0" y="0.0" z="-22.05"/>
+    <location x="0.0" y="0.0" z="-18.45"/>
   </component>
   <type name="wfm-chopper" is="Source" />
 
@@ -33,31 +33,22 @@ last-modified="2018-02-09 09:00:00">
     <location x="0.0" y="0.0" z="0"/>
   </component>
   <type name="some-sample-holder" is="SamplePos" />
-
-  <component type="150 degree bank" idlist="150 degree bank">
-    <location x="0.0" y="0.0" z="0" rot="150.0" axis-x="0.0" axis-y="1.0" axis-z="0.0"/>
+  
+  <component name="transmission-beam-monitor" type="monitor" idlist="monitor-id-list">
+    <location x="0.0" y="0.0" z="0.030" />
   </component>  
   
-  <type name="150 degree bank"> 
-    <component type="tall He3 element">  
-      <location x="0.070" z="0.775"/>
-      <location x="0.035" z="0.775"/>
-      <location x="0.000" z="0.775"/>
-      <location x="-0.035" z="0.775"/>
-    </component>
+    <type name="monitor" is="monitor"> 
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.02" y="-0.0525" z="0.0"  />
+      <left-front-top-point  x="0.02" y="-0.0525" z="0.040"  />
+      <left-back-bottom-point  x="-0.02" y="-0.0525" z="0.0"  />
+      <right-front-bottom-point  x="0.02" y="0.0525" z="0.0"  />
+    </cuboid>
   </type>
-  
-  <type name="tall He3 element" is="detector">     
-    <cylinder id="shape">
-      <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
-      <axis x="0.0" y="1.0" z="0" /> 
-      <radius val="0.0127" />
-      <height val="0.3200" />
-    </cylinder> 
-  </type>  
 
-  <idlist idname="150 degree bank">
-    <id start="5" end="8" />
+  <idlist idname="monitor-id-list">
+    <id val="3" />
   </idlist>
 
 </instrument>
