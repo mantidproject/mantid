@@ -1,50 +1,21 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
-#include <boost/python/handle.hpp>
-#include <boost/python/list.hpp>
+#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
+using namespace Mantid::PythonInterface::Converters;
+using namespace Mantid::PythonInterface::Policies;
 using namespace boost::python;
-namespace Converters = Mantid::PythonInterface::Converters;
-
-// Helper function to call a converter for std::vector<size_t> to a Python list
-boost::python::list createList(std::vector<size_t> items) {
-  // Create a list to populate
-  boost::python::list dataAsList;
-
-  // Store the data
-  dataAsList.append(object(handle<>(
-      Converters::VectorToNDArray<size_t, Converters::WrapReadOnly>()(items))));
-
-  return dataAsList;
-}
-
-// Helper function to call the detectorsInSubtree method
-boost::python::list createListForDetectorsInSubtree(const ComponentInfo &self,
-                                                    const size_t index) {
-  return createList(self.detectorsInSubtree(index));
-}
-
-// Helper function to call the componentsInSubtree method
-boost::python::list createListForComponentsInSubtree(const ComponentInfo &self,
-                                                     const size_t index) {
-  return createList(self.componentsInSubtree(index));
-}
-
-// Helper function to call the children method
-boost::python::list createListForComponentChildren(const ComponentInfo &self,
-                                                   const size_t index) {
-  return createList(self.children(index));
-}
 
 // Function pointers to help resolve ambiguity
 Mantid::Kernel::V3D (ComponentInfo::*position)(const size_t) const =
@@ -61,7 +32,6 @@ void (ComponentInfo::*setRotation)(const size_t, const Mantid::Kernel::Quat &) =
 
 // Export ComponentInfo
 void export_ComponentInfo() {
-
   class_<ComponentInfo, boost::noncopyable>("ComponentInfo", no_init)
 
       .def("__len__", &ComponentInfo::size, arg("self"),
@@ -74,13 +44,13 @@ void export_ComponentInfo() {
            (arg("self"), arg("index")),
            "Checks if the component is a detector.")
 
-      .def("detectorsInSubtree", createListForDetectorsInSubtree,
-           (arg("self"), arg("index")),
+      .def("detectorsInSubtree", &ComponentInfo::detectorsInSubtree,
+           return_value_policy<VectorToNumpy>(), (arg("self"), arg("index")),
            "Returns a list of detectors in the subtree for the component "
            "identified by 'index'.")
 
-      .def("componentsInSubtree", createListForComponentsInSubtree,
-           (arg("self"), arg("index")),
+      .def("componentsInSubtree", &ComponentInfo::componentsInSubtree,
+           return_value_policy<VectorToNumpy>(), (arg("self"), arg("index")),
            "Returns a list of components in the subtree for the component "
            "identified by 'index'.")
 
@@ -136,12 +106,31 @@ void export_ComponentInfo() {
            "Returns the parent component of the component identified by "
            "'index'.")
 
-      .def("children", createListForComponentChildren,
-           (arg("self"), arg("index")),
+      .def("children", &ComponentInfo::children, (arg("self"), arg("index")),
+           return_value_policy<VectorRefToNumpy<WrapReadOnly>>(),
            "Returns a list of child components for the component identified by "
            "'index'.")
 
       .def("name", &ComponentInfo::name, (arg("self"), arg("index")),
            return_value_policy<copy_const_reference>(),
-           "Returns the name of the component identified by 'index'.");
+           "Returns the name of the component identified by 'index'.")
+
+      .def("l1", &ComponentInfo::l1, arg("self"), "Returns the l1 value.")
+
+      .def("scaleFactor", &ComponentInfo::scaleFactor,
+           (arg("self"), arg("index")),
+           "Returns the scale factor for the component identified by 'index'.")
+
+      .def("setScaleFactor", &ComponentInfo::setScaleFactor,
+           (arg("self"), arg("index"), arg("scaleFactor")),
+           "Set the scale factor of the component identifed by 'index'.")
+
+      .def("hasValidShape", &ComponentInfo::hasValidShape,
+           (arg("self"), arg("index")),
+           "Returns True if the component identified by 'index' has a valid "
+           "shape.")
+
+      .def("shape", &ComponentInfo::shape, (arg("self"), arg("index")),
+           return_value_policy<reference_existing_object>(),
+           "Returns the shape of the component identified by 'index'.");
 }

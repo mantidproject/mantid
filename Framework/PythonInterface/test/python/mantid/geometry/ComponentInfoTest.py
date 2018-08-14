@@ -2,9 +2,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import argparse
+import numpy as np
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
+from mantid.geometry import CSGObject
 from mantid.simpleapi import *
 
 class ComponentInfoTest(unittest.TestCase):
@@ -47,12 +49,12 @@ class ComponentInfoTest(unittest.TestCase):
     def test_detectorsInSubtree(self):
         """ Test that a list of detectors is returned """
         info = self._ws.componentInfo()
-        self.assertEquals(type(info.detectorsInSubtree(0)), list)
+        self.assertEquals(type(info.detectorsInSubtree(0)), np.ndarray)
 
     def test_componentsInSubtree(self):
         """ Test that a list of components is returned """
         info = self._ws.componentInfo()
-        self.assertEquals(type(info.componentsInSubtree(0)), list)
+        self.assertEquals(type(info.componentsInSubtree(0)), np.ndarray)
 
     def test_position(self):
         """ Test that the component's position is returned. """
@@ -135,12 +137,39 @@ class ComponentInfoTest(unittest.TestCase):
         """ Check that for a component that has children, the children
             components can be retrieved. """
         info = self._ws.componentInfo()
-        self.assertEquals(type(info.children(0)), list)
+        self.assertEquals(type(info.children(0)), np.ndarray)
 
     def test_name(self):
         """ Get the name of a component as a string """
         info = self._ws.componentInfo()
         self.assertEquals(type(info.name(0)), str)
+
+    def test_l1(self):
+        """ Get the l1 value """
+        info = self._ws.componentInfo()
+        self.assertEquals(type(info.l1()), float)
+
+    def test_scaleFactor(self):
+        """ Get the scale factor """
+        info = self._ws.componentInfo()
+        self.assertEquals(type(info.scaleFactor(0)), V3D)
+
+    def test_setScaleFactor(self):
+        """ Set the scale factor """
+        info = self._ws.componentInfo()
+        sf = V3D(0,0,0)
+        info.setScaleFactor(0, sf)
+        self.assertEquals(info.scaleFactor(0), sf)
+
+    def test_hasValidShape(self):
+        """ Check for a valid shape """
+        info = self._ws.componentInfo()
+        self.assertEquals(info.hasValidShape(0), True)
+
+    def test_shape(self):
+        """ Check a shape is returned"""
+        info = self._ws.componentInfo()
+        self.assertEquals(type(info.shape(0)), CSGObject)
 
     def test_createWorkspaceAndComponentInfo(self):
         """ Try to create a workspace and see if ComponentInfo object is accessable """
@@ -168,13 +197,13 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         with self.assertRaises(OverflowError):
             info.detectorsInSubtree(-1)
-        self.assertEquals(type(info.detectorsInSubtree(5)), list)
+        self.assertEquals(type(info.detectorsInSubtree(5)), np.ndarray)
 
     def test_componentsInSubtree_extreme(self):
         info = self._ws.componentInfo()
         with self.assertRaises(OverflowError):
             info.componentsInSubtree(-1)
-        self.assertEquals(type(info.componentsInSubtree(5)), list)
+        self.assertEquals(type(info.componentsInSubtree(5)), np.ndarray)
 
     def test_position_extreme(self):
         info = self._ws.componentInfo()
@@ -234,8 +263,8 @@ class ComponentInfoTest(unittest.TestCase):
         info = self._ws.componentInfo()
         with self.assertRaises(OverflowError):
             info.children(-1)
-        self.assertEquals(type(info.children(0)), list)
-        self.assertEquals(type(info.children(5)), list)
+        self.assertEquals(type(info.children(0)), np.ndarray)
+        self.assertEquals(type(info.children(5)), np.ndarray)
 
     def test_name_extreme(self):
         info = self._ws.componentInfo()
@@ -243,6 +272,33 @@ class ComponentInfoTest(unittest.TestCase):
             info.name(-1)
         self.assertEquals(type(info.name(0)), str)
         self.assertEquals(type(info.name(5)), str)
+
+    def test_scaleFactor_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.scaleFactor(-1)
+        self.assertEquals(type(info.scaleFactor(0)), V3D)
+        self.assertEquals(type(info.scaleFactor(5)), V3D)
+
+    def test_setScaleFactor_extreme(self):
+        info = self._ws.componentInfo()
+        sf = V3D(0,0,0)
+        with self.assertRaises(OverflowError):
+            info.setScaleFactor(-1, sf)
+
+    def test_hasValidShape_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.hasValidShape(-1)
+        self.assertEquals(type(info.hasValidShape(0)), bool)
+        self.assertEquals(type(info.hasValidShape(5)), bool)
+
+    def test_shape_extreme(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(OverflowError):
+            info.shape(-1)
+        self.assertEquals(type(info.shape(0)), CSGObject)
+        self.assertEquals(type(info.shape(5)), CSGObject)
 
 
     """
@@ -377,6 +433,40 @@ class ComponentInfoTest(unittest.TestCase):
             info.name("Name")
         with self.assertRaises(TypeError):
             info.name(0.12)
+
+    def test_l1_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.l1(0)
+
+    def test_scaleFactor_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.scaleFactor("Scale factor")
+        with self.assertRaises(TypeError):
+            info.scaleFactor(0.12)
+
+    def test_setScaleFactor_exceptional(self):
+        info = self._ws.componentInfo()
+        sf = V3D(0,0,0)
+        with self.assertRaises(TypeError):
+            info.setScaleFactor("1", sf)
+        with self.assertRaises(TypeError):
+            info.setScaleFactor(1.0, sf)
+
+    def test_hasValidShape_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.hasValidShape("ValidShape")
+        with self.assertRaises(TypeError):
+            info.hasValidShape(1010.00)
+
+    def test_shape_exceptional(self):
+        info = self._ws.componentInfo()
+        with self.assertRaises(TypeError):
+            info.shape("Shape")
+        with self.assertRaises(TypeError):
+            info.shape(11.32)
 
 if __name__ == '__main__':
     unittest.main()
