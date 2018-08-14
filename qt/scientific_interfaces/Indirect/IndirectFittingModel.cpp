@@ -296,6 +296,13 @@ ITableWorkspace_sptr getOutputParameters(IAlgorithm_sptr algorithm) {
 WorkspaceGroup_sptr getOutputGroup(IAlgorithm_sptr algorithm) {
   return getWorkspaceOutput<WorkspaceGroup>(algorithm, "OutputWorkspaceGroup");
 }
+
+void addFitProperties(Mantid::API::IAlgorithm &algorithm,
+                      Mantid::API::IFunction_sptr function,
+                      std::string const &xAxisUnit) {
+  algorithm.setProperty("Function", function);
+  algorithm.setProperty("ResultXAxisUnit", xAxisUnit);
+}
 } // namespace
 
 namespace MantidQt {
@@ -542,12 +549,6 @@ void IndirectFittingModel::setDefaultParameterValue(const std::string &name,
     m_defaultParameters[dataIndex][name] = ParameterValue(value);
 }
 
-void IndirectFittingModel::addFitProperties(
-    Mantid::API::IAlgorithm &algorithm) const {
-  algorithm.setProperty("Function", getFittingFunction());
-  algorithm.setProperty("ResultXAxisUnit", getResultXAxisUnit());
-}
-
 void IndirectFittingModel::addOutput(IAlgorithm_sptr fitAlgorithm) {
   addOutput(fitAlgorithm, m_fittingData.begin(), m_fittingData.end());
 }
@@ -746,7 +747,7 @@ IAlgorithm_sptr IndirectFittingModel::getSingleFit(std::size_t dataIndex,
   const auto exclude = fitData->excludeRegionsVector(spectrum);
 
   auto fitAlgorithm = simultaneousFitAlgorithm();
-  addFitProperties(*fitAlgorithm);
+  addFitProperties(*fitAlgorithm, getFittingFunction(), getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, workspace, spectrum, range,
                                 exclude, "");
   fitAlgorithm->setProperty("OutputWorkspace",
@@ -774,7 +775,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
     IFunction_sptr function, const std::string &input,
     IndirectFitData *initialFitData) const {
   auto fitAlgorithm = sequentialFitAlgorithm();
-  addFitProperties(*fitAlgorithm);
+  addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("PassWSIndexToFunction", true);
@@ -793,7 +794,7 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
 IAlgorithm_sptr
 IndirectFittingModel::createSimultaneousFit(IFunction_sptr function) const {
   auto fitAlgorithm = simultaneousFitAlgorithm();
-  addFitProperties(*fitAlgorithm);
+  addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData);
   fitAlgorithm->setProperty("OutputWorkspace", simultaneousFitOutputName());
   return fitAlgorithm;
@@ -802,7 +803,7 @@ IndirectFittingModel::createSimultaneousFit(IFunction_sptr function) const {
 IAlgorithm_sptr IndirectFittingModel::createSimultaneousFitWithEqualRange(
     IFunction_sptr function) const {
   auto fitAlgorithm = simultaneousFitAlgorithm();
-  addFitProperties(*fitAlgorithm);
+  addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
 
   auto exclude = vectorFromString<double>(getExcludeRegion(0, 0));
   addInputDataToSimultaneousFit(fitAlgorithm, m_fittingData,

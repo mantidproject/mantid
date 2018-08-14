@@ -149,8 +149,7 @@ protected:
 
 private:
   Mantid::API::IAlgorithm_sptr
-  createSequentialFit(Mantid::API::IFunction_sptr function,
-                      const std::string &input,
+  createSequentialFit(Mantid::API::IFunction_sptr function, const std::string &input,
                       IndirectFitData *initialFitData) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
@@ -164,8 +163,6 @@ private:
   virtual std::string getResultXAxisUnit() const;
 
   bool isPreviousModelSelected() const;
-
-  void addFitProperties(Mantid::API::IAlgorithm &algorithm) const;
 
   virtual IndirectFitOutput
   createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
