@@ -3,6 +3,9 @@
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
+#include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreter.h"
+#include <Poco/Thread.h>
+#include <iostream>
 
 using Mantid::API::FileFinder;
 using Mantid::API::FileFinderImpl;
@@ -20,6 +23,20 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 } // namespace
 
+/**
+ * Runs FileFinder.findRuns after releasing the python GIL.
+ * @param self :: A reference to the calling object
+ * @param hinstr :: A string containing the run number and possibly instrument to search for
+ */
+std::vector<std::string> runFinderProxy(FileFinderImpl &self, std::string hinstr) {
+  //   Before calling the function we need to release the GIL, 
+  //   drop the Python threadstate and reset anything installed
+  //   via PyEval_SetTrace while we execute the C++ code - ReleaseGlobalInterpreter
+  //   does this for us
+  Mantid::PythonInterface::Environment::ReleaseGlobalInterpreter releaseGlobalInterpreter; 
+  return self.findRuns(hinstr);
+}
+
 void export_FileFinder() {
   class_<FileFinderImpl, boost::noncopyable>("FileFinderImpl", no_init)
       .def("getFullPath", &FileFinderImpl::getFullPath,
@@ -28,7 +45,7 @@ void export_FileFinder() {
                "Return a full path to the given file if it can be found within "
                "datasearch.directories paths. Directories can be ignored with "
                "ignoreDirs=True. An empty string is returned otherwise."))
-      .def("findRuns", &FileFinderImpl::findRuns, (arg("self"), arg("hintstr")),
+      .def("findRuns", &runFinderProxy, (arg("self"), arg("hintstr")),
            "Find a list of files file given a hint. "
            "The hint can be a comma separated list of run numbers and can also "
            "include ranges of runs, e.g. 123-135 or equivalently 123-35"
