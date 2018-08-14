@@ -1,4 +1,4 @@
-#include "MantidNexusGeometry/Tube.h"
+#include "MantidNexusGeometry/TubeBuilder.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
@@ -10,14 +10,14 @@ namespace NexusGeometry {
 
 namespace detail {
 
-Tube::Tube(const Mantid::Geometry::IObject &firstDetectorShape,
-           Eigen::Vector3d firstDetectorPosition, int firstDetectorId)
-    : m_radius(firstDetectorShape.getGeometryHandler()->shapeInfo().radius()),
-      m_baseHeight(
-          firstDetectorShape.getGeometryHandler()->shapeInfo().height()) {
+TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
+                         Eigen::Vector3d firstDetectorPosition,
+                         int firstDetectorId)
+    : m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()),
+      m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()) {
   // Get axis along which cylinder lies
   m_axis = Kernel::toVector3d(
-      firstDetectorShape.getGeometryHandler()->shapeInfo().points()[1]);
+      pixelShape.getGeometryHandler()->shapeInfo().points()[1]);
   // Set position and id of first detector in tube
   m_positions.push_back(firstDetectorPosition);
   m_detIDs.push_back(firstDetectorId);
@@ -26,27 +26,28 @@ Tube::Tube(const Mantid::Geometry::IObject &firstDetectorShape,
   m_p1 = m_axis + firstDetectorPosition;
   m_p2 = firstDetectorPosition;
 
-  m_height = m_baseHeight;
+  // initialise height
+  m_tubeHeight = m_pixelHeight;
 
   auto norm = m_axis.norm();
-  auto factor = (m_baseHeight / 2.0) / norm;
+  auto factor = (m_pixelHeight / 2.0) / norm;
   m_halfHeightVec = m_axis * factor;
   m_baseVec = firstDetectorPosition - m_halfHeightVec;
 }
 
-Tube::~Tube() {}
+TubeBuilder::~TubeBuilder() {}
 
-const Eigen::Vector3d &Tube::position() const { return m_baseVec; }
+const Eigen::Vector3d &TubeBuilder::tubePosition() const { return m_baseVec; }
 
-const size_t Tube::size() const { return m_positions.size(); }
+const size_t TubeBuilder::size() const { return m_positions.size(); }
 
-const std::vector<Eigen::Vector3d> &Tube::detPositions() const {
+const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const {
   return m_positions;
 }
 
-const std::vector<int> &Tube::detIDs() const { return m_detIDs; }
+const std::vector<int> &TubeBuilder::detIDs() const { return m_detIDs; }
 
-boost::shared_ptr<const Mantid::Geometry::IObject> Tube::shape() const {
+boost::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
   Eigen::Matrix<double, 3, 3> points;
   // calcualte height vector;
   // Centre shape about (0, 0, 0)
@@ -62,33 +63,36 @@ boost::shared_ptr<const Mantid::Geometry::IObject> Tube::shape() const {
   // Find point on outer circle
   auto normVec = p1.cross(p2);
   auto norm = normVec.norm();
-  auto factor = m_radius / norm;
+  auto factor = m_pixelRadius / norm;
   points.col(1) = (normVec * factor) + (points.col(0));
 
   return NexusShapeFactory::createCylinder(points);
 }
 
-const double Tube::height() const { return m_height; }
+const double TubeBuilder::tubeHeight() const { return m_tubeHeight; }
 
-const double Tube::radius() const { return m_radius; }
+const double TubeBuilder::tubeRadius() const { return m_pixelRadius; }
 
-bool Tube::addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID) {
-  if (checkCoLinear(pos)) {
+bool TubeBuilder::addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID) {
+  auto isCoLinear = checkCoLinear(pos);
+
+  if (isCoLinear) {
+    // Add Detector
     m_positions.push_back(pos);
     m_detIDs.push_back(detID);
 
-    // calculate half height vector for detector
+    // Recalculate height as distance between base of tube and tip of new
+    // detector
     auto dist = (m_baseVec) - (pos + m_halfHeightVec);
 
-    if (dist.norm() > m_height)
-      m_height = dist.norm();
-    return true;
+    if (dist.norm() > m_tubeHeight)
+      m_tubeHeight = dist.norm();
   }
 
-  return false;
+  return isCoLinear;
 }
 
-bool Tube::checkCoLinear(const Eigen::Vector3d &pos) const {
+bool TubeBuilder::checkCoLinear(const Eigen::Vector3d &pos) const {
   // Check if pos is on the same line as p1 and p2
   auto numVec = ((m_p2 - m_p1).cross(m_p1 - pos));
   auto denomVec = (m_p2 - m_p1);

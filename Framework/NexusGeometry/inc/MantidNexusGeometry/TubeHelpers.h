@@ -1,6 +1,6 @@
 #ifndef MANTIDNEXUSGEOMETRY_TUBEHELPERS_H
 #define MANTIDNEXUSGEOMETRY_TUBEHELPERS_H
-#include "MantidNexusGeometry/Tube.h"
+#include "MantidNexusGeometry/TubeBuilder.h"
 #include <Eigen/Core>
 #include <vector>
 // Eigen typedefs
@@ -15,9 +15,9 @@ namespace detail {
 class Tube;
 }
 namespace TubeHelpers {
-MANTID_NEXUSGEOMETRY_DLL std::vector<detail::Tube>
-findTubes(const Mantid::Geometry::IObject &shape, const Pixels &positions,
-          const std::vector<int> &detIDs);
+MANTID_NEXUSGEOMETRY_DLL std::vector<detail::TubeBuilder>
+findAndSortTubes(const Mantid::Geometry::IObject &shape,
+                 const Pixels &positions, const std::vector<int> &detIDs);
 } // namespace TubeHelpers
 } // namespace NexusGeometry
 } // namespace Mantid

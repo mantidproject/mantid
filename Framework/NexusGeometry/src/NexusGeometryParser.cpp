@@ -634,15 +634,11 @@ extractInstrument(const H5File &file, const Group &root) {
     // Extract shape
     auto detShape = parseNexusShape(detectorGroup, searchTubes);
 
-    std::vector<detail::Tube> tubes;
+    std::vector<detail::TubeBuilder> tubes;
     if (searchTubes) {
-      tubes = TubeHelpers::findTubes(*detShape, pixelOffsets, detectorIds);
-      auto baseName = bankName + "_tube_";
-      for (size_t i = 0; i < tubes.size(); ++i) {
-        auto &tube = tubes[i];
-        builder.addObjComponentAssembly(baseName + std::to_string(i), tube,
-                                        detShape);
-      }
+      tubes =
+          TubeHelpers::findAndSortTubes(*detShape, pixelOffsets, detectorIds);
+      builder.addTubes(bankName, tubes, detShape);
     } else {
       for (size_t i = 0; i < detectorIds.size(); ++i) {
         auto index = static_cast<int>(i);

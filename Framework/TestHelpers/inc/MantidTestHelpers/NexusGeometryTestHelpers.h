@@ -14,8 +14,8 @@ class IObject;
 
 namespace NexusGeometryTestHelpers {
 boost::shared_ptr<const Mantid::Geometry::IObject> createShape();
-Pixels generateValidPixels();
-Pixels generateInvalidPixels();
+Pixels generateCoLinearPixels();
+Pixels generateNonCoLinearPixels();
 std::vector<int> getFakeDetIDs();
 } // namespace NexusGeometryTestHelpers
 

@@ -8,13 +8,16 @@ using namespace Mantid::NexusGeometry;
 namespace NexusGeometryTestHelpers {
 boost::shared_ptr<const Mantid::Geometry::IObject> createShape() {
   Eigen::Matrix<double, 3, 3> pointsDef;
+  // Vector to base positioned at center of cylinder
   pointsDef.col(0) = Eigen::Vector3d(-0.00101, 0.0, 0.0);
+  // vector to base which is radial
   pointsDef.col(1) = Eigen::Vector3d(-0.00101, 0.00405, 0.0);
+  // vector to top positioned at center of cylinder
   pointsDef.col(2) = Eigen::Vector3d(0.00101, 0.0, 0.0);
   return NexusShapeFactory::createCylinder(pointsDef);
 }
 
-Pixels generateValidPixels() {
+Pixels generateCoLinearPixels() {
   // Assuming tubes with axis vectors (1, 0, 0) create two tubes lying along x
   // axis.
   Eigen::Matrix<double, 3, 4> pix;
@@ -32,8 +35,8 @@ Pixels generateValidPixels() {
   return pix;
 }
 
-Pixels generateInvalidPixels() {
-  // Add two 4 cylinders which are randomly distrubuted.
+Pixels generateNonCoLinearPixels() {
+  // Add two 4 cylinders which are not CoLinear
   Eigen::Matrix<double, 3, 4> pix;
   pix.col(0) = Eigen::Vector3d(0, 0.1, 0);
   pix.col(1) = Eigen::Vector3d(0.3, 0.6, 0.3);

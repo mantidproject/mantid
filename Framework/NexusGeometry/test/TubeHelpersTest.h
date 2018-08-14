@@ -17,36 +17,43 @@ using namespace NexusGeometryTestHelpers;
 
 class TubeHelpersTest : public CxxTest::TestSuite {
 public:
-  void test_findTubesInvalid() {
-    auto pixels = generateValidPixels();
+  void test_CoLinearDetectorsProduceTubes() {
+    auto pixels = generateCoLinearPixels();
     auto shape = createShape();
     auto detIds = getFakeDetIDs();
 
-    auto tubes = TubeHelpers::findTubes(*shape, pixels, detIds);
+    // Inputs represent two parallel tubes comprising two cylindrical detectors
+    // each.
+    auto tubes = TubeHelpers::findAndSortTubes(*shape, pixels, detIds);
 
     TS_ASSERT_EQUALS(tubes.size(), 2);
     TS_ASSERT(tubes[0].size() == tubes[1].size());
     TS_ASSERT_EQUALS(tubes[0].size(), 2);
   }
 
-  void test_findTubesValid() {
-    auto pixels = generateInvalidPixels();
+  void test_NonColinearDetectorsDoNotProduceTubes() {
+    auto pixels = generateNonCoLinearPixels();
     auto shape = createShape();
     auto detIds = getFakeDetIDs();
-    auto tubes = TubeHelpers::findTubes(*shape, pixels, detIds);
+
+    // Inputs represent 4 discrete cylinders which are not coLinear.
+    auto tubes = TubeHelpers::findAndSortTubes(*shape, pixels, detIds);
 
     TS_ASSERT_EQUALS(tubes.size(), 0)
   }
 
-  void test_findTubesMixed() {
-    auto pixels = generateValidPixels();
+  void test_MixtureOfCoLinearAndNonCoLinearTubes() {
+    auto pixels = generateCoLinearPixels();
     auto shape = createShape();
     auto detIds = getFakeDetIDs();
 
-    // replace with invalid coord
+    // replace with coord which is not CoLinear and thus will not be part of any
+    // tube
     pixels.col(3) = Eigen::Vector3d(-0.7, -0.7, 0);
 
-    auto tubes = TubeHelpers::findTubes(*shape, pixels, detIds);
+    // Inputs represent one tube comprising of two cylinders and two discrete
+    // non-colinear detectors.
+    auto tubes = TubeHelpers::findAndSortTubes(*shape, pixels, detIds);
     TS_ASSERT_EQUALS(tubes.size(), 1);
     TS_ASSERT_EQUALS(tubes[0].size(), 2);
   }

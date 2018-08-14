@@ -7,7 +7,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
-#include "MantidNexusGeometry/Tube.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
@@ -68,17 +67,29 @@ InstrumentBuilder::addComponent(const std::string &compName,
   return component;
 }
 
-/** Add a tube to the last bank
+/** Add a set of tubes to the last registered bank
+@param bankName Bank name
+@param tubes Tubes to be added to bank
+@param pixelShape Shape of each detector within the tube
+*/
+void InstrumentBuilder::addTubes(
+    const std::string &bankName, const std::vector<detail::TubeBuilder> &tubes,
+    boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape) {
+  for (size_t i = 0; i < tubes.size(); i++)
+    doAddTube(bankName + "_tube_" + std::to_string(i), tubes[i], pixelShape);
+}
+
+/** Add a tube to the last registered bank
 @param compName Tube name
 @param tube Tube to be added to bank
-@param detShape Shape of each detector within the tube
+@param pixelShape Shape of each detector within the tube
 */
-void InstrumentBuilder::addObjComponentAssembly(
-    const std::string &compName, const detail::Tube &tube,
-    boost::shared_ptr<const Mantid::Geometry::IObject> detShape) {
+void InstrumentBuilder::doAddTube(
+    const std::string &compName, const detail::TubeBuilder &tube,
+    boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape) {
   verifyMutable();
   auto *objComp(new Geometry::ObjCompAssembly(compName));
-  const auto &pos = tube.position();
+  const auto &pos = tube.tubePosition();
   objComp->setPos(pos(0), pos(1), pos(2));
   objComp->setOutline(tube.shape());
   auto baseName = compName + "_";
@@ -86,7 +97,7 @@ void InstrumentBuilder::addObjComponentAssembly(
     auto *detector = new Geometry::Detector(baseName + std::to_string(i),
                                             tube.detIDs()[i], objComp);
     detector->translate(Mantid::Kernel::toV3D(tube.detPositions()[i]));
-    detector->setShape(detShape);
+    detector->setShape(pixelShape);
     objComp->add(detector);
     m_instrument->markAsDetectorIncomplete(detector);
   }

@@ -1,12 +1,13 @@
 #ifndef MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
 #define MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
 
-#include "MantidNexusGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidNexusGeometry/DllConfig.h"
+#include "MantidNexusGeometry/TubeBuilder.h"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <string>
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {
@@ -15,9 +16,6 @@ class IComponent;
 class ICompAssembly;
 }
 namespace NexusGeometry {
-namespace detail {
-class Tube;
-}
 
 /** InstrumentBuilder : Builder for wrapping the creating of a Mantid
   Instrument. Provides some useful abstractions over the full-blown Instrument
@@ -51,10 +49,10 @@ public:
   /// Adds component to instrument
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);
-
-  void addObjComponentAssembly(
-      const std::string &compName, const detail::Tube &tube,
-      boost::shared_ptr<const Mantid::Geometry::IObject> detShape);
+  /// Adds tubes (ObjComponentAssemblies) to the last registered bank
+  void addTubes(const std::string &bankName,
+                const std::vector<detail::TubeBuilder> &tubes,
+                boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(
       const std::string &detName, int detId, const Eigen::Vector3d &position,
@@ -82,6 +80,9 @@ public:
   std::unique_ptr<const Geometry::Instrument> createInstrument() const;
 
 private:
+  /// Add a single tube to the last registed bank
+  void doAddTube(const std::string &compName, const detail::TubeBuilder &tube,
+                 boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
   /// Sorts detectors
   void sortDetectors() const;
   /// Check that this instance is not locked
