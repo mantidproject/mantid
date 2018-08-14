@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1499</width>
-    <height>863</height>
+    <width>1531</width>
+    <height>884</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -215,10 +215,22 @@
       <item row="0" column="2">
        <widget class="QComboBox" name="comboBox_roiList">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>140</width>
+          <height>160</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -270,6 +282,24 @@
       </item>
       <item row="1" column="4">
        <widget class="QPushButton" name="pushButton_retrieveFWHM">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>140</width>
+          <height>160</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -285,6 +315,24 @@
       </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="pushButton_load2thetaSigmaFile">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>140</width>
+          <height>160</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -328,6 +376,24 @@
       </item>
       <item row="0" column="4">
        <widget class="QPushButton" name="pushButton_integrteDetectorCounts">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>140</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>140</width>
+          <height>160</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -355,12 +421,12 @@
           </property>
           <item>
            <property name="text">
-            <string>Vertical</string>
+            <string>Horizontal</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Horizontal</string>
+            <string>Vertical</string>
            </property>
           </item>
          </widget>
@@ -371,6 +437,9 @@
            <font>
             <pointsize>9</pointsize>
            </font>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This check box is used with two push buttons&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;1. &amp;quot;Sum Counts&amp;quot;: when checked,  peaks will be fitted with Gaussian&lt;/p&gt;&lt;p&gt;2. &amp;quot;Plot&amp;quot; (to the right side): when checked, calculated data (from peak fitting) will be plot agains the original data&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>Fit</string>
@@ -391,7 +460,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1499</width>
+     <width>1531</width>
      <height>25</height>
     </rect>
    </property>
@@ -425,6 +494,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionCalculate_FWHM"/>
+    <addaction name="actionDefine_2theta_FWHM_Function"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView_2"/>
@@ -461,6 +531,11 @@
   <action name="actionCalculate_FWHM">
    <property name="text">
     <string>Calculate FWHM</string>
+   </property>
+  </action>
+  <action name="actionDefine_2theta_FWHM_Function">
+   <property name="text">
+    <string>Define $\2theta$-FWHM Function</string>
    </property>
   </action>
  </widget>

@@ -53,6 +53,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         # TODO - 20180809 - Implement the following...calling change_scan_number
         # pushButton_rewindPlot
         # pushButton_forwardPlot
+        # actionDefine_2theta_FWHM_Function  # TODO VERY IMPORTANT
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -134,7 +135,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
     def do_integrate_detector_counts(self):
         """
-        integrate the (selected) scan's detector counts by ROI
+        sum over the (selected) scan's detector counts by ROI
         :return:
         """
         # get ROI
@@ -147,12 +148,15 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         direction = str(self.ui.comboBox_integrateDirection.currentText()).lower()
         fit_gaussian = self.ui.checkBox_fitPeaks.isChecked()
 
+        num_rows = self.ui.tableView_summary.rowCount()
+        print ('[DB...BAT] Number of rows = {}'.format(num_rows))
         scan_number_list = list()
-        for row_number in range(self.ui.tableView_summary.rowCount()):
+        for row_number in range(num_rows):
             # integrate counts on detector
             scan_number = self.ui.tableView_summary.get_scan_number(row_number)
             scan_number_list.append(scan_number)
         # END-FOR
+        print ('[DB...BAT] Scan numbers: {}'.format(scan_number_list))
 
         peak_height_dict = self._controller.integrate_single_pt_scans_detectors_counts(self._exp_number,
                                                                                        scan_number_list,
@@ -238,11 +242,12 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
-    def plot_summed_single_pt_scan_counts(self, is_vertical_summed, figure_file=None):
+    def plot_summed_single_pt_scan_counts(self, is_vertical_summed, figure_file=None, pop_error=False):
         """
         plot single pt scanned counts
         :param is_vertical_summed:
         :param figure_file:
+        :param pop_error:
         :return:
         """
         # get scan number
@@ -259,18 +264,29 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             direction = 'horizontal'
 
         # get data: pt number is always 1 as it is a single Pt. measurement
+        model_y = None
         if self.ui.checkBox_fitPeaks.isChecked():
-            vec_x, vec_y, model_y = self._controller.get_single_scan_pt_model(self._exp_number, scan_number,
-                                                                              pt_number=1, roi_name=roi_name,
-                                                                              integration_direction=direction)
-        else:
-            vec_x, vec_y = self._controller.get_single_scan_pt_summed(self._exp_number, scan_number,
-                                                                      pt_number=1, roi_name=roi_name,
-                                                                      integration_direction=direction)
-            model_y = None
+            try:
+                vec_x, model_y = self._controller.get_single_scan_pt_model(self._exp_number, scan_number,
+                                                                           pt_number=1, roi_name=roi_name,
+                                                                           integration_direction=direction)
+            except RuntimeError as run_err:
+                err_msg = 'Unable to get single-pt scan model for {} {} {} due to {}' \
+                          ''.format(self._exp_number, scan_number, roi_name, run_err)
+                if pop_error:
+                    raise RuntimeError(err_msg)
+                else:
+                    print (err_msg)
+            # END-TRY-EXCEPT
+        # END-IF
+
+        # get original data
+        vec_x, vec_y = self._controller.get_single_scan_pt_summed(self._exp_number, scan_number,
+                                                                  pt_number=1, roi_name=roi_name,
+                                                                  integration_direction=direction)
 
         # plot
-        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='integrated counts',
+        self.ui.graphicsView_integration1DView.add_observed_data(vec_x, vec_y, label='Summed (raw) counts',
                                                                  update_plot=False)
         if model_y is not None:
             self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label='Gaussian model',
@@ -368,6 +384,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get the column ascii file name
+        # TODO - 20180814 - _WORKING_DIR is not correct!  Check the real one!
         file_filter = 'Data Files (*.dat);;All Files (*.*)'
         twotheta_sigma_file_name = str(QFileDialog.getOpenFileName(self, self._working_dir,
                                                                    '2theta Gaussian-Sigma File',

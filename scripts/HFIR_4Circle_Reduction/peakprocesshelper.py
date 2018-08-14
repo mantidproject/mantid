@@ -614,7 +614,7 @@ class PeakProcessRecord(object):
 
 class SinglePointPeakIntegration(object):
     """
-    simple class to store the result of a single point measurement peak integration
+    simple class to store the result of ONE and ONLY ONE single point measurement peak integration
     """
     def __init__(self, exp_number, scan_number, roi_name, pt_number, two_theta):
         """
@@ -648,6 +648,7 @@ class SinglePointPeakIntegration(object):
         self._gauss_x0 = None
         self._gauss_sigma = None
         self._flat_b = None
+        self._a1 = None  # background first order
 
         # reference peak width
         self._ref_peak_sigma = None
@@ -804,7 +805,7 @@ class SinglePointPeakIntegration(object):
 
         self._peak_intensity = peak_intensity
 
-    def set_fit_params(self, x0, sigma, a, b):
+    def set_fit_params(self, x0, sigma, height, a0, a1):
         """
         set the parameters for fitting
         :param x0:
@@ -813,10 +814,12 @@ class SinglePointPeakIntegration(object):
         :param b:
         :return:
         """
-        self._pt_intensity = a
+        # TODO - 2018 - clean!
+        self._pt_intensity = height
         self._gauss_x0 = x0
         self._gauss_sigma = sigma
-        self._flat_b = b
+        self._flat_b = a0
+        self._a1 = a1
 
         return
 
@@ -837,7 +840,7 @@ class SinglePointPeakIntegration(object):
 # END-CLASS
 
 
-class SinglePtIntegrationWorkspace(object):
+class SinglePtScansIntegrationOperation(object):
     """
     a class to handle and manage Mantid Workspace2D instance created from integrated single pt-scan peaks
     along either vertical direction or horizontal direction
@@ -868,6 +871,11 @@ class SinglePtIntegrationWorkspace(object):
         self._scan_spectrum_map = scan_spectrum_map
         self._spectrum_scan_map = spectrum_scan_map
 
+        # TODO - 20180814 - Add pt number, rio name and integration direction for future check!
+
+        # others
+        self._model_ws_name = None
+
         return
 
     def check_scan_numbers_same(self, scans_to_check):
@@ -885,6 +893,21 @@ class SinglePtIntegrationWorkspace(object):
         my_scans_set = set(self._scan_number_list)
 
         return scans_to_check_set == my_scans_set
+
+    @property
+    def exp_number(self):
+        """
+        experiment number
+        :return:
+        """
+        return self._exp_number
+
+    def get_model_workspace(self):
+        """
+        get the workspace name for calculated data (model)
+        :return:
+        """
+        return self._model_ws_name
 
     def get_workspace(self):
         """ get workspace name
@@ -919,12 +942,23 @@ class SinglePtIntegrationWorkspace(object):
             raise RuntimeError('Scan  number {} of type {} cannot be found in spectrum-scan map'
                                ''.format(scan_number, type(scan_number)))
 
-        spectrum_number = self._spectrum_scan_map[scan_number]
+        spectrum_number = self._scan_spectrum_map[scan_number]
 
         if not from_zero:
             spectrum_number += 1
 
         return spectrum_number
+
+    def set_model_workspace(self, model_ws_name):
+        """
+        set the workspace name for calculated peak (model) workspace from FitPeaks
+        :param model_ws_name:
+        :return:
+        """
+        self._model_ws_name = model_ws_name
+
+        return
+
 # END-CLASS
 
 

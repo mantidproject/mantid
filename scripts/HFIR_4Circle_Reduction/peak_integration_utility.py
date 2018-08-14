@@ -219,53 +219,77 @@ def fit_gaussian_linear_background_mtd(matrix_ws_name):
     """
     fit Gaussian with linear background by calling Mantid's FitPeaks
     :param matrix_ws_name:
-    :return:
+    :return: 2-tuple: dictionary for fit result (key = ws index, value = dictionary),
+                      model workspace name
     """
     # check input workspace
     check_string('MatrixWorkspace name', matrix_ws_name)
+
     if not AnalysisDataService.doesExist(matrix_ws_name):
         raise RuntimeError('Workspace {} does not exist in Mantid ADS.'.format(matrix_ws_name))
+    else:
+        peak_ws = AnalysisDataService.retrieve(matrix_ws_name)
 
     # fit peaks
     out_ws_name = '{}_fit_positions'.format(matrix_ws_name)
+    model_ws_name = '{}_model'.format(matrix_ws_name)
     fit_param_table_name = '{}_params_table'.format(matrix_ws_name)
-    # TODO - 20180809 - usually peak center shall be around the center of ROI
 
-    mantidsimple.FitPeaks(InputWorkspace='Exp668_Scan320_430_roi322_vertical',
-                          OutputWorkspace='fittedpeaks',
-                          PeakCenters='120',  # FIXME
-                          FitWindowBoundaryList='60,160',  # FIXME
+    # estimated peak center
+    vec_x = peak_ws.readX(0)
+    estimated_peak_center = numpy.mean(vec_x)
+
+    mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
+                          OutputWorkspace=out_ws_name,
+                          PeakCenters=estimated_peak_center,
+                          FitWindowBoundaryList='{}, {}'.format(vec_x[0], vec_x[-1]),
                           FitFromRight=False,
                           Minimizer='Levenberg-MarquardtMD',
                           HighBackground=False,
                           ConstrainPeakPositions=False,
-                          FittedPeaksWorkspace='voigtmodel',
-                          OutputPeakParametersWorkspace='voigtparams')
-    # mantidsimple.FitPeaks(InputWorkspace=matrix_ws_name,
-    #                       PeakFunction='Gaussian',
-    #                       BackgroundType='Linear',
-    #                       OutputWorkspace=out_ws_name,
-    #                       ParameterWorkspace=fit_param_table_name)
+                          FittedPeaksWorkspace=model_ws_name,
+                          OutputPeakParametersWorkspace=fit_param_table_name)
 
-    # TODO - 20180801 - Fix issue by following example
-    """
-    FitPeaks(InputWorkspace='Exp668_Scan320_430_roi322_horizontal', OutputWorkspace='fittedpeaks',
-        PeakCenters='120', FitWindowBoundaryList='60,160', FitFromRight=False,
-        Minimizer='Levenberg-MarquardtMD', HighBackground=False, ConstrainPeakPositions=False,
-        FittedPeaksWorkspace='voigtmodel', OutputPeakParametersWorkspace='voigtparams')
+    # Convert the table workspace to a standard dictionary
+    fit_param_dict = convert_fit_parameter_table_to_dict(fit_param_table_name)
+
+    return fit_param_dict, model_ws_name
+
+
+def convert_fit_parameter_table_to_dict(table_name):
     """
 
-    # process output and set to a dictionary
-    # voigtparams = mtd["voigtparams"]
-    #
-    # voigtparams.getColumnNames()
-    # Out[2]: ['wsindex', 'peakindex', 'Height', 'PeakCentre', 'Sigma', 'A0', 'A1', 'chi2']
-    # bad chi2 : 1.7976931348623157e+308
+    :param table_name:
+    :return:
+    """
+    # table workspace
+    assert isinstance(table_name, str), 'blabla'
+    table_ws = AnalysisDataService.retrieve(table_name)
 
-    return
+    # create dictionary
+    fit_param_dict = dict()
+    params_list = table_ws.getColumnNames()
+    #  ['wsindex', 'peakindex', 'Height', 'PeakCentre', 'Sigma', 'A0', 'A1', 'chi2']
+
+    # go through all lines
+    num_rows = table_ws.rowCount()
+    for irow in range(num_rows):
+        value_dict = dict()
+        ws_index = None
+        for iparam, par_name in enumerate(params_list):
+            value_i = table_ws.cell(irow, iparam)
+            if par_name == 'wsindex':
+                ws_index = int(value_i)
+            else:
+                value_dict[par_name] = float(value_i)
+        # END-FOR (column)
+        assert ws_index is not None
+        fit_param_dict[ws_index] = value_dict
+    # END-FOR (row)
+
+    return fit_param_dict
 
 
-# TODO TODO TODO - 20180801 - Replace the scipy curve fit by Mantid.FitPeaks()!
 def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, find_start_value_by_fit=False):
     """
     Fit a curve with Gaussian + linear background

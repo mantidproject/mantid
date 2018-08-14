@@ -30,7 +30,7 @@ from HFIR_4Circle_Reduction.fourcircle_utility import *
 import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
 from HFIR_4Circle_Reduction.peakprocesshelper import SinglePointPeakIntegration
-from HFIR_4Circle_Reduction.peakprocesshelper import SinglePtIntegrationWorkspace
+from HFIR_4Circle_Reduction.peakprocesshelper import SinglePtScansIntegrationOperation
 from HFIR_4Circle_Reduction import fputility
 from HFIR_4Circle_Reduction import project_manager
 from HFIR_4Circle_Reduction import peak_integration_utility
@@ -200,6 +200,7 @@ class CWSCDReductionControl(object):
         self._two_theta_scan_dict = dict()
         self._scan_2theta_set = set()
         self._two_theta_sigma = None  # a 2-tuple vector for (2theta, gaussian-sigma)
+        self._current_single_pt_integration_key = None
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
@@ -460,23 +461,30 @@ class CWSCDReductionControl(object):
         :param pt_number:
         :param roi_name:
         :param integration_direction:
-        :return:
+        :return: 2-tuple.. vector model
         """
-        # original summed data
-        integration_record = self.get_single_pt_info(exp_number, scan_number, pt_number, roi_name,
-                                                     integration_direction)
+        # get record key
+        ws_record_key = self._current_single_pt_integration_key
+        print('[DB...BAT] Retrieve ws record key: {}'.format(ws_record_key))
 
-        vec_x, vec_y = integration_record.get_vec_x_y()
+        # TODO - 20180814 - Check pt number, rio name and integration direction
 
-        # calculate model
-        x0, sigma, gaussian_a, linear_b = integration_record.get_gaussian_parameters()
-        model_y = peak_integration_utility.gaussian_linear_background(vec_x, x0, sigma, gaussian_a, linear_b)
+        if ws_record_key in self._single_pt_matrix_dict:
+            # check integration manager
+            integration_manager = self._single_pt_matrix_dict[ws_record_key]
+            assert integration_manager.exp_number == exp_number, 'blabla'
+        else:
+            raise RuntimeError('Last single-pt integration manager (key) {} does not exist.'
+                               .format(ws_record_key))
 
-        # print ('[DB...BAT] Calculated Gaussian: {0}'.format(model_y))
+        matrix_ws = AnalysisDataService.retrieve(integration_manager.get_model_workspace())
+        ws_index = integration_manager.get_spectrum_number(scan_number, from_zero=True)
 
-        return vec_x, vec_y, model_y
+        vec_x = matrix_ws.readX(ws_index)
+        vec_model = matrix_ws.readY(ws_index)
 
-    # TESTME - newly improved
+        return vec_x, vec_model
+
     def get_single_scan_pt_summed(self, exp_number, scan_number, pt_number, roi_name, integration_direction):
         """ get a single scan Pt. 's on-detector in-roi integration result
         :param exp_number:
@@ -514,7 +522,7 @@ class CWSCDReductionControl(object):
             err_message = 'Exp {0} Scan {1} Pt {2} ROI {3} does not have integration direction {4}' \
                           'in Single-Pt-Integration dictionary which has keys: {5}' \
                           ''.format(exp_number, scan_number, pt_number, roi_name, integration_direction,
-                                    peak_info.keys())
+                                    sorted(peak_info.keys()))
             raise RuntimeError(err_message)
 
         return peak_info
@@ -1630,6 +1638,7 @@ class CWSCDReductionControl(object):
             raise RuntimeError('2theta-sigma file {0} does not exist.'.format(twotheta_sigma_file_name))
 
         vec_2theta, vec_sigma = numpy.loadtxt(twotheta_sigma_file_name, delimiter=' ', usecols=(0, 1), unpack=True)
+        # TODO - 20180814 - shall be noted as single-pt scan...
         self._two_theta_sigma = vec_2theta, vec_sigma
 
         return vec_2theta, vec_sigma
@@ -1855,15 +1864,17 @@ class CWSCDReductionControl(object):
         # get the workspace key.  if it does exist, it means there is no need to sum the data but just get from dict
         ws_record_key = self.generate_single_pt_scans_key(exp_number, scan_number_list, roi_name,
                                                           integration_direction)
+        print ('[DB...BAT] Retrieve ws record key: {}'.format(ws_record_key))
 
         if ws_record_key in self._single_pt_matrix_dict:
             # it does exist.  get the workspace name
-            ws_record = self._single_pt_matrix_dict[ws_record_key]
-            out_ws_name = ws_record.get_workspace()
-            print ('[DB...TRACE] workspace key {} does exist'.format(ws_record_key))
+            integration_manager = self._single_pt_matrix_dict[ws_record_key]
+            out_ws_name = integration_manager.get_workspace()
+            print ('[DB...TRACE] workspace key {} does exist: workspace name = {}'
+                   ''.format(ws_record_key, out_ws_name))
         else:
             # it does not exist.  sum over all the scans and create the workspace
-            out_ws_name = 'Exp{}_Scan{}_{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1],
+            out_ws_name = 'Exp{}_Scan{}-{}_{}_{}'.format(exp_number, scan_number_list[0], scan_number_list[-1],
                                                          roi_name, integration_direction)
 
             print('[DB...TRACE] workspace key {} does not exist. Integrate and generate workspace {}.'
@@ -1909,10 +1920,11 @@ class CWSCDReductionControl(object):
                                          OutputWorkspace=out_ws_name)
 
             # record the workspace
-            ws_record = SinglePtIntegrationWorkspace(exp_number, scan_number_list, out_ws_name,
-                                                     scan_spectrum_map, spectrum_scan_map)
+            integration_manager = SinglePtScansIntegrationOperation(exp_number, scan_number_list, out_ws_name,
+                                                                    scan_spectrum_map, spectrum_scan_map)
 
-            self._single_pt_matrix_dict[ws_record_key] = ws_record
+            self._single_pt_matrix_dict[ws_record_key] = integration_manager
+            self._current_single_pt_integration_key = ws_record_key
         # END-IF-ELSE
 
         # about result: peak height
@@ -1922,18 +1934,27 @@ class CWSCDReductionControl(object):
 
         # fit gaussian
         if fit_gaussian:
-            fit_result_dict = peak_integration_utility.fit_gaussian_linear_background_mtd(out_ws_name)
-            for ws_index in fit_result_dict:
-                scan_number = ws_record.get_scan_number(ws_index, from_zero=True)
+            # for mantid Gaussian, 'peakindex', 'Height', 'PeakCentre', 'Sigma', 'A0', 'A1', 'chi2'
+            fit_result_dict, model_ws_name = peak_integration_utility.fit_gaussian_linear_background_mtd(out_ws_name)
+            # digest fit parameters
+            for ws_index in sorted(fit_result_dict.keys()):
+                scan_number = integration_manager.get_scan_number(ws_index, from_zero=True)
                 integrate_record_i = \
                     self._single_pt_integration_dict[(exp_number, scan_number, 1, roi_name)][integration_direction]
-                integrate_record_i.set_fit_cost(cost)
-                integrate_record_i.set_fit_params(x0=params[0], sigma=params[1], a=params[2], b=params[3])
-                peak_height_dict[scan_number] = height
+                integrate_record_i.set_fit_cost(fit_result_dict[ws_index]['chi2'])
+                integrate_record_i.set_fit_params(x0=fit_result_dict[ws_index]['PeakCentre'],
+                                                  sigma=fit_result_dict[ws_index]['Sigma'],
+                                                  a0=fit_result_dict[ws_index]['A0'],
+                                                  a1=fit_result_dict[ws_index]['A1'],
+                                                  height=fit_result_dict[ws_index]['Height'])
+                peak_height_dict[scan_number] = fit_result_dict[ws_index]['Height']
             # END-FOR
 
-            print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
-                   ''.format(cost, params, integrated_intensity, intensity_error))
+            # workspace
+            integration_manager.set_model_workspace(model_ws_name)
+
+            # print ('[DB..BAT] SinglePt-Scan: cost = {0}, params = {1}, integrated = {2} +/- {3}'
+            #        ''.format(cost, params, integrated_intensity, intensity_error))
         # END-IF
 
         return peak_height_dict
