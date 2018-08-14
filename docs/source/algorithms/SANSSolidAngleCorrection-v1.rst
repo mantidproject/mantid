@@ -23,6 +23,10 @@ If *DetectorTubes* is set to True, the correction is calculated according to a t
     
 :math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
 
+If *DetectorWing* is set to True, the correction is calculated according to a curved geometry, i.e., the detector is curved around the sample. The cosine term above then becomes:
+
+:math:`\cos^3(2\theta) \rightarrow \cos^3(\alpha)`
+
 where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
 
 
