@@ -172,7 +172,7 @@ class SANSFunctionsTest(unittest.TestCase):
         # Act
         output_workspace, _ = get_standard_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
-        self.assertTrue("12345rear_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
 
     def test_that_get_transmission_output_name_returns_correct_name_for_user_specified_workspace(self):
         # Arrange
@@ -381,8 +381,8 @@ class SANSFunctionsTest(unittest.TestCase):
 
         output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, False)
 
-        self.assertEqual(output_name, '12345rear_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37')
-        self.assertEqual(group_output_name, '12345rear_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37')
+        self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
+        self.assertEqual(group_output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
 
     def test_get_output_name_should_replace_name_with_user_specified_name_for_LAB_reduction(self):
         state = self._get_state()
@@ -505,8 +505,8 @@ class SANSFunctionsTest(unittest.TestCase):
         output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
                                                          multi_reduction_type=multi_reduction_type)
 
-        self.assertEqual(output_name, '12345merged_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37')
-        self.assertEqual(group_output_name, '12345merged_1D_Phi12.0_56.0')
+        self.assertEqual(output_name, '12345merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
+        self.assertEqual(group_output_name, '12345merged_1DPhi12.0_56.0')
 
     def test_returned_name_for_all_multi_reduction_without_user_specified_name_correct(self):
         state = self._get_state()
@@ -519,8 +519,8 @@ class SANSFunctionsTest(unittest.TestCase):
         output_name, group_output_name = get_output_name(state, ISISReductionMode.Merged, True,
                                                          multi_reduction_type=multi_reduction_type)
 
-        self.assertEqual(output_name, '12345merged_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37')
-        self.assertEqual(group_output_name, '12345merged_1D_Phi12.0_56.0')
+        self.assertEqual(output_name, '12345merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
+        self.assertEqual(group_output_name, '12345merged_1DPhi12.0_56.0')
 
     def test_returned_name_for_all_multi_reduction_without_user_specified_name_correct_LAB_reduction(self):
         state = self._get_state()
@@ -533,8 +533,8 @@ class SANSFunctionsTest(unittest.TestCase):
         output_name, group_output_name = get_output_name(state, ISISReductionMode.LAB, True,
                                                          multi_reduction_type=multi_reduction_type)
 
-        self.assertEqual(output_name, '12345rear_1D_12.0_34.0_Phi12.0_56.0_t4.57_T12.37')
-        self.assertEqual(group_output_name, '12345rear_1D_Phi12.0_56.0')
+        self.assertEqual(output_name, '12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
+        self.assertEqual(group_output_name, '12345rear_1DPhi12.0_56.0')
 
 if __name__ == '__main__':
     unittest.main()
