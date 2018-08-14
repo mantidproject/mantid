@@ -149,7 +149,8 @@ protected:
 
 private:
   Mantid::API::IAlgorithm_sptr
-  createSequentialFit(Mantid::API::IFunction_sptr function, const std::string &input,
+  createSequentialFit(Mantid::API::IFunction_sptr function,
+                      const std::string &input,
                       IndirectFitData *initialFitData) const;
   virtual Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const;
   virtual Mantid::API::IAlgorithm_sptr simultaneousFitAlgorithm() const;
