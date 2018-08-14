@@ -201,9 +201,6 @@ Network Properties
 | ``usagereports.enabled``                  | Enable usage reporting                            | ``1``                           |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 
-                           '', # partially documented in docs/source/release/v3.13.0/framework.rst
-
-
 
 ScriptRepository Properties
 ***************************
