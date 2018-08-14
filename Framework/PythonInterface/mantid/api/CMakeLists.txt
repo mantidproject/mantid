@@ -78,6 +78,9 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmProperty.cpp
   src/Exports/MultiDomainFunction.cpp
   src/Exports/SpectrumDefinition.cpp
+  src/Exports/SpectrumInfoItem.cpp
+  src/Exports/SpectrumInfoIterator.cpp
+  src/Exports/SpectrumInfoPythonIterator.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
