@@ -9,14 +9,14 @@ class ErrorReporterPresenter(object):
         self._exit_code = exit_code
         self._view.action.connect(self.error_handler)
 
-    def error_handler(self, continue_working, share, name, email):
+    def error_handler(self, continue_working, share, name, email, textbox):
         if share == 0:
             errorReporter = ErrorReporter(
-                "mantidplot", UsageService.getUpTime(), self._exit_code, True, str(name), str(email))
+                "mantidplot", UsageService.getUpTime(), self._exit_code, True, str(name), str(email), str(textbox))
             errorReporter.sendErrorReport()
         elif share == 1:
             errorReporter = ErrorReporter(
-                "mantidplot", UsageService.getUpTime(), self._exit_code, False, str(name), str(email))
+                "mantidplot", UsageService.getUpTime(), self._exit_code, False, str(name), str(email), str(textbox))
             errorReporter.sendErrorReport()
 
         if not continue_working:

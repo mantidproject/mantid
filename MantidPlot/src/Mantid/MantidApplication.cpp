@@ -35,16 +35,16 @@ MantidApplication::MantidApplication(int &argc, char **argv)
 }
 
 void MantidApplication::errorHandling(bool continueWork, int share,
-                                      QString name, QString email) {
+                                      QString name, QString email, QString textbox) {
   if (share == 0) {
     Mantid::Kernel::ErrorReporter errorReporter(
         "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
-        true, name.toStdString(), email.toStdString());
+        true, name.toStdString(), email.toStdString(), textbox.toStdString());
     errorReporter.sendErrorReport();
   } else if (share == 1) {
     Mantid::Kernel::ErrorReporter errorReporter(
         "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
-        false, name.toStdString(), email.toStdString());
+        false, name.toStdString(), email.toStdString(), textbox.toStdString());
     errorReporter.sendErrorReport();
   }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>768</width>
-    <height>451</height>
+    <height>608</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -134,18 +134,32 @@
           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;We are really sorry that Mantid is not behaving as it should and are aware how frustrating this is. We'd be very grateful if you could provide us with some details about your problems. &lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;The more information you can give, the quicker we can fix this issue. All information will be stored according to our data policy (&lt;/span&gt;&lt;a href=&quot;https://www.mantidproject.org/MantidProject:Privacy_policy&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:10pt; text-decoration: underline; color:#0000ff;&quot;&gt;privacy policy&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text'; font-size:10pt; color:#000000;&quot;&gt;Are you happy for us to send an error report about this incident? If you are willing it would also be helpful to provide some contact details below to allow us to follow up on the report.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; color:#000000;&quot;&gt;We are really sorry that Mantid is not behaving as it should and are aware how frustrating this is. We'd be very grateful if you could provide us with some details about your problems. &lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:14pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; color:#000000;&quot;&gt;The more information you can give, the quicker we can fix this issue. All information will be stored according to our data policy (&lt;/span&gt;&lt;a href=&quot;https://www.mantidproject.org/MantidProject:Privacy_policy&quot;&gt;&lt;span style=&quot; font-size:14pt; text-decoration: underline; color:#0000ff;&quot;&gt;privacy policy&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:14pt; color:#000000;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:14pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:14pt; color:#000000;&quot;&gt;Are you happy for us to send an error report about this incident? If you are willing it would also be helpful to provide some contact details below to allow us to follow up on the report.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="openExternalLinks">
           <bool>false</bool>
          </property>
          <property name="openLinks">
           <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPlainTextEdit" name="input_free_text">
+         <property name="plainText">
+          <string>Please enter any additional information about your problems. 
+
+For example:
+Error messages on the screen 
+A script that causes the problem 
+The functions you used immediately before the problem
+
+Thank you! </string>
          </property>
         </widget>
        </item>
@@ -187,16 +201,6 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="icon">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap>../../images/crying_mantid.png</pixmap>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
