@@ -48,10 +48,10 @@ public:
   const std::vector<Eigen::Vector3d> &detPositions() const;
   const std::vector<int> &detIDs() const;
   boost::shared_ptr<const Mantid::Geometry::IObject> shape() const;
-  const double tubeHeight() const;
-  const double tubeRadius() const;
+  double tubeHeight() const;
+  double tubeRadius() const;
   bool addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID);
-  const size_t size() const;
+  size_t size() const;
 
 private:
   Eigen::Vector3d m_axis;

@@ -39,7 +39,7 @@ TubeBuilder::~TubeBuilder() {}
 
 const Eigen::Vector3d &TubeBuilder::tubePosition() const { return m_baseVec; }
 
-const size_t TubeBuilder::size() const { return m_positions.size(); }
+size_t TubeBuilder::size() const { return m_positions.size(); }
 
 const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const {
   return m_positions;
@@ -69,9 +69,9 @@ boost::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
   return NexusShapeFactory::createCylinder(points);
 }
 
-const double TubeBuilder::tubeHeight() const { return m_tubeHeight; }
+double TubeBuilder::tubeHeight() const { return m_tubeHeight; }
 
-const double TubeBuilder::tubeRadius() const { return m_pixelRadius; }
+double TubeBuilder::tubeRadius() const { return m_pixelRadius; }
 
 bool TubeBuilder::addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID) {
   auto isCoLinear = checkCoLinear(pos);
