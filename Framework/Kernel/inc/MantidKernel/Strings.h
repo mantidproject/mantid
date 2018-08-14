@@ -164,7 +164,7 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
 
       // Initialise ostringstream
       std::ostringstream thread_stream;
-#pragma omp for
+#pragma omp for schedule(static)
       for (int i = 0; i < dist; i++) {
         // Write to ostringstream
         thread_stream << separator << *(begin + i);
