@@ -1,9 +1,8 @@
 #ifndef MANTID_PYTHONINTERFACE_RELEASEGLOBALINTERPRETER_H_
 #define MANTID_PYTHONINTERFACE_RELEASEGLOBALINTERPRETER_H_
 
-#endif /* MANTID_PYTHONINTERFACE_RELEASEGLOBALINTERPRETER_H_ */
-
 #include "MantidPythonInterface/kernel/DllConfig.h"
+#include <boost/python/detail/wrap_python.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -49,3 +48,5 @@ ReleaseGlobalInterpreter::~ReleaseGlobalInterpreter() {
 } // namespace Environment
 } // namespace PythonInterface
 } // namespace Mantid
+
+#endif /* MANTID_PYTHONINTERFACE_RELEASEGLOBALINTERPRETER_H_ */

@@ -1,11 +1,9 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreter.h"
-#include <Poco/Thread.h>
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
-#include <iostream>
 
 using Mantid::API::FileFinder;
 using Mantid::API::FileFinderImpl;
