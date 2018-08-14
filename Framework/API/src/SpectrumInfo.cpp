@@ -1,12 +1,12 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidTypes/SpectrumDefinition.h"
-#include "MantidAPI/SpectrumInfoIterator.h"
 
 #include <algorithm>
 #include <boost/make_shared.hpp>

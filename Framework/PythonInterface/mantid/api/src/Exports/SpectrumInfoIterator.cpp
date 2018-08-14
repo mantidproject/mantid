@@ -11,5 +11,5 @@ void export_SpectrumInfoIterator() {
 
   // Export to Python
   class_<SpectrumInfoIterator, boost::noncopyable>("SpectrumInfoIterator",
-    no_init);
+                                                   no_init);
 }

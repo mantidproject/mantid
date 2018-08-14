@@ -13,14 +13,14 @@ void export_SpectrumInfoPythonIterator() {
 
   // Export to Python
   class_<SpectrumInfoPythonIterator>("SpectrumInfoPythonIterator", no_init)
-    .def("__iter__", objects::identity_function())
-    .def(
+      .def("__iter__", objects::identity_function())
+      .def(
 #if PY_VERSION_HEX >= 0x03000000
-      "__next__"
+          "__next__"
 #else
-      "next"
+          "next"
 #endif
-      ,
-      &SpectrumInfoPythonIterator::next,
-      return_value_policy<copy_const_reference>());
+          ,
+          &SpectrumInfoPythonIterator::next,
+          return_value_policy<copy_const_reference>());
 }
