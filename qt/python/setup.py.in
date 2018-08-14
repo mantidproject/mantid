@@ -16,15 +16,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from setuptools import setup
+from setuptools import find_packages, setup
+
+@SETUPTOOLS_BUILD_COMMANDS_DEF@
 
 # The most basic setup possible to be able to use setup.py develop
 setup(
-    name="workbench",
-    install_requires=['mantidqt'],
-    entry_points={
-        'gui_scripts': [
-            'workbench = workbench.app.mainwindow:main'
-        ]
-    },
+    name='mantidqt', # must match what is required by workbench setup.py
+    version='@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@',
+    packages=find_packages(exclude=['*.test']),
+    package_data={'mantidqt': ['dialogs/*.ui']},
+    @SETUPTOOLS_BUILD_COMMANDS_USE@
 )

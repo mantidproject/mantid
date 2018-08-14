@@ -10,8 +10,10 @@ ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 # Remove exe and links only if it looks like we were removed
 # and not upgraded. If launch_mantidplot.sh exists then package
 # has been upgraded and MantidPlot_exe replaced so don't touch anything
-if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh  ]; then
-    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
+if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh ]; then
+    if [ -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe ]; then
+        rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/MantidPlot_exe
+    fi
 
     if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
 	if [ -h /etc/profile.d/mantid.sh ]; then
@@ -39,6 +41,10 @@ if [ ! -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh  ]; then
 
     if [ -L $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot ]; then
         rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/mantidplot
+    fi
+
+    if [ -L /usr/bin/mantidworkbench@CPACK_PACKAGE_SUFFIX@ ]; then
+        rm /usr/bin/mantidworkbench@CPACK_PACKAGE_SUFFIX@
     fi
 fi
 
