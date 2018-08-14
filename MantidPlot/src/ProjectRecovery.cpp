@@ -124,13 +124,6 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   return folderPaths;
 }
 
-std::string removeInvalidFilenameChars(std::string s) {
-  // NTFS is most restrictive, so blacklist on this
-  std::string blacklistChars{":*?<>|/\"\\"};
-  boost::remove_erase_if(s, boost::is_any_of(blacklistChars));
-  return s;
-}
-
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
 // Config keys
@@ -506,9 +499,8 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   alg->setChild(true);
   alg->setLogging(false);
 
-  for (const auto &ws : wsHandles) {
-    std::string filename = removeInvalidFilenameChars(ws->getName());
-    filename.append(".py");
+  for (auto i = 0u; i < wsHandles.size(); ++i) {
+    std::string filename = std::to_string(i) + ".py";
 
     Poco::Path destFilename = historyDestFolder;
     destFilename.append(filename);
@@ -516,7 +508,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->initialize();
     alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
-    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace", wsHandles[i]);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
 

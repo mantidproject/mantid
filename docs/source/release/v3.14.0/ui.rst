@@ -11,4 +11,11 @@ UI & Usability Changes
 
 - Added time standard deviation to the sample log dialog
 
+Project Recovery
+----------------
+
+Changes
+#######
+- Workspaces now save locally as a number of how many workspaces have already been saved instead of workspace names
+
 :ref:`Release 3.14.0 <v3.14.0>`
