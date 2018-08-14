@@ -13,9 +13,6 @@ fi
 if [ -h $RPM_INSTALL_PREFIX0/@BIN_DIR@/Mantidplot ]; then
     rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/Mantidplot
 fi
-if [ -e $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh ]; then
-    rm $RPM_INSTALL_PREFIX0/@BIN_DIR@/launch_mantidplot.sh
-fi
 
 if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
   # Profiles

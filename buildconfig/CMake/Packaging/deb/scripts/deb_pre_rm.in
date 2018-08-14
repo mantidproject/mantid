@@ -21,6 +21,9 @@ ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 case "$1" in
     remove|upgrade|deconfigure)
 	# Remove links and _exe in package directory
+	if [ -h @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot ]; then
+	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/mantidplot
+	fi
 	if [ -f @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe  ]; then
 	    rm @CMAKE_INSTALL_PREFIX@/@BIN_DIR@/MantidPlot_exe
 	fi
@@ -38,10 +41,10 @@ case "$1" in
 	    fi
 	fi
 	;;
-
+    
     failed-upgrade)
 	;;
-
+    
     *)
 	echo "prerm called with unknown argument \`$1'" >&2
 	exit 1
