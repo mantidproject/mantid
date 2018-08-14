@@ -1,10 +1,10 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreter.h"
+#include <Poco/Thread.h>
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
-#include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreter.h"
-#include <Poco/Thread.h>
 #include <iostream>
 
 using Mantid::API::FileFinder;
@@ -26,14 +26,17 @@ GNU_DIAG_ON("unused-local-typedef")
 /**
  * Runs FileFinder.findRuns after releasing the python GIL.
  * @param self :: A reference to the calling object
- * @param hinstr :: A string containing the run number and possibly instrument to search for
+ * @param hinstr :: A string containing the run number and possibly instrument
+ * to search for
  */
-std::vector<std::string> runFinderProxy(FileFinderImpl &self, std::string hinstr) {
-  //   Before calling the function we need to release the GIL, 
+std::vector<std::string> runFinderProxy(FileFinderImpl &self,
+                                        std::string hinstr) {
+  //   Before calling the function we need to release the GIL,
   //   drop the Python threadstate and reset anything installed
-  //   via PyEval_SetTrace while we execute the C++ code - ReleaseGlobalInterpreter
-  //   does this for us
-  Mantid::PythonInterface::Environment::ReleaseGlobalInterpreter releaseGlobalInterpreter; 
+  //   via PyEval_SetTrace while we execute the C++ code -
+  //   ReleaseGlobalInterpreter does this for us
+  Mantid::PythonInterface::Environment::ReleaseGlobalInterpreter
+      releaseGlobalInterpreter;
   return self.findRuns(hinstr);
 }
 
