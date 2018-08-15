@@ -41,6 +41,7 @@ import mantid
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
+from numpy import *
 
 
 DebugMode = True
@@ -347,10 +348,10 @@ class CWSCDReductionControl(object):
 
         return
 
-    @staticmethod
-    def check_2theta_fwhm_formula(formula):
+    def check_2theta_fwhm_formula(self, formula):
         """
-        check whether a formula can be used to calculate FWHM from 2theta
+        check whether a formula can be used to calculate FWHM from 2theta.
+        If it is a valid formula, set as a class variable
         :param formula:
         :return: 2-tuple
         """
@@ -2796,6 +2797,30 @@ class CWSCDReductionControl(object):
         self._roiDict[roi_name] = ((ll_x, ll_y), (ur_x, ur_y))
 
         return
+
+    def get_2theta_fwhm_data(self, min_2theta, res_2theta, max_2theta):
+        """
+
+        :param min_2theta:
+        :param max_2theta:
+        :return:
+        """
+        if self._curr_2theta_fwhm_func is None:
+            # user inputs smoothed data for interpolation
+            raise RuntimeError(blabla)
+
+        else:
+            # user inputs math equation as model
+            print ('[DB...BAT] Prepare to evaluate 2theta-FWHM model {}'.format(self._curr_2theta_fwhm_func))
+
+            vec_2theta = numpy.arange(min_2theta, max_2theta, res_2theta)
+            vec_model = self._curr_2theta_fwhm_func(vec_2theta)
+
+        # END-IF-ELSE
+
+        vec_fwhm = None
+
+        return vec_2theta, vec_fwhm, vec_model
 
     def get_calibrated_det_center(self, exp_number):
         """

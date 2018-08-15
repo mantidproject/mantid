@@ -87,20 +87,20 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         pop out a dialog for user to input the 2theta-FWHM formula
         :return:
         """
-        status, formula = guiutility.get_value_from_dialog(title='Input 2theta-FWHM function',
-                                                           details='Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\n'
-                                                                   'where y is FWHM and x is 2theta')
+        formula = guiutility.get_value_from_dialog(parent=self, title='Input 2theta-FWHM function',
+                                                   details='Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\n'
+                                                           'where y is FWHM and x is 2theta',
+                                                   label_name='Equation: ')
 
-        if not status:
+        if formula is None:
             # return if user cancels operation
             return
 
+        print ('[DB...BAT] User input 2theta formula: {}'.format(formula))
         state, error_message = self._controller.check_2theta_fwhm_formula(formula)
         if not state:
-            guiutility.pop_error_message(error_message)
+            guiutility.show_message(self, message=error_message, message_type='error')
             return
-
-        self.ui.plainText_mesage.appendText('$2\theta$-FWHM: {}\n'.format(formula))
 
         return
 
@@ -373,7 +373,12 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """ plot the loaded 2theta-FWHM model
         :return:
         """
-        vec_2theta, vec_fwhm, vec_model = self._controller.get_2theta_fwhm_data()
+        # TODO - 20180815 - Need to parse the range from self.ui.lineEdit_Scan
+        # default
+        two_theta_range = 10, 2.0, 110   # start, resolution, stop
+
+        vec_2theta, vec_fwhm, vec_model = self._controller.get_2theta_fwhm_data(two_theta_range[0], two_theta_range[1],
+                                                                                two_theta_range[2])
 
         self.ui.graphicsView_integration1DView.plot_2theta_model(vec_2theta, vec_fwhm, vec_model)
 

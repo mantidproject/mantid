@@ -371,21 +371,37 @@ class GetValueDialog(QtGui.QDialog):
     """
     A dialog that gets a single value
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, label_name=''):
         """
-
         :param parent:
+        :param label_name
         """
         super(GetValueDialog, self).__init__(parent)
 
         layout = QtGui.QVBoxLayout(self)
 
+        # details information
+        self.info_line = QtGui.QPlainTextEdit(self)
+        self.info_line.setEnabled(False)
+        layout.addWidget(self.info_line)
+
+        # input
+        # TODO - 20180815 - Find out how to construct such a layout by layout structure
+        if False:
+            layout2 = QtGui.QHBoxLayout(self)
+            self.label = QtGui.QLabel(self)
+            self.value_edit = QtGui.QLineEdit(self)
+            layout2.addWidget(self.label)
+            layout2.addWidget(self.value_edit)
+            layout.addWidget(layout2)
+        else:
+            self.label = QtGui.QLabel(self)
+            self.value_edit = QtGui.QLineEdit(self)
+            layout.addWidget(self.label)
+            layout.addWidget(self.value_edit)
+        # END-IF-ELSE
+
         # nice widget for editing the date
-        self.value_edit = QtGui.QLineEdit(self)
-        layout.addWidget(self.value_edit)
-
-        self.setWindowTitle('Workspace Name')
-
         # self.datetime = QDateTimeEdit(self)
         # self.datetime.setCalendarPopup(True)
         # self.datetime.setDateTime(QDateTime.currentDateTime())
@@ -399,51 +415,61 @@ class GetValueDialog(QtGui.QDialog):
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-        return
+        # set some values
+        self.setWindowTitle('Get user input')
+        self.label.setText(label_name)
 
-    # def accept(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     self.close()
-    #
-    # def reject(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     self.close()
+        return
 
     # get current date and time from the dialog
     def get_value(self):
-        """
-
+        """ get the value in string
         :return:
         """
         return str(self.value_edit.text())
 
+    def set_message_type(self, message_type):
+        """
 
-# static method to create the dialog and return (date, time, accepted)
-def get_value(parent=None):
-    """ Get value from a pop-up dialog
-    :param parent:
-    :return:
-    """
-    dialog = GetValueDialog(parent)
-    result = dialog.exec_()
-    value = dialog.get_value()
+        :param message_type:
+        :return:
+        """
+        if message_type == 'error':
+            self.value_edit.setStyleSheet("color: rgb(255, 0, 0);")
+        else:
+            self.value_edit.setStyleSheet('color: blue')
 
-    return value, result == QtGui.QDialog.Accepted
+        return
+
+    def set_title(self, title):
+        """
+        set window/dialog title
+        :param title:
+        :return:
+        """
+        self.setWindowTitle(title)
+
+        return
+
+    def show_message(self, message):
+        """
+        set or show message
+        :param message:
+        :return:
+        """
+        self.info_line.setPlainText(message)
+
+        return
+# END-DEF-CLASS
 
 
+# TODO - 20180815 - Clean!
 class DisplayDialog(QtGui.QDialog):
     """
     This is a simple dialog display which can be configured by users
     """
     def __init__(self, parent=None, name='Test'):
-        """
-
+        """ init
         :param parent:
         """
         super(DisplayDialog, self).__init__(parent)
@@ -481,9 +507,49 @@ class DisplayDialog(QtGui.QDialog):
         self.message_edit.setPlainText(message)
 
         return
+# END-DEF-CLASS
 
 
-def show_message(parent=None, message='show message here!'):
+# static method to create the dialog and return (date, time, accepted)
+def get_value(parent=None):
+    """ Get value from a pop-up dialog
+    :param parent:
+    :return:
+    """
+    dialog = GetValueDialog(parent)
+    result = dialog.exec_()
+    value = dialog.get_value()
+
+    return value, result == QtGui.QDialog.Accepted
+
+
+def get_value_from_dialog(parent, title, details, label_name='Equation'):
+    """
+    pop a dialog with user-specified message and take a value (string) from the dialog to return
+    :param title:
+    :param details:
+    :param label_name:
+    :return:
+    """
+    # start dialog
+    dialog = GetValueDialog(parent, label_name=label_name)
+
+    # set up title
+    dialog.set_title(title)
+    dialog.show_message(details)
+
+    # launch and get result
+    result = dialog.exec_()
+    print ('Method get_value_from_dialog: returned result is {}'.format(result))
+    if result is False:
+        return None
+
+    str_value = dialog.get_value()
+
+    return str_value
+
+
+def show_message(parent=None, message='show message here!', message_type='info'):
     """
     show message
     :param parent:
@@ -491,12 +557,11 @@ def show_message(parent=None, message='show message here!'):
     :return: True for accepting.  False for rejecting or cancelling
     """
     dialog = DisplayDialog(parent)
-    dialog.set_name('Teset new name')
+    # dialog.set_name('Teset new name')
     dialog.show_message(message)
-
-    # TODO - 20180814 - TestMe - Whether name can do some work
+    dialog.set_message_type(message)
     result = dialog.exec_()
-    print ('dialog.others: {}'.format(dialog.name))
+    # Dialog object: dialog still exists after exec_()
 
     return result
 

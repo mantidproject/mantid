@@ -350,7 +350,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
 
         return
 
-    def plot_2theta_model(self, vec_x, vec_y):
+    def plot_2theta_model(self, vec_2theta, vec_fwhm, vec_model):
         """
         plot 2theta model
         :param vec_x:
@@ -363,8 +363,13 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         self._rawDataID = None
 
         # add the line
-        self._2thetaModelID = self.add_plot_1d(vec_x, vec_y, xlabel='$2\theta$', ylable='FWHM',
-                                               color='blue', update_plot=True)
+        if vec_fwhm is not None:
+            self._2thetaFWHM = self.add_plot_1d(vec_2theta, vec_fwhm, x_label='$2\theta$', y_label='FWHM',
+                                               color='black', update_plot=True, label='Observed')
+
+        if vec_model is not None:
+            self._2thetaModelID = self.add_plot_1d(vec_2theta, vec_model, x_label='$2\theta$', y_label='FWHM',
+                                                   color='blue', update_plot=True, label='Model')
 
         return
 
