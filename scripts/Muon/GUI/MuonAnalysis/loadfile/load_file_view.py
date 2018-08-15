@@ -3,6 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal
 
+from Muon.GUI.Common.message_box import *
+
 
 class BrowseFileWidgetView(QtWidgets.QWidget):
     # signals for use by parent widgets
@@ -19,6 +21,11 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self._store_edit_text = False
         self._stored_edit_text = ""
         self._cached_text = ""
+
+        # To ensure at most one warning window open
+
+        self._warning_window = None
+
 
     def setupUi(self, BrowseFileWidget):
         BrowseFileWidget.setObjectName("BrowseFileWidget")
@@ -68,7 +75,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.browseButton.clicked.connect(slot)
 
     def on_file_edit_changed(self, slot):
-        self.filePathEdit.editingFinished.connect(slot)
+        self.filePathEdit.returnPressed.connect(slot)
 
     def copy_line_edit_to_clipboard(self):
         cb = QtWidgets.QApplication.clipboard()
@@ -124,6 +131,20 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self._cached_text = ""
 
     def reset_edit_to_cached_value(self):
+        print("Reset to cache : ",self._cached_text )
         tmp = self._cached_text
         self.set_file_edit(tmp)
         self._cached_text = tmp
+
+    def warning_popup(self, message):
+        mutex = QtCore.QMutex()
+        mutex.lock()
+        print("WARNING POPUP")
+        try:
+            self._warning_window.done(1)
+        except:
+            pass
+        self._warning_window = None
+        self._warning_window = QtWidgets.QMessageBox.warning(self, "Error", str(message))
+
+        mutex.unlock()

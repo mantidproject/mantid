@@ -16,7 +16,7 @@ def get_instrument_directory(instrument):
             instrument_directory = "NDW1030"
         return instrument_directory
     else:
-        return ""
+        return None
 
 
 def get_current_run_filename(instrument):
@@ -52,14 +52,13 @@ def file_path_for_instrument_and_run(instrument, run):
 
 
 # Allow any filepath, only allow .nxs files separated by commas
-def parse_input_files(text):
-    files = text.split(",")
+def parse_input_text_to_files(text, separator = ','):
+    files = text.split(separator)
     for file in files:
         try:
             filestem = file.split(".")[-1]
         except:
             raise ValueError("Please supply a valid list of files")
-
         if filestem != "nxs":
             raise ValueError("Only .nxs files supported")
     return files
@@ -121,11 +120,16 @@ def parse_user_input_to_files(input_text, allowed_extensions=[".nxs"]):
     input_list = input_text.split(";")
     filenames = []
     for text in input_list:
-        if os.path.isfile(text):
-            print("is a file!")
-            print(os.path.splitext(text)[-1].lower())
-            # remove whitespace
-            if os.path.splitext(text)[-1].lower() in allowed_extensions:
+        # remove whitespace
+        if os.path.splitext(text)[-1].lower() in allowed_extensions:
 
-                filenames += [text]
+            filenames += [text]
     return filenames
+
+
+def remove_duplicated_files_from_list(file_list):
+    # first occurance of a given file is taken
+    files = [os.path.basename(full_path) for full_path in file_list]
+    unique_files = [file_list[n] for n, file_name in enumerate(files) if file_name not in files[:n]]
+    return unique_files
+

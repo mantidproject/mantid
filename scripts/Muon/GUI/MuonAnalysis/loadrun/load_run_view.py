@@ -18,6 +18,8 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.setupUi(self)
         self.set_run_edit_regex()
 
+        self._warning_window = None
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(468, 45)
@@ -120,4 +122,11 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.loadCurrentRunButton.clicked.connect(slot)
 
     def on_run_edit_changed(self, slot):
-        self.runEdit.editingFinished.connect(slot)
+        self.runEdit.returnPressed.connect(slot)
+
+    def warning_popup(self, message):
+        self._warning_window = None
+        self._warning_window = QtWidgets.QMessageBox.warning(self, "Error", str(message))
+
+    def clear(self):
+        self.set_run_edit_text("")

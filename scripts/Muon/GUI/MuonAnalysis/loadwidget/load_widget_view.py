@@ -88,5 +88,5 @@ class LoadWidgetView(QtWidgets.QWidget):
         self.load_run_widget.disable_load_buttons()
 
     def enable_loading(self):
-        self.load_file_widget.ensable_load_buttons()
-        self.load_run_widget.ensable_load_buttons()
+        self.load_file_widget.enable_load_buttons()
+        self.load_run_widget.enable_load_buttons()

@@ -49,39 +49,13 @@ class LoadWidgetPresenter(object):
 
     def handle_file_widget_data_changed(self):
         print("handle_file_widget_data_changed")
-        # get data from browse
-        if not self._view.get_multiple_loading_state():
-            self.clear_data()
-        self.add_new_loaded_data_from_widget(self.load_file_widget)
-        # store data (work out whether to append or clear then add)
-        # clear browse.
-        # update browse with the state of the model
-        self.load_run_widget.update_model_and_view(self._model.runs)
-        self.load_file_widget.update_model_and_view(self._model.filenames)
+        self.load_run_widget.update_view_from_model(self._model.runs)
+        self.load_file_widget.update_view_from_model(self._model.filenames)
 
     def handle_run_widget_data_changed(self):
         print("handle_run_widget_data_changed")
-        # get data from runs
-        if not self._view.get_multiple_loading_state():
-            self.clear_data()
-        self.add_new_loaded_data_from_widget(self.load_run_widget)
-        # store data (work out whether to append or clear then add)
-        # clear runs.
-        # update runs with the state of the model
-        print(self._model.runs)
-        self.load_run_widget.update_model_and_view(self._model.runs)
-        self.load_file_widget.update_model_and_view(self._model.filenames)
-
-    def add_new_loaded_data_from_widget(self, widget, overwrite=False):
-        new_filenames = widget.get_loaded_filenames()
-        print(new_filenames)
-        for i, filename in enumerate(new_filenames):
-            if self._model.is_filename_loaded(filename) and not overwrite:
-                continue
-            else:
-                ws = widget.workspaces[i]
-                run = widget.runs[i]
-                self._model.add_muon_data(filename, ws, run)
+        self.load_run_widget.update_view_from_model(self._model.runs)
+        self.load_file_widget.update_view_from_model(self._model.filenames)
 
     def handle_instrument_changed(self, new_instrument):
         # clear both run and browse
@@ -104,7 +78,6 @@ class LoadWidgetPresenter(object):
 
     def clear_data(self):
         self._model.clear_data()
-
 
     @property
     def view(self):

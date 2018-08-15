@@ -1,33 +1,40 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 import mantid.simpleapi as mantid
 from mantid.kernel import ConfigService
 from mantid import config as cf
-from qtpy.QtCore import QThread
-import os
 
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 class BrowseFileWidgetModel(object):
 
-    def __init__(self):
+    def __init__(self, loaded_data_store = MuonLoadData()):
         # Temporary list of filenames used for load thread
         self._filenames = []
 
-        self._loaded_filenames = []
-        self._loaded_workspaces = []
-        self._loaded_runs = []
+        self._loaded_data_store = loaded_data_store
 
     @property
     def loaded_filenames(self):
-        return self._loaded_filenames
+        return self._loaded_data_store.get_parameter("filename")
 
     @property
     def loaded_workspaces(self):
-        return self._loaded_workspaces
+        return self._loaded_data_store.get_parameter("workspace")
 
     @property
     def loaded_runs(self):
-        return self._loaded_runs
+        return self._loaded_data_store.get_parameter("run")
+
+    # Used with load thread
+    def output(self):
+        pass
+
+    # Used with load thread
+    def cancel(self):
+        pass
 
     # Used with load thread
     def loadData(self, filename_list):
@@ -42,9 +49,7 @@ class BrowseFileWidgetModel(object):
             except ValueError:
                 failed_files += [filename]
                 continue
-            self._loaded_workspaces += [ws]
-            self._loaded_runs += [run]
-            self._loaded_filenames += [filename]
+            self._loaded_data_store.add_data(run = run, workspace = ws, filename=filename)
         if failed_files:
             message = self.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
@@ -52,14 +57,6 @@ class BrowseFileWidgetModel(object):
     def exception_message_for_failed_files(self, failed_file_list):
         print("Exception in execute!")
         return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
-
-    # Used with load thread
-    def output(self):
-        pass
-
-    # Used with load thread
-    def cancel(self):
-        pass
 
     def load_workspace_from_filename(self, filename):
         print("Loading file : ", filename)
@@ -71,9 +68,7 @@ class BrowseFileWidgetModel(object):
         return workspace, run
 
     def clear(self):
-        self._loaded_filenames = []
-        self._loaded_workspaces = []
-        self._loaded_runs = []
+        self._loaded_data_store.clear()
 
     def add_directories_to_config_service(self, file_list):
         print(file_list)

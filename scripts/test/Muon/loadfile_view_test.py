@@ -5,6 +5,7 @@ import unittest
 from qtpy.QtWidgets import QApplication
 
 
+
 class LoadFileWidgetViewTest(unittest.TestCase):
 
     def test_view_initialized_with_empty_line_edit(self):
