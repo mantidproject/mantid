@@ -438,7 +438,10 @@ def get_value(parent=None):
 
 
 class DisplayDialog(QtGui.QDialog):
-    def __init__(self, parent=None):
+    """
+    This is a simple dialog display which can be configured by users
+    """
+    def __init__(self, parent=None, name='Test'):
         """
 
         :param parent:
@@ -461,7 +464,13 @@ class DisplayDialog(QtGui.QDialog):
         buttons.accepted.connect(self.accept)
         layout.addWidget(buttons)
 
+        self.name = name
+
         return
+
+    def set_name(self, new_name):
+
+        self.name = new_name
 
     def show_message(self, message):
         """
@@ -482,8 +491,12 @@ def show_message(parent=None, message='show message here!'):
     :return: True for accepting.  False for rejecting or cancelling
     """
     dialog = DisplayDialog(parent)
+    dialog.set_name('Teset new name')
     dialog.show_message(message)
 
+    # TODO - 20180814 - TestMe - Whether name can do some work
     result = dialog.exec_()
+    print ('dialog.others: {}'.format(dialog.name))
 
     return result
+

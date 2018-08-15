@@ -51,9 +51,9 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.pushButton_exportToMovie.clicked.connect(self.do_export_to_movie)
 
         # TODO - 20180809 - Implement the following...calling change_scan_number
-        # pushButton_rewindPlot
-        # pushButton_forwardPlot
-        # actionDefine_2theta_FWHM_Function  # TODO VERY IMPORTANT
+        self.ui.pushButton_rewindPlot.clicked.connect(self.do_plot_previous_scan)
+        self.ui.pushButton_forwardPlot.clicked.connect(self.do_plot_next_scan)
+        self.ui.actionDefine_2theta_FWHM_Function.triggered.connect(self.do_define_2theta_fwhm_function)
 
         # menu bar
         self.ui.menuQuit.triggered.connect(self.do_close)
@@ -64,7 +64,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         self.ui.actionRefresh_ROI_List.triggered.connect(self.do_refresh_roi)
 
         # class variable
-        self._working_dir = os.path.expanduser('~')
+        self._working_dir = self._controller.get_working_directory()
         self._exp_number = None
         self._roiMutex = False
 
@@ -79,6 +79,28 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         self.close()
+
+        return
+
+    def do_define_2theta_fwhm_function(self):
+        """
+        pop out a dialog for user to input the 2theta-FWHM formula
+        :return:
+        """
+        status, formula = guiutility.get_value_from_dialog(title='Input 2theta-FWHM function',
+                                                           details='Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\n'
+                                                                   'where y is FWHM and x is 2theta')
+
+        if not status:
+            # return if user cancels operation
+            return
+
+        state, error_message = self._controller.check_2theta_fwhm_formula(formula)
+        if not state:
+            guiutility.pop_error_message(error_message)
+            return
+
+        self.ui.plainText_mesage.appendText('$2\theta$-FWHM: {}\n'.format(formula))
 
         return
 
@@ -127,9 +149,8 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         png_list_file.close()
 
         # prompt how to make a movie
-        # TODO - 20180809 - Make the message output work!
-        # TODO - continue - Run ffmpeg
-        # command_linux = 'ffmpeg -framerate 8 -pattern_type glob -i "*.png" -r 30 test.mp4'
+        command_linux = 'ffmpeg -framerate 8 -pattern_type glob -i "*.png" -r 30 test.mp4'
+        guiutility.show_message(self, command_linux)
 
         return
 
@@ -242,6 +263,52 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
 
         return
 
+    def do_plot_previous_scan(self):
+        """ plot previous scan if not in 2theta FWHM model
+        :return:
+        """
+        plot_type = str(self.ui.comboBox_plotType.currentText())
+        if plot_type == '2-theta FWHM Model':
+            return
+
+        scan_number_str = str(self.ui.lineEdit_Scan.text()).strip()
+        if scan_number_str == '':
+            return
+
+        scan_number = int(scan_number_str)
+        row_number = self.ui.tableView_summary.get_row_number_by_scan(scan_number)
+        if row_number == 0:
+            row_number = self.ui.tableView_summary.rowCount() - 1
+        scan_number = self.ui.tableView_summary.get_scan_number(row_number)
+        self.ui.lineEdit_Scan.setText(scan_number)
+
+        self.do_plot_integrated_pt()
+
+        return
+
+    def do_plot_next_scan(self):
+        """  plot next scan if not in 2theta FWHM model
+        :return:
+        """
+        plot_type = str(self.ui.comboBox_plotType.currentText())
+        if plot_type == '2-theta FWHM Model':
+            return
+
+        scan_number_str = str(self.ui.lineEdit_Scan.text()).strip()
+        if scan_number_str == '':
+            return
+
+        scan_number = int(scan_number_str)
+        row_number = self.ui.tableView_summary.get_row_number_by_scan(scan_number)
+        if row_number == self.ui.tableView_summary.rowCount() - 1:
+            row_number = 0
+        scan_number = self.ui.tableView_summary.get_scan_number(row_number)
+        self.ui.lineEdit_Scan.setText(scan_number)
+
+        self.do_plot_integrated_pt()
+
+        return
+
     def plot_summed_single_pt_scan_counts(self, is_vertical_summed, figure_file=None, pop_error=False):
         """
         plot single pt scanned counts
@@ -306,9 +373,11 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         """ plot the loaded 2theta-FWHM model
         :return:
         """
-        # TODO - 20180808 - Implement
+        vec_2theta, vec_fwhm, vec_model = self._controller.get_2theta_fwhm_data()
 
-        raise NotImplementedError('Not Implemented Yet!')
+        self.ui.graphicsView_integration1DView.plot_2theta_model(vec_2theta, vec_fwhm, vec_model)
+
+        return
 
     def do_refresh_roi(self):
         """
@@ -384,7 +453,6 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # get the column ascii file name
-        # TODO - 20180814 - _WORKING_DIR is not correct!  Check the real one!
         file_filter = 'Data Files (*.dat);;All Files (*.*)'
         twotheta_sigma_file_name = str(QFileDialog.getOpenFileName(self, self._working_dir,
                                                                    '2theta Gaussian-Sigma File',

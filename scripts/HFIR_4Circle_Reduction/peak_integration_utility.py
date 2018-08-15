@@ -214,7 +214,6 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     return [x0, est_sigma, est_a, est_background]
 
 
-# TODO TODO - 20180809 - this is the last several core part!
 def fit_gaussian_linear_background_mtd(matrix_ws_name):
     """
     fit Gaussian with linear background by calling Mantid's FitPeaks

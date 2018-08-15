@@ -201,6 +201,7 @@ class CWSCDReductionControl(object):
         self._scan_2theta_set = set()
         self._two_theta_sigma = None  # a 2-tuple vector for (2theta, gaussian-sigma)
         self._current_single_pt_integration_key = None
+        self._curr_2theta_fwhm_func = None
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface", "4-Circle Reduction", False)
@@ -346,6 +347,26 @@ class CWSCDReductionControl(object):
 
         return
 
+    @staticmethod
+    def check_2theta_fwhm_formula(formula):
+        """
+        check whether a formula can be used to calculate FWHM from 2theta
+        :param formula:
+        :return: 2-tuple
+        """
+        assert isinstance(formula, str), '2theta-FWHM formula {} must be a string but not a {}' \
+                                         ''.format(formula, type(formula))
+
+        try:
+            equation = 'lambda x: {}'.format(formula)
+            fwhm_func = eval(equation)
+        except SyntaxError as syn_err:
+            return False, 'Unable to accept 2theta-FWHM formula {} due to {}'.format(formula, syn_err)
+
+        self._curr_2theta_fwhm_func = fwhm_func
+
+        return True, None
+
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
         :param exp_number:
@@ -356,8 +377,9 @@ class CWSCDReductionControl(object):
         This part will be redo as 11847_Load_HB3A_Experiment
         """
         # Check & set pt. numbers
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        check_int_type(exp_number, 'Experiment number')
+        check_int_type(scan_number, 'Scan Number')
+
         if pt_number_list is None:
             status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
             assert status, 'Unable to get Pt numbers from scan %d.' % scan_number
