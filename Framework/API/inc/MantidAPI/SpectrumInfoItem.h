@@ -5,9 +5,9 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using Mantid::Kernel::V3D;
+using Mantid::SpectrumDefinition;
 
 namespace Mantid {
 namespace API {
