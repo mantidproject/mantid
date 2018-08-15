@@ -14,3 +14,39 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+""" Main configuration module.
+
+A singleton instance called CONF is defined. Modules wishing to access the settings
+should import the CONF object as
+
+    from workbench.config.main import CONF
+
+and use it to access the settings
+"""
+from __future__ import (absolute_import, unicode_literals)
+
+from workbench.config.user import UserConfig
+
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
+ORGANIZATION = 'mantidproject'
+ORG_DOMAIN = 'mantidproject.org'
+APPNAME = 'workbench'
+
+# Iterable containing defaults for each configurable section of the code
+# General application settings are in the main section
+DEFAULTS = {
+    'main': {
+      'high_dpi_scaling': True,
+      'window/size': (1260, 740),
+      'window/position': (10, 10),
+      'window/is_maximized': True,
+      'window/is_fullscreen': False,
+    }
+}
+
+# -----------------------------------------------------------------------------
+# 'Singleton' instance
+# -----------------------------------------------------------------------------
+CONF = UserConfig(ORGANIZATION, APPNAME, defaults=DEFAULTS)
