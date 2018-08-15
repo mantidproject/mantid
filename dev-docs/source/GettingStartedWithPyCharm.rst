@@ -103,3 +103,18 @@ On Linux the instructions are identical to Windows except that :
 - In step 1, the file is ``pycharm.sh`` rather than ``pycharm.bat``
 - In step 2, use the native python interpreter (``/usr/bin/python2.7/python.exe``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
 - In step 4, add ``<Mantid Build Directory>/bin;`` to the ``PATH`` environment variable in the new configuration (rather than ``<Mantid Build Directory>/bin/Debug;``), and remove the other three file paths.
+
+Useful Plugins
+##############
+
+You can install non-default plugins by pressing ``Ctrl+Alt+S`` to open the **Settings/Preferences** dialog and then going to **Plugins**.
+From here you can manage plugins, or add new ones by clicking **Browse repositories**.
+
+The following non-default plugins are things our team has found useful for Mantid development:
+
+- **Markdown support** - Side by side rendering of markdown documents such as``.md`` , ``.rst`` (requires `Graphviz <https://graphviz.gitlab.io/download/>`_ to show graphs in preview)
+- **dotplugin** -  Syntax highlighting for ``DOT``
+- **BashSupport** - Syntax highlighting for ``BASH`` scripts
+- **CMD Support** - Syntax highlighting for ``.BAT`` ~scripts
+
+Please add to this list if you find a useful plugin of your own

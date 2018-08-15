@@ -26,7 +26,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
 
         if mantid.mtd.doesExist(self.TEST_WS_NAME):
             mantid.mtd.remove(self.TEST_WS_NAME)
-            
+
     def test_saveFileWithSingleValueProperties(self):
         input_ws = self._create_sample_workspace()
         self._add_log_to_workspace(input_ws, "Test1", 1.0)
@@ -80,6 +80,34 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
             logs_group = output_file["Sample Logs"]
             self.assertEquals(logs_group["TestLog"].attrs["Units"], "uAmps")
 
+    def test_create_timeSeries(self):
+        """ Tests that the correct TimeSeriesProperty is returned when given a
+            name and a list of values of a given type."""
+
+        # Test for Int32TimeSeriesProperty
+        int_log_name = "Int32Series"
+        int_log_values = [1,2,3,4,5,6,7]
+        int_prop = PropertyFactory.createTimeSeries(int_log_name, int_log_values)
+        self.assertEquals(type(int_prop), Int32TimeSeriesProperty)
+
+        # Test for BoolTimeSeriesProperty
+        bool_log_name = "BoolSeries"
+        bool_log_values = [True, False, False, True, False]
+        bool_prop = PropertyFactory.createTimeSeries(bool_log_name, bool_log_values)
+        self.assertEquals(type(bool_prop), BoolTimeSeriesProperty)
+
+        # Test for StringSeriesProperty
+        str_log_name = "StringSeries"
+        str_log_values = ["Testing", "string", "time", "series", "property"]
+        str_prop = PropertyFactory.createTimeSeries(str_log_name, str_log_values)
+        self.assertEquals(type(str_prop), StringTimeSeriesProperty)
+
+        # Test for FloatTimeSeriesProperty
+        float_log_name = "FloatSeries"
+        float_log_values = [1.0 ,2.1, 3.2, 4.3, 5.6, 6.7, 7.8]
+        float_prop = PropertyFactory.createTimeSeries(float_log_name, float_log_values)
+        self.assertTrue(type(float_prop), FloatTimeSeriesProperty)
+
     def _add_log_to_workspace(self, ws, log_name, log_value):
         if isinstance(log_value, list):
             ws.mutableRun()[log_name] = self._create_time_series_log(log_name, log_value)
@@ -98,17 +126,7 @@ class ExportSampleLogsToHDF5Test(unittest.TestCase):
         return ws
 
     def _create_time_series_log(self, log_name, log_value):
-        if isinstance(log_value[0], int):
-            prop = Int32TimeSeriesProperty(log_name)
-        elif isinstance(log_value[0], float):
-            prop = FloatTimeSeriesProperty(log_name)
-        elif isinstance(log_value[0], str):
-            prop = StringTimeSeriesProperty(log_name)
-        elif isinstance(log_value[0], bool):
-            prop = BoolTimeSeriesProperty(log_name)
-        else:
-            raise RuntimeError("Unsupported property type {}".format(type(log_value[0])))
-
+        prop = PropertyFactory.createTimeSeries(log_name, log_value)
         for i, value in enumerate(log_value):
             prop.addValue(i, value)
 

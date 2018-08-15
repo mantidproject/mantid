@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
