@@ -44,7 +44,7 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QSettings, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
@@ -52,6 +52,9 @@ from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
+
+from mantid.kernel import version_str
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION
 
 
 # -----------------------------------------------------------------------------
@@ -67,7 +70,13 @@ def qapplication():
     app = QApplication.instance()
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-        app = QApplication(['Mantid Workbench'])
+        argv = sys.argv[:]
+        argv[0] = 'Mantid Workbench' # replace application name
+        app = QApplication(argv)
+        app.setOrganizationName(ORGANIZATION)
+        app.setOrganizationDomain(ORG_DOMAIN)
+        app.setApplicationName(APPNAME)
+        app.setApplicationVersion(version_str())
     return app
 
 
@@ -107,17 +116,38 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
+        # -- instance attributes --
+        self.settings = CONF # uses default configuration as necessary
+
         qapp = QApplication.instance()
         qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, self.settings.get('main/high_dpi_scaling'))
 
         self.setWindowTitle("Mantid Workbench")
 
-        # -- instance attributes --
-        self.window_size = None
-        self.window_position = None
-        self.maximized_flag = None
+
+        # restore window geometry
+        if self.settings.has('main/window/geometry'): # preferred
+            self.restoreGeometry(self.settings.get('main/window/geometry'))
+        else:
+            self.resize(QSize(*self.settings.get('main/window/size')))
+            self.move(QPoint(*self.settings.get('main/window/position')))
+
+        # restore window state
+        windowstate = Qt.WindowNoState
+        if self.settings.has('main/window/state'): # preferred
+            self.settings.get('main/window/state')
+        elif self.settings.get('main/window/is_maximized'):
+            windowstate = Qt.WindowMaximized
+        elif self.settings.get('main/window/is_fullscreen'):
+            windowstate = Qt.WindowFullScreen
+        self.setWindowState(windowstate)
+
+        # TODO should save elsewhere
+        self.settings.set('main/window/geometry', self.saveGeometry())
+        self.settings.set('main/window/state', self.saveState())
+
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
@@ -263,9 +293,9 @@ class MainWindow(QMainWindow):
     def setup_for_first_run(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
-        self.setWindowState(Qt.WindowMaximized)
+        windowstate = None
+        self.setWindowState(Qt.WindowMaximized) # TODO get from config.CONF
         desktop = QDesktopWidget()
-        self.window_size = desktop.screenGeometry().size()
         self.setup_default_layouts()
 
     def prep_window_for_reset(self):
@@ -333,6 +363,8 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
+        # TODO update values  of geometry and windowState in config.CONF
+
         # Close editors
         if self.editor.app_closing():
             # Close all open plots
@@ -402,6 +434,7 @@ def start_workbench(app):
     importlib.import_module('mantid')
 
     main_window.show()
+
     if main_window.splash:
         main_window.splash.hide()
     # lift-off!
