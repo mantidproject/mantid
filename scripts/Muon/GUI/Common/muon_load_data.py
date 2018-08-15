@@ -1,18 +1,20 @@
 class MuonLoadData:
-    """Lightweight struct to store the results of loading from any of the load widgets.
+    """
+    Lightweight struct to store the results of loading from a load widget. Hard-code all required parameters for each
+    entry in the __init__ method below.
 
+    - Can be extended to add as many parameters as needed; all getting/setting is done through keyword arguments.
+    - Can be used as an iterator, with elements being dictionaries of parameter:value pairs.
 
-    - Clients responsibility to prevent duplicates
-    - No validation is performed so it's left to the client code to ensure the entries are
-    correct.
+    - Clients responsibility to prevent duplicated entries.
+    - Clients responsibility to ensure the entries are correct (i.e. no validation is performed).
+
+    The instance of this class is intended to be shared between all models in the load widget (the parent, run and file
+    widgets).
     """
 
     def __init__(self):
-        self._filenames = []
-        self._workspaces = []
-        self._runs = []
-
-        self.params = {"run": self._runs, "workspace": self._workspaces, "filename": self._filenames}
+        self.params = {"run": [], "workspace": [], "filename": []}
         self.defaults = {"run": 0, "workspace": [], "filename": ""}
 
     def __iter__(self):
@@ -27,8 +29,14 @@ class MuonLoadData:
         else:
             raise StopIteration
 
+    # TODO : unit test this
+    def remove_current_data(self):
+        indices = [i for i in range(self.num_items()) if i != self.num_items() - 1]
+        for key, vals in self.params.items():
+            self.params[key] = [vals[i] for i in indices]
+
     def remove_last_added_data(self):
-        indices = [i for i in range(self.num_items()) if i != self.num_items() -2]
+        indices = [i for i in range(self.num_items()) if i != self.num_items() - 2]
         for key, vals in self.params.items():
             self.params[key] = [vals[i] for i in indices]
 
@@ -55,7 +63,7 @@ class MuonLoadData:
     def contains_n(self, **kwargs):
         return sum(self._matches(**kwargs))
 
-    # TODO : unit test
+    # TODO : unit test this
     def contains(self, **kwargs):
         n_matches = self.contains_n(kwargs)
         if n_matches > 0:
@@ -65,23 +73,3 @@ class MuonLoadData:
 
     def clear(self):
         self.params = {key: [] for key, _ in self.params.items()}
-
-
-if __name__ == "__main__":
-    data = MuonLoadData()
-
-    data.add_data(filename="file1.nxs", run=1234, workspace=[1])
-    data.add_data(filename="file2.nxs", run=1235, workspace=[2])
-    data.add_data(filename="file3.nxs", run=1236, workspace=[3])
-    data.add_data(filename="file4.nxs", run=1237, workspace=[4])
-
-    print(data.contains_n(run=1235))
-
-    print(data.get_parameter("run"), data.get_parameter("workspace"), data.get_parameter("filename"))
-
-    print(data.remove_data(run=1236))
-
-    print(data.get_parameter("run"), data.get_parameter("workspace"), data.get_parameter("filename"))
-
-    for data_item in iter(data):
-        print(data_item)

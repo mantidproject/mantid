@@ -61,7 +61,7 @@ class BrowseFileWidgetPresenter(object):
         if self._load_thread:
             return
         print("Load thread started, Model : ", self._model.loaded_filenames)
-        self._view.disable_loading()
+        self._view.notify_loading_started()
         self._load_thread = self.create_load_thread()
         self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.loadData(filenames)
@@ -79,7 +79,8 @@ class BrowseFileWidgetPresenter(object):
         file_list = self._model.loaded_filenames
         print(file_list)
         self.set_file_edit(file_list)
-        self._view.enable_loading()
+        self._view.notify_loading_finished()
+        self.enable_loading()
         self._model.add_directories_to_config_service(file_list)
 
 

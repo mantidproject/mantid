@@ -19,6 +19,7 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.set_run_edit_regex()
 
         self._warning_window = None
+        self._cached_text = ""
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -86,6 +87,13 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.loadingFinished.emit()
         self.dataChanged.emit()
 
+    def notify_loading_started(self):
+        self.loadingStarted.emit()
+
+    def notify_loading_finished(self):
+        self.loadingFinished.emit()
+        self.dataChanged.emit()
+
     def disable_load_buttons(self):
         self.loadCurrentRunButton.setEnabled(False)
         self.runEdit.setEnabled(False)
@@ -103,6 +111,16 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def set_run_edit_text(self, text):
         self.runEdit.setText(text)
+        self._cached_text = self.get_run_edit_text()
+
+        # , text):
+        # self.runEdit.setText(text)
+
+    def reset_run_edit_from_cache(self):
+        print("Reset to cache : ",self._cached_text )
+        tmp = self._cached_text
+        self.set_run_edit_text(tmp)
+        self._cached_text = tmp
 
     def set_current_instrument(self, instrument):
         self.instrumentLabel.setText(instrument)

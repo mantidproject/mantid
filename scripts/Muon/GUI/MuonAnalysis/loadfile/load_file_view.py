@@ -102,6 +102,13 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.loadingFinished.emit()
         self.dataChanged.emit()
 
+    def notify_loading_started(self):
+        self.loadingStarted.emit()
+
+    def notify_loading_finished(self):
+        self.loadingFinished.emit()
+        self.dataChanged.emit()
+
     def disable_load_buttons(self):
         self.browseButton.setEnabled(False)
         self.filePathEdit.setEnabled(False)

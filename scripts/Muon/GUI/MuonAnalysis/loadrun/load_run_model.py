@@ -4,12 +4,11 @@ import mantid.simpleapi as mantid
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
-# TODO : Encapsulate the run, workspace and filename into a class and test it
 
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
 
-    def __init__(self, loaded_data_store = MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData()):
         # Used with load thread
         self._filenames = []
 
@@ -33,7 +32,7 @@ class LoadRunWidgetModel(object):
             except Exception as e:
                 failed_files += [filename]
                 continue
-            self._loaded_data_store.add_data(run = run, workspace= ws, filename = filename)
+            self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
         if failed_files:
             message = self.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
@@ -73,9 +72,6 @@ class LoadRunWidgetModel(object):
         run = int(workspace.getRunNumber())
 
         return workspace, filename, run
-
-    def set_loaded_runs(self, run_list):
-        self._loaded_runs = run_list
 
     def get_run_list(self):
         return self.loaded_runs

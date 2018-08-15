@@ -37,7 +37,6 @@ class LoadWidgetPresenter(object):
         self.load_file_widget.enable_multiple_files(False)
 
     def handle_multiple_files_option_changed(self):
-        print("handling multiple files changed")
         if self._view.get_multiple_loading_state():
             self.enable_multiple_files(True)
         else:
@@ -58,6 +57,7 @@ class LoadWidgetPresenter(object):
         self.load_file_widget.update_view_from_model(self._model.filenames)
 
     def handle_instrument_changed(self, new_instrument):
+        # TODO : Implement
         # clear both run and browse
         # set new instrument in browse
         # set new instrument in run
