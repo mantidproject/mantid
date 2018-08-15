@@ -1,7 +1,7 @@
 #ifndef GRID_DETECTOR_TEST_H
 #define GRID_DETECTOR_TEST_H
 
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Quat.h"
@@ -86,7 +86,7 @@ public:
   }
 
   void testConstructorThrowsWithInvalidFillOrderString() {
-    GridDetector *det = new GridDetector("MyRectangle");
+    GridDetector *det = new GridDetector("MyGrid");
     auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
     // Initialize with these parameters
     TS_ASSERT_THROWS(det->initialize(cuboidShape, 100, -50.0, 1.0, 200, -100.0,
