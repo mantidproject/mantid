@@ -1373,6 +1373,119 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
   m_facingComponent.push_back(detector);
 }
 
+void InstrumentDefinitionParser::createGridDetector(
+    Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
+    const Poco::XML::Element *pCompElem, const std::string &filename,
+    const Poco::XML::Element *pType) {
+
+  //-------------- Create a RectangularDetector
+  //------------------------------------------------
+  std::string name =
+      InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
+
+  // Create the bank with the given parent.
+  auto bank = new Geometry::GridDetector(name, parent);
+
+  // set location for this newly added comp and set facing if specified in
+  // instrument def. file. Also
+  // check if any logfiles are referred to through the <parameter> element.
+  setLocation(bank, pLocElem, m_angleConvertConst, m_deltaOffsets);
+  setFacing(bank, pLocElem);
+  setLogfile(
+      bank, pCompElem,
+      m_instrument->getLogfileCache()); // params specified within <component>
+  setLogfile(
+      bank, pLocElem,
+      m_instrument
+          ->getLogfileCache()); // params specified within specific <location>
+
+  // Extract all the parameters from the XML attributes
+  int xpixels = 0;
+  int ypixels = 0;
+  int zpixels = 0;
+  int idstart = 0;
+  std::string idfillorder;
+  int idstepbyrow = 0;
+  int idstep = 1;
+
+  // The shape!
+  // Given that this leaf component is actually an assembly, its constituent
+  // component detector shapes comes from its type attribute.
+  const std::string shapeType = pType->getAttribute("type");
+  boost::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
+  // These parameters are in the TYPE defining RectangularDetector
+  if (pType->hasAttribute("xpixels"))
+    xpixels = std::stoi(pType->getAttribute("xpixels"));
+  double xstart = attrToDouble(pType, "xstart");
+  double xstep = attrToDouble(pType, "xstep");
+
+  if (pType->hasAttribute("ypixels"))
+    ypixels = std::stoi(pType->getAttribute("ypixels"));
+  double ystart = attrToDouble(pType, "ystart");
+  double ystep = attrToDouble(pType, "ystep");
+
+  if (pType->hasAttribute("zpixels"))
+    zpixels = std::stoi(pType->getAttribute("zpixels"));
+  double zstart = attrToDouble(pType, "zstart");
+  double zstep = attrToDouble(pType, "zstep");
+
+  // THESE parameters are in the INSTANCE of this type - since they will
+  // change.
+  if (pCompElem->hasAttribute("idstart"))
+    idstart = std::stoi(pCompElem->getAttribute("idstart"));
+  if (pCompElem->hasAttribute("idfillorder"))
+    idfillorder = pCompElem->getAttribute("idfillorder");
+  // Default ID row step size
+  if (idfillorder[0] == 'x')
+    idstepbyrow = xpixels;
+  else if (idfillorder[0] == 'y')
+    idstepbyrow = ypixels;
+  else
+    idstepbyrow = zpixels;
+
+  if (pCompElem->hasAttribute("idstepbyrow")) {
+    idstepbyrow = std::stoi(pCompElem->getAttribute("idstepbyrow"));
+  }
+  // Default ID row step size
+  if (pCompElem->hasAttribute("idstep"))
+    idstep = std::stoi(pCompElem->getAttribute("idstep"));
+
+  // Now, initialize all the pixels in the bank
+  bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep,
+                   zpixels, zstart, zstep, idstart, idfillorder, idstepbyrow,
+                   idstep);
+
+  // Loop through all detectors in the newly created bank and mark those in
+  // the instrument.
+  try {
+    for (int z = 0; z < bank->nelements(); ++z) {
+      auto zLayer =
+          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[z]);
+      for (int x = 0; x < zLayer->nelements(); ++x) {
+        auto xColumn =
+            boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*zLayer)[x]);
+        for (int y = 0; y < xColumn->nelements(); ++y) {
+          boost::shared_ptr<Geometry::Detector> detector =
+              boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+          if (detector) {
+            // Make default facing for the pixel
+            Geometry::IComponent *comp =
+                static_cast<IComponent *>(detector.get());
+            if (m_haveDefaultFacing)
+              makeXYplaneFaceComponent(comp, m_defaultFacing);
+            // Mark it as a detector (add to the instrument cache)
+            m_instrument->markAsDetectorIncomplete(detector.get());
+          }
+        }
+      }
+    }
+  } catch (Kernel::Exception::ExistsError &) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Duplicate detector ID found when adding GridDetector " + name +
+        " in XML instrument file" + filename);
+  }
+}
+
 void InstrumentDefinitionParser::createRectangularDetector(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
     const Poco::XML::Element *pCompElem, const std::string &filename,
@@ -1681,7 +1794,9 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   static const boost::regex exp("Detector|detector|Monitor|monitor");
 
   // do stuff a bit differently depending on which category the type belong to
-  if (RectangularDetector::compareName(category)) {
+  if (GridDetector::compareName(category)) {
+    createGridDetector(parent, pLocElem, pCompElem, filename, pType);
+  } else if (RectangularDetector::compareName(category)) {
     createRectangularDetector(parent, pLocElem, pCompElem, filename, pType);
   } else if (StructuredDetector::compareName(category)) {
     createStructuredDetector(parent, pLocElem, pCompElem, filename, pType);

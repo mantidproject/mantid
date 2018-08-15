@@ -829,6 +829,15 @@ void GridDetector::getBoundingBox(BoundingBox &assemblyBox) const {
     m_cachedBoundingBox->grow(compBox);
     getAtXYZ(0, 0, this->zpixels() - 1)->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
+    getAtXYZ(this->xpixels() - 1, 0, this->zpixels() - 1)
+        ->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    getAtXYZ(this->xpixels() - 1, this->ypixels() - 1, this->zpixels() - 1)
+        ->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
+    getAtXYZ(0, this->ypixels() - 1, this->zpixels() - 1)
+        ->getBoundingBox(compBox);
+    m_cachedBoundingBox->grow(compBox);
   }
 
   // Use cached box
