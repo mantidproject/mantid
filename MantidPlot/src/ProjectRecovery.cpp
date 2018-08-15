@@ -126,7 +126,7 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
 
 std::string removeInvalidFilenameChars(std::string s) {
   // NTFS is most restrictive, so blacklist on this
-  std::string blacklistChars{"#:*?<>|/\"\\"};
+  std::string blacklistChars{":*?<>|/\"\\"};
   boost::remove_erase_if(s, boost::is_any_of(blacklistChars));
   return s;
 }
@@ -356,17 +356,12 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
   bool loadCompleted = false;
-  if (!isSanitised(recoveryFolder)) {
     if (!QMetaObject::invokeMethod(
-            m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(bool, loadCompleted),
-            Q_ARG(const std::string, projectFile.toString()))) {
-      throw std::runtime_error("Project Recovery: Failed to load project "
-                               "windows - Qt binding failed");
-    }
-  } else {
-    g_log.debug("Recovered workspace name was sanitised");
-    loadCompleted = true;
+          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
+          Q_RETURN_ARG(bool, loadCompleted),
+          Q_ARG(const std::string, projectFile.toString()))) {
+    throw std::runtime_error(
+        "Project Recovery: Failed to load project windows - Qt binding failed");
   }
 
   if (!loadCompleted) {
@@ -527,28 +522,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
 
     alg->execute();
   }
-}
-
-/**
- * Check the OUTPUT_PROJ_NAME file for WorkspaceNames and if any of them have
- * "#" then return True else False.
- *
- */
-bool ProjectRecovery::isSanitised(const Poco::Path &recoveryFolder) {
-  auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
-
-  std::ifstream propFile(projectFile.toString(), std::ios_base::in);
-  std::string processString((std::istreambuf_iterator<char>(propFile)),
-                            std::istreambuf_iterator<char>());
-  propFile.close();
-  auto filePosition = processString.find("WorkspaceNames") + 15;
-  auto endOfPosition = processString.find("</mantidworkspaces>");
-  for (; filePosition < endOfPosition; ++filePosition) {
-    if (processString[filePosition] == char('#')) {
-      return true;
-    }
-  }
-  return false;
 }
 
 } // namespace MantidQt

@@ -100,9 +100,6 @@ private:
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
 
-  /// Checks if the workspaces had been sanitised when saved
-  bool isSanitised(const Poco::Path &recoveryFolder);
-
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;
 
