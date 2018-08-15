@@ -142,21 +142,30 @@ void MDNormDirectSC::exec() {
   m_normWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty("OutputNormalizationWorkspace", m_normWS);
 
-  // Check for other dimensions if we could measure anything in the original
-  // data
-  bool skipNormalization = false;
-  const std::vector<coord_t> otherValues =
-      getValuesFromOtherDimensions(skipNormalization);
-  const auto affineTrans =
-      findIntergratedDimensions(otherValues, skipNormalization);
-  cacheDimensionXValues();
+  m_numExptInfos = outputWS->getNumExperimentInfo();
+  // loop over all experiment infos
+  for (uint16_t expInfoIndex=0; expInfoIndex < m_numExptInfos; expInfoIndex++)
+  {
+      if (expInfoIndex > 0) {
+          m_accumulate = true;
+      }
+      // Check for other dimensions if we could measure anything in the original
+      // data
+      bool skipNormalization = false;
+      const std::vector<coord_t> otherValues =
+          getValuesFromOtherDimensions(skipNormalization,expInfoIndex);
+      const auto affineTrans =
+          findIntergratedDimensions(otherValues, skipNormalization);
+      cacheDimensionXValues();
 
-  if (!skipNormalization) {
-    calculateNormalization(otherValues, affineTrans);
-  } else {
-    g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
-                  "Not applying normalization.");
+      if (!skipNormalization) {
+        calculateNormalization(otherValues, affineTrans,expInfoIndex);
+      } else {
+        g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
+                      "Not applying normalization.");
+      }
   }
+
 
   // Set the display normalization based on the input workspace
   outputWS->setDisplayNormalization(m_inputWS->displayNormalizationHisto());
@@ -299,8 +308,8 @@ void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
  * MD position calculation
  */
 std::vector<coord_t>
-MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization) const {
-  const auto &runZero = m_inputWS->getExperimentInfo(0)->run();
+MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex) const {
+  const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
   std::vector<coord_t> otherDimValues;
   for (size_t i = 4; i < m_inputWS->getNumDims(); i++) {
@@ -308,7 +317,7 @@ MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization) const {
     float dimMin = static_cast<float>(dimension->getMinimum());
     float dimMax = static_cast<float>(dimension->getMaximum());
     auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        runZero.getProperty(dimension->getName()));
+        currentRun.getProperty(dimension->getName()));
     if (dimProp) {
       coord_t value = static_cast<coord_t>(dimProp->firstValue());
       otherDimValues.push_back(value);
@@ -396,7 +405,8 @@ Kernel::Matrix<coord_t> MDNormDirectSC::findIntergratedDimensions(
 }
 
 /**
- * Stores the X values from each H,K,L dimension as member variables
+ * Stores the X values from each H,K,L,E dimension as member variables
+ * Energy dimension is transformed to final wavevector.
  */
 void MDNormDirectSC::cacheDimensionXValues() {
   constexpr double energyToK = 8.0 * M_PI * M_PI *
@@ -442,17 +452,17 @@ void MDNormDirectSC::cacheDimensionXValues() {
  * @param otherValues
  * @param affineTrans
  */
-void MDNormDirectSC::calculateNormalization(
-    const std::vector<coord_t> &otherValues,
-    const Kernel::Matrix<coord_t> &affineTrans) {
+void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherValues,
+    const Kernel::Matrix<coord_t> &affineTrans,
+    uint16_t expInfoIndex) {
   constexpr double energyToK = 8.0 * M_PI * M_PI *
                                PhysicalConstants::NeutronMass *
                                PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
-  const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
   auto *rubwLog =
-      dynamic_cast<VectorDoubleProperty *>(exptInfoZero.getLog("RUBW_MATRIX"));
+      dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
     throw std::runtime_error(
         "Wokspace does not contain a log entry for the RUBW matrix."
@@ -460,12 +470,12 @@ void MDNormDirectSC::calculateNormalization(
   } else {
     Kernel::DblMatrix rubwValue(
         (*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
-    m_rubw = exptInfoZero.run().getGoniometerMatrix() * rubwValue;
+    m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
     m_rubw.Invert();
   }
-  const double protonCharge = exptInfoZero.run().getProtonCharge();
+  const double protonCharge = currentExptInfo.run().getProtonCharge();
 
-  const auto &spectrumInfo = exptInfoZero.spectrumInfo();
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mapping
   const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
@@ -482,7 +492,8 @@ void MDNormDirectSC::calculateNormalization(
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<coord_t> pos, posNew;
-  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
+  double progStep = 0.7/m_numExptInfos;
+  auto prog = make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.), ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {
