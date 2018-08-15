@@ -27,7 +27,7 @@ class SANSMaskDTP(PythonAlgorithm):
                 "pixels": 256
             },
         ],
-        'GPSANS': [
+        'CG2': [
             {
                 "name": "detector1",
                 "tubes": 192,
