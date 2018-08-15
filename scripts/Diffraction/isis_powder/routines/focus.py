@@ -113,9 +113,9 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
 
 def _divide_one_spectrum_by_spline(spectrum, spline):
     rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum, StoreInADS=False)
-    rebinned_spline = mantid.ReplaceSpecialValues(rebinned_spline, SmallNumberThreshold=0.000000001, SmallNumberValue=1,
-                                                  StoreInADS=False)
+
     divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
+    divided = mantid.ReplaceSpecialValues(rebinned_spline, InfinityValue=0, OutputWorkspace=spectrum)
     return divided
 
 
