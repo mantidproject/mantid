@@ -77,7 +77,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                 line = None
                 for t in tokens:
                 # Start a new line when we see a name
-                    if line == None and t[0] == tokenize.NAME:
+                    if line is None and t[0] == tokenize.NAME:
                         line = [t]
                     # End the line when we see a logical line ending
                     elif t[0] == tokenize.NEWLINE:
@@ -92,7 +92,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         # l[-1][1][1:] is the comment string, with the preceeding hash stripped off
         all_commands = [(''.join(t[1] for t in l[:-1]), l[-1][1][1:])
-                      for l in all_lines]
+                       for l in all_lines]
         # Remove duplicate commands by casting commands as a set
         unique_commands = set()
         for command in all_commands:
