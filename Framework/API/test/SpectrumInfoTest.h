@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -481,6 +482,107 @@ public:
     det2group_map mapping{{1, {1, 2}}};
     TS_ASSERT_THROWS(m_workspace.cacheDetectorGroupings(mapping),
                      std::runtime_error);
+  }
+
+  /**
+   * Tests for Iterator Functionality
+   **/
+
+  void test_iterator_begin() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Check we start at the correct place
+    TS_ASSERT(iter != spectrumInfo.end());
+  }
+
+  void test_iterator_end() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.end();
+
+    // Check we start at the correct place
+    TS_ASSERT(iter != spectrumInfo.begin());
+  }
+
+  void test_iterator_increment() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Check that we start at the beginning
+    TS_ASSERT(iter == spectrumInfo.begin());
+
+    // Increment and check index
+    for (int i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
+      TS_ASSERT_EQUALS(iter->getIndex(), i);
+      ++iter;
+    }
+
+    // Check we've reached the end
+    TS_ASSERT(iter == spectrumInfo.end());
+  }
+
+  void test_iterator_decrement() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.end();
+
+    // Check that we start at the end
+    TS_ASSERT(iter == spectrumInfo.end());
+
+    // Decrement and check index
+    for (int i = m_workspace.spectrumInfo().size(); i > 0; --i) {
+      TS_ASSERT_EQUALS(iter->getIndex(), i);
+      --iter;
+    }
+
+    // Check we've reached the beginning
+    TS_ASSERT(iter == spectrumInfo.begin());
+  }
+
+  void test_iterator_advance() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Advance 6 places
+    std::advance(iter, 6);
+    TS_ASSERT_EQUALS(iter->getIndex(), 5);
+
+    // Go past end of valid range
+    std::advance(iter, 8);
+    TS_ASSERT(iter == spectrumInfo.end());
+
+    // Go backwards
+    std::advance(iter, -2);
+    TS_ASSERT_EQUALS(iter->getIndex(), 3);
+
+    // Go to the start
+    std::advance(iter, -3);
+    TS_ASSERT(iter == spectrumInfo.begin());
+  }
+
+  void test_copy_iterator() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Create a copy
+    auto iterCopy = SpectrumInfoIterator(iter);
+
+    // Check
+    TS_ASSERT_EQUALS(iter->getIndex(), 0);
+    TS_ASSERT_EQUALS(iterCopy->getIndex(), 0);
+
+    // Increment
+    ++iter;
+    ++iterCopy;
+
+    // Check again
+    TS_ASSERT_EQUALS(iter->getIndex(), 1);
+    TS_ASSERT_EQUALS(iterCopy->getIndex(), 1);
   }
 
 private:
