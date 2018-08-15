@@ -10,6 +10,5 @@ using namespace boost::python;
 void export_SpectrumInfoIterator() {
 
   // Export to Python
-  class_<SpectrumInfoIterator, boost::noncopyable>("SpectrumInfoIterator",
-                                                   no_init);
+  class_<SpectrumInfoIterator>("SpectrumInfoIterator", no_init);
 }

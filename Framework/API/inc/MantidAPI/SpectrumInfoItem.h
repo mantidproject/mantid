@@ -5,9 +5,9 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using Mantid::Kernel::V3D;
-using Mantid::SpectrumDefinition;
 
 namespace Mantid {
 namespace API {
@@ -60,6 +60,7 @@ public:
   SpectrumInfoItem(SpectrumInfoItem &&other) = default;
   SpectrumInfoItem &operator=(SpectrumInfoItem &&rhs) = default;
 
+  // Methods that can be called via the iterator
   bool isMonitor() const { return m_spectrumInfo->isMonitor(m_index); }
 
   bool isMasked() const { return m_spectrumInfo->isMasked(m_index); }
@@ -76,7 +77,7 @@ public:
     return m_spectrumInfo->hasUniqueDetector(m_index);
   }
 
-  Mantid::SpectrumDefinition spectrumDefinition() const {
+  const Mantid::SpectrumDefinition &spectrumDefinition() const {
     return m_spectrumInfo->spectrumDefinition(m_index);
   }
 
@@ -84,34 +85,8 @@ public:
     return m_spectrumInfo->position(m_index);
   }
 
-  void advance(int64_t delta) {
-    m_index = delta < 0 ? std::max(static_cast<uint64_t>(0),
-                                   static_cast<uint64_t>(m_index) + delta)
-                        : std::min(m_spectrumInfo->size(),
-                                   m_index + static_cast<size_t>(delta));
-  }
-
-  // This could cause a segmentation fault if a user goes past the end of the
-  // iterator and tries to index into the n+1 th element (which would not
-  // exist). Adding range checks to all the above methods may slow down
-  // performance though.
-  void incrementIndex() {
-    if (m_index < m_spectrumInfo->size()) {
-      ++m_index;
-    }
-  }
-
-  void decrementIndex() {
-    if (m_index > 0) {
-      --m_index;
-    }
-  }
-
-  size_t getIndex() const { return m_index; }
-
-  void setIndex(const size_t index) { m_index = index; }
-
 private:
+  // Allow SpectrumInfoIterator access
   friend class SpectrumInfoIterator;
 
   // Private constructor, can only be created by SpectrumInfoIterator

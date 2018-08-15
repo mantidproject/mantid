@@ -19,6 +19,8 @@ void export_SpectrumInfoItem() {
       .add_property("signedTwoTheta", &SpectrumInfoItem::signedTwoTheta)
       .add_property("l2", &SpectrumInfoItem::l2)
       .add_property("hasUniqueDetector", &SpectrumInfoItem::hasUniqueDetector)
-      .add_property("spectrumDefinition", &SpectrumInfoItem::spectrumDefinition)
+      .add_property("spectrumDefinition",
+                    make_function(&SpectrumInfoItem::spectrumDefinition,
+                                  return_internal_reference<>()))
       .add_property("position", &SpectrumInfoItem::position);
 }
