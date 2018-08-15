@@ -12,7 +12,7 @@ using namespace boost::python;
 void export_DetectorInfoItem() {
 
   // Export to Python
-  class_<DetectorInfoItem>("DetectorInfoItem", no_init)
+  class_<DetectorInfoItem, boost::noncopyable>("DetectorInfoItem", no_init)
       .add_property("isMonitor", &DetectorInfoItem::isMonitor)
       .add_property("isMasked", &DetectorInfoItem::isMasked)
       .add_property("twoTheta", &DetectorInfoItem::twoTheta)

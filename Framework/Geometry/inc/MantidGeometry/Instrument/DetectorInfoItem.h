@@ -51,12 +51,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL DetectorInfoItem {
 
 public:
-  // Provide copy and move constructors
-  DetectorInfoItem(const DetectorInfoItem &other) = default;
-  DetectorInfoItem &operator=(const DetectorInfoItem &rhs) = default;
-  DetectorInfoItem(DetectorInfoItem &&other) = default;
-  DetectorInfoItem &operator=(DetectorInfoItem &&rhs) = default;
-
   // Methods that can be accessed via the iterator
   bool isMonitor() const { return m_detectorInfo->isMonitor(m_index); }
 
@@ -82,6 +76,12 @@ private:
   // Private constructor, can only be created by DetectorInfoIterator
   DetectorInfoItem(const DetectorInfo &detectorInfo, const size_t index)
       : m_detectorInfo(&detectorInfo), m_index(index) {}
+
+  // Provide copy and move constructors
+  DetectorInfoItem(const DetectorInfoItem &other) = default;
+  DetectorInfoItem &operator=(const DetectorInfoItem &rhs) = default;
+  DetectorInfoItem(DetectorInfoItem &&other) = default;
+  DetectorInfoItem &operator=(DetectorInfoItem &&rhs) = default;
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.

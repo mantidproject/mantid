@@ -22,5 +22,5 @@ void export_DetectorInfoPythonIterator() {
 #endif
           ,
           &DetectorInfoPythonIterator::next,
-          return_value_policy<copy_const_reference>());
+          return_value_policy<reference_existing_object>());
 }

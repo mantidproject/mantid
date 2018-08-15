@@ -55,20 +55,23 @@ class DetectorInfoPythonIterator {
 public:
   explicit DetectorInfoPythonIterator(const DetectorInfo &detectorInfo)
       : m_begin(detectorInfo.begin()), m_end(detectorInfo.end()),
-        m_current(*m_begin) {}
+        m_firstOrDone(true) {}
 
   const DetectorInfoItem &next() {
-    if (m_begin == m_end) {
+    if (!m_firstOrDone) {
+      ++m_begin;
+    } else {
+      m_firstOrDone = false;
       objects::stop_iteration_error();
     }
-    m_current = *m_begin++;
-    return m_current;
+
+    return *m_begin;
   }
 
 private:
   DetectorInfoIterator m_begin;
   DetectorInfoIterator m_end;
-  DetectorInfoItem m_current;
+  bool m_firstOrDone;
 };
 
 } // namespace Geometry
