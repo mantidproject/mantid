@@ -24,6 +24,7 @@ import math
 
 # 3rd party imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
+from mantid.kernel import Logger
 import matplotlib.pyplot as plt
 from mantidqt.py3compat import is_text_string
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
@@ -41,6 +42,7 @@ DEFAULT_COLORMAP = 'viridis'
 # See https://matplotlib.org/api/_as_gen/matplotlib.figure.SubplotParams.html#matplotlib.figure.SubplotParams
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
+LOGGER = Logger("workspace.plotting.functions")
 
 
 # -----------------------------------------------------------------------------
@@ -104,7 +106,7 @@ def figure_title(workspaces, fig_num):
 def plot_from_names(names, errors, overplot, fig=None):
     """
     Given a list of names of workspaces, raise a dialog asking for the
-    a selection of what to plot and then plot it
+    a selection of what to plot and then plot it.
 
     :param names: A list of workspace names
     :param errors: If true then error bars will be plotted on the points
@@ -114,7 +116,12 @@ def plot_from_names(names, errors, overplot, fig=None):
     :return: The figure containing the plot or None if selection was cancelled
     """
     workspaces = AnalysisDataService.Instance().retrieveWorkspaces(names, unrollGroups=True)
-    selection = get_spectra_selection(workspaces)
+    try:
+        selection = get_spectra_selection(workspaces)
+    except Exception as exc:
+        LOGGER.warning(format(str(exc)))
+        selection = None
+
     if selection is None:
         return None
 
@@ -180,8 +187,12 @@ def pcolormesh_from_names(names, fig=None):
     :param fig: An optional figure to contain the new plots. Its current contents will be cleared
     :returns: The figure containing the plots
     """
-    return pcolormesh(AnalysisDataService.retrieveWorkspaces(names, unrollGroups=True),
-                      fig=fig)
+    try:
+        return pcolormesh(AnalysisDataService.retrieveWorkspaces(names, unrollGroups=True),
+                          fig=fig)
+    except Exception as exc:
+        LOGGER.warning(format(str(exc)))
+        return None
 
 
 def pcolormesh(workspaces, fig=None):
@@ -260,10 +271,25 @@ def plotSpectrum(workspaces, indices, distribution=None, error_bars=False,
 # -----------------------------------------------------------------------------
 # 'Private' Functions
 # -----------------------------------------------------------------------------
-def _raise_if_not_sequence(seq, seq_name):
-    accepted_types = [list, tuple]
-    if type(seq) not in accepted_types:
+def _raise_if_not_sequence(value, seq_name, element_type=None):
+    """
+    Raise a ValueError if the given object is not a sequence
+
+    :param value: The value object to validate
+    :param seq_name: The variable name of the sequence for the error message
+    :param element_type: An optional type to provide to check that each element
+    is an instance of this type
+    :raises ValueError: if the conditions are not met
+    """
+    accepted_types = (list, tuple)
+    if type(value) not in accepted_types:
         raise ValueError("{} should be a list or tuple".format(seq_name))
+    if element_type is not None:
+        def raise_if_not_type(x):
+            if not isinstance(x, element_type):
+                raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
+
+        map(raise_if_not_type, value)
 
 
 def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
@@ -272,8 +298,7 @@ def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
         raise ValueError("Both spectrum_nums and wksp_indices supplied. "
                          "Please supply only 1.")
 
-    if not isinstance(workspaces, MatrixWorkspace):
-        _raise_if_not_sequence(workspaces, 'Workspaces')
+    _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
 
     if spectrum_nums is not None:
         _raise_if_not_sequence(spectrum_nums, 'spectrum_nums')
@@ -284,8 +309,7 @@ def _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices):
 
 def _validate_pcolormesh_inputs(workspaces):
     """Raises a ValueError if any arguments have the incorrect types"""
-    if not isinstance(workspaces, MatrixWorkspace):
-        _raise_if_not_sequence(workspaces, 'Workspaces')
+    _raise_if_not_sequence(workspaces, 'workspaces', MatrixWorkspace)
 
 
 def _create_subplots(nplots, fig=None):

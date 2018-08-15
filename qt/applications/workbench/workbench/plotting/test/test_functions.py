@@ -155,6 +155,22 @@ class FunctionsTest(TestCase):
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().collections))
 
+    # ------------- Failure tests -------------
+
+    def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):
+        table = WorkspaceFactory.Instance().createTable()
+        table_name = 'test_plot_from_names_with_non_plottable_workspaces_returns_None'
+        AnalysisDataService.Instance().addOrReplace(table_name, table)
+        result = plot_from_names([table_name], errors=False, overplot=False)
+        self.assertTrue(result is None)
+
+    def test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None(self):
+        table = WorkspaceFactory.Instance().createTable()
+        table_name = 'test_pcolormesh_from_names_with_non_plottable_workspaces_returns_None'
+        AnalysisDataService.Instance().addOrReplace(table_name, table)
+        result = pcolormesh_from_names([table_name])
+        self.assertTrue(result is None)
+
     # ------------- Private -------------------
     def _do_plot_from_names_test(self, get_spectra_selection_mock, expected_labels,
                                  wksp_indices, errors, overplot, target_fig=None):
@@ -178,4 +194,4 @@ class FunctionsTest(TestCase):
 
 
 if __name__ == '__main__':
-    main(buffer=False, verbosity=2)
+    main()
