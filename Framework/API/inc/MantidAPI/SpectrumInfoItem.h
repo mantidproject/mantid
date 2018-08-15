@@ -5,9 +5,9 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using Mantid::Kernel::V3D;
-using Mantid::SpectrumDefinition;
 
 namespace Mantid {
 namespace API {
@@ -54,12 +54,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL SpectrumInfoItem {
 
 public:
-  // Provide copy and move constructors
-  SpectrumInfoItem(const SpectrumInfoItem &other) = default;
-  SpectrumInfoItem &operator=(const SpectrumInfoItem &rhs) = default;
-  SpectrumInfoItem(SpectrumInfoItem &&other) = default;
-  SpectrumInfoItem &operator=(SpectrumInfoItem &&rhs) = default;
-
   // Methods that can be called via the iterator
   bool isMonitor() const { return m_spectrumInfo->isMonitor(m_index); }
 
@@ -95,6 +89,12 @@ private:
   // Private constructor, can only be created by SpectrumInfoIterator
   SpectrumInfoItem(const SpectrumInfo &spectrumInfo, const size_t index)
       : m_spectrumInfo(&spectrumInfo), m_index(index) {}
+
+  // Provide copy and move constructors
+  SpectrumInfoItem(const SpectrumInfoItem &other) = default;
+  SpectrumInfoItem &operator=(const SpectrumInfoItem &rhs) = default;
+  SpectrumInfoItem(SpectrumInfoItem &&other) = default;
+  SpectrumInfoItem &operator=(SpectrumInfoItem &&rhs) = default;
 
   // Non-owning pointer. A reference makes the class unable to define an
   // assignment operator that we need.

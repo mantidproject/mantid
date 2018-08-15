@@ -22,5 +22,5 @@ void export_SpectrumInfoPythonIterator() {
 #endif
           ,
           &SpectrumInfoPythonIterator::next,
-          return_value_policy<copy_const_reference>());
+          return_value_policy<reference_existing_object>());
 }

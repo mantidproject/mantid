@@ -59,20 +59,22 @@ class SpectrumInfoPythonIterator {
 public:
   explicit SpectrumInfoPythonIterator(const SpectrumInfo &spectrumInfo)
       : m_begin(spectrumInfo.begin()), m_end(spectrumInfo.end()),
-        m_current(*m_begin) {}
+        m_firstOrDone(true) {}
 
   const SpectrumInfoItem &next() {
-    if (m_begin == m_end) {
+    if (!m_firstOrDone) {
+      ++m_begin;
+    } else {
+      m_firstOrDone = false;
       objects::stop_iteration_error();
     }
-    m_current = *m_begin++;
-    return m_current;
+    return *m_begin;
   }
 
 private:
   SpectrumInfoIterator m_begin;
   SpectrumInfoIterator m_end;
-  SpectrumInfoItem m_current;
+  bool m_firstOrDone;
 };
 
 } // namespace API

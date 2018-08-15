@@ -12,7 +12,7 @@ using namespace boost::python;
 void export_SpectrumInfoItem() {
 
   // Export to Python
-  class_<SpectrumInfoItem>("SpectrumInfoItem", no_init)
+  class_<SpectrumInfoItem, boost::noncopyable>("SpectrumInfoItem", no_init)
       .add_property("isMonitor", &SpectrumInfoItem::isMonitor)
       .add_property("isMasked", &SpectrumInfoItem::isMasked)
       .add_property("twoTheta", &SpectrumInfoItem::twoTheta)
