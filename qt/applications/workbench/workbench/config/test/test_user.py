@@ -62,6 +62,12 @@ class ConfigUserTest(TestCase):
 
         self.assertEqual(True, self.cfg.get('main/bool_option2'))
 
+    def test_has_keys(self):
+        self.assertTrue(self.cfg.has('main', 'a_default_key'))
+        self.assertTrue(self.cfg.has('main/a_default_key'))
+        self.assertFalse(self.cfg.has('main', 'missing-key'))
+        self.assertFalse(self.cfg.has('main/missing-key'))
+
     # ----------------------------------------------
     # Failure tests
     # ----------------------------------------------

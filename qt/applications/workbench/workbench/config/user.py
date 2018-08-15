@@ -91,6 +91,14 @@ class UserConfig(object):
         else:
             return value
 
+    def has(self, option, second=None):
+        """Return a True if the key exists in the
+        settings. ``config.get('main', 'window/size')`` and
+        ``config.get('main/window/size')`` are equivalent.
+        """
+        option = self._check_section_option_is_valid(option, second)
+        return option in self.all_keys()
+
     def set(self, option, value, extra=None):
         """Set a value for an option in a given section. Can either supply
         the fully qualified option or add the section as an additional
