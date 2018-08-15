@@ -29,22 +29,6 @@ private:
   PyThreadState *m_saved;
 };
 
-ReleaseGlobalInterpreterLock::ReleaseGlobalInterpreterLock()
-    : m_tracefunc(nullptr), m_tracearg(nullptr), m_saved(nullptr) {
-  PyThreadState *curThreadState = PyThreadState_GET();
-  m_tracefunc = curThreadState->c_tracefunc;
-  m_tracearg = curThreadState->c_traceobj;
-  Py_XINCREF(m_tracearg);
-  PyEval_SetTrace(nullptr, nullptr);
-  m_saved = PyEval_SaveThread();
-}
-
-ReleaseGlobalInterpreterLock::~ReleaseGlobalInterpreterLock() {
-  PyEval_RestoreThread(m_saved);
-  PyEval_SetTrace(m_tracefunc, m_tracearg);
-  Py_XDECREF(m_tracearg);
-}
-
 } // namespace Environment
 } // namespace PythonInterface
 } // namespace Mantid
