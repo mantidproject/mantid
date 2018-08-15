@@ -114,6 +114,13 @@ class UserConfig(object):
             value = extra
         self.qsettings.setValue(option, value)
 
+    def remove(self, option, second=None):
+        """Removes a key from the settings. Key not existing returns without effect.
+        """
+        option = self._check_section_option_is_valid(option, second)
+        if self.has(option):
+            self.qsettings.remove(option)
+
     # -------------------------------------------------------------------------
     # "Private" methods
     # -------------------------------------------------------------------------

@@ -68,6 +68,12 @@ class ConfigUserTest(TestCase):
         self.assertFalse(self.cfg.has('main', 'missing-key'))
         self.assertFalse(self.cfg.has('main/missing-key'))
 
+    def test_remove_key(self):
+        self.cfg.set('main', 'key1', 1)
+        self.assertTrue(self.cfg.has('main/key1'))
+        self.cfg.remove('main/key1')
+        self.assertFalse(self.cfg.has('main/key1'))
+
     # ----------------------------------------------
     # Failure tests
     # ----------------------------------------------
