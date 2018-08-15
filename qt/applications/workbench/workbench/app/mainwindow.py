@@ -117,36 +117,10 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         # -- instance attributes --
-        self.settings = CONF # uses default configuration as necessary
-
-        qapp = QApplication.instance()
-        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, self.settings.get('main/high_dpi_scaling'))
-
         self.setWindowTitle("Mantid Workbench")
 
-
-        # restore window geometry
-        if self.settings.has('main/window/geometry'): # preferred
-            self.restoreGeometry(self.settings.get('main/window/geometry'))
-        else:
-            self.resize(QSize(*self.settings.get('main/window/size')))
-            self.move(QPoint(*self.settings.get('main/window/position')))
-
-        # restore window state
-        windowstate = Qt.WindowNoState
-        if self.settings.has('main/window/state'): # preferred
-            self.settings.get('main/window/state')
-        elif self.settings.get('main/window/is_maximized'):
-            windowstate = Qt.WindowMaximized
-        elif self.settings.get('main/window/is_fullscreen'):
-            windowstate = Qt.WindowFullScreen
-        self.setWindowState(windowstate)
-
-        # TODO should save elsewhere
-        self.settings.set('main/window/geometry', self.saveGeometry())
-        self.settings.set('main/window/state', self.saveState())
+        # uses default configuration as necessary
+        self.readSettings(CONF)
 
         # widgets
         self.messagedisplay = None
@@ -363,10 +337,10 @@ class MainWindow(QMainWindow):
 
     # ----------------------- Events ---------------------------------
     def closeEvent(self, event):
-        # TODO update values  of geometry and windowState in config.CONF
-
         # Close editors
         if self.editor.app_closing():
+            self.writeSettings(CONF) # write current window information to global settings object
+
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  #noqa
@@ -393,6 +367,40 @@ class MainWindow(QMainWindow):
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
 
+    def readSettings(self, settings):
+        qapp = QApplication.instance()
+        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('main/high_dpi_scaling'))
+
+        # restore window geometry
+        window_size = settings.get('main/window/size')
+        if not isinstance(window_size, QSize):
+            window_size = QSize(*window_size)
+        self.resize(window_size)
+        window_pos = settings.get('main/window/position')
+        if not isinstance(window_pos, QPoint):
+            window_pos = QPoint(*window_pos)
+        self.move(window_pos)
+
+        # restore window state
+        windowstate = Qt.WindowNoState
+        if settings.has('main/window/state'): # preferred
+            settings.get('main/window/state')
+        elif settings.get('main/window/is_maximized'):
+            windowstate = Qt.WindowMaximized
+        elif settings.get('main/window/is_fullscreen'):
+            windowstate = Qt.WindowFullScreen
+        self.setWindowState(windowstate)
+
+    def writeSettings(self, settings):
+        settings.set('main/window/size', self.size())
+        settings.set('main/window/position', self.pos())
+
+        # remove keys that come from the defaults
+        settings.set('main/window/state', self.saveState())
+        settings.remove('main/window/is_maximized')
+        settings.remove('main/window/is_fullscreen')
 
 def initialize():
     """Perform an initialization of the application instance. Most notably
@@ -438,9 +446,7 @@ def start_workbench(app):
     if main_window.splash:
         main_window.splash.hide()
     # lift-off!
-    app.exec_()
-
-    return main_window
+    return app.exec_()
 
 
 def main():
@@ -462,9 +468,9 @@ def main():
     # the default sys check interval leads to long lags
     # when request scripts to be aborted
     sys.setcheckinterval(SYSCHECK_INTERVAL)
-    main_window = None
+    exit_value = 0
     try:
-        main_window = start_workbench(app)
+        exit_value = start_workbench(app)
     except BaseException:
         # We count this as a crash
         import traceback
@@ -472,12 +478,10 @@ def main():
         # about. Prints to stderr as we can't really count on anything
         # else
         traceback.print_exc(file=ORIGINAL_STDERR)
+        exit_value = -1
+    finally:
+        ORIGINAL_SYS_EXIT(exit_value)
 
-    if main_window is None:
-        # An exception occurred don't exit here
-        return
-
-    ORIGINAL_SYS_EXIT()
 
 
 if __name__ == '__main__':
