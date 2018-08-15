@@ -4,7 +4,6 @@
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::Geometry::CSGObject;
 using Mantid::Geometry::IObject;
 using namespace boost::python;
 
