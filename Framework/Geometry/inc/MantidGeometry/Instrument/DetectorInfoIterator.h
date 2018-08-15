@@ -79,7 +79,7 @@ private:
       --m_item.m_index;
     }
   }
-  
+
   size_t getIndex() const { return m_item.m_index; }
 
   void setIndex(const size_t index) { m_item.m_index = index; }
