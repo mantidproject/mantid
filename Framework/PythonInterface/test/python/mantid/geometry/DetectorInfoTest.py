@@ -4,7 +4,6 @@ import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
-from mantid.geometry import DetectorInfoItem
 from mantid.simpleapi import *
 
 

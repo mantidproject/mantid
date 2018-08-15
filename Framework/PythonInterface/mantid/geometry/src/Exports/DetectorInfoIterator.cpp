@@ -10,6 +10,6 @@ using namespace boost::python;
 void export_DetectorInfoIterator() {
 
   // Export to Python
-  class_<DetectorInfoIterator, boost::noncopyable>("DetectorInfoIterator",
+  class_<DetectorInfoIterator>("DetectorInfoIterator",
                                                    no_init);
 }

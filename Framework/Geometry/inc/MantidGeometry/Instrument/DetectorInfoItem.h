@@ -57,6 +57,7 @@ public:
   DetectorInfoItem(DetectorInfoItem &&other) = default;
   DetectorInfoItem &operator=(DetectorInfoItem &&rhs) = default;
 
+  // Methods that can be accessed via the iterator
   bool isMonitor() const { return m_detectorInfo->isMonitor(m_index); }
 
   bool isMasked() const { return m_detectorInfo->isMasked(m_index); }
@@ -71,34 +72,11 @@ public:
     return m_detectorInfo->rotation(m_index);
   }
 
-  void advance(int64_t delta) {
-    m_index = delta < 0 ? std::max(static_cast<uint64_t>(0),
-                                   static_cast<uint64_t>(m_index) + delta)
-                        : std::min(m_detectorInfo->size(),
-                                   m_index + static_cast<size_t>(delta));
-  }
-
-  // This could cause a segmentation fault if a user goes past the end of the
-  // iterator and tries to index into the n+1 th element (which would not
-  // exist). Adding range checks to all the above methods may slow down
-  // performance though.
-  void incrementIndex() {
-    if (m_index < m_detectorInfo->size()) {
-      ++m_index;
-    }
-  }
-
-  void decrementIndex() {
-    if (m_index > 0) {
-      --m_index;
-    }
-  }
-
+  // Needed for test file
   size_t getIndex() const { return m_index; }
 
-  void setIndex(const size_t index) { m_index = index; }
-
 private:
+  // Allow DetectorInfoIterator access
   friend class DetectorInfoIterator;
 
   // Private constructor, can only be created by DetectorInfoIterator

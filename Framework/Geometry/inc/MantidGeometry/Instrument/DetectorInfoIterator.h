@@ -52,23 +52,47 @@ public:
       : m_item(detectorInfo, index) {}
 
 private:
+  // Allow boost iterator access
   friend class boost::iterator_core_access;
 
-  void increment() { m_item.incrementIndex(); }
+  // Iterator methods
+  void advance(int64_t delta) {
+    m_item.m_index =
+        delta < 0 ? std::max(static_cast<uint64_t>(0),
+                             static_cast<uint64_t>(m_item.m_index) + delta)
+                  : std::min(m_item.m_detectorInfo->size(),
+                             m_item.m_index + static_cast<size_t>(delta));
+  }
+
+  // This could cause a segmentation fault if a user goes past the end of the
+  // iterator and tries to index into the n+1 th element (which would not
+  // exist). Adding range checks to all the above methods may slow down
+  // performance though.
+  void increment() {
+    if (m_item.m_index < m_item.m_detectorInfo->size()) {
+      ++m_item.m_index;
+    }
+  }
+
+  void decrement() {
+    if (m_item.m_index > 0) {
+      --m_item.m_index;
+    }
+  }
+  
+  size_t getIndex() const { return m_item.m_index; }
+
+  void setIndex(const size_t index) { m_item.m_index = index; }
 
   bool equal(const DetectorInfoIterator &other) const {
-    return m_item.getIndex() == other.m_item.getIndex();
+    return getIndex() == other.getIndex();
   }
 
   const DetectorInfoItem &dereference() const { return m_item; }
 
-  void decrement() { m_item.decrementIndex(); }
-
-  void advance(int64_t delta) { m_item.advance(delta); }
-
   uint64_t distance_to(const DetectorInfoIterator &other) const {
-    return static_cast<uint64_t>(other.m_item.getIndex()) -
-           static_cast<uint64_t>(m_item.getIndex());
+    return static_cast<uint64_t>(other.getIndex()) -
+           static_cast<uint64_t>(getIndex());
   }
 
   DetectorInfoItem m_item;
