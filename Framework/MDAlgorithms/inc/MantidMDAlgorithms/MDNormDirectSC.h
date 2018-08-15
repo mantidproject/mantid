@@ -55,13 +55,15 @@ private:
   DataObjects::MDHistoWorkspace_sptr binInputWS();
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   std::vector<coord_t>
-  getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex=0) const;
+  getValuesFromOtherDimensions(bool &skipNormalization,
+                               uint16_t expInfoIndex = 0) const;
   Kernel::Matrix<coord_t>
   findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
                             bool &skipNormalization);
   void cacheDimensionXValues();
   void calculateNormalization(const std::vector<coord_t> &otherValues,
-                              const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex);
+                              const Kernel::Matrix<coord_t> &affineTrans,
+                              uint16_t expInfoIndex);
 
   void calculateIntersections(std::vector<std::array<double, 4>> &intersections,
                               const double theta, const double phi);

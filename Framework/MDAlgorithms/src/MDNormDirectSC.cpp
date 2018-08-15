@@ -144,28 +144,27 @@ void MDNormDirectSC::exec() {
 
   m_numExptInfos = outputWS->getNumExperimentInfo();
   // loop over all experiment infos
-  for (uint16_t expInfoIndex=0; expInfoIndex < m_numExptInfos; expInfoIndex++)
-  {
-      if (expInfoIndex > 0) {
-          m_accumulate = true;
-      }
-      // Check for other dimensions if we could measure anything in the original
-      // data
-      bool skipNormalization = false;
-      const std::vector<coord_t> otherValues =
-          getValuesFromOtherDimensions(skipNormalization,expInfoIndex);
-      const auto affineTrans =
-          findIntergratedDimensions(otherValues, skipNormalization);
-      cacheDimensionXValues();
+  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
+       expInfoIndex++) {
+    if (expInfoIndex > 0) {
+      m_accumulate = true;
+    }
+    // Check for other dimensions if we could measure anything in the original
+    // data
+    bool skipNormalization = false;
+    const std::vector<coord_t> otherValues =
+        getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+    const auto affineTrans =
+        findIntergratedDimensions(otherValues, skipNormalization);
+    cacheDimensionXValues();
 
-      if (!skipNormalization) {
-        calculateNormalization(otherValues, affineTrans,expInfoIndex);
-      } else {
-        g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
-                      "Not applying normalization.");
-      }
+    if (!skipNormalization) {
+      calculateNormalization(otherValues, affineTrans, expInfoIndex);
+    } else {
+      g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
+                    "Not applying normalization.");
+    }
   }
-
 
   // Set the display normalization based on the input workspace
   outputWS->setDisplayNormalization(m_inputWS->displayNormalizationHisto());
@@ -308,7 +307,8 @@ void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
  * MD position calculation
  */
 std::vector<coord_t>
-MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex) const {
+MDNormDirectSC::getValuesFromOtherDimensions(bool &skipNormalization,
+                                             uint16_t expInfoIndex) const {
   const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
   std::vector<coord_t> otherDimValues;
@@ -452,17 +452,17 @@ void MDNormDirectSC::cacheDimensionXValues() {
  * @param otherValues
  * @param affineTrans
  */
-void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherValues,
-    const Kernel::Matrix<coord_t> &affineTrans,
-    uint16_t expInfoIndex) {
+void MDNormDirectSC::calculateNormalization(
+    const std::vector<coord_t> &otherValues,
+    const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
   constexpr double energyToK = 8.0 * M_PI * M_PI *
                                PhysicalConstants::NeutronMass *
                                PhysicalConstants::meV * 1e-20 /
                                (PhysicalConstants::h * PhysicalConstants::h);
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-  auto *rubwLog =
-      dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
+  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(
+      currentExptInfo.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
     throw std::runtime_error(
         "Wokspace does not contain a log entry for the RUBW matrix."
@@ -492,8 +492,10 @@ void MDNormDirectSC::calculateNormalization(const std::vector<coord_t> &otherVal
   std::vector<std::atomic<signal_t>> signalArray(m_normWS->getNPoints());
   std::vector<std::array<double, 4>> intersections;
   std::vector<coord_t> pos, posNew;
-  double progStep = 0.7/m_numExptInfos;
-  auto prog = make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex, 0.3 + progStep * (expInfoIndex + 1.), ndets);
+  double progStep = 0.7 / m_numExptInfos;
+  auto prog =
+      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
+                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {
