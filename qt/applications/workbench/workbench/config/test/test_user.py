@@ -30,7 +30,8 @@ class ConfigUserTest(TestCase):
             defaults = {
                 'main': {
                     'a_default_key': 100,
-                    'bool_option': False
+                    'bool_option': False,
+                    'bool_option2': True
                 },
             }
             cls.cfg = UserConfig(cls.__name__, cls.__name__, defaults)
@@ -53,28 +54,32 @@ class ConfigUserTest(TestCase):
 
     def test_value_not_in_settings_retrieves_default_if_it_exists(self):
         self.assertEqual(100, self.cfg.get('main', 'a_default_key'))
+        self.assertEqual(100, self.cfg.get('main/a_default_key'))
 
     def test_boolean_with_default_false_can_be_retrieved(self):
         self.assertEqual(False, self.cfg.get('main', 'bool_option'))
+        self.assertEqual(False, self.cfg.get('main/bool_option'))
+
+        self.assertEqual(True, self.cfg.get('main/bool_option2'))
 
     # ----------------------------------------------
     # Failure tests
     # ----------------------------------------------
 
     def test_get_raises_error_with_invalid_section_type(self):
-        self.assertRaises(RuntimeError, self.cfg.get, 1, 'key1')
+        self.assertRaises(TypeError, self.cfg.get, 1, 'key1')
 
     def test_get_raises_error_with_invalid_option_type(self):
-        self.assertRaises(RuntimeError, self.cfg.get, 'section', 1)
+        self.assertRaises(TypeError, self.cfg.get, 'section', 1)
 
     def test_get_raises_keyerror_with_no_saved_setting_or_default(self):
         self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key')
 
     def test_set_raises_error_with_invalid_section_type(self):
-        self.assertRaises(RuntimeError, self.cfg.set, 1, 'key1', 1)
+        self.assertRaises(TypeError, self.cfg.set, 1, 'key1', 1)
 
     def test_set_raises_error_with_invalid_option_type(self):
-        self.assertRaises(RuntimeError, self.cfg.set, 'section', 1, 1)
+        self.assertRaises(TypeError, self.cfg.set, 'section', 1, 1)
 
 
 if __name__ == '__main__':
