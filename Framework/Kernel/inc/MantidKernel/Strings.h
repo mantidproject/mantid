@@ -164,9 +164,18 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
 
       // Initialise ostringstream
       std::ostringstream thread_stream;
-#pragma omp for schedule(static)
-      for (int i = 0; i < dist; i++) {
-        // Write to ostringstream
+
+      // Compute loop start and stop for current thread
+      int nchunk = dist / nThreads;
+      int nstart = nchunk * idThread;
+      int nextra = dist % nchunk;
+      if (idThread < nextra)
+        nchunk++;
+      nstart += std::min(idThread % nThreads, nextra);
+      int nstop = nstart + nchunk;
+
+      // Write to ostringstream for this thread
+      for (int i = nstart; i < nstop; i++) {
         thread_stream << separator << *(begin + i);
       }
       output[idThread] = thread_stream.str();

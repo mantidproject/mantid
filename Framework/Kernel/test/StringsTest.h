@@ -286,6 +286,25 @@ public:
     TS_ASSERT_EQUALS(out, "A,Help,I'm,Inside,Me,Stuck,Test");
   }
 
+  void test_joinLong() {
+    std::vector<std::string> v;
+    std::string out;
+    std::string ans;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS(out, "");
+
+    int n = 100000;
+    for (int i = 0; i < n; i++) {
+      v.emplace_back(std::to_string(i));
+      ans += std::to_string(i) + ",";
+    }
+
+    out = join(v.begin(), v.end(), ",");
+    ans.pop_back();
+    TS_ASSERT_EQUALS(out, ans);
+  }
+
   void test_joinCompress() {
 
     std::vector<std::vector<int>> inputList{
@@ -615,7 +634,7 @@ public:
     return new StringsTestPerformance();
   }
   static void destroySuite(StringsTestPerformance *suite) { delete suite; }
-  void setUp() override { input = std::vector<double>(10000000, 0.123456); }
+  void setUp() override { input = std::vector<double>(50000000, 0.123456); }
   void test_join_double() {
     auto result = join(input.begin(), input.end(), separator);
   }
