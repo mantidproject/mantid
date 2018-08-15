@@ -25,9 +25,7 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         Form.setObjectName("Form")
         Form.resize(468, 45)
 
-        self.gridLayout = QtWidgets.QGridLayout(Form)
-        self.gridLayout.setObjectName("gridLayout")
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.horizontalLayout.setObjectName("horizontalLayout")
 
         self.loadCurrentRunButton = QtWidgets.QPushButton(Form)
@@ -70,9 +68,6 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self.horizontalLayout.addWidget(self.incrementRunButton)
         self.horizontalLayout.addItem(spacerItem)
 
-        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
-        QtCore.QMetaObject.connectSlotsByName(Form)
-
     def set_run_edit_regex(self):
         regex = QtCore.QRegExp(runUtils.run_string_regex)  # "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"
         validator = QtGui.QRegExpValidator(regex)
@@ -112,9 +107,6 @@ class LoadRunWidgetView(QtWidgets.QWidget):
     def set_run_edit_text(self, text):
         self.runEdit.setText(text)
         self._cached_text = self.get_run_edit_text()
-
-        # , text):
-        # self.runEdit.setText(text)
 
     def reset_run_edit_from_cache(self):
         print("Reset to cache : ",self._cached_text )

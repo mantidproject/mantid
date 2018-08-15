@@ -31,9 +31,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         BrowseFileWidget.setObjectName("BrowseFileWidget")
         BrowseFileWidget.resize(462, 45)
 
-        self.gridLayout = QtWidgets.QGridLayout(BrowseFileWidget)
-        self.gridLayout.setObjectName("gridLayout")
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.browseButton = QtWidgets.QPushButton(BrowseFileWidget)
 
@@ -68,8 +66,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.copyButton.setObjectName("copyButton")
 
         self.horizontalLayout.addWidget(self.copyButton)
-        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
-        # QtCore.QMetaObject.connectSlotsByName(BrowseFileWidget)
 
     def on_browse_clicked(self, slot):
         self.browseButton.clicked.connect(slot)

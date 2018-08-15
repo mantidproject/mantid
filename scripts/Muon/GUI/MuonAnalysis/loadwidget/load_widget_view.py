@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from qtpy import QtCore, QtWidgets, QtGui
 
+#from mantidqtpython import MantidQt
 
 class LoadWidgetView(QtWidgets.QWidget):
 
@@ -11,7 +12,8 @@ class LoadWidgetView(QtWidgets.QWidget):
         self.load_run_widget = load_run_view
         self.load_file_widget = load_file_view
 
-        self.setupUi(self)
+        self.setupUi()
+        self.set_connections()
 
     def set_connections(self):
         self.on_multiple_loading_check_changed(self.change_multiple_loading_state)
@@ -42,51 +44,69 @@ class LoadWidgetView(QtWidgets.QWidget):
     def on_run_widget_data_changed(self, slot):
         self.load_run_widget.dataChanged.connect(slot)
 
-    def setupUi(self, Form):
-        Form.setObjectName("Form")
-        Form.resize(675, 180)
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(Form)
+    def on_clear_button_clicked(self, slot):
+        self.clearButton.clicked.connect(slot)
 
-        self.verticalLayout_2.addWidget(self.load_file_widget)
-        self.verticalLayout_2.addWidget(self.load_run_widget)
+    def setupUi(self):
 
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
-        spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem4)
+        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton.setMinimumSize(QtCore.QSize(100, 25))
+        self.clearButton.setObjectName("clearButton")
+        self.clearButton.setToolTip("Clear the currently loaded data")
+        self.clearButton.setText("Clear")
 
-        self.multiple_loading_label = QtWidgets.QLabel(Form)
-        self.multiple_loading_label.setObjectName("label_2")
+        self.multiple_loading_label = QtWidgets.QLabel(self)
+        self.multiple_loading_label.setObjectName("multiple_loading_label")
         self.multiple_loading_label.setText("Multiple loading : ")
-        self.horizontalLayout_3.addWidget(self.multiple_loading_label)
 
         self.multiple_loading_check = QtWidgets.QCheckBox()
+        self.multiple_loading_check.setToolTip("Enable/disable loading multiple runs at once")
         self.multiple_loading_check.setChecked(False)
-        # self.multiple_loading_check.stateChanged.connect(lambda: self.btnstate(self.b1))
-        self.horizontalLayout_3.addWidget(self.multiple_loading_check)
 
-        self.label_2 = QtWidgets.QLabel(Form)
-        self.label_2.setObjectName("label_2")
-        self.label_2.setText("Load Behaviour : ")
-        self.horizontalLayout_3.addWidget(self.label_2)
-        self.load_behaviour_combo = QtWidgets.QComboBox(Form)
+        # self.load_behaviour_label = QtWidgets.QLabel(self)
+        # self.load_behaviour_label.setObjectName("load_behaviour_label")
+        # self.load_behaviour_label.setText("Load Behaviour : ")
+
+        self.load_behaviour_combo = QtWidgets.QComboBox(self)
         self.load_behaviour_combo.setObjectName("load_behaviour_combo")
         self.load_behaviour_combo.addItem("Co-Add")
         self.load_behaviour_combo.addItem("Simultaneous")
+        self.load_behaviour_combo.setToolTip("The behaviour of the loaded data in multiple file mode")
         self.load_behaviour_combo.setEnabled(False)
-        self.horizontalLayout_3.addWidget(self.load_behaviour_combo)
-        spacerItem5 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_3.addItem(spacerItem5)
 
-        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
+        self.manageDirectoriesButton = QtWidgets.QPushButton(self)
+        self.manageDirectoriesButton.setMinimumSize(QtCore.QSize(100, 25))
+        self.manageDirectoriesButton.setObjectName("manageDirectoriesButton")
+        self.manageDirectoriesButton.setText("Manage User Directories")
 
-        self.set_connections()
-        QtCore.QMetaObject.connectSlotsByName(Form)
+        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+
+        # Set the layout of the tools at the bottom of the widget
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.addWidget(self.clearButton)
+        self.horizontalLayout.addWidget(self.multiple_loading_label)
+        self.horizontalLayout.addWidget(self.multiple_loading_check)
+        # self.horizontalLayout.addWidget(self.load_behaviour_label)
+        self.horizontalLayout.addWidget(self.load_behaviour_combo)
+        self.horizontalLayout.addItem(spacer)
+        self.horizontalLayout.addWidget(self.manageDirectoriesButton)
+        self.horizontalLayout.addItem(spacer)
+
+        # Set the layout vertically
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
+        self.verticalLayout.addWidget(self.load_file_widget)
+        self.verticalLayout.addWidget(self.load_run_widget)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout.addStretch(1)
 
     def disable_loading(self):
-        self.load_file_widget.disable_load_buttons()
-        self.load_run_widget.disable_load_buttons()
+        self.clearButton.setEnabled(False)
+        self.multiple_loading_check.setEnabled(False)
 
     def enable_loading(self):
-        self.load_file_widget.enable_load_buttons()
-        self.load_run_widget.enable_load_buttons()
+        self.clearButton.setEnabled(True)
+        self.multiple_loading_check.setEnabled(True)
+
+    # def show_directory_manager(self):
+    #     MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
