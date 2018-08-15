@@ -4,6 +4,8 @@ set ( SRC_FILES
 	src/IO/Chunker.cpp
 	src/IO/EventLoader.cpp
 	src/IO/EventParser.cpp
+	src/IO/EventsListsShmemManager.cpp
+	src/IO/EventsListsShmemStorage.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
@@ -18,6 +20,8 @@ set ( INC_FILES
 	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/EventLoaderHelpers.h
 	inc/MantidParallel/IO/EventParser.h
+	inc/MantidParallel/IO/EventsListsShmemManager.h
+	inc/MantidParallel/IO/EventsListsShmemStorage.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
 	inc/MantidParallel/IO/PulseTimeGenerator.h
@@ -35,6 +39,8 @@ set ( TEST_FILES
 	EventDataPartitionerTest.h
 	EventLoaderTest.h
 	EventParserTest.h
+	EventsListsShmemManagerTest.h
+	EventsListsShmemStorageTest.h
 	ExecutionModeTest.h
 	NonblockingTest.h
 	ParallelRunnerTest.h
