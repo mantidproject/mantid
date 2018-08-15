@@ -5,6 +5,29 @@ import optparse
 import os
 import sys
 
+from multiprocessing import Process, Array
+
+# Function to spawn one test manager per CPU
+def testProcess(testDir,runner,output,testsInclude, testsExclude, exclude_in_pr_builds,
+                results_array,process_number,ncores):
+
+    mgr = stresstesting.TestManager(testDir,runner,output=output,testsInclude=testsInclude,
+                                    testsExclude=testsExclude, exclude_in_pr_builds=exclude_in_pr_builds,
+                                    process_number=process_number,ncores=ncores)
+    try:
+        mgr.executeTests()
+    except KeyboardInterrupt:
+        mgr.markSkipped("KeyboardInterrupt")
+
+    # Update the test results in the array shared accross cpus
+    results_array[process_number] = mgr.skippedTests
+    results_array[process_number + ncores] = mgr.failedTests
+    results_array[process_number + 2*ncores] = mgr.totalTests
+
+    return
+
+#==============================================================================
+
 # set up the command line options
 VERSION = "1.1"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -44,6 +67,8 @@ loglevelChoices=["error", "warning", "notice", "information", "debug"]
 parser.add_option("-l", "--loglevel", dest="loglevel",
                   choices=loglevelChoices,
                   help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
+parser.add_option("-j", "--parallel", dest="parallel",
+                  help="The number of instances to run in parallel, like the -j option in ctest. Default is 1")
 parser.add_option("", "--showskipped", dest="showskipped", action="store_true",
                   help="List the skipped tests.")
 parser.add_option("-d", "--datapaths", dest="datapaths",
@@ -84,12 +109,21 @@ if options.makeprop:
 execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
-mgr = stresstesting.TestManager(mtdconf.testDir, runner, output = [reporter],
-                                testsInclude=options.testsInclude, testsExclude=options.testsExclude, exclude_in_pr_builds=options.exclude_in_pr_builds)
-try:
-    mgr.executeTests()
-except KeyboardInterrupt:
-    mgr.markSkipped("KeyboardInterrupt")
+
+# Multi-core processes
+ncores = int(options.parallel)
+processes = []
+# Prepare a shared array to hold skipped, failed and total number of tests
+results_array = Array('i', 3*ncores)
+# Prepare ncores processes
+for ip in range(ncores):
+    processes.append(Process(target=testProcess,args=(mtdconf.testDir, runner, [reporter],
+        options.testsInclude, options.testsExclude,options.exclude_in_pr_builds,results_array,ip,ncores)))
+# Start and join processes
+for p in processes:
+    p.start()
+for p in processes:
+    p.join()
 
 # report the errors
 success = reporter.reportStatus()
@@ -101,15 +135,20 @@ xml_report.close()
 if options.makeprop:
     mtdconf.restoreconfig()
 
+# Gather sums over ncores
+skippedTests = sum(results_array[:ncores])
+failedTests = sum(results_array[ncores:2*ncores])
+totalTests = sum(results_array[2*ncores:3*ncores])
+
 print()
-if mgr.skippedTests == mgr.totalTests:
+if skippedTests == totalTests:
     print("All tests were skipped")
     success = False # fail if everything was skipped
 else:
-    percent = 1.-float(mgr.failedTests)/float(mgr.totalTests-mgr.skippedTests)
+    percent = 1.-float(failedTests)/float(totalTests-skippedTests)
     percent = int(100. * percent)
     print("%d%s tests passed, %d tests failed out of %d (%d skipped)" %
-          (percent, '%', mgr.failedTests, (mgr.totalTests-mgr.skippedTests), mgr.skippedTests))
+          (percent, '%', failedTests, (totalTests-skippedTests), skippedTests))
 print('All tests passed? ' + str(success))
 if not success:
     sys.exit(1)

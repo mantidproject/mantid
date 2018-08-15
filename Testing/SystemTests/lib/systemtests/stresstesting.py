@@ -708,7 +708,8 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 testsInclude=None, testsExclude=None, exclude_in_pr_builds=None):
+                 testsInclude=None, testsExclude=None, exclude_in_pr_builds=None,
+                 process_number=0,ncores=1):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -720,7 +721,9 @@ class TestManager(object):
             test_dir = os.path.abspath(test_loc).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            self._tests = self.loadTestsFromDir(test_dir)
+            full_test_list = self.loadTestsFromDir(test_dir)
+            indices = range(process_number,len(full_test_list),ncores)
+            self._tests = [full_test_list[i] for i in indices]
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
@@ -953,6 +956,9 @@ class MantidFrameworkConfig:
 
         # Case insensitive
         config['filefinder.casesensitive'] = 'Off'
+
+        # Maximum number of threads
+        config['MultiThreaded.MaxCores'] = '4'
 
         # datasearch
         if self.__datasearch:
