@@ -356,7 +356,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
 
   bool loadCompleted = false;
-    if (!QMetaObject::invokeMethod(
+  if (!QMetaObject::invokeMethod(
           m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
           Q_RETURN_ARG(bool, loadCompleted),
           Q_ARG(const std::string, projectFile.toString()))) {
