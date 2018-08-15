@@ -1,6 +1,6 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreter.h"
+#include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreterLock.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -33,8 +33,8 @@ std::vector<std::string> runFinderProxy(FileFinderImpl &self,
   //   drop the Python threadstate and reset anything installed
   //   via PyEval_SetTrace while we execute the C++ code -
   //   ReleaseGlobalInterpreter does this for us
-  Mantid::PythonInterface::Environment::ReleaseGlobalInterpreter
-      releaseGlobalInterpreter;
+  Mantid::PythonInterface::Environment::ReleaseGlobalInterpreterLock
+      releaseGlobalInterpreterLock;
   return self.findRuns(hinstr);
 }
 
