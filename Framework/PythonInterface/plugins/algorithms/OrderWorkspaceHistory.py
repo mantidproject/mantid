@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import datetime
 import os
+import tokenize
 
 import mantid.api
 import mantid.kernel
@@ -67,38 +68,46 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         self.log().debug("Found {0} history files".format(len(historyfiles)))
 
-        # Read each history in as a list of tuples
-        original_lines = set()
-        for infile in historyfiles:
-            with open(os.path.join(source_folder, infile), 'r') as f:
-                for line in f:
-                    original_lines.add(line)
+        all_lines = []
 
-        commands = []
-        # Remove any comment lines
-        for line in original_lines:
-            stripped_line = line.lstrip()
-            if stripped_line[0] is not '#':
-                commands.append(stripped_line)
+        for fn in historyfiles:
+            with open(os.path.join(source_folder, fn)) as f:
+                tokens = tokenize.generate_tokens(f.readline)
 
-        self.log().debug("Found {0} unique commands".format(len(commands)))
+                line = None
+                for t in tokens:
+                # Start a new line when we see a name
+                    if line == None and t[0] == tokenize.NAME:
+                        line = [t]
+                    # End the line when we see a logical line ending
+                    elif t[0] == tokenize.NEWLINE:
+                        # Only care about the line if it has a comment
+                        have_comment = any(x[0] == tokenize.COMMENT for x in line)
+                        if have_comment:
+                            all_lines.append(line)
+                        line = []
+                    # Everything in between we care about
+                    elif line is not None:
+                        line.append(t)
 
-        # Add lists of histories together
-        all_unique_commands = [command.strip().split('#') for command in commands]
-
-        # Convert the datetime into a sortable integer
-        all_unique_commands = [(i[0], self._concatenate_iso_datetime(i[1]))
-                               for i in all_unique_commands]
+        # l[-1][1][1:] is the comment string, with the preceeding hash stripped off
+        all_commands = [(''.join(t[1] for t in l[:-1]), l[-1][1][1:])
+                      for l in all_lines]
+        # Remove duplicate commands by casting commands as a set
+        unique_commands = set()
+        for command in all_commands:
+            unique_commands.add(command)
 
         # Sort the new list on datetime integer
-        all_unique_commands.sort(key=lambda time: (time[1]))
+        unique_commands = list(unique_commands)
+        unique_commands.sort(key=lambda time: (time[1]))
 
         destination = self.getPropertyValue(_destination_file)
 
         self.log().debug("Writing commands to file")
         # Write to file
         with open(destination, 'w') as outfile:
-            for x in all_unique_commands:
+            for x in unique_commands:
                 outfile.write('{} # {} \n'.format(x[0], x[1]))
 
 
