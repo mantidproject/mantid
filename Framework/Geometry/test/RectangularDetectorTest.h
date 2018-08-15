@@ -226,9 +226,6 @@ public:
     TS_ASSERT_EQUALS(pos, V3D((-50 + 1) * 12., (-100 + 1) * 23., 0.));
 
     // Check some positions
-    std::cout << parDet->getAtXY(0, 0)->getPos() << '\n';
-    std::cout << parDet->getAtXY(1, 0)->getPos() << '\n';
-    std::cout << parDet->getAtXY(1, 1)->getPos() << '\n';
     TS_ASSERT_EQUALS(parDet->getAtXY(0, 0)->getPos(),
                      V3D(1000 - (50) * 12., 2000 - (100 * 23.), 3000.));
     TS_ASSERT_EQUALS(parDet->getAtXY(1, 0)->getPos(),

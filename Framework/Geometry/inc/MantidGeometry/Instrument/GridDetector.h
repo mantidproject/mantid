@@ -69,8 +69,8 @@ public:
   void initialize(boost::shared_ptr<IObject> shape, int xpixels, double xstart,
                   double xstep, int ypixels, double ystart, double ystep,
                   int zpixels, double zstart, double zstep, int idstart,
-                  bool idfillbyfirst_y, bool idfillbyfirst_z, int idstepbyrow,
-                  int idlayerstep, int idstep = 1);
+                  const std::string &idFillOrder, int idstepbyrow,
+                  int idstep = 1);
 
   //! Make a clone of the present component
   IComponent *clone() const override;
@@ -102,9 +102,8 @@ public:
 
   int idstart() const;
   bool idfillbyfirst_y() const;
-  bool idfillbyfirst_z() const;
+  const std::string &idFillOrder() const;
   int idstepbyrow() const;
-  int idlayerstep() const;
   int idstep() const;
 
   Kernel::V3D getRelativePosAtXYZ(int x, int y, int z) const;
@@ -172,7 +171,13 @@ protected:
                    int &minDetID, int &maxDetID);
 
 private:
-  
+  void initializeValues(boost::shared_ptr<IObject> shape, int xpixels,
+                        double xstart, double xstep, int ypixels, double ystart,
+                        double ystep, int zpixels, double zstart, double zstep,
+                        int idstart, const std::string &idFillOrder,
+                        int idstepbyrow, int idstep);
+
+  void validateInput() const;
   /// Pointer to the base GridDetector, for parametrized instruments
   const GridDetector *m_gridBase;
   /// Private copy assignment operator
@@ -218,12 +223,10 @@ private:
   int m_idstart;
   /// IDs are filled in Y fastest
   bool m_idfillbyfirst_y;
-  /// IDs are filled in Z fastest
-  bool m_idfillbyfirst_z;
+  /// The order in which to fill IDs
+  std::string m_idFillOrder;
   /// Step size in ID in each row
   int m_idstepbyrow;
-  /// Step size in ID in each layer
-  int m_idlayerstep;
   /// Step size in ID in each col
   int m_idstep;
 };

@@ -77,9 +77,7 @@ void GridDetector::init() {
   m_minDetId = m_maxDetId = 0;
   m_idstart = 0;
   m_idfillbyfirst_y = false;
-  m_idfillbyfirst_z = false;
   m_idstepbyrow = 0;
-  m_idlayerstep = 0;
   m_idstep = 0;
 }
 
@@ -112,27 +110,57 @@ boost::shared_ptr<Detector> GridDetector::getAtXYZ(const int x, const int y,
   if ((y < 0) || (y >= ypixels()))
     throw std::runtime_error(
         "GridDetector::getAtXYZ: y specified is out of range.");
-  if ((z < 0) || (z >= zpixels()))
-    throw std::runtime_error(
-        "GridDetector::getAtXYZ: z specified is out of range.");
-
-  // Find the index and return that.
-  // Get to layer
-  auto *zLayer = this;
-  if (m_zpixels > 0) {
-    auto zLayer = boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(z));
-    if (!zLayer)
+  if (zpixels() > 0) {
+    if ((z < 0) || (z >= zpixels()))
       throw std::runtime_error(
           "GridDetector::getAtXYZ: z specified is out of range.");
   }
 
-  auto xCol = boost::dynamic_pointer_cast<ICompAssembly>(zLayer->getChild(x));
+  // Find the index and return that.
+  boost::shared_ptr<ICompAssembly> xCol;
+  // Get to layer
+  if (this->zpixels() > 0) {
+    auto zLayer = boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(z));
+    if (!zLayer)
+      throw std::runtime_error(
+          "GridDetector::getAtXYZ: z specified is out of range.");
+
+    xCol = boost::dynamic_pointer_cast<ICompAssembly>(zLayer->getChild(x));
+  } else
+    xCol = boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(x));
 
   if (!xCol)
     throw std::runtime_error(
         "GridDetector::getAtXYZ: x specified is out of range.");
-
+  auto detector = xCol->getChild(y);
   return boost::dynamic_pointer_cast<Detector>(xCol->getChild(y));
+}
+
+detid_t getFillFirstZ(const GridDetector *me, int x, int y, int z) {
+  if (me->idFillOrder()[1] == 'y')
+    return me->idstart() + z * me->idstep() + y * me->idstepbyrow() +
+           x * (me->ypixels() * me->idstepbyrow());
+  else
+    return me->idstart() + z * me->idstep() + x * me->idstepbyrow() +
+           y * (me->xpixels() * me->idstepbyrow());
+}
+
+detid_t getFillFirstY(const GridDetector *me, int x, int y, int z) {
+  if (me->idFillOrder()[1] == 'x')
+    return me->idstart() + y * me->idstep() + x * me->idstepbyrow() +
+           z * (me->xpixels() * me->idstepbyrow());
+  else
+    return me->idstart() + y * me->idstep() + z * me->idstepbyrow() +
+           x * (me->zpixels() * me->idstepbyrow());
+}
+
+detid_t getFillFirstX(const GridDetector *me, int x, int y, int z) {
+  if (me->idFillOrder()[1] == 'y')
+    return me->idstart() + x * me->idstep() + y * me->idstepbyrow() +
+           z * (me->ypixels() * me->idstepbyrow());
+  else
+    return me->idstart() + x * me->idstep() + z * me->idstepbyrow() +
+           y * (me->zpixels() * me->idstepbyrow());
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -152,15 +180,51 @@ detid_t GridDetector::getDetectorIDAtXYZ(const int x, const int y,
   if (m_map)
     me = this->m_gridBase;
 
-  if (me->m_idfillbyfirst_y)
-    return me->m_idstart + x * me->m_idstepbyrow + y * me->m_idstep +
-           z * me->m_idlayerstep;
-  else if (me->m_idfillbyfirst_z)
-    return me->m_idstart + z * me->m_idstep+ y * me->m_idlayerstep +
-           x * me->m_idstepbyrow;
+  if (me->m_idFillOrder[0] == 'z')
+    return getFillFirstZ(me, x, y, z);
+  else if (me->m_idFillOrder[0] == 'y')
+    return getFillFirstY(me, x, y, z);
   else
-    return me->m_idstart + y * me->m_idstepbyrow + x * me->m_idstep +
-           z * me->m_idlayerstep;
+    return getFillFirstX(me, x, y, z);
+}
+
+std::tuple<int, int, int> getXYZFillFirstZ(const GridDetector *me, int col,
+                                           int id) {
+  if (me->idFillOrder()[1] == 'y') {
+    int row = (id / me->idstepbyrow()) % me->ypixels();
+    auto layer = (id / me->idstepbyrow()) / me->ypixels();
+    return std::tuple<int, int, int>(layer, row, col);
+  } else {
+    int row = (id / me->idstepbyrow()) % me->xpixels();
+    auto layer = (id / me->idstepbyrow()) / me->xpixels();
+    return std::tuple<int, int, int>(row, layer, col);
+  }
+}
+
+std::tuple<int, int, int> getXYZFillFirstY(const GridDetector *me, int col,
+                                           int id) {
+  if (me->idFillOrder()[1] == 'z') {
+    int row = (id / me->idstepbyrow()) % me->zpixels();
+    auto layer = (id / me->idstepbyrow()) / me->zpixels();
+    return std::tuple<int, int, int>(layer, col, row);
+  } else {
+    int row = (id / me->idstepbyrow()) % me->xpixels();
+    auto layer = (id / me->idstepbyrow()) / me->xpixels();
+    return std::tuple<int, int, int>(row, col, layer);
+  }
+}
+
+std::tuple<int, int, int> getXYZFillFirstX(const GridDetector *me, int col,
+                                           int id) {
+  if (me->idFillOrder()[1] == 'y') {
+    int row = (id / me->idstepbyrow()) % me->ypixels();
+    auto layer = (id / me->idstepbyrow()) / me->ypixels();
+    return std::tuple<int, int, int>(col, row, layer);
+  } else {
+    int row = (id / me->idstepbyrow()) % me->zpixels();
+    auto layer = (id / me->idstepbyrow()) / me->zpixels();
+    return std::tuple<int, int, int>(col, layer, row);
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -178,16 +242,14 @@ GridDetector::getXYZForDetectorID(const int detectorID) const {
   int id = detectorID - me->m_idstart;
   if ((me->m_idstepbyrow == 0) || (me->m_idstep == 0))
     return std::tuple<int, int, int>(-1, -1, -1);
-  int row = id / me->m_idstepbyrow;
   int col = (id % me->m_idstepbyrow) / me->m_idstep;
-  int layer = ((id % me->m_idstepbyrow) % me->m_idstep) / me->m_idlayerstep;
 
-  if (me->m_idfillbyfirst_y) // x is the fast-changing axis
-    return std::tuple<int, int, int>(row, col, layer);
-  else if (me->m_idfillbyfirst_z)
-    return std::tuple<int, int, int>(layer, col, row);
+  if (me->m_idFillOrder[0] == 'z')
+    return getXYZFillFirstZ(me, col, id);
+  else if (me->m_idFillOrder[0] == 'y')
+    return getXYZFillFirstY(me, col, id);
   else
-    return std::tuple<int, int, int>(col, row, layer);
+    return getXYZFillFirstX(me, col, id);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -346,13 +408,12 @@ bool GridDetector::idfillbyfirst_y() const {
     return this->m_idfillbyfirst_y;
 }
 
-//-------------------------------------------------------------------------------------------------
-/// Returns the idfillbyfirst_z
-bool GridDetector::idfillbyfirst_z() const {
+/// Returns the id fill order
+const std::string &GridDetector::idFillOrder() const {
   if (m_map)
-    return m_gridBase->m_idfillbyfirst_z;
+    return m_gridBase->m_idFillOrder;
   else
-    return this->m_idfillbyfirst_z;
+    return this->m_idFillOrder;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -362,15 +423,6 @@ int GridDetector::idstepbyrow() const {
     return m_gridBase->m_idstepbyrow;
   else
     return this->m_idstepbyrow;
-}
-
-//-------------------------------------------------------------------------------------------------
-/// Returns the layer idstep
-int GridDetector::idlayerstep() const {
-  if (m_map)
-    return m_gridBase->m_idlayerstep;
-  else
-    return this->m_idlayerstep;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -402,7 +454,7 @@ V3D GridDetector::getRelativePosAtXYZ(int x, int y, int z) const {
       scaley = m_map->get(m_gridBase, "scaley")->value<double>();
     double scalez = 1.0;
     if (m_map->contains(m_gridBase, "scalez"))
-      scaley = m_map->get(m_gridBase, "scalez")->value<double>();
+      scalez = m_map->get(m_gridBase, "scalez")->value<double>();
     return m_gridBase->getRelativePosAtXYZ(x, y, z) *
            V3D(scalex, scaley, scalez);
   } else
@@ -412,21 +464,28 @@ V3D GridDetector::getRelativePosAtXYZ(int x, int y, int z) const {
 
 void GridDetector::createLayer(const std::string &name, CompAssembly *parent,
                                int iz, int &minDetID, int &maxDetID) {
-  int ix, iy;
-  for (ix = 0; ix < m_xpixels; ++ix) {
+  // Loop and create all detectors in this layer.
+  for (int ix = 0; ix < m_xpixels; ++ix) {
     // Create an ICompAssembly for each x-column
     std::ostringstream oss_col;
-    oss_col << name << "(x=" << ix << ")";
+    if (m_zpixels > 0)
+      oss_col << name << "(z=" << iz << ","
+              << "x=" << ix << ")";
+    else
+      oss_col << name << "(x=" << ix << ")";
+
     auto *xColumn = new CompAssembly(oss_col.str(), parent);
 
-    for (iy = 0; iy < m_ypixels; ++iy) {
+    for (int iy = 0; iy < m_ypixels; ++iy) {
       // Make the name
       std::ostringstream oss;
-      oss << name << "(" << ix << "," << iy << ")";
+      if (m_zpixels > 0)
+        oss << name << "(" << ix << "," << iy << "," << iz << ")";
+      else
+        oss << name << "(" << ix << "," << iy << ")";
 
       // Calculate its id and set it.
-      int id;
-      id = this->getDetectorIDAtXYZ(ix, iy, iz);
+      auto id = this->getDetectorIDAtXYZ(ix, iy, iz);
 
       // minimum grid detector id
       if (id < minDetID) {
@@ -439,8 +498,8 @@ void GridDetector::createLayer(const std::string &name, CompAssembly *parent,
       // Create the detector from the given id & shape and with xColumn as the
       // parent.
       auto *detector =
-          new GridDetectorPixel(oss.str(), id, m_shape, xColumn, this, size_t(iy),
-                                size_t(ix), size_t(iz));
+          new GridDetectorPixel(oss.str(), id, m_shape, xColumn, this,
+                                size_t(ix), size_t(iy), size_t(iz));
 
       // Calculate the x,y,z position
       double x = m_xstart + ix * m_xstep;
@@ -456,6 +515,62 @@ void GridDetector::createLayer(const std::string &name, CompAssembly *parent,
     }
   }
 }
+
+bool checkValidOrderString(const std::string &order) {
+  static const boost::regex exp("xyz|xzy|yzx|yxz|zyx|zxy");
+
+  return boost::regex_match(order, exp);
+}
+
+void GridDetector::validateInput() const {
+  // Some safety checks
+  if (!checkValidOrderString(m_idFillOrder) || m_idFillOrder.size() != 3)
+    throw std::invalid_argument("GridDetector::initialize(): order string "
+                                "should only comprise exactly 3 letters x, y, "
+                                "and z in any order.");
+  if (m_xpixels <= 0)
+    throw std::invalid_argument(
+        "GridDetector::initialize(): xpixels should be > 0");
+  if (m_ypixels <= 0)
+    throw std::invalid_argument(
+        "GridDetector::initialize(): ypixels should be > 0");
+}
+
+void GridDetector::initializeValues(boost::shared_ptr<IObject> shape,
+                                    int xpixels, double xstart, double xstep,
+                                    int ypixels, double ystart, double ystep,
+                                    int zpixels, double zstart, double zstep,
+                                    int idstart, const std::string &idFillOrder,
+                                    int idstepbyrow, int idstep) {
+
+  m_xpixels = xpixels;
+  m_ypixels = ypixels;
+  m_zpixels = zpixels;
+  m_xsize = xpixels * xstep;
+  m_ysize = ypixels * ystep;
+  m_zsize = zpixels * zstep;
+  m_xstart = xstart;
+  m_ystart = ystart;
+  m_zstart = zstart;
+  m_xstep = xstep;
+  m_ystep = ystep;
+  m_zstep = zstep;
+  m_shape = shape;
+
+  /// IDs start here
+  m_idstart = idstart;
+  /// IDs are filled in Y fastest
+  m_idfillbyfirst_y = idFillOrder[0] == 'y';
+  /// IDs are filled by Y fastest
+  m_idFillOrder = idFillOrder;
+  /// Step size in ID in each row
+  m_idstepbyrow = idstepbyrow;
+  /// Step size in ID in each col
+  m_idstep = idstep;
+
+  validateInput();
+}
+
 //-------------------------------------------------------------------------------------------------
 /** Initialize a GridDetector by creating all of the pixels
  * contained within it. You should have set the name, position
@@ -499,63 +614,27 @@ void GridDetector::initialize(boost::shared_ptr<IObject> shape, int xpixels,
                               double xstart, double xstep, int ypixels,
                               double ystart, double ystep, int zpixels,
                               double zstart, double zstep, int idstart,
-                              bool idfillbyfirst_y, bool idfillbyfirst_z,
-                              int idstepbyrow, int idlayerstep, int idstep) {
+                              const std::string &idFillOrder, int idstepbyrow,
+                              int idstep) {
 
   if (m_map)
     throw std::runtime_error("GridDetector::initialize() called for a "
                              "parametrized GridDetector");
 
-  m_xpixels = xpixels;
-  m_ypixels = ypixels;
-  m_zpixels = zpixels;
-  m_xsize = xpixels * xstep;
-  m_ysize = ypixels * ystep;
-  m_zsize = zpixels * zstep;
-  m_xstart = xstart;
-  m_ystart = ystart;
-  m_zstart = zstart;
-  m_xstep = xstep;
-  m_ystep = ystep;
-  m_zstep = zstep;
-  m_shape = shape;
-
-  /// IDs start here
-  m_idstart = idstart;
-  /// IDs are filled in Y fastest
-  m_idfillbyfirst_y = idfillbyfirst_y;
-  /// IDs are filled by Y fastest
-  m_idfillbyfirst_z = idfillbyfirst_z;
-  /// Step size in ID in each row
-  m_idstepbyrow = idstepbyrow;
-  /// Step size in ID in each layer
-  m_idlayerstep = idlayerstep;
-  /// Step size in ID in each col
-  m_idstep = idstep;
-
-  // Some safety checks
-  if (idfillbyfirst_y && idfillbyfirst_z)
-    throw std::invalid_argument(
-        "GridDetector::initialize(): cannot fill by both y and z initially");
-  if (m_xpixels <= 0)
-    throw std::invalid_argument(
-        "GridDetector::initialize(): xpixels should be > 0");
-  if (m_ypixels <= 0)
-    throw std::invalid_argument(
-        "GridDetector::initialize(): ypixels should be > 0");
+  initializeValues(shape, xpixels, xstart, xstep, ypixels, ystart, ystep,
+                   zpixels, zstart, zstep, idstart, idFillOrder, idstepbyrow,
+                   idstep);
 
   std::string name = this->getName();
   int minDetId = idstart, maxDetId = idstart;
   // Loop through all the pixels
   if (m_zpixels > 0) {
-    int iz;
-    for (iz = 0; iz < m_zpixels; ++iz) {
-      // Create an ICompAssembly for each x-column
+    for (int iz = 0; iz < m_zpixels; ++iz) {
+      // Create an ICompAssembly for each z-layer
       std::ostringstream oss_layer;
       oss_layer << name << "(z=" << iz << ")";
-      CompAssembly *zLayer = new CompAssembly(oss_layer.str(), this);
-
-      createLayer(name, zLayer, iz, minDetId, maxDetId);
+      createLayer(name, new CompAssembly(oss_layer.str(), this), iz, minDetId,
+                  maxDetId);
     }
   } else
     createLayer(name, this, 0, minDetId, maxDetId);

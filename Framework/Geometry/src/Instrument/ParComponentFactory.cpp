@@ -85,6 +85,10 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   if (rd)
     return boost::make_shared<RectangularDetector>(rd, map);
 
+  const GridDetector *gd = dynamic_cast<const GridDetector *>(base.get());
+  if (gd)
+    return boost::make_shared<GridDetector>(gd, map);
+
   const CompAssembly *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)
     return boost::make_shared<CompAssembly>(ac, map);
