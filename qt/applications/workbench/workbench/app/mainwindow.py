@@ -53,8 +53,7 @@ from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
 # Pre-application setup
 plugins.setup_library_paths()
 
-from mantid.kernel import version_str
-from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -71,12 +70,13 @@ def qapplication():
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
         argv = sys.argv[:]
-        argv[0] = 'Mantid Workbench' # replace application name
+        argv[0] = APPNAME # replace application name
         app = QApplication(argv)
         app.setOrganizationName(ORGANIZATION)
         app.setOrganizationDomain(ORG_DOMAIN)
         app.setApplicationName(APPNAME)
-        app.setApplicationVersion(version_str())
+        # not calling app.setApplicationVersion(mantid.kernel.version_str())
+        # because it needs to happen after logging is monkey-patched in
     return app
 
 
@@ -267,8 +267,6 @@ class MainWindow(QMainWindow):
     def setup_for_first_run(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
-        windowstate = None
-        self.setWindowState(Qt.WindowMaximized) # TODO get from config.CONF
         desktop = QDesktopWidget()
         self.setup_default_layouts()
 
@@ -384,23 +382,16 @@ class MainWindow(QMainWindow):
         self.move(window_pos)
 
         # restore window state
-        windowstate = Qt.WindowNoState
-        if settings.has('main/window/state'): # preferred
-            settings.get('main/window/state')
-        elif settings.get('main/window/is_maximized'):
-            windowstate = Qt.WindowMaximized
-        elif settings.get('main/window/is_fullscreen'):
-            windowstate = Qt.WindowFullScreen
-        self.setWindowState(windowstate)
+        if settings.has('main/window/state'):
+            self.restoreState(settings.get('main/window/state'))
+        else:
+            self.setWindowState(Qt.WindowMaximized | Qt.WindowFullScreen)
 
     def writeSettings(self, settings):
-        settings.set('main/window/size', self.size())
-        settings.set('main/window/position', self.pos())
+        settings.set('main/window/size', self.size()) # QSize
+        settings.set('main/window/position', self.pos()) # QPoint
+        settings.set('main/window/state', self.saveState()) # QByteArray
 
-        # remove keys that come from the defaults
-        settings.set('main/window/state', self.saveState())
-        settings.remove('main/window/is_maximized')
-        settings.remove('main/window/is_fullscreen')
 
 def initialize():
     """Perform an initialization of the application instance. Most notably
@@ -481,7 +472,6 @@ def main():
         exit_value = -1
     finally:
         ORIGINAL_SYS_EXIT(exit_value)
-
 
 
 if __name__ == '__main__':
