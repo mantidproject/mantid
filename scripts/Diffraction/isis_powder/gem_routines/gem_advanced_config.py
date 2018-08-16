@@ -88,6 +88,24 @@ texture_vanadium_cropping_values = [(75, 34933), (65, 22887), (65, 22230), (73, 
                                     (100, 20015), (100, 20026), (100, 20030), (100, 20010), (100, 19999), (100, 20023),
                                     (100, 19993), (100, 20034), (100, 20026), (100, 20033)]
 
+calibration_params = {
+    "create_cal_rebin_1_params": "100,-0.0006,19950",
+    "create_cal_rebin_2_params": "1.8,0.002,2.1",
+    "create_cal_cross_correlate_params": {
+        "cross_corr_reference_spectra": 20,
+        "cross_corr_ws_index_min": 9,
+        "cross_corr_ws_index_max": 1063,
+        "cross_corr_x_min": 1.8,
+        "cross_corr_x_max": 2.1
+    },
+    "create_cal_get_detector_offsets_params": {
+        "get_det_offsets_step": 0.002,
+        "get_det_offsets_x_min": -200,
+        "get_det_offsets_x_max": 200,
+        "get_det_offsets_d_ref": 1.912795
+    }
+}
+
 all_adv_variables = {
     "gsas_calib_filename": "GEM_PF1_PROFILE.IPF",
     "maud_grouping_scheme": [1] * 3 + [2] * 8 + [3] * 20 + [4] * 42 + [5] * 52 + [6] * 35,
@@ -114,3 +132,7 @@ def get_mode_specific_variables(is_texture_mode):
 
 def get_all_adv_variables():
     return all_adv_variables
+
+
+def get_calibration_variables():
+    return calibration_params
