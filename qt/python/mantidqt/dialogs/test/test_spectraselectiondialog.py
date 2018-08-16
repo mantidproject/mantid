@@ -106,7 +106,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
 
         self.assertTrue(dlg.selection is not None)
         self.assertTrue(dlg.selection.spectra is None)
-        self.assertEqual(range(50, 61), dlg.selection.wksp_indices)
+        self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)
 
     @mock.patch('mantidqt.dialogs.spectraselectordialog.SpectraSelectionDialog', autospec=True)
     def test_get_spectra_selection_cancelled_returns_None(self, dialog_mock):
@@ -169,4 +169,4 @@ class SpectraSelectionDialogTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2, buffer=False)

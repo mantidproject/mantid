@@ -19,6 +19,7 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rd party imports
+from mantid.api import MatrixWorkspace
 import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
 
@@ -57,8 +58,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     @staticmethod
     def raise_error_if_workspaces_not_compatible(workspaces):
         def value_error_if_not_compatible(x):
-            if not hasattr(x, 'getNumberHistograms'):
-                raise ValueError("Workspace '{}' is not a MatrixWorkspace".format(x.name()))
+            if not isinstance(x, MatrixWorkspace):
+                raise ValueError("Expected MatrixWorkspace, found {}.".format(x.__class__.__name__))
+
         map(value_error_if_not_compatible, workspaces)
 
     def __init__(self, workspaces,
