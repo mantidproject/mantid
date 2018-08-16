@@ -63,8 +63,8 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isInitialized = other.m_isInitialized;
   m_YUnit = other.m_YUnit;
   m_YUnitLabel = other.m_YUnitLabel;
-  m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
-  m_isCommonBinsFlag = other.m_isCommonBinsFlag;
+  m_isCommonBinsFlagSet.store(other.m_isCommonBinsFlagSet);
+  m_isCommonBinsFlag.store(other.m_isCommonBinsFlag);
   m_masks = other.m_masks;
   // TODO: Do we need to init m_monitorWorkspace?
 }

@@ -602,9 +602,9 @@ private:
 
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default
-  mutable bool m_isCommonBinsFlagSet{false};
+  mutable std::atomic<bool> m_isCommonBinsFlagSet{false};
   /// Flag indicating whether the data has common bins. False by default
-  mutable bool m_isCommonBinsFlag{false};
+  mutable std::atomic<bool> m_isCommonBinsFlag{false};
 
   /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
