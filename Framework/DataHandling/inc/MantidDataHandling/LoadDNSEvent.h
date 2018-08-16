@@ -27,7 +27,7 @@ namespace DataHandling {
 
   Algorithm used to generate an EventWorkspace from a DNS listmode (.mdat) file.
 
-  @author Joachim Coenen, Juelich Center for Neutron Science
+  @author Joachim Coenen, Jülich Centre for Neutron Science
   @date 2018-08-16
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
