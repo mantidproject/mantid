@@ -262,12 +262,8 @@ class MainWindow(QMainWindow):
     # ----------------------- Layout ---------------------------------
 
     def setup_layout(self):
-        self.setup_for_first_run()
-
-    def setup_for_first_run(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
-        desktop = QDesktopWidget()
         self.setup_default_layouts()
 
     def prep_window_for_reset(self):
@@ -371,21 +367,34 @@ class MainWindow(QMainWindow):
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
             qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('main/high_dpi_scaling'))
 
-        # restore window geometry
+        # get the saved window geometry
         window_size = settings.get('main/window/size')
         if not isinstance(window_size, QSize):
             window_size = QSize(*window_size)
-        self.resize(window_size)
         window_pos = settings.get('main/window/position')
         if not isinstance(window_pos, QPoint):
             window_pos = QPoint(*window_pos)
+
+        # make sure main window is smaller than the desktop
+        desktop_size = QDesktopWidget().screenGeometry().size()
+        w = min(desktop_size.width(), window_size.width())
+        h = min(desktop_size.height(), window_size.height())
+        window_size = QSize(w, h)
+
+        # and that it will be painted on screen
+        x = min(window_pos.x(), desktop_size.width() - window_size.width())
+        y = min(window_pos.y(), desktop_size.height() - window_size.height())
+        window_pos = QPoint(x, y)
+
+        # set the geometry
+        self.resize(window_size)
         self.move(window_pos)
 
         # restore window state
         if settings.has('main/window/state'):
             self.restoreState(settings.get('main/window/state'))
         else:
-            self.setWindowState(Qt.WindowMaximized | Qt.WindowFullScreen)
+            self.setWindowState(Qt.WindowMaximized)
 
     def writeSettings(self, settings):
         settings.set('main/window/size', self.size()) # QSize
