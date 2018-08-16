@@ -119,45 +119,45 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
  * requirements of this algorithm
  */
 DataObjects::EventWorkspace_sptr
-WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &event_ws1,
-                            const DataObjects::EventWorkspace &event_ws2) {
+WorkspaceJoiners::execEvent(const DataObjects::EventWorkspace &eventWs1,
+                            const DataObjects::EventWorkspace &eventWs2) {
   // Create the output workspace
   const size_t totalHists =
-      event_ws1.getNumberHistograms() + event_ws2.getNumberHistograms();
+      eventWs1.getNumberHistograms() + eventWs2.getNumberHistograms();
   auto output =
-      create<EventWorkspace>(event_ws1, totalHists, event_ws1.binEdges(0));
+      create<EventWorkspace>(eventWs1, totalHists, eventWs1.binEdges(0));
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
-  const int64_t &nhist1 = event_ws1.getNumberHistograms();
+  const int64_t &nhist1 = eventWs1.getNumberHistograms();
   for (int64_t i = 0; i < nhist1; ++i) {
-    output->getSpectrum(i) = event_ws1.getSpectrum(i);
+    output->getSpectrum(i) = eventWs1.getSpectrum(i);
     m_progress->report();
   }
 
   // For second loop we use the offset from the first
-  const int64_t &nhist2 = event_ws2.getNumberHistograms();
-  const auto &spectrumInfo = event_ws2.spectrumInfo();
+  const int64_t &nhist2 = eventWs2.getNumberHistograms();
+  const auto &spectrumInfo = eventWs2.spectrumInfo();
   auto &outSpectrumInfo = output->mutableSpectrumInfo();
   for (int64_t j = 0; j < nhist2; ++j) {
     // This is the workspace index at which we assign in the output
-    int64_t output_wi = j + nhist1;
-    output->getSpectrum(output_wi) = event_ws2.getSpectrum(j);
+    int64_t outputWi = j + nhist1;
+    output->getSpectrum(outputWi) = eventWs2.getSpectrum(j);
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
     if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
-      output->getSpectrum(output_wi).clearData();
+      output->getSpectrum(outputWi).clearData();
       PARALLEL_CRITICAL(setMaskedEvent) {
-        outSpectrumInfo.setMasked(output_wi, true);
+        outSpectrumInfo.setMasked(outputWi, true);
       }
     }
 
     m_progress->report();
   }
 
-  fixSpectrumNumbers(event_ws1, event_ws2, *output);
+  fixSpectrumNumbers(eventWs1, eventWs2, *output);
 
   return std::move(output);
 }

@@ -60,14 +60,14 @@ void AppendSpectra::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  DataObjects::EventWorkspace_const_sptr event_ws1 =
+  DataObjects::EventWorkspace_const_sptr eventWs1 =
       boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  DataObjects::EventWorkspace_const_sptr event_ws2 =
+  DataObjects::EventWorkspace_const_sptr eventWs2 =
       boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
-  if (((event_ws1) && (!event_ws2)) || ((!event_ws1) && (event_ws2))) {
+  if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
     const std::string message("Only one of the input workspaces are of type "
                               "EventWorkspace; please use matching workspace "
                               "types (both EventWorkspace's or both "
@@ -86,14 +86,14 @@ void AppendSpectra::exec() {
   const int number = getProperty("Number");
   MatrixWorkspace_sptr output;
 
-  if (event_ws1 && event_ws2) {
+  if (eventWs1 && eventWs2) {
     // Both are event workspaces. Use the special method
-    DataObjects::EventWorkspace_sptr e_output =
-        this->execEvent(*event_ws1, *event_ws2);
+    DataObjects::EventWorkspace_sptr eOutput =
+        this->execEvent(*eventWs1, *eventWs2);
     for (int i = 1; i < number; i++) {
-      e_output = this->execEvent(*e_output, *event_ws2);
+      eOutput = this->execEvent(*eOutput, *eventWs2);
     }
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(e_output);
+    output = boost::static_pointer_cast<MatrixWorkspace>(eOutput);
   } else { // So it is a workspace 2D.
     // The only restriction, even with ValidateInputs=false
     if (ws1->blocksize() != ws2->blocksize())
