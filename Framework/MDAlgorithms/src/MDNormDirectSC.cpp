@@ -303,6 +303,7 @@ void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
  * Retrieve logged values from non-HKL dimensions
  * @param skipNormalization [InOut] Updated to false if any values are outside
  * range measured by input workspace
+ * @param expInfoIndex current experiment info index
  * @return A vector of values from other dimensions to be include in normalized
  * MD position calculation
  */
@@ -449,8 +450,9 @@ void MDNormDirectSC::cacheDimensionXValues() {
 /**
  * Computed the normalization for the input workspace. Results are stored in
  * m_normWS
- * @param otherValues
- * @param affineTrans
+ * @param otherValues non HKLE dimensions
+ * @param affineTrans affine matrix
+ * @param expInfoIndex current experiment info index
  */
 void MDNormDirectSC::calculateNormalization(
     const std::vector<coord_t> &otherValues,
