@@ -116,8 +116,8 @@ public:
                                          "test_all_items_present_unroll_2"};
     std::vector<Workspace_sptr> expected;
     expected.push_back(addToADS(names[0]));
-    const auto nitems{4u};
-    auto groupWS{addGroupToADS(names[1], nitems)};
+    const size_t nitems{4u};
+    WorkspaceGroup_sptr groupWS{addGroupToADS(names[1], nitems)};
     for (auto i = 0u; i < nitems; ++i) {
       expected.push_back(groupWS->getItem(i));
     }
@@ -538,7 +538,7 @@ private:
   /// Add a group with N simple workspaces to the ADS
   WorkspaceGroup_sptr addGroupToADS(const std::string &name,
                                     const size_t nitems = 2) {
-    auto group{boost::make_shared<WorkspaceGroup>()};
+    auto group(boost::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
       group->addWorkspace(boost::make_shared<MockWorkspace>());
     }
