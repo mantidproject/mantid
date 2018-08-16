@@ -62,8 +62,12 @@ public:
                                            V3D(10, 0, 0),  // Sample position
                                            V3D(11, 0, 0)); // Detector position
 
+    // Total number of detectors will be 11
+    // Need to loop until 12
+    int numDetectors = 12;
+
     // Add 10 more detectors to the instrument
-    for (int i = 2; i < 12; i++) {
+    for (int i = 2; i < numDetectors; i++) {
       Detector *det =
           new Detector("point-detector", i /*detector id*/, nullptr);
       det->setPos(V3D(10 + i, 0, 0));
@@ -98,7 +102,7 @@ public:
     TS_ASSERT(iter != detectorInfo->begin());
   }
 
-  void test_iterator_increment() {
+  void test_iterator_increment_and_positions() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
     auto iter = detectorInfo->begin();
@@ -106,9 +110,21 @@ public:
     // Check that we start at the beginning
     TS_ASSERT(iter == detectorInfo->begin());
 
-    // Increment and check index
+    // Doubles for values in the V3D position object
+    double xValue = 0.0;
+    double zero = 0.0;
+
+    // Increment the iterator and check positions
     for (int i = 0; i < 11; ++i) {
-      TS_ASSERT_EQUALS(iter->getIndex(), i);
+      // Store expected X as double
+      xValue = 11.0 + (double)i;
+
+      // Assertions
+      TS_ASSERT_EQUALS(iter->position().X(), xValue);
+      TS_ASSERT(iter->position().Y() == zero);
+      TS_ASSERT(iter->position().Z() == zero);
+
+      // Increment the iterator
       ++iter;
     }
 
@@ -116,7 +132,7 @@ public:
     TS_ASSERT(iter == detectorInfo->end());
   }
 
-  void test_iterator_decrement() {
+  void test_iterator_decrement_and_positions() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
     auto iter = detectorInfo->end();
@@ -124,39 +140,52 @@ public:
     // Check that we start at the end
     TS_ASSERT(iter == detectorInfo->end());
 
-    // Decrement and check index
+    // Doubles for values in the V3D position object
+    double xValue = 0.0;
+    double zero = 0.0;
+
+    // Increment the iterator and check positions
     for (int i = 11; i > 0; --i) {
-      TS_ASSERT_EQUALS(iter->getIndex(), i);
+      // Decrement the iterator
       --iter;
+
+      // Store expected X as double
+      xValue = 10.0 + (double)i;
+
+      // Assertions
+      TS_ASSERT_EQUALS(iter->position().X(), xValue);
+      TS_ASSERT(iter->position().Y() == zero);
+      TS_ASSERT(iter->position().Z() == zero);
     }
 
     // Check we've reached the beginning
     TS_ASSERT(iter == detectorInfo->begin());
   }
 
-  void test_iterator_advance() {
+  void test_iterator_advance_and_positions() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
     auto iter = detectorInfo->begin();
 
+    // Store the expected X value
+    double xValue = 0.0;
+
     // Advance 6 places
+    xValue = 17.0;
     std::advance(iter, 6);
-    TS_ASSERT_EQUALS(iter->getIndex(), 6);
+    TS_ASSERT_EQUALS(iter->position().X(), xValue)
 
-    // Go past end of valid range
-    std::advance(iter, 8);
-    TS_ASSERT(iter == detectorInfo->end());
-
-    // Go backwards
+    // Go backwards 2 places
+    xValue = 15.0;
     std::advance(iter, -2);
-    TS_ASSERT_EQUALS(iter->getIndex(), 9);
+    TS_ASSERT_EQUALS(iter->position().X(), xValue)
 
     // Go to the start
-    std::advance(iter, -9);
+    std::advance(iter, -4);
     TS_ASSERT(iter == detectorInfo->begin());
   }
 
-  void test_copy_iterator() {
+  void test_copy_iterator_and_positions() {
     // Get the DetectorInfo object
     auto detectorInfo = create_detector_info_object();
     auto iter = detectorInfo->begin();
@@ -165,16 +194,16 @@ public:
     auto iterCopy = DetectorInfoIterator(iter);
 
     // Check
-    TS_ASSERT_EQUALS(iter->getIndex(), 0);
-    TS_ASSERT_EQUALS(iterCopy->getIndex(), 0);
+    TS_ASSERT_EQUALS(iter->position().X(), 11.0);
+    TS_ASSERT_EQUALS(iterCopy->position().X(), 11.0);
 
     // Increment
     ++iter;
     ++iterCopy;
 
     // Check again
-    TS_ASSERT_EQUALS(iter->getIndex(), 1);
-    TS_ASSERT_EQUALS(iterCopy->getIndex(), 1);
+    TS_ASSERT_EQUALS(iter->position().X(), 12.0);
+    TS_ASSERT_EQUALS(iterCopy->position().X(), 12.0);
   }
 };
 
