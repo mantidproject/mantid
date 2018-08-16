@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import datetime
 import os
 import tokenize
+import glob
 
 import mantid.api
 import mantid.kernel
@@ -59,24 +60,17 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
     def write_ordered_workspace_history(self):
         self.log().debug("Started saving workspace histories")
-        source_folder = self.getPropertyValue(_recovery_folder)
-
-        # Get list of all workspace histories
-        onlyfiles = [f for f in os.listdir(source_folder)
-                     if os.path.isfile(os.path.join(source_folder, f))]
-        historyfiles = [x for x in onlyfiles if x.endswith('.py')]
-
-        self.log().debug("Found {0} history files".format(len(historyfiles)))
 
         all_lines = []
 
-        for fn in historyfiles:
-            with open(os.path.join(source_folder, fn)) as f:
+        #for fn in historyfiles:
+        for fn in glob.iglob(os.path.join(self.getPropertyValue(_recovery_folder), '*.py')):
+            with open(fn) as f:
                 tokens = tokenize.generate_tokens(f.readline)
 
                 line = None
                 for t in tokens:
-                # Start a new line when we see a name
+                    #Start a new line when we see a name
                     if line is None and t[0] == tokenize.NAME:
                         line = [t]
                     # End the line when we see a logical line ending
@@ -93,12 +87,8 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         # l[-1][1][1:] is the comment string, with the preceeding hash stripped off
         all_commands = [(''.join(t[1] for t in l[:-1]), l[-1][1][1:]) for l in all_lines]
         # Remove duplicate commands by casting commands as a set
-        unique_commands = set()
-        for command in all_commands:
-            unique_commands.add(command)
+        unique_commands = list(set(all_commands))
 
-        # Sort the new list on datetime integer
-        unique_commands = list(unique_commands)
         unique_commands.sort(key=lambda time: (time[1]))
 
         destination = self.getPropertyValue(_destination_file)
