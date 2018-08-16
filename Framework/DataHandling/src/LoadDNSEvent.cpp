@@ -79,9 +79,6 @@ void LoadDNSEvent::init() {
   declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
                       "ChopperPeriod", EMPTY_INT(), Kernel::Direction::Input),
                   "The Chopper Period");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
-                      "MaxDeltaT", EMPTY_INT(), Kernel::Direction::Input),
-                  "The Max Delta T");
 
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -116,7 +113,7 @@ void LoadDNSEvent::exec() {
   Progress progress(this, 0.0, 1.0, 4);
 
   try {
-    ByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big, [this]() -> std::ostream& { return g_log.notice(); });
+    ByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big);
     //file.exceptions(std::ifstream::eofbit);
 
     auto elaapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file); });
