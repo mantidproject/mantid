@@ -64,9 +64,6 @@ public:
   HistogramY(HistogramY &&) = default;
   HistogramY &operator=(const HistogramY &) & = default;
   HistogramY &operator=(HistogramY &&) & = default;
-  bool operator==(const HistogramY &rhs) const {
-    return this->rawData() == rhs.rawData();
-  }
   // Multiple inheritance causes ambiguous overload, bring operators into scope.
   using detail::Addable<HistogramY>::operator+;
   using detail::Addable<HistogramY>::operator+=;

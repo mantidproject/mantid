@@ -66,9 +66,6 @@ public:
   HistogramE(HistogramE &&) = default;
   HistogramE &operator=(const HistogramE &) & = default;
   HistogramE &operator=(HistogramE &&) & = default;
-  bool operator==(const HistogramE &rhs) const {
-    return this->rawData() == rhs.rawData();
-  }
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<CountStandardDeviations, HistogramE>;

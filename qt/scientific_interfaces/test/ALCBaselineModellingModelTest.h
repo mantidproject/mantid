@@ -8,7 +8,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include "../Muon/ALCBaselineModellingModel.h"
 

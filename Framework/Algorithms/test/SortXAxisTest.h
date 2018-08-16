@@ -141,9 +141,9 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->x(0), xData);
-    TS_ASSERT_EQUALS(sortedws->y(0), yData);
-    TS_ASSERT_EQUALS(sortedws->e(0), eData);
+    TS_ASSERT_EQUALS(sortedws->x(0).rawData(), xData);
+    TS_ASSERT_EQUALS(sortedws->y(0).rawData(), yData);
+    TS_ASSERT_EQUALS(sortedws->e(0).rawData(), eData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -174,9 +174,9 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->x(0), sortedXData);
-    TS_ASSERT_EQUALS(sortedws->y(0), reverseYData);
-    TS_ASSERT_EQUALS(sortedws->e(0), reverseEData);
+    TS_ASSERT_EQUALS(sortedws->x(0).rawData(), sortedXData);
+    TS_ASSERT_EQUALS(sortedws->y(0).rawData(), reverseYData);
+    TS_ASSERT_EQUALS(sortedws->e(0).rawData(), reverseEData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -207,13 +207,13 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->x(0), sortedXData);
-    TS_ASSERT_EQUALS(sortedws->y(0), reverseYData);
-    TS_ASSERT_EQUALS(sortedws->e(0), reverseEData);
+    TS_ASSERT_EQUALS(sortedws->x(0).rawData(), sortedXData);
+    TS_ASSERT_EQUALS(sortedws->y(0).rawData(), reverseYData);
+    TS_ASSERT_EQUALS(sortedws->e(0).rawData(), reverseEData);
 
-    TS_ASSERT_EQUALS(sortedws->x(1), sortedXData);
-    TS_ASSERT_EQUALS(sortedws->y(1), reverseYData);
-    TS_ASSERT_EQUALS(sortedws->e(1), reverseEData);
+    TS_ASSERT_EQUALS(sortedws->x(1).rawData(), sortedXData);
+    TS_ASSERT_EQUALS(sortedws->y(1).rawData(), reverseYData);
+    TS_ASSERT_EQUALS(sortedws->e(1).rawData(), reverseEData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -242,9 +242,9 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->x(0), xData);
-    TS_ASSERT_EQUALS(sortedws->y(0), yData);
-    TS_ASSERT_EQUALS(sortedws->e(0), eData);
+    TS_ASSERT_EQUALS(sortedws->x(0).rawData(), xData);
+    TS_ASSERT_EQUALS(sortedws->y(0).rawData(), yData);
+    TS_ASSERT_EQUALS(sortedws->e(0).rawData(), eData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -276,9 +276,9 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->x(0), sortedXData);
-    TS_ASSERT_EQUALS(sortedws->y(0), reverseYData);
-    TS_ASSERT_EQUALS(sortedws->e(0), reverseEData);
+    TS_ASSERT_EQUALS(sortedws->x(0).rawData(), sortedXData);
+    TS_ASSERT_EQUALS(sortedws->y(0).rawData(), reverseYData);
+    TS_ASSERT_EQUALS(sortedws->e(0).rawData(), reverseEData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -308,8 +308,8 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->dx(0), reverseDxData);
-    TS_ASSERT_EQUALS(sortedws->dx(1), reverseDxData);
+    TS_ASSERT_EQUALS(sortedws->dx(0).rawData(), reverseDxData);
+    TS_ASSERT_EQUALS(sortedws->dx(1).rawData(), reverseDxData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -338,7 +338,7 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->dx(0), dxData);
+    TS_ASSERT_EQUALS(sortedws->dx(0).rawData(), dxData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
@@ -368,8 +368,8 @@ public:
             "sortedws"));
     TS_ASSERT(sortedws);
 
-    TS_ASSERT_EQUALS(sortedws->x(0), reverseXData);
-    TS_ASSERT_EQUALS(sortedws->y(0), reverseYData);
+    TS_ASSERT_EQUALS(sortedws->x(0).rawData(), reverseXData);
+    TS_ASSERT_EQUALS(sortedws->y(0).rawData(), reverseYData);
 
     TS_ASSERT_THROWS_NOTHING(
         AnalysisDataService::Instance().remove("unsortedws"));
