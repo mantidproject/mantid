@@ -38,11 +38,9 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return dict()
 
     def PyExec(self):
-        self.log().debug("Started saving workspace histories")
 
         all_lines = []
 
-        #for fn in historyfiles:
         for fn in glob.iglob(os.path.join(self.getPropertyValue(_recovery_folder), '*.py')):
             with open(fn) as f:
                 tokens = tokenize.generate_tokens(f.readline)
@@ -72,7 +70,6 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         destination = self.getPropertyValue(_destination_file)
 
-        self.log().debug("Writing commands to file")
         # Write to file
         with open(destination, 'w') as outfile:
             for x in unique_commands:
