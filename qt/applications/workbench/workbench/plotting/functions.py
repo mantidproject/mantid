@@ -218,8 +218,8 @@ def pcolormesh(workspaces, fig=None):
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
             pcm = ax.pcolormesh(ws, cmap=DEFAULT_COLORMAP)
-            xticks = ax.get_xticklabels()
-            map(lambda lbl: lbl.set_rotation(45), xticks)
+            for lbl in ax.get_xticklabels():
+                lbl.set_rotation(45)
             if col_idx < ncols - 1:
                 col_idx += 1
             else:

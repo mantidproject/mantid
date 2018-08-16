@@ -137,7 +137,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         if self.window._destroying:
             return
         self.window._destroying = True
-        map(self.canvas.mpl_disconnect, self._cids)
+        for id in self._cids:
+            self.canvas.mpl_disconnect(id)
         try:
             Gcf.destroy(self.num)
         except AttributeError:
