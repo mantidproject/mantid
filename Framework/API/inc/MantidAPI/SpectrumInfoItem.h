@@ -79,9 +79,6 @@ public:
     return m_spectrumInfo->position(m_index);
   }
 
-  // Need this for test file
-  size_t getIndex() const { return m_index; }
-
 private:
   // Allow SpectrumInfoIterator access
   friend class SpectrumInfoIterator;

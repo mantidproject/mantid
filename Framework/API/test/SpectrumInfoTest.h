@@ -506,7 +506,7 @@ public:
     TS_ASSERT(iter != spectrumInfo.begin());
   }
 
-  void test_iterator_increment() {
+  void test_iterator_increment_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     auto iter = spectrumInfo.begin();
@@ -514,9 +514,9 @@ public:
     // Check that we start at the beginning
     TS_ASSERT(iter == spectrumInfo.begin());
 
-    // Increment and check index
+    // Increment iterator and check hasUniqueDetector
     for (size_t i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
-      TS_ASSERT_EQUALS(iter->getIndex(), i);
+      TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
       ++iter;
     }
 
@@ -524,7 +524,7 @@ public:
     TS_ASSERT(iter == spectrumInfo.end());
   }
 
-  void test_iterator_decrement() {
+  void test_iterator_decrement_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     auto iter = spectrumInfo.end();
@@ -532,39 +532,35 @@ public:
     // Check that we start at the end
     TS_ASSERT(iter == spectrumInfo.end());
 
-    // Decrement and check index
+    // Decrement iterator and check hasUniqueDetector
     for (size_t i = m_workspace.spectrumInfo().size(); i > 0; --i) {
-      TS_ASSERT_EQUALS(iter->getIndex(), i);
       --iter;
+      TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
     }
 
     // Check we've reached the beginning
     TS_ASSERT(iter == spectrumInfo.begin());
   }
 
-  void test_iterator_advance() {
+  void test_iterator_advance_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     auto iter = spectrumInfo.begin();
 
-    // Advance 6 places
-    std::advance(iter, 6);
-    TS_ASSERT_EQUALS(iter->getIndex(), 5);
-
-    // Go past end of valid range
-    std::advance(iter, 8);
-    TS_ASSERT(iter == spectrumInfo.end());
+    // Advance 3 places
+    std::advance(iter, 3);
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
 
     // Go backwards
     std::advance(iter, -2);
-    TS_ASSERT_EQUALS(iter->getIndex(), 3);
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
 
     // Go to the start
-    std::advance(iter, -3);
+    std::advance(iter, -1);
     TS_ASSERT(iter == spectrumInfo.begin());
   }
 
-  void test_copy_iterator() {
+  void test_copy_iterator_and_hasUniqueDetector() {
     // Get the SpectrumInfo object
     const auto &spectrumInfo = m_workspace.spectrumInfo();
     auto iter = spectrumInfo.begin();
@@ -573,16 +569,16 @@ public:
     auto iterCopy = SpectrumInfoIterator(iter);
 
     // Check
-    TS_ASSERT_EQUALS(iter->getIndex(), 0);
-    TS_ASSERT_EQUALS(iterCopy->getIndex(), 0);
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+    TS_ASSERT_EQUALS(iterCopy->hasUniqueDetector(), true);
 
     // Increment
     ++iter;
     ++iterCopy;
 
     // Check again
-    TS_ASSERT_EQUALS(iter->getIndex(), 1);
-    TS_ASSERT_EQUALS(iterCopy->getIndex(), 1);
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+    TS_ASSERT_EQUALS(iterCopy->hasUniqueDetector(), true);
   }
 
 private:
