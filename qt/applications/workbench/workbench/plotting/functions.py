@@ -26,6 +26,10 @@ import math
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import Logger
 import matplotlib.pyplot as plt
+try:
+    from matplotlib.cm import viridis as DEFAULT_CMAP
+except ImportError:
+    from matplotlib.cm import jet as DEFAULT_CMAP
 from mantidqt.py3compat import is_text_string
 from mantidqt.dialogs.spectraselectordialog import get_spectra_selection
 from matplotlib.gridspec import GridSpec
@@ -38,7 +42,6 @@ from .figuretype import figure_type, FigureType
 # Constants
 # -----------------------------------------------------------------------------
 PROJECTION = 'mantid'
-DEFAULT_COLORMAP = 'viridis'
 # See https://matplotlib.org/api/_as_gen/matplotlib.figure.SubplotParams.html#matplotlib.figure.SubplotParams
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
@@ -217,7 +220,7 @@ def pcolormesh(workspaces, fig=None):
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             ax.set_title(ws.name())
-            pcm = ax.pcolormesh(ws, cmap=DEFAULT_COLORMAP)
+            pcm = ax.pcolormesh(ws, cmap=DEFAULT_CMAP)
             for lbl in ax.get_xticklabels():
                 lbl.set_rotation(45)
             if col_idx < ncols - 1:
