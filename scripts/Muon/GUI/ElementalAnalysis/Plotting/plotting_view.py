@@ -38,7 +38,6 @@ class PlotView(QtGui.QWidget):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
-        self.last_positions = []
 
         self.plot_selector = QtGui.QComboBox()
         self.plot_selector.currentIndexChanged[str].connect(self._set_bounds)
