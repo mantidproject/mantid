@@ -62,6 +62,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                         line.append(t)
 
         # l[-1][1][1:] is the comment string, with the preceeding hash stripped off
+        # t[1] for t in l[:-1] is the command line, minus the comment at the end
         all_commands = [(''.join(t[1] for t in l[:-1]), l[-1][1][1:]) for l in all_lines]
         # Remove duplicate commands by casting commands as a set
         unique_commands = list(set(all_commands))
