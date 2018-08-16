@@ -57,11 +57,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     @staticmethod
     def raise_error_if_workspaces_not_compatible(workspaces):
-        def value_error_if_not_compatible(x):
-            if not isinstance(x, MatrixWorkspace):
-                raise ValueError("Expected MatrixWorkspace, found {}.".format(x.__class__.__name__))
-
-        map(value_error_if_not_compatible, workspaces)
+        for ws in workspaces:
+            if not isinstance(ws, MatrixWorkspace):
+                raise ValueError("Expected MatrixWorkspace, found {}.".format(ws.__class__.__name__))
 
     def __init__(self, workspaces,
                  parent=None):
