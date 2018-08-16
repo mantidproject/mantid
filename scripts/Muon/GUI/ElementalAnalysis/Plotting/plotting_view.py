@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 from qtpy import QtWidgets
 
+from collections import OrderedDict
+
 from matplotlib.figure import Figure
 from matplotlib import gridspec
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -14,6 +16,9 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
+
+from random import choice, randint
+from time import time
 
 
 class PlotView(QtWidgets.QWidget):
@@ -33,6 +38,7 @@ class PlotView(QtWidgets.QWidget):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
+        self.last_positions = []
 
         self.plot_selector = QtWidgets.QComboBox()
         self._update_plot_selector()
