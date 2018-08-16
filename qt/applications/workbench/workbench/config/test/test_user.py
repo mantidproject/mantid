@@ -86,6 +86,7 @@ class ConfigUserTest(TestCase):
 
     def test_get_raises_keyerror_with_no_saved_setting_or_default(self):
         self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key')
+        self.assertRaises(KeyError, self.cfg.get, 'main/missing-key')
 
     def test_set_raises_error_with_invalid_section_type(self):
         self.assertRaises(TypeError, self.cfg.set, 1, 'key1', 1)
