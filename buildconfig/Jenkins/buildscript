@@ -342,7 +342,8 @@ fi
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
 mkdir -p $userconfig_dir
-touch $userconfig_dir/Mantid.user.properties
+# use a fixed number of openmp threads to avoid overloading the system
+echo MultiThreaded.MaxCores=2 > $userconfig_dir/Mantid.user.properties
 
 if [[ ${DO_UNITTESTS} == true ]]; then
   $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure

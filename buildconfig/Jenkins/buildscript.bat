@@ -170,7 +170,9 @@ del %USERPROPS%
 set CONFIGDIR=%APPDATA%\mantidproject\mantid
 rmdir /S /Q %CONFIGDIR%
 mkdir %CONFIGDIR%
-call cmake.exe -E touch %USERPROPS%
+:: use a fixed number of openmp threads to avoid overloading the system
+echo MultiThreaded.MaxCores=2 > %USERPROPS%
+
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
