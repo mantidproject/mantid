@@ -61,12 +61,15 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 
   // Scanning related fields. Not testing m_scanCounts and m_indexMap since
   // those just are internally derived from m_indices.
-  if (m_scanIntervals && other.m_scanIntervals &&
-      !(m_scanIntervals == other.m_scanIntervals) &&
-      (*m_scanIntervals != *other.m_scanIntervals))
+  // if (m_scanIntervals && other.m_scanIntervals &&
+  //     !(m_scanIntervals == other.m_scanIntervals) &&
+  //     (*m_scanIntervals != *other.m_scanIntervals))
+  //   return false;
+  if (m_scanIntervals != other.m_scanIntervals)
     return false;
-  if (m_indices && other.m_indices && !(m_indices == other.m_indices) &&
-      (*m_indices != *other.m_indices))
+//   if (m_indices && other.m_indices && !(m_indices == other.m_indices) &&
+//       (*m_indices != *other.m_indices))
+  if (m_scanCounts && other.m_scanCounts && !(m_scanCounts == other.m_scanCounts))
     return false;
 
   // Positions: Absolute difference matter, so comparison is not relative.
@@ -114,7 +117,7 @@ size_t DetectorInfo::scanSize() const {
  * Returns true if all of the detectors all have the same scan interval. Will
  * return false if DetectorInfo is not scanning.
  */
-bool DetectorInfo::isSyncScan() const { return isScanning() && m_isSyncScan; }
+// bool DetectorInfo::isSyncScan() const { return isScanning() && m_isSyncScan; }
 
 /// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -162,26 +165,44 @@ void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
 }
 
 /// Returns the scan count of the detector with given detector index.
-size_t DetectorInfo::scanCount(const size_t index) const {
+// size_t DetectorInfo::scanCount(const size_t index) const {
+size_t DetectorInfo::scanCount() const {
   if (!m_scanCounts)
     return 1;
-  if (m_isSyncScan)
-    return (*m_scanCounts)[0];
-  return (*m_scanCounts)[index];
+//   if (m_isSyncScan)
+  else
+    return m_scanCounts;
+//   return (*m_scanCounts)[0];
+//   return m_scanCounts.access()[0]; //?
+//   return (*m_scanCounts)[index];
 }
 
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-std::pair<int64_t, int64_t>
-DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
-  if (!m_scanIntervals)
-    return {0, 0};
-  if (m_isSyncScan)
-    return (*m_scanIntervals)[index.second];
-  return (*m_scanIntervals)[linearIndex(index)];
+const std::vector<std::pair<int64_t, int64_t>> &DetectorInfo::scanIntervals() const {
+//   if (!m_scanIntervals) {
+// // //     return &{0, 0};
+//     std::vector<std::pair<int64_t, int64_t>>* dummy_vec = new std::vector<std::pair<int64_t, int64_t>> (1);
+// //     std::pair<int64_t, int64_t> dummy_pair = {0,0};
+// //     dummy_vec[0] = dummy_pair;
+//     dummy_vec->push_back({0, 0});
+//     return *dummy_vec;
+// //     return new std::vector<std::pair<int64_t, int64_t>> {{0,0}};
+//   } else {
+    return m_scanIntervals;
+  // }
 }
+
+// std::pair<int64_t, int64_t>
+// DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
+//   if (!m_scanIntervals)
+//     return {0, 0};
+//   if (m_isSyncScan)
+//     return (*m_scanIntervals)[index.second];
+//   return (*m_scanIntervals)[linearIndex(index)];
+// }
 
 namespace {
 void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
@@ -199,20 +220,20 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
  * to modify scan intervals for a DetectorInfo with time-dependent detectors,
  * i.e., time intervals must be set with this method before merging individual
  * scans. */
-void DetectorInfo::setScanInterval(
-    const size_t index, const std::pair<int64_t, int64_t> &interval) {
-  // Time intervals must be set up before adding time sensitive
-  // positions/rotations hence check below.
-  checkNoTimeDependence();
-  checkScanInterval(interval);
-  if (!m_scanIntervals)
-    initScanIntervals();
-  if (m_isSyncScan)
-    throw std::runtime_error("DetectorInfo has been initialized with a "
-                             "synchonous scan, cannot set scan interval for "
-                             "individual detector.");
-  m_scanIntervals.access()[index] = interval;
-}
+// void DetectorInfo::setScanInterval(
+//     const size_t index, const std::pair<int64_t, int64_t> &interval) {
+//   // Time intervals must be set up before adding time sensitive
+//   // positions/rotations hence check below.
+//   checkNoTimeDependence();
+//   checkScanInterval(interval);
+//   if (!m_scanIntervals)
+//     initScanIntervals();
+//   if (m_isSyncScan)
+//     throw std::runtime_error("DetectorInfo has been initialized with a "
+//                              "synchonous scan, cannot set scan interval for "
+//                              "individual detector.");
+//   m_scanIntervals.access()[index] = interval;
+// }
 
 /** Set the scan interval for all detectors.
  *
@@ -222,17 +243,17 @@ void DetectorInfo::setScanInterval(
     const std::pair<int64_t, int64_t> &interval) {
   checkNoTimeDependence();
   checkScanInterval(interval);
-  if (!m_scanIntervals) {
-    m_scanIntervals =
-        Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-            1, std::pair<int64_t, int64_t>{0, 1});
-  }
-  if (!m_isSyncScan) {
-    throw std::runtime_error(
-        "DetectorInfo has been initialized with a "
-        "asynchonous scan, cannot set synchronous scan interval.");
-  }
-  m_scanIntervals.access()[0] = interval;
+  // if (!m_scanIntervals) {
+  //   m_scanIntervals =
+  //       Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+  //           1, std::pair<int64_t, int64_t>{0, 1});
+  // }
+//   if (!m_isSyncScan) {
+//     throw std::runtime_error(
+//         "DetectorInfo has been initialized with a "
+//         "asynchonous scan, cannot set synchronous scan interval.");
+//   }
+  m_scanIntervals[0] = interval;
 }
 
 namespace {
@@ -240,13 +261,13 @@ void failMerge(const std::string &what) {
   throw std::runtime_error(std::string("Cannot merge DetectorInfo: ") + what);
 }
 
-std::pair<size_t, size_t>
-getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
-         const size_t index) {
-  if (!indices)
-    return {index, 0};
-  return (*indices)[index];
-}
+// std::pair<size_t, size_t>
+// getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
+//          const size_t index) {
+//   if (!indices)
+//     return {index, 0};
+//   return (*indices)[index];
+// }
 } // namespace
 
 /** Merges the contents of other into this.
@@ -261,52 +282,54 @@ getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
  * index in `other` is identical to a corresponding interval in `this`, it is
  * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other) {
-  if (!m_scanCounts)
-    initScanCounts();
-  if (m_isSyncScan) {
-    const auto &merge = buildMergeSyncScanIndices(other);
-    for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals->size();
-         ++timeIndex) {
-      if (!merge[timeIndex])
-        continue;
-      auto &scanIntervals = m_scanIntervals.access();
-      auto &isMasked = m_isMasked.access();
-      auto &positions = m_positions.access();
-      auto &rotations = m_rotations.access();
-      m_scanCounts.access()[0]++;
-      scanIntervals.push_back((*other.m_scanIntervals)[timeIndex]);
-      const size_t indexStart = other.linearIndex({0, timeIndex});
-      size_t indexEnd = indexStart + size();
-      isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart,
-                      other.m_isMasked->begin() + indexEnd);
-      positions.insert(positions.end(), other.m_positions->begin() + indexStart,
-                       other.m_positions->begin() + indexEnd);
-      rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
-                       other.m_rotations->begin() + indexEnd);
-    }
-    return;
-  }
-  const auto &merge = buildMergeIndices(other);
-  if (!m_indexMap)
-    initIndices();
-  // Temporary to accumulate scan counts (need original for index offset).
-  auto scanCounts(m_scanCounts);
-  for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
-       ++linearIndex) {
-    if (!merge[linearIndex])
+//   if (!m_scanCounts)
+//     initScanCounts();
+//   if (m_isSyncScan) {
+  const auto &merge = buildMergeSyncScanIndices(other);
+  for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals.size();
+        ++timeIndex) {
+    if (!merge[timeIndex])
       continue;
-    auto newIndex = getIndex(other.m_indices, linearIndex);
-    const size_t detIndex = newIndex.first;
-    newIndex.second += scanCount(detIndex);
-    scanCounts.access()[detIndex]++;
-    m_indexMap.access()[detIndex].push_back((*m_indices).size());
-    m_indices.access().push_back(newIndex);
-    m_isMasked.access().push_back((*other.m_isMasked)[linearIndex]);
-    m_positions.access().push_back((*other.m_positions)[linearIndex]);
-    m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
-    m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
+    // auto &scanIntervals = m_scanIntervals.access();
+    auto &isMasked = m_isMasked.access();
+    auto &positions = m_positions.access();
+    auto &rotations = m_rotations.access();
+//     m_scanCounts.access()[0]++;
+    m_scanCounts++;
+    // scanIntervals.push_back((*other.m_scanIntervals)[timeIndex]);
+    m_scanIntervals.push_back(other.m_scanIntervals[timeIndex]);
+    const size_t indexStart = other.linearIndex({0, timeIndex});
+    size_t indexEnd = indexStart + size();
+    isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart,
+                    other.m_isMasked->begin() + indexEnd);
+    positions.insert(positions.end(), other.m_positions->begin() + indexStart,
+                      other.m_positions->begin() + indexEnd);
+    rotations.insert(rotations.end(), other.m_rotations->begin() + indexStart,
+                      other.m_rotations->begin() + indexEnd);
   }
-  m_scanCounts = std::move(scanCounts);
+  return;
+//   }
+//   const auto &merge = buildMergeIndices(other);
+//   if (!m_indexMap)
+//     initIndices();
+//   // Temporary to accumulate scan counts (need original for index offset).
+//   auto scanCounts(m_scanCounts);
+//   for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
+//        ++linearIndex) {
+//     if (!merge[linearIndex])
+//       continue;
+//     auto newIndex = getIndex(other.m_indices, linearIndex);
+//     const size_t detIndex = newIndex.first;
+//     newIndex.second += scanCount(detIndex);
+//     scanCounts.access()[detIndex]++;
+//     m_indexMap.access()[detIndex].push_back((*m_indices).size());
+//     m_indices.access().push_back(newIndex);
+//     m_isMasked.access().push_back((*other.m_isMasked)[linearIndex]);
+//     m_positions.access().push_back((*other.m_positions)[linearIndex]);
+//     m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
+//     m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
+//   }
+//   m_scanCounts = std::move(scanCounts);
 }
 
 void DetectorInfo::setComponentInfo(ComponentInfo *componentInfo) {
@@ -344,71 +367,71 @@ Eigen::Vector3d DetectorInfo::samplePosition() const {
   return m_componentInfo->samplePosition();
 }
 
-void DetectorInfo::initScanCounts() {
-  checkNoTimeDependence();
-  if (m_isSyncScan)
-    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(1, 1);
-  else
-    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(size(), 1);
-}
+// void DetectorInfo::initScanCounts() {
+//   checkNoTimeDependence();
+// //   if (m_isSyncScan)
+//   m_scanCounts = Kernel::make_cow<std::vector<size_t>>(1, 1);
+// //   else
+// //     m_scanCounts = Kernel::make_cow<std::vector<size_t>>(size(), 1);
+// }
 
-void DetectorInfo::initScanIntervals() {
-  checkNoTimeDependence();
-  m_isSyncScan = false;
-  m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-      size(), std::pair<int64_t, int64_t>{0, 1});
-}
+// void DetectorInfo::initScanIntervals() {
+//   checkNoTimeDependence();
+//   m_isSyncScan = false;
+//   m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+//       size(), std::pair<int64_t, int64_t>{0, 1});
+// }
 
-void DetectorInfo::initIndices() {
-  checkNoTimeDependence();
-  m_indexMap = Kernel::make_cow<std::vector<std::vector<size_t>>>();
-  m_indices = Kernel::make_cow<std::vector<std::pair<size_t, size_t>>>();
-  auto &indexMap = m_indexMap.access();
-  auto &indices = m_indices.access();
-  indexMap.reserve(size());
-  indices.reserve(size());
-  // No time dependence, so both the detector index and the linear index are i.
-  for (size_t i = 0; i < size(); ++i) {
-    indexMap.emplace_back(1, i);
-    indices.emplace_back(i, 0);
-  }
-}
+// void DetectorInfo::initIndices() {
+//   checkNoTimeDependence();
+//   m_indexMap = Kernel::make_cow<std::vector<std::vector<size_t>>>();
+//   m_indices = Kernel::make_cow<std::vector<std::pair<size_t, size_t>>>();
+//   auto &indexMap = m_indexMap.access();
+//   auto &indices = m_indices.access();
+//   indexMap.reserve(size());
+//   indices.reserve(size());
+//   // No time dependence, so both the detector index and the linear index are i.
+//   for (size_t i = 0; i < size(); ++i) {
+//     indexMap.emplace_back(1, i);
+//     indices.emplace_back(i, 0);
+//   }
+// }
 
-// Indices returned here are the list of linear indexes not to merge
-std::vector<bool>
-DetectorInfo::buildMergeIndices(const DetectorInfo &other) const {
-  checkSizes(other);
-  std::vector<bool> merge(other.m_positions->size(), true);
-
-  for (size_t linearIndex1 = 0; linearIndex1 < other.m_positions->size();
-       ++linearIndex1) {
-    const size_t detIndex = getIndex(other.m_indices, linearIndex1).first;
-    const auto &interval1 = (*other.m_scanIntervals)[linearIndex1];
-    for (size_t timeIndex = 0; timeIndex < scanCount(detIndex); ++timeIndex) {
-      const auto linearIndex2 = linearIndex({detIndex, timeIndex});
-      const auto &interval2 = (*m_scanIntervals)[linearIndex2];
-      if (interval1 == interval2) {
-        checkIdenticalIntervals(other, linearIndex1, linearIndex2);
-        merge[linearIndex1] = false;
-      } else if ((interval1.first < interval2.second) &&
-                 (interval1.second > interval2.first)) {
-        failMerge("scan intervals overlap but not identical");
-      }
-    }
-  }
-  return merge;
-}
+// // Indices returned here are the list of linear indexes not to merge
+// std::vector<bool>
+// DetectorInfo::buildMergeIndices(const DetectorInfo &other) const {
+//   checkSizes(other);
+//   std::vector<bool> merge(other.m_positions->size(), true);
+// 
+//   for (size_t linearIndex1 = 0; linearIndex1 < other.m_positions->size();
+//        ++linearIndex1) {
+//     const size_t detIndex = getIndex(other.m_indices, linearIndex1).first;
+//     const auto &interval1 = (*other.m_scanIntervals)[linearIndex1];
+//     for (size_t timeIndex = 0; timeIndex < scanCount(detIndex); ++timeIndex) {
+//       const auto linearIndex2 = linearIndex({detIndex, timeIndex});
+//       const auto &interval2 = (*m_scanIntervals)[linearIndex2];
+//       if (interval1 == interval2) {
+//         checkIdenticalIntervals(other, linearIndex1, linearIndex2);
+//         merge[linearIndex1] = false;
+//       } else if ((interval1.first < interval2.second) &&
+//                  (interval1.second > interval2.first)) {
+//         failMerge("scan intervals overlap but not identical");
+//       }
+//     }
+//   }
+//   return merge;
+// }
 
 // Indices returned here are the list of time indexes not to merge
 std::vector<bool>
 DetectorInfo::buildMergeSyncScanIndices(const DetectorInfo &other) const {
   checkSizes(other);
-  std::vector<bool> merge(other.m_scanIntervals->size(), true);
+  std::vector<bool> merge(other.m_scanIntervals.size(), true);
 
-  for (size_t t1 = 0; t1 < other.m_scanIntervals->size(); ++t1) {
-    for (size_t t2 = 0; t2 < m_scanIntervals->size(); ++t2) {
-      const auto &interval1 = (*other.m_scanIntervals)[t1];
-      const auto &interval2 = (*m_scanIntervals)[t2];
+  for (size_t t1 = 0; t1 < other.m_scanIntervals.size(); ++t1) {
+    for (size_t t2 = 0; t2 < m_scanIntervals.size(); ++t2) {
+      const auto &interval1 = other.m_scanIntervals[t1];
+      const auto &interval2 = m_scanIntervals[t2];
       if (interval1 == interval2) {
         for (size_t detIndex = 0; detIndex < size(); ++detIndex) {
           const size_t linearIndex1 = other.linearIndex({detIndex, t1});
@@ -428,10 +451,10 @@ DetectorInfo::buildMergeSyncScanIndices(const DetectorInfo &other) const {
 void DetectorInfo::checkSizes(const DetectorInfo &other) const {
   if (size() != other.size())
     failMerge("size mismatch");
-  if (!m_scanIntervals || !other.m_scanIntervals)
-    failMerge("scan intervals not defined");
-  if (m_isSyncScan != other.m_isSyncScan)
-    failMerge("both or none of the scans must be synchronous");
+  // if (!m_scanIntervals || !other.m_scanIntervals)
+    // failMerge("scan intervals not defined");
+//   if (m_isSyncScan != other.m_isSyncScan)
+//     failMerge("both or none of the scans must be synchronous");
   if (!(m_isMonitor == other.m_isMonitor) &&
       (*m_isMonitor != *other.m_isMonitor))
     failMerge("monitor flags mismatch");

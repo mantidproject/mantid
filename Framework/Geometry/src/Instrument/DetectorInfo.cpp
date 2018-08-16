@@ -92,7 +92,7 @@ bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
 
 /// Returns true if the beamline has scanning detectors and they have all the
 /// same scan intervals.
-bool DetectorInfo::isSyncScan() const { return m_detectorInfo->isSyncScan(); }
+// bool DetectorInfo::isSyncScan() const { return m_detectorInfo->isSyncScan(); }
 
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
@@ -321,19 +321,28 @@ const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
 }
 
 /// Returns the scan count of the detector with given detector index.
-size_t DetectorInfo::scanCount(const size_t index) const {
-  return m_detectorInfo->scanCount(index);
+size_t DetectorInfo::scanCount() const {
+  return m_detectorInfo->scanCount();
 }
 
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Types::Core::DateAndTime. */
-std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
-  const auto &interval = m_detectorInfo->scanInterval(index);
-  return {interval.first, interval.second};
+const std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> &DetectorInfo::scanIntervals() const {
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> *intervals_vector = new std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> ((m_detectorInfo->scanIntervals()).size());
+  for (auto it = m_detectorInfo->scanIntervals().begin(); it != m_detectorInfo->scanIntervals().end(); ++it) {
+    intervals_vector->push_back({(*it).first, (*it).second});
+  }
+  return *intervals_vector;
+//   return m_detectorInfo->scanIntervals();
 }
+
+// std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+// DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
+//   const auto &interval = m_detectorInfo->scanInterval(index);
+//   return {interval.first, interval.second};
+// }
 
 /** Set the scan interval of the detector with given detector index.
  *
@@ -343,13 +352,13 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
  * to modify scan intervals for a DetectorInfo with time-dependent detectors,
  * i.e., time intervals must be set with this method before merging individual
  * scans. */
-void DetectorInfo::setScanInterval(
-    const size_t index,
-    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
-        &interval) {
-  m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
-                                          interval.second.totalNanoseconds()});
-}
+// void DetectorInfo::setScanInterval(
+//     const size_t index,
+//     const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+//         &interval) {
+//   m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
+//                                           interval.second.totalNanoseconds()});
+// }
 
 /** Set the scan interval for all detectors.
  *
@@ -367,9 +376,9 @@ void DetectorInfo::setScanInterval(
  * Scan intervals in both other and this must be set. Intervals must be
  * identical or non-overlapping. If they are identical all other parameters (for
  * that index) must match. */
-void DetectorInfo::merge(const DetectorInfo &other) {
-  m_detectorInfo->merge(*other.m_detectorInfo);
-}
+// void DetectorInfo::merge(const DetectorInfo &other) {
+//   m_detectorInfo->merge(*other.m_detectorInfo);
+// }
 
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
