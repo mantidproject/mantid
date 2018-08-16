@@ -37,3 +37,15 @@ class AxisChanger(QtGui.QWidget):
         layout.addWidget(QtGui.QLabel("to"))
         layout.addWidget(self.upper_bound)
         self.setLayout(layout)
+
+    def on_lbound_return_pressed(self, slot):
+        self.lower_bound.returnPressed.connect(slot)
+
+    def unreg_on_lbound_return_pressed(self, slot):
+        self.lower_bound.returnPressed.disconnect(slot)
+
+    def on_ubound_return_pressed(self, slot):
+        self.upper_bound.returnPressed.connect(slot)
+
+    def unreg_on_ubound_return_pressed(self, slot):
+        self.upper_bound.returnPressed.disconnect(slot)
