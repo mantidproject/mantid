@@ -30,7 +30,6 @@ class PlotView(QtGui.QWidget):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
-        self.last_positions = []
 
         self.plot_selector = QtGui.QComboBox()
 
@@ -61,9 +60,6 @@ class PlotView(QtGui.QWidget):
         grid.addLayout(button_layout, 1, 0)
         self.setLayout(grid)
 
-    def _get_positions(self):
-        return [p.get_position() for p in self.plots.values()]
-
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
             plot.set_position(
@@ -82,10 +78,12 @@ class PlotView(QtGui.QWidget):
                 # testing purposes
                 self.plots[last].plot([randint(0, 100) for i in range(5)])
                 self.plots[last].set_title(last)
+                self.add_vline(last, 2.5, 0, 0.75)
+                self.add_hline(last, 50, 0, 1)
         self.canvas.draw()
-        self.update_plot_selector()
+        self._update_plot_selector()
 
-    def update_plot_selector(self):
+    def _update_plot_selector(self):
         self.plot_selector.clear()
         self.plot_selector.addItems(self.plots.keys())
 
@@ -97,6 +95,20 @@ class PlotView(QtGui.QWidget):
     def remove_subplot(self, name):
         """ will raise KeyError if: 'name' isn't a plot; there are no plots """
         self.figure.delaxes(self.plots[name])
-        self.canvas.draw()
         del self.plots[name]
         self._update_gridspec(len(self.plots))
+
+    def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
+        return self.plots[plot_name].axvline(x_value, y_min, y_max, **kwargs)
+
+    def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
+        return self.plots[plot_name].axhline(y_value, x_min, x_max, **kwargs)
+
+    def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
+        pass
+
+    def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
+        pass
+
+    def add_errors(self, *plots):
+        pass
