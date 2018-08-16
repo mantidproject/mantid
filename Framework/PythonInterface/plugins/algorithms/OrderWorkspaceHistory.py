@@ -39,26 +39,6 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return dict()
 
     def PyExec(self):
-        self.write_ordered_workspace_history()
-
-    def _concatenate_iso_datetime(self, date_time):
-        '''
-        Concatenates the datetime string provided by Mantid into a single integer
-        Args:
-            date_time: ISO 8601 standard datetime string
-        Returns:
-            int
-        '''
-
-        if not date_time:
-            raise ValueError("No date time stamp was found in the recovery history")
-        self.log().debug("Found datetime stamp: {0}".format(date_time))
-
-        # Remove whitespace and any trailing zeros
-        stipped_time = date_time.strip().rstrip('0')
-        return datetime.datetime.strptime(stipped_time, "%Y-%m-%dT%H:%M:%S.%f")
-
-    def write_ordered_workspace_history(self):
         self.log().debug("Started saving workspace histories")
 
         all_lines = []
@@ -99,6 +79,22 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
             for x in unique_commands:
                 outfile.write('{} # {} \n'.format(x[0], x[1]))
 
+    def _concatenate_iso_datetime(self, date_time):
+        '''
+        Concatenates the datetime string provided by Mantid into a single integer
+        Args:
+            date_time: ISO 8601 standard datetime string
+        Returns:
+            int
+        '''
+
+        if not date_time:
+            raise ValueError("No date time stamp was found in the recovery history")
+        self.log().debug("Found datetime stamp: {0}".format(date_time))
+
+        # Remove whitespace and any trailing zeros
+        stipped_time = date_time.strip().rstrip('0')
+        return datetime.datetime.strptime(stipped_time, "%Y-%m-%dT%H:%M:%S.%f")
 
 # Required to have Mantid recognise the new function
 mantid.api.AlgorithmFactory.subscribe(OrderWorkspaceHistory)
