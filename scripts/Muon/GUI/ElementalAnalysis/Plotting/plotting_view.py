@@ -12,9 +12,6 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 from PyQt4 import QtGui
 
-from random import choice, randint
-from time import time
-
 
 class PlotView(QtGui.QWidget):
     def __init__(self):
@@ -36,20 +33,6 @@ class PlotView(QtGui.QWidget):
         button_layout = QtGui.QHBoxLayout()
         self.x_axis_changer = putils.AxisChanger("X")
         self.y_axis_changer = putils.AxisChanger("Y")
-
-        ### to test functionality: ###
-        self.add_button = QtGui.QPushButton("Add")
-        self.del_button = QtGui.QPushButton("Del")
-
-        def _add(): return self.add_subplot("{:.2f}".format(time()))
-
-        def _del(): return self.remove_subplot(choice(self.plots.keys()))
-        self.add_button.clicked.connect(_add)
-        self.del_button.clicked.connect(_del)
-
-        button_layout.addWidget(self.add_button)
-        button_layout.addWidget(self.del_button)
-        ###  -------------------  ###
 
         button_layout.addWidget(self.plot_selector)
         button_layout.addWidget(self.x_axis_changer)
@@ -75,17 +58,18 @@ class PlotView(QtGui.QWidget):
                 # https://github.com/matplotlib/matplotlib/issues/4786
                 self.plots[last] = self.figure.add_subplot(
                     self.current_grid[positions[-1][0], positions[-1][1]], label=last)
-                # testing purposes
-                self.plots[last].plot([randint(0, 100) for i in range(5)])
-                self.plots[last].set_title(last)
-                self.add_vline(last, 2.5, 0, 0.75)
-                self.add_hline(last, 50, 0, 1)
         self.canvas.draw()
         self._update_plot_selector()
 
     def _update_plot_selector(self):
         self.plot_selector.clear()
         self.plot_selector.addItems(self.plots.keys())
+
+    def get_subplot(self, name):
+        return self.plots[name]
+
+    def get_subplots(self):
+        return self.plots
 
     def add_subplot(self, name):
         """ will raise KeyError if: plots exceed 4 """
