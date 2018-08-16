@@ -16,6 +16,20 @@ attr_mapping = \
      ParamMapEntry(ext_name="calibration_directory",     int_name="calibration_dir"),
      ParamMapEntry(ext_name="calibration_mapping_file",  int_name="cal_mapping_path"),
      ParamMapEntry(ext_name="config_file",               int_name="config_file"),
+
+     ParamMapEntry(ext_name="create_cal_rebin_1_params", int_name="cal_rebin_1"),
+     ParamMapEntry(ext_name="create_cal_rebin_2_params", int_name="cal_rebin_2"),
+     ParamMapEntry(ext_name="cross_corr_reference_spectra", int_name="reference_spectra"),
+     ParamMapEntry(ext_name="cross_corr_ws_index_max", int_name="cross_corr_ws_max"),
+     ParamMapEntry(ext_name="cross_corr_ws_index_min", int_name="cross_corr_ws_min"),
+     ParamMapEntry(ext_name="cross_corr_x_min", int_name="cross_corr_x_min"),
+     ParamMapEntry(ext_name="cross_corr_x_max", int_name="cross_corr_x_max"),
+
+     ParamMapEntry(ext_name="get_det_offsets_d_ref", int_name="d_reference"),
+     ParamMapEntry(ext_name="get_det_offsets_step", int_name="get_det_offsets_step"),
+     ParamMapEntry(ext_name="get_det_offsets_x_min", int_name="get_det_offsets_x_min"),
+     ParamMapEntry(ext_name="get_det_offsets_x_max", int_name="get_det_offsets_x_max"),
+
      ParamMapEntry(ext_name="do_absorb_corrections",     int_name="do_absorb_corrections"),
      ParamMapEntry(ext_name="file_ext",                  int_name="file_extension", optional=True),
      ParamMapEntry(ext_name="first_cycle_run_no",        int_name="run_in_range"),
