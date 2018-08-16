@@ -10,86 +10,10 @@
 
 
 #include <array>
+#include <set>
 #include <fstream>
 #include <limits>
 #include <iterator>
-
-// #include <experimental/optional>
-// std::experimental::optional opt;
-/*
-template<typename T>
-struct Optional {
-public:
-  constexpr Optional() noexcept
-  : value{} { }
-
-  // Constructors for engaged optionals.
-  constexpr Optional(const T& value)
-  : value(value), hasValue(true) { }
-
-  constexpr Optional(T&& value)
-  : value(std::move(value)), hasValue(true) { }
-
-  template<typename... Args>
-    constexpr explicit Optional(Args&&... args)
-    : value(std::forward<Args>(args)...), hasValue(true) { }
-
-  // Copy and move constructors.
-  Optional(const Optional& other) {
-    if (other.hasValue){
-      value = T_Stored(*other);
-      hasValue = true;
-    } else {
-      empty = Empty();
-      hasValue = false;
-    }
-  }
-
-  Optional(Optional&& __other) {
-    if (other.hasValue){
-      value = T_Stored(std::move(*other));
-      hasValue = true;
-    } else {
-      empty = Empty();
-      hasValue = false;
-    }
-  }
-
-  template<typename R>
-  const Optional bind(const function<Optional<R>(T)> func) {
-    return hasValue ? func(value) : Optional<R>();
-  }
-
-  template<typename R>
-  const Optional bind(const function<R(T)> func) {
-
-    return hasValue ? Optional<R>(func(value)) : Optional<R>();
-  }
-
-  template<typename R, typename E>
-  const Optional bind(const function<R(T)> func, Optional<E> &exception) {
-    Optional<R> result;
-    try {
-      result = bind(func);
-      exception = Optional<E>();
-    } catch(E e) {
-      exception = Optional(e);
-      result = Optional<R>();
-    }
-    return result;
-  }
-
-
-private:
-  using T_Stored = remove_const_t<_Tp>;
-  struct Empty { };
-  union {
-      Empty empty;
-      T_Stored value;
-  };
-  bool hasValue = false;
-};
-*/
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -101,13 +25,12 @@ namespace DataHandling {
 /**
   LoadDNSEvent
 
-  Algorithm used to generate a GroupingWorkspace from an .xml or .map file
-  containing the
-  detectors' grouping information.
+  Algorithm used to generate an EventWorkspace from a DNS listmode (.mdat) file.
 
-  @date 2011-11-17
+  @author Joachim Coenen, Juelich Center for Neutron Science
+  @date 2018-08-16
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -151,13 +74,13 @@ public:
   }
 
 private:
+  static const std::string INSTRUMENT_NAME;
   /// Initialise the properties
   void init() override;
   /// Run the algorithm
   void exec() override;
 
-  typedef uint64_t                 separator_t;
-  //typedef std::array<uint16_t, 21> buffer_header_t;
+  typedef uint64_t separator_t;
 
   enum class BufferType {
     DATA = 0,
@@ -189,45 +112,6 @@ private:
     // std::array<uint16_t, 3> parameter3;
   };
 
-  enum event_id_e {
-    NEUTRON = 0,
-    TRIGGER = 1
-  };
-
-
-  typedef uint32_t EventCount;
-  //typedef uint16_t ChannelIndex;
-
-public:
-  /*
-  struct ChannelIndex {
-    uint8_t mcpdId;
-    uint8_t	modId;
-    uint8_t	slotId;
-    bool operator < (ChannelIndex const& rhs) const {
-      return (mcpdId < rhs.mcpdId)
-          || ((mcpdId == rhs.mcpdId)  && (
-             (modId < rhs.modId)
-          || ((modId == rhs.modId) &&
-             (slotId < rhs.slotId))));
-    }
-    bool operator == (ChannelIndex const& rhs) const {
-      return (mcpdId == rhs.mcpdId) && (modId == rhs.modId) && (slotId == rhs.slotId);
-    }
-  };
-
-  struct EventPosition {
-    ChannelIndex channel;
-    uint16_t position;
-
-    bool operator < (EventPosition const& rhs) const {
-      return (channel < rhs.channel)
-          || ((channel == rhs.channel)  && (position < rhs.position));
-    }
-
-  };
-*/
-
   struct NeutronEventData {
     uint8_t	modId;
     //! number of the slot inside the MPSD
@@ -244,17 +128,11 @@ public:
     uint32_t data;
   };
 
-  struct NeutronEvent {
-    event_id_e eventId;
-    uint16_t amplitude;
-    double tof;
-    uint32_t timestamp;
-    uint64_t headerTim;
-
+  enum event_id_e {
+    NEUTRON = 0,
+    TRIGGER = 1
   };
 
-
-  typedef size_t HeaderId;
   struct Event {
     event_id_e eventId;
 
@@ -263,230 +141,86 @@ public:
       TriggerEventData trigger;
     } data;
 
-    int64_t timestamp;
     uint8_t mcpdId;
+    uint64_t timestamp;
   };
 
-  struct TofEvent {
-    int64_t tof;
+  struct CompactEvent {
+    uint64_t timestamp;
     uint16_t channel;
     uint16_t position;
-
+    event_id_e eventId;
   };
-
-  struct TriggerEventChannel {
-    uint8_t trigId;
-    uint8_t dataId;
-    uint8_t mcpdId;
-
-    bool operator < (TriggerEventChannel const &rhs) const {
-      bool isSmaller = dataId < rhs.dataId;
-      isSmaller = trigId < rhs.trigId || (trigId == rhs.trigId && isSmaller);
-      isSmaller = mcpdId < rhs.mcpdId || (mcpdId == rhs.mcpdId && isSmaller);
-
-      return isSmaller;
-    }
-  };
-
-  static inline TriggerEventChannel triggerEventChannel(const Event &event) {
-    return {event.data.trigger.trigId, event.data.trigger.dataId, event.mcpdId};
-  }
-
 
 private:
 
-  struct ChopperFinder {
-    struct DataSourceInfo {
-      int64_t min = std::numeric_limits<int>::max();
-      int64_t max = std::numeric_limits<int>::min();
-      std::map<int64_t, uint64_t> deltaTFrequencies;
-
-      int64_t lastEventTimestamp = std::numeric_limits<int64_t>::max();
-
-      void addEvent(const Event &event, const uint binSize) {
-        const int64_t deltaT = event.timestamp - lastEventTimestamp;
-        lastEventTimestamp = event.timestamp;
-
-        deltaTFrequencies[(deltaT / binSize) * binSize]++;
-
-        if (deltaT < std::numeric_limits<int64_t>::min() / 2) {
-          //discard event;
-          return;
-        }
-
-        min = std::min(min, deltaT);
-        max = std::max(max, deltaT);
-      }
-    };
-
-    static constexpr uint INPUTS_COUNT = 4;
-    static constexpr uint TRIGS_COUNT = 8;
-    uint8_t chopperCandidates = uint8_t(uint16_t(1u << INPUTS_COUNT) - 1u);
-
-    std::map<TriggerEventChannel, DataSourceInfo> dataSourceInfos; // used to determin which DataSource is the chopper.
-
-    inline void setChopperCandidate(uint8_t dataId) {
-      chopperCandidates = static_cast<uint8_t>(1u << dataId);
-    }
-
-    inline bool couldBeChopper(const TriggerEventData &data) {
-      return (1u << data.dataId) & chopperCandidates;
-    }
-
-    inline bool isChopper(const TriggerEventData &data) {
-      return ((1u << data.dataId) & chopperCandidates) == chopperCandidates;
-    }
-
-    inline bool didFindChopper() {
-      // exactly ONE bit is set:
-      return chopperCandidates && !(chopperCandidates & (chopperCandidates-1));
-    }
-
-    inline void addEvent(const Event &event, const uint binSize) {
-      const TriggerEventData &data = event.data.trigger;
-      auto &dsi = dataSourceInfos[triggerEventChannel(event)];
-      //dsi.addEvent(event, binSize);
-      //return;
-      static const int64_t THRESHOLD = 0;
-      chopperCandidates = chopperCandidates & ( 0
-        | ~(1u << data.dataId)
-        | (std::abs(dsi.max -  dsi.min) < THRESHOLD ? 0xFF : 0x00)
-      );
-    }
-  };
-
   struct EventAccumulator {
-    EventAccumulator(Kernel::Logger &g_log, Progress &progress, uint64_t chopperPeriod)
-      : g_log(g_log), progress(progress), chopperPeriod(chopperPeriod) { }
-  private:
-    Kernel::Logger &g_log;
-    Progress &progress;
-
-  public:
-    int64_t chopperPeriod;
-
-    inline void addNeutronEvent(Event &event) {
-        event.timestamp += lastHeader.timestamp;
-        event.mcpdId = lastHeader.mcpdId;
-        events.push_back(event);
-    }
-
-    inline void addTriggerEvent(Event &event) {
-      const TriggerEventData &data = event.data.trigger;
-      if (!chopperFinder.couldBeChopper(data)) {
-        return;
-      }
-      event.timestamp += lastHeader.timestamp;
-      event.mcpdId = lastHeader.mcpdId;
-      events.push_back(event);
-    }
-
-    inline void registerDataBuffer(const BufferHeader &header) {
-        lastHeader = header;
-      }
-
-    inline void postProcessData(Mantid::DataObjects::EventWorkspace_sptr eventWS) {
-      std::sort(events.begin(), events.end(), [](Event l, Event r){ return l.timestamp < r.timestamp; });
-/*
-      for (const Event &event : events) {
-        if (chopperFinder.didFindChopper()) {
-          break;
-        }
-        if (event.eventId == event_id_e::TRIGGER && chopperFinder.couldBeChopper(event.data.trigger)) {
-          //g_log.notice() << "event_id_e::TRIGGER\n";
-          chopperFinder.addEvent(event, 1);
-        }
-      }
-*/
-      int64_t chopperTimestamp = 0;
-      for (const auto &event : events) {
-        if ((event.timestamp - chopperTimestamp) > chopperPeriod) { //(event.eventId == event_id_e::TRIGGER && chopperFinder.isChopper(event.data.trigger)) {
-          chopperTimestamp = event.timestamp;
-        }
-        if (event.timestamp - chopperTimestamp != 0) {
-          const uint16_t channel = uint16_t(event.mcpdId << 8 | event.data.neutron.modId << 5 | event.data.neutron.slotId);
-          const uint16_t position = event.data.neutron.position;
-          Mantid::DataObjects::EventList &eventList = eventWS->getSpectrum(0*channel * 960 + position);
-          //eventList.switchTo(TOF);
-          eventList.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp)));
-        }
-      }
-      //events = tmpEvents;
-    }
-
-    inline void postProcessDataX() {
-      std::sort(events.begin(), events.end(), [](Event l, Event r){ return l.timestamp < r.timestamp; });
-
-      //return;
-      for (Event event : events) {
-        if (event.eventId == event_id_e::TRIGGER) {
-          chopperFinder.addEvent(event, 18/*binSize*/);
-        }
-      }
-
-      uint64_t chopperTimestamp = 0;
-      for (uint i = 0; i < events.size(); i++) {
-        Event event = events[i];
-        if (event.eventId == event_id_e::TRIGGER) {
-          const TriggerEventData data = event.data.trigger;
-          if (chopperFinder.couldBeChopper(data)) {
-            chopperTimestamp = event.timestamp;
-          }
-        } else {
-          // event.timestamp -= chopperTimestamp;
-          // events[i] = event;
-        }
-      }
-    }
-  //private:
-    //std::map<uint32_t, uint64_t> tofs;
-    ChopperFinder chopperFinder;
-    std::vector<Event> events;
-    std::vector<TofEvent> tmpEvents;
-    std::vector<std::map<TriggerEventChannel, Event>> eventsOut;
-    BufferHeader lastHeader;
+    std::vector<CompactEvent> neutronEvents;
   };
+  EventAccumulator _eventAccumulator;
 
-  //template<class EventWorkspace_sptr>
-  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS, LoadDNSEvent::EventAccumulator eventAccumulator);
+  uint chopperChannel;
+  uint monitorChannel;
 
-  void parse_File(ByteStream &file, EventAccumulator &eventAccumulator);
+  uint chopperPeriod;
+
+  void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
+
+  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
+
+  void parse_File(ByteStream &file);
   std::vector<uint8_t> parse_Header(ByteStream &file);
   void parse_BlockList(ByteStream &file, EventAccumulator &eventAccumulator);
   void parse_Block(ByteStream &file, EventAccumulator &eventAccumulator);
   void parse_BlockSeparator(ByteStream &file);
   void parse_DataBuffer(ByteStream &file, EventAccumulator &eventAccumulator);
   BufferHeader parse_DataBufferHeader(ByteStream &file);
-  void parse_EventList(ByteStream &file, EventAccumulator &eventAccumulator, const uint16_t &dataLength);
-  void parse_EventListQuickly(ByteStream &file, EventAccumulator &eventAccumulator, const uint16_t &dataLength);
-  Event parse_Event(ByteStream &file, const HeaderId &headerId);
+
+  inline void parse_andAddEvent(ByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
+    CompactEvent event = {};
+    const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
+
+    switch (event.eventId) {
+      case event_id_e::TRIGGER: {
+        uint8_t trigId;
+        dataChunk
+            .readBits<3>(trigId)
+            .skipBits<25>()
+            .readBits<19>(event.timestamp);
+        if (!(trigId == chopperChannel)) {
+          return;
+        }
+        event.channel = 0xFFFF;
+        event.position = 0xFFFF;
+      } break;
+      case event_id_e::NEUTRON: {
+        dataChunk
+            .readBits<8>(event.channel)
+            .skipBits<10>()
+            .readBits<10>(event.position)
+            .readBits<19>(event.timestamp);
+      } break;
+    default:
+      // Panic!!!!
+      g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
+      break;
+    }
+
+    event.timestamp += bufferHeader.timestamp;
+    event.channel |= bufferHeader.mcpdId << 8;
+    addEvent(event, eventAccumulator);
+  }
+
+  inline void addEvent(const CompactEvent &event, EventAccumulator &eventAccumulator) {
+    eventAccumulator.neutronEvents.push_back(event);
+  }
+
+
+
   void parse_EndSignature(ByteStream &file);
 
-  void parse_BlockQuickly(ByteStream &file, EventAccumulator &eventAccumulator);
-  void parse_DataBufferQuickly(ByteStream &file, EventAccumulator &eventAccumulator);
+
 };
-
-/*
-std::ostream& operator<<(std::ostream& os, const LoadDNSEvent::ChannelIndex &obj) {
-  return logTuple(os, obj.mcpdId, obj.modId, obj.slotId);
-}
-
-std::ostream& operator<<(std::ostream& os, const LoadDNSEvent::EventPosition &obj) {
-  return logTuple(os, obj.channel, obj.position);
-}
-*/
-
-std::ostream& operator<<(std::ostream& os, const LoadDNSEvent::TriggerEventData &obj) {
-  return logTuple(os, obj.trigId, obj.dataId, obj.data);//, obj.timestamp);
-}
-
-std::ostream& operator<<(std::ostream& os, const LoadDNSEvent::NeutronEventData &obj) {
-  return logTuple(os, obj.amplitude, obj.position);//, obj.timestamp);
-}
-
-std::ostream& operator<<(std::ostream& os, const LoadDNSEvent::NeutronEvent &obj) {
-  return logTuple(os, obj.amplitude, obj.tof);
-}
 
 }
 }

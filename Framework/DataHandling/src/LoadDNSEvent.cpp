@@ -1,7 +1,7 @@
 #include <sstream>
 
 #include "MantidDataHandling/LoadDNSEvent.h"
-
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -10,6 +10,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -57,6 +58,8 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadDNSEvent)
 
+const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS";
+
 void LoadDNSEvent::init() {
   /// Initialise the properties
 
@@ -64,15 +67,21 @@ void LoadDNSEvent::init() {
   declareProperty(Kernel::make_unique<FileProperty>("InputFile", "",
                                                     FileProperty::Load, exts),
                   "The XML or Map file with full path.");
+
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+                      "ChopperChannel", 1, boost::shared_ptr<BoundedValidator<uint>>(new BoundedValidator<uint>(0, 4)), Kernel::Direction::Input),
+                  "The Chopper Channel");
+
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
+                      "MonitorChannel", 1, boost::shared_ptr<BoundedValidator<uint>>(new BoundedValidator<uint>(0, 4)), Kernel::Direction::Input),
+                  "The Monitor Channel");
+
   declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
                       "ChopperPeriod", EMPTY_INT(), Kernel::Direction::Input),
                   "The Chopper Period");
   declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
                       "MaxDeltaT", EMPTY_INT(), Kernel::Direction::Input),
                   "The Max Delta T");
-  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<uint>>(
-                      "MaxCount", EMPTY_INT(), Kernel::Direction::Input),
-                  "The Max Count");
 
   declareProperty(
       make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -83,27 +92,35 @@ void LoadDNSEvent::init() {
 
 /// Run the algorithm
 void LoadDNSEvent::exec() {
-  // The number of steps depends on the type of input file
-  // Set them to zero for the moment
-  Progress progress(this, 0.0, 1.0, 4);
-
   const size_t DUMMY_SIZE = 42;
   EventWorkspace_sptr outputWS =  boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace", 960*128, DUMMY_SIZE, DUMMY_SIZE));
 
+  runLoadInstrument(INSTRUMENT_NAME, outputWS);
+  outputWS->instrumentParameters().getType<uint>("chopper", "channel");
+
+  g_log.notice() << "ChopperChannel: " << static_cast<uint>(getProperty("ChopperChannel")) << std::endl;
+  g_log.notice() << "MonitorChannel: " << static_cast<uint>(getProperty("MonitorChannel")) << std::endl;
+  chopperChannel = static_cast<uint>(getProperty("ChopperChannel"));
+  monitorChannel = static_cast<uint>(getProperty("MonitorChannel"));
+  const auto chopperChannels = outputWS->instrumentParameters().getType<uint>("chopper", "channel");
+  const auto monitorChannels = outputWS->instrumentParameters().getType<uint>("monitor", "channel");
+  chopperChannel = chopperChannel != 0 ? chopperChannel : chopperChannels.empty() ? 1 : chopperChannels.at(0);
+  monitorChannel = monitorChannel != 0 ? monitorChannel : monitorChannels.empty() ? 1 : monitorChannels.at(0);
+
+  chopperPeriod = static_cast<uint>(getProperty("ChopperPeriod"));
+
+
+  // The number of steps depends on the type of input file
+  // Set them to zero for the moment
+  Progress progress(this, 0.0, 1.0, 4);
 
   try {
     ByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big, [this]() -> std::ostream& { return g_log.notice(); });
     //file.exceptions(std::ifstream::eofbit);
 
-    EventAccumulator eventAccumulator(g_log, progress, static_cast<uint>(getProperty("ChopperPeriod")));
-    eventAccumulator.chopperFinder.setChopperCandidate(1);
-    auto elaapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file, eventAccumulator); });
-    auto elaapsedTimeProcessing = measureMicroSecs::execution([&](){ eventAccumulator.postProcessData(outputWS); });
-
-    const uint maxN = static_cast<uint>(getProperty("MaxCount"));
-
-    populate_EventWorkspace(outputWS, eventAccumulator);
+    auto elaapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file); });
+    auto elaapsedTimeProcessing = measureMicroSecs::execution([&](){ populate_EventWorkspace(outputWS); });
 
     progress.doReport();
 
@@ -113,89 +130,6 @@ void LoadDNSEvent::exec() {
         << "\nelaapsedTime Total  \t= " << elaapsedTimeParsing + elaapsedTimeProcessing
         << std::endl;
 
-
-
-
-    std::ofstream textfile(static_cast<std::string>(getProperty("InputFile")) + ".txt");
-
-    std::set<int64_t> allDeltaTs;
-    for (const auto &pair1 : eventAccumulator.chopperFinder.dataSourceInfos) {
-      for (const auto &pair2 : pair1.second.deltaTFrequencies ) {
-        allDeltaTs.insert(pair2.first);
-      }
-    }
-    textfile << "\t";
-    int i = 0;
-    for (const auto &deltaT : allDeltaTs ) {
-      i++;
-      if (i > maxN) {
-        break;
-      }
-      textfile << deltaT << "\t";
-    }
-    textfile << "\n";
-
-    for (const auto &pair1 : eventAccumulator.chopperFinder.dataSourceInfos) {
-      logTuple(textfile, pair1.first.mcpdId, pair1.first.dataId, pair1.first.trigId) << "\t";
-      i = 0;
-
-      for (const int64_t &deltaT : allDeltaTs ) {
-        i++;
-        if (i > maxN) {
-          break;
-        }
-
-        if (pair1.second.deltaTFrequencies.find(deltaT) != pair1.second.deltaTFrequencies.end()) {
-          textfile << pair1.second.deltaTFrequencies.at(deltaT) << "\t";
-        } else {
-          textfile << "0\t";
-        }
-      }
-      textfile << "\n";
-    }
-
-
-
-    std::stringstream sbx;
-    int k = 0;
-    for (const auto &event : eventAccumulator.events) {
-
-      if (k++ > maxN) { break; }
-
-      sbx << event.timestamp << "\n";
-
-    }
-    textfile << sbx.str();
-
-    textfile.close();
-
-
-    {
-      g_log.notice() << " Events found (" << eventAccumulator.eventsOut.size() << " of " << eventAccumulator.events.size() << "):" << "\n";
-
-      for (const auto &pair : eventAccumulator.chopperFinder.dataSourceInfos) {
-        logTuple(g_log.notice(), pair.first.mcpdId, pair.first.dataId, pair.first.trigId) << "\t";
-      }
-      g_log.notice() << "\n";
-
-      int maxK = static_cast<uint>(getProperty("MaxCount"));
-      std::stringstream sb;
-      for (const auto &events : eventAccumulator.eventsOut) {
-        maxK--;
-        if (maxK <= 0) {
-          break;
-        }
-        for (const auto &pair : eventAccumulator.chopperFinder.dataSourceInfos) {
-            const auto searchResult = events.find(pair.first);
-            if (searchResult != events.end()) {
-              sb << searchResult->second.timestamp;
-            }
-            sb << "\t";
-        }
-        sb << std::endl;
-      }
-      g_log.notice() << sb.str();
-    }
 
     progress.doReport();
   } catch (std::runtime_error e) {
@@ -209,63 +143,42 @@ void LoadDNSEvent::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-//template<class EventWorkspace_sptr>
-void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS, LoadDNSEvent::EventAccumulator eventAccumulator) {
-  return;
-  std::map<uint64_t, uint32_t> histogram;
+void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
+  std::sort(_eventAccumulator.neutronEvents.begin(), _eventAccumulator.neutronEvents.end(), [](auto l, auto r){ return l.timestamp < r.timestamp; });
 
-  //eventWS->getSpectrum(1).setDetectorID();
+  int64_t chopperTimestamp = 0;
+  for (const auto &event : _eventAccumulator.neutronEvents) {
+  //for (auto iter = _eventAccumulator.events.crbegin(); iter != _eventAccumulator.events.crend(); iter++) {
+  //  const auto &event = *iter;
 
-  for (auto event : eventAccumulator.tmpEvents) {
-    //const uint16_t channel = event.mcpdId << 8 | event.data.neutron.modId << 5 | event.data.neutron.slotId;
-    //const uint16_t position = event.data.neutron.position;
-    const double tof = double(event.tof);//event.timestamp);
-
-    //eventList.addDetectorID();
-    EventList &eventList = eventWS->getSpectrum(0*event.channel * 960 + event.position);
-    //eventList.switchTo(TOF);
-    eventList.addEventQuickly(Types::Event::TofEvent(tof));
-  }
-
-  for (auto pair : histogram) {
-    g_log.notice() << pair.first << "\t" << pair.second << std::endl;
-  }
-  return;
-
-
-  //eventList.setHistogram()
-  //el.setHistogram(this->m_xbins);
-  //eventList.setBinEdges(); ???
-
-  const auto &xVals = eventWS->x(0);
-  const size_t xSize = xVals.size();
-  auto ax0 = new NumericAxis(xSize);
-  std::cout << "xSize = " << xSize << std::endl;
-  // X-axis is 1 <= wavelength <= 6 Angstrom with step of 0.05
-  ax0->setUnit("Wavelength");
-  for (size_t i = 0; i < xSize; i++) {
-    ax0->setValue(i, 1.0 + 0.05 * xVals[i]);
-  }
-  eventWS->replaceAxis(0, ax0);
-
-  for (Event event : eventAccumulator.events) {
-    if (event.eventId == event_id_e::NEUTRON){
-      const uint16_t position = event.data.neutron.position;
-      const double tof = double(event.timestamp) / 10000.0;
-
-      //eventList.addDetectorID();
-      EventList &eventList = eventWS->getSpectrum(position);
+    //if ((event.timestamp - chopperTimestamp) > chopperPeriod) {
+    if (event.position == 0xFFFF && event.channel == 0xFFFF) {
+      chopperTimestamp = event.timestamp;
+    } else /*if (event.timestamp - chopperTimestamp != 0)*/ {
+      Mantid::DataObjects::EventList &eventList = eventWS->getSpectrum(0*event.channel * 960 + event.position);
       eventList.switchTo(TOF);
-      eventList.addEventQuickly(Types::Event::TofEvent(tof));
+      eventList.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp)));
     }
   }
+}
 
+void LoadDNSEvent::runLoadInstrument(std::string instrumentName, EventWorkspace_sptr &eventWS) {
+  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    loadInst->setPropertyValue("InstrumentName", instrumentName);
+    g_log.debug() << "InstrumentName" << instrumentName << '\n';
+    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", eventWS);
+    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
 
+    loadInst->execute();
+  } catch (...) {
+    g_log.information("Cannot load the instrument definition.");
+  }
 }
 
 namespace {
-//std::result_of<decltype(&foo::bar)(foo)>::type
-//decltype(*Iterable::cbegin())
+
 template<typename Iterable>
 constexpr std::map<
    std::remove_reference_t<decltype(*std::declval<decltype(std::declval<Iterable>().cbegin())>())>,
@@ -320,65 +233,10 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(ByteStream &file) {
   return header;
 }
 
-/*
-LoadDNSEvent::eventAccumulator_t LoadDNSEvent::parse_FileX(ByteStream &file) {
-  // File := Header Body
-  auto header = parse_Header(file);
-  g_log.information() << std::string((char*)header.data(), header.size()) << "\n";
-
-  //parse_BlockList(file);
-  LOG_INFORMATION("parse_BlockList...\n")
-  // BlockList := DataBuffer BlockListTrail
-  eventAccumulator_t eventAccumulator;
-  while (file.peek() != 0xFF) {
-    //parse_Block(file, eventAccumulator);
-    LOG_INFORMATION("parse_Block...\n")
-    // Block := DataBufferHeader DataBuffer
-    //parse_DataBuffer(file, eventAccumulator);  LOG_INFORMATION("parse_DataBuffer...\n")
-    //const auto header = parse_DataBufferHeader(file);
-    LOG_INFORMATION("parse_DataBufferHeader...\n")
-    const auto header = file.read(buffer_header_t());
-    g_log.information() << "buffer length: " << convert_endianness(header[0]) << "\n";
-
-    const auto event_count = (convert_endianness(header[0]) - 21) / 3;
-    //parse_EventList(file, eventAccumulator, event_count);
-    LOG_INFORMATION("parse_EventList...\n")
-    for (uint16_t i = 0; i < event_count; i++) {
-      //eventAccumulator.push_back(parse_Event(file));
-      LOG_INFORMATION("parse_Event...\n" )
-      event_t event = {};
-      file.read(event, sizeof(event));
-      eventAccumulator.push_back(event);
-    }
-    //parse_BlockSeparator(file);
-    LOG_INFORMATION("parse_BlockSeparator...\n")
-    const separator_t block_sep = convert_endianness(0x0000FFFF5555AAAA); // 0xAAAA5555FFFF0000; //
-    auto separator = file.read(separator_t());
-    if (separator != block_sep) {
-      throw std::runtime_error(std::string("File Integrety LOST. (ugh!) 0x") + n2hexstr(separator));
-    }
-  }
-  g_log.notice() << "" << eventAccumulator.size() << " events found"<< "\n";
-//  for (const auto event : eventAccumulator) {
-//    g_log.notice() << "0x" << n2hexstr(event) << "\n";
-//  }
-  //parse_EndSignature(file);
-  LOG_INFORMATION("parse_EndSignature...\n" )
-  const separator_t closing_sig = convert_endianness(0xFFFFAAAA55550000); // 0x00005555AAAAFFFF; //
-  auto separator = file.read(separator_t());
-  if (separator != closing_sig) {
-    throw std::runtime_error(std::string("File Integrety LOST. (ugh!) 0x") + n2hexstr(separator));
-  }
-  return eventAccumulator;
-}
-*/
-
-
-void LoadDNSEvent::parse_File(ByteStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_File(ByteStream &file) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
-
-  parse_BlockList(file, eventAccumulator);
+  parse_BlockList(file, _eventAccumulator);
   parse_EndSignature(file);
 }
 
@@ -408,28 +266,32 @@ void LoadDNSEvent::parse_BlockSeparator(ByteStream &file) {
 }
 
 void LoadDNSEvent::parse_DataBuffer(ByteStream &file, EventAccumulator &eventAccumulator) {
-  LOG_INFORMATION("parse_DataBuffer...\n")
-  const auto header = parse_DataBufferHeader(file);
-  eventAccumulator.registerDataBuffer(header);
-  LOG_INFORMATION("buffer length: " << header.bufferLength << "\n");
-  parse_EventList(file, eventAccumulator, uint16_t(header.bufferLength - 21));
+  LOG_INFORMATION("parse_DataBuffer...\n");
+  const auto bufferHeader = parse_DataBufferHeader(file);
+
+  const uint16_t dataLength = uint16_t(bufferHeader.bufferLength - 21);
+  const auto event_count = dataLength / 3;
+  LOG_INFORMATION("event_count = " << event_count << "\n");
+
+  LOG_INFORMATION("parse_EventList...\n");
+  for (uint16_t i = 0; i < event_count; i++) {
+    parse_andAddEvent(file, bufferHeader, eventAccumulator);
+  }
+
 }
 
 LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(ByteStream &file) {
   LOG_INFORMATION("parse_DataBufferHeader...\n")
   BufferHeader header = {};
   file.read<2>(header.bufferLength);
-//  file.skip<2>();
-file.extractDataChunk<2>()
+  file.extractDataChunk<2>()
         .readBits<1>(header.bufferType)
         .readBits<15>(header.bufferVersion);
   file.read<2>(header.headerLength);
-//  file.skip<4>();
-file.read<2>(header.bufferNumber);
-file.read<2>(header.runId);
+  file.read<2>(header.bufferNumber);
+  file.read<2>(header.runId);
   file.read<1>(header.mcpdId);
-//  file.skip<1>();
-file.extractDataChunk<1>()
+  file.extractDataChunk<1>()
         .skipBits<6>()
         .readBits<2>(header.deviceStatus);
   file.read<6>(header.timestamp);
@@ -438,90 +300,6 @@ file.extractDataChunk<1>()
 
 }
 
-void LoadDNSEvent::parse_EventList(ByteStream &file, EventAccumulator &eventAccumulator, const uint16_t &dataLength) {
-  LOG_INFORMATION("parse_EventList...\n")
-  const auto event_count = dataLength / 3;
-  LOG_INFORMATION("event_count = " << event_count << "\n")
-  for (uint16_t i = 0; i < event_count; i++) {
-    Event event = {};
-    const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
-
-    switch (event.eventId) {
-      case event_id_e::TRIGGER: {
-        TriggerEventData eventData = {};
-        dataChunk
-            //.skip<28>()
-            .readBits<3>(eventData.trigId)
-            .readBits<4>(eventData.dataId)
-            .readBits<21>(eventData.data)
-            .readBits<19>(event.timestamp);
-        event.data.trigger = eventData;
-        eventAccumulator.addTriggerEvent(event);
-      } break;
-      case event_id_e::NEUTRON: {
-        NeutronEventData eventData = {};
-        dataChunk
-            //.skip<28>()
-            .readBits<3>(eventData.modId)
-            .skipBits<1>()
-            .readBits<4>(eventData.slotId)
-            .readBits<10>(eventData.amplitude)
-            .readBits<10>(eventData.position)
-            .readBits<19>(event.timestamp);
-        event.data.neutron = eventData;
-        eventAccumulator.addNeutronEvent(event);
-      } break;
-    default:
-      // Panic!!!!
-      g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
-      break;
-    }
-  }
-}
-
-LoadDNSEvent::Event LoadDNSEvent::parse_Event(ByteStream &file, const HeaderId &headerId) {
-
-  Event event = {};
-  file.extractDataChunk<6>()
-      //.readBits<1>(event.eventId)
-      .skipBits<29>()
-      .readBits<19>(event.timestamp);
-  return event;
-
-
-//  const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
-//  switch (event.eventId) {
-//    case event_id_e::TRIGGER: {
-//      TriggerEventData eventData = {};
-//      dataChunk
-//          //.skip<28>()
-//          .readBits<3>(eventData.trigId)
-//          .readBits<4>(eventData.dataId)
-//          .readBits<21>(eventData.data)
-//          .readBits<19>(event.timestamp);
-//      event.data.trigger = eventData;
-//    } break;
-//    case event_id_e::NEUTRON: {
-//      NeutronEventData eventData = {};
-//      dataChunk
-//          //.skip<28>()
-//          .readBits<3>(eventData.modId)
-//          .skipBits<1>()
-//          .readBits<4>(eventData.slotId)
-//          .readBits<10>(eventData.amplitude)
-//          .readBits<10>(eventData.position)
-//          .readBits<19>(event.timestamp);
-//      event.data.neutron = eventData;
-//    } break;
-//  default:
-//    // Panic!!!!
-//    g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
-//    break;
-//  }
-
-//  event.headerId = headerId;
-//  return event;
-}
 
 void LoadDNSEvent::parse_EndSignature(ByteStream &file) {
   LOG_INFORMATION("parse_EndSignature...\n")
