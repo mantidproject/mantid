@@ -18,9 +18,6 @@ from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
-from random import choice, randint
-from time import time
-
 
 class PlotView(QtGui.QWidget):
     def __init__(self):
