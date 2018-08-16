@@ -515,7 +515,7 @@ public:
     TS_ASSERT(iter == spectrumInfo.begin());
 
     // Increment and check index
-    for (int i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
+    for (size_t i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
       TS_ASSERT_EQUALS(iter->getIndex(), i);
       ++iter;
     }
@@ -533,7 +533,7 @@ public:
     TS_ASSERT(iter == spectrumInfo.end());
 
     // Decrement and check index
-    for (int i = m_workspace.spectrumInfo().size(); i > 0; --i) {
+    for (size_t i = m_workspace.spectrumInfo().size(); i > 0; --i) {
       TS_ASSERT_EQUALS(iter->getIndex(), i);
       --iter;
     }
