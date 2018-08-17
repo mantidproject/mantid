@@ -5,6 +5,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -234,7 +235,7 @@ void ScanningWorkspaceBuilder::buildOutputComponentInfo(
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     auto &mergeComponentInfo = mergeWorkspace->mutableComponentInfo();
     mergeComponentInfo.setScanInterval(m_timeRanges[i]);
-    outputComponentInfo.merge(mergeComponentInfoInfo);
+    outputComponentInfo.merge(mergeComponentInfo);
   }
 }
 

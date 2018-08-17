@@ -99,7 +99,7 @@ private:
   IndexingType m_indexingType;
 
   void
-  buildOutputDetectorInfo(Geometry::DetectorInfo &outputDetectorInfo) const;
+  buildOutputComponentInfo(Geometry::ComponentInfo &outputComponentInfo) const;
 
   void buildPositions(Geometry::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(Geometry::DetectorInfo &outputDetectorInfo) const;

@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -118,7 +119,9 @@ MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
   MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
       *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
 
-  newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
+  // newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
+  newOutWS->mutableComponentInfo().merge(addeeWS->componentInfo());
+
 
   if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
     // In this case the detector info objects were identical. We just add the
@@ -715,25 +718,50 @@ std::vector<SpectrumDefinition> MergeRuns::buildScanIntervals(
     const DetectorInfo &newOutDetInfo) {
   std::vector<SpectrumDefinition> newAddeeSpecDefs(addeeSpecDefs.size());
 
+  const auto &addeeScanIntervals = addeeDetInfo.scanIntervals();
+  const auto &outScanIntervals = outDetInfo.scanIntervals();
+  const auto &newOutScanIntervals = newOutDetInfo.scanIntervals();
+
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
     for (auto &index : addeeSpecDefs[i]) {
       SpectrumDefinition newSpecDef;
-      const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
-      if (addeeScanInterval == outDetInfo.scanInterval(index)) {
+      // const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
+      // if (addeeScanInterval == outDetInfo.scanInterval(index)) {
+      if (addeeScanIntervals[index] == outScanIntervals[index]) {
         newSpecDef.add(index.first, index.second);
       } else {
         // Find the correct time index for this entry
-        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
-          if (addeeScanInterval ==
-              newOutDetInfo.scanInterval({index.first, i})) {
-            newSpecDef.add(index.first, i);
+        for (size_t j = 0; j < newOutDetInfo.scanCount(); j++) {
+          if (addeeScanIntervals[index] ==
+              newOutScanInterval[{index.first, j}]) {
+            newSpecDef.add(index.first, j);
           }
         }
       }
       newAddeeSpecDefs[i] = newSpecDef;
     }
   }
+
+  // PARALLEL_FOR_NO_WSP_CHECK()
+  // for (int64_t i = 0; i < int64_t(addeeSpecDefs.size()); ++i) {
+  //   for (auto &index : addeeSpecDefs[i]) {
+  //     SpectrumDefinition newSpecDef;
+  //     const auto &addeeScanInterval = addeeDetInfo.scanInterval(index);
+  //     if (addeeScanInterval == outDetInfo.scanInterval(index)) {
+  //       newSpecDef.add(index.first, index.second);
+  //     } else {
+  //       // Find the correct time index for this entry
+  //       for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+  //         if (addeeScanInterval ==
+  //             newOutDetInfo.scanInterval({index.first, i})) {
+  //           newSpecDef.add(index.first, i);
+  //         }
+  //       }
+  //     }
+  //     newAddeeSpecDefs[i] = newSpecDef;
+  //   }
+  // }
 
   return newAddeeSpecDefs;
 }
