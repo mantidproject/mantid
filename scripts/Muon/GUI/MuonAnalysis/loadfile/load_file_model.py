@@ -78,8 +78,7 @@ class BrowseFileWidgetModel(object):
         if dirs:
             for dir in dirs:
                 ConfigService.Instance().appendDataSearchDir(dir.encode('ascii', 'ignore'))
-
-        print("Dirs : ", dirs)
-        print("Data search : ", ConfigService.Instance().getDataSearchDirs())
-        print("config : ", cf.getDataSearchDirs())
-        print(cf["datasearch.directories"])
+        # print("Dirs : ", dirs)
+        # print("Data search : ", ConfigService.Instance().getDataSearchDirs())
+        # print("config : ", cf.getDataSearchDirs())
+        # print(cf["datasearch.directories"])

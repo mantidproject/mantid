@@ -109,6 +109,10 @@ def decrement_run_list(run_list, decrement_by=1):
     return decrement_run_list(run_list, decrement_by - 1)
 
 
+def increment_run(run, increment_by=1):
+    return run + increment_by
+
+
 def increment_run_string(run_string, increment_by=1):
     """
     Takes a string representation of runs, and adds a number of runs starting at one after the highest.
@@ -121,6 +125,10 @@ def increment_run_string(run_string, increment_by=1):
     return run_list_to_string(run_list)
 
 
+def decrement_run(run, decrement_by=1):
+    return max(0, run - decrement_by)
+
+
 def decrement_run_string(run_string, decrement_by=1):
     """
     Takes a string representation of runs, and adds a number of runs starting at one before the lowest and decrementing.
@@ -131,11 +139,3 @@ def decrement_run_string(run_string, decrement_by=1):
     run_list = run_string_to_list(run_string)
     run_list = decrement_run_list(run_list, decrement_by)
     return run_list_to_string(run_list)
-
-
-def increment_run(run, increment_by=1):
-    return run + increment_by
-
-
-def decrement_run(run, decrement_by=1):
-    return max(0, run - decrement_by)
