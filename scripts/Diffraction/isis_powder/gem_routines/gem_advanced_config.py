@@ -109,7 +109,7 @@ all_adv_variables = {
 
 
 def get_mode_specific_variables(is_texture_mode, is_save_all):
-    texture_mode_dict = {};
+    texture_mode_dict = {}
     if is_texture_mode:
         texture_mode_dict.update(texture_mode_on)
     else:
