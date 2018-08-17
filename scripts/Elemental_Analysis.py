@@ -15,6 +15,8 @@ from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadMo
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 
+import mantid.simpleapi as mantid
+
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -74,6 +76,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         p = self.plotting.add_subplot(name)
         p.set_title(name)
         self.plotting.update_canvas()
+        c = mantid.CreateSampleWorkspace()
+        self.plotting.plot_workspace(name, c)
         self.plot_incr += 1
 
     def del_plot(self):

@@ -2,8 +2,7 @@ from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
-
-#from mantid import plots
+from mantid import plots
 
 from collections import OrderedDict
 
@@ -101,6 +100,11 @@ class PlotView(QtGui.QWidget):
     def _update_plot_selector(self):
         self.plot_selector.clear()
         self.plot_selector.addItems(self.plots.keys())
+
+    def plot_workspace(self, name, workspace):
+        subplot = self.plots[name]
+        plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
+        self.canvas.draw()
 
     def get_subplot(self, name):
         return self.plots[name]

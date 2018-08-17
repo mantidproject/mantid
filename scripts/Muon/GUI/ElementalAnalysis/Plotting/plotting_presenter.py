@@ -11,6 +11,9 @@ class PlotPresenter(object):
     def add_subplot(self, name):
         return self.view.add_subplot(name)
 
+    def plot_workspace(self, name, workspace):
+        self.view.plot_workspace(name, workspace)
+
     def remove_subplot(self, name):
         self.view.remove_subplot(name)
 
