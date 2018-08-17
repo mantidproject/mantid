@@ -78,8 +78,9 @@ class PlotView(QtGui.QWidget):
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
-            plot.set_position(
-                self.current_grid[pos[0], pos[1]].get_position(self.figure))
+            p = self.current_grid[pos[0], pos[1]]
+            plot.set_position(p.get_position(self.figure))
+            plot.set_subplotspec(p)
 
     def _update_gridspec(self, new_plots, last=None):
         if new_plots:
@@ -89,8 +90,11 @@ class PlotView(QtGui.QWidget):
             if last is not None:
                 # label is necessary to fix
                 # https://github.com/matplotlib/matplotlib/issues/4786
-                self.plots[last] = self.figure.add_subplot(
-                    self.current_grid[positions[-1][0], positions[-1][1]], label=last)
+                pos = self.current_grid[positions[-1][0], positions[-1][1]]
+                self.plots[last] = self.figure.add_subplot(pos, label=last)
+                self.plots[last].set_subplotspec(pos)
+        if len(self.plots) > 1:
+            self.figure.tight_layout()
         self._update_plot_selector()
         self.canvas.draw()
 
