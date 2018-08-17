@@ -41,6 +41,9 @@ class MANTID_PARALLEL_DLL EventsListsShmemStorage : public EventsListsShmemManag
 public:
   EventsListsShmemStorage(const std::string& segmentName, const std::string& elName, size_t size);
   virtual ~EventsListsShmemStorage();
+
+  MANTID_PARALLEL_DLL friend std::ostream &operator<<(std::ostream &os,
+                                                      const EventsListsShmemStorage &storage);
 private:
   /// Memory segment to store data
   ip::managed_shared_memory m_segment;

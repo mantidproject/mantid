@@ -5,6 +5,7 @@
 #include "boost/interprocess/managed_shared_memory.hpp"
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/offset_ptr.hpp>
+#include <ostream>
 
 #include "MantidParallel/DllConfig.h"
 
@@ -52,7 +53,15 @@ public:
   // with existed GuardedEventLists in it
   EventsListsShmemManager(const std::string &segmentName,
                           const std::string &elName);
-  ~EventsListsShmemManager();
+
+  virtual ~EventsListsShmemManager();
+
+  void AppendEvent(std::size_t listN,
+                   const Types::Event::TofEvent &event);
+
+  MANTID_PARALLEL_DLL friend std::ostream &operator<<(std::ostream &os,
+                                                      const EventsListsShmemManager &manager);
+
 
 protected:
   using SegmentManager = ip::managed_shared_memory::segment_manager;
@@ -60,13 +69,16 @@ protected:
   using TofEventAllocator =
       ip::allocator<Types::Event::TofEvent, SegmentManager>;
   using EventList = ip::vector<Types::Event::TofEvent, TofEventAllocator>;
+  using EventListAllocator = ip::allocator<EventList, SegmentManager>;
   using EventListPtr = ip::offset_ptr<EventList>;
   using EventListPtrAllocator = ip::allocator<EventListPtr, SegmentManager>;
 
   // Structure to control access to every event list
   struct GuardedEventList {
-    EventListPtr eventList;
-    ip::interprocess_mutex mutex;
+    EventList eventList;
+    ip::offset_ptr<ip::interprocess_mutex> mutex;
+
+    GuardedEventList(VoidAllocator &alloc);
   };
 
   using GuardedEventListAllocator =
