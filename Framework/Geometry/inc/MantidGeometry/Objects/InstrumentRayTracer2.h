@@ -12,7 +12,7 @@ tracking rays and accumulating a list of objects that are intersected along the
 way.
 
 @author Bhuvan Bezawada, STFC
-@date 08/08/2018
+@date 17/08/2018
 
 Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -43,19 +43,23 @@ namespace InstrumentRayTracer2 {
 using Kernel::V3D;
 using Links = Track::LType;
 
-void fireRay(const ComponentInfo &componentInfo, Track &testRay) {}
-
 /**
  * Trace a given track from the source in the given direction.
  * @param dir :: A directional vector. The starting point is defined by the
  * instrument source.
  * @param componentInfo :: The object used to access the source position.
- * @param resultsTrack :: The track to trace.
+ * @return resultsTrack :: The track to trace.
  */
-void traceFromSource(const Kernel::V3D &dir, const ComponentInfo &componentInfo,
-                     Track &resultsTrack) {
-  resultsTrack.reset(componentInfo.sourcePosition(), dir);
-  Mantid::Geometry::InstrumentRayTracer2::fireRay(componentInfo, resultsTrack);
+Track traceFromSource(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+
+  // Create a new results track to return
+  Track resultsTrack(componentInfo.sourcePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(componentInfo, resultsTrack);
+
+  return resultsTrack;
 }
 
 /**
@@ -63,12 +67,18 @@ void traceFromSource(const Kernel::V3D &dir, const ComponentInfo &componentInfo,
  * @param dir :: A directional vector. The starting point is defined by the
  * source.
  * @param componentInfo :: The object used to access the source position.
- * @param resultsTrack :: The track to trace.
+ * @return resultsTrack :: The track to trace.
  */
-void traceFromSample(const Kernel::V3D &dir, const ComponentInfo &componentInfo,
-                     Track &resultsTrack) {
-  resultsTrack.reset(componentInfo.samplePosition(), dir);
-  Mantid::Geometry::InstrumentRayTracer2::fireRay(componentInfo, resultsTrack);
+Track traceFromSample(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+
+  // Create a new results track to return
+  Track resultsTrack(componentInfo.samplePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(componentInfo, resultsTrack);
+
+  return resultsTrack;
 }
 
 /**
@@ -76,8 +86,12 @@ void traceFromSample(const Kernel::V3D &dir, const ComponentInfo &componentInfo,
  * @returns A collection of links defining intersection information
  */
 Links getResults(Track &resultsTrack) {
+  // Create a list of the results
   Links results(resultsTrack.cbegin(), resultsTrack.cend());
+
+  // Clear intersection results
   resultsTrack.clearIntersectionResults();
+
   return results;
 }
 
@@ -91,47 +105,42 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
   Links::const_iterator resultIterator = results.begin();
 
   // Return the first detectorIndex
-  for (; resultIterator != results.end(); ++resultIterator) {
+  while (resultIterator != results.end()) {
+    // Increment the iterator
+    ++resultIterator;
+
+    // Get the detector index
     auto index = componentInfo.indexOf(resultIterator->componentID);
-    // Need to make sure index is valid
-    return index;
+
+    // Validate the index
+    if (index >= 0 && index <= componentInfo.size()) {
+      return index;
+    }
+
+    // If we reach here, the index must be invalid
+    throw std::out_of_range("Error, index is invalid!");
   }
 }
 
-/*
+/**
+ * Fire the test ray at the instrument and perform a bread-first search of the
+ * object tree to find the objects that were intersected.
+ * @param componentInfo :: The object that will provide access to the bounding
+ * boxes
+ * @param testRay :: An input/output parameter that defines the track and
+ * accumulates the intersection results
+ */
 void fireRay(const ComponentInfo &componentInfo, Track &testRay) {
-  std::deque<IComponent_const_sptr> nodeQueue;
-
-  // Start at the root of the tree
-  nodeQueue.push_back(componentInfo);
-
-  IComponent_const_sptr node;
-  while (!nodeQueue.empty()) {
-    node = nodeQueue.front();
-    nodeQueue.pop_front();
-    BoundingBox bbox;
-    auto it = m_boxCache.find(node->getComponentID());
-    if (it != m_boxCache.end()) {
-      bbox = it->second;
-    } else {
-      node->getBoundingBox(bbox);
-      std::lock_guard<std::mutex> lock(m_mutex);
-      m_boxCache[node->getComponentID()] = bbox;
-    }
-
-    // Quick test. If this suceeds moved on to test the children
-    if (bbox.doesLineIntersect(testRay)) {
-      if (ICompAssembly_const_sptr assembly =
-              boost::dynamic_pointer_cast<const ICompAssembly>(node)) {
-        assembly->testIntersectionWithChildren(testRay, nodeQueue);
-      } else {
-        throw Kernel::Exception::NotImplementedError(
-            "Implement non-comp assembly interactions");
-      }
-    }
+  // Loop through the bounding boxes in reverse
+  // (essentially a breadth first search)
+  for (size_t i = componentInfo.size(); i <= 0; --i) {
+    // Store the bounding box
+    auto box = componentInfo.boundingBox(i);
+    // Test for intersection
+    box.doesLineIntersect(testRay);
   }
 }
-*/
+
 } // namespace InstrumentRayTracer2
 } // namespace Geometry
 } // namespace Mantid
