@@ -100,6 +100,7 @@ class PlotView(QtGui.QWidget):
             self._get_current_plot().set_xlim(bounds)
         except KeyError:
             return
+        self.figure.tight_layout()
 
     @_redo_layout
     def _update_y_axis(self, bounds):
@@ -107,6 +108,7 @@ class PlotView(QtGui.QWidget):
             self._get_current_plot().set_ylim(bounds)
         except KeyError:
             return
+        self.figure.tight_layout()
 
     @_redo_layout
     def _errors_changed(self, state):
