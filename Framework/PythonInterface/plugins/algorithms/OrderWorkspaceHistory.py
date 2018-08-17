@@ -44,10 +44,9 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         for fn in glob.iglob(os.path.join(self.getPropertyValue(_recovery_folder), '*.py')):
             with open(fn) as f:
                 tokens = tokenize.generate_tokens(f.readline)
-
                 line = None
                 for t in tokens:
-                    #Start a new line when we see a name
+                    # Start a new line when we see a name
                     if line is None and t[0] == tokenize.NAME:
                         line = [t]
                     # End the line when we see a logical line ending
@@ -55,26 +54,23 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                         # Only care about the line if it has a comment
                         have_comment = any(x[0] == tokenize.COMMENT for x in line)
                         if have_comment:
-                            all_lines.append(line)
+                            # line[-1][1][1:] is the comment string, with the preceeding hash stripped off; line[0][4] is the command and the comment
+                            all_lines.append((line[0][4], line[-1][1][1:]))
                         line = []
                     # Everything in between we care about
                     elif line is not None:
                         line.append(t)
 
-        # l[-1][1][1:] is the comment string, with the preceeding hash stripped off
-        # t[1] for t in l[:-1] is the command line, minus the comment at the end
-        all_commands = [(''.join(t[1] for t in l[:-1]), l[-1][1][1:]) for l in all_lines]
-        # Remove duplicate commands by casting commands as a set
-        unique_commands = list(set(all_commands))
-
-        unique_commands.sort(key=lambda time: (time[1]))
+        # Cast as a set to remove duplicates
+        unique_lines = list(set(all_lines))
+        # Sort according to time
+        unique_lines.sort(key=lambda time: (time[1]))
 
         destination = self.getPropertyValue(_destination_file)
 
-        # Write to file
         with open(destination, 'w') as outfile:
-            for x in unique_commands:
-                outfile.write('{} # {} \n'.format(x[0], x[1]))
+            for x in unique_lines:
+                outfile.write('{}'.format(x[0]))
 
 # Required to have Mantid recognise the new function
 mantid.api.AlgorithmFactory.subscribe(OrderWorkspaceHistory)
