@@ -104,6 +104,7 @@ class PlotView(QtGui.QWidget):
     def plot_workspace(self, name, workspace):
         subplot = self.plots[name]
         plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
+        self.figure.tight_layout()
         self.canvas.draw()
 
     def get_subplot(self, name):
