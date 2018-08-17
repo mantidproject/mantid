@@ -68,9 +68,11 @@ class Gem(AbstractInst):
             maud_filename = filename_stub + "_MAUD.gem"
             out_file_names["maud_filename"] = maud_filename
 
-        if self._inst_settings.texture_mode:
-            angles_filename = filename_stub + "_grouping.new"
-            out_file_names["angles_filename"] = angles_filename
+        if hasattr(self._inst_settings, "texture_mode"):
+
+            if self._inst_settings.texture_mode:
+                angles_filename = filename_stub + "_grouping.new"
+                out_file_names["angles_filename"] = angles_filename
 
         if self._inst_settings.save_maud_calib:
             maud_calib_filename = filename_stub + ".maud"
