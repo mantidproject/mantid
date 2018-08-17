@@ -82,7 +82,7 @@ public:
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
-  bool isGroup() const override { return true; } 
+  bool isGroup() const override { return true; }
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;
