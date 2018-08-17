@@ -18,6 +18,8 @@ from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 
 import mantid.simpleapi as mantid
 
+import mantid.simpleapi as mantid
+
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):

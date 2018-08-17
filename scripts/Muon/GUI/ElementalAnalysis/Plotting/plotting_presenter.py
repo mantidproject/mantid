@@ -11,9 +11,16 @@ class PlotPresenter(object):
     def add_subplot(self, name):
         return self.view.add_subplot(name)
 
+<<<<<<< ae7573c727e5735ae06fb9409e70f3bca0028ba1
     def plot(self, name, workspace):
         self.view.plot(name, workspace)
 
+||||||| merged common ancestors
+=======
+    def plot_workspace(self, name, workspace):
+        self.view.plot_workspace(name, workspace)
+
+>>>>>>> refs #23260 add workspace plotting
     def remove_subplot(self, name):
         self.view.remove_subplot(name)
 
