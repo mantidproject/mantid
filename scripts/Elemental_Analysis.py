@@ -30,6 +30,8 @@ import mantid.simpleapi as mantid
 
 import mantid.simpleapi as mantid
 
+import mantid.simpleapi as mantid
+
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
