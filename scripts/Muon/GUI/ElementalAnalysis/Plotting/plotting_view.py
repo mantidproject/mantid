@@ -32,10 +32,14 @@ class PlotView(QtGui.QWidget):
         self.canvas = FigureCanvas(self.figure)
 
         self.plot_selector = QtGui.QComboBox()
+        self.plot_selector.currentIndexChanged[str].connect(self._set_bounds)
 
         button_layout = QtGui.QHBoxLayout()
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
+        self.x_axis_changer.on_bounds_changed(self._update_x_axis)
+
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
+        self.y_axis_changer.on_bounds_changed(self._update_y_axis)
 
         button_layout.addWidget(self.plot_selector)
         button_layout.addWidget(self.x_axis_changer.view)
@@ -45,6 +49,23 @@ class PlotView(QtGui.QWidget):
         grid.addWidget(self.canvas, 0, 0)
         grid.addLayout(button_layout, 1, 0)
         self.setLayout(grid)
+
+    def _set_bounds(self, new_plot):
+        if new_plot:
+            p = self.plots[str(new_plot)]
+            self.x_axis_changer.set_bounds(p.get_xlim())
+            self.y_axis_changer.set_bounds(p.get_ylim())
+
+    def _get_current_plot(self):
+        return self.plots[str(self.plot_selector.currentText())]
+
+    def _update_x_axis(self, bounds):
+        self._get_current_plot().set_xlim(bounds)
+        self.canvas.draw()
+
+    def _update_y_axis(self, bounds):
+        self._get_current_plot().set_ylim(bounds)
+        self.canvas.draw()
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
@@ -61,8 +82,8 @@ class PlotView(QtGui.QWidget):
                 # https://github.com/matplotlib/matplotlib/issues/4786
                 self.plots[last] = self.figure.add_subplot(
                     self.current_grid[positions[-1][0], positions[-1][1]], label=last)
-        self.canvas.draw()
         self._update_plot_selector()
+        self.canvas.draw()
 
     def _update_plot_selector(self):
         self.plot_selector.clear()
