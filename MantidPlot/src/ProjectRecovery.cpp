@@ -7,6 +7,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
@@ -490,11 +492,22 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  const auto wsHandles =
+  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
       ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
     return;
+  }
+
+  // Handle group workspaces, and make sure they are last.
+  for (auto i = 0u; i < wsHandles.size(); ++i) {
+    const auto wsHistory = wsHandles.at(i)->getHistory();
+    if (wsHistory.getAlgorithmHistories().size() == 1 &&
+        wsHistory.getAlgorithmHistories()[0].name() ==
+            "GroupWorkspaces") {
+      wsHandles.emplace_back(wsHandles[i]);
+      wsHandles.erase(i);
+    }
   }
 
   static auto startTime =
