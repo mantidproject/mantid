@@ -24,7 +24,7 @@ attr_mapping = \
      ParamMapEntry(ext_name="run_number",                int_name="run_number"),
      ParamMapEntry(ext_name="sample_empty",              int_name="sample_empty",   optional=True),
      ParamMapEntry(ext_name="sample_empty_scale",        int_name="sample_empty_scale"),
-     ParamMapEntry(ext_name="save_angles",               int_name="save_angles"),
+     ParamMapEntry(ext_name="save_all",                  int_name="save_all"),
      ParamMapEntry(ext_name="save_maud_calib",           int_name="save_maud_calib"),
      ParamMapEntry(ext_name="save_maud",                 int_name="save_maud"),
      ParamMapEntry(ext_name="spline_coefficient",        int_name="spline_coeff"),

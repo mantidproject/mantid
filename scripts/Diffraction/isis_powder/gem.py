@@ -4,7 +4,7 @@ import os
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import absorb_corrections, common, instrument_settings
+from isis_powder.routines import absorb_corrections, common, instrument_settings, common_output
 
 
 class Gem(AbstractInst):
@@ -61,7 +61,6 @@ class Gem(AbstractInst):
 
     def _generate_out_file_paths(self, run_details):
         out_file_names = super(Gem, self)._generate_out_file_paths(run_details)
-
         nxs_filename = out_file_names["nxs_filename"]
         filename_stub = ".".join(nxs_filename.split(".")[:-1])
 
@@ -69,7 +68,7 @@ class Gem(AbstractInst):
             maud_filename = filename_stub + "_MAUD.gem"
             out_file_names["maud_filename"] = maud_filename
 
-        if self._inst_settings.save_angles:
+        if self._inst_settings.texture_mode:
             angles_filename = filename_stub + "_grouping.new"
             out_file_names["angles_filename"] = angles_filename
 
@@ -87,9 +86,15 @@ class Gem(AbstractInst):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing and TOF groups of the processed output workspaces
         """
-        d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
-                                                                         run_details=run_details,
-                                                                         output_mode=output_mode)
+
+        if self._inst_settings.save_all:
+            d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
+                                                                             run_details=run_details,
+                                                                             output_mode=output_mode)
+        else:
+            d_spacing_group, \
+                tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                          processed_spectra=processed_spectra)
 
         output_paths = self._generate_out_file_paths(run_details=run_details)
         if "maud_filename" in output_paths:
@@ -149,7 +154,11 @@ class Gem(AbstractInst):
     def _switch_texture_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "texture_mode"):
             mode = self._inst_settings.texture_mode
-        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode),
+        save_all = True
+        if hasattr(self._inst_settings, "save_all"):
+            save_all = False
+        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode,
+                                                                                                              save_all),
                                               suppress_warnings=True)
 
 

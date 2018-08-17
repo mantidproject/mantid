@@ -52,6 +52,7 @@ texture_focused_cropping_values = [(448, 29344), (390, 19225), (390, 18673), (43
                                    (600, 16813), (600, 16822), (600, 16825), (600, 16808), (600, 16799), (600, 16819),
                                    (600, 16794), (600, 16828), (600, 16822), (600, 16827)]
 
+
 vanadium_cropping_values = [(510, 19997),  # Bank 1
                             (510, 19997),  # Bank 2
                             (510, 19997),  # Bank 3
@@ -88,6 +89,18 @@ texture_vanadium_cropping_values = [(75, 34933), (65, 22887), (65, 22230), (73, 
                                     (100, 20015), (100, 20026), (100, 20030), (100, 20010), (100, 19999), (100, 20023),
                                     (100, 19993), (100, 20034), (100, 20026), (100, 20033)]
 
+texture_mode_on = {"focused_cropping_values": texture_focused_cropping_values,
+                   "vanadium_cropping_values": texture_vanadium_cropping_values,
+                   "grouping_file_name": "offsets_xie_test_2.cal",
+                   "save_maud": True,
+                   "save_maud_calib": True}
+
+texture_mode_off ={"focused_cropping_values": focused_cropping_values,
+                   "vanadium_cropping_values": vanadium_cropping_values,
+                   "grouping_file_name": "GEM_Instrument_grouping.cal",
+                   "save_maud": False,
+                   "save_maud_calib": False}
+
 all_adv_variables = {
     "gsas_calib_filename": "GEM_PF1_PROFILE.IPF",
     "maud_grouping_scheme": [1] * 3 + [2] * 8 + [3] * 20 + [4] * 42 + [5] * 52 + [6] * 35,
@@ -95,21 +108,16 @@ all_adv_variables = {
 }
 
 
-def get_mode_specific_variables(is_texture_mode):
+def get_mode_specific_variables(is_texture_mode, is_save_all):
+    texture_mode_dict = {};
     if is_texture_mode:
-        return {"focused_cropping_values": texture_focused_cropping_values,
-                "vanadium_cropping_values": texture_vanadium_cropping_values,
-                "grouping_file_name": "offsets_xie_test_2.cal",
-                "save_angles": True,
-                "save_maud": True,
-                "save_maud_calib": True}
+        texture_mode_dict.update(texture_mode_on)
     else:
-        return {"focused_cropping_values": focused_cropping_values,
-                "vanadium_cropping_values": vanadium_cropping_values,
-                "grouping_file_name": "GEM_Instrument_grouping.cal",
-                "save_angles": False,
-                "save_maud": False,
-                "save_maud_calib": False}
+        texture_mode_dict.update(texture_mode_off)
+    if is_save_all:
+        save_all = {"save_all": True}
+        texture_mode_dict.update(save_all)
+    return texture_mode_dict
 
 
 def get_all_adv_variables():
