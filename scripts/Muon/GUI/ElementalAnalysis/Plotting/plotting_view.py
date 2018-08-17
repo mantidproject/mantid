@@ -67,6 +67,7 @@ class PlotView(QtGui.QWidget):
             self.canvas.draw()
         except KeyError:
             return
+        self.figure.tight_layout()
 
     def _update_y_axis(self, bounds):
         try:
@@ -74,6 +75,7 @@ class PlotView(QtGui.QWidget):
             self.canvas.draw()
         except KeyError:
             return
+        self.figure.tight_layout()
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
