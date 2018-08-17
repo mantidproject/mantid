@@ -42,7 +42,7 @@ public:
   /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
-                std::string email, std::string textbox);
+                std::string email, std::string textBox);
   /// Sends an error report
   void sendErrorReport();
 
