@@ -43,8 +43,7 @@ void AppendSpectra::init() {
 
   declareProperty("Number", 1,
                   boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
-                  "Append the spectra from InputWorkspace2 multiple times (for "
-                  "MatrixWorkspaces only)");
+                  "Append the spectra from InputWorkspace2 multiple times.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
