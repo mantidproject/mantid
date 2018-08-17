@@ -304,21 +304,16 @@ void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
   // Chunk no longer needed in ADS
   AnalysisDataService::Instance().remove(chunkName);
 
-  if (!alg->isExecuted()) {
-    throw std::runtime_error("Error when calling " + alg->name() +
-                             " to add the chunk of live data. See log.");
-  } else {
-    // Get the output as the generic Workspace type
-    // This step is necessary for when we are operating on MD workspaces
-    Property *prop = alg->getProperty("OutputWorkspace");
-    IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
-    if (!wsProp)
-      throw std::runtime_error(
-          "The " + alg->name() +
-          " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
-    Workspace_sptr temp = wsProp->getWorkspace();
-    accumWS = temp;
-  }
+  // Get the output as the generic Workspace type
+  // This step is necessary for when we are operating on MD workspaces
+  Property *prop = alg->getProperty("OutputWorkspace");
+  IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+  if (!wsProp)
+    throw std::runtime_error(
+        "The " + alg->name() +
+        " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+  Workspace_sptr temp = wsProp->getWorkspace();
+  accumWS = temp;
 }
 
 //----------------------------------------------------------------------------------------------
