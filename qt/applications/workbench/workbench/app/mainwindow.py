@@ -305,7 +305,8 @@ class MainWindow(QMainWindow):
             # flatten list
             widgets = [item for column in widgets_layout for row in column for item in row]
             # show everything
-            map(lambda w: w.toggle_view(True), widgets)
+            for w in widgets:
+                w.toggle_view(True)
             # split everything on the horizontal
             for i in range(len(widgets) - 1):
                 first, second = widgets[i], widgets[i+1]
