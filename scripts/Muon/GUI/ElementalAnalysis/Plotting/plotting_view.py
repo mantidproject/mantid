@@ -1,4 +1,7 @@
 from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
+from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
+from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
+
 
 #from mantid import plots
 
@@ -31,12 +34,12 @@ class PlotView(QtGui.QWidget):
         self.plot_selector = QtGui.QComboBox()
 
         button_layout = QtGui.QHBoxLayout()
-        self.x_axis_changer = putils.AxisChanger("X")
-        self.y_axis_changer = putils.AxisChanger("Y")
+        self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
+        self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
         button_layout.addWidget(self.plot_selector)
-        button_layout.addWidget(self.x_axis_changer)
-        button_layout.addWidget(self.y_axis_changer)
+        button_layout.addWidget(self.x_axis_changer.view)
+        button_layout.addWidget(self.y_axis_changer.view)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(self.canvas, 0, 0)
