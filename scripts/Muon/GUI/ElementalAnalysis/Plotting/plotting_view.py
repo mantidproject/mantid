@@ -55,17 +55,26 @@ class PlotView(QtGui.QWidget):
             p = self.plots[str(new_plot)]
             self.x_axis_changer.set_bounds(p.get_xlim())
             self.y_axis_changer.set_bounds(p.get_ylim())
+        else:
+            self.x_axis_changer.clear_bounds()
+            self.y_axis_changer.clear_bounds()
 
     def _get_current_plot(self):
         return self.plots[str(self.plot_selector.currentText())]
 
     def _update_x_axis(self, bounds):
-        self._get_current_plot().set_xlim(bounds)
-        self.canvas.draw()
+        try:
+            self._get_current_plot().set_xlim(bounds)
+            self.canvas.draw()
+        except KeyError:
+            return
 
     def _update_y_axis(self, bounds):
-        self._get_current_plot().set_ylim(bounds)
-        self.canvas.draw()
+        try:
+            self._get_current_plot().set_ylim(bounds)
+            self.canvas.draw()
+        except KeyError:
+            return
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):

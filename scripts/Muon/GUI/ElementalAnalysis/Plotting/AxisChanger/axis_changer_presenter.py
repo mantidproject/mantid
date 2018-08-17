@@ -8,6 +8,9 @@ class AxisChangerPresenter(object):
     def set_bounds(self, bounds):
         self.view.set_bounds(bounds)
 
+    def clear_bounds(self):
+        self.view.clear_bounds()
+
     def on_bounds_changed(self, slot):
         self.view.on_bounds_changed(slot)
 

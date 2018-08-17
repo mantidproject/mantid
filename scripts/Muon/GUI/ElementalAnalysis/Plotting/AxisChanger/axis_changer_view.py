@@ -31,6 +31,10 @@ class AxisChangerView(QtGui.QWidget):
         self.lower_bound.setText(l)
         self.upper_bound.setText(u)
 
+    def clear_bounds(self):
+        self.lower_bound.clear()
+        self.upper_bound.clear()
+
     def _bounds_changed(self):
         self.sig_bounds_changed.emit(self.get_bounds())
 
