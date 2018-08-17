@@ -11,7 +11,7 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
     """
     Create a calibration file from (usually) a ceria run
     :param calibration_runs: Run number(s) for this run
-    :param instrument: The PEARL instrument object
+    :param instrument: The GEM instrument object
     :param offset_file_name: Name of the file to write detector offset information to
     :param grouping_file_name: Name of grouping calibration file
     :param calibration_dir: Path to directory containing calibration information
