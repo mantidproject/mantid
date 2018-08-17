@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from six import iteritems
 
 from mantid import plots
