@@ -144,6 +144,7 @@ class PlotView(QtGui.QWidget):
                 self.plots[last] = self.figure.add_subplot(pos, label=last)
                 self.plots[last].set_subplotspec(pos)
         self._update_plot_selector()
+        self.canvas.draw()
 
     def _update_plot_selector(self):
         self.plot_selector.clear()
