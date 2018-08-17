@@ -10,7 +10,6 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::Sample;
-using Mantid::Geometry::CSGObject;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::Material; // NOLINT
 using namespace boost::python;
