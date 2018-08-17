@@ -17,6 +17,14 @@ namespace BankRenderingHelpers {
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW std::pair<size_t, size_t>
 getCorrectedTextureSize(const size_t width, const size_t height);
 
+/** Render GridDetector Bank as 6 bitmaps for all layers or one bitmap for the
+selected layer Makes OpenGL calls for drawing the bank in an OpenGL window as
+textures. NB glBegin() and glEnd() are called within this function.
+*/
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
+renderGridBank(const Mantid::Geometry::ComponentInfo &compInfo, size_t index,
+               bool allLayers = true, size_t layer = 0);
+
 /** Render RectangularDetector Bank as bitmap texture
 Makes OpenGL calls for drawing the bank in an OpenGL window. NB glBegin() and
 glEnd() are called within this function.

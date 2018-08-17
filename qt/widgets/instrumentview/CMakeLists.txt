@@ -1,5 +1,6 @@
 set ( SRC_FILES
         src/BankRenderingHelpers.cpp
+        src/BankTextureBuilder.cpp
 	src/BinDialog.cpp
 	src/CollapsiblePanel.cpp
 	src/ColorMapWidget.cpp
@@ -65,6 +66,7 @@ set ( MOC_FILES
 
 set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
+	inc/MantidQtWidgets/InstrumentView/BankTextureBuilder.h
 	inc/MantidQtWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
 	inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h

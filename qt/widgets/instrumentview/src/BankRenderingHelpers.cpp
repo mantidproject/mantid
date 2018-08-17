@@ -92,6 +92,12 @@ std::pair<size_t, size_t> getCorrectedTextureSize(const size_t width,
   return {roundToNearestPowerOfTwo(width), roundToNearestPowerOfTwo(height)};
 }
 
+void
+renderGridBank(const Mantid::Geometry::ComponentInfo &compInfo, size_t index,
+  bool allLayers, size_t layer) {
+
+}
+
 void renderRectangularBank(const Mantid::Geometry::ComponentInfo &compInfo,
                            size_t index) {
 

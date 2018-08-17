@@ -43,21 +43,15 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   m_useDisplayList[1] = false;
 
   const auto &componentInfo = actor.componentInfo();
-  size_t numTextures = 0;
+  size_t textureIndex = 0;
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
     if (type == Mantid::Beamline::ComponentType::Rectangular ||
         type == Mantid::Beamline::ComponentType::OutlineComposite) {
-      m_textureIndices.push_back(i);
-      m_reverseTextureIndexMap[i] = numTextures;
-      numTextures++;
+      m_textures.emplace_back(componentInfo, i);
+      m_reverseTextureIndexMap[i] = textureIndex;
+      textureIndex++;
     }
-  }
-
-  if (numTextures > 0) {
-    m_textureIDs.resize(numTextures, 0);
-    colorTextures.resize(numTextures);
-    pickTextures.resize(numTextures);
   }
 }
 
@@ -157,13 +151,13 @@ void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
   }
 
   auto ti = m_reverseTextureIndexMap[bankIndex];
-  glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
-  uploadRectangularTexture(picking ? pickTextures[ti] : colorTextures[ti],
-                           bankIndex);
+  auto &tex = m_textures[ti];
+  tex.bindTextures(picking);
+  tex.uploadTextures(picking);
 
   BankRenderingHelpers::renderRectangularBank(compInfo, bankIndex);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  tex.unbindTextures();
   glPopMatrix();
 }
 
@@ -200,14 +194,14 @@ void InstrumentRenderer::drawTube(size_t bankIndex, bool picking) {
   glRotated(deg, ax0, ax1, ax2);
 
   auto ti = m_reverseTextureIndexMap[bankIndex];
+  auto &tex = m_textures[ti];
   glColor3f(1.0f, 1.0f, 1.0f);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
-  uploadTubeTexture(picking ? pickTextures[ti] : colorTextures[ti], bankIndex);
+  tex.bindTextures(picking);
+  tex.uploadTextures(picking);
 
   compInfo.shape(bankIndex).draw();
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  tex.unbindTextures();
   glPopMatrix();
 }
 
@@ -244,21 +238,9 @@ void InstrumentRenderer::reset() {
   resetColors();
   resetPickColors();
 
-  if (m_textureIDs.size() > 0) {
-    const auto &compInfo = m_actor.componentInfo();
-    for (size_t i = 0; i < m_textureIDs.size(); i++) {
-      auto type = compInfo.componentType(m_textureIndices[i]);
-
-      if (type == Mantid::Beamline::ComponentType::Rectangular) {
-        generateRectangularTexture(colorTextures[i], m_colors,
-                                   m_textureIndices[i]);
-        generateRectangularTexture(pickTextures[i], m_pickColors,
-                                   m_textureIndices[i]);
-      } else if (type == Mantid::Beamline::ComponentType::OutlineComposite) {
-        generateTubeTexture(colorTextures[i], m_colors, m_textureIndices[i]);
-        generateTubeTexture(pickTextures[i], m_pickColors, m_textureIndices[i]);
-      }
-    }
+  for (auto &texture : m_textures) {
+    texture.buildColorTextures(m_colors);
+    texture.buildPickTextures(m_pickColors);
   }
 
   /// Invalidate the OpenGL display lists to force full re-drawing of the
@@ -350,94 +332,5 @@ size_t InstrumentRenderer::decodePickColor(const QRgb &c) {
 void InstrumentRenderer::loadColorMap(const QString &fname) {
   m_colorMap.loadMap(fname);
 }
-
-void InstrumentRenderer::generateRectangularTexture(
-    std::vector<char> &texture, const std::vector<GLColor> &colors,
-    size_t bankIndex) {
-  const auto &compInfo = m_actor.componentInfo();
-  auto bank = compInfo.quadrilateralComponent(bankIndex);
-  // Round size up to nearest power of 2
-  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
-  auto texSizeX = res.first;
-  auto texSizeY = res.second;
-
-  // Texture width is 3 times wider due to RGB values
-  texture.resize(texSizeX * texSizeY * 3, 0); // fill with black
-
-  const auto &children = compInfo.children(bankIndex);
-  auto colWidth = children.size() * 3;
-  for (size_t x = 0; x < colWidth; x += 3) {
-    const auto &dets = compInfo.detectorsInSubtree(children[x / 3]);
-    for (size_t y = 0; y < dets.size(); ++y) {
-      auto det = dets[y];
-      auto ti = (y * texSizeX * 3) + x;
-      texture[ti] = static_cast<char>(colors[det].red());
-      texture[ti + 1] = static_cast<char>(colors[det].green());
-      texture[ti + 2] = static_cast<char>(colors[det].blue());
-    }
-  }
-}
-
-void InstrumentRenderer::generateTubeTexture(std::vector<char> &texture,
-                                             const std::vector<GLColor> &colors,
-                                             size_t bankIndex) {
-  const auto &compInfo = m_actor.componentInfo();
-  const auto &children = compInfo.children(bankIndex);
-  texture.resize(children.size() * 3);
-
-  for (size_t i = 0; i < children.size(); ++i) {
-    auto col = colors[children[i]];
-    auto pos = i * 3;
-    texture[pos] = static_cast<unsigned char>(col.red());
-    texture[pos + 1] = static_cast<unsigned char>(col.green());
-    texture[pos + 2] = static_cast<unsigned char>(col.blue());
-  }
-}
-
-void InstrumentRenderer::uploadRectangularTexture(
-    const std::vector<char> &texture, size_t textureIndex) const {
-  auto bank = m_actor.componentInfo().quadrilateralComponent(textureIndex);
-  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
-  auto xsize = res.first;
-  auto ysize = res.second;
-
-  auto ti = m_reverseTextureIndexMap[textureIndex];
-  if (m_textureIDs[ti] != 0)
-    glDeleteTextures(1, &m_textureIDs[ti]);
-
-  glGenTextures(1, &m_textureIDs[ti]);
-  glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-  // Allow lighting effects
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(xsize),
-               static_cast<GLsizei>(ysize), 0, GL_RGB, GL_UNSIGNED_BYTE,
-               texture.data());
-}
-
-void InstrumentRenderer::uploadTubeTexture(const std::vector<char> &texture,
-                                           size_t textureIndex) const {
-  auto ti = m_reverseTextureIndexMap[textureIndex];
-  if (m_textureIDs[ti] > 0)
-    glDeleteTextures(1, &m_textureIDs[ti]);
-
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glGenTextures(1, &m_textureIDs[ti]);
-  glBindTexture(GL_TEXTURE_2D, m_textureIDs[ti]);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, 3, 1, static_cast<GLsizei>(texture.size() / 3),
-               0, GL_RGB, GL_UNSIGNED_BYTE, texture.data());
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-}
-
 } // namespace MantidWidgets
 } // namespace MantidQt
