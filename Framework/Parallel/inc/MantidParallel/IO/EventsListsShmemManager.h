@@ -99,6 +99,9 @@ protected:
   /// Event list shared storage name
   const std::string m_eventListsName;
 
+  /// Memory segment to store data
+  std::shared_ptr<ip::managed_shared_memory> m_segment;
+
   /// Event list shared storage
   EventLists *m_eventLists;
 };
