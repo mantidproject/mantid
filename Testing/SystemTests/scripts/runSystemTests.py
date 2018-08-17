@@ -6,12 +6,15 @@ import os
 import sys
 
 from multiprocessing import Process, Array
+from multiprocessing.managers import BaseManager
 
 # Function to spawn one test manager per CPU
-def testProcess(testDir,runner,output,testsInclude, testsExclude, exclude_in_pr_builds,
+def testProcess(testDir,saveDir,runner,testsInclude, testsExclude, exclude_in_pr_builds,
                 results_array,process_number,ncores):
 
-    mgr = stresstesting.TestManager(testDir,runner,output=output,testsInclude=testsInclude,
+    reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
+
+    mgr = stresstesting.TestManager(testDir,runner,output=[reporter],testsInclude=testsInclude,
                                     testsExclude=testsExclude, exclude_in_pr_builds=exclude_in_pr_builds,
                                     process_number=process_number,ncores=ncores)
     try:
@@ -23,6 +26,12 @@ def testProcess(testDir,runner,output,testsInclude, testsExclude, exclude_in_pr_
     results_array[process_number] = mgr.skippedTests
     results_array[process_number + ncores] = mgr.failedTests
     results_array[process_number + 2*ncores] = mgr.totalTests
+    results_array[process_number + 3*ncores] = int(reporter.reportStatus())
+
+    # report the errors
+    xml_report = open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number),'w')
+    xml_report.write(reporter.getResults())
+    xml_report.close()
 
     return
 
@@ -80,7 +89,7 @@ parser.add_option("", "--archivesearch", dest="archivesearch", action="store_tru
 parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
                   help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
-                    loglevel="information")
+                    loglevel="information",parallel="1")
 (options, args) = parser.parse_args()
 
 # import the stress testing framework
@@ -108,16 +117,26 @@ if options.makeprop:
 # run the tests
 execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
-reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
+# xml_file_root = "TEST-systemtests"
+# reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
+
+
+# BaseManager.register('XmlReporterClass', stresstesting.XmlResultReporter(showSkipped=options.showskipped))
+# manager = BaseManager()
+# manager.start()
+# reporter = manager.XmlReporterClass
+# print(reporter)
+# reporter2 = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
+# print(reporter2)
 
 # Multi-core processes
 ncores = int(options.parallel)
 processes = []
-# Prepare a shared array to hold skipped, failed and total number of tests
-results_array = Array('i', 3*ncores)
+# Prepare a shared array to hold skipped, failed and total number of tests + status
+results_array = Array('i', 4*ncores)
 # Prepare ncores processes
 for ip in range(ncores):
-    processes.append(Process(target=testProcess,args=(mtdconf.testDir, runner, [reporter],
+    processes.append(Process(target=testProcess,args=(mtdconf.testDir, mtdconf.saveDir, runner,
         options.testsInclude, options.testsExclude,options.exclude_in_pr_builds,results_array,ip,ncores)))
 # Start and join processes
 for p in processes:
@@ -125,11 +144,20 @@ for p in processes:
 for p in processes:
     p.join()
 
-# report the errors
-success = reporter.reportStatus()
-xml_report = open(os.path.join(mtdconf.saveDir, "TEST-systemtests.xml"),'w')
-xml_report.write(reporter.getResults())
-xml_report.close()
+# # merge reports to master xml file
+# xml_master_file = open(os.path.join(mtdconf.saveDir, xml_file_root)+".xml", 'w')
+# for i in range(ncores):
+#     with open(os.path.join(mtdconf.saveDir, xml_file_root)+"-%i.xml" % i, mode='r') as xml_file:
+#         xml_content = xml_file.read()
+#     xml_file.close()
+#     xml_master_file.write(xml_content)
+#     print(xml_content)
+# xml_master_file.close()
+
+# success = reporter.reportStatus()
+# xml_report = open(os.path.join(mtdconf.saveDir, "TEST-systemtests.xml"),'w')
+# xml_report.write(reporter.getResults())
+# xml_report.close()
 
 # put the configuration back to its original state
 if options.makeprop:
@@ -139,6 +167,8 @@ if options.makeprop:
 skippedTests = sum(results_array[:ncores])
 failedTests = sum(results_array[ncores:2*ncores])
 totalTests = sum(results_array[2*ncores:3*ncores])
+# Find minimum of status: if min = 0, then success is False
+success = bool(min(results_array[3*ncores:4*ncores]))
 
 print()
 if skippedTests == totalTests:
