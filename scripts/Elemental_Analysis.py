@@ -75,7 +75,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     def add_plot(self):
         name = "Plot {}".format(time())
         p = self.plotting.add_subplot(name)
-        p.set_title(name)
+        self.plotting.call_plot_method(name, p.set_title, name)
+        self.plotting.add_hline(name, 0.06, 0, 1)
         self.plotting.update_canvas()
         a = mantid.CreateSampleWorkspace(OutputWorkspace=str(time()))
         self.plotting.plot(name, a)

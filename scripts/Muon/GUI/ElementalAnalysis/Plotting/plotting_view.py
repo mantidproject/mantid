@@ -22,6 +22,7 @@ class PlotView(QtGui.QWidget):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
         self.workspaces = {}
+        self.plot_additions = {}
         self.current_grid = None
         self.gridspecs = {
             1: gridspec.GridSpec(1, 1),
@@ -64,6 +65,15 @@ class PlotView(QtGui.QWidget):
             self.canvas.draw()
         return wraps
 
+    def _save_addition(func):
+        def wraps(self, name, *args, **kwargs):
+            try:
+                self.plot_additions[name].append((func, name, args, kwargs))
+            except KeyError:
+                self.plot_additions[name] = [(func, name, args, kwargs)]
+            func(self, name, *args, **kwargs)
+        return wraps
+
     def _set_bounds(self, new_plot):
         if new_plot:
             p = self.plots[str(new_plot)]
@@ -95,15 +105,17 @@ class PlotView(QtGui.QWidget):
         for name, plot in iteritems(self.plots):
             workspaces = self.workspaces[name]
             self.workspaces[name] = []
-            x, y, title = plot.get_xlim(), plot.get_ylim(), plot.get_title()
+            x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
             for ws in workspaces:
                 self.plot(name, ws)
-            # temp fix - clearing plot removes all additions (lines, title
-            # etc.)
             plot.set_xlim(x)
             plot.set_ylim(y)
-            plot.set_title(title)
+            self._replay_additions(name)
+
+    def _replay_additions(self, name):
+        for func, name, args, kwargs in self.plot_additions[name]:
+            func(self, name, *args, **kwargs)
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
@@ -167,16 +179,26 @@ class PlotView(QtGui.QWidget):
         """ will raise KeyError if: 'name' isn't a plot; there are no plots """
         self.figure.delaxes(self.plots[name])
         del self.plots[name]
+        del self.workspaces[name]
+        del self.plot_additions[name]
         self._update_gridspec(len(self.plots))
 
+    @_save_addition
+    def call_plot_method(self, name, func, *args, **kwargs):
+        return func(*args, **kwargs)
+
+    @_save_addition
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         return self.plots[plot_name].axvline(x_value, y_min, y_max, **kwargs)
 
+    @_save_addition
     def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         return self.plots[plot_name].axhline(y_value, x_min, x_max, **kwargs)
 
+    @_save_addition
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
         pass
 
+    @_save_addition
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass

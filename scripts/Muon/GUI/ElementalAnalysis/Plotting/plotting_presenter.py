@@ -20,6 +20,9 @@ class PlotPresenter(object):
     def update_canvas(self):
         self.view.canvas.draw()
 
+    def call_plot_method(self, name, func, *args, **kwargs):
+        return self.view.call_plot_method(name, func, *args, **kwargs)
+
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         return self.view.add_vline(plot_name, x_value, y_min, y_max, **kwargs)
 
