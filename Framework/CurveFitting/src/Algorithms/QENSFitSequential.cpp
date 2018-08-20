@@ -285,6 +285,7 @@ IAlgorithm_sptr createProcessIndirectFitParametersAlgorithm(
     const std::vector<std::string> &parameterNames) {
   auto pifp =
       AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
+  pifp->setChild(true);
   pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
   pifp->setProperty("ColumnX", "axis-1");

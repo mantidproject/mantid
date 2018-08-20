@@ -170,6 +170,7 @@ IAlgorithm_sptr createProcessIndirectFitParametersAlgorithm(
     const std::vector<std::string> &parameterNames) {
   auto pifp =
       AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
+  pifp->setChild(true);
   pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
   pifp->setProperty("ColumnX", "axis-1");
@@ -179,12 +180,12 @@ IAlgorithm_sptr createProcessIndirectFitParametersAlgorithm(
 }
 
 ITableWorkspace_sptr transposeFitTable(ITableWorkspace_sptr table,
-                                       IFunction_sptr function,
+                                       const IFunction &function,
                                        const std::string &yAxisType) {
   auto transposed = WorkspaceFactory::Instance().createTable();
   transposed->addColumn(yAxisType, "axis-1");
 
-  auto parameters = function->getParameterNames();
+  auto parameters = function.getParameterNames();
   for (const auto &parameter : parameters) {
     transposed->addColumn("double", parameter);
     transposed->addColumn("double", parameter + "_Err");

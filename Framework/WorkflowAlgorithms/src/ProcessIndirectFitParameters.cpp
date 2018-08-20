@@ -92,9 +92,10 @@ std::vector<T> getColumnValues(Column const &column, std::size_t startRow,
 std::vector<double> getNumericColumnValuesOrIndices(Column const &column,
                                                     std::size_t startRow,
                                                     std::size_t endRow) {
+  auto const length = startRow >= endRow ? 1 + startRow - endRow : 0;
   if (column.isNumber())
     return getColumnValues<double>(column, startRow, endRow);
-  return getIncrementingSequence(0.0, endRow - startRow + 1);
+  return getIncrementingSequence(0.0, length);
 }
 
 std::string getColumnName(Column_const_sptr column) { return column->name(); }
