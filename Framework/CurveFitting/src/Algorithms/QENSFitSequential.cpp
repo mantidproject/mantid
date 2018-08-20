@@ -280,20 +280,6 @@ createGroup(const std::vector<MatrixWorkspace_sptr> &workspaces) {
   return group;
 }
 
-IAlgorithm_sptr createProcessIndirectFitParametersAlgorithm(
-    ITableWorkspace_sptr parameterWorkspace, const std::string &xAxisUnit,
-    const std::vector<std::string> &parameterNames) {
-  auto pifp =
-      AlgorithmManager::Instance().create("ProcessIndirectFitParameters");
-  pifp->setChild(true);
-  pifp->setAlwaysStoreInADS(false);
-  pifp->setProperty("InputWorkspace", parameterWorkspace);
-  pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("XAxisUnit", xAxisUnit);
-  pifp->setProperty("ParameterNames", parameterNames);
-  return pifp;
-}
-
 WorkspaceGroup_sptr
 runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
                                    const std::vector<std::size_t> &grouping) {
@@ -649,14 +635,15 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
-  Progress logAdderProg(this, 0.91, 0.95, 1);
-
   std::string const xAxisUnit = getProperty("ResultXAxisUnit");
-  auto pifp = createProcessIndirectFitParametersAlgorithm(
-      parameterWorkspace, xAxisUnit, getFitParameterNames());
-  auto group = runParameterProcessingWithGrouping(*pifp, grouping);
-  logAdderProg.report("Result workspace created.");
-  return group;
+  auto pifp =
+      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
+  pifp->setAlwaysStoreInADS(false);
+  pifp->setProperty("InputWorkspace", parameterWorkspace);
+  pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("XAxisUnit", xAxisUnit);
+  pifp->setProperty("ParameterNames", getFitParameterNames());
+  return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 
 ITableWorkspace_sptr
