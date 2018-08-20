@@ -94,7 +94,7 @@ private:
                              const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
-  Poco::Glob::Options m_globOption;
+  int m_globOption;
 };
 
 using FileFinder = Mantid::Kernel::SingletonHolder<FileFinderImpl>;

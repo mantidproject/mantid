@@ -99,9 +99,53 @@ bool FileFinderImpl::getCaseSensitive() const {
  */
 std::string FileFinderImpl::getFullPath(const std::string &filename,
                                         const bool ignoreDirs) const {
+  std::string fName = Kernel::Strings::strip(filename);
+  g_log.debug() << "getFullPath(" << fName << ")\n";
+  // If this is already a full path, nothing to do
+  if (Poco::Path(fName).isAbsolute())
+    return fName;
 
-  return Kernel::ConfigService::Instance().getFullPath(filename, ignoreDirs,
-                                                       m_globOption);
+  // First try the path relative to the current directory. Can throw in some
+  // circumstances with extensions that have wild cards
+  try {
+    Poco::File fullPath(Poco::Path().resolve(fName));
+    if (fullPath.exists() && (!ignoreDirs || !fullPath.isDirectory()))
+      return fullPath.path();
+  } catch (std::exception &) {
+  }
+
+  const std::vector<std::string> &searchPaths =
+      Kernel::ConfigService::Instance().getDataSearchDirs();
+  for (const auto &searchPath : searchPaths) {
+    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
+// On windows globbing is note working properly with network drives
+// for example a network drive containing a $
+// For this reason, and since windows is case insensitive anyway
+// a special case is made for windows
+#ifdef _WIN32
+    if (fName.find("*") != std::string::npos) {
+#endif
+      Poco::Path path(searchPath, fName);
+      std::set<std::string> files;
+      Kernel::Glob::glob(path, files, m_globOption);
+      if (!files.empty()) {
+        Poco::File matchPath(*files.begin());
+        if (ignoreDirs && matchPath.isDirectory()) {
+          continue;
+        }
+        return *files.begin();
+      }
+#ifdef _WIN32
+    } else {
+      Poco::Path path(searchPath, fName);
+      Poco::File file(path);
+      if (file.exists() && !(ignoreDirs && file.isDirectory())) {
+        return path.toString();
+      }
+    }
+#endif
+  }
+  return "";
 }
 
 /** Run numbers can be followed by an allowed string. Check if there is

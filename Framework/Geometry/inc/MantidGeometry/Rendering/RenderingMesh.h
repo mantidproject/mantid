@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_RENDERINGMESH_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {

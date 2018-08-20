@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/ProxyInfo.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #include <Poco/Notification.h>
@@ -16,9 +17,6 @@
 #include <set>
 #include <string>
 #include <vector>
-
-#include <Poco/Notification.h>
-#include <Poco/NotificationCenter.h>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -253,9 +251,6 @@ public:
 
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
-
-  std::string getFullPath(const std::string &filename, const bool ignoreDirs,
-                          const Poco::Glob::Options option) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
