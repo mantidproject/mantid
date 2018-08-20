@@ -4,6 +4,8 @@ from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import Ax
 
 from mantid import plots
 
+from six import iteritems
+
 from collections import OrderedDict
 
 from matplotlib.figure import Figure
@@ -19,6 +21,7 @@ class PlotView(QtGui.QWidget):
     def __init__(self):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
+        self.workspaces = {}
         self.current_grid = None
         self.gridspecs = {
             1: gridspec.GridSpec(1, 1),
@@ -40,14 +43,26 @@ class PlotView(QtGui.QWidget):
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
         self.y_axis_changer.on_bounds_changed(self._update_y_axis)
 
+        self.errors = QtGui.QCheckBox("Errors")
+        self.errors.stateChanged.connect(self._errors_changed)
+
         button_layout.addWidget(self.plot_selector)
         button_layout.addWidget(self.x_axis_changer.view)
         button_layout.addWidget(self.y_axis_changer.view)
+        button_layout.addWidget(self.errors)
 
         grid = QtGui.QGridLayout()
         grid.addWidget(self.canvas, 0, 0)
         grid.addLayout(button_layout, 1, 0)
         self.setLayout(grid)
+
+    def _redo_layout(func):
+        def wraps(self, *args, **kwargs):
+            func(self, *args, **kwargs)
+            if len(self.plots) > 1:
+                self.figure.tight_layout()
+            self.canvas.draw()
+        return wraps
 
     def _set_bounds(self, new_plot):
         if new_plot:
@@ -61,21 +76,30 @@ class PlotView(QtGui.QWidget):
     def _get_current_plot(self):
         return self.plots[str(self.plot_selector.currentText())]
 
+    @_redo_layout
     def _update_x_axis(self, bounds):
         try:
             self._get_current_plot().set_xlim(bounds)
             self.canvas.draw()
         except KeyError:
             return
-        self.figure.tight_layout()
 
+    @_redo_layout
     def _update_y_axis(self, bounds):
         try:
             self._get_current_plot().set_ylim(bounds)
             self.canvas.draw()
         except KeyError:
             return
-        self.figure.tight_layout()
+
+    @_redo_layout
+    def _errors_changed(self, state):
+        for name, plot in iteritems(self.plots):
+            workspaces = self.workspaces[name]
+            self.workspaces[name] = []
+            plot.clear()
+            for ws in workspaces:
+                self.plot(name, ws)
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
@@ -83,6 +107,7 @@ class PlotView(QtGui.QWidget):
             plot.set_position(p.get_position(self.figure))
             plot.set_subplotspec(p)
 
+    @_redo_layout
     def _update_gridspec(self, new_plots, last=None):
         if new_plots:
             self.current_grid = self.gridspecs[new_plots]
@@ -94,20 +119,34 @@ class PlotView(QtGui.QWidget):
                 pos = self.current_grid[positions[-1][0], positions[-1][1]]
                 self.plots[last] = self.figure.add_subplot(pos, label=last)
                 self.plots[last].set_subplotspec(pos)
-        if len(self.plots) > 1:
-            self.figure.tight_layout()
         self._update_plot_selector()
-        self.canvas.draw()
 
     def _update_plot_selector(self):
         self.plot_selector.clear()
         self.plot_selector.addItems(self.plots.keys())
 
-    def plot_workspace(self, name, workspace):
+    def _add_workspace_name(self, name, workspace):
+        try:
+            if workspace not in self.workspaces[name]:
+                self.workspaces[name].append(workspace)
+        except KeyError:
+            self.workspaces[name] = [workspace]
+
+    @_redo_layout
+    def plot(self, name, workspace):
+        self._add_workspace_name(name, workspace)
+        if self.errors.isChecked():
+            self.plot_workspace_errors(name, workspace)
+        else:
+            self.plot_workspace(name, workspace)
+
+    def plot_workspace_errors(self, name, workspace):
         subplot = self.plots[name]
         plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
-        self.figure.tight_layout()
-        self.canvas.draw()
+
+    def plot_workspace(self, name, workspace):
+        subplot = self.plots[name]
+        plots.plotfunctions.plot(subplot, workspace, specNum=1)
 
     def get_subplot(self, name):
         return self.plots[name]

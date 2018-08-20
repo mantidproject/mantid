@@ -4,6 +4,7 @@ from PyQt4 import QtGui
 
 import sys
 import random
+from time import time
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
@@ -37,7 +38,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.load_widget = LoadPresenter(
             LoadView(), LoadModel(), CoLoadModel())
         self.plotting = PlotPresenter(PlotView())
-        self.plot_incr = 0
 
         self.add = QtGui.QPushButton("Add")
         self.add.clicked.connect(self.add_plot)
@@ -72,13 +72,12 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.ptable.set_peak_datafile(filename)
 
     def add_plot(self):
-        name = "Plot {}".format(self.plot_incr)
+        name = "Plot {}".format(time())
         p = self.plotting.add_subplot(name)
         p.set_title(name)
         self.plotting.update_canvas()
-        c = mantid.CreateSampleWorkspace()
-        self.plotting.plot_workspace(name, c)
-        self.plot_incr += 1
+        c = mantid.CreateSampleWorkspace(OutputWorkspace=name)
+        self.plotting.plot(name, c)
 
     def del_plot(self):
         to_del = random.choice(self.plotting.get_subplots().keys())
