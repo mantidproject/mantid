@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 using namespace MantidQt::MantidWidgets;
+using Mantid::Beamline::ComponentType;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,8 +47,9 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   size_t textureIndex = 0;
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
-    if (type == Mantid::Beamline::ComponentType::Rectangular ||
-        type == Mantid::Beamline::ComponentType::OutlineComposite) {
+    if (type == ComponentType::Rectangular ||
+        type == ComponentType::OutlineComposite ||
+        type == ComponentType::Grid) {
       m_textures.emplace_back(componentInfo, i);
       m_reverseTextureIndexMap[i] = textureIndex;
       textureIndex++;
@@ -96,24 +98,30 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
   for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max();
        --i) {
     auto type = compInfo.componentType(i);
-    if (type == Mantid::Beamline::ComponentType::Infinite)
+    if (type == ComponentType::Infinite)
       continue;
 
-    if (type == Mantid::Beamline::ComponentType::Rectangular) {
+    if (type == ComponentType::Grid) {
+      updateVisited(visited, compInfo.componentsInSubtree(i));
+      if (visibleComps[i])
+        drawGridBank(i, picking);
+      continue;
+    }
+    if (type == ComponentType::Rectangular) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawRectangularBank(i, picking);
       continue;
     }
 
-    if (type == Mantid::Beamline::ComponentType::OutlineComposite) {
+    if (type == ComponentType::OutlineComposite) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawTube(i, picking);
       continue;
     }
 
-    if (type == Mantid::Beamline::ComponentType::Structured) {
+    if (type == ComponentType::Structured) {
       updateVisited(visited, compInfo.componentsInSubtree(i));
       if (visibleComps[i])
         drawStructuredBank(i, picking);
@@ -131,6 +139,8 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
     }
   }
 }
+
+void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {}
 
 void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
   const auto &compInfo = m_actor.componentInfo();

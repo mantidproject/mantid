@@ -4,8 +4,8 @@
 #include "DllOption.h"
 #include "GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QString>
 
 namespace MantidQt {
@@ -50,6 +50,7 @@ private:
   void resetPickColors();
   void draw(const std::vector<bool> &visibleComps, bool showGuides,
             bool picking);
+  void drawGridBank(size_t bankIndex, bool picking);
   void drawRectangularBank(size_t bankIndex, bool picking);
   void drawStructuredBank(size_t bankIndex, bool picking);
   void drawTube(size_t bankIndex, bool picking);

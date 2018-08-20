@@ -117,8 +117,10 @@ size_t ComponentInfo::size() const { return m_componentInfo->size(); }
 ComponentInfo::QuadrilateralComponent
 ComponentInfo::quadrilateralComponent(const size_t componentIndex) const {
   auto type = componentType(componentIndex);
+  auto parentType = componentType(parent(componentIndex));
   if (!(type == Beamline::ComponentType::Structured ||
-        type == Beamline::ComponentType::Rectangular))
+        type == Beamline::ComponentType::Rectangular ||
+        parentType == Beamline::ComponentType::Grid))
     throw std::runtime_error("ComponentType is not Structured or Rectangular "
                              "in ComponentInfo::quadrilateralComponent.");
 

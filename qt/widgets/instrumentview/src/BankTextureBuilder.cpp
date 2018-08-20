@@ -4,13 +4,100 @@
 
 using Mantid::Beamline::ComponentType;
 
+namespace { // anonymous namespace for helper funcitons
+void createTexture(const Mantid::Geometry::ComponentInfo &compInfo,
+                   const std::vector<size_t> &children,
+                   const std::vector<MantidQt::MantidWidgets::GLColor> &colors,
+                   std::vector<char> &texture, size_t texSizeX,
+                   size_t texSizeY) {
+  auto colWidth = children.size() * 3;
+  for (size_t x = 0; x < colWidth; x += 3) {
+    const auto &dets = compInfo.detectorsInSubtree(children[x / 3]);
+    for (size_t y = 0; y < dets.size(); ++y) {
+      auto det = dets[y];
+      auto ti = (y * texSizeX * 3) + x;
+      texture[ti] = static_cast<char>(colors[det].red());
+      texture[ti + 1] = static_cast<char>(colors[det].green());
+      texture[ti + 2] = static_cast<char>(colors[det].blue());
+    }
+  }
+}
+
+void addColorsToLeftAndRightTextures(
+    const Mantid::Geometry::ComponentInfo &compInfo,
+    const Mantid::Geometry::ComponentInfo::QuadrilateralComponent &bank,
+    size_t nZ, const size_t layerIndex, const std::vector<size_t> &children,
+    const std::vector<MantidQt::MantidWidgets::GLColor> &colors,
+    std::vector<char> &leftText, std::vector<char> &rightText) {
+  const auto &firstColumn = compInfo.children(children[0]);
+  const auto &lastColumn = compInfo.children(children[bank.nX - 1]);
+
+  for (int i = 0; i < bank.nY; ++i) {
+    auto col = colors[firstColumn[i]];
+    auto ti = (i * nZ * 3) + (layerIndex * 3); // texture index
+    leftText[ti] = static_cast<char>(col.red());
+    leftText[ti + 1] = static_cast<char>(col.green());
+    leftText[ti + 2] = static_cast<char>(col.blue());
+    col = colors[lastColumn[i]];
+    rightText[ti] = static_cast<char>(col.red());
+    rightText[ti + 1] = static_cast<char>(col.green());
+    rightText[ti + 2] = static_cast<char>(col.blue());
+  }
+}
+
+void addColorsToTopAndBottomTextures(
+    const Mantid::Geometry::ComponentInfo &compInfo,
+    const Mantid::Geometry::ComponentInfo::QuadrilateralComponent &bank,
+    const size_t layerIndex, const std::vector<size_t> &children,
+    const std::vector<MantidQt::MantidWidgets::GLColor> &colors,
+    std::vector<char> &topText, std::vector<char> &bottomText) {
+  for (int i = 0; i < bank.nX; ++i) {
+    auto ti = (layerIndex * bank.nX * 3) + (i * 3);
+    const auto &column = compInfo.children(children[i]);
+    auto col = colors[column[0]];
+    topText[ti] = static_cast<char>(col.red());
+    topText[ti + 1] = static_cast<char>(col.green());
+    topText[ti + 2] = static_cast<char>(col.blue());
+    col = colors[column[bank.nY - 1]];
+    bottomText[ti] = static_cast<char>(col.red());
+    bottomText[ti + 1] = static_cast<char>(col.red());
+    bottomText[ti + 2] = static_cast<char>(col.red());
+  }
+}
+
+void upload2DTexture(const std::pair<size_t, size_t> textSizes,
+                     GLuint &textureID, std::vector<char> &texture) {
+  auto w = textSizes.first;
+  auto h = textSizes.second;
+
+  if (textureID != 0)
+    glDeleteTextures(1, &textureID);
+
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_2D, textureID);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+  // Allow lighting effects
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(w),
+               static_cast<GLsizei>(h), 0, GL_RGB, GL_UNSIGNED_BYTE,
+               texture.data());
+}
+} // namespace
+
 namespace MantidQt {
 namespace MantidWidgets {
 
 namespace detail {
 
-BankTextureBuilder::BankTextureBuilder(const Mantid::Geometry::ComponentInfo &compInfo,
-                           size_t index)
+BankTextureBuilder::BankTextureBuilder(
+    const Mantid::Geometry::ComponentInfo &compInfo, size_t index)
     : m_compInfo(compInfo), m_bankIndex(index),
       m_bankType(compInfo.componentType(index)) {
 
@@ -20,6 +107,7 @@ BankTextureBuilder::BankTextureBuilder(const Mantid::Geometry::ComponentInfo &co
     m_pickTextureIDs.resize(6);
     m_detColorTextures.resize(6);
     m_detPickTextures.resize(6);
+    m_textSizes.resize(6);
     break;
   case ComponentType::Rectangular:
   case ComponentType::OutlineComposite:
@@ -27,6 +115,7 @@ BankTextureBuilder::BankTextureBuilder(const Mantid::Geometry::ComponentInfo &co
     m_pickTextureIDs.resize(1);
     m_detColorTextures.resize(1);
     m_detPickTextures.resize(1);
+    m_textSizes.resize(1);
     break;
   }
 }
@@ -40,7 +129,7 @@ other types.
 @param layer grid layer which should be rendered. Ignored for all other types.
 */
 void BankTextureBuilder::buildColorTextures(const std::vector<GLColor> &colors,
-                                      bool isUsingLayer, size_t layer) {
+                                            bool isUsingLayer, size_t layer) {
   buildOpenGLTextures(false, colors, isUsingLayer, layer);
 }
 
@@ -53,7 +142,7 @@ other types.
 @param layer grid layer which should be rendered. Ignored for all other types.
 */
 void BankTextureBuilder::buildPickTextures(const std::vector<GLColor> &colors,
-                                     bool isUsingLayer, size_t layer) {
+                                           bool isUsingLayer, size_t layer) {
   buildOpenGLTextures(true, colors, isUsingLayer, layer);
 }
 
@@ -67,8 +156,8 @@ other types.
 @param layer grid layer which should be rendered. Ignored for all other types.
 */
 void BankTextureBuilder::buildOpenGLTextures(bool picking,
-                                       const std::vector<GLColor> &colors,
-                                       bool isUsingLayer, size_t layer) {
+                                             const std::vector<GLColor> &colors,
+                                             bool isUsingLayer, size_t layer) {
   switch (m_bankType) {
   case ComponentType::OutlineComposite:
     buildTubeBankTextures(colors, picking);
@@ -99,10 +188,12 @@ void BankTextureBuilder::uploadTextures(bool picking) {
   }
 }
 
-size_t BankTextureBuilder::numTextures() const { return m_detColorTextures.size(); }
+size_t BankTextureBuilder::numTextures() const {
+  return m_detColorTextures.size();
+}
 
-void BankTextureBuilder::buildTubeBankTextures(const std::vector<GLColor> &colors,
-                                         bool picking) {
+void BankTextureBuilder::buildTubeBankTextures(
+    const std::vector<GLColor> &colors, bool picking) {
   auto &texture = picking ? m_detPickTextures[0] : m_detColorTextures[0];
   const auto &children = m_compInfo.children(m_bankIndex);
   texture.resize(children.size() * 3);
@@ -116,11 +207,84 @@ void BankTextureBuilder::buildTubeBankTextures(const std::vector<GLColor> &color
   }
 }
 
-void BankTextureBuilder::buildGridBankTextures(const std::vector<GLColor> &colors,
-                                         bool picking, bool isUsingLayer,
-                                         size_t layer) {
+void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
+                                           bool picking) {
+  const auto &layers = m_compInfo.children(m_bankIndex);
+  auto bank = m_compInfo.quadrilateralComponent(layers[0]);
+
+  auto &textures = picking ? m_detPickTextures : m_detColorTextures;
+
+  // Front face
+  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
+  m_textSizes[0] = res;
+  m_textSizes[1] = res;
+  textures[0].resize(res.first * res.second * 3, 0);
+  // Rear face
+  textures[1].resize(res.first * res.second * 3, 0);
+
+  // make front and back faces which lie along the z (layer) axis
+  createTexture(m_compInfo, m_compInfo.children(layers[0]), colors, textures[0],
+                res.first, res.second);
+  createTexture(m_compInfo, m_compInfo.children(layers[1]), colors, textures[1],
+                res.first, res.second);
+
+  // Left face
+  res = BankRenderingHelpers::getCorrectedTextureSize(layers.size(), bank.nY);
+  m_textSizes[2] = res;
+  m_textSizes[3] = res;
+  textures[2].resize(res.first * res.second * 3, 0);
+  // Right Face
+  textures[3].resize(res.first * res.second * 3, 0);
+
+  // Top face
+  res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, layers.size());
+  m_textSizes[4] = res;
+  m_textSizes[5] = res;
+  textures[4].resize(res.first * res.second * 3, 0);
+  // Right Face
+  textures[5].resize(res.first * res.second * 3, 0);
+
+  auto nZ = layers.size();
+  auto li = nZ - 1;
+  for (auto layerIndex : layers) {
+    auto bank = m_compInfo.quadrilateralComponent(layerIndex);
+    const auto &children = m_compInfo.children(layerIndex);
+    // add colors to left/right faces
+    addColorsToLeftAndRightTextures(m_compInfo, bank, nZ, li, children, colors,
+                                    textures[2], textures[3]);
+    addColorsToTopAndBottomTextures(m_compInfo, bank, nZ - li - 1, children,
+                                    colors, textures[4], textures[5]);
+    --li;
+  }
+}
+
+void BankTextureBuilder::buildGridBankLayer(const std::vector<GLColor> &colors,
+                                            bool picking, size_t layer) {
+  const auto &layers = m_compInfo.children(m_bankIndex);
+  auto bank = m_compInfo.quadrilateralComponent(layers[0]);
+
+  auto &texture = picking ? m_detPickTextures[0] : m_detColorTextures[0];
+
+  // Front face
+  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
+  m_textSizes[0] = res;
+  texture.resize(res.first * res.second * 3, 0);
+
+  // make front and back faces which lie along the z (layer) axis
+  createTexture(m_compInfo, m_compInfo.children(layers[layer]), colors, texture,
+                res.first, res.second);
+}
+
+void BankTextureBuilder::buildGridBankTextures(
+    const std::vector<GLColor> &colors, bool picking, bool isUsingLayer,
+    size_t layer) {
   m_isUsingLayers = isUsingLayer;
   m_layer = layer;
+
+  if (isUsingLayer)
+    buildGridBankLayer(colors, picking, layer);
+  else
+    buildGridBankFull(colors, picking);
 }
 
 void BankTextureBuilder::buildRectangularBankTextures(
@@ -129,24 +293,15 @@ void BankTextureBuilder::buildRectangularBankTextures(
   auto bank = m_compInfo.quadrilateralComponent(m_bankIndex);
   // Round size up to nearest power of 2
   auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
+  m_textSizes[0] = res;
   auto texSizeX = res.first;
   auto texSizeY = res.second;
 
   // Texture width is 3 times wider due to RGB values
   texture.resize(texSizeX * texSizeY * 3, 0); // fill with black
 
-  const auto &children = m_compInfo.children(m_bankIndex);
-  auto colWidth = children.size() * 3;
-  for (size_t x = 0; x < colWidth; x += 3) {
-    const auto &dets = m_compInfo.detectorsInSubtree(children[x / 3]);
-    for (size_t y = 0; y < dets.size(); ++y) {
-      auto det = dets[y];
-      auto ti = (y * texSizeX * 3) + x;
-      texture[ti] = static_cast<char>(colors[det].red());
-      texture[ti + 1] = static_cast<char>(colors[det].green());
-      texture[ti + 2] = static_cast<char>(colors[det].blue());
-    }
-  }
+  createTexture(m_compInfo, m_compInfo.children(m_bankIndex), colors, texture,
+                texSizeX, texSizeY);
 }
 
 void BankTextureBuilder::uploadTubeBankTextures(bool picking) {
@@ -167,35 +322,28 @@ void BankTextureBuilder::uploadTubeBankTextures(bool picking) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void BankTextureBuilder::uploadGridBankTextures(bool picking) {}
+void BankTextureBuilder::uploadGridBankTextures(bool picking) {
+  auto &textures = picking ? m_detPickTextures : m_detColorTextures;
+  auto &textureIDs = picking ? m_pickTextureIDs : m_colorTextureIDs;
+
+  if (m_isUsingLayers)
+    upload2DTexture(m_textSizes[m_layer], textureIDs[m_layer],
+                    textures[m_layer]);
+  else {
+    for (size_t i = 0; i < textures.size(); ++i) {
+      auto &texture = textures[i];
+      auto &textureID = textureIDs[i];
+
+      upload2DTexture(m_textSizes[i], textureID, texture);
+    }
+  }
+}
 
 void BankTextureBuilder::uploadRectangularBankTextures(bool picking) {
   auto &texture = picking ? m_detPickTextures[0] : m_detColorTextures[0];
-
-  auto bank = m_compInfo.quadrilateralComponent(m_bankIndex);
-  auto res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, bank.nY);
-  auto xsize = res.first;
-  auto ysize = res.second;
-
   auto &textureID = picking ? m_pickTextureIDs[0] : m_colorTextureIDs[0];
-  if (textureID != 0)
-    glDeleteTextures(1, &textureID);
 
-  glGenTextures(1, &textureID);
-  glBindTexture(GL_TEXTURE_2D, textureID);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-  // Allow lighting effects
-  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, static_cast<GLsizei>(xsize),
-               static_cast<GLsizei>(ysize), 0, GL_RGB, GL_UNSIGNED_BYTE,
-               texture.data());
+  upload2DTexture(m_textSizes[0], textureID, texture);
 }
 
 void BankTextureBuilder::bindTextures(bool picking) {
