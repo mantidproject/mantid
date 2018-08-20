@@ -113,9 +113,12 @@ class PlotView(QtGui.QWidget):
         for name, plot in iteritems(self.plots):
             workspaces = self.workspaces[name]
             self.workspaces[name] = []
+            x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
             for ws in workspaces:
                 self.plot(name, ws)
+            plot.set_xlim(x)
+            plot.set_ylim(y)
 
     @_redo_layout
     def _errors_changed(self, state):
