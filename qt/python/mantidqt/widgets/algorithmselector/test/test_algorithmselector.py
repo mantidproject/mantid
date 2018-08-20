@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
-from mantidqt.utils.qt.testing import requires_qapp,  select_item_in_combo_box, select_item_in_tree
+from mantidqt.utils.qt.test import requires_qapp,  select_item_in_combo_box, select_item_in_tree
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 

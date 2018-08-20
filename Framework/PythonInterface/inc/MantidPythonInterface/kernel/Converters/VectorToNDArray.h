@@ -37,7 +37,7 @@ namespace Converters {
  * Converter that takes a std::vector and converts it into a flat numpy array.
  *
  * The type of conversion is specified by another struct/class that
- * contains a static member create.
+ * contains a static member create1D.
  */
 template <typename ElementType, typename ConversionPolicy>
 struct VectorToNDArray {

@@ -105,30 +105,18 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
       QApplication::startDragDistance())
     return;
 
-  // Start dragging
+  QStringList wsNames = getSelectedWorkspaceNames();
+  if (wsNames.isEmpty())
+    return;
+
+  // Start dragging - Qt docs say not to delete the QDrag object
+  // manually
   QDrag *drag = new QDrag(this);
   QMimeData *mimeData = new QMimeData;
-
-  QStringList wsnames = getSelectedWorkspaceNames();
-  if (wsnames.size() == 0)
-    return;
-  QString importStatement = "";
-  foreach (const QString wsname, wsnames) {
-    QString prefix = "";
-    if (wsname[0].isDigit())
-      prefix = "ws";
-    if (importStatement.size() > 0)
-      importStatement += "\n";
-    importStatement += prefix + wsname + " = mtd[\"" + wsname + "\"]";
-  }
-
-  mimeData->setText(importStatement);
-  mimeData->setObjectName("MantidWorkspace");
-
   drag->setMimeData(mimeData);
-
-  Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
-  (void)dropAction;
+  mimeData->setObjectName("MantidWorkspace");
+  mimeData->setText(wsNames.join("\n"));
+  drag->exec(Qt::CopyAction | Qt::MoveAction);
 }
 
 void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
