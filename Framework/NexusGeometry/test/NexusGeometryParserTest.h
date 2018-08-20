@@ -18,6 +18,7 @@
 #include <H5Cpp.h>
 #include <chrono>
 #include <string>
+#include <Poco/Glob.h>
 
 using namespace Mantid;
 using namespace NexusGeometry;
