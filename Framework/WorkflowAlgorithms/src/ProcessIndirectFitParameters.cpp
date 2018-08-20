@@ -92,7 +92,7 @@ std::vector<T> getColumnValues(Column const &column, std::size_t startRow,
 std::vector<double> getNumericColumnValuesOrIndices(Column const &column,
                                                     std::size_t startRow,
                                                     std::size_t endRow) {
-  auto const length = startRow >= endRow ? 1 + startRow - endRow : 0;
+  auto const length = startRow > endRow ? 0 : 1 + endRow - startRow;
   if (column.isNumber())
     return getColumnValues<double>(column, startRow, endRow);
   return getIncrementingSequence(0.0, length);

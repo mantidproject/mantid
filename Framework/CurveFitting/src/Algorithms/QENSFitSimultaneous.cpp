@@ -438,7 +438,7 @@ void QENSFitSimultaneous::execConcrete() {
   const auto fitResult = performFit(inputWorkspaces, outputBaseName);
   const auto yAxisType = getAxisType(*workspaces.front(), 1);
   auto transposedTable =
-      transposeFitTable(fitResult.first, singleDomainFunction, yAxisType);
+      transposeFitTable(fitResult.first, *singleDomainFunction, yAxisType);
   addValuesToTableColumn(*transposedTable, workspaces, *this, 0);
   const auto parameterWs = processParameterTable(transposedTable);
   const auto groupWs = makeGroup(fitResult.second);
