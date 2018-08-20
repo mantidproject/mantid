@@ -113,15 +113,17 @@ class PlotView(QtGui.QWidget):
         for name, plot in iteritems(self.plots):
             workspaces = self.workspaces[name]
             self.workspaces[name] = []
-            x, y, title = plot.get_xlim(), plot.get_ylim(), plot.get_title()
+            x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
             for ws in workspaces:
                 self.plot(name, ws)
-            # temp fix - clearing plot removes all additions (lines, title
-            # etc.)
             plot.set_xlim(x)
             plot.set_ylim(y)
-            plot.set_title(title)
+            self._replay_additions(name)
+
+    def _replay_additions(self, name):
+        for func, name, args, kwargs in self.plot_additions[name]:
+            func(self, name, *args, **kwargs)
 
     @_redo_layout
     def _errors_changed(self, state):
