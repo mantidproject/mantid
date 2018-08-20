@@ -1886,6 +1886,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         mantidplot.runPythonScript(text, True)
 
     def hide_period_columns(self):
+        self.multi_period_check_box.setChecked(False)
         self.data_processor_table.hideColumn(1)
         self.data_processor_table.hideColumn(3)
         self.data_processor_table.hideColumn(5)
@@ -1894,6 +1895,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.data_processor_table.hideColumn(11)
 
     def show_period_columns(self):
+        self.multi_period_check_box.setChecked(True)
         self.data_processor_table.showColumn(1)
         self.data_processor_table.showColumn(3)
         self.data_processor_table.showColumn(5)
