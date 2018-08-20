@@ -16,8 +16,7 @@ def column(matrix, i):
 
 
 def split_kwarg_list(kwarg_list, n):
-    split = lambda x: split_list_into_n_parts(x, n)
-    chunks = list(map(split, kwarg_list.values()))
+    chunks = [split_list_into_n_parts(args, n) for args in kwarg_list.values()]
     return [dict(zip(kwarg_list.keys(), column(chunks, i))) for i in range(n)]
 
 
@@ -83,7 +82,8 @@ class Worker(QtCore.QThread):
         self.signals.started.emit()
         try:
             result, fails = self.fn(**self.kwargs)
-            if 'progress_callback' in self.kwargs: del self.kwargs['progress_callback']
+            if 'progress_callback' in self.kwargs:
+                del self.kwargs['progress_callback']
             for fail in fails:
                 # Exceptions caught whilst executing the function
                 exctype, value = type(fail), next(iter(fail.args), "")
@@ -94,14 +94,16 @@ class Worker(QtCore.QThread):
         except:
             # Catch errors not thrown by the function evaluation
             exctype, value = sys.exc_info()[:2]  # traceback.print_exc()
-            if 'progress_callback' in self.kwargs: del self.kwargs['progress_callback']
+            if 'progress_callback' in self.kwargs:
+                del self.kwargs['progress_callback']
             self.signals.error.emit({"inputs": self.kwargs,
                                      "exctype": exctype,
                                      "value": value,
                                      "traceback": traceback.format_exc()})
         else:
             # Successful evaluation
-            if 'progress_callback' in self.kwargs: del self.kwargs['progress_callback']
+            if 'progress_callback' in self.kwargs:
+                del self.kwargs['progress_callback']
             self.signals.result.emit((self.kwargs, result))
         finally:
             self.signals.finished.emit()
