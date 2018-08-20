@@ -9,6 +9,8 @@ from six import iteritems
 
 from collections import OrderedDict
 
+from six import iteritems
+
 from collections import OrderedDict
 
 from matplotlib.figure import Figure
