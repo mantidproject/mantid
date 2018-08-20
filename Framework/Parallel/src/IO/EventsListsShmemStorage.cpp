@@ -15,12 +15,8 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
       std::make_shared<VoidAllocator>(m_segment->get_segment_manager());
   m_eventLists = m_segment->construct<EventLists>(m_eventListsName.c_str())(
       *m_allocatorInstance.get());
-  for (unsigned i = 0; i < 10; ++i) {
+  for (unsigned i = 0; i < 10; ++i)
     m_eventLists->emplace_back(*m_allocatorInstance.get());
-    m_eventLists->rbegin()->mutex =
-        m_segment->construct<ip::interprocess_mutex>(
-            ("_mutex" + std::to_string(i)).c_str())();
-  }
 }
 
 EventsListsShmemStorage::~EventsListsShmemStorage() {

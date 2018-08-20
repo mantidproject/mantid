@@ -7,10 +7,6 @@
 namespace Mantid {
 namespace Parallel {
 
-EventsListsShmemManager::GuardedEventList::GuardedEventList(
-    VoidAllocator &alloc)
-    : eventList(alloc) {}
-
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
                                                  const std::string &elName)
     : m_segmentName(segmentName), m_eventListsName(elName),
@@ -36,9 +32,8 @@ void EventsListsShmemManager::AppendEvent(std::size_t listN,
                                           const Types::Event::TofEvent &event) {
   if (!m_eventLists)
     throw ("No event lists found.");
-  auto &guardedList = m_eventLists->at(listN);
-  ip::scoped_lock<ip::interprocess_mutex> lock(*guardedList.mutex.get());
-  guardedList.eventList.emplace_back(event);
+  auto &list = m_eventLists->at(listN);
+  list.emplace_back(event);
 }
 
 std::ostream &operator<<(std::ostream &os,
@@ -46,9 +41,8 @@ std::ostream &operator<<(std::ostream &os,
   os << "m_segmentName: " << manager.m_segmentName
      << " m_eventListsName: " << manager.m_eventListsName << "\n";
 
-  for (auto &guardedList : *manager.m_eventLists) {
-    ip::scoped_lock<ip::interprocess_mutex> lock(*guardedList.mutex.get());
-    for (auto &event : guardedList.eventList)
+  for (auto &list : *manager.m_eventLists) {
+    for (auto &event : list)
       os << event.tof() << "\n";
   }
   os << "\n\n";

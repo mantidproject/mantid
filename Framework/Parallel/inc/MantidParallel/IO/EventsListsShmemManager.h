@@ -70,20 +70,8 @@ protected:
       ip::allocator<Types::Event::TofEvent, SegmentManager>;
   using EventList = ip::vector<Types::Event::TofEvent, TofEventAllocator>;
   using EventListAllocator = ip::allocator<EventList, SegmentManager>;
-  using EventListPtr = ip::offset_ptr<EventList>;
-  using EventListPtrAllocator = ip::allocator<EventListPtr, SegmentManager>;
 
-  // Structure to control access to every event list
-  struct GuardedEventList {
-    EventList eventList;
-    ip::offset_ptr<ip::interprocess_mutex> mutex;
-
-    GuardedEventList(VoidAllocator &alloc);
-  };
-
-  using GuardedEventListAllocator =
-      ip::allocator<GuardedEventList, SegmentManager>;
-  using EventLists = ip::vector<GuardedEventList, GuardedEventListAllocator>;
+  using EventLists = ip::vector<EventList, EventListAllocator>;
 
   // Constructor for internal usage in  that just sets up the names, instance
   // for m_eventLists is defined later in derivated class constructor.
