@@ -500,21 +500,22 @@ class ResultReporter(object):
         Print the results to standard out
         '''
         nstars = 80
-        print('*' * nstars)
+        console_output = ('*' * nstars) + '\n'
         print_list = ['test_name','filename','test_date','host_name','environment',
                       'status','time_taken','memory footprint increase','output','err']
         for key in print_list:
             key_not_found = True
             for i in range(len(result._results)):
                 if key == result._results[i][0]:
-                    print(key+": "+result._results[i][1])
+                    console_output += key+": "+result._results[i][1]+'\n'
                     key_not_found = False
             if key_not_found:
                 try:
-                    print(key+": "+getattr(result,key))
+                    console_output += key+": "+getattr(result,key)+'\n'
                 except AttributeError:
                     pass
-        print('*' * nstars)
+        console_output += ('*' * nstars) + '\n'
+        print(console_output)
         return
 
 #########################################################################
@@ -737,7 +738,7 @@ class TestManager(object):
             test_dir = os.path.abspath(test_loc).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)
+            full_test_list = self.loadTestsFromDir(test_dir)[:10]
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
@@ -745,7 +746,7 @@ class TestManager(object):
             test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
+            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))[:10]
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes module by module instead of test by test, to avoid issues
@@ -782,6 +783,13 @@ class TestManager(object):
                     if (i == process_number):
                         self._tests.extend(modtests[key])
                     break
+
+        print("========================================")
+        print("CPU %i will execute the following tests:" % process_number)
+        for t in self._tests:
+            print(t._fqtestname)
+        print("========================================")
+        
 
         if len(self._tests) == 0:
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
