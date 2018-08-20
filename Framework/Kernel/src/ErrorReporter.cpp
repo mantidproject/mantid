@@ -101,15 +101,14 @@ std::string ErrorReporter::generateErrorMessage() {
 
   message["exitCode"] = m_exitCode;
 
+  message["textBox"] = m_textbox;
 
   if (m_share) {
     message["email"] = m_email;
     message["name"] = m_name;
-    message["textBox"] = m_textbox;
   } else {
     message["email"] = "";
     message["name"] = "";
-    message["textBox"] = m_textbox;
   }
 
   ::Json::FastWriter writer;
