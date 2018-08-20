@@ -4,11 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "BoundingBox.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include "BoundingBox.h"
+#include "MantidKernel/Material.h"
 #include <map>
 #include <memory>
 
@@ -19,7 +19,7 @@ namespace Mantid {
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class CompGrp;

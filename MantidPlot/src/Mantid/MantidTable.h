@@ -2,8 +2,8 @@
 #define MANTIDTABLE_H
 
 #include "../Table.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 /** A MantidTable appears to be a MantidPlot "Table" object
  * that shows the data from an ITableWorkspace.

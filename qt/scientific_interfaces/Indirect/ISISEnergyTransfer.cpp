@@ -34,8 +34,9 @@ std::string createDetectorGroupingString(std::size_t groupSize,
   const auto remainder = numberOfDetectors % numberOfGroups;
   if (remainder == 0)
     return groupingString;
-  return groupingString + "," + createRangeString(numberOfDetectors - remainder,
-                                                  numberOfDetectors - 1);
+  return groupingString + "," +
+         createRangeString(numberOfDetectors - remainder,
+                           numberOfDetectors - 1);
 }
 
 std::string createDetectorGroupingString(std::size_t numberOfDetectors,

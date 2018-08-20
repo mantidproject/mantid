@@ -3,126 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/ScopedWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::MuonAlgorithmHelper;
-// using Mantid::Types::Core::DateAndTime;
-
-namespace {
-
-struct yDataCounts {
-  yDataCounts() : m_count(-1) {}
-  int m_count;
-  double operator()(const double, size_t) {
-    m_count++;
-    return static_cast<double>(m_count);
-  }
-};
-
-struct eData {
-  double operator()(const double, size_t) { return 0.005; }
-};
-
-/**
- * Create a matrix workspace appropriate for Group Counts. One detector per
- * spectra, numbers starting from 1. The detector ID and spectrum number are
- * equal. Y values increase from 0 in integer steps.
- * @param nspec :: The number of spectra
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param seed :: Number added to all y-values.
- * @return Pointer to the workspace.
- */
-MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
-                                           double seed) {
-
-  MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-          yDataCounts(), static_cast<int>(nspec), 0.0, 1.0,
-          (1.0 / static_cast<double>(maxt)), true, eData());
-
-  ws->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-      static_cast<int>(nspec)));
-
-  for (int g = 0; g < static_cast<int>(nspec); g++) {
-    auto &spec = ws->getSpectrum(g);
-    spec.addDetectorID(g + 1);
-    spec.setSpectrumNo(g + 1);
-    ws->mutableY(g) += seed;
-  }
-
-  return ws;
-}
-
-/**
- * Create a WorkspaceGroup and add to the ADS, populate with MatrixWorkspaces
- * simulating periods as used in muon analysis. Workspace for period i has a
- * name ending _i.
- * @param nPeriods :: The number of periods (independent workspaces)
- * @param maxt ::  The number of histogram bin edges (between 0.0 and 1.0).
- * Number of bins = maxt - 1 .
- * @param wsGroupName :: Name of the workspace group containing the period
- * workspaces.
- * @return Pointer to the workspace group.
- */
-WorkspaceGroup_sptr
-createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
-                                const std::string &wsGroupName) {
-
-  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
-  AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
-
-  std::string wsNameStem = "MuonDataPeriod_";
-  std::string wsName;
-
-  for (int period = 1; period < nPeriods + 1; period++) {
-    // Period 1 yvalues : 1,2,3,4,5,6,7,8,9,10
-    // Period 2 yvalues : 2,3,4,5,6,7,8,9,10,11 etc..
-    MatrixWorkspace_sptr ws = createCountsWorkspace(nspec, maxt, period);
-    wsGroup->addWorkspace(ws);
-    wsName = wsNameStem + std::to_string(period);
-    AnalysisDataService::Instance().addOrReplace(wsName, ws);
-  }
-
-  return wsGroup;
-}
-
-/**
- * Creates a single-point workspace with instrument and runNumber set.
- * @param intrName :: Instrument name e.g. MUSR
- * @param runNumber ::  e.g. 1000
- * @param nSpectra :: Number of spectra in the workspace, defaults to 1.
- * @return Pointer to the workspace.
- */
-Workspace_sptr createWs(const std::string &instrName, int runNumber,
-                        size_t nSpectra = 1) {
-
-  Geometry::Instrument_const_sptr instr =
-      boost::make_shared<Geometry::Instrument>(instrName);
-  MatrixWorkspace_sptr ws =
-      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
-  ws->setInstrument(instr);
-  ws->mutableRun().addProperty("run_number", runNumber);
-  return ws;
-}
-
-} // namespace
 
 class MuonAlgorithmHelperTest : public CxxTest::TestSuite {
 public:
@@ -180,17 +71,23 @@ public:
   }
 
   void test_getRunLabel_singleWs() {
-    std::string label = getRunLabel(createWs("MUSR", 15189));
+    std::string label = getRunLabel(
+        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+            "MUSR", 15189));
     TS_ASSERT_EQUALS(label, "MUSR00015189");
   }
 
   void test_getRunLabel_argus() {
-    std::string label = getRunLabel(createWs("ARGUS", 26577));
+    std::string label = getRunLabel(
+        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+            "ARGUS", 26577));
     TS_ASSERT_EQUALS(label, "ARGUS0026577");
   }
 
   void test_getRunLabel_singleWs_tooBigRunNumber() {
-    std::string label = getRunLabel(createWs("EMU", 999999999));
+    std::string label = getRunLabel(
+        MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+            "EMU", 999999999));
     TS_ASSERT_EQUALS(label, "EMU999999999");
   }
 
@@ -198,7 +95,9 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (int i = 15189; i <= 15193; ++i) {
-      list.push_back(createWs("MUSR", i));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "MUSR", i));
     }
 
     std::string label = getRunLabel(list);
@@ -210,7 +109,9 @@ public:
     std::vector<Workspace_sptr> list;
 
     for (auto it = runNumbers.begin(); it != runNumbers.end(); ++it) {
-      list.push_back(createWs("EMU", *it));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "EMU", *it));
     }
 
     std::string label = getRunLabel(list);
@@ -221,7 +122,9 @@ public:
     std::vector<int> runNumbers{1, 2, 3, 5, 6, 8, 10, 11, 12, 13, 14};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.push_back(createWs("EMU", *it));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -231,7 +134,9 @@ public:
     std::vector<int> runNumbers{5, 14, 8, 1, 11, 3, 10, 6, 13, 12, 2};
     std::vector<Workspace_sptr> list;
     for (auto it = runNumbers.begin(); it != runNumbers.end(); it++) {
-      list.push_back(createWs("EMU", *it));
+      list.push_back(
+          MuonWorkspaceCreationHelper::createWorkspaceWithInstrumentandRun(
+              "EMU", *it));
     }
     std::string label = getRunLabel(list);
     TS_ASSERT_EQUALS(label, "EMU00000001-3, 5-6, 8, 10-4");
@@ -255,7 +160,8 @@ public:
   }
 
   void test_firstPeriod_singleWorkspace() {
-    MatrixWorkspace_sptr ws = createCountsWorkspace(2, 10, 0.0);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, 0.0);
     Mantid::API::MatrixWorkspace_sptr wsFirstPeriod =
         Mantid::MuonAlgorithmHelper::firstPeriod(ws);
     AnalysisDataService::Instance().addOrReplace("wsSingle", ws);
@@ -266,7 +172,8 @@ public:
 
   void test_firstPeriod_groupWorkspace() {
     WorkspaceGroup_sptr ws =
-        createMultiPeriodWorkspaceGroup(3, 1, 10, "MuonAnalysis");
+        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
+            3, 1, 10, "MuonAnalysis");
     Mantid::API::MatrixWorkspace_sptr wsFirstPeriod =
         Mantid::MuonAlgorithmHelper::firstPeriod(ws);
     TS_ASSERT(wsFirstPeriod);
@@ -323,7 +230,8 @@ public:
   void test_groupWorkspaces_workspacesInGroupAlready() {
 
     WorkspaceGroup_sptr testGroup =
-        createMultiPeriodWorkspaceGroup(5, 2, 10, "TestGroup");
+        MuonWorkspaceCreationHelper::createMultiPeriodWorkspaceGroup(
+            5, 2, 10, "TestGroup");
     std::vector<std::string> names = testGroup->getNames();
     groupWorkspaces("TestGroup", names);
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestGroup"));
@@ -342,7 +250,9 @@ public:
     std::string wsName;
     std::vector<std::string> names;
     for (int numWorkspaces = 1; numWorkspaces < 6; numWorkspaces++) {
-      MatrixWorkspace_sptr ws = createCountsWorkspace(2, 10, numWorkspaces);
+      MatrixWorkspace_sptr ws =
+          MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10,
+                                                             numWorkspaces);
       wsName = wsNameStem + std::to_string(numWorkspaces);
       names.emplace_back(wsName);
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -366,14 +276,17 @@ public:
     std::string wsName;
     std::vector<std::string> names;
     for (int numWorkspaces = 1; numWorkspaces < 6; numWorkspaces++) {
-      MatrixWorkspace_sptr ws = createCountsWorkspace(2, 10, numWorkspaces);
+      MatrixWorkspace_sptr ws =
+          MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10,
+                                                             numWorkspaces);
       wsName = wsNameStem + std::to_string(numWorkspaces);
       names.emplace_back(wsName);
       AnalysisDataService::Instance().addOrReplace(wsName, ws);
     }
 
     // Create a workspace with the same name as the intended group
-    MatrixWorkspace_sptr ws = createCountsWorkspace(2, 10, 1);
+    MatrixWorkspace_sptr ws =
+        MuonWorkspaceCreationHelper::createCountsWorkspace(2, 10, 1);
     AnalysisDataService::Instance().addOrReplace("TestGroup", ws);
 
     groupWorkspaces("TestGroup", names);
@@ -385,6 +298,95 @@ public:
     TS_ASSERT_EQUALS(checkGroup->getNames()[4], names[4]);
     AnalysisDataService::Instance().clear();
   }
+
+  void test_checkItemsInSet() {
+    std::set<int> set = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::set<int> emptySet = {};
+    std::vector<int> itemsIn = {1, 2, 3, 8, 9, 10};
+    std::vector<int> itemsNotIn = {11, 100, 0, -1};
+    std::vector<int> noItems = {};
+    TS_ASSERT(checkItemsInSet(itemsIn, set));
+    TS_ASSERT(!checkItemsInSet(itemsNotIn, set));
+    TS_ASSERT(checkItemsInSet(noItems, set));
+    TS_ASSERT(checkItemsInSet(noItems, set));
+    TS_ASSERT(!checkItemsInSet(itemsNotIn, emptySet));
+    TS_ASSERT(checkItemsInSet(noItems, emptySet));
+  }
+
+  void test_getAllDetectorIDsFromMatrixWorkspace() {
+    auto ws = MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0);
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromMatrixWorkspace(ws);
+    for (auto i = 1; i < 6; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+  }
+
+  void test_getAllDetectorIDsWorkspace_Matrix() {
+    Workspace_sptr ws =
+        MuonWorkspaceCreationHelper::createCountsWorkspace(5, 3, 0);
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
+    for (auto i = 1; i < 6; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+  }
+
+  void test_getAllDetectorIDsFromGroupWorkspace() {
+    auto ws =
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromGroupWorkspace(ws);
+    for (auto i = 1; i < 10; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_getAllDetectorIDsWorkspace_Group() {
+    Workspace_sptr ws =
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
+    std::set<Mantid::detid_t> ids = getAllDetectorIDsFromWorkspace(ws);
+    for (auto i = 1; i < 10; i++) {
+      TS_ASSERT_DIFFERS(ids.find(i), ids.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_getAllDetectorIDsFromGroup() {
+    // Duplicates are allowed, and no ordering is implied.
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9"};
+    grouping.groups = groups;
+    std::vector<int> ids = getAllDetectorIDsFromGroup(grouping);
+    for (auto i = 1; i < 10; i++) {
+      TS_ASSERT_DIFFERS(std::find(ids.begin(), ids.end(), i), ids.end());
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_checkGroupDetectorsInWorkspaceTrue() {
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9"};
+    grouping.groups = groups;
+    Workspace_sptr ws =
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
+    TS_ASSERT(checkGroupDetectorsInWorkspace(grouping, ws));
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_checkGroupDetectorsInWorkspaceFalse() {
+    API::Grouping grouping;
+    const std::vector<std::string> groups = {"1", "2", "3,4,5", "6-9", "10"};
+    grouping.groups = groups;
+    Workspace_sptr ws =
+        MuonWorkspaceCreationHelper::createWorkspaceGroupConsecutiveDetectorIDs(
+            3, 3, 2, "group");
+    TS_ASSERT(!checkGroupDetectorsInWorkspace(grouping, ws));
+
+    AnalysisDataService::Instance().clear();
+  };
 
   void test_parseWorkspaceNameParsesCorrectly() {
     const std::string workspaceName =
@@ -496,6 +498,21 @@ public:
         "EMU000015189; Group; fwd; Counts; 1+2; #1";
     TS_ASSERT_THROWS(checkValidPair(validWorkspaceName, invalidWorkspaceName),
                      std::invalid_argument);
+  }
+
+  void test_checkValidGroupPairName_invalid_names() {
+    std::vector<std::string> badNames = {"",      "_name", "name_", "name;",
+                                         "#name", "Group", "Pair"};
+    for (auto &&badName : badNames) {
+      TS_ASSERT(!MuonAlgorithmHelper::checkValidGroupPairName(badName));
+    }
+  }
+
+  void test_checkValidGroupPairName_valid_names() {
+    std::vector<std::string> goodNames = {"name", "group", "pair", "123"};
+    for (auto &&goodName : goodNames) {
+      TS_ASSERT(MuonAlgorithmHelper::checkValidGroupPairName(goodName));
+    }
   }
 };
 

@@ -16,7 +16,7 @@ namespace Kernel {
 class PseudoRandomNumberGenerator;
 class Material;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class BoundingBox;

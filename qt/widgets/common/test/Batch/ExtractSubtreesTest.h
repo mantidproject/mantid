@@ -2,8 +2,8 @@
 #define MANTID_MANTIDWIDGETS_EXTRACTSUBTREESTEST_H
 
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Row.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>

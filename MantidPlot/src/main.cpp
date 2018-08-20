@@ -27,15 +27,15 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <iostream>
 #include <QApplication>
 #include <QBitmap>
-#include <QFontDatabase>
-#include <QSplashScreen>
-#include <QMessageBox>
 #include <QDir>
+#include <QFontDatabase>
+#include <QMessageBox>
+#include <QSplashScreen>
 #include <QThread>
 #include <QTimer>
+#include <iostream>
 
 #include "ApplicationWindow.h"
 #include "MantidKernel/Logger.h"

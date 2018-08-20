@@ -7,7 +7,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "Poco/Glob.h"
 
 #include <set>
 #include <vector>
@@ -19,7 +18,7 @@ namespace Mantid {
 namespace Kernel {
 class InstrumentInfo;
 class FacilityInfo;
-}
+} // namespace Kernel
 namespace API {
 
 /**

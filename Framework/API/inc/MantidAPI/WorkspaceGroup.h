@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <Poco/NObserver.h>
 #include <iterator>
@@ -82,6 +82,7 @@ public:
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
+  bool isGroup() const override { return true; }
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;

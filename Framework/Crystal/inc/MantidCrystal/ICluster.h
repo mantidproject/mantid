@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_ICLUSTER_H_
 #define MANTID_CRYSTAL_ICLUSTER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCrystal/DisjointElement.h"
-#include <vector>
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace API {

@@ -5,8 +5,8 @@
 #include "MantidQtWidgets/Common/MultifitSetupDialog.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 //---------------------------------------
@@ -67,5 +67,5 @@ void MultifitSetupDialog::cellChanged(int row, int col) {
     }
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

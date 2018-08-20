@@ -111,7 +111,7 @@ void Integration::exec() {
     maxWsIndex = numberOfSpectra - 1;
   }
   auto rangeListCheck = [minWsIndex, maxWsIndex](
-      const std::vector<double> &list, const char *name) {
+                            const std::vector<double> &list, const char *name) {
     if (!list.empty() &&
         list.size() != static_cast<size_t>(maxWsIndex - minWsIndex) + 1) {
       std::ostringstream sout;
@@ -336,8 +336,8 @@ void Integration::exec() {
 }
 
 /**
-* Uses rebin to reduce event workspaces to a single bin histogram
-*/
+ * Uses rebin to reduce event workspaces to a single bin histogram
+ */
 API::MatrixWorkspace_sptr
 Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
                                        double minRange, double maxRange) {

@@ -26,5 +26,5 @@ void CatalogMyDataSearch::exec() {
       ->myData(outputws);
   setProperty("OutputWorkspace", outputws);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

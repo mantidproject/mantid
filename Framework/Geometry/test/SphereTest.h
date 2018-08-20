@@ -1,17 +1,17 @@
 #ifndef MANTID_TESTSPHERE__
 #define MANTID_TESTSPHERE__
 
+#include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <ostream>
-#include <vector>
-#include <algorithm>
 #include <sstream>
+#include <vector>
 
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
 
 using namespace Mantid;
 using namespace Geometry;

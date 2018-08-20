@@ -6,19 +6,19 @@
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QSpinBox>
-#include <QUrl>
 #include <QDesktopWidget>
 #include <QFileInfo>
+#include <QSpinBox>
+#include <QUrl>
 
 // Mantid
-#include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidKernel/Property.h"
 
 #include <limits>
 
@@ -324,8 +324,8 @@ void FitDialog::initLayout() {
 }
 
 /**
-* Save the input after OK is clicked
-*/
+ * Save the input after OK is clicked
+ */
 void FitDialog::saveInput() {
   storePropertyValue("DomainType", getDomainTypeString());
   QString funStr = m_form.function->getFunctionString();
@@ -360,11 +360,11 @@ void FitDialog::parseInput() {
 }
 
 /**
-* Tie static widgets to their properties
-* @param readHistory :: If true then the history will be re read.
-*/
+ * Tie static widgets to their properties
+ * @param readHistory :: If true then the history will be re read.
+ */
 void FitDialog::tieStaticWidgets(const bool readHistory) {
-  QString funValue = getStoredPropertyValue("Function");
+  QString funValue = getPreviousValue("Function");
   if (!funValue.isEmpty()) {
     m_form.function->setFunction(funValue);
   }
@@ -386,7 +386,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
   // tie(m_form.cbDomainType, "DomainType", m_form.staticLayout, readHistory);
   connect(m_form.cbDomainType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(domainTypeChanged()));
-  QString domainTypeValue = getStoredPropertyValue("DomainType");
+  QString domainTypeValue = getPreviousValue("DomainType");
   if (!domainTypeValue.isEmpty()) {
     m_form.cbDomainType->setItemText(-1, domainTypeValue);
   }
@@ -398,7 +398,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
   // read value from history
   tie(m_form.cbMinimizer, "Minimizer", m_form.staticLayout, readHistory);
 
-  auto value = getStoredPropertyValue("InputWorkspace");
+  auto value = getPreviousValue("InputWorkspace");
   setWorkspaceName(0, value);
 }
 
@@ -487,29 +487,6 @@ void FitDialog::functionChanged() {
 }
 
 /**
-  * Return property value stored in history
-  * @param propName :: A property name
-  */
-QString FitDialog::getStoredPropertyValue(const QString &propName) const {
-  // Get the value from either the previous input store or from Python argument
-  QString value("");
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-
-  if (!isForScript()) {
-    value = m_propertyValueMap.value(propName);
-    if (value.isEmpty()) {
-      value =
-          AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
-    }
-  } else {
-    if (!property)
-      return "";
-    value = m_propertyValueMap.value(propName);
-  }
-  return value;
-}
-
-/**
  * Get allowed values for a property
  * @param propName :: A property name
  */
@@ -541,7 +518,7 @@ bool isFunctionMD(Mantid::API::IFunction_sptr fun) {
   }
   return false;
 }
-}
+} // namespace
 
 /**
  * Is the function MD?
@@ -572,5 +549,5 @@ QString FitDialog::getDomainTypeString() const {
   return m_form.cbDomainType->currentText();
 }
 
-} // CustomDialogs
-} // MantidQt
+} // namespace CustomDialogs
+} // namespace MantidQt

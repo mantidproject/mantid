@@ -34,7 +34,6 @@ set ( SRC_FILES
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
 	src/FileValidator.cpp
-	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
@@ -133,7 +132,6 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
 	src/NeutronAtom.cpp
 	src/FacilityInfo.cpp
-	src/FilterChannel.cpp
 	src/FileValidator.cpp
 	src/DirectoryValidator.cpp
 	src/PropertyManager.cpp
@@ -191,7 +189,6 @@ set ( INC_FILES
 	inc/MantidKernel/Fast_Exponential.h
 	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
-	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
@@ -360,7 +357,6 @@ set ( TEST_FILES
 	FacilitiesTest.h
 	FileDescriptorTest.h
 	FileValidatorTest.h
-	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
 	FloatingPointComparisonTest.h
 	FreeBlockTest.h
@@ -632,12 +628,6 @@ if ( MPI_BUILD )
   set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
-  if ( ENABLE_FILE_LOGGING )
-    set ( FILELOGGER_CHANNEL fileFilterChannel )
-  else ()
-    set ( FILELOGGER_CHANNEL "" )
-  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
@@ -679,10 +669,8 @@ endif ()
 
 # Log to file for installed packages but not mpi
 if ( MPI_BUILD OR MPI_EXPERIMENTAL )
-  set ( FILELOGGER_CHANNEL "" )
   set ( ENABLE_NETWORK_ACCESS 0 )
 else ()
-  set ( FILELOGGER_CHANNEL fileFilterChannel )
   set ( ENABLE_NETWORK_ACCESS 1 )
 endif ()
 set ( FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins )

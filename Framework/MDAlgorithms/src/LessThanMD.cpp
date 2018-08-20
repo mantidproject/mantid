@@ -33,5 +33,5 @@ void LessThanMD::execHistoScalar(
   out->lessThan(scalar->y(0)[0]);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

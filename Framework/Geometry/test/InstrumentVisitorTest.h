@@ -196,9 +196,10 @@ public:
         "Should contain the sample id", 1,
         componentIds.count(visitee->getComponentByName("some-surface-holder")
                                ->getComponentID()));
-    TSM_ASSERT_EQUALS("Should contain the source id", 1,
-                      componentIds.count(visitee->getComponentByName("source")
-                                             ->getComponentID()));
+    TSM_ASSERT_EQUALS(
+        "Should contain the source id", 1,
+        componentIds.count(
+            visitee->getComponentByName("source")->getComponentID()));
 
     auto detectorComponentId =
         visitee->getComponentByName("point-detector")->getComponentID();

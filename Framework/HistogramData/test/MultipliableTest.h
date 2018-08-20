@@ -9,11 +9,11 @@
 #include "MantidHistogramData/Multipliable.h"
 #include "MantidHistogramData/VectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::Multipliable;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class MultipliableTester : public VectorOf<MultipliableTester, HistogramX>,
                            public Iterable<MultipliableTester>,

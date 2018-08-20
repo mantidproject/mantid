@@ -61,7 +61,7 @@ std::vector<Mantid::Kernel::V3D> getDirectionsForEllipticalPeak(
   }
   return directions;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -75,7 +75,7 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
                                  colorNumber),
       m_mdWS(mdWS), m_peaksWS(peaksWS),
       m_calculator(std::make_shared<
-          Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
+                   Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>()) {
   setForegroundAndBackgroundColors(colorNumber);
 }
 
@@ -214,5 +214,5 @@ void PeakViewFactory::getNonOrthogonalInfo(NonOrthogonalAxis &info) {
         API::getMissingHKLDimensionIndex(m_mdWS, info.dimX, info.dimY);
   }
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -96,7 +96,7 @@ private:
   /// as a runAsPythonScript signal
   PythonRunner m_pyRunner;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQT_API_MANTIDDIALOG_H_

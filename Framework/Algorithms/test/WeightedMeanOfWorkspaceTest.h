@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

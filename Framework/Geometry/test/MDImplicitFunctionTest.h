@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_MDIMPLICITFUNCTIONTEST_H_
 #define MANTID_MDALGORITHMS_MDIMPLICITFUNCTIONTEST_H_
 
-#include <boost/shared_array.hpp>
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include <boost/shared_array.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;

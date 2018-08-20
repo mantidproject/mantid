@@ -62,13 +62,9 @@ FileFinderImpl::FileFinderImpl() {
 #ifdef _WIN32
   m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
-  std::string casesensitive =
-      Mantid::Kernel::ConfigService::Instance().getString(
-          "filefinder.casesensitive");
-  if (boost::iequals("Off", casesensitive))
-    m_globOption = Poco::Glob::GLOB_CASELESS;
-  else
-    m_globOption = Poco::Glob::GLOB_DEFAULT;
+  setCaseSensitive(Kernel::ConfigService::Instance()
+                       .getValue<bool>("filefinder.casesensitive")
+                       .get_value_or(false));
 #endif
 }
 
@@ -583,8 +579,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
   g_log.debug() << "findRuns hint = " << hint << "\n";
   std::vector<std::string> res;
   Mantid::Kernel::StringTokenizer hints(
-      hint, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      hint, ",",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = hints.begin();
 
   for (; h != hints.end(); ++h) {
@@ -602,8 +599,9 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
     }
 
     Mantid::Kernel::StringTokenizer range(
-        *h, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        *h, "-",
+        Mantid::Kernel::StringTokenizer::TOK_TRIM |
+            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if ((range.count() > 2) && (!fileSuspected)) {
       throw std::invalid_argument("Malformed range of runs: " + *h);
     } else if ((range.count() == 2) && (!fileSuspected)) {

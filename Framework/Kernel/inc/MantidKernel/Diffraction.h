@@ -47,7 +47,7 @@ MANTID_KERNEL_DLL std::function<double(double)>
 getDToTofConversionFunc(const double difc, const double difa,
                         const double tzero);
 
-} // Diffraction
+} // namespace Diffraction
 } // namespace Kernel
 } // namespace Mantid
 

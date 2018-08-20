@@ -14,8 +14,8 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include <gmock/gmock.h>
 #include <boost/algorithm/string/replace.hpp>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -24,7 +24,7 @@ using namespace testing;
 using ScopedFileHelper::ScopedFile;
 
 class InstrumentDefinitionParserTest : public CxxTest::TestSuite {
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   /// Mock Type to act as IDF files.
   class MockIDFObject : public Mantid::Geometry::IDFObject {
@@ -42,7 +42,7 @@ private:
     MOCK_CONST_METHOD0(exists, bool());
     MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   /**
   Helper type to pass around related IDF environment information in a
   collection.

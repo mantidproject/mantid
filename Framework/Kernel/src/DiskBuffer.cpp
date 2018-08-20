@@ -387,5 +387,5 @@ std::string DiskBuffer::getMemoryStr() const {
   return mess.str();
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
@@ -382,13 +382,15 @@ public:
     a.setScanInterval(0, {0, 1});
     b.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "both or none of the scans "
-                                                   "must be synchronous");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "both or none of the scans "
+                            "must be synchronous");
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "both or none of the scans "
-                                                   "must be synchronous");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "both or none of the scans "
+                            "must be synchronous");
   }
 
   void test_merge_fail_monitor_mismatch() {
@@ -417,19 +419,22 @@ public:
     b = a;
     b.setScanInterval({-1, 5});
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "sync scan intervals "
-                                                   "overlap but not identical");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "sync scan intervals "
+                            "overlap but not identical");
     b.setScanInterval({1, 5});
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "sync scan intervals "
-                                                   "overlap but not identical");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "sync scan intervals "
+                            "overlap but not identical");
     b.setScanInterval({1, 11});
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "sync scan intervals "
-                                                   "overlap but not identical");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "sync scan intervals "
+                            "overlap but not identical");
   }
 
   void do_test_merge_identical_interval_failures(DetectorInfo &a) {
@@ -448,27 +453,30 @@ public:
     b = a;
     b.setMasked(0, false);
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "matching scan interval but "
-                                                   "mask flags differ");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "matching scan interval but "
+                            "mask flags differ");
     b.setMasked(0, true);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
     b = a;
     b.setPosition(0, pos2);
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "matching scan interval but "
-                                                   "positions differ");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "matching scan interval but "
+                            "positions differ");
     b.setPosition(0, pos1);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
     b = a;
     b.setRotation(0, rot2);
     TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()), "Cannot merge DetectorInfo: "
-                                                   "matching scan interval but "
-                                                   "rotations differ");
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: "
+                            "matching scan interval but "
+                            "rotations differ");
     b.setRotation(0, rot1);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
   }

@@ -76,17 +76,21 @@ InstrumentVisitor::InstrumentVisitor(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
       m_componentRanges(
           boost::make_shared<std::vector<std::pair<size_t, size_t>>>()),
-      m_componentIdToIndexMap(boost::make_shared<
-          std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
+      m_componentIdToIndexMap(
+          boost::make_shared<
+              std::unordered_map<Mantid::Geometry::IComponent *, size_t>>()),
       m_detectorIdToIndexMap(makeDetIdToIndexMap(*m_orderedDetectorIds)),
       m_positions(boost::make_shared<std::vector<Eigen::Vector3d>>()),
       m_detectorPositions(boost::make_shared<std::vector<Eigen::Vector3d>>(
           m_orderedDetectorIds->size())),
-      m_rotations(boost::make_shared<std::vector<
-          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>()),
-      m_detectorRotations(boost::make_shared<std::vector<
-          Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>>(
-          m_orderedDetectorIds->size())),
+      m_rotations(boost::make_shared<
+                  std::vector<Eigen::Quaterniond,
+                              Eigen::aligned_allocator<Eigen::Quaterniond>>>()),
+      m_detectorRotations(
+          boost::make_shared<
+              std::vector<Eigen::Quaterniond,
+                          Eigen::aligned_allocator<Eigen::Quaterniond>>>(
+              m_orderedDetectorIds->size())),
       m_monitorIndices(boost::make_shared<std::vector<size_t>>()),
       m_instrument(std::move(instrument)), m_pmap(nullptr),
       m_nullShape(boost::make_shared<const CSGObject>()),
@@ -213,16 +217,16 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
 }
 
 /**
-* @brief InstrumentVisitor::registerInfiniteComponent
-* @param component : IComponent being visited
-* @return Component index of this component
-*/
+ * @brief InstrumentVisitor::registerInfiniteComponent
+ * @param component : IComponent being visited
+ * @return Component index of this component
+ */
 size_t InstrumentVisitor::registerInfiniteComponent(
     const Mantid::Geometry::IComponent &component) {
   /*
-  * For a generic leaf component we extend the component ids list, but
-  * the detector indexes entries will of course be empty
-  */
+   * For a generic leaf component we extend the component ids list, but
+   * the detector indexes entries will of course be empty
+   */
   m_detectorRanges->emplace_back(
       std::make_pair(0, 0)); // Represents an empty range
                              // Record the ID -> index mapping
@@ -254,10 +258,10 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
-* Register a structured bank
-* @param bank : Rectangular Detector
-* @return index assigned
-*/
+ * Register a structured bank
+ * @param bank : Rectangular Detector
+ * @return index assigned
+ */
 size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
@@ -266,10 +270,10 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
 }
 
 /**
-* @brief InstrumentVisitor::registerInfiniteObjComponent
-* @param objComponent : IObjComponent being visited
-* @return Component index of this component
-*/
+ * @brief InstrumentVisitor::registerInfiniteObjComponent
+ * @param objComponent : IObjComponent being visited
+ * @return Component index of this component
+ */
 size_t InstrumentVisitor::registerInfiniteObjComponent(
     const IObjComponent &objComponent) {
   auto index = registerInfiniteComponent(objComponent);

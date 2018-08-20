@@ -257,7 +257,7 @@ public slots:
                             int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on
   /// success/failure.
-  bool runPythonScript(const QString &code, bool async = false,
+  bool runPythonScript(const QString &code, bool asynchronous = false,
                        bool quiet = false, bool redirect = true);
 
   QList<MdiSubWindow *> windowsList() const;

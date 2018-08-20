@@ -55,11 +55,11 @@ void MantidDialog::handleException(const std::exception &e) {
 }
 
 /** Run a piece of python code and return any output that it writes to stdout
-*  @param code :: the Python commands to execute
-*  @param no_output :: if set to true this method returns an empty string, if
-* false it returns the output from any Python print statements
-*  @return output from Python print statements unless no_output is false
-*/
+ *  @param code :: the Python commands to execute
+ *  @param no_output :: if set to true this method returns an empty string, if
+ * false it returns the output from any Python print statements
+ *  @return output from Python print statements unless no_output is false
+ */
 QString MantidDialog::runPythonCode(const QString &code, bool no_output) {
   return m_pyRunner.runPythonCode(code, no_output);
 }

@@ -78,7 +78,7 @@ private:
   std::vector<double>
   createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch);
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /*ALGORITHMS_REBINTOWORKSPACE_H_*/

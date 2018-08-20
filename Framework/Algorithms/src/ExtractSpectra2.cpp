@@ -1,10 +1,10 @@
 #include "MantidAlgorithms/ExtractSpectra2.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/make_unique.h"
 
@@ -53,9 +53,10 @@ void ExtractSpectra2::exec() {
       getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");
 
   auto outputWS = create<MatrixWorkspace>(
-      *inputWS, dynamic_cast<IndexProperty *>(
-                    getPointerToProperty("InputWorkspaceIndexSet"))
-                    ->getFilteredIndexInfo(),
+      *inputWS,
+      dynamic_cast<IndexProperty *>(
+          getPointerToProperty("InputWorkspaceIndexSet"))
+          ->getFilteredIndexInfo(),
       HistogramData::BinEdges(2));
 
   Axis *inAxis1(nullptr);

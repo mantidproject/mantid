@@ -4,9 +4,9 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/make_shared.hpp>
 
@@ -51,10 +51,10 @@ void MeshObject::initialize() {
 const Kernel::Material MeshObject::material() const { return m_material; }
 
 /**
-* Returns whether this object has a valid shape
-* @returns True if the entire MeshObject may enclose
-* one or more volumes.
-*/
+ * Returns whether this object has a valid shape
+ * @returns True if the entire MeshObject may enclose
+ * one or more volumes.
+ */
 bool MeshObject::hasValidShape() const {
   // May enclose volume if there are at
   // at least 2 triangles and 4 vertices
@@ -62,10 +62,10 @@ bool MeshObject::hasValidShape() const {
 }
 
 /**
-* Determines whether point is within the object or on the surface
-* @param point :: Point to be tested
-* @returns true if point is within object or on surface
-*/
+ * Determines whether point is within the object or on the surface
+ * @param point :: Point to be tested
+ * @returns true if point is within object or on surface
+ */
 bool MeshObject::isValid(const Kernel::V3D &point) const {
 
   BoundingBox bb = getBoundingBox();
@@ -103,10 +103,10 @@ bool MeshObject::isValid(const Kernel::V3D &point) const {
 }
 
 /**
-* Determines wither point is on the surface.
-* @param point :: Point to check
-* @returns true if the point is on the surface
-*/
+ * Determines wither point is on the surface.
+ * @param point :: Point to check
+ * @returns true if the point is on the surface
+ */
 bool MeshObject::isOnSide(const Kernel::V3D &point) const {
 
   BoundingBox bb = getBoundingBox();
@@ -139,10 +139,10 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
 }
 
 /**
-* Given a track, fill the track with valid section
-* @param UT :: Initial track
-* @return Number of segments added
-*/
+ * Given a track, fill the track with valid section
+ * @param UT :: Initial track
+ * @return Number of segments added
+ */
 int MeshObject::interceptSurface(Geometry::Track &UT) const {
 
   int originalCount = UT.count(); // Number of intersections original track
@@ -173,7 +173,7 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
  * @param direction :: Direction of ray
  * @param intersectionPoints :: Intersection points (not sorted)
  * @param entryExitFlags :: +1 ray enters -1 ray exits at corresponding point
-*/
+ */
 void MeshObject::getIntersections(const Kernel::V3D &start,
                                   const Kernel::V3D &direction,
                                   std::vector<Kernel::V3D> &intersectionPoints,
@@ -192,16 +192,16 @@ void MeshObject::getIntersections(const Kernel::V3D &start,
 }
 
 /**
-* Get intersection points and their in out directions on the given ray
-* @param start :: Start point of ray
-* @param direction :: Direction of ray
-* @param v1 :: First vertex of triangle
-* @param v2 :: Second vertex of triangle
-* @param v3 :: Third vertex of triangle
-* @param intersection :: Intersection point
-* @param entryExit :: 1 if intersection is entry, -1 if exit
-* @returns true if there is an intersection
-*/
+ * Get intersection points and their in out directions on the given ray
+ * @param start :: Start point of ray
+ * @param direction :: Direction of ray
+ * @param v1 :: First vertex of triangle
+ * @param v2 :: Second vertex of triangle
+ * @param v3 :: Third vertex of triangle
+ * @param intersection :: Intersection point
+ * @param entryExit :: 1 if intersection is entry, -1 if exit
+ * @returns true if there is an intersection
+ */
 bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
                                        const Kernel::V3D &direction,
                                        const V3D &v1, const V3D &v2,
@@ -249,13 +249,13 @@ bool MeshObject::rayIntersectsTriangle(const Kernel::V3D &start,
 }
 
 /*
-* Get a triangle - useful for iterating over triangles
-* @param index :: Index of triangle in MeshObject
-* @param v1 :: First vertex of triangle
-* @param v2 :: Second vertex of triangle
-* @param v3 :: Third vertex of triangle
-* @returns true if the specified triangle exists
-*/
+ * Get a triangle - useful for iterating over triangles
+ * @param index :: Index of triangle in MeshObject
+ * @param v1 :: First vertex of triangle
+ * @param v2 :: Second vertex of triangle
+ * @param v3 :: Third vertex of triangle
+ * @returns true if the specified triangle exists
+ */
 bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2,
                              V3D &vertex3) const {
   bool triangleExists = index < m_triangles.size() / 3;
@@ -268,20 +268,20 @@ bool MeshObject::getTriangle(const size_t index, V3D &vertex1, V3D &vertex2,
 }
 
 /**
-* Find the solid angle of a triangle defined by vectors a,b,c from point
-*"observer"
-*
-* formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
-*
-* @param a :: first point of triangle
-* @param b :: second point of triangle
-* @param c :: third point of triangle
-* @param observer :: point from which solid angle is required
-* @return :: solid angle of triangle in Steradians.
-*
-* This duplicates code in CSGOjbect both need a place to be merged.
-* To aid this, this function has been defined as a non-member.
-*/
+ * Find the solid angle of a triangle defined by vectors a,b,c from point
+ *"observer"
+ *
+ * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+ *
+ * @param a :: first point of triangle
+ * @param b :: second point of triangle
+ * @param c :: third point of triangle
+ * @param observer :: point from which solid angle is required
+ * @return :: solid angle of triangle in Steradians.
+ *
+ * This duplicates code in CSGOjbect both need a place to be merged.
+ * To aid this, this function has been defined as a non-member.
+ */
 double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
                              const V3D &observer) {
   const V3D ao = a - observer;
@@ -303,13 +303,13 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
 }
 
 /**
-* Calculate if a point PT is a valid point on the track
-* @param point :: Point to calculate from.
-* @param uVec :: Unit vector of the track
-* @retval 0 :: Not valid / double valid
-* @retval 1 :: Entry point
-* @retval -1 :: Exit Point
-*/
+ * Calculate if a point PT is a valid point on the track
+ * @param point :: Point to calculate from.
+ * @param uVec :: Unit vector of the track
+ * @retval 0 :: Not valid / double valid
+ * @retval 1 :: Entry point
+ * @retval -1 :: Exit Point
+ */
 int MeshObject::calcValidType(const Kernel::V3D &point,
                               const Kernel::V3D &uVec) const {
   const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
@@ -323,17 +323,17 @@ int MeshObject::calcValidType(const Kernel::V3D &point,
 }
 
 /**
-* Takes input axis aligned bounding box max and min points and calculates the
-*bounding box for the
-* object and returns them back in max and min points.
-*
-* @param xmax :: Maximum value for the bounding box in x direction
-* @param ymax :: Maximum value for the bounding box in y direction
-* @param zmax :: Maximum value for the bounding box in z direction
-* @param xmin :: Minimum value for the bounding box in x direction
-* @param ymin :: Minimum value for the bounding box in y direction
-* @param zmin :: Minimum value for the bounding box in z direction
-*/
+ * Takes input axis aligned bounding box max and min points and calculates the
+ *bounding box for the
+ * object and returns them back in max and min points.
+ *
+ * @param xmax :: Maximum value for the bounding box in x direction
+ * @param ymax :: Maximum value for the bounding box in y direction
+ * @param zmax :: Maximum value for the bounding box in z direction
+ * @param xmin :: Minimum value for the bounding box in x direction
+ * @param ymin :: Minimum value for the bounding box in y direction
+ * @param zmin :: Minimum value for the bounding box in z direction
+ */
 void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                 double &xmin, double &ymin,
                                 double &zmin) const {
@@ -347,10 +347,10 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
 }
 
 /**
-* Find solid angle of object wrt the observer.
-* @param observer :: point to measure solid angle from
-* @return :: estimate of solid angle of object.
-*/
+ * Find solid angle of object wrt the observer.
+ * @param observer :: point to measure solid angle from
+ * @return :: estimate of solid angle of object.
+ */
 double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 
   double solidAngleSum(0), solidAngleNegativeSum(0);
@@ -367,11 +367,12 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 }
 
 /**
-* Find solid angle of object wrt the observer with a scaleFactor for the object.
-* @param observer :: point to measure solid angle from
-* @param scaleFactor :: V3D giving scaling of the object
-* @return :: estimate of solid angle of object.
-*/
+ * Find solid angle of object wrt the observer with a scaleFactor for the
+ * object.
+ * @param observer :: point to measure solid angle from
+ * @param scaleFactor :: V3D giving scaling of the object
+ * @return :: estimate of solid angle of object.
+ */
 double MeshObject::solidAngle(const Kernel::V3D &observer,
                               const Kernel::V3D &scaleFactor) const
 
@@ -417,9 +418,9 @@ double MeshObject::volume() const {
 }
 
 /**
-* Returns an axis-aligned bounding box that will fit the shape
-* @returns A reference to a bounding box for this shape.
-*/
+ * Returns an axis-aligned bounding box that will fit the shape
+ * @returns A reference to a bounding box for this shape.
+ */
 const BoundingBox &MeshObject::getBoundingBox() const {
 
   if (m_boundingBox.isNull())
@@ -525,10 +526,10 @@ V3D MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
 }
 
 /**
-* Try to find a point that lies within (or on) the object, given a seed point
-* @param point :: on entry the seed point, on exit point in object, if found
-* @return true if point found
-*/
+ * Try to find a point that lies within (or on) the object, given a seed point
+ * @param point :: on entry the seed point, on exit point in object, if found
+ * @return true if point found
+ */
 bool MeshObject::searchForObject(Kernel::V3D &point) const {
   //
   // Method - check if point in object, if not search directions along
@@ -549,10 +550,10 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
 }
 
 /**
-* Set the geometry handler for Object
-* @param[in] h is pointer to the geometry handler. don't delete this pointer in
-* the calling function.
-*/
+ * Set the geometry handler for Object
+ * @param[in] h is pointer to the geometry handler. don't delete this pointer in
+ * the calling function.
+ */
 void MeshObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
   if (h == nullptr)
     return;
@@ -560,9 +561,9 @@ void MeshObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
 }
 
 /**
-* Draws the Object using geometry handler, If the handler is not set then this
-* function does nothing.
-*/
+ * Draws the Object using geometry handler, If the handler is not set then this
+ * function does nothing.
+ */
 void MeshObject::draw() const {
   if (m_handler == nullptr)
     return;
@@ -571,10 +572,10 @@ void MeshObject::draw() const {
 }
 
 /**
-* Initializes/prepares the object to be rendered, this will generate geometry
-* for object,
-* If the handler is not set then this function does nothing.
-*/
+ * Initializes/prepares the object to be rendered, this will generate geometry
+ * for object,
+ * If the handler is not set then this function does nothing.
+ */
 void MeshObject::initDraw() const {
   if (m_handler == nullptr)
     return;
@@ -583,8 +584,8 @@ void MeshObject::initDraw() const {
 }
 
 /**
-* Returns the geometry handler
-*/
+ * Returns the geometry handler
+ */
 boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
@@ -592,20 +593,20 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
 }
 
 /**
-* Updates the geometry handler if needed
-*/
+ * Updates the geometry handler if needed
+ */
 void MeshObject::updateGeometryHandler() {
   return; // Hopefully nothing necessary here
 }
 
 /**
-* Output functions for rendering, may also be used internally
-*/
+ * Output functions for rendering, may also be used internally
+ */
 size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 
 /**
-* get faces
-*/
+ * get faces
+ */
 std::vector<uint32_t> MeshObject::getTriangles() const {
   std::vector<uint32_t> faces;
   size_t nFaceCorners = m_triangles.size();
@@ -619,15 +620,15 @@ std::vector<uint32_t> MeshObject::getTriangles() const {
 }
 
 /**
-* get number of points
-*/
+ * get number of points
+ */
 size_t MeshObject::numberOfVertices() const {
   return static_cast<int>(m_vertices.size());
 }
 
 /**
-* get vertices
-*/
+ * get vertices
+ */
 std::vector<double> MeshObject::getVertices() const {
   std::vector<double> points;
   size_t nPoints = m_vertices.size();
@@ -644,8 +645,8 @@ std::vector<double> MeshObject::getVertices() const {
 }
 
 /**
-* get info on standard shapes (none for Mesh Object)
-*/
+ * get info on standard shapes (none for Mesh Object)
+ */
 void MeshObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
                                std::vector<Kernel::V3D> &vectors,
                                double &myradius, double &myheight) const {

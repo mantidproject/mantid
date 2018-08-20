@@ -13,5 +13,5 @@ decltype(std::mem_fn(
                  (DataObjects::EventWorkspace::*)(const std::size_t)) &
                 DataObjects::EventWorkspace::getSpectrum);
 ///@endcond
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

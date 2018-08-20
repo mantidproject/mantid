@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
-#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

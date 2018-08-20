@@ -3,9 +3,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 #include <stdexcept>
-#include <cmath>
 #include <string>
 
 namespace Mantid {

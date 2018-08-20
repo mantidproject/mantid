@@ -39,6 +39,10 @@ struct TimeSeriesPropertyStatistics {
   double median;
   /// standard_deviation of the values
   double standard_deviation;
+  /// time weighted average
+  double time_mean;
+  /// time weighted standard deviation
+  double time_standard_deviation;
   /// Duration in seconds
   double duration;
 };
@@ -182,7 +186,10 @@ public:
   /// Calculate the time-weighted average of a property in a filtered range
   double averageValueInFilter(
       const std::vector<SplittingInterval> &filter) const override;
-  /// Calculate the time-weighted average of a property
+  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::averageAndStdDevInFilter()
+  std::pair<double, double> averageAndStdDevInFilter(
+      const std::vector<SplittingInterval> &filter) const override;
+  /// @copydoc Mantid::Kernel::ITimeSeriesProperty::timeAverageValue()
   double timeAverageValue() const override;
   /// generate constant time-step histogram from the property values
   void histogramData(const Types::Core::DateAndTime &tMin,
@@ -334,6 +341,8 @@ private:
   std::string setValueFromProperty(const Property &right) override;
   /// Find if time lies in a filtered region
   bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
+  /// Time weighted mean and standard deviation
+  std::pair<double, double> timeAverageValueAndStdDev() const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;

@@ -5,16 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Unit.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Unit.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/variant.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
 #endif
 #include <string>
 #include <vector>

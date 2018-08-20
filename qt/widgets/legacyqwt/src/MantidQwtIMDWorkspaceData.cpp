@@ -1,5 +1,4 @@
 #include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
-#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -8,15 +7,16 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include <QStringBuilder>
 
 using MantidQt::API::toQStringInternal;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using Mantid::API::NullCoordTransform;
 using Mantid::API::CoordTransform;
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_const_sptr;
+using Mantid::API::NullCoordTransform;
 using Mantid::coord_t;
 
 /** Constructor
@@ -119,11 +119,11 @@ MantidQwtIMDWorkspaceData *MantidQwtIMDWorkspaceData::copy(
 }
 
 /**
-  * Handles copying member variables for the copy constructor and
-  * assignment operator
-  *
-  * @param data The pointer to the object to copy from
-  */
+ * Handles copying member variables for the copy constructor and
+ * assignment operator
+ *
+ * @param data The pointer to the object to copy from
+ */
 void MantidQwtIMDWorkspaceData::copyData(
     const MantidQwtIMDWorkspaceData &data) {
   if (this != &data) {
@@ -322,9 +322,8 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis() {
           regularBinnedMDWorkspace) {
         for (size_t d = 0; d < diff.getNumDims(); d++) {
           if (fabs(diff[d]) > largest ||
-              (originalWS &&
-               originalWS->getDimension(m_currentPlotAxis)
-                   ->getIsIntegrated())) {
+              (originalWS && originalWS->getDimension(m_currentPlotAxis)
+                                 ->getIsIntegrated())) {
             // Skip over any integrated dimensions
             if (originalWS && !originalWS->getDimension(d)->getIsIntegrated()) {
               largest = fabs(diff[d]);

@@ -2,9 +2,9 @@
 #define MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
 
 #include "DllOption.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/Crystal/PeakTransform.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -124,7 +124,7 @@ public:
   /// Make a new box based on the slice
   PeakBoundingBox makeSliceBox(const double &sliceDelta) const;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_ */

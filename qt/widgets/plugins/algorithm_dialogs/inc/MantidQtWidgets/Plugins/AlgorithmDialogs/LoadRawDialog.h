@@ -72,7 +72,7 @@ private:
   /// The line inputs
   QLineEdit *m_pathBox, *m_wsBox;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMDIALOGS_LOADRAWDIALOG_H

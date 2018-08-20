@@ -7,7 +7,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/make_unique.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
 #include <memory>
 #include <vector>
 #include "MantidGeometry/Rendering/RenderingMesh.h"

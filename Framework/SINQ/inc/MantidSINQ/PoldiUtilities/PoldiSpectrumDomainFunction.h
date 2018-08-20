@@ -111,8 +111,9 @@ public:
 
   void set(size_t iY, size_t iP, double value) override {
     size_t realY = (m_offset + iY) % m_domainSize;
-    m_jacobian.set(realY, iP, m_jacobian.get(realY, iP) +
-                                  value * m_factors[m_factorOffset + iY]);
+    m_jacobian.set(realY, iP,
+                   m_jacobian.get(realY, iP) +
+                       value * m_factors[m_factorOffset + iY]);
   }
 
   void zero() override { m_jacobian.zero(); }

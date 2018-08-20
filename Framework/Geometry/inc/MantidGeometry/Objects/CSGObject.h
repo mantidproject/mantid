@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 
 #include "BoundingBox.h"
 #include <map>
@@ -20,7 +20,7 @@ namespace Kernel {
 class PseudoRandomNumberGenerator;
 class Material;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class CompGrp;

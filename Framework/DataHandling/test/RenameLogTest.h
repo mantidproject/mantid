@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAHANDLING_RENAMELOGTEST_H_
 #define MANTID_DATAHANDLING_RENAMELOGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/RenameLog.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;

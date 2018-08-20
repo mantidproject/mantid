@@ -52,7 +52,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class MantidTreeWidget;
 }
-}
+} // namespace MantidQt
 
 /**
  * \brief An MDI window (MdiSubWindow) managing one or more Graph objects.
@@ -204,7 +204,7 @@ public slots:
   bool isWaterfallPlot() { return d_is_waterfall_plot; }
   QColor waterfallFillColor() { return d_waterfall_fill_color; }
   void setWaterfallFillColor(const QColor &c);
-//@}
+  //@}
 
 signals:
   void showTextDialog();

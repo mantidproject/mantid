@@ -57,7 +57,7 @@ private:
   withoutAppendedRow(QModelIndex const &index) const;
   QtTreeCursorNavigationResult withAppendedRow(QModelIndex const &index) const;
 };
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_QTTREECURSORNAVIGATION_H_
