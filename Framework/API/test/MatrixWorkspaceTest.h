@@ -2041,6 +2041,11 @@ public:
         ws->hasOrientedLattice(), false);
   }
 
+  void test_isGroup() {
+    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    TS_ASSERT_EQUALS(ws->isGroup(), false);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceSans;

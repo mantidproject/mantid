@@ -42,12 +42,12 @@ New Algorithms
 
 Improvements
 ############
-
+- :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
 - :ref:`Live Data <algm-StartLiveData>` for events in PreserveEvents mode now produces workspaces that have bin boundaries which encompass the total x-range (TOF) for all events across all spectra.
 
 Bugfixes
 ########
-
+- :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
 
 
 Python
@@ -55,6 +55,8 @@ Python
 
 New
 ###
+
+ - New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
 
 
 Improvements

@@ -17,17 +17,19 @@ if (POLICY CMP0072)
 endif ()
 
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
-set ( SYSTEM_PACKAGE_TARGET "")
+set ( SYSTEM_PACKAGE_TARGET "" )
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
-set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the Qt4-based gui & components")
-# TODO: Switch this on by default when the builders all have Qt5 installed
-set ( ENABLE_WORKBENCH OFF CACHE BOOL "Switch for compiling the Qt5-based gui & components")
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Enable Qt4-based gui & components" )
+set ( ENABLE_WORKBENCH OFF CACHE BOOL "Enable Qt5-based gui & components" )
+set ( PACKAGE_WORKBENCH OFF CACHE BOOL "If packaging is enabled then include the Qt-5 workbench in the package" )
+if ( PACKAGE_WORKBENCH AND NOT ENABLE_WORKBENCH )
+  message ( FATAL_ERROR "Packaging workbench requested but workbench build is disabled!" )
+endif ()
 
-set ( CPACK_INSTALL_CMAKE_PROJECTS
-      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
+set ( CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################
 # Quick exit if we only want data targets
@@ -304,6 +306,9 @@ if ( ENABLE_CPACK )
       # scipy
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
+      if (ENABLE_WORKBENCH)
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-qt5" )
+      endif()
 
       if( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
@@ -371,6 +376,13 @@ if ( ENABLE_CPACK )
           list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3),")
           string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
           string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
+          if (ENABLE_WORKBENCH)
+            set ( APPEND DEPENDS_LIST ",python3-qt5" )
+          endif()
+        else()
+          if (ENABLE_WORKBENCH)
+            set ( APPEND DEPENDS_LIST ",pyqt5" )
+          endif()
         endif ()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )

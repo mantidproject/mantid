@@ -22,7 +22,7 @@ import unittest
 
 from qtpy.QtWidgets import QInputDialog
 
-from mantidqt.utils.qt.testing import requires_qapp, ModalTester
+from mantidqt.utils.qt.test import requires_qapp, ModalTester
 
 
 @requires_qapp
