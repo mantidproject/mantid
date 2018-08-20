@@ -9,13 +9,11 @@ std::vector<detail::TubeBuilder>
 findAndSortTubes(const Mantid::Geometry::IObject &shape,
                  const Pixels &positions, const std::vector<int> &detIDs) {
   std::vector<detail::TubeBuilder> tubes;
-
   tubes.emplace_back(shape, positions.col(0), detIDs[0]);
-  bool newEntry;
 
   // Loop through all detectors and add to tubes
   for (size_t i = 1; i < detIDs.size(); ++i) {
-    newEntry = true;
+    bool newEntry = true;
     for (auto t = tubes.rbegin(); t != tubes.rend(); ++t) {
       auto &tube = (*t);
       // Adding detector to existing tube
