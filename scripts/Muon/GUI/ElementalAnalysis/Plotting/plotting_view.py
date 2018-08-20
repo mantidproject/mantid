@@ -183,22 +183,27 @@ class PlotView(QtGui.QWidget):
         del self.plot_additions[name]
         self._update_gridspec(len(self.plots))
 
+    @_redo_layout
     @_save_addition
     def call_plot_method(self, name, func, *args, **kwargs):
         return func(*args, **kwargs)
 
+    @_redo_layout
     @_save_addition
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         return self.plots[plot_name].axvline(x_value, y_min, y_max, **kwargs)
 
+    @_redo_layout
     @_save_addition
     def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         return self.plots[plot_name].axhline(y_value, x_min, x_max, **kwargs)
 
+    @_redo_layout
     @_save_addition
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
         pass
 
+    @_redo_layout
     @_save_addition
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass

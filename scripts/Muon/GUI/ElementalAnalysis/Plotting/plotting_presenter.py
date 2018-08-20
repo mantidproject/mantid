@@ -17,9 +17,6 @@ class PlotPresenter(object):
     def remove_subplot(self, name):
         self.view.remove_subplot(name)
 
-    def update_canvas(self):
-        self.view.canvas.draw()
-
     def call_plot_method(self, name, func, *args, **kwargs):
         return self.view.call_plot_method(name, func, *args, **kwargs)
 
