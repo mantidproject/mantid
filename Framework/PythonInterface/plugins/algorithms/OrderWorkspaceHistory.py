@@ -55,7 +55,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                         have_comment = any(x[0] == tokenize.COMMENT for x in line)
                         if have_comment:
                             # line[-1][1][1:] is the comment string, with the preceeding hash stripped off; line[0][4] is the command and the comment
-                            all_lines.append((line[0][4], line[-1][1][1:]))
+                            all_lines.append((line[-1][4], line[-1][1][1:]))
                         line = []
                     # Everything in between we care about
                     elif line is not None:
@@ -70,7 +70,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
 
         with open(destination, 'w') as outfile:
             for x in unique_lines:
-                outfile.write('{}'.format(x[0]))
+                outfile.write(x[0])
 
 # Required to have Mantid recognise the new function
 mantid.api.AlgorithmFactory.subscribe(OrderWorkspaceHistory)
