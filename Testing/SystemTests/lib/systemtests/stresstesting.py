@@ -218,7 +218,7 @@ class MantidStressTest(unittest.TestCase):
             self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
         delta_t = float(time.time() - start)
         # Finish
-        #self.reportResult('time_taken', '%.2f' % delta_t)
+        self.reportResult('time_taken', '%.2f' % delta_t)
 
     def __prepASCIIFile(self, filename):
         """
@@ -495,6 +495,28 @@ class ResultReporter(object):
     def dispatchResults(self, result):
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
 
+    def printResultsToConsole(self, result):
+        '''
+        Print the results to standard out
+        '''
+        nstars = 80
+        print('*' * nstars)
+        print_list = ['test_name','filename','test_date','host_name','environment',
+                      'status','time_taken','memory footprint increase','output','err']
+        for key in print_list:
+            key_not_found = True
+            for i in range(len(result._results)):
+                if key == result._results[i][0]:
+                    print(key+": "+result._results[i][1])
+                    key_not_found = False
+            if key_not_found:
+                try:
+                    print(key+": "+getattr(result,key))
+                except AttributeError:
+                    pass
+        print('*' * nstars)
+        return
+
 #########################################################################
 # A class to report results as formatted text output
 #########################################################################
@@ -505,13 +527,10 @@ class TextResultReporter(ResultReporter):
 
     def dispatchResults(self, result):
         '''
-        Print the results to standard out
+        The default text reporter prints to standard out
         '''
-        nstars = 30
-        print('*' * nstars)
-        for t in result.resultLogs():
-            print('\t' + str(t[0]).ljust(15) + '->  ', str(t[1]))
-        print('*' * nstars)
+        self.printResultsToConsole(result)
+        return
 
 #########################################################################
 # A class to report results as junit xml
@@ -567,7 +586,6 @@ class TestRunner(object):
         tmp_file.write(script.asString())
         tmp_file.close()
         cmd = exec_call + ' ' + tmp_file.name
-        print("Executing test script '%s'" % (cmd))
         results = self.spawnSubProcess(cmd)
         os.remove(tmp_file.name)
         return results
@@ -649,7 +667,6 @@ class TestSuite(object):
         self._result.status = 'skipped'
 
     def execute(self, runner, exclude_in_pr_builds):
-        print(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname)
         if self._test_cls_name is not None:
           script = TestScript(self._test_dir, self._modname, self._test_cls_name,exclude_in_pr_builds)
           # Start the new process and wait until it finishes
@@ -682,7 +699,6 @@ class TestSuite(object):
         if PY3:
             if isinstance(output, bytes):
                 output = output.decode()
-        print(output)
         self._result.output = output
         all_lines = output.split('\n')
         # Find the test results
@@ -722,8 +738,6 @@ class TestManager(object):
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
             full_test_list = self.loadTestsFromDir(test_dir)
-            indices = range(process_number,len(full_test_list),ncores)
-            self._tests = [full_test_list[i] for i in indices]
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
@@ -731,7 +745,43 @@ class TestManager(object):
             test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            self._tests = self.loadTestsFromModule(os.path.basename(test_loc))
+            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
+
+        # When using multiprocessing, we have to split the list of tests among
+        # the processes module by module instead of test by test, to avoid issues
+        # with data being cleaned up before another process has finished.
+        #
+        # This is not optimal, ideally we would like to distribute the runtimes
+        # evenly so that all cpu finish in the same amount of time but this will
+        # do as a first step.
+        #
+        # First we need to count how many tests are in each module
+        # We also create on the fly a list of tests for each module
+        modcounts = dict()
+        modtests = dict()
+        for t in full_test_list:
+            if t._modname in modcounts.keys():
+                modcounts[t._modname] += 1
+                modtests[t._modname].append(t)
+            else:
+                modcounts[t._modname] = 1
+                modtests[t._modname] = [t]
+
+        # Now we distribute the tests to each cpu
+        # This is done by sorting the modules by descending order of number of tests
+        # We then iterate through that list and give all the tests inside a given module
+        # to the cpu which currently has the lowest number of tests.
+        # The number of tests for that cpu is then incremented by the number of tests
+        # inside the module it has just received.
+        ntests_per_core = [0] * ncores
+        self._tests = []
+        for key, value in sorted(modcounts.iteritems(), key=lambda (k,v): (v,k),reverse=True):
+            for i in range(ncores):
+                if(ntests_per_core[i] == min(ntests_per_core)):
+                    ntests_per_core[i] += value
+                    if (i == process_number):
+                        self._tests.extend(modtests[key])
+                    break
 
         if len(self._tests) == 0:
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')

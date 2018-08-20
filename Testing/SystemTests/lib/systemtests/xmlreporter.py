@@ -85,3 +85,5 @@ class XmlResultReporter(stresstesting.ResultReporter):
 			elem.setAttribute('time',str(time_taken))
 			elem.setAttribute('totalTime',str(time_taken))
 		self._doc.documentElement.appendChild(elem)
+		# Also output to terminal
+		self.printResultsToConsole(result)

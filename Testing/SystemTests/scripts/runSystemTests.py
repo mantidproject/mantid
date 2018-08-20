@@ -117,17 +117,6 @@ if options.makeprop:
 # run the tests
 execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
-# xml_file_root = "TEST-systemtests"
-# reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
-
-
-# BaseManager.register('XmlReporterClass', stresstesting.XmlResultReporter(showSkipped=options.showskipped))
-# manager = BaseManager()
-# manager.start()
-# reporter = manager.XmlReporterClass
-# print(reporter)
-# reporter2 = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
-# print(reporter2)
 
 # Multi-core processes
 ncores = int(options.parallel)
@@ -144,21 +133,6 @@ for p in processes:
 for p in processes:
     p.join()
 
-# # merge reports to master xml file
-# xml_master_file = open(os.path.join(mtdconf.saveDir, xml_file_root)+".xml", 'w')
-# for i in range(ncores):
-#     with open(os.path.join(mtdconf.saveDir, xml_file_root)+"-%i.xml" % i, mode='r') as xml_file:
-#         xml_content = xml_file.read()
-#     xml_file.close()
-#     xml_master_file.write(xml_content)
-#     print(xml_content)
-# xml_master_file.close()
-
-# success = reporter.reportStatus()
-# xml_report = open(os.path.join(mtdconf.saveDir, "TEST-systemtests.xml"),'w')
-# xml_report.write(reporter.getResults())
-# xml_report.close()
-
 # put the configuration back to its original state
 if options.makeprop:
     mtdconf.restoreconfig()
@@ -167,7 +141,7 @@ if options.makeprop:
 skippedTests = sum(results_array[:ncores])
 failedTests = sum(results_array[ncores:2*ncores])
 totalTests = sum(results_array[2*ncores:3*ncores])
-# Find minimum of status: if min = 0, then success is False
+# Find minimum of status: if min == 0, then success is False
 success = bool(min(results_array[3*ncores:4*ncores]))
 
 print()
