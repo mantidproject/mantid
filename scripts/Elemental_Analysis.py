@@ -38,6 +38,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.load_widget = LoadPresenter(
             LoadView(), LoadModel(), CoLoadModel())
         self.plotting = PlotPresenter(PlotView())
+        self.plotting.view.setFixedSize(self.plotting.view.sizeHint())
 
         self.add = QtGui.QPushButton("Add")
         self.add.clicked.connect(self.add_plot)
