@@ -49,6 +49,7 @@ from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
+from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -397,10 +398,16 @@ class MainWindow(QMainWindow):
         else:
             self.setWindowState(Qt.WindowMaximized)
 
+        # have algorithm dialogs do their thing
+        AlgorithmInputHistory().readSettings(settings)
+
     def writeSettings(self, settings):
         settings.set('main/window/size', self.size()) # QSize
         settings.set('main/window/position', self.pos()) # QPoint
         settings.set('main/window/state', self.saveState()) # QByteArray
+
+        # have algorithm dialogs do their thing
+        AlgorithmInputHistory().writeSettings(settings)
 
 
 def initialize():
