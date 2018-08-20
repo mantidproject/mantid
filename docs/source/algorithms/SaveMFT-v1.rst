@@ -10,16 +10,19 @@ Description
 -----------
 
 This algorithm saves the first spectrum of a workspace in ASCII format with .mft file name extension and can be used by software like Motofit.
-The file contains minimum 21 header lines, an empty line separating the columns of data described by a header line informing about the quantities which are q, refl, refl_error and eventually q_res (FWHM), if present.
+In case of histogrammed input data, the resulting file will contain the bin centre for the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
-A file can be loaded back into Mantid by SaveAscii, which will not have an instrument defined and `Sample Logs` are missing.
-Both, point data and histograms can be saved but note that the resulting file will always contain points for q and not bin edges but instead its bin centre.
-This algorithm writes data in scientific exponential notation (E-notation) of double-precision.
-The header constists of 21 or more, if required and user defined, lines which are as following: Instrument:, User-local contact:, Title:, Subtitle:, Start date + time, End date + time, Theta 1 + dir + ref numbers:, Theta 2 + dir + ref numbers:, Theta 3 + dir + ref numbers:
-, (foreseen potentially added angle(s),) followed by 9 user defined parameter lines, followed by potentially added user defined parameter lines, Number of file format:, Number of data points:.
-The number of the file format is set randomly to a higher value (40) in order to exceed all ILL Cosmos numbers.
+A file can be loaded back into Mantid by :ref:`algm-LoadAscii`, which will not have an instrument defined and `Sample Logs` are missing.
+
+File Format
+-----------
+
+The file contains minimum 21 header lines each separating its name and value by a colon, followed by an empty line and a line describing the quantities of each column which are `q`, `refl`, `refl_error` and eventually `q_res (FWHM)`, if present, and the data.
+The header lines contain the following information: `Instrument`, `User-local contact`, `Title`, `Subtitle`, `Start date + time`, `End date + time`, `Theta 1 + dir + ref numbers`, `Theta 2 + dir + ref numbers`, `Theta 3 + dir + ref numbers`, (foreseen potentially added angle(s),) followed by 9 user defined parameter lines, followed by potentially added user defined parameter lines, `Number of file format`, `Number of data points`.
+The version of the file format is set randomly to a higher value (40) in order to exceed all ILL Cosmos versions.
 For the ILL instruments D17 and FIGARO, obligatory header lines will be automatically filled by using the workspaces `Sample Logs` information which can be modified as shown in the example.
-An option exists to only write data with no header lines and column description.
+No header lines will be written when disabling the input option `WriteHeader`.
+This algorithm writes data in scientific exponential notation (E-notation) of double-precision.
 
 Usage
 -----
@@ -44,10 +47,13 @@ Usage
     file = os.path.join(os.path.expanduser("~"), "ws.mft")
 
     # Add Sample Log entries
+    # Add a Title entry which will be automatically used
     AddSampleLog(Workspace=ws, LogName='Title', LogText='MyTest', LogType='String')
+    # Add an entry called d as a Parameter (then, only eight not defined parameter lines remain):
     AddSampleLog(Workspace=ws, LogName='d', LogText='0.3', LogType='Number', LogUnit='mm', NumberType='Double')
 
-    # Save with mft extension and using the option LogList: Title will be added to a required header line and d will be additionally added to the first parameter field.
+    # Save with mft extension and using the option LogList: Title will be added to a required header line and d will be additionally added
+    # to the first parameter field.
     SaveMFT(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
 
     if os.path.exists(file):

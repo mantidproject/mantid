@@ -37,12 +37,7 @@ void SaveMFT::init() {
       "The output filename.");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
-  std::vector<std::string> header;
-  header.push_back("Write header lines");
-  header.push_back("Do not write header lines");
-  declareProperty("Header", "Write header lines",
-                  boost::make_shared<StringListValidator>(header),
-                  "Wether to write header lines.");
+  declareProperty("WriteHeader", true, "Whether to write header lines.");
 }
 
 /// Input validation
@@ -173,7 +168,7 @@ void SaveMFT::exec() {
     g_log.error("Unable to create file: " + filename);
   }
   g_log.information("Filename: " + filename);
-  if (getPointerToProperty("Header")->isDefault())
+  if (getPointerToProperty("WriteHeader"))
     header();
   data();
   m_file.close();
