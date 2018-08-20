@@ -146,9 +146,6 @@ void MDNormDirectSC::exec() {
   // loop over all experiment infos
   for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
        expInfoIndex++) {
-    if (expInfoIndex > 0) {
-      m_accumulate = true;
-    }
     // Check for other dimensions if we could measure anything in the original
     // data
     bool skipNormalization = false;
@@ -164,6 +161,8 @@ void MDNormDirectSC::exec() {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                     "Not applying normalization.");
     }
+    //if more than one experiment info, keep accumulating
+    m_accumulate = true;
   }
 
   // Set the display normalization based on the input workspace
