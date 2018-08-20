@@ -13,8 +13,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-#include <memory>
-
 using namespace Mantid::Kernel;
 
 class LiveListenerInfoTest : public CxxTest::TestSuite {
