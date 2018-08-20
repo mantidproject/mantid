@@ -16,9 +16,9 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include <H5Cpp.h>
+#include <Poco/Glob.h>
 #include <chrono>
 #include <string>
-#include <Poco/Glob.h>
 
 using namespace Mantid;
 using namespace NexusGeometry;
