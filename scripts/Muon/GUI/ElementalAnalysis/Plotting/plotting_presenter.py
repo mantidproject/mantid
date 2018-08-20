@@ -31,6 +31,3 @@ class PlotPresenter(object):
 
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
-
-    def add_errors(self, *plots):
-        pass

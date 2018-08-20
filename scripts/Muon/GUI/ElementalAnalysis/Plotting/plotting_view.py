@@ -59,7 +59,7 @@ class PlotView(QtGui.QWidget):
     def _redo_layout(func):
         def wraps(self, *args, **kwargs):
             func(self, *args, **kwargs)
-            if len(self.plots) > 1:
+            if len(self.plots):
                 self.figure.tight_layout()
             self.canvas.draw()
         return wraps
@@ -80,7 +80,6 @@ class PlotView(QtGui.QWidget):
     def _update_x_axis(self, bounds):
         try:
             self._get_current_plot().set_xlim(bounds)
-            self.canvas.draw()
         except KeyError:
             return
 
@@ -88,7 +87,6 @@ class PlotView(QtGui.QWidget):
     def _update_y_axis(self, bounds):
         try:
             self._get_current_plot().set_ylim(bounds)
-            self.canvas.draw()
         except KeyError:
             return
 
@@ -97,9 +95,12 @@ class PlotView(QtGui.QWidget):
         for name, plot in iteritems(self.plots):
             workspaces = self.workspaces[name]
             self.workspaces[name] = []
+            x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
             for ws in workspaces:
                 self.plot(name, ws)
+            plot.set_xlim(x)
+            plot.set_ylim(y)
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
@@ -175,7 +176,4 @@ class PlotView(QtGui.QWidget):
         pass
 
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
-        pass
-
-    def add_errors(self, *plots):
         pass
