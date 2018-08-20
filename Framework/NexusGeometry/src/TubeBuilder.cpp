@@ -14,8 +14,7 @@ TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
                          Eigen::Vector3d firstDetectorPosition,
                          int firstDetectorId)
     : m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
-      m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius())
-       {
+      m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()) {
   // Get axis along which cylinder lies
   m_axis = Kernel::toVector3d(
       pixelShape.getGeometryHandler()->shapeInfo().points()[1]);
