@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAOBJECTS_BOXCONTROLLER_NEXUSS_IO_H
 #define MANTID_DATAOBJECTS_BOXCONTROLLER_NEXUSS_IO_H
 
-#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include <nexus/NeXusFile.hpp>
 
@@ -162,6 +162,6 @@ private:
   void loadGenericBlock(std::vector<Type> &Block, const uint64_t blockPosition,
                         const size_t nPoints) const;
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 #endif

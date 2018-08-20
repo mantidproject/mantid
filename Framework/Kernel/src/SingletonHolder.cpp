@@ -1,38 +1,41 @@
-#include <list>
 #include <MantidKernel/SingletonHolder.h>
+#include <list>
 
 namespace Mantid {
 namespace Kernel {
 
+namespace {
 /// List of functions to call on program exit
-static std::list<atexit_func_t> *cleanup_list = nullptr;
+using CleanupList = std::list<SingletonDeleterFn>;
 
-/// Function registed to atexit() that will clean up
-/// all our singletons
+CleanupList &cleanupList() {
+  static CleanupList cleanup;
+  return cleanup;
+}
+
+/// Intended to be registered to atexit() that will clean up
+/// all registered singletons
 /// This function may be registed with atexit() more than once, so it needs to
 /// clear the list once it has called all the functions
-MANTID_KERNEL_DLL void CleanupSingletons() {
-  if (cleanup_list == nullptr) {
-    return;
+void cleanupSingletons() {
+  auto &deleters = cleanupList();
+  for (auto &deleter : deleters) {
+    deleter();
   }
-  std::list<atexit_func_t>::const_iterator it;
-  for (it = cleanup_list->begin(); it != cleanup_list->end(); ++it) {
-    (*(*it))();
-  }
-  delete cleanup_list;
-  cleanup_list = nullptr;
+  deleters.clear();
 }
+} // namespace
 
 /// Adds singleton cleanup function to our atexit list
 /// functions are added to the start of the list so on deletion it is last in,
 /// first out
 /// @param func :: Exit function to call - the singleton destructor function
-MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func) {
-  if (cleanup_list == nullptr) {
-    cleanup_list = new std::list<atexit_func_t>;
-    atexit(&CleanupSingletons);
+void deleteOnExit(SingletonDeleterFn func) {
+  auto &deleters = cleanupList();
+  if (deleters.empty()) {
+    atexit(&cleanupSingletons);
   }
-  cleanup_list->push_front(func);
+  deleters.push_front(func);
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

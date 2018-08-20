@@ -29,4 +29,4 @@ void ProgressableView::setAsEndlessIndicator() {
     setProgressRange(0, 0);
 }
 } // namespace MantidWidgets
-} // namepsace MantidQt
+} // namespace MantidQt

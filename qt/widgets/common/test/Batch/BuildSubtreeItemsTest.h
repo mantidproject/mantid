@@ -3,13 +3,13 @@
 
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
-#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
+#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
+#include <QStandardItem>
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>
 #include <vector>
-#include <QStandardItem>
 
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;

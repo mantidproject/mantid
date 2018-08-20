@@ -38,6 +38,8 @@ set ( EXPORT_FILES
   src/Exports/SymmetryOperationFactory.cpp
   src/Exports/CrystalStructure.cpp
   src/Exports/ReflectionGenerator.cpp
+  src/Exports/DetectorInfo.cpp
+  src/Exports/ComponentInfo.cpp
 )
 
 #############################################################################################

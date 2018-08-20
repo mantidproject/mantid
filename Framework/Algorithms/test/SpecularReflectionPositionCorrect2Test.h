@@ -1,12 +1,12 @@
 #ifndef MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT2TEST_H_
 #define MANTID_ALGORITHMS_SPECULARREFLECTIONPOSITIONCORRECT2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SpecularReflectionPositionCorrect2.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/SpecularReflectionPositionCorrect2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect2;
 using namespace Mantid::API;

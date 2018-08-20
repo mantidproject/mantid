@@ -3,8 +3,8 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Crystal {

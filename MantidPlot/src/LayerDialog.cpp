@@ -29,16 +29,16 @@
 #include "LayerDialog.h"
 #include "ApplicationWindow.h"
 
-#include <QLayout>
-#include <QSpinBox>
 #include <QCheckBox>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QComboBox>
-#include <QFontDialog>
 #include <QFont>
+#include <QFontDialog>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
 
 LayerDialog::LayerDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), multi_layer(nullptr) {
@@ -249,7 +249,8 @@ void LayerDialog::update() {
   if (cols > graphs && !fitBox->isChecked()) {
     QMessageBox::about(this, tr("MantidPlot - Columns input error"),
                        tr("The number of columns you've entered is greater "
-                          "than the number of graphs (%1)!").arg(graphs));
+                          "than the number of graphs (%1)!")
+                           .arg(graphs));
     boxX->setFocus();
     return;
   }
@@ -257,7 +258,8 @@ void LayerDialog::update() {
   if (rows > graphs && !fitBox->isChecked()) {
     QMessageBox::about(this, tr("MantidPlot - Rows input error"),
                        tr("The number of rows you've entered is greater than "
-                          "the number of graphs (%1)!").arg(graphs));
+                          "the number of graphs (%1)!")
+                           .arg(graphs));
     boxY->setFocus();
     return;
   }

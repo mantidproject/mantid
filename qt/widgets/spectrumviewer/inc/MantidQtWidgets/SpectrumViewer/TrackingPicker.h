@@ -1,9 +1,9 @@
 #ifndef TRACKING_PICKER_H
 #define TRACKING_PICKER_H
 
-#include <qwt_plot_picker.h>
-#include <qwt_plot_canvas.h>
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_picker.h>
 
 /**
     @class TrackingPicker

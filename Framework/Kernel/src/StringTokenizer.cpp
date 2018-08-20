@@ -103,7 +103,7 @@ splitIgnoringWhitespaceEmptyTokens(const std::string &str,
                  });
   return output;
 }
-}
+} // namespace
 
 /**
  * Constructor requiring a string to tokenize and a string of separators.

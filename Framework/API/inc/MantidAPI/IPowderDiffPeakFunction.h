@@ -1,8 +1,8 @@
 #ifndef MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
 #define MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
 
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include <complex>
 

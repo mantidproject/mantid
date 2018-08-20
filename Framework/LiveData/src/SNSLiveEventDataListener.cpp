@@ -74,7 +74,7 @@ DECLARE_LISTENER(SNSLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("SNSLiveEventDataListener");
-}
+} // namespace
 
 /// Constructor
 SNSLiveEventDataListener::SNSLiveEventDataListener()
@@ -90,14 +90,11 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
   // documented anywhere and this lack of documentation is deliberate.
-  int keepPausedEvents;
-  if (ConfigService::Instance().getValue("livelistener.keeppausedevents",
-                                         keepPausedEvents)) {
-    m_keepPausedEvents = (keepPausedEvents != 0);
-  } else {
-    // If the property hasn't been set, assume false
-    m_keepPausedEvents = false;
-  }
+  auto keepPausedEvents =
+      ConfigService::Instance().getValue<bool>("livelistener.keeppausedevents");
+
+  // If the property hasn't been set, assume false
+  m_keepPausedEvents = keepPausedEvents.get_value_or(false);
 }
 
 /// Destructor
@@ -484,8 +481,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
       // sufficient.
       g_log.error()
           << "Mantid cannot handle monitor ID's higher than 5.  If "
-          << monitorID << " is actually valid, then an appropriate "
-                          "entry must be made to the "
+          << monitorID
+          << " is actually valid, then an appropriate "
+             "entry must be made to the "
           << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
     } else {
       std::string monName("monitor");
@@ -1095,9 +1093,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
             prop = new TimeSeriesProperty<std::string>(pvName);
           } else {
             // invalid type string
-            g_log.warning() << "Ignoring process variable " << pvName
-                            << " because it had an unrecognized type ("
-                            << pvType << ").\n";
+            g_log.warning()
+                << "Ignoring process variable " << pvName
+                << " because it had an unrecognized type (" << pvType << ").\n";
           }
 
           if (prop) {

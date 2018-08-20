@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using WS_type = Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::CurveFitting::Functions::ProductFunction;
 using Mantid::CurveFitting::Functions::Gaussian;
+using Mantid::CurveFitting::Functions::ProductFunction;
 
 class ProductFunctionMWTest_Gauss : public Mantid::API::IPeakFunction {
 public:

@@ -4,9 +4,9 @@
 
 //-------------------- AlgorithmDockWidget ----------------------//
 /** Create a QDockWidget containing:
-* The AlgorithmSelectorWidget
-* The progress bar and Details button
-*/
+ * The AlgorithmSelectorWidget
+ * The progress bar and Details button
+ */
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
     : QDockWidget(w), m_progressBar(nullptr), m_algID(), m_mantidUI(mui) {
   setWindowTitle(tr("Algorithms"));

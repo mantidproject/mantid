@@ -14,8 +14,8 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPBasicCredentials.h>
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/StreamCopier.h>
 
 #include <boost/algorithm/string/trim.hpp>

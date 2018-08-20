@@ -1,8 +1,8 @@
 #ifndef MANTID_GPUALGORITHMS_GPUALGORITHM_H_
 #define MANTID_GPUALGORITHMS_GPUALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include <CL/cl.hpp>
 
 namespace Mantid {

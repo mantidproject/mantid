@@ -86,7 +86,7 @@ private:
   std::vector<double> getNorms();
 };
 
-} // namespace Algorithm
+} // namespace Muon
 } // namespace Mantid
 
 #endif /*MANTID_CONVERTFITFUNCTIONFORMUONTFASYMMETRYS_H_*/

@@ -36,6 +36,6 @@ namespace DataProcessor {
 std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_COMMON
 toStdStringMap(std::map<QString, QString> const &inMap);
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTID_MANTIDWIDGETS_DATAPROCESSORTOSTDSTRINGMAP_H

@@ -1,16 +1,16 @@
 #ifndef MANTID_CRYSTAL_SETUBTEST_H_
 #define MANTID_CRYSTAL_SETUBTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/SetUB.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidAPI/Sample.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

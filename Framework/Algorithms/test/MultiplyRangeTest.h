@@ -1,10 +1,10 @@
 #ifndef MULTIPLYRANGETEST_H_
 #define MULTIPLYRANGETEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/MultiplyRange.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

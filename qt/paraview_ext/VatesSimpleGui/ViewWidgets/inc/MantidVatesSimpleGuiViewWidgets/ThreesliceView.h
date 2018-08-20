@@ -1,9 +1,9 @@
 #ifndef THREESLICEVIEW_H_
 #define THREESLICEVIEW_H_
 
-#include "ui_ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_ThreesliceView.h"
 
 #include <QPointer>
 #include <QWidget>
@@ -99,8 +99,8 @@ private:
 
   Ui::ThreeSliceView m_ui; ///< The three slice view's UI form
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // THREESLICEVIEW_H_

@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadSINQFocus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadSINQFocus.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadSINQFocus;

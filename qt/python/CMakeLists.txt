@@ -1,6 +1,7 @@
 # This file manages building/installation of the mantidqt and mantidqtpython
 # Python wrappers.
 #
+include ( PythonPackageTargetFunctions )
 
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )
@@ -20,7 +21,6 @@ if ( ENABLE_WORKBENCH )
       ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
   )
 
-  # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output
@@ -36,12 +36,12 @@ if ( ENABLE_WORKBENCH )
   add_custom_target ( mantidqt_resources ALL DEPENDS ${_output_res_py} )
 
   # Now add any compiled sip targets
-  add_subdirectory ( mantidqt/widgets )
+  add_subdirectory ( mantidqt )
 
   # Setup dependency chain
   add_dependencies ( mantidqt
-    mantidqt_widgetscoreqt5
-    mantidqt_widgetscoreqt4
+    mantidqt_commonqt4
+    mantidqt_commonqt5
     mantidqt_resources
   )
 
@@ -66,22 +66,22 @@ endif ()
     mantidqt/test/test_algorithm_observer.py
     mantidqt/test/test_import.py
 
+    mantidqt/dialogs/test/test_algorithm_dialog.py
+    mantidqt/dialogs/test/test_spectraselectiondialog.py
+
     mantidqt/utils/test/test_async.py
     mantidqt/utils/test/test_modal_tester.py
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/utils/test/test_writetosignal.py
 
-    mantidqt/widgets/test/test_algorithm_dialog.py
-
+    mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
     mantidqt/widgets/codeeditor/test/test_codeeditor.py
     mantidqt/widgets/codeeditor/test/test_errorformatter.py
     mantidqt/widgets/codeeditor/test/test_execution.py
     mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
+    mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
 
-    mantidqt/widgets/workspacewidget/test/test_plotselectiondialog.py
-
-    mantidqt/widgets/test/test_algorithmselector.py
     mantidqt/widgets/test/test_jupyterconsole.py
     mantidqt/widgets/test/test_messagedisplay.py
   )

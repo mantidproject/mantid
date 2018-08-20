@@ -19,7 +19,6 @@
 #include <pqPipelineSource.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
-#include <pqServerManagerModel.h>
 #include <pqUndoStack.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMInputProperty.h>
@@ -197,8 +196,9 @@ void RebinnedSourcesManager::getWorkspaceInfo(pqPipelineSource *source,
   workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
                       .GetAsString();
 
-  workspaceType = vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName",
-                                      true).GetAsString();
+  workspaceType =
+      vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true)
+          .GetAsString();
 }
 
 /**
@@ -431,10 +431,10 @@ void RebinnedSourcesManager::untrackWorkspaces(
 }
 
 /**
-  * Rebuild the pipeline for the new source
-  * @param source1 The old source.
-  * @param source2 The new source.
-  */
+ * Rebuild the pipeline for the new source
+ * @param source1 The old source.
+ * @param source2 The new source.
+ */
 void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
                                              pqPipelineSource *source2) {
   // Step through all the filters in old pipeline and reproduce them
@@ -485,10 +485,10 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
 }
 
 /**
-  * Copy the properties of the old filter to the new filter.
-  * @param filter1 The old filter.
-  * @param filter2 The new filter.
-  */
+ * Copy the properties of the old filter to the new filter.
+ * @param filter1 The old filter.
+ * @param filter2 The new filter.
+ */
 void RebinnedSourcesManager::copyProperties(pqPipelineFilter *filter1,
                                             pqPipelineFilter *filter2) {
   vtkSMProxy *proxy1 = filter1->getProxy();
@@ -498,13 +498,13 @@ void RebinnedSourcesManager::copyProperties(pqPipelineFilter *filter1,
 }
 
 /**
-  * This method is taken from a newer version of pqCopyReaction, which contains
+ * This method is taken from a newer version of pqCopyReaction, which contains
  * a bug fix
-  * for copying CutFilter properties. This is the correct way to copy proxy
+ * for copying CutFilter properties. This is the correct way to copy proxy
  * properties.
-  * @param dest Destination proxy.
-  * @param source Source proxy.
-  */
+ * @param dest Destination proxy.
+ * @param source Source proxy.
+ */
 void RebinnedSourcesManager::copySafe(vtkSMProxy *dest, vtkSMProxy *source) {
   if (dest && source) {
     BEGIN_UNDO_SET("Copy Properties");
@@ -789,10 +789,10 @@ void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource *source) {
 }
 
 /**
-  * Go to the beginning of a pipeline (assuming that it is linear
-  * @param source A pointer to a source
-  * @returns a pointer to the beginning of the pipeline
-  */
+ * Go to the beginning of a pipeline (assuming that it is linear
+ * @param source A pointer to a source
+ * @returns a pointer to the beginning of the pipeline
+ */
 pqPipelineSource *
 RebinnedSourcesManager::goToPipelineBeginning(pqPipelineSource *source) {
   // Crawl up to the beginnign of the pipeline
@@ -805,6 +805,6 @@ RebinnedSourcesManager::goToPipelineBeginning(pqPipelineSource *source) {
 
   return tempSource;
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

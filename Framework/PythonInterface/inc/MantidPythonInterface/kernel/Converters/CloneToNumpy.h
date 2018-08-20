@@ -36,7 +36,7 @@ PyObject *clone1D(const std::vector<ElementType> &cvector);
 template <typename ElementType>
 PyObject *cloneND(const ElementType *carray, const int ndims,
                   Py_intptr_t *dims);
-}
+} // namespace Impl
 
 /**
  * Clone is a policy (in the C++ sense)for converting to an ND Array. The result
@@ -66,8 +66,8 @@ struct Clone {
     }
   };
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif //

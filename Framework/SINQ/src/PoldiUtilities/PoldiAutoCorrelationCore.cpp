@@ -28,12 +28,12 @@ PoldiAutoCorrelationCore::PoldiAutoCorrelationCore(Kernel::Logger &g_log)
       m_logger(g_log) {}
 
 /** Sets the components POLDI currently consists of. The detector should
-  *probably be one with a DeadWireDecorator so dead wires are taken into account
-  *properly.
-  *
-  * @param detector :: Instance of PoldiAbstractDetector.
-  * @param chopper :: Instance of PoldiAbstractChopper.
-  */
+ *probably be one with a DeadWireDecorator so dead wires are taken into account
+ *properly.
+ *
+ * @param detector :: Instance of PoldiAbstractDetector.
+ * @param chopper :: Instance of PoldiAbstractChopper.
+ */
 void PoldiAutoCorrelationCore::setInstrument(
     const PoldiAbstractDetector_sptr &detector,
     const PoldiAbstractChopper_sptr &chopper) {
@@ -44,26 +44,26 @@ void PoldiAutoCorrelationCore::setInstrument(
 }
 
 /** Takes wavelength limits to be considered for the calculation.
-  *
-  * @param lambdaMin :: Minimum wavelength in Angstrom.
-  * @param lambdaMax :: Maximum wavelength in Angstrom.
-  */
+ *
+ * @param lambdaMin :: Minimum wavelength in Angstrom.
+ * @param lambdaMax :: Maximum wavelength in Angstrom.
+ */
 void PoldiAutoCorrelationCore::setWavelengthRange(double lambdaMin,
                                                   double lambdaMax) {
   m_wavelengthRange = std::make_pair(lambdaMin, lambdaMax);
 }
 
 /** Finalizes the calculation of the correlation spectrum
-  *
-  * This method offers a variable way of using the correlation spectrum
-  *calculated previously.
-  * The base version converts to Q and creates an appropriate output workspace.
-  *
-  * @param correctedCorrelatedIntensities :: Intensities of correlation
-  *spectrum.
-  * @param dValues :: d-spacings at which the spectrum was calculated.
-  * @return A workspace containing the correlation spectrum.
-  */
+ *
+ * This method offers a variable way of using the correlation spectrum
+ *calculated previously.
+ * The base version converts to Q and creates an appropriate output workspace.
+ *
+ * @param correctedCorrelatedIntensities :: Intensities of correlation
+ *spectrum.
+ * @param dValues :: d-spacings at which the spectrum was calculated.
+ * @return A workspace containing the correlation spectrum.
+ */
 DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
     const std::vector<double> &correctedCorrelatedIntensities,
     const std::vector<double> &dValues) const {
@@ -93,11 +93,11 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 }
 
 /** Performs auto-correlation algorithm on the POLDI data in the supplied
-  *workspace.
-  *
-  * @param countData :: Instance of Workspace2D with POLDI data.
-  * @return A workspace containing the correlation spectrum.
-  */
+ *workspace.
+ *
+ * @param countData :: Instance of Workspace2D with POLDI data.
+ * @return A workspace containing the correlation spectrum.
+ */
 DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
     DataObjects::Workspace2D_sptr &countData,
     const DataObjects::Workspace2D_sptr &normCountData) {
@@ -225,12 +225,12 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
 }
 
 /** Computes the sums of the given vector. Currently simply wraps
-  *std::accumulate.
-  *
-  * @param normalizedTofs :: Vector with dimensionless numbers (TOF/(time bin
-  *size)).
-  * @return Sum over all elements of given vector.
-  */
+ *std::accumulate.
+ *
+ * @param normalizedTofs :: Vector with dimensionless numbers (TOF/(time bin
+ *size)).
+ * @return Sum over all elements of given vector.
+ */
 double PoldiAutoCorrelationCore::getNormalizedTOFSum(
     const std::vector<double> &normalizedTofs) const {
   /* Regarding numerical differences to fortran version
@@ -247,16 +247,16 @@ double PoldiAutoCorrelationCore::getNormalizedTOFSum(
 }
 
 /** Calculates weights used for correction of correlation background.
-  *
-  * @param tofsFor1Angstrom :: Vector which contains the time of flight (in
-  *microseconds) for each element of the detector, for a neutron with lambda = 1
-  *Angstrom.
-  * @param deltaT :: Size of one time bin in microseconds.
-  * @param deltaD :: d-Resolution in Angstrom.
-  * @param nd :: Number of d-values.
-  * @return Vector with nd elements, each containing the weight for the given
-  *d-Value
-  */
+ *
+ * @param tofsFor1Angstrom :: Vector which contains the time of flight (in
+ *microseconds) for each element of the detector, for a neutron with lambda = 1
+ *Angstrom.
+ * @param deltaT :: Size of one time bin in microseconds.
+ * @param deltaD :: d-Resolution in Angstrom.
+ * @param nd :: Number of d-values.
+ * @return Vector with nd elements, each containing the weight for the given
+ *d-Value
+ */
 std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
     const std::vector<double> &tofsFor1Angstrom, double deltaT, double deltaD,
     size_t nd) const {
@@ -279,12 +279,12 @@ std::vector<double> PoldiAutoCorrelationCore::calculateDWeights(
 }
 
 /** Returns correlation intensity for a given d-Value, using a given weight.
-  *
-  * @param dValue :: d-value in Angstrom.
-  * @param weight :: Dimensionless weight used for reduction of intermediate
-  *result.
-  * @return Correlated intensity, not corrected for correlation background.
-  */
+ *
+ * @param dValue :: d-value in Angstrom.
+ * @param weight :: Dimensionless weight used for reduction of intermediate
+ *result.
+ * @return Correlated intensity, not corrected for correlation background.
+ */
 double
 PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
                                                     double weight) const {
@@ -337,13 +337,13 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
 }
 
 /** Calculate correlation intensity and error for a given d-Value and a given
-  *time-offset, arriving
-  *
-  * @param dValue :: d-value in Angstrom.
-  * @param slitTimeOffset :: Time-offset given by chopperslit in microseconds.
-  * @param index :: Index of detector element the calculation is performed for.
-  * @return Pair of intensity and error for given input.
-  */
+ *time-offset, arriving
+ *
+ * @param dValue :: d-value in Angstrom.
+ * @param slitTimeOffset :: Time-offset given by chopperslit in microseconds.
+ * @param index :: Index of detector element the calculation is performed for.
+ * @return Pair of intensity and error for given input.
+ */
 UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
     double dValue, double slitTimeOffset, int index) const {
   /* The "count locator" describes where the counts for a given combination of
@@ -424,19 +424,19 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
 }
 
 /** Return parameters for locating counts in the data
-  *
-  * This method forms the heart of PoldiAutoCorrelationCore::getCMessAndCSigma,
-  *by returning
-  * an object that contains the necessary information to locate counts in the
-  *stored data
-  * that belong to a given combination of d, TOF-offset and detector element.
-  *
-  * @param dValue :: d-spacing that should be located.
-  * @param slitTimeOffset :: TOF offset given by chopper slit.
-  * @param index :: Index of detector element.
-  * @return CountLocator object which contains information about the location of
-  *counts.
-  */
+ *
+ * This method forms the heart of PoldiAutoCorrelationCore::getCMessAndCSigma,
+ *by returning
+ * an object that contains the necessary information to locate counts in the
+ *stored data
+ * that belong to a given combination of d, TOF-offset and detector element.
+ *
+ * @param dValue :: d-spacing that should be located.
+ * @param slitTimeOffset :: TOF offset given by chopper slit.
+ * @param index :: Index of detector element.
+ * @return CountLocator object which contains information about the location of
+ *counts.
+ */
 CountLocator PoldiAutoCorrelationCore::getCountLocator(double dValue,
                                                        double slitTimeOffset,
                                                        int index) const {
@@ -482,11 +482,11 @@ CountLocator PoldiAutoCorrelationCore::getCountLocator(double dValue,
 }
 
 /** Maps index I onto the interval [0, max - 1], wrapping around using modulo
-  *
-  * @param index :: Index I, on interval [-inf, inf]
-  * @param maximum :: Number of indices.
-  * @return Index on interval [0, max - 1]
-  */
+ *
+ * @param index :: Index I, on interval [-inf, inf]
+ * @param maximum :: Number of indices.
+ * @return Index on interval [0, max - 1]
+ */
 int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum) const {
   int cleanIndex = index % maximum;
   if (cleanIndex < 0) {
@@ -497,34 +497,34 @@ int PoldiAutoCorrelationCore::cleanIndex(int index, int maximum) const {
 }
 
 /** Assigns workspace pointer containing count data to class member
-  *
-  * @param countData :: Workspace containing count data
-  */
+ *
+ * @param countData :: Workspace containing count data
+ */
 void PoldiAutoCorrelationCore::setCountData(
     const DataObjects::Workspace2D_sptr &countData) {
   m_countData = countData;
 }
 
 /** Assigns workspace pointer containing norm count data to class member
-  *
-  * @param countData :: Workspace containing norm count data
-  */
+ *
+ * @param countData :: Workspace containing norm count data
+ */
 void PoldiAutoCorrelationCore::setNormCountData(
     const DataObjects::Workspace2D_sptr &normCountData) {
   m_normCountData = normCountData;
 }
 
 /** Returns the corrected intensity.
-  *
-  * This method returns the corrected intensity calculated from the supplied
-  *intensity value
-  * and weight. It also uses the internally stored values for the correlation
-  *background
-  * and the sum of weights for all d values.
-  *
-  * @param intensity :: Raw correlation intensity.
-  * @param weight :: Weight as determined in calculateDWeights.
-  * @return Corrected correlation intensity.
+ *
+ * This method returns the corrected intensity calculated from the supplied
+ *intensity value
+ * and weight. It also uses the internally stored values for the correlation
+ *background
+ * and the sum of weights for all d values.
+ *
+ * @param intensity :: Raw correlation intensity.
+ * @param weight :: Weight as determined in calculateDWeights.
+ * @return Corrected correlation intensity.
  */
 double PoldiAutoCorrelationCore::correctedIntensity(double intensity,
                                                     double weight) const {
@@ -537,12 +537,12 @@ double PoldiAutoCorrelationCore::calculateCorrelationBackground(
 }
 
 /** Reduces list of I/sigma-pairs for N chopper slits to correlation intensity
-  *by checking for negative I/sigma-ratios and summing their inverse values.
-  *
-  * @param valuesWithSigma :: Vector of I/sigma-pairs.
-  * @param weight :: Dimensionless weight.
-  * @return Correlated intensity, multiplied by weight.
-  */
+ *by checking for negative I/sigma-ratios and summing their inverse values.
+ *
+ * @param valuesWithSigma :: Vector of I/sigma-pairs.
+ * @param weight :: Dimensionless weight.
+ * @return Correlated intensity, multiplied by weight.
+ */
 double PoldiAutoCorrelationCore::reduceChopperSlitList(
     const std::vector<UncertainValue> &valuesWithSigma, double weight) const {
   try {
@@ -559,13 +559,13 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(
 }
 
 /** Transforms a vector of detector element indices to total flight path, adding
-  *the distances from chopper to sample and sample to detector element.
-  *
-  * The result depends on the detector that is used.
-  *
-  * @param elements :: Vector of element indices.
-  * @return Vector of total neutron flight paths in mm.
-  */
+ *the distances from chopper to sample and sample to detector element.
+ *
+ * The result depends on the detector that is used.
+ *
+ * @param elements :: Vector of element indices.
+ * @return Vector of total neutron flight paths in mm.
+ */
 std::vector<double>
 PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
   double chopperDistance = m_chopper->distanceFromSample();
@@ -581,14 +581,14 @@ PoldiAutoCorrelationCore::getDistances(const std::vector<int> &elements) const {
 }
 
 /** Transforms a vector of detector element indices to specific TOFs.
-  *
-  * The function takes a vector of detector element indices and calculates the
-  *time of flight for each detector element for neutrons with a wavelength of 1
-  *Angstrom.
-  *
-  * @param elements :: Vector of element indices.
-  * @return Vector of specific TOFs (microseconds/Angstrom).
-  */
+ *
+ * The function takes a vector of detector element indices and calculates the
+ *time of flight for each detector element for neutrons with a wavelength of 1
+ *Angstrom.
+ *
+ * @param elements :: Vector of element indices.
+ * @return Vector of specific TOFs (microseconds/Angstrom).
+ */
 std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
     const std::vector<int> &elements) const {
   // Map element indices to 2Theta-Values
@@ -618,34 +618,34 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
 }
 
 /** Returns counts at given position
-  *
-  * @param x :: Detector element index.
-  * @param y :: Time bin index.
-  * @return Counts at position.
-  */
+ *
+ * @param x :: Detector element index.
+ * @param y :: Time bin index.
+ * @return Counts at position.
+ */
 double PoldiAutoCorrelationCore::getCounts(int x, int y) const {
   return m_countData->y(x)[y];
 }
 
 /** Returns normalized counts for correlation method at given position - these
-  *may come from a different source than the counts
-  *
-  * @param x :: Detector element index.
-  * @param y :: Time bin index.
-  * @return Normalized counts at position.
-  */
+ *may come from a different source than the counts
+ *
+ * @param x :: Detector element index.
+ * @param y :: Time bin index.
+ * @return Normalized counts at position.
+ */
 double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const {
   return std::max(1.0, m_normCountData->y(x)[y]);
 }
 
 /** Returns detector element index for given index
-  *
-  * This is a bit complicated at the moment, but currently necessary because
-  *this way dead wires are easier to handle
-  *
-  * @param index :: Detector element index.
-  * @return Detector element index.
-  */
+ *
+ * This is a bit complicated at the moment, but currently necessary because
+ *this way dead wires are easier to handle
+ *
+ * @param index :: Detector element index.
+ * @return Detector element index.
+ */
 int PoldiAutoCorrelationCore::getElementFromIndex(int index) const {
   if (index < 0 || index >= static_cast<int>(m_detectorElements.size())) {
     throw(std::range_error(
@@ -656,10 +656,10 @@ int PoldiAutoCorrelationCore::getElementFromIndex(int index) const {
 }
 
 /** Returns specific TOF for given index
-  *
-  * @param index :: Specific TOF index.
-  * @return TOF at index.
-  */
+ *
+ * @param index :: Specific TOF index.
+ * @return TOF at index.
+ */
 double PoldiAutoCorrelationCore::getTofFromIndex(int index) const {
   if (index < 0 || index >= static_cast<int>(m_tofsFor1Angstrom.size())) {
     throw(std::range_error(
@@ -670,12 +670,12 @@ double PoldiAutoCorrelationCore::getTofFromIndex(int index) const {
 }
 
 /** Returns the total sum of counts in the spectrum
-  *
-  * @param timeBinCount :: Number of time bins
-  * @param detectorElements :: Vector with all detector elements to be
-  *considered for the summation.
-  * @return Sum of all counts.
-  */
+ *
+ * @param timeBinCount :: Number of time bins
+ * @param detectorElements :: Vector with all detector elements to be
+ *considered for the summation.
+ * @return Sum of all counts.
+ */
 double PoldiAutoCorrelationCore::getSumOfCounts(
     int timeBinCount, const std::vector<int> &detectorElements) const {
   double sum = 0.0;

@@ -1,11 +1,11 @@
+#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
-#include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
@@ -136,8 +136,8 @@ std::string RunPythonScript::scriptCode() const {
   const char *indent = "    ";
   os << "import mantid\n"
      << "from mantid.simpleapi import *\n"
-     << "class _DUMMY_ALG(mantid.api.PythonAlgorithm):\n" << indent
-     << "def PyExec(self, input=None,output=None):\n";
+     << "class _DUMMY_ALG(mantid.api.PythonAlgorithm):\n"
+     << indent << "def PyExec(self, input=None,output=None):\n";
   std::string line;
   while (getline(is, line)) {
     os << indent << indent << line << "\n";

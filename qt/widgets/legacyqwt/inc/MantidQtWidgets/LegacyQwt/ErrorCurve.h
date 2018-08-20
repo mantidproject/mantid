@@ -2,8 +2,8 @@
 #define MANTIDWIDGETS_ERRORCURVE_H
 
 #include "DllOption.h"
-#include <qwt_plot_item.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_item.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,7 +30,7 @@ private:
   QPen m_pen;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTIDWIDGETS_ERRORCURVE_H */

@@ -29,16 +29,16 @@
 
 #include "SelectionMoveResizer.h"
 
-#include <QPainter>
 #include <QMouseEvent>
+#include <QPainter>
 
-#include <qwt_scale_map.h>
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
+#include <qwt_scale_map.h>
 
-#include "LegendWidget.h"
 #include "ArrowMarker.h"
 #include "ImageMarker.h"
+#include "LegendWidget.h"
 
 SelectionMoveResizer::SelectionMoveResizer(LegendWidget *target)
     : QWidget(target->parentWidget()) {

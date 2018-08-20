@@ -1,17 +1,17 @@
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
-#include "MantidCurveFitting/FortranDefs.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <cmath>
 #include <boost/algorithm/string/predicate.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -73,7 +73,7 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
     out[j] /= 3.;
   }
 }
-}
+} // namespace
 
 CrystalFieldMagnetisationBase::CrystalFieldMagnetisationBase()
     : API::IFunction1D(), m_nre(0) {

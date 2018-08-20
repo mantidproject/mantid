@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
 #define MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAlgorithms/RebinByTimeBase.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

@@ -5,10 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include <vector>
-#include <functional>
 #include <cmath>
 #include <complex>
+#include <functional>
+#include <vector>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -43,8 +43,8 @@ namespace CurveFitting {
 namespace SpecialFunctionSupport {
 /// Compute exp(z)*E1(z) where z is complex and E1(z) is the Exponential
 /// Integral
-std::complex<double> DLLExport
-exponentialIntegral(const std::complex<double> &z);
+std::complex<double>
+    DLLExport exponentialIntegral(const std::complex<double> &z);
 
 } // namespace SpecialFunctionSupport
 } // namespace CurveFitting

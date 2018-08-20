@@ -62,6 +62,6 @@ private:
   Kernel::DblMatrix U;
   Kernel::DblMatrix UB;
 };
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 #endif /* MANTID_GEOMETRY_UNITCELL_H_ */
