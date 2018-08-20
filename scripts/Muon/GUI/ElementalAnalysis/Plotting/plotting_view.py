@@ -5,6 +5,8 @@ from collections import OrderedDict
 
 from qtpy import QtWidgets
 
+from six import iteritems
+
 from collections import OrderedDict
 
 from matplotlib.figure import Figure
