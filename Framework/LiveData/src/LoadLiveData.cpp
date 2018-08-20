@@ -36,19 +36,23 @@ namespace {
  */
 void copyInstrument(const API::Workspace *source, API::Workspace *target) {
 
-  // Special handling for Worspace Groups.
-  auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
-  auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+  if (!source || !target)
+    return;
 
-  if (sourceGroup && targetGroup) {
-    for (size_t index = 0;
-         index < std::min(sourceGroup->size(), targetGroup->size()); ++index) {
+  // Special handling for Worspace Groups.
+  if (source->isGroup() && target->isGroup()) {
+    auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
+    auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+    auto minSize = std::min(sourceGroup->size(), targetGroup->size());
+    for (size_t index = 0; index < minSize; ++index) {
       copyInstrument(sourceGroup->getItem(index).get(),
                      targetGroup->getItem(index).get());
     }
-  } else if (sourceGroup) {
+  } else if (source->isGroup()) {
+    auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
     copyInstrument(sourceGroup->getItem(0).get(), target);
-  } else if (targetGroup) {
+  } else if (target->isGroup()) {
+    auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
     copyInstrument(source, targetGroup->getItem(0).get());
   } else {
     if (auto *sourceExpInfo =
