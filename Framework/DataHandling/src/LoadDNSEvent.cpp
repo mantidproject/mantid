@@ -91,26 +91,24 @@ void LoadDNSEvent::init() {
 void LoadDNSEvent::exec() {
   const size_t DUMMY_SIZE = 42;
   EventWorkspace_sptr outputWS =  boost::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", 960*128, DUMMY_SIZE, DUMMY_SIZE));
+      WorkspaceFactory::Instance().create("EventWorkspace", 960*128+24, DUMMY_SIZE, DUMMY_SIZE));
+  outputWS->switchEventType(Mantid::API::EventType::TOF);
+  outputWS->getAxis(0)->setUnit("TOF");
 
   runLoadInstrument(INSTRUMENT_NAME, outputWS);
-  outputWS->instrumentParameters().getType<uint>("chopper", "channel");
 
-  g_log.notice() << "ChopperChannel: " << static_cast<uint>(getProperty("ChopperChannel")) << std::endl;
-  g_log.notice() << "MonitorChannel: " << static_cast<uint>(getProperty("MonitorChannel")) << std::endl;
   chopperChannel = static_cast<uint>(getProperty("ChopperChannel"));
   monitorChannel = static_cast<uint>(getProperty("MonitorChannel"));
   const auto chopperChannels = outputWS->instrumentParameters().getType<uint>("chopper", "channel");
   const auto monitorChannels = outputWS->instrumentParameters().getType<uint>("monitor", "channel");
-  chopperChannel = chopperChannel != 0 ? chopperChannel : chopperChannels.empty() ? 1 : chopperChannels.at(0);
-  monitorChannel = monitorChannel != 0 ? monitorChannel : monitorChannels.empty() ? 1 : monitorChannels.at(0);
+  chopperChannel = chopperChannel != 0 ? chopperChannel : (chopperChannels.empty() ? 99 : chopperChannels.at(0));
+  monitorChannel = monitorChannel != 0 ? monitorChannel : (monitorChannels.empty() ? 99 : monitorChannels.at(0));
+  g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
+  g_log.notice() << "MonitorChannel: " << monitorChannel << std::endl;
 
-  chopperPeriod = static_cast<uint>(getProperty("ChopperPeriod"));
+  chopperPeriod = static_cast<uint>(getProperty("ChopperPeriod")) * 10;
 
 
-  // The number of steps depends on the type of input file
-  // Set them to zero for the moment
-  Progress progress(this, 0.0, 1.0, 4);
 
   try {
     ByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big);
@@ -119,7 +117,6 @@ void LoadDNSEvent::exec() {
     auto elaapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file); });
     auto elaapsedTimeProcessing = measureMicroSecs::execution([&](){ populate_EventWorkspace(outputWS); });
 
-    progress.doReport();
 
     g_log.notice()
         << "elaapsedTime Parsing\t= " << elaapsedTimeParsing
@@ -128,7 +125,6 @@ void LoadDNSEvent::exec() {
         << std::endl;
 
 
-    progress.doReport();
   } catch (std::runtime_error e) {
     g_log.error(e.what());
   }
@@ -138,26 +134,60 @@ void LoadDNSEvent::exec() {
   //            << std::endl;
 
   setProperty("OutputWorkspace", outputWS);
+  g_log.notice() << std::endl;
 }
 
 void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
+  static const uint EVENTS_PER_PROGRESS = 100;
+  // The number of steps depends on the type of input file
+  Progress progress(this, 0.0, 1.0, _eventAccumulator.neutronEvents.size()/EVENTS_PER_PROGRESS);
+
   std::sort(_eventAccumulator.neutronEvents.begin(), _eventAccumulator.neutronEvents.end(), [](auto l, auto r){ return l.timestamp < r.timestamp; });
 
-  int64_t chopperTimestamp = 0;
-  for (const auto &event : _eventAccumulator.neutronEvents) {
-  //for (auto iter = _eventAccumulator.events.crbegin(); iter != _eventAccumulator.events.crend(); iter++) {
-  //  const auto &event = *iter;
 
-    //if ((event.timestamp - chopperTimestamp) > chopperPeriod) {
-    if (event.position == 0xFFFF && event.channel == 0xFFFF) {
+  uint64_t chopperTimestamp = 0;
+  uint64_t oversizedChanelIndexCounter = 0;
+  uint64_t oversizedPosCounter = 0;
+  uint64_t triggerCounter = 0;
+  uint64_t i = 0;
+  g_log.notice() << _eventAccumulator.neutronEvents.size() << std::endl;
+  for (const auto &event : _eventAccumulator.neutronEvents) {
+
+    i++;
+    if (i%EVENTS_PER_PROGRESS == 0) {
+      progress.report();
+      if (this->getCancel()) {
+        throw CancelException();
+      }
+    }
+
+    if ((((event.timestamp - chopperTimestamp) > chopperPeriod) && (chopperChannel == 99))
+    ||  (event.eventId == LoadDNSEvent::event_id_e::TRIGGER && chopperChannel != 99)) {
       chopperTimestamp = event.timestamp;
-    } else /*if (event.timestamp - chopperTimestamp != 0)*/ {
-      Mantid::DataObjects::EventList &eventList = eventWS->getSpectrum(0*event.channel * 960 + event.position);
-      eventList.switchTo(TOF);
-      eventList.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp)));
+      triggerCounter++;
+    } else {
+
+      if ((event.channel & 0b0000000000010000) != 0) {
+        oversizedChanelIndexCounter++;
+      }
+      if (event.position >= 960) {
+        oversizedPosCounter++;
+      }
+
+      const uint16_t channelIndex = ((event.channel & 0b1111111111100000) >> 1) | (event.channel & 0b0000000000001111);
+      const uint16_t position = std::min(uint16_t(959u), event.position);
+      const size_t wsIndex = channelIndex * 960 + position + 24;
+
+      Mantid::DataObjects::EventList &eventList = eventWS->getSpectrum(wsIndex);
+      eventList.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
     }
   }
+  g_log.notice() << "Bad chanel indices: " << oversizedChanelIndexCounter << std::endl;
+  g_log.notice() << "Bad position values: " << oversizedPosCounter << std::endl;
+  g_log.notice() << "Trigger Counter: " << triggerCounter << std::endl;
 }
+
+
 
 void LoadDNSEvent::runLoadInstrument(std::string instrumentName, EventWorkspace_sptr &eventWS) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");

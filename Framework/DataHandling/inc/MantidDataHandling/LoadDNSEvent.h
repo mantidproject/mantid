@@ -190,8 +190,6 @@ private:
         if (!(trigId == chopperChannel)) {
           return;
         }
-        event.channel = 0xFFFF;
-        event.position = 0xFFFF;
       } break;
       case event_id_e::NEUTRON: {
         dataChunk

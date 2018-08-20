@@ -132,7 +132,7 @@ public:
 
   template<std::size_t bitcount>
   inline DataChunk<bytecount, bitsLeft-bitcount> skipBits () const {
-    return {buffer << bitcount};
+    return { buffer << bitcount };
   }
 };
 
