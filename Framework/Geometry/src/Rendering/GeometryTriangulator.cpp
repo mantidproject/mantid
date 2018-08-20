@@ -1,8 +1,8 @@
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
-#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <climits>

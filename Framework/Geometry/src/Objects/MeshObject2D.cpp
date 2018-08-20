@@ -1,11 +1,11 @@
 #include "MantidGeometry/Objects/MeshObject2D.h"
-#include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Material.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include <numeric>
+#include "MantidKernel/Material.h"
+#include "MantidKernel/V3D.h"
 #include <boost/make_shared.hpp>
+#include <numeric>
 
 namespace Mantid {
 namespace Geometry {
@@ -66,26 +66,26 @@ validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
     throw std::invalid_argument("Vertices do not define a plane");
   return normal;
 }
-}
+} // namespace CoplanarChecks
 
 namespace {
 using Mantid::Kernel::V3D;
 
 /**
-* Find the solid angle of a triangle defined by vectors a,b,c from point
-*"observer"
-*
-* formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
-*
-* @param a :: first point of triangle
-* @param b :: second point of triangle
-* @param c :: third point of triangle
-* @param observer :: point from which solid angle is required
-* @return :: solid angle of triangle in Steradians.
-*
-* This duplicates code in CSGOjbect both need a place to be merged.
-* To aid this, this function has been defined as a non-member.
-*/
+ * Find the solid angle of a triangle defined by vectors a,b,c from point
+ *"observer"
+ *
+ * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+ *
+ * @param a :: first point of triangle
+ * @param b :: second point of triangle
+ * @param c :: third point of triangle
+ * @param observer :: point from which solid angle is required
+ * @return :: solid angle of triangle in Steradians.
+ *
+ * This duplicates code in CSGOjbect both need a place to be merged.
+ * To aid this, this function has been defined as a non-member.
+ */
 double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
                              const V3D &observer) {
   const V3D ao = a - observer;
@@ -105,7 +105,7 @@ double getTriangleSolidAngle(const V3D &a, const V3D &b, const V3D &c,
   else
     return 0.0; // not certain this is correct
 }
-}
+} // namespace
 
 const double MeshObject2D::MinThickness = 0.001;
 const std::string MeshObject2D::Id = "MeshObject2D";
@@ -235,10 +235,10 @@ bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
 }
 
 /**
-* Given a track, fill the track with valid section
-* @param ut :: Initial track
-* @return Number of segments added
-*/
+ * Given a track, fill the track with valid section
+ * @param ut :: Initial track
+ * @return Number of segments added
+ */
 int MeshObject2D::interceptSurface(Geometry::Track &ut) const {
 
   int originalCount = ut.count(); // Number of intersections original track
@@ -326,12 +326,12 @@ double MeshObject2D::volume() const {
 }
 
 /**
-* Returns an axis-aligned bounding box that will fit the shape
-*
-* This is not threadsafe
-*
-* @returns A reference to a bounding box for this shape.
-*/
+ * Returns an axis-aligned bounding box that will fit the shape
+ *
+ * This is not threadsafe
+ *
+ * @returns A reference to a bounding box for this shape.
+ */
 const BoundingBox &MeshObject2D::getBoundingBox() const {
 
   if (m_boundingBox.isNull()) {

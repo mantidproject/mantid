@@ -4,8 +4,8 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
-#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {

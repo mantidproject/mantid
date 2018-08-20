@@ -4,16 +4,15 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/WarningSuppressions.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cmath>
 
 using Mantid::Geometry::MeshObject2D;
@@ -55,7 +54,7 @@ public:
   MOCK_CONST_METHOD0(max, double());
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
-}
+} // namespace
 
 class MeshObject2DTest : public CxxTest::TestSuite {
 public:

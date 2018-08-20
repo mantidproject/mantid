@@ -26,5 +26,5 @@ std::string ParseErrors::ParsingErrorMessages(ParsingErrors pError) {
     return "Parsing Completed";
   }
 }
-}
-}
+} // namespace NexusGeometry
+} // namespace Mantid

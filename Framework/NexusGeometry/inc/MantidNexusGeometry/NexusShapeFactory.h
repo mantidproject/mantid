@@ -5,8 +5,8 @@
 
 #include "Eigen/Core"
 #include "Eigen/Geometry"
-#include <memory>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -63,7 +63,7 @@ DLLExport std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                   const std::vector<uint16_t> &windingOrder,
                   const std::vector<Eigen::Vector3d> &nexusVertices);
-}
-}
-}
+} // namespace NexusShapeFactory
+} // namespace NexusGeometry
+} // namespace Mantid
 #endif // MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H

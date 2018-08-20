@@ -14,7 +14,7 @@ namespace Geometry {
 class Instrument;
 class IComponent;
 class ICompAssembly;
-}
+} // namespace Geometry
 namespace NexusGeometry {
 
 /** InstrumentBuilder : Builder for wrapping the creating of a Mantid
@@ -94,6 +94,6 @@ private:
   /// completed
   mutable bool m_finalized = false;
 };
-}
-}
+} // namespace NexusGeometry
+} // namespace Mantid
 #endif // MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H

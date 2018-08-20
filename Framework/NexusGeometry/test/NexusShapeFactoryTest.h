@@ -2,12 +2,12 @@
 // Includes
 //----------------
 
-#include <cxxtest/TestSuite.h>
-#include "MantidNexusGeometry/NexusShapeFactory.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObject2D.h"
+#include "MantidKernel/V3D.h"
+#include "MantidNexusGeometry/NexusShapeFactory.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::NexusGeometry::NexusShapeFactory;
 using Mantid::Kernel::V3D;

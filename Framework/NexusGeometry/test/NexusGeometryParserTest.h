@@ -10,14 +10,14 @@
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include <string>
 #include <H5Cpp.h>
 #include <chrono>
+#include <string>
 
 using namespace Mantid;
 using namespace NexusGeometry;
@@ -35,7 +35,7 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
   auto beamline = instrument.makeBeamline(pmap);
   return {std::move(std::get<0>(beamline)), std::move(std::get<1>(beamline))};
 }
-}
+} // namespace
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
@@ -56,16 +56,18 @@ public:
     TSM_ASSERT_EQUALS("Detectors + 2 banks + root + source + sample",
                       componentInfo->size(), detectorInfo->size() + 5);
     // Check 128 detectors in first bank
-    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(
-                                             componentInfo->root() - 3).size());
+    TS_ASSERT_EQUALS(
+        128,
+        componentInfo->detectorsInSubtree(componentInfo->root() - 3).size());
     TS_ASSERT_EQUALS("rear-detector",
                      componentInfo->name(componentInfo->root() - 3));
     TS_ASSERT(Mantid::Kernel::toVector3d(
                   componentInfo->position(componentInfo->root() - 3))
                   .isApprox(Eigen::Vector3d{0, 0, 4}));
     // Check 128 detectors in second bank
-    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(
-                                             componentInfo->root() - 4).size());
+    TS_ASSERT_EQUALS(
+        128,
+        componentInfo->detectorsInSubtree(componentInfo->root() - 4).size());
   }
 
   void test_source_is_where_expected() {
@@ -206,8 +208,10 @@ public:
         NexusGeometryParser::createInstrument(m_wishHDF5DefinitionPath);
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating WISH instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     stop - start).count() << " ms" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
+                                                                       start)
+                     .count()
+              << " ms" << std::endl;
     auto detInfo = extractDetectorInfo(*wishInstrument);
     TS_ASSERT_EQUALS(detInfo->size(), 778245); // Sanity check
   }
@@ -218,8 +222,10 @@ public:
         NexusGeometryParser::createInstrument(m_sans2dHDF5DefinitionPath);
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating SANS2D instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     stop - start).count() << " ms" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
+                                                                       start)
+                     .count()
+              << " ms" << std::endl;
     auto detInfo = extractDetectorInfo(*sansInstrument);
     TS_ASSERT_EQUALS(detInfo->size(), 122888); // Sanity check
   }
@@ -230,8 +236,10 @@ public:
         NexusGeometryParser::createInstrument(m_lokiHDF5DefinitionPath);
     auto stop = std::chrono::high_resolution_clock::now();
     std::cout << "Creating LOKI instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     stop - start).count() << " ms" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
+                                                                       start)
+                     .count()
+              << " ms" << std::endl;
 
     auto beamline = extractBeamline(*sansInstrument);
     auto componentInfo = std::move(std::get<0>(beamline));

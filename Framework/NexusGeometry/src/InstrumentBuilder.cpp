@@ -24,7 +24,7 @@ public:
   Transaction(const Transaction &) = delete;
   Transaction &operator=(const Transaction &) = delete;
 };
-}
+} // namespace
 
 /// Constructor
 InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
@@ -197,5 +197,5 @@ InstrumentBuilder::createInstrument() const {
   sortDetectors();
   return std::unique_ptr<const Geometry::Instrument>(std::move(m_instrument));
 }
-}
-}
+} // namespace NexusGeometry
+} // namespace Mantid

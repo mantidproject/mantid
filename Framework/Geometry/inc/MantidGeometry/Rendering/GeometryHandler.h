@@ -2,6 +2,7 @@
 #define GEOMETRYHANDLER_H
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Rendering/RenderingMesh.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
@@ -9,7 +10,6 @@
 #include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
-#include "MantidGeometry/Rendering/RenderingMesh.h"
 
 namespace Mantid {
 
@@ -50,7 +50,7 @@ makeRenderingMesh(const Adaptee &adaptee) {
   };
   return Kernel::make_unique<Adapter>(adaptee);
 }
-}
+} // namespace detail
 
 /**
 \class GeometryHandler

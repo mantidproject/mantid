@@ -2,12 +2,12 @@
 #define MANTID_GEOMETRY_MESHOBJECT2D_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include <vector>
+#include "MantidKernel/Material.h"
+#include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Mantid {
 

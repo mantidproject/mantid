@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -1074,8 +1074,10 @@ public:
     TS_ASSERT_EQUALS(extractDetectorInfo(*wishInstrument)->size(),
                      778245); // Sanity check
     std::cout << "Creating WISH instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     stop - start).count() << " ms" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
+                                                                       start)
+                     .count()
+              << " ms" << std::endl;
   }
 
   void test_load_sans2d() {
@@ -1089,8 +1091,10 @@ public:
     TS_ASSERT_EQUALS(extractDetectorInfo(*sansInstrument)->size(),
                      122888); // Sanity check
     std::cout << "Creating SANS2D instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     stop - start).count() << " ms" << std::endl;
+              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
+                                                                       start)
+                     .count()
+              << " ms" << std::endl;
   }
 
 private:
