@@ -161,7 +161,7 @@ void MDNormDirectSC::exec() {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                     "Not applying normalization.");
     }
-    //if more than one experiment info, keep accumulating
+    // if more than one experiment info, keep accumulating
     m_accumulate = true;
   }
 
