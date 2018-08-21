@@ -387,6 +387,7 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
 
   BoundingBox absoluteBB;
   const auto compFlag = componentType(componentIndex);
+  const auto parentFlag = componentType(parent(componentIndex));
   if (hasSource() && componentIndex == source()) {
     // Do nothing. Source is not considered part of the beamline for bounding
     // box calculations.
@@ -394,8 +395,13 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
     for (const auto &childIndex : this->children(componentIndex)) {
       absoluteBB.grow(boundingBox(childIndex, reference));
     }
+  } else if (compFlag == Beamline::ComponentType::Grid) {
+    for (const auto &childIndex : this->children(componentIndex)) {
+      growBoundingBoxAsRectuangularBank(childIndex, reference, absoluteBB);
+    }
   } else if (compFlag == Beamline::ComponentType::Rectangular ||
-             compFlag == Beamline::ComponentType::Structured) {
+             compFlag == Beamline::ComponentType::Structured ||
+             parentFlag == Beamline::ComponentType::Grid) {
     growBoundingBoxAsRectuangularBank(componentIndex, reference, absoluteBB);
   } else if (compFlag == Beamline::ComponentType::OutlineComposite) {
     growBoundingBoxAsOutline(componentIndex, reference, absoluteBB);

@@ -226,13 +226,14 @@ void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
   textures[1].resize(res.first * res.second * 3, 0);
 
   // make front and back faces which lie along the z (layer) axis
-  createTexture(m_compInfo, m_compInfo.children(layers[0]), colors, textures[0],
-                res.first, res.second);
-  createTexture(m_compInfo, m_compInfo.children(layers[1]), colors, textures[1],
-                res.first, res.second);
+  createTexture(m_compInfo, m_compInfo.children(layers.back()), colors,
+                textures[0], res.first, res.second);
+  createTexture(m_compInfo, m_compInfo.children(layers.front()), colors,
+                textures[1], res.first, res.second);
 
+  auto nZ = layers.size();
   // Left face
-  res = BankRenderingHelpers::getCorrectedTextureSize(layers.size(), bank.nY);
+  res = BankRenderingHelpers::getCorrectedTextureSize(nZ, bank.nY);
   m_textSizes[2] = res;
   m_textSizes[3] = res;
   textures[2].resize(res.first * res.second * 3, 0);
@@ -240,14 +241,13 @@ void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
   textures[3].resize(res.first * res.second * 3, 0);
 
   // Top face
-  res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, layers.size());
+  res = BankRenderingHelpers::getCorrectedTextureSize(bank.nX, nZ);
   m_textSizes[4] = res;
   m_textSizes[5] = res;
   textures[4].resize(res.first * res.second * 3, 0);
   // Right Face
   textures[5].resize(res.first * res.second * 3, 0);
 
-  auto nZ = layers.size();
   auto li = nZ - 1;
   for (auto layerIndex : layers) {
     auto bank = m_compInfo.quadrilateralComponent(layerIndex);
@@ -331,8 +331,7 @@ void BankTextureBuilder::uploadGridBankTexture(bool picking,
     auto &textures = picking ? m_detPickTextures : m_detColorTextures;
     auto &textureIDs = picking ? m_pickTextureIDs : m_colorTextureIDs;
 
-    upload2DTexture(m_textSizes[m_layer], textureIDs[m_layer],
-                    textures[m_layer]);
+    upload2DTexture(m_textSizes[0], textureIDs[0], textures[0]);
     return;
   }
 

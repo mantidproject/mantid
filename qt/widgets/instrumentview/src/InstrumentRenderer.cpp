@@ -180,7 +180,6 @@ void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {
   tex.uploadTextures(picking, detail::GridTextureFace::Bottom);
   BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
                                            detail::GridTextureFace::Bottom);
-
   tex.unbindTextures();
   glPopMatrix();
 }
