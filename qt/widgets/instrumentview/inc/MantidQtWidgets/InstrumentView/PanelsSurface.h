@@ -70,8 +70,7 @@ protected:
   void setupAxes();
   // Add a flat bank
   void addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal,
-                              const std::vector<size_t> &detectors,
-                              size_t bankIndex);
+                              const std::vector<size_t> &detectors);
   void constructFromComponentInfo();
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos,
                                         Mantid::Kernel::V3D normal) const;

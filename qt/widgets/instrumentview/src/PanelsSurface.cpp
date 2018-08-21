@@ -229,7 +229,6 @@ void PanelsSurface::setupAxes() {
 
 /**
  * Add a flat bank from an assembly of detectors.
- * @param bankId :: Component ID of the bank.
  * @param normal :: Normal vector to the bank's plane.
  * @param detectors :: List of detectorIndices.
  */
@@ -452,7 +451,7 @@ void PanelsSurface::constructFromComponentInfo() {
         Mantid::Kernel::V3D normal;
         std::tie(detectors, normal) = res.get();
         if (detectors.size() > 1)
-          addFlatBankOfDetectors(normal, detectors, i);
+          addFlatBankOfDetectors(normal, detectors);
       }
     } else if (children.size() > 0 &&
                componentInfo.parent(children[0]) == componentInfo.root()) {
