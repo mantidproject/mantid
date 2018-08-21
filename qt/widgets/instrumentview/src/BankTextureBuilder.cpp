@@ -246,7 +246,8 @@ void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
   textures[5].resize(res.first * res.second * 3, 0);
 
   auto li = nZ - 1;
-  for (auto layerIndex : layers) {
+  for (auto it = layers.rbegin(); it != layers.rend(); ++it) {
+    auto layerIndex = (*it);
     auto bank = m_compInfo.quadrilateralComponent(layerIndex);
     const auto &children = m_compInfo.children(layerIndex);
     addColorsToLeftAndRightTextures(m_compInfo, bank, nZ, li, children, colors,
