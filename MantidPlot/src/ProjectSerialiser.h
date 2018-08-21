@@ -125,6 +125,10 @@ private:
   QString saveWorkspaces();
   /// Save additional windows
   QString saveAdditionalWindows();
+  /// Save Python interfaces
+  QString savePythonInterfaces();
+  /// Save Python interfaces
+  QString savePythonInterface(const QString &launcherModuleName);
 
   // Loading Functions
 

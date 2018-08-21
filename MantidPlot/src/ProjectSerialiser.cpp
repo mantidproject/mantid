@@ -4,6 +4,7 @@
 #include "Graph3D.h"
 #include "Matrix.h"
 #include "Note.h"
+#include "PythonScripting.h"
 #include "ScriptingWindow.h"
 #include "TableStatistics.h"
 #include "WindowFactory.h"
@@ -18,6 +19,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
@@ -50,12 +52,72 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
   return foundWsNames;
 }
 
+/**
+ * @brief Call a named attribute on a named Python module
+ * @param moduleName The name of the module
+ * @param attrName The name of the attribute
+ * @param arg A single argument for the function call (can be nullptr)
+ * @return A new reference PyObject that results from the call
+ * @throws std::runtime_error if any Python operation fails
+ */
+PyObject *callPythonModuleAttr(QString moduleName, const char *attrName,
+                               PyObject *arg) {
+  auto throwIfPythonError = [](auto result) {
+    if (!PyErr_Occurred())
+      return result;
+    PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
+    PyErr_Fetch(&exception, &value, &traceback);
+    PyErr_Clear();
+    auto msg = PyObject_Str(value);
+    auto msgAsCstr = PyString_AsString(msg);
+    Py_DecRef(msg);
+    Py_XDECREF(traceback);
+    Py_XDECREF(value);
+    Py_XDECREF(exception);
+    throw std::runtime_error(
+        std::string(msgAsCstr) + " at line " +
+        std::to_string(
+            reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno));
+  };
+
+  PyObject *launcher(nullptr), *moduleAttr(nullptr), *callResult(nullptr);
+  try {
+    launcher = throwIfPythonError(PyImport_ImportModule(
+        const_cast<char *>(moduleName.toLatin1().data())));
+    moduleAttr = throwIfPythonError(
+        PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
+    callResult = throwIfPythonError(PyObject_CallObject(moduleAttr, arg));
+    Py_DECREF(callResult);
+    Py_DECREF(moduleAttr);
+    Py_DECREF(launcher);
+    return callResult;
+  } catch (std::runtime_error &) {
+    Py_DECREF(callResult);
+    Py_DECREF(moduleAttr);
+    Py_DECREF(launcher);
+    throw;
+  }
+}
+
 /// static logger
 Logger g_log("ProjectSerialiser");
 
 /// Keys for parsed workspace names
 const std::string ALL_WS = "";
 const std::string ALL_GROUP_NAMES = "__all_groups";
+
+/// Section names
+constexpr auto PY_INTERFACE_SECTION = "pythoninterface";
+// A list of python interfaces to be saved. This should be the name
+// of the launcher script containing the def main() function.
+// WARNING: The module here should be importable without any side effects, i.e.
+// it should finish with
+//
+// if __name__ == '__main__':
+//     main()
+//
+// and any work to start the interface be done in main().
+QStringList SAVED_PY_INTERFACES;
 
 } // namespace
 
@@ -434,6 +496,7 @@ QString ProjectSerialiser::serialiseProjectState(Folder *folder) {
   }
 
   text += saveAdditionalWindows();
+  text += savePythonInterfaces();
 
   // Finally, recursively save folders
   if (folder) {
@@ -633,6 +696,61 @@ QString ProjectSerialiser::saveAdditionalWindows() {
   }
 
   return output;
+}
+
+/**
+ * @brief Save the current state of all of the active Python interfaces
+ * to the project
+ * @return A string representing the state
+ */
+QString ProjectSerialiser::savePythonInterfaces() {
+  QString pythonInterfacesState;
+  for (const auto &interfaceLauncher : SAVED_PY_INTERFACES) {
+    try {
+      pythonInterfacesState += savePythonInterface(interfaceLauncher);
+    } catch (std::runtime_error &exc) {
+      g_log.warning() << "Error saving " << interfaceLauncher.toLatin1().data()
+                      << ": " << exc.what() << "\n";
+    }
+  }
+  return pythonInterfacesState;
+}
+
+/**
+ * @brief Save the current state of the Python interface. This calls the
+ * interface to have it return its state as a string and wraps the string
+ * with the metadata:
+ * <pythoninterface>
+ * InterfaceLauncherModuleName
+ * ... # state from interface
+ * </pythoninterface>
+ * @param launcherModuleName The name of the module responsible for launching
+ * the window. The string should not be empty
+ * @return A string representing the state
+ */
+QString
+ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
+  assert(!launcherModuleName.isEmpty());
+  ScopedGIL<PythonGIL> gil;
+  auto state =
+      callPythonModuleAttr(launcherModuleName, "saveToProject", nullptr);
+  if (!PyString_Check(state)) {
+    Py_XDECREF(state);
+    throw std::runtime_error("saveToProject() did not return a string.");
+  }
+  QString serialised;
+  serialised.append("<")
+      .append(PY_INTERFACE_SECTION)
+      .append(">\n")
+      .append(launcherModuleName)
+      .append("\n")
+      .append(PyString_AsString(state))
+      .append("\n")
+      .append("</")
+      .append(PY_INTERFACE_SECTION)
+      .append(">\n");
+  Py_DECREF(state);
+  return serialised;
 }
 
 /**
