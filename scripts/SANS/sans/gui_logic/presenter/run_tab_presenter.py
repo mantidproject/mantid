@@ -121,6 +121,7 @@ class RunTabPresenter(object):
 
         # File information for the first input
         self._file_information = None
+        self._clipboard = []
 
         # Settings diagnostic tab presenter
         self._settings_diagnostic_tab_presenter = SettingsDiagnosticPresenter(self)
@@ -435,11 +436,12 @@ class RunTabPresenter(object):
         self.on_rows_removed(rows)
 
     def on_paste_rows_requested(self):
-        selected_rows = self._view.get_selected_rows()
-        selected_rows = selected_rows if selected_rows else [self._table_model.get_number_of_rows()]
-        replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
-        self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
-        self.update_view_from_table_model()
+        if self._clipboard:
+            selected_rows = self._view.get_selected_rows()
+            selected_rows = selected_rows if selected_rows else [self._table_model.get_number_of_rows()]
+            replacement_table_index_models = [TableIndexModel(*x) for x in self._clipboard]
+            self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
+            self.update_view_from_table_model()
 
     def on_manage_directories(self):
         self._view.show_directory_manager()
