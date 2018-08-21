@@ -54,7 +54,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
                         # Only care about the line if it has a comment
                         have_comment = any(x[0] == tokenize.COMMENT for x in line)
                         if have_comment:
-                            # line[-1][1][1:] is the comment string, with the preceeding hash stripped off; 
+                            # line[-1][1][1:] is the comment string, with the preceeding hash stripped off;
                             # line[0][4] is the command and the comment
                             all_lines.append((line[-1][4], line[-1][1][1:]))
                         line = []
