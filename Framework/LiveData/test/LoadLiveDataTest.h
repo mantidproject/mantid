@@ -214,7 +214,6 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
-    TS_ASSERT(ws->monitorWorkspace());
   }
 
   //--------------------------------------------------------------------------------------------
