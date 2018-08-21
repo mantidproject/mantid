@@ -1,3 +1,4 @@
+<<<<<<< 849aea4b1c8c90117a4aa34bc0a2ec41c2080560
 import unittest
 
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
@@ -69,3 +70,16 @@ class AxisChangerViewTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+||||||| merged common ancestors
+=======
+import unittest
+
+
+class AxisChangerViewTest(unittest.TestCase):
+    def setUp(self):
+        pass
+
+
+if __name__ == "__main__":
+    unittest.main()
+>>>>>>> refs #23260 add axis_changer_presenter tests
