@@ -11,4 +11,10 @@ UI & Usability Changes
 
 - Added time standard deviation to the sample log dialog
 
+Project Recovery
+----------------
+Bugfixes
+########
+- Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
+
 :ref:`Release 3.14.0 <v3.14.0>`
