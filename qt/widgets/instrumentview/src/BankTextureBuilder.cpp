@@ -173,14 +173,17 @@ void BankTextureBuilder::buildOpenGLTextures(bool picking,
 
 /** Uploads openGL textures for rendering. This method results in openGL calls.
 @param picking flag which determines whether pick colors are rendered.
+@param gridFace flag which determines which grid face to be rendered. Ignored if
+using layers or not a grid detector.
 */
-void BankTextureBuilder::uploadTextures(bool picking) {
+void BankTextureBuilder::uploadTextures(bool picking,
+                                        GridTextureFace gridFace) {
   switch (m_bankType) {
   case ComponentType::OutlineComposite:
     uploadTubeBankTextures(picking);
     break;
   case ComponentType::Grid:
-    uploadGridBankTextures(picking);
+    uploadGridBankTexture(picking, gridFace);
     break;
   case ComponentType::Rectangular:
     uploadRectangularBankTextures(picking);
@@ -322,21 +325,24 @@ void BankTextureBuilder::uploadTubeBankTextures(bool picking) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-void BankTextureBuilder::uploadGridBankTextures(bool picking) {
-  auto &textures = picking ? m_detPickTextures : m_detColorTextures;
-  auto &textureIDs = picking ? m_pickTextureIDs : m_colorTextureIDs;
+void BankTextureBuilder::uploadGridBankTexture(bool picking,
+                                               GridTextureFace gridBankFace) {
+  if (m_isUsingLayers) {
+    auto &textures = picking ? m_detPickTextures : m_detColorTextures;
+    auto &textureIDs = picking ? m_pickTextureIDs : m_colorTextureIDs;
 
-  if (m_isUsingLayers)
     upload2DTexture(m_textSizes[m_layer], textureIDs[m_layer],
                     textures[m_layer]);
-  else {
-    for (size_t i = 0; i < textures.size(); ++i) {
-      auto &texture = textures[i];
-      auto &textureID = textureIDs[i];
-
-      upload2DTexture(m_textSizes[i], textureID, texture);
-    }
+    return;
   }
+
+  auto textureIndex = static_cast<size_t>(gridBankFace);
+  auto &texture = picking ? m_detPickTextures[textureIndex]
+                          : m_detColorTextures[textureIndex];
+  auto &textureID = picking ? m_pickTextureIDs[textureIndex]
+                            : m_colorTextureIDs[textureIndex];
+
+  upload2DTexture(m_textSizes[textureIndex], textureID, texture);
 }
 
 void BankTextureBuilder::uploadRectangularBankTextures(bool picking) {

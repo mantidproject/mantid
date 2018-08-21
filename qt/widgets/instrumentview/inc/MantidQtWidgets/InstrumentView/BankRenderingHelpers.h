@@ -2,6 +2,7 @@
 #define BANKRENDERINGHELPERS_H
 #include "DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/GridTextureFace.h"
 #include <vector>
 
 namespace Mantid {
@@ -22,8 +23,12 @@ selected layer Makes OpenGL calls for drawing the bank in an OpenGL window as
 textures. NB glBegin() and glEnd() are called within this function.
 */
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
-renderGridBank(const Mantid::Geometry::ComponentInfo &compInfo, size_t index,
-               bool allLayers = true, size_t layer = 0);
+renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
+                    size_t index, size_t layer);
+
+EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
+renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
+                   size_t index, detail::GridTextureFace gridFace);
 
 /** Render RectangularDetector Bank as bitmap texture
 Makes OpenGL calls for drawing the bank in an OpenGL window. NB glBegin() and
@@ -40,7 +45,7 @@ glEnd() are called within this function.
 EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW void
 renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
                      size_t index, const std::vector<GLColor> &color);
-} // namespace RenderingHelpers
+} // namespace BankRenderingHelpers
 } // namespace MantidWidgets
 } // namespace MantidQt
 

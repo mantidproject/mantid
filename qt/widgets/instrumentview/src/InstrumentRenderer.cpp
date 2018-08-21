@@ -140,7 +140,50 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
   }
 }
 
-void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {}
+void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {
+  const auto &compInfo = m_actor.componentInfo();
+  glPushMatrix();
+
+  auto firstLayer = compInfo.children(bankIndex)[0];
+  auto bank = compInfo.quadrilateralComponent(firstLayer);
+  auto pos = compInfo.position(bank.bottomLeft);
+
+  auto scale = compInfo.scaleFactor(bankIndex);
+  glTranslated(pos.X(), pos.Y(), pos.Z());
+  glScaled(scale[0], scale[1], scale[2]);
+
+  auto rot = compInfo.rotation(bankIndex);
+  if (!(rot.isNull())) {
+    double deg, ax0, ax1, ax2;
+    rot.getAngleAxis(deg, ax0, ax1, ax2);
+    glRotated(deg, ax0, ax1, ax2);
+  }
+
+  auto ti = m_reverseTextureIndexMap[bankIndex];
+  auto &tex = m_textures[ti];
+  tex.bindTextures(picking);
+  tex.uploadTextures(picking, detail::GridTextureFace::Front);
+  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                           detail::GridTextureFace::Front);
+  tex.uploadTextures(picking, detail::GridTextureFace::Back);
+  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                           detail::GridTextureFace::Back);
+  tex.uploadTextures(picking, detail::GridTextureFace::Left);
+  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                           detail::GridTextureFace::Left);
+  tex.uploadTextures(picking, detail::GridTextureFace::Right);
+  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                           detail::GridTextureFace::Right);
+  tex.uploadTextures(picking, detail::GridTextureFace::Top);
+  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                           detail::GridTextureFace::Top);
+  tex.uploadTextures(picking, detail::GridTextureFace::Bottom);
+  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                           detail::GridTextureFace::Bottom);
+
+  tex.unbindTextures();
+  glPopMatrix();
+}
 
 void InstrumentRenderer::drawRectangularBank(size_t bankIndex, bool picking) {
   const auto &compInfo = m_actor.componentInfo();

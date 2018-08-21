@@ -74,6 +74,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/InstrumentView/DllOption.h
 	inc/MantidQtWidgets/InstrumentView/GLColor.h
 	inc/MantidQtWidgets/InstrumentView/GLObject.h
+	inc/MantidQtWidgets/InstrumentView/GridTextureFace.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
 	inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h

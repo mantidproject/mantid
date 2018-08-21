@@ -3,6 +3,7 @@
 
 #include "GLColor.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MantidQtWidgets/InstrumentView/GridTextureFace.h"
 #include <MantidBeamline/ComponentType.h>
 #include <utility>
 #include <vector>
@@ -25,7 +26,8 @@ public:
                           bool isUsingLayer = false, size_t layer = 0);
   void buildPickTextures(const std::vector<GLColor> &colors,
                          bool isUsingLayer = false, size_t layer = 0);
-  void uploadTextures(bool picking);
+  void uploadTextures(bool picking,
+                      GridTextureFace gridFace = GridTextureFace::Front);
   size_t numTextures() const;
   void bindTextures(bool picking);
   void unbindTextures();
@@ -42,7 +44,7 @@ private:
   void buildRectangularBankTextures(const std::vector<GLColor> &colors,
                                     bool picking);
   void uploadTubeBankTextures(bool picking);
-  void uploadGridBankTextures(bool picking);
+  void uploadGridBankTexture(bool picking, GridTextureFace gridFace);
   void uploadRectangularBankTextures(bool picking);
 
 private:
