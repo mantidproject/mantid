@@ -37,10 +37,10 @@ class LoadGudrunOutput(PythonAlgorithm):
         """
         with open(input_file, 'r') as gudrun_file:
             data_line_start = 0
-            while gudrun_file.next().startswith('#'):
+            while gudrun_file.readline().startswith('#'):
                 # skip over lines that are commented
                 data_line_start += 1
-            row = self.format_data_row(gudrun_file.next().split(" "))
+            row = self.format_data_row(gudrun_file.readline().split(" "))
             return len(row), data_line_start
 
     def load_gudrun_file(self, input_file, output_workspace, number_of_columns, first_data_line):
