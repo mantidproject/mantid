@@ -323,6 +323,8 @@ class RunTabPresenter(object):
             self._view.add_row(row_entry)
             if row.isMultiPeriod():
                 self._view.show_period_columns()
+        self._view.remove_rows([0])
+        self._view.clear_selection()
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
