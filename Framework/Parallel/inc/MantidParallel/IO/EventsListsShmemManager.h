@@ -47,6 +47,16 @@ namespace Parallel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+using SegmentManager = ip::managed_shared_memory::segment_manager;
+using VoidAllocator = ip::allocator<void, SegmentManager>;
+using TofEventAllocator = ip::allocator<Types::Event::TofEvent, SegmentManager>;
+using EventList = ip::vector<Types::Event::TofEvent, TofEventAllocator>;
+using EventListAllocator = ip::allocator<EventList, SegmentManager>;
+using EventLists = ip::vector<EventList, EventListAllocator>;
+using EventListsAllocator = ip::allocator<EventLists, SegmentManager>;
+using Chunks = ip::vector<EventLists, EventListsAllocator>;
+
 class MANTID_PARALLEL_DLL EventsListsShmemManager {
 public:
   // Constructor for client usage: "sets" Manager to the piece of shared memory
@@ -56,27 +66,25 @@ public:
 
   virtual ~EventsListsShmemManager();
 
-  void AppendEvent(std::size_t listN,
+  void AppendEvent(std::size_t chunkN, std::size_t listN,
                    const Types::Event::TofEvent &event);
 
-  MANTID_PARALLEL_DLL friend std::ostream &operator<<(std::ostream &os,
-                                                      const EventsListsShmemManager &manager);
+  static void appendEventsRandomly(std::size_t nE, unsigned nP,
+                                   unsigned chunkId,
+                                   EventsListsShmemManager &mngr);
+  static void appendEventsDeterm(std::size_t nE, unsigned nP, unsigned chunkId,
+                                 EventsListsShmemManager &mngr);
 
+  MANTID_PARALLEL_DLL friend std::ostream &
+  operator<<(std::ostream &os, const EventsListsShmemManager &manager);
 
 protected:
-  using SegmentManager = ip::managed_shared_memory::segment_manager;
-  using VoidAllocator = ip::allocator<void, SegmentManager>;
-  using TofEventAllocator =
-      ip::allocator<Types::Event::TofEvent, SegmentManager>;
-  using EventList = ip::vector<Types::Event::TofEvent, TofEventAllocator>;
-  using EventListAllocator = ip::allocator<EventList, SegmentManager>;
-
-  using EventLists = ip::vector<EventList, EventListAllocator>;
-
   // Constructor for internal usage in  that just sets up the names, instance
   // for m_eventLists is defined later in derivated class constructor.
   EventsListsShmemManager(const std::string &segmentName,
                           const std::string &elName, int);
+
+  const VoidAllocator &alloc() const;
 
   /// The name of shared memory segment to save the list of event
   const std::string m_segmentName;
@@ -85,13 +93,13 @@ protected:
   std::shared_ptr<VoidAllocator> m_allocatorInstance;
 
   /// Event list shared storage name
-  const std::string m_eventListsName;
+  const std::string m_chunksName;
 
   /// Memory segment to store data
   std::shared_ptr<ip::managed_shared_memory> m_segment;
 
   /// Event list shared storage
-  EventLists *m_eventLists;
+  Chunks *m_chunks;
 };
 
 } // namespace Parallel

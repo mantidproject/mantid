@@ -1,9 +1,9 @@
 #ifndef MANTID_PARALLEL_EVENTSLISTSSHMEMSTORAGE_H_
 #define MANTID_PARALLEL_EVENTSLISTSSHMEMSTORAGE_H_
 
-#include <vector>
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/EventsListsShmemManager.h"
+#include <vector>
 
 namespace ip = boost::interprocess;
 
@@ -37,15 +37,21 @@ namespace Parallel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_PARALLEL_DLL EventsListsShmemStorage : public EventsListsShmemManager {
+class MANTID_PARALLEL_DLL EventsListsShmemStorage
+    : public EventsListsShmemManager {
 public:
-  EventsListsShmemStorage(const std::string& segmentName, const std::string& elName, size_t size);
+  EventsListsShmemStorage(const std::string &segmentName,
+                          const std::string &elName, size_t size,
+                          size_t chunksCnt, size_t pixelsCount,
+                          bool destroy = true);
   virtual ~EventsListsShmemStorage();
 
-  MANTID_PARALLEL_DLL friend std::ostream &operator<<(std::ostream &os,
-                                                      const EventsListsShmemStorage &storage);
-};
+  MANTID_PARALLEL_DLL friend std::ostream &
+  operator<<(std::ostream &os, const EventsListsShmemStorage &storage);
 
+private:
+  const bool destroyShared;
+};
 
 } // namespace Parallel
 } // namespace Mantid
