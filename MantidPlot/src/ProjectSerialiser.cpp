@@ -60,7 +60,7 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
  * @return A new reference PyObject that results from the call
  * @throws std::runtime_error if any Python operation fails
  */
-PyObject *callPythonModuleAttr(QString moduleName, const char *attrName,
+PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
                                PyObject *arg) {
   auto throwIfPythonError = [](auto result) {
     if (!PyErr_Occurred())
@@ -71,19 +71,19 @@ PyObject *callPythonModuleAttr(QString moduleName, const char *attrName,
     auto msg = PyObject_Str(value);
     auto msgAsCstr = PyString_AsString(msg);
     Py_DecRef(msg);
+    const auto lineno(
+        reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
     Py_XDECREF(traceback);
     Py_XDECREF(value);
     Py_XDECREF(exception);
-    throw std::runtime_error(
-        std::string(msgAsCstr) + " at line " +
-        std::to_string(
-            reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno));
+    throw std::runtime_error(std::string(msgAsCstr) + " at line " +
+                             std::to_string(lineno));
   };
 
   PyObject *launcher(nullptr), *moduleAttr(nullptr), *callResult(nullptr);
   try {
-    launcher = throwIfPythonError(PyImport_ImportModule(
-        const_cast<char *>(moduleName.toLatin1().data())));
+    launcher = throwIfPythonError(
+        PyImport_ImportModule(const_cast<char *>(moduleName)));
     moduleAttr = throwIfPythonError(
         PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
     callResult = throwIfPythonError(PyObject_CallObject(moduleAttr, arg));
@@ -106,8 +106,9 @@ Logger g_log("ProjectSerialiser");
 const std::string ALL_WS = "";
 const std::string ALL_GROUP_NAMES = "__all_groups";
 
-/// Section names
+// Name of the section tags
 constexpr auto PY_INTERFACE_SECTION = "pythoninterface";
+
 // A list of python interfaces to be saved. This should be the name
 // of the launcher script containing the def main() function.
 // WARNING: The module here should be importable without any side effects, i.e.
@@ -299,6 +300,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   loadLogData(tsv);
   loadScriptWindow(tsv, fileVersion);
   loadAdditionalWindows(lines, fileVersion);
+  loadPythonInterfaces(lines);
 
   // Deal with subfolders last.
   loadSubFolders(tsv, fileVersion);
@@ -710,7 +712,7 @@ QString ProjectSerialiser::savePythonInterfaces() {
       pythonInterfacesState += savePythonInterface(interfaceLauncher);
     } catch (std::runtime_error &exc) {
       g_log.warning() << "Error saving " << interfaceLauncher.toLatin1().data()
-                      << ": " << exc.what() << "\n";
+                      << " to project: " << exc.what() << "\n";
     }
   }
   return pythonInterfacesState;
@@ -732,8 +734,8 @@ QString
 ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
   assert(!launcherModuleName.isEmpty());
   ScopedGIL<PythonGIL> gil;
-  auto state =
-      callPythonModuleAttr(launcherModuleName, "saveToProject", nullptr);
+  auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(),
+                                    "saveToProject", nullptr);
   if (!PyString_Check(state)) {
     Py_XDECREF(state);
     throw std::runtime_error("saveToProject() did not return a string.");
@@ -1023,6 +1025,52 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     window->mantidUI->setVatesSubWindow(subWindow);
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
   }
+}
+
+/**
+ * @brief Load any Python interfaces saved in the project.
+ */
+void ProjectSerialiser::loadPythonInterfaces(const std::string &lines) {
+  TSVSerialiser parser(lines);
+  for (auto &section : parser.sections(PY_INTERFACE_SECTION)) {
+    // The first line of the section is the launcher module name.
+    const auto indexOfEOL = section.find_first_of("\n");
+    // drops EOL char
+    std::string launcherModuleName = section.substr(0, indexOfEOL);
+    section = section.substr(indexOfEOL + 1);
+    try {
+      loadPythonInterface(launcherModuleName, section);
+    } catch (std::runtime_error &exc) {
+      g_log.warning() << "Error loading Python interface " << launcherModuleName
+                      << " from project: " << exc.what() << "\n";
+    }
+  }
+}
+
+/**
+ * @brief Load a single Python interface
+ * @param launcherModuleName The name of the module containing the interface
+ * entry point
+ * @param pySection The serialised state from the project file
+ * @throws std::runtime_error if loading fails for some reason
+ */
+void ProjectSerialiser::loadPythonInterface(
+    const std::string &launcherModuleName, const std::string &pySection) {
+  // sanity check that this an interface we know how to save
+  if (!SAVED_PY_INTERFACES.contains(
+          QString::fromStdString(launcherModuleName))) {
+    throw std::runtime_error("Interface not whitelisted as saveable.");
+  }
+
+  ScopedGIL<PythonGIL> gil;
+  PyObject *fnArg = Py_BuildValue("(s)", pySection.c_str());
+  try {
+    callPythonModuleAttr(launcherModuleName.c_str(), "loadFromProject", fnArg);
+  } catch (std::runtime_error &) {
+    Py_DECREF(fnArg);
+    throw;
+  }
+  Py_DECREF(fnArg);
 }
 
 /**

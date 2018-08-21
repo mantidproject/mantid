@@ -155,6 +155,11 @@ private:
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
   void loadAdditionalWindows(const std::string &lines, const int fileVersion);
+  /// Load any PythonInterfaces in the project
+  void loadPythonInterfaces(const std::string &lines);
+  /// Load a single Python interface
+  void loadPythonInterface(const std::string &launcherModuleName,
+                           const std::string &pySection);
 
   // Misc functions
 
