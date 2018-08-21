@@ -223,6 +223,7 @@ void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
   textures[1].resize(res.first * res.second * 3, 0);
 
   // make front and back faces which lie along the z (layer) axis
+  // NB. last texture in the layer is the front face
   createTexture(m_compInfo, m_compInfo.children(layers.back()), colors,
                 textures[0], res.first, res.second);
   createTexture(m_compInfo, m_compInfo.children(layers.front()), colors,
