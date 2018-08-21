@@ -223,6 +223,9 @@ QGroupBox::title {
              <layout class="QHBoxLayout" name="horizontalLayout_11">
               <item>
                <widget class="QToolButton" name="insert_row_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert row&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -236,6 +239,9 @@ QGroupBox::title {
               </item>
               <item>
                <widget class="QToolButton" name="delete_row_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -256,6 +262,9 @@ QGroupBox::title {
               </item>
               <item>
                <widget class="QToolButton" name="copy_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -269,6 +278,9 @@ QGroupBox::title {
               </item>
               <item>
                <widget class="QToolButton" name="cut_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -282,6 +294,9 @@ QGroupBox::title {
               </item>
               <item>
                <widget class="QToolButton" name="paste_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
@@ -295,6 +310,9 @@ QGroupBox::title {
               </item>
               <item>
                <widget class="QToolButton" name="erase_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>...</string>
                 </property>
