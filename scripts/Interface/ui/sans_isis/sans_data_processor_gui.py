@@ -129,6 +129,18 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_paste_rows_requested(self):
             pass
 
+        @abstractmethod
+        def on_insert_row(self):
+            pass
+
+        @abstractmethod
+        def on_erase_rows(self):
+            pass
+
+        @abstractmethod
+        def on_cut_rows(self):
+            pass
+
     def __init__(self, main_presenter):
         """
         Initialise the interface
@@ -165,6 +177,22 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         settings.endGroup()
 
         self.instrument = SANSInstrument.from_string(instrument_name)
+
+        self.paste_button.setIcon(QtGui.QIcon(":/paste.png"))
+        self.copy_button.setIcon(QtGui.QIcon(":/copy.png"))
+        self.cut_button.setIcon(QtGui.QIcon(":/cut.png"))
+        self.erase_button.setIcon(QtGui.QIcon(":/erase.png"))
+        self.delete_row_button.setIcon(QtGui.QIcon(":/delete_row.png"))
+        self.insert_row_button.setIcon(QtGui.QIcon(":/insert_row.png"))
+
+        self.paste_button.clicked.connect(self._paste_rows_requested)
+        self.copy_button.clicked.connect(self._copy_rows_requested)
+        self.erase_button.clicked.connect(self._erase_rows)
+        self.cut_button.clicked.connect(self._cut_rows)
+
+        self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
+        self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
+
         # Attach validators
         self._attach_validators()
 
@@ -393,14 +421,27 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         rows = [item.rowRelativeToParent() for item in rows]
         self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
+    def _remove_rows_requested_from_button(self):
+        rows = self.get_selected_rows()
+        self._call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
+
     def _copy_rows_requested(self):
         self._call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
+
+    def _erase_rows(self):
+        self._call_settings_listeners(lambda listener: listener.on_erase_rows())
+
+    def _cut_rows(self):
+        self._call_settings_listeners(lambda listener: listener.on_cut_rows())
 
     def _paste_rows_requested(self):
         self._call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
 
     def _instrument_changed(self):
         self._call_settings_listeners(lambda listener: listener.on_instrument_changed())
+
+    def _on_insert_button_pressed(self):
+        self._call_settings_listeners(lambda listener: listener.on_insert_row())
 
     def _on_help_button_clicked(self):
         pymantidplot.proxies.showCustomInterfaceHelp('ISIS SANS v2')
@@ -1787,14 +1828,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def clear_table(self):
         self.data_processor_table.removeAllRows()
 
-    def add_row(self, value):
-        """
-        Inserts a row in to the table.
+    def clear_selection(self):
+        self.data_processor_table.clearSelection()
 
-        The value needs to have the form: "Input:test,Output:test,Options:OutputWorkspace=2", where the keys
-        are the names of the column
-        :param value: the value specifying a row
-        """
+    def update_table_selection(self, row_locations):
+        row_locations = [self.row([x]) for x in row_locations]
+        self.data_processor_table.setSelectedRowLocations(row_locations)
+
+    def add_row(self, value):
         value = [self.cell(x) for x in value]
         self.data_processor_table.appendChildRowOf(self.row([]), value)
 
@@ -1802,82 +1843,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         rows = [self.row([item]) for item in rows]
         self.data_processor_table.removeRows(rows)
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # NON-ESSENTIAL (Should we get rid of it?)
-    # ------------------------------------------------------------------------------------------------------------------
-    # def add_actions_to_menus(self, workspace_list):
-    #     """
-    #     Initialize table actions. Some table actions are not shown with the widget but they can be added to
-    #     external menus.
-    #     In this interface we have a 'File' menu and an 'Edit' menu
-    #     """
-    #     self.menuEdit.clear()
-    #     self.menuFile.clear()
-    #
-    #     # Actions that go in the 'Edit' menu
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendRowCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.CopySelectedCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.CutSelectedCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ClearSelectedCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteRowCommand(self.data_processor_table),
-    #                         self.menuEdit)
-    #
-    #     # Actions that go in the 'File' menu
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.OpenTableCommand(self.data_processor_table),
-    #                         self.menuFile, workspace_list)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.NewTableCommand(self.data_processor_table),
-    #                         self.menuFile)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableCommand(self.data_processor_table),
-    #                         self.menuFile)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableAsCommand(self.data_processor_table),
-    #                         self.menuFile)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table),
-    #                         self.menuFile)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.ExportTableCommand(self.data_processor_table),
-    #                         self.menuFile)
-    #     self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
-    #                         self.menuFile)
-    #
-    # def _create_action(self, command, menu, workspace_list=None):
-    #     """
-    #     Create an action from a given DataProcessorCommand and add it to a given menu
-    #     A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.
-    #     It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
-    #     table workspaces with an appropriate number of columns and column types can be loaded.
-    #     """
-    #     if (workspace_list is not None and command.name() == "Open Table"):
-    #         submenu = QtGui.QMenu(command.name(), self)
-    #         submenu.setIcon(QtGui.QIcon(command.icon()))
-    #
-    #         for ws in workspace_list:
-    #             ws_command = MantidQt.MantidWidgets.DataProcessor.WorkspaceCommand(self.data_processor_table, ws)
-    #             action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), ws_command.name(), self)
-    #             action.triggered.connect(lambda: self._connect_action(ws_command))
-    #             submenu.addAction(action)
-    #
-    #         menu.addMenu(submenu)
-    #     else:
-    #         action = QtGui.QAction(QtGui.QIcon(command.icon()), command.name(), self)
-    #         action.setShortcut(command.shortcut())
-    #         action.setStatusTip(command.tooltip())
-    #         action.triggered.connect(lambda: self._connect_action(command))
-    #         menu.addAction(action)
-    #
-    # def _connect_action(self, command):
-    #     """
-    #     Executes an action
-    #     """
-    #     command.execute()
+    def insert_empty_row(self, row_index):
+        self.data_processor_table.insertChildRowOf(self.row([]), row_index)
 
     def _run_python_code(self, text):
         """
