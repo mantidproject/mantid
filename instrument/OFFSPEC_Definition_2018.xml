@@ -5,9 +5,9 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
             name="OFFSPEC"
-            valid-from   ="1900-02-01 00:00:00"
-            valid-to     ="2115-01-02 23:59:59"
-            last-modified="2018-08-07 11:00:00">
+            valid-from   ="1900-01-31 23:59:59"
+            valid-to     ="1900-01-31 23:59:59"
+	    last-modified="2018-08-07 11:00:00">
 
   <defaults>
     <length unit="meter" />
@@ -23,22 +23,27 @@
   <!-- source and sample-position components -->
 
   <component type="source">
-   <!-- <location z="-23.7" /> -->
     <location z="-23.83" />
   </component>
-  <type name="source" is="Source"/>
+  <type name="source" is="Source">
+    <properties>
+      40mm(H) x 60mm(W)
+    </properties>
+  </type>
    
   <component type="some-surface-holder">
     <location x="0.0" y="0.0" z="0.0" />
   </component>
   <type name="some-surface-holder" is="SamplePos"/>
   
-  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- source and sample-position components END=============================== -->
+
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- detector components (including monitors) -->
   
-  <!-- detector components (including monitors) -->
-  
+<!-- ================MONITOR 1 START========================================= -->
   <component type="monitor1" idlist="monitor1">
-  <!--  <location r="11.387" t="180.0" /> -->
     <location r="11.38" t="180.0" />
   </component>
   
@@ -52,9 +57,10 @@
     </cylinder> 
     <algebra val="shape" />
   </type>  
+<!-- ================MONITOR 1 END=========================================== -->
   
+<!-- ================MONITOR 2 START========================================= -->  
   <component type="monitor2" idlist="monitor2">
-  <!--  <location r="5.65" t="180.0" />  -->
     <location r="5.62" t="180.0" />
   </component>  
   
@@ -68,7 +74,9 @@
     </cylinder> 
     <algebra val="shape" />
   </type>  
-  
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================MONITOR 3 START========================================= -->  
   <component type="monitor3" idlist="monitor3">
   <!--  <location r="0.4" t="180.0" /> -->
     <location r="0.55" t="180.0" />
@@ -92,9 +100,15 @@
     
     <algebra val="base : top" />
   </type>  
-  
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================DETECTORs START==================================== -->  
   <component type="DetectorBench" idlist="DetectorBench">
-    <location r="0.0" t="0.0"> <facing x="0" y="0" z="0"/> </location>
+    <location z="0.0" /> 
+    <parameter name="rotx">
+      <logfile id="Theta" eq="-2*value" extract-single-value-as="last_value"/>
+    </parameter>
+  <!--   <facing x="0" y="0" z="0"/> </location -->
   </component>
 
   <type name="DetectorBench">
@@ -708,7 +722,51 @@
   </type>    
   
   <!-- other components -->  
+
+  <component type="slit" name="slit1">
+    <location z="-5.5474"/> 
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap"> 
+      <logfile id="s1vgap" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
   
+  <component type="slit" name="slit2">  
+    <location z="-0.3853"/>
+    <!-- This log file stores the vertical opening of this. Note this
+     slit can also be translated in the z. However this info not stored
+     in log file since it is not used in the data analysis process. -->
+    <parameter name="vertical gap">
+      <logfile id="s2vgap" extract-single-value-as="last_value" />         
+    </parameter>
+  </component>    
+  
+  <component type="slit" name="slit3">   
+    <location z="0.5"/>
+    <!-- This log file stores the vertical opening of slit -->  
+    <parameter name="vertical gap">
+      <logfile id="s3vgap" extract-single-value-as="last_value" />        
+    </parameter>
+  </component>    
+  
+  
+  <type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+  <component type="supermirror">
+    <location z="28.52"/>  <!-- x=32.0-3.480   -->
+  </component>  
+  <type name="supermirror" /> 
+
+
+    
   <!-- DETECTOR and MONITOR ID LISTS -->
 
   <idlist idname="monitor1">
