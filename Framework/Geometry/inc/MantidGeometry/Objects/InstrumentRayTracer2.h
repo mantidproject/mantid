@@ -9,7 +9,7 @@
 /**
 InstrumentRayTracer2 contains a set of free functions that are responsible for
 tracking rays and accumulating a list of objects that are intersected along the
-way.
+way. These methods have been adapted from the original InstrumentRayTracer.
 
 @author Bhuvan Bezawada, STFC
 @date 17/08/2018
@@ -83,7 +83,7 @@ Track traceFromSample(const Kernel::V3D &dir,
 
 /**
  * Return the results of any trace() calls since the last call the getResults.
- * @returns A collection of links defining intersection information
+ * @return A collection of links defining intersection information
  */
 Links getResults(Track &resultsTrack) {
   // Create a list of the results
@@ -95,13 +95,17 @@ Links getResults(Track &resultsTrack) {
   return results;
 }
 
-// Return the detector index
+/**
+ * Gets the results of the trace, then returns the first detector
+ * index found in the results.
+ * @return size_t index value or throws an error if index is invalid
+ */
 size_t getDetectorResult(const ComponentInfo &componentInfo,
                          Track &resultsTrack) {
   // Store the results
   Links results = getResults(resultsTrack);
 
-  // Go through all results
+  // Go through all results via an iterator
   Links::const_iterator resultIterator = results.begin();
 
   // Return the first detectorIndex
