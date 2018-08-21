@@ -2257,6 +2257,41 @@ namespace MantidQt
 namespace API
 {
 
+class TSVSerialiser
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+%End
+private:
+TSVSerialiser(const TSVSerialiser &);
+TSVSerialiser(const TSVSerialiser &, const std::string &lines);
+
+public:
+TSVSerialiser();
+TSVSerialiser(const std::string &lines);
+
+void clear();
+std::string outputLines();
+std::vector<std::string> sections(const std::string &name);
+
+TSVSerialiser writeLine(const std::string &name);
+void writeSection(const std::string &name, const std::string &body);
+
+
+bool selectLine(const std::string &name); 
+bool selectSection(const std::string &name);
+
+void storeDouble(const double value);
+void storeInt(const int value);
+void storeString(const std::string value);
+void storeBool(const bool value);
+
+double readDouble();
+int readInt();
+std::string readString();
+bool readBool();
+};
+
 class WidgetScrollbarDecorator
 {
 %TypeHeaderCode
