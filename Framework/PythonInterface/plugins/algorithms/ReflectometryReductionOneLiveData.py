@@ -23,7 +23,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.copyProperties('ReflectometryReductionOneAuto',[
-            'InputWorkspace', 'SummationType', 'ReductionType','AnalysisMode',
+            'InputWorkspace', 'SummationType', 'ReductionType','IncludePartialBins', 'AnalysisMode',
             'ProcessingInstructions','ThetaIn', 'ThetaLogName','CorrectDetectors',
             'DetectorCorrectionType','WavelengthMin','WavelengthMax','I0MonitorIndex',
             'MonitorBackgroundWavelengthMin','MonitorBackgroundWavelengthMax',
@@ -32,8 +32,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'SecondTransmissionRun','Params','StartOverlap','EndOverlap',
             'StrictSpectrumChecking','CorrectionAlgorithm','Polynomial','C0','C1',
             'MomentumTransferMin','MomentumTransferStep','MomentumTransferMax',
-            'PolarizationAnalysis','Pp','Ap','Rho','Alpha','OutputWorkspace','Debug',
-            'IncludePartialBins'])
+            'PolarizationAnalysis','Pp','Ap','Rho','Alpha','Debug','OutputWorkspace'])
 
     def validateInputs(self):
         issues = {}
