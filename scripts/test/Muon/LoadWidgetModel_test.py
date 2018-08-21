@@ -16,65 +16,74 @@ class LoadUtilsTest(unittest.TestCase):
         self.test_ws_name = self.var_ws_name.format(1, self.test_run)
         self.test_ws_names = [
             self.var_ws_name.format(
-                x, self.test_run) for x in range(
+                i, self.test_run) for i in range(
                 1, 9)]
         self.test_workspaces = [mantid.CreateSampleWorkspace(
-            OutputWorkspace=s) for s in self.test_ws_names]
+            OutputWorkspace=name) for name in self.test_ws_names]
 
     def test_pad_run(self):
         tests = {123: "00123", 0: "00000", 12345: "12345", 123456: "123456"}
-        for i, s in iteritems(tests):
-            assert lutils.pad_run(i) == s
+        for run, padded_run in iteritems(tests):
+            self.assertEquals(lutils.pad_run(run), padded_run)
 
     def test_get_detector_num_from_ws(self):
-        assert lutils.get_detector_num_from_ws(self.test_ws_name) == "1"
+        self.assertEquals(
+            lutils.get_detector_num_from_ws(
+                self.test_ws_name), "1")
 
     def test_get_detectors_num(self):
-        assert lutils.get_detectors_num(self.test_path) == "1"
+        self.assertEquals(lutils.get_detectors_num(self.test_path), "1")
 
     def test_get_end_num(self):
-        assert lutils.get_end_num(self.test_path) == "rooth2020"
+        self.assertEquals(lutils.get_end_num(self.test_path), "rooth2020")
 
     def test_get_run_type(self):
-        assert lutils.get_run_type(self.test_path) == "Delayed"
+        self.assertEquals(lutils.get_run_type(self.test_path), "Delayed")
         with self.assertRaises(KeyError):
             lutils.get_run_type(self.bad_path)
 
     def test_get_filename(self):
-        assert lutils.get_filename(
+        self.assertEquals(lutils.get_filename(
             self.test_path,
-            self.test_run) == self.test_ws_name
+            self.test_run), self.test_ws_name)
 
     def test_hyphenise(self):
         tests = {"1-5": [1, 2, 3, 4, 5],
                  "1, 4-5": [1, 4, 5], "1-3, 5": [1, 3, 2, 5], "1, 3, 5": [1, 5, 3]}
         for out, arg in iteritems(tests):
-            assert lutils.hyphenise(arg) == out
+            self.assertEquals(lutils.hyphenise(arg), out)
 
     def test_group_by_detector(self):
         output, workspaces = [], []
-        for x in range(1, 5):
-            ws = self.var_ws_name.format(x, self.test_run)
-            workspaces.append(ws)
-            mantid.CreateSampleWorkspace(OutputWorkspace=ws).getName()
-            output.append("{}; Detector {}".format(self.test_run, x))
-        assert lutils.group_by_detector(self.test_run, workspaces) == output
+        detectors = range(1, 5)
+        for detector in detectors:
+            workspace = self.var_ws_name.format(detector, self.test_run)
+            workspaces.append(workspace)
+            mantid.CreateSampleWorkspace(OutputWorkspace=workspace).getName()
+            output.append("{}; Detector {}".format(self.test_run, detector))
+        self.assertEquals(
+            lutils.group_by_detector(
+                self.test_run,
+                workspaces),
+            output)
 
     def test_flatten_run_data(self):
         workspaces = []
-        for x in range(0, len(self.test_workspaces), 2):
-            name = str(x)
+        for i in range(0, len(self.test_workspaces), 2):
+            name = str(i)
             mantid.GroupWorkspaces(
-                self.test_workspaces[x:x + 2], OutputWorkspace=name)
+                self.test_workspaces[i:i + 2], OutputWorkspace=name)
             workspaces.append(name)
-        assert lutils.flatten_run_data(workspaces) == [self.test_ws_names]
+        self.assertEquals(
+            lutils.flatten_run_data(workspaces), [
+                self.test_ws_names])
 
     def test_replace_workspace_name_suffix(self):
         tests = {self.test_ws_name: "suffix", "_".join(
             [self.test_ws_name, "test"]): "suffix"}
-        for w, suffix in iteritems(tests):
-            assert lutils.replace_workspace_name_suffix(
-                w, suffix) == self.var_ws_name.format(1, suffix)
+        for workspace_name, suffix in iteritems(tests):
+            self.assertEquals(lutils.replace_workspace_name_suffix(
+                workspace_name, suffix), self.var_ws_name.format(1, suffix))
 
 
 if __name__ == "__main__":

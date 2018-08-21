@@ -30,6 +30,16 @@ class LoadView(QtGui.QWidget):
     def show_directory_manager(self):
         MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)
 
+    def disable_buttons(self):
+        self.spinbox.setEnabled(False)
+        self.load_button.setEnabled(False)
+        self.co_button.setEnabled(False)
+
+    def enable_buttons(self):
+        self.spinbox.setEnabled(True)
+        self.load_button.setEnabled(True)
+        self.co_button.setEnabled(True)
+
     def on_load_clicked(self, slot):
         self.load_button.clicked.connect(slot)
 

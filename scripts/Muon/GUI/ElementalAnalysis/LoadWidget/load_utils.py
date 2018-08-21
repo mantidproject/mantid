@@ -23,8 +23,8 @@ class LModel(object):
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
-        workspaces = {f: get_filename(
-            f, self.run) for f in to_load if get_filename(f, self.run) is not None}
+        workspaces = {filename: get_filename(
+            filename, self.run) for filename in to_load if get_filename(filename, self.run) is not None}
         self._load(workspaces)
         self.loaded_runs[self.run] = group_by_detector(
             self.run, workspaces.values())
@@ -53,7 +53,7 @@ def search_user_dirs(run):
     for user_dir in config["datasearch.directories"].split(";"):
         path = os.path.join(user_dir,
                             "ral{}.rooth*.dat".format(pad_run(run)))
-        files.extend([g for g in glob.iglob(path)])
+        files.extend([file for file in glob.iglob(path)])
     return files
 
 
@@ -63,11 +63,11 @@ def group_by_detector(run, workspaces):
     """
     d_string = "{}; Detector {}"
     detectors = {d_string.format(run, x): [] for x in range(1, 5)}
-    for w in workspaces:
-        detector_number = get_detector_num_from_ws(w)
-        detectors[d_string.format(run, detector_number)].append(w)
-    for d, v in iteritems(detectors):
-        mantid.GroupWorkspaces(v, OutputWorkspace=str(d))
+    for workspace in workspaces:
+        detector_number = get_detector_num_from_ws(workspace)
+        detectors[d_string.format(run, detector_number)].append(workspace)
+    for detector, workspace_list in iteritems(detectors):
+        mantid.GroupWorkspaces(workspace_list, OutputWorkspace=str(detector))
     detector_list = sorted(list(detectors))
     group_grouped_workspaces(run, detector_list)
     return detector_list
@@ -76,8 +76,8 @@ def group_by_detector(run, workspaces):
 def group_grouped_workspaces(name, workspaces):
     tmp = mantid.CreateSampleWorkspace()
     overall = mantid.GroupWorkspaces(tmp, OutputWorkspace=str(name))
-    for w in workspaces:
-        overall.add(w)
+    for workspace in workspaces:
+        overall.add(workspace)
     mantid.AnalysisDataService.remove("tmp")
 
 
@@ -128,22 +128,23 @@ def replace_workspace_name_suffix(name, suffix):
 
 def flatten_run_data(*workspaces):
     out = []
-    for ws in workspaces:
-        detectors = [mantid.mtd[d] for d in ws]
-        out.append(sorted([w.getName() for d in detectors for w in d]))
+    for workspace in workspaces:
+        detectors = [mantid.mtd[detector] for detector in workspace]
+        out.append(sorted([_workspace.getName()
+                           for detector in detectors for _workspace in detector]))
     return out
 
 
 def hyphenise(vals):
     out = []
     if vals:
-        vals = [str(s) for s in sorted(list(set(vals)))]
+        vals = [str(val) for val in sorted(list(set(vals)))]
         diffs = [int(vals[i + 1]) - int(vals[i]) for i in range(len(vals) - 1)]
-        a = b = vals[0]
-        for i, d in enumerate(diffs):
-            if d != 1:
-                out.append("-".join([a, b]) if a != b else a)
-                a = vals[i + 1]
-            b = vals[i + 1]
-        out.append("-".join([a, b]) if a != b else vals[-1])
+        first = last = vals[0]
+        for i, diff in enumerate(diffs):
+            if diff != 1:
+                out.append("-".join([first, last]) if first != last else first)
+                first = vals[i + 1]
+            last = vals[i + 1]
+        out.append("-".join([first, last]) if first != last else vals[-1])
     return ", ".join(out)
