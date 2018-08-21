@@ -28,9 +28,8 @@ public:
                          bool isUsingLayer = false, size_t layer = 0);
   void uploadTextures(bool picking,
                       GridTextureFace gridFace = GridTextureFace::Front);
-  size_t numTextures() const;
-  void bindTextures(bool picking);
-  void unbindTextures();
+  void bindTextures(bool picking) const;
+  void unbindTextures() const;
 
 private:
   void buildOpenGLTextures(bool picking, const std::vector<GLColor> &colors,

@@ -152,8 +152,9 @@ in opengl calls to
 @param colors the color mapping of the detectors.
 @param picking flag which determines whether pick colors are rendered.
 @param isUsingLayer if layering for grid detectors is enabled. Ignored for all
-other types.
+other types.This state of this flag is stored for uploading at a later stage.
 @param layer grid layer which should be rendered. Ignored for all other types.
+This layer value is stored for uploading at a later stage.
 */
 void BankTextureBuilder::buildOpenGLTextures(bool picking,
                                              const std::vector<GLColor> &colors,
@@ -189,10 +190,6 @@ void BankTextureBuilder::uploadTextures(bool picking,
     uploadRectangularBankTextures(picking);
     break;
   }
-}
-
-size_t BankTextureBuilder::numTextures() const {
-  return m_detColorTextures.size();
 }
 
 void BankTextureBuilder::buildTubeBankTextures(
@@ -350,7 +347,7 @@ void BankTextureBuilder::uploadRectangularBankTextures(bool picking) {
   upload2DTexture(m_textSizes[0], textureID, texture);
 }
 
-void BankTextureBuilder::bindTextures(bool picking) {
+void BankTextureBuilder::bindTextures(bool picking) const {
   glEnable(GL_TEXTURE_2D);
   auto &textureIDs = picking ? m_pickTextureIDs : m_colorTextureIDs;
 
@@ -358,7 +355,7 @@ void BankTextureBuilder::bindTextures(bool picking) {
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
 
-void BankTextureBuilder::unbindTextures() {
+void BankTextureBuilder::unbindTextures() const {
   for (size_t i = 0; i < m_pickTextureIDs.size(); ++i)
     glBindTexture(GL_TEXTURE_2D, 0);
 }

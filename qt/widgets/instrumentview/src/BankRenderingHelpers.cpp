@@ -8,8 +8,9 @@
 #include "MantidKernel/Quat.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
+using MantidQt::MantidWidgets::detail::GridTextureFace;
 namespace {
 
 class Corners {
@@ -71,57 +72,68 @@ Corners findCorners(const Mantid::Geometry::ComponentInfo &compInfo,
   return c;
 }
 
-std::vector<Corners>
-findGridCorners(const Mantid::Geometry::ComponentInfo &compInfo,
-                size_t bankIndex) {
+Corners findGridCorners(const Mantid::Geometry::ComponentInfo &compInfo,
+                        size_t bankIndex, GridTextureFace gridFace) {
   // Find the six faces which make up the bank cube.
   const auto &layers = compInfo.children(bankIndex);
   size_t nZ = layers.size();
 
   auto frontBank = compInfo.quadrilateralComponent(layers.back());
   auto rearBank = compInfo.quadrilateralComponent(layers.front());
-  std::vector<Corners> corners(6);
-  // front face
-  corners[0] = Corners(compInfo.position(frontBank.bottomLeft),
-                       compInfo.position(frontBank.bottomRight),
-                       compInfo.position(frontBank.topRight),
-                       compInfo.position(frontBank.topLeft));
-  // rear face
-  corners[1] = Corners(compInfo.position(rearBank.bottomLeft),
-                       compInfo.position(rearBank.bottomRight),
-                       compInfo.position(rearBank.topRight),
-                       compInfo.position(rearBank.topLeft));
-  // left face
-  corners[2] = Corners(compInfo.position(rearBank.bottomLeft),
-                       compInfo.position(frontBank.bottomLeft),
-                       compInfo.position(frontBank.topLeft),
-                       compInfo.position(rearBank.topLeft));
-  // right face
-  corners[3] = Corners(compInfo.position(rearBank.bottomRight),
-                       compInfo.position(frontBank.bottomRight),
-                       compInfo.position(frontBank.topRight),
-                       compInfo.position(rearBank.topRight));
-  // top face
-  corners[4] = Corners(compInfo.position(frontBank.topLeft),
-                       compInfo.position(frontBank.topRight),
-                       compInfo.position(rearBank.topRight),
-                       compInfo.position(rearBank.topLeft));
-  // bottom face
-  corners[5] = Corners(compInfo.position(frontBank.bottomLeft),
-                       compInfo.position(frontBank.bottomRight),
-                       compInfo.position(rearBank.bottomRight),
-                       compInfo.position(rearBank.bottomLeft));
+  Corners c;
+  switch (gridFace) {
+  case GridTextureFace::Front:
+    // front face
+    c = Corners(compInfo.position(frontBank.bottomLeft),
+                compInfo.position(frontBank.bottomRight),
+                compInfo.position(frontBank.topRight),
+                compInfo.position(frontBank.topLeft));
+    break;
+  case GridTextureFace::Back:
+    // rear face
+    c = Corners(compInfo.position(rearBank.bottomLeft),
+                compInfo.position(rearBank.bottomRight),
+                compInfo.position(rearBank.topRight),
+                compInfo.position(rearBank.topLeft));
+    break;
+  case GridTextureFace::Left:
+    // left face
+    c = Corners(compInfo.position(rearBank.bottomLeft),
+                compInfo.position(frontBank.bottomLeft),
+                compInfo.position(frontBank.topLeft),
+                compInfo.position(rearBank.topLeft));
+    break;
+  case GridTextureFace::Right:
+    // right face
+    c = Corners(compInfo.position(rearBank.bottomRight),
+                compInfo.position(frontBank.bottomRight),
+                compInfo.position(frontBank.topRight),
+                compInfo.position(rearBank.topRight));
+    break;
+  case GridTextureFace::Top:
+    // top face
+    c = Corners(compInfo.position(frontBank.topLeft),
+                compInfo.position(frontBank.topRight),
+                compInfo.position(rearBank.topRight),
+                compInfo.position(rearBank.topLeft));
+    break;
+  case GridTextureFace::Bottom:
+    // bottom face
+    c = Corners(compInfo.position(frontBank.bottomLeft),
+                compInfo.position(frontBank.bottomRight),
+                compInfo.position(rearBank.bottomRight),
+                compInfo.position(rearBank.bottomLeft));
+    break;
+  }
   // Apply bank transformation
   auto rotation = compInfo.rotation(bankIndex);
   auto position = compInfo.position(bankIndex);
   rotation.conjugate();
   rotation.rotate(position);
-  for (auto &corner : corners) {
-    corner.rotate(rotation);
-    corner.translate(-position);
-  }
+  c.rotate(rotation);
+  c.translate(-position);
 
-  return corners;
+  return c;
 }
 
 void addVertex(const V3D &pos) {
@@ -252,8 +264,9 @@ void renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
 }
 
 void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
-                        size_t index, detail::GridTextureFace gridFace) {
-  auto corners = findGridCorners(compInfo, index);
+                        size_t index, GridTextureFace gridFace) {
+  auto baseCorner = findGridCorners(compInfo, index, GridTextureFace::Front);
+  auto corners = findGridCorners(compInfo, index, gridFace);
   auto layers = compInfo.children(index);
   auto firstLayerIndex = layers[0];
   auto bank = compInfo.quadrilateralComponent(firstLayerIndex);
@@ -265,50 +278,51 @@ void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
   auto ystep = std::get<1>(steps);
   auto zstep = std::get<2>(steps);
 
-  auto basePos = corners[1].bottomLeft();
+  // All positions referenced from bottomLeft of front face
+  auto basePos = baseCorner.bottomLeft();
   auto nZ = layers.size();
 
   switch (gridFace) {
-  case detail::GridTextureFace::Front:
-    render2DTexture(corners[0], bank.nX, bank.nY,
+  case GridTextureFace::Front:
+    render2DTexture(corners, bank.nX, bank.nY,
                     V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * 0.5), (zstep * 0.5)),
                     V3D((xstep * -0.5), (ystep * 0.5), (zstep * 0.5)), basePos);
     break;
-  case detail::GridTextureFace::Back:
-    render2DTexture(corners[1], bank.nX, bank.nY,
+  case GridTextureFace::Back:
+    render2DTexture(corners, bank.nX, bank.nY,
                     V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
                     V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5)),
                     V3D((xstep * -0.5), (ystep * 0.5), (zstep * -0.5)),
                     basePos);
     break;
-  case detail::GridTextureFace::Left:
-    render2DTexture(corners[2], nZ, bank.nY,
+  case GridTextureFace::Left:
+    render2DTexture(corners, nZ, bank.nY,
                     V3D((xstep * -0.5), (ystep * -0.5), (zstep * -0.5)),
                     V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * -0.5), (ystep * 0.5), (zstep * 0.5)),
                     V3D((xstep * -0.5), (ystep * 0.5), (zstep * -0.5)),
                     basePos);
     break;
-  case detail::GridTextureFace::Right:
-    render2DTexture(corners[3], nZ, bank.nY,
+  case GridTextureFace::Right:
+    render2DTexture(corners, nZ, bank.nY,
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * 0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5)), basePos);
     break;
-  case detail::GridTextureFace::Top:
-    render2DTexture(corners[4], nZ, bank.nY,
+  case GridTextureFace::Top:
+    render2DTexture(corners, nZ, bank.nY,
                     V3D((xstep * -0.5), (ystep * +0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * +0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * +0.5), (zstep * -0.5)),
                     V3D((xstep * -0.5), (ystep * +0.5), (zstep * -0.5)),
                     basePos);
     break;
-  case detail::GridTextureFace::Bottom:
-    render2DTexture(corners[5], nZ, bank.nY,
+  case GridTextureFace::Bottom:
+    render2DTexture(corners, nZ, bank.nY,
                     V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),
