@@ -53,9 +53,11 @@ class WorkerSignals(QtCore.QObject):
     result = Signal(tuple)
     progress = Signal(int)
     cancelled = Signal()
+    # Use this to start the worker
+    start = Signal()
 
 
-class Worker(QtCore.QThread):
+class Worker(QtCore.QObject):
     """
     Worker thread. Inherits from QThread to handle worker thread setup, signals and wrap-up. Using QThread here
     (instead of QRunnable) so we can cancel the thread.
@@ -108,13 +110,8 @@ class Worker(QtCore.QThread):
         finally:
             self.signals.finished.emit()
 
-    def cancel(self):
-        self.signals.cancelled.emit()
-        # must use terminate (not quit/exit) as there is no event loop for the thread
-        self.terminate()
 
-
-class WorkerManager(QtWidgets.QWidget):
+class WorkerManager(QtCore.QObject):
     """
     The WorkerManager class handles multi-threading of a function, by splitting an arbitrary number of list arguments
     equally across a specified number of threads.
@@ -132,14 +129,14 @@ class WorkerManager(QtWidgets.QWidget):
     finished = Signal()  # used for unit tests
     cancelled = Signal()  # used for unit tests
 
-    def __init__(self, fn, num_threads,
+    def __init__(self, fn, num_threads=1,
                  callback_on_threads_complete=lambda: 0,
                  callback_on_progress_update=lambda dbl: 0,
                  callback_on_thread_exception=lambda err_dict: 0,
-                 verbose=0,
+                 callback_on_threads_cancelled=lambda: 0,
+                 verbose=False,
                  **kwarg_list):
         """
-
         :param fn: The function to be evaluated.
         :param num_threads: Number of threads to use.
         :param callback_on_threads_complete: Optional callable for when all threads are finished
@@ -156,32 +153,39 @@ class WorkerManager(QtWidgets.QWidget):
         self.progress_callback = callback_on_progress_update
         # Callback called when an error is thrown from a thread
         self.error_callback = callback_on_thread_exception
+        # Callback called when threads are cancelled
+        self.cancelled_callback = callback_on_threads_cancelled
+        self._cancelled = False
 
         self.fn = fn
         self.kwarg_list = kwarg_list
 
-        # maintain a list of running threads to allow for cancelling
+        # maintain a list of running threads/workers to allow for cancelling
         self._threads = []
+        self._workers = []
 
         self._results = {key: [] for key in self.kwarg_list.keys() + ['results']}
         self._failed_results = {key: [] for key in self.kwarg_list.keys()}
 
         self._progress = 0.0
 
-        self._num_threads = num_threads  # total number of threads started
-        self._thread_count = 0  # current threads running
+        # total number of threads started
+        self._num_threads = num_threads
+        # current running threads
+        self._thread_count = 0
 
         self.mutex = QtCore.QMutex()
 
         self.verbose = verbose
 
     def _cancel_threads(self):
-        for thread in self._threads:
-            if thread.isRunning():
-                thread.cancel()
+        self._cancelled = True
+        for i, thread in enumerate(self._threads):
+            thread.quit()
+            thread.wait()
 
     def _clear_threads(self):
-        self._cancel_threads()
+        self._workers = []
         self._threads = []
         self._thread_count = 0
 
@@ -191,12 +195,13 @@ class WorkerManager(QtWidgets.QWidget):
         self._failed_results = {key: [] for key in self.kwarg_list.keys()}
 
     def cancel(self):
-        self._clear_threads()
+        self._cancel_threads()
         self.cancelled.emit()  # for unit tests
 
     def clear(self):
         self._clear_threads()
         self._clear_results()
+        self._cancelled = False
 
     def is_running(self):
         return self._thread_count > 0
@@ -209,12 +214,24 @@ class WorkerManager(QtWidgets.QWidget):
 
             thread_list = split_kwarg_list(self.kwarg_list, self._num_threads)
             for i, arg in enumerate(thread_list):
-                worker = Worker(self.fn, **arg)
-                self.connect_worker_signals(worker)
-                self._threads += [worker]
                 if self.verbose:
                     print("\tStarting thread " + str(i + 1) + " with arg : ", arg)
-                worker.start()
+
+                # set up th thread and start its event loop
+                thread = QtCore.QThread(self)
+                self._threads += [thread]
+                thread.start()
+
+                # create the worker and move it to the new thread
+                worker = Worker(self.fn, **arg)
+                worker.moveToThread(thread)
+                worker.signals.start.connect(worker.run)
+                self.connect_worker_signals(worker)
+                self._workers += [worker]
+
+            # start the execution in the threads
+            for worker in self._workers:
+                worker.signals.start.emit()
         else:
             raise RuntimeError("Cannot start threads, "
                                "WorkerManager has active threads (call cancel() or clear() first)")
@@ -225,12 +242,9 @@ class WorkerManager(QtWidgets.QWidget):
         worker.signals.finished.connect(self.on_thread_complete)
         worker.signals.progress.connect(self.on_thread_progress)
         worker.signals.error.connect(self.on_thread_exception)
-        worker.signals.cancelled.connect(self.on_thread_cancelled)
 
     def on_thread_start(self):
-        pass
-
-    def on_thread_cancelled(self):
+        """Will be executed on a thread starting execution. Optionally override if needed."""
         pass
 
     def on_thread_exception(self, kwargs):
@@ -261,11 +275,21 @@ class WorkerManager(QtWidgets.QWidget):
             self.on_final_thread_complete()
 
     def on_final_thread_complete(self):
-        self._cancel_threads()
+        # exit the thread event loops
+        for i, thread in enumerate(self._threads):
+            thread.quit()
+            thread.wait()
+        self._clear_threads()
+
         if self._progress < 100.0:
             # in case of exceptions in threads
             self._update_progress(100.0 - self._progress)
-        self.thread_complete_callback()
+
+        if self._cancelled:
+            self.cancelled_callback()
+        else:
+            self.thread_complete_callback()
+
         self.finished.emit()  # for unit tests
 
     def _update_progress(self, percentage):
