@@ -108,20 +108,23 @@ void LoadDNSEvent::exec() {
 
   chopperPeriod = static_cast<uint>(getProperty("ChopperPeriod")) * 10;
 
+  _eventAccumulator.neutronEvents.resize(960*128+24);
 
 
   try {
-    ByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big);
+    FileByteStream file(static_cast<std::string>(getProperty("InputFile")), endian::big);
     //file.exceptions(std::ifstream::eofbit);
 
-    auto elaapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file); });
-    auto elaapsedTimeProcessing = measureMicroSecs::execution([&](){ populate_EventWorkspace(outputWS); });
+    long elapsedTimeSorting    = 0;
+    auto elapsedTimeParsing    = measureMicroSecs::execution([&](){ parse_File(file); });
+    auto elapsedTimeProcessing = measureMicroSecs::execution([&](){ elapsedTimeSorting = populate_EventWorkspace(outputWS); });
 
 
     g_log.notice()
-        << "elaapsedTime Parsing\t= " << elaapsedTimeParsing
-        << "\nelaapsedTime Processing\t= " << elaapsedTimeProcessing
-        << "\nelaapsedTime Total  \t= " << elaapsedTimeParsing + elaapsedTimeProcessing
+        << "elapsedTime Parsing\t= " << elapsedTimeParsing
+        << "\nelapsedTime Processing\t= " << elapsedTimeProcessing
+        << "\nelapsedTime Sorting\t= " << elapsedTimeSorting
+        << "\nelapsedTime Total  \t= " << elapsedTimeParsing + elapsedTimeProcessing
         << std::endl;
 
 
@@ -137,35 +140,162 @@ void LoadDNSEvent::exec() {
   g_log.notice() << std::endl;
 }
 
-void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
+template<typename _RAIter, typename _Compare>
+_RAIter partitionVector(_RAIter first, _RAIter last, _Compare comp) {
+
+  _RAIter pivot = first + (last - first) / 2;
+
+
+  while (true){
+    while (comp(*first, *pivot)) {
+      ++first;
+    }
+    --last;
+    while (comp(*pivot, *last)) {
+      --last;
+    }
+    if (!(first < last)) {
+      return first;
+    }
+    std::iter_swap(first, last);
+    ++first;
+  }
+}
+
+template<typename _RAIter, typename _Compare>
+void qsort(_RAIter first, _RAIter last, _Compare comp) {
+  auto pivot = partitionVector(first, last, comp);
+  std::array<std::pair<_RAIter, _RAIter>, 2> parts ={std::pair<_RAIter, _RAIter>{first, pivot-1}, {pivot+1, last}};
+
+  for (size_t i = 0; i < parts.size(); ++i) {
+    auto part = parts[i];
+    if (part.first < part.second) {
+      qsort(part.first, part.second, comp);
+    }
+  }
+}
+
+template<typename _RAIter, typename _Compare>
+void qsortParallel(_RAIter first, _RAIter last, _Compare comp, uint8_t depth) {
+  auto pivot = partitionVector(first, last, comp);
+  std::array<std::pair<_RAIter, _RAIter>, 2> parts ={std::pair<_RAIter, _RAIter>{first, pivot-1}, {pivot+1, last}};
+
+  PARALLEL_FOR_IF(true)
+  for (size_t i = 0; i < parts.size(); ++i) {
+    auto part = parts[i];
+    if (part.first < part.second) {
+      if (depth > 0) {
+        qsortParallel(part.first, part.second, comp, depth-1);
+      } else {
+        qsort(part.first, part.second, comp);
+      }
+    }
+  }
+}
+
+template<typename Vector, typename _Compare>
+void sortVector(Vector &v, _Compare comp) {
+  qsortParallel(v.begin(), v.end(), comp, 2);
+}
+
+inline std::ostream &operator <<(std::ostream &lhs, const LoadDNSEvent::CompactEvent &rhs) {
+  return lhs << "(" << rhs.timestamp << ", " << rhs.channel << ", " << rhs.position << ", " << rhs.eventId << ")" ;//_writeToStream(lhs, rhs, "\n");
+}
+
+template<size_t n>
+inline std::ostream &operator <<(std::ostream &lhs, const typename std::array<LoadDNSEvent::CompactEvent, n>::const_iterator &rhs) {
+  return lhs << *rhs;
+}
+
+inline std::ostream &operator <<(std::ostream &lhs, const typename std::vector<LoadDNSEvent::CompactEvent>::const_iterator &rhs) {
+  return lhs << *rhs;
+}
+
+template<typename Container, typename T>
+inline std::ostream &_writeToStream(std::ostream &lhs, const Container &rhs, const T &separator) {
+  const auto end = rhs.end();
+  auto it  = rhs.begin();
+  lhs << "[";
+  lhs << (*it);
+
+  while (++it != end) {
+    lhs << separator << *it;
+  }
+  return lhs << "]";
+}
+
+template<typename T>
+inline std::ostream &operator <<(std::ostream &lhs, const std::vector<T> &rhs) {
+  return _writeToStream(lhs, rhs, ", ");
+}
+
+template<typename T, size_t n>
+inline std::ostream &operator <<(std::ostream &lhs, const std::array<T, n> &rhs) {
+  return _writeToStream(lhs, rhs, ", ");
+}
+
+template<int n, typename _RAIter, typename _Pred>
+std::array<_RAIter, n+1> partitionWhere(_RAIter begin, _RAIter end, _Pred pred) {
+  size_t length = end-begin;
+  std::array<_RAIter, n+1> result;
+  result[0] = begin;
+  result[result.size()-1] = end;
+
+  for (size_t i = 1; i < n; ++i) {
+    const auto advance = ((i * length) / (n));
+    result[i] = begin + advance;
+    //result[i] = std::find_if(begin + (i * length) / n, begin + ((i+1) * length) / n, pred);
+
+  }
+  return result;
+}
+
+template<int n, typename Vector, typename _Pred>
+auto partitionWhere(Vector &v, _Pred pred) {
+  return partitionWhere<n>(v.begin(), v.end()-1, pred);
+}
+
+long LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
   static const uint EVENTS_PER_PROGRESS = 100;
   // The number of steps depends on the type of input file
   Progress progress(this, 0.0, 1.0, _eventAccumulator.neutronEvents.size()/EVENTS_PER_PROGRESS);
 
-  std::sort(_eventAccumulator.neutronEvents.begin(), _eventAccumulator.neutronEvents.end(), [](auto l, auto r){ return l.timestamp < r.timestamp; });
+  // Sort reversed (latest event first, most early event last):
+  auto elapsedTimeSorting = measureMicroSecs::execution([&](){ sortVector(_eventAccumulator.triggerEvents, [](auto l, auto r){ return l.timestamp > r.timestamp; }); });
 
-
-  uint64_t chopperTimestamp = 0;
-  uint64_t oversizedChanelIndexCounter = 0;
-  uint64_t oversizedPosCounter = 0;
-  uint64_t triggerCounter = 0;
-  uint64_t i = 0;
   g_log.notice() << _eventAccumulator.neutronEvents.size() << std::endl;
-  for (const auto &event : _eventAccumulator.neutronEvents) {
 
-    i++;
-    if (i%EVENTS_PER_PROGRESS == 0) {
-      progress.report();
-      if (this->getCancel()) {
-        throw CancelException();
-      }
+  std::atomic<uint64_t> oversizedChanelIndexCounterA(0);
+  std::atomic<uint64_t> oversizedPosCounterA(0);
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS))
+  for (uint j = 0; j < _eventAccumulator.neutronEvents.size(); j++)
+  {
+    //uint64_t chopperTimestamp = 0;
+    uint64_t oversizedChanelIndexCounter = 0;
+    uint64_t oversizedPosCounter = 0;
+    uint64_t triggerCounter = 0;
+    uint64_t i = 0;
+    const auto wsIndex = j;
+    auto &eventList = _eventAccumulator.neutronEvents[j];
+    if (eventList.size() != 0) {
+      std::sort(eventList.begin(), eventList.end(), [](auto l, auto r){ return l.timestamp < r.timestamp; });
     }
 
-    if ((((event.timestamp - chopperTimestamp) > chopperPeriod) && (chopperChannel == 99))
-    ||  (event.eventId == LoadDNSEvent::event_id_e::TRIGGER && chopperChannel != 99)) {
-      chopperTimestamp = event.timestamp;
-      triggerCounter++;
-    } else {
+    auto chopperIt = _eventAccumulator.triggerEvents.cbegin();
+
+    auto &spectrum = eventWS->getSpectrum(wsIndex);
+    //PARALLEL_START_INTERUPT_REGION
+
+    for (const auto &event : eventList) {
+      i++;
+      if (i%EVENTS_PER_PROGRESS == 0) {
+        progress.report();
+        if (this->getCancel()) {
+          throw CancelException();
+        }
+      }
+
 
       if ((event.channel & 0b0000000000010000) != 0) {
         oversizedChanelIndexCounter++;
@@ -174,17 +304,25 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS) {
         oversizedPosCounter++;
       }
 
-      const uint16_t channelIndex = ((event.channel & 0b1111111111100000) >> 1) | (event.channel & 0b0000000000001111);
-      const uint16_t position = std::min(uint16_t(959u), event.position);
-      const size_t wsIndex = channelIndex * 960 + position + 24;
+      chopperIt = std::lower_bound(chopperIt, _eventAccumulator.triggerEvents.cend(),  event.timestamp, [](auto l, auto r){ return l.timestamp > r; });
+      const uint64_t chopperTimestamp = chopperIt != _eventAccumulator.triggerEvents.cend() ? chopperIt->timestamp : 0;
 
-      Mantid::DataObjects::EventList &eventList = eventWS->getSpectrum(wsIndex);
-      eventList.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
+      spectrum.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
+
     }
+
+    //PARALLEL_END_INTERUPT_REGION
+    oversizedChanelIndexCounterA += oversizedChanelIndexCounter;
+    oversizedPosCounterA += oversizedPosCounter;
   }
-  g_log.notice() << "Bad chanel indices: " << oversizedChanelIndexCounter << std::endl;
-  g_log.notice() << "Bad position values: " << oversizedPosCounter << std::endl;
-  g_log.notice() << "Trigger Counter: " << triggerCounter << std::endl;
+  //PARALLEL_CHECK_INTERUPT_REGION
+
+
+
+  g_log.notice() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
+  g_log.notice() << "Bad position values: " << oversizedPosCounterA << std::endl;
+  g_log.notice() << "Trigger Counter: " << _eventAccumulator.triggerEvents.size() << std::endl;
+  return elapsedTimeSorting;
 }
 
 
@@ -226,7 +364,7 @@ buildSkipTable(const Iterable &iterable) {
 }
 }
 
-std::vector<uint8_t> LoadDNSEvent::parse_Header(ByteStream &file) {
+std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   // using Boyer-Moore String Search:
   LOG_INFORMATION("parse_Header...\n")
   static constexpr std::array<uint8_t, 8> header_sep {0x00, 0x00, 0x55, 0x55, 0xAA, 0xAA, 0xFF, 0xFF};
@@ -260,14 +398,14 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(ByteStream &file) {
   return header;
 }
 
-void LoadDNSEvent::parse_File(ByteStream &file) {
+void LoadDNSEvent::parse_File(FileByteStream &file) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
   parse_BlockList(file, _eventAccumulator);
   parse_EndSignature(file);
 }
 
-void LoadDNSEvent::parse_BlockList(ByteStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_BlockList(FileByteStream &file, EventAccumulator &eventAccumulator) {
   LOG_INFORMATION("parse_BlockList...\n");
   // BlockList := DataBuffer BlockListTrail
   while (file.peek() != 0xFF) {
@@ -275,14 +413,14 @@ void LoadDNSEvent::parse_BlockList(ByteStream &file, EventAccumulator &eventAccu
   }
 }
 
-void LoadDNSEvent::parse_Block(ByteStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_Block(FileByteStream &file, EventAccumulator &eventAccumulator) {
   LOG_INFORMATION("parse_Block...\n")
   // Block := DataBufferHeader DataBuffer
   parse_DataBuffer(file, eventAccumulator);
   parse_BlockSeparator(file);
 }
 
-void LoadDNSEvent::parse_BlockSeparator(ByteStream &file) {
+void LoadDNSEvent::parse_BlockSeparator(FileByteStream &file) {
   LOG_INFORMATION("parse_BlockSeparator...\n")
   const separator_t block_sep = (0x0000FFFF5555AAAA); // 0xAAAA5555FFFF0000; //
   auto separator = file.read(separator_t());
@@ -292,7 +430,7 @@ void LoadDNSEvent::parse_BlockSeparator(ByteStream &file) {
   }
 }
 
-void LoadDNSEvent::parse_DataBuffer(ByteStream &file, EventAccumulator &eventAccumulator) {
+void LoadDNSEvent::parse_DataBuffer(FileByteStream &file, EventAccumulator &eventAccumulator) {
   LOG_INFORMATION("parse_DataBuffer...\n");
   const auto bufferHeader = parse_DataBufferHeader(file);
 
@@ -307,7 +445,7 @@ void LoadDNSEvent::parse_DataBuffer(ByteStream &file, EventAccumulator &eventAcc
 
 }
 
-LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(ByteStream &file) {
+LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(FileByteStream &file) {
   LOG_INFORMATION("parse_DataBufferHeader...\n")
   BufferHeader header = {};
   file.read<2>(header.bufferLength);
@@ -328,7 +466,7 @@ LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(ByteStream &file
 }
 
 
-void LoadDNSEvent::parse_EndSignature(ByteStream &file) {
+void LoadDNSEvent::parse_EndSignature(FileByteStream &file) {
   LOG_INFORMATION("parse_EndSignature...\n")
   const separator_t closing_sig = (0xFFFFAAAA55550000); // 0x00005555AAAAFFFF; //
   auto separator = file.read(separator_t());

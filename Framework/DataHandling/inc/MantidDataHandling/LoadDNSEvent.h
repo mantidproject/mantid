@@ -127,7 +127,7 @@ private:
     uint8_t dataId;
     uint32_t data;
   };
-
+public:
   enum event_id_e {
     NEUTRON = 0,
     TRIGGER = 1
@@ -155,7 +155,8 @@ private:
 private:
 
   struct EventAccumulator {
-    std::vector<CompactEvent> neutronEvents;
+    std::vector<std::vector<CompactEvent>> neutronEvents;
+    std::vector<CompactEvent> triggerEvents;
   };
   EventAccumulator _eventAccumulator;
 
@@ -166,17 +167,23 @@ private:
 
   void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
 
-  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
+  long populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
 
-  void parse_File(ByteStream &file);
-  std::vector<uint8_t> parse_Header(ByteStream &file);
-  void parse_BlockList(ByteStream &file, EventAccumulator &eventAccumulator);
-  void parse_Block(ByteStream &file, EventAccumulator &eventAccumulator);
-  void parse_BlockSeparator(ByteStream &file);
-  void parse_DataBuffer(ByteStream &file, EventAccumulator &eventAccumulator);
-  BufferHeader parse_DataBufferHeader(ByteStream &file);
+  void parse_File(FileByteStream &file);
+  std::vector<uint8_t> parse_Header(FileByteStream &file);
+  void parse_BlockList(FileByteStream &file, EventAccumulator &eventAccumulator);
+  void parse_Block(FileByteStream &file, EventAccumulator &eventAccumulator);
+  void parse_BlockSeparator(FileByteStream &file);
+  void parse_DataBuffer(FileByteStream &file, EventAccumulator &eventAccumulator);
+  BufferHeader parse_DataBufferHeader(FileByteStream &file);
 
-  inline void parse_andAddEvent(ByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
+  inline size_t getWsIndex(const CompactEvent &event) {
+    const uint16_t channelIndex = ((event.channel & 0b1111111111100000) >> 1) | (event.channel & 0b0000000000001111);
+    const uint16_t position = std::min(uint16_t(959u), event.position);
+    return channelIndex * 960 + position + 24;
+  }
+
+  inline void parse_andAddEvent(FileByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
     CompactEvent event = {};
     const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
 
@@ -190,6 +197,9 @@ private:
         if (!(trigId == chopperChannel)) {
           return;
         }
+        event.timestamp += bufferHeader.timestamp;
+        //event.channel |= bufferHeader.mcpdId << 8;
+        eventAccumulator.triggerEvents.push_back(event);
       } break;
       case event_id_e::NEUTRON: {
         dataChunk
@@ -197,25 +207,21 @@ private:
             .skipBits<10>()
             .readBits<10>(event.position)
             .readBits<19>(event.timestamp);
+        event.timestamp += bufferHeader.timestamp;
+        event.channel |= bufferHeader.mcpdId << 8;
+
+        const size_t wsIndex = getWsIndex(event);
+        eventAccumulator.neutronEvents[wsIndex].push_back(event);
       } break;
     default:
       // Panic!!!!
       g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
       break;
     }
-
-    event.timestamp += bufferHeader.timestamp;
-    event.channel |= bufferHeader.mcpdId << 8;
-    addEvent(event, eventAccumulator);
-  }
-
-  inline void addEvent(const CompactEvent &event, EventAccumulator &eventAccumulator) {
-    eventAccumulator.neutronEvents.push_back(event);
   }
 
 
-
-  void parse_EndSignature(ByteStream &file);
+  void parse_EndSignature(FileByteStream &file);
 
 
 };

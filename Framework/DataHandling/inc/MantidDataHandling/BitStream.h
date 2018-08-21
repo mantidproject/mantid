@@ -8,9 +8,10 @@
 #include <cxxabi.h>
 #include <limits>
 #include <functional>
+#include <cstring>;
 
 /**
-  ByteStream.h
+  VectorByteStream.h
   Helper to read bytewise and bitwise information from a binary file.
 
   @author Joachim Coenen, Jülich Centre for Neutron Science
@@ -144,9 +145,9 @@ struct DataChunk<bytecount, 0> {
   Buffer buffer;
 };
 
-class ByteStream {
+class FileByteStream {
 public:
-  explicit ByteStream (const std::string &filename, const endian endianess)
+  explicit FileByteStream (const std::string &filename, const endian endianess)
     : stream(filename, std::ios_base::binary), endianess(endianess)
   {
     stream.exceptions(std::ifstream::eofbit);
@@ -163,25 +164,25 @@ private:
 
  public:
   template<typename T>
-  inline ByteStream& readRaw (T &result, const std::size_t &bytecount) {
+  inline FileByteStream& readRaw (T &result, const std::size_t &bytecount) {
     stream.read(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
   template<std::size_t bytecount, typename T>
-  inline ByteStream& readRaw (T& result) {
+  inline FileByteStream& readRaw (T& result) {
     static_assert(sizeof(T) >= bytecount, "byte count of result needs to be greater or equal to bytecount");
     stream.read(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
   template<typename T>
-  inline ByteStream& readRaw (T& result) {
+  inline FileByteStream& readRaw (T& result) {
     return readRaw<sizeof(T)>(result);
   }
 
   template<std::size_t bytecount, typename T>
-  inline ByteStream& read (T& result) {
+  inline FileByteStream& read (T& result) {
     readRaw<bytecount>(result);
     if (endianess != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
       result = convert_endianness(result);
@@ -190,7 +191,7 @@ private:
   }
 
   template<typename T>
-  inline ByteStream& read (T& result) {
+  inline FileByteStream& read (T& result) {
     return read<sizeof(result)>(result);
   }
 
@@ -215,13 +216,13 @@ private:
   bool eof() const { return stream.eof(); }
 
   template<size_t bytecount>
-  inline ByteStream& skip () {
+  inline FileByteStream& skip () {
     stream.ignore(bytecount);
     return *this;
   }
 
   template<typename T>
-  ByteStream& operator>>(T &val) {
+  FileByteStream& operator>>(T &val) {
     return read(val);
   }
 
