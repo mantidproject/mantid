@@ -116,6 +116,10 @@ public:
   void setModerr1(double _dh1err, double _dk1err, double _dl1err);
   void setModerr2(double _dh2err, double _dk2err, double _dl2err);
   void setModerr3(double _dh3err, double _dk3err, double _dl3err);
+  void setMaxOrder(int MaxO);
+  void setCrossTerm(bool CT);
+  int getMaxOrder();
+  bool getCrossTerm();
 
   const Kernel::V3D getModVec(int j) const;
   const Kernel::V3D getVecErr(int j) const;
@@ -209,6 +213,8 @@ protected:
   Kernel::DblMatrix ModHKL;
 
   Kernel::DblMatrix errorModHKL;
+  int MaxOrder;
+  bool CrossTerm;
 
   // Private functions
 

@@ -19,7 +19,7 @@ using Mantid::Kernel::V3D;
  \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
 UnitCell::UnitCell()
     : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
-      errorModHKL(3, 3) {
+      errorModHKL(3, 3), MaxOrder(0), CrossTerm(false) {
   da[0] = da[1] = da[2] = 1.;
   da[3] = da[4] = da[5] = deg2rad * 90.0;
   errorda[0] = errorda[1] = errorda[2] = errorda[3] = errorda[4] = errorda[5] =
@@ -32,7 +32,7 @@ UnitCell::UnitCell()
  with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
 UnitCell::UnitCell(double _a, double _b, double _c)
     : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
-      errorModHKL(3, 3) {
+      errorModHKL(3, 3), MaxOrder(0), CrossTerm(false) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
@@ -50,7 +50,7 @@ UnitCell::UnitCell(double _a, double _b, double _c)
 UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta,
                    double _gamma, const int angleunit)
     : da(6), ra(6), errorda(6), G(3, 3), Gstar(3, 3), B(3, 3), ModHKL(3, 3),
-      errorModHKL(3, 3) {
+      errorModHKL(3, 3), MaxOrder(0), CrossTerm(false) {
   da[0] = _a;
   da[1] = _b;
   da[2] = _c;
@@ -452,6 +452,25 @@ double UnitCell::getDlErr(int j) const { return errorModHKL[2][j - 1]; }
 
 /** Set lattice parameter
  @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
+         void UnitCell::setMaxOrder(int MaxO)
+         {
+             MaxOrder = MaxO;
+         }
+         void UnitCell::setCrossTerm(bool CT)
+         {
+             CrossTerm = CT;
+         }
+         int UnitCell::getMaxOrder()
+         {
+             return MaxOrder;
+         }
+         
+         bool UnitCell::getCrossTerm()
+         {
+             return CrossTerm;
+         }
+
+
 void UnitCell::seta(double _a) {
   da[0] = _a;
   recalculate();

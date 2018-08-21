@@ -2,6 +2,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -274,10 +276,10 @@ void SaveIsawPeaks::exec() {
   // Go in order of run numbers
   std::vector<double> offset1, offset2, offset3;
   if (m_isModulatedStructure) {
-    auto run = ws->mutableRun();
-    offset1 = run.getPropertyValueAsType<std::vector<double>>("Offset1");
-    offset2 = run.getPropertyValueAsType<std::vector<double>>("Offset2");
-    offset3 = run.getPropertyValueAsType<std::vector<double>>("Offset3");
+    Sample &sample = ws->mutableSample();
+    offset1 = sample.getOrientedLattice().getModVec(0);
+    offset2 = sample.getOrientedLattice().getModVec(1);
+    offset3 = sample.getOrientedLattice().getModVec(2);
     out << "9  MODVECTOR ";
     writeOffsets(out, qSign, offset1);
     writeOffsets(out, qSign, offset2);

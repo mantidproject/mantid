@@ -135,12 +135,13 @@ void FindUBUsingIndexedPeakswithSatellites::logLattice(
   }
 }
 int FindUBUsingIndexedPeakswithSatellites::getModulationDimension(V3D &mnp) {
+  // Find the number of modulation vectors that are nonzero
   int ModDim = 0;
-  if (mnp[0] != 0 && ModDim == 0)
+  if (mnp[0] != 0)
     ModDim = 1;
-  if (mnp[1] != 0 && ModDim == 1)
+  if (mnp[1] != 0)
     ModDim = 2;
-  if (mnp[2] != 0 && ModDim == 2)
+  if (mnp[2] != 0)
     ModDim = 3;
   return ModDim;
 }
