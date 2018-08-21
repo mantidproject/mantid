@@ -127,6 +127,9 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
          <property name="verticalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
          </property>
@@ -151,8 +154,11 @@ p, li { white-space: pre-wrap; }
        </item>
        <item>
         <widget class="QPlainTextEdit" name="input_free_text">
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
          <property name="plainText">
-          <string>Please enter any additional information about your problems. 
+          <string>Please enter any additional information about your problems. (Max 3200 characters)
 
 For example:
 Error messages on the screen 
@@ -161,12 +167,19 @@ The functions you used immediately before the problem
 
 Thank you! </string>
          </property>
+         <property name="overwriteMode">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="1">
-          <widget class="QLineEdit" name="input_name_line_edit"/>
+          <widget class="QLineEdit" name="input_name_line_edit">
+           <property name="maxLength">
+            <number>128</number>
+           </property>
+          </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_2">
@@ -176,7 +189,14 @@ Thank you! </string>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="input_email_line_edit"/>
+          <widget class="QLineEdit" name="input_email_line_edit">
+           <property name="maxLength">
+            <number>128</number>
+           </property>
+           <property name="frame">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label">
