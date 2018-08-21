@@ -733,12 +733,14 @@ class TestManager(object):
         self._runner = runner
         self._reporters = output
 
+        nmax = 30
+
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
             test_dir = os.path.abspath(test_loc).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)[:10]
+            full_test_list = self.loadTestsFromDir(test_dir)[:nmax]
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
@@ -746,7 +748,7 @@ class TestManager(object):
             test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))[:10]
+            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))[:nmax]
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes module by module instead of test by test, to avoid issues

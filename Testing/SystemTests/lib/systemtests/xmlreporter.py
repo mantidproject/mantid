@@ -17,19 +17,27 @@ class XmlResultReporter(stresstesting.ResultReporter):
 	def reportStatus(self):
 		return len(self._failures) == 0
 
-	def getResults(self):
+	def getResults(self,stat_array,pid,ncores):
 		# print the command line summary version of the results
 		self._failures.sort()
 		self._skipped.sort()
-		print()
+		# print()
+		print("NVAYTET:in here",self._show_skipped,len(self._skipped))
+
 		if self._show_skipped and len(self._skipped) > 0:
-			print("SKIPPED:")
+			# print("SKIPPED:")
 			for test in self._skipped:
-				print(test.name)
+				# print(test.name)
+				print("NVAYTET1:",pid,test.name,'|',stat_array[pid],'|')
+				stat_array[pid] += test.name + ','
+				print("NVAYTET2:",pid,test.name,'|',stat_array[pid],'|')
+				
+
 		if len(self._failures) > 0:
-			print("FAILED:")
+			# print("FAILED:")
 			for test in self._failures:
-				print(test.name)
+				stat_array[pid+ncores] += test.name + ','
+				# print(test.name)
 
 		# return the xml document version
 		docEl = self._doc.documentElement

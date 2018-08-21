@@ -6,31 +6,31 @@ import os
 import sys
 
 from multiprocessing import Process, Array
-from multiprocessing.managers import BaseManager
+from ctypes import c_wchar_p
 
 # Function to spawn one test manager per CPU
 def testProcess(testDir,saveDir,runner,testsInclude, testsExclude, exclude_in_pr_builds,
-                results_array,process_number,ncores):
+                showskipped, res_array, stat_array, process_number, ncpu):
 
-    reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
+    reporter = stresstesting.XmlResultReporter(showSkipped=showskipped)
 
     mgr = stresstesting.TestManager(testDir,runner,output=[reporter],testsInclude=testsInclude,
                                     testsExclude=testsExclude, exclude_in_pr_builds=exclude_in_pr_builds,
-                                    process_number=process_number,ncores=ncores)
+                                    process_number=process_number,ncores=ncpu)
     try:
         mgr.executeTests()
     except KeyboardInterrupt:
         mgr.markSkipped("KeyboardInterrupt")
 
     # Update the test results in the array shared accross cpus
-    results_array[process_number] = mgr.skippedTests
-    results_array[process_number + ncores] = mgr.failedTests
-    results_array[process_number + 2*ncores] = mgr.totalTests
-    results_array[process_number + 3*ncores] = int(reporter.reportStatus())
+    res_array[process_number] = mgr.skippedTests
+    res_array[process_number + ncpu] = mgr.failedTests
+    res_array[process_number + 2*ncpu] = mgr.totalTests
+    res_array[process_number + 3*ncpu] = int(reporter.reportStatus())
 
     # report the errors
     xml_report = open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number),'w')
-    xml_report.write(reporter.getResults())
+    xml_report.write(reporter.getResults(stat_array,process_number,ncpu))
     xml_report.close()
 
     return
@@ -76,7 +76,7 @@ loglevelChoices=["error", "warning", "notice", "information", "debug"]
 parser.add_option("-l", "--loglevel", dest="loglevel",
                   choices=loglevelChoices,
                   help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
-parser.add_option("-j", "--parallel", dest="parallel",
+parser.add_option("-j", "--parallel", dest="parallel", action="store", type="int",
                   help="The number of instances to run in parallel, like the -j option in ctest. Default is 1")
 parser.add_option("", "--showskipped", dest="showskipped", action="store_true",
                   help="List the skipped tests.")
@@ -116,17 +116,27 @@ if options.makeprop:
 
 # run the tests
 execargs = options.execargs
-runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
+test_runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 
 # Multi-core processes
 ncores = int(options.parallel)
 processes = []
 # Prepare a shared array to hold skipped, failed and total number of tests + status
 results_array = Array('i', 4*ncores)
+# status_array = Array(c_wchar_p, 2*ncores)
+string_tuple = ('',) * (2*ncores)
+# print(string_tuple)
+# exit()
+# for i in range(2*ncores):
+#     string_tuple.append()
+status_array = Array(c_wchar_p, string_tuple)
+# for ip in range(2*ncores):
+    # status_array[ip] = ''
+
 # Prepare ncores processes
 for ip in range(ncores):
-    processes.append(Process(target=testProcess,args=(mtdconf.testDir, mtdconf.saveDir, runner,
-        options.testsInclude, options.testsExclude,options.exclude_in_pr_builds,results_array,ip,ncores)))
+    processes.append(Process(target=testProcess,args=(mtdconf.testDir, mtdconf.saveDir, test_runner,
+        options.testsInclude, options.testsExclude,options.exclude_in_pr_builds,options.showskipped,results_array,status_array,ip,ncores)))
 # Start and join processes
 for p in processes:
     p.start()
@@ -144,6 +154,32 @@ totalTests = sum(results_array[2*ncores:3*ncores])
 # Find minimum of status: if min == 0, then success is False
 success = bool(min(results_array[3*ncores:4*ncores]))
 
+# Report the names of the SKIPPED and FAILED tests
+print()
+for i in range(ncores):
+    print(status_array[i])
+
+print('skipped:',skippedTests)
+print('failed:',failedTests)
+
+if skippedTests > 0:
+    skipped_list = []
+    for i in range(ncores):
+        for test in status_array[i].split(','):
+            skipped_list.append(test)
+    print("SKIPPED:")
+    for test in skipped_list:
+        print(test)
+if failedTests > 0:
+    failed_list = []
+    for i in range(ncores):
+        for test in status_array[i].split(','):
+            failed_list.append(test)
+    print("FAILED:")
+    for test in failed_list:
+        print(test)
+
+# Report global statistics on tests
 print()
 if skippedTests == totalTests:
     print("All tests were skipped")
