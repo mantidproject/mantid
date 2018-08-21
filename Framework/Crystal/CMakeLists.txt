@@ -21,14 +21,12 @@ set ( SRC_FILES
 	src/FindSXPeaksHelper.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
-        src/FindUBUsingIndexedPeakswithSatellites.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/GoniometerAnglesFromPhiRotation.cpp
 	src/HardThresholdBackground.cpp
 	src/HasUB.cpp
 	src/IndexPeaks.cpp
-	src/IndexPeakswithSatellites.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/IntegratePeaksHybrid.cpp
@@ -96,7 +94,6 @@ set ( INC_FILES
 	inc/MantidCrystal/FindSXPeaksHelper.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
-	inc/MantidCrystal/FindUBUsingIndexedPeakswithSatellites.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
 	inc/MantidCrystal/GSLFunctions.h
@@ -105,7 +102,6 @@ set ( INC_FILES
 	inc/MantidCrystal/HasUB.h
 	inc/MantidCrystal/ICluster.h
 	inc/MantidCrystal/IndexPeaks.h
-	inc/MantidCrystal/IndexPeakswithSatellites.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/IntegratePeaksHybrid.h
@@ -170,14 +166,12 @@ set ( TEST_FILES
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h
-        FindUBUsingIndexedPeakswithSatellitesTest.h
 	FindUBUsingLatticeParametersTest.h
 	FindUBUsingMinMaxDTest.h
 	GoniometerAnglesFromPhiRotationTest.h
 	HardThresholdBackgroundTest.h
 	HasUBTest.h
 	IndexPeaksTest.h
-	IndexPeakswithSatellitesTest.h
 	IndexSXPeaksTest.h
 	IntegratePeakTimeSlicesTest.h
 	IntegratePeaksHybridTest.h
