@@ -144,6 +144,7 @@ public:
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;
   void setDetectorInfo(DetectorInfo *detectorInfo);
+  // const DetectorInfo &getDetectorInfo() const {return *m_detectorInfo;}
   bool hasSource() const;
   bool hasSample() const;
   Eigen::Vector3d sourcePosition() const;
@@ -165,7 +166,7 @@ public:
   bool isScanning() const;
 //   std::pair<int64_t, int64_t>
 //   scanInterval(const std::pair<size_t, size_t> &index) const;
-  const std::vector<std::pair<int64_t, int64_t>> &scanIntervals() const;
+  const std::vector<std::pair<int64_t, int64_t>> &scanIntervals() const {return m_scanIntervals;}
   void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   void merge(const ComponentInfo &other);
 

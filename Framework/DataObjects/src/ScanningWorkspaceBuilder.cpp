@@ -196,7 +196,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputComponentInfo = outputWorkspace->mutableComponentInfo();
-  outputComponentInfo.setScanInterval(m_timeRanges[0]);
+  outputComponentInfo.setScanInterval({m_timeRanges[0].first.totalNanoseconds(),m_timeRanges[0].second.totalNanoseconds()});
 
   buildOutputComponentInfo(outputComponentInfo);
 
@@ -234,7 +234,7 @@ void ScanningWorkspaceBuilder::buildOutputComponentInfo(
       create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     auto &mergeComponentInfo = mergeWorkspace->mutableComponentInfo();
-    mergeComponentInfo.setScanInterval(m_timeRanges[i]);
+    mergeComponentInfo.setScanInterval({m_timeRanges[i].first.totalNanoseconds(),m_timeRanges[i].second.totalNanoseconds()});
     outputComponentInfo.merge(mergeComponentInfo);
   }
 }

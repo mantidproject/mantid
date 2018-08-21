@@ -273,89 +273,97 @@ public:
 
   void test_scanCount() {
     DetectorInfo info(PosVec(1), RotVec(1));
-    TS_ASSERT_EQUALS(info.scanCount(0), 1);
+    TS_ASSERT_EQUALS(info.scanCount(), 1);
   }
 
   void test_scanInterval() {
     DetectorInfo info(PosVec(1), RotVec(1));
-    TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
+    TS_ASSERT_EQUALS(info.scanIntervals()[0],
                      (std::pair<int64_t, int64_t>(0, 0)));
   }
 
-  void test_setScanInterval() {
-    DetectorInfo info(PosVec(1), RotVec(1));
-    info.setScanInterval(0, {1, 2});
-    TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
-                     (std::pair<int64_t, int64_t>(1, 2)));
-    info.setScanInterval(0, {1, 3});
-    TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
-                     (std::pair<int64_t, int64_t>(1, 3)));
-  }
+  // void test_setScanInterval() {
+  //   DetectorInfo info(PosVec(1), RotVec(1));
+  //   info.setScanInterval(0, {1, 2});
+  //   TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
+  //                    (std::pair<int64_t, int64_t>(1, 2)));
+  //   info.setScanInterval(0, {1, 3});
+  //   TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
+  //                    (std::pair<int64_t, int64_t>(1, 3)));
+  // }
 
-  void test_setScanInterval_sync() {
+  void test_setScanInterval() {
     DetectorInfo info(PosVec(2), RotVec(2));
     std::pair<int64_t, int64_t> interval(1, 2);
     info.setScanInterval(interval);
-    TS_ASSERT_EQUALS(info.scanInterval({0, 0}), interval);
-    TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
+    TS_ASSERT_EQUALS(info.scanIntervals()[0], interval);
+    // TS_ASSERT_EQUALS(info.scanIntervals({1, 0}), interval);
     interval = {1, 3};
     info.setScanInterval(interval);
-    TS_ASSERT_EQUALS(info.scanInterval({0, 0}), interval);
-    TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
+    TS_ASSERT_EQUALS(info.scanIntervals()[0], interval);
+    // TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
   }
+
+  // void test_setScanInterval_failures() {
+  //   DetectorInfo info(PosVec(1), RotVec(1));
+  //   TS_ASSERT_THROWS_EQUALS(
+  //       info.setScanInterval(0, {1, 1}), const std::runtime_error &err,
+  //       std::string(err.what()),
+  //       "DetectorInfo: cannot set scan interval with start >= end");
+  //   TS_ASSERT_THROWS_EQUALS(
+  //       info.setScanInterval(0, {2, 1}), const std::runtime_error &err,
+  //       std::string(err.what()),
+  //       "DetectorInfo: cannot set scan interval with start >= end");
+  // }
 
   void test_setScanInterval_failures() {
     DetectorInfo info(PosVec(1), RotVec(1));
     TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval(0, {1, 1}), const std::runtime_error &e,
-        std::string(e.what()),
+        info.setScanInterval({1, 1}), const std::runtime_error &err,
+        std::string(err.what()),
         "DetectorInfo: cannot set scan interval with start >= end");
     TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval(0, {2, 1}), const std::runtime_error &e,
-        std::string(e.what()),
+        info.setScanInterval({2, 1}), const std::runtime_error &err,
+        std::string(err.what()),
         "DetectorInfo: cannot set scan interval with start >= end");
   }
 
-  void test_setScanInterval_sync_failures() {
-    DetectorInfo info(PosVec(1), RotVec(1));
-    TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval({1, 1}), const std::runtime_error &e,
-        std::string(e.what()),
-        "DetectorInfo: cannot set scan interval with start >= end");
-    TS_ASSERT_THROWS_EQUALS(
-        info.setScanInterval({2, 1}), const std::runtime_error &e,
-        std::string(e.what()),
-        "DetectorInfo: cannot set scan interval with start >= end");
-  }
+  // void test_setScanInterval_sync_async_fail() {
+  //   DetectorInfo info(PosVec(1), RotVec(1));
+  //   info.setScanInterval({1, 2});
+  //   TS_ASSERT_THROWS_EQUALS(info.setScanInterval(0, {1, 2}),
+  //                           const std::runtime_error &err, std::string(err.what()),
+  //                           "DetectorInfo has been initialized with a "
+  //                           "synchonous scan, cannot set scan interval for "
+  //                           "individual detector.");
+  // }
 
-  void test_setScanInterval_sync_async_fail() {
-    DetectorInfo info(PosVec(1), RotVec(1));
-    info.setScanInterval({1, 2});
-    TS_ASSERT_THROWS_EQUALS(info.setScanInterval(0, {1, 2}),
-                            const std::runtime_error &e, std::string(e.what()),
-                            "DetectorInfo has been initialized with a "
-                            "synchonous scan, cannot set scan interval for "
-                            "individual detector.");
-  }
-
-  void test_setScanInterval_async_sync_fail() {
-    DetectorInfo info(PosVec(1), RotVec(1));
-    info.setScanInterval(0, {1, 2});
-    TS_ASSERT_THROWS_EQUALS(info.setScanInterval({1, 2}),
-                            const std::runtime_error &e, std::string(e.what()),
-                            "DetectorInfo has been initialized with a "
-                            "asynchonous scan, cannot set synchronous scan "
-                            "interval.");
-  }
+  // void test_setScanInterval_async_sync_fail() {
+  //   DetectorInfo info(PosVec(1), RotVec(1));
+  //   info.setScanInterval(0, {1, 2});
+  //   TS_ASSERT_THROWS_EQUALS(info.setScanInterval({1, 2}),
+  //                           const std::runtime_error &err, std::string(err.what()),
+  //                           "DetectorInfo has been initialized with a "
+  //                           "asynchonous scan, cannot set synchronous scan "
+  //                           "interval.");
+  // }
 
   void test_merge_fail_size() {
     DetectorInfo a(PosVec(1), RotVec(1));
     DetectorInfo b(PosVec(2), RotVec(2));
-    a.setScanInterval(0, {0, 1});
-    b.setScanInterval(0, {0, 1});
-    b.setScanInterval(1, {0, 1});
-    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
-                            std::string(e.what()),
+    a.setScanInterval({0, 1});
+    b.setScanInterval({0, 1});
+    // b.setScanInterval(1, {0, 1});
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    
+    // TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &err,
+    //                         std::string(err.what()),
+    //                         "Cannot merge DetectorInfo: size mismatch");
+    TS_ASSERT_THROWS_EQUALS(c.merge(d), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: size mismatch");
   }
 
@@ -363,75 +371,97 @@ public:
     DetectorInfo a(PosVec(1), RotVec(1));
     DetectorInfo b(PosVec(1), RotVec(1));
     DetectorInfo c(PosVec(1), RotVec(1));
+    Mantid::Beamline::ComponentInfo d;
+    Mantid::Beamline::ComponentInfo e;
+    Mantid::Beamline::ComponentInfo f;
+    d.setDetectorInfo(&a);
+    e.setDetectorInfo(&b);
+    f.setDetectorInfo(&c);
     TS_ASSERT_THROWS_EQUALS(
-        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        d.merge(e), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: scan intervals not defined");
-    c.setScanInterval(0, {0, 1});
+    c.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(
-        a.merge(c), const std::runtime_error &e, std::string(e.what()),
+        d.merge(f), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: scan intervals not defined");
-    a.setScanInterval(0, {0, 1});
+    a.setScanInterval({0, 1});
     TS_ASSERT_THROWS_EQUALS(
-        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        d.merge(e), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: scan intervals not defined");
   }
 
-  void test_merge_fail_sync_async_mismatch() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    DetectorInfo b(PosVec(1), RotVec(1));
-    a.setScanInterval(0, {0, 1});
-    b.setScanInterval({0, 1});
-    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
-                            std::string(e.what()),
-                            "Cannot merge DetectorInfo: "
-                            "both or none of the scans "
-                            "must be synchronous");
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
-                            "Cannot merge DetectorInfo: "
-                            "both or none of the scans "
-                            "must be synchronous");
-  }
+  // void test_merge_fail_sync_async_mismatch() {
+  //   DetectorInfo a(PosVec(1), RotVec(1));
+  //   DetectorInfo b(PosVec(1), RotVec(1));
+  //   a.setScanInterval({0, 1});
+  //   b.setScanInterval({0, 1});
+  //   Mantid::Beamline::ComponentInfo c;
+  //   Mantid::Beamline::ComponentInfo d;
+  //   c.setDetectorInfo(&a);
+  //   d.setDetectorInfo(&b);
+  //   TS_ASSERT_THROWS_EQUALS(c.merge(d), const std::runtime_error &err,
+  //                           std::string(err.what()),
+  //                           "Cannot merge DetectorInfo: "
+  //                           "both or none of the scans "
+  //                           "must be synchronous");
+  //   TS_ASSERT_THROWS_EQUALS(d.merge(a), const std::runtime_error &err,
+  //                           std::string(err.what()),
+  //                           "Cannot merge DetectorInfo: "
+  //                           "both or none of the scans "
+  //                           "must be synchronous");
+  // }
 
   void test_merge_fail_monitor_mismatch() {
     DetectorInfo a(PosVec(2), RotVec(2));
     DetectorInfo b(PosVec(2), RotVec(2), {1});
-    a.setScanInterval(0, {0, 1});
-    a.setScanInterval(1, {0, 1});
-    b.setScanInterval(0, {0, 1});
-    b.setScanInterval(1, {0, 1});
+    a.setScanInterval({0, 1});
+    // a.setScanInterval(1, {0, 1});
+    b.setScanInterval({0, 1});
+    // b.setScanInterval(1, {0, 1});
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
     TS_ASSERT_THROWS_EQUALS(
-        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        c.merge(d), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: monitor flags mismatch");
   }
 
-  void test_merge_identical_sync() {
+  void test_merge_identical() {
     DetectorInfo a(PosVec(2), RotVec(2));
     a.setScanInterval({0, 10});
     auto b(a);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
   }
 
-  void test_merge_fail_overlap_sync() {
+  void test_merge_fail_overlap() {
     DetectorInfo a(PosVec(2), RotVec(2));
     a.setScanInterval({0, 10});
     auto b(a);
     b = a;
     b.setScanInterval({-1, 5});
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: "
                             "sync scan intervals "
                             "overlap but not identical");
     b.setScanInterval({1, 5});
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: "
                             "sync scan intervals "
                             "overlap but not identical");
     b.setScanInterval({1, 11});
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: "
                             "sync scan intervals "
                             "overlap but not identical");
@@ -448,93 +478,111 @@ public:
     a.setPosition(0, pos1);
     a.setRotation(0, rot1);
     auto b(a);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
 
     b = a;
     b.setMasked(0, false);
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: "
                             "matching scan interval but "
                             "mask flags differ");
     b.setMasked(0, true);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
 
     b = a;
     b.setPosition(0, pos2);
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: "
                             "matching scan interval but "
                             "positions differ");
     b.setPosition(0, pos1);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
 
     b = a;
     b.setRotation(0, rot2);
-    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+                            std::string(err.what()),
                             "Cannot merge DetectorInfo: "
                             "matching scan interval but "
                             "rotations differ");
     b.setRotation(0, rot1);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
   }
 
-  void test_merge_identical_interval_failures_async() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    a.setScanInterval(0, {0, 1});
-    do_test_merge_identical_interval_failures(a);
-  }
+  // void test_merge_identical_interval_failures_async() {
+  //   DetectorInfo a(PosVec(1), RotVec(1));
+  //   a.setScanInterval({0, 1});
+  //   do_test_merge_identical_interval_failures(a);
+  // }
 
-  void test_merge_identical_interval_failures_sync() {
+  void test_merge_identical_interval_failures() {
     DetectorInfo a(PosVec(1), RotVec(1));
     a.setScanInterval({0, 1});
     do_test_merge_identical_interval_failures(a);
   }
 
-  void test_merge_identical_interval_async() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    a.setScanInterval(0, {0, 1});
-    const auto b(a);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
-    TS_ASSERT(a.isEquivalent(b));
-  }
+  // void test_merge_identical_interval_async() {
+  //   DetectorInfo a(PosVec(1), RotVec(1));
+  //   a.setScanInterval(0, {0, 1});
+  //   const auto b(a);
+  //   TS_ASSERT_THROWS_NOTHING(a.merge(b));
+  //   TS_ASSERT(a.isEquivalent(b));
+  // }
 
-  void test_merge_identical_interval_sync() {
+  void test_merge_identical_interval() {
     DetectorInfo a(PosVec(2), RotVec(2));
     a.setScanInterval({0, 10});
     auto b(a);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
   }
 
   void test_merge_identical_interval_with_monitor() {
     DetectorInfo a(PosVec(2), RotVec(2), {1});
-    a.setScanInterval(0, {0, 1});
-    a.setScanInterval(1, {0, 1});
-    const auto b(a);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    a.setScanInterval({0, 1});
+    a.setScanInterval({0, 1});
+    auto b(a);
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    TS_ASSERT_THROWS_NOTHING(c.merge(d));
     TS_ASSERT(a.isEquivalent(b));
   }
 
   void test_merge_fail_partial_overlap() {
     DetectorInfo a(PosVec(2), RotVec(2));
-    a.setScanInterval(0, {0, 10});
-    a.setScanInterval(1, {0, 10});
+    a.setScanInterval({0, 10});
+    a.setScanInterval({0, 10});
     auto b(a);
-    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    TS_ASSERT_THROWS_NOTHING(d.merge(c));
     b = a;
-    b.setScanInterval(1, {-1, 5});
+    b.setScanInterval({-1, 5});
     TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        d.merge(c), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: scan intervals overlap but not identical");
-    b.setScanInterval(1, {1, 5});
+    b.setScanInterval({1, 5});
     TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        d.merge(c), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: scan intervals overlap but not identical");
-    b.setScanInterval(1, {1, 11});
+    b.setScanInterval({1, 11});
     TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        d.merge(c), const std::runtime_error &err, std::string(err.what()),
         "Cannot merge DetectorInfo: scan intervals overlap but not identical");
   }
 
@@ -542,7 +590,7 @@ public:
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval
     std::pair<int64_t, int64_t> monitorInterval(0, 2);
-    a.setScanInterval(1, monitorInterval);
+    a.setScanInterval(monitorInterval);
     auto b(a);
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
@@ -550,23 +598,28 @@ public:
     b.setPosition(0, pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval(0, interval1);
-    b.setScanInterval(0, interval2);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    
+    TS_ASSERT_THROWS_NOTHING(c.merge(d));
     TS_ASSERT(a.isScanning());
-    TS_ASSERT(!a.isSyncScan());
+    // TS_ASSERT(!a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 3);
-    TS_ASSERT_EQUALS(a.scanCount(0), 2);
+    TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
-    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[0], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[1], interval2);
     TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
     TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
     // Monitor is not scanning
-    TS_ASSERT_EQUALS(a.scanCount(1), 1);
+    TS_ASSERT_EQUALS(a.scanCount(), 1);
   }
 
   void test_merge_sync() {
@@ -580,20 +633,25 @@ public:
     std::pair<int64_t, int64_t> interval2(1, 2);
     a.setScanInterval(interval1);
     b.setScanInterval(interval2);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    
+    TS_ASSERT_THROWS_NOTHING(c.merge(d));
     TS_ASSERT(a.isScanning());
-    TS_ASSERT(a.isSyncScan());
+    // TS_ASSERT(a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 4);
-    TS_ASSERT_EQUALS(a.scanCount(0), 2);
-    TS_ASSERT_EQUALS(a.scanCount(1), 2);
+    TS_ASSERT_EQUALS(a.scanCount(), 2);
+    TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
-    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval({1, 0}), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
-    TS_ASSERT_EQUALS(a.scanInterval({1, 1}), interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[0], interval1);
+    // TS_ASSERT_EQUALS(a.scanIntervals()[0], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[1], interval2);
+    // TS_ASSERT_EQUALS(a.scanIntervals()[1], interval2);
     TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
     TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
   }
@@ -603,7 +661,7 @@ public:
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval
     std::pair<int64_t, int64_t> monitorInterval(0, 2);
-    a.setScanInterval(1, monitorInterval);
+    a.setScanInterval(monitorInterval);
     a.setPosition(1, {0, 0, 0});
     auto b(a);
     Eigen::Vector3d pos1(1, 0, 0);
@@ -612,54 +670,59 @@ public:
     b.setPosition(0, pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval(0, interval1);
-    b.setScanInterval(0, interval2);
+    a.setScanInterval(interval1);
+    b.setScanInterval(interval2);
+    Mantid::Beamline::ComponentInfo c;
+    Mantid::Beamline::ComponentInfo d;
+    c.setDetectorInfo(&a);
+    d.setDetectorInfo(&b);
+    
 
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT_THROWS_NOTHING(c.merge(d));
     auto a0(a);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT_THROWS_NOTHING(c.merge(d));
     TS_ASSERT(a.isEquivalent(a0));
   }
 
-  void test_merge_multiple() {
-    DetectorInfo a(PosVec(2), RotVec(2), {1});
-    // Monitor at index 1, set up for identical interval
-    std::pair<int64_t, int64_t> monitorInterval(0, 3);
-    a.setScanInterval(1, monitorInterval);
-    auto b(a);
-    auto c(a);
-    Eigen::Vector3d pos1(1, 0, 0);
-    Eigen::Vector3d pos2(2, 0, 0);
-    Eigen::Vector3d pos3(3, 0, 0);
-    a.setPosition(0, pos1);
-    b.setPosition(0, pos2);
-    c.setPosition(0, pos3);
-    std::pair<int64_t, int64_t> interval1(0, 1);
-    std::pair<int64_t, int64_t> interval2(1, 2);
-    std::pair<int64_t, int64_t> interval3(2, 3);
-    a.setScanInterval(0, interval1);
-    b.setScanInterval(0, interval2);
-    c.setScanInterval(0, interval3);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
-    TS_ASSERT_THROWS_NOTHING(a.merge(c));
-    TS_ASSERT(a.isScanning());
-    TS_ASSERT(!a.isSyncScan());
-    TS_ASSERT(!a.isEquivalent(b));
-    TS_ASSERT(!a.isEquivalent(c));
-    TS_ASSERT_EQUALS(a.size(), 2);
-    TS_ASSERT_EQUALS(a.scanSize(), 4);
-    TS_ASSERT_EQUALS(a.scanCount(0), 3);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 2}), interval3);
-    TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
-    TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
-    TS_ASSERT_EQUALS(a.position({0, 2}), pos3);
-    // Monitor is not scanning
-    TS_ASSERT_EQUALS(a.scanCount(1), 1);
-  }
+  // void test_merge_multiple() {
+  //   DetectorInfo a(PosVec(2), RotVec(2), {1});
+  //   // Monitor at index 1, set up for identical interval
+  //   std::pair<int64_t, int64_t> monitorInterval(0, 3);
+  //   a.setScanInterval(1, monitorInterval);
+  //   auto b(a);
+  //   auto c(a);
+  //   Eigen::Vector3d pos1(1, 0, 0);
+  //   Eigen::Vector3d pos2(2, 0, 0);
+  //   Eigen::Vector3d pos3(3, 0, 0);
+  //   a.setPosition(0, pos1);
+  //   b.setPosition(0, pos2);
+  //   c.setPosition(0, pos3);
+  //   std::pair<int64_t, int64_t> interval1(0, 1);
+  //   std::pair<int64_t, int64_t> interval2(1, 2);
+  //   std::pair<int64_t, int64_t> interval3(2, 3);
+  //   a.setScanInterval(0, interval1);
+  //   b.setScanInterval(0, interval2);
+  //   c.setScanInterval(0, interval3);
+  //   TS_ASSERT_THROWS_NOTHING(a.merge(b));
+  //   TS_ASSERT_THROWS_NOTHING(a.merge(c));
+  //   TS_ASSERT(a.isScanning());
+  //   TS_ASSERT(!a.isSyncScan());
+  //   TS_ASSERT(!a.isEquivalent(b));
+  //   TS_ASSERT(!a.isEquivalent(c));
+  //   TS_ASSERT_EQUALS(a.size(), 2);
+  //   TS_ASSERT_EQUALS(a.scanSize(), 4);
+  //   TS_ASSERT_EQUALS(a.scanCount(), 3);
+  //   TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
+  //   TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
+  //   TS_ASSERT_EQUALS(a.scanInterval({0, 2}), interval3);
+  //   TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
+  //   TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
+  //   TS_ASSERT_EQUALS(a.position({0, 2}), pos3);
+  //   // Monitor is not scanning
+  //   TS_ASSERT_EQUALS(a.scanCount(), 1);
+  // }
 
-  void test_merge_multiple_sync() {
+  void test_merge_multiple() {
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     auto b(a);
     auto c(a);
@@ -675,55 +738,62 @@ public:
     a.setScanInterval(interval1);
     b.setScanInterval(interval2);
     c.setScanInterval(interval3);
-    TS_ASSERT_THROWS_NOTHING(a.merge(b));
-    TS_ASSERT_THROWS_NOTHING(a.merge(c));
+    Mantid::Beamline::ComponentInfo d;
+    Mantid::Beamline::ComponentInfo e;
+    Mantid::Beamline::ComponentInfo f;
+    d.setDetectorInfo(&a);
+    e.setDetectorInfo(&b);
+    f.setDetectorInfo(&c);
+    
+    TS_ASSERT_THROWS_NOTHING(d.merge(e));
+    TS_ASSERT_THROWS_NOTHING(d.merge(f));
     TS_ASSERT(a.isScanning());
-    TS_ASSERT(a.isSyncScan());
+    // TS_ASSERT(a.isSyncScan());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT(!a.isEquivalent(c));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 6);
-    TS_ASSERT_EQUALS(a.scanCount(0), 3);
-    TS_ASSERT_EQUALS(a.scanCount(1), 3);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval({1, 0}), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 1}), interval2);
-    TS_ASSERT_EQUALS(a.scanInterval({1, 1}), interval2);
-    TS_ASSERT_EQUALS(a.scanInterval({0, 2}), interval3);
-    TS_ASSERT_EQUALS(a.scanInterval({1, 2}), interval3);
+    TS_ASSERT_EQUALS(a.scanCount(), 3);
+    TS_ASSERT_EQUALS(a.scanCount(), 3);
+    TS_ASSERT_EQUALS(a.scanIntervals()[0], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[0], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[1], interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[1], interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[2], interval3);
+    TS_ASSERT_EQUALS(a.scanIntervals()[2], interval3);
     TS_ASSERT_EQUALS(a.position({0, 0}), pos1);
     TS_ASSERT_EQUALS(a.position({0, 1}), pos2);
     TS_ASSERT_EQUALS(a.position({0, 2}), pos3);
   }
 
-  void test_merge_multiple_associative() {
-    // Test that (A + B) + C == A + (B + C)
-    // This is implied by the ordering guaranteed by merge().
-    DetectorInfo a1(PosVec(1), RotVec(1));
-    a1.setRotation(0, Eigen::Quaterniond::Identity());
-    auto b(a1);
-    auto c(a1);
-    Eigen::Vector3d pos1(1, 0, 0);
-    Eigen::Vector3d pos2(2, 0, 0);
-    Eigen::Vector3d pos3(3, 0, 0);
-    a1.setPosition(0, pos1);
-    b.setPosition(0, pos2);
-    c.setPosition(0, pos3);
-    std::pair<int64_t, int64_t> interval1(0, 1);
-    std::pair<int64_t, int64_t> interval2(1, 2);
-    std::pair<int64_t, int64_t> interval3(2, 3);
-    a1.setScanInterval(0, interval1);
-    b.setScanInterval(0, interval2);
-    c.setScanInterval(0, interval3);
-    auto a2(a1);
-    TS_ASSERT_THROWS_NOTHING(a1.merge(b));
-    TS_ASSERT_THROWS_NOTHING(a1.merge(c));
-    TS_ASSERT_THROWS_NOTHING(b.merge(c));
-    TS_ASSERT_THROWS_NOTHING(a2.merge(b));
-    TS_ASSERT(a1.isEquivalent(a2));
-  }
+  // void test_merge_multiple_associative() {
+  //   // Test that (A + B) + C == A + (B + C)
+  //   // This is implied by the ordering guaranteed by merge().
+  //   DetectorInfo a1(PosVec(1), RotVec(1));
+  //   a1.setRotation(0, Eigen::Quaterniond::Identity());
+  //   auto b(a1);
+  //   auto c(a1);
+  //   Eigen::Vector3d pos1(1, 0, 0);
+  //   Eigen::Vector3d pos2(2, 0, 0);
+  //   Eigen::Vector3d pos3(3, 0, 0);
+  //   a1.setPosition(0, pos1);
+  //   b.setPosition(0, pos2);
+  //   c.setPosition(0, pos3);
+  //   std::pair<int64_t, int64_t> interval1(0, 1);
+  //   std::pair<int64_t, int64_t> interval2(1, 2);
+  //   std::pair<int64_t, int64_t> interval3(2, 3);
+  //   a1.setScanInterval(0, interval1);
+  //   b.setScanInterval(0, interval2);
+  //   c.setScanInterval(0, interval3);
+  //   auto a2(a1);
+  //   TS_ASSERT_THROWS_NOTHING(a1.merge(b));
+  //   TS_ASSERT_THROWS_NOTHING(a1.merge(c));
+  //   TS_ASSERT_THROWS_NOTHING(b.merge(c));
+  //   TS_ASSERT_THROWS_NOTHING(a2.merge(b));
+  //   TS_ASSERT(a1.isEquivalent(a2));
+  // }
 
-  void test_merge_multiple_associative_sync() {
+  void test_merge_multiple_associative() {
     // Test that (A + B) + C == A + (B + C)
     // This is implied by the ordering guaranteed by merge().
     DetectorInfo a1(PosVec(1), RotVec(1));
@@ -743,10 +813,18 @@ public:
     b.setScanInterval(interval2);
     c.setScanInterval(interval3);
     auto a2(a1);
-    TS_ASSERT_THROWS_NOTHING(a1.merge(b));
-    TS_ASSERT_THROWS_NOTHING(a1.merge(c));
-    TS_ASSERT_THROWS_NOTHING(b.merge(c));
-    TS_ASSERT_THROWS_NOTHING(a2.merge(b));
+    Mantid::Beamline::ComponentInfo d1;
+    Mantid::Beamline::ComponentInfo d2;
+    Mantid::Beamline::ComponentInfo e;
+    Mantid::Beamline::ComponentInfo f;
+    d1.setDetectorInfo(&a1);
+    d2.setDetectorInfo(&a2);
+    e.setDetectorInfo(&b);
+    f.setDetectorInfo(&c);
+    TS_ASSERT_THROWS_NOTHING(d1.merge(e));
+    TS_ASSERT_THROWS_NOTHING(d1.merge(f));
+    TS_ASSERT_THROWS_NOTHING(e.merge(f));
+    TS_ASSERT_THROWS_NOTHING(d2.merge(e));
     TS_ASSERT(a1.isEquivalent(a2));
   }
 };

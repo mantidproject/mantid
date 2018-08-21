@@ -1648,15 +1648,18 @@ public:
     auto ws2 = makeWorkspaceWithDetectors(1, 1);
     auto &detInfo1 = ws1->mutableDetectorInfo();
     auto &detInfo2 = ws2->mutableDetectorInfo();
+    // auto &compInfo2 = ws2->mutableComponentInfo();
     detInfo1.setPosition(0, {1, 0, 0});
     detInfo2.setPosition(0, {2, 0, 0});
-    detInfo1.setScanInterval(0, {10, 20});
-    detInfo2.setScanInterval(0, {20, 30});
+    detInfo1.setScanInterval({10, 20});
+    detInfo2.setScanInterval({20, 30});
 
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2);
-    auto &detInfo = merged->mutableDetectorInfo();
-    detInfo.merge(detInfo2);
+    // auto &detInfo = merged->mutableDetectorInfo();
+    // detInfo.merge(detInfo2);
+    merged->mutableComponentInfo().merge(ws2->mutableComponentInfo());
+    
 
     // Setting IndexInfo without spectrum definitions will set up a 1:1 mapping
     // such that each spectrum corresponds to 1 time index of a detector.

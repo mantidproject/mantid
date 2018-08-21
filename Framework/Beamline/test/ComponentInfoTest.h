@@ -845,7 +845,7 @@ public:
 
   void test_scan_count_no_scanning() {
     ComponentInfo info;
-    TS_ASSERT_EQUALS(info.scanCount(0), 1);
+    TS_ASSERT_EQUALS(info.scanCount(), 1);
   }
 
   void test_unmerged_is_not_scanning() {
@@ -949,11 +949,11 @@ public:
     ComponentInfo &b = *std::get<0>(infos2);
     b.setScanInterval({0, 10});
 
-    TSM_ASSERT_EQUALS("Scan size should be 1", b.scanCount(0), 1);
+    TSM_ASSERT_EQUALS("Scan size should be 1", b.scanCount(), 1);
     b.merge(a);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
     TSM_ASSERT_EQUALS("Intervals identical. Scan size should not grow",
-                      b.scanCount(0), 1)
+                      b.scanCount(), 1)
   }
 
   void test_merge_identical_interval_when_positions_differ() {
@@ -1048,22 +1048,22 @@ public:
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), a.size() + b.size());
-    TS_ASSERT_EQUALS(a.scanCount(0), 2);
+    TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
     auto index1 =
         std::pair<size_t, size_t>(0 /*static index*/, 0 /*time index*/);
     auto index2 =
         std::pair<size_t, size_t>(0 /*static index*/, 1 /*time index*/);
-    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index1.second], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index2.second], interval2);
     TS_ASSERT_EQUALS(a.position(index1), pos1);
     TS_ASSERT_EQUALS(a.position(index2), pos2);
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 2);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval(index1), interval1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(), 2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[index1.second], interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[index2.second], interval2);
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index1), pos1);
     TS_ASSERT_EQUALS(mergeDetectorInfo.position(index2), pos2);
   }
@@ -1090,23 +1090,23 @@ public:
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
-    TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
+    TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
     auto index1 =
         std::pair<size_t, size_t>(a.root() /*static index*/, 0 /*time index*/);
     auto index2 =
         std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
-    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index1.second], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index2.second], interval2);
     TS_ASSERT_EQUALS(a.position(index1), pos1);
     TS_ASSERT_EQUALS(a.position(index2), pos2);
 
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 2);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(), 1 * 2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[0], interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[1], interval2);
     // Check that the child detectors have been positioned according to the
     // correct offsets
     const auto rootOffsetA = pos1 - rootPosA;
@@ -1136,22 +1136,22 @@ public:
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 2 * 2);
-    TS_ASSERT_EQUALS(a.scanCount(a.root()), 2);
+    TS_ASSERT_EQUALS(a.scanCount(), 2);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
     auto index1 =
         std::pair<size_t, size_t>(a.root() /*static index*/, 0 /*time index*/);
     auto index2 =
         std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
-    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index1.second], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index2.second], interval2);
     TS_ASSERT(a.rotation(index1).isApprox(rot1));
     TS_ASSERT(a.rotation(index2).isApprox(rot2));
 
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 2);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(), 1 * 2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[0], interval1);
     // Check detectors moved correctly as a result of root rotation
     // Detector at x=1,y=0,z=0 rotated around root at x=0,y=0,z=0 with rotation
     // vector y=1, 90 degrees
@@ -1187,7 +1187,7 @@ public:
     TS_ASSERT(a.isScanning());
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanSize(), 2 * 3);
-    TS_ASSERT_EQUALS(a.scanCount(a.root()), 3);
+    TS_ASSERT_EQUALS(a.scanCount(), 3);
     // Note that the order is not guaranteed, currently these are just in the
     // order in which the are merged.
     auto index1 =
@@ -1196,19 +1196,19 @@ public:
         std::pair<size_t, size_t>(a.root() /*static index*/, 1 /*time index*/);
     auto index3 =
         std::pair<size_t, size_t>(a.root() /*static index*/, 2 /*time index*/);
-    TS_ASSERT_EQUALS(a.scanInterval(index1), interval1);
-    TS_ASSERT_EQUALS(a.scanInterval(index2), interval2);
-    TS_ASSERT_EQUALS(a.scanInterval(index3), interval3);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index1.second], interval1);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index2.second], interval2);
+    TS_ASSERT_EQUALS(a.scanIntervals()[index3.second], interval3);
     TS_ASSERT_EQUALS(a.position(index1), pos1);
     TS_ASSERT_EQUALS(a.position(index2), pos2);
     TS_ASSERT_EQUALS(a.position(index3), pos3);
 
     // Test Detector info is synched internally
     const DetectorInfo &mergeDetectorInfo = *std::get<1>(infos1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(0), 1 * 3);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 0}), interval1);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 1}), interval2);
-    TS_ASSERT_EQUALS(mergeDetectorInfo.scanInterval({0, 2}), interval3);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanCount(), 1 * 3);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[0], interval1);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[1], interval2);
+    TS_ASSERT_EQUALS(mergeDetectorInfo.scanIntervals()[2], interval3);
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

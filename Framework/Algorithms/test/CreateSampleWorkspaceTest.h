@@ -540,7 +540,7 @@ public:
     const auto radiansToDegrees = 180.0 / M_PI;
 
     // The centre pixel should go from 0 -> 10 degrees, all at the same l2
-    for (size_t j = 0; j < detectorInfo.scanCount(centreDetector); ++j) {
+    for (size_t j = 0; j < detectorInfo.scanCount(); ++j) {
       const auto index = std::pair<size_t, size_t>(centreDetector, j);
       TS_ASSERT_DELTA(10.0, detectorInfo.l2(index), 1e-10);
       TS_ASSERT_DELTA(j, detectorInfo.twoTheta(index) * radiansToDegrees,

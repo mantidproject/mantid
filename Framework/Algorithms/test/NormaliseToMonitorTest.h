@@ -10,6 +10,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -511,14 +512,16 @@ public:
         N_DET, N_BINS, true);
     auto &detInfo1 = ws1->mutableDetectorInfo();
     auto &detInfo2 = ws2->mutableDetectorInfo();
-    for (size_t i = 0; i < N_DET; ++i) {
-      detInfo1.setScanInterval(i, {10, 20});
-      detInfo2.setScanInterval(i, {20, 30});
-    }
+    // auto &cmpInfo2 = ws2->mutableComponentInfo();
+    
+    // for (size_t i = 0; i < N_DET; ++i) {
+      detInfo1.setScanInterval({10, 20});
+      detInfo2.setScanInterval({20, 30});
+    // }
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
-    auto &detInfo = merged->mutableDetectorInfo();
-    detInfo.merge(detInfo2);
+    auto &cmpInfo = merged->mutableComponentInfo();
+    cmpInfo.merge(ws2->mutableComponentInfo());
     merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
 
     NormaliseToMonitor alg;

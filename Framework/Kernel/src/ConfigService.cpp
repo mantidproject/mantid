@@ -647,7 +647,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#algorithms.retained=90\n\n";
     filestr
         << "## Set the maximum number of cores used to run algorithms over\n";
-    filestr << "#MultiThreaded.MaxCores=4\n\n";
+    filestr << "MultiThreaded.MaxCores=2\n\n";
     filestr << "##\n";
     filestr << "## FACILITY AND INSTRUMENT\n";
     filestr << "##\n\n";

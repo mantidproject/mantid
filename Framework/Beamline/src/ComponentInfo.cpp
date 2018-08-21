@@ -601,24 +601,24 @@ void ComponentInfo::checkNoTimeDependence() const {
         "beamline has time-dependent (moving) components.");
 }
 
-/**
- * Retrieve the scan interval for a component at a time index
- * @param index component index, time index pair
- * @return offset interval times since epoch
- */
-const std::vector<std::pair<int64_t, int64_t>> &ComponentInfo::scanIntervals() const {
-//   if (!m_scanIntervals) {
-// // //     return &{0, 0};
-//     std::vector<std::pair<int64_t, int64_t>>* dummy_vec = new std::vector<std::pair<int64_t, int64_t>> (1);
-// //     std::pair<int64_t, int64_t> dummy_pair = {0,0};
-// //     dummy_vec[0] = dummy_pair;
-//     dummy_vec->push_back({0, 0});
-//     return *dummy_vec;
-// //     return new std::vector<std::pair<int64_t, int64_t>> {{0,0}};
-//   } else {
-    return m_scanIntervals;
-  // }
-}
+// /**
+//  * Retrieve the scan interval for a component at a time index
+//  * @param index component index, time index pair
+//  * @return offset interval times since epoch
+//  */
+// const std::vector<std::pair<int64_t, int64_t>> &ComponentInfo::scanIntervals() const {
+// //   if (!m_scanIntervals) {
+// // // //     return &{0, 0};
+// //     std::vector<std::pair<int64_t, int64_t>>* dummy_vec = new std::vector<std::pair<int64_t, int64_t>> (1);
+// // //     std::pair<int64_t, int64_t> dummy_pair = {0,0};
+// // //     dummy_vec[0] = dummy_pair;
+// //     dummy_vec->push_back({0, 0});
+// //     return *dummy_vec;
+// // //     return new std::vector<std::pair<int64_t, int64_t>> {{0,0}};
+// //   } else {
+//     return m_scanIntervals;
+//   // }
+// }
 
 // std::pair<int64_t, int64_t>
 // ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const {

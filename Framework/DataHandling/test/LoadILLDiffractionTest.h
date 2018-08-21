@@ -312,30 +312,50 @@ public:
         "2015-04-16T16:40:34.289000000";
     const std::string EXPECTED_END_TIME = "2015-04-16T16:41:11.956000000";
 
-    for (size_t i = 0; i < detInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(detInfo.scanCount(i), SCAN_COUNT)
+    TS_ASSERT_EQUALS(detInfo.scanCount(), SCAN_COUNT)
 
-      const auto &startRange = detInfo.scanInterval({i, 0});
-      const auto &secondRange = detInfo.scanInterval({i, 1});
-      const auto &secondFromEndRange =
-          detInfo.scanInterval({i, detInfo.scanCount(i) - 2});
-      const auto &endRange =
-          detInfo.scanInterval({i, detInfo.scanCount(i) - 1});
+    const auto &startRange = detInfo.scanIntervals()[0];
+    const auto &secondRange = detInfo.scanIntervals()[1];
+    const auto &secondFromEndRange =
+        detInfo.scanIntervals()[detInfo.scanCount() - 2];
+    const auto &endRange =
+        detInfo.scanIntervals()[detInfo.scanCount() - 1];
 
-      TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
-      TS_ASSERT_EQUALS(startRange.second.toISO8601String(),
-                       EXPECTED_SECOND_TIME)
-      TS_ASSERT_EQUALS(secondRange.first.toISO8601String(),
-                       EXPECTED_SECOND_TIME)
-      TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
-                       EXPECTED_SECOND_FROM_END_TIME)
-      TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
-                       EXPECTED_SECOND_FROM_END_TIME)
-      TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
-    }
+    TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
+    TS_ASSERT_EQUALS(startRange.second.toISO8601String(),
+                     EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(secondRange.first.toISO8601String(),
+                     EXPECTED_SECOND_TIME)
+    TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
+                     EXPECTED_SECOND_FROM_END_TIME)
+    TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
+                     EXPECTED_SECOND_FROM_END_TIME)
+    TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
+
+    // for (size_t i = 0; i < detInfo.size(); ++i) {
+    //   TS_ASSERT_EQUALS(detInfo.scanCount(), SCAN_COUNT)
+
+    //   const auto &startRange = detInfo.scanInterval({i, 0});
+    //   const auto &secondRange = detInfo.scanInterval({i, 1});
+    //   const auto &secondFromEndRange =
+    //       detInfo.scanInterval({i, detInfo.scanCount(i) - 2});
+    //   const auto &endRange =
+    //       detInfo.scanInterval({i, detInfo.scanCount(i) - 1});
+
+    //   TS_ASSERT_EQUALS(startRange.first.toISO8601String(), EXPECTED_START_TIME)
+    //   TS_ASSERT_EQUALS(startRange.second.toISO8601String(),
+    //                    EXPECTED_SECOND_TIME)
+    //   TS_ASSERT_EQUALS(secondRange.first.toISO8601String(),
+    //                    EXPECTED_SECOND_TIME)
+    //   TS_ASSERT_EQUALS(secondFromEndRange.second.toISO8601String(),
+    //                    EXPECTED_SECOND_FROM_END_TIME)
+    //   TS_ASSERT_EQUALS(endRange.first.toISO8601String(),
+    //                    EXPECTED_SECOND_FROM_END_TIME)
+    //   TS_ASSERT_EQUALS(endRange.second.toISO8601String(), EXPECTED_END_TIME)
+    // }
 
     // Check monitor does not move
-    for (size_t j = 0; j < detInfo.scanCount(0); ++j) {
+    for (size_t j = 0; j < detInfo.scanCount(); ++j) {
       TS_ASSERT(detInfo.isMonitor({0, j}))
       TS_ASSERT_EQUALS(detInfo.position({0, j}), detInfo.position({0, 0}))
     }
@@ -346,7 +366,7 @@ public:
     const double TUBE_128_FIRST_ANGLE = 147.496;
 
     for (size_t i = 0; i < NUMBER_OF_TUBES; ++i) {
-      for (size_t j = 0; j < detInfo.scanCount(i); ++j) {
+      for (size_t j = 0; j < detInfo.scanCount(); ++j) {
         // Find two pixels just above and just below the centre, and take their
         // average position as the tube centre
         auto belowCentrePixel = i * NUMBER_OF_PIXELS + NUMBER_OF_PIXELS / 2;
