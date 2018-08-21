@@ -60,8 +60,8 @@ void addColorsToTopAndBottomTextures(
     topText[ti + 2] = static_cast<char>(col.blue());
     col = colors[column[bank.nY - 1]];
     bottomText[ti] = static_cast<char>(col.red());
-    bottomText[ti + 1] = static_cast<char>(col.red());
-    bottomText[ti + 2] = static_cast<char>(col.red());
+    bottomText[ti + 1] = static_cast<char>(col.green());
+    bottomText[ti + 2] = static_cast<char>(col.blue());
   }
 }
 
@@ -252,7 +252,6 @@ void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
   for (auto layerIndex : layers) {
     auto bank = m_compInfo.quadrilateralComponent(layerIndex);
     const auto &children = m_compInfo.children(layerIndex);
-    // add colors to left/right faces
     addColorsToLeftAndRightTextures(m_compInfo, bank, nZ, li, children, colors,
                                     textures[2], textures[3]);
     addColorsToTopAndBottomTextures(m_compInfo, bank, nZ - li - 1, children,
