@@ -47,7 +47,7 @@ def qapp():
 def main():
     app = qapp()
     try:
-        global muonGUI = MuonAnalysis2Gui()
+        muonGUI = MuonAnalysis2Gui()
         muonGUI.resize(700, 700)
         muonGUI.show()
         app.exec_()
