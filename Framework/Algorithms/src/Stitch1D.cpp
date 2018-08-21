@@ -3,6 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/SortXAxis.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -41,32 +42,11 @@ bool isNonzero(double i) { return (0 != i); }
  @return A shared pointer to the resulting MatrixWorkspace
  */
 void sortXAxis(MatrixWorkspace_sptr &ws) {
-  // using a std::multimap (keys are sorted)
-  std::multimap<double, double> sorter;
-  double x_value;
-  const int nHists = static_cast<int>(ws->getNumberHistograms());
-  for (int i = 0; i < nHists; ++i) {
-    for (size_t k = 0; k < ws->size(); ++k) {
-      x_value = ws->x(i)[k];
-      sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
-      sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
-      // histograms: no recalculation of Dx implemented -> skip
-      if (ws->hasDx(i) && !ws->isHistogramData())
-        sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
-    }
-    int l = 0;
-    auto it = sorter.cbegin();
-    while (it != sorter.cend()) {
-      ws->mutableX(i)[l] = it->first;
-      ws->mutableY(i)[l] = it->second;
-      ws->mutableE(i)[l] = (++it)->second;
-      // histograms: no recalculation of Dx implemented -> skip
-      if (ws->hasDx(i) && !ws->isHistogramData())
-        ws->mutableDx(i)[l] = (++it)->second;
-      ++l;
-      ++it;
-    }
-  }
+  Mantid::Algorithms::SortXAxis alg;
+  alg.initialize();
+  alg.setProperty("InputWorkspace", ws);
+  alg.setProperty("OutputWorkspace", "outputSearch");
+  alg.execute();
 }
 } // namespace
 
@@ -658,6 +638,10 @@ void Stitch1D::exec() {
     if (!result)
       g_log.error("Could not retrieve joined workspace.");
     sortXAxis(result);
+    MatrixWorkspace_sptr outputSearch =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("outputSearch"));
+    result = outputSearch;
   }
   setProperty("OutputWorkspace", result);
   setProperty("OutScaleFactor", m_scaleFactor);
