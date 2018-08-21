@@ -11,4 +11,10 @@ UI & Usability Changes
 
 - Added time standard deviation to the sample log dialog
 
+Project Recovery
+----------------
+Changes
+#######
+- Project Recovery will no longer save groups, this fixes an issue where it would cause crashes if you deleted a workspace from a group.
+
 :ref:`Release 3.14.0 <v3.14.0>`

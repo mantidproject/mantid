@@ -499,17 +499,6 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     return;
   }
 
-  // Handle group workspaces, and make sure they are last.
-  for (auto i = 0u; i < wsHandles.size(); ++i) {
-    const auto wsHistory = wsHandles.at(i)->getHistory();
-    if (wsHistory.getAlgorithmHistories().size() == 1 &&
-        wsHistory.getAlgorithmHistories()[0].name() ==
-            "GroupWorkspaces") {
-      wsHandles.emplace_back(wsHandles[i]);
-      wsHandles.erase(i);
-    }
-  }
-
   static auto startTime =
       Mantid::Kernel::UsageService::Instance().getStartTime().toISO8601String();
 
@@ -532,6 +521,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
+    alg->setProperty("IgnoreGroups", true);
 
     alg->execute();
   }

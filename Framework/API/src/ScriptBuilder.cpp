@@ -31,10 +31,11 @@ const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity,
-                             bool appendTimestamp)
+                             bool appendTimestamp, bool ignoreGroupWorkspaces)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp) {}
+      m_timestampCommands(appendTimestamp),
+      m_ignoreGroups(ignoreGroupWorkspaces) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -87,13 +88,21 @@ void ScriptBuilder::writeHistoryToStream(
     }
   } else {
     // create the string for this algorithm
-    os << buildAlgorithmString(*algHistory);
-    if (m_timestampCommands) {
-      os << " # " << algHistory->executionDate().toISO8601String();
+    if (!m_ignoreGroups || algHistory->name() != "GroupWorkspaces") {
+      createStringForAlg(os, algHistory);
     }
-
-    os << "\n";
   }
+}
+
+void ScriptBuilder::createStringForAlg(
+    std::ostringstream &os,
+    boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory) {
+  os << buildAlgorithmString(*algHistory);
+  if (m_timestampCommands) {
+    os << " # " << algHistory->executionDate().toISO8601String();
+  }
+
+  os << "\n";
 }
 
 /**
