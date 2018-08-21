@@ -18,13 +18,12 @@ are "1N" representing it as the format that this will load.
 Errors
 ######
 
-The error for each histogram count is set as the square root of the
-number of counts.
+For errors we use the Poisson distribution.
 
 Child Algorithms used
 #####################
 
-The ChildAlgorithms used by LoadMuonNexus are:
+The ChildAlgorithms used by LoadPSIMuonBin are:
 
 * :ref:`algm-AddSampleLog-v1` - It adds to the Sample Log of the workspace
 
