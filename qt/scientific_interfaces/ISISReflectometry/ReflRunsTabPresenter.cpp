@@ -913,17 +913,6 @@ void ReflRunsTabPresenter::stopMonitor() {
   updateViewWhenMonitorStopped();
 }
 
-void ReflRunsTabPresenter::restartMonitorAfterError(const std::string &what) {
-  if (!userTerminatedError(what))
-    startMonitor();
-}
-
-bool ReflRunsTabPresenter::userTerminatedError(const std::string &what) {
-  if (what == "Algorithm terminated")
-    return true;
-  return false;
-}
-
 /** Handler called when the monitor algorithm finishes
  */
 void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
@@ -938,10 +927,10 @@ void ReflRunsTabPresenter::finishHandle(const IAlgorithm *alg) {
 void ReflRunsTabPresenter::errorHandle(const IAlgorithm *alg,
                                        const std::string &what) {
   UNUSED_ARG(alg);
+  UNUSED_ARG(what);
   stopObserving(m_monitorAlg);
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
-  restartMonitorAfterError(what);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
