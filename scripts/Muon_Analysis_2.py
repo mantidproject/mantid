@@ -33,6 +33,7 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
     # cancel algs if window is closed
     def closeEvent(self, event):
         self.dockWidget.closeEvent(event)
+        global muonGUI
         muonGUI = None
 
 
@@ -47,6 +48,7 @@ def qapp():
 def main():
     app = qapp()
     try:
+        global muonGUI
         muonGUI = MuonAnalysis2Gui()
         muonGUI.resize(700, 700)
         muonGUI.show()
