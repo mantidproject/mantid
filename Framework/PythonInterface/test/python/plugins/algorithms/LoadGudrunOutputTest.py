@@ -54,13 +54,13 @@ class LoadGudrunOutputTest(unittest.TestCase):
         self.assertEqual(actual.getNumberHistograms(), 1)
 
     def test_one_column_data_file(self):
-        with tempfile.NamedTemporaryFile(suffix='.dcs01') as tmp:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.dcs01') as tmp:
             tmp.write('1234\n2345\n3456\n4567')
             tmp.close()
             self.assertRaises(ValueError, LoadGudrunOutput, tmp.name, 'out_ws')
 
     def test_even_column_data_file(self):
-        with tempfile.NamedTemporaryFile(suffix='.dcs01') as tmp:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.dcs01') as tmp:
             tmp.write('1234 2345 3456 4567\n1234 2345 3456 4567')
             tmp.close()
             self.assertRaises(ValueError, LoadGudrunOutput, tmp.name, 'out_ws')
