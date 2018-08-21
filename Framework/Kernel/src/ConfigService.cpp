@@ -2048,7 +2048,6 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   return "";
 }
 
-/** Sets the log level priority for the File log channel
 /** Sets the log level priority for all logging channels
  * @param logLevel the integer value of the log level to set, 1=Critical,
  * 7=Debug
