@@ -10,9 +10,10 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -26,15 +27,19 @@ using namespace DataObjects;
 using namespace HistogramData;
 
 namespace {
-bool isIDF(const std::string filename, const std::string instrumentname) {
-  return boost::regex_match(filename,
-                            boost::regex(".+\\.(xml)$", boost::regex::icase)) ||
+bool isIDF(const std::string &filename, const std::string &instrumentname) {
+  FileDescriptor descriptor(filename);
+  return ((descriptor.isAscii() && descriptor.extension() == ".xml")) ||
          !instrumentname.empty();
 }
 
-bool isNexus(const std::string filename) {
-  return boost::regex_match(
-      filename, boost::regex(".+\\.(hdf5|nxs)$", boost::regex::icase));
+bool isNexus(const std::string &filename) {
+  if (!FileDescriptor(filename).isAscii(filename)) {
+    NexusDescriptor descriptor(filename);
+    return descriptor.isHDF(filename) &&
+           descriptor.classTypeExists("NXinstrument");
+  }
+  return false;
 }
 } // namespace
 
@@ -124,6 +129,8 @@ void LoadEmptyInstrument::exec() {
   } else if (isIDF(filename, instrumentname)) {
     MatrixWorkspace_sptr ws = this->runLoadInstrument(filename, instrumentname);
     instrument = ws->getInstrument();
+  } else {
+    throw std::invalid_argument("Input " + filename + " cannot be read");
   }
 
   // Get number of detectors stored in instrument

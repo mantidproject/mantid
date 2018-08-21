@@ -46,6 +46,7 @@ public:
 
   void testExecSLS() {
     LoadEmptyInstrument loaderSLS;
+    loaderSLS.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT(loaderSLS.isInitialized());
@@ -62,7 +63,7 @@ public:
                                  loaderSLS.getPropertyValue("OutputWorkspace"));
     TS_ASSERT(!result.compare(wsName));
 
-    TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
+    loaderSLS.execute();
 
     TS_ASSERT(loaderSLS.isExecuted());
 
