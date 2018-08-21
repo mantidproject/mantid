@@ -499,23 +499,24 @@ class ResultReporter(object):
         '''
         Print the results to standard out
         '''
-        nstars = 80
-        console_output = ('*' * nstars) + '\n'
-        print_list = ['test_name','filename','test_date','host_name','environment',
-                      'status','time_taken','memory footprint increase','output','err']
-        for key in print_list:
-            key_not_found = True
-            for i in range(len(result._results)):
-                if key == result._results[i][0]:
-                    console_output += key+": "+result._results[i][1]+'\n'
-                    key_not_found = False
-            if key_not_found:
-                try:
-                    console_output += key+": "+getattr(result,key)+'\n'
-                except AttributeError:
-                    pass
-        console_output += ('*' * nstars) + '\n'
-        print(console_output)
+        if self._verbose:
+            nstars = 80
+            console_output = ('*' * nstars) + '\n'
+            print_list = ['test_name','filename','test_date','host_name','environment',
+                          'status','time_taken','memory footprint increase','output','err']
+            for key in print_list:
+                key_not_found = True
+                for i in range(len(result._results)):
+                    if key == result._results[i][0]:
+                        console_output += key+": "+result._results[i][1]+'\n'
+                        key_not_found = False
+                if key_not_found:
+                    try:
+                        console_output += key+": "+getattr(result,key)+'\n'
+                    except AttributeError:
+                        pass
+            console_output += ('*' * nstars) + '\n'
+            print(console_output)
         return
 
 #########################################################################
@@ -725,22 +726,22 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 testsInclude=None, testsExclude=None, exclude_in_pr_builds=None,
-                 process_number=0,ncores=1):
+                 verbose=False, testsInclude=None, testsExclude=None,
+                 exclude_in_pr_builds=None, process_number=0, ncores=1):
         '''Initialize a class instance'''
 
         # Runners and reporters
         self._runner = runner
         self._reporters = output
-
-        nmax = 30
+        for r in self._reporters:
+            r._verbose = verbose
 
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
             test_dir = os.path.abspath(test_loc).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)[:nmax]
+            full_test_list = self.loadTestsFromDir(test_dir)[:20]
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
@@ -748,7 +749,7 @@ class TestManager(object):
             test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))[:nmax]
+            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))[:20]
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes module by module instead of test by test, to avoid issues
@@ -786,16 +787,16 @@ class TestManager(object):
                         self._tests.extend(modtests[key])
                     break
 
-        print("========================================")
-        print("CPU %i will execute the following tests:" % process_number)
-        for t in self._tests:
-            print(t._fqtestname)
-        print("========================================")
-        
-
         if len(self._tests) == 0:
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
             exit(2)
+
+        if verbose:
+            print("========================================")
+            print("CPU %i will execute the following tests:" % process_number)
+            for t in self._tests:
+                print(t._fqtestname)
+            print("========================================")
 
         self._passedTests = 0
         self._skippedTests = 0
@@ -1033,8 +1034,10 @@ class MantidFrameworkConfig:
         self.__moveFile(self.__userPropsFile, self.__userPropsFileSystest)
         self.__moveFile(self.__userPropsFileBackup, self.__userPropsFile)
 
-
-#==============================================================================
+#########################################################################
+# Function to return a string describing the environment
+# (platform) of this test.
+#########################################################################
 def envAsString():
     """Returns a string describing the environment
     (platform) of this test."""
@@ -1047,3 +1050,40 @@ def envAsString():
     else:
         env = platform.dist()[0] + "-" + platform.dist()[1]
     return env
+
+#########################################################################
+# Function to spawn one test manager per CPU
+#########################################################################
+def testProcess(testDir,saveDir,runner,testsInclude, testsExclude,
+                exclude_in_pr_builds, showskipped, verbose, res_array,
+                stat_dict, process_number, ncpu):
+
+    reporter = XmlResultReporter(showSkipped=showskipped)
+
+    mgr = TestManager(testDir,runner,output=[reporter],
+                      verbose=verbose,
+                      testsInclude=testsInclude,
+                      testsExclude=testsExclude,
+                      exclude_in_pr_builds=exclude_in_pr_builds,
+                      process_number=process_number,ncores=ncpu)
+    try:
+        mgr.executeTests()
+    except KeyboardInterrupt:
+        mgr.markSkipped("KeyboardInterrupt")
+
+    # Update the test results in the array shared accross cpus
+    res_array[process_number] = mgr.skippedTests
+    res_array[process_number + ncpu] = mgr.failedTests
+    res_array[process_number + 2*ncpu] = mgr.totalTests
+    res_array[process_number + 3*ncpu] = int(reporter.reportStatus())
+
+    # Report the errors
+    local_dict = dict()
+    xml_report = open(os.path.join(saveDir,
+                      "TEST-systemtests-%i.xml" % process_number),'w')
+    xml_report.write(reporter.getResults(local_dict))
+    xml_report.close()
+    for key in local_dict.keys():
+        stat_dict[key] = local_dict[key]
+
+    return
