@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_MULTIPLYMDTEST_H_
 #define MANTID_MDALGORITHMS_MULTIPLYMDTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 #include <cxxtest/TestSuite.h>

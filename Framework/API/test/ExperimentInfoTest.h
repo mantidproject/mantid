@@ -1,21 +1,21 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -156,14 +156,12 @@ public:
 
   void test_GetSetSample() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.sample());
     ws.mutableSample().setName("test");
     TS_ASSERT_EQUALS(ws.sample().getName(), "test");
   }
 
   void test_GetSetRun() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.run());
     ws.mutableRun().setProtonCharge(1.234);
     TS_ASSERT_DELTA(ws.run().getProtonCharge(), 1.234, 0.001);
   }
@@ -526,7 +524,8 @@ public:
     // iterator to browse through the multimap: paramInfoFromIDF
     std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
-              std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
+              std::unordered_multimap<std::string, fromToEntry>::iterator>
+        ret;
 
     for (const auto &idfIdentifier : idfIdentifiers) {
       ret = idfFiles.equal_range(idfIdentifier);
@@ -716,9 +715,9 @@ public:
   }
 
   /**
-  * Test declaring an ExperimentInfo property and retrieving as const or
-  * non-const
-  */
+   * Test declaring an ExperimentInfo property and retrieving as const or
+   * non-const
+   */
   void testGetProperty_const_sptr() {
     const std::string eiName = "InputEi";
     ExperimentInfo_sptr eiInput(new ExperimentInfo());

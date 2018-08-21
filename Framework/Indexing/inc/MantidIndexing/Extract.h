@@ -37,12 +37,13 @@ class SpectrumIndexSet;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-MANTID_INDEXING_DLL IndexInfo
-extract(const IndexInfo &source, const SpectrumIndexSet &indices);
-MANTID_INDEXING_DLL IndexInfo
-extract(const IndexInfo &source, const std::vector<size_t> &indices);
-MANTID_INDEXING_DLL IndexInfo
-extract(const IndexInfo &source, const size_t minIndex, const size_t maxIndex);
+MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
+                                      const SpectrumIndexSet &indices);
+MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
+                                      const std::vector<size_t> &indices);
+MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
+                                      const size_t minIndex,
+                                      const size_t maxIndex);
 
 } // namespace Indexing
 } // namespace Mantid

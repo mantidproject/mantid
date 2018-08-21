@@ -3,20 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using Mantid::DataHandling::GroupDetectors;
 using Mantid::MantidVecPtr;

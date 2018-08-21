@@ -2,8 +2,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/EmptyValues.h"
-#include <climits>
 #include <cfloat>
+#include <climits>
 
 namespace Mantid {
 

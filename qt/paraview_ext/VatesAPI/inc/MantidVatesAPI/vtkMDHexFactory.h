@@ -8,9 +8,9 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include <vtkNew.h>
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <vtkNew.h>
 
 namespace Mantid {
 namespace VATES {
@@ -115,7 +115,7 @@ private:
   /// Time value.
   double m_time;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 
 #include "DllConfig.h"
-#include "IALCBaselineModellingView.h"
 #include "IALCBaselineModellingModel.h"
+#include "IALCBaselineModellingView.h"
 
 #include <QObject>
 

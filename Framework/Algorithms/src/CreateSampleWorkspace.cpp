@@ -1,23 +1,23 @@
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -201,7 +201,8 @@ void CreateSampleWorkspace::exec() {
     // down
     binWidth = xMax - xMin;
     g_log.warning() << "The bin width is so large that there is less than one "
-                       "bin - it has been changed to " << binWidth << '\n';
+                       "bin - it has been changed to "
+                    << binWidth << '\n';
   }
 
   std::string functionString;
@@ -559,8 +560,9 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
 
     testInst->add(bank);
     // Set the bank along the z-axis of the instrument, between the detectors.
-    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample *
-                                   (monitorNumber - monitorsStart + 0.5)));
+    bank->setPos(
+        V3D(0.0, 0.0,
+            bankDistanceFromSample * (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component

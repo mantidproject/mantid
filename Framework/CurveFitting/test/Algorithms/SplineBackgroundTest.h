@@ -1,14 +1,14 @@
 #ifndef SPLINEBACKGROUNDTEST_H_
 #define SPLINEBACKGROUNDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

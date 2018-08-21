@@ -1,9 +1,9 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMTEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMTEST_H_
 
+#include "MantidAPI/CoordTransform.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidAPI/CoordTransform.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

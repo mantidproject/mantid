@@ -1,14 +1,14 @@
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
-#include "MantidVatesAPI/ViewFrustum.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/NoShape.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 namespace Mantid {
 namespace VATES {
 
@@ -178,5 +178,5 @@ void ConcretePeaksPresenterVsi::sortPeaksWorkspace(
   alg->setPropertyValue("ColumnNameToSortBy", byColumnName);
   alg->execute();
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -126,8 +126,8 @@ void LoadMcStasNexus::exec() {
       try {
         nxFile.readData<double>("errors", errors);
       } catch (::NeXus::Exception &) {
-        g_log.information() << "Field " << dataName
-                            << " contains no error information.\n";
+        g_log.information()
+            << "Field " << dataName << " contains no error information.\n";
       }
 
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(

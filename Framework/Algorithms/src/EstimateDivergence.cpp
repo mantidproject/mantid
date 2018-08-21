@@ -14,8 +14,8 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace std;
-using Mantid::Kernel::Direction;      // NOLINT
 using Mantid::API::WorkspaceProperty; // NOLINT
+using Mantid::Kernel::Direction;      // NOLINT
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EstimateDivergence)

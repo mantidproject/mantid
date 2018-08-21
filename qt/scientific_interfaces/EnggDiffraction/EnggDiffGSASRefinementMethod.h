@@ -6,6 +6,6 @@ namespace CustomInterfaces {
 
 enum class GSASRefinementMethod { PAWLEY, RIETVELD };
 }
-}
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASREFINEMENTMETHOD_H_

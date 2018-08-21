@@ -2,13 +2,13 @@
 #define POLDIMOCKINSTRUMENTHELPERS_H
 
 #include "MantidSINQ/DllConfig.h"
-#include <gmock/gmock.h>
-#include <algorithm>
-#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
-#include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"
+#include <algorithm>
+#include <gmock/gmock.h>
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
@@ -17,15 +17,15 @@
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidGeometry/Crystal/CrystalStructure.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
+#include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 using ::testing::Return;
 
@@ -53,14 +53,14 @@ public:
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
   }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(efficiency, double());
   MOCK_METHOD1(twoTheta, double(int elementIndex));
   MOCK_METHOD1(distanceFromSample, double(int elementIndex));
   MOCK_METHOD0(elementCount, size_t());
   MOCK_METHOD0(centralElement, size_t());
   MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 
   const std::vector<int> &availableElements() override {
     return m_availableElements;
@@ -102,17 +102,15 @@ public:
 
   ~MockChopper() override {}
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
-    UNUSED_ARG(poldiInstrument)
-  }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_METHOD0(rotationSpeed, double());
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override{
+      UNUSED_ARG(poldiInstrument)} GNU_DIAG_OFF_SUGGEST_OVERRIDE
+      MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
   MOCK_METHOD0(distanceFromSample, double());
 
   MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 
   const std::vector<double> &slitPositions() override {
     return m_slitPositions;
@@ -545,6 +543,6 @@ public:
     return PoldiPeakCollection_sptr(new PoldiPeakCollection(Si, 1.1, 1.95));
   }
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 #endif // POLDIMOCKINSTRUMENTHELPERS_H

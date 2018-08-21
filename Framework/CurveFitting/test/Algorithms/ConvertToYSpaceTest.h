@@ -3,18 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 
 using namespace Mantid::API;
 using Mantid::CurveFitting::Algorithms::ConvertToYSpace;
 
 namespace {
 /** Creates an instance of the ConvertToYSpace algorithm and sets its
-* properties.
-*
-* @return ConvertToYSpace alg
-*/
+ * properties.
+ *
+ * @return ConvertToYSpace alg
+ */
 IAlgorithm_sptr createAlgorithm() {
   IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
   alg->initialize();
@@ -22,7 +22,7 @@ IAlgorithm_sptr createAlgorithm() {
   alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
   return alg;
 }
-}
+} // namespace
 
 class ConvertToYSpaceTest : public CxxTest::TestSuite {
 public:

@@ -20,8 +20,8 @@ DECLARE_ALGORITHM(CreatePSDBleedMask)
 
 const std::string CreatePSDBleedMask::category() const { return "Diagnostics"; }
 
-using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace_sptr;
 using DataObjects::MaskWorkspace_sptr;
 
 /// Default constructor
@@ -30,8 +30,8 @@ CreatePSDBleedMask::CreatePSDBleedMask() {}
 /// Initialize the algorithm properties
 void CreatePSDBleedMask::init() {
   using API::WorkspaceProperty;
-  using Kernel::Direction;
   using Kernel::BoundedValidator;
+  using Kernel::Direction;
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                            Direction::Input),
@@ -264,5 +264,5 @@ void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
     workspace->mutableY(tubeIndice)[0] = deadValue;
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

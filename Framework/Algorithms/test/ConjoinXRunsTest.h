@@ -20,9 +20,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;
+using Mantid::Algorithms::ConjoinXRuns;
 using Mantid::Algorithms::GroupWorkspaces;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::HistogramDx;

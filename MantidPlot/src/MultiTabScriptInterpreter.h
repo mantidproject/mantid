@@ -4,10 +4,10 @@
 //---------------------------------------------------------
 // Includes
 //---------------------------------------------------------
-#include <QTabWidget>
-#include <QDialog>
-#include "Scripted.h"
 #include "Script.h"
+#include "Scripted.h"
+#include <QDialog>
+#include <QTabWidget>
 
 //---------------------------------------------------------
 // Forward declarations
@@ -149,7 +149,7 @@ public slots:
   /** @name Execute members.*/
   //@{
   /// Execute all using the given mode
-  void executeAll(const Script::ExecutionMode mode);
+  bool executeAll(const Script::ExecutionMode mode);
   /// Execute selection using the given mode
   void executeSelection(const Script::ExecutionMode mode);
   /// Abort the current script

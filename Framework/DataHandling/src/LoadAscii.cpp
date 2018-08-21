@@ -1,14 +1,14 @@
+#include "MantidDataHandling/LoadAscii.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 #include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
@@ -50,9 +50,9 @@ int LoadAscii::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 /**
-* Process the header information. This implementation just skips it entirely.
-* @param file :: A reference to the file stream
-*/
+ * Process the header information. This implementation just skips it entirely.
+ * @param file :: A reference to the file stream
+ */
 void LoadAscii::processHeader(std::ifstream &file) const {
 
   // Most files will have some sort of header. If we've haven't been told how
@@ -121,12 +121,12 @@ void LoadAscii::processHeader(std::ifstream &file) const {
 }
 
 /**
-* Reads the data from the file. It is assumed that the provided file stream has
-* its position
-* set such that the first call to getline will be give the first line of data
-* @param file :: A reference to a file stream
-* @returns A pointer to a new workspace
-*/
+ * Reads the data from the file. It is assumed that the provided file stream has
+ * its position
+ * set such that the first call to getline will be give the first line of data
+ * @param file :: A reference to a file stream
+ * @returns A pointer to a new workspace
+ */
 API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   // Get the first line and find the number of spectra from the number of
   // columns
@@ -243,27 +243,27 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
 }
 
 /**
-* Peek at a line without extracting it from the stream
-*/
+ * Peek at a line without extracting it from the stream
+ */
 void LoadAscii::peekLine(std::ifstream &is, std::string &str) const {
   str = Kernel::Strings::peekLine(is);
 }
 
 /**
-* Return true if the line is to be skipped.
-* @param line :: The line to be checked
-* @return True if the line should be skipped
-*/
+ * Return true if the line is to be skipped.
+ * @param line :: The line to be checked
+ * @return True if the line should be skipped
+ */
 bool LoadAscii::skipLine(const std::string &line) const {
   return Kernel::Strings::skipLine(line);
 }
 
 /**
-* Split the data into columns based on the input separator
-* @param[out] columns :: A reference to a list to store the column data
-* @param[in] str :: The input string
-* @returns The number of columns
-*/
+ * Split the data into columns based on the input separator
+ * @param[out] columns :: A reference to a list to store the column data
+ * @param[in] str :: The input string
+ * @returns The number of columns
+ */
 int LoadAscii::splitIntoColumns(std::list<std::string> &columns,
                                 const std::string &str) const {
   boost::split(columns, str, boost::is_any_of(m_columnSep),
@@ -272,10 +272,10 @@ int LoadAscii::splitIntoColumns(std::list<std::string> &columns,
 }
 
 /**
-* Fill the given vector with the data values. Its size is assumed to be correct
-* @param[out] values :: The data vector fill
-* @param columns :: The list of strings denoting columns
-*/
+ * Fill the given vector with the data values. Its size is assumed to be correct
+ * @param[out] values :: The data vector fill
+ * @param columns :: The list of strings denoting columns
+ */
 void LoadAscii::fillInputValues(std::vector<double> &values,
                                 const std::list<std::string> &columns) const {
   values.resize(columns.size());
@@ -312,12 +312,9 @@ void LoadAscii::init() {
                   "the read-in data and stored in the [[Analysis Data "
                   "Service]].");
 
-  std::string spacers[6][6] = {{"Automatic", ",\t:; "},
-                               {"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"}};
+  std::string spacers[6][6] = {{"Automatic", ",\t:; "}, {"CSV", ","},
+                               {"Tab", "\t"},           {"Space", " "},
+                               {"Colon", ":"},          {"SemiColon", ";"}};
   // For the ListValidator
   std::array<std::string, 5> sepOptions;
   for (size_t i = 0; i < 5; ++i) {
@@ -349,8 +346,8 @@ void LoadAscii::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void LoadAscii::exec() {
   std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());

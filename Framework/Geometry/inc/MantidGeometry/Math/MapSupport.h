@@ -207,6 +207,6 @@ public:
     return vc->second;
   }
 };
-}
+} // namespace MapSupport
 
 #endif

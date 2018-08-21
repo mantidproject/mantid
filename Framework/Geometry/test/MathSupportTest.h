@@ -1,16 +1,16 @@
 #ifndef MANTID_TESTMATHSUPPORT__
 #define MANTID_TESTMATHSUPPORT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <ostream>
-#include <vector>
 #include <algorithm>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <ostream>
 #include <sstream>
+#include <vector>
 
+#include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Math/mathSupport.h"
 
 using namespace Mantid;
 using namespace mathSupport;

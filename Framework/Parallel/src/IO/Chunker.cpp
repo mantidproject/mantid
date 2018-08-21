@@ -73,7 +73,7 @@ size_t taskSize(const std::pair<int, std::vector<size_t>> &partition,
   // the maximum.
   return (total + workers - 1) / workers;
 }
-}
+} // namespace
 
 /** Create a chunker based on bank sizes and chunk size.
  *
@@ -86,8 +86,9 @@ Chunker::Chunker(const int numWorkers, const int worker,
     : m_worker(worker), m_chunkSize(chunkSize), m_bankSizes(bankSizes) {
   // Create partitions based on chunk counts.
   m_chunkCounts = m_bankSizes;
-  const auto sizeToChunkCount =
-      [&](size_t &value) { value = (value + m_chunkSize - 1) / m_chunkSize; };
+  const auto sizeToChunkCount = [&](size_t &value) {
+    value = (value + m_chunkSize - 1) / m_chunkSize;
+  };
   std::for_each(m_chunkCounts.begin(), m_chunkCounts.end(), sizeToChunkCount);
   m_partitioning = makeBalancedPartitioning(numWorkers, m_chunkCounts);
 }

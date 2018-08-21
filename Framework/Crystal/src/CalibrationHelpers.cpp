@@ -1,7 +1,7 @@
-#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidCrystal/CalibrationHelpers.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

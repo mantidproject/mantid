@@ -27,39 +27,21 @@ class DLLExport IqtFit : public IndirectFitAnalysisTab {
 public:
   IqtFit(QWidget *parent = nullptr);
 
-  bool doPlotGuess() const override;
-
 private:
   void setupFitTab() override;
-  bool validate() override;
-  void loadSettings(const QSettings &settings) override;
 
 protected:
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
-  void enablePlotPreview() override;
-  void disablePlotPreview() override;
-  void addGuessPlot(Mantid::API::MatrixWorkspace_sptr workspace) override;
-  void removeGuessPlot() override;
 
 protected slots:
-  void newDataLoaded(const QString wsName);
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
-  void updatePreviewPlots() override;
-  void updatePlotRange() override;
-  void startXChanged(double startX) override;
-  void endXChanged(double endX) override;
-  void backgroundSelectorChanged(double val);
   void updatePlotOptions() override;
-  void plotWorkspace();
   void fitFunctionChanged();
-  void parameterUpdated(const Mantid::API::IFunction *function);
   void customBoolUpdated(const QString &key, bool value);
+  void plotResult();
 
 private:
-  void disablePlotGuess() override;
-  void enablePlotGuess() override;
-
   void setConstrainIntensitiesEnabled(bool enabled);
   std::string fitTypeString() const;
 

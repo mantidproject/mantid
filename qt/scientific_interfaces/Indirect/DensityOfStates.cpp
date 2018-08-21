@@ -242,16 +242,16 @@ void DensityOfStates::loadSettings(const QSettings &settings) {
 }
 
 /**
-* Handle mantid plotting of workspace
-*/
+ * Handle mantid plotting of workspace
+ */
 void DensityOfStates::plotClicked() {
   if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
     plotSpectrum(m_outputWsName);
 }
 
 /**
-* Handle saving of workspace
-*/
+ * Handle saving of workspace
+ */
 void DensityOfStates::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), false))
     addSaveWorkspaceToQueue(m_outputWsName);

@@ -3,28 +3,27 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -595,9 +594,9 @@ public:
     HistogramData::Counts counts(points.size(), 0.0);
     // This value should be excluded.
     counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(
-        DataObjects::create<Workspace2D>(
-            1, HistogramData::Histogram(points, counts)).release());
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
+                                1, HistogramData::Histogram(points, counts))
+                                .release());
     AnalysisDataService::Instance().addOrReplace("InputWS", ws);
 
     PlotPeakByLogValue alg;

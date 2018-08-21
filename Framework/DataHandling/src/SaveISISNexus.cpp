@@ -10,22 +10,22 @@
 
 #include "LoadRaw/isisraw2.h"
 
-#include <boost/regex.hpp>
-#include <boost/scoped_array.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
+#include <boost/scoped_array.hpp>
 
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
 
-#include <sstream>
 #include <algorithm>
-#include <map>
-#include <iterator>
 #include <fstream>
+#include <iterator>
+#include <map>
+#include <sstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -63,21 +63,21 @@ void SaveISISNexus::init() {
 }
 
 /**
-  * To be used with std::generate to copy only those values from a dataset that
+ * To be used with std::generate to copy only those values from a dataset that
  * don't relate to monitors
-  */
+ */
 template <typename T> class getWithoutMonitors {
 public:
   /**
-    * Constructor.
-    * @param alg This algorithm.
-    * @param data Pointer to the data to be copied from
-    */
+   * Constructor.
+   * @param alg This algorithm.
+   * @param data Pointer to the data to be copied from
+   */
   getWithoutMonitors(SaveISISNexus *alg, T *data)
       : m_alg(alg), m_data(data), m_index(-1) {}
   /** function operator.
-    * @return copies of data values that don't relate to monitors
-    */
+   * @return copies of data values that don't relate to monitors
+   */
   T operator()() {
     ++m_index;
     while (m_alg->monitor_index.find(m_index) != m_alg->monitor_index.end())
@@ -227,44 +227,44 @@ void SaveISISNexus::exec() {
 }
 
 /**
-  * Save int data.
-  * @param name Name of the data set
-  * @param data Pointer to the data source
-  * @param size size of the data in sizeof(int)
-  */
+ * Save int data.
+ * @param name Name of the data set
+ * @param data Pointer to the data source
+ * @param size size of the data in sizeof(int)
+ */
 void SaveISISNexus::saveInt(const char *name, void *data, int size) {
   saveIntOpen(name, data, size);
   close();
 }
 
 /**
-  * Save char data.
-  * @param name Name of the data set
-  * @param data Pointer to the data source
-  * @param size size of the data in sizeof(char)
-  */
+ * Save char data.
+ * @param name Name of the data set
+ * @param data Pointer to the data source
+ * @param size size of the data in sizeof(char)
+ */
 void SaveISISNexus::saveChar(const char *name, void *data, int size) {
   saveCharOpen(name, data, size);
   close();
 }
 
 /**
-  * Save float data.
-  * @param name Name of the data set
-  * @param data Pointer to the data source
-  * @param size size of the data in sizeof(float)
-  */
+ * Save float data.
+ * @param name Name of the data set
+ * @param data Pointer to the data source
+ * @param size size of the data in sizeof(float)
+ */
 void SaveISISNexus::saveFloat(const char *name, void *data, int size) {
   saveFloatOpen(name, data, size);
   close();
 }
 
 /**
-  * Save int data and leave the dataset open.
-  * @param name Name of the data set
-  * @param data Pointer to the data source
-  * @param size size of the data in sizeof(int)
-  */
+ * Save int data and leave the dataset open.
+ * @param name Name of the data set
+ * @param data Pointer to the data source
+ * @param size size of the data in sizeof(int)
+ */
 void SaveISISNexus::saveIntOpen(const char *name, void *data, int size) {
   int dim[1];
   dim[0] = size;
@@ -276,11 +276,11 @@ void SaveISISNexus::saveIntOpen(const char *name, void *data, int size) {
 }
 
 /**
-  * Save char data and leave the dataset open.
-  * @param name Name of the data set
-  * @param data Pointer to the data source
-  * @param size size of the data in sizeof(char)
-  */
+ * Save char data and leave the dataset open.
+ * @param name Name of the data set
+ * @param data Pointer to the data source
+ * @param size size of the data in sizeof(char)
+ */
 void SaveISISNexus::saveCharOpen(const char *name, void *data, int size) {
   int dim[1];
   dim[0] = size;
@@ -292,11 +292,11 @@ void SaveISISNexus::saveCharOpen(const char *name, void *data, int size) {
 }
 
 /**
-  * Save float data ald leave the dataset open.
-  * @param name Name of the data set
-  * @param data Pointer to the data source
-  * @param size size of the data in sizeof(float)
-  */
+ * Save float data ald leave the dataset open.
+ * @param name Name of the data set
+ * @param data Pointer to the data source
+ * @param size size of the data in sizeof(float)
+ */
 void SaveISISNexus::saveFloatOpen(const char *name, void *data, int size) {
   int dim[1];
   dim[0] = size;
@@ -308,12 +308,12 @@ void SaveISISNexus::saveFloatOpen(const char *name, void *data, int size) {
 }
 
 /**
-  * Save a vector of string in a dataset.
-  * @param name :: Name of the data set
-  * @param str_vec :: The vector to save
-  * @param max_str_size :: The maximum string size
-  * @return The line size
-  */
+ * Save a vector of string in a dataset.
+ * @param name :: Name of the data set
+ * @param str_vec :: The vector to save
+ * @param max_str_size :: The maximum string size
+ * @return The line size
+ */
 int SaveISISNexus::saveStringVectorOpen(const char *name,
                                         const std::vector<std::string> &str_vec,
                                         int max_str_size) {
@@ -348,10 +348,10 @@ int SaveISISNexus::saveStringVectorOpen(const char *name,
 }
 
 /**
-  * Save a string in a dataset.
-  * @param name :: Name of the data set
-  * @param str :: The vector to save
-  */
+ * Save a string in a dataset.
+ * @param name :: Name of the data set
+ * @param str :: The vector to save
+ */
 void SaveISISNexus::saveString(const char *name, const std::string &str) {
   if (str.empty())
     return;
@@ -360,10 +360,10 @@ void SaveISISNexus::saveString(const char *name, const std::string &str) {
 }
 
 /**
-  * Save a string in a dataset.
-  * @param name :: Name of the data set
-  * @param str :: The vector to save
-  */
+ * Save a string in a dataset.
+ * @param name :: Name of the data set
+ * @param str :: The vector to save
+ */
 void SaveISISNexus::saveStringOpen(const char *name, const std::string &str) {
   if (str.empty())
     return;
@@ -567,8 +567,8 @@ void SaveISISNexus::detector_1() {
 }
 
 /**
-  * Write instrument/moderator group
-  */
+ * Write instrument/moderator group
+ */
 void SaveISISNexus::moderator() {
   NXmakegroup(handle, "moderator", "NXmoderator");
   NXopengroup(handle, "moderator", "NXmoderator");
@@ -581,8 +581,8 @@ void SaveISISNexus::moderator() {
 }
 
 /**
-  * Write instrument/source group
-  */
+ * Write instrument/source group
+ */
 void SaveISISNexus::source() {
   NXmakegroup(handle, "source", "NXsource");
   NXopengroup(handle, "source", "NXsource");
@@ -595,9 +595,9 @@ void SaveISISNexus::source() {
 }
 
 /**
-  * Create group "detector_1" at NXentry level and link to some of the data in
+ * Create group "detector_1" at NXentry level and link to some of the data in
  * instrument/detector_1
-  */
+ */
 void SaveISISNexus::make_detector_1_link() {
   NXmakegroup(handle, "detector_1", "NXdata");
   NXopengroup(handle, "detector_1", "NXdata");
@@ -611,10 +611,10 @@ void SaveISISNexus::make_detector_1_link() {
 }
 
 /**
-  * Get a pointer to the saved monitor data
-  * @param period Period, starts with 0
-  * @param imon Monitor index (not its spectrum number)
-  */
+ * Get a pointer to the saved monitor data
+ * @param period Period, starts with 0
+ * @param imon Monitor index (not its spectrum number)
+ */
 int *SaveISISNexus::getMonitorData(int period, int imon) {
   return &monitorData[period * m_isisRaw->i_mon * m_isisRaw->t_ntc1 +
                       imon * m_isisRaw->t_ntc1];
@@ -628,9 +628,9 @@ void SaveISISNexus::write_monitors() {
 }
 
 /**
-  * Write monitor_i gorup
-  * @param i Index of a monitor
-  */
+ * Write monitor_i gorup
+ * @param i Index of a monitor
+ */
 void SaveISISNexus::monitor_i(int i) {
   int nper = m_isisRaw->t_nper; // number of periods
   int ntc = m_isisRaw->t_ntc1;  // number of time channels
@@ -734,8 +734,8 @@ void SaveISISNexus::sample() {
 }
 
 /**
-  * Create and write run logs form \<RawFilename\>_ICPstatus.txt log file
-  */
+ * Create and write run logs form \<RawFilename\>_ICPstatus.txt log file
+ */
 void SaveISISNexus::runlog() {
   progress(0);
   std::string ICPstatus_filename = inputFilename;
@@ -893,14 +893,14 @@ void SaveISISNexus::runlog() {
 }
 
 /**
-  * Write one run log.
-  * @param name The log name
-  * @param times The pointer to the time array
-  * @param data The pointer to the data
-  * @param type The type of the data
-  * @param size The size of the data
-  * @param units The units of the data
-  */
+ * Write one run log.
+ * @param name The log name
+ * @param times The pointer to the time array
+ * @param data The pointer to the data
+ * @param type The type of the data
+ * @param size The size of the data
+ * @param units The units of the data
+ */
 void SaveISISNexus::write_runlog(const char *name, void *times, void *data,
                                  int type, int size, const std::string &units) {
   write_logOpen(name, times, data, type, size, units);
@@ -908,14 +908,14 @@ void SaveISISNexus::write_runlog(const char *name, void *times, void *data,
 }
 
 /**
-  * Writes a NXlog and leaves it open.
-  * @param name The log name
-  * @param times The pointer to the time array
-  * @param data The pointer to the data
-  * @param type The type of the data
-  * @param size The size of the data
-  * @param units The units of the data
-  */
+ * Writes a NXlog and leaves it open.
+ * @param name The log name
+ * @param times The pointer to the time array
+ * @param data The pointer to the data
+ * @param type The type of the data
+ * @param size The size of the data
+ * @param units The units of the data
+ */
 void SaveISISNexus::write_logOpen(const char *name, void *times, void *data,
                                   int type, int size,
                                   const std::string &units) {
@@ -1098,5 +1098,5 @@ void SaveISISNexus::write_vpb() {
   saveFloat("RVPB", &m_isisRaw->ivpb, 64);
 }
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

@@ -12,23 +12,24 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 using API::ExperimentInfo;
-using Geometry::MDHistoDimensionBuilder;
 using Geometry::Goniometer;
+using Geometry::MDHistoDimensionBuilder;
 using Geometry::OrientedLattice;
 using Kernel::BinaryStreamReader;
-using Kernel::Logger;
 using Kernel::DblMatrix;
+using Kernel::Logger;
 using Kernel::V3D;
 
 namespace {
@@ -43,7 +44,7 @@ constexpr int64_t NCHUNKS_SPLIT = 125;
 constexpr int32_t FIELDS_PER_PIXEL = 9;
 /// 1/2pi
 constexpr double INV_TWO_PI = 0.5 / M_PI;
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
@@ -67,11 +68,11 @@ const std::string LoadSQW2::summary() const {
 }
 
 /**
-* Return the confidence with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
   // only .sqw can be considered
   const std::string &extn = descriptor.extension();
@@ -177,10 +178,10 @@ int32_t LoadSQW2::readMainHeader() {
  */
 void LoadSQW2::throwIfUnsupportedFileType(int32_t sqwType) {
   if (sqwType != 1) {
-    throw std::runtime_error("Unsupported SQW type: " +
-                             std::to_string(sqwType) +
-                             "\nOnly files containing the full pixel "
-                             "information are currently supported");
+    throw std::runtime_error(
+        "Unsupported SQW type: " + std::to_string(sqwType) +
+        "\nOnly files containing the full pixel "
+        "information are currently supported");
   }
 }
 
@@ -482,12 +483,9 @@ std::vector<float> LoadSQW2::calculateDimLimitsFromData() {
   return dimLimits;
 }
 
-#ifdef __clang__
 // The missing braces warning is a false positive -
 // https://llvm.org/bugs/show_bug.cgi?id=21629
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-braces"
-#endif
+GNU_DIAG_OFF("missing-braces")
 /**
  * Create the Q MDHistoDimension for the output frame and given information
  * from the file
@@ -540,9 +538,8 @@ LoadSQW2::createQDimension(size_t index, float dimMin, float dimMax,
 
   return builder.create();
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+
+GNU_DIAG_ON("missing-braces")
 
 /**
  * Create an energy dimension

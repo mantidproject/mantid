@@ -2,17 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/Expression.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/muParser_Silent.h"
-#include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <cfloat>
@@ -101,11 +101,11 @@ void IFunctionMD::evaluateFunction(const FunctionDomainMD &domain,
 
 /** User functions call this method in their constructors to set up the order of
  * the dimensions.
-  * The dimensions will be sorted in the order of calls to useDimension.
+ * The dimensions will be sorted in the order of calls to useDimension.
  * Ordering is needed to
-  * access dimensions by ineteger index rather than by name (string)
-  * @param id :: The id of a dimension in the workspace
-  */
+ * access dimensions by ineteger index rather than by name (string)
+ * @param id :: The id of a dimension in the workspace
+ */
 void IFunctionMD::useDimension(const std::string &id) {
   size_t n = m_dimensionIndexMap.size();
   if (m_dimensionIndexMap.find(id) != m_dimensionIndexMap.end()) {
@@ -115,11 +115,11 @@ void IFunctionMD::useDimension(const std::string &id) {
 }
 
 /**
-  * This method is called if a function does not call to useDimension at all.
-  * It adds all the dimensions in the workspace in the order they are in in that
+ * This method is called if a function does not call to useDimension at all.
+ * It adds all the dimensions in the workspace in the order they are in in that
  * workspace
-  * then calls init().
-  */
+ * then calls init().
+ */
 void IFunctionMD::useAllDimensions(IMDWorkspace_const_sptr workspace) {
   if (!workspace) {
     throw std::runtime_error("Method IFunctionMD::useAllDimensions() can only "

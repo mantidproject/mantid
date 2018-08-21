@@ -1,19 +1,19 @@
 #ifndef MANTID_SINQ_POLDICALCULATESPECTRUM2D_H_
 #define MANTID_SINQ_POLDICALCULATESPECTRUM2D_H_
 
-#include "MantidKernel/System.h"
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include "MantidKernel/Matrix.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
-#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
 namespace Mantid {
 namespace Poldi {

@@ -1,10 +1,10 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
 #define MANTID_WORKFLOWALGORITHMS_MUONPROCESS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

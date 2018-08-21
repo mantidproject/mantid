@@ -1,18 +1,18 @@
 #ifndef SPECTRUM_VIEW_H
 #define SPECTRUM_VIEW_H
 
+#include <QList>
 #include <QMainWindow>
 #include <QMdiSubWindow>
-#include <QList>
 #include <vector>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
-#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 
 /**
     @class SpectrumView

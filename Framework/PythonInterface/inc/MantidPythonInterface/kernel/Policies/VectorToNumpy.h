@@ -24,12 +24,12 @@
  */
 #include "MantidKernel/System.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
+#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 
-#include <type_traits>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>
+#include <type_traits>
 #include <vector>
 
 namespace Mantid {
@@ -37,7 +37,7 @@ namespace PythonInterface {
 namespace Policies {
 
 namespace // anonymous
-    {
+{
 //-----------------------------------------------------------------------
 // MPL helper structs
 //-----------------------------------------------------------------------
@@ -69,7 +69,7 @@ struct VectorRefToNumpyImpl {
 
 template <typename T>
 struct VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type {};
-}
+} // namespace
 
 /**
  * Implements a return value policy that
@@ -117,7 +117,7 @@ template <typename VectorType> struct VectorToNumpyImpl {
 
 template <typename T>
 struct VectorToNumpy_Requires_StdVector_Return_By_Value {};
-}
+} // namespace
 
 /**
  * Implements a return value policy that
@@ -137,8 +137,8 @@ struct VectorToNumpy {
         VectorToNumpy_Requires_StdVector_Return_By_Value<T>>::type;
   };
 };
-}
-}
-}
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_
