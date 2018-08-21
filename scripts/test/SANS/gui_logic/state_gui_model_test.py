@@ -165,8 +165,8 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_defaults_for_merge_are_empty_and_false(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.merge_scale == "")
-        self.assertTrue(state_gui_model.merge_shift == "")
+        self.assertTrue(state_gui_model.merge_scale == "1.0")
+        self.assertTrue(state_gui_model.merge_shift == "0.0")
         self.assertFalse(state_gui_model.merge_scale_fit)
         self.assertFalse(state_gui_model.merge_shift_fit)
         self.assertTrue(state_gui_model.merge_q_range_start == "")

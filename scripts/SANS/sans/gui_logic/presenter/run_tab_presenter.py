@@ -515,7 +515,6 @@ class RunTabPresenter(object):
         self._set_on_view("zero_error_free")
         self._set_on_view("save_types")
         self._set_on_view("compatibility_mode")
-
         self._set_on_view("merge_scale")
         self._set_on_view("merge_shift")
         self._set_on_view("merge_scale_fit")

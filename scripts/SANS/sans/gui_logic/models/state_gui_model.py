@@ -264,7 +264,7 @@ class StateGuiModel(object):
 
     @property
     def merge_scale(self):
-        return self.get_simple_element(element_id=DetectorId.rescale, default_value="")
+        return self.get_simple_element(element_id=DetectorId.rescale, default_value="1.0")
 
     @merge_scale.setter
     def merge_scale(self, value):
@@ -272,7 +272,7 @@ class StateGuiModel(object):
 
     @property
     def merge_shift(self):
-        return self.get_simple_element(element_id=DetectorId.shift, default_value="")
+        return self.get_simple_element(element_id=DetectorId.shift, default_value="0.0")
 
     @merge_shift.setter
     def merge_shift(self, value):
