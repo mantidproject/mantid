@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -73,6 +74,61 @@ public:
 
     ads.remove("Z");
     TS_ASSERT_THROWS(ads.retrieve("z"), Exception::NotFoundError);
+  }
+
+  void test_retrieveWorkspaces_with_empty_list_returns_empty_list() {
+    std::vector<Workspace_sptr> empty;
+    TS_ASSERT_EQUALS(empty, ads.retrieveWorkspaces({}));
+  }
+
+  void test_retrieveWorkspaces_with_all_missing_items_throws_exception() {
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a"}), Exception::NotFoundError);
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}),
+                     Exception::NotFoundError);
+  }
+
+  void test_retrieveWorkspaces_with_some_missing_items_throws_exception() {
+    const std::string name("test_some_missing_items");
+    addToADS(name);
+    TS_ASSERT_THROWS(ads.retrieveWorkspaces({"a", "b"}),
+                     Exception::NotFoundError);
+    ads.remove(name);
+  }
+
+  void test_retrieveWorkspaces_with_all_items_present_and_no_group_unrolling() {
+    const std::vector<std::string> names{"test_all_items_present_1",
+                                         "test_all_items_present_2"};
+    std::vector<Workspace_sptr> expected;
+    for (const auto &name : names) {
+      expected.push_back(addToADS(name));
+    }
+    std::vector<Workspace_sptr> items;
+    TS_ASSERT_THROWS_NOTHING(items = ads.retrieveWorkspaces(names));
+    TS_ASSERT_EQUALS(expected, expected);
+
+    for (const auto &name : names) {
+      ads.remove(name);
+    }
+  }
+
+  void test_retrieveWorkspaces_with_group_unrolling() {
+    const std::vector<std::string> names{"test_all_items_present_unroll_1",
+                                         "test_all_items_present_unroll_2"};
+    std::vector<Workspace_sptr> expected;
+    expected.push_back(addToADS(names[0]));
+    const size_t nitems{4u};
+    WorkspaceGroup_sptr groupWS{addGroupToADS(names[1], nitems)};
+    for (auto i = 0u; i < nitems; ++i) {
+      expected.push_back(groupWS->getItem(i));
+    }
+    std::vector<Workspace_sptr> items;
+    TS_ASSERT_THROWS_NOTHING(items = ads.retrieveWorkspaces(names, true));
+    TS_ASSERT_EQUALS(expected.size(), items.size());
+    TS_ASSERT_EQUALS(expected, items);
+
+    for (const auto &name : names) {
+      ads.remove(name);
+    }
   }
 
   void test_Add_With_Name_That_Has_No_Special_Chars_Is_Accpeted() {
@@ -479,11 +535,13 @@ private:
     return space;
   }
 
-  /// Add a group with 2 simple workspaces to the ADS
-  WorkspaceGroup_sptr addGroupToADS(const std::string &name) {
-    WorkspaceGroup_sptr group(new WorkspaceGroup);
-    group->addWorkspace(MockWorkspace_sptr(new MockWorkspace));
-    group->addWorkspace(MockWorkspace_sptr(new MockWorkspace));
+  /// Add a group with N simple workspaces to the ADS
+  WorkspaceGroup_sptr addGroupToADS(const std::string &name,
+                                    const size_t nitems = 2) {
+    auto group(boost::make_shared<WorkspaceGroup>());
+    for (auto i = 0u; i < nitems; ++i) {
+      group->addWorkspace(boost::make_shared<MockWorkspace>());
+    }
     ads.add(name, group);
     return group;
   }
