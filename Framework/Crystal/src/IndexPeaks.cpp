@@ -203,12 +203,13 @@ void IndexPeaks::exec() {
 
       g_log.notice() << "Maximum Order: " << o_lattice.getMaxOrder() << '\n';
 
-      if (!round_hkls &&
-          o_lattice.getMaxOrder() ==
-              0) // If data not modulated, recalculate fractional HKL
+      if ( o_lattice.getMaxOrder() == 0) // If data not modulated, recalculate fractional HKL
       {
-        num_indexed = IndexingUtils::CalculateMillerIndices(
-            tempUB, q_vectors, tolerance, miller_indices, average_error);
+        if (!round_hkls) // If user wants fractional hkls, recalculate them
+        {
+          num_indexed = IndexingUtils::CalculateMillerIndices(
+              tempUB, q_vectors, tolerance, miller_indices, average_error);
+        }
         total_indexed += num_indexed;
         total_error += average_error * num_indexed;
 

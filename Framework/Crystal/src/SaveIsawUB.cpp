@@ -219,7 +219,7 @@ void SaveIsawUB::exec() {
       out << "Cross Terms:      " << lattice.getCrossTerm() << " \n";
     }
 
-    out << "\n\n";
+    out << "\n";
 
     out << "The above matrix is the Transpose of the UB Matrix. ";
     out << "The UB matrix maps the column\n";

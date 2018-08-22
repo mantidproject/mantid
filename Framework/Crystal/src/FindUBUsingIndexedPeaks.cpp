@@ -127,7 +127,6 @@ void FindUBUsingIndexedPeaks::exec() {
         std::vector<V3D> run_hkl_vectors;
         std::vector<V3D> run_mnp_vectors;
         size_t run_indexed = 0;
-        double average_error = 0.;
 
         for (Peak peak : peaks)
           if (peak.getRunNumber() == run) {
@@ -174,6 +173,7 @@ void FindUBUsingIndexedPeaks::exec() {
         g_log.notice() << run_lattice << "\n";
 
         if (!CrossTerm) {
+          double average_error = 0.;
           IndexingUtils::CalculateMillerIndices(
               UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
           for (size_t i = 0; i < run_indexed; i++) {
