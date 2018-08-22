@@ -10,7 +10,7 @@ except ImportError:
 
 class PlottingUtilsTest(unittest.TestCase):
     def setUp(self):
-        putils.layout = [mock.Mock() for i in range(len(putils.layout))]
+        putils.layout = [mock.Mock() for i in putils.layout]
 
     def test_get_layout_num_too_high(self):
         with self.assertRaises(IndexError):
