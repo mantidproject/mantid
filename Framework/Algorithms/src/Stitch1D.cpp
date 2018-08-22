@@ -36,18 +36,6 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
 
 /// Check if a double is not zero and returns a bool indicating success
 bool isNonzero(double i) { return (0 != i); }
-
-/** Sort x axis (Dx will be handled only for point data)
- @param ws :: Input workspace
- @return A shared pointer to the resulting MatrixWorkspace
- */
-void sortXAxis(MatrixWorkspace_sptr &ws) {
-  Mantid::Algorithms::SortXAxis alg;
-  alg.initialize();
-  alg.setProperty("InputWorkspace", ws);
-  alg.setProperty("OutputWorkspace", "outputSearch");
-  alg.execute();
-}
 } // namespace
 
 namespace Mantid {
@@ -637,11 +625,12 @@ void Stitch1D::exec() {
     result = conjoinXAxis(lhs, rhs);
     if (!result)
       g_log.error("Could not retrieve joined workspace.");
-    sortXAxis(result);
-    MatrixWorkspace_sptr outputSearch =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("outputSearch"));
-    result = outputSearch;
+
+    // Sort the X Axis
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("SortXAxis");
+    childAlg->setProperty("InputWorkspace", result);
+    childAlg->execute();
+    result = childAlg->getProperty("OutputWorkspace");
   }
   setProperty("OutputWorkspace", result);
   setProperty("OutScaleFactor", m_scaleFactor);
