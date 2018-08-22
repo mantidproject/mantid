@@ -22,4 +22,12 @@ Bug fixes
 
 - A bug has been fixed on the Settings tab where the IncludePartialBins check box had been hidden by a misplaced text entry box.
 
+Algorithms
+----------
+
+Bug fixes
+#########
+
+- In :ref:`algm-ReflectometryReductionOneAuto` an issue where if you gave only one of either MomentumTransferMax or MomentumTransferMin were specified it would be ignored, this has been fixed.
+
 :ref:`Release 3.14.0 <v3.14.0>`
