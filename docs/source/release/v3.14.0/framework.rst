@@ -56,6 +56,7 @@ New
 ###
 
 - As part of the initiative to move towards ``Instrument 2.0`` new objects have been exposed to Python and are now available via workspaces. The newly exposed classes include:
+
  * :class:`mantid.geometry.ComponentInfo`
  * :class:`mantid.geometry.DetectorInfo`
  * :class:`mantid.api.SpectrumInfo`
