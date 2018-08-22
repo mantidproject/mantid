@@ -5,7 +5,9 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 
+#include <deque>
 #include <iterator>
 #include <list>
 
@@ -39,13 +41,90 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+
+
+
 namespace Mantid {
 namespace Geometry {
 namespace InstrumentRayTracer2 {
 
 using Kernel::V3D;
+using Kernel::Matrix;
 using Links = Track::LType;
 using Types = Mantid::Beamline::ComponentType;
+
+namespace IntersectionHelpers {
+
+  void checkIntersectsWithRectangularBank(Track &testRay, ComponentInfo &componentInfo, size_t componentIndex) {
+    /// Base point (x,y,z) = position of pixel 0,0
+    V3D basePoint;
+
+    /// Vertical (y-axis) basis vector of the detector
+    V3D vertical;
+
+    /// Horizontal (x-axis) basis vector of the detector
+    V3D horizontal;
+
+    //basePoint = getAtXY(0, 0)->getPos();
+
+    //horizontal = getAtXY(xpixels() - 1, 0)->getPos() - basePoint;
+
+    //vertical = getAtXY(0, ypixels() - 1)->getPos() - basePoint;
+
+    // The beam direction
+    V3D beam = testRay.direction();
+
+    // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4,
+    // 2011),
+    // We build a matrix to solve the linear equation:
+    Matrix<double> mat(3, 3);
+    mat.setColumn(0, beam * -1.0);
+    mat.setColumn(1, horizontal);
+    mat.setColumn(2, vertical);
+    mat.Invert();
+
+    // Multiply by the inverted matrix to find t,u,v
+    V3D tuv = mat * (testRay.startPoint() - basePoint);
+    //  std::cout << tuv << "\n";
+
+    // Intersection point
+    V3D intersec = beam;
+    intersec *= tuv[0];
+
+    // t = coordinate along the line
+    // u,v = coordinates along horizontal, vertical
+    // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
+    // base point is at the CENTER of pixel 0,0.
+    double u = (double(xpixels() - 1) * tuv[1] + 0.5);
+    double v = (double(ypixels() - 1) * tuv[2] + 0.5);
+
+    //  std::cout << u << ", " << v << "\n";
+
+    // In indices
+    int xIndex = int(u);
+    int yIndex = int(v);
+
+    // Out of range?
+    if (xIndex < 0)
+      return;
+    if (yIndex < 0)
+      return;
+    if (xIndex >= xpixels())
+      return;
+    if (yIndex >= ypixels())
+      return;
+
+    // TODO: Do I need to put something smart here for the first 3 parameters?
+    //componentInfo.componentID();
+    //componentInfo.shape();
+
+    auto comp = getAtXY(xIndex, yIndex);
+    testRay.addLink(intersec, intersec, 0.0, *(comp->shape()),
+      comp->getComponentID());
+  }
+
+}
+
 
 /**
  * Fire the test ray at the instrument and perform a bread-first search of the
