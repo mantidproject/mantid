@@ -115,7 +115,7 @@ class AxisChangerViewTest(unittest.TestCase):
     def test_get_bounds(self):
         self.assertEqual(
             self.view.get_bounds(), [
-                int(i) for i in self.test_bounds])
+                int(bound) for bound in self.test_bounds])
 
     def test_set_bounds(self):
         self.view.set_bounds(self.test_bounds)

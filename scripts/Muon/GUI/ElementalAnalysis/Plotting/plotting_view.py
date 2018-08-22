@@ -1,10 +1,13 @@
 from six import iteritems
 
 from mantid import plots
+from collections import OrderedDict
 
 from PyQt4 import QtGui
 
-from collections import OrderedDict
+from mantid import plots
+
+from PyQt4 import QtGui
 
 from matplotlib.figure import Figure
 from matplotlib import gridspec
@@ -115,8 +118,8 @@ class PlotView(QtGui.QWidget):
             self.workspaces[name] = []
             x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
-            for ws in workspaces:
-                self.plot(name, ws)
+            for workspace in workspaces:
+                self.plot(name, workspace)
             plot.set_xlim(x)
             plot.set_ylim(y)
             self._replay_additions(name)
