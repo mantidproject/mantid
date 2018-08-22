@@ -19,6 +19,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
         self.mock_func = mock.Mock(return_value=True)
         self.mock_args = [mock.Mock() for i in range(3)]
+        self.mock_kwargs = {}
         self.mock_name = mock.Mock()
         self.view.figure = mock.Mock()
         self.view.figure.tight_layout = mock.Mock()
@@ -28,15 +29,19 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.new_plot = "test plot"
         self.plots_return_value = mock.Mock()
         self.view.plots = {self.new_plot: self.plots_return_value}
+        self.view.workspaces = {self.new_plot: [self.plots_return_value]}
         self.mock_plot = mock.Mock()
         self.mock_plot.get_xlim = mock.Mock()
         self.mock_plot.get_ylim = mock.Mock()
+        self.mock_workspace = mock.Mock()
 
         self.mock_bounds = mock.Mock()
 
         self.view.plot_selector = mock.Mock()
         self.view.plot_selector.currentText = mock.Mock(
             return_value=self.new_plot)
+        self.view.plot_selector.clear = mock.Mock()
+        self.view.plot_selector.addItems = mock.Mock()
 
         self.view.x_axis_changer = mock.create_autospec(AxisChangerPresenter)
         self.view.y_axis_changer = mock.create_autospec(AxisChangerPresenter)
@@ -110,6 +115,49 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def test_update_y_axis(self):
         self.view._update_y_axis(self.mock_bounds)
         self.view._get_current_plot().set_ylim.assert_called_once_with(self.mock_bounds)
+
+    def test_errors_changed(self):
+        pass
+
+    def test_replay_additions(self):
+        self.view.plot_additions = {
+            self.new_plot: [
+                (self.mock_func,
+                 self.mock_name,
+                 self.mock_args,
+                 self.mock_kwargs)]}
+        self.view._replay_additions(self.new_plot)
+        args = [self.view, self.mock_name]
+        args.extend(self.mock_args)
+        self.mock_func.assert_called_once_with(*args)
+
+    def test_set_positions(self):
+        pass
+
+    def test_update_gridspec_if_new_plots(self):
+        pass
+
+    def test_gridspec_if_not_new_plots(self):
+        self.view._update_plot_selector = mock.Mock()
+        self.view._update_gridspec([])
+        self.view._update_plot_selector.assert_called_once()
+
+    def test_update_plot_selector(self):
+        self.view._update_plot_selector()
+        self.view.plot_selector.clear.assert_called_once()
+        self.view.plot_selector.addItems.assert_called_once_with(
+            self.view.plots.keys())
+
+    def test_add_workspace_name_if_not_in_workspaces(self):
+        self.view._add_workspace_name(self.new_plot, self.mock_workspace)
+        self.assertEquals(self.view.workspaces[self.new_plot], [
+                          self.plots_return_value, self.mock_workspace])
+
+    def test_add_workspace_name_if_in_workspaces(self):
+        self.view.workspaces = {}
+        self.view._add_workspace_name(self.new_plot, self.mock_workspace)
+        self.assertEquals(self.view.workspaces[self.new_plot], [
+                          self.mock_workspace])
 
 
 class PlottingViewPlotFunctionsTests(unittest.TestCase):
