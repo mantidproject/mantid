@@ -112,16 +112,13 @@ void LoadIsawUB::exec() {
     latVal = val;
   }
 
-  double ModVecErr[3][3];
+  double ModVecErr[3][3] = {0};
   if (ModDim > 0) {
     readToEndOfLine(in, true);
     readToEndOfLine(in, true);
     for (int i = 0; i < ModDim; i++) {
       readToEndOfLine(in, true);
-      s = getWord(in, true);
-      s = getWord(in, true);
-      s = getWord(in, true);
-      s = getWord(in, true);
+      for (int j = 0; j < 4; j++) s = getWord(in, true);
       for (double &Mod : ModVecErr[i]) {
         s = getWord(in, true);
         if (!convert(s, val))
@@ -134,17 +131,13 @@ void LoadIsawUB::exec() {
     }
 
     readToEndOfLine(in, true);
-    s = getWord(in, true);
-    s = getWord(in, true);
-    s = getWord(in, true);
+    for (int j = 0; j < 3; j++) s = getWord(in, true);
     if (!convert(s, val))
       throw std::runtime_error("The string '" + s +
                                "' in the file was not understood as a number.");
     maxorder = static_cast<int>(val);
     readToEndOfLine(in, true);
-    s = getWord(in, true);
-    s = getWord(in, true);
-    s = getWord(in, true);
+    for (int j = 0; j < 3; j++) s = getWord(in, true);
     if (!convert(s, val))
       throw std::runtime_error("The string '" + s +
                                "' in the file was not understood as a number.");

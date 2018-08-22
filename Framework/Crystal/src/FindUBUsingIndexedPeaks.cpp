@@ -127,7 +127,7 @@ void FindUBUsingIndexedPeaks::exec() {
         std::vector<V3D> run_hkl_vectors;
         std::vector<V3D> run_mnp_vectors;
         size_t run_indexed = 0;
-        double average_error;
+        double average_error = 0.;
 
         for (Peak peak : peaks)
           if (peak.getRunNumber() == run) {
