@@ -173,8 +173,8 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
    team in a round-robin fashion **in the order of the thread number**."
 
    "When no chunk_size is specified, the iteration space is divided into chunks
-   that are approximately equal in size, and at most one chunk is distributed to
-   each thread."
+   that are approximately equal in size, and at most one chunk is distributed
+   to each thread."
 */
 #pragma omp for schedule(static)
       for (int i = 0; i < dist; i++) {
