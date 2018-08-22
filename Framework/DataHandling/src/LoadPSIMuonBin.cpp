@@ -334,6 +334,11 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   outputWorkspace->setTitle(m_header.sample +
                             " - Run:" + std::to_string(m_header.numberOfRuns));
 
+  // Set the detector IDs
+  for (auto i = 0u; i < m_header.numberOfHistograms; ++i) {
+    outputWorkspace->getSpectrum(i).setDetectorID(i);
+  }
+
   // Set axis variables
   outputWorkspace->setYUnit("Counts");
   boost::shared_ptr<Kernel::Units::Label> lblUnit =
