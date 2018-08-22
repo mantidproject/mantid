@@ -173,12 +173,10 @@ void PredictSatellitePeaks::exec() {
   auto orientedUB = goniometer * UB;
   HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
   int seqNum = 0;
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
-                                                          true);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
-                                                          true);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
-                                                          true);
+  Sample &sampleOut = OutPeaks->mutableSample();
+  sampleOut.getOrientedLattice().setModVec1(offsets1);
+  sampleOut.getOrientedLattice().setModVec2(offsets2);
+  sampleOut.getOrientedLattice().setModVec3(offsets3);
   for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
     V3D hkl = *it;
     if (crossTerms) {
@@ -235,12 +233,10 @@ void PredictSatellitePeaks::exec_peaks() {
   vector<vector<int>> AlreadyDonePeaks;
   int seqNum = 0;
   HKLFilterWavelength lambdaFilter(DblMatrix(3, 3, true), 0.1, 100.);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
-                                                          true);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
-                                                          true);
-  OutPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
-                                                          true);
+  Sample &sampleOut = OutPeaks->mutableSample();
+  sampleOut.getOrientedLattice().setModVec1(offsets1);
+  sampleOut.getOrientedLattice().setModVec2(offsets2);
+  sampleOut.getOrientedLattice().setModVec3(offsets3);
   std::vector<Peak> peaks = Peaks->getPeaks();
   for (auto it = peaks.begin(); it != peaks.end(); ++it) {
     auto peak = *it;

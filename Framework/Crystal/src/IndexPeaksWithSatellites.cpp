@@ -3,24 +3,11 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/BasicHKLFilters.h"
-#include "MantidGeometry/Crystal/HKLFilterWavelength.h"
-#include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/Quat.h"
-#include <Eigen/Geometry>
-#include <algorithm>
-#include <boost/math/special_functions/round.hpp>
-#include <boost/numeric/conversion/cast.hpp>
-#include <cmath>
-#include <stdexcept>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 using namespace Mantid::DataObjects;
@@ -369,3 +356,4 @@ V3D IndexPeaksWithSatellites::getOffsetVector(const std::string &label) {
 
 } // namespace Crystal
 } // namespace Mantid
+
