@@ -5327,7 +5327,7 @@ void ApplicationWindow::saveSettings() {
 #endif
 
   // Root level is named "General" by Qt
-  resultsLog->writeSettings(&settings);
+  resultsLog->writeSettings(settings);
 
   // Our named group General, displayed as %General in the file
   settings.beginGroup("/General");

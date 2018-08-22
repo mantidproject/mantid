@@ -11,10 +11,12 @@ Interface
 Improvements
 ############
 - Elemental Analysis added to Muon Interfaces: Includes a selectable Periodic Table.
+- TF Asymmetry mode now displays the chi squared value at the top of the browser.
 
 Bugfixes
 ########
 - Results table now includes all logs that are common to all of the loaded files.
+- When turning TF Asymmetry mode off it no longer resets the global options.
 
 Algorithms
 ----------

@@ -80,6 +80,7 @@ void CalculateMuonAsymmetry::init() {
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
+  declareProperty("ChiSquared", 0.0, Kernel::Direction::Output);
   declareProperty(make_unique<API::FunctionProperty>("OutputFunction",
                                                      Kernel::Direction::Output),
                   "The fitting function after fit.");
@@ -251,7 +252,8 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   fit->execute();
   auto status = fit->getPropertyValue("OutputStatus");
   setProperty("OutputStatus", status);
-
+  double chi2 = std::stod(fit->getPropertyValue("OutputChi2overDoF"));
+  setProperty("ChiSquared", chi2);
   API::IFunction_sptr tmp = fit->getProperty("Function");
   setProperty("OutputFunction", tmp);
   try {

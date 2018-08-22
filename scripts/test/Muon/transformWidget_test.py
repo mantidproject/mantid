@@ -16,7 +16,7 @@ if sys.version_info.major == 3:
 else:
     import mock
 
-class FFTTransformTest(unittest.TestCase):
+class TransformTest(unittest.TestCase):
     def setUp(self):
         self._qapp = mock_widget.mockQapp()
         self.load=  mock.create_autospec( load_utils.LoadUtils,spec_set=True)
