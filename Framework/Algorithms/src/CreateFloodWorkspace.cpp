@@ -60,7 +60,7 @@ void CreateFloodWorkspace::init() {
   std::vector<std::string> exts = defaultFacility.extensions();
 
   declareProperty(make_unique<MultipleFileProperty>(Prop::FILENAME, exts),
-                  "The name of the fllod run file(s) to read. Multiple runs "
+                  "The name of the flood run file(s) to read. Multiple runs "
                   "can be loaded and added together, e.g. INST10+11+12+13.ext");
 
   declareProperty(Prop::START_X, EMPTY_DBL(),
