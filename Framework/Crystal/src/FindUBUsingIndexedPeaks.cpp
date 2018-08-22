@@ -29,7 +29,7 @@ namespace Mantid
             mustBePositive->setLower(0.0);
             declareProperty("Tolerance", 0.1, mustBePositive,
                             "Indexing Tolerance (0.1)");
-            declareProperty("ToleranceforSatellite", 0.1, mustBePositive,
+            declareProperty("ToleranceForSatellite", 0.1, mustBePositive,
                             "Indexing Tolerance for satellite (0.1)");
         }
         
@@ -130,7 +130,7 @@ namespace Mantid
                 
                 int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
                 int sate_indexed=0;
-                double satetolerance = getProperty("ToleranceforSatellite");
+                double satetolerance = getProperty("ToleranceForSatellite");
                 
                 if (ModDim > 0)
                 {

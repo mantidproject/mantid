@@ -8,7 +8,7 @@
 
 namespace Mantid {
 namespace Crystal {
-/** IndexPeakswithSatellites : Algorithm to use the UB saved in the sample
+/** IndexPeaksWithSatellites : Algorithm to use the UB saved in the sample
    associated
     with the specified PeaksWorkspace, to index the peaks in the workspace.
 
@@ -37,11 +37,11 @@ namespace Crystal {
     <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport IndexPeakswithSatellites : public API::Algorithm {
+class DLLExport IndexPeaksWithSatellites : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {
-    return "IndexPeakswithSatellites";
+    return "IndexPeaksWithSatellites";
   };
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -51,7 +51,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"IndexPeakswithSatellites"};
+    return {"IndexPeaksWithSatellites"};
   }
 
   /// Algorithm's category for identification
@@ -65,6 +65,7 @@ private:
   void exec() override;
   void predictOffsets(DataObjects::Peak &peak, int &sate_indexed,
                       double &satetolerance, double &satellite_error,
+                      int numberOffset,
                       Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl);
   void predictOffsetsWithCrossTerms(DataObjects::Peak &peak, int &sate_indexed,
                                     double &satetolerance,

@@ -1,4 +1,4 @@
-#include "MantidCrystal/IndexPeakswithSatellites.h"
+#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -30,7 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(IndexPeakswithSatellites)
+DECLARE_ALGORITHM(IndexPeaksWithSatellites)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -39,7 +39,7 @@ using namespace Mantid::Geometry;
 
 /** Initialize the algorithm's properties.
  */
-void IndexPeakswithSatellites::init() {
+void IndexPeaksWithSatellites::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Input Peaks Workspace");
@@ -52,9 +52,9 @@ void IndexPeakswithSatellites::init() {
                   "Main Indexing Tolerance (0.15)");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
+      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.1,
                                              mustBePositive, Direction::Input),
-      "Satellite Indexing Tolerance (0.15)");
+      "Satellite Indexing Tolerance (0.1)");
 
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       std::string("ModVector1"), "0.0,0.0,0.0"),
@@ -101,7 +101,7 @@ void IndexPeakswithSatellites::init() {
 
 /** Execute the algorithm.
  */
-void IndexPeakswithSatellites::exec() {
+void IndexPeaksWithSatellites::exec() {
   bool crossTerms = getProperty("CrossTerms");
   PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   if (!ws) {
@@ -244,11 +244,11 @@ void IndexPeakswithSatellites::exec() {
           main_error += h_error + k_error + l_error;
         } else if (!crossTerms) {
           predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
-                         offsets1, maxOrder, hkl);
+                         1, offsets1, maxOrder, hkl);
           predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
-                         offsets2, maxOrder, hkl);
+                         2, offsets2, maxOrder, hkl);
           predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
-                         offsets3, maxOrder, hkl);
+                         3, offsets3, maxOrder, hkl);
         } else {
           predictOffsetsWithCrossTerms(peak, sate_indexed, satetolerance,
                                        satellite_error, offsets1, offsets2,
@@ -291,9 +291,10 @@ void IndexPeakswithSatellites::exec() {
   setProperty("MainError", main_error);
   setProperty("SatelliteError", satellite_error);
 }
-void IndexPeakswithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
+void IndexPeaksWithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
                                               double &satetolerance,
                                               double &satellite_error,
+                                              int numberOffset,
                                               V3D offsets, int &maxOrder,
                                               V3D &hkl) {
   if (offsets != V3D(0, 0, 0)) {
@@ -306,7 +307,9 @@ void IndexPeakswithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
       hkl1[2] -= order * offsets[2];
       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
         peak.setIntHKL(hkl1);
-        peak.setIntMNP(V3D(order, 0, 0));
+        V3D mnp = V3D(0,0,0);
+        mnp[numberOffset-1] = order;
+        peak.setIntMNP(mnp);
         sate_indexed++;
         double h_error = fabs(round(hkl1[0]) - hkl1[0]);
         double k_error = fabs(round(hkl1[1]) - hkl1[1]);
@@ -316,7 +319,7 @@ void IndexPeakswithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
     }
   }
 }
-void IndexPeakswithSatellites::predictOffsetsWithCrossTerms(
+void IndexPeaksWithSatellites::predictOffsetsWithCrossTerms(
     Peak &peak, int &sate_indexed, double &satetolerance,
     double &satellite_error, V3D offsets1, V3D offsets2, V3D offsets3,
     int &maxOrder, V3D &hkl) {
@@ -353,7 +356,7 @@ void IndexPeakswithSatellites::predictOffsetsWithCrossTerms(
         }
       }
 }
-V3D IndexPeakswithSatellites::getOffsetVector(const std::string &label) {
+V3D IndexPeaksWithSatellites::getOffsetVector(const std::string &label) {
   vector<double> offsets = getProperty(label);
   if (offsets.empty()) {
     offsets.push_back(0.0);

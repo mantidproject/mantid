@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/HardThresholdBackground.cpp
 	src/HasUB.cpp
 	src/IndexPeaks.cpp
+	src/IndexPeaksWithSatellites.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/IntegratePeaksHybrid.cpp
@@ -102,6 +103,7 @@ set ( INC_FILES
 	inc/MantidCrystal/HasUB.h
 	inc/MantidCrystal/ICluster.h
 	inc/MantidCrystal/IndexPeaks.h
+	inc/MantidCrystal/IndexPeaksWithSatellites.h
 	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/IntegratePeaksHybrid.h
@@ -172,6 +174,7 @@ set ( TEST_FILES
 	HardThresholdBackgroundTest.h
 	HasUBTest.h
 	IndexPeaksTest.h
+	IndexPeaksWithSatellitesTest.h
 	IndexSXPeaksTest.h
 	IntegratePeakTimeSlicesTest.h
 	IntegratePeaksHybridTest.h

@@ -1,5 +1,5 @@
 /*
- * IndexPeakswithSatellitesTest.h
+ * IndexPeaksWithSatellitesTest.h
  *
  *  Created on: July, 2018
  *      Author: Vickie Lynch
@@ -12,7 +12,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidCrystal/CalculateUMatrix.h"
-#include "MantidCrystal/IndexPeakswithSatellites.h"
+#include "MantidCrystal/IndexPeaksWithSatellites.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/PredictSatellitePeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -26,11 +26,11 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-class IndexPeakswithSatellitesTest : public CxxTest::TestSuite {
+class IndexPeaksWithSatellitesTest : public CxxTest::TestSuite {
 
 public:
   void test_Init() {
-    IndexPeakswithSatellites alg;
+    IndexPeaksWithSatellites alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -79,7 +79,7 @@ public:
     alg3.setPropertyValue("SatellitePeaks", "SatellitePeaks");
     PeaksWorkspace_sptr SatellitePeaks = alg3.getProperty("SatellitePeaks");
 
-    IndexPeakswithSatellites alg;
+    IndexPeaksWithSatellites alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
