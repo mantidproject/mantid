@@ -161,7 +161,7 @@ void MDNormSCD::exec() {
       calculateNormalization(otherValues, affineTrans, expInfoIndex);
     } else {
       g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
-                  "Not applying normalization.");
+                    "Not applying normalization.");
     }
     m_accumulate = true;
   }
@@ -413,8 +413,8 @@ void MDNormSCD::calculateNormalization(
 
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-  auto *rubwLog =
-      dynamic_cast<VectorDoubleProperty *>(currentExptInfo.getLog("RUBW_MATRIX"));
+  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(
+      currentExptInfo.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
     throw std::runtime_error(
         "Wokspace does not contain a log entry for the RUBW matrix."
@@ -442,8 +442,9 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
   double progStep = 0.7 / m_numExptInfos;
-  auto prog = make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
-                                         0.3 + progStep * (expInfoIndex + 1.), ndets);
+  auto prog =
+      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
+                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {

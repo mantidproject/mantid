@@ -56,7 +56,7 @@ private:
   void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization,
-                               uint16_t expInfoIndex=0) const;
+                               uint16_t expInfoIndex = 0) const;
   Kernel::Matrix<coord_t>
   findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
                             bool &skipNormalization);
