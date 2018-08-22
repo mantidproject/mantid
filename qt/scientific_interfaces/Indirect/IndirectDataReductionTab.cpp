@@ -1,11 +1,11 @@
 #include "IndirectDataReductionTab.h"
 
+#include "IndirectDataReduction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
-#include "IndirectDataReduction.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -228,4 +228,4 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

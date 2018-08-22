@@ -1,13 +1,13 @@
 #ifndef MANTID_DATAHANDLING_SAVEILLCOSMOSASCIITEST_H_
 #define MANTID_DATAHANDLING_SAVEILLCOSMOSASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveILLCosmosAscii.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/SaveILLCosmosAscii.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 #include <string>
 
 using namespace Mantid::API;

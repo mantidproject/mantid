@@ -54,5 +54,5 @@ void ModeratorModel::setTiltAngleInDegrees(const double theta) {
  * @return The value of the tilt angle in radians
  */
 double ModeratorModel::getTiltAngleInRadians() const { return m_tiltAngle; }
-}
-}
+} // namespace API
+} // namespace Mantid

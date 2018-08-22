@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 
-#include <boost/algorithm/string.hpp>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QStyle>
@@ -86,7 +85,7 @@ void HintingLineEdit::updateHints(const QString &text) {
 }
 
 /** Hides the list of hints
-*/
+ */
 void HintingLineEdit::hideHints() { m_hintLabel->hide(); }
 
 /** Updates the list of hints matching the user's current input */
@@ -194,4 +193,4 @@ void HintingLineEdit::prevSuggestion() {
   }
 }
 } // namespace MantidWidgets
-} // namepsace MantidQt
+} // namespace MantidQt

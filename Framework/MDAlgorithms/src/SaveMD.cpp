@@ -35,7 +35,7 @@ void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
   // box structure
   BoxFlatStruct.initFlatStructure(ws, filename);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -335,5 +335,5 @@ void SaveMD::exec() {
                              "type.");
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

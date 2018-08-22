@@ -1,19 +1,19 @@
 #ifndef MANTID_DATAHANDLING_SAVEMFTTEST_H_
 #define MANTID_DATAHANDLING_SAVEMFTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveMFT.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/SaveMFT.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <iterator>
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
+#include <cxxtest/TestSuite.h>
+#include <iterator>
 
 #include <boost/shared_ptr.hpp>
 

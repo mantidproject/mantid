@@ -10,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -19,7 +20,6 @@
 #include <map>
 #include <stdexcept>
 #include <vector>
-#include <Poco/File.h>
 
 namespace Mantid {
 namespace DataHandling {

@@ -30,18 +30,18 @@
  *                                                                         *
  ***************************************************************************/
 #include "MatrixValuesDialog.h"
-#include "MatrixCommand.h"
 #include "MantidQtWidgets/Common/ScriptEditor.h"
+#include "MatrixCommand.h"
 
-#include <QLayout>
-#include <QSpinBox>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
 #include <QComboBox>
-#include <QTextEdit>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
+#include <QTextEdit>
 #ifdef SCRIPTING_PYTHON
 #include <QCheckBox>
 #endif

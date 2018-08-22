@@ -5,8 +5,8 @@
 
 #include "DllConfig.h"
 
-#include "IALCPeakFittingView.h"
 #include "IALCPeakFittingModel.h"
+#include "IALCPeakFittingView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

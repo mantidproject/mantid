@@ -9,12 +9,12 @@ GUI
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <Poco/File.h>
 #include <boost/make_shared.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
 #include <stdexcept>
-#include <Poco/File.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,8 +33,8 @@ void AsciiPointBase::init() {
 }
 
 /** Executes the algorithm. In this case it provides the process for any child
-* classes as this class is abstract
-*/
+ * classes as this class is abstract
+ */
 void AsciiPointBase::exec() {
   std::string filename = getProperty("Filename");
   g_log.information("FILENAME: " + filename);

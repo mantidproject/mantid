@@ -132,8 +132,9 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
  * @param fileVersion :: project file version used
  * @param isTopLevel :: whether this function is being called on a top level
  * 		folder. (Default True)
+ * @return True is loading was successful, otherwise false
  */
-void ProjectSerialiser::load(std::string filepath, const int fileVersion,
+bool ProjectSerialiser::load(std::string filepath, const int fileVersion,
                              const bool isTopLevel) {
   // We have to accept std::string to maintain Python compatibility
   auto qfilePath = QString::fromStdString(filepath);
@@ -204,6 +205,8 @@ void ProjectSerialiser::load(std::string filepath, const int fileVersion,
 
   g_log.notice() << "Finished Loading Project: "
                  << window->projectname.toStdString() << "\n";
+
+  return true;
 }
 
 /**
@@ -225,7 +228,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
   // If were recovering projects the workspaces should already be loaded
-  if (isTopLevel && !m_projectRecovery) {
+  if (isTopLevel) {
     loadWorkspaces(tsv);
   }
 
@@ -278,8 +281,11 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
     std::unordered_set<std::string> allWsNames(parsedNames.at(ALL_WS).begin(),
                                                parsedNames.at(ALL_WS).end());
 
-    allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
-                      parsedNames.at(ALL_GROUP_NAMES).end());
+    if (parsedNames.find(ALL_GROUP_NAMES) != parsedNames.cend()) {
+      // Add group names to the list of accepted names
+      allWsNames.insert(parsedNames.at(ALL_GROUP_NAMES).begin(),
+                        parsedNames.at(ALL_GROUP_NAMES).end());
+    }
 
     const auto loadedWs = adsInstance.getObjectNames();
     for (const std::string &adsWsName : loadedWs) {
@@ -302,7 +308,7 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
 void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
                                     const int fileVersion) {
   auto keys = WindowFactory::Instance().getKeys();
-  // Work around for graph-table dependance. Graph3D's currently rely on
+  // Work around for graph-table dependence. Graph3D's currently rely on
   // looking up tables. These must be loaded before the graphs, so work around
   // by loading in reverse alphabetical order.
   std::reverse(keys.begin(), keys.end());
@@ -391,8 +397,10 @@ bool ProjectSerialiser::canWriteToProject(QFile *fileHandle,
                   projectName.toStdString());
     } else {
       QMessageBox::about(window, window->tr("MantidPlot - File save error"),
-                         window->tr("The file: <br><b>%1</b> is opened in "
-                                    "read-only mode").arg(projectName));
+                         window
+                             ->tr("The file: <br><b>%1</b> is opened in "
+                                  "read-only mode")
+                             .arg(projectName));
     }
     return false;
   }
@@ -650,9 +658,10 @@ bool ProjectSerialiser::canBackupProjectFiles(QFile *fileHandle,
         fileHandle->close();
       int choice = QMessageBox::warning(
           window, window->tr("MantidPlot - File backup error"), // Mantid
-          window->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
-                     "you ignore "
-                     "this, you run the risk of <b>data loss</b>.")
+          window
+              ->tr("Cannot make a backup copy of <b>%1</b> (to %2).<br>If "
+                   "you ignore "
+                   "this, you run the risk of <b>data loss</b>.")
               .arg(projectName)
               .arg(projectName + "~"),
           QMessageBox::Retry | QMessageBox::Default,
@@ -932,8 +941,8 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
   // The first element is removed since it says "WorkspaceNames"
   unparsedWorkspaces.erase(unparsedWorkspaces.begin());
 
+  const char groupWorkspaceChar = ',';
   for (const auto &workspaceName : unparsedWorkspaces) {
-    const char groupWorkspaceChar = ',';
 
     if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
       // Normal workspace

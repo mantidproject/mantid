@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SOFQWPOLYGONTEST_H_
 #define MANTID_ALGORITHMS_SOFQWPOLYGONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/SofQWPolygon.h"
+#include <cxxtest/TestSuite.h>
 
 #include "SofQWTest.h"
 

@@ -45,9 +45,11 @@ set ( TEST_PY_FILES
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
+  FractionalIndexingTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectTransmissionTest.py
+  IndexSatellitePeaksTest.py
   LoadAndMergeTest.py
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
@@ -82,7 +84,6 @@ set ( TEST_PY_FILES
   SetDetScaleTest.py
   SortByQVectorsTest.py
   SortDetectorsTest.py
-  SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py

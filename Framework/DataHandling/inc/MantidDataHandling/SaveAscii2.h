@@ -51,8 +51,13 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
-    return {"LoadAscii", "SaveCSV", "SaveDiffFittingAscii", "SaveMFT",
-            "SaveOpenGenieAscii", "SaveGSS", "SaveFocusedXYE"};
+    return {"LoadAscii",
+            "SaveCSV",
+            "SaveDiffFittingAscii",
+            "SaveReflCustomAscii",
+            "SaveOpenGenieAscii",
+            "SaveGSS",
+            "SaveFocusedXYE"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Text"; }

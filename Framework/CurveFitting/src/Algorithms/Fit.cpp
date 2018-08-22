@@ -29,13 +29,13 @@ DECLARE_ALGORITHM(Fit)
 Fit::Fit() : IFittingAlgorithm(), m_maxIterations() {}
 
 /** Initialisation method
-*/
+ */
 void Fit::initConcrete() {
 
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")
-      ->setDocumentation("Math expressions defining ties between parameters of "
-                         "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation(
+      "Math expressions defining ties between parameters of "
+      "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
@@ -131,9 +131,9 @@ void Fit::initializeMinimizer(size_t maxIterations) {
 }
 
 /**
-  * Copy all output workspace properties from the minimizer to Fit algorithm.
-  * @param minimizer :: The minimizer to copy from.
-  */
+ * Copy all output workspace properties from the minimizer to Fit algorithm.
+ * @param minimizer :: The minimizer to copy from.
+ */
 void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   auto &properties = minimizer.getProperties();
   for (auto property : properties) {
@@ -369,9 +369,9 @@ void Fit::createOutput() {
 }
 
 /** Executes the algorithm
-*
-*  @throw runtime_error Thrown if algorithm cannot execute
-*/
+ *
+ *  @throw runtime_error Thrown if algorithm cannot execute
+ */
 void Fit::execConcrete() {
 
   // Read Fit's own properties

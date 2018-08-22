@@ -1,13 +1,13 @@
 #include "ReflSaveTabPresenter.h"
-#include "IReflSaveTabView.h"
 #include "IReflMainWindowPresenter.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "IReflSaveTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ConfigService.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
@@ -19,9 +19,9 @@ namespace CustomInterfaces {
 using namespace Mantid::API;
 
 /**
-* @param saver :: The model to use to save the files
-* @param view :: The view we are handling
-*/
+ * @param saver :: The model to use to save the files
+ * @param view :: The view we are handling
+ */
 ReflSaveTabPresenter::ReflSaveTabPresenter(
     std::unique_ptr<IReflAsciiSaver> saver,
     std::unique_ptr<IReflSaveTabView> view)
@@ -32,12 +32,12 @@ ReflSaveTabPresenter::ReflSaveTabPresenter(
 }
 
 /** Destructor
-*/
+ */
 ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
 
 /** Accept a main presenter
-* @param mainPresenter :: [input] The main presenter
-*/
+ * @param mainPresenter :: [input] The main presenter
+ */
 void ReflSaveTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
@@ -129,15 +129,15 @@ void ReflSaveTabPresenter::completedRowReductionSuccessfully(
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
-* workspaces
-*/
+ * workspaces
+ */
 void ReflSaveTabPresenter::populateWorkspaceList() {
   m_view->clearWorkspaceList();
   m_view->setWorkspaceList(getAvailableWorkspaceNames());
 }
 
 /** Filters the names in the 'List of Workspaces' widget
-*/
+ */
 void ReflSaveTabPresenter::filterWorkspaceNames() {
   m_view->clearWorkspaceList();
 
@@ -171,8 +171,8 @@ void ReflSaveTabPresenter::filterWorkspaceNames() {
 }
 
 /** Fills the 'List of Logged Parameters' widget with the parameters of the
-* currently selected workspace
-*/
+ * currently selected workspace
+ */
 void ReflSaveTabPresenter::populateParametersList() {
   m_view->clearParametersList();
 
@@ -277,7 +277,7 @@ void ReflSaveTabPresenter::saveSelectedWorkspaces() {
 }
 
 /** Suggests a save directory and sets it in the 'Save path' text field
-*/
+ */
 void ReflSaveTabPresenter::suggestSaveDir() {
   std::string path = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
@@ -285,8 +285,8 @@ void ReflSaveTabPresenter::suggestSaveDir() {
 }
 
 /** Obtains all available workspace names to save
-* @return :: list of workspace names
-*/
+ * @return :: list of workspace names
+ */
 std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
   // Exclude workspace groups and table workspaces as they cannot be saved to
@@ -303,5 +303,5 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -22,5 +22,5 @@ int parseDenaryInteger(QString const &in) {
     throw std::runtime_error("Failed to parse '" + in.toStdString() +
                              "' as a denary integer.");
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

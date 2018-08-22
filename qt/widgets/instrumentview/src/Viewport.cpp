@@ -10,10 +10,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* Initialize with defaults.
-* @param w :: Vieport width in pixels
-* @param h :: Vieport height in pixels
-*/
+ * Initialize with defaults.
+ * @param w :: Vieport width in pixels
+ * @param h :: Vieport height in pixels
+ */
 Viewport::Viewport(int w, int h)
     : m_projectionType(Viewport::ORTHO), m_width(w), m_height(h), m_left(-1),
       m_right(1), m_bottom(-1), m_top(1), m_near(-1), m_far(1),
@@ -23,43 +23,44 @@ Viewport::Viewport(int w, int h)
 }
 
 /**
-* Resize the viewport = size of the displaying widget.
-* @param w :: New viewport width in pixels.
-* @param h :: New viewport height in pixels.
-*/
+ * Resize the viewport = size of the displaying widget.
+ * @param w :: New viewport width in pixels.
+ * @param h :: New viewport height in pixels.
+ */
 void Viewport::resize(int w, int h) {
   m_width = w;
   m_height = h;
 }
 
 /**
-* Get the size of the viewport in screen pixels (size of the displaying widget).
-*
-* @param w :: Buffer to accept the viewport width value.
-* @param h :: Buffer to accept the viewport height value.
-*/
+ * Get the size of the viewport in screen pixels (size of the displaying
+ * widget).
+ *
+ * @param w :: Buffer to accept the viewport width value.
+ * @param h :: Buffer to accept the viewport height value.
+ */
 void Viewport::getViewport(int &w, int &h) const {
   w = m_width;
   h = m_height;
 }
 
 /**
-* This will set the projection. The parameters describe the dimensions of a
-*scene
-* which has to be fully visible in this viewport by default. These don't set
-* the actual projection sizes because they have to be adjusted for the aspect
-* ratio of the displaying widget. The actual projection dimensions can be
-* retrieved by calling getInstantProjection() method.
-*
-* @param l :: left side of the scene (xmin)
-* @param r :: right side of the scene (xmax)
-* @param b :: bottom side of the scene (ymin)
-* @param t :: top side of the scene (ymax)
-* @param nearz :: near side of the scene (zmin)
-* @param farz :: far side of the scene (zmax)
-* @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
-*implemented
-*/
+ * This will set the projection. The parameters describe the dimensions of a
+ *scene
+ * which has to be fully visible in this viewport by default. These don't set
+ * the actual projection sizes because they have to be adjusted for the aspect
+ * ratio of the displaying widget. The actual projection dimensions can be
+ * retrieved by calling getInstantProjection() method.
+ *
+ * @param l :: left side of the scene (xmin)
+ * @param r :: right side of the scene (xmax)
+ * @param b :: bottom side of the scene (ymin)
+ * @param t :: top side of the scene (ymax)
+ * @param nearz :: near side of the scene (zmin)
+ * @param farz :: far side of the scene (zmax)
+ * @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
+ *implemented
+ */
 void Viewport::setProjection(double l, double r, double b, double t,
                              double nearz, double farz,
                              Viewport::ProjectionType type) {
@@ -77,13 +78,13 @@ void Viewport::setProjection(double l, double r, double b, double t,
 }
 
 /**
-* Convenience overload.
-*
-* @param minBounds :: Near-bottom-left corner of the scene.
-* @param maxBounds :: Far-top-right corner of the scene.
-* @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
-*implemented
-*/
+ * Convenience overload.
+ *
+ * @param minBounds :: Near-bottom-left corner of the scene.
+ * @param maxBounds :: Far-top-right corner of the scene.
+ * @param type :: Projection type: ORTHO or PERSPECTIVE. PERSPECTIVE isn't fully
+ *implemented
+ */
 void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds,
                              const Mantid::Kernel::V3D &maxBounds,
                              ProjectionType type) {
@@ -97,8 +98,8 @@ void Viewport::setProjection(const Mantid::Kernel::V3D &minBounds,
 }
 
 /**
-* Return XY plane bounds corrected for the aspect ratio.
-*/
+ * Return XY plane bounds corrected for the aspect ratio.
+ */
 void Viewport::correctForAspectRatioAndZoom(double &xmin, double &xmax,
                                             double &ymin, double &ymax,
                                             double &zmin, double &zmax) const {
@@ -131,14 +132,14 @@ Viewport::ProjectionType Viewport::getProjectionType() const {
 }
 
 /**
-* Get the projection bounds.
-* @param xmin :: left side of the Ortho projection
-* @param xmax :: right side of the Ortho projection
-* @param ymin :: bottom side of the Ortho projection
-* @param ymax :: top side of the Ortho projection
-* @param zmin :: near side of the Ortho Projection
-* @param zmax :: far side of the Ortho Projection
-*/
+ * Get the projection bounds.
+ * @param xmin :: left side of the Ortho projection
+ * @param xmax :: right side of the Ortho projection
+ * @param ymin :: bottom side of the Ortho projection
+ * @param ymax :: top side of the Ortho projection
+ * @param zmin :: near side of the Ortho Projection
+ * @param zmax :: far side of the Ortho Projection
+ */
 void Viewport::getInstantProjection(double &xmin, double &xmax, double &ymin,
                                     double &ymax, double &zmin,
                                     double &zmax) const {
@@ -151,8 +152,8 @@ void Viewport::setTranslation(double xval, double yval) {
 }
 
 /**
-* Issue the OpenGL commands that define the viewport and projection.
-*/
+ * Issue the OpenGL commands that define the viewport and projection.
+ */
 void Viewport::applyProjection() const {
   glViewport(0, 0, m_width, m_height);
   glMatrixMode(GL_PROJECTION);
@@ -171,16 +172,18 @@ void Viewport::applyProjection() const {
 
     if (OpenGLError::hasError("GLViewport::issueGL()")) {
       OpenGLError::log() << "Arguments to glFrustum:\n";
-      OpenGLError::log() << xmin << ' ' << xmax << '\n' << ymin << ' ' << ymax
-                         << '\n' << znear << ' ' << zfar << "\n\n";
+      OpenGLError::log() << xmin << ' ' << xmax << '\n'
+                         << ymin << ' ' << ymax << '\n'
+                         << znear << ' ' << zfar << "\n\n";
     }
   } else {
     glOrtho(xmin, xmax, ymin, ymax, zmin, zmax);
 
     if (OpenGLError::hasError("GLViewport::issueGL()")) {
       OpenGLError::log() << "Arguments to glOrtho:\n";
-      OpenGLError::log() << xmin << ' ' << xmax << '\n' << ymin << ' ' << ymax
-                         << '\n' << zmin << ' ' << zmax << "\n\n";
+      OpenGLError::log() << xmin << ' ' << xmax << '\n'
+                         << ymin << ' ' << ymax << '\n'
+                         << zmin << ' ' << zmax << "\n\n";
     }
   }
   // Reset the rendering options just in case
@@ -189,12 +192,12 @@ void Viewport::applyProjection() const {
 }
 
 /**
-* A point on the screen is projected onto a sphere with center at the rotation
-* point
-* @param a :: The x screen coordinate in pixels
-* @param b :: The y screen coordinate in pixels
-* @param point :: The projection point on the sphere in model coordinates
-*/
+ * A point on the screen is projected onto a sphere with center at the rotation
+ * point
+ * @param a :: The x screen coordinate in pixels
+ * @param b :: The y screen coordinate in pixels
+ * @param point :: The projection point on the sphere in model coordinates
+ */
 void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
   // z initiaised to zero if out of the sphere
   double z = 0;
@@ -214,8 +217,8 @@ void Viewport::projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const {
 }
 
 /**
-* Apply the transformation to the scene: translation, rotation and zooming.
-*/
+ * Apply the transformation to the scene: translation, rotation and zooming.
+ */
 void Viewport::applyRotation() const {
   // Translate
   glTranslated(m_xTrans, m_yTrans, m_zTrans);
@@ -228,8 +231,8 @@ void Viewport::applyRotation() const {
 }
 
 /**
-* Clear all transforamtions (rotation, translation. scaling)
-*/
+ * Clear all transforamtions (rotation, translation. scaling)
+ */
 void Viewport::reset() {
   m_quaternion.init();
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
@@ -239,9 +242,9 @@ void Viewport::reset() {
 }
 
 /**
-* Rotate the scene such that its X axis is perpendicular to the screen and
-* points towards the viewer.
-*/
+ * Rotate the scene such that its X axis is perpendicular to the screen and
+ * points towards the viewer.
+ */
 void Viewport::setViewToXPositive() {
   reset();
   Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
@@ -251,9 +254,9 @@ void Viewport::setViewToXPositive() {
 }
 
 /**
-* Rotate the scene such that its Y axis is perpendicular to the screen and
-* points towards the viewer.
-*/
+ * Rotate the scene such that its Y axis is perpendicular to the screen and
+ * points towards the viewer.
+ */
 void Viewport::setViewToYPositive() {
   reset();
   Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
@@ -263,9 +266,9 @@ void Viewport::setViewToYPositive() {
 }
 
 /**
-* Rotate the scene such that its Z axis is perpendicular to the screen and
-* points towards the viewer.
-*/
+ * Rotate the scene such that its Z axis is perpendicular to the screen and
+ * points towards the viewer.
+ */
 void Viewport::setViewToZPositive() {
   reset();
   m_quaternion.init();
@@ -273,9 +276,9 @@ void Viewport::setViewToZPositive() {
 }
 
 /**
-* Rotate the scene such that its X axis is perpendicular to the screen and
-* points away from the viewer.
-*/
+ * Rotate the scene such that its X axis is perpendicular to the screen and
+ * points away from the viewer.
+ */
 void Viewport::setViewToXNegative() {
   reset();
   Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
@@ -285,9 +288,9 @@ void Viewport::setViewToXNegative() {
 }
 
 /**
-* Rotate the scene such that its Y axis is perpendicular to the screen and
-* points away from the viewer.
-*/
+ * Rotate the scene such that its Y axis is perpendicular to the screen and
+ * points away from the viewer.
+ */
 void Viewport::setViewToYNegative() {
   reset();
   Mantid::Kernel::Quat tempy(Mantid::Kernel::V3D(0.0, 0.0, 1.0),
@@ -297,9 +300,9 @@ void Viewport::setViewToYNegative() {
 }
 
 /**
-* Rotate the scene such that its Z axis is perpendicular to the screen and
-* points away from the viewer.
-*/
+ * Rotate the scene such that its Z axis is perpendicular to the screen and
+ * points away from the viewer.
+ */
 void Viewport::setViewToZNegative() {
   reset();
   Mantid::Kernel::Quat tempy(180.0, Mantid::Kernel::V3D(0.0, 1.0, 0.0));
@@ -308,21 +311,21 @@ void Viewport::setViewToZNegative() {
 }
 
 /**
-* Set a new rotation.
-* @param rot :: Rotattion as a quaternion.
-*/
+ * Set a new rotation.
+ * @param rot :: Rotattion as a quaternion.
+ */
 void Viewport::setRotation(const Mantid::Kernel::Quat &rot) {
   m_quaternion = rot;
   m_quaternion.GLMatrix(&m_rotationmatrix[0]);
 }
 
 /**
-* Init zooming at a point on the screen. The user starts zooming by clicking
-* (middle)
-* mouse button then drags holding the button.
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-*/
+ * Init zooming at a point on the screen. The user starts zooming by clicking
+ * (middle)
+ * mouse button then drags holding the button.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::initZoomFrom(int a, int b) {
   if (a <= 0 || b <= 0)
     return;
@@ -335,11 +338,11 @@ void Viewport::initZoomFrom(int a, int b) {
 }
 
 /**
-* Calculate the zoom factor when the user releases the mouse button at a point
-* on the screen.
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-*/
+ * Calculate the zoom factor when the user releases the mouse button at a point
+ * on the screen.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::generateZoomTo(int a, int b) {
   if (a >= m_width || b >= m_height || a <= 0 || b <= 0)
     return;
@@ -351,11 +354,11 @@ void Viewport::generateZoomTo(int a, int b) {
 }
 
 /**
-* Generate zooming factor using mouse wheel
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-* @param d :: The mouse wheel delta
-*/
+ * Generate zooming factor using mouse wheel
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ * @param d :: The mouse wheel delta
+ */
 void Viewport::wheelZoom(int a, int b, int d) {
   // OpenGL works with floats. Set a limit to the zoom factor
   // based on the epsilon for floats
@@ -376,9 +379,9 @@ void Viewport::wheelZoom(int a, int b, int d) {
 }
 
 /**
-* Set zooming factor.
-* @param zoom :: A new zooming factor.
-*/
+ * Set zooming factor.
+ * @param zoom :: A new zooming factor.
+ */
 void Viewport::setZoom(double zoom) {
   if (zoom > 0.0) {
     m_zoomFactor = zoom;
@@ -386,19 +389,19 @@ void Viewport::setZoom(double zoom) {
 }
 
 /**
-* Start a trackball rotation from here.
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-*/
+ * Start a trackball rotation from here.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::initRotationFrom(int a, int b) {
   projectOnSphere(a, b, m_lastpoint);
 }
 
 /**
-* Generate the rotation matrix to rotate to this point.
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-*/
+ * Generate the rotation matrix to rotate to this point.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::generateRotationTo(int a, int b) {
   Mantid::Kernel::V3D newpoint;
   projectOnSphere(a, b, newpoint);
@@ -419,20 +422,20 @@ void Viewport::generateRotationTo(int a, int b) {
 }
 
 /**
-* Initialize scene translation at a point on the screen
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-*/
+ * Initialize scene translation at a point on the screen
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::initTranslateFrom(int a, int b) {
   generateTranslationPoint(a, b, m_lastpoint);
 }
 
 /**
-* Generate scene translation such that a point of the last initTranslateFrom
-* moved to the new position pointed by the mouse.
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-*/
+ * Generate scene translation such that a point of the last initTranslateFrom
+ * moved to the new position pointed by the mouse.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ */
 void Viewport::generateTranslationTo(int a, int b) {
   Mantid::Kernel::V3D newpoint;
   generateTranslationPoint(a, b, newpoint);
@@ -443,11 +446,11 @@ void Viewport::generateTranslationTo(int a, int b) {
 }
 
 /**
-* Find coordinates of a point on z = 0 plane under the mouse.
-* @param a :: The x mouse coordinate
-* @param b :: The y mouse coordinate
-* @param point :: Return the result through this reference.
-*/
+ * Find coordinates of a point on z = 0 plane under the mouse.
+ * @param a :: The x mouse coordinate
+ * @param b :: The y mouse coordinate
+ * @param point :: Return the result through this reference.
+ */
 void Viewport::generateTranslationPoint(int a, int b,
                                         Mantid::Kernel::V3D &point) const {
   double x, y, z = 0.0;
@@ -460,9 +463,9 @@ void Viewport::generateTranslationPoint(int a, int b,
 }
 
 /**
-* Apply the transformation to a vector.
-* @param pos :: A position vector to transform (in and out).
-*/
+ * Apply the transformation to a vector.
+ * @param pos :: A position vector to transform (in and out).
+ */
 void Viewport::transform(Mantid::Kernel::V3D &pos) const {
   pos *= m_zoomFactor;
   m_quaternion.rotate(pos);
@@ -502,5 +505,5 @@ std::string Viewport::saveToProject() const {
 
   return tsv.outputLines();
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

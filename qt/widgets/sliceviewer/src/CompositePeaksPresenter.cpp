@@ -483,7 +483,7 @@ public:
     return result;
   }
 };
-}
+} // namespace
 
 CompositePeaksPresenter::SubjectContainer::iterator
 CompositePeaksPresenter::getPresenterIteratorFromName(const QString &name) {
@@ -559,7 +559,7 @@ public:
     return candidate.get() == m_toFind;
   }
 };
-}
+} // namespace
 
 /**
  * Zoom to a peak
@@ -714,5 +714,5 @@ bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX,
   }
   return result;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

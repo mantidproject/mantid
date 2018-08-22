@@ -396,8 +396,8 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
  */
 void LoadRawHelper::setWorkspaceData(
     DataObjects::Workspace2D_sptr newWorkspace,
-    const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &
-        timeChannelsVec,
+    const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+        &timeChannelsVec,
     int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
     int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
@@ -779,7 +779,7 @@ void LoadRawHelper::createPeriodLogs(
  */
 void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
                                       ISISRAW *const rawFile) const {
-  ISISRAW &localISISRaw = [this, rawFile]() -> ISISRAW &{
+  ISISRAW &localISISRaw = [this, rawFile]() -> ISISRAW & {
     if (rawFile)
       return *rawFile;
     else
@@ -1110,9 +1110,8 @@ void LoadRawHelper::loadSpectra(
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + periodTimesNSpectraP1;
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list &&
-         find(m_spec_list.begin(), m_spec_list.end(), i) !=
-             m_spec_list.end())) {
+        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
+                       m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
@@ -1126,9 +1125,9 @@ void LoadRawHelper::loadSpectra(
 
       if (numberOfPeriods == 1) {
         if (++histCurrent % 100 == 0) {
-          m_prog = progStart +
-                   (progEnd - progStart) *
-                       (static_cast<double>(histCurrent) / histTotal);
+          m_prog =
+              progStart + (progEnd - progStart) *
+                              (static_cast<double>(histCurrent) / histTotal);
         }
         interruption_point();
       }

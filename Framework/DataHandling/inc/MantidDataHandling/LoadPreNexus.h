@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LoadPreNexus_H_
 #define MANTID_DATAHANDLING_LoadPreNexus_H_
 
+#include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IEventWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

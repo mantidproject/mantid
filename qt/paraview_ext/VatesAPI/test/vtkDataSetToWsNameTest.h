@@ -1,10 +1,10 @@
 #ifndef VTK_DATASET_TO_WS_NAME_TEST
 #define VTK_DATASET_TO_WS_NAME_TEST
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
-#include "MockObjects.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 #include <vtkNew.h>
 
 using namespace Mantid::VATES;
@@ -19,8 +19,9 @@ private:
   // see Architectural design document.
   static std::string constructXML() {
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
-           "<MDInstruction>" + "<MDWorkspaceName>WS_NAME</MDWorkspaceName>"
-                               "</MDInstruction>";
+           "<MDInstruction>" +
+           "<MDWorkspaceName>WS_NAME</MDWorkspaceName>"
+           "</MDInstruction>";
   }
 
 public:

@@ -1,11 +1,11 @@
 #ifndef INSTRUMENTDATASERVICETEST_H_
 #define INSTRUMENTDATASERVICETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

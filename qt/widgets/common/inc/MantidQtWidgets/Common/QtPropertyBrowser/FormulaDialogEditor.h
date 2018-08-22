@@ -34,7 +34,7 @@ protected:
     return new FormulaDialogEditor(property, parent);
   }
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQT_MANTIDWIDGETS_FORMULADIALOGEDIT_H

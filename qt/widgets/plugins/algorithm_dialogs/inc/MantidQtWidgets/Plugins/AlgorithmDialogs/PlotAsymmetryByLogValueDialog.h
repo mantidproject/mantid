@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "ui_PlotAsymmetryByLogValueDialog.h"
 
-#include <QString>
 #include <QSignalMapper>
+#include <QString>
 
 //---------------------------
 // Qt Forward declarations
@@ -83,7 +83,7 @@ private:
   /// Maps Browse buttons to file properties
   QSignalMapper *browseButtonMapper;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOM_DIALOGSLPLOTASYMMETRYBYLOGVALUEDIALOG_H

@@ -25,12 +25,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_FILTEREDTREEMODEL_H_
 #define MANTIDQTMANTIDWIDGETS_FILTEREDTREEMODEL_H_
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
+#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QSortFilterProxyModel>
 #include <memory>
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
-#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
-#include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
-#include "MantidQtWidgets/Common/DllOption.h"
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -51,7 +51,7 @@ private:
   std::unique_ptr<RowPredicate> m_predicate;
   RowLocationAdapter m_rowLocation;
 };
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_FILTEREDTREEMODEL_H_

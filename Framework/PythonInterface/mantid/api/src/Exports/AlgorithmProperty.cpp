@@ -38,7 +38,7 @@ AlgorithmProperty *createPropertyWithValidator(const std::string &name,
   return createPropertyWithValidatorAndDirection(
       name, validator, Mantid::Kernel::Direction::Input);
 }
-}
+} // namespace
 
 void export_AlgorithmProperty() {
   // AlgorithmProperty has base PropertyWithValue<boost::shared_ptr<IAlgorithm>>

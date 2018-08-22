@@ -1,7 +1,7 @@
 #include "MantidCrystal/DiffPeaksWorkspaces.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Crystal {

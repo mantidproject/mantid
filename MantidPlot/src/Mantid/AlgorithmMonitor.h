@@ -2,6 +2,7 @@
 #define ALGMONITOR_H
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <Poco/NObserver.h>
 #include <QDialog>
 #include <QMutex>
@@ -9,7 +10,6 @@
 #include <QPushButton>
 #include <QThread>
 #include <QVector>
-#include "MantidAPI/AlgorithmManager.h"
 
 class QLabel;
 class QTreeWidget;

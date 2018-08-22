@@ -50,5 +50,5 @@ const API::Workspace_sptr ExtractWorkspace::operator()() const {
         "Unable to extract boost::shared_ptr<Workspace> from Python object");
   }
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

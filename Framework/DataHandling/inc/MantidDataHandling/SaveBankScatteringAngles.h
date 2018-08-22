@@ -30,7 +30,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 };
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_SAVEBANKSCATTERINGANGLES_H_

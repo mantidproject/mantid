@@ -24,8 +24,8 @@
 */
 #include "MantidKernel/System.h"
 #include <boost/python/object.hpp>
-#include <string>
 #include <memory>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -33,7 +33,7 @@ namespace Kernel {
 class DataItem;
 class IPropertyManager;
 class Property;
-}
+} // namespace Kernel
 namespace PythonInterface {
 namespace Registry {
 /**
@@ -55,8 +55,8 @@ struct DLLExport PropertyValueHandler {
          const boost::python::object &validator,
          const unsigned int direction) const = 0;
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTYVALUEHANDLER_H_ */

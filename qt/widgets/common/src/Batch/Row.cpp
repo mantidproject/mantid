@@ -37,6 +37,6 @@ bool operator<=(Row const &lhs, Row const &rhs) {
 bool operator>=(Row const &lhs, Row const &rhs) { return !(lhs < rhs); }
 
 bool operator>(Row const &lhs, Row const &rhs) { return !(lhs <= rhs); }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

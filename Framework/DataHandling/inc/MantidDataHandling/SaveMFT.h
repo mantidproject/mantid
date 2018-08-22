@@ -5,8 +5,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
 
 namespace Mantid {

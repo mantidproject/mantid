@@ -1,6 +1,7 @@
 #include "MantidDataHandling/SaveReflThreeColumnAscii.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {

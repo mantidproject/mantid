@@ -450,5 +450,5 @@ void BinMD::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADBANKFROMDISKTASK_H_
 #define MANTID_DATAHANDLING_LOADBANKFROMDISKTASK_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Progress.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 
@@ -55,8 +55,8 @@ public:
 private:
   void loadPulseTimes(::NeXus::File &file);
   void loadEventIndex(::NeXus::File &file, std::vector<uint64_t> &event_index);
-  void prepareEventId(::NeXus::File &file, size_t &start_event,
-                      size_t &stop_event, std::vector<uint64_t> &event_index);
+  void prepareEventId(::NeXus::File &file, int64_t &start_event,
+                      int64_t &stop_event, std::vector<uint64_t> &event_index);
   void loadEventId(::NeXus::File &file);
   void loadTof(::NeXus::File &file);
   void loadEventWeights(::NeXus::File &file);
@@ -79,9 +79,9 @@ private:
   /// Old names in the file?
   bool m_oldNexusFileNames;
   /// Index to load start at in the file
-  std::vector<int> m_loadStart;
+  std::vector<int64_t> m_loadStart;
   /// How much to load in the file
-  std::vector<int> m_loadSize;
+  std::vector<int64_t> m_loadSize;
   /// Event pixel ID data
   uint32_t *m_event_id;
   /// Minimum pixel ID in this data

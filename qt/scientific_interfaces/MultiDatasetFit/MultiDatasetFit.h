@@ -1,8 +1,8 @@
 #ifndef MULTIDATASETFIT_H_
 #define MULTIDATASETFIT_H_
 
-#include "MantidKernel/Statistics.h"
 #include "DllConfig.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_MultiDatasetFit.h"
 
@@ -11,8 +11,8 @@ namespace API {
 class IFunction;
 class IAlgorithm;
 class MatrixWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 
@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class FunctionBrowser;
 class FitOptionsBrowser;
-}
+} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
@@ -31,7 +31,7 @@ namespace CustomInterfaces {
 namespace MDF {
 class DataController;
 class PlotController;
-}
+} // namespace MDF
 
 /**
  * Class MultiDatasetFitDialog implements a dialog for setting up a
@@ -141,7 +141,7 @@ private:
   QString m_fitStatus;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MULTIDATASETFITDIALOG_H_*/

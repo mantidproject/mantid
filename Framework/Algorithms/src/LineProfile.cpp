@@ -14,8 +14,8 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include <algorithm>
 #include "boost/make_shared.hpp"
+#include <algorithm>
 
 namespace Mantid {
 namespace Algorithms {
@@ -28,24 +28,16 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
-using Mantid::DataObjects::create;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::Frequencies;
-using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::Histogram;
+using Mantid::DataObjects::create;
 using Mantid::HistogramData::HistogramBuilder;
-using Mantid::HistogramData::HistogramIterator;
-using Mantid::HistogramData::Points;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::ListValidator;
-using Mantid::Kernel::make_unique;
 using Mantid::Kernel::MandatoryValidator;
+using Mantid::Kernel::make_unique;
 
 namespace {
 /// An enum specifying a line profile orientation.
@@ -55,13 +47,13 @@ enum class LineDirection { horizontal, vertical };
 namespace DirectionChoices {
 const static std::string HORIZONTAL{"Horizontal"};
 const static std::string VERTICAL{"Vertical"};
-}
+} // namespace DirectionChoices
 
 /// A private namespace for the mode options.
 namespace ModeChoices {
 const static std::string AVERAGE{"Average"};
 const static std::string SUM{"Sum"};
-}
+} // namespace ModeChoices
 
 /// A private namespace for property names.
 namespace PropertyNames {
@@ -75,7 +67,7 @@ const static std::string IGNORE_NANS{"IgnoreNans"};
 const static std::string MODE{"Mode"};
 const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string START{"Start"};
-}
+} // namespace PropertyNames
 
 /// A convenience struct for rectangular constraints.
 struct Box {
@@ -294,7 +286,7 @@ void divideByBinHeight(MatrixWorkspace &ws) {
   ws.mutableY(0) /= height;
   ws.mutableE(0) /= height;
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LineProfile)
