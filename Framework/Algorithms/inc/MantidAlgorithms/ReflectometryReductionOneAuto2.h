@@ -83,7 +83,7 @@ private:
   getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);
   double getPropertyOrDefault(const std::string &propertyName,
-                            const double defaultValue);
+                              const double defaultValue);
 };
 
 } // namespace Algorithms
