@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAHANDLING_SAVEMFTTEST_H_
 #define MANTID_DATAHANDLING_SAVEMFTTEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
@@ -51,13 +50,12 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -89,13 +87,12 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
     Workspace2D_sptr ws = create<Workspace2D>(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -124,13 +121,12 @@ public:
 
   void test_empty_workspace() {
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
@@ -144,13 +140,12 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -171,13 +166,12 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     histogram.setPointStandardDeviations(std::vector<double>{1.1, 1.3});
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -211,13 +205,12 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -245,23 +238,21 @@ public:
     const auto &y1 = Mantid::HistogramData::Counts({4., 7.6});
     Mantid::HistogramData::Histogram histogram1(x1, y1);
     const Workspace_sptr ws1 = create<Workspace2D>(1, histogram1);
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
     const auto &x2 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y2 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram2(x2, y2);
     const Workspace_sptr ws2 = create<Workspace2D>(1, histogram2);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws2"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
@@ -290,13 +281,12 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("LogList", std::vector<std::string>{"a", "b"}))
@@ -346,7 +336,6 @@ public:
     Mantid::HistogramData::Histogram histogram(x1, y1);
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
-    AnalysisDataService::Instance().addOrReplace("ws", ws);
     Mantid::Kernel::PropertyWithValue<int> *a =
         new Mantid::Kernel::PropertyWithValue<int>("a", 5);
     ws->mutableRun().addLogData(a);
@@ -355,7 +344,7 @@ public:
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("LogList", std::vector<std::string>{"a"}))
@@ -408,16 +397,13 @@ public:
     const Workspace_sptr ws2 = create<Workspace2D>(1, histogram2);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
     WorkspaceGroup_sptr group(new WorkspaceGroup());
-    AnalysisDataService::Instance().addOrReplace("group", group);
     group->add("ws1");
     group->add("ws2");
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "group"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", group))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())

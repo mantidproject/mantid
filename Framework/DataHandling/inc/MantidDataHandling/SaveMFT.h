@@ -55,12 +55,16 @@ public:
   }
   /// Cross-check properties with each other. @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
+  /// Check if input workspace is a group. @see Algorithm::checkGroups
+  bool checkGroups() override;
 
 private:
   /// Algorithm initialisation
   void init() override;
-  /// Algorithm execution
+  /// Algorithm execution for single MatrixWorkspaces
   void exec() override;
+  /// Algorithm execution for WorkspaceGroups
+  bool processGroups() override;
   /// Check file validity
   void checkFile(const std::string filename);
   /// Write the data
