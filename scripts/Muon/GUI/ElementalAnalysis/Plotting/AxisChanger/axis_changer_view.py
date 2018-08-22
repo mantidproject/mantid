@@ -23,13 +23,14 @@ class AxisChangerView(QtGui.QWidget):
         self.setLayout(layout)
 
     def get_bounds(self):
-        b = [self.lower_bound, self.upper_bound]
-        return [float(str(f.text())) if f.text() else 0 for f in b]
+        bounds = [self.lower_bound, self.upper_bound]
+        return [float(str(bound.text())) if bound.text()
+                else 0 for bound in bounds]
 
     def set_bounds(self, bounds):
-        l, u = [str(n) for n in bounds]
-        self.lower_bound.setText(l)
-        self.upper_bound.setText(u)
+        lower, upper = [str(bound) for bound in bounds]
+        self.lower_bound.setText(lower)
+        self.upper_bound.setText(upper)
 
     def clear_bounds(self):
         self.lower_bound.clear()

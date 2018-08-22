@@ -1,12 +1,10 @@
-from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
-from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
-from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
-
-from mantid import plots
+from collections import OrderedDict
 
 from six import iteritems
 
-from collections import OrderedDict
+from mantid import plots
+
+from PyQt4 import QtGui
 
 from matplotlib.figure import Figure
 from matplotlib import gridspec
@@ -14,7 +12,9 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 # pyplot should not be imported:
 # https://stackoverflow.com/posts/comments/26295260
 
-from PyQt4 import QtGui
+from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
+from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
+from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
 
 class PlotView(QtGui.QWidget):
@@ -58,6 +58,10 @@ class PlotView(QtGui.QWidget):
         self.setLayout(grid)
 
     def _redo_layout(func):
+        """
+        Simple decorator to call tight_layout() on plots, and to redraw the canvas.
+        """
+
         def wraps(self, *args, **kwargs):
             func(self, *args, **kwargs)
             if len(self.plots):
@@ -66,6 +70,10 @@ class PlotView(QtGui.QWidget):
         return wraps
 
     def _save_addition(func):
+        """
+        'Saves' the function call to be replayed later when the plots are cleared.
+        """
+
         def wraps(self, name, *args, **kwargs):
             try:
                 self.plot_additions[name].append((func, name, args, kwargs))
@@ -76,9 +84,9 @@ class PlotView(QtGui.QWidget):
 
     def _set_bounds(self, new_plot):
         if new_plot:
-            p = self.plots[str(new_plot)]
-            self.x_axis_changer.set_bounds(p.get_xlim())
-            self.y_axis_changer.set_bounds(p.get_ylim())
+            plot = self.plots[str(new_plot)]
+            self.x_axis_changer.set_bounds(plot.get_xlim())
+            self.y_axis_changer.set_bounds(plot.get_ylim())
         else:
             self.x_axis_changer.clear_bounds()
             self.y_axis_changer.clear_bounds()
@@ -107,8 +115,8 @@ class PlotView(QtGui.QWidget):
             self.workspaces[name] = []
             x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
-            for ws in workspaces:
-                self.plot(name, ws)
+            for workspace in workspaces:
+                self.plot(name, workspace)
             plot.set_xlim(x)
             plot.set_ylim(y)
             self._replay_additions(name)
@@ -119,9 +127,9 @@ class PlotView(QtGui.QWidget):
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
-            p = self.current_grid[pos[0], pos[1]]
-            plot.set_position(p.get_position(self.figure))
-            plot.set_subplotspec(p)
+            grid_pos = self.current_grid[pos[0], pos[1]]
+            plot.set_position(grid_pos.get_position(self.figure))
+            plot.set_subplotspec(grid_pos)
 
     @_redo_layout
     def _update_gridspec(self, new_plots, last=None):
@@ -155,6 +163,7 @@ class PlotView(QtGui.QWidget):
             self.plot_workspace_errors(name, workspace)
         else:
             self.plot_workspace(name, workspace)
+        self._set_bounds(name)
 
     def plot_workspace_errors(self, name, workspace):
         subplot = self.plots[name]
