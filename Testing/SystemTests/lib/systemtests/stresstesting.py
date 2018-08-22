@@ -774,7 +774,7 @@ class TestManager(object):
         # with data being cleaned up before another process has finished.
         #
         # This is not optimal, ideally we would like to distribute the runtimes
-        # evenly so that all cpu finish in the same amount of time but this will
+        # evenly so that all cores finish in the same amount of time but this will
         # do as a first step.
         #
         # First we need to count how many tests are in each module
@@ -789,11 +789,11 @@ class TestManager(object):
                 modcounts[t._modname] = 1
                 modtests[t._modname] = [t]
 
-        # Now we distribute the tests to each cpu
+        # Now we distribute the tests to each core
         # This is done by sorting the modules by descending order of number of tests
         # We then iterate through that list and give all the tests inside a given module
-        # to the cpu which currently has the lowest number of tests.
-        # The number of tests for that cpu is then incremented by the number of tests
+        # to the core which currently has the lowest number of tests.
+        # The number of tests for that core is then incremented by the number of tests
         # inside the module it has just received.
         ntests_per_core = [0] * ncores
         self._tests = []
@@ -813,13 +813,13 @@ class TestManager(object):
         if quiet:
             if process_number == 0:
                 print(hline)
-                print("Number of tests run per CPU:")
+                print("Number of tests run per core:")
                 for i in range(ncores):
-                    print("CPU %i will execute %i tests" % (i,ntests_per_core[i]))
+                    print("Core %i will execute %i tests" % (i,ntests_per_core[i]))
                 print(hline)
         else:
             print(hline)
-            print("CPU %i will execute the following tests:" % process_number)
+            print("Core %i will execute the following tests:" % process_number)
             for t in self._tests:
                 print(t._fqtestname)
             print(hline)
@@ -1080,11 +1080,11 @@ def envAsString():
     return env
 
 #########################################################################
-# Function to spawn one test manager per CPU
+# Function to spawn one test manager per core
 #########################################################################
 def testProcess(testDir,saveDir,runner,testsInclude, testsExclude,
                 exclude_in_pr_builds, showskipped, quiet, res_array,
-                stat_dict, test_count, process_number, ncpu):
+                stat_dict, test_count, process_number, nc):
 
     reporter = XmlResultReporter(showSkipped=showskipped)
 
@@ -1094,17 +1094,17 @@ def testProcess(testDir,saveDir,runner,testsInclude, testsExclude,
                       testsExclude=testsExclude,
                       exclude_in_pr_builds=exclude_in_pr_builds,
                       test_count=test_count,
-                      process_number=process_number,ncores=ncpu)
+                      process_number=process_number,ncores=nc)
     try:
         mgr.executeTests()
     except KeyboardInterrupt:
         mgr.markSkipped("KeyboardInterrupt")
 
-    # Update the test results in the array shared accross cpus
+    # Update the test results in the array shared accross cores
     res_array[process_number] = mgr.skippedTests
-    res_array[process_number + ncpu] = mgr.failedTests
-    res_array[process_number + 2*ncpu] = mgr.totalTests
-    res_array[process_number + 3*ncpu] = int(reporter.reportStatus())
+    res_array[process_number + nc] = mgr.failedTests
+    res_array[process_number + 2*nc] = mgr.totalTests
+    res_array[process_number + 3*nc] = int(reporter.reportStatus())
 
     # Report the errors
     local_dict = dict()
