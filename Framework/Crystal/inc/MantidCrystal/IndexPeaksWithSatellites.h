@@ -65,8 +65,8 @@ private:
   void exec() override;
   void predictOffsets(DataObjects::Peak &peak, int &sate_indexed,
                       double &satetolerance, double &satellite_error,
-                      int numberOffset,
-                      Kernel::V3D offsets, int &maxOrder, Kernel::V3D &hkl);
+                      int numberOffset, Kernel::V3D offsets, int &maxOrder,
+                      Kernel::V3D &hkl);
   void predictOffsetsWithCrossTerms(DataObjects::Peak &peak, int &sate_indexed,
                                     double &satetolerance,
                                     double &satellite_error,

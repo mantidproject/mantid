@@ -5,9 +5,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/Sample.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 using namespace Mantid::DataObjects;
@@ -230,12 +229,12 @@ void IndexPeaksWithSatellites::exec() {
           double l_error = fabs(round(hkl[2]) - hkl[2]);
           main_error += h_error + k_error + l_error;
         } else if (!crossTerms) {
-          predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
-                         1, offsets1, maxOrder, hkl);
-          predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
-                         2, offsets2, maxOrder, hkl);
-          predictOffsets(peak, sate_indexed, satetolerance, satellite_error,
-                         3, offsets3, maxOrder, hkl);
+          predictOffsets(peak, sate_indexed, satetolerance, satellite_error, 1,
+                         offsets1, maxOrder, hkl);
+          predictOffsets(peak, sate_indexed, satetolerance, satellite_error, 2,
+                         offsets2, maxOrder, hkl);
+          predictOffsets(peak, sate_indexed, satetolerance, satellite_error, 3,
+                         offsets3, maxOrder, hkl);
         } else {
           predictOffsetsWithCrossTerms(peak, sate_indexed, satetolerance,
                                        satellite_error, offsets1, offsets2,
@@ -281,9 +280,8 @@ void IndexPeaksWithSatellites::exec() {
 void IndexPeaksWithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
                                               double &satetolerance,
                                               double &satellite_error,
-                                              int numberOffset,
-                                              V3D offsets, int &maxOrder,
-                                              V3D &hkl) {
+                                              int numberOffset, V3D offsets,
+                                              int &maxOrder, V3D &hkl) {
   if (offsets != V3D(0, 0, 0)) {
     for (int order = -maxOrder; order <= maxOrder; order++) {
       if (order == 0)
@@ -294,8 +292,8 @@ void IndexPeaksWithSatellites::predictOffsets(Peak &peak, int &sate_indexed,
       hkl1[2] -= order * offsets[2];
       if (IndexingUtils::ValidIndex(hkl1, satetolerance)) {
         peak.setIntHKL(hkl1);
-        V3D mnp = V3D(0,0,0);
-        mnp[numberOffset-1] = order;
+        V3D mnp = V3D(0, 0, 0);
+        mnp[numberOffset - 1] = order;
         peak.setIntMNP(mnp);
         sate_indexed++;
         double h_error = fabs(round(hkl1[0]) - hkl1[0]);
@@ -356,4 +354,3 @@ V3D IndexPeaksWithSatellites::getOffsetVector(const std::string &label) {
 
 } // namespace Crystal
 } // namespace Mantid
-

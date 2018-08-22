@@ -2,8 +2,8 @@
 #define MANTID_CRYSTAL_FIND_UB_USING_INDEXED_PEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -64,7 +64,6 @@ private:
   void exec() override;
   void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
-
 };
 
 } // namespace Crystal
