@@ -174,7 +174,7 @@ public:
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 12.403, 0.01);
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
         const auto d = detectorInfo.l2(detectorIndex);
-        TS_ASSERT_DELTA(d, 2.1561, 0.0001);
+        TS_ASSERT_DELTA(d, 2.1477, 0.0001);
       }
     }
 

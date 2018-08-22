@@ -177,7 +177,8 @@ Desktop.ini
 #Dynamically created files
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
 Vates/VatesSimpleGui/ViewWidgets/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
-
+qt/applications/workbench/setup.py
+qt/python/setup.py
 
 # Make sure Third_Party doesn't get checked into the main repository
 Third_Party/

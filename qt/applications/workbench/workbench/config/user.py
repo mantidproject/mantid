@@ -18,7 +18,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from mantidqt.py3compat import is_text_string
-
+from posixpath import join as joinsettings
 from qtpy.QtCore import QSettings
 
 
@@ -32,11 +32,9 @@ class UserConfig(object):
 
     # The raw QSettings instance
     qsettings = None
-    defaults = None
 
     def __init__(self, organization, application, defaults=None):
         """
-
         :param organization: A string name for the organization
         :param application: A string name for the application name
         :param defaults: Default configuration values for this instance in the
@@ -45,77 +43,113 @@ class UserConfig(object):
         # Loads the saved settings if found
         self.qsettings = QSettings(QSettings.IniFormat, QSettings.UserScope,
                                    organization, application)
-        self.defaults = defaults
 
-    def all_keys(self):
-        return self.qsettings.allKeys()
+        # convert the defaults into something that qsettings can handle
+        default_settings = self._flatten_defaults(defaults)
+
+        # put defaults into qsettings if they weren't there already
+        configFileKeys = self.qsettings.allKeys()
+        for key in default_settings.keys():
+            if key not in configFileKeys:
+                self.qsettings.setValue(key, default_settings[key])
+
+        # fixup the values of booleans - they do not evaluate correctly when read from the config file
+        # TODO come up with a unit test for this
+        for key in self.all_keys():
+            value = self.get(key)
+            if value == 'true':
+                self.set(key, True)
+            elif value == 'false':
+                self.set(key, False)
+
+    def all_keys(self, group=None):
+        if group is not None:
+            self.qsettings.beginGroup(group)
+            result = self.qsettings.allKeys()
+            self.qsettings.endGroup()
+        else:
+            result = self.qsettings.allKeys()
+
+        return result
 
     @property
     def filename(self):
         return self.qsettings.fileName()
 
-    def get(self, section, option):
-        """
-        Return a value for an option in a given section. If not
-        specified in the saved settings then the initial
-        defaults are consulted. If no option is found then
+    def get(self, option, second=None):
+        """Return a value for an option. If two arguments are given the first
+        is the group/section and the second is the option within it.
+        ``config.get('main', 'window/size')`` is equivalent to
+        ``config.get('main/window/size')`` If no option is found then
         a KeyError is raised
-        :param section: A string section name
-        :param option: A string option name
-        :return: The value of the option
         """
-        value = self.qsettings.value(self._settings_path(section, option))
-        if not value:
-            value = self._get_default_or_raise(section, option)
+        option = self._check_section_option_is_valid(option, second)
+        value = self.qsettings.value(option)
 
-        return value
+        # qsettings appears to return None if the option isn't found
+        if value is None:
+            raise KeyError('Unknown config item requested: "{}"'.format(option))
+        else:
+            return value
 
-    def set(self, section, option, value):
+    def has(self, option, second=None):
+        """Return a True if the key exists in the
+        settings. ``config.get('main', 'window/size')`` and
+        ``config.get('main/window/size')`` are equivalent.
         """
-        Set a value for an option in a given section.
-        :param section: A string section name
-        :param option: A string option name
-        :param value: The value of the setting
+        option = self._check_section_option_is_valid(option, second)
+        return option in self.all_keys()
+
+    def set(self, option, value, extra=None):
+        """Set a value for an option in a given section. Can either supply
+        the fully qualified option or add the section as an additional
+        first argument. ``config.set('main', 'high_dpi_scaling',
+        True)`` is equivalent to ``config.set('main/high_dpi_scaling',
+        True)``
         """
-        self.qsettings.setValue(self._settings_path(section, option), value)
+        if extra is None:
+            option = self._check_section_option_is_valid(option, extra)
+            # value is in the right place
+        else:
+            option = self._check_section_option_is_valid(option, value)
+            value = extra
+        self.qsettings.setValue(option, value)
+
+    def remove(self, option, second=None):
+        """Removes a key from the settings. Key not existing returns without effect.
+        """
+        option = self._check_section_option_is_valid(option, second)
+        if self.has(option):
+            self.qsettings.remove(option)
 
     # -------------------------------------------------------------------------
     # "Private" methods
     # -------------------------------------------------------------------------
 
-    def _check_section_option_is_valid(self, section, option):
-        """
-        Sanity check the section and option are strings
-        """
-        if not is_text_string(section):
-            raise RuntimeError("section is not a text string")
-        if not is_text_string(option):
-            raise RuntimeError("option is not a text string")
+    @staticmethod
+    def _flatten_defaults(input_dict):
+        result = {}
+        for key in input_dict:
+            value = input_dict[key]
+            if isinstance(value, dict):
+                value = UserConfig._flatten_defaults(value)
+                for key_inner in value.keys():
+                    result[joinsettings(key, key_inner)] = value[key_inner]
+            else:
+                result[key] = value
+        return result
 
-    def _get_default_or_raise(self, section, option):
+    def _check_section_option_is_valid(self, option, second):
         """
-        Returns the value listed in the defaults if it exists
-        :param section: A string denoting the section (not checked)
-        :param option: A string denoting the option name
-        :return: The value of the default
-        :raises KeyError: if the item does not exist
+        Sanity check the section and option are strings and return the flattened option key
         """
-        value = None
-        if self.defaults and section in self.defaults:
-            try:
-                value = self.defaults[section][option]
-            except KeyError:
-                raise KeyError("Unknown config item requested: " +
-                               self._settings_path(section, option))
-        return value
-
-    def _settings_path(self, section, option):
-        """
-        Private method to construct a path to the given option with the
-        section
-        :param section: The name of the section
-        :param option: The name of the option
-        :return: A path to the location within the QSettings instance
-        """
-        self._check_section_option_is_valid(section, option)
-        return section + "/" + option
+        if second is None:
+            if not is_text_string(option):
+                raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(option), option))
+            return option
+        else: # fist argument is actually the section/group
+            if not is_text_string(option):
+                raise TypeError('Found invalid type ({}) for section ({}) must be a string'.format(type(option), option))
+            if not is_text_string(second):
+                raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(second), second))
+            return joinsettings(option, second)

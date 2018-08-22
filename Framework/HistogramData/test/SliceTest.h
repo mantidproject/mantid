@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Slice.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::HistogramData;
 

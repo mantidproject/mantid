@@ -21,7 +21,7 @@ import unittest
 
 # local imports
 from mantidqt.widgets.codeeditor.editor import CodeEditor
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 
 TEST_LANG = "Python"
 
