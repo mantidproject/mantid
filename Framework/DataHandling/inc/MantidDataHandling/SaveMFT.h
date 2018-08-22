@@ -2,6 +2,8 @@
 #define MANTID_DATAHANDLING_SaveMFT_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include <iostream>
 #include <fstream>
@@ -59,6 +61,8 @@ private:
   void init() override;
   /// Algorithm execution
   void exec() override;
+  /// Check file validity
+  void checkFile(const std::string filename);
   /// Write the data
   void data();
   /// Print a double value to file
@@ -71,10 +75,10 @@ private:
   void writeInfo(const std::string logName, const std::string logValue = "");
   /// Write header
   void header();
-  /// Number of data
-  size_t m_length{0};
   /// Input workspace
   API::MatrixWorkspace_const_sptr m_ws;
+  /// Input workspace group
+  API::WorkspaceGroup_sptr m_group;
   /// The output file stream
   std::ofstream m_file;
 };

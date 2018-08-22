@@ -1,14 +1,18 @@
 #include "MantidDataHandling/SaveMFT.h"
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
@@ -28,10 +32,9 @@ DECLARE_ALGORITHM(SaveMFT)
 
 /// Initialise the algorithm
 void SaveMFT::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
-                                                      Direction::Input),
-      "The name of the workspace containing the data you want to save.");
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+                      "InputWorkspace", boost::make_shared<ADSValidator>()),
+                  "List or group of MatrixWorkspaces");
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Save, ".mft"),
       "The output filename.");
@@ -43,13 +46,35 @@ void SaveMFT::init() {
 /// Input validation
 std::map<std::string, std::string> SaveMFT::validateInputs() {
   std::map<std::string, std::string> issues;
-  m_ws = getProperty("InputWorkspace");
-  if (!m_ws)
-    issues["InputWorkspace"] = "Cannot treat InputWorkspace";
-  try {
-    m_length = m_ws->y(0).size();
-  } catch (std::range_error) {
-    issues["InputWorkspace"] = "InputWorkspace does not contain data";
+  const std::string wsName = getProperty("InputWorkspace");
+  m_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+  if (m_ws) {
+    // MatrixWorkspace
+    try {
+      m_ws->y(0).size();
+    } catch (std::range_error) {
+      issues["InputWorkspace"] = "InputWorkspace does not contain data";
+    }
+  } else {
+    m_group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+    if (m_group) {
+      // WorkspaceGroup
+      if (m_group->isEmpty())
+        issues["InputWorkspace"] = "Empty WorkspaceGroup";
+      for (auto i : m_group->getAllItems()) {
+        try {
+          boost::dynamic_pointer_cast<MatrixWorkspace>(i)->y(0).size();
+        } catch (std::range_error) {
+          issues["InputWorkspace"] =
+              "InputWorkspace " + i->getName() + " does not contain data";
+          m_group->remove(i->getName());
+        }
+      }
+    } else {
+      issues["InputWorkspace"] = "The input workspace is neither a "
+                                 "WorkspaceGroup nor a MatrixWorkspace";
+    }
   }
   return issues;
 }
@@ -61,7 +86,7 @@ void SaveMFT::data() {
   const auto points = m_ws->points(0);
   const auto &yData = m_ws->y(0);
   const auto &eData = m_ws->e(0);
-  for (size_t i = 0; i < m_length; ++i) {
+  for (size_t i = 0; i < m_ws->y(0).size(); ++i) {
     outputval(points[i]);
     outputval(yData[i]);
     outputval(eData[i]);
@@ -142,7 +167,7 @@ void SaveMFT::header() {
     writeInfo("Parameter ");
   m_file << "Number of file format : "
          << "40\n";
-  m_file << "Number of data points : " << m_length << '\n';
+  m_file << "Number of data points : " << m_ws->y(0).size() << '\n';
   m_file << '\n';
   outputval("q");
   outputval("refl");
@@ -152,11 +177,10 @@ void SaveMFT::header() {
   m_file << "\n";
 }
 
-/// Execute the algorithm
-void SaveMFT::exec() {
-  const std::string filename = getProperty("Filename");
+/// Check file
+void SaveMFT::checkFile(const std::string filename) {
   if (Poco::File(filename).exists()) {
-    g_log.warning("File already exists and will be overwritten.");
+    g_log.warning("File already exists and will be overwritten");
     try {
       Poco::File(filename).remove();
     } catch (...) { // maybe we do not have the permission to delete the file
@@ -168,10 +192,31 @@ void SaveMFT::exec() {
     g_log.error("Unable to create file: " + filename);
   }
   g_log.information("Filename: " + filename);
-  if (getPointerToProperty("WriteHeader"))
-    header();
-  data();
-  m_file.close();
+}
+
+/// Execute the algorithm
+void SaveMFT::exec() {
+  const std::string filename = getProperty("Filename");
+  if (m_ws) {
+    checkFile(filename);
+    if (getProperty("WriteHeader"))
+      header();
+    data();
+    m_file.close();
+  } else {
+    for (auto i = 0u; i < m_group->size(); ++i) {
+      auto ws = m_group->getItem(i);
+      m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      const std::string uniqueFilename =
+          filename.substr(0, filename.find(".")) + m_ws->getName() +
+          filename.substr(filename.find("."));
+      checkFile(uniqueFilename);
+      if (getProperty("WriteHeader"))
+        header();
+      data();
+      m_file.close();
+    }
+  }
 }
 
 } // namespace DataHandling
