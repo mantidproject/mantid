@@ -165,17 +165,19 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
       // Initialise ostringstream
       std::ostringstream thread_stream;
 
-      // Compute loop start and stop for current thread
-      int nchunk = dist / nThreads;
-      int nstart = nchunk * idThread;
-      int nextra = dist % nchunk;
-      if (idThread < nextra)
-        nchunk++;
-      nstart += std::min(idThread % nThreads, nextra);
-      int nstop = nstart + nchunk;
+/* To make sure the loop is done in the right order, we use schedule(static).
 
-      // Write to ostringstream for this thread
-      for (int i = nstart; i < nstop; i++) {
+   From the OpenMP documentation:
+   "When schedule(static, chunk_size) is specified, iterations are divided into
+   chunks of size chunk_size, and the chunks are assigned to the threads in the
+   team in a round-robin fashion **in the order of the thread number**."
+
+   "When no chunk_size is specified, the iteration space is divided into chunks
+   that are approximately equal in size, and at most one chunk is distributed to
+   each thread."
+*/
+#pragma omp for schedule(static)
+      for (int i = 0; i < dist; i++) {
         thread_stream << separator << *(begin + i);
       }
       output[idThread] = thread_stream.str();
