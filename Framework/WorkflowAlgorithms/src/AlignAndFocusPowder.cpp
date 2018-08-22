@@ -130,7 +130,7 @@ void AlignAndFocusPowder::init() {
                                                          Direction::Input),
                   "Compress events (in "
                   "microseconds) within this "
-                  "tolerance. (Default 0.01)");
+                  "tolerance. (Default 1e-5)");
   declareProperty(
       make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
                                              EMPTY_DBL(), mustBePositive,
