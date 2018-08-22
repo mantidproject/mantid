@@ -6,7 +6,10 @@ import optparse
 import os
 import sys
 
-# set up the command line options
+#########################################################################
+# Set up the command line options
+#########################################################################
+
 VERSION = "1.1"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..","lib","systemtests"))
@@ -22,7 +25,6 @@ info.append("current version of the code does not print to stdout while the test
 info.append("running, so the impatient user may ^C to kill the process. In this case")
 info.append("all of the tests that haven't been run will be marked as skipped in the")
 info.append("full logs.")
-
 
 parser = optparse.OptionParser("Usage: %prog [options]", None,
                                optparse.Option, VERSION, 'error', ' '.join(info))
@@ -47,7 +49,7 @@ parser.add_option("-l", "--loglevel", dest="loglevel",
                   help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
 parser.add_option("-j", "--parallel", dest="parallel", action="store", type="int",
                   help="The number of instances to run in parallel, like the -j option in ctest. Default is 1.")
-parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
+parser.add_option("-q", "--quiet", dest="quiet", action="store_true",
                   help="Prints detailed log to terminal.")
 parser.add_option("", "--showskipped", dest="showskipped", action="store_true",
                   help="List the skipped tests.")
@@ -60,14 +62,17 @@ parser.add_option("", "--archivesearch", dest="archivesearch", action="store_tru
 parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
                   help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
-                    loglevel="information",parallel="1")
+                    loglevel="information", parallel="1", quiet=False)
 (options, args) = parser.parse_args()
 
 # import the stress testing framework
 sys.path.append(options.frameworkLoc)
 import stresstesting
 
+#########################################################################
 # Configure mantid
+#########################################################################
+
 # Parse files containing the search and save directories, unless otherwise given
 data_paths = options.datapaths
 if data_paths is None or data_paths == "":
@@ -85,28 +90,35 @@ mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
 if options.makeprop:
     mtdconf.config()
 
-# run the tests
+#########################################################################
+# Run the tests
+#########################################################################
+
 execargs = options.execargs
 test_runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 
 # Multi-core processes
 ncores = int(options.parallel)
-processes = []
-# Prepare a shared array to hold skipped, failed and total number of tests + status
-results_array = Array('i', 4*ncores)
-manager = Manager()
-status_dict = manager.dict()
+processes = [] # an array to hold the processes
+results_array = Array('i', 4*ncores) # shared array to hold skipped, failed and total number of tests + status
+test_counter = Array('i', [0, 0, 0]) # shared array for number of executed tests, total number and max name length
+manager = Manager() # a manager to create a shared dict to store names of skipped and failed tests
+status_dict = manager.dict() # a shared dict to store names of skipped and failed tests
 
 # Prepare ncores processes
 for ip in range(ncores):
     processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
                      test_runner, options.testsInclude, options.testsExclude, options.exclude_in_pr_builds,
-                     options.showskipped, options.verbose, results_array, status_dict, ip, ncores)))
+                     options.showskipped, options.quiet, results_array, status_dict, test_counter, ip, ncores)))
 # Start and join processes
 for p in processes:
     p.start()
 for p in processes:
     p.join()
+
+#########################################################################
+# Cleanup
+#########################################################################
 
 # put the configuration back to its original state
 if options.makeprop:
@@ -119,7 +131,10 @@ totalTests = sum(results_array[2*ncores:3*ncores])
 # Find minimum of status: if min == 0, then success is False
 success = bool(min(results_array[3*ncores:4*ncores]))
 
+#########################################################################
 # Output summary to terminal
+#########################################################################
+
 nwidth = 80
 banner = "#" * nwidth
 print()

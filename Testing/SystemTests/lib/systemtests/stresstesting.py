@@ -492,14 +492,24 @@ class ResultReporter(object):
         '''Initialize a class instance, e.g. connect to a database'''
         pass
 
-    def dispatchResults(self, result):
+    def dispatchResults(self, result, test_count):
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
 
-    def printResultsToConsole(self, result):
+    def printResultsToConsole(self, result, test_count):
         '''
         Print the results to standard out
         '''
-        if self._verbose:
+        if self._quiet:
+            percentage = int(float(test_count[0])*100.0/float(test_count[1]))
+            if len(result._results) < 6:
+                time_taken = " -- "
+            else:
+                time_taken = result._results[6][1]
+            res_string = ("[%3i%%] %3i/%3i : " % (percentage,test_count[0],test_count[1])) \
+                   + (result.name+" ").ljust(test_count[2]+2,'.') + " (" + result.status \
+                   + ": " + time_taken + "s)"
+            print(res_string)
+        else:
             nstars = 80
             console_output = ('*' * nstars) + '\n'
             print_list = ['test_name','filename','test_date','host_name','environment',
@@ -517,6 +527,7 @@ class ResultReporter(object):
                         pass
             console_output += ('*' * nstars) + '\n'
             print(console_output)
+        sys.stdout.flush()
         return
 
 #########################################################################
@@ -527,11 +538,11 @@ class TextResultReporter(ResultReporter):
     Report the results of a test using standard out
     '''
 
-    def dispatchResults(self, result):
+    def dispatchResults(self, result, test_count):
         '''
         The default text reporter prints to standard out
         '''
-        self.printResultsToConsole(result)
+        self.printResultsToConsole(result, test_count)
         return
 
 #########################################################################
@@ -713,9 +724,9 @@ class TestSuite(object):
         if msg is not None:
             self._result.output = msg
 
-    def reportResults(self, reporters):
+    def reportResults(self, reporters, test_count):
         for r in reporters:
-            r.dispatchResults(self._result)
+            r.dispatchResults(self._result, test_count)
 
 #########################################################################
 # The main API class
@@ -726,22 +737,24 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 verbose=False, testsInclude=None, testsExclude=None,
-                 exclude_in_pr_builds=None, process_number=0, ncores=1):
+                 quiet=False, testsInclude=None, testsExclude=None,
+                 exclude_in_pr_builds=None, test_count=[0,0,0],
+                 process_number=0, ncores=1):
         '''Initialize a class instance'''
 
         # Runners and reporters
         self._runner = runner
         self._reporters = output
         for r in self._reporters:
-            r._verbose = verbose
+            r._quiet = quiet
+        self._test_count = test_count
 
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
             test_dir = os.path.abspath(test_loc).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromDir(test_dir)[:20]
+            full_test_list = self.loadTestsFromDir(test_dir)
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
@@ -749,7 +762,12 @@ class TestManager(object):
             test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))[:20]
+            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
+
+        # Gather statistics on full test list
+        self._test_count[1] = len(full_test_list)
+        for t in full_test_list:
+            self._test_count[2] = max(self._test_count[2],len(t._fqtestname))
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes module by module instead of test by test, to avoid issues
@@ -791,12 +809,21 @@ class TestManager(object):
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
             exit(2)
 
-        if verbose:
-            print("========================================")
+        hline = "========================================"
+        if quiet:
+            if process_number == 0:
+                print(hline)
+                print("Number of tests run per CPU:")
+                for i in range(ncores):
+                    print("CPU %i will execute %i tests" % (i,ntests_per_core[i]))
+                print(hline)
+        else:
+            print(hline)
             print("CPU %i will execute the following tests:" % process_number)
             for t in self._tests:
                 print(t._fqtestname)
-            print("========================================")
+            print(hline)
+        sys.stdout.flush()
 
         self._passedTests = 0
         self._skippedTests = 0
@@ -835,13 +862,14 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            suite.reportResults(self._reporters)
+            self._test_count[0] += 1
+            suite.reportResults(self._reporters, self._test_count)
             self._lastTestRun += 1
 
     def markSkipped(self, reason=None):
         for suite in self._tests[self._lastTestRun:]:
             suite.setOutputMsg(reason)
-            suite.reportResults(self._reporters) # just let people know you were skipped
+            suite.reportResults(self._reporters, self._test_count) # just let people know you were skipped
 
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
@@ -1055,16 +1083,17 @@ def envAsString():
 # Function to spawn one test manager per CPU
 #########################################################################
 def testProcess(testDir,saveDir,runner,testsInclude, testsExclude,
-                exclude_in_pr_builds, showskipped, verbose, res_array,
-                stat_dict, process_number, ncpu):
+                exclude_in_pr_builds, showskipped, quiet, res_array,
+                stat_dict, test_count, process_number, ncpu):
 
     reporter = XmlResultReporter(showSkipped=showskipped)
 
     mgr = TestManager(testDir,runner,output=[reporter],
-                      verbose=verbose,
+                      quiet=quiet,
                       testsInclude=testsInclude,
                       testsExclude=testsExclude,
                       exclude_in_pr_builds=exclude_in_pr_builds,
+                      test_count=test_count,
                       process_number=process_number,ncores=ncpu)
     try:
         mgr.executeTests()

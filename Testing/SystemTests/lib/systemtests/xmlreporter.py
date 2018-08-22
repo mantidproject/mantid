@@ -39,7 +39,7 @@ class XmlResultReporter(stresstesting.ResultReporter):
 		docEl.setAttribute('time',str(self._time_taken))
 		return self._doc.toxml()
 
-	def dispatchResults(self, result):
+	def dispatchResults(self, result, test_count):
 		''' This relies on the order and names of the items to give the correct output '''
 		test_name = result.name.split('.')
 		if len(test_name) > 1:
@@ -85,4 +85,4 @@ class XmlResultReporter(stresstesting.ResultReporter):
 			elem.setAttribute('totalTime',str(time_taken))
 		self._doc.documentElement.appendChild(elem)
 		# Also output to terminal
-		self.printResultsToConsole(result)
+		self.printResultsToConsole(result, test_count)
