@@ -1,10 +1,13 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTRAYTRACER2_H_
 #define MANTID_GEOMETRY_INSTRUMENTRAYTRACER2_H_
 
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
+
 #include <iterator>
+#include <list>
 
 /**
 InstrumentRayTracer2 contains a set of free functions that are responsible for
@@ -42,47 +45,68 @@ namespace InstrumentRayTracer2 {
 
 using Kernel::V3D;
 using Links = Track::LType;
+using Types = Mantid::Beamline::ComponentType;
 
 /**
- * Trace a given track from the source in the given direction.
- * @param dir :: A directional vector. The starting point is defined by the
- * instrument source.
- * @param componentInfo :: The object used to access the source position.
- * @return resultsTrack :: The track to trace.
- */
-Track traceFromSource(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) {
+ * Fire the test ray at the instrument and perform a bread-first search of the
+ * object tree to find the objects that were intersected.
+ * @param componentInfo :: The object that will provide access to the bounding
+ * boxes
+ * @param testRay :: An input/output parameter that defines the track and
+ * accumulates the intersection results
 
-  // Create a new results track to return
-  Track resultsTrack(componentInfo.sourcePosition(), dir);
+void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
+  // Cast size of componentInfo to int
+  int size = static_cast<int>(componentInfo.size());
+  --size;
 
-  // Fire the test ray at the instrument
-  fireRay(componentInfo, resultsTrack);
+  // Loop through the bounding boxes in reverse
+  // (essentially a breadth first search)
+  for (int i = size; i >= 0; --i) {
+    // Store the bounding box
+    BoundingBox box = componentInfo.boundingBox(i);
+    // Test for intersection
+    box.doesLineIntersect(testRay);
+  }
+}*/
 
-  return resultsTrack;
+void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
+  // Store all the components, starting with root
+  std::deque<size_t> components;
+  components.push_back(componentInfo.root());
+
+  // Loop through each of the components
+  // comp is the componentIndex
+  size_t comp;
+  while (!components.empty()) {
+    comp = components.front();
+    components.pop_front();
+    BoundingBox box = componentInfo.boundingBox(comp);
+
+    // Test for intersection
+    if (box.doesLineIntersect(testRay)) {
+      // Get all the children of the current component
+      const auto &children = componentInfo.children(comp);
+
+      // Test intersection with children
+      for (auto child : children) {
+        auto childComponentType = componentInfo.componentType(child);
+        if (childComponentType == Types::Rectangular) {
+          //checkIntersectsWithRectangularBank(testRay);
+        } else if (childComponentType == Types::OutlineComposite) {
+          //checkIntersectsWithTubeBank(testRay);
+        } else if (childComponentType == Types::Structured) {
+          //checkIntersectsWithStructuredBank(testRay);
+        } else if (childComponentType == Types::Detector) {
+          //checkIntersectsWithDetector(testRay);
+        }
+      }
+    }
+  }
 }
 
 /**
- * Trace a given track from the sample position in the given direction.
- * @param dir :: A directional vector. The starting point is defined by the
- * source.
- * @param componentInfo :: The object used to access the source position.
- * @return resultsTrack :: The track to trace.
- */
-Track traceFromSample(const Kernel::V3D &dir,
-                      const ComponentInfo &componentInfo) {
-
-  // Create a new results track to return
-  Track resultsTrack(componentInfo.samplePosition(), dir);
-
-  // Fire the test ray at the instrument
-  fireRay(componentInfo, resultsTrack);
-
-  return resultsTrack;
-}
-
-/**
- * Return the results of any trace() calls since the last call the getResults.
+ * Return the results of any trace() calls since the last call to getResults.
  * @return A collection of links defining intersection information
  */
 Links getResults(Track &resultsTrack) {
@@ -93,6 +117,44 @@ Links getResults(Track &resultsTrack) {
   resultsTrack.clearIntersectionResults();
 
   return results;
+}
+
+/**
+ * Trace a given track from the source in the given direction.
+ * @param dir :: A directional vector. The starting point is defined by the
+ * instrument source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSource(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+
+  // Create a results track
+  Track resultsTrack(componentInfo.sourcePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(resultsTrack, componentInfo);
+
+  return getResults(resultsTrack);
+}
+
+/**
+ * Trace a given track from the sample position in the given direction.
+ * @param dir :: A directional vector. The starting point is defined by the
+ * source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSample(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+
+  // Create a new results track
+  Track resultsTrack(componentInfo.samplePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(resultsTrack, componentInfo);
+
+  return getResults(resultsTrack);
 }
 
 /**
@@ -123,25 +185,6 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
 
     // If we reach here, the index must be invalid
     throw std::out_of_range("Error, index is invalid!");
-  }
-}
-
-/**
- * Fire the test ray at the instrument and perform a bread-first search of the
- * object tree to find the objects that were intersected.
- * @param componentInfo :: The object that will provide access to the bounding
- * boxes
- * @param testRay :: An input/output parameter that defines the track and
- * accumulates the intersection results
- */
-void fireRay(const ComponentInfo &componentInfo, Track &testRay) {
-  // Loop through the bounding boxes in reverse
-  // (essentially a breadth first search)
-  for (size_t i = componentInfo.size(); i <= 0; --i) {
-    // Store the bounding box
-    auto box = componentInfo.boundingBox(i);
-    // Test for intersection
-    box.doesLineIntersect(testRay);
   }
 }
 

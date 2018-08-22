@@ -5,11 +5,11 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer2.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidBeamline/ComponentInfo.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
@@ -17,7 +17,8 @@
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
-using Mantid::detid_t;
+namespace IRT2 = Mantid::Geometry::InstrumentRayTracer2;
+using Links = Track::LType;
 
 class InstrumentRayTracer2Test : public CxxTest::TestSuite {
 public:
@@ -33,30 +34,62 @@ public:
     Mantid::Kernel::ConfigService::Instance();
   }
 
-  std::unique_ptr<Mantid::Geometry::ComponentInfo>
-  create_component_info_object() {
+  void
+  test_That_A_Ray_Which_Just_Intersects_One_Component_Gives_This_Component_Only() {
+    create_instrument_and_componentInfo();
 
-    // Create a very basic instrument to visit
-    auto visitee = createMinimalInstrument(V3D(0, 0, 0),   // Source pos
-                                           V3D(10, 0, 0),  // Sample pos
-                                           V3D(11, 0, 0)); // Detector position
+    V3D testDir(0.010, 0.0, 15.004);
 
-    // Create the instrument visitor
-    InstrumentVisitor visitor(visitee);
+    Links results = IRT2::traceFromSource(testDir, *m_compInfo);
+
+    TS_ASSERT_EQUALS(results.size(), 1);
+  }
+
+private:
+  /**
+   * Helper methods for tests
+   */
+
+  // Creates the objects to use in the tests
+  void create_instrument_and_componentInfo() {
+    // Create 9 cylindrical detectors and set the instrument
+    m_testInstrument =
+        ComponentCreationHelper::createTestInstrumentCylindrical(1);
+
+    // Create an instrument visitor
+    InstrumentVisitor visitor = (m_testInstrument);
 
     // Visit everything
     visitor.walkInstrument();
 
-    // Get the ComponentInfo object
-    auto compInfo = InstrumentVisitor::makeWrappers(*visitee, nullptr).first;
+    // Get ComponentInfo and DetectorInfo objects and set them
+    auto infos = InstrumentVisitor::makeWrappers(*m_testInstrument, nullptr);
 
-    return compInfo;
+    // Unpack the pair
+    m_compInfo = std::move(infos.first);
+    m_detInfo = std::move(infos.second);
   }
 
-  void test_get_componentInfo() {
-    auto compInfo = create_component_info_object();
-    TS_ASSERT(compInfo != nullptr);
+  /**
+   * Getters
+   */
+  Instrument_sptr get_instrument() { return m_testInstrument; }
+
+  Mantid::Geometry::ComponentInfo *get_componentInfo() {
+    return m_compInfo.get();
   }
+
+  /**
+   * Member variables
+   */
+  // Holds the Instrument
+  Instrument_sptr m_testInstrument;
+
+  // Holds the ComponentInfo
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfo;
+
+  // Holds the DetectorInfo
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfo;
 };
 
 #endif /* INSTRUMENTRAYTRACER2TEST_H_ */
