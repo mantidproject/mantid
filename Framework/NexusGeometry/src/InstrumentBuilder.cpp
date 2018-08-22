@@ -96,7 +96,8 @@ void InstrumentBuilder::doAddTube(
   for (size_t i = 0; i < tube.detPositions().size(); ++i) {
     auto *detector = new Geometry::Detector(baseName + std::to_string(i),
                                             tube.detIDs()[i], objComp);
-    detector->translate(Mantid::Kernel::toV3D(tube.detPositions()[i]));
+    detector->translate(
+        Mantid::Kernel::toV3D(tube.detPositions()[i] - tube.tubePosition()));
     detector->setShape(pixelShape);
     objComp->add(detector);
     m_instrument->markAsDetectorIncomplete(detector);

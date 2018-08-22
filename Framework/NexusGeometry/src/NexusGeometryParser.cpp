@@ -637,7 +637,7 @@ extractInstrument(const H5File &file, const Group &root) {
     std::vector<detail::TubeBuilder> tubes;
     if (searchTubes) {
       tubes =
-          TubeHelpers::findAndSortTubes(*detShape, pixelOffsets, detectorIds);
+          TubeHelpers::findAndSortTubes(*detShape, detectorPixels, detectorIds);
       builder.addTubes(bankName, tubes, detShape);
     } else {
       for (size_t i = 0; i < detectorIds.size(); ++i) {

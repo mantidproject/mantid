@@ -52,10 +52,11 @@ public:
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
     auto detectorInfo = std::move(beamline.second);
+
     TSM_ASSERT_EQUALS("Detectors + 1 monitor", detectorInfo->size(),
                       128 * 2 + 1);
-    TSM_ASSERT_EQUALS("Detectors + 2 banks + root + source + sample",
-                      componentInfo->size(), detectorInfo->size() + 5);
+    TSM_ASSERT_EQUALS("Detectors + 2 banks + 16 tubes + root + source + sample",
+                      componentInfo->size(), detectorInfo->size() + 21);
     // Check 128 detectors in first bank
     TS_ASSERT_EQUALS(
         128,
@@ -68,7 +69,7 @@ public:
     // Check 128 detectors in second bank
     TS_ASSERT_EQUALS(
         128,
-        componentInfo->detectorsInSubtree(componentInfo->root() - 4).size());
+        componentInfo->detectorsInSubtree(componentInfo->root() - 12).size());
   }
 
   void test_source_is_where_expected() {
