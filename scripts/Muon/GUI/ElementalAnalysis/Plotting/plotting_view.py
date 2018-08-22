@@ -215,6 +215,9 @@ class PlotView(QtGui.QWidget):
     @_redo_layout
     @_save_addition
     def call_plot_method(self, name, func, *args, **kwargs):
+        """
+        Allows an arbitrary function call to be replayed
+        """
         return func(*args, **kwargs)
 
     @_redo_layout

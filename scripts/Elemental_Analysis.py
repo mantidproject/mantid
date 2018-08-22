@@ -76,13 +76,14 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def add_plot(self):
         name = "Plot {}".format(time())
-        p = self.plotting.add_subplot(name)
-        self.plotting.call_plot_method(name, p.set_title, name)
-        a = mantid.CreateSampleWorkspace(OutputWorkspace=str(time()))
-        self.plotting.plot(name, a)
-        b = mantid.Plus(a, a, OutputWorkspace=str(time()))
-        self.plotting.plot(name, b)
+        subplot = self.plotting.add_subplot(name)
+        self.plotting.call_plot_method(name, subplot.set_title, name)
+        plot1 = mantid.CreateSampleWorkspace(OutputWorkspace=str(time()))
+        self.plotting.plot(name, plot1)
+        plot2 = mantid.Plus(plot1, plot1, OutputWorkspace=str(time()))
+        self.plotting.plot(name, plot2)
         self.plotting.add_hline(name, 0.06, 0, 1)
+        self.plotting.add_vline(name, 10100, 0, 1)
 
     def del_plot(self):
         to_del = random.choice(self.plotting.get_subplots().keys())
