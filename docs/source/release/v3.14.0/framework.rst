@@ -42,11 +42,11 @@ New Algorithms
 
 Improvements
 ############
-
+- :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
 
 Bugfixes
 ########
-
+- :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
 
 
 Python
@@ -54,6 +54,8 @@ Python
 
 New
 ###
+
+ - New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
 
 
 Improvements

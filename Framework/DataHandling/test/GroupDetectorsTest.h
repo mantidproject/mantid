@@ -16,7 +16,6 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using Mantid::DataHandling::GroupDetectors;
 using Mantid::MantidVecPtr;
