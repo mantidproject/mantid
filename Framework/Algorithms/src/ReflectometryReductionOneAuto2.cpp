@@ -594,9 +594,15 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
       params.push_back(qmin);
       params.push_back(qstep);
       params.push_back(inputWS->x(0).back());
-    } else {
+    } else  if (qMin->isDefault() && !qMax->isDefault()){
       double qmax = getProperty("MomentumTransferMax");
       params.push_back(inputWS->x(0).front());
+      params.push_back(qstep);
+      params.push_back(qmax);
+    } else {
+      double qmin = getProperty("MomentumTransferMin");
+      double qmax = getProperty("MomentumTransferMax");
+      params.push_back(qmin);
       params.push_back(qstep);
       params.push_back(qmax);
     }
