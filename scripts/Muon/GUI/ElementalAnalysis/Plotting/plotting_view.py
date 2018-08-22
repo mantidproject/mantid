@@ -116,12 +116,10 @@ class PlotView(QtGui.QWidget):
         for name, plot in iteritems(self.plots):
             workspaces = self.workspaces[name]
             self.workspaces[name] = []
-            x, y = plot.get_xlim(), plot.get_ylim()
             plot.clear()
             for workspace in workspaces:
                 self.plot(name, workspace)
-            plot.set_xlim(x)
-            plot.set_ylim(y)
+            self._set_bounds(name)
             self._replay_additions(name)
 
     def _replay_additions(self, name):
