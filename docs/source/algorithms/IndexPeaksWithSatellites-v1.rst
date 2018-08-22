@@ -28,7 +28,7 @@ Usage
    IndexPeaks(peaks)
 
    fractional_peaks = PredictSatellitePeaks(peaks, ModVector1=[-0.5,0,0.0], MaxOrder=1)
-   IndexPeakswithSatellites(fractional_peaks, ModVector1=[-0.5,0,0.0], MaxOrder=1)
+   IndexPeaksWithSatellites(fractional_peaks, ModVector1=[-0.5,0,0.0], MaxOrder=1)
    print("Number of fractional peaks: {}".format(fractional_peaks.getNumberPeaks()))
 
 .. testoutput:: TopazExample
