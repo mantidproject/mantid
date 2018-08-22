@@ -13,7 +13,6 @@
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
@@ -207,9 +206,13 @@ void SaveMFT::exec() {
     for (auto i = 0u; i < m_group->size(); ++i) {
       auto ws = m_group->getItem(i);
       m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      std::string ending{""};
+      try {
+        ending = filename.substr(filename.find("."));
+      } catch (...) {
+      }
       const std::string uniqueFilename =
-          filename.substr(0, filename.find(".")) + m_ws->getName() +
-          filename.substr(filename.find("."));
+          filename.substr(0, filename.find(".")) + m_ws->getName() + ending;
       checkFile(uniqueFilename);
       if (getProperty("WriteHeader"))
         header();

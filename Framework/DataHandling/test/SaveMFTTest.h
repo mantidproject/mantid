@@ -12,10 +12,9 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iterator>
-
-#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -421,15 +420,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "group"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
-    // TS_ASSERT_THROWS_NOTHING(alg.execute())
-    // TS_ASSERT(alg.isExecuted())
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
     const std::string filename = alg.getPropertyValue("Filename");
-    // std::string f1 = filename.substr(0, filename.find(".")) + "ws1" +
-    //        filename.substr(filename.find("."));
-    // std::string f2 = filename.substr(0, filename.find(".")) + "ws2" +
-    //        filename.substr(filename.find("."));
-    // TS_ASSERT(Poco::File(f1).exists())
-    // TS_ASSERT(Poco::File(f2).exists())
+    std::string f1 = filename.substr(0, filename.find(".")) + "ws1";
+    std::string f2 = filename.substr(0, filename.find(".")) + "ws2";
+    TS_ASSERT(Poco::File(f1).exists())
+    TS_ASSERT(Poco::File(f2).exists())
   }
 
 private:
