@@ -347,15 +347,9 @@ void ReflectometryReductionOneAuto2::exec() {
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
   if (!params.empty()) {
-    if (params.size() == 3) {
-      setProperty("MomentumTransferMin", params[0]);
-      setProperty("MomentumTransferStep", -params[1]);
-      setProperty("MomentumTransferMax", params[2]);
-    } else {
-      setProperty("MomentumTransferMin", IvsQ->x(0).front());
-      setProperty("MomentumTransferMax", IvsQ->x(0).back());
-      setProperty("MomentumTransferStep", -params[0]);
-    }
+    setProperty("MomentumTransferMin", params[0]);
+    setProperty("MomentumTransferStep", -params[1]);
+    setProperty("MomentumTransferMax", params[2]);
   }
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
@@ -584,29 +578,13 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
     qstep = -qstep;
   }
 
-  Property *qMin = getProperty("MomentumTransferMin");
-  Property *qMax = getProperty("MomentumTransferMax");
-  if (qMin->isDefault() && qMax->isDefault()) {
-    params.push_back(qstep);
-  } else {
-    if (!qMin->isDefault() && qMax->isDefault()) {
-      double qmin = getProperty("MomentumTransferMin");
-      params.push_back(qmin);
-      params.push_back(qstep);
-      params.push_back(inputWS->x(0).back());
-    } else if (qMin->isDefault() && !qMax->isDefault()) {
-      double qmax = getProperty("MomentumTransferMax");
-      params.push_back(inputWS->x(0).front());
-      params.push_back(qstep);
-      params.push_back(qmax);
-    } else {
-      double qmin = getProperty("MomentumTransferMin");
-      double qmax = getProperty("MomentumTransferMax");
-      params.push_back(qmin);
-      params.push_back(qstep);
-      params.push_back(qmax);
-    }
-  }
+  auto qmin =
+      getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
+  auto qmax = getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
+
+  params.push_back(qmin);
+  params.push_back(qstep);
+  params.push_back(qmax);
 
   // Rebin
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
@@ -631,6 +609,21 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
   }
 
   return IvsQ;
+}
+
+/**
+ * @brief Get the Property Or return a default given value
+ *
+ * @param propertyName
+ * @param defaultValue
+ */
+double ReflectometryReductionOneAuto2::getPropertyOrDefault(
+    const std::string &propertyName, const double defaultValue) {
+  Property *property = getProperty(propertyName);
+  if (property->isDefault())
+    return defaultValue;
+  else
+    return getProperty(propertyName);
 }
 
 /** Check if input workspace is a group

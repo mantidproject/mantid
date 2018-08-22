@@ -82,6 +82,8 @@ private:
   std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
   getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);
+  double getPropertyOrDefault(const std::string &propertyName,
+                            const double defaultValue);
 };
 
 } // namespace Algorithms
