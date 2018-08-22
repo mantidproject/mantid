@@ -28,13 +28,15 @@ using namespace HistogramData;
 
 namespace {
 bool isIDF(const std::string &filename, const std::string &instrumentname) {
-  FileDescriptor descriptor(filename);
-  return ((descriptor.isAscii() && descriptor.extension() == ".xml")) ||
-         !instrumentname.empty();
+  if (!filename.empty()) {
+    FileDescriptor descriptor(filename);
+    return ((descriptor.isAscii() && descriptor.extension() == ".xml"));
+  }
+  return !instrumentname.empty();
 }
 
 bool isNexus(const std::string &filename) {
-  if (!FileDescriptor(filename).isAscii(filename)) {
+  if (!filename.empty() && !FileDescriptor(filename).isAscii(filename)) {
     NexusDescriptor descriptor(filename);
     return descriptor.isHDF(filename) &&
            descriptor.classTypeExists("NXinstrument");
