@@ -586,14 +586,21 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
 
   Property *qMin = getProperty("MomentumTransferMin");
   Property *qMax = getProperty("MomentumTransferMax");
-  if (!qMin->isDefault() && !qMax->isDefault()) {
-    double qmin = getProperty("MomentumTransferMin");
-    double qmax = getProperty("MomentumTransferMax");
-    params.push_back(qmin);
+  if (qMin->isDefault() && qMax->isDefault()) {
     params.push_back(qstep);
-    params.push_back(qmax);
   } else {
-    params.push_back(qstep);
+    if (!qMin->isDefault() && qMax->isDefault()) {
+      double qmin = getProperty("MomentumTransferMin");
+      params.push_back(qmin);
+      params.push_back(qstep);
+      params.push_back(inputWS->x(0).back());
+    }
+    if (!qMax->isDefault() && qMin->isDefault()) {
+      double qmax = getProperty("MomentumTransferMax");
+      params.push_back(inputWS->x(0).front());
+      params.push_back(qstep);
+      params.push_back(qmax);
+    }
   }
 
   // Rebin
@@ -638,16 +645,16 @@ bool ReflectometryReductionOneAuto2::checkGroups() {
 }
 
 /** Process groups. Groups are processed differently depending on transmission
- * runs and polarization analysis. If transmission run is a matrix workspace, it
- * will be applied to each of the members in the input workspace group. If
+ * runs and polarization analysis. If transmission run is a matrix workspace,
+ * it will be applied to each of the members in the input workspace group. If
  * transmission run is a workspace group, the behaviour is different depending
  * on polarization analysis. If polarization analysis is off (i.e.
- * 'PolarizationAnalysis' is set to 'None') each item in the transmission group
- * is associated with the corresponding item in the input workspace group. If
- * polarization analysis is on (i.e. 'PolarizationAnalysis' is 'PA' or 'PNR')
- * items in the transmission group will be summed to produce a matrix workspace
- * that will be applied to each of the items in the input workspace group. See
- * documentation of this algorithm for more details.
+ * 'PolarizationAnalysis' is set to 'None') each item in the transmission
+ * group is associated with the corresponding item in the input workspace
+ * group. If polarization analysis is on (i.e. 'PolarizationAnalysis' is 'PA'
+ * or 'PNR') items in the transmission group will be summed to produce a
+ * matrix workspace that will be applied to each of the items in the input
+ * workspace group. See documentation of this algorithm for more details.
  */
 bool ReflectometryReductionOneAuto2::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
@@ -768,7 +775,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
   groupAlg->execute();
 
-  // Set other properties so they can be updated in the Reflectometry interface
+  // Set other properties so they can be updated in the Reflectometry
+  // interface
   setPropertyValue("ThetaIn", alg->getPropertyValue("ThetaIn"));
   setPropertyValue("MomentumTransferMin",
                    alg->getPropertyValue("MomentumTransferMin"));
@@ -859,7 +867,8 @@ ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
 
 /**
  * Apply a polarization correction to workspaces in lambda.
- * @param outputIvsLam :: Name of a workspace group to apply the correction to.
+ * @param outputIvsLam :: Name of a workspace group to apply the correction
+ * to.
  */
 void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
     std::string const &outputIvsLam) {
@@ -889,7 +898,8 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
 /**
  * Sum transmission workspaces that belong to a workspace group
  * @param transGroup : The transmission group containing the transmission runs
- * @return :: A workspace pointer containing the sum of transmission workspaces
+ * @return :: A workspace pointer containing the sum of transmission
+ * workspaces
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
     WorkspaceGroup_sptr &transGroup) {
@@ -897,8 +907,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
   const std::string transSum = "trans_sum";
   Workspace_sptr sumWS = transGroup->getItem(0)->clone();
 
-  /// For this step to appear in the history of the output workspaces I need to
-  /// set child to false and work with the ADS
+  /// For this step to appear in the history of the output workspaces I need
+  /// to set child to false and work with the ADS
   auto plusAlg = createChildAlgorithm("Plus");
   plusAlg->setChild(false);
   plusAlg->initialize();
