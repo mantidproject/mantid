@@ -147,9 +147,9 @@ public:
 
   struct CompactEvent {
     uint64_t timestamp;
-    uint16_t channel;
-    uint16_t position;
-    event_id_e eventId;
+    //uint16_t channel;
+    //uint16_t position;
+    //event_id_e eventId;
   };
 
 private:
@@ -169,25 +169,29 @@ private:
 
   long populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS);
 
-  void parse_File(FileByteStream &file);
+  std::pair<long, long> parse_File(FileByteStream &file, const uint64_t fileSize);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
-  void parse_BlockList(FileByteStream &file, EventAccumulator &eventAccumulator);
-  void parse_Block(FileByteStream &file, EventAccumulator &eventAccumulator);
-  void parse_BlockSeparator(FileByteStream &file);
-  void parse_DataBuffer(FileByteStream &file, EventAccumulator &eventAccumulator);
-  BufferHeader parse_DataBufferHeader(FileByteStream &file);
 
-  inline size_t getWsIndex(const CompactEvent &event) {
-    const uint16_t channelIndex = ((event.channel & 0b1111111111100000) >> 1) | (event.channel & 0b0000000000001111);
-    const uint16_t position = std::min(uint16_t(959u), event.position);
-    return channelIndex * 960 + position + 24;
+  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const size_t &chunckSize);
+
+  void parse_BlockList(VectorByteStream &file, EventAccumulator &eventAccumulator);
+  void parse_Block(VectorByteStream &file, EventAccumulator &eventAccumulator);
+  void parse_BlockSeparator(VectorByteStream &file);
+  void parse_DataBuffer(VectorByteStream &file, EventAccumulator &eventAccumulator);
+  BufferHeader parse_DataBufferHeader(VectorByteStream &file);
+
+  inline size_t getWsIndex(const uint16_t &channel, const uint16_t &position) {
+    const uint16_t channelIndex = ((channel & 0b1111111111100000) >> 1) | (channel & 0b0000000000001111);
+    const uint16_t positionClamped = std::min(uint16_t(959u), position);
+    return channelIndex * 960 + positionClamped + 24;
   }
 
-  inline void parse_andAddEvent(FileByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
+  inline void parse_andAddEvent(VectorByteStream &file, const BufferHeader &bufferHeader, EventAccumulator &eventAccumulator) {
     CompactEvent event = {};
-    const auto dataChunk = file.extractDataChunk<6>().readBits<1>(event.eventId);
+    event_id_e eventId;
+    const auto dataChunk = file.extractDataChunk<6>().readBits<1>(eventId);
 
-    switch (event.eventId) {
+    switch (eventId) {
       case event_id_e::TRIGGER: {
         uint8_t trigId;
         dataChunk
@@ -199,23 +203,27 @@ private:
         }
         event.timestamp += bufferHeader.timestamp;
         //event.channel |= bufferHeader.mcpdId << 8;
+        //PARALLEL_CRITICAL(push_back_Tevent)
         eventAccumulator.triggerEvents.push_back(event);
       } break;
       case event_id_e::NEUTRON: {
+        uint16_t channel;
+        uint16_t position;
         dataChunk
-            .readBits<8>(event.channel)
+            .readBits<8>(channel)
             .skipBits<10>()
-            .readBits<10>(event.position)
+            .readBits<10>(position)
             .readBits<19>(event.timestamp);
         event.timestamp += bufferHeader.timestamp;
-        event.channel |= bufferHeader.mcpdId << 8;
+        channel |= bufferHeader.mcpdId << 8;
 
-        const size_t wsIndex = getWsIndex(event);
+        const size_t wsIndex = getWsIndex(channel, position);
+        //PARALLEL_CRITICAL(push_back_Nevent)
         eventAccumulator.neutronEvents[wsIndex].push_back(event);
       } break;
     default:
       // Panic!!!!
-      g_log.error() << "unknow event id 0x" << n2hexstr(event.eventId) << "\n";
+      g_log.error() << "unknow event id 0x" << n2hexstr(eventId) << "\n";
       break;
     }
   }

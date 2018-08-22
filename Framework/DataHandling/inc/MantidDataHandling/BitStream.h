@@ -40,17 +40,19 @@
 */
 
 template <typename T>
-std::string n2hexstr(T w) {
+std::string n2hexstr(T const &w, size_t sizeofw = sizeof(T), bool useSpacers = false) {
   static const char* digits = "0123456789ABCDEF";
-  std::string result(sizeof(w)*2, '0');
+  const size_t charsPerByte = useSpacers ? 3 : 2;
+  const size_t stringLength = (sizeofw-1) * charsPerByte + 2;
+  std::string result(stringLength, '_');
 
-  uint8_t (*wtmp_p)[sizeof(w)] = reinterpret_cast<uint8_t (*)[sizeof(w)]>(&w);
+  uint8_t const *const wtmp_p = reinterpret_cast<uint8_t const * const>(&w);
 
-  auto wtmp = *wtmp_p;
-  for (size_t i = 0; i < sizeof(w); i++) {
-    const auto j = i*2;
-    result[j]   = digits[(wtmp[i] & 0xF0) >> 4 ];
-    result[j+1] = digits[ wtmp[i] & 0x0F ];
+  //auto wtmp = *wtmp_p;
+  for (size_t i = 0; i < sizeofw; i++) {
+    const auto j = i * charsPerByte;
+    result[j]   = digits[(wtmp_p[i] & 0xF0) >> 4 ];
+    result[j+1] = digits[ wtmp_p[i] & 0x0F ];
   }
   return result;// + "  " + std::to_string(sizeof(w)) + " " + type_name(typeid(T).name());
 }
@@ -159,7 +161,7 @@ private:
 
   template<typename T>
   inline char *getResultPointer(T *const result, const std::size_t &bytecount) const {
-    return reinterpret_cast<char*>(result) + sizeof(T)-bytecount;
+    return reinterpret_cast<char*>(result) + sizeof(T) - std::min(sizeof(T), bytecount);
   }
 
  public:
@@ -221,11 +223,117 @@ private:
     return *this;
   }
 
+  std::streamsize gcount() const {
+    return stream.gcount();
+  }
   template<typename T>
   FileByteStream& operator>>(T &val) {
     return read(val);
   }
 
 };
+
+class VectorByteStream {
+public:
+  explicit VectorByteStream (const std::vector<uint8_t> &vector, const endian endianess)
+    : endianess(endianess), pos(vector.begin()), end(vector.end())
+  {
+  }
+
+  const endian endianess;
+private:
+  typename std::vector<uint8_t>::const_iterator pos;
+  typename std::vector<uint8_t>::const_iterator end;
+
+
+  template<typename T>
+  inline char *getResultPointer(T *const result, const std::size_t &bytecount) const {
+    return reinterpret_cast<char*>(result) + sizeof(T)-bytecount;
+  }
+
+  inline void streamread(char* dest, const std::size_t &bytecount) {
+    std::memcpy(dest, &*pos, bytecount);
+    pos += bytecount;
+  }
+
+  inline void streamignore(const std::size_t &bytecount) {
+    pos += bytecount;
+  }
+
+  inline uint streampeek() const {
+    return *pos;
+  }
+
+  inline bool streameof() const {
+    return pos >= end;
+  }
+
+ public:
+  template<typename T>
+  inline VectorByteStream& readRaw (T &result, const std::size_t &bytecount) {
+
+    streamread(getResultPointer(&result, bytecount), bytecount);
+    return *this;
+  }
+
+  template<std::size_t bytecount, typename T>
+  inline VectorByteStream& readRaw (T& result) {
+    static_assert(sizeof(T) >= bytecount, "byte count of result needs to be greater or equal to bytecount");
+    streamread(getResultPointer(&result, bytecount), bytecount);
+    return *this;
+  }
+
+  template<typename T>
+  inline VectorByteStream& readRaw (T& result) {
+    return readRaw<sizeof(T)>(result);
+  }
+
+  template<std::size_t bytecount, typename T>
+  inline VectorByteStream& read (T& result) {
+    readRaw<bytecount>(result);
+    if (endianess != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
+      result = convert_endianness(result);
+    }
+    return *this;
+  }
+
+  template<typename T>
+  inline VectorByteStream& read (T& result) {
+    return read<sizeof(result)>(result);
+  }
+
+  template<typename T>
+  inline T read (T&& result) {
+    read<sizeof(result)>(result);
+    return result;
+  }
+
+  template<size_t bytecount>
+  const DataChunk<bytecount> extractDataChunk() {
+    DataChunk<bytecount> dc = {};
+    read<bytecount>(dc.buffer);
+    dc.buffer <<= (sizeof(dc.buffer) - bytecount)*8;
+    return dc;
+  }
+
+  inline uint8_t peek () {
+    return static_cast<uint8_t>(streampeek());
+  }
+
+  bool eof() const { return streameof(); }
+
+  template<size_t bytecount>
+  inline VectorByteStream& skip () {
+    streamignore(bytecount);
+    return *this;
+  }
+
+  template<typename T>
+  VectorByteStream& operator>>(T &val) {
+    return read(val);
+  }
+
+};
+
 
 #endif /* MANTID_DATAHANDLING_BIT_STREAM_H_ */
