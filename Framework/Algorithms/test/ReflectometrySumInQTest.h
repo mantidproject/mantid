@@ -186,6 +186,11 @@ public:
     const int spectrum2{static_cast<int>(spectrumInfo.size()) - 2};
     TS_ASSERT_LESS_THAN(spectrumInfo.signedTwoTheta(spectrum1), 0.)
     TS_ASSERT_LESS_THAN(0., spectrumInfo.signedTwoTheta(spectrum2))
+    double summedInLambda{0.};
+    for (auto i : std::array<int, 2>{{spectrum1, spectrum2}}) {
+      const auto &Ys = inputWS->y(i);
+      summedInLambda += std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
+    }
     std::ostringstream indexSetValue;
     indexSetValue << spectrum1 << "," << spectrum2;
     const std::array<bool, 2> flatSampleOptions{{true, false}};
@@ -201,8 +206,14 @@ public:
           alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", spectrum1))
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", isFlatSample))
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", false))
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("IncludePartialBins", true))
       TS_ASSERT_THROWS_NOTHING(alg.execute())
+      API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+      TS_ASSERT(outputWS);
+      TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+      auto &Ys = outputWS->y(0);
+      const auto summedInQ = std::accumulate(Ys.cbegin(), Ys.cend(), 0.0);
+      TS_ASSERT_DELTA(summedInQ, summedInLambda, 1e-10)
     }
   }
 
@@ -286,7 +297,9 @@ private:
     const Kernel::V3D sourcePos{0., 0., -50.};
     const Kernel::V3D monitorPos{0., 0., -0.5};
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     const double twoTheta{centreTwoThetaDegrees / 180. * M_PI};
     constexpr double detectorHeight{0.001};
@@ -321,7 +334,9 @@ public:
     const Kernel::V3D sourcePos{0., 0., -50.};
     const Kernel::V3D monitorPos{0., 0., -0.5};
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     constexpr double twoTheta{5.87 / 180. * M_PI};
     constexpr double detectorHeight{0.001};
