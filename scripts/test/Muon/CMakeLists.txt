@@ -7,9 +7,8 @@ set ( TEST_PY_FILES
    FFTModel_test.py
    MaxEntPresenter_test.py
    MaxEntModel_test.py
+   threading_manager_test.py
    transformWidget_test.py
-   PeriodicTablePresenter_test.py
-   PeriodicTableModel_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

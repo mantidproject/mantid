@@ -2,8 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import traceback
 import sys
+import time
 
-from qtpy import QtCore, QtWidgets
+from qtpy import QtCore
 from qtpy.QtCore import Signal
 
 
@@ -34,9 +35,9 @@ def threading_decorator(fn):
             try:
                 result = fn(**inputs)
             except Exception as e:
-                failed_results_exceptions += [e]
+                failed_results_exceptions.append(e)
                 continue
-            results += [result]
+            results.append(result)
             progress_callback.emit(100 / num_evals)
         return results, failed_results_exceptions
 
@@ -164,8 +165,9 @@ class WorkerManager(QtCore.QObject):
         self._threads = []
         self._workers = []
 
-        self._results = {key: [] for key in self.kwarg_list.keys() + ['results']}
-        self._failed_results = {key: [] for key in self.kwarg_list.keys()}
+        keys = self.kwarg_list.keys()
+        self._results = {key: [] for key in keys + ['results']}
+        self._failed_results = {key: [] for key in keys}
 
         self._progress = 0.0
 
@@ -191,8 +193,9 @@ class WorkerManager(QtCore.QObject):
 
     def _clear_results(self):
         self._progress = 0.0
-        self._results = {key: [] for key in self.kwarg_list.keys() + ['results']}
-        self._failed_results = {key: [] for key in self.kwarg_list.keys()}
+        keys = self.kwarg_list.keys()
+        self._results = {key: [] for key in keys + ['results']}
+        self._failed_results = {key: [] for key in keys}
 
     def cancel(self):
         self._cancel_threads()
@@ -215,11 +218,11 @@ class WorkerManager(QtCore.QObject):
             thread_list = split_kwarg_list(self.kwarg_list, self._num_threads)
             for i, arg in enumerate(thread_list):
                 if self.verbose:
-                    print("\tStarting thread " + str(i + 1) + " with arg : ", arg)
+                    print("\tStarting thread {} with arg: {}".format(str(i + 1), arg))
 
                 # set up th thread and start its event loop
                 thread = QtCore.QThread(self)
-                self._threads += [thread]
+                self._threads.append(thread)
                 thread.start()
 
                 # create the worker and move it to the new thread
@@ -227,7 +230,7 @@ class WorkerManager(QtCore.QObject):
                 worker.moveToThread(thread)
                 worker.signals.start.connect(worker.run)
                 self.connect_worker_signals(worker)
-                self._workers += [worker]
+                self._workers.append(worker)
 
             # start the execution in the threads
             for worker in self._workers:
@@ -266,7 +269,7 @@ class WorkerManager(QtCore.QObject):
 
     def on_thread_complete(self):
         if self.verbose:
-            print("\tTHREAD " + str(self._thread_count) + " COMPLETE!\n")
+            print("\tThread {} complete\n".format(str(self._thread_count)))
         self.mutex.lock()
         self._thread_count -= 1
         self.mutex.unlock()
@@ -290,6 +293,7 @@ class WorkerManager(QtCore.QObject):
         else:
             self.thread_complete_callback()
 
+        print("finished emit : ", time.time())
         self.finished.emit()  # for unit tests
 
     def _update_progress(self, percentage):

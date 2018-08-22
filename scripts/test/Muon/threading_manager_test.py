@@ -4,9 +4,9 @@ import sys
 import time
 import unittest
 
-if sys.version_info.major == 3:
+try:
     from unittest import mock
-else:
+except ImportError:
     import mock
 
 from qtpy import QtWidgets, QtCore
@@ -70,6 +70,7 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
             self._thread = thread
             self._worker = worker
             self._worker.signals.finished.connect(self.finished)
+            self._worker.signals.start.emit()
             self.QT_APP.exec_()
 
         def finished(self):
@@ -93,7 +94,7 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.start.connect(worker.run)
         worker.signals.finished.connect(worker_finished)
         thread.start()
-        worker.signals.start.emit()
+        #worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_started.call_count, 1)
@@ -109,7 +110,7 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.start.connect(worker.run)
         worker.signals.progress.connect(worker_progress)
         thread.start()
-        worker.signals.start.emit()
+        #worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_progress.call_count, 5)
@@ -124,7 +125,7 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.start.connect(worker.run)
         worker.signals.result.connect(worker_result)
         thread.start()
-        worker.signals.start.emit()
+        #worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_result.call_count, 1)
@@ -143,7 +144,7 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.result.connect(worker_result)
         worker.signals.error.connect(worker_error)
         thread.start()
-        worker.signals.start.emit()
+        #worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_result.call_count, 0)
@@ -156,7 +157,9 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
 
         def __init__(self, thread):
             self._thread = thread
+            print("connecting : ", time.time())
             self._thread.finished.connect(self.finished)
+            self._thread.start()
             self.QT_APP.exec_()
 
         def finished(self):
@@ -173,7 +176,6 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
                                 callback_on_threads_complete=manager_finished,
                                 lst=[1, 2, 3, 4, 5, 6, 7, 8])
 
-        manager.start()
         self.Runner(manager)
 
         self.assertEqual(manager_finished.call_count, 1)
@@ -184,7 +186,6 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
         manager = WorkerManager(test_function, num_threads,
                                 lst=[1, 2, 3, 4, 5, 6, 7, 8])
 
-        manager.start()
         self.Runner(manager)
 
         self.assertEqual(len(manager.results['results']), 8)
@@ -201,7 +202,6 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
                                 callback_on_thread_exception=manager_exception,
                                 lst=[1, 2, 3, 4, 5, 6, 7, 8])
 
-        manager.start()
         self.Runner(manager)
 
         self.assertIn(1, manager_exception.call_args[1]['inputs']['lst'])
@@ -218,7 +218,6 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
                                 callback_on_thread_exception=manager_exception,
                                 lst=[1, 2, 3, 4, 5, 6, 7, 8])
 
-        manager.start()
         self.Runner(manager)
 
         self.assertEqual(manager._failed_results['lst'], [1, 5])
@@ -227,9 +226,7 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
         num_threads = 4
         manager = WorkerManager(test_function, num_threads, lst=[1, 2, 3, 4])
 
-        manager.start()
         manager.is_running = mock.Mock(return_value=True)
-        self.Runner(manager)
 
         self.assertRaises(RuntimeError, manager.start)
 
@@ -240,7 +237,6 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
                                 callback_on_progress_update=manager_progress,
                                 lst=[1, 2, 3, 4])
 
-        manager.start()
         self.Runner(manager)
 
         progress_call_args = [i[0][0] for i in manager_progress.call_args_list]
