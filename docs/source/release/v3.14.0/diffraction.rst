@@ -13,6 +13,7 @@ Improvements
 ############
 
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
