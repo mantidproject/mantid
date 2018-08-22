@@ -66,9 +66,6 @@ public:
     return m_detectorInfo->rotation(m_index);
   }
 
-  // Needed for test file
-  size_t getIndex() const { return m_index; }
-
 private:
   // Allow DetectorInfoIterator access
   friend class DetectorInfoIterator;
