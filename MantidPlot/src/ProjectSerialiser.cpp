@@ -1,10 +1,13 @@
+// clang-format off
+#include "PythonScripting.h"
+// clang-format on
+
 #include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "Graph3D.h"
 #include "Matrix.h"
 #include "Note.h"
-#include "PythonScripting.h"
 #include "ScriptingWindow.h"
 #include "TableStatistics.h"
 #include "WindowFactory.h"
@@ -69,7 +72,7 @@ PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
     PyErr_Fetch(&exception, &value, &traceback);
     PyErr_Clear();
     auto msg = PyObject_Str(value);
-    auto msgAsCstr = PyString_AsString(msg);
+    auto msgAsCstr = TO_CSTRING(msg);
     Py_DecRef(msg);
     const auto lineno(
         reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
@@ -736,7 +739,7 @@ ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
   ScopedGIL<PythonGIL> gil;
   auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(),
                                     "saveToProject", nullptr);
-  if (!PyString_Check(state)) {
+  if (!STR_CHECK(state)) {
     Py_XDECREF(state);
     throw std::runtime_error("saveToProject() did not return a string.");
   }
@@ -746,7 +749,7 @@ ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
       .append(">\n")
       .append(launcherModuleName)
       .append("\n")
-      .append(PyString_AsString(state))
+      .append(TO_CSTRING(state))
       .append("\n")
       .append("</")
       .append(PY_INTERFACE_SECTION)
