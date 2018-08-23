@@ -185,8 +185,9 @@ class RunStringUtilsIncrementAndDecrementRunStrings(unittest.TestCase):
     def test_cannot_decrement_list_below_zero(self):
         run_string = "0-2"
         increment = 1
-        with self.assertRaises(ValueError):
-            utils.decrement_run_string(run_string, increment)
+        decremented_run_string = utils.decrement_run_string(run_string, increment)
+
+        self.assertEqual(decremented_run_string, run_string)
 
 
 if __name__ == '__main__':

@@ -16,7 +16,6 @@ def exception_message_for_failed_files(failed_file_list):
 def empty_function(**kwargs):
     return
 
-
 class BrowseFileWidgetModel(object):
 
     def __init__(self, loaded_data_store=MuonLoadData()):

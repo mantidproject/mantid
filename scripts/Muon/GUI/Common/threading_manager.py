@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import traceback
 import sys
-import time
 
 from qtpy import QtCore
 from qtpy.QtCore import Signal
@@ -111,8 +110,10 @@ class Worker(QtCore.QObject):
         finally:
             self.signals.finished.emit()
 
+
 def empty_function(**kwargs):
     return
+
 
 class WorkerManager(QtCore.QObject):
     """
@@ -295,7 +296,6 @@ class WorkerManager(QtCore.QObject):
         else:
             self.thread_complete_callback()
 
-        print("finished emit : ", time.time())
         self.finished.emit()  # for unit tests
 
     def _update_progress(self, percentage):
