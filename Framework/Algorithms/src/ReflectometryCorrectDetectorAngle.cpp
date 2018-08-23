@@ -2,10 +2,14 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+
+using Mantid::Geometry::deg2rad;
+using Mantid::Geometry::rad2deg;
 
 namespace {
 namespace Prop {
@@ -17,7 +21,7 @@ std::string const INPUT_WS{"InputWorkspace"};
 std::string const OUTPUT_WS{"OutputWorkspace"};
 std::string const PIXEL_SIZE{"PixelSize"};
 std::string const TWO_THETA{"TwoTheta"};
-}
+} // namespace Prop
 
 /// Enumerations to define the rotation plane of the detector.
 enum class RotationPlane { horizontal, vertical };
@@ -32,18 +36,6 @@ bool isAngleIncreasingWithIndex(Mantid::API::SpectrumInfo const &spectrumInfo) {
   auto const last = spectrumInfo.signedTwoTheta(spectrumInfo.size() - 1);
   return first < last;
 }
-
-/** Convert degrees to radians.
- *  @param x an angle in degrees
- *  @return the angle in radians
- */
-constexpr double inRad(const double x) noexcept { return x * M_PI / 180; }
-
-/** Convert radians to degrees.
- *  @param x an angle in radians
- *  @return the angle in degrees
- */
-constexpr double inDeg(const double x) noexcept { return x * 180 / M_PI; }
 
 /** Calculate the detector position from given parameters.
  *  @param plane rotation plane of the detector
@@ -97,7 +89,7 @@ Mantid::Kernel::V3D faceRotationAxis(Mantid::API::MatrixWorkspace const &ws,
   }
   return rotationAxis;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -140,9 +132,10 @@ void ReflectometryCorrectDetectorAngle::init() {
                   "Name of the detector component to move.");
   declareProperty(Prop::LINE_POS, EMPTY_DBL(),
                   "A possibly fractional workspace index for the line centre.");
-  declareProperty(Prop::TWO_THETA, EMPTY_DBL(), "Angle of the detector centre "
-                                                "with respect to the beam "
-                                                "axis, in degrees.");
+  declareProperty(Prop::TWO_THETA, EMPTY_DBL(),
+                  "Angle of the detector centre "
+                  "with respect to the beam "
+                  "axis, in degrees.");
   auto mandatoryDouble =
       boost::make_shared<Kernel::MandatoryValidator<double>>();
   declareProperty(Prop::PIXEL_SIZE, EMPTY_DBL(), mandatoryDouble,
@@ -227,7 +220,8 @@ void ReflectometryCorrectDetectorAngle::correctDetectorPosition(
 double ReflectometryCorrectDetectorAngle::correctedTwoTheta(
     API::MatrixWorkspace const &ws) {
   if (!isDefault(Prop::TWO_THETA)) {
-    double const twoTheta = inRad(getProperty(Prop::TWO_THETA));
+    auto const twoTheta =
+        static_cast<double>(getProperty(Prop::TWO_THETA)) * deg2rad;
     if (isDefault(Prop::LINE_POS)) {
       return twoTheta;
     } else {
@@ -240,14 +234,14 @@ double ReflectometryCorrectDetectorAngle::correctedTwoTheta(
     double const directLinePosition = getProperty(Prop::DIRECT_LINE_POS);
     const double directOffset =
         offsetAngleFromCentre(*directWS, directLinePosition);
-    m_log.debug() << "Direct beam offset angle: " << inDeg(directOffset)
+    m_log.debug() << "Direct beam offset angle: " << directOffset * rad2deg
                   << '\n';
     auto const reflectedDetectorAngle = signedDetectorAngle(ws);
     auto const directDetectorAngle = signedDetectorAngle(*directWS);
     auto const angle =
         reflectedDetectorAngle - directDetectorAngle - directOffset;
-    m_log.debug() << "Direct beam calibrated detector angle: " << inDeg(angle)
-                  << '\n';
+    m_log.debug() << "Direct beam calibrated detector angle: "
+                  << angle * rad2deg << '\n';
     return angle;
   }
 }
@@ -298,7 +292,7 @@ void ReflectometryCorrectDetectorAngle::rotateComponent(
   rotate->setProperty("Y", rotationAxis.Y());
   rotate->setProperty("Z", rotationAxis.Z());
   rotate->setProperty("RelativeRotation", false);
-  rotate->setProperty("Angle", inDeg(angle));
+  rotate->setProperty("Angle", angle * rad2deg);
   rotate->execute();
 }
 
