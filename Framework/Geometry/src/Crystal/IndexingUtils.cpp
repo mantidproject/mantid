@@ -1473,9 +1473,7 @@ double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N,
   if (found_max) {
     double sum = 0;
     double w_sum = 0;
-    // only include single extra index if we're too near the end
-    const size_t last_index = i < N - 2 ? i + 2 : i + 1;
-    for (size_t j = i - 2; j <= last_index; j++) {
+    for (size_t j = i - 2; j < std::min(N, i + 3); j++) {
       sum += static_cast<double>(j) * magnitude_fft[j];
       w_sum += magnitude_fft[j];
     }
