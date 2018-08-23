@@ -26,8 +26,6 @@ Usage
 
 .. testcode:: exLoadEmptyInstrumentXML
 
-    import os
-
     wsOut = LoadEmptyInstrument(Filename="INES_Definition.xml")
     print("The workspace contains {} spectra".format(wsOut.getNumberHistograms()))
 

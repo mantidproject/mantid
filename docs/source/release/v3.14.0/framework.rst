@@ -25,6 +25,10 @@ Logging
 	  	# Have been replaced by
 	  	ConfigService.SetLogLevel(int)
 
+Nexus Geometry Loading
+----------------------
+:ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` will now load instrument geometry from hdf5 `NeXus <https://www.nexusformat.org/>`_ format files. Files consistent with the standard following the introduction of `NXinstrument <http://download.nexusformat.org/doc/html/classes/base_classes/NXinstrument.html?highlight=nxinstrument>`_ (and related types) will be used to build the entire in-memory instrument geometry within Mantid. This IDF-free route is primarily envisioned for the ESS. This marks the completion of the first phase in the feasibility and rollout of support for the new format. Over coming releases we will be expanding our support for the NeXus geometry both across Loading and Saving algorithms. While dependent on the instrument, we are overall seeing significant improvements in instrument load times over loading from equivalent IDF based implementations.
+
 Stability
 ---------
 
