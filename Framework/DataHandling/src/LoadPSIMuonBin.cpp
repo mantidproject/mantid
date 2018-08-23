@@ -335,7 +335,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
                             " - Run:" + std::to_string(m_header.numberOfRuns));
 
   // Set the detector IDs
-  for (auto i = 0u; i < m_header.numberOfHistograms; ++i) {
+  for (auto i = 0; i < m_header.numberOfHistograms; ++i) {
     outputWorkspace->getSpectrum(i).setDetectorID(i);
   }
 
