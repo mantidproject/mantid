@@ -935,7 +935,7 @@ public:
     TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
   }
 
-  void xtestMonteCarloVolume() {
+  void testMonteCarloVolume() {
     // We use a cuboid with spherical void here.
     using namespace Poco::XML;
     const double width = 71.99;
