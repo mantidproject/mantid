@@ -220,6 +220,9 @@ class PlotView(QtWidgets.QWidget):
             if last is not None:
                 # label is necessary to fix
                 # https://github.com/matplotlib/matplotlib/issues/4786
+                #print(type(positions), positions)
+                print(type(self.current_grid), self.current_grid)
+                #print(positions[-1][0], positions[-1][1])
                 pos = self.current_grid[positions[-1][0], positions[-1][1]]
                 self.plots[last] = self.figure.add_subplot(pos, label=last)
                 self.plots[last].set_subplotspec(pos)
