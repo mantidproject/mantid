@@ -8,11 +8,11 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
- Algorithm to create a flood correction workspace for reflectometry
- data reduction.
+ Algorithm to apply a flood correction workspace to a reflectometry
+ data workspace.
 
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- National Laboratory & European Spallation Source
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 

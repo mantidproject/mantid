@@ -1,13 +1,5 @@
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidAPI/Run.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
