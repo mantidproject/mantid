@@ -53,6 +53,11 @@ private:
   std::vector<uint16_t> m_facesIndices;
   std::vector<uint16_t> m_windingOrder;
 
+  template <typename T>
+  void appendTo(std::vector<T> &destination, unsigned int value) {
+    destination.push_back(static_cast<T>(value));
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -75,13 +80,13 @@ public:
        *     x           x     x
        */
 
-      m_facesIndices.push_back(i * 4);
-      m_facesIndices.push_back((i + 1) * 4);
+      appendTo<uint16_t>(m_facesIndices, (i * 4));
+      appendTo<uint16_t>(m_facesIndices, ((i + 1) * 4));
       if (i % 2 != 0) {
-        m_windingOrder.push_back(i * 2);
-        m_windingOrder.push_back(i * 2 + 1);
-        m_windingOrder.push_back(i * 2 + 2);
-        m_windingOrder.push_back(i * 2 + 3);
+        appendTo<uint16_t>(m_windingOrder, (i * 2));
+        appendTo<uint16_t>(m_windingOrder, (i * 2 + 1));
+        appendTo<uint16_t>(m_windingOrder, (i * 2 + 2));
+        appendTo<uint16_t>(m_windingOrder, (i * 2 + 3));
       }
     }
   }
