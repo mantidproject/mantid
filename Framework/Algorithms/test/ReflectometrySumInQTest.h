@@ -7,10 +7,12 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ReflectometrySumInQ;
+using Mantid::Geometry::deg2rad;
 
 class ReflectometrySumInQTest : public CxxTest::TestSuite {
 public:
@@ -301,7 +303,7 @@ private:
         0.,
         0.,
     };
-    const double twoTheta{centreTwoThetaDegrees / 180. * M_PI};
+    const double twoTheta{centreTwoThetaDegrees * deg2rad};
     constexpr double detectorHeight{0.001};
     constexpr double l2{2.3};
     const auto y = l2 * std::sin(twoTheta);
@@ -338,7 +340,7 @@ public:
         0.,
         0.,
     };
-    constexpr double twoTheta{5.87 / 180. * M_PI};
+    constexpr double twoTheta{5.87 * deg2rad};
     constexpr double detectorHeight{0.001};
     constexpr double l2{2.3};
     const auto y = l2 * std::sin(twoTheta);
