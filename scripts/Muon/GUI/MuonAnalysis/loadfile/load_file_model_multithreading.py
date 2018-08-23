@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import time
 
 import mantid.simpleapi as mantid
 from mantid.kernel import ConfigService
@@ -13,8 +12,10 @@ import Muon.GUI.Common.threading_manager as thread_manager
 def exception_message_for_failed_files(failed_file_list):
     return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
 
+
 def empty_function(**kwargs):
     return
+
 
 class BrowseFileWidgetModel(object):
 
