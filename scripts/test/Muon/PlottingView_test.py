@@ -70,8 +70,8 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
             self.mock_func,
             *self.mock_args)
         self.mock_func.assert_called_once_with(*self.mock_args)
-        self.view.figure.tight_layout.assert_called_once()
-        self.view.canvas.draw.assert_called_once()
+        self.assertEquals(self.view.figure.tight_layout.call_count, 1)
+        self.assertEquals(self.view.canvas.draw.call_count, 1)
 
     def test_redo_layout_with_plots_equal_to_zero(self):
         self.view.plots = []
@@ -80,7 +80,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
             self.mock_func,
             *self.mock_args)
         self.mock_func.assert_called_once_with(*self.mock_args)
-        self.view.canvas.draw.assert_called_once()
+        self.assertEquals(self.view.canvas.draw.call_count, 1)
 
     def test_save_addition_called_once(self):
         self.view.call_plot_method(
@@ -112,8 +112,8 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
     def test_set_bounds_when_not_new_plots(self):
         self.plot_name = ""
         self.view._set_bounds(self.plot_name)
-        self.view.x_axis_changer.clear_bounds.assert_called_once()
-        self.view.y_axis_changer.clear_bounds.assert_called_once()
+        self.assertEquals(self.view.x_axis_changer.clear_bounds.call_count, 1)
+        self.assertEquals(self.view.y_axis_changer.clear_bounds.call_count, 1)
 
     def test_get_current_plot(self):
         self.assertEquals(
@@ -138,7 +138,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view._set_bounds = mock.Mock()
         self.view._replay_additions = mock.Mock()
         self.view._errors_changed(None)
-        self.plots_return_value.clear.assert_called_once()
+        self.assertEquals(self.plots_return_value.clear.call_count, 1)
         self.view.plot.assert_called_once_with(
             self.plot_name, self.plots_return_value)
         self.view._set_bounds.assert_called_once_with(self.plot_name)
@@ -174,7 +174,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view._update_gridspec(new_plots)
         get_layout.assert_called_once_with(new_plots)
         self.view._set_positions.assert_called_once_with(get_layout())
-        self.view._update_plot_selector.assert_called_once()
+        self.assertEquals(self.view._update_plot_selector.call_count, 1)
 
     @mock.patch("Muon.GUI.ElementalAnalysis.Plotting.plotting_utils.get_layout")
     def test_update_gridspec_if_new_plots_and_last(self, get_layout):
@@ -185,16 +185,16 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
             self.mock_grid_pos, label=self.plot_name)
         self.plots_return_value.set_subplotspec.assert_called_once_with(
             self.mock_grid_pos)
-        self.view._update_plot_selector.assert_called_once()
+        self.assertEquals(self.view._update_plot_selector.call_count, 1)
 
     def test_gridspec_if_not_new_plots(self):
         self.view._update_plot_selector = mock.Mock()
         self.view._update_gridspec([])
-        self.view._update_plot_selector.assert_called_once()
+        self.assertEquals(self.view._update_plot_selector.call_count, 1)
 
     def test_update_plot_selector(self):
         self.view._update_plot_selector()
-        self.view.plot_selector.clear.assert_called_once()
+        self.assertEquals(self.view.plot_selector.clear.call_count, 1)
         self.view.plot_selector.addItems.assert_called_once_with(
             self.view.plots.keys())
 
@@ -263,12 +263,12 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
     @mock.patch("mantid.plots.plotfunctions.errorbar")
     def test_plot_workspace_errors(self, error_bar):
         self.view.plot_workspace_errors(self.plot_name, self.mock_workspace)
-        error_bar.assert_called_once()
+        self.assertEquals(error_bar.call_count, 1)
 
     @mock.patch("mantid.plots.plotfunctions.plot")
     def test_plot_workspace(self, plot):
         self.view.plot_workspace(self.plot_name, self.mock_workspace)
-        plot.assert_called_once()
+        self.assertEquals(plot.call_count, 1)
 
     def test_get_subplot_raises_key_error(self):
         self.view.plots = {}
