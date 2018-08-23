@@ -54,7 +54,7 @@ public:
 
 private:
   void loadPulseTimes(::NeXus::File &file);
-  std::unique_ptr<std::vector<uint64_t>> loadEventIndex(::NeXus::File &file);
+  std::vector<uint64_t> loadEventIndex(::NeXus::File &file);
   void prepareEventId(::NeXus::File &file, int64_t &start_event,
                       int64_t &stop_event,
                       const std::vector<uint64_t> &event_index);

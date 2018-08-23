@@ -75,15 +75,15 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
     pulse)
  * @param file :: File handle for the NeXus file
  */
-std::unique_ptr<std::vector<uint64_t>>
+std::vector<uint64_t>
 LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   // Get the event_index (a list of size of # of pulses giving the index in
   // the event list for that pulse)
   file.openData("event_index");
   // Must be uint64
-  auto event_index = Kernel::make_unique<std::vector<uint64_t>>();
+  std::vector<uint64_t> event_index;
   if (file.getInfo().type == ::NeXus::UINT64)
-    file.getData(*event_index);
+    file.getData(event_index);
   else {
     m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
@@ -93,8 +93,8 @@ LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   file.closeData();
 
   // Look for the sign that the bank is empty
-  if (event_index->size() == 1) {
-    if ((*event_index)[0] == 0) {
+  if (event_index.size() == 1) {
+    if (event_index[0] == 0) {
       // One entry, only zero. This means NO events in this bank.
       m_loadError = true;
       m_loader.alg->getLogger().debug()
@@ -188,7 +188,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Now we allocate the required arrays
-  auto event_id = Kernel::make_unique<uint32_t[]>(m_loadSize[0]);
+  auto event_id = std::make_unique<uint32_t[]>(m_loadSize[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -251,7 +251,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
  */
 std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto event_time_of_flight = Kernel::make_unique<float[]>(m_loadSize[0]);
+  auto event_time_of_flight = std::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   if (!m_oldNexusFileNames)
@@ -314,7 +314,7 @@ LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   m_have_weight = true;
 
   // Allocate the array
-  auto event_weight = Kernel::make_unique<float[]>(m_loadSize[0]);
+  auto event_weight = std::make_unique<float[]>(m_loadSize[0]);
 
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
@@ -356,7 +356,7 @@ void LoadBankFromDiskTask::run() {
   std::unique_ptr<uint32_t[]> event_id;
   std::unique_ptr<float[]> event_time_of_flight;
   std::unique_ptr<float[]> event_weight;
-  std::unique_ptr<std::vector<uint64_t>> event_index_ptr;
+  std::vector<uint64_t> event_index;
 
   // Open the file
   ::NeXus::File file(m_loader.alg->m_filename);
@@ -367,7 +367,7 @@ void LoadBankFromDiskTask::run() {
     file.openGroup(entry_name, entry_type);
 
     // Load the event_index field.
-    event_index_ptr = this->loadEventIndex(file);
+    event_index = this->loadEventIndex(file);
 
     if (!m_loadError) {
       // Load and validate the pulse times
@@ -375,7 +375,7 @@ void LoadBankFromDiskTask::run() {
 
       // The event_index should be the same length as the pulse times from DAS
       // logs.
-      if (event_index_ptr->size() != thisBankPulseTimes->numPulses)
+      if (event_index.size() != thisBankPulseTimes->numPulses)
         m_loader.alg->getLogger().warning()
             << "Bank " << entry_name
             << " has a mismatch between the number of event_index entries "
@@ -384,7 +384,7 @@ void LoadBankFromDiskTask::run() {
       // Open and validate event_id field.
       int64_t start_event = 0;
       int64_t stop_event = 0;
-      this->prepareEventId(file, start_event, stop_event, *event_index_ptr);
+      this->prepareEventId(file, start_event, stop_event, event_index);
 
       // These are the arguments to getSlab()
       m_loadStart[0] = start_event;
@@ -486,8 +486,8 @@ void LoadBankFromDiskTask::run() {
   boost::shared_array<float> event_time_of_flight_shrd(
       event_time_of_flight.release());
   boost::shared_array<float> event_weight_shrd(event_weight.release());
-  boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(
-      event_index_ptr.release());
+  auto event_index_shrd =
+      boost::make_shared<std::vector<uint64_t>>(std::move(event_index));
 
   ProcessBankData *newTask1 = new ProcessBankData(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
