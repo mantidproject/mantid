@@ -3,11 +3,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
-
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -79,10 +78,14 @@ private:
   void writeInfo(const std::string logName, const std::string logValue = "");
   /// Write header
   void header();
+  /// Filename
+  std::string m_filename;
   /// Input workspace
   API::MatrixWorkspace_const_sptr m_ws;
   /// Input workspace group
-  API::WorkspaceGroup_sptr m_group;
+  std::vector<API::MatrixWorkspace_const_sptr> m_group;
+  /// Names of the workspaces in a group
+  std::vector<std::string> m_wsName;
   /// The output file stream
   std::ofstream m_file;
 };

@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAHANDLING_SAVEMFTTEST_H_
 #define MANTID_DATAHANDLING_SAVEMFTTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
@@ -396,23 +397,58 @@ public:
     Mantid::HistogramData::Histogram histogram2(x2, y2);
     const Workspace_sptr ws2 = create<Workspace2D>(1, histogram2);
     auto outputFileHandle = Poco::TemporaryFile();
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
     const std::string file = outputFileHandle.path();
     WorkspaceGroup_sptr group(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group", group);
     group->add("ws1");
     group->add("ws2");
     SaveMFT alg;
     alg.initialize();
     alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", group))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "group"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     const std::string filename = alg.getPropertyValue("Filename");
-    std::string f1 = filename.substr(0, filename.find(".")) + "ws1";
-    std::string f2 = filename.substr(0, filename.find(".")) + "ws2";
+    std::string ending{""};
+    try {
+      ending = filename.substr(filename.find("."));
+    } catch (...) {
+    }
+    std::string f1 = filename.substr(0, filename.find(".")) + "ws1" + ending;
+    std::string f2 = filename.substr(0, filename.find(".")) + "ws2" + ending;
     TS_ASSERT(Poco::File(f1).exists())
+    std::vector<std::string> data1;
+    data1.reserve(2);
+    data1.emplace_back("       4.360000000000000e+00       "
+                       "4.000000000000000e+00       2.000000000000000e+00");
+    data1.emplace_back("       6.320000000000000e+00       "
+                       "7.600000000000000e+00       2.756809750418044e+00");
+    std::ifstream in1(f1);
+    TS_ASSERT(not_empty(in1))
+    std::string fullline;
+    auto it1 = data1.begin();
+    while (std::getline(in1, fullline)) {
+      TS_ASSERT_EQUALS(fullline, *(it1++));
+    }
+    TS_ASSERT(in1.eof())
     TS_ASSERT(Poco::File(f2).exists())
+    std::vector<std::string> data2;
+    data2.reserve(2);
+    data2.emplace_back("       3.300000000000000e-01       "
+                       "3.000000000000000e+00       1.732050807568877e+00");
+    data2.emplace_back("       3.400000000000000e-01       "
+                       "6.600000000000000e+00       2.569046515733026e+00");
+    std::ifstream in2(f2);
+    TS_ASSERT(not_empty(in2))
+    auto it2 = data2.begin();
+    while (std::getline(in2, fullline)) {
+      TS_ASSERT_EQUALS(fullline, *(it2++));
+    }
+    TS_ASSERT(in2.eof())
   }
 
 private:

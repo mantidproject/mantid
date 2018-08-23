@@ -1,5 +1,5 @@
 #include "MantidDataHandling/SaveMFT.h"
-#include "MantidAPI/ADSValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -20,7 +20,6 @@
 #include <limits>
 #include <map>
 #include <stdexcept>
-#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -45,21 +44,38 @@ void SaveMFT::init() {
   declareProperty("WriteHeader", true, "Whether to write header lines.");
 }
 
-/// Input validation
+/// Validate single MatrixWorkspace
+void validateMatrix(std::map<std::string, std::string> &issuesMatrixWS,
+                    MatrixWorkspace_const_sptr &ws) {
+  if (!ws)
+    issuesMatrixWS["InputWorkspace"] =
+        "InputWorkspace must be a MatrixWorkspace";
+  try {
+    ws->y(0).size();
+  } catch (std::range_error) {
+    issuesMatrixWS["InputWorkspace"] = "InputWorkspace does not contain data";
+  }
+}
+
+/// Validate single MatrixWorkspace
+void validateMatrix(MatrixWorkspace_const_sptr &ws) {
+  if (!ws)
+    throw(std::runtime_error("WorkspaceGroup must contain MatrixWorkspaces"));
+  try {
+    ws->y(0).size();
+  } catch (std::range_error) {
+    throw(std::runtime_error("InputWorkspace does not contain data"));
+  }
+}
+
+/// Input validation for single MatrixWorkspace
 std::map<std::string, std::string> SaveMFT::validateInputs() {
   std::map<std::string, std::string> issues;
-  if (!checkGroups()) {
-    m_ws = getProperty("InputWorkspace");
-    if (m_ws) {
-      // MatrixWorkspace
-      try {
-        m_ws->y(0).size();
-      } catch (std::range_error) {
-        issues["InputWorkspace"] = "InputWorkspace does not contain data";
-      }
-    } else
-      issues["InputWorkspace"] = "InputWorkspace must be a MatrixWorkspace";
-  }
+  m_ws = getProperty("InputWorkspace");
+  validateMatrix(issues, m_ws);
+  m_filename = getPropertyValue("Filename");
+  if (m_filename.empty())
+    issues["InputWorkspace"] = "Provide a file name";
   return issues;
 }
 
@@ -180,8 +196,7 @@ void SaveMFT::checkFile(const std::string filename) {
 
 /// Execute the algorithm
 void SaveMFT::exec() {
-  const std::string filename = getProperty("Filename");
-  checkFile(filename);
+  checkFile(m_filename);
   if (getProperty("WriteHeader"))
     header();
   data();
@@ -191,46 +206,42 @@ void SaveMFT::exec() {
 /// Check if input workspace is a group
 bool SaveMFT::checkGroups() {
   try {
-    m_group = getProperty("InputWorkspace");
+    WorkspaceGroup_const_sptr group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            getPropertyValue("InputWorkspace"));
+    for (auto i : group->getAllItems()) {
+      if (i->getName().empty())
+        g_log.warning("InputWorkspace must have a name, skip");
+      else {
+        m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
+        validateMatrix(m_ws);
+        m_group.emplace_back(m_ws);
+        m_wsName.emplace_back(i->getName()); // since we lost names
+      }
+    }
+    if (group->isEmpty())
+      g_log.warning("WorkspaceGroup does not contain MatrixWorkspaces");
+    const std::string filename = getPropertyValue("Filename");
+    if (filename.empty())
+      throw(std::runtime_error("Provide a file name"));
+    return true;
   } catch (...) {
     return false;
   }
-  for (auto i : m_group->getAllItems()) {
-    try {
-      boost::dynamic_pointer_cast<MatrixWorkspace>(i)->y(0).size();
-    } catch (std::range_error) {
-      g_log.warning("InputWorkspace " + i->getName() +
-                    " does not contain data, skip");
-      m_group->remove(i->getName());
-    } catch (...) {
-      g_log.warning("InputWorkspace " + i->getName() +
-                    " is not a MatrixWorkspace, skip");
-      m_group->remove(i->getName());
-    }
-  }
-  if (!(m_group->isEmpty()))
-    g_log.warning("No valid workspaces to treat");
-  return true;
 }
 
 /// Execution of group workspaces
 bool SaveMFT::processGroups() {
-  const std::string filename = getProperty("Filename");
-  for (auto i = 0u; i < m_group->size(); ++i) {
-    auto ws = m_group->getItem(i);
-    m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  const std::string filename = getPropertyValue("Filename");
+  for (auto i = 0u; i < m_group.size(); ++i) {
+    m_ws = m_group[i]->clone();
     std::string ending{""};
     try {
       ending = filename.substr(filename.find("."));
     } catch (...) {
     }
-    const std::string uniqueFilename =
-        filename.substr(0, filename.find(".")) + m_ws->getName() + ending;
-    checkFile(uniqueFilename);
-    if (getProperty("WriteHeader"))
-      header();
-    data();
-    m_file.close();
+    m_filename = filename.substr(0, filename.find(".")) + m_wsName[i] + ending;
+    this->exec();
   }
   return true;
 }
