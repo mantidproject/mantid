@@ -226,11 +226,13 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
-/** Map a vector of detector indices to a vector of global spectrum indices.
- *
- * The mapping is based on the held spectrum definitions. Throws if any spectrum
- * maps to more than one detectors. Throws when some of the detectors have no
- * matching spectrum. */
+/** Map a vector of detector indices to a vector of global spectrum indices. *
+ * The mapping is based on the held spectrum definitions.
+ * Throws if any spectrum maps to more than one detectors.
+ * Throws if any of the detectors has no matching spectrum.
+ * Throws if more than one spectrum maps to the same detector at the same time
+ * index.
+ */
 std::vector<GlobalSpectrumIndex>
 IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     const std::vector<size_t> &detectorIndices) const {
@@ -238,20 +240,21 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     throw std::runtime_error("IndexInfo::"
                              "globalSpectrumIndicesFromDetectorIndices -- no "
                              "spectrum definitions available");
-  std::vector<char> detectorMap;
+  std::vector<std::pair<char, std::vector<char>>> detectorMap;
   for (const auto &index : detectorIndices) {
     // IndexInfo has no knowledge of the maximum detector index so we workaround
     // this knowledge gap by assuming below that any index beyond the end of the
     // map is 0.
     if (index >= detectorMap.size())
-      detectorMap.resize(index + 1, 0);
-    detectorMap[index] = 1;
+      detectorMap.resize(index + 1, std::make_pair(0, std::vector<char>()));
+    detectorMap[index].first = 1;
   }
 
   // Global vector of spectrum definitions. For this purpose we do not need
   // actual definitions which would be hard to transmit via MPI (many small
   // vectors of unknown length). Either single detector or error flag.
-  std::vector<std::vector<int64_t>> spectrumDefinitions(communicator().size());
+  std::vector<std::vector<std::pair<int64_t, size_t>>> spectrumDefinitions(
+      communicator().size());
   auto &thisRankSpectrumDefinitions =
       spectrumDefinitions[communicator().rank()];
   thisRankSpectrumDefinitions.resize(size());
@@ -259,13 +262,14 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     const auto &spectrumDefinition = m_spectrumDefinitions->operator[](i);
     if (spectrumDefinition.size() == 1) {
       const auto detectorIndex = spectrumDefinition[0].first;
-      thisRankSpectrumDefinitions[i] = detectorIndex;
+      const auto timeIndex = spectrumDefinition[0].second;
+      thisRankSpectrumDefinitions[i] = std::make_pair(detectorIndex, timeIndex);
     }
     // detectorIndex is unsigned so we can use negative values as error flags.
     if (spectrumDefinition.size() == 0)
-      thisRankSpectrumDefinitions[i] = -1;
+      thisRankSpectrumDefinitions[i] = {-1, 0};
     if (spectrumDefinition.size() > 1)
-      thisRankSpectrumDefinitions[i] = -2;
+      thisRankSpectrumDefinitions[i] = {-2, 0};
   }
 
   std::vector<size_t> allSizes;
@@ -285,17 +289,26 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
           m_spectrumNumberTranslator->partitionOf(GlobalSpectrumIndex(i)));
       const auto spectrumDefinition =
           spectrumDefinitions[rank][currentIndex[rank]++];
-      if (spectrumDefinition >= 0) {
-        const auto detectorIndex = static_cast<size_t>(spectrumDefinition);
+      if (spectrumDefinition.first >= 0) {
+        const auto detectorIndex =
+            static_cast<size_t>(spectrumDefinition.first);
+        const auto timeIndex = static_cast<size_t>(spectrumDefinition.second);
         if (detectorMap.size() > detectorIndex &&
-            detectorMap[detectorIndex] != 0) {
+            detectorMap[detectorIndex].first != 0) {
           spectrumIndices.push_back(i);
-          if (detectorMap[detectorIndex] == 1) {
-            ++detectorMap[detectorIndex];
+          if (detectorMap[detectorIndex].second.size() <= timeIndex) {
+            detectorMap[detectorIndex].second.resize(timeIndex + 1, {0});
+            detectorMap[detectorIndex].second[timeIndex] = 1;
+          }
+          if (detectorMap[detectorIndex].first == 1) {
+            ++detectorMap[detectorIndex].first;
+          }
+          if (detectorMap[detectorIndex].second[timeIndex] != 0) {
+            ++detectorMap[detectorIndex].second[timeIndex];
           }
         }
       }
-      if (spectrumDefinition == -2)
+      if (spectrumDefinition.first == -2)
         throw std::runtime_error(
             "SpectrumDefinition contains multiple entries. "
             "No unique mapping from detector to spectrum "
@@ -307,9 +320,19 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
       communicator().send(rank, tag, buffer, bytes);
     }
     if (std::any_of(detectorMap.begin(), detectorMap.end(),
-                    [](char c) { return c == 1; })) {
+                    [](const std::pair<char, std::vector<char>> &p) {
+                      return p.first == 1;
+                    })) {
       throw std::runtime_error("Some of the requested detectors do not have a "
                                "corresponding spectrum");
+    }
+    if (std::any_of(detectorMap.begin(), detectorMap.end(),
+                    [](const std::pair<char, std::vector<char>> &p) {
+                      return std::any_of(p.second.begin(), p.second.end(),
+                                         [](char c) { return c > 2; });
+                    })) {
+      throw std::runtime_error("Some of the spectra map to the same detector "
+                               "at the same time index");
     }
   } else {
     auto buffer = reinterpret_cast<char *>(thisRankSpectrumDefinitions.data());

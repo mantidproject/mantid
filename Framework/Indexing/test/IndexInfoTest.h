@@ -354,6 +354,21 @@ public:
     TS_ASSERT_EQUALS(indices[2], 2);
   }
 
+  void
+  test_globalSpectrumIndicesFromDetectorIndices_scanning_same_time_indices() {
+    IndexInfo info(2);
+    std::vector<size_t> detectorIndices{6};
+    std::vector<SpectrumDefinition> specDefs(2);
+    // Two indices map to the same detector at the same time index; throw
+    specDefs[0].add(6, 1);
+    specDefs[1].add(6, 1);
+    info.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "Some of the spectra map to the same detector at the same time index");
+  }
+
   void test_globalSpectrumIndicesFromDetectorIndices_fails_conflict_miss() {
     IndexInfo info(3);
     std::vector<size_t> detectorIndices{6, 8};
