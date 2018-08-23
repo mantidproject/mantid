@@ -10,6 +10,7 @@
 #include "MantidKernel/Statistics.h"
 
 namespace {
+/// String constants for the algorithm's property names
 namespace Prop {
 std::string const END_INDEX{"EndWorkspaceIndex"};
 std::string const INPUT_WS{"InputWorkspace"};
@@ -20,6 +21,9 @@ std::string const RANGE_UPPER{"RangeUpper"};
 std::string const START_INDEX{"StartWorkspaceIndex"};
 }
 
+/** Set the first bin edge to 0 and last to 1.
+ *  @param ws a preferably single bin workspace
+ */
 void clearIntegrationLimits(Mantid::API::MatrixWorkspace &ws) {
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
     auto &Xs = ws.mutableX(i);
@@ -36,12 +40,20 @@ void convertXToWorkspaceIndex(Mantid::API::MatrixWorkspace &ws) {
   std::iota(xs.begin(), xs.end(), 0.);
 }
 
+/** Calculate the median over the first histogram.
+ *  @param ws a workspace
+ *  @return the median Y over the first histogram
+ */
 double median(const Mantid::API::MatrixWorkspace &ws) {
   using namespace Mantid::Kernel;
   const auto statistics = getStatistics(ws.y(0).rawData(), StatOptions::Median);
   return statistics.median;
 }
 
+/** Create a single value workspace from the input value.
+ *  @param x a value to store in the returned workspace
+ *  @return a single value workspace
+ */
 Mantid::API::MatrixWorkspace_sptr makeOutput(double const x) {
   auto ws = boost::make_shared<Mantid::DataObjects::WorkspaceSingleValue>(x);
   return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
@@ -50,9 +62,6 @@ Mantid::API::MatrixWorkspace_sptr makeOutput(double const x) {
 
 namespace Mantid {
 namespace Algorithms {
-
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindReflectometryLines2)
@@ -76,20 +85,19 @@ const std::string FindReflectometryLines2::summary() const {
          "direct line in a line detector workspace.";
 }
 
-/** Initialize the algorithm's properties.
- */
+/// Initialize the algorithm's properties.
 void FindReflectometryLines2::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      Prop::INPUT_WS, "", Direction::Input),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      Prop::INPUT_WS, "", Kernel::Direction::Input),
                   "A reflectometry workspace.");
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::OUTPUT_WS, "", Direction::Output, API::PropertyMode::Optional),
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          Prop::OUTPUT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
       "A workspaced containing the fractional workspace index of "
       "the line centre.");
   declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(),
                   "The fractional workspace index of the line centre",
-                  Direction::Output);
+                  Kernel::Direction::Output);
   declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(),
                   "The lower peak search limit (an X value).");
   declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(),
@@ -103,6 +111,7 @@ void FindReflectometryLines2::init() {
                   "Index of the last histogram to include in the peak search.");
 }
 
+/// Validate the algorithm's input properties.
 std::map<std::string, std::string> FindReflectometryLines2::validateInputs() {
   std::map<std::string, std::string> issues;
   if (!isDefault(Prop::RANGE_LOWER) && !isDefault(Prop::RANGE_UPPER)) {
@@ -122,8 +131,7 @@ std::map<std::string, std::string> FindReflectometryLines2::validateInputs() {
   return issues;
 }
 
-/** Execute the algorithm.
- */
+/// Execute the algorithm.
 void FindReflectometryLines2::exec() {
   API::MatrixWorkspace_sptr inputWS = getProperty(Prop::INPUT_WS);
   double const peakWSIndex = findPeak(inputWS);
@@ -134,18 +142,18 @@ void FindReflectometryLines2::exec() {
   }
 }
 
-/**
-  * Gaussian fit to determine peak position if no user position given.
-  *
-  * @return :: detector position of the peak: Gaussian fit and position
-  * of the maximum (serves as start value for the optimization)
-  */
+/** Gaussian + linear background fit to determine peak position.
+ *  @param ws a workspace to fit to
+ *  @return fractional workspace index of the peak: Gaussian fit and position
+ *  of the maximum
+ */
 double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   auto integralWS = integrate(ws);
   // integralWS may be ragged due to different integration limits for each
   // histogram. We don't really care but Transpose does.
   clearIntegrationLimits(*integralWS);
   auto transposedWS = transpose(integralWS);
+  // Use median as an initial guess for background
   auto const medianY = median(*transposedWS);
   convertXToWorkspaceIndex(*transposedWS);
   // determine initial height: maximum value
@@ -209,6 +217,10 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   return centreByFit;
 }
 
+/** Integrate a workspace.
+ *  @param ws a workspace to integrate
+ *  @return a workspace containing the integrals
+ */
 API::MatrixWorkspace_sptr
 FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
   int const startIndex = getProperty(Prop::START_INDEX);
@@ -229,6 +241,10 @@ FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
   return integralWS;
 }
 
+/** Transpose a workspace.
+ *  @param ws a workspace to transpos
+ *  @return a transposed workspace
+ */
 API::MatrixWorkspace_sptr
 FindReflectometryLines2::transpose(API::MatrixWorkspace_sptr &ws) {
   API::IAlgorithm_sptr transpose = createChildAlgorithm("Transpose");
