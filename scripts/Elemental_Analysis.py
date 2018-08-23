@@ -16,6 +16,9 @@ from Muon.GUI.ElementalAnalysis.Detectors.detectors_view import DetectorsView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
 
+from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
+from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
+
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -53,11 +56,23 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
 
+        self.element_widgets = {}
+        self._generate_element_widgets()
+
+    def _generate_element_widgets(self):
+        self.element_widgets = {}
+        for element in self.ptable.peak_data:
+            if element not in ["Gammas", "Electrons"]:
+                data = self.ptable.element_data(element)
+                widget = PeakSelectorPresenter(PeakSelectorView(data, element))
+                self.element_widgets[element] = widget
+
     def table_left_clicked(self, item):
         print("Element Left Clicked: {}".format(
             self.ptable.element_data(item.symbol)))
 
     def table_right_clicked(self, item):
+        self.element_widgets[item.symbol].view.show()
         print("Element Right Clicked: {}".format(item.symbol))
 
     def table_changed(self, items):
@@ -67,6 +82,12 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
+
+    def spinbox_changed(self, val):
+        print("SpinBox Value Changed: {}".format(val))
+
+    def spinbox_submit(self, val):
+        print("SpinBox Submitted: {}".format(val))
 
 
 def qapp():
