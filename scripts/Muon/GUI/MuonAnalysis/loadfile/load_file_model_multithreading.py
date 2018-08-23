@@ -13,6 +13,9 @@ import Muon.GUI.Common.threading_manager as thread_manager
 def exception_message_for_failed_files(failed_file_list):
     return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
 
+def empty_function(**kwargs):
+    return
+
 
 class BrowseFileWidgetModel(object):
 
@@ -41,12 +44,13 @@ class BrowseFileWidgetModel(object):
         if self.thread_manager:
             self.thread_manager.cancel()
 
-    def load_with_multithreading(self, filenames, callback_finished, callback_progress,
-                                 callback_exception, callback_cancelled):
-        n_threads = min(4, len(filenames))
+    def load_with_multithreading(self, filenames,
+                                 callback_finished=lambda: 0, callback_progress=lambda dbl: 0,
+                                 callback_exception=empty_function, callback_cancelled=lambda: 0):
+        # TODO : add sensible thread number
+        n_threads = min(4, max(len(filenames), 1))
         # n_threads = min(10,len(filenames))
         if self.thread_manager:
-            # print(thread_manager.findChildren(QtCore.QObjects))
             self.thread_manager.clear()
             self.thread_manager.deleteLater()
             self.thread_manager = None
@@ -56,25 +60,9 @@ class BrowseFileWidgetModel(object):
                                                            callback_on_threads_complete=callback_finished,
                                                            callback_on_threads_cancelled=callback_cancelled,
                                                            filename=filenames)
-        self.thread_manager.destroyed.connect(self.dest)
         self.thread_manager.start()
 
-    def dest(self):
-        print("Thread manager destroyed ", time.time())
-
     def load_workspace_from_filename(self, filename):
-
-        # try:
-        #     workspace = mantid.Load(Filename=filename)
-        #     run = int(workspace[0].getRunNumber())
-        # except Exception as e:
-        #     print("\nload filename error : ", e.args)
-        #     raise ValueError("Cannot load file " + filename)
-
-        # try:
-        #     run = int(workspace[0].getRunNumber())
-        # except Exception as e:
-        #     raise ValueError("Cannot get run number from file " + filename, e.args)
 
         alg = mantid.AlgorithmManager.create("Load")
         alg.initialize()
@@ -93,8 +81,6 @@ class BrowseFileWidgetModel(object):
             filename = alg.getProperty("Filename").value
 
         run = int(workspace.getRunNumber())
-
-        # return workspace, filename, run
 
         return filename, workspace, run
 

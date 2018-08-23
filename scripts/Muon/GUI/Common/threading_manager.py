@@ -111,6 +111,8 @@ class Worker(QtCore.QObject):
         finally:
             self.signals.finished.emit()
 
+def empty_function(**kwargs):
+    return
 
 class WorkerManager(QtCore.QObject):
     """
@@ -133,7 +135,7 @@ class WorkerManager(QtCore.QObject):
     def __init__(self, fn, num_threads=1,
                  callback_on_threads_complete=lambda: 0,
                  callback_on_progress_update=lambda dbl: 0,
-                 callback_on_thread_exception=lambda err_dict: 0,
+                 callback_on_thread_exception=empty_function,
                  callback_on_threads_cancelled=lambda: 0,
                  verbose=False,
                  **kwarg_list):

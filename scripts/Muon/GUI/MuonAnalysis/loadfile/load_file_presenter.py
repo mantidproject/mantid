@@ -77,13 +77,6 @@ class BrowseFileWidgetPresenter(object):
     def handle_cancel_threads(self):
         print("View requests a cancellation")
         self._model.cancel_threads()
-        #print("Handle cancel threads 2")
-        #self._model.thread_manager.clear()
-        #print("Handle cancel threads 3")
-        # self._view.remove_progress_bar()
-        # print("Handle cancel threads 4")
-        # self._view.notify_loading_finished()
-        # self.enable_loading()
 
     def handle_load_threads_cancelled(self):
         print("handle_load_threads_cancelled()")

@@ -1,4 +1,5 @@
 import sys
+from qtpy import QtWidgets
 
 from Muon.GUI.MuonAnalysis.loadfile.load_file_model_multithreading import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
@@ -38,6 +39,18 @@ class IteratorWithException:
 
 
 class LoadFileWidgetModelTest(unittest.TestCase):
+    class Runner:
+        QT_APP = QtWidgets.QApplication([])
+
+        def __init__(self, thread):
+            if thread:
+                self._thread = thread
+                self._thread.finished.connect(self.finished)
+                self.QT_APP.exec_()
+
+        def finished(self):
+            self.QT_APP.processEvents()
+            self.QT_APP.exit(0)
 
     def test_model_initialized_with_empty_lists_of_loaded_data(self):
         model = BrowseFileWidgetModel(MuonLoadData())
@@ -47,7 +60,7 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
     def test_executing_load_without_filenames_does_nothing(self):
         model = BrowseFileWidgetModel(MuonLoadData())
-        model.execute()
+        model.load_with_multithreading(filenames = [])
         self.assertEqual(model.loaded_workspaces, [])
         self.assertEqual(model.loaded_filenames, [])
         self.assertEqual(model.loaded_runs, [])
@@ -55,14 +68,16 @@ class LoadFileWidgetModelTest(unittest.TestCase):
     def test_execute_successfully_loads_valid_files(self):
         # Mock the load algorithm
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], 19489 + i) for i in range(3)]
+        load_return_vals = [(files[i], [1, 2, 3], 19489 + i) for i in range(3)]
 
         model = BrowseFileWidgetModel(MuonLoadData())
         model.load_workspace_from_filename = mock.Mock()
         model.load_workspace_from_filename.side_effect = load_return_vals
 
-        model.loadData(files)
-        model.execute()
+        model.load_with_multithreading(filenames=files)
+        self.Runner(model.thread_manager)
+        model.add_thread_data()
+
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_runs))
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_filenames))
         self.assertEqual(len(model.loaded_workspaces), 3)
@@ -75,14 +90,16 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
     def test_model_is_cleared_correctly(self):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], 19489 + i) for i in range(3)]
+        load_return_vals = [(files[i], [1, 2, 3], 19489 + i) for i in range(3)]
 
         model = BrowseFileWidgetModel(MuonLoadData())
         model.load_workspace_from_filename = mock.Mock()
         model.load_workspace_from_filename.side_effect = load_return_vals
 
-        model.loadData(files)
-        model.execute()
+        model.load_with_multithreading(filenames=files)
+        self.Runner(model.thread_manager)
+        model.add_thread_data()
+
         model.clear()
         self.assertEqual(model.loaded_workspaces, [])
         self.assertEqual(model.loaded_filenames, [])
@@ -90,16 +107,15 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
     def test_execute_throws_if_one_file_does_not_load_correctly_but_still_loads_other_files(self):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
-        load_return_vals = [([1, 2, 3], 19489 + i) for i in range(3)]
+        load_return_vals = [(files[i], [1, 2, 3], 19489 + i) for i in range(3)]
 
         model = BrowseFileWidgetModel(MuonLoadData())
         model.load_workspace_from_filename = mock.Mock()
-
         model.load_workspace_from_filename.side_effect = iter(IteratorWithException(load_return_vals, [1]))
 
-        model.loadData(files)
-        with self.assertRaises(ValueError):
-            model.execute()
+        model.load_with_multithreading(filenames=files)
+        self.Runner(model.thread_manager)
+        model.add_thread_data()
 
         self.assertEqual(len(model.loaded_workspaces), 2)
         self.assertEqual(model.loaded_filenames[0], files[0])
