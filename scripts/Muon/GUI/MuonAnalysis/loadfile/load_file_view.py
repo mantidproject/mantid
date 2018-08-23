@@ -147,7 +147,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self._cached_text = tmp
 
     def warning_popup(self, message):
-        # TODO : fix this to limit the number of warnings
+        # TODO : limit the number of warnings to prevent spamming if a list of bad files is selected.
         QtWidgets.QMessageBox.warning(self, "Error", str(message))
 
     def show_progress_bar(self, cancel_slot):
@@ -158,7 +158,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.cancel_button.setMinimumSize(QtCore.QSize(50, 50))
         self.cancel_button.setText("X")
         # TODO : get correct icon
-        #self.cancel_button.setIcon(QtGui.QIcon(":/copy.png"))
+        # self.cancel_button.setIcon(QtGui.QIcon("..."))
         self.cancel_button.setObjectName("cancelButton")
 
         self.cancel_button.clicked.connect(cancel_slot)

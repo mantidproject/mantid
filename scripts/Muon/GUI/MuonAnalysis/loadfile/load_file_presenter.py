@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import copy
-import time
 
 import Muon.GUI.Common.muon_file_utils as file_utils
 

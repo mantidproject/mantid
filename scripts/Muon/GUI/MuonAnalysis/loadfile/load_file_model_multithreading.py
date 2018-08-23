@@ -1,13 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-import gc
 import time
 
 import mantid.simpleapi as mantid
 from mantid.kernel import ConfigService
-
-from qtpy import QtCore
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 import Muon.GUI.Common.threading_manager as thread_manager
@@ -47,9 +44,9 @@ class BrowseFileWidgetModel(object):
     def load_with_multithreading(self, filenames, callback_finished, callback_progress,
                                  callback_exception, callback_cancelled):
         n_threads = min(4, len(filenames))
-        #n_threads = min(10,len(filenames))
+        # n_threads = min(10,len(filenames))
         if self.thread_manager:
-            #print(thread_manager.findChildren(QtCore.QObjects))
+            # print(thread_manager.findChildren(QtCore.QObjects))
             self.thread_manager.clear()
             self.thread_manager.deleteLater()
             self.thread_manager = None
@@ -64,7 +61,6 @@ class BrowseFileWidgetModel(object):
 
     def dest(self):
         print("Thread manager destroyed ", time.time())
-
 
     def load_workspace_from_filename(self, filename):
 
@@ -89,7 +85,7 @@ class BrowseFileWidgetModel(object):
             alg.setProperty("Filename", filename)
             alg.execute()
             workspace = alg.getProperty("OutputWorkspace").value
-        except Exception as e:
+        except Exception:
             # let Load search for the file
             alg.setProperty("Filename", filename.split("\\")[-1])
             alg.execute()
@@ -98,7 +94,7 @@ class BrowseFileWidgetModel(object):
 
         run = int(workspace.getRunNumber())
 
-        #return workspace, filename, run
+        # return workspace, filename, run
 
         return filename, workspace, run
 

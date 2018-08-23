@@ -4,7 +4,7 @@ import traceback
 import sys
 import time
 
-from qtpy import QtCore, QtWidgets
+from qtpy import QtCore
 from qtpy.QtCore import Signal
 
 
