@@ -19,7 +19,7 @@ std::string const OUTPUT_WS{"OutputWorkspace"};
 std::string const RANGE_LOWER{"RangeLower"};
 std::string const RANGE_UPPER{"RangeUpper"};
 std::string const START_INDEX{"StartWorkspaceIndex"};
-}
+} // namespace Prop
 
 /** Set the first bin edge to 0 and last to 1.
  *  @param ws a preferably single bin workspace
@@ -58,7 +58,7 @@ Mantid::API::MatrixWorkspace_sptr makeOutput(double const x) {
   auto ws = boost::make_shared<Mantid::DataObjects::WorkspaceSingleValue>(x);
   return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -87,12 +87,14 @@ const std::string FindReflectometryLines2::summary() const {
 
 /// Initialize the algorithm's properties.
 void FindReflectometryLines2::init() {
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      Prop::INPUT_WS, "", Kernel::Direction::Input),
-                  "A reflectometry workspace.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::OUTPUT_WS, "", Kernel::Direction::Output, API::PropertyMode::Optional),
+          Prop::INPUT_WS, "", Kernel::Direction::Input),
+      "A reflectometry workspace.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          Prop::OUTPUT_WS, "", Kernel::Direction::Output,
+          API::PropertyMode::Optional),
       "A workspaced containing the fractional workspace index of "
       "the line centre.");
   declareProperty(Prop::LINE_CENTRE, EMPTY_DBL(),

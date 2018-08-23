@@ -151,7 +151,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", 1.))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e,
-                            e.what(), std::string("Some invalid Properties found"))
+                            e.what(),
+                            std::string("Some invalid Properties found"))
   }
 
   void test_invalidEndAndStartIndicesThrows() {
@@ -169,7 +170,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", 1))
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e,
-                            e.what(), std::string("Some invalid Properties found"))
+                            e.what(),
+                            std::string("Some invalid Properties found"))
   }
 
 private:
@@ -183,16 +185,16 @@ private:
       auto const arg = (x - verticalCentre) / verticalWidth;
       return std::exp(-arg * arg);
     };
-    auto horizontalFunction =
-        [horizontalCentre, horizontalWidth](double const x) {
-          // Ugly box function ___|^^^^|___
-          if (x >= horizontalCentre - horizontalWidth / 2. &&
-              x < horizontalCentre + horizontalWidth / 2.) {
-            return 1.;
-          } else {
-            return 0.;
-          }
-        };
+    auto horizontalFunction = [horizontalCentre,
+                               horizontalWidth](double const x) {
+      // Ugly box function ___|^^^^|___
+      if (x >= horizontalCentre - horizontalWidth / 2. &&
+          x < horizontalCentre + horizontalWidth / 2.) {
+        return 1.;
+      } else {
+        return 0.;
+      }
+    };
     for (size_t wsIndex = 0; wsIndex < ws.getNumberHistograms(); ++wsIndex) {
       auto const &Xs = ws.x(wsIndex);
       auto &Ys = ws.mutableY(wsIndex);
@@ -208,7 +210,7 @@ private:
   }
 
   static API::MatrixWorkspace_sptr emptyWorkspace(size_t const nHisto,
-                                                 size_t const nBins) {
+                                                  size_t const nBins) {
     HistogramData::BinEdges const edges{
         nBins + 1, HistogramData::LinearGenerator(0., 2.3)};
     HistogramData::Counts const counts(nBins, 0.);
