@@ -43,6 +43,7 @@ New Algorithms
 Improvements
 ############
 - :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
+- :ref:`SumSpectra <algm-SumSpectra>` has an additional option, ``MultiplyBySpectra``, which controls whether or not the output spectra are multiplied by the number of bins. This property should be set to ``False`` for summing spectra as PDFgetN does.
 
 Bugfixes
 ########
@@ -55,7 +56,7 @@ Python
 New
 ###
 
- - New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
+- New python validator type: :class:`~mantid.geometry.OrientedLattice` checks whether a workspace has an oriented lattice object attached.
 
 
 Improvements
@@ -68,5 +69,3 @@ Bugfixes
 
 
 :ref:`Release 3.14.0 <v3.14.0>`
-
-
