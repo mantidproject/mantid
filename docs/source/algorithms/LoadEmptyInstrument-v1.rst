@@ -28,10 +28,7 @@ Usage
 
     import os
 
-    inesPath = os.path.join(ConfigService.getInstrumentDirectory(),"INES_Definition.xml")
-
-    wsOut = LoadEmptyInstrument(inesPath)
-
+    wsOut = LoadEmptyInstrument(Filename="INES_Definition.xml")
     print("The workspace contains {} spectra".format(wsOut.getNumberHistograms()))
 
 Output:
@@ -42,15 +39,15 @@ Output:
 
 **Example - Loading an instrument from an NeXus file**
 
-.. testcode:: exLoadEmptyNexusGeometryNXS
+.. testcode:: exLoadEmptyInstrumentNXS
 
-    ws = LoadEmptyNexusGeometry(Filename="LOKI_Definition.hdf5")
+    ws = LoadEmptyInstrument(Filename="LOKI_Definition.hdf5")
     print("The workspace contains {} spectra".format(ws.getNumberHistograms()))
     print("Instrument is {}".format(ws.getInstrument().getName()))
 
 Output:
 
-.. testoutput:: exLoadEmptyNexusGeometryNXS
+.. testoutput:: exLoadEmptyInstrumentNXS
 
     The workspace contains 8000 spectra
     Instrument is LOKI
