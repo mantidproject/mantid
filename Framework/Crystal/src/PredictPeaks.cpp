@@ -366,7 +366,7 @@ void PredictPeaks::exec() {
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("PeakNumber", true));
+  criteria.push_back(std::pair<std::string, bool>("BankName", true));
   m_pw->sort(criteria);
 
   auto &peaks = m_pw->getPeaks();
