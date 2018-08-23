@@ -9,6 +9,14 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms
+----------
+
+New Algorithms
+##############
+
+- :ref:`FindReflectometryLines <algm-FindReflectometryLines-v2>` has been rewritten and updated to version 2. The new version finds a single line by a Gaussian fit. Version 1 has been deprecated and will be removed in a future release.
+
 Liquids Reflectometer
 ---------------------
 
