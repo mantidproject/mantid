@@ -11,6 +11,7 @@ class ReflectometryCreateFloodWorkspaceNoExclude(stresstesting.MantidStressTest)
         CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=265, EndSpectrumIndex=500, OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
+        self.disableChecking.append('Instrument')
         return self.flood_ws_name,'ReflFloodFileNoExclude.nxs'
 
 
@@ -23,6 +24,7 @@ class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
                              Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
+        self.disableChecking.append('Instrument')
         return self.flood_ws_name,'ReflFloodFileExclude.nxs'
 
 
@@ -35,4 +37,5 @@ class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest)
                              Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
+        self.disableChecking.append('Instrument')
         return self.flood_ws_name,'ReflFloodFileQuadratic.nxs'
