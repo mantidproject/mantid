@@ -1,4 +1,5 @@
 import sys
+import six
 from qtpy import QtWidgets
 
 from Muon.GUI.MuonAnalysis.loadfile.load_file_model_multithreading import BrowseFileWidgetModel
@@ -12,7 +13,7 @@ else:
     import mock
 
 
-class IteratorWithException:
+class IteratorWithException(object):
     """Wraps a simple iterable (i.e. list) so that it throws a ValueError on a particular index."""
 
     def __init__(self, iterable, throw_on_index):
@@ -25,7 +26,7 @@ class IteratorWithException:
         self.n = 0
         return self
 
-    def next(self):
+    def __next__(self):
 
         if self.n in self.throw_indices:
             next(self.iterable)
@@ -36,6 +37,9 @@ class IteratorWithException:
         else:
             self.n += 1
             return next(self.iterable)
+
+    # Python 3 compatibility
+    next = __next__
 
 
 class LoadFileWidgetModelTest(unittest.TestCase):
@@ -60,7 +64,7 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
     def test_executing_load_without_filenames_does_nothing(self):
         model = BrowseFileWidgetModel(MuonLoadData())
-        model.load_with_multithreading(filenames = [])
+        model.load_with_multithreading(filenames=[])
         self.assertEqual(model.loaded_workspaces, [])
         self.assertEqual(model.loaded_filenames, [])
         self.assertEqual(model.loaded_runs, [])
@@ -81,12 +85,8 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_runs))
         self.assertEqual(len(model.loaded_workspaces), len(model.loaded_filenames))
         self.assertEqual(len(model.loaded_workspaces), 3)
-        self.assertEqual(model.loaded_filenames[0], files[0])
-        self.assertEqual(model.loaded_filenames[1], files[1])
-        self.assertEqual(model.loaded_filenames[2], files[2])
-        self.assertEqual(model.loaded_runs[0], 19489)
-        self.assertEqual(model.loaded_runs[1], 19490)
-        self.assertEqual(model.loaded_runs[2], 19491)
+        six.assertCountEqual(self, model.loaded_filenames, files)
+        six.assertCountEqual(self, model.loaded_runs, [19489, 19490, 19491])
 
     def test_model_is_cleared_correctly(self):
         files = [r'EMU00019489.nxs', r'EMU00019490.nxs', r'EMU00019491.nxs']
@@ -118,10 +118,8 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         model.add_thread_data()
 
         self.assertEqual(len(model.loaded_workspaces), 2)
-        self.assertEqual(model.loaded_filenames[0], files[0])
-        self.assertEqual(model.loaded_filenames[1], files[2])
-        self.assertEqual(model.loaded_runs[0], 19489)
-        self.assertEqual(model.loaded_runs[1], 19491)
+        six.assertCountEqual(self, model.loaded_filenames, [files[0], files[2]])
+        six.assertCountEqual(self, model.loaded_runs, [19489, 19491])
 
 
 if __name__ == '__main__':

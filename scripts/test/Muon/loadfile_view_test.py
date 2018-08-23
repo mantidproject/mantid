@@ -5,8 +5,8 @@ import unittest
 from qtpy.QtWidgets import QApplication
 
 
-
 class LoadFileWidgetViewTest(unittest.TestCase):
+    QT_APP = QApplication([])
 
     def test_view_initialized_with_empty_line_edit(self):
         view = BrowseFileWidgetView()
@@ -40,6 +40,4 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    QT_APP = QApplication([])
     unittest.main(buffer=False, verbosity=2)
-    QT_APP.exec_()

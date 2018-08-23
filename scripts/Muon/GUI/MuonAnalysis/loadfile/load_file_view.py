@@ -141,7 +141,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self._cached_text = ""
 
     def reset_edit_to_cached_value(self):
-        print("Reset to cache : ", self._cached_text)
         tmp = self._cached_text
         self.set_file_edit(tmp)
         self._cached_text = tmp

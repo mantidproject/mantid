@@ -169,7 +169,7 @@ class WorkerManager(QtCore.QObject):
         self._workers = []
 
         keys = self.kwarg_list.keys()
-        self._results = {key: [] for key in keys + ['results']}
+        self._results = {key: [] for key in list(keys) + ['results']}
         self._failed_results = {key: [] for key in keys}
 
         self._progress = 0.0
@@ -197,7 +197,7 @@ class WorkerManager(QtCore.QObject):
     def _clear_results(self):
         self._progress = 0.0
         keys = self.kwarg_list.keys()
-        self._results = {key: [] for key in keys + ['results']}
+        self._results = {key: [] for key in list(keys) + ['results']}
         self._failed_results = {key: [] for key in keys}
 
     def cancel(self):

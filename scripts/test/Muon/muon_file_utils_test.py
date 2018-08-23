@@ -10,7 +10,7 @@ else:
     import mock
 
 
-class RunStringUtilsListToStringTest(unittest.TestCase):
+class MuonFileUtilsTest(unittest.TestCase):
 
     def test_parse_user_input_to_files_returns_single_file_as_list(self):
         filename = "EMU0001234.nxs"
@@ -47,13 +47,13 @@ class RunStringUtilsListToStringTest(unittest.TestCase):
         self.assertEqual(parsed_file, files)
 
     def test_duplicates_removed_from_list_of_filenames_and_ordering_maintained(self):
-        file_list = ["\\dir1\\dir2\\file1.nxs",
-                     "\\dir1\\dir4\\file2.nxs",
-                     "\\dir4\\dir2\\file1.nxs",
-                     "\\dir1\\dir4\\file1.nxs"]
+        file_list = [os.sep + "dir1" + os.sep + "dir2" + os.sep + "file1.nxs",
+                     os.sep + "dir1" + os.sep + "dir4" + os.sep + "file2.nxs",
+                     os.sep + "dir4" + os.sep + "dir2" + os.sep + "file1.nxs",
+                     os.sep + "dir1" + os.sep + "dir4" + os.sep + "file1.nxs"]
         unique_file_list = utils.remove_duplicated_files_from_list(file_list)
-        self.assertEqual(unique_file_list, ["\\dir1\\dir2\\file1.nxs",
-                                            "\\dir1\\dir4\\file2.nxs"])
+        self.assertEqual(unique_file_list, [os.sep + "dir1" + os.sep + "dir2" + os.sep + "file1.nxs",
+                                            os.sep + "dir1" + os.sep + "dir4" + os.sep + "file2.nxs"])
 
     def test_that_get_current_run_filename_throws_if_autosave_file_not_found(self):
         utils.check_file_exists = mock.Mock(return_value=False)
