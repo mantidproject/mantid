@@ -36,14 +36,14 @@ DECLARE_ALGORITHM(CreateFloodWorkspace)
 
 const std::string CreateFloodWorkspace::name() const {
   return "CreateFloodWorkspace";
-};
+}
 
 const std::string CreateFloodWorkspace::summary() const {
   return "Algorithm to create a flood correction workspace for reflectometry "
          "data reduction.";
 }
 
-int CreateFloodWorkspace::version() const { return 1; };
+int CreateFloodWorkspace::version() const { return 1; }
 
 const std::vector<std::string> CreateFloodWorkspace::seeAlso() const {
   return {"ReflectometryReductionOneAuto"};
