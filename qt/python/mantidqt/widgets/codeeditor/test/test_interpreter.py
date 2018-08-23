@@ -24,7 +24,7 @@ import six
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 
 if six.PY2:
     import mock

@@ -252,7 +252,7 @@ protected:
   /// argument
   /// @param propName :: Name of the property
   /// @return Previous value. If there is no value, empty string is returned
-  QString getPreviousValue(const QString &propName);
+  QString getPreviousValue(const QString &propName) const;
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString &property);
   /// Handle completion of algorithm started while staying open

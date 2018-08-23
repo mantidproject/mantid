@@ -16,7 +16,7 @@ set ( EXPORT_FILES
   src/Exports/CompAssembly.cpp
   src/Exports/ObjComponent.cpp
   src/Exports/ObjCompAssembly.cpp
-  src/Exports/Detector.cpp
+  src/Exports/Detector.cpp  
   src/Exports/DetectorGroup.cpp
   src/Exports/RectangularDetector.cpp
   src/Exports/Instrument.cpp
@@ -27,7 +27,7 @@ set ( EXPORT_FILES
   src/Exports/Goniometer.cpp
   src/Exports/CSGObject.cpp
   src/Exports/PeakShape.cpp
-  src/Exports/Group.cpp
+  src/Exports/Group.cpp  
   src/Exports/PointGroup.cpp
   src/Exports/PointGroupFactory.cpp
   src/Exports/SpaceGroup.cpp
@@ -39,9 +39,11 @@ set ( EXPORT_FILES
   src/Exports/CrystalStructure.cpp
   src/Exports/ReflectionGenerator.cpp
   src/Exports/DetectorInfo.cpp
+  src/Exports/ComponentInfo.cpp
   src/Exports/DetectorInfoItem.cpp
   src/Exports/DetectorInfoIterator.cpp
   src/Exports/DetectorInfoPythonIterator.cpp
+
 )
 
 #############################################################################################

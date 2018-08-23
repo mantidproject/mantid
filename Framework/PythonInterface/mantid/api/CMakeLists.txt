@@ -54,6 +54,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceValidators.cpp
   src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
+  src/Exports/OrientedLatticeValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
@@ -76,6 +77,7 @@ set ( EXPORT_FILES
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
   src/Exports/MultiDomainFunction.cpp
+  src/Exports/SpectrumDefinition.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )

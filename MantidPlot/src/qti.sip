@@ -1103,7 +1103,7 @@ sipType=sipFindType(sipCpp->metaObject()->className());
 
 public:
   void setExitCode(int code);
-  bool runPythonScript(const QString & code, const bool async = false,
+  bool runPythonScript(const QString & code, const bool asynchronous = false,
       bool quiet=false, bool redirect=true);
 
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
