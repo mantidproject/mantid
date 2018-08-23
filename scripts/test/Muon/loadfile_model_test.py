@@ -1,6 +1,6 @@
 import sys
 import six
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from Muon.GUI.MuonAnalysis.loadfile.load_file_model_multithreading import BrowseFileWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
@@ -20,23 +20,29 @@ class IteratorWithException(object):
         self.max = len(iterable)
         self.iterable = iter(iterable)
 
-        self.throw_indices = [index for index in throw_on_index if index < self.max]
+        self.mutex = QtCore.QMutex()
+
+        self.throw_indices = [index for index in throw_on_index if index <= self.max]
 
     def __iter__(self):
         self.n = 0
         return self
 
     def __next__(self):
-
+        self.mutex.lock()
         if self.n in self.throw_indices:
             next(self.iterable)
             self.n += 1
+            self.mutex.unlock()
             raise ValueError()
         elif self.n == self.max:
+            self.mutex.unlock()
             raise StopIteration()
         else:
             self.n += 1
+            self.mutex.unlock()
             return next(self.iterable)
+
 
     # Python 3 compatibility
     next = __next__
