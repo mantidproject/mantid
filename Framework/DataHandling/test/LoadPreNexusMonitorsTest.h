@@ -6,7 +6,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <Poco/Path.h>
 

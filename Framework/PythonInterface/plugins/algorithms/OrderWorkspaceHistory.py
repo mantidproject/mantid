@@ -1,7 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-import datetime
 import os
+import tokenize
+import glob
 
 import mantid.api
 import mantid.kernel
@@ -37,70 +38,40 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return dict()
 
     def PyExec(self):
-        self.write_ordered_workspace_history()
 
-    def _concatenate_iso_datetime(self, date_time):
-        '''
-        Concatenates the datetime string provided by Mantid into a single integer
-        Args:
-            date_time: ISO 8601 standard datetime string
-        Returns:
-            int
-        '''
+        all_lines = []
 
-        if not date_time:
-            raise ValueError("No date time stamp was found in the recovery history")
-        self.log().debug("Found datetime stamp: {0}".format(date_time))
+        for fn in glob.iglob(os.path.join(self.getPropertyValue(_recovery_folder), '*.py')):
+            with open(fn) as f:
+                tokens = tokenize.generate_tokens(f.readline)
+                line = None
+                for t in tokens:
+                    # Start a new line when we see a name
+                    if line is None and t[0] == tokenize.NAME:
+                        line = [t]
+                    # End the line when we see a logical line ending
+                    elif t[0] == tokenize.NEWLINE:
+                        # Only care about the line if it has a comment
+                        have_comment = any(x[0] == tokenize.COMMENT for x in line)
+                        if have_comment:
+                            # line[-1][1][1:] is the comment string, with the preceeding hash stripped off;
+                            # line[0][4] is the command and the comment
+                            all_lines.append((line[-1][4], line[-1][1][1:]))
+                        line = []
+                    # Everything in between we care about
+                    elif line is not None:
+                        line.append(t)
 
-        # Remove whitespace and any trailing zeros
-        stipped_time = date_time.strip().rstrip('0')
-        return datetime.datetime.strptime(stipped_time, "%Y-%m-%dT%H:%M:%S.%f")
-
-    def write_ordered_workspace_history(self):
-        self.log().debug("Started saving workspace histories")
-        source_folder = self.getPropertyValue(_recovery_folder)
-
-        # Get list of all workspace histories
-        onlyfiles = [f for f in os.listdir(source_folder)
-                     if os.path.isfile(os.path.join(source_folder, f))]
-        historyfiles = [x for x in onlyfiles if x.endswith('.py')]
-
-        self.log().debug("Found {0} history files".format(len(historyfiles)))
-
-        # Read each history in as a list of tuples
-        original_lines = set()
-        for infile in historyfiles:
-            with open(os.path.join(source_folder, infile), 'r') as f:
-                for line in f:
-                    original_lines.add(line)
-
-        commands = []
-        # Remove any comment lines
-        for line in original_lines:
-            stripped_line = line.lstrip()
-            if stripped_line[0] is not '#':
-                commands.append(stripped_line)
-
-        self.log().debug("Found {0} unique commands".format(len(commands)))
-
-        # Add lists of histories together
-        all_unique_commands = [command.strip().split('#') for command in commands]
-
-        # Convert the datetime into a sortable integer
-        all_unique_commands = [(i[0], self._concatenate_iso_datetime(i[1]))
-                               for i in all_unique_commands]
-
-        # Sort the new list on datetime integer
-        all_unique_commands.sort(key=lambda time: (time[1]))
+        # Cast as a set to remove duplicates
+        unique_lines = list(set(all_lines))
+        # Sort according to time
+        unique_lines.sort(key=lambda time: (time[1]))
 
         destination = self.getPropertyValue(_destination_file)
 
-        self.log().debug("Writing commands to file")
-        # Write to file
         with open(destination, 'w') as outfile:
-            for x in all_unique_commands:
-                outfile.write('{} # {} \n'.format(x[0], x[1]))
-
+            for x in unique_lines:
+                outfile.write(x[0])
 
 # Required to have Mantid recognise the new function
 mantid.api.AlgorithmFactory.subscribe(OrderWorkspaceHistory)

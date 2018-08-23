@@ -13,6 +13,9 @@ Improvements
 ############
 
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support weighted events (with time). This allows for event filtering **after** processing the data.
+- :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
+- Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
@@ -29,4 +32,3 @@ Bugfixes
 ########
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
-

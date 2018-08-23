@@ -9,8 +9,8 @@ import unittest
 import mantid.api
 import mantid.plots.plotfunctions as funcs
 from mantid.kernel import config
-from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
-                             ConjoinWorkspaces, AddTimeSeriesLog
+from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace,
+                              CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
 
 
 
@@ -115,6 +115,19 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.tripcolor(ax, self.ws2d_histo, vmin=0)
         funcs.pcolormesh(ax, self.ws_MD_2d)
         funcs.pcolorfast(ax, self.ws2d_point_uneven, vmin=-1)
+
+    def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
+        table = CreateEmptyTableWorkspace()
+        _, ax = plt.subplots()
+        self.assertRaises(AttributeError, funcs.plot, ax, table, wkspIndex=0)
+        self.assertRaises(AttributeError, funcs.errorbar, ax, table, wkspIndex=0)
+
+    def test_2d_plots_with_unplottable_type_raises_attributeerror(self):
+        table = CreateEmptyTableWorkspace()
+        _, ax = plt.subplots()
+        self.assertRaises(AttributeError, funcs.pcolor, ax, table)
+        self.assertRaises(AttributeError, funcs.pcolormesh, ax, table)
+        self.assertRaises(AttributeError, funcs.pcolorfast, ax, table)
 
 
 if __name__ == '__main__':
