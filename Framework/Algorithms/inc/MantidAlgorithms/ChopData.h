@@ -64,6 +64,6 @@ private:
   void init() override; ///< Initialise the algorithm. Declare properties, etc.
   void exec() override; ///< Executes the algorithm.
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 #endif

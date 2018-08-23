@@ -2,12 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
-#include <boost/mpi.hpp>
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include <boost/mpi.hpp>
 
 namespace mpi = boost::mpi;
 

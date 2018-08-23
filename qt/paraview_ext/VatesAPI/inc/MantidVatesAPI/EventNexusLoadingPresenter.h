@@ -52,7 +52,7 @@ private:
   const std::string m_filename;
   std::string m_wsTypeName;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

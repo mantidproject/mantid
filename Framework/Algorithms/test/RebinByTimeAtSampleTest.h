@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_
 #define MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "RebinByTimeBaseTest.h"
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include <numeric>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "RebinByTimeBaseTest.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using Mantid::Algorithms::RebinByTimeAtSample;
 using Mantid::Types::Event::TofEvent;
@@ -49,7 +49,7 @@ createSinglePulseEventWorkspace(const V3D &sourcePosition,
 
   return retVal;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests
@@ -276,8 +276,8 @@ public:
 // clang-format off
 class RebinByTimeAtSampleTestPerformance: public CxxTest::TestSuite,
     public RebinByTimeBaseTestPerformance<RebinByTimeAtSample>
-      // clang-format on
-      {
+// clang-format on
+{
 
 public:
   static RebinByTimeAtSampleTestPerformance *createSuite() {

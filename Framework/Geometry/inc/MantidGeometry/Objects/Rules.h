@@ -1,13 +1,15 @@
 #ifndef Rules_h
 #define Rules_h
 
-#include <map>
 #include <boost/shared_ptr.hpp>
+#include <map>
 
 class TopoDS_Shape;
 
 namespace Mantid {
-
+namespace Kernel {
+class V3D;
+}
 namespace Geometry {
 
 class CSGObject;

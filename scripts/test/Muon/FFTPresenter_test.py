@@ -1,10 +1,10 @@
 import sys
 
-from Muon import load_utils
-from Muon import fft_presenter
-from Muon import fft_view
-from Muon import fft_model
-from Muon import thread_model
+from Muon.GUI.Common import load_utils
+from Muon.GUI.Common import thread_model
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_view
+from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_model
 
 import unittest
 
@@ -28,6 +28,8 @@ class FFTPresenterTest(unittest.TestCase):
         self.view.phaseCheckSignal = mock.Mock(return_value=True)
         # needed for connect in presenter
         self.view.buttonSignal = mock.Mock()
+        self.view.tableClickSignal = mock.Mock()
+        self.view.phaseCheckSignal = mock.Mock()
         self.view.changed = mock.MagicMock()
         self.view.changedHideUnTick = mock.MagicMock()
         self.view.initFFTInput = mock.Mock(
@@ -74,9 +76,19 @@ class FFTPresenterTest(unittest.TestCase):
         row, col = self.view.tableClickSignal()
         self.presenter.tableClicked(row, col)
 
+    def test_connects(self):
+        assert(self.view.tableClickSignal.connect.call_count==1)
+        self.view.tableClickSignal.connect.assert_called_with(self.presenter.tableClicked)
+
+        assert(self.view.buttonSignal.connect.call_count==1)
+        self.view.buttonSignal.connect.assert_called_with(self.presenter.handleButton)
+
+        assert(self.view.phaseCheckSignal.connect.call_count==1)
+        self.view.phaseCheckSignal.connect.assert_called_with(self.presenter.phaseCheck)
+
     def test_ImBox(self):
-        self.sendSignal()
         self.view.tableClickSignal = mock.Mock(return_value=[3, 1])
+        self.sendSignal()
         assert(self.view.changedHideUnTick.call_count == 1)
         assert(self.view.changed.call_count == 0)
 

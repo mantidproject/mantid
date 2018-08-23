@@ -2,14 +2,14 @@
 #define RUNTEST_H_
 
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,7 +50,7 @@ void addTestTimeSeries(Run &run, const std::string &name) {
   timeSeries->addValue("2012-07-19T16:19:20", 24);
   run.addProperty(timeSeries);
 }
-}
+} // namespace
 
 class RunTest : public CxxTest::TestSuite {
 public:

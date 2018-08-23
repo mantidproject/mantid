@@ -1,11 +1,11 @@
 #include "MantidCrystal/SelectCellOfType.h"
+#include "MantidAPI/Sample.h"
+#include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidCrystal/SelectCellWithForm.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -143,5 +143,5 @@ void SelectCellOfType::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

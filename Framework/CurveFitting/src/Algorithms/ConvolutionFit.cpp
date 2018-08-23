@@ -195,6 +195,54 @@ calculateEISFAndError(const MantidVec &height, const MantidVec &heightError,
 
   return {eisfY, addVectors(eisfYSumRoot, errOverTotalSq)};
 }
+
+void addEISFToTable(ITableWorkspace_sptr &tableWs) {
+  // Get height data from parameter table
+  const auto height = searchForFitParameters("Height", tableWs).at(0);
+  const auto heightErr = searchForFitParameters("Height_Err", tableWs).at(0);
+  auto heightY = tableWs->getColumn(height)->numeric_fill<>();
+  auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
+
+  // Get amplitude column names
+  const auto ampIndices = searchForFitParameters("Amplitude", tableWs);
+  const auto ampErrorIndices = searchForFitParameters("Amplitude_Err", tableWs);
+
+  // For each lorentzian, calculate EISF
+  auto maxSize = ampIndices.size();
+  if (ampErrorIndices.size() > maxSize)
+    maxSize = ampErrorIndices.size();
+
+  for (auto i = 0u; i < maxSize; ++i) {
+    // Get amplitude from column in table workspace
+    auto ampY = tableWs->getColumn(ampIndices[i])->numeric_fill<>();
+    auto ampErr = tableWs->getColumn(ampErrorIndices[i])->numeric_fill<>();
+    auto eisfAndError = calculateEISFAndError(heightY, heightE, ampY, ampErr);
+
+    // Append the calculated values to the table workspace
+    auto ampName = tableWs->getColumn(ampIndices[i])->name();
+    auto ampErrorName = tableWs->getColumn(ampErrorIndices[i])->name();
+    auto columnName =
+        ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
+    columnName += "EISF";
+    auto errorColumnName = ampErrorName.substr(
+        0, (ampErrorName.size() - std::string("Amplitude_Err").size()));
+    errorColumnName += "EISF_Err";
+
+    tableWs->addColumn("double", columnName);
+    tableWs->addColumn("double", errorColumnName);
+    auto maxEisf = eisfAndError.first.size();
+    if (eisfAndError.second.size() > maxEisf) {
+      maxEisf = eisfAndError.second.size();
+    }
+
+    auto col = tableWs->getColumn(columnName);
+    auto errCol = tableWs->getColumn(errorColumnName);
+    for (auto j = 0u; j < maxEisf; j++) {
+      col->cell<double>(j) = eisfAndError.first.at(j);
+      errCol->cell<double>(j) = eisfAndError.second.at(j);
+    }
+  }
+}
 } // namespace
 
 namespace Mantid {
@@ -255,7 +303,7 @@ ConvolutionFit<QENSFitSequential>::seeAlso() const {
 template <>
 const std::vector<std::string>
 ConvolutionFit<QENSFitSimultaneous>::seeAlso() const {
-  return {"QENSSimultaneousFit"};
+  return {"QENSFitSimultaneous"};
 }
 
 template <typename Base>
@@ -292,7 +340,7 @@ ITableWorkspace_sptr ConvolutionFit<Base>::processParameterTable(
   IFunction_sptr function = Base::getProperty("Function");
   m_deltaUsed = containsFunction(function, "DeltaFunction");
   if (m_deltaUsed)
-    calculateEISF(parameterTable);
+    addEISFToTable(parameterTable);
   return parameterTable;
 }
 
@@ -316,57 +364,12 @@ ConvolutionFit<Base>::getAdditionalLogNumbers() const {
   return logs;
 }
 
-/**
- * Calculates the EISF if the fit includes a Delta function
- * @param tableWs - The TableWorkspace to append the EISF calculation to
- */
 template <typename Base>
-void ConvolutionFit<Base>::calculateEISF(ITableWorkspace_sptr &tableWs) const {
-  // Get height data from parameter table
-  const auto height = searchForFitParameters("Height", tableWs).at(0);
-  const auto heightErr = searchForFitParameters("Height_Err", tableWs).at(0);
-  auto heightY = tableWs->getColumn(height)->numeric_fill<>();
-  auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
-
-  // Get amplitude column names
-  const auto ampIndices = searchForFitParameters("Amplitude", tableWs);
-  const auto ampErrorIndices = searchForFitParameters("Amplitude_Err", tableWs);
-
-  // For each lorentzian, calculate EISF
-  auto maxSize = ampIndices.size();
-  if (ampErrorIndices.size() > maxSize)
-    maxSize = ampErrorIndices.size();
-
-  for (auto i = 0u; i < maxSize; ++i) {
-    // Get amplitude from column in table workspace
-    auto ampY = tableWs->getColumn(ampIndices[i])->numeric_fill<>();
-    auto ampErr = tableWs->getColumn(ampErrorIndices[i])->numeric_fill<>();
-    auto eisfAndError = calculateEISFAndError(heightY, heightE, ampY, ampErr);
-
-    // Append the calculated values to the table workspace
-    auto ampName = tableWs->getColumn(ampIndices[i])->name();
-    auto ampErrorName = tableWs->getColumn(ampErrorIndices[i])->name();
-    auto columnName =
-        ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
-    columnName += "EISF";
-    auto errorColumnName = ampErrorName.substr(
-        0, (ampErrorName.size() - std::string("Amplitude_Err").size()));
-    errorColumnName += "EISF_Err";
-
-    tableWs->addColumn("double", columnName);
-    tableWs->addColumn("double", errorColumnName);
-    auto maxEisf = eisfAndError.first.size();
-    if (eisfAndError.second.size() > maxEisf) {
-      maxEisf = eisfAndError.second.size();
-    }
-
-    auto col = tableWs->getColumn(columnName);
-    auto errCol = tableWs->getColumn(errorColumnName);
-    for (auto j = 0u; j < maxEisf; j++) {
-      col->cell<double>(j) = eisfAndError.first.at(j);
-      errCol->cell<double>(j) = eisfAndError.second.at(j);
-    }
-  }
+std::vector<std::string> ConvolutionFit<Base>::getFitParameterNames() const {
+  auto names = Base::getFitParameterNames();
+  if (m_deltaUsed)
+    names.emplace_back("EISF");
+  return names;
 }
 
 // Register the algorithms into the AlgorithmFactory

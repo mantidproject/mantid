@@ -25,11 +25,11 @@ using Mantid::Kernel::IValidator_sptr;
 
 namespace {
 /**
-  * Create the appropriate validator based on the parameters
-  * @param action The type of property that is being defined, @see FileAction
-  * @param exts A list of extensions, only use for File-type actions and are
-  *             passed to the validator
-  */
+ * Create the appropriate validator based on the parameters
+ * @param action The type of property that is being defined, @see FileAction
+ * @param exts A list of extensions, only use for File-type actions and are
+ *             passed to the validator
+ */
 IValidator_sptr createValidator(unsigned int action,
                                 const std::vector<std::string> &exts) {
   if (action == FileProperty::Directory ||
@@ -145,15 +145,15 @@ std::string createDirectory(const std::string &path) {
 // Public member functions
 //-----------------------------------------------------------------
 /**
-* Constructor
-* @param name The name of the property
-* @param defaultValue A default value for the property
-* @param action Inndicate whether this should be a load/save
-* property
-* @param exts The allowed extensions. The front entry in the vector
-* will be the default extension
-* @param direction An optional direction (default=Input)
-*/
+ * Constructor
+ * @param name The name of the property
+ * @param defaultValue A default value for the property
+ * @param action Inndicate whether this should be a load/save
+ * property
+ * @param exts The allowed extensions. The front entry in the vector
+ * will be the default extension
+ * @param direction An optional direction (default=Input)
+ */
 FileProperty::FileProperty(const std::string &name,
                            const std::string &defaultValue, unsigned int action,
                            const std::vector<std::string> &exts,
@@ -222,9 +222,9 @@ bool FileProperty::isDirectoryProperty() const {
 }
 
 /**
-* Check if this property is optional
-* @returns True if the property is optinal, false otherwise
-*/
+ * Check if this property is optional
+ * @returns True if the property is optinal, false otherwise
+ */
 bool FileProperty::isOptional() const {
   return (m_action == OptionalLoad || m_action == OptionalSave ||
           m_action == OptionalDirectory);
@@ -427,5 +427,5 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   }
   return errorMsg;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

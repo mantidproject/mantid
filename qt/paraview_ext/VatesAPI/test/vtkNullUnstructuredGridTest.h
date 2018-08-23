@@ -7,8 +7,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <vtkUnstructuredGrid.h>
 #include <vtkPoints.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::VATES;
 

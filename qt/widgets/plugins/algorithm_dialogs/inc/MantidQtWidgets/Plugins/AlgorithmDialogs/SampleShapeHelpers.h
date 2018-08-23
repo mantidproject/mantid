@@ -4,8 +4,8 @@
 //--------------------------------------
 // Includes
 //--------------------------------------
-#include <QWidget>
 #include <QGroupBox>
+#include <QWidget>
 
 //--------------------------------------
 // Qt forward declarations
@@ -428,7 +428,7 @@ private:
 //   /// Corner points
 //   PointGroupBox *m_centre, *m_axis;
 // };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_

@@ -70,7 +70,7 @@ private:
   bool m_IC = false; ///< Ikeida Carpenter fit of TOF
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_PEAKINTEGRATION_H_*/

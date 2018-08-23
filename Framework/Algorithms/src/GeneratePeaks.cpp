@@ -1,21 +1,21 @@
 #include "MantidAlgorithms/GeneratePeaks.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IBackgroundFunction.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -64,9 +64,12 @@ void GeneratePeaks::init() {
                   "mapping to PeakParameterNames list. ");
 
   // Background properties
-  std::vector<std::string> bkgdtypes{"Auto", "Flat (A0)", "Linear (A0, A1)",
-                                     "Quadratic (A0, A1, A2)", "Flat"
-                                                               "Linear",
+  std::vector<std::string> bkgdtypes{"Auto",
+                                     "Flat (A0)",
+                                     "Linear (A0, A1)",
+                                     "Quadratic (A0, A1, A2)",
+                                     "Flat"
+                                     "Linear",
                                      "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
@@ -162,7 +165,7 @@ void GeneratePeaks::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process algorithm properties
-  */
+ */
 void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
                                          std::string &bkgdfunctype) {
   // Function parameters
@@ -226,12 +229,12 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
 
 //----------------------------------------------------------------------------------------------
 /** Import peak and background functions from table workspace
-  * @param functionmap :: (output) map contains vector of functions for each
+ * @param functionmap :: (output) map contains vector of functions for each
  * spectrum
-  */
+ */
 void GeneratePeaks::importPeaksFromTable(
-    std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>> &
-        functionmap) {
+    std::map<specnum_t, std::vector<std::pair<double, API::IFunction_sptr>>>
+        &functionmap) {
   size_t numpeaks = m_funcParamWS->rowCount();
   size_t icolchi2 = m_funcParamWS->columnCount() - 1;
   size_t numpeakparams = m_peakFunction->nParams();
@@ -318,7 +321,8 @@ void GeneratePeaks::importPeaksFromTable(
       std::pair<std::map<specnum_t,
                          std::vector<std::pair<double, API::IFunction_sptr>>>::
                     iterator,
-                bool> ret;
+                bool>
+          ret;
       ret = functionmap.emplace(wsindex, tempvector);
       mapiter = ret.first;
     }
@@ -409,14 +413,14 @@ void GeneratePeaks::importPeakFromVector(
 
 //----------------------------------------------------------------------------------------------
 /** Generate peaks in the given output workspace
-  * @param functionmap :: map to contain the list of functions with key as their
+ * @param functionmap :: map to contain the list of functions with key as their
  * spectra
-  * @param dataWS :: output matrix workspace
-  */
+ * @param dataWS :: output matrix workspace
+ */
 void GeneratePeaks::generatePeaks(
     const std::map<specnum_t,
-                   std::vector<std::pair<double, API::IFunction_sptr>>> &
-        functionmap,
+                   std::vector<std::pair<double, API::IFunction_sptr>>>
+        &functionmap,
     API::MatrixWorkspace_sptr dataWS) {
   // Calcualte function
   std::map<specnum_t,
@@ -510,7 +514,7 @@ void GeneratePeaks::createFunction(std::string &peaktype,
 
 //----------------------------------------------------------------------------------------------
 /** Process table column names for peak and background function parameters names
-  */
+ */
 void GeneratePeaks::processTableColumnNames() {
   using namespace boost::algorithm;
 
@@ -611,9 +615,9 @@ void GeneratePeaks::processTableColumnNames() {
 
 //----------------------------------------------------------------------------------------------
 /** Get set of spectra of the input table workspace
-  * Spectra is set to the column named 'spectrum'.
-  * Algorithm supports multiple peaks in multiple spectra
-  */
+ * Spectra is set to the column named 'spectrum'.
+ * Algorithm supports multiple peaks in multiple spectra
+ */
 void GeneratePeaks::getSpectraSet(
     DataObjects::TableWorkspace_const_sptr peakParmsWS) {
   size_t numpeaks = peakParmsWS->rowCount();
@@ -638,7 +642,7 @@ void GeneratePeaks::getSpectraSet(
 
 //----------------------------------------------------------------------------------------------
 /** Get the IPeakFunction part in the input function
-  */
+ */
 API::IPeakFunction_sptr
 GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction) {
   // Not a composite function
@@ -778,7 +782,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 }
 
 /** Add function's parameter names after peak function name
-  */
+ */
 std::vector<std::string>
 GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
   std::vector<std::string> vec_funcparnames;
@@ -807,5 +811,5 @@ GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
   return vec_funcparnames;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

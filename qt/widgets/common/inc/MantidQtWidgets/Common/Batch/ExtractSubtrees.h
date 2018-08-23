@@ -26,8 +26,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTIDQTMANTIDWIDGETS_EXTRACTSUBTREES_H_
 #define MANTIDQTMANTIDWIDGETS_EXTRACTSUBTREES_H_
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Row.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <boost/optional.hpp>

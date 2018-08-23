@@ -26,5 +26,5 @@ ReflectometryTransformQxQz::ReflectometryTransformQxQz(
   }
   m_calculator->setThetaIncident(incidentTheta);
 }
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

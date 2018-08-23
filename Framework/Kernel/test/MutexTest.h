@@ -1,12 +1,12 @@
 #ifndef MUTEXTEST_H
 #define MUTEXTEST_H
 
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidKernel/CPUTimer.h"
 #include <Poco/RWLock.h>
+#include <cxxtest/TestSuite.h>
 using namespace Mantid::Kernel;
 
 #define DATA_SIZE 10000000

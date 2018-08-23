@@ -37,7 +37,7 @@ struct DLLExport ExtractWorkspace {
 private:
   API::Workspace_sptr m_value;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_EXTRACTWORKSPACE_H_

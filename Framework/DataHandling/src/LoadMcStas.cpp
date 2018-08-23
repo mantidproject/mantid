@@ -1,3 +1,4 @@
+#include "MantidDataHandling/LoadMcStas.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -6,16 +7,17 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadMcStas.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
-#include <nexus/NeXusException.hpp>
+// clang-format off
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {
@@ -148,10 +150,10 @@ void LoadMcStas::exec() {
 } // LoadMcStas::exec()
 
 /**
-* Group workspaces
-* @param workspaces workspace names to group
-* @return Workspace group
-*/
+ * Group workspaces
+ * @param workspaces workspace names to group
+ * @return Workspace group
+ */
 API::WorkspaceGroup_sptr
 LoadMcStas::groupWorkspaces(const std::vector<std::string> &workspaces) const {
   API::IAlgorithm_sptr groupAlgorithm =

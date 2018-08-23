@@ -104,6 +104,6 @@ private:
                          HistogramData::PointStandardDeviations &xe,
                          API::Progress &prog, bool readXError = false);
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif /*MANTID_DATAHANDLING_LOADRKH_H_*/

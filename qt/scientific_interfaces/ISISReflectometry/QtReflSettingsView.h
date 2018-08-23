@@ -2,11 +2,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 
+#include "ExperimentOptionDefaults.h"
 #include "IReflSettingsView.h"
+#include "InstrumentOptionDefaults.h"
 #include "ui_ReflSettingsWidget.h"
 #include <memory>
-#include "ExperimentOptionDefaults.h"
-#include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
 
@@ -95,6 +95,8 @@ public:
   std::string getSummationType() const override;
   /// Return selected reduction type
   std::string getReductionType() const override;
+  /// Return debug option
+  bool getDebugOption() const override;
   /// Return whether to include partial bins
   bool getIncludePartialBins() const override;
   /// Set the status of whether polarisation corrections should be enabled
@@ -135,6 +137,9 @@ public slots:
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
   /// Adds another row to the per-angle options table
   void addPerAngleOptionsTableRow();
+
+private slots:
+  void setPolCorPageForIndex(int index);
 
 private:
   /// Initialise the interface
@@ -193,7 +198,7 @@ private:
   /// instead?
   QStringList m_columnProperties;
 };
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_ */

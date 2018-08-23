@@ -1,12 +1,12 @@
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
-#include "MantidKernel/MagneticIon.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MagneticIon.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::PhysicalConstants;
 

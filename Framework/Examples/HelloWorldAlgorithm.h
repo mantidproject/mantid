@@ -54,7 +54,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*USER_ALGORITHMS_HELLOWORLDALGORITHM_H_*/

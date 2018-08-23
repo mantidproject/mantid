@@ -1,14 +1,14 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
-#include <QIcon>
-#include <QMessageBox>
 #include <QDir>
 #include <QFileDialog>
+#include <QIcon>
+#include <QMessageBox>
 #include <QTemporaryFile>
 #include <QTextStream>
 
@@ -144,9 +144,9 @@ QString UserSubWindow::openFileDialog(const bool save,
   return filename;
 }
 /** Returns a pointer to a new validator QLabel. The code is copied from
-*  AlgorithmDialog.cpp and wont know if the validator label changes there
-*  @param parent :: a pointer to an object that will look after it deleting it
-*/
+ *  AlgorithmDialog.cpp and wont know if the validator label changes there
+ *  @param parent :: a pointer to an object that will look after it deleting it
+ */
 QLabel *UserSubWindow::newValidator(QWidget *parent) {
   QLabel *validLbl = new QLabel("*", parent);
   QPalette pal = validLbl->palette();

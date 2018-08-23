@@ -8,7 +8,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramDx;
 class HistogramX;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /**
   This is an abstract base class for sharing methods between algorithms that
@@ -78,7 +78,7 @@ private:
   Kernel::cow_ptr<HistogramData::HistogramX> m_cachedX{nullptr};
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_XDATACONVERTER_H_*/

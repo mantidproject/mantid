@@ -1,18 +1,18 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
-#include <stdexcept>
+#include "MantidKernel/V3D.h"
+#include <cfloat>
 #include <iomanip>
 #include <ios>
-#include <cfloat>
+#include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Geometry {
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 /** Default constructor.
 \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
@@ -570,7 +570,8 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
   if (NewGstar.numRows() != 3 || NewGstar.numCols() != 3) {
     std::ostringstream msg;
     msg << "UnitCell::recalculateFromGstar - Expected a 3x3 matrix but was "
-           "given a " << NewGstar.numRows() << "x" << NewGstar.numCols();
+           "given a "
+        << NewGstar.numRows() << "x" << NewGstar.numCols();
     throw std::invalid_argument(msg.str());
   }
 
@@ -652,5 +653,5 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
   }
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

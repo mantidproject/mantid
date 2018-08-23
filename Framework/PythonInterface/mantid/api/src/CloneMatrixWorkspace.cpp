@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/MultiThreaded.h"
 
 #include <boost/python/extract.hpp>
 
@@ -14,8 +15,8 @@
 
 namespace Mantid {
 namespace PythonInterface {
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_sptr;
 
 // ----------------------------------------------------------------------------------------------------------
 namespace {
@@ -33,8 +34,8 @@ enum DataField { XValues = 0, YValues = 1, EValues = 2, DxValues = 3 };
  */
 PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
                           const size_t start, const size_t endp1) {
-  const size_t numHist = endp1 - start;
-  npy_intp stride(0);
+  const npy_intp numHist(endp1 - start);
+  npy_intp stride{0};
 
   // Find out which function we need to call to access the data
   using ArrayAccessFn =
@@ -57,7 +58,7 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
     else
       dataAccesor = &MatrixWorkspace::readE;
   }
-  npy_intp arrayDims[2] = {static_cast<npy_intp>(numHist), stride};
+  npy_intp arrayDims[2] = {numHist, stride};
   PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(
       PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
                            2,         // rank 2
@@ -65,14 +66,15 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
                            nullptr, nullptr, 0, nullptr));
   double *dest = reinterpret_cast<double *>(
       PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
-  for (size_t i = start; i < endp1; ++i) {
-    const MantidVec &src = (workspace.*(dataAccesor))(i);
-    std::copy(src.begin(), src.end(), dest);
-    dest += stride; // Move the ptr to the start of the next 1D array
+
+  PARALLEL_FOR_IF(threadSafe(workspace))
+  for (npy_intp i = 0; i < numHist; ++i) {
+    const MantidVec &src = (workspace.*(dataAccesor))(start + i);
+    std::copy(src.begin(), src.end(), std::next(dest, i * stride));
   }
   return nparray;
 }
-}
+} // namespace
 
 // -------------------------------------- Cloned
 // arrays---------------------------------------------------
@@ -114,5 +116,5 @@ PyObject *cloneDx(MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(
       cloneArray(self, DxValues, 0, self.getNumberHistograms()));
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

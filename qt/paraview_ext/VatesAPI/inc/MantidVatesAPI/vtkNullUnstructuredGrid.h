@@ -45,6 +45,6 @@ public:
 
   vtkUnstructuredGrid *createNullData();
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

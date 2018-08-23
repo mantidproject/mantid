@@ -74,8 +74,8 @@ private:
 
   Poco::AutoPtr<Poco::XML::Document> pDoc; ///< A XML document handle
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // GEOMETRYPARSER_H_

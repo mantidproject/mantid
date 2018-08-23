@@ -52,8 +52,9 @@ public:
 protected:
   API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1,
                                      const API::MatrixWorkspace &ws2);
-  API::MatrixWorkspace_sptr execEvent();
-
+  DataObjects::EventWorkspace_sptr
+  execEvent(const DataObjects::EventWorkspace &eventWs1,
+            const DataObjects::EventWorkspace &eventWs2);
   using Mantid::API::Algorithm::validateInputs;
   void validateInputs(const API::MatrixWorkspace &ws1,
                       const API::MatrixWorkspace &ws2, const bool checkBinning);
@@ -66,10 +67,6 @@ protected:
                                   API::MatrixWorkspace &output) = 0;
 
   API::Progress *m_progress; ///< Progress reporting object
-  DataObjects::EventWorkspace_const_sptr
-      event_ws1; ///< First event workspace input.
-  DataObjects::EventWorkspace_const_sptr
-      event_ws2; ///< Second event workspace input.
 };
 
 } // namespace Algorithms

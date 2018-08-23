@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_SPACEGROUP_H_
 #define MANTID_GEOMETRY_SPACEGROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 #include <set>

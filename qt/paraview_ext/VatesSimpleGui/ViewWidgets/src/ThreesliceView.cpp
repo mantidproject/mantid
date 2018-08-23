@@ -31,7 +31,7 @@ namespace SimpleGui {
 namespace {
 /// Static logger
 Kernel::Logger g_log("ThreeSliceView");
-}
+} // namespace
 
 ThreeSliceView::ThreeSliceView(QWidget *parent,
                                RebinnedSourcesManager *rebinnedSourcesManager,
@@ -110,6 +110,6 @@ ModeControlWidget::Views ThreeSliceView::getViewType() {
 }
 
 void ThreeSliceView::resetCamera() { this->m_mainView->resetCamera(); }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

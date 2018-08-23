@@ -1,28 +1,28 @@
 #ifndef LOADRAWSAVENXSLOADNXSTEST_H_
 #define LOADRAWSAVENXSLOADNXSTEST_H_
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadNexus.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
-#include "MantidDataHandling/LoadNexus.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
-#include "MantidDataHandling/SaveNexusProcessed.h"
+#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -174,7 +174,7 @@ public:
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Z(), 12.403, 0.01);
         TS_ASSERT_DELTA(detectorInfo.position(detectorIndex).Y(), 0.1164, 0.01);
         const auto d = detectorInfo.l2(detectorIndex);
-        TS_ASSERT_DELTA(d, 2.1561, 0.0001);
+        TS_ASSERT_DELTA(d, 2.1477, 0.0001);
       }
     }
 

@@ -50,5 +50,5 @@ void BoolPropertyWidget::setValueImpl(const QString &value) {
   else
     m_checkBox->setCheckState(Qt::Checked);
 }
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

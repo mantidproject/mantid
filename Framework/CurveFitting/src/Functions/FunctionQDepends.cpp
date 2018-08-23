@@ -7,9 +7,9 @@
 // Mantid headers from other projects
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/UnitConversion.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/UnitConversion.h"
 // third party libraries
 // N/A
 // standard library

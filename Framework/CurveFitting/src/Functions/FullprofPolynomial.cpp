@@ -81,7 +81,7 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
 //----------------------------------------------------------------------------------------------
 /** Get Attribute names
  * @return A list of attribute names (identical toFullprofPolynomial)
-*/
+ */
 std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
   return {"n", "Bkpos"};
 }
@@ -138,7 +138,7 @@ void FullprofPolynomial::setAttribute(const std::string &attName,
 
 //----------------------------------------------------------------------------------------------
 /** Check if attribute attName exists
-  */
+ */
 bool FullprofPolynomial::hasAttribute(const std::string &attName) const {
   bool has = false;
   if (attName == "n")

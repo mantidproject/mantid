@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -8,7 +8,7 @@ namespace MDAlgorithms {
 DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 
 /** method returns number of matrix dimensions calculated by this class
-* as function of energy analysis mode   */
+ * as function of energy analysis mode   */
 unsigned int
 MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                                   API::MatrixWorkspace_const_sptr inWS) const {
@@ -181,13 +181,13 @@ std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin,
 }
 
 /** Method updates the value of preprocessed detector coordinates in Q-space,
-*used by other functions
-* @param Coord -- vector of MD coordinates with filled in momentum and energy
-*transfer
-* @param i -- index of the detector, which corresponds to the spectra to
-*process.
-*
-*/
+ *used by other functions
+ * @param Coord -- vector of MD coordinates with filled in momentum and energy
+ *transfer
+ * @param i -- index of the detector, which corresponds to the spectra to
+ *process.
+ *
+ */
 bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   UNUSED_ARG(Coord);
   m_ex = (m_DetDirecton + i)->X();
@@ -315,10 +315,10 @@ MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
 }
 
 /**function returns units ID-s which this transformation prodiuces its ouptut.
-* @param dEmode   -- energy conversion mode
-* @param inWS -- input workspace
-* @return
-* It is Momentum and DelteE in inelastic modes   */
+ * @param dEmode   -- energy conversion mode
+ * @param inWS -- input workspace
+ * @return
+ * It is Momentum and DelteE in inelastic modes   */
 std::vector<std::string>
 MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
                           API::MatrixWorkspace_const_sptr inWS) const {
@@ -343,5 +343,5 @@ MDTransfQ3D::MDTransfQ3D()
     : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(),
       m_SinThetaSq(0.), m_AbsMin(0.) {}
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid

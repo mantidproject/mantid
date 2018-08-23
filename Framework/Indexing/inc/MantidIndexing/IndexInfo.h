@@ -3,8 +3,8 @@
 
 #include "MantidIndexing/DllConfig.h"
 #include "MantidIndexing/SpectrumNumber.h"
-#include "MantidParallel/StorageMode.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidParallel/StorageMode.h"
 
 #include <functional>
 #include <set>

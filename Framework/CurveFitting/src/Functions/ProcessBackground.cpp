@@ -1,11 +1,11 @@
 #include "MantidCurveFitting/Functions/ProcessBackground.h"
-#include "MantidCurveFitting/Functions/Polynomial.h"
-#include "MantidCurveFitting/Functions/Chebyshev.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidCurveFitting/Functions/Chebyshev.h"
+#include "MantidCurveFitting/Functions/Polynomial.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/ListValidator.h"
@@ -229,7 +229,7 @@ void ProcessBackground::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Main execution function
-  */
+ */
 void ProcessBackground::exec() {
   // Process general properties
   m_dataWS = this->getProperty("InputWorkspace");
@@ -277,7 +277,7 @@ void ProcessBackground::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Set dummy output workspaces to avoid python error for optional workspaces
-  */
+ */
 void ProcessBackground::setupDummyOutputWSes() {
   // Dummy outputs to make it work with python script
   setPropertyValue("UserBackgroundWorkspace", "dummy0");
@@ -440,7 +440,7 @@ void ProcessBackground::addRegion() {
 
 //----------------------------------------------------------------------------------------------
 /** Main method to select background points
-  */
+ */
 void ProcessBackground::selectBkgdPoints() {
   // Select background points
   string smode = getProperty("SelectionMode");
@@ -469,7 +469,7 @@ void ProcessBackground::selectBkgdPoints() {
 
 //----------------------------------------------------------------------------------------------
 /** Select background points
-  */
+ */
 void ProcessBackground::selectFromGivenXValues() {
   // Get special input properties
   std::vector<double> bkgdpoints = getProperty("BackgroundPoints");
@@ -542,7 +542,7 @@ void ProcessBackground::selectFromGivenXValues() {
 
 //----------------------------------------------------------------------------------------------
 /** Select background points via a given background function
-  */
+ */
 void ProcessBackground::selectFromGivenFunction() {
   // Process properties
   BackgroundFunction_sptr bkgdfunc = createBackgroundFunction(m_bkgdType);
@@ -641,7 +641,7 @@ ProcessBackground::autoBackgroundSelection(Workspace2D_sptr bkgdWS) {
 
 //----------------------------------------------------------------------------------------------
 /** Create a background function from input properties
-  */
+ */
 BackgroundFunction_sptr
 ProcessBackground::createBackgroundFunction(const string backgroundtype) {
   Functions::BackgroundFunction_sptr bkgdfunction;
@@ -672,7 +672,7 @@ ProcessBackground::createBackgroundFunction(const string backgroundtype) {
 
 //----------------------------------------------------------------------------------------------
 /** Filter non-background data points out and create a background workspace
-  */
+ */
 Workspace2D_sptr
 ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
   double posnoisetolerance = getProperty("NoiseTolerance");
@@ -744,7 +744,7 @@ ProcessBackground::filterForBackground(BackgroundFunction_sptr bkgdfunction) {
 
 //----------------------------------------------------------------------------------------------
 /** Fit background function
-  */
+ */
 void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
   // Get background type and create bakground function
   BackgroundFunction_sptr bkgdfunction =
@@ -877,7 +877,7 @@ void ProcessBackground::removePeaks() {
 
 //----------------------------------------------------------------------------------------------
 /** Set up: parse peak workspace to vectors
-  */
+ */
 void RemovePeaks::setup(TableWorkspace_sptr peaktablews) {
   // Parse table workspace
   parsePeakTableWorkspace(peaktablews, m_vecPeakCentre, m_vecPeakFWHM);
@@ -892,7 +892,7 @@ void RemovePeaks::setup(TableWorkspace_sptr peaktablews) {
 
 //----------------------------------------------------------------------------------------------
 /** Remove peaks from a input workspace
-  */
+ */
 Workspace2D_sptr
 RemovePeaks::removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
                          double numfwhm) {
@@ -949,7 +949,7 @@ RemovePeaks::removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
 
 //----------------------------------------------------------------------------------------------
 /** Parse table workspace
-  */
+ */
 void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
                                           vector<double> &vec_peakcentre,
                                           vector<double> &vec_peakfwhm) {
@@ -985,7 +985,7 @@ void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
 
 //----------------------------------------------------------------------------------------------
 /** Exclude peaks from
-  */
+ */
 size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX,
                                  vector<double> v_centre, vector<double> v_fwhm,
                                  double num_fwhm) {

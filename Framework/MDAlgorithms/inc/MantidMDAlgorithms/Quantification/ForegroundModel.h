@@ -138,8 +138,8 @@ private:
 using ForegroundModel_sptr = boost::shared_ptr<ForegroundModel>;
 /// boost::shared_ptr to const typedef
 using ForegroundModel_const_sptr = boost::shared_ptr<const ForegroundModel>;
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 /*
  * Register a class into the factory using a global RegistrationHelper
