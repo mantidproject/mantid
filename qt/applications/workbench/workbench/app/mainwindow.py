@@ -49,6 +49,7 @@ from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
+from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
@@ -377,14 +378,20 @@ class MainWindow(QMainWindow):
             window_pos = QPoint(*window_pos)
 
         # make sure main window is smaller than the desktop
-        desktop_size = QDesktopWidget().screenGeometry().size()
-        w = min(desktop_size.width(), window_size.width())
-        h = min(desktop_size.height(), window_size.height())
+        desktop = QDesktopWidget()
+
+        # this gives the maximum screen number if the position is off screen
+        screen = desktop.screenNumber(window_pos)
+
+        # recalculate the window size
+        desktop_geom = desktop.screenGeometry(screen)
+        w = min(desktop_geom.size().width(), window_size.width())
+        h = min(desktop_geom.size().height(), window_size.height())
         window_size = QSize(w, h)
 
-        # and that it will be painted on screen
-        x = min(window_pos.x(), desktop_size.width() - window_size.width())
-        y = min(window_pos.y(), desktop_size.height() - window_size.height())
+        # and position it on the supplied desktop screen
+        x = max(window_pos.x(), desktop_geom.left())
+        y = max(window_pos.y(), desktop_geom.top())
         window_pos = QPoint(x, y)
 
         # set the geometry
@@ -397,10 +404,16 @@ class MainWindow(QMainWindow):
         else:
             self.setWindowState(Qt.WindowMaximized)
 
+        # have algorithm dialogs do their thing
+        AlgorithmInputHistory().readSettings(settings)
+
     def writeSettings(self, settings):
         settings.set('main/window/size', self.size()) # QSize
         settings.set('main/window/position', self.pos()) # QPoint
         settings.set('main/window/state', self.saveState()) # QByteArray
+
+        # have algorithm dialogs do their thing
+        AlgorithmInputHistory().writeSettings(settings)
 
 
 def initialize():

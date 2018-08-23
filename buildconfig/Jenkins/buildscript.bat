@@ -170,7 +170,9 @@ del %USERPROPS%
 set CONFIGDIR=%APPDATA%\mantidproject\mantid
 rmdir /S /Q %CONFIGDIR%
 mkdir %CONFIGDIR%
-call cmake.exe -E touch %USERPROPS%
+:: use a fixed number of openmp threads to avoid overloading the system
+echo MultiThreaded.MaxCores=2 > %USERPROPS%
+
 call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
@@ -179,6 +181,7 @@ if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 echo Note: not running doc-test target as it currently takes too long
 :: if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
+::   del /Q %USERPROPS%
 ::   call cmake.exe --build . --target StandardTestData
 ::   call cmake.exe --build . --target docs-test
 :: )

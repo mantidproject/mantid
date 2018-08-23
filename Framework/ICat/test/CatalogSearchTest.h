@@ -12,6 +12,10 @@ using namespace Mantid;
 using namespace Mantid::ICat;
 class CatalogSearchTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogSearchTest *createSuite() { return new CatalogSearchTest(); }
+  static void destroySuite(CatalogSearchTest *suite) { delete suite; }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
 
