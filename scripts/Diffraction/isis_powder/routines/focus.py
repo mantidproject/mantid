@@ -19,7 +19,7 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details):
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details, vanadium_path):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -55,9 +55,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 
-    calibrated_spectra = _apply_vanadium_corrections(instrument=instrument, run_number=run_number,
-                                                     input_workspace=focused_ws,
-                                                     perform_vanadium_norm=perform_vanadium_norm)
+    calibrated_spectra = _apply_vanadium_corrections(input_workspace=focused_ws,
+                                                     perform_vanadium_norm=perform_vanadium_norm,
+                                                     vanadium_splines=vanadium_path)
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
@@ -82,14 +82,13 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     return d_spacing_group
 
 
-def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform_vanadium_norm):
-    run_details = instrument._get_run_details(run_number_string=run_number)
+def _apply_vanadium_corrections(input_workspace, perform_vanadium_norm, vanadium_splines):
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
     split_data_spectra = common.extract_ws_spectra(input_workspace)
 
     if perform_vanadium_norm:
         processed_spectra = _divide_by_vanadium_splines(spectra_list=split_data_spectra,
-                                                        spline_file_path=run_details.splined_vanadium_file_path)
+                                                        vanadium_splines=vanadium_splines)
     else:
         processed_spectra = split_data_spectra
 
@@ -99,11 +98,16 @@ def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform
 def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
+    run_details = instrument._get_run_details(run_number_string=run_number_string)
+    vanadium_splines = None
+    if perform_vanadium_norm:
+        vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
+
     output = None
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
-                               sample_details=sample_details)
+                               sample_details=sample_details, vanadium_path=vanadium_splines)
     return output
 
 
@@ -113,8 +117,7 @@ def _divide_one_spectrum_by_spline(spectrum, spline):
     return divided
 
 
-def _divide_by_vanadium_splines(spectra_list, spline_file_path):
-    vanadium_splines = mantid.LoadNexus(Filename=spline_file_path)
+def _divide_by_vanadium_splines(spectra_list, vanadium_splines):
 
     if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
         vanadium_splines = vanadium_splines.OutputWorkspace
@@ -138,11 +141,16 @@ def _divide_by_vanadium_splines(spectra_list, spline_file_path):
 def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
+    run_details = instrument._get_run_details(run_number_string=run_number)
+    vanadium_splines = None
+    if perform_vanadium_norm:
+        vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
     output = None
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
-                               perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details)
+                               perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
+                               vanadium_path=vanadium_splines)
     return output
 
 

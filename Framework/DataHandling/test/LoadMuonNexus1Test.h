@@ -24,7 +24,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <Poco/Path.h>
 
