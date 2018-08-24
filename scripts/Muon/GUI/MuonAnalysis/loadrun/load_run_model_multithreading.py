@@ -32,7 +32,7 @@ class LoadRunWidgetModel(object):
         for filename in self._filenames:
             try:
                 ws, filename, run = self.load_workspace_from_filename(filename)
-            except Exception as e:
+            except Exception:
                 failed_files += [filename]
                 continue
             self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
@@ -76,7 +76,7 @@ class LoadRunWidgetModel(object):
             alg.setProperty("Filename", filename)
             alg.execute()
             workspace = alg.getProperty("OutputWorkspace").value
-        except Exception as e:
+        except Exception:
             # let Load search for the file
             alg.setProperty("Filename", filename.split("\\")[-1])
             alg.execute()
