@@ -24,12 +24,6 @@ def test_function_raises_on_n(lst, raise_on=0):
         return 2 * lst
 
 
-def cancel_test_function(lst):
-    # add a delay to allow for cancellation of threads during evaluation
-    time.sleep(1)
-    return 2 * lst
-
-
 class ThreadingManagerFreeFunctionTest(unittest.TestCase):
 
     def test_split_list_into_n_parts_splits_list(self):
@@ -62,102 +56,12 @@ class ThreadingManagerFreeFunctionTest(unittest.TestCase):
         self.assertEqual(split_kwargs[1], {"arg1": [2, 4], "arg2": ["b", "d"]})
 
 
-class ThreadingManagerWorkerTest(unittest.TestCase):
-    class Runner:
-        QT_APP = QtWidgets.QApplication([])
-
-        def __init__(self, thread, worker):
-            self._thread = thread
-            self._worker = worker
-            self._worker.signals.finished.connect(self.finished)
-            self._worker.signals.start.emit()
-            self.QT_APP.exec_()
-
-        def finished(self):
-            self._thread.quit()
-            self._thread.wait()
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
-
-    def setUp(self):
-        pass
-
-    def test_that_worker_thread_starts_and_finishes(self):
-        worker = Worker(test_function, lst=[1, 2, 3, 4, 5])
-
-        worker_started = mock.Mock()
-        worker_finished = mock.Mock()
-
-        thread = QtCore.QThread()
-        worker.moveToThread(thread)
-        worker.signals.started.connect(worker_started)
-        worker.signals.start.connect(worker.run)
-        worker.signals.finished.connect(worker_finished)
-        thread.start()
-        #worker.signals.start.emit()
-        self.Runner(thread, worker)
-
-        self.assertEqual(worker_started.call_count, 1)
-        self.assertEqual(worker_finished.call_count, 1)
-
-    def test_that_worker_thread_updates_progress_from_each_evaluation(self):
-        worker = Worker(test_function, lst=[1, 2, 3, 4, 5])
-
-        worker_progress = mock.Mock()
-
-        thread = QtCore.QThread()
-        worker.moveToThread(thread)
-        worker.signals.start.connect(worker.run)
-        worker.signals.progress.connect(worker_progress)
-        thread.start()
-        #worker.signals.start.emit()
-        self.Runner(thread, worker)
-
-        self.assertEqual(worker_progress.call_count, 5)
-
-    def test_that_worker_thread_evaluates_results_correctly(self):
-        worker = Worker(test_function, lst=[1, 2, 3, 4, 5])
-
-        worker_result = mock.Mock()
-
-        thread = QtCore.QThread()
-        worker.moveToThread(thread)
-        worker.signals.start.connect(worker.run)
-        worker.signals.result.connect(worker_result)
-        thread.start()
-        #worker.signals.start.emit()
-        self.Runner(thread, worker)
-
-        self.assertEqual(worker_result.call_count, 1)
-        self.assertEqual(worker_result.call_args_list[0][0][0][0]["lst"], [1, 2, 3, 4, 5])
-        self.assertEqual(worker_result.call_args_list[0][0][0][1], [2, 4, 6, 8, 10])
-
-    def test_that_error_slot_called_if_function_raises(self):
-        worker = Worker(test_function_raises_on_n, lst=[1, 2, 3, 4, 5], raise_on=1)
-
-        worker_result = mock.Mock()
-        worker_error = mock.Mock()
-
-        thread = QtCore.QThread()
-        worker.moveToThread(thread)
-        worker.signals.start.connect(worker.run)
-        worker.signals.result.connect(worker_result)
-        worker.signals.error.connect(worker_error)
-        thread.start()
-        #worker.signals.start.emit()
-        self.Runner(thread, worker)
-
-        self.assertEqual(worker_result.call_count, 0)
-        self.assertEqual(worker_error.call_count, 1)
-
-
 class ThreadingManagerWorkerManagerTest(unittest.TestCase):
     class Runner:
         QT_APP = QtWidgets.QApplication([])
 
         def __init__(self, thread):
             self._thread = thread
-            print("connecting : ", time.time())
             self._thread.finished.connect(self.finished)
             self._thread.start()
             self.QT_APP.exec_()
@@ -193,15 +97,15 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
             index = [i for i, arg in enumerate(manager.results['lst']) if arg == item][0]
             self.assertEqual(manager.results['results'][index], 2 * item)
 
+    #
     def test_manager_passes_exceptions_from_evaluation_to_callback(self):
         manager_finished = mock.Mock()
         manager_exception = mock.Mock()
         test_function = lambda lst: test_function_raises_on_n(lst, raise_on=1)
-        manager = WorkerManager(test_function, 4,
+        manager = WorkerManager(fn=test_function, num_threads=4,
                                 callback_on_threads_complete=manager_finished,
                                 callback_on_thread_exception=manager_exception,
                                 lst=[1, 2, 3, 4, 5, 6, 7, 8])
-
         self.Runner(manager)
 
         self.assertIn(1, manager_exception.call_args[1]['inputs']['lst'])
@@ -213,11 +117,10 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
         manager_finished = mock.Mock()
         manager_exception = mock.Mock()
         test_function = lambda lst: test_function_raises_on_n(lst, raise_on=1)
-        manager = WorkerManager(test_function, 4,
+        manager = WorkerManager(fn=test_function, num_threads=4, verbose=True,
                                 callback_on_threads_complete=manager_finished,
                                 callback_on_thread_exception=manager_exception,
                                 lst=[1, 2, 3, 4, 5, 6, 7, 8])
-
         self.Runner(manager)
 
         self.assertEqual(manager._failed_results['lst'], [1, 5])
@@ -243,53 +146,6 @@ class ThreadingManagerWorkerManagerTest(unittest.TestCase):
         self.assertEqual(progress_call_args[0], 0.0)
         self.assertEqual(progress_call_args[-1], 100.0)
         self.assertEqual(sorted(progress_call_args), progress_call_args)
-
-
-class ThreadingManagerCancelWorkerManagerTest(unittest.TestCase):
-    class ManagerRunner:
-        QT_APP = QtWidgets.QApplication([])
-
-        def __init__(self, thread):
-            self._thread = thread
-            self._thread.finished.connect(self.finished)
-            self._thread.cancelled.connect(self.finished)
-            QtCore.QTimer.singleShot(1000, self._thread.cancel)
-            self.QT_APP.exec_()
-
-        def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
-
-    def test_that_worker_manager_can_be_safely_cancelled_while_running(self):
-        # 2 executions per thread
-        num_threads = 4
-        manager = WorkerManager(cancel_test_function, num_threads,
-                                lst=[1, 2, 3, 4, 5, 6, 7, 8])
-        manager_cancelled = mock.Mock()
-        manager.cancelled.connect(manager_cancelled)
-
-        # Called function will wait 1 second on each arg (total of 5 seconds)
-        manager.start()
-        # Will call the cancel slot after 1 second
-        self.ManagerRunner(manager)
-
-        self.assertEqual(manager_cancelled.call_count, 1)
-
-    def test_that_threads_and_workers_of_a_cancelled_worker_manager_are_cleared(self):
-        # 2 executions per thread
-        num_threads = 4
-        manager = WorkerManager(cancel_test_function, num_threads,
-                                lst=[1, 2, 3, 4, 5, 6, 7, 8])
-        manager_cancelled = mock.Mock()
-        manager.cancelled.connect(manager_cancelled)
-
-        # Called function will wait 1 second on each arg (total of 5 seconds)
-        manager.start()
-        # Will call the cancel slot after 1 second
-        self.ManagerRunner(manager)
-
-        self.assertEqual(manager._threads, [])
-        self.assertEqual(manager._workers, [])
 
 
 if __name__ == "__main__":
