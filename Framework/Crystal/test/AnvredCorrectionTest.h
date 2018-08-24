@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_AnvredCorrectionTEST_H_
 #define MANTID_CRYSTAL_AnvredCorrectionTEST_H_
 
-#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
+#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
@@ -12,8 +12,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <math.h>
 #include <cxxtest/TestSuite.h>
+#include <math.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -98,7 +98,7 @@ void do_test_events(MatrixWorkspace_sptr workspace, bool ev,
     TS_ASSERT_DELTA(y_actual[2], 0.0656, 0.0001);
   }
 }
-}
+} // namespace
 
 class AnvredCorrectionTest : public CxxTest::TestSuite {
 public:

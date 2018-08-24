@@ -1,15 +1,15 @@
 #include "MDFLocalParameterEditor.h"
 #include "MDFEditLocalParameterDialog.h"
 
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QMenu>
 #include <QAction>
 #include <QDoubleValidator>
 #include <QEvent>
-#include <QKeyEvent>
+#include <QHBoxLayout>
 #include <QInputDialog>
+#include <QKeyEvent>
+#include <QLineEdit>
+#include <QMenu>
+#include <QPushButton>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -267,6 +267,6 @@ void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
   m_setToLogAction->setEnabled(enabled);
   m_setAllToLogAction->setEnabled(enabled);
 }
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

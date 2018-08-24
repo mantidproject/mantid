@@ -1,14 +1,14 @@
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
-#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include "MantidKernel/make_unique.h"
 
-#include <QPainter>
 #include <QList>
-#include <cmath>
+#include <QPainter>
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace MantidQt {
@@ -17,8 +17,8 @@ namespace MantidWidgets {
 QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 
 /**
-* Constructor.
-*/
+ * Constructor.
+ */
 PeakHKL::PeakHKL(PeakMarker2D *m, const QRectF &trect, bool sr)
     : p(m->origin()), rect(trect),
       // rectTopLeft(m->getLabelRect().topLeft()),
@@ -28,11 +28,11 @@ PeakHKL::PeakHKL(PeakMarker2D *m, const QRectF &trect, bool sr)
 }
 
 /**
-* Check if this rect intersects with marker's and if it does combine the labels
-* @param marker :: A marker to check for intersection
-* @param trect :: Transformed marker's label rect
-* @return True if labels were combined, false otherwise.
-*/
+ * Check if this rect intersects with marker's and if it does combine the labels
+ * @param marker :: A marker to check for intersection
+ * @param trect :: Transformed marker's label rect
+ * @return True if labels were combined, false otherwise.
+ */
 bool PeakHKL::add(PeakMarker2D *marker, const QRectF &trect) {
   if (!rect.intersects(trect)) {
     return false;
@@ -50,10 +50,10 @@ bool PeakHKL::add(PeakMarker2D *marker, const QRectF &trect) {
   return true;
 }
 /**
-* Draw the label
-* @param painter :: QPainter to draw with
-* @param prec :: precision
-*/
+ * Draw the label
+ * @param painter :: QPainter to draw with
+ * @param prec :: precision
+ */
 void PeakHKL::draw(QPainter &painter, int prec) {
   QString label;
   if (nh) {
@@ -84,11 +84,11 @@ void PeakHKL::print() const {
 }
 
 /**
-* Creates formated string for outputting h,k, or l
-*
-* @param h :: Value to output.
-* @param prec :: Precision as a number of decimal places.
-*/
+ * Creates formated string for outputting h,k, or l
+ *
+ * @param h :: Value to output.
+ * @param prec :: Precision as a number of decimal places.
+ */
 QString PeakHKL::formatNumber(double h, int prec) {
   if (h == 0)
     return "0";
@@ -143,17 +143,17 @@ PeakMarker2D::Style QualitativeIntensityScale::getScaledMarker(
 }
 
 /**
-* Returns the marker size corresponding to the supplied intensity
-*
-* Intensity levels are specified in m_intensityLevels. The method looks for
-* the first element >= than the relative intensity and returns the distance
-* from the beginning of list to that element + 1.
-*
-* For values less than the first element, 0 is returned.
-*
-* @param intensity :: Absolute intensity.
-* @return Intensity level between 0 and the number of intensity levels + 1
-*/
+ * Returns the marker size corresponding to the supplied intensity
+ *
+ * Intensity levels are specified in m_intensityLevels. The method looks for
+ * the first element >= than the relative intensity and returns the distance
+ * from the beginning of list to that element + 1.
+ *
+ * For values less than the first element, 0 is returned.
+ *
+ * @param intensity :: Absolute intensity.
+ * @return Intensity level between 0 and the number of intensity levels + 1
+ */
 int QualitativeIntensityScale::getIntensityLevel(double intensity) const {
   auto intensityGreaterThan =
       std::lower_bound(m_intensityLevels.cbegin(), m_intensityLevels.cend(),
@@ -170,8 +170,8 @@ int QualitativeIntensityScale::getIntensityLevel(double intensity) const {
 }
 
 /**---------------------------------------------------------------------
-* Constructor
-*/
+ * Constructor
+ */
 PeakOverlay::PeakOverlay(UnwrappedSurface *surface,
                          boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws)
     : Shape2DCollection(), m_peaksWorkspace(pws), m_surface(surface),
@@ -188,10 +188,10 @@ PeakOverlay::PeakOverlay(UnwrappedSurface *surface,
 }
 
 /**---------------------------------------------------------------------
-* Overridden virtual function to remove peaks from the workspace along with
-* the shapes.
-* @param shapeList :: Shapes to remove.
-*/
+ * Overridden virtual function to remove peaks from the workspace along with
+ * the shapes.
+ * @param shapeList :: Shapes to remove.
+ */
 void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
   // vectors of rows to delete from the peaks workspace.
   std::vector<size_t> rows;
@@ -211,28 +211,28 @@ void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
 }
 
 /**---------------------------------------------------------------------
-* Not implemented yet.
-*/
+ * Not implemented yet.
+ */
 void PeakOverlay::clear() {
   Shape2DCollection::clear();
   m_det2marker.clear();
 }
 
 /**---------------------------------------------------------------------
-* Add new marker to the overlay.
-* @param m :: Pointer to the new marker
-*/
+ * Add new marker to the overlay.
+ * @param m :: Pointer to the new marker
+ */
 void PeakOverlay::addMarker(PeakMarker2D *m) {
   addShape(m, false);
   m_det2marker.insert(m->getDetectorID(), m);
 }
 
 /**---------------------------------------------------------------------
-* Create the markers which graphically represent the peaks on the surface.
-* The coordinates of the Shape2DCollection must be set (calling setWindow())
-* prior calling this method.
-* @param style :: A style of drawing the markers.
-*/
+ * Create the markers which graphically represent the peaks on the surface.
+ * The coordinates of the Shape2DCollection must be set (calling setWindow())
+ * prior calling this method.
+ * @param style :: A style of drawing the markers.
+ */
 void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
   int nPeaks = getNumberPeaks();
 
@@ -256,9 +256,9 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
 }
 
 /**---------------------------------------------------------------------
-* Draw peaks on screen.
-* @param painter :: The QPainter to draw with.
-*/
+ * Draw peaks on screen.
+ * @param painter :: The QPainter to draw with.
+ */
 void PeakOverlay::draw(QPainter &painter) const {
   // Draw symbols
   Shape2DCollection::draw(painter);
@@ -313,26 +313,26 @@ void PeakOverlay::draw(QPainter &painter) const {
 }
 
 /**---------------------------------------------------------------------
-* Return a list of markers put onto a detector
-* @param detID :: A detector ID for which markers are to be returned.
-* @return :: A list of zero ot more markers.
-*/
+ * Return a list of markers put onto a detector
+ * @param detID :: A detector ID for which markers are to be returned.
+ * @return :: A list of zero ot more markers.
+ */
 QList<PeakMarker2D *> PeakOverlay::getMarkersWithID(int detID) const {
   return m_det2marker.values(detID);
 }
 
 /**---------------------------------------------------------------------
-* Return the total number of peaks.
-*/
+ * Return the total number of peaks.
+ */
 int PeakOverlay::getNumberPeaks() const {
   return m_peaksWorkspace->getNumberPeaks();
 }
 
 /** ---------------------------------------------------------------------
-* Return the i-th peak.
-* @param i :: Peak index.
-* @return A reference to the peak.
-*/
+ * Return the i-th peak.
+ * @param i :: Peak index.
+ * @return A reference to the peak.
+ */
 Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
   return m_peaksWorkspace->getPeak(i);
 }
@@ -377,10 +377,10 @@ PeakMarker2D::Style PeakOverlay::getCurrentStyle() const {
 }
 
 /** ---------------------------------------------------------------------
-* Handler of the AfterReplace notifications. Updates the markers.
-* @param wsName :: The name of the modified workspace.
-* @param ws :: The shared pointer to the modified workspace.
-*/
+ * Handler of the AfterReplace notifications. Updates the markers.
+ * @param wsName :: The name of the modified workspace.
+ * @param ws :: The shared pointer to the modified workspace.
+ */
 void PeakOverlay::afterReplaceHandle(const std::string &wsName,
                                      const Mantid::API::Workspace_sptr ws) {
   Q_UNUSED(wsName);
@@ -399,23 +399,23 @@ void PeakOverlay::recreateMarkers(const PeakMarker2D::Style &style) {
 }
 
 /** ---------------------------------------------------------------------
-* Return a default style for creating markers by index.
-* Styles are taken form g_defaultStyles
-*/
+ * Return a default style for creating markers by index.
+ * Styles are taken form g_defaultStyles
+ */
 PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index) {
   index %= g_defaultStyles.size();
   return g_defaultStyles[index];
 }
 
 /** ---------------------------------------------------------------------
-* Set visibility of the peak markers according to the integration range
-* in the instrument actor.
-*
-* @param xmin :: The lower bound of the integration range.
-* @param xmax :: The upper bound of the integration range.
-* @param units :: Units of the x - array in the underlying workspace:
-*     "TOF", "dSpacing", or "Wavelength".
-*/
+ * Set visibility of the peak markers according to the integration range
+ * in the instrument actor.
+ *
+ * @param xmin :: The lower bound of the integration range.
+ * @param xmax :: The upper bound of the integration range.
+ * @param units :: Units of the x - array in the underlying workspace:
+ *     "TOF", "dSpacing", or "Wavelength".
+ */
 void PeakOverlay::setPeakVisibility(double xmin, double xmax, QString units) {
   enum XUnits { Unknown, TOF, dSpacing, Wavelength };
   XUnits xUnits = Unknown;
@@ -450,5 +450,5 @@ void PeakOverlay::setPeakVisibility(double xmin, double xmax, QString units) {
   }
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

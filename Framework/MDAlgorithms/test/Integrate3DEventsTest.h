@@ -1,9 +1,9 @@
 #ifndef MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_
 #define MANTID_MDEVENTS_INTEGRATE_3D_EVENTS_TEST_H_
 
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
-#include "MantidKernel/V3D.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/Integrate3DEvents.h"
 
 #include <cxxtest/TestSuite.h>
 #include <random>
@@ -358,13 +358,13 @@ private:
   }
 
   /** Generate a symmetric Gaussian peak
-    *
-    * @param event_Qs :: vector of event Qs
-    * @param center :: location of the center of the peak
-    * @param sigma :: standard deviation of the peak
-    * @param numSamples :: number of samples to draw
-    * @param seed :: the seed to the pseudo-random number generator
-    */
+   *
+   * @param event_Qs :: vector of event Qs
+   * @param center :: location of the center of the peak
+   * @param sigma :: standard deviation of the peak
+   * @param numSamples :: number of samples to draw
+   * @param seed :: the seed to the pseudo-random number generator
+   */
   void generatePeak(std::vector<std::pair<double, V3D>> &event_Qs, V3D center,
                     double sigma = 5, size_t numSamples = 1000, int seed = 1) {
 

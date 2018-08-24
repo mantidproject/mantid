@@ -7,7 +7,7 @@ TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
 
-from itertools import repeat
+from itertools import repeat, compress
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
@@ -72,11 +72,11 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
-    DEF_saveSofQW  = False
-    DEF_saveSofTW  = False
-    DEF_saveNXSPE  = False
-    DEF_saveNexus  = False
-    DEF_saveAscii  = False
+    DEF_saveSofTWNxspe  = False
+    DEF_saveSofTWNexus  = False
+    DEF_saveSofTWAscii  = False
+    DEF_saveSofQWNexus  = False
+    DEF_saveSofQWAscii  = False
 
     XML_TAG = 'TOFTOFReduction'
 
@@ -126,11 +126,11 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # save data
         self.saveDir      = ''
-        self.saveSofQW    = self.DEF_saveSofQW
-        self.saveSofTW    = self.DEF_saveSofTW
-        self.saveNXSPE    = self.DEF_saveNXSPE
-        self.saveNexus    = self.DEF_saveNexus
-        self.saveAscii    = self.DEF_saveAscii
+        self.saveSofTWNxspe = self.DEF_saveSofTWNxspe
+        self.saveSofTWNexus = self.DEF_saveSofTWNexus
+        self.saveSofTWAscii = self.DEF_saveSofTWAscii
+        self.saveSofQWNexus = self.DEF_saveSofQWNexus
+        self.saveSofQWAscii = self.DEF_saveSofQWAscii
 
     def to_xml(self):
         res = ['']
@@ -174,11 +174,11 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('keep_steps',     self.keepSteps)
 
         put('save_dir',      self.saveDir)
-        put('save_sofqw',    self.saveSofQW)
-        put('save_softw',    self.saveSofTW)
-        put('save_nxspe',    self.saveNXSPE)
-        put('save_nexus',    self.saveNexus)
-        put('save_ascii',    self.saveAscii)
+        put('saveSofTWNxspe', self.saveSofTWNxspe)
+        put('saveSofTWNexus', self.saveSofTWNexus)
+        put('saveSofTWAscii', self.saveSofTWAscii)
+        put('saveSofQWNexus', self.saveSofQWNexus)
+        put('saveSofQWAscii', self.saveSofQWAscii)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -259,11 +259,19 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.keepSteps     = get_bol('keep_steps',     self.DEF_keepSteps)
 
             self.saveDir     = get_str('save_dir')
-            self.saveSofQW   = get_bol('save_sofqw',   self.DEF_saveSofQW)
-            self.saveSofTW   = get_bol('save_softw',   self.DEF_saveSofTW)
-            self.saveNXSPE   = get_bol('save_nxspe',   self.DEF_saveNXSPE)
-            self.saveNexus   = get_bol('save_nexus',   self.DEF_saveNexus)
-            self.saveAscii   = get_bol('save_ascii',   self.DEF_saveAscii)
+
+            # for backwards compatibility:
+            SofQW   = get_bol('save_sofqw', False)
+            SofTW   = get_bol('save_softw', False)
+            NXSPE   = get_bol('save_nxspe', False)
+            Nexus   = get_bol('save_nexus', False)
+            Ascii   = get_bol('save_ascii', False)
+
+            self.saveSofTWNxspe = get_bol('saveSofTWNxspe', (SofTW and NXSPE) or self.DEF_saveSofTWNxspe)
+            self.saveSofTWNexus = get_bol('saveSofTWNexus', (SofTW and Nexus) or self.DEF_saveSofTWNexus)
+            self.saveSofTWAscii = get_bol('saveSofTWAscii', (SofTW and Ascii) or self.DEF_saveSofTWAscii)
+            self.saveSofQWNexus = get_bol('saveSofQWNexus', (SofQW and Nexus) or self.DEF_saveSofQWNexus)
+            self.saveSofQWAscii = get_bol('saveSofQWAscii', (SofQW and Ascii) or self.DEF_saveSofQWAscii)
 
     def validate_inputs(self):
         # must have vanadium for TOF correction
@@ -301,15 +309,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.error('missing vanadium comment')
 
         # saving settings must be consistent
-        if self.saveNXSPE or self.saveNexus or self.saveAscii:
-            if not self.saveDir:
-                self.error('missing directory to save the data')
-            elif not (self.saveSofQW or self.saveSofTW):
-                self.error('you must select workspaces to save')
-        elif self.saveSofQW or self.saveSofTW:
-            if not self.saveDir:
-                self.error('missing directory to save the data')
-            self.error('missing data format to save')
+        if any([self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii,
+                self.saveSofQWNexus, self.saveSofQWAscii]   ) and not self.saveDir:
+            self.error('missing directory to save the data')
 
     @staticmethod
     def error(message):
@@ -392,14 +394,21 @@ class TOFTOFScriptElement(BaseScriptElement):
     def get_time(self, workspace):
         return self.get_log(workspace, 'duration')
 
-    def save_wsgroup(self, wsgroup, suffix):
+    allowed_save_formats = ['nxspe', 'nexus', 'ascii']
+
+    def save_wsgroup(self, wsgroup, suffix, spectrumMetaData, saveFormats):
+        assert(saveFormats <= set(self.allowed_save_formats))
+        if len(saveFormats) == 0:
+            return
         self.l("# save {}".format(wsgroup))
         self.l("for ws in {}:".format(wsgroup))
         self.l("    name = ws.getComment() + {}".format(suffix))
-        if self.saveNXSPE and self.binEon:
-            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
-        if self.saveNexus:
+        if 'nxspe' in saveFormats:
+            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir,))
+        if 'nexus' in saveFormats:
             self.l("    SaveNexus(ws, join(r'{}', name + '.nxs'))".format(self.saveDir))
+        if 'ascii' in saveFormats:
+            self.l("    SaveAscii(ws, join(r'{}', name + '.txt'), SpectrumMetaData='{}')".format(self.saveDir, spectrumMetaData))
         self.l()
 
     def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
@@ -663,9 +672,11 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
-        if self.saveSofTW:
-            suf = "'_Ei_{}'.format(round(Ei,2))"
-            self.save_wsgroup(gLast, suf)
+        # save S(2theta, w):
+        suf = "'_Ei_{}'.format(round(Ei,2))"
+        #nxspe only if self.binEon
+        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
+        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
 
         if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
@@ -677,8 +688,10 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.replaceNaNs:
                 self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
-            if self.saveSofQW:
-                self.save_wsgroup(gDataBinQ, "'_SQW'")
+
+            # save S(Q, w)
+            saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofQWNexus, self.saveSofQWAscii]))
+            self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
 
         self.rename_workspaces(gData)
 

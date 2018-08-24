@@ -9,7 +9,7 @@ namespace Mantid {
 namespace VATES {
 class vtkSplatterPlotFactory;
 }
-}
+} // namespace Mantid
 
 // cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm {

@@ -44,6 +44,6 @@ struct ScopedFacilities {
 private:
   std::string defFacilityOnStart;
 };
-}
+} // namespace FacilityHelper
 
 #endif /* TESTHELPERS_FACILITYHELPER_H_ */

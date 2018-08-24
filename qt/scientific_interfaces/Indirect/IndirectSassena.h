@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTSASSENA_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTSASSENA_H_
 
-#include "ui_IndirectSassena.h"
 #include "IndirectSimulationTab.h"
+#include "ui_IndirectSassena.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

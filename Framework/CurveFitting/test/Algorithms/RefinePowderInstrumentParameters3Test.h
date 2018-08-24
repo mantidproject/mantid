@@ -26,7 +26,7 @@ namespace {
 
 //----------------------------------------------------------------------------------------------
 /** Generate workspace holding peak positions
-*/
+ */
 Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
 
   if (bankid != 1) {
@@ -68,8 +68,8 @@ Workspace2D_sptr generatePeakPositionWorkspace(int bankid) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate a table workspace for holding instrument parameters for POWGEN's
-* bank 1
-*/
+ * bank 1
+ */
 TableWorkspace_sptr generateInstrumentProfileTableBank1() {
   DataObjects::TableWorkspace *tablews = new DataObjects::TableWorkspace();
   DataObjects::TableWorkspace_sptr geomws =
@@ -111,7 +111,7 @@ TableWorkspace_sptr generateInstrumentProfileTableBank1() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse Table Workspace to a map of string, double pair
-*/
+ */
 void parseParameterTableWorkspace(TableWorkspace_sptr paramws,
                                   map<string, double> &paramvalues) {
   for (size_t irow = 0; irow < paramws->rowCount(); ++irow) {
@@ -125,7 +125,7 @@ void parseParameterTableWorkspace(TableWorkspace_sptr paramws,
 
   return;
 }
-}
+} // namespace
 
 class RefinePowderInstrumentParameters3Test : public CxxTest::TestSuite {
 public:
@@ -140,7 +140,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Fit with non Monte Carlo method.
-    * The parameters to fit include Dtt1, Zero, and Width/Tcross
+   * The parameters to fit include Dtt1, Zero, and Width/Tcross
    */
   void test_FitNonMonteCarlo() {
     // 1. Create workspaces for testing
@@ -215,7 +215,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Fit with Monte Carlo method.
-    * The parameters to fit include Dtt1, Zero, and Width/Tcross
+   * The parameters to fit include Dtt1, Zero, and Width/Tcross
    */
   void test_FitMonteCarlo() {
     // 1. Create workspaces for testing

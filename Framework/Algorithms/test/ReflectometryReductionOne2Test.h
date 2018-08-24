@@ -1,17 +1,17 @@
 #ifndef ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONE2TEST_H_
 #define ALGORITHMS_TEST_REFLECTOMETRYREDUCTIONONE2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/ReflectometryReductionOne2.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/ReflectometryReductionOne2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <algorithm>
 

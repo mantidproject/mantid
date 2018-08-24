@@ -1,10 +1,10 @@
 #ifndef TEST_INVALID_PARAMETER_H_
 #define TEST_INVALID_PARAMETER_H_
 
+#include "MantidMDAlgorithms/InvalidParameter.h"
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <boost/scoped_ptr.hpp>
-#include "MantidMDAlgorithms/InvalidParameter.h"
 
 class InvalidParameterTest : public CxxTest::TestSuite {
 public:

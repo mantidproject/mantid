@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
 #define MANTID_DATAOBJECTS_MDLEANEVENTTEST_H_
 
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataObjects/MDLeanEvent.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_array.hpp>

@@ -7,7 +7,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
@@ -108,7 +107,8 @@ public:
 
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
     std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+              Mantid::API::MatrixWorkspace_sptr>
+        correctionWorkspaces;
     TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
                                  model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(model.m_calculateCorrectionsCalled);
@@ -137,7 +137,8 @@ public:
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
 
     std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+              Mantid::API::MatrixWorkspace_sptr>
+        correctionWorkspaces;
     TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
                                  model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(!model.m_calculateCorrectionsCalled);
@@ -160,7 +161,8 @@ public:
     TestEnggVanadiumCorrectionsModel model(calibSettings, CURRENT_INSTRUMENT);
 
     std::pair<Mantid::API::ITableWorkspace_sptr,
-              Mantid::API::MatrixWorkspace_sptr> correctionWorkspaces;
+              Mantid::API::MatrixWorkspace_sptr>
+        correctionWorkspaces;
     TS_ASSERT_THROWS_NOTHING(correctionWorkspaces =
                                  model.fetchCorrectionWorkspaces("123"));
     TS_ASSERT(model.m_calculateCorrectionsCalled);

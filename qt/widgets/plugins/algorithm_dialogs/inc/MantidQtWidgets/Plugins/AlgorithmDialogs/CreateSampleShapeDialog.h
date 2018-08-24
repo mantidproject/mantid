@@ -4,14 +4,14 @@
 //---------------------------
 // Includes
 //--------------------------
-#include "ui_CreateSampleShapeDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "ui_CreateSampleShapeDialog.h"
 
-#include <QTreeWidget>
-#include <QItemDelegate>
-#include <QPoint>
 #include <QHash>
+#include <QItemDelegate>
 #include <QMap>
+#include <QPoint>
+#include <QTreeWidget>
 #include <QVector>
 
 //-----------------------------------
@@ -195,7 +195,7 @@ public:
   void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
                             const QModelIndex &index) const override;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMDIALOGS_CREATESAMPLESHAPE_H_

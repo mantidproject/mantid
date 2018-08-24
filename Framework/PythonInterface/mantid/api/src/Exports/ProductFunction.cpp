@@ -2,8 +2,8 @@
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
-using Mantid::API::ProductFunction;
 using Mantid::API::IFunction;
+using Mantid::API::ProductFunction;
 using namespace boost::python;
 
 namespace {
@@ -17,7 +17,7 @@ using setParameterType2 = void (ProductFunction::*)(const std::string &,
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
-}
+} // namespace
 
 void export_ProductFunction() {
 

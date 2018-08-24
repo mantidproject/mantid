@@ -77,6 +77,9 @@ SUCCESS_RESPONSE = r'^OK( \((.+)\))?$'
 # Point all "deleted" DOIs to here:
 INVALID_URL = 'http://www.datacite.org/invalidDOI'
 
+PLAINTEXT_CONTENT_HEADER = 'Content-Type:text/plain;charset=UTF-8'
+XML_CONTENT_HEADER = 'Content-Type:application/xml;charset=UTF-8'
+
 
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
@@ -190,7 +193,7 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     return ET.tostring(root, encoding='utf-8')
 
 
-def _http_request(body, method, url, options):
+def _http_request(body, method, url, options, content_type=None):
     '''Issue an HTTP request with the given options.
 
     We are forced to use a command line tool for this rather than use the
@@ -207,11 +210,13 @@ def _http_request(body, method, url, options):
     args = [
         'curl',
         '--user',    options.username + ':' + options.password,
-        '--header',  'Content-Type:text/plain;charset=UTF-8',
         # The bodies of HTTP messages must be encoded:
         '--data',    body.encode('utf-8'),
         '--request', method,
     ]
+    if content_type is not None:
+        args.extend(['--header',  content_type,])
+
     if 'http_proxy' in os.environ:
         args.extend(['--proxy', os.environ['http_proxy']])
 
@@ -266,9 +271,10 @@ def create_or_update_metadata(xml_form, base, doi, options):
     print("\nAttempting to create / update metadata:")
     result = _http_request(
         body    = xml_form,
-        method  = "PUT",
-        url     = base + "metadata/" + doi,
-        options = options
+        method  = "POST",
+        url     = base + "metadata",
+        options = options,
+        content_type=XML_CONTENT_HEADER
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
@@ -287,7 +293,8 @@ def create_or_update_doi(base, doi, destination, options):
         body    = 'doi=' + doi + '\n' + 'url=' + destination,
         method  = "PUT",
         url     = base + "doi/" + doi,
-        options = options
+        options = options,
+        content_type = XML_CONTENT_HEADER
     )
 
     if not re.match(SUCCESS_RESPONSE, result[0]):
@@ -420,7 +427,7 @@ def run(args):
                                                          prev_version_str, shortened_prev_version_str)
 
     if args.test:
-        server_url_base = 'https://test.datacite.org/mds/'
+        server_url_base = 'https://mds.test.datacite.org/'
     else:
         server_url_base = 'https://mds.datacite.org/'
 

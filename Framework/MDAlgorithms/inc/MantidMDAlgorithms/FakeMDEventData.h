@@ -59,7 +59,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_FAKEMDEVENTDATA_H_ */

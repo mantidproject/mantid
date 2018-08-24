@@ -74,6 +74,8 @@ public:
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override;
 
+  bool dataReset() override;
+
 private:
   std::unique_ptr<KafkaEventStreamDecoder> m_decoder = nullptr;
   std::string m_instrumentName;

@@ -1,6 +1,7 @@
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+
 #include "MantidGeometry/Crystal/CrystalStructure.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 
@@ -25,8 +26,9 @@ void export_Sample() {
       .def("getName", &Sample::getName,
            return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the string name of the sample")
-      .def("getOrientedLattice", (const OrientedLattice &(Sample::*)() const) &
-                                     Sample::getOrientedLattice,
+      .def("getOrientedLattice",
+           (const OrientedLattice &(Sample::*)() const) &
+               Sample::getOrientedLattice,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Get the oriented lattice for this sample")
       .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
@@ -64,10 +66,13 @@ void export_Sample() {
            "Set the height in mm.")
       .def("setWidth", &Sample::setWidth, (arg("self"), arg("width")),
            "Set the width in mm.")
+      .def("getShape", &Sample::getShape, arg("self"),
+           "Returns a shape of a Sample object.",
+           return_value_policy<reference_existing_object>())
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"),
            "Gets the number of samples in this collection")
-      .def("__getitem__", &Sample::operator[], (arg("self"), arg("index")),
+      .def("__getitem__", &Sample::operator[],(arg("self"), arg("index")),
            return_internal_reference<>());
 }

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
+#include "MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h"
 
 using Mantid::CurveFitting::Algorithms::VesuvioCalculateGammaBackground;
 

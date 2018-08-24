@@ -25,9 +25,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_
 #define MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_
+#include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <QColor>
 #include <QStandardItem>
-#include "MantidQtWidgets/Common/Batch/Cell.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -56,7 +56,7 @@ void setBackgroundColor(QStandardItem &item,
 
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item);
 Cell extractCellPropertiesFromItem(QStandardItem const &item);
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_

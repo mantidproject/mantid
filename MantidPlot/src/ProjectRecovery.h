@@ -55,7 +55,7 @@ public:
   ~ProjectRecovery();
 
   /// Attempts recovery of the most recent checkpoint
-  bool attemptRecovery();
+  void attemptRecovery();
   /// Checks if recovery is required
   bool checkForRecovery() const noexcept;
 
@@ -81,11 +81,12 @@ private:
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
 
-  /// Loads a recovery checkpoint in the given folder - TODO in future PR
-  // bool loadRecoveryCheckpoint(const Poco::Path &path);
+  /// Loads a recovery checkpoint in the given folder
+  void loadRecoveryCheckpoint(const Poco::Path &path);
 
   /// Open a recovery checkpoint in the scripting window
-  bool openInEditor(const Poco::Path &inputFolder);
+  void openInEditor(const Poco::Path &inputFolder,
+                    const Poco::Path &historyDest);
 
   /// Wraps the thread in a try catch to log any failures
   void projectSavingThreadWrapper();

@@ -2,14 +2,14 @@
 
 #include <algorithm>
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
@@ -17,10 +17,10 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
@@ -317,12 +317,12 @@ void ConvertToMD::addExperimentInfo(API::IMDEventWorkspace_sptr &mdEventWS,
 }
 
 /**
-* Copy over the metadata from the input matrix workspace to output
-*MDEventWorkspace
-* @param mdEventWS :: The output MDEventWorkspace where metadata are copied to.
-*The source of the metadata is the input matrix workspace
-*
-*/
+ * Copy over the metadata from the input matrix workspace to output
+ *MDEventWorkspace
+ * @param mdEventWS :: The output MDEventWorkspace where metadata are copied to.
+ *The source of the metadata is the input matrix workspace
+ *
+ */
 void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
   // found detector which is not a monitor to get proper bin boundaries.
@@ -516,13 +516,13 @@ bool ConvertToMD::buildTargetWSDescription(
 }
 
 /**
-* Create new MD workspace and set up its box controller using algorithm's box
-* controllers properties
-* @param targWSDescr :: Description of workspace to create
-* @param filebackend :: true if the workspace will have a file back end
-* @param filename :: file to use for file back end of workspace
-* @return :: Shared pointer for the created workspace
-*/
+ * Create new MD workspace and set up its box controller using algorithm's box
+ * controllers properties
+ * @param targWSDescr :: Description of workspace to create
+ * @param filebackend :: true if the workspace will have a file back end
+ * @param filename :: file to use for file back end of workspace
+ * @return :: Shared pointer for the created workspace
+ */
 API::IMDEventWorkspace_sptr
 ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
                                   const bool filebackend,
@@ -588,12 +588,12 @@ void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
 }
 
 /**Check if the target workspace new or exists and we need to create new
-*workspace
-*@param spws -- shared pointer to target MD workspace, which can be undefined if
-*the workspace does not exist
-*
-*@returns true if one needs to create new workspace and false otherwise
-*/
+ *workspace
+ *@param spws -- shared pointer to target MD workspace, which can be undefined
+ *if the workspace does not exist
+ *
+ *@returns true if one needs to create new workspace and false otherwise
+ */
 bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
 
   bool createNewWs(false);
@@ -607,22 +607,22 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
 }
 
 /** Method takes min-max values from algorithm parameters if they are present or
-*calculates default min-max values if these values
+ *calculates default min-max values if these values
  *  were not supplied to the method or the supplied value is incorrect.
  *
-*@param inWS     -- the shared pointer to the source workspace
-*@param QMode    -- the string which defines algorithms Q-conversion mode
-*@param dEMode   -- the string describes the algorithms energy conversion mode
-*@param QFrame   -- in Q3D case this describes target coordinate system and is
-*ignored in any other caste
-*@param ConvertTo -- The parameter describing Q-scaling transformations
-*@param otherDim -- the vector of other dimension names (if any)
-*  Input-output values:
-*@param minVal   -- the vector with min values for the algorithm
-*@param maxVal   -- the vector with max values for the algorithm
-*
-*
-*/
+ *@param inWS     -- the shared pointer to the source workspace
+ *@param QMode    -- the string which defines algorithms Q-conversion mode
+ *@param dEMode   -- the string describes the algorithms energy conversion mode
+ *@param QFrame   -- in Q3D case this describes target coordinate system and is
+ *ignored in any other caste
+ *@param ConvertTo -- The parameter describing Q-scaling transformations
+ *@param otherDim -- the vector of other dimension names (if any)
+ *  Input-output values:
+ *@param minVal   -- the vector with min values for the algorithm
+ *@param maxVal   -- the vector with max values for the algorithm
+ *
+ *
+ */
 void ConvertToMD::findMinMax(
     const Mantid::API::MatrixWorkspace_sptr &inWS, const std::string &QMode,
     const std::string &dEMode, const std::string &QFrame,
@@ -749,5 +749,5 @@ void ConvertToMD::setupFileBackend(
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

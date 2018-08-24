@@ -1,9 +1,9 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IALCPEAKFITTINGVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_IALCPEAKFITTINGVIEW_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 #include "DllConfig.h"
 

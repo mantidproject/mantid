@@ -10,7 +10,7 @@ namespace CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncUnweightedLeastSquares");
-}
+} // namespace
 
 DECLARE_COSTFUNCTION(CostFuncUnweightedLeastSquares, Unweighted least squares)
 

@@ -83,8 +83,9 @@ void PoldiAnalyseResiduals::init() {
                   "Input workspace containing the fitted data.");
   declareProperty("LambdaMin", 1.1, "Minimum wavelength to be considered.");
   declareProperty("LambdaMax", 5.0, "Maximum wavelength to be considered.");
-  declareProperty("MaxIterations", 0, "Maximum number of iterations. Default 0 "
-                                      "does not limit number of iterations.");
+  declareProperty("MaxIterations", 0,
+                  "Maximum number of iterations. Default 0 "
+                  "does not limit number of iterations.");
   declareProperty(
       "MaxRelativeChange", 1.0,
       "Relative change in counts (in percent) that should be reached.");
@@ -248,5 +249,5 @@ void PoldiAnalyseResiduals::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(sum));
 }
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid

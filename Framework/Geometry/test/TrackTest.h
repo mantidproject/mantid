@@ -1,13 +1,13 @@
 #ifndef MANTID_TESTTRACK__
 #define MANTID_TESTTRACK__
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Geometry;

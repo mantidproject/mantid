@@ -1,10 +1,10 @@
 #include "MantidCrystal/ShowPossibleCells.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -83,5 +83,5 @@ void ShowPossibleCells::exec() {
   this->setProperty("NumberOfCells", static_cast<int>(num_cells));
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

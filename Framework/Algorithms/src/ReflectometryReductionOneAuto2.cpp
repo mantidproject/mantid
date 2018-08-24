@@ -24,7 +24,7 @@ namespace {
 std::string const OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX("IvsQ_binned");
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
 std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -793,7 +793,6 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   alg->setProperty("FirstTransmissionRun", "");
   alg->setProperty("SecondTransmissionRun", "");
   alg->setProperty("CorrectionAlgorithm", "None");
-  alg->setProperty("ThetaIn", Mantid::EMPTY_DBL());
   alg->setProperty("ProcessingInstructions", "0");
   for (size_t i = 0; i < group->size(); ++i) {
     const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);

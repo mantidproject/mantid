@@ -9,10 +9,10 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <cxxtest/TestSuite.h>
 
+using MantidQt::API::FakeMWRunFiles;
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
 using MantidQt::API::FindFilesWorker;
-using MantidQt::API::FakeMWRunFiles;
 
 class FindFilesWorkerTest : public CxxTest::TestSuite {
 public:

@@ -1,9 +1,9 @@
 #ifndef MANTID_GEOMETRY_GROUPTRANSFORMATION_H_
 #define MANTID_GEOMETRY_GROUPTRANSFORMATION_H_
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
