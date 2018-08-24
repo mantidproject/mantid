@@ -223,7 +223,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         l2_2 = mtd[ws2].getRun().getLogData('L2').value
         return fabs(l2_1 - l2_2) < tolerance
 
-    def PyExec(self):
+    def PyExec(self): # noqa: C901
 
         process = self.getPropertyValue('ProcessAs')
         ws = '__' + self.getPropertyValue('OutputWorkspace')
