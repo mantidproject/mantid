@@ -92,7 +92,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.view.set_run_edit_text("1234,1235,1236")
 
         self.presenter.handle_run_changed_by_user()
-        #self.Runner(self.presenter._model.thread_manager)
+        self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.presenter.filenames, ["1234.nxs"])
         self.assertEqual(self.presenter.runs, [1234])
@@ -298,7 +298,6 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
-        self.view.disable_load_buttons.assert_not_called()
 
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
         # set up previous data
@@ -339,10 +338,9 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.Runner(self.presenter._model.thread_manager)
 
         self.presenter.handle_increment_run()
-        #self.Runner(self.presenter._model.thread_manager)
+        self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
-        self.view.disable_load_buttons.assert_not_called()
 
 
 if __name__ == '__main__':
