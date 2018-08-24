@@ -1,10 +1,9 @@
-
-import PyQt4.QtGui as QtGui
+from qtpy import QtWidgets
 
 
 def mockQapp():
-    qapp = QtGui.QApplication.instance()
+    qapp = QtWidgets.QApplication.instance()
     if qapp is None:
-        return QtGui.QApplication([''])
+        return QtWidgets.QApplication([''])
     else:
         return qapp

@@ -1,7 +1,6 @@
-import PyQt4.QtGui as QtGui
+from qtpy import QtWidgets
 
 
 def warning(error):
-
-    ex = QtGui.QWidget()
-    QtGui.QMessageBox.warning(ex, "Error", str(error))
+    ex = QtWidgets.QWidget()
+    QtWidgets.QMessageBox.warning(ex, "Error", str(error))

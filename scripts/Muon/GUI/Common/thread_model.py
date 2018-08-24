@@ -1,17 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4.QtCore import QThread
-from PyQt4 import QtCore
+from qtpy.QtCore import QThread, Signal
 from Muon.GUI.Common import message_box
 
 
 class ThreadModel(QThread):
-
     """
     A wrapper to allow threading with
     the MaxEnt models.
     """
-    exceptionSignal = QtCore.pyqtSignal(object)
+    exceptionSignal = Signal(object)
 
     def __init__(self, model):
         QThread.__init__(self)
