@@ -27,6 +27,7 @@ Improvements
 ############
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+- :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 
 Bugfixes
 ########
