@@ -458,6 +458,9 @@ void LoadILLSANS::moveDetectorsD33(const DetectorPosition &detPos) {
   moveDetectorVertical(-detPos.shiftDown, "front_detector_bottom");
   // Set the sample log
   API::Run &runDetails = m_localWorkspace->mutableRun();
+  if (runDetails.hasProperty("L2")) {
+    runDetails.removeProperty("L2");
+  }
   runDetails.addProperty<double>("L2", detPos.distanceSampleRear);
 }
 
@@ -481,6 +484,9 @@ void LoadILLSANS::moveDetectorDistance(double distance,
   g_log.debug() << "Moving component '" << componentName
                 << "' to Z = " << distance << '\n';
   API::Run &runDetails = m_localWorkspace->mutableRun();
+  if (runDetails.hasProperty("L2")) {
+    runDetails.removeProperty("L2");
+  }
   runDetails.addProperty<double>("L2", distance);
 }
 
