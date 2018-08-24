@@ -1,7 +1,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
-#include "MantidGeometry/Instrument/DetectorInfoPythonIterator.h"
+#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -17,7 +17,7 @@
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::DetectorInfoItem;
 using Mantid::Geometry::DetectorInfoIterator;
-using Mantid::Geometry::DetectorInfoPythonIterator;
+using Mantid::PythonInterface::DetectorInfoPythonIterator;
 
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;

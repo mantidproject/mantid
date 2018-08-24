@@ -1,11 +1,11 @@
-#include "MantidGeometry/Instrument/DetectorInfoPythonIterator.h"
+#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/module.hpp>
 
-using Mantid::Geometry::DetectorInfoPythonIterator;
+using Mantid::PythonInterface::DetectorInfoPythonIterator;
 using namespace boost::python;
 
 // Export DetectorInfoPythonIterator

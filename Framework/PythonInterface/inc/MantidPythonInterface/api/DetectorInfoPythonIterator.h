@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_DETECTORINFOPYTHONITERATOR_H_
-#define MANTID_GEOMETRY_DETECTORINFOPYTHONITERATOR_H_
+#ifndef MANTID_PYTHONINTERFACE_DETECTORINFOPYTHONITERATOR_H_
+#define MANTID_PYTHONINTERFACE_DETECTORINFOPYTHONITERATOR_H_
 
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
@@ -13,7 +13,7 @@ using Mantid::Geometry::DetectorInfoIterator;
 using namespace boost::python;
 
 namespace Mantid {
-namespace Geometry {
+namespace PythonInterface {
 
 /** DetectorInfoPythonIterator
 
@@ -74,7 +74,7 @@ private:
   bool m_firstOrDone;
 };
 
-} // namespace Geometry
+} // namespace PythonInterface
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_DETECTORINFOPYTHONITERATOR_H_ */
+#endif /* MANTID_PYTHONINTERFACE_DETECTORINFOPYTHONITERATOR_H_ */
