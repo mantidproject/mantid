@@ -75,12 +75,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.keepSteps     = False
 
         # save data
-        scriptElement.saveDir      = ''
-        scriptElement.saveSofQW    = False
-        scriptElement.saveSofTW    = False
-        scriptElement.saveNXSPE    = False
-        scriptElement.saveNexus    = False
-        scriptElement.saveAscii    = False
+        scriptElement.saveDir        = ''
+        scriptElement.saveSofTWNxspe = False
+        scriptElement.saveSofTWNexus = False
+        scriptElement.saveSofTWAscii = False
+        scriptElement.saveSofQWNexus = False
+        scriptElement.saveSofQWAscii = False
 
     @staticmethod
     def setValidInputs(scriptElement):
@@ -129,12 +129,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.keepSteps     = False
 
         # save data
-        scriptElement.saveDir      = ''
-        scriptElement.saveSofQW    = False
-        scriptElement.saveSofTW    = False
-        scriptElement.saveNXSPE    = False
-        scriptElement.saveNexus    = False
-        scriptElement.saveAscii    = False
+        scriptElement.saveDir        = ''
+        scriptElement.saveSofTWNxspe = False
+        scriptElement.saveSofTWNexus = False
+        scriptElement.saveSofTWAscii = False
+        scriptElement.saveSofQWNexus = False
+        scriptElement.saveSofQWAscii = False
 
     def setUp(self):
         self.scriptElement = TOFTOFScriptElement()
@@ -154,20 +154,11 @@ class TOFTOFScriptElementTest(unittest.TestCase):
                 self.assertEqual(getattr(self.scriptElement, name), getattr(scriptElement2, name))
 
     def test_that_script_is_executable_in_mantid(self):
-        self.scriptElement.reset()
-        self.scriptElement.facility_name   = 'MLZ'
-        self.scriptElement.instrument_name = 'TOFTOF'
-
-        # prefix of (some) workspace names
-        self.scriptElement.prefix   = 'ws'
-
         # data files are here
         self.scriptElement.dataDir  = ''
 
         # vanadium runs & comment
         self.scriptElement.vanRuns  = 'TOFTOFTestdata.nxs'
-        self.scriptElement.vanCmnt  = 'vanadium comment'
-        self.scriptElement.vanTemp  = OptionalFloat(None)
 
         # empty can runs, comment, and factor
         self.scriptElement.ecRuns   = 'TOFTOFTestdata.nxs'
@@ -180,17 +171,6 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             [unicode('TOFTOFTestdata.nxs'), unicode('H2O 34C'), OptionalFloat(34.0)]
         ]
 
-        # additional parameters
-        self.scriptElement.binEon        = True
-        self.scriptElement.binEstart     = -1.0
-        self.scriptElement.binEstep      = 0.4
-        self.scriptElement.binEend       = 1.8
-
-        self.scriptElement.binQon        = True
-        self.scriptElement.binQstart     = 0.4
-        self.scriptElement.binQstep      = 0.2
-        self.scriptElement.binQend       = 1.0
-
         self.scriptElement.maskDetectors = '1,2'
 
         # options
@@ -200,14 +180,6 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.replaceNaNs   = True
         self.scriptElement.createDiff    = True
         self.scriptElement.keepSteps     = True
-
-        # save data
-        self.scriptElement.saveDir      = ''
-        self.scriptElement.saveSofQW    = False
-        self.scriptElement.saveSofTW    = False
-        self.scriptElement.saveNXSPE    = False
-        self.scriptElement.saveNexus    = False
-        self.scriptElement.saveAscii    = False
 
         with self.assertRaisesNothing("Generated reduction script cannot be executed."):
             exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
@@ -223,7 +195,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         if sys.version_info >= (3, 5):
             HasNullBytesError = ValueError
         try:
-            compiledScript = compile(script + "\0", '<string>', 'exec')
+            compiledScript = compile(script, '<string>', 'exec')
         except SyntaxError as e:
             self.fail("generated script has a syntax error: '{}'".format(e))
         except HasNullBytesError as e:
@@ -279,10 +251,9 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             ({'vanRuns': '0:2', 'vanCmnt': ''}, True),
             ({'vanRuns': '0:2', 'vanCmnt': 'Comment for Vanadium'}, False),
 
-            ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': ''}, True),
-            ({'saveNXSPE': True, 'saveSofQW': False, 'saveDir': ''}, True),
-            ({'saveNXSPE': True, 'saveSofQW': False, 'saveDir': '/some/SaveDir/'}, True),
-            ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': '/some/SaveDir/'}, False),
+            ({'saveSofTWNxspe': True, 'saveSofTWAscii': True,  'saveDir': ''}, True),
+            ({'saveSofTWNexus': True, 'saveSofQWNexus': False, 'saveDir': ''}, True),
+            ({'saveSofQWNexus': True, 'saveSofQWAscii': True,  'saveDir': '/some/SaveDir/'}, False),
         ]
 
         def executeSubTest(inputs, shouldThrow):

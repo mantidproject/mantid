@@ -81,12 +81,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.keepSteps     = True
 
         # save data
-        scriptElement.saveDir      = ''
-        scriptElement.saveSofQW    = False
-        scriptElement.saveSofTW    = True
-        scriptElement.saveNXSPE    = True
-        scriptElement.saveNexus    = False
-        scriptElement.saveAscii    = True
+        scriptElement.saveDir        = ''
+        scriptElement.saveSofTWNxspe = False
+        scriptElement.saveSofTWNexus = True
+        scriptElement.saveSofTWAscii = True
+        scriptElement.saveSofQWNexus = False
+        scriptElement.saveSofQWAscii = True
 
         self.setupWidget.set_state(scriptElement)
 
