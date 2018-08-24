@@ -358,7 +358,6 @@ set ( INC_FILES
 	inc/MantidAPI/Workspace_fwd.h
 	inc/MantidAPI/SpectrumInfoIterator.h
 	inc/MantidAPI/SpectrumInfoItem.h
-	inc/MantidAPI/SpectrumInfoPythonIterator.h
 )
 
 set ( TEST_FILES

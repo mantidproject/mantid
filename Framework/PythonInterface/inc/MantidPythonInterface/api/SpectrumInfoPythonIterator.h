@@ -1,5 +1,5 @@
-#ifndef MANTID_API_SPECTRUMINFOPYTHONITERATOR_H_
-#define MANTID_API_SPECTRUMINFOPYTHONITERATOR_H_
+#ifndef MANTID_PYTHONINTERFACE_SPECTRUMINFOPYTHONITERATOR_H_
+#define MANTID_PYTHONINTERFACE_SPECTRUMINFOPYTHONITERATOR_H_
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/SpectrumInfoItem.h"
@@ -13,7 +13,7 @@ using Mantid::API::SpectrumInfoIterator;
 using namespace boost::python;
 
 namespace Mantid {
-namespace API {
+namespace PythonInterface {
 
 /** SpectrumInfoPythonIterator
 
@@ -77,7 +77,7 @@ private:
   bool m_firstOrDone;
 };
 
-} // namespace API
+} // namespace PythonInterface
 } // namespace Mantid
 
-#endif /* MANTID_API_SPECTRUMINFOPYTHONITERATOR_H_ */
+#endif /* MANTID_PYTHONINTERFACE_SPECTRUMINFOPYTHONITERATOR_H_ */

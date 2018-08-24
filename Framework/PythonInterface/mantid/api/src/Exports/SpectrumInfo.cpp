@@ -1,7 +1,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/SpectrumInfoItem.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
-#include "MantidAPI/SpectrumInfoPythonIterator.h"
+#include "MantidPythonInterface/api/SpectrumInfoPythonIterator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/python/class.hpp>
@@ -12,7 +12,7 @@
 using Mantid::API::SpectrumInfo;
 using Mantid::API::SpectrumInfoItem;
 using Mantid::API::SpectrumInfoIterator;
-using Mantid::API::SpectrumInfoPythonIterator;
+using Mantid::PythonInterface::SpectrumInfoPythonIterator;
 using Mantid::SpectrumDefinition;
 using namespace boost::python;
 

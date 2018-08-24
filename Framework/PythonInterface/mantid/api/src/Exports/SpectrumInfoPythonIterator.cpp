@@ -1,11 +1,11 @@
-#include "MantidAPI/SpectrumInfoPythonIterator.h"
+#include "MantidPythonInterface/api/SpectrumInfoPythonIterator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/module.hpp>
 
-using Mantid::API::SpectrumInfoPythonIterator;
+using Mantid::PythonInterface::SpectrumInfoPythonIterator;
 using namespace boost::python;
 
 // Export SpectrumInfoPythonIterator
