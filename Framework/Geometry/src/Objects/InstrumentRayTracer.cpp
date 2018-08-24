@@ -149,6 +149,9 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 
     // Quick test. If this suceeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
+
+      std::cout << "IRT Component Name: " << node->getFullName() << std::endl;
+
       if (ICompAssembly_const_sptr assembly =
               boost::dynamic_pointer_cast<const ICompAssembly>(node)) {
         assembly->testIntersectionWithChildren(testRay, nodeQueue);

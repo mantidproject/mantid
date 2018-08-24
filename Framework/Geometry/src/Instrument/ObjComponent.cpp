@@ -108,6 +108,9 @@ bool ObjComponent::isOnSide(const V3D &point) const {
  * set
  */
 int ObjComponent::interceptSurface(Track &track) const {
+
+  std::cout << "interceptSurface Component Name: " << getFullName() << std::endl;
+
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
     throw Kernel::Exception::NullPointerException(
@@ -136,6 +139,8 @@ int ObjComponent::interceptSurface(Track &track) const {
     track.addLink(in, out, out.distance(track.startPoint()), *(this->shape()),
                   this->getComponentID());
   }
+
+  std::cout << "Number of Links OC: " << track.count() << std::endl;
 
   return intercepts;
 }
