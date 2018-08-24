@@ -32,21 +32,22 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 
 namespace {
 
-template<class ET>
-const std::vector<ET> &getEventVector(const EventList &el);
+template <class ET> const std::vector<ET> &getEventVector(const EventList &el);
 
-template<>
+template <>
 const std::vector<Types::Event::TofEvent> &getEventVector(const EventList &el) {
   return el.getEvents();
 }
 
-template<>
-const std::vector<DataObjects::WeightedEvent> &getEventVector(const EventList &el) {
+template <>
+const std::vector<DataObjects::WeightedEvent> &
+getEventVector(const EventList &el) {
   return el.getWeightedEvents();
 }
 
-template<>
-const std::vector<DataObjects::WeightedEventNoTime> &getEventVector(const EventList &el) {
+template <>
+const std::vector<DataObjects::WeightedEventNoTime> &
+getEventVector(const EventList &el) {
   return el.getWeightedEventsNoTime();
 }
 
@@ -105,7 +106,8 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1,
         if (difftof)
           outss << "Diff-TOF: " << e1.tof() << " vs. " << e2.tof() << ";";
         if (diffweight)
-          outss << "Diff-Weight: " << e1.weight() << " vs. " << e2.weight() << ";";
+          outss << "Diff-Weight: " << e1.weight() << " vs. " << e2.weight()
+                << ";";
 
         logger.information(outss.str());
       }
@@ -532,7 +534,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
         } else {
           tempNumUnequal = compareEventsListInDetails(
               el1, el2, toleranceTOF, toleranceWeight, tolerancePulse,
-              printdetail, tempNumPulses, tempNumTof, tempNumBoth, tempNumWeight);
+              printdetail, tempNumPulses, tempNumTof, tempNumBoth,
+              tempNumWeight);
         }
 
         mismatchedEvent = true;
@@ -572,8 +575,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
            << ") events are differrent. " << numUnequalTOFEvents
            << " have different TOF; " << numUnequalPulseEvents
            << " have different pulse time; " << numUnequalBothEvents
-           << " have different in both TOF and pulse time; " << numUnequalWeights
-           << " have different weights."
+           << " have different in both TOF and pulse time; "
+           << numUnequalWeights << " have different weights."
            << "\n";
 
       mess << "Mismatched event lists include " << vec_mismatchedwsindex.size()
