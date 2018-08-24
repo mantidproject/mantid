@@ -510,6 +510,9 @@ RectangularDetector::getComponentByName(const std::string &cname,
  */
 void RectangularDetector::testIntersectionWithChildren(
     Track &testRay, std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
+
+  std::cout << "RectangularDetector Component Name: " << getFullName() << std::endl;
+
   /// Base point (x,y,z) = position of pixel 0,0
   V3D basePoint;
 
@@ -522,6 +525,10 @@ void RectangularDetector::testIntersectionWithChildren(
   basePoint = getAtXY(0, 0)->getPos();
   horizontal = getAtXY(xpixels() - 1, 0)->getPos() - basePoint;
   vertical = getAtXY(0, ypixels() - 1)->getPos() - basePoint;
+
+  std::cout << "BASEPOINT : " << basePoint << std::endl;
+  std::cout << "HORIZONTAL : " << horizontal << std::endl;
+  std::cout << "VERTICAL : " << vertical << std::endl;
 
   // The beam direction
   V3D beam = testRay.direction();
@@ -550,7 +557,9 @@ void RectangularDetector::testIntersectionWithChildren(
   double u = (double(xpixels() - 1) * tuv[1] + 0.5);
   double v = (double(ypixels() - 1) * tuv[2] + 0.5);
 
-  //  std::cout << u << ", " << v << "\n";
+  std::cout << "xpixels : " << xpixels() << std::endl;
+  std::cout << "ypixels : " << ypixels() << std::endl;
+  std::cout << "\n U V Values: " << u << ", " << v << "\n";
 
   // In indices
   int xIndex = int(u);
@@ -570,6 +579,8 @@ void RectangularDetector::testIntersectionWithChildren(
   auto comp = getAtXY(xIndex, yIndex);
   testRay.addLink(intersec, intersec, 0.0, *(comp->shape()),
                   comp->getComponentID());
+
+  std::cout << "Number of Links RD: " << testRay.count() << std::endl;
 }
 
 //-------------------------------------------------------------------------------------------------

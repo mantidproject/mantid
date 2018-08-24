@@ -4,8 +4,9 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 #include <deque>
 #include <iterator>
@@ -41,89 +42,142 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-
-
 namespace Mantid {
 namespace Geometry {
 namespace InstrumentRayTracer2 {
 
-using Kernel::V3D;
 using Kernel::Matrix;
+using Kernel::Quat;
+using Kernel::V3D;
 using Links = Track::LType;
 using Types = Mantid::Beamline::ComponentType;
 
 namespace IntersectionHelpers {
 
-  void checkIntersectsWithRectangularBank(Track &testRay, ComponentInfo &componentInfo, size_t componentIndex) {
-    /// Base point (x,y,z) = position of pixel 0,0
-    V3D basePoint;
+void checkIntersectsWithRectangularBank(Track &testRay,
+                                        const ComponentInfo &componentInfo,
+                                        size_t componentIndex) {
+  /// Base point (x,y,z) = position of pixel 0,0
+  V3D basePoint;
 
-    /// Vertical (y-axis) basis vector of the detector
-    V3D vertical;
+  /// Vertical (y-axis) basis vector of the detector
+  V3D vertical;
 
-    /// Horizontal (x-axis) basis vector of the detector
-    V3D horizontal;
+  /// Horizontal (x-axis) basis vector of the detector
+  V3D horizontal;
 
-    //basePoint = getAtXY(0, 0)->getPos();
+  // Get the corners of the detector
+  auto corners = componentInfo.quadrilateralComponent(componentIndex);
 
-    //horizontal = getAtXY(xpixels() - 1, 0)->getPos() - basePoint;
+  basePoint = componentInfo.position(corners.bottomLeft);
 
-    //vertical = getAtXY(0, ypixels() - 1)->getPos() - basePoint;
+  V3D bottomRight = componentInfo.position(corners.bottomRight);
+  V3D topLeft = componentInfo.position(corners.topLeft);
 
-    // The beam direction
-    V3D beam = testRay.direction();
+  horizontal = bottomRight - basePoint;
+  vertical = topLeft - basePoint;
 
-    // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4,
-    // 2011),
-    // We build a matrix to solve the linear equation:
-    Matrix<double> mat(3, 3);
-    mat.setColumn(0, beam * -1.0);
-    mat.setColumn(1, horizontal);
-    mat.setColumn(2, vertical);
-    mat.Invert();
+  std::cout << "BASEPOINT : " << basePoint << std::endl;
+  std::cout << "HORIZONTAL : " << horizontal << std::endl;
+  std::cout << "VERTICAL : " << vertical << std::endl;
 
-    // Multiply by the inverted matrix to find t,u,v
-    V3D tuv = mat * (testRay.startPoint() - basePoint);
-    //  std::cout << tuv << "\n";
+  // The beam direction
+  V3D beam = testRay.direction();
 
-    // Intersection point
-    V3D intersec = beam;
-    intersec *= tuv[0];
+  // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4,
+  // 2011),
+  // We build a matrix to solve the linear equation:
+  Matrix<double> mat(3, 3);
+  mat.setColumn(0, beam * -1.0);
+  mat.setColumn(1, horizontal);
+  mat.setColumn(2, vertical);
+  mat.Invert();
 
-    // t = coordinate along the line
-    // u,v = coordinates along horizontal, vertical
-    // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
-    // base point is at the CENTER of pixel 0,0.
-    double u = (double(xpixels() - 1) * tuv[1] + 0.5);
-    double v = (double(ypixels() - 1) * tuv[2] + 0.5);
+  // Multiply by the inverted matrix to find t,u,v
+  V3D tuv = mat * (testRay.startPoint() - basePoint);
+  //  std::cout << tuv << "\n";
 
-    //  std::cout << u << ", " << v << "\n";
+  // Intersection point
+  V3D intersec = beam;
+  intersec *= tuv[0];
 
-    // In indices
-    int xIndex = int(u);
-    int yIndex = int(v);
+  // t = coordinate along the line
+  // u,v = coordinates along horizontal, vertical
+  // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
+  // base point is at the CENTER of pixel 0,0.
 
-    // Out of range?
-    if (xIndex < 0)
-      return;
-    if (yIndex < 0)
-      return;
-    if (xIndex >= xpixels())
-      return;
-    if (yIndex >= ypixels())
-      return;
+  double u = (double(corners.nX - 1) * tuv[1] + 0.5);
+  double v = (double(corners.nY - 1) * tuv[2] + 0.5);
 
-    // TODO: Do I need to put something smart here for the first 3 parameters?
-    //componentInfo.componentID();
-    //componentInfo.shape();
+  std::cout << "\n U V Values: " << u << ", " << v << "\n";
 
-    auto comp = getAtXY(xIndex, yIndex);
-    testRay.addLink(intersec, intersec, 0.0, *(comp->shape()),
-      comp->getComponentID());
+  // In indices
+  int xIndex = int(u);
+  int yIndex = int(v);
+
+  // Out of range?
+  if (xIndex < 0)
+    return;
+  if (yIndex < 0)
+    return;
+  if (xIndex >= corners.nX)
+    return;
+  if (yIndex >= corners.nY)
+    return;
+
+  // TODO: Do I need to put something smart here for the first 3 parameters?
+  // componentInfo.componentID();
+  // componentInfo.shape();
+  testRay.addLink(intersec, intersec, 0.0, componentInfo.shape(componentIndex),
+                  componentInfo.componentID(componentIndex)->getComponentID());
+
+  std::cout << testRay.count() << std::endl;
+}
+
+void interceptSurface(Track &track, const ComponentInfo &componentInfo,
+                      size_t componentIndex) {
+
+  // TODO: If scaling parameters are ever enabled, would they need need to be
+  // used here?
+  V3D factored = track.startPoint() - componentInfo.position(componentIndex);
+  Quat unrotate = componentInfo.rotation(componentIndex);
+  unrotate.inverse();
+  unrotate.rotate(factored);
+  V3D trkStart = factored;
+
+  V3D factored2 = track.direction();
+  Quat unrotate2 = componentInfo.rotation(componentIndex);
+  unrotate2.inverse();
+  unrotate2.rotate(factored2);
+  V3D trkDirection = factored2;
+
+  Track probeTrack(trkStart, trkDirection);
+  int intercepts =
+      componentInfo.shape(componentIndex).interceptSurface(probeTrack);
+
+  Track::LType::const_iterator it;
+  for (it = probeTrack.cbegin(); it != probeTrack.cend(); ++it) {
+    V3D in = it->entryPoint;
+    componentInfo.rotation(componentIndex).rotate(in);
+
+    // use the scale factor
+    in *= componentInfo.scaleFactor(componentIndex);
+    in += componentInfo.position(componentIndex);
+    V3D out = it->exitPoint;
+    componentInfo.rotation(componentIndex).rotate(out);
+
+    // use the scale factor
+    out *= componentInfo.scaleFactor(componentIndex);
+    out += componentInfo.position(componentIndex);
+    track.addLink(in, out, out.distance(track.startPoint()),
+                  componentInfo.shape(componentIndex),
+                  componentInfo.componentID(componentIndex)->getComponentID());
   }
 
+  std::cout << track.count() << std::endl;
 }
+
+} // namespace IntersectionHelpers
 
 
 /**
@@ -133,8 +187,9 @@ namespace IntersectionHelpers {
  * boxes
  * @param testRay :: An input/output parameter that defines the track and
  * accumulates the intersection results
-
+ */
 void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
+
   // Cast size of componentInfo to int
   int size = static_cast<int>(componentInfo.size());
   --size;
@@ -144,41 +199,20 @@ void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
   for (int i = size; i >= 0; --i) {
     // Store the bounding box
     BoundingBox box = componentInfo.boundingBox(i);
-    // Test for intersection
-    box.doesLineIntersect(testRay);
-  }
-}*/
-
-void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
-  // Store all the components, starting with root
-  std::deque<size_t> components;
-  components.push_back(componentInfo.root());
-
-  // Loop through each of the components
-  // comp is the componentIndex
-  size_t comp;
-  while (!components.empty()) {
-    comp = components.front();
-    components.pop_front();
-    BoundingBox box = componentInfo.boundingBox(comp);
 
     // Test for intersection
     if (box.doesLineIntersect(testRay)) {
-      // Get all the children of the current component
-      const auto &children = componentInfo.children(comp);
 
-      // Test intersection with children
-      for (auto child : children) {
-        auto childComponentType = componentInfo.componentType(child);
-        if (childComponentType == Types::Rectangular) {
-          //checkIntersectsWithRectangularBank(testRay);
-        } else if (childComponentType == Types::OutlineComposite) {
-          //checkIntersectsWithTubeBank(testRay);
-        } else if (childComponentType == Types::Structured) {
-          //checkIntersectsWithStructuredBank(testRay);
-        } else if (childComponentType == Types::Detector) {
-          //checkIntersectsWithDetector(testRay);
-        }
+      std::cout << "IRT Component Name: "
+                << componentInfo.componentID(i)->getFullName() << std::endl;
+
+      auto childComponentType = componentInfo.componentType(i);
+
+      if (childComponentType == Types::Rectangular) {
+        IntersectionHelpers::checkIntersectsWithRectangularBank(
+            testRay, componentInfo, i);
+      } else {
+        IntersectionHelpers::interceptSurface(testRay, componentInfo, i);
       }
     }
   }
