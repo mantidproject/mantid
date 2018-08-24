@@ -65,60 +65,71 @@ This example performs the complete reduction. :ref:`Q1DWeighted <algm-Q1DWeighte
 
 .. testcode:: ExILLSANSReduction
 
-  # Process the dark current Cd/B4C for water
-  ILLSANSReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
+    # Process the dark current Cd/B4C for water
+    ILLSANSReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
 
-  # Process the empty beam for water
-  ILLSANSReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
+    # Process the empty beam for water
+    ILLSANSReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
 
-  # Water container transmission
-  ILLSANSReduction(Run='010446.nxs', ProcessAs='Transmission',
-                   AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
-                   OutputWorkspace='wc_tr')
-  print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
+    # Water container transmission
+    ILLSANSReduction(Run='010446.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
+                     OutputWorkspace='wc_tr')
+    print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
 
-  # Water container
-  ILLSANSReduction(Run='010454.nxs', ProcessAs='Container',
-                   AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
-                   TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
+    # Water container
+    ILLSANSReduction(Run='010454.nxs', ProcessAs='Container',
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
+                     TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
 
-  # Water transmission
-  ILLSANSReduction(Run='010445.nxs', ProcessAs='Transmission',
-                   AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
-  print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
+    # Water transmission
+    ILLSANSReduction(Run='010445.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
+    print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
 
-  # Water
-  ILLSANSReduction(Run='010453.nxs', ProcessAs='Reference',
-                   AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
-                   BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
-                   SensitivityOutputWorkspace='sens', OutputWorkspace='water')
+    # Water
+    ILLSANSReduction(Run='010453.nxs', ProcessAs='Reference',
+                     AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
+                     BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
+                     SensitivityOutputWorkspace='sens', OutputWorkspace='water')
 
-  # Process the dark current Cd/B4C for sample
-  ILLSANSReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
+    # Process the dark current Cd/B4C for sample
+    ILLSANSReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
 
-  # Process the empty beam for sample
-  ILLSANSReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+    # Process the empty beam for sample
+    ILLSANSReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
 
-  # Sample container transmission
-  ILLSANSReduction(Run='010444.nxs', ProcessAs='Transmission',
-                   AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
-  print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
+    # Sample container transmission
+    ILLSANSReduction(Run='010444.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
+    print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
 
-  # Sample container
-  ILLSANSReduction(Run='010460.nxs', ProcessAs='Container',
-                   AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
-                   TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
+    # Sample container
+    ILLSANSReduction(Run='010460.nxs', ProcessAs='Container',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                     TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
 
-  # Sample transmission
-  ILLSANSReduction(Run='010585.nxs', ProcessAs='Transmission',
-                   AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr')
-  print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
+    # Sample transmission
+    ILLSANSReduction(Run='010585.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr')
+    print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
 
-  # Sample
-  ILLSANSReduction(Run='010569.nxs', ProcessAs='Sample',
-                   AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
-                   BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
-                   TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
+    # Sample
+    ILLSANSReduction(Run='010569.nxs', ProcessAs='Sample',
+                     AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
+                     BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
+                     TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
+
+    # Convert to I(Q)
+    Q1DWeighted(InputWorkspace='sample_flux', OutputBinning='0.0027,0.0004,0.033', OutputWorkspace='iq')
+
+    # Print the output
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+    ax.plot(mtd['iq'],'-')
+    ax.set_ylabel('I [cm-1]')
+    #uncomment the next line to plot the figure
+    #fig.show()
 
 Output:
 
@@ -131,6 +142,78 @@ Output:
 
 .. testcleanup:: ExILLSANSReduction
 
+    mtd.clear()
+
+.. plot::
+
+    from mantid.simpleapi import ILLSANSReduction, Q1DWeighted, mtd
+
+    # Process the dark current Cd/B4C for water
+    ILLSANSReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
+
+    # Process the empty beam for water
+    ILLSANSReduction(Run='010414.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cdw', OutputWorkspace='Dbw')
+
+    # Water container transmission
+    ILLSANSReduction(Run='010446.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
+                     OutputWorkspace='wc_tr')
+    print('Water container transmission is {0:.3f}'.format(mtd['wc_tr'].readY(0)[0]))
+
+    # Water container
+    ILLSANSReduction(Run='010454.nxs', ProcessAs='Container',
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw',
+                     TransmissionInputWorkspace='wc_tr', OutputWorkspace='wc')
+
+    # Water transmission
+    ILLSANSReduction(Run='010445.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cdw', BeamInputWorkspace='Dbw', OutputWorkspace='w_tr')
+    print('Water transmission is {0:.3f}'.format(mtd['w_tr'].readY(0)[0]))
+
+    # Water
+    ILLSANSReduction(Run='010453.nxs', ProcessAs='Reference',
+                     AbsorberInputWorkspace='Cdw', ContainerInputWorkspace='wc',
+                     BeamInputWorkspace='Dbw', TransmissionInputWorkspace='wc_tr',
+                     SensitivityOutputWorkspace='sens', OutputWorkspace='water')
+
+    # Process the dark current Cd/B4C for sample
+    ILLSANSReduction(Run='010462.nxs', ProcessAs='Absorber', OutputWorkspace='Cd')
+
+    # Process the empty beam for sample
+    ILLSANSReduction(Run='010413.nxs', ProcessAs='Beam', AbsorberInputWorkspace='Cd', OutputWorkspace='Db')
+
+    # Sample container transmission
+    ILLSANSReduction(Run='010444.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='sc_tr')
+    print('Sample container transmission is {0:.3f}'.format(mtd['sc_tr'].readY(0)[0]))
+
+    # Sample container
+    ILLSANSReduction(Run='010460.nxs', ProcessAs='Container',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Db',
+                     TransmissionInputWorkspace='sc_tr', OutputWorkspace='sc')
+
+    # Sample transmission
+    ILLSANSReduction(Run='010585.nxs', ProcessAs='Transmission',
+                     AbsorberInputWorkspace='Cd', BeamInputWorkspace='Dbw', OutputWorkspace='s_tr')
+    print('Sample transmission is {0:.3f}'.format(mtd['s_tr'].readY(0)[0]))
+
+    # Sample
+    ILLSANSReduction(Run='010569.nxs', ProcessAs='Sample',
+                     AbsorberInputWorkspace='Cd', ContainerInputWorkspace='sc',
+                     BeamInputWorkspace='Db', SensitivityInputWorkspace='sens',
+                     TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
+
+    # Convert to I(Q)
+    Q1DWeighted(InputWorkspace='sample_flux', OutputBinning='0.0027,0.0004,0.033', OutputWorkspace='iq')
+
+    # Print the output
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+    ax.plot(mtd['iq'],'-')
+    ax.set_ylabel('I [cm-1]')
+    fig.show()
+
+    # Clear the ADS
     mtd.clear()
 
 .. note::
