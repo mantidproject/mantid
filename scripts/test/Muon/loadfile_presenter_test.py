@@ -41,7 +41,7 @@ class IteratorWithException:
         self.n = 0
         return self
 
-    def next(self):
+    def __next__(self):
 
         if self.n in self.throw_indices:
             next(self.iterable)
@@ -53,6 +53,7 @@ class IteratorWithException:
             self.n += 1
             return next(self.iterable)
 
+    next = __next__
 
 class LoadFileWidgetPresenterTest(unittest.TestCase):
     class Runner:
@@ -97,6 +98,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     def test_dialog_opens_when_browse_button_clicked(self):
         self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.mock_view.show_file_browser_and_return_selection.call_count,1)
 
@@ -105,19 +107,22 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.handle_load_thread_start = mock.Mock()
 
         self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.presenter.handle_load_thread_start.assert_not_called()
 
     def test_buttons_disabled_while_load_thread_running(self):
         self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._model.thread_manager)
 
-        self.assertEqual(self.mock_view.disable_load_buttons.assert_call_count,1)
-        self.assertEqual(self.mock_view.enable_load_buttons.assert_call_count,1)
+        self.assertEqual(self.mock_view.disable_load_buttons.call_count,1)
+        self.assertEqual(self.mock_view.enable_load_buttons.call_count,1)
 
     def test_buttons_enabled_even_if_load_throws(self):
         self.mock_model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.mock_view.disable_load_buttons.call_count,1)
         self.assertEqual(self.mock_view.enable_load_buttons.call_count,1)
@@ -129,6 +134,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
 
         self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.mock_model.load_workspace_from_filename.assert_not_called()
         self.mock_view.disable_load_buttons.assert_not_called()
@@ -141,6 +147,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
 
         self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.mock_view.warning_popup.call_count, 1)
 
@@ -150,6 +157,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
 
         self.presenter.handle_file_changed_by_user()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.mock_model.load_workspace_from_filename.assert_not_called()
         self.mock_view.disable_load_buttons.assert_not_called()
@@ -161,6 +169,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
 
         self.presenter.handle_file_changed_by_user()
+        self.Runner(self.presenter._model.thread_manager)
 
         self.assertEqual(self.mock_view.warning_popup.call_count, 1)
 
