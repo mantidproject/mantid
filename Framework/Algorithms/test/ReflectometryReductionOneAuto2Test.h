@@ -55,6 +55,15 @@ private:
     return MatrixWorkspace_sptr();
   };
 
+  void momentumTransferHelper(ReflectometryReductionOneAuto2 &alg, MatrixWorkspace_sptr &inter,const double &theta){
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("Debug", false);
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -929,6 +938,126 @@ public:
                             std::string(e.what()),
                             "A monitor is expected at spectrum index 1");
   }
+
+  void test_QStep_QMin_and_QMax(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.setProperty("MomentumTransferMax", 1.0);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    auto x = 1;
+  }
+
+  void test_QMin_alone(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQbinned->x(0);
+    auto outY = outQbinned->y(0);
+  }
+
+  void test_QMax_alone(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);    
+    alg.setProperty("MomentumTransferMax", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+  }
+
+  void test_QMax_and_QMin(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.setProperty("MomentumTransferMax", 1.0);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+  }
+
+  void test_QStep_alone(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+  }
+
+  void test_QStep_QMin_alone(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+  }
+
+  void test_QStep_QMax_alone(){
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.setProperty("MomentumTransferMax", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+  }
+
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */
