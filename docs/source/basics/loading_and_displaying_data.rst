@@ -24,15 +24,15 @@ Other ways to load data are:
 
 * Navigating to the "File->Load->File" menu item.
 * Clicking the |load_symbol| symbol in the toolbar.
-* Using the "Load" algorithm. (:ref:`load algorithm`).
+* Using the :ref:Load algorithm.
 
 Types of Data Files
 ###################
 
 Mantid can load many different data formats. A few important examples are:
 
-* ISIS, SNS, ILL, PSI .nexus data files.
-* ISIS .raw data and log files.
+* ISIS, SNS, ILL, PSI `.nexus` data files.
+* ISIS `.raw` data and log files.
 * Simulated data formats.
 * Ascii data, Table data, etc.
 * Live data streams.
@@ -43,10 +43,10 @@ Multiple Data Files
 ###################
 
 You can load multiple files into mantid with a single Load command, either keeping each workspace separate, 
-or summing the data into a single workspace:
+or summing the data into a single workspace, for more information see :ref:`MultipleFileProperty`:
 
-* <name>, <name> : load a list
-* <name>+<name>: sum the data in the files
-* <name>:<name>: load a range of files
-* <name>-<name>: sum a range of files
+* `<name>,<name>` : load a list
+* `<name>+<name>`: sum the data in the files
+* `<name>:<name>`: load a range of files
+* `<name>-<name>`: sum a range of files
 
