@@ -285,7 +285,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': '/some/SaveDir/'}, False),
         ]
 
-        def executeSubTest(inputs, shoudThrow):
+        def executeSubTest(inputs, shouldThrow):
             self.setMinimumValidInputs(self.scriptElement)
             for name, value in inputs.items():
                 setattr(self.scriptElement, name, value)
@@ -293,18 +293,18 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             try:
                 self.scriptElement.validate_inputs()
             except RuntimeError as e:
-                if not shoudThrow:
+                if not shouldThrow:
                     self.fail("Valid input did cause an exception: '{}'.\nThe input was: {}".format(e, inputs))
             else:
-                if shoudThrow:
+                if shouldThrow:
                     self.fail("Invalid input did NOT cause an exception!\nThe input was: {}".format(inputs))
 
-        for inputs, shoudThrow in modifiedValues:
+        for inputs, shouldThrow in modifiedValues:
             if hasattr(self, 'subTest'):
                 with self.subTest():
-                    executeSubTest(inputs, shoudThrow)
+                    executeSubTest(inputs, shouldThrow)
             else:
-                executeSubTest(inputs, shoudThrow)
+                executeSubTest(inputs, shouldThrow)
 
 if __name__ == '__main__':
     unittest.main()
