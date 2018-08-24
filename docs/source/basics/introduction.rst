@@ -26,7 +26,7 @@ We have a number of documentation resources.
 + The basics guide has sections on:
     * :ref:`getting started`
     * :ref:`loading and displaying`
-    * :ref:`algorithms workspaces and history`
+    * :ref:`algorithms and workspaces`
 + User documentation, is extensive and has sections on:
     * :ref:`Algorithms List`, with specific details of inputs and parameters for all of our algorithms.
     * :ref:`training`, with links to further learning resources.
@@ -38,6 +38,6 @@ We have a number of documentation resources.
 
 
 + In addition to documentation we also have
-    * A users help forum: `Here <http://forum.mantidproject.org/>`_.
-    * A Mantid help email address: mantid-help@mantidproject.org.
+    * A `forum <http://forum.mantidproject.org/>`_.
+    * An email address: `mantid-help@mantidproject.org <mailto:mantid-help@mantidproject.org>`__.
     * A built in error-reporter. We really encourage you to use this, as it helps us to make Mantid more stable in future.

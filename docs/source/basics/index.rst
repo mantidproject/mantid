@@ -22,7 +22,7 @@ of resources to get you up and running in no time.
    introduction
    getting_started
    loading_and_displaying_data
-   algorithms_workspaces_and_history
+   algorithms_and_workspaces
 
 
 **Sections**
@@ -30,4 +30,4 @@ of resources to get you up and running in no time.
 * :ref:`mantid introduction`
 * :ref:`getting started`
 * :ref:`loading and displaying`
-* :ref:`algorithms workspaces and history`
+* :ref:`algorithms and workspaces`
