@@ -32,7 +32,6 @@ public:
 
   void test_SetTwoTheta() {
     using namespace WorkspaceCreationHelper;
-    constexpr double pixelSize{0.003};
     constexpr double angle{1.23};
     constexpr double startX{0.};
     Kernel::V3D const slit1Pos(-2, 0, 0);
@@ -45,33 +44,37 @@ public:
     auto inputWS = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, slitOpening, slitOpening, sourcePos,
         monitorPos, samplePos, detectorPos);
-    Algorithms::ReflectometryCorrectDetectorAngle alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", angle))
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("DetectorComponent", "point-detector"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", pixelSize))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted())
-    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_ASSERT(onlyInstrumentsDiffer(inputWS, outputWS));
-    auto const &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT(!spectrumInfo.isMonitor(0));
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), angle * deg2rad, 1e-10)
+    checkSetTwoTheta(inputWS, angle);
   }
 
   void test_SetTwoThetaWhenSampleNotInOrigin() {
     using namespace WorkspaceCreationHelper;
-    constexpr double pixelSize{0.003};
     constexpr double angle{1.23};
     auto inputWS = create2DWorkspaceWithReflectometryInstrument();
+    checkSetTwoTheta(inputWS, angle);
+  }
+
+  void test_SetNegativeTwoTheta() {
+    using namespace WorkspaceCreationHelper;
+    constexpr double angle{-1.23};
+    constexpr double startX{0.};
+    Kernel::V3D const slit1Pos(-2, 0, 0);
+    Kernel::V3D const slit2Pos(-1, 0, 0);
+    double const slitOpening{0.001};
+    Kernel::V3D const sourcePos(-15, 0, 0);
+    Kernel::V3D const monitorPos(-3, 0, 0);
+    Kernel::V3D const samplePos(0, 0, 0);
+    Kernel::V3D const detectorPos(5.42, 0, 0);
+    auto inputWS = create2DWorkspaceWithReflectometryInstrument(
+        startX, slit1Pos, slit2Pos, slitOpening, slitOpening, sourcePos,
+        monitorPos, samplePos, detectorPos);
+    checkSetTwoTheta(inputWS, angle);
+  }
+
+private:
+  void checkSetTwoTheta(API::MatrixWorkspace_sptr &inputWS, double const twoTheta) {
+    // A random pixel size, not really needed.
+    constexpr double pixelSize{0.003};
     Algorithms::ReflectometryCorrectDetectorAngle alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -80,7 +83,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", angle))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", twoTheta))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorComponent", "point-detector"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", pixelSize))
@@ -91,10 +94,9 @@ public:
     TS_ASSERT(onlyInstrumentsDiffer(inputWS, outputWS));
     auto const &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(!spectrumInfo.isMonitor(0));
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0), angle * deg2rad, 1e-10)
+    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(0), twoTheta * deg2rad, 1e-10)
   }
 
-private:
   bool onlyInstrumentsDiffer(API::MatrixWorkspace_sptr &ws1,
                              API::MatrixWorkspace_sptr &ws2) {
     auto alg =

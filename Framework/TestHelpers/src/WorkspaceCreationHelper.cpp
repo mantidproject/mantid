@@ -26,6 +26,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -667,7 +668,7 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 }
 
 /**
- * Create a very small 2D workspace for a virtual reflectometry instrument with
+ * Create a 2D workspace for a virtual reflectometry instrument with
  * multiple detectors
  * @return workspace with instrument attached.
  * @param startX :: X Tof start value for the workspace.
@@ -699,12 +700,20 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
   addSample(instrument, samplePos, "some-surface-holder");
   addMonitor(instrument, monitorPos, 1, "Monitor");
 
+  auto detectorPanel = new ObjCompAssembly("detector-panel");
+  detectorPanel->setPos(detectorCenterPos);
+  instrument->add(detectorPanel);
   const int nDet = nSpectra - 1;
-  const double minY = detectorCenterPos.Y() - detSize * (nDet - 1) / 2.;
+  const double minY = -detSize * (nDet - 1) / 2.;
   for (int i = 0; i < nDet; ++i) {
     const double y = minY + i * detSize;
-    const V3D pos{detectorCenterPos.X(), y, detectorCenterPos.Z()};
-    addDetector(instrument, pos, i + 2, "point-detector");
+    const V3D pos{0, y, 0};
+    const auto detId = i + 2;
+    const auto shape = ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03);
+    auto pointDetector = new Detector("point-detector", detId, shape, nullptr);
+    detectorPanel->add(pointDetector);
+    pointDetector->setPos(pos);
+    instrument->markAsDetector(pointDetector);
   }
   auto slit1 = addComponent(instrument, slit1Pos, "slit1");
   auto slit2 = addComponent(instrument, slit2Pos, "slit2");

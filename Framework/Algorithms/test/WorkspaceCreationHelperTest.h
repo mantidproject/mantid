@@ -2,6 +2,9 @@
 #define MANTID_ALGORITHMS_WORKSPACECREATIONHELPERTEST_H_
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include "MantidAPI/SpectrumInfo.h"
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -43,6 +46,23 @@ public:
     Workspace2D_sptr ws2 = WorkspaceCreationHelper::create2DWorkspace123(
         1, 2, false, std::set<int64_t>(), false);
     TS_ASSERT(!ws2->hasDx(0));
+  }
+
+  void test_create2DWorkspaceWithReflectometryInstrumentMultiDetector() {
+    constexpr double startX{0.};
+    constexpr double detSize{0.023};
+    auto ws = WorkspaceCreationHelper::
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(startX,
+                                                                  detSize);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 4)
+    TS_ASSERT(spectrumInfo.isMonitor(0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(0), Mantid::Kernel::V3D(14, 0, 0))
+    TS_ASSERT_EQUALS(spectrumInfo.position(1),
+                     Mantid::Kernel::V3D(20, 5 - detSize, 0))
+    TS_ASSERT_EQUALS(spectrumInfo.position(2), Mantid::Kernel::V3D(20, 5, 0))
+    TS_ASSERT_EQUALS(spectrumInfo.position(3),
+                     Mantid::Kernel::V3D(20, 5 + detSize, 0))
   }
 };
 
