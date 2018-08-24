@@ -1,9 +1,9 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoItem.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
-#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
