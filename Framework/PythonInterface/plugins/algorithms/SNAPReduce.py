@@ -279,6 +279,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         elif masking == 'Custom - xml masking file':
             maskWSname = 'CustomMask'
             maskFile = self.getProperty('MaskingFilename').value
+        # TODO not reading the correct mask file geometry
         elif masking == 'Horizontal' or masking == 'Vertical':
             maskWSname = masking + 'Mask' # append the work 'Mask' for the wksp name
             if not mtd.doesExist(maskWSname): # only load if it isn't already loaded
@@ -392,6 +393,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         if not mtd.doesExist(group):
             if group == '2_4 Grouping':
                 group = '2_4_Grouping'
+            # TODO take instrument from the data being loaded
             CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
                                     OutputWorkspace=group)
             progress.report('create grouping')
@@ -416,7 +418,6 @@ class SNAPReduce(DataProcessorAlgorithm):
                 raise RuntimeError('Live data is not currently supported')
             else:
                 Load(Filename='SNAP' + str(r), OutputWorkspace='WS')
-                NormaliseByCurrent(InputWorkspace='WS', OutputWorkspace='WS')
             progress.report('loaded data')
 
             CompressEvents(InputWorkspace='WS', OutputWorkspace='WS')
@@ -424,7 +425,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             CropWorkspace(InputWorkspace='WS', OutputWorkspace='WS', XMax=50000)
             progress.report('cropped in tof')
             RemovePromptPulse(InputWorkspace='WS', OutputWorkspace='WS',
-                              Width='1600', Frequency='60.4') # TODO don't declare frequency
+                              Width='1600')
             progress.report('remove prompt pulse')
 
             if maskWSname is not None:
@@ -436,6 +437,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             self._alignAndFocus(params, calib, cal_File, group)
             progress.report('align and focus')
 
+            NormaliseByCurrent(InputWorkspace='WS_red', OutputWorkspace='WS_red')
+
+            # normalize the data as requested
             normWS = self._generateNormalization('WS_red', norm, normWS)
             WS_nor = None
             if normWS is not None:
