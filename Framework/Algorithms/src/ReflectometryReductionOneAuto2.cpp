@@ -695,9 +695,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
-    } else if (polarizationAnalysisOn) {
-      firstTransSum = sumTransmissionWorkspaces(firstTransG);
     }
+    alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
   }
   const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
   WorkspaceGroup_sptr secondTransG;
@@ -708,9 +707,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
-    } else if (polarizationAnalysisOn) {
-      secondTransSum = sumTransmissionWorkspaces(secondTransG);
     }
+    alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
   }
 
   std::vector<std::string> IvsQGroup, IvsQUnbinnedGroup, IvsLamGroup;
@@ -722,21 +720,6 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     const std::string IvsQBinnedName =
         outputIvsQBinned + "_" + std::to_string(i + 1);
     const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
-
-    if (firstTransG) {
-      if (!polarizationAnalysisOn)
-        alg->setProperty("FirstTransmissionRun",
-                         firstTransG->getItem(i)->getName());
-      else
-        alg->setProperty("FirstTransmissionRun", firstTransSum);
-    }
-    if (secondTransG) {
-      if (!polarizationAnalysisOn)
-        alg->setProperty("SecondTransmissionRun",
-                         secondTransG->getItem(i)->getName());
-      else
-        alg->setProperty("SecondTransmissionRun", secondTransSum);
-    }
 
     alg->setProperty("InputWorkspace", group->getItem(i)->getName());
     alg->setProperty("Debug", true);

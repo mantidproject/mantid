@@ -7,9 +7,13 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadParameterFile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 namespace Mantid {
 
@@ -74,7 +78,8 @@ MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
 }
 
 void prepareInputGroup(std::string const &name, std::string const &paramsType,
-                       size_t size, double const startX, double const endX) {
+                       size_t size, double const startX, double const endX,
+                       size_t const nBins) {
   double monitorValue = 99.0;
   double detectorValue = 0.9;
   std::string names;
@@ -85,7 +90,7 @@ void prepareInputGroup(std::string const &name, std::string const &paramsType,
     std::vector<double> values(257, detectorValue);
     values[0] = monitorValue;
     MatrixWorkspace_sptr ws =
-        createREFL_WS(10, startX, endX, values, paramsType);
+        createREFL_WS(nBins, startX, endX, values, paramsType);
     std::string const name1 = name + "_" + std::to_string(i + 1);
     ADS.addOrReplace(name1, ws);
     monitorValue -= 1.0;
@@ -175,5 +180,38 @@ void applyPolarizationEfficiencies(std::string const &name) {
   applyPolarizationEfficiencies(group);
 }
 
+MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
+                                           const double deltaX,
+                                           const std::vector<double> &yValues) {
+  auto ws = WorkspaceCreationHelper::
+      create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+          startX, 0.0, Mantid::Kernel::V3D(0, 0, 0),
+          Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0,
+          Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(14, 0, 0),
+          Mantid::Kernel::V3D(15, 0, 0), Mantid::Kernel::V3D(20, (20 - 15), 0),
+          2, nBins, deltaX);
+
+  for (auto i = 0u; i < ws->y(0).size(); ++i) {
+    ws->mutableY(0)[i] = yValues[i];
+  }
+
+  ws->mutableRun().addProperty<std::string>("run_number", "1234");
+
+  return ws;
+}
+
+MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
+                                           const double deltaX) {
+  auto ws = WorkspaceCreationHelper::
+      create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+          startX, 0.0, Mantid::Kernel::V3D(0, 0, 0),
+          Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0,
+          Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(14, 0, 0),
+          Mantid::Kernel::V3D(15, 0, 0), Mantid::Kernel::V3D(20, (20 - 15), 0),
+          2, nBins, deltaX);
+  
+  ws->mutableRun().addProperty<std::string > ("run_number", "1234");
+  return ws;
+}
 } // namespace TestHelpers
 } // namespace Mantid
