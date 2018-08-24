@@ -45,7 +45,6 @@ class LoadRunWidgetModel(object):
             self._loaded_data_store.add_data(run=res[2], workspace=res[0], filename=res[1])
 
     def load_with_multithreading(self, filenames, callback_finished, callback_progress, callback_exception):
-        self.load_func = thread_manager.threading_decorator(self.load_workspace_from_filename)
         n_threads = min(2, len(filenames))
         self.thread_manager = thread_manager.WorkerManager(fn=self.load_workspace_from_filename, num_threads=n_threads,
                                                            callback_on_progress_update=callback_progress,

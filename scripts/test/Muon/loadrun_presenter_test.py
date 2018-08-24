@@ -78,7 +78,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.presenter.handle_run_changed_by_user()
         self.Runner(self.presenter._model.thread_manager)
 
-        self.view.warning_popup.assert_called_once()
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_data_reverts_to_previous_entry_if_user_enters_multiple_files_in_single_file_mode(self):
         self.presenter.enable_multiple_files(False)
@@ -151,7 +151,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.Runner(self.presenter._model.thread_manager)
 
-        self.model.load_workspace_from_filename.assert_called_once()
+        # called once in setUp
+        self.assertEqual(self.model.load_workspace_from_filename.call_count, 2)
         filename = self.model.load_workspace_from_filename.call_args[1]['filename']
         self.assertEqual(os.path.basename(filename), new_filename)
 
@@ -161,7 +162,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.Runner(self.presenter._model.thread_manager)
 
-        self.model.load_workspace_from_filename.assert_called_once()
+        # called once in setUp
+        self.assertEqual(self.model.load_workspace_from_filename.call_count, 2)
         filename = self.model.load_workspace_from_filename.call_args[1]['filename']
         self.assertEqual(os.path.basename(filename), new_filename)
 
@@ -217,7 +219,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.Runner(self.presenter._model.thread_manager)
 
-        self.view.warning_popup.assert_called_once()
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_that_if_increment_run_fails_warning_message_is_displayed(self):
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
@@ -225,7 +227,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.Runner(self.presenter._model.thread_manager)
 
-        self.view.warning_popup.assert_called_once()
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
 
 class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
@@ -295,7 +297,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.presenter.handle_load_current_run()
         self.Runner(self.presenter._model.thread_manager)
 
-        self.view.warning_popup.assert_called_once()
+        self.assertEqual(self.view.warning_popup.call_count, 1)
         self.view.disable_load_buttons.assert_not_called()
 
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):

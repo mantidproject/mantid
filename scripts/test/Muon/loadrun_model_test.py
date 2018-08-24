@@ -24,7 +24,7 @@ class IteratorWithException:
         self.n = 0
         return self
 
-    def next(self):
+    def __next__(self):
 
         if self.n in self.throw_indices:
             next(self.iterable)
@@ -36,6 +36,7 @@ class IteratorWithException:
             self.n += 1
             return next(self.iterable)
 
+    next = __next__
 
 class LoadRunWidgetModelTest(unittest.TestCase):
 

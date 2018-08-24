@@ -34,12 +34,14 @@ class MuonLoadData:
         self._max = len(self.params["run"])
         return self
 
-    def next(self):
+    def __next__(self):
         if self._n < self._max - 1:
             self._n += 1
             return {key: val[self._n] for key, val in self.params.items()}
         else:
             raise StopIteration
+
+    next = __next__
 
     # Getters
 
