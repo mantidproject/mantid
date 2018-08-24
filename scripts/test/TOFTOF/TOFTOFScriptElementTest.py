@@ -1,13 +1,33 @@
 from __future__ import (absolute_import, division, print_function)
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
-import mantid
 import unittest
 
 import sys
 
+try:
+    unicode('test for unicode type')
+except NameError:
+    unicode = str
+
 
 class TOFTOFScriptElementTest(unittest.TestCase):
+    def assertRaisesNothing(self, assertMessage):
+        class AssertRaisesNothingContextManager(object):
+            def __init__(self, testCase):
+                super(AssertRaisesNothingContextManager, self).__init__()
+                self._testCase = testCase
+                self._assertMessage = assertMessage
+
+            def __enter__(self):
+                pass
+
+            def __exit__(self, exc_type, exc_value, traceback):
+                if exc_type is not None:
+                    self._testCase.fail("{}\nThe exception was: '{}'.".format(self._assertMessage, exc_value))
+
+        return AssertRaisesNothingContextManager(self)
+
     @staticmethod
     def setMinimumValidInputs(scriptElement):
         scriptElement.reset()
@@ -31,7 +51,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.ecFactor = 1
 
         # data runs: [(runs,comment, temperature), ...]
-        scriptElement.dataRuns = [[u'0:5', u'Comment for Run 0:5', OptionalFloat(None)]]
+        scriptElement.dataRuns = [[unicode('0:5'), unicode('Comment for Run 0:5'), OptionalFloat(None)]]
 
         # additional parameters
         scriptElement.binEon        = False
@@ -85,7 +105,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         scriptElement.ecFactor = 1
 
         # data runs: [(runs,comment, temperature), ...]
-        scriptElement.dataRuns = [[u'0:5', u'Comment for Run 0:5', OptionalFloat(None)]]
+        scriptElement.dataRuns = [[unicode('0:5'), unicode('Comment for Run 0:5'), OptionalFloat(None)]]
 
         # additional parameters
         scriptElement.binEon        = True
@@ -156,8 +176,8 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
         # data runs: [(runs,comment, temperature), ...]
         self.scriptElement.dataRuns = [
-            [u'TOFTOFTestdata.nxs', u'H2O 21C', OptionalFloat(None)],
-            [u'TOFTOFTestdata.nxs', u'H2O 34C', OptionalFloat(34.0)]
+            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 21C'), OptionalFloat(None)],
+            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 34C'), OptionalFloat(34.0)]
         ]
 
         # additional parameters
@@ -188,7 +208,9 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.saveNXSPE    = False
         self.scriptElement.saveNexus    = False
         self.scriptElement.saveAscii    = False
-        exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
+
+        with self.assertRaisesNothing("Generated reduction script cannot be executed."):
+            exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
 
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False
@@ -196,15 +218,15 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.dataRuns = [('0:5', 'Comment for Run 0:5', None)]
 
         script = self.scriptElement.to_script()
+
+        HasNullBytesError = TypeError
+        if sys.version_info >= (3, 5):
+            HasNullBytesError = ValueError
         try:
-            compiledScript = compile(script, '<string>', 'exec')
+            compiledScript = compile(script + "\0", '<string>', 'exec')
         except SyntaxError as e:
             self.fail("generated script has a syntax error: '{}'".format(e))
-        except ValueError as e:
-            if sys.version_info >= (3, 5):
-                self.fail("generated script has null bytes: '{}'".format(e))
-        except TypeError as e:
-            if sys.version_info < (3, 5):
+        except HasNullBytesError as e:
                 self.fail("generated script has null bytes: '{}'".format(e))
         self.assertIsNotNone(compiledScript)
 
@@ -219,42 +241,48 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
         # [(inputDict, causesException=True), ...]
         modifiedValues = [
-        ({}, False),
+            ({}, False),
 
-        ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN},                   True),
-        ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN, 'vanRuns': '0:2', 'vanCmnt': 'vanComment'}, False),
+            ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN},                   True),
+            ({'correctTof': TOFTOFScriptElement.CORR_TOF_VAN, 'vanRuns': '0:2', 'vanCmnt': 'vanComment'}, False),
 
-        ({'subtractECVan': True, 'vanRuns': '',    'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, True),
-        ({'subtractECVan': True, 'vanRuns': '',    'vanCmnt': '',           'ecRuns': '3:5'}, True),
-        ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': ''},    True),
-        ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, False),
+            ({'subtractECVan': True, 'vanRuns': '',    'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, True),
+            ({'subtractECVan': True, 'vanRuns': '',    'vanCmnt': '',           'ecRuns': '3:5'}, True),
+            ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': ''},    True),
+            ({'subtractECVan': True, 'vanRuns': '0:2', 'vanCmnt': 'vanComment', 'ecRuns': '3:5'}, False),
 
-        ({}, False),
-        ({'binEon': True,  'binEstart': 1.0, 'binEstep': 0.1, 'binEend': 1.0}, True),
-        ({'binEon': True,  'binEstart': 0.0, 'binEstep': 2.0, 'binEend': 1.0}, True),
-        ({'binEon': True,  'binEstart': 0.0, 'binEstep': 0.0, 'binEend': 1.0}, True),
-        ({'binEon': True,  'binEstart': 0.0, 'binEstep':-0.1, 'binEend': 1.0}, True),
-        ({'binEon': False, 'binEstart': 0.0, 'binEstep':-0.1, 'binEend': 1.0}, False),
+            ({}, False),
+            ({'binEon': True,  'binEstart': 1.0, 'binEstep': 0.1, 'binEend': 1.0}, True),
+            ({'binEon': True,  'binEstart': 0.0, 'binEstep': 2.0, 'binEend': 1.0}, True),
+            ({'binEon': True,  'binEstart': 0.0, 'binEstep': 0.0, 'binEend': 1.0}, True),
+            ({'binEon': True,  'binEstart': 0.0, 'binEstep':-0.1, 'binEend': 1.0}, True),
+            ({'binEon': False, 'binEstart': 0.0, 'binEstep':-0.1, 'binEend': 1.0}, False),
 
-        ({'binQon': True,  'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, True),
-        ({'binQon': True,  'binQstart': 0.0, 'binQstep': 2.0, 'binQend': 1.0}, True),
-        ({'binQon': True,  'binQstart': 0.0, 'binQstep': 0.0, 'binQend': 1.0}, True),
-        ({'binQon': True,  'binQstart': 0.0, 'binQstep':-0.1, 'binQend': 1.0}, True),
-        ({'binQon': False, 'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, False),
+            ({'binQon': True,  'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, True),
+            ({'binQon': True,  'binQstart': 0.0, 'binQstep': 2.0, 'binQend': 1.0}, True),
+            ({'binQon': True,  'binQstart': 0.0, 'binQstep': 0.0, 'binQend': 1.0}, True),
+            ({'binQon': True,  'binQstart': 0.0, 'binQstep':-0.1, 'binQend': 1.0}, True),
+            ({'binQon': False, 'binQstart': 1.0, 'binQstep': 0.1, 'binQend': 1.0}, False),
 
-        ({'dataRuns'  : []}, True),
+            ({'dataRuns'  : []}, True),
 
-        ({'dataRuns'  : [[u'0:5', u'', OptFloat(None)]]}, True),
-        ({'dataRuns'  : [[u'0:5', u'Comment for Run 0:5', OptFloat(None)], [u'6:7', u'', OptFloat(None)]]}, True),
-        ({'dataRuns'  : [[u'0:5', u'', OptFloat(None)], [u'6:7', u'Comment for Run 6:7', OptFloat(None)]]}, True),
+            ({'dataRuns'  : [[unicode('0:5'), unicode(''), OptFloat(None)]]}, True),
+            ({'dataRuns'  : [
+                [unicode('0:5'), unicode('Comment for Run 0:5'), OptFloat(None)],
+                [unicode('6:7'), unicode(''), OptFloat(None)]
+            ]}, True),
+            ({'dataRuns'  : [
+                [unicode('0:5'), unicode(''), OptFloat(None)],
+                [unicode('6:7'), unicode('Comment for Run 6:7'), OptFloat(None)]
+            ]}, True),
 
-        ({'vanRuns': '0:2', 'vanCmnt': ''}, True),
-        ({'vanRuns': '0:2', 'vanCmnt': 'Comment for Vanadium'}, False),
+            ({'vanRuns': '0:2', 'vanCmnt': ''}, True),
+            ({'vanRuns': '0:2', 'vanCmnt': 'Comment for Vanadium'}, False),
 
-        ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': ''}, True),
-        ({'saveNXSPE': True, 'saveSofQW': False, 'saveDir': ''}, True),
-        ({'saveNXSPE': True, 'saveSofQW': False, 'saveDir': '/some/SaveDir/'}, True),
-        ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': '/some/SaveDir/'}, False),
+            ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': ''}, True),
+            ({'saveNXSPE': True, 'saveSofQW': False, 'saveDir': ''}, True),
+            ({'saveNXSPE': True, 'saveSofQW': False, 'saveDir': '/some/SaveDir/'}, True),
+            ({'saveNXSPE': True, 'saveSofQW': True,  'saveDir': '/some/SaveDir/'}, False),
         ]
 
         def executeSubTest(inputs, shoudThrow):

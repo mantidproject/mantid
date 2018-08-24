@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
 from reduction_gui.widgets.toftof.toftof_setup import TOFTOFSetupWidget
-import mantid
 from PyQt4 import QtGui
 
 import unittest
@@ -10,6 +9,11 @@ try:
     from unittest import mock
 except ImportError:
     import mock
+
+try:
+    unicode('test for unicode type')
+except NameError:
+    unicode = str
 
 
 class TOFTOFScriptElementTest(unittest.TestCase):
@@ -19,20 +23,13 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
     def setUp(self):
         self.settingsMock = mock.Mock()
-        facility_name = "name of facility"
-        self.settingsMock.facility_name = facility_name
-        instrument_name = "name of instrument"
-        self.settingsMock.instrument_name = instrument_name
+        self.settingsMock.facility_name = "name of facility"
+        self.settingsMock.instrument_name = "name of instrument"
         self.setupWidget = TOFTOFSetupWidget(self.settingsMock)
 
     def tearDown(self):
         self.settingsMock = None
         self.setupWidget = None
-        #pass
-        #self.scriptElement = None
-        #done
-
-    #def test_that_init_works_correctly(self):
 
     def test_that_preserves_data(self):
         scriptElement = TOFTOFScriptElement()
@@ -58,8 +55,8 @@ class TOFTOFScriptElementTest(unittest.TestCase):
 
         # data runs: [(runs,comment, temperature), ...]
         scriptElement.dataRuns = [
-            [u'TOFTOFTestdata.nxs', u'H2O 21C', OptionalFloat(None)],
-            [u'TOFTOFTestdata.nxs', u'H2O 34C', OptionalFloat(34.0)]
+            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 21C'), OptionalFloat(None)],
+            [unicode('TOFTOFTestdata.nxs'), unicode('H2O 34C'), OptionalFloat(34.0)]
         ]
 
         # additional parameters
@@ -102,7 +99,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             attr1 = getattr(scriptElement, name)
             try:
                 attr2 = getattr(scriptElement2, name)
-            except AttributeError as e:
+            except AttributeError:
                 self.fail("TOFTOFSetupWidget.get_state() doesn't set the attribute '{}'".format(name))
 
             if not name.startswith('__') and not hasattr(attr1, '__call__'):
@@ -123,7 +120,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             attr1 = getattr(scriptElement, name)
             try:
                 attr2 = getattr(scriptElement2, name)
-            except AttributeError as e:
+            except AttributeError:
                 self.fail("TOFTOFSetupWidget.get_state() doesn't set the attribute '{}'".format(name))
 
             if not name.startswith('__') and not hasattr(attr1, '__call__'):
