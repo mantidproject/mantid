@@ -160,8 +160,9 @@ void ReflectometryCorrectDetectorAngle::exec() {
   } else {
     outputWS = inputWS->clone();
   }
-  auto const twoTheta = correctedTwoTheta(*inputWS);
-  correctDetectorPosition(outputWS, twoTheta);
+  ComponentPositions const positions = sampleAndDetectorPositions(*inputWS);
+  auto const twoTheta = correctedTwoTheta(*inputWS, positions.l2);
+  correctDetectorPosition(outputWS, positions, twoTheta);
   setProperty(Prop::OUTPUT_WS, outputWS);
 }
 
@@ -202,13 +203,14 @@ ReflectometryCorrectDetectorAngle::validateInputs() {
 
 /// Update detector position.
 void ReflectometryCorrectDetectorAngle::correctDetectorPosition(
-    API::MatrixWorkspace_sptr &ws, double const twoTheta) {
-  auto const l2 = sampleToDetectorDistance(*ws);
+    API::MatrixWorkspace_sptr &ws, ComponentPositions const &positions,
+    double const twoTheta) {
   std::string const componentName = getProperty(Prop::DETECTOR_COMPONENT);
   auto const rotPlane = rotationPlane(*ws);
-  auto const newPosition = detectorPosition(*ws, rotPlane, l2, twoTheta);
-  moveComponent(ws, componentName, newPosition);
-  // apply a local rotation to stay perpendicular to the beam
+  auto const newPosition =
+      detectorPosition(*ws, rotPlane, positions.l2, twoTheta);
+  moveComponent(ws, componentName, newPosition + positions.sample);
+  // apply a local rotation so detector centre normal points to the sample
   auto const rotationAxis = faceRotationAxis(*ws, rotPlane);
   rotateComponent(ws, componentName, rotationAxis, twoTheta);
 }
@@ -218,7 +220,7 @@ void ReflectometryCorrectDetectorAngle::correctDetectorPosition(
  *  @return a rotation angle
  */
 double ReflectometryCorrectDetectorAngle::correctedTwoTheta(
-    API::MatrixWorkspace const &ws) {
+    API::MatrixWorkspace const &ws, double const l2) {
   if (!isDefault(Prop::TWO_THETA)) {
     auto const twoTheta =
         static_cast<double>(getProperty(Prop::TWO_THETA)) * deg2rad;
@@ -226,14 +228,14 @@ double ReflectometryCorrectDetectorAngle::correctedTwoTheta(
       return twoTheta;
     } else {
       double const linePosition = getProperty(Prop::LINE_POS);
-      double const offset = offsetAngleFromCentre(ws, linePosition);
+      double const offset = offsetAngleFromCentre(ws, l2, linePosition);
       return twoTheta - offset;
     }
   } else {
     API::MatrixWorkspace_sptr directWS = getProperty(Prop::DIRECT_WS);
     double const directLinePosition = getProperty(Prop::DIRECT_LINE_POS);
     const double directOffset =
-        offsetAngleFromCentre(*directWS, directLinePosition);
+        offsetAngleFromCentre(*directWS, l2, directLinePosition);
     m_log.debug() << "Direct beam offset angle: " << directOffset * rad2deg
                   << '\n';
     auto const reflectedDetectorAngle = signedDetectorAngle(ws);
@@ -266,7 +268,8 @@ void ReflectometryCorrectDetectorAngle::moveComponent(
  *  @return the offset angle.
  */
 double ReflectometryCorrectDetectorAngle::offsetAngleFromCentre(
-    API::MatrixWorkspace const &ws, double const linePosition) {
+    API::MatrixWorkspace const &ws, double const l2,
+    double const linePosition) {
   auto const &spectrumInfo = ws.spectrumInfo();
   if (linePosition > spectrumInfo.size() - 1) {
     std::ostringstream msg;
@@ -275,7 +278,6 @@ double ReflectometryCorrectDetectorAngle::offsetAngleFromCentre(
     throw std::runtime_error(msg.str());
   }
   auto const centreIndex = detectorCentreIndex(spectrumInfo);
-  auto const l2 = sampleToDetectorDistance(ws);
   double const pixelSize = getProperty(Prop::PIXEL_SIZE);
   auto const sign = isAngleIncreasingWithIndex(spectrumInfo) ? -1. : 1.;
   double const offsetWidth = (centreIndex - linePosition) * pixelSize;
@@ -296,15 +298,18 @@ void ReflectometryCorrectDetectorAngle::rotateComponent(
   rotate->execute();
 }
 
-double ReflectometryCorrectDetectorAngle::sampleToDetectorDistance(
+ReflectometryCorrectDetectorAngle::ComponentPositions
+ReflectometryCorrectDetectorAngle::sampleAndDetectorPositions(
     API::MatrixWorkspace const &ws) {
+  ComponentPositions positions;
   auto const instrument = ws.getInstrument();
   std::string const componentName = getProperty(Prop::DETECTOR_COMPONENT);
   auto const detector = instrument->getComponentByName(componentName);
-  auto const detectorPos = detector->getPos();
+  positions.detector = detector->getPos();
   auto const sample = instrument->getSample();
-  auto const samplePos = sample->getPos();
-  return detectorPos.distance(samplePos);
+  positions.sample = sample->getPos();
+  positions.l2 = positions.sample.distance(positions.detector);
+  return positions;
 }
 
 double ReflectometryCorrectDetectorAngle::signedDetectorAngle(

@@ -1,13 +1,12 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYCORRECTDETECTORANGLE_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYCORRECTDETECTORANGLE_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
+
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-}
 namespace Algorithms {
 
 /** ReflectometryCorrectDetectorAngle : Corrects the angle of a reflectometry
@@ -43,19 +42,26 @@ public:
   const std::string summary() const override;
 
 private:
+  struct ComponentPositions {
+    Kernel::V3D sample;
+    Kernel::V3D detector;
+    double l2;
+  };
+
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   void correctDetectorPosition(API::MatrixWorkspace_sptr &ws,
+                               ComponentPositions const &positions,
                                double const twoTheta);
-  double correctedTwoTheta(API::MatrixWorkspace const &ws);
+  double correctedTwoTheta(API::MatrixWorkspace const &ws, const double l2);
   void moveComponent(API::MatrixWorkspace_sptr &ws, std::string const &name,
                      Kernel::V3D const &position);
-  double offsetAngleFromCentre(API::MatrixWorkspace const &ws,
+  double offsetAngleFromCentre(API::MatrixWorkspace const &ws, double const l2,
                                double const linePosition);
   void rotateComponent(API::MatrixWorkspace_sptr &ws, std::string const &name,
                        Kernel::V3D const &rotationAxis, double const angle);
-  double sampleToDetectorDistance(API::MatrixWorkspace const &ws);
+  ComponentPositions sampleAndDetectorPositions(API::MatrixWorkspace const &ws);
   double signedDetectorAngle(API::MatrixWorkspace const &ws);
 };
 
