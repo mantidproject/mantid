@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtCore, QtGui, QtWidgets
+from qtpy import QtCore, QtWidgets
 from qtpy.QtCore import Signal
 
 from Muon.GUI.Common import table_utils
