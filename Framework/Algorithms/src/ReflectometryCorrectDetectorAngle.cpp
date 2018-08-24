@@ -78,7 +78,8 @@ Mantid::Kernel::V3D faceRotationAxis(Mantid::API::MatrixWorkspace const &ws,
                                      RotationPlane const plane) {
   auto const instrument = ws.getInstrument();
   auto const referenceFrame = instrument->getReferenceFrame();
-  auto const sign = referenceFrame->getHandedness() == Mantid::Geometry::Right ? 1. : -1.;
+  auto const sign =
+      referenceFrame->getHandedness() == Mantid::Geometry::Right ? 1. : -1.;
   Mantid::Kernel::V3D rotationAxis;
   switch (plane) {
   case RotationPlane::horizontal:
@@ -174,10 +175,6 @@ ReflectometryCorrectDetectorAngle::validateInputs() {
     if (isDefault(Prop::DIRECT_LINE_POS)) {
       issues[Prop::DIRECT_LINE_POS] = "Direct beam position has to be given "
                                       "when using a direct beam reference.";
-    }
-    if (isDefault(Prop::LINE_POS)) {
-      issues[Prop::LINE_POS] = "Reflected beam position has to be given when "
-                               "using a direct beam reference";
     }
   } else {
     if (isDefault(Prop::TWO_THETA)) {
