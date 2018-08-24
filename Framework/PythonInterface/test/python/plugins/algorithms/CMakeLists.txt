@@ -84,7 +84,6 @@ set ( TEST_PY_FILES
   SetDetScaleTest.py
   SortByQVectorsTest.py
   SortDetectorsTest.py
-  SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py

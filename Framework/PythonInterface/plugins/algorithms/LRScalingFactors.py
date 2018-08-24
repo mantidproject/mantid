@@ -63,7 +63,9 @@ class LRScalingFactors(PythonAlgorithm):
                              "Pixel range defining the data peak")
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [147, 163]),
                              "Pixel range defining the background")
-        self.declareProperty(IntArrayProperty("LowResolutionPixelRange", [94, 160]),
+        self.declareProperty(IntArrayProperty("LowResolutionPixelRange",
+                                              [Property.EMPTY_INT, Property.EMPTY_INT],
+                                              direction=Direction.Input),
                              "Pixel range defining the region to use in the low-resolution direction")
         self.declareProperty("IncidentMedium", "Medium", doc="Name of the incident medium")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
@@ -454,6 +456,12 @@ class LRScalingFactors(PythonAlgorithm):
             @param background_range: range of pixels defining the background
             @param low_res_range: range of pixels in the x-direction
         """
+        # Check low-res axis
+        if low_res_range[0] == Property.EMPTY_INT:
+            low_res_range[0] = 0
+        if low_res_range[1] == Property.EMPTY_INT:
+            low_res_range[1] = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])-1
+
         # Rebin TOF axis
         tof_range = self.getProperty("TOFRange").value
         tof_step = self.getProperty("TOFSteps").value

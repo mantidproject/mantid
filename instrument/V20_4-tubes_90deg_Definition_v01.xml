@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File
 see http://www.mantidproject.org/IDF -->
+<!-- IDF configurations can be gound here https://github.com/mantidproject/documents/blob/master/IDF-Configurations/V20_idf_configurations_v05.pptx -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
 name="IMAT" valid-from ="1900-01-31 23:59:59"
 valid-to ="2099-12-31 23:59:59"
@@ -19,7 +20,7 @@ last-modified="2018-02-09 09:00:00">
   </defaults>
 
   <component type="source-chopper">
-    <location x="0.0" y="0.0" z="-50.6"/>
+    <location x="0.0" y="0.0" z="-28.9"/>
   </component>
   <type name="source-chopper"/>
 
@@ -42,7 +43,7 @@ last-modified="2018-02-09 09:00:00">
       <location x="-0.070" />
       <location x="-0.035" />
       <location x="0.000" />
-      <location x="-0.035" />
+      <location x="0.035" />
     </component>
   </type>
   
