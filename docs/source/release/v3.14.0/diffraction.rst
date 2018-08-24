@@ -13,6 +13,7 @@ Improvements
 ############
 
 - :ref:`SNAPReduce <algm-SNAPReduce>` now has progress bar and all output workspaces have history
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
@@ -38,9 +39,9 @@ Improvements
 - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks with the offset vectors in the header and the order of each satellite by the hkl of the nuclear peak.
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+- :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 
 Bugfixes
 ########
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
-
