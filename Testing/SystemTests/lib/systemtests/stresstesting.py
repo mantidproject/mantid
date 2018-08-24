@@ -1161,7 +1161,7 @@ def envAsString():
 #########################################################################
 # Function to spawn one test manager per core
 #########################################################################
-def testProcess(testDir="", saveDir, options, res_array,
+def testProcess(testDir, saveDir, options, res_array,
                 stat_dict, test_count, process_number, nc, do_cleanup):
 
     # mtdconf = MantidFrameworkConfig(loglevel=options.loglevel,

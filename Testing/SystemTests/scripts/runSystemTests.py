@@ -107,9 +107,8 @@ status_dict = manager.dict() # a shared dict to store names of skipped and faile
 
 # Prepare ncores processes
 for ip in range(ncores):
-    processes.append(Process(target=stresstesting.testProcess,args=(testDir=mtdconf.testDir, saveDir=mtdconf.saveDir,
-                     options=options, res_array=results_array, stat_dict=status_dict, test_count=test_counter, 
-                     process_number=ip, nc=ncores, do_cleanup=False)))
+    processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
+                     options, results_array, status_dict, test_counter, ip, ncores, False)))
 # Start and join processes
 for p in processes:
     p.start()
@@ -137,9 +136,8 @@ status_dict2 = manager2.dict() # a shared dict to store names of skipped and fai
 
 # Prepare ncores processes
 for ip in range(ncores):
-    processes2.append(Process(target=stresstesting.testProcess,args=(testDir=mtdconf.testDir, saveDir=mtdconf.saveDir,
-                     options=options, res_array=results_array2, stat_dict=status_dict2, test_count=test_counter2, 
-                     process_number=ip, nc=ncores, do_cleanup=True)))
+    processes2.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
+                     options, results_array2, status_dict2, test_counter2, ip, ncores, True)))
 # Start and join processes
 for p in processes2:
     p.start()
