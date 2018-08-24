@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import traceback
 import sys
-import time
 
 from qtpy import QtCore
 from qtpy.QtCore import Signal
