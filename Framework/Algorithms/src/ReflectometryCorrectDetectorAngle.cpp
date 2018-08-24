@@ -12,6 +12,7 @@ using Mantid::Geometry::deg2rad;
 using Mantid::Geometry::rad2deg;
 
 namespace {
+/// This namespace contains algorithm's property names.
 namespace Prop {
 std::string const DETECTOR_COMPONENT{"DetectorComponent"};
 std::string const DIRECT_LINE_POS{"DirectLinePosition"};
@@ -26,11 +27,19 @@ std::string const TWO_THETA{"TwoTheta"};
 /// Enumerations to define the rotation plane of the detector.
 enum class RotationPlane { horizontal, vertical };
 
+/** Return the fractional workspace index to the centre pixel.
+ *  @param spectrumInfo a spectrum info
+ *  @return the centre's fractional workspace index
+ */
 double
 detectorCentreIndex(Mantid::API::SpectrumInfo const &spectrumInfo) noexcept {
   return static_cast<double>(spectrumInfo.size() - 1) / 2.;
 }
 
+/** Return true if twoTheta increases with workspace index.
+ *  @param spectrumInfo a spectrum info
+ *  @return true if twoTheta increases with workspace index
+ */
 bool isAngleIncreasingWithIndex(Mantid::API::SpectrumInfo const &spectrumInfo) {
   auto const first = spectrumInfo.signedTwoTheta(0);
   auto const last = spectrumInfo.signedTwoTheta(spectrumInfo.size() - 1);
@@ -65,6 +74,10 @@ Mantid::Kernel::V3D detectorPosition(Mantid::API::MatrixWorkspace const &ws,
   return position;
 }
 
+/** Return the rotation plane of a reflectometry workspace.
+ *  @param ws a workspace
+ *  @return the rotation plane
+ */
 RotationPlane rotationPlane(Mantid::API::MatrixWorkspace const &ws) {
   auto const instrument = ws.getInstrument();
   auto const referenceFrame = instrument->getReferenceFrame();
@@ -74,6 +87,13 @@ RotationPlane rotationPlane(Mantid::API::MatrixWorkspace const &ws) {
                              : RotationPlane::horizontal;
 }
 
+/** Return the axis for the detector face rotation.
+ *
+ *  The detector centre normal should point to the sample in the end.
+ *  @param ws a workspace
+ *  @param plane the rotation plane
+ *  @return the rotation axis
+ */
 Mantid::Kernel::V3D faceRotationAxis(Mantid::API::MatrixWorkspace const &ws,
                                      RotationPlane const plane) {
   auto const instrument = ws.getInstrument();
@@ -110,6 +130,12 @@ int ReflectometryCorrectDetectorAngle::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ReflectometryCorrectDetectorAngle::category() const {
   return "Reflectometry;ILL\\Reflectometry";
+}
+
+/// Return a vector of related algorithm names.
+const std::vector<std::string>
+ReflectometryCorrectDetectorAngle::seeAlso() const {
+  return {"SpecularReflectionPositionCorrect"};
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -168,6 +194,7 @@ void ReflectometryCorrectDetectorAngle::exec() {
   setProperty(Prop::OUTPUT_WS, outputWS);
 }
 
+/// Validate the algorithm's input properties.
 std::map<std::string, std::string>
 ReflectometryCorrectDetectorAngle::validateInputs() {
   std::map<std::string, std::string> issues;
@@ -199,7 +226,11 @@ ReflectometryCorrectDetectorAngle::validateInputs() {
   return issues;
 }
 
-/// Update detector position.
+/** Move and rotate the detector around the sample.
+ * @param ws a workspace
+ * @param positions a ComponentPositions object
+ * @param twoTheta the rotation angle, in radians
+ */
 void ReflectometryCorrectDetectorAngle::correctDetectorPosition(
     API::MatrixWorkspace_sptr &ws, ComponentPositions const &positions,
     double const twoTheta) {
@@ -213,9 +244,10 @@ void ReflectometryCorrectDetectorAngle::correctDetectorPosition(
   rotateComponent(ws, componentName, rotationAxis, twoTheta);
 }
 
-/** Compute the detector rotation angle around origin and optionally set the
- *  OutputBeamPosition property.
- *  @return a rotation angle
+/** Compute the detector rotation angle around sample.
+ *  @param ws a workspace
+ *  @param l2 sample to detector centre distance
+ *  @return a rotation angle in radians
  */
 double ReflectometryCorrectDetectorAngle::correctedTwoTheta(
     API::MatrixWorkspace const &ws, double const l2) {
@@ -246,6 +278,11 @@ double ReflectometryCorrectDetectorAngle::correctedTwoTheta(
   }
 }
 
+/** Move a component to given position.
+ * @param ws a workspace
+ * @param name component's name
+ * @param position an absolute position
+ */
 void ReflectometryCorrectDetectorAngle::moveComponent(
     API::MatrixWorkspace_sptr &ws, std::string const &name,
     Kernel::V3D const &position) {
@@ -259,11 +296,11 @@ void ReflectometryCorrectDetectorAngle::moveComponent(
   moveComp->execute();
 }
 
-/** Calculate the offset angle between detector center and peak.
- *  @param peakCentre peak centre in pixels.
- *  @param detectorCentre detector centre in pixels.
- *  @param detectorDistance detector-sample distance in meters.
- *  @return the offset angle.
+/** Calculate a pixel's offset angle from detector centre.
+ * @param ws a workspace
+ * @param l2 sample to detector distance
+ * @param linePosition pixel's workspace index
+ * @return the offset angle, in radians
  */
 double ReflectometryCorrectDetectorAngle::offsetAngleFromCentre(
     API::MatrixWorkspace const &ws, double const l2,
@@ -282,6 +319,12 @@ double ReflectometryCorrectDetectorAngle::offsetAngleFromCentre(
   return sign * std::atan2(offsetWidth, l2);
 }
 
+/** Rotate the detector's face.
+ * @param ws a workspace
+ * @param name the detector component's name
+ * @param rotationAxis a rotation axis
+ * @param angle the rotation angle, in radians
+ */
 void ReflectometryCorrectDetectorAngle::rotateComponent(
     API::MatrixWorkspace_sptr &ws, std::string const &name,
     Kernel::V3D const &rotationAxis, double const angle) {
@@ -296,6 +339,10 @@ void ReflectometryCorrectDetectorAngle::rotateComponent(
   rotate->execute();
 }
 
+/** Return a ComponentPositions object for given workspace.
+ * @param ws a workspace
+ * @return a ComponentPositions object
+ */
 ReflectometryCorrectDetectorAngle::ComponentPositions
 ReflectometryCorrectDetectorAngle::sampleAndDetectorPositions(
     API::MatrixWorkspace const &ws) {
@@ -310,6 +357,10 @@ ReflectometryCorrectDetectorAngle::sampleAndDetectorPositions(
   return positions;
 }
 
+/** Calculate the signed angle between the sample and the detector centre.
+ * @param ws a workspace
+ * @return the signed twoTheta angle, in radians
+ */
 double ReflectometryCorrectDetectorAngle::signedDetectorAngle(
     API::MatrixWorkspace const &ws) {
   auto const instrument = ws.getInstrument();
