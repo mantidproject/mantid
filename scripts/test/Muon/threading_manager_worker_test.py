@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import sys
-import time
 import unittest
 
 try:
@@ -10,7 +8,7 @@ except ImportError:
     import mock
 
 from qtpy import QtWidgets, QtCore
-from Muon.GUI.Common.threading_manager import Worker, WorkerManager, split_kwarg_list, split_list_into_n_parts
+from Muon.GUI.Common.threading_worker import Worker
 
 
 def test_function(lst):
@@ -56,7 +54,6 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.start.connect(worker.run)
         worker.signals.finished.connect(worker_finished)
         thread.start()
-        # worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_started.call_count, 1)
@@ -72,7 +69,6 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.start.connect(worker.run)
         worker.signals.progress.connect(worker_progress)
         thread.start()
-        # worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_progress.call_count, 5)
@@ -87,7 +83,6 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.start.connect(worker.run)
         worker.signals.result.connect(worker_result)
         thread.start()
-        # worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_result.call_count, 1)
@@ -106,7 +101,6 @@ class ThreadingManagerWorkerTest(unittest.TestCase):
         worker.signals.result.connect(worker_result)
         worker.signals.error.connect(worker_error)
         thread.start()
-        # worker.signals.start.emit()
         self.Runner(thread, worker)
 
         self.assertEqual(worker_result.call_count, 0)
