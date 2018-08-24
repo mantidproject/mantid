@@ -1,4 +1,5 @@
 #include "MantidGeometry/Objects/MeshObject.h"
+#include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -630,18 +631,7 @@ size_t MeshObject::numberOfVertices() const {
  * get vertices
  */
 std::vector<double> MeshObject::getVertices() const {
-  std::vector<double> points;
-  size_t nPoints = m_vertices.size();
-  if (nPoints > 0) {
-    points.resize(static_cast<std::size_t>(nPoints) * 3);
-    for (size_t i = 0; i < nPoints; ++i) {
-      V3D pnt = m_vertices[i];
-      points[i * 3 + 0] = pnt.X();
-      points[i * 3 + 1] = pnt.Y();
-      points[i * 3 + 2] = pnt.Z();
-    }
-  }
-  return points;
+  return MeshObjectCommon::getVertices(m_vertices);
 }
 
 /**

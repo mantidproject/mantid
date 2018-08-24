@@ -104,8 +104,9 @@ set ( SRC_FILES
 	src/Objects/BoundingBox.cpp
 	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
-        src/Objects/MeshObject2D.cpp
 	src/Objects/MeshObject.cpp
+	src/Objects/MeshObject2D.cpp
+	src/Objects/MeshObjectCommon.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
@@ -261,6 +262,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
 	inc/MantidGeometry/Objects/MeshObject.h
 	inc/MantidGeometry/Objects/MeshObject2D.h
+	inc/MantidGeometry/Objects/MeshObjectCommon.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
@@ -346,7 +348,8 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
-        MeshObject2DTest.h
+	MeshObject2DTest.h
+	MeshObjectCommonTest.h
 	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h

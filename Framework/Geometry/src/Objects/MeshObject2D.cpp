@@ -1,5 +1,6 @@
 #include "MantidGeometry/Objects/MeshObject2D.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/MeshObjectCommon.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
@@ -421,18 +422,7 @@ size_t MeshObject2D::numberOfTriangles() const {
 }
 
 std::vector<double> MeshObject2D::getVertices() const {
-  std::vector<double> points;
-  size_t nPoints = m_vertices.size();
-  if (nPoints > 0) {
-    points.resize(static_cast<std::size_t>(nPoints) * 3);
-    for (size_t i = 0; i < nPoints; ++i) {
-      V3D pnt = m_vertices[i];
-      points[i * 3] = pnt.X();
-      points[i * 3 + 1] = pnt.Y();
-      points[i * 3 + 2] = pnt.Z();
-    }
-  }
-  return points;
+  return MeshObjectCommon::getVertices(m_vertices);
 }
 
 std::vector<uint32_t> MeshObject2D::getTriangles() const {
