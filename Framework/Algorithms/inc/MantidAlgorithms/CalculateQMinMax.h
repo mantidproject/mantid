@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_CALCULATEQMINMAX_H_
 #define MANTID_ALGORITHMS_CALCULATEQMINMAX_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {

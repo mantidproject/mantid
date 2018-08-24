@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CalculateQMinMax.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/CalculateQMinMax.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 

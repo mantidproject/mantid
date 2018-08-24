@@ -1,17 +1,17 @@
 #include "MantidAlgorithms/CalculateQMinMax.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::Run;
 using Mantid::API::SpectrumInfo;
 using Mantid::API::WorkspaceProperty;
 using Mantid::API::WorkspaceUnitValidator;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateQMinMax)
