@@ -6,8 +6,10 @@
 
 from collections import OrderedDict
 import logging
-from PyQt4 import QtCore
-from PyQt4 import QtGui as qt
+from qtpy import QtCore
+from qtpy.QtCore import Signal
+from qtpy import QtWidgets as qt
+from qtpy import QtGui
 
 # coding: utf-8
 # /*##########################################################################
@@ -256,13 +258,13 @@ _defaultTableItems = [ColoredPeriodicTableItem(*info) for info in _elements]
 class _ElementButton(qt.QPushButton):
     """Atomic element button, used as a cell in the periodic table
     """
-    sigElementEnter = QtCore.pyqtSignal(object)
+    sigElementEnter = Signal(object)
     """Signal emitted as the cursor enters the widget"""
-    sigElementLeave = QtCore.pyqtSignal(object)
+    sigElementLeave = Signal(object)
     """Signal emitted as the cursor leaves the widget"""
-    sigElementLeftClicked = QtCore.pyqtSignal(object)
+    sigElementLeftClicked = Signal(object)
     """Signal emitted when the widget is left clicked"""
-    sigElementRightClicked = QtCore.pyqtSignal(object)
+    sigElementRightClicked = Signal(object)
     """Signal emitted when the widget is right clicked"""
 
     def __init__(self, item, parent=None):
@@ -287,18 +289,18 @@ class _ElementButton(qt.QPushButton):
         self.current = False
 
         # selection colors
-        self.selected_color = qt.QColor(QtCore.Qt.yellow)
-        self.current_color = qt.QColor(QtCore.Qt.gray)
-        self.selected_current_color = qt.QColor(QtCore.Qt.darkYellow)
+        self.selected_color = QtGui.QColor(QtCore.Qt.yellow)
+        self.current_color = QtGui.QColor(QtCore.Qt.gray)
+        self.selected_current_color = QtGui.QColor(QtCore.Qt.darkYellow)
 
         # element colors
 
         if hasattr(item, "bgcolor"):
-            self.bgcolor = qt.QColor(item.bgcolor)
+            self.bgcolor = QtGui.QColor(item.bgcolor)
         else:
-            self.bgcolor = qt.QColor("#FFFFFF")
+            self.bgcolor = QtGui.QColor("#FFFFFF")
 
-        self.brush = qt.QBrush()
+        self.brush = QtGui.QBrush()
         self.__setBrush()
 
         self.clicked.connect(self.leftClickedSlot)
@@ -346,16 +348,16 @@ class _ElementButton(qt.QPushButton):
         instantiation (:attr:`bgcolor`)"""
         palette = self.palette()
         # if self.current and self.selected:
-        #     self.brush = qt.QBrush(self.selected_current_color)
+        #     self.brush = QtGui.QBrush(self.selected_current_color)
         # el
         if self.selected:
-            self.brush = qt.QBrush(self.selected_color)
+            self.brush = QtGui.QBrush(self.selected_color)
         # elif self.current:
-        #     self.brush = qt.QBrush(self.current_color)
+        #     self.brush = QtGui.QBrush(self.current_color)
         elif self.bgcolor is not None:
-            self.brush = qt.QBrush(self.bgcolor)
+            self.brush = QtGui.QBrush(self.bgcolor)
         else:
-            self.brush = qt.QBrush()
+            self.brush = QtGui.QBrush()
         palette.setBrush(self.backgroundRole(),
                          self.brush)
         self.setPalette(palette)
@@ -370,11 +372,11 @@ class _ElementButton(qt.QPushButton):
                                  widgGeom.height() - 2)
 
         # paint background color
-        painter = qt.QPainter(self)
+        painter = QtGui.QPainter(self)
         if self.brush is not None:
             painter.fillRect(paintGeom, self.brush)
         # paint frame
-        pen = qt.QPen(QtCore.Qt.black)
+        pen = QtGui.QPen(QtCore.Qt.black)
         pen.setWidth(1 if not self.isCurrent() else 5)
         painter.setPen(pen)
         painter.drawRect(paintGeom)
@@ -426,16 +428,16 @@ class PeriodicTable(qt.QWidget):
         pt.sigElementClicked.connect(my_slot)
 
     """
-    sigElementLeftClicked = QtCore.pyqtSignal(object)
+    sigElementLeftClicked = Signal(object)
     """When any element is clicked in the table, the widget emits
     this signal and sends a :class:`PeriodicTableItem` object.
     """
-    sigElementRightClicked = QtCore.pyqtSignal(object)
+    sigElementRightClicked = Signal(object)
     """When any element is clicked in the table, the widget emits
     this signal and sends a :class:`PeriodicTableItem` object.
     """
 
-    sigSelectionChanged = QtCore.pyqtSignal(object)
+    sigSelectionChanged = Signal(object)
     """When any element is selected/unselected in the table, the widget emits
     this signal and sends a list of :class:`PeriodicTableItem` objects.
 
@@ -639,7 +641,7 @@ class PeriodicCombo(qt.QComboBox):
         a predefined list with minimal information (symbol, atomic number,
         name, mass).
     """
-    sigSelectionChanged = QtCore.pyqtSignal(object)
+    sigSelectionChanged = Signal(object)
     """Signal emitted when the selection changes. Send
     :class:`PeriodicTableItem` object representing selected
     element
@@ -695,7 +697,7 @@ class PeriodicList(qt.QTreeWidget):
     :param single: *True* for single element selection with mouse click,
         *False* for multiple element selection mode.
     """
-    sigSelectionChanged = QtCore.pyqtSignal(object)
+    sigSelectionChanged = Signal(object)
     """When any element is selected/unselected in the widget, it emits
     this signal and sends a list of currently selected
     :class:`PeriodicTableItem` objects.

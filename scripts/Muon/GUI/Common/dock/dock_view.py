@@ -14,7 +14,7 @@ class DockView(QtWidgets.QMainWindow):
         # add widget
         self.widgets.append(widget)
         # make an empty dock for widget
-        self.docks.append(QtGui.QDockWidget(name))
+        self.docks.append(QtWidgets.QDockWidget(name))
         # add widget to dock
         self.docks[-1].setWidget(self.widgets[-1])
         # add dock to view
