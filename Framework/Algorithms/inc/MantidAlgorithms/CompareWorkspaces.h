@@ -139,7 +139,7 @@ private:
                                  double tolTof, double tolWeight,
                                  int64_t tolPulse, bool printdetails,
                                  size_t &numdiffpulse, size_t &numdifftof,
-                                 size_t &numdiffboth) const;
+                                 size_t &numdiffboth, size_t &numdiffweight) const;
 
   /// Records a mismatch in the Messages workspace and sets Result to false
   void recordMismatch(std::string msg, std::string ws1 = "",
