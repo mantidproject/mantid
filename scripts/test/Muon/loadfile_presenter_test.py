@@ -98,7 +98,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def test_dialog_opens_when_browse_button_clicked(self):
         self.presenter.on_browse_button_clicked()
 
-        self.mock_view.show_file_browser_and_return_selection.assert_called_once()
+        self.assertEqual(self.mock_view.show_file_browser_and_return_selection.call_count,1)
 
     def test_loading_not_initiated_if_no_file_selected_from_browser(self):
         self.mock_view.show_file_browser_and_return_selection = mock.Mock(return_value=[])
@@ -111,16 +111,16 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def test_buttons_disabled_while_load_thread_running(self):
         self.presenter.on_browse_button_clicked()
 
-        self.mock_view.disable_load_buttons.assert_called_once()
-        self.mock_view.enable_load_buttons.assert_called_once()
+        self.assertEqual(self.mock_view.disable_load_buttons.assert_call_count,1)
+        self.assertEqual(self.mock_view.enable_load_buttons.assert_call_count,1)
 
     def test_buttons_enabled_even_if_load_throws(self):
         self.mock_model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.on_browse_button_clicked()
 
-        self.mock_view.disable_load_buttons.assert_called_once()
-        self.mock_view.enable_load_buttons.assert_called_once()
+        self.assertEqual(self.mock_view.disable_load_buttons.call_count,1)
+        self.assertEqual(self.mock_view.enable_load_buttons.call_count,1)
 
     def test_files_not_loaded_into_model_if_multiple_files_selected_from_browse_in_single_file_mode(self):
         self.mock_model.load_workspace_from_filename = mock.Mock(return_value=("file.nxs", [1, 2, 3, 4], 1234))
