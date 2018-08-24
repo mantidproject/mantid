@@ -51,6 +51,8 @@ parser.add_option("-j", "--parallel", dest="parallel", action="store", type="int
                   help="The number of instances to run in parallel, like the -j option in ctest. Default is 1.")
 parser.add_option("-q", "--quiet", dest="quiet", action="store_true",
                   help="Prints detailed log to terminal.")
+parser.add_option("", "--output-on-failure", dest="output_on_failure", action="store_true",
+                  help="Print full log for failed tests.")
 parser.add_option("", "--showskipped", dest="showskipped", action="store_true",
                   help="List the skipped tests.")
 parser.add_option("-d", "--datapaths", dest="datapaths",
@@ -62,7 +64,7 @@ parser.add_option("", "--archivesearch", dest="archivesearch", action="store_tru
 parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
                   help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
-                    loglevel="information", parallel="1", quiet=False)
+                    loglevel="information", parallel="1", quiet=False, output_on_failure=False)
 (options, args) = parser.parse_args()
 
 # import the stress testing framework
@@ -83,6 +85,7 @@ save_dir = options.savedir
 if save_dir is None or save_dir == "":
     with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
         save_dir = f_handle.read().strip()
+
 # Configure properties file
 mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
                                               data_dirs=data_paths, save_dir=save_dir,
@@ -94,9 +97,6 @@ if options.makeprop:
 # Run the tests
 #########################################################################
 
-execargs = options.execargs
-test_runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
-
 # Multi-core processes
 ncores = int(options.parallel)
 processes = [] # an array to hold the processes
@@ -107,29 +107,48 @@ status_dict = manager.dict() # a shared dict to store names of skipped and faile
 
 # Prepare ncores processes
 for ip in range(ncores):
-    processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
-                     test_runner, options.testsInclude, options.testsExclude, options.exclude_in_pr_builds,
-                     options.showskipped, options.quiet, results_array, status_dict, test_counter, ip, ncores)))
+    processes.append(Process(target=stresstesting.testProcess,args=(testDir=mtdconf.testDir, saveDir=mtdconf.saveDir,
+                     options=options, res_array=results_array, stat_dict=status_dict, test_count=test_counter, 
+                     process_number=ip, nc=ncores, do_cleanup=False)))
 # Start and join processes
 for p in processes:
     p.start()
 for p in processes:
     p.join()
 
-#########################################################################
-# Cleanup
-#########################################################################
 
-# put the configuration back to its original state
-if options.makeprop:
-    mtdconf.restoreconfig()
-
-# Gather sums over ncores
+# Gather results
 skippedTests = sum(results_array[:ncores])
 failedTests = sum(results_array[ncores:2*ncores])
 totalTests = sum(results_array[2*ncores:3*ncores])
 # Find minimum of status: if min == 0, then success is False
 success = bool(min(results_array[3*ncores:4*ncores]))
+
+#########################################################################
+# Cleanup
+#########################################################################
+
+# ncores = int(options.parallel)
+processes2 = [] # an array to hold the processes
+results_array2 = Array('i', 4*ncores) # shared array to hold skipped, failed and total number of tests + status
+test_counter2 = Array('i', [0, 0, 0]) # shared array for number of executed tests, total number and max name length
+manager2 = Manager() # a manager to create a shared dict to store names of skipped and failed tests
+status_dict2 = manager2.dict() # a shared dict to store names of skipped and failed tests
+
+# Prepare ncores processes
+for ip in range(ncores):
+    processes2.append(Process(target=stresstesting.testProcess,args=(testDir=mtdconf.testDir, saveDir=mtdconf.saveDir,
+                     options=options, res_array=results_array2, stat_dict=status_dict2, test_count=test_counter2, 
+                     process_number=ip, nc=ncores, do_cleanup=True)))
+# Start and join processes
+for p in processes2:
+    p.start()
+for p in processes2:
+    p.join()
+
+# Put the configuration back to its original state
+if options.makeprop:
+    mtdconf.restoreconfig()
 
 #########################################################################
 # Output summary to terminal

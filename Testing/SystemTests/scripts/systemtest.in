@@ -69,11 +69,8 @@ fi
 $CMAKE_EXE --build . $CMAKE_TARGET_ARG -- StandardTestData
 $CMAKE_EXE --build . $CMAKE_TARGET_ARG -- SystemTestData
 
-# Get number of cores
-NCORES=$(grep -c ^processor /proc/cpuinfo)
-
 # Execute
 echo
-echo "Running tests on ${NCORES} cores..."
-$MANTIDPYTHON $MANTIDPYTHON_ARGS $RUNNER_SCRIPT -j ${NCORES} \
+echo "Running tests..."
+$MANTIDPYTHON $MANTIDPYTHON_ARGS $RUNNER_SCRIPT \
   --executable="${MANTIDPYTHON}" --exec-args="${MANTIDPYTHON_ARGS}" "$@"
