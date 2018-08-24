@@ -14,6 +14,7 @@ from mantid.api import (FileFinder)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
@@ -114,6 +115,7 @@ class RunTabPresenter(object):
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
+        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished, self.on_processing_error)
 
         # Models that are being used by the presenter
         self._state_model = None
@@ -373,11 +375,10 @@ class RunTabPresenter(object):
 
             # Get the name of the graph to output to
             output_graph = self.output_graph
-            sans_batch = SANSBatchReduction()
-            listener = RunTabPresenter.ProcessListener(self)
 
-            self.work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations,
-                                      output_mode=output_mode, plot_results=plot_results, output_graph=output_graph)
+            setattr(self._view, 'progress_bar_value', 0)
+            setattr(self._view, 'progress_bar_maximum', len(states))
+            self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results, output_graph)
 
         except Exception as e:
             self._view.enable_buttons()
@@ -393,13 +394,17 @@ class RunTabPresenter(object):
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
+    def notify_progress(self, row):
+        setattr(self._view, 'progress_bar_value', row + 1)
+        self._view.change_row_color("#d0f4d0", row)
+
     def on_processing_finished(self, result):
         self._view.enable_buttons()
         self._processing = False
 
-    def on_processing_error(self, error):
-        self._view.enable_buttons()
-        self._processing = False
+    def on_processing_error(self, row, error_msg):
+        self._view.change_row_color("#ff6363", row)
+        self.display_warning_box('Warning', 'Processing row {} failed'.format(row), error_msg)
 
     def on_row_inserted(self, index, row):
         row_table_index = TableIndexModel(*row)

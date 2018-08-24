@@ -141,15 +141,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         def on_cut_rows(self):
             pass
 
-    def __init__(self, main_presenter):
+    def __init__(self):
         """
         Initialise the interface
         """
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
-
-        # Main presenter
-        self._main_presenter = main_presenter
 
         # Listeners allow us to to notify all presenters
         self._settings_listeners = []
@@ -195,6 +192,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         # Attach validators
         self._attach_validators()
+
+        self._setup_progress_bar()
+
+    def _setup_progress_bar(self):
+        self.batch_progress_bar.setMinimum(0)
+        self.batch_progress_bar.setMaximum(1)
+        self.batch_progress_bar.setValue(0)
 
     def add_listener(self, listener):
         if not isinstance(listener, SANSDataProcessorGui.RunTabListener):
@@ -797,6 +801,30 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @zero_error_free.setter
     def zero_error_free(self, value):
         self.save_zero_error_free.setChecked(value)
+
+    @property
+    def progress_bar_minimum(self):
+        return self.batch_progress_bar.minimum()
+
+    @progress_bar_minimum.setter
+    def progress_bar_minimum(self, value):
+        self.batch_progress_bar.setMinimum(value)
+
+    @property
+    def progress_bar_maximum(self):
+        return self.batch_progress_bar.maximum()
+
+    @progress_bar_maximum.setter
+    def progress_bar_maximum(self, value):
+        self.batch_progress_bar.setMaximum(value)
+
+    @property
+    def progress_bar_value(self):
+        return self.batch_progress_bar.value()
+
+    @progress_bar_value.setter
+    def progress_bar_value(self, progress):
+        self.batch_progress_bar.setValue(progress)
 
     # -----------------------------------------------------------------
     # Global options
@@ -1815,6 +1843,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         cell = self.data_processor_table.cellAt(row, column)
         cell.setContentText(value_as_str)
         self.data_processor_table.setCellAt(row, column, cell)
+
+    def change_row_color(self, color, row):
+        row_location = self.row([row])
+        cell_data = self.data_processor_table.cellsAt(row_location)
+        for index, cell in enumerate(cell_data):
+            cell.setBackgroundColor(color)
+            self.data_processor_table.setCellAt(row_location, index, cell)
 
     def get_selected_rows(self):
         row_locations = self.data_processor_table.selectedRowLocations()
