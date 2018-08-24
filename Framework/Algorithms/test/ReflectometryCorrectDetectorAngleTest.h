@@ -71,6 +71,49 @@ public:
     checkSetTwoTheta(inputWS, angle);
   }
 
+  void test_correctionWithLinePosition() {
+    using namespace WorkspaceCreationHelper;
+    constexpr double angle{12.3};
+    constexpr double startX{0.};
+    constexpr double pixelSize{0.03};
+    Kernel::V3D const slit1Pos(-2, 0, 0);
+    Kernel::V3D const slit2Pos(-1, 0, 0);
+    double const slitOpening{0.001};
+    Kernel::V3D const sourcePos(-15, 0, 0);
+    Kernel::V3D const monitorPos(-3, 0, 0);
+    Kernel::V3D const samplePos(0, 0, 0);
+    Kernel::V3D const detectorPos(1.42, 0, 0);
+    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+        startX, pixelSize, slit1Pos, slit2Pos, slitOpening, slitOpening, sourcePos,
+        monitorPos, samplePos, detectorPos);
+    inputWS = extractDetectors(inputWS);
+    constexpr int lineIndex{2};
+    Algorithms::ReflectometryCorrectDetectorAngle alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("LinePosition", static_cast<double>(lineIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", angle))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DetectorComponent", "detector-panel"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", pixelSize))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT(onlyInstrumentsDiffer(inputWS, outputWS));
+    auto const &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(lineIndex), angle * deg2rad, 1e-10)
+    auto const &inSpectrumInfo = inputWS->spectrumInfo();
+    for (size_t i = 0; i < spectrumInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(spectrumInfo.l2(i), inSpectrumInfo.l2(i))
+    }
+  }
+
 private:
   void checkSetTwoTheta(API::MatrixWorkspace_sptr &inputWS, double const twoTheta) {
     // A random pixel size, not really needed.
@@ -93,11 +136,23 @@ private:
     TS_ASSERT(outputWS);
     TS_ASSERT(onlyInstrumentsDiffer(inputWS, outputWS));
     auto const &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT(!spectrumInfo.isMonitor(0));
     TS_ASSERT_DELTA(spectrumInfo.signedTwoTheta(0), twoTheta * deg2rad, 1e-10)
   }
 
-  bool onlyInstrumentsDiffer(API::MatrixWorkspace_sptr &ws1,
+  static API::MatrixWorkspace_sptr extractDetectors(API::MatrixWorkspace_sptr &ws) {
+    auto alg =
+    API::AlgorithmManager::Instance().createUnmanaged("ExtractSpectra");
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("OutputWorkspace", "_unused_for_child");
+    alg->setProperty("StartWorkspaceIndex", 1);
+    alg->execute();
+    API::MatrixWorkspace_sptr detectorWS = alg->getProperty("OutputWorkspace");
+    return detectorWS;
+  }
+
+  static bool onlyInstrumentsDiffer(API::MatrixWorkspace_sptr &ws1,
                              API::MatrixWorkspace_sptr &ws2) {
     auto alg =
         API::AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");

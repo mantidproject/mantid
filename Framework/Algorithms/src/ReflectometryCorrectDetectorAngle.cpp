@@ -78,13 +78,14 @@ Mantid::Kernel::V3D faceRotationAxis(Mantid::API::MatrixWorkspace const &ws,
                                      RotationPlane const plane) {
   auto const instrument = ws.getInstrument();
   auto const referenceFrame = instrument->getReferenceFrame();
+  auto const sign = referenceFrame->getHandedness() == Mantid::Geometry::Right ? 1. : -1.;
   Mantid::Kernel::V3D rotationAxis;
   switch (plane) {
   case RotationPlane::horizontal:
-    rotationAxis[referenceFrame->pointingUp()] = 1.;
+    rotationAxis[referenceFrame->pointingUp()] = sign;
     break;
   case RotationPlane::vertical:
-    rotationAxis[referenceFrame->pointingHorizontal()] = -1.;
+    rotationAxis[referenceFrame->pointingHorizontal()] = -sign;
     break;
   }
   return rotationAxis;
