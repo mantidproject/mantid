@@ -85,7 +85,7 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
             min_values = numpy.maximum(min_values, run_obj.getProperty('MDNorm_low').value).tolist()
         run_obj.addProperty('MDNorm_low', min_values, True)
         if run_obj.hasProperty('MDNorm_high'):
-            min_values = numpy.minimum(max_values, run_obj.getProperty('MDNorm_high').value).tolist()
+            max_values = numpy.minimum(max_values, run_obj.getProperty('MDNorm_high').value).tolist()
         run_obj.addProperty('MDNorm_high', [xmax]*num_spectra, True)
         self.setProperty('OutputWorkspace', out_ws)
 
