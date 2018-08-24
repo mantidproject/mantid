@@ -695,8 +695,9 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
+    } else {
+      alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
     }
-    alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
   }
   const std::string secondTrans = getPropertyValue("SecondTransmissionRun");
   WorkspaceGroup_sptr secondTransG;
@@ -707,8 +708,9 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
+    } else {
+      alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
     }
-    alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
   }
 
   std::vector<std::string> IvsQGroup, IvsQUnbinnedGroup, IvsLamGroup;
