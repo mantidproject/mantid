@@ -53,7 +53,7 @@ Sample
 .. diagram:: ILLSANS-v1_sample_wkflw.dot
 
 Full Treatment
-~~~~~~~~~~~~~~
+--------------
 
 This example performs the complete reduction. :ref:`Q1DWeighted <algm-Q1DWeighted>` can be called over the final result to produce the I of Q.
 
