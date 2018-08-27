@@ -73,17 +73,19 @@ void CalculateQMinMax::exec() {
       detPos.getSpherical(r, theta, phi);
       const double v1 = calculateQ(*(lambdaBinning.begin()), theta);
       const double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
-      if (v1 < min) {
-        min = v1;
-      }
-      if (v2 < min) {
-        min = v2;
-      }
-      if (v1 > max) {
-        max = v1;
-      }
-      if (v2 > max) {
-        max = v2;
+      PARALLEL_CRITICAL(CalculateQMinMax) {
+        if (v1 < min) {
+          min = v1;
+        }
+        if (v2 < min) {
+          min = v2;
+        }
+        if (v1 > max) {
+          max = v1;
+        }
+        if (v2 > max) {
+          max = v2;
+        }
       }
     }
   }
