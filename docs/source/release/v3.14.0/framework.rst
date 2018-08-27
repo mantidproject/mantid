@@ -43,6 +43,7 @@ New Algorithms
 Improvements
 ############
 - :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
+- :ref:`Live Data <algm-StartLiveData>` for events in PreserveEvents mode now produces workspaces that have bin boundaries which encompass the total x-range (TOF) for all events across all spectra.
 
 Bugfixes
 ########
