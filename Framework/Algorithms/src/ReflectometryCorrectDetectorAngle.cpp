@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 using Mantid::Geometry::deg2rad;
@@ -158,8 +159,7 @@ void ReflectometryCorrectDetectorAngle::init() {
       boost::make_shared<Kernel::MandatoryValidator<std::string>>();
   declareProperty(Prop::DETECTOR_COMPONENT, "", mandatoryString,
                   "Name of the detector component to move.");
-  auto positiveDouble =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(0.);
   declareProperty(Prop::LINE_POS, EMPTY_DBL(), positiveDouble,
                   "A possibly fractional workspace index for the line centre.");
@@ -336,6 +336,7 @@ void ReflectometryCorrectDetectorAngle::rotateComponent(
 /** Return a ComponentPositions object for given workspace.
  * @param ws a workspace
  * @return a ComponentPositions object
+ * @throw NotFoundError if given instrument component does not exist.
  */
 ReflectometryCorrectDetectorAngle::ComponentPositions
 ReflectometryCorrectDetectorAngle::sampleAndDetectorPositions(
@@ -344,6 +345,10 @@ ReflectometryCorrectDetectorAngle::sampleAndDetectorPositions(
   auto const instrument = ws.getInstrument();
   std::string const componentName = getProperty(Prop::DETECTOR_COMPONENT);
   auto const detector = instrument->getComponentByName(componentName);
+  if (!detector) {
+    throw Kernel::Exception::NotFoundError(
+        "Detector component does not exists:", componentName);
+  }
   positions.detector = detector->getPos();
   auto const sample = instrument->getSample();
   positions.sample = sample->getPos();
