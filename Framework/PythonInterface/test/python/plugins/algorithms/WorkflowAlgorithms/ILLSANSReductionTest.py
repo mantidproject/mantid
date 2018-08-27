@@ -11,6 +11,7 @@ class ILLSANSReductionTest(unittest.TestCase):
 
     def setUp(self):
         self._facility = config['default.facility']
+        config.appendDataSearchSubDir('ILL/D11/')
         config['default.facility'] = 'ILL'
 
     def tearDown(self):
