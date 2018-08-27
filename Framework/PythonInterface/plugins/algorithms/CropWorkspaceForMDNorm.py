@@ -8,21 +8,21 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory,
 from mantid.kernel import (Direction, CompositeValidator, Property,
                            CompositeRelation, FloatMandatoryValidator)
 
+
 class CropWorkspaceForMDNorm(PythonAlgorithm):
     """
     Crops an event workspace and store the information
     about trajectories limits in the run object
     """
-    
-    
+
     def category(self):
-        """ 
+        """
         Return category
         """
         return "Utility\\Workspaces;MDAlgorithms\\Normalisation"
 
     def name(self):
-        """ 
+        """
         Return name
         """
         return "CropWorkspaceForMDNorm"
@@ -36,13 +36,13 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
                " about trajectories limits in the run object."
 
     def PyInit(self):
-        """ 
+        """
         Declare properties
         """
         allowed_units = CompositeValidator([WorkspaceUnitValidator("DeltaE"),
                                             WorkspaceUnitValidator("Momentum")],
                                            relation=CompositeRelation.OR)
-        self.declareProperty(IEventWorkspaceProperty("InputWorkspace", "", 
+        self.declareProperty(IEventWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input,
                                                      validator=allowed_units),
                              doc="Input workspace. It has to be an event workspace"+
@@ -56,8 +56,8 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
                              validator=FloatMandatoryValidator(),
                              doc="Maximum energy transfer or momentum")
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                                               direction=Direction.Output), 
-                             doc='Output workspace')                     
+                                               direction=Direction.Output),
+                             doc='Output workspace')
 
     def PyExec(self):
         xmin = self.getProperty('XMin').value
@@ -83,7 +83,7 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
         max_values = [xmax]*num_spectra
         if run_obj.hasProperty('MDNorm_low'):
             #TODO: when handling of masking bins is implemented, number of spectra will be different
-            #      than the number of limits 
+            #      than the number of limits
             try:
                 min_values = numpy.maximum(min_values, run_obj.getProperty('MDNorm_low').value).tolist()
             except ValueError:
@@ -102,4 +102,3 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(CropWorkspaceForMDNorm)
-
