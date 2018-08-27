@@ -9,6 +9,15 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms
+----------
+
+New Algorithms
+##############
+
+- :ref:`ReflectometryCorrectDetectorAngle <algm-ReflectometryCorrectDetectorAngle>` can be used to rotate the detector to given :math:`2 \theta` angle or correct the detector angle using a direct beam reference.
+
+
 Liquids Reflectometer
 ---------------------
 
