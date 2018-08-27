@@ -55,9 +55,11 @@ Sample
 Full Treatment
 --------------
 
-This example performs the complete reduction. :ref:`Q1DWeighted <algm-Q1DWeighted>` can be called over the final result to produce the I of Q.
+This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1DWeighted>` can be called over the final result to produce the I of Q.
 
 **Example - full treatment of a sample**
+
+.. include:: ../usagedata-note.txt
 
 .. testsetup:: ExILLSANSReduction
 
