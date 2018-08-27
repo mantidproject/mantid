@@ -64,6 +64,7 @@ This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1
 .. testsetup:: ExILLSANSReduction
 
     config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D11/')
 
 .. testcode:: ExILLSANSReduction
 
