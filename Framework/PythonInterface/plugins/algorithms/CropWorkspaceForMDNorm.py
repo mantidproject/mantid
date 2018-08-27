@@ -82,11 +82,22 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
         min_values = [xmin]*num_spectra
         max_values = [xmax]*num_spectra
         if run_obj.hasProperty('MDNorm_low'):
-            min_values = numpy.maximum(min_values, run_obj.getProperty('MDNorm_low').value).tolist()
+            #TODO: when handling of masking bins is implemented, number of spectra will be different
+            #      than the number of limits 
+            try:
+                min_values = numpy.maximum(min_values, run_obj.getProperty('MDNorm_low').value).tolist()
+            except ValueError:
+                raise RuntimeError("Could not compare old and new values for 'MDNorm_low' log. "+
+                                   "Make sure the length of the old data is equal to the number of spectra")
         run_obj.addProperty('MDNorm_low', min_values, True)
         if run_obj.hasProperty('MDNorm_high'):
-            max_values = numpy.minimum(max_values, run_obj.getProperty('MDNorm_high').value).tolist()
+            try:
+                max_values = numpy.minimum(max_values, run_obj.getProperty('MDNorm_high').value).tolist()
+            except ValueError:
+                raise RuntimeError("Could not compare old and new values for 'MDNorm_high' log. "+
+                                   "Make sure the length of the old data is equal to the number of spectra")
         run_obj.addProperty('MDNorm_high', [xmax]*num_spectra, True)
+        run_obj.addProperty('MDNorm_spectra_index', list(range(num_spectra)), True)
         self.setProperty('OutputWorkspace', out_ws)
 
 # Register algorithm with Mantid.
