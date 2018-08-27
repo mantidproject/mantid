@@ -158,15 +158,16 @@ void ReflectometryCorrectDetectorAngle::init() {
       boost::make_shared<Kernel::MandatoryValidator<std::string>>();
   declareProperty(Prop::DETECTOR_COMPONENT, "", mandatoryString,
                   "Name of the detector component to move.");
-  declareProperty(Prop::LINE_POS, EMPTY_DBL(),
+  auto positiveDouble =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
+  positiveDouble->setLower(0.);
+  declareProperty(Prop::LINE_POS, EMPTY_DBL(), positiveDouble,
                   "A possibly fractional workspace index for the line centre.");
   declareProperty(Prop::TWO_THETA, EMPTY_DBL(),
                   "Angle of the detector centre "
                   "with respect to the beam "
                   "axis, in degrees.");
-  auto mandatoryDouble =
-      boost::make_shared<Kernel::MandatoryValidator<double>>();
-  declareProperty(Prop::PIXEL_SIZE, EMPTY_DBL(), mandatoryDouble,
+  declareProperty(Prop::PIXEL_SIZE, EMPTY_DBL(), positiveDouble,
                   "Size of a detector pixel, in metres.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
@@ -174,7 +175,7 @@ void ReflectometryCorrectDetectorAngle::init() {
           API::PropertyMode::Optional),
       "A reference direct beam workspace.");
   declareProperty(
-      Prop::DIRECT_LINE_POS, EMPTY_DBL(),
+      Prop::DIRECT_LINE_POS, EMPTY_DBL(), positiveDouble,
       "A possibly fractional workspace index for the direct line centre.");
 }
 
@@ -203,24 +204,17 @@ ReflectometryCorrectDetectorAngle::validateInputs() {
       issues[Prop::DIRECT_LINE_POS] = "Direct beam position has to be given "
                                       "when using a direct beam reference.";
     }
+    if (isDefault(Prop::PIXEL_SIZE)) {
+      issues[Prop::PIXEL_SIZE] =
+          "Pixel size is needed for direct beam calibration.";
+    }
   } else {
     if (isDefault(Prop::TWO_THETA)) {
       issues[Prop::TWO_THETA] =
           "An angle must be given when no direct beam reference is used.";
     }
-  }
-  if (!isDefault(Prop::LINE_POS)) {
-    double const pos = getProperty(Prop::LINE_POS);
-    if (pos < 0.) {
-      issues[Prop::LINE_POS] =
-          "The beam position workspace index has to be nonnegative.";
-    }
-  }
-  if (!isDefault(Prop::DIRECT_LINE_POS)) {
-    double const pos = getProperty(Prop::DIRECT_LINE_POS);
-    if (pos < 0.) {
-      issues[Prop::DIRECT_LINE_POS] =
-          "The direct beam position workspace index has to be nonnegative.";
+    if (!isDefault(Prop::LINE_POS) && isDefault(Prop::PIXEL_SIZE)) {
+      issues[Prop::PIXEL_SIZE] = "Pixel size is needed for angle correction.";
     }
   }
   return issues;

@@ -144,7 +144,6 @@ private:
   void checkSetTwoTheta(API::MatrixWorkspace_sptr &inputWS,
                         double const twoTheta) {
     // A random pixel size, not really needed.
-    constexpr double pixelSize{0.003};
     Algorithms::ReflectometryCorrectDetectorAngle alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -156,7 +155,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("TwoTheta", twoTheta))
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("DetectorComponent", "point-detector"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PixelSize", pixelSize))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
