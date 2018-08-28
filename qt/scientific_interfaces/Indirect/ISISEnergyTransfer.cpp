@@ -47,7 +47,6 @@ std::string createDetectorGroupingString(std::size_t numberOfDetectors,
   return createDetectorGroupingString(groupSize, numberOfGroups,
                                       numberOfDetectors);
 }
-
 } // namespace
 
 namespace MantidQt {
@@ -316,6 +315,7 @@ void ISISEnergyTransfer::run() {
 
   std::pair<std::string, std::string> grouping =
       createMapFile(m_uiForm.cbGroupingOptions->currentText().toStdString());
+
   reductionAlg->setProperty("GroupingMethod", grouping.first);
 
   if (grouping.first == "File")
@@ -375,6 +375,22 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
+void ISISEnergyTransfer::removeGroupingOption(const QString &option) {
+  for (auto i = 0u; i < m_uiForm.cbGroupingOptions->count(); ++i)
+    if (m_uiForm.cbGroupingOptions->itemText(i) == option) {
+      m_uiForm.cbGroupingOptions->removeItem(i);
+      return;
+    }
+}
+
+void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
+                                                    const QString &option) {
+  if (includeOption)
+    m_uiForm.cbGroupingOptions->addItem(option);
+  else
+    removeGroupingOption(option);
+}
+
 /**
  * Called when the instrument has changed, used to update default values.
  */
@@ -388,6 +404,12 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   qens << "IRIS"
        << "OSIRIS";
   m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
+
+  QStringList allowDefaultGroupingInstruments;
+  allowDefaultGroupingInstruments << "TOSCA";
+  includeExtraGroupingOption(
+      allowDefaultGroupingInstruments.contains(instDetails["instrument"]),
+      "Default");
 
   if (instDetails["spectra-min"].isEmpty() ||
       instDetails["spectra-max"].isEmpty()) {
