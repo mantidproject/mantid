@@ -9,10 +9,14 @@
 Description
 -----------
 
-This algorithm transforms an input workspace in wavelength to Q or momentum space for
-reflectometry workspaces. Prior to the transformation, the algorithm corrects the
-detector position to an angle :math:`\theta_f`, where :math:`\theta_f` is extracted
-from the log value :literal:`stheta`.
+This algorithm transforms an input workspace in wavelength to :math:`Q_{x}, Q_{z}`
+or momentum space for reflectometry workspaces. Prior to the transformation, the
+algorithm corrects the detector position to an angle :math:`\theta_f`, where
+:math:`\theta_f` is extracted from the log value :literal:`stheta`.
+
+For conversion of single histogram workspaces to :math:`Q_{z}`, see
+:ref:`ConvertUnits <algm-ConvertUnits>` or
+:ref:`ReflectometryConvertToQ <algm-ReflectometryMomentumTransfer>`.
 
 Prerequisites
 #############
