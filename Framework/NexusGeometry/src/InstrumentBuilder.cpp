@@ -12,20 +12,6 @@
 namespace Mantid {
 namespace NexusGeometry {
 
-namespace {
-
-class Transaction {
-private:
-  bool *m_success = nullptr;
-
-public:
-  explicit Transaction(bool *handle) : m_success(handle) { *m_success = false; }
-  ~Transaction() { *m_success = true; }
-  Transaction(const Transaction &) = delete;
-  Transaction &operator=(const Transaction &) = delete;
-};
-} // namespace
-
 /// Constructor
 InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
     : m_instrument(
@@ -116,7 +102,6 @@ void InstrumentBuilder::addDetectorToLastBank(
       detName, detId,
       const_cast<Geometry::IComponent *>(m_lastBank->getBaseComponent()));
   detector->translate(Mantid::Kernel::toV3D(relativeOffset));
-  // detector->setPos(relativeOffset[0], relativeOffset[1], relativeOffset[2]);
   // No rotation set for detector pixels of a bank. This is not possible in the
   // Nexus Geometry specification.
   detector->setShape(shape);
@@ -192,10 +177,8 @@ void InstrumentBuilder::addBank(const std::string &localName,
 std::unique_ptr<const Geometry::Instrument>
 InstrumentBuilder::createInstrument() const {
   verifyMutable();
-  // Lock this from further modification. Temporary releases on destruction.
-  Transaction transaction(&m_finalized);
-  (void)transaction;
   sortDetectors();
+  m_finalized = true;
   return std::unique_ptr<const Geometry::Instrument>(std::move(m_instrument));
 }
 } // namespace NexusGeometry

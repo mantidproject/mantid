@@ -47,6 +47,8 @@ class MANTID_NEXUSGEOMETRY_DLL InstrumentBuilder {
 public:
   /// Constructor creates the instrument
   explicit InstrumentBuilder(const std::string &instrumentName);
+  InstrumentBuilder(const InstrumentBuilder &) = delete;
+  InstrumentBuilder &operator=(const InstrumentBuilder &) = delete;
   /// Adds component to instrument
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);
