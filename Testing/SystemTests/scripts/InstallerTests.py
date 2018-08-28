@@ -14,8 +14,8 @@ SAVE_DIR_LIST_PATH = os.path.join(THIS_MODULE_DIR, "defaultsave-directory.txt")
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', dest='package_dir', metavar='directory', default=os.getcwd(),
                     help='Directory to look for packages. Defaults to current working directory')
-parser.add_argument("-j", "--parallel", dest="ncores", action="store", type="int", default=1,
-                    help="The number of instances to run in parallel, like the -j option in ctest.")
+parser.add_argument('-j', '--parallel', dest='ncores', type=int, default=1,
+                    help='The number of instances to run in parallel, like the -j option in ctest.')
 parser.add_argument('-n', dest='doInstall', action='store_false',
                     help='Run tests without installing Mantid (it must be already installed)')
 parser.add_argument('-o', dest='out2stdout', action='store_true',

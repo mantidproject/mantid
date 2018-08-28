@@ -72,5 +72,4 @@ find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
 PKGDIR=${WORKSPACE}/build
-NCORES=$(grep -c ^processor /proc/cpuinfo)
-python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j $NCORES $EXTRA_ARGS
+python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${BUILD_THREADS:?} $EXTRA_ARGS
