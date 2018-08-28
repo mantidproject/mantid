@@ -3,6 +3,7 @@
     Magnetism reflectometry reduction
 """
 from __future__ import (absolute_import, division, print_function)
+import sys
 import math
 import numpy as np
 from mantid.api import *
@@ -168,6 +169,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 output_list.append(q_rebin)
             except:
                 logger.error("Could not process %s" % str(workspace))
+                logger.error(str(sys.exc_info()[1]))
 
         # Prepare output workspace group
         if len(output_list)>1:
@@ -380,9 +382,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # this a distribution.
         workspace.setDistribution(True)
 
-        # TOF range
-        tof_range = self.get_tof_range(workspace)
-
         # Get Q range
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
@@ -412,18 +411,18 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         h = 6.626e-34  # m^2 kg s^-1
         m = 1.675e-27  # kg
         constant = 4e-4 * math.pi * m * source_detector_distance / h * math.sin(theta)
-        q_range = [qMin, qStep, constant / tof_range[0] * 1.2]
+        q_range = [qMin, qStep, constant / self._tof_range[0] * 1.2]
 
-        q_min_from_data = constant / tof_range[1]
-        q_max_from_data = constant / tof_range[0]
+        q_min_from_data = constant / self._tof_range[1]
+        q_max_from_data = constant / self._tof_range[0]
         AddSampleLog(Workspace=q_workspace, LogName='q_min', LogText=str(q_min_from_data),
                      LogType='Number', LogUnit='1/Angstrom')
         AddSampleLog(Workspace=q_workspace, LogName='q_max', LogText=str(q_max_from_data),
                      LogType='Number', LogUnit='1/Angstrom')
 
         tof_to_lambda = 1.0e4 * h / (m * source_detector_distance)
-        lambda_min = tof_to_lambda * tof_range[0]
-        lambda_max = tof_to_lambda * tof_range[1]
+        lambda_min = tof_to_lambda * self._tof_range[0]
+        lambda_max = tof_to_lambda * self._tof_range[1]
         AddSampleLog(Workspace=q_workspace, LogName='lambda_min', LogText=str(lambda_min),
                      LogType='Number', LogUnit='Angstrom')
         AddSampleLog(Workspace=q_workspace, LogName='lambda_max', LogText=str(lambda_max),
@@ -563,14 +562,22 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
     def get_tof_range(self, ws_event_data):
         """
-            Determine the TOF range
+            Determine the TOF range. To ensure consistency, determine it once and
+            return the same range for subsequent calls.
+
+            If a TOF range has been set using TimeAxisRange, it will be used to
+            determine the range.
+
             @param ws_event_data: data workspace
         """
         if self._tof_range is not None:
+            self.validate_tof_range(ws_event_data)
             return self._tof_range
 
-        crop_TOF = self.getProperty("CutTimeAxis").value
         tof_step = self.getProperty("TimeAxisStep").value
+        crop_TOF = self.getProperty("CutTimeAxis").value
+        use_wl_cut = self.getProperty("UseWLTimeAxis").value
+        crop_TOF = crop_TOF and not use_wl_cut
         if crop_TOF:
             self._tof_range = self.getProperty("TimeAxisRange").value  #microS
             if self._tof_range[0] <= 0:
@@ -587,6 +594,23 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             logger.notice("Determining range: %g %g" % (tof_min, tof_max))
 
         return self._tof_range
+
+    def validate_tof_range(self, ws_event_data):
+        """
+            Validate that the TOF range we previously stored is consistent with
+            the given workspace.
+            @param ws_event_data: data workspace
+        """
+        if self._tof_range is not None:
+            # If we have determined the range
+            tof_max = ws_event_data.getTofMax()
+            tof_min = ws_event_data.getTofMin()
+            if tof_min > self._tof_range[1] or tof_max < self._tof_range[0]:
+                error_msg = "Requested range does not match data for %s: " % str(ws_event_data)
+                error_msg += "[%g, %g] found [%g, %g]" % (self._tof_range[0], self._tof_range[1],
+                                                          tof_min, tof_max)
+                raise RuntimeError(error_msg)
+        return True
 
     def write_meta_data(self, workspace):
         """
@@ -651,37 +675,43 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             :param background__range: pixel range of the background region
             :param rebin_to_ws: Workspace to rebin to instead of doing independent rebinning
         """
+        logger.warning("Processing %s" % str(workspace))
         use_wl_cut = self.getProperty("UseWLTimeAxis").value
         constant_q_binning = self.getProperty("ConstantQBinning").value
+        tof_step = self.getProperty("TimeAxisStep").value
 
-        # With constant-Q binning, convert to wavelength before or after
-        # cutting the time axis depending on how the user wanted it.
-        if constant_q_binning and use_wl_cut:
+        # First, a sanity check to see that the TOF range matches what we expect.
+        self.get_tof_range(workspace)
+
+        # For constant-Q binning, we work in wavelength. We just need to know
+        # whether we need to convert units first and bin/cut in wavelength,
+        # or bin/cut in TOF and convert afterwards
+        convert_first = use_wl_cut or rebin_to_ws
+
+        if constant_q_binning and convert_first:
             # Convert to wavelength
             workspace = ConvertUnits(InputWorkspace=workspace, Target="Wavelength",
                                      AlignBins=True, ConvertFromPointData=False,
                                      OutputWorkspace="%s_histo" % str(workspace))
-        tof_range = self.get_tof_range(workspace)
-        # Rebin wavelength axis
-        tof_max = workspace.getTofMax()
-        tof_min = workspace.getTofMin()
-        if tof_min > tof_range[1] or tof_max < tof_range[0]:
-            error_msg = "Requested range does not match data for %s: " % str(workspace)
-            error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
-                                                      tof_min, tof_max)
-            raise RuntimeError(error_msg)
 
+        # Rebin either to the specified parameter or to the given workspace
         if rebin_to_ws is not None:
             workspace = RebinToWorkspace(WorkspaceToRebin=workspace,
                                          WorkspaceToMatch=rebin_to_ws,
                                          OutputWorkspace="%s_histo" % str(workspace))
         else:
-            tof_step = self.getProperty("TimeAxisStep").value
-            logger.notice("Time axis range: %s %s %s [%s %s]" % (tof_range[0], tof_step, tof_range[1], tof_min, tof_max))
-            workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
+            # Determine rebinning parameters according to whether we work in
+            # wavelength or TOF
+            if use_wl_cut:
+                _range = self.getProperty("TimeAxisRange").value
+                if _range[0] <= 0:
+                    _range[0] = tof_step
+            else:
+                _range = self._tof_range
+            workspace = Rebin(InputWorkspace=workspace, Params=[_range[0], tof_step, _range[1]],
                               OutputWorkspace="%s_histo" % str(workspace))
 
-        if constant_q_binning and not use_wl_cut:
+        if constant_q_binning and not convert_first:
             # Convert to wavelength
             workspace = ConvertUnits(InputWorkspace=workspace, Target="Wavelength",
                                      AlignBins=True, ConvertFromPointData=False,
