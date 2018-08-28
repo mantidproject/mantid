@@ -1,4 +1,4 @@
-#include "MantidDataHandling/SaveMFT.h"
+#include "MantidDataHandling/SaveReflectometryAscii.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -28,10 +28,10 @@ using namespace Kernel;
 using namespace API;
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(SaveMFT)
+DECLARE_ALGORITHM(SaveReflectometryAscii)
 
 /// Initialise the algorithm
-void SaveMFT::init() {
+void SaveReflectometryAscii::init() {
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
@@ -69,7 +69,7 @@ void validateMatrix(MatrixWorkspace_const_sptr &ws) {
 }
 
 /// Input validation for single MatrixWorkspace
-std::map<std::string, std::string> SaveMFT::validateInputs() {
+std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   std::map<std::string, std::string> issues;
   m_ws = getProperty("InputWorkspace");
   validateMatrix(issues, m_ws);
@@ -80,7 +80,7 @@ std::map<std::string, std::string> SaveMFT::validateInputs() {
 }
 
 /// Write data to file
-void SaveMFT::data() {
+void SaveReflectometryAscii::data() {
   m_file << std::scientific;
   m_file << std::setprecision(std::numeric_limits<double>::digits10);
   const auto points = m_ws->points(0);
@@ -99,7 +99,7 @@ void SaveMFT::data() {
 /** Write formatted line of data
  *  @param val :: the double value to be written
  */
-void SaveMFT::outputval(double val) {
+void SaveReflectometryAscii::outputval(double val) {
   m_file << std::setw(28);
   if (!std::isnan(val) && !std::isinf(val))
     m_file << val;
@@ -112,10 +112,12 @@ void SaveMFT::outputval(double val) {
 /** Write formatted line of data
  *  @param val :: a string value to be written
  */
-void SaveMFT::outputval(std::string val) { m_file << std::setw(28) << val; }
+void SaveReflectometryAscii::outputval(std::string val) {
+  m_file << std::setw(28) << val;
+}
 
 /// Retrieve sample log information
-std::string SaveMFT::sampleInfo(const std::string &logName) {
+std::string SaveReflectometryAscii::sampleInfo(const std::string &logName) {
   auto run = m_ws->run();
   try {
     return boost::lexical_cast<std::string>(run.getLogData(logName)->value());
@@ -125,7 +127,8 @@ std::string SaveMFT::sampleInfo(const std::string &logName) {
 }
 
 /// Write one header line
-void SaveMFT::writeInfo(const std::string logName, const std::string logValue) {
+void SaveReflectometryAscii::writeInfo(const std::string logName,
+                                       const std::string logValue) {
   if (!logValue.empty())
     m_file << logName << " : " << sampleInfo(logValue) << '\n';
   else
@@ -133,7 +136,7 @@ void SaveMFT::writeInfo(const std::string logName, const std::string logValue) {
 }
 
 /// Write header lines
-void SaveMFT::header() {
+void SaveReflectometryAscii::header() {
   m_file << std::setfill(' ');
   m_file << "MFT\n";
   std::map<std::string, std::string> logs;
@@ -178,7 +181,7 @@ void SaveMFT::header() {
 }
 
 /// Check file
-void SaveMFT::checkFile(const std::string filename) {
+void SaveReflectometryAscii::checkFile(const std::string filename) {
   if (Poco::File(filename).exists()) {
     g_log.warning("File already exists and will be overwritten");
     try {
@@ -195,7 +198,7 @@ void SaveMFT::checkFile(const std::string filename) {
 }
 
 /// Execute the algorithm
-void SaveMFT::exec() {
+void SaveReflectometryAscii::exec() {
   checkFile(m_filename);
   if (getProperty("WriteHeader"))
     header();
@@ -204,7 +207,7 @@ void SaveMFT::exec() {
 }
 
 /// Check if input workspace is a group
-bool SaveMFT::checkGroups() {
+bool SaveReflectometryAscii::checkGroups() {
   try {
     WorkspaceGroup_const_sptr group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
@@ -231,7 +234,7 @@ bool SaveMFT::checkGroups() {
 }
 
 /// Execution of group workspaces
-bool SaveMFT::processGroups() {
+bool SaveReflectometryAscii::processGroups() {
   const std::string filename = getPropertyValue("Filename");
   for (auto i = 0u; i < m_group.size(); ++i) {
     m_ws = m_group[i]->clone();

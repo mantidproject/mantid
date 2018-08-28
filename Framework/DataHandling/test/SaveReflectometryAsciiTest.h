@@ -1,12 +1,12 @@
-#ifndef MANTID_DATAHANDLING_SAVEMFTTEST_H_
-#define MANTID_DATAHANDLING_SAVEMFTTEST_H_
+#ifndef MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
+#define MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/SaveMFT.h"
+#include "MantidDataHandling/SaveReflectometryAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -20,23 +20,25 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class SaveMFTTest : public CxxTest::TestSuite {
+class SaveReflectometryAsciiTest : public CxxTest::TestSuite {
 
 public:
-  static SaveMFTTest *createSuite() { return new SaveMFTTest(); }
-  static void destroySuite(SaveMFTTest *suite) { delete suite; }
+  static SaveReflectometryAsciiTest *createSuite() {
+    return new SaveReflectometryAsciiTest();
+  }
+  static void destroySuite(SaveReflectometryAsciiTest *suite) { delete suite; }
 
-  SaveMFTTest() {}
-  ~SaveMFTTest() override {}
+  SaveReflectometryAsciiTest() {}
+  ~SaveReflectometryAsciiTest() override {}
 
   void testInit() {
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized())
   }
 
   void test_invalid_InputWorkspace() {
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", "ws"))
@@ -53,7 +55,7 @@ public:
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -90,7 +92,7 @@ public:
     Workspace2D_sptr ws = create<Workspace2D>(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -124,7 +126,7 @@ public:
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -143,7 +145,7 @@ public:
     ws->initialize(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -169,7 +171,7 @@ public:
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -208,7 +210,7 @@ public:
     const Workspace_sptr ws = create<Workspace2D>(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -245,7 +247,7 @@ public:
     const Workspace_sptr ws2 = create<Workspace2D>(1, histogram2);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws1))
@@ -284,7 +286,7 @@ public:
     ws->initialize(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -342,7 +344,7 @@ public:
     ws->mutableRun().addLogData(a);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
@@ -404,7 +406,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("group", group);
     group->add("ws1");
     group->add("ws2");
-    SaveMFT alg;
+    SaveReflectometryAscii alg;
     alg.initialize();
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "group"))
@@ -456,4 +458,4 @@ private:
     return in.peek() != std::ifstream::traits_type::eof();
   }
 };
-#endif /*MANTID_DATAHANDLING_SAVEMFTTEST_H_*/
+#endif /*MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_*/

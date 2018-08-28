@@ -27,9 +27,9 @@ This algorithm writes data in scientific exponential notation (E-notation) of do
 Usage
 -----
 
-**Example - Save a workspace in MFT ASCII**
+**Example - Save a workspace in reflectometry ASCII format**
 
-.. testcode:: SaveMFT_general_usage
+.. testcode:: SaveReflectometryAscii_general_usage
 
     # import the os path libraries for directory functions
     import os
@@ -54,13 +54,13 @@ Usage
 
     # Save with mft extension and using the option LogList: Title will be added to a required header line and d will be additionally added
     # to the first parameter field.
-    SaveMFT(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
+    SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
 
     if os.path.exists(file):
       myFile = open(file, 'r')
       print(myFile.read())
 
-.. testoutput:: SaveMFT_general_usage
+.. testoutput:: SaveReflectometryAscii_general_usage
    :options: +NORMALIZE_WHITESPACE
 
    MFT
@@ -90,7 +90,7 @@ Usage
           1.500000000000000e+00       1.000000000000000e+00       1.000000000000000e+00       9.500000000000000e+00
           2.500000000000000e+00       2.000000000000000e+00       1.000000000000000e+00       9.500000000000000e+00
 
-.. testcleanup:: SaveMFT_general_usage
+.. testcleanup:: SaveReflectometryAscii_general_usage
 
    if os.path.exists(file):
      # Delete file

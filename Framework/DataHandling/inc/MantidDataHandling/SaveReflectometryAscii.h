@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SaveMFT_H_
-#define MANTID_DATAHANDLING_SaveMFT_H_
+#ifndef MANTID_DATAHANDLING_SaveReflectometryAscii_H_
+#define MANTID_DATAHANDLING_SaveReflectometryAscii_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -34,10 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveMFT : public API::Algorithm {
+class DLLExport SaveReflectometryAscii : public API::Algorithm {
 public:
   /// Algorithm's name. @see Algorithm::name
-  const std::string name() const override { return "SaveMFT"; }
+  const std::string name() const override { return "SaveReflectometryAscii"; }
   /// Algorithm's version. @see Algorithm::version
   int version() const override { return 1; }
   /// Algorithm's category for identification. @see Algorithm::category
@@ -92,4 +92,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*  MANTID_DATAHANDLING_SaveMFT_H_  */
+#endif /*  MANTID_DATAHANDLING_SaveReflectometryAscii_H_  */

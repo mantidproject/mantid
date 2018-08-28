@@ -157,7 +157,7 @@ set ( SRC_FILES
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
 	src/SaveMask.cpp
-        src/SaveMFT.cpp
+        src/SaveReflectometryAscii.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -342,7 +342,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
 	inc/MantidDataHandling/SaveMask.h
-        inc/MantidDataHandling/SaveMFT.h
+        inc/MantidDataHandling/SaveReflectometryAscii.h
 	inc/MantidDataHandling/SaveNISTDAT.h
 	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SaveNXTomo.h
@@ -517,7 +517,7 @@ set ( TEST_FILES
 	SaveILLCosmosAsciiTest.h
 	SaveIsawDetCalTest.h
 	SaveMaskTest.h
-        SaveMFTTest.h
+        SaveReflectometryAsciiTest.h
 	SaveNISTDATTest.h
 	SaveNXSPETest.h
 	SaveNXTomoTest.h
