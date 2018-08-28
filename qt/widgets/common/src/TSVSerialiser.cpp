@@ -401,7 +401,7 @@ TSVSerialiser &TSVSerialiser::writeLine(const std::string &name) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const std::string &val) {
-  m_output << "\t" << val;
+  storeString(val);
   return *this;
 }
 
@@ -417,12 +417,12 @@ TSVSerialiser &TSVSerialiser::operator<<(const QString &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const double &val) {
-  m_output << "\t" << val;
+  storeDouble(val);
   return *this;
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const int &val) {
-  m_output << "\t" << val;
+  storeInt(val);
   return *this;
 }
 
@@ -432,7 +432,7 @@ TSVSerialiser &TSVSerialiser::operator<<(const size_t &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const bool &val) {
-  m_output << "\t" << val;
+  storeBool(val);
   return *this;
 }
 
