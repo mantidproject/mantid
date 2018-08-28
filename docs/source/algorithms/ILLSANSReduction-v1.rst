@@ -151,7 +151,10 @@ Print the I(Q):
 
 .. plot::
 
-    from mantid.simpleapi import ILLSANSReduction, Q1DWeighted, mtd
+    from mantid.simpleapi import ILLSANSReduction, Q1DWeighted, mtd, config
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D11/')
 
     # Process the dark current Cd/B4C for water
     ILLSANSReduction(Run='010455.nxs', ProcessAs='Absorber', OutputWorkspace='Cdw')
