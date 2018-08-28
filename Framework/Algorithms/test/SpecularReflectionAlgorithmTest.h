@@ -25,6 +25,15 @@ using namespace Mantid::Kernel;
 using VerticalHorizontalOffsetType = boost::tuple<double, double>;
 
 class SpecularReflectionAlgorithmTest {
+public:
+  // This means the constructor isn't called when running other tests
+  static SpecularReflectionAlgorithmTest *createSuite() {
+    return new SpecularReflectionAlgorithmTest();
+  }
+  static void destroySuite(SpecularReflectionAlgorithmTest *suite) {
+    delete suite;
+  }
+
 protected:
   MatrixWorkspace_sptr pointDetectorWS;
 

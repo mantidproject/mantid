@@ -19,7 +19,7 @@ Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 
 #### Reviewer ####
 
-Please comment on the following ([full description](http://www.mantidproject.org/Individual_Ticket_Testing)):
+Please comment on the following ([full description](http://developer.mantidproject.org/IndividualTicketTesting/)):
 
 ##### Code Review #####
 
