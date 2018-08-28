@@ -1,10 +1,6 @@
 #ifndef TUBEHELPERS_TEST_H_
 #define TUBEHELPERS_TEST_H_
 
-//---------------------------
-// Includes
-//---------------------------
-
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
