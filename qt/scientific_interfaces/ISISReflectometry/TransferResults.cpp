@@ -26,5 +26,5 @@ void TransferResults::addErrorRow(COLUMN_NAME_TYPE id,
                                   COLUMN_VALUE_TYPE error) {
   m_errorRuns.push_back({{id, error}});
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

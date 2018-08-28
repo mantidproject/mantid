@@ -5,9 +5,9 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 namespace Mantid {

@@ -575,7 +575,7 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 # -------------------------------------------------------------------------------
 
 
-def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
+def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -585,14 +585,15 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
+    @param group_string String for custom method - comma separated list or range
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string)
 
     if grouped_ws is not None:
         mtd.addOrReplace(workspace_name, grouped_ws)
 
 
-def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
+def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -602,6 +603,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
+    @param group_string String for custom method - comma separated list or range
     """
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
@@ -663,6 +665,9 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     elif grouping_method == 'Workspace':
         # Apply the grouping
         group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
+
+    elif grouping_method == 'Custom':
+        group_detectors.setProperty("GroupingPattern", group_string)
 
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))

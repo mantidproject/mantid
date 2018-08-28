@@ -2,11 +2,11 @@ from __future__ import (absolute_import, division, print_function)
 
 import sys
 
-from  Muon import load_utils
-from  Muon import maxent_presenter
-from  Muon import maxent_view
-from  Muon import maxent_model
-from  Muon import thread_model
+from  Muon.GUI.Common import load_utils
+from  Muon.GUI.Common import thread_model
+from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter
+from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_view
+from  Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 import unittest
 if sys.version_info.major == 3:
@@ -49,13 +49,24 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.thread.threadWrapperSetup = mock.Mock()
         self.thread.threadWrapperTearDown = mock.Mock()
 
-        self.presenter.createThread=mock.Mock(return_value=self.thread)
-        self.presenter.createPhaseThread=mock.Mock(return_value=self.thread)
+    def test_connects(self):
+        assert(self.view.cancelSignal.connect.call_count==1)
+        self.view.cancelSignal.connect.assert_called_with(self.presenter.cancel)
+
+        assert(self.view.maxEntButtonSignal.connect.call_count==1)
+        self.view.maxEntButtonSignal.connect.assert_called_with(self.presenter.handleMaxEntButton)
+
+        assert(self.view.phaseSignal.connect.call_count==1)
+        self.view.phaseSignal.connect.assert_called_with(self.presenter.handlePhase)
 
     def test_button(self):
+        self.presenter.createThread = lambda *args:self.thread
+
         self.presenter.handleMaxEntButton()
         assert(self.view.initMaxEntInput.call_count==1)
         assert(self.thread.start.call_count==1)
+
+        assert(self.thread.threadWrapperSetUp.call_count==1)
 
     def test_dataHasChanged(self):
         self.load.hasDataChanged = mock.MagicMock(return_value=True)

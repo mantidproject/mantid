@@ -46,8 +46,8 @@ void AbstractAlgorithmInputHistory::storeNewValue(
 }
 
 /**
-  * Clear all stored values associated with a particular algorithm
-  */
+ * Clear all stored values associated with a particular algorithm
+ */
 void AbstractAlgorithmInputHistory::clearAlgorithmInput(
     const QString &algName) {
   if (m_lastInput.contains(algName))
@@ -72,11 +72,11 @@ AbstractAlgorithmInputHistory::previousInput(const QString &algName,
 }
 
 /**
-  * Set the directory that was accessed when the previous open file dialog was
+ * Set the directory that was accessed when the previous open file dialog was
  * used
-  * @param lastdir :: A QString giving the path of the directory that was last
+ * @param lastdir :: A QString giving the path of the directory that was last
  * accessed with a file dialog
-  */
+ */
 void AbstractAlgorithmInputHistory::setPreviousDirectory(
     const QString &lastdir) {
   m_previousDirectory = lastdir;
@@ -89,30 +89,64 @@ const QString &AbstractAlgorithmInputHistory::getPreviousDirectory() const {
 }
 
 /**
-  * Save the stored information to persistent storage
-  */
+ * Save the stored information to persistent storage
+ */
 void AbstractAlgorithmInputHistory::save() const {
   QSettings settings;
-  settings.beginGroup(m_algorithmsGroup);
+  this->writeSettings(settings);
+}
+
+void AbstractAlgorithmInputHistory::readSettings(const QSettings &storage) {
+  // unfortunately QSettings does not allow const when using beginGroup and
+  // endGroup
+  m_lastInput.clear();
+  const_cast<QSettings &>(storage).beginGroup(m_algorithmsGroup);
+  //  QStringList algorithms = settings.childGroups();
+  QListIterator<QString> algNames(storage.childGroups());
+
+  // Each property is a key of the algorithm group
+  while (algNames.hasNext()) {
+    QHash<QString, QString> algorithmProperties;
+    QString group = algNames.next();
+    const_cast<QSettings &>(storage).beginGroup(group);
+    QListIterator<QString> properties(storage.childKeys());
+    while (properties.hasNext()) {
+      QString propName = properties.next();
+      QString value = storage.value(propName).toString();
+      if (!value.isEmpty())
+        algorithmProperties.insert(propName, value);
+    }
+    m_lastInput.insert(group, algorithmProperties);
+    const_cast<QSettings &>(storage).endGroup();
+  }
+
+  // The previous dir
+  m_previousDirectory = storage.value(m_dirKey).toString();
+
+  const_cast<QSettings &>(storage).endGroup();
+}
+
+void AbstractAlgorithmInputHistory::writeSettings(QSettings &storage) const {
+  storage.beginGroup(m_algorithmsGroup);
   QHashIterator<QString, QHash<QString, QString>> inputHistory(m_lastInput);
   while (inputHistory.hasNext()) {
     inputHistory.next();
-    settings.beginGroup(inputHistory.key());
+    storage.beginGroup(inputHistory.key());
     // Remove all keys for this group that exist at the moment
-    settings.remove("");
+    storage.remove("");
     QHash<QString, QString>::const_iterator iend = inputHistory.value().end();
     for (QHash<QString, QString>::const_iterator itr =
              inputHistory.value().begin();
          itr != iend; ++itr) {
-      settings.setValue(itr.key(), itr.value());
+      storage.setValue(itr.key(), itr.value());
     }
-    settings.endGroup();
+    storage.endGroup();
   }
 
   // Store the previous directory
-  settings.setValue(m_dirKey, m_previousDirectory);
+  storage.setValue(m_dirKey, m_previousDirectory);
 
-  settings.endGroup();
+  storage.endGroup();
 }
 
 //----------------------------------
@@ -120,34 +154,10 @@ void AbstractAlgorithmInputHistory::save() const {
 //----------------------------------
 
 /**
-  * Load any values that are available from persistent storage. Note: this
+ * Load any values that are available from persistent storage. Note: this
  * clears all currently values stored
-  */
+ */
 void AbstractAlgorithmInputHistory::load() {
-  m_lastInput.clear();
   QSettings settings;
-  settings.beginGroup(m_algorithmsGroup);
-  //  QStringList algorithms = settings.childGroups();
-  QListIterator<QString> algNames(settings.childGroups());
-
-  // Each property is a key of the algorithm group
-  while (algNames.hasNext()) {
-    QHash<QString, QString> algorithmProperties;
-    QString group = algNames.next();
-    settings.beginGroup(group);
-    QListIterator<QString> properties(settings.childKeys());
-    while (properties.hasNext()) {
-      QString propName = properties.next();
-      QString value = settings.value(propName).toString();
-      if (!value.isEmpty())
-        algorithmProperties.insert(propName, value);
-    }
-    m_lastInput.insert(group, algorithmProperties);
-    settings.endGroup();
-  }
-
-  // The previous dir
-  m_previousDirectory = settings.value(m_dirKey).toString();
-
-  settings.endGroup();
+  this->readSettings(settings);
 }

@@ -1,17 +1,17 @@
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
-#include "MantidCrystal/ICluster.h"
-#include "MantidCrystal/ConnectedComponentLabeling.h"
-#include "MantidCrystal/HardThresholdBackground.h"
-#include "MantidCrystal/PeakClusterProjection.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Utils.h"
+#include "MantidCrystal/ConnectedComponentLabeling.h"
+#include "MantidCrystal/HardThresholdBackground.h"
+#include "MantidCrystal/ICluster.h"
+#include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Utils.h"
 
 #include <cmath>
 
@@ -49,7 +49,7 @@ void IntegratePeaksUsingClusters::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -74,7 +74,7 @@ void IntegratePeaksUsingClusters::init() {
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
@@ -105,8 +105,8 @@ MDNormalization IntegratePeaksUsingClusters::getNormalization() {
  */
 void IntegratePeaksUsingClusters::exec() {
   IMDHistoWorkspace_sptr mdWS = getProperty("InputWorkspace");
-  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
-  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
     peakWS = inPeakWS->clone();
   }

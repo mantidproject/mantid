@@ -129,12 +129,12 @@ void PeakFitResult::setBadRecord(size_t ipeak, const double peak_position) {
     m_function_parameters_vector[ipeak][ipar] = 0.;
   }
 }
-}
+} // namespace FitPeaksAlgorithm
 
 //----------------------------------------------------------------------------------------------
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
-  */
+ */
 size_t findXIndex(const std::vector<double> &vecx, double x) {
   size_t index;
   if (x <= vecx.front()) {
@@ -793,7 +793,8 @@ void FitPeaks::convertParametersNameToIndex() {
       // out-of-range index is thus set to this
       g_log.warning() << "Given peak parameter " << paramName
                       << " is not an allowed parameter of peak "
-                         "function " << m_peakFunction->name() << "\n";
+                         "function "
+                      << m_peakFunction->name() << "\n";
       m_initParamIndexes.push_back(m_peakFunction->nParams() * 10);
     }
   }
@@ -888,7 +889,7 @@ double numberCounts(const Histogram &histogram, const double xmin,
     total += std::fabs(histogram.y()[i]);
   return total;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Fit peaks across one single spectrum
@@ -956,14 +957,20 @@ void FitPeaks::fitSpectrumPeaks(
       std::pair<double, double> peak_window_i =
           getPeakFitWindow(wi, peak_index);
 
-      bool observe_peak_width =
+      bool observe_peak_width_flag =
           decideToEstimatePeakWidth(!foundAnyPeak, peakfunction);
+
+      if (observe_peak_width_flag &&
+          m_peakWidthEstimateApproach == EstimatePeakWidth::NoEstimation) {
+        g_log.warning(
+            "Peak width can be estimated as ZERO.  The result can be wrong");
+      }
 
       // do fitting with peak and background function (no analysis at this
       // point)
-      cost =
-          fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
-                            observe_peak_width, peakfunction, bkgdfunction);
+      cost = fitIndividualPeak(wi, peak_fitter, expected_peak_pos,
+                               peak_window_i, observe_peak_width_flag,
+                               peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
         foundAnyPeak = true;
         for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
@@ -1126,8 +1133,9 @@ void FitPeaks::processSinglePeakFitResult(
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks(std::vector<
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
+void FitPeaks::calculateFittedPeaks(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_results) {
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
@@ -1243,7 +1251,7 @@ vector<double> calculateMomentsAboutMean(const Histogram &histogram,
 
   return vector<double>{zeroth, first, second};
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /**  Estimate background: There are two methods that will be tried.
@@ -1282,6 +1290,7 @@ int FitPeaks::estimatePeakParameters(
     const Histogram &histogram, const std::pair<double, double> &peak_window,
     API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunction, bool observe_peak_width) {
+
   // get the range of start and stop to construct a function domain
   const auto &vector_x = histogram.points();
   std::vector<double>::const_iterator start_iter =
@@ -1307,6 +1316,7 @@ int FitPeaks::estimatePeakParameters(
       observePeakCenter(histogram, bkgd_values, start_index, stop_index,
                         peak_center, peak_center_index, peak_height);
 
+  // return if failing to 'observe' peak center
   if (result != GOOD)
     return result;
 
@@ -1318,12 +1328,10 @@ int FitPeaks::estimatePeakParameters(
   peakfunction->setCentre(peak_center);
 
   // Estimate FHWM (peak width)
-  //  if (result == GOOD &&
   if (observe_peak_width &&
       m_peakWidthEstimateApproach != EstimatePeakWidth::NoEstimation) {
     double peak_width = observePeakWidth(
         histogram, bkgd_values, peak_center_index, start_index, stop_index);
-    const auto vec_x = histogram.points();
 
     // proper factor for gaussian
     const double CONVERSION = 1.; // 2. * std::sqrt(2.);
@@ -1344,7 +1352,7 @@ int FitPeaks::estimatePeakParameters(
 bool FitPeaks::isObservablePeakProfile(const std::string &peakprofile) {
   return (std::find(supported_peak_profiles.begin(),
                     supported_peak_profiles.end(),
-                    peakprofile) == supported_peak_profiles.end());
+                    peakprofile) != supported_peak_profiles.end());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1846,8 +1854,9 @@ void FitPeaks::generateCalculatedPeaksWS() {
 
 //----------------------------------------------------------------------------------------------
 /// set up output workspaces
-void FitPeaks::processOutputs(std::vector<
-    boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_result_vec) {
+void FitPeaks::processOutputs(
+    std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+        fit_result_vec) {
   setProperty("OutputWorkspace", m_outputPeakPositionWorkspace);
 
   // optional

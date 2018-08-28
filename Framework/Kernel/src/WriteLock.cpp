@@ -21,5 +21,5 @@ WriteLock::~WriteLock() {
   m_item.m_lock->unlock();
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

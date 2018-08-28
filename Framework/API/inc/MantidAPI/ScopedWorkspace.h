@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

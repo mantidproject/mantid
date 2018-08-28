@@ -102,6 +102,11 @@ private:
   /// Check if the group/pair names are valid, and if all the groups which
   /// are paired are also included as groups.
   void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
+
+  void getTimeLimitsFromInputWorkspace(Mantid::API::Workspace_sptr inputWS,
+                                       Mantid::Muon::AnalysisOptions &options);
+
+  void getTimeLimitsFromInputs(AnalysisOptions &options);
 };
 
 } // namespace Muon

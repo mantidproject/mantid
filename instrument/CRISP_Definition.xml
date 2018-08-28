@@ -2,9 +2,10 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="CSP" valid-from   ="1900-01-31 23:59:59"
-                          valid-to     ="2100-01-31 23:59:59"          
-						  last-modified="2010-11-04 00:00:00">
+            name="CSP"
+            valid-from   ="1900-01-31 23:59:59"
+            valid-to     ="2017-05-04 15:14:59"
+            last-modified="2018-08-07 11:00:00">
 
   <defaults>
     <length unit="meter" />
@@ -70,7 +71,17 @@
   
   <component type="monitor2" idlist="monitor2">
     <location z="9.92" />
+  </component>
+
+  <!-- Putting in monitors, which are defined in raw/neuxs
+         files, and have detector IDs, but currently not physically present
+         on the instrument. Defined with no geometric shape, as they do not
+         physically exist, and with a dummy position -->
+  <type>
+  <component type="no shape monitor">
+    <location z="12.12" name="placeholder monitor"/>
   </component>  
+  </type>
   
   <type name="monitor2" is="monitor">
     <!-- Shape specified as a minimum needs to cover the beam which
@@ -96,6 +107,8 @@
     <algebra val="base : top" />
   </type>  
   
+  <type name="no shape monitor" is="monitor" />
+
   <component type="point-detector" idlist="point-detector">
   
     <location z="12.113" />
@@ -106,7 +119,7 @@
     assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
     to radians factor in the eq attribute. -->
     <parameter name="y">
-      <logfile id="theta" eq="1.863*sin(value*0.0174533)" />
+      <logfile id="theta" eq="1.8545*sin(2*value*0.0174533)" />
     </parameter>
     
   </component>   
@@ -411,8 +424,8 @@
   
   
   <component type="some-surface-holder">
-    <!-- worry about linking relevant logfiles for y,z,theta,phi up later -->
-    <location z="10.25"/>
+    <!-- worry about linking relevant logfiles for y,z,theta,phi up later. Change from 10.25 -->
+    <location z="10.2585"/>
   </component>
 
   <type name="some-surface-holder" is="SamplePos">
@@ -421,46 +434,52 @@
   
   <!-- other components -->  
   
-  <component type="slit1">
+  <component type="slit" name="slit1">
     <location z="7.3025"/>
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap"> 
-      <logfile id="s1" extract-single-value-as="position 1" />
+      <logfile id="s1" extract-single-value-as="last_value" />
     </parameter>
   </component>
   
-  <component type="slit2">  
+  <component type="slit" name="slit2">
     <location z="9.6885"/> 
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
     <parameter name="vertical gap"> 
-      <logfile id="s2" extract-single-value-as="position 1" />
+      <logfile id="s2" extract-single-value-as="last_value" />
     </parameter>
   </component>    
   
-  <component type="slit3">   
+  <component type="slit" name="slit3">
     <location z="10.651"/>
     <!-- This log file stores the vertical opening of slit -->  
     <parameter name="vertical gap">
-      <logfile id="s3" extract-single-value-as="position 1" />
+      <logfile id="s3" extract-single-value-as="last_value" />
     </parameter>
   </component>    
   
-  <component type="slit4">    
+  <component type="slit" name="slit4">
     <location z="11.983"/>     
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
     <parameter name="vertical gap"> 
-      <logfile id="s4" extract-single-value-as="position 1" />    
+      <logfile id="s4" extract-single-value-as="last_value" />
     </parameter>
   </component>
-  
-  <type name="slit1"></type>
-  <type name="slit2"></type>
-  <type name="slit3"></type>
-  <type name="slit4"></type>  
-  
+
+<type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+
   
   
   <component type="supermirror">
@@ -487,6 +506,10 @@
     <id val="3" />  
   </idlist>
   
+  <idlist idname="monitor3">
+    <id val="4" />
+  </idlist>
+
   <idlist idname="linear-detector">
     <id start="6" end="125" />
     <id start="134" end="253" />

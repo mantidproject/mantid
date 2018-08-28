@@ -1,8 +1,8 @@
 #include "ALCLatestFileFinder.h"
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Exception.h>
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 
 namespace MantidQt {
 namespace CustomInterfaces {

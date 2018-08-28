@@ -121,3 +121,7 @@ Output:
   irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Diff
   irs26176_graphite002_conv_1LFixF_s0_to_9_Members_LinearBackground
   irs26176_graphite002_conv_1LFixF_s0_to_9_Members_Lorentzian
+
+.. categories::
+
+.. sourcelink::

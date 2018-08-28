@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_MERGEMDTEST_H_
 #define MANTID_MDALGORITHMS_MERGEMDTEST_H_
 
-#include "MantidMDAlgorithms/MergeMD.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -137,6 +137,91 @@ public:
                      ws->displayNormalization());
     TS_ASSERT_EQUALS(API::MDNormalization::NumEventsNormalization,
                      ws->displayNormalizationHisto());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_runIndex() {
+    // Name of the output workspace.
+    std::string outWSName("MergeMDTest_OutputWS");
+
+    MergeMD alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaces", "mde3,mde3,mde3"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    MDEventWorkspace3::sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(
+            outWSName);)
+    TS_ASSERT(ws);
+
+    typename std::vector<API::IMDNode *> boxes;
+    ws->getBox()->getBoxes(boxes, 10, true);
+
+    API::IMDNode *box = boxes[0];
+    TS_ASSERT_EQUALS(box->getNPoints(), 3);
+    std::vector<coord_t> events;
+    size_t ncols;
+    box->getEventsData(events, ncols);
+    // 7 columns: I, err^2, run_num, det_id, x, y, z
+    TS_ASSERT_EQUALS(ncols, 7);
+    // 7*3 = 21
+    TS_ASSERT_EQUALS(events.size(), 21);
+
+    // reference vector, 3 identical events except for incremented run numbers
+    const std::vector<coord_t> ref = {1, 1, 0, 0, 6.25, 6.25, 6.25,
+                                      1, 1, 1, 0, 6.25, 6.25, 6.25,
+                                      1, 1, 2, 0, 6.25, 6.25, 6.25};
+
+    for (auto i = 0; i < 21; i++) {
+      TS_ASSERT_EQUALS(events[i], ref[i]);
+    }
+
+    // Merge merged ws with self
+    MergeMD alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue(
+        "InputWorkspaces", "MergeMDTest_OutputWS,MergeMDTest_OutputWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT(alg2.isExecuted());
+
+    // Retrieve the workspace from data service.
+    TS_ASSERT_THROWS_NOTHING(
+        ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3>(
+            outWSName);)
+    TS_ASSERT(ws);
+
+    typename std::vector<API::IMDNode *> boxes2;
+    ws->getBox()->getBoxes(boxes2, 10, true);
+
+    API::IMDNode *box2 = boxes2[0];
+    TS_ASSERT_EQUALS(box2->getNPoints(), 6);
+    box2->getEventsData(events, ncols);
+    // 7 columns: I, err^2, run_num, det_id, x, y, z
+    TS_ASSERT_EQUALS(ncols, 7);
+    // 7*6 = 42
+    TS_ASSERT_EQUALS(events.size(), 42);
+
+    // reference vector, 6 identical events except for incremented run numbers
+    const std::vector<coord_t> ref2 = {
+        1, 1, 0, 0, 6.25, 6.25, 6.25, 1, 1, 1, 0, 6.25, 6.25, 6.25,
+        1, 1, 2, 0, 6.25, 6.25, 6.25, 1, 1, 3, 0, 6.25, 6.25, 6.25,
+        1, 1, 4, 0, 6.25, 6.25, 6.25, 1, 1, 5, 0, 6.25, 6.25, 6.25};
+
+    for (auto i = 0; i < 42; i++) {
+      TS_ASSERT_EQUALS(events[i], ref2[i]);
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

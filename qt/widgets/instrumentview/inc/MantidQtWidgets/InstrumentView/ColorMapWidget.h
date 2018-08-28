@@ -14,8 +14,8 @@ class DoubleSpinBox;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
-* Displays a color map with numeric axis and editable bounds
-*/
+ * Displays a color map with numeric axis and editable bounds
+ */
 class ColorMapWidget : public QFrame {
   Q_OBJECT
   enum DragType { Bottom, Top };
@@ -69,7 +69,7 @@ private:
   double m_nth_power;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*COLORMAPWIDGET_H_*/

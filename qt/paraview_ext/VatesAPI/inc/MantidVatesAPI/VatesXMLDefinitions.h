@@ -1,8 +1,8 @@
 #ifndef VATESXMLDEFINITIONS_H_
 #define VATESXMLDEFINITIONS_H_
 
-#include <string>
 #include "MantidKernel/System.h"
+#include <string>
 namespace Mantid {
 namespace VATES {
 
@@ -122,6 +122,6 @@ public:
   }
   static const std::string RebinnedWSName() { return "RebinnedWS"; }
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

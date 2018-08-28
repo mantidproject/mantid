@@ -25,7 +25,7 @@ public:
                         const WhiteList &whitelist, const GroupData &groupData);
   QString getPostprocessedWorkspaceName(
       const GroupData &groupData,
-      boost::optional<size_t> sliceIndex = boost::optional<size_t>());
+      boost::optional<size_t> sliceIndex = boost::optional<size_t>()) const;
   QString m_options;
   PostprocessingAlgorithm m_algorithm;
   std::map<QString, QString> m_map;
@@ -37,7 +37,7 @@ private:
   void ensureRowSizeMatchesColumnCount(const WhiteList &columns,
                                        const QStringList &row);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTWIDGETS_POSTPROCESSINGSTEP

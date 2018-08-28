@@ -6,12 +6,14 @@ namespace CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param parent :: [input] The parent of this widget
-*/
-QtReflEventView::QtReflEventView(QWidget *parent) {
+ * @param group :: [input] The group on the parent tab this belongs to
+ * @param parent :: [input] The parent of this widget
+ */
+QtReflEventView::QtReflEventView(int group, QWidget *parent) {
   UNUSED_ARG(parent);
   initLayout();
-  m_presenter.reset(new ReflEventPresenter(this));
+  m_presenter.reset(new ReflEventPresenter(this, group));
+  registerEventWidgets();
 }
 
 QtReflEventView::~QtReflEventView() {}
@@ -55,8 +57,8 @@ void QtReflEventView::initLogValueSliceTypeLayout() {
 }
 
 /** Returns the presenter managing this view
-* @return :: A pointer to the presenter
-*/
+ * @return :: A pointer to the presenter
+ */
 IReflEventPresenter *QtReflEventView::getPresenter() const {
   return m_presenter.get();
 }
@@ -146,5 +148,31 @@ void QtReflEventView::toggleLogValue(bool isChecked) {
   if (isChecked)
     m_presenter->notifySliceTypeChanged(SliceType::LogValue);
 }
+
+void QtReflEventView::notifySettingsChanged() {
+  m_presenter->notifySettingsChanged();
+}
+
+void QtReflEventView::connectSettingsChange(QLineEdit &edit) {
+  connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(notifySettingsChanged()));
+}
+
+void QtReflEventView::connectSettingsChange(QGroupBox &edit) {
+  connect(&edit, SIGNAL(toggled(bool)), this, SLOT(notifySettingsChanged()));
+}
+
+void QtReflEventView::registerEventWidgets() {
+  connectSettingsChange(*m_ui.uniformGroup);
+  connectSettingsChange(*m_ui.uniformEvenEdit);
+  connectSettingsChange(*m_ui.uniformEdit);
+
+  connectSettingsChange(*m_ui.customGroup);
+  connectSettingsChange(*m_ui.customEdit);
+
+  connectSettingsChange(*m_ui.logValueGroup);
+  connectSettingsChange(*m_ui.logValueEdit);
+  connectSettingsChange(*m_ui.logValueTypeEdit);
+}
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

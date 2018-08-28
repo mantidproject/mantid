@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H
 #define MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H
-#include <vector>
-#include <string>
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <string>
+#include <vector>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -37,6 +37,15 @@ private:
   std::string m_path;
 };
 
+class InvalidWorkspaceName : public std::runtime_error {
+public:
+  explicit InvalidWorkspaceName(std::string const &path);
+  std::string const &name() const;
+
+private:
+  std::string m_name;
+};
+
 class IReflAsciiSaver {
 public:
   virtual bool isValidSaveDirectory(std::string const &filePath) const = 0;
@@ -46,6 +55,6 @@ public:
                     FileFormatOptions const &inputParameters) const = 0;
   virtual ~IReflAsciiSaver() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_IREFLASCIISAVER_H

@@ -1,22 +1,22 @@
-#include <fstream>
-#include <sstream>
+#include <algorithm>
 #include <cmath>
 #include <complex>
+#include <fstream>
 #include <list>
-#include <vector>
 #include <map>
+#include <sstream>
 #include <stack>
-#include <algorithm>
+#include <vector>
 
+#include "MantidGeometry/Surfaces/BaseVisit.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Line.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Line.h"
-#include "MantidGeometry/Surfaces/BaseVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Surfaces/Cone.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -30,15 +30,11 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepPrimAPI_MakeCone.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {
@@ -335,7 +331,7 @@ void Cone::write(std::ostream &OX) const
       cx << Centre[i] << " ";
   }
   const double TA = tan((M_PI * alpha) / 180.0); // tan^2(angle)
-  cx << TA *TA;
+  cx << TA * TA;
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
 
@@ -398,7 +394,8 @@ TopoDS_Shape Cone::createShape() {
              gp_Dir(Normal[0], Normal[1], Normal[2]));
   return BRepPrimAPI_MakeCone(gpA, 0.0,
                               1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0,
-                              2.0 * M_PI).Shape();
+                              2.0 * M_PI)
+      .Shape();
 }
 #endif
 } // NAMESPACE Geometry

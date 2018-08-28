@@ -40,5 +40,5 @@ private:
   void *operator new[](size_t);
   void operator delete[](void *);
 };
-}
+} // namespace ScopedFileHelper
 #endif

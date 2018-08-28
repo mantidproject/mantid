@@ -3,13 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/ISISDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
-#include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/InternetHelper.h"
 
-#include <Poco/Path.h>
-#include <Poco/File.h>
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/Exception.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <sstream>
 
@@ -18,7 +18,7 @@ namespace DataHandling {
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISDataArchive");
-}
+} // namespace
 
 DECLARE_ARCHIVESEARCH(ISISDataArchive, ISISDataSearch)
 
@@ -60,12 +60,12 @@ ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
 }
 
 /**
-* Calls a web service to get a full path to a file.
-* Only returns a full path string if the file exists
-* @param fName :: The file name.
-* @return The path to the file or an empty string in case of error/non-existing
-* file.
-*/
+ * Calls a web service to get a full path to a file.
+ * Only returns a full path string if the file exists
+ * @param fName :: The file name.
+ * @return The path to the file or an empty string in case of error/non-existing
+ * file.
+ */
 std::string ISISDataArchive::getPath(const std::string &fName) const {
   g_log.debug() << "ISISDataArchive::getPath() - fName=" << fName << "\n";
   if (fName.empty())

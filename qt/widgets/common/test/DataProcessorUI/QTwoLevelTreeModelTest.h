@@ -12,12 +12,25 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 
 class QTwoLevelTreeModelTest : public CxxTest::TestSuite {
-
 public:
+  // This means the constructor isn't called when running other tests
+  static QTwoLevelTreeModelTest *createSuite() {
+    return new QTwoLevelTreeModelTest();
+  }
+  static void destroySuite(QTwoLevelTreeModelTest *suite) { delete suite; }
+
   // Constructor (initializes whitelist)
   QTwoLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");
     m_whitelist.addElement("Column2", "Property2", "Description2");
+  }
+
+  WhiteList whitelistWithKeyColumn() {
+    WhiteList whitelist;
+    whitelist.addElement("Column1", "Property1", "Description1", false, "",
+                         true); // key column
+    whitelist.addElement("Column2", "Property2", "Description2");
+    return whitelist;
   }
 
   ITableWorkspace_sptr oneRowTable() {
@@ -652,7 +665,7 @@ public:
         model.data(model.index(0, 0, model.index(0, 0)), Qt::BackgroundRole)
             .toString()
             .toStdString(),
-        "#00b300");
+        Colour::SUCCESS);
     TS_ASSERT_EQUALS(
         model.data(model.index(1, 0, model.index(0, 0)), Qt::BackgroundRole)
             .toString()
@@ -661,7 +674,7 @@ public:
     TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
-                     "#00b300");
+                     Colour::SUCCESS);
     TS_ASSERT_EQUALS(
         model.data(model.index(0, 0, model.index(1, 0)), Qt::BackgroundRole)
             .toString()
@@ -701,6 +714,131 @@ public:
                      true);
     TS_ASSERT_EQUALS(model.isProcessed(0, model.index(1, 0)), false);
     TS_ASSERT_EQUALS(model.isProcessed(1, model.index(1, 0)), false);
+  }
+
+  void testTransferThrowsIfNoGroupSpecified() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, m_whitelist);
+
+    auto rowValues = std::map<QString, QString>{{"Column1", "row_10"},
+                                                {"Column2", "row_11"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    TS_ASSERT_THROWS(model.transfer(rowsToTransfer), std::invalid_argument);
+  }
+
+  void testTransferToExistingGroup() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, m_whitelist);
+
+    constexpr int group = 0;
+    auto rowValues = std::map<QString, QString>{
+        {"Group", "group_0"}, {"Column1", "row_10"}, {"Column2", "row_11"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    model.transfer(rowsToTransfer);
+
+    // One group with two rows
+    TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 2);
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    // New row inserted at end of group
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 0), "row_00");
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 1), "row_01");
+    TS_ASSERT_EQUALS(model.cellValue(group, 1, 0), "row_10");
+    TS_ASSERT_EQUALS(model.cellValue(group, 1, 1), "row_11");
+  }
+
+  void testTransferToExistingSortedGroupBeforeCurrentRow() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, whitelistWithKeyColumn());
+
+    constexpr int group = 0;
+    auto rowValues = std::map<QString, QString>{
+        {"Group", "group_0"}, {"Column1", "arow_10"}, {"Column2", "arow_11"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    model.transfer(rowsToTransfer);
+
+    // One group with two rows
+    TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 2);
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    // The new row should be sorted first
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 0), "arow_10");
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 1), "arow_11");
+    TS_ASSERT_EQUALS(model.cellValue(group, 1, 0), "row_00");
+    TS_ASSERT_EQUALS(model.cellValue(group, 1, 1), "row_01");
+  }
+
+  void testTransferToExistingSortedGroupAfterCurrentRow() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, whitelistWithKeyColumn());
+
+    constexpr int group = 0;
+    auto rowValues = std::map<QString, QString>{
+        {"Group", "group_0"}, {"Column1", "zrow_10"}, {"Column2", "zrow_11"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    model.transfer(rowsToTransfer);
+
+    // One group with two rows
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 2);
+    // The new row should be sorted last
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 0), "row_00");
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 1), "row_01");
+    TS_ASSERT_EQUALS(model.cellValue(group, 1, 0), "zrow_10");
+    TS_ASSERT_EQUALS(model.cellValue(group, 1, 1), "zrow_11");
+  }
+
+  void testTransferDuplicateRow() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, m_whitelist);
+
+    // If the whole row is a duplicate nothing will be added
+    constexpr int group = 0;
+    auto rowValues = std::map<QString, QString>{
+        {"Group", "group_0"}, {"Column1", "row_00"}, {"Column2", "row_01"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    model.transfer(rowsToTransfer);
+
+    // Should just have original group with one row and original values
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 1);
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 0), "row_00");
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 1), "row_01");
+  }
+
+  void testTransferOverwritesRow() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, whitelistWithKeyColumn());
+
+    // If the group and key column matches, the existing row will be
+    // overwritten
+    constexpr int group = 0;
+    auto rowValues = std::map<QString, QString>{
+        {"Group", "group_0"}, {"Column1", "row_00"}, {"Column2", "new_row_01"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    model.transfer(rowsToTransfer);
+
+    // Still just one group with one row but containing new values
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 1);
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 0), "row_00");
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 1), "new_row_01");
+  }
+
+  void testTransferToNewGroup() {
+    auto ws = oneRowTable();
+    QTwoLevelTreeModel model(ws, m_whitelist);
+
+    constexpr int group = 0;
+    auto rowValues = std::map<QString, QString>{
+        {"Group", "group_1"}, {"Column1", "row_10"}, {"Column2", "row_11"}};
+    auto rowsToTransfer = std::vector<std::map<QString, QString>>{{rowValues}};
+    model.transfer(rowsToTransfer);
+
+    // The new row should be ordered first
+    TS_ASSERT_EQUALS(model.rowCount(), 2);
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 0), "row_00");
+    TS_ASSERT_EQUALS(model.cellValue(group, 0, 1), "row_01");
+    TS_ASSERT_EQUALS(model.cellValue(group + 1, 0, 0), "row_10");
+    TS_ASSERT_EQUALS(model.cellValue(group + 1, 0, 1), "row_11");
   }
 
 private:

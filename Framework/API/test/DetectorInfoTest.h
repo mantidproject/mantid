@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -393,8 +393,8 @@ public:
     size_t numberOfBins = 1;
     workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     for (int32_t i = 0; i < numberOfHistograms; ++i)
-      workspace.getSpectrum(i)
-          .setSpectrumNo(static_cast<int32_t>(numberOfHistograms) - i);
+      workspace.getSpectrum(i).setSpectrumNo(
+          static_cast<int32_t>(numberOfHistograms) - i);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");

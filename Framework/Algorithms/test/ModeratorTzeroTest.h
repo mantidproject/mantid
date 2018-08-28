@@ -40,7 +40,7 @@ void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS,
     }
   }
 } // end of void AddToInstrument
-}
+} // namespace
 
 class ModeratorTzeroTest : public CxxTest::TestSuite {
 public:

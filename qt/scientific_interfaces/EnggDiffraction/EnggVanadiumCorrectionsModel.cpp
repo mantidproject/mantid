@@ -186,5 +186,5 @@ void EnggVanadiumCorrectionsModel::setCurrentInstrument(
   m_currentInstrument = currentInstrument;
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

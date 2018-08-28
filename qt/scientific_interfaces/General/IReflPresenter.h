@@ -47,6 +47,7 @@ public:
     PrependRowFlag,
     DeleteRowFlag,
     ProcessFlag,
+    ProcessAllFlag,
     GroupRowsFlag,
     OpenTableFlag,
     NewTableFlag,
@@ -73,6 +74,6 @@ public:
   virtual const std::map<std::string, QVariant> &options() const = 0;
   virtual void setOptions(const std::map<std::string, QVariant> &options) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif

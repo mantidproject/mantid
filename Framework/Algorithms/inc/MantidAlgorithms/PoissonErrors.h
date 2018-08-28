@@ -87,7 +87,7 @@ private:
   std::string outputPropName() const override { return "OutputWorkspace"; }
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_POISSONERRORS_H_*/

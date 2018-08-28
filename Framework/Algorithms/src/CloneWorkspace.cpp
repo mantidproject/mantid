@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {

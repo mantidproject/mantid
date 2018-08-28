@@ -39,7 +39,7 @@ void setDetectorNamesOnCanSasFormat(QString &saveCommands,
       saveCommands += "'HAB, main-detector-bank'";
   }
 }
-}
+} // namespace
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::Kernel;
@@ -82,9 +82,9 @@ SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString &suggFname,
 /// Set up the dialog layout
 void SaveWorkspaces::initLayout() {}
 /** Puts the controls that go on the first line, the output
-*  filename commands, on to the layout that's passed to it
-*  @param lineOne :: the layout on to which the controls will be placed
-*/
+ *  filename commands, on to the layout that's passed to it
+ *  @param lineOne :: the layout on to which the controls will be placed
+ */
 void SaveWorkspaces::setupLine1(QHBoxLayout *const lineOne) {
   QLabel *fNameLabel = new QLabel("Filename:");
   m_fNameEdit = new QLineEdit();
@@ -100,10 +100,10 @@ void SaveWorkspaces::setupLine1(QHBoxLayout *const lineOne) {
   fNameButton->setToolTip("Filename to save under");
 }
 /** Puts the controls that go on the second line, the workspace
-*  list and save commands, on to the layout that's passed to it
-*  @param lineTwo :: the layout on to which the controls will be placed
-*  @param defSavs the formats to save into, sets the check boxes to be checked
-*/
+ *  list and save commands, on to the layout that's passed to it
+ *  @param lineTwo :: the layout on to which the controls will be placed
+ *  @param defSavs the formats to save into, sets the check boxes to be checked
+ */
 void SaveWorkspaces::setupLine2(
     QHBoxLayout *const lineTwo,
     const QHash<const QCheckBox *const, QString> &defSavs) {
@@ -127,13 +127,11 @@ void SaveWorkspaces::setupLine2(
   QPushButton *cancel = new QPushButton("Cancel");
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
 
-  QCheckBox *saveNIST = new QCheckBox("NIST Qxy (2D)");
   QCheckBox *saveRKH = new QCheckBox("RKH (1D/2D)");
   QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS (1D/2D)");
   QCheckBox *saveCan = new QCheckBox("CanSAS (1D)");
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(saveNIST, "SaveNISTDAT");
   m_savFormats.insert(saveRKH, "SaveRKH");
   m_savFormats.insert(saveNXcanSAS, "SaveNXcanSAS");
   m_savFormats.insert(saveCan, "SaveCanSAS1D");
@@ -150,7 +148,6 @@ void SaveWorkspaces::setupLine2(
   ly_saveConts->addStretch();
 
   QVBoxLayout *ly_saveFormats = new QVBoxLayout;
-  ly_saveFormats->addWidget(saveNIST);
   ly_saveFormats->addWidget(saveRKH);
   ly_saveFormats->addWidget(saveNXcanSAS);
   ly_saveFormats->addWidget(saveCan);
@@ -168,13 +165,12 @@ void SaveWorkspaces::setupLine2(
   save->setToolTip(formatsTip);
   cancel->setToolTip(formatsTip);
   saveNXcanSAS->setToolTip(formatsTip);
-  saveNIST->setToolTip(formatsTip);
   saveCan->setToolTip(formatsTip);
   saveRKH->setToolTip(formatsTip);
   m_append->setToolTip(formatsTip);
 }
 /** Sets up some controls from what is in the QSettings
-*/
+ */
 void SaveWorkspaces::readSettings() {
   QSettings prevValues;
   prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveWorkspaces");
@@ -182,8 +178,8 @@ void SaveWorkspaces::readSettings() {
   m_append->setChecked(prevValues.value("append", false).toBool());
 }
 /** Set the name of the output file
-*  @param newName filename to use
-*/
+ *  @param newName filename to use
+ */
 void SaveWorkspaces::setFileName(const QString &newName) {
   if ((!m_append->isChecked()) && (!newName.isEmpty())) {
     m_fNameEdit->setText(newName);
@@ -193,9 +189,9 @@ void SaveWorkspaces::setFileName(const QString &newName) {
   }
 }
 /** For each save format tick box take the user setting from the
-* main form
-* @param defSavs the formats to save into
-*/
+ * main form
+ * @param defSavs the formats to save into
+ */
 void SaveWorkspaces::setupFormatTicks(
     const QHash<const QCheckBox *const, QString> &defSavs) {
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
@@ -212,7 +208,7 @@ void SaveWorkspaces::setupFormatTicks(
   }
 }
 /** Saves the state of some controls to the QSettings
-*/
+ */
 void SaveWorkspaces::saveSettings() const {
   QSettings prevValues;
   prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveWorkspaces");
@@ -270,7 +266,7 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       outFile += exten;
     }
     saveCommands += outFile + "'";
-    if (algorithm != "SaveNISTDAT" && algorithm != "SaveNXcanSAS") {
+    if (algorithm != "SaveNXcanSAS") {
       saveCommands += ", Append=";
       saveCommands += toAppend ? "True" : "False";
     }
@@ -280,8 +276,9 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
       // Add the geometry information
       emit updateGeometryInformation();
       // Remove the first three characters, since they are unwanted
-      saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
-                      m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
+      saveCommands += ", Geometry='" + m_geometryID +
+                      "', SampleHeight=" + m_sampleHeight +
+                      ", SampleWidth=" + m_sampleWidth +
                       ", SampleThickness=" + m_sampleThickness;
     }
     if (algorithm == "SaveNXcanSAS") {
@@ -292,11 +289,11 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
   return saveCommands;
 }
 /** Gets the first extension that the algorithm passed algorithm has in it's
-*  FileProperty (the FileProperty must have the name "Filename"
-*  @param algName :: name of the Mantid save algorithm
-*  @return the first extension, if the algorithm's Filename property has an
-* extension list or ""
-*/
+ *  FileProperty (the FileProperty must have the name "Filename"
+ *  @param algName :: name of the Mantid save algorithm
+ *  @return the first extension, if the algorithm's Filename property has an
+ * extension list or ""
+ */
 QString SaveWorkspaces::getSaveAlgExt(const QString &algName) {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(algName.toStdString());
@@ -310,8 +307,8 @@ QString SaveWorkspaces::getSaveAlgExt(const QString &algName) {
   }
 }
 /** Excutes the selected save algorithms on the workspaces that
-*  have been selected to be saved
-*/
+ *  have been selected to be saved
+ */
 void SaveWorkspaces::saveSel() {
   // Check if the save selection is valid
   if (!isValid()) {
@@ -364,33 +361,24 @@ void SaveWorkspaces::saveSel() {
  */
 bool SaveWorkspaces::isValid() {
   // Get the dimensionality of the workspaces
-  auto is1D = false;
   auto is2D = false;
-
   auto workspacesList = m_workspaces->selectedItems();
   for (auto it = workspacesList.begin(); it != workspacesList.end(); ++it) {
     auto wsName = (*it)->text();
     auto workspace =
         AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>(wsName.toStdString());
-    if (workspace->getNumberHistograms() == 1) {
-      is1D = true;
-    } else {
+    if (workspace->getNumberHistograms() != 1) {
       is2D = true;
     }
   }
 
-  // Check if the NistQxy or CanSAS were selected
+  // Check if CanSAS was selected
   auto isCanSAS = false;
-  auto isNistQxy = false;
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
        ++i) { // the key to a pointer to the check box that the user may have
               // clicked
     if (i.key()->isChecked()) { // we need to save in this format
-      if (i.value() == "SaveNISTDAT") {
-        isNistQxy = true;
-      }
-
       if (i.value() == "SaveCanSAS1D") {
         isCanSAS = true;
       }
@@ -400,11 +388,6 @@ bool SaveWorkspaces::isValid() {
   // Check for errors
   QString message;
   auto isValidOption = true;
-  if (is1D && isNistQxy) {
-    isValidOption = false;
-    message +=
-        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
-  }
 
   if (is2D && isCanSAS) {
     isValidOption = false;
@@ -422,14 +405,14 @@ bool SaveWorkspaces::isValid() {
 }
 
 /** Sets the filename to the name of the selected workspace
-*  @param row number of the row that is selected
-*/
+ *  @param row number of the row that is selected
+ */
 void SaveWorkspaces::setFileName(int row) {
   setFileName(m_workspaces->item(row)->text());
 }
 /** Raises a browse dialog and inserts the selected file into the
-*  save text edit box, outfile_edit
-*/
+ *  save text edit box, outfile_edit
+ */
 void SaveWorkspaces::saveFileBrowse() {
   QString title = "Save output workspace as";
 
@@ -437,9 +420,11 @@ void SaveWorkspaces::saveFileBrowse() {
   prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveWorkspaces");
   // use their previous directory first and go to their default if that fails
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultsave.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultsave.directory")))
+          .toString();
 
   QString filter = ";;AllFiles (*)";
   QFileDialog::Option userCon = m_append->isChecked()

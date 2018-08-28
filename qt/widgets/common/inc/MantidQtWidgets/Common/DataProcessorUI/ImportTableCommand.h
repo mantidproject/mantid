@@ -50,7 +50,7 @@ public:
   }
   QString shortcut() override { return QString(); }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORIMPORTTABLECOMMAND_H*/

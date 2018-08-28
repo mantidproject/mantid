@@ -1,11 +1,11 @@
 #ifndef SUMROWCOLUMNTEST_H_
 #define SUMROWCOLUMNTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SumRowColumn.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/SumRowColumn.h"
 #include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

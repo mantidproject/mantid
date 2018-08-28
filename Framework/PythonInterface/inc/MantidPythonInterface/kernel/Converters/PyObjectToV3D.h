@@ -46,8 +46,8 @@ private:
   /// Is the object a wrapped instance of V3D
   bool m_alreadyV3D;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINERFACE_PYOBJECTTOV3D_H_ */

@@ -52,5 +52,5 @@ void MagneticFormFactorTable::setup(const MagneticIon &ion) {
   }
 }
 
-} // namespace Kernel
+} // namespace PhysicalConstants
 } // namespace Mantid

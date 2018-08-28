@@ -60,7 +60,7 @@ public:
   virtual bool hasFittedPeaksForRun(const RunLabel &runLabel) const = 0;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGMODEL_H_

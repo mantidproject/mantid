@@ -8,13 +8,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -103,7 +103,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
                      reference->getNumberHistograms());
   }
 }
-}
+} // namespace
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -383,9 +383,8 @@ public:
     ldLMM.setProperty<bool>("LoadLogs", false); // Time-saver
     // Note: this is done here to avoid additional loads
     // This will produce a workspace with suffix _monitors, that is used below
-    // in test_MonitorsAsEvents
+    // in test_CNCSMonitors
     ldLMM.setProperty<bool>("LoadMonitors", true);
-    ldLMM.setProperty<bool>("MonitorsAsEvents", true);
 
     TS_ASSERT(ldLMM.execute());
 
@@ -463,18 +462,21 @@ public:
     AnalysisDataService::Instance().remove(wsName2);
   }
 
-  void test_MonitorsAsEvents() {
-    // Re-uses the workspace loaded in the last test to save a load execution
+  void test_CNCSMonitors() {
+    // Re-uses the workspace loaded in test_partial_spectra_loading to save a
+    // load execution
     // This is a very simple test for performance issues. There's no real event
     // data, so this just check that the algorithm creates a consistent output
-    // (monitors) event workspace. Real/intensive testing happens in system
+    // (monitors). Real/intensive testing happens in `LoadNexusMonitors` and
+    // system
     // tests.
-    const std::string &mon_outws_name =
+    const std::string mon_outws_name =
         wsSpecFilterAndEventMonitors + "_monitors";
     auto &ads = AnalysisDataService::Instance();
 
     // Valid workspace and it is an event workspace
-    EventWorkspace_sptr monWS = ads.retrieveWS<EventWorkspace>(mon_outws_name);
+    const auto monWS = ads.retrieveWS<MatrixWorkspace>(mon_outws_name);
+
     TS_ASSERT(monWS);
     TS_ASSERT_EQUALS(monWS->getTitle(), "test after manual intervention");
 
@@ -482,21 +484,6 @@ public:
     TS_ASSERT_EQUALS(
         monWS, ads.retrieveWS<MatrixWorkspace>(wsSpecFilterAndEventMonitors)
                    ->monitorWorkspace());
-
-    // Check basic event props / data
-    TS_ASSERT_EQUALS(monWS->getNumberHistograms(), 4);
-    TS_ASSERT_EQUALS(monWS->getNEvents(), 4);
-    TS_ASSERT_EQUALS(monWS->getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(monWS->isHistogramData(), true);
-    TS_ASSERT_EQUALS(monWS->blocksize(), 1);
-
-    TS_ASSERT_EQUALS(monWS->readX(0).size(), 2);
-    TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6);
-    TS_ASSERT_DELTA(monWS->readX(0)[1], 1, 1e-6);
-    TS_ASSERT_EQUALS(monWS->readY(0).size(), 1);
-    TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6);
-    TS_ASSERT_EQUALS(monWS->readE(0).size(), 1);
-    TS_ASSERT_DELTA(monWS->readE(0)[0], 0, 1e-6);
   }
 
   void test_Load_And_CompressEvents() {
@@ -559,8 +546,9 @@ public:
                     1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
-    TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")
-                             ->monitorWorkspace());
+    TS_ASSERT_EQUALS(
+        WS,
+        ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,

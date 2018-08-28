@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_
 #define MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

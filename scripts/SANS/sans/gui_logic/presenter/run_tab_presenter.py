@@ -16,7 +16,6 @@ from mantid.kernel import (Property)
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
@@ -29,10 +28,11 @@ from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from ui.sans_isis.work_handler import WorkHandler
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.gui_logic.models.diagnostics_page_model import run_integral, create_state
 from sans.sans_batch import SANSCentreFinder
+from sans.gui_logic.models.create_state import create_states
+from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
 
 try:
@@ -86,6 +86,7 @@ class RunTabPresenter(object):
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
+        self._processing = False
 
         # Models that are being used by the presenter
         self._state_model = None
@@ -138,9 +139,9 @@ class RunTabPresenter(object):
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
         sample_shape = ["Read from file",
-                        SampleShape.to_string(SampleShape.CylinderAxisUp),
-                        SampleShape.to_string(SampleShape.Cuboid),
-                        SampleShape.to_string(SampleShape.CylinderAxisAlong)]
+                        SampleShape.Cylinder,
+                        SampleShape.FlatPlate,
+                        SampleShape.Disc]
         self._view.sample_shape = sample_shape
 
         # Set the q range
@@ -214,16 +215,16 @@ class RunTabPresenter(object):
             self._state_model = StateGuiModel(user_file_items)
             # 5. Update the views.
             self._update_view_from_state_model()
+            self._beam_centre_presenter.update_centre_positions(self._state_model)
 
             # 6. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
-            self._settings_diagnostic_tab_presenter.on_update_rows()
             self._beam_centre_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
 
         except Exception as e:
-            self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
-                                   "to the Mantid search directories! See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the user file failed. {}".format(str(e)))
+            self.display_warning_box('Warning', 'Loading of the user file failed.', str(e))
 
     def on_batch_file_load(self):
         """
@@ -252,18 +253,17 @@ class RunTabPresenter(object):
 
             # 5. Perform calls on child presenters
             self._masking_table_presenter.on_update_rows()
-            self._settings_diagnostic_tab_presenter.on_update_rows()
             self._beam_centre_presenter.on_update_rows()
 
         except RuntimeError as e:
-            self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
-                                   " to the Mantid search directories! See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
+            self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 
     def on_data_changed(self):
-        # 1. Perform calls on child presenters
-        self._masking_table_presenter.on_update_rows()
-        self._settings_diagnostic_tab_presenter.on_update_rows()
-        self._beam_centre_presenter.on_update_rows()
+        if not self._processing:
+            # 1. Perform calls on child presenters
+            self._masking_table_presenter.on_update_rows()
+            self._beam_centre_presenter.on_update_rows()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
@@ -279,6 +279,7 @@ class RunTabPresenter(object):
         """
         try:
             self._view.disable_buttons()
+            self._processing = True
             self.sans_logger.information("Starting processing of batch table.")
             # 0. Validate rows
             self._create_dummy_input_workspace()
@@ -308,10 +309,15 @@ class RunTabPresenter(object):
             self._view.halt_process_flag()
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
+            self.display_warning_box('Warning', 'Process halted', str(e))
+
+    def display_warning_box(self, title, text, detailed_text):
+        self._view.display_message_box(title, text, detailed_text)
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
         self._view.enable_buttons()
+        self._processing = False
 
     def on_multi_period_selection(self):
         multi_period = self._view.is_multi_period_view()
@@ -451,7 +457,7 @@ class RunTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Table Model and state population
     # ------------------------------------------------------------------------------------------------------------------
-    def get_states(self, row_index=None):
+    def get_states(self, row_index=None, file_lookup=True):
         """
         Gathers the state information for all rows.
         :param row_index: if a single row is selected, then only this row is returned, else all the state for all
@@ -467,7 +473,8 @@ class RunTabPresenter(object):
 
         # 3. Go through each row and construct a state object
         if table_model and state_model_with_view_update:
-            states = self._create_states(state_model_with_view_update, table_model, row_index)
+            states = create_states(state_model_with_view_update, table_model, self._view.instrument
+                                   , self._facility, row_index, file_lookup=file_lookup)
         else:
             states = None
         stop_time_state_generation = time.time()
@@ -487,13 +494,13 @@ class RunTabPresenter(object):
                 row_indices_which_are_not_empty.append(row)
         return row_indices_which_are_not_empty
 
-    def get_state_for_row(self, row_index):
+    def get_state_for_row(self, row_index, file_lookup=True):
         """
         Creates the state for a particular row.
         :param row_index: the row index
         :return: a state if the index is valid and there is a state else None
         """
-        states = self.get_states(row_index=row_index)
+        states = self.get_states(row_index=row_index, file_lookup=file_lookup)
         if states is None:
             self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None
@@ -581,12 +588,6 @@ class RunTabPresenter(object):
         self._set_on_view("phi_limit_use_mirror")
         self._set_on_view("radius_limit_min")
         self._set_on_view("radius_limit_max")
-
-        # Beam Centre
-        self._beam_centre_presenter.set_on_view('lab_pos_1', self._state_model)
-        self._beam_centre_presenter.set_on_view('lab_pos_2', self._state_model)
-        self._beam_centre_presenter.set_on_view('hab_pos_1', self._state_model)
-        self._beam_centre_presenter.set_on_view('hab_pos_2', self._state_model)
 
     def _set_on_view_transmission_fit_sample_settings(self):
         # Set transmission_sample_use_fit
@@ -921,53 +922,6 @@ class RunTabPresenter(object):
     def get_cell_value(self, row, column):
         return self._view.get_cell(row=row, column=self.table_index[column], convert_to=str)
 
-    def _create_states(self, state_model, table_model, row_index=None):
-        """
-        Here we create the states based on the settings in the models
-        :param state_model: the state model object
-        :param table_model: the table model object
-        :param row_index: the selected row, if None then all rows are generated
-        """
-        number_of_rows = self._view.get_number_of_rows()
-        if row_index is not None:
-            # Check if the selected index is valid
-            if row_index >= number_of_rows:
-                return None
-            rows = [row_index]
-        else:
-            rows = range(number_of_rows)
-        states = {}
-
-        gui_state_director = GuiStateDirector(table_model, state_model, self._facility)
-        for row in rows:
-            self.sans_logger.information("Generating state for row {}".format(row))
-            if not self.is_empty_row(row):
-                row_user_file = table_model.get_row_user_file(row)
-                if row_user_file:
-                    user_file_path = FileFinder.getFullPath(row_user_file)
-                    if not os.path.exists(user_file_path):
-                        raise RuntimeError("The user path {} does not exist. Make sure a valid user file path"
-                                           " has been specified.".format(user_file_path))
-
-                    user_file_reader = UserFileReader(user_file_path)
-                    user_file_items = user_file_reader.read_user_file()
-
-                    row_state_model = StateGuiModel(user_file_items)
-                    row_gui_state_director = GuiStateDirector(table_model, row_state_model, self._facility)
-                    self._create_row_state(row_gui_state_director, states, row)
-                else:
-                    self._create_row_state(gui_state_director, states, row)
-        return states
-
-    def _create_row_state(self, director, states, row):
-        try:
-            state = director.create_state(row)
-            states.update({row: state})
-        except (ValueError, RuntimeError) as e:
-            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                               "been added to the Mantid search directories! See here for more "
-                               "details: {}".format(row, str(e)))
-
     def _populate_row_in_table(self, row):
         """
         Adds a row to the table
@@ -1010,29 +964,29 @@ class RunTabPresenter(object):
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
                         "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
                         "CanDirect:{},cdp:{},OutputName:{},User File:{}," \
-                        "Sample Thickness:{}".format(sample_scatter,
-                                                     get_string_period(sample_scatter_period),
-                                                     sample_transmission,
-                                                     get_string_period(sample_transmission_period),
-                                                     sample_direct,
-                                                     get_string_period(sample_direct_period),
-                                                     can_scatter,
-                                                     get_string_period(can_scatter_period),
-                                                     can_transmission,
-                                                     get_string_period(can_transmission_period),
-                                                     can_direct,
-                                                     get_string_period(can_direct_period),
-                                                     output_name, user_file, sample_thickness)
+                        "Sample Thickness:{:.2f}".format(sample_scatter,
+                                                         get_string_period(sample_scatter_period),
+                                                         sample_transmission,
+                                                         get_string_period(sample_transmission_period),
+                                                         sample_direct,
+                                                         get_string_period(sample_direct_period),
+                                                         can_scatter,
+                                                         get_string_period(can_scatter_period),
+                                                         can_transmission,
+                                                         get_string_period(can_transmission_period),
+                                                         can_direct,
+                                                         get_string_period(can_direct_period),
+                                                         output_name, user_file, sample_thickness)
         else:
             row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
                         "CanScatter:{},CanTrans:{}," \
-                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{}".format(sample_scatter,
-                                                                                             sample_transmission,
-                                                                                             sample_direct,
-                                                                                             can_scatter,
-                                                                                             can_transmission,
-                                                                                             can_direct,
-                                                                                             output_name, user_file,sample_thickness)
+                        "CanDirect:{},OutputName:{},User File:{},Sample Thickness:{:.2f}".format(sample_scatter,
+                                                                                                 sample_transmission,
+                                                                                                 sample_direct,
+                                                                                                 can_scatter,
+                                                                                                 can_transmission,
+                                                                                                 can_direct,
+                                                                                                 output_name, user_file,sample_thickness)
 
         self._view.add_row(row_entry)
 

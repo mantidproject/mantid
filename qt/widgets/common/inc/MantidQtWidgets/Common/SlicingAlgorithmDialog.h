@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_SlicingAlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "DllOption.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "ui_SlicingAlgorithmDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -145,7 +145,7 @@ public:
   ~BinMDDialog() override {}
   void customiseInitLayout() override;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif

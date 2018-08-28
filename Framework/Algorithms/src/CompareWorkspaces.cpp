@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -12,8 +11,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
@@ -43,8 +44,9 @@ void CompareWorkspaces::init() {
       "Tolerance", 0.0,
       "The maximum amount by which values may differ between the workspaces.");
 
-  declareProperty("CheckType", true, "Whether to check that the data types "
-                                     "(Workspace2D vs EventWorkspace) match.");
+  declareProperty("CheckType", true,
+                  "Whether to check that the data types "
+                  "(Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes", true, "Whether to check that the axes match.");
   declareProperty("CheckSpectraMap", true,
                   "Whether to check that the spectra-detector maps match. ");
@@ -227,8 +229,8 @@ void CompareWorkspaces::doComparison() {
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  IPeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w1);
-  IPeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w2);
+  PeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
+  PeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
   if ((pws1 && !pws2) || (!pws1 && pws2)) {
     recordMismatch("One workspace is a PeaksWorkspace and the other is not.");
     return;
@@ -357,7 +359,7 @@ void CompareWorkspaces::doComparison() {
 
 //------------------------------------------------------------------------------------------------
 /** Check whether 2 event lists are identical
-  */
+ */
 bool CompareWorkspaces::compareEventWorkspaces(
     const DataObjects::EventWorkspace &ews1,
     const DataObjects::EventWorkspace &ews2) {
@@ -423,9 +425,9 @@ bool CompareWorkspaces::compareEventWorkspaces(
       const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
-        g_log.information() << "Spectrum " << i
-                            << " is set to print out in details. "
-                            << "\n";
+        g_log.information()
+            << "Spectrum " << i << " is set to print out in details. "
+            << "\n";
       }
 
       if (!el1.equals(el2, toleranceTOF, toleranceWeight, tolerancePulse)) {
@@ -804,8 +806,8 @@ bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
 bool CompareWorkspaces::checkSample(const API::Sample &sample1,
                                     const API::Sample &sample2) {
   if (sample1.getName() != sample2.getName()) {
-    g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
-    g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
+    g_log.debug() << "WS1 sample name: \"" << sample1.getName() << "\"\n";
+    g_log.debug() << "WS2 sample name: \"" << sample2.getName() << "\"\n";
     recordMismatch("Sample name mismatch");
     return false;
   }
@@ -961,8 +963,8 @@ int CompareWorkspaces::compareEventsListInDetails(
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doPeaksComparison(API::IPeaksWorkspace_sptr tws1,
-                                          API::IPeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
+                                          PeaksWorkspace_sptr tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");

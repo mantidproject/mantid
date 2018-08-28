@@ -34,7 +34,7 @@ void PostprocessingStep::ensureRowSizeMatchesColumnCount(
 }
 
 QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const GroupData &groupData, boost::optional<size_t> sliceIndex) {
+    const GroupData &groupData, boost::optional<size_t> sliceIndex) const {
   /* This method calculates, for a given set of rows, the name of the output
    * (post-processed) workspace for a given slice */
 
@@ -76,9 +76,12 @@ void PostprocessingStep::postProcessGroup(
     auto const inputWSName =
         row.second->preprocessedOptionValue(rowOutputWSPropertyName);
 
-    if (workspaceExists(inputWSName)) {
-      inputNames.append(inputWSName);
-    }
+    // Only postprocess if all workspaces exist
+    if (!workspaceExists(inputWSName))
+      throw std::runtime_error(
+          "Some workspaces in the group could not be found");
+
+    inputNames.append(inputWSName);
   }
 
   auto const inputWSNames = inputNames.join(", ");
@@ -90,6 +93,7 @@ void PostprocessingStep::postProcessGroup(
 
   auto alg = Mantid::API::AlgorithmManager::Instance().create(
       m_algorithm.name().toStdString());
+
   alg->initialize();
   alg->setProperty(m_algorithm.inputProperty().toStdString(),
                    inputWSNames.toStdString());
@@ -123,9 +127,11 @@ void PostprocessingStep::postProcessGroup(
 
   alg->execute();
 
-  if (!alg->isExecuted())
-    throw std::runtime_error("Failed to post-process workspaces.");
+  if (!alg->isExecuted()) {
+    throw std::runtime_error("Failed to execute algorithm " +
+                             m_algorithm.name().toStdString());
+  }
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

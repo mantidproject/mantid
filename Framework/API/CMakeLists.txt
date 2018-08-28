@@ -96,6 +96,7 @@ set ( SRC_FILES
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
+        src/MDFrameValidator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
@@ -110,6 +111,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
+        src/OrientedLatticeValidator.cpp
 	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -292,6 +294,7 @@ set ( INC_FILES
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
+        inc/MantidAPI/MDFrameValidator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
@@ -308,6 +311,7 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NumericAxisValidator.h
+	inc/MantidAPI/OrientedLatticeValidator.h
 	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
@@ -420,6 +424,7 @@ set ( TEST_FILES
 	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
+	MDFrameValidatorTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
 	MuParserUtilsTest.h
@@ -432,6 +437,7 @@ set ( TEST_FILES
 	NotebookWriterTest.h
 	NumericAxisTest.h
 	NumericAxisValidatorTest.h
+	OrientedLatticeValidatorTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h

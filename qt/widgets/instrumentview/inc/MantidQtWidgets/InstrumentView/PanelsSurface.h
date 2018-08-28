@@ -29,18 +29,18 @@ private:
 };
 
 /**
-* @class PanelsSurface
-* @brief Finds all flat banks of detectors and places them side by side.
-*
-* Who qualifies as a flat bank:
-*
-*  - Rectangular detector
-*  - CompAssembly containing an array of ObjCompAssemblies
-*     + all ObjCompAssemblies must be cylinders
-*     + two first ObjCompAssemblies (returned by CompAssembly::getChild(i))
-*       cannot lie on the same line (being parallel is alright)
-*  - CompAssembly with detectors lying in the same plane
-*/
+ * @class PanelsSurface
+ * @brief Finds all flat banks of detectors and places them side by side.
+ *
+ * Who qualifies as a flat bank:
+ *
+ *  - Rectangular detector
+ *  - CompAssembly containing an array of ObjCompAssemblies
+ *     + all ObjCompAssemblies must be cylinders
+ *     + two first ObjCompAssemblies (returned by CompAssembly::getChild(i))
+ *       cannot lie on the same line (being parallel is alright)
+ *  - CompAssembly with detectors lying in the same plane
+ */
 class PanelsSurface : public UnwrappedSurface {
 public:
   PanelsSurface(const InstrumentActor *rootActor,
@@ -103,7 +103,7 @@ protected:
   friend struct FlatBankInfo;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // PANELSSURFACE_H

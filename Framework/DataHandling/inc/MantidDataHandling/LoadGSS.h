@@ -85,6 +85,6 @@ private:
                                 const std::vector<double> &totalflightpaths,
                                 const std::vector<double> &twothetas);
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_LOADGSS_H_

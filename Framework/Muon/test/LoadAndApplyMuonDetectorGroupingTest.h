@@ -130,10 +130,10 @@ public:
     // Group Asymmetry, unNormalized
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm"));
     TS_ASSERT(
-        wsGroup->contains("EMU00012345; Group; group1; Asym; #1_Raw_unNorm"));
+        wsGroup->contains("EMU00012345; Group; group1; Asym; #1_unNorm_Raw"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm"));
     TS_ASSERT(
-        wsGroup->contains("EMU00012345; Group; group2; Asym; #1_Raw_unNorm"));
+        wsGroup->contains("EMU00012345; Group; group2; Asym; #1_unNorm_Raw"));
     // Pair Asymmetry
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1"));
     TS_ASSERT(wsGroup->contains("EMU00012345; Pair; pair1; Asym; #1_Raw"));
@@ -526,6 +526,40 @@ public:
     TS_ASSERT_DELTA(wsOut->readY(0)[1], -0.39421, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[4], 0.4491, 0.001);
   }
+
+  void test_workspace_cropped_only_on_lower_limit() {
+
+    auto ws = MuonWorkspaceCreationHelper::createAsymmetryWorkspace(
+        4, 10, MuonWorkspaceCreationHelper::yDataAsymmetry(1.5, 0.1));
+    setUpADSWithWorkspace setup(ws);
+    auto file = MuonGroupingXMLHelper::createXMLwithPairsAndGroups(2, 2);
+
+    auto alg = algorithmWithPropertiesSet(ws->getName(), file.getFileName());
+    alg->setProperty("CropWorkspaces", true);
+    alg->setProperty("TimeMin", 0.2);
+    alg->setProperty("TimeMax", 0.8);
+    alg->execute();
+
+    WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        AnalysisDataService::Instance().retrieve("EMU00012345"));
+
+    auto delta = 0.001;
+    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Group; group1; Counts; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.2, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.3, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[8], 1.0, delta);
+
+    wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        wsGroup->getItem("EMU00012345; Pair; pair1; Asym; #1_Raw"));
+
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.25, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.35, delta);
+    TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.65, delta);
+  }
+
+  void test_group_asymmetry_range_applied_correctly() {}
 };
 
 #endif /* MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPING_H_ */

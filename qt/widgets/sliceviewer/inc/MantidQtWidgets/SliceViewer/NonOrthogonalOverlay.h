@@ -2,17 +2,17 @@
 #define MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_
 
 #include "DllOption.h"
-#include <QWidget>
-#include <qwt_plot.h>
-#include <qwt_valuelist.h>
-#include <QPainter>
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
-#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtWidgets/Common/NonOrthogonal.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
+#include "MantidQtWidgets/LegacyQwt/QwtRasterDataMDNonOrthogonal.h"
+#include <QPainter>
+#include <QWidget>
+#include <qwt_plot.h>
+#include <qwt_valuelist.h>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -87,6 +87,6 @@ private:
 };
 
 } // namespace SliceViewer
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_ */

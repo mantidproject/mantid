@@ -3,9 +3,9 @@
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
-#include <qwt3d_function.h>
-#include <QString>
 #include <QObject>
+#include <QString>
+#include <qwt3d_function.h>
 
 /**
  * @brief The Function2D class is the base class for 2D functions to be used

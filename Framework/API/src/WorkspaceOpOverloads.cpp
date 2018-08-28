@@ -1,13 +1,13 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/Property.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Property.h"
 
 #include <numeric>
 
@@ -85,57 +85,45 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   }
 }
 
-template DLLExport MatrixWorkspace_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
-                       const WorkspaceGroup_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const WorkspaceGroup_sptr, bool, bool,
-                       const std::string &, bool);
+template DLLExport MatrixWorkspace_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr, const MatrixWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const WorkspaceGroup_sptr, const WorkspaceGroup_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const WorkspaceGroup_sptr, const MatrixWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr, const WorkspaceGroup_sptr,
+    bool, bool, const std::string &, bool);
 
-template DLLExport IMDWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
-                       const IMDWorkspace_sptr, bool, bool, const std::string &,
-                       bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const WorkspaceGroup_sptr,
-                       const IMDWorkspace_sptr, bool, bool, const std::string &,
-                       bool);
-template DLLExport WorkspaceGroup_sptr
-executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
-                       const WorkspaceGroup_sptr, bool, bool,
-                       const std::string &, bool);
+template DLLExport IMDWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDWorkspace_sptr, const IMDWorkspace_sptr, bool,
+    bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const WorkspaceGroup_sptr, const IMDWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport WorkspaceGroup_sptr executeBinaryOperation(
+    const std::string &, const IMDWorkspace_sptr, const WorkspaceGroup_sptr,
+    bool, bool, const std::string &, bool);
 
-template DLLExport IMDWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDWorkspace_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport IMDWorkspace_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const IMDWorkspace_sptr, bool, bool, const std::string &,
-                       bool);
+template DLLExport IMDWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDWorkspace_sptr, const MatrixWorkspace_sptr,
+    bool, bool, const std::string &, bool);
+template DLLExport IMDWorkspace_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr, const IMDWorkspace_sptr,
+    bool, bool, const std::string &, bool);
 
-template DLLExport IMDHistoWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr,
-                       const IMDHistoWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport IMDHistoWorkspace_sptr
-executeBinaryOperation(const std::string &, const IMDHistoWorkspace_sptr,
-                       const MatrixWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
-template DLLExport IMDHistoWorkspace_sptr
-executeBinaryOperation(const std::string &, const MatrixWorkspace_sptr,
-                       const IMDHistoWorkspace_sptr, bool, bool,
-                       const std::string &, bool);
+template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDHistoWorkspace_sptr,
+    const IMDHistoWorkspace_sptr, bool, bool, const std::string &, bool);
+template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(
+    const std::string &, const IMDHistoWorkspace_sptr,
+    const MatrixWorkspace_sptr, bool, bool, const std::string &, bool);
+template DLLExport IMDHistoWorkspace_sptr executeBinaryOperation(
+    const std::string &, const MatrixWorkspace_sptr,
+    const IMDHistoWorkspace_sptr, bool, bool, const std::string &, bool);
 
 } // namespace OperatorOverloads
 

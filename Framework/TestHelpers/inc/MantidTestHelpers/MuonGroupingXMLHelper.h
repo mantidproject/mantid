@@ -1,8 +1,8 @@
 #ifndef MUONGROUPINGXMLHELPER_H_
 #define MUONGROUPINGXMLHELPER_H_
 
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 namespace MuonGroupingXMLHelper {
 

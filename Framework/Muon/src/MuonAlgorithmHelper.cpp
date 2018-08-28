@@ -7,10 +7,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 
-#include <algorithm>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -20,7 +16,6 @@ namespace MuonAlgorithmHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Types::Core::DateAndTime;
 
 /**
  * Return a first period MatrixWorkspace in a run workspace. If the run

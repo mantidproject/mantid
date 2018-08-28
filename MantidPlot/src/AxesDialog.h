@@ -30,13 +30,13 @@
 #ifndef AXESDIALOG_H
 #define AXESDIALOG_H
 
+#include "AxisDetails.h"
+#include "GridDetails.h"
+#include "ScaleDetails.h"
 #include <QDialog>
 #include <QLabel>
 #include <QList>
 #include <QTextEdit>
-#include "AxisDetails.h"
-#include "ScaleDetails.h"
-#include "GridDetails.h"
 //#include "MantidKernel/Logger.h"
 
 class QTimeEdit;

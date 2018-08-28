@@ -4,9 +4,9 @@
 #include "ui_PreviewPlot.h"
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/LegacyQwt/ErrorCurve.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -112,6 +112,8 @@ signals:
   void needToHardReplot();
   /// Signals that the axis scale has been changed
   void axisScaleChanged();
+  /// Signals that workspace has been removed
+  void workspaceRemoved(Mantid::API::MatrixWorkspace_sptr);
 
 public slots:
   void showLegend(bool show);
@@ -158,6 +160,7 @@ private slots:
   void showContextMenu(QPoint position);
   void handleViewToolSelect();
   void handleAxisTypeSelect();
+  void removeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
 
 private:
   Ui::PreviewPlot m_uiForm;
@@ -206,7 +209,7 @@ private:
 
   friend class DisplayCurveFit;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_PREVIEWPLOT_H_

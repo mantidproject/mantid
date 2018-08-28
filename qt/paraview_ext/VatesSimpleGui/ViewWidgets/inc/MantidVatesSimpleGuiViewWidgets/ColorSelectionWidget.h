@@ -1,12 +1,12 @@
 #ifndef COLORSELECTIONWIDGET_H_
 #define COLORSELECTIONWIDGET_H_
 
-#include "ui_ColorSelectionWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "boost/scoped_ptr.hpp"
+#include "ui_ColorSelectionWidget.h"
 #include <QWidget>
 
 class QDoubleValidator;
@@ -162,8 +162,8 @@ private:
   Mantid::VATES::ColorScaleLock *m_colorScaleLock;
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // COLORSELECTIONWIDGET_H_

@@ -15,8 +15,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/V3D.h"
 
@@ -152,7 +152,7 @@ QString convertBoolToPythonBoolString(bool input) {
  * Converts string representation of a Python bool to a C++ bool
  * @param input: the python string representation
  * @returns a true or false
-*/
+ */
 bool convertPythonBoolStringToBool(QString input) {
   bool value = false;
   if (input ==
@@ -201,15 +201,9 @@ void setTransmissionOnSaveCommand(
   }
 }
 
-bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
-                      bool isNistQxy) {
+bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS) {
   // Check we are dealing with 1D or 2D data
   bool isValid = true;
-  if (is1D && isNistQxy) {
-    isValid = false;
-    message +=
-        "Save option issue: Cannot save in NistQxy format for 1D data.\n";
-  }
 
   if (!is1D && isCanSAS) {
     isValid = false;
@@ -217,7 +211,7 @@ bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
   }
   return isValid;
 }
-}
+} // namespace
 
 //----------------------------------------------
 // Public member functions
@@ -400,7 +394,7 @@ void SANSRunWindow::initLayout() {
   readSettings();
 }
 /** Ssetup the controls for the Analysis Tab on this form
-*/
+ */
 void SANSRunWindow::initAnalysDetTab() {
   // Add shortened forms of step types to step boxes
   m_uiForm.q_dq_opt->setItemData(0, "LIN");
@@ -436,11 +430,11 @@ void SANSRunWindow::initAnalysDetTab() {
 }
 
 /** Formats a Qlabel to be a validator and adds it to the list
-*  @param newValid :: a QLabel to use as a validator
-*  @param control :: the control whose entry the validator is validates
-*  @param tab :: the tab that contains this widgets
-*  @param errorMsg :: the tooltip message that the validator should have
-*/
+ *  @param newValid :: a QLabel to use as a validator
+ *  @param control :: the control whose entry the validator is validates
+ *  @param tab :: the tab that contains this widgets
+ *  @param errorMsg :: the tooltip message that the validator should have
+ */
 void SANSRunWindow::makeValidator(QLabel *const newValid, QWidget *control,
                                   QWidget *tab, const QString &errorMsg) {
   QPalette pal = newValid->palette();
@@ -481,7 +475,7 @@ void SANSRunWindow::initLocalPython() {
 }
 
 /** Initialise some of the data and signal connections in the save box
-*/
+ */
 void SANSRunWindow::setupSaveBox() {
   connect(m_uiForm.saveDefault_btn, SIGNAL(clicked()), this,
           SLOT(handleDefSaveClick()));
@@ -493,7 +487,6 @@ void SANSRunWindow::setupSaveBox() {
           SLOT(setUserFname()));
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
   m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
@@ -505,8 +498,8 @@ void SANSRunWindow::setupSaveBox() {
   }
 }
 /** Raises a saveWorkspaces dialog which allows people to save any workspace
-*  workspaces the user chooses
-*/
+ *  workspaces the user chooses
+ */
 void SANSRunWindow::saveWorkspacesDialog() {
   // Qt::WA_DeleteOnClose must be set for the dialog to aviod a memory leak
   m_saveWorkspaces =
@@ -533,23 +526,25 @@ void SANSRunWindow::saveWorkspacesDialog() {
   // Connect the transfer of geometry inforamtion
   connect(m_saveWorkspaces, SIGNAL(updateGeometryInformation()), this,
           SLOT(onUpdateGeometryRequest()));
-  connect(this, SIGNAL(sendGeometryInformation(QString &, QString &, QString &,
-                                               QString &)),
-          m_saveWorkspaces, SLOT(onUpdateGeomtryInformation(
-                                QString &, QString &, QString &, QString &)));
+  connect(this,
+          SIGNAL(sendGeometryInformation(QString &, QString &, QString &,
+                                         QString &)),
+          m_saveWorkspaces,
+          SLOT(onUpdateGeomtryInformation(QString &, QString &, QString &,
+                                          QString &)));
 
   m_uiForm.saveSel_btn->setEnabled(false);
   m_saveWorkspaces->show();
 }
 /**When the save workspaces dialog box is closes its pointer, m_saveWorkspaces,
-* is set to NULL and the raise dialog button is re-enabled
-*/
+ * is set to NULL and the raise dialog button is re-enabled
+ */
 void SANSRunWindow::saveWorkspacesClosed() {
   m_uiForm.saveSel_btn->setEnabled(true);
   m_saveWorkspaces = nullptr;
 }
 /** Connection the buttons to their signals
-*/
+ */
 void SANSRunWindow::connectButtonSignals() {
   connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
   connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this,
@@ -574,7 +569,7 @@ void SANSRunWindow::connectButtonSignals() {
           SLOT(handleShowMaskButtonClick()));
 }
 /**  Calls connect to fix up all the slots for the run tab to their events
-*/
+ */
 void SANSRunWindow::connectFirstPageSignals() {
   // controls on the first tab page
 
@@ -586,7 +581,7 @@ void SANSRunWindow::connectFirstPageSignals() {
 }
 /** Calls connect to fix up all the slots for the analysis details tab to their
  * events
-*/
+ */
 void SANSRunWindow::connectAnalysDetSignals() {
   // controls on the second page
   connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this,
@@ -749,15 +744,13 @@ void SANSRunWindow::readSettings() {
                 << m_ins_defdir.toStdString() << '\n';
 }
 /** Sets the states of the checkboxes in the save box using those
-* in the passed QSettings object
-*  @param valueStore :: where the settings will be stored
-*/
+ * in the passed QSettings object
+ *  @param valueStore :: where the settings will be stored
+ */
 void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   m_uiForm.saveCan_check->setChecked(
       valueStore.value("canSAS", false).toBool());
-  m_uiForm.saveNIST_Qxy_check->setChecked(
-      valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
   m_uiForm.saveNXcanSAS_check->setChecked(
       valueStore.value("NXcanSAS", false).toBool());
@@ -793,13 +786,12 @@ void SANSRunWindow::saveSettings() {
   saveSaveSettings(value_store);
 }
 /** Stores the state of the checkboxes in the save box with the
-* passed QSettings object
-*  @param valueStore :: where the settings will be stored
-*/
+ * passed QSettings object
+ *  @param valueStore :: where the settings will be stored
+ */
 void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
-  valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
   valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
 }
@@ -842,9 +834,9 @@ void SANSRunWindow::trimPyMarkers(QString &txt) {
   txt.chop(1);
 }
 /** Issues a Python command to load the user file and returns any output if
-*  there are warnings or errors
-*  @return the output printed by the Python commands
-*/
+ *  there are warnings or errors
+ *  @return the output printed by the Python commands
+ */
 bool SANSRunWindow::loadUserFile() {
   // Check the user file
   if (!isValidUserFile()) {
@@ -869,7 +861,8 @@ bool SANSRunWindow::loadUserFile() {
   QString errors =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().user_settings.execute(i."
-                              "ReductionSingleton()))").trimmed();
+                              "ReductionSingleton()))")
+          .trimmed();
   // create a string list with a string for each line
   const QStringList allOutput = errors.split("\n");
   errors.clear();
@@ -895,8 +888,9 @@ bool SANSRunWindow::loadUserFile() {
       runReduceScriptFunction("print(i.ReductionSingleton().mask.min_radius)")
           .toDouble();
   m_uiForm.rad_min->setText(QString::number(dbl_param * unit_conv));
-  dbl_param = runReduceScriptFunction(
-                  "print(i.ReductionSingleton().mask.max_radius)").toDouble();
+  dbl_param =
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.max_radius)")
+          .toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param * unit_conv));
   // EventsTime
   m_uiForm.l_events_binning->setText(
@@ -906,19 +900,23 @@ bool SANSRunWindow::loadUserFile() {
       "print(i.ReductionSingleton().to_wavelen.wav_low)"));
   m_uiForm.wav_max->setText(
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_wavelen.wav_high)").trimmed());
+          "print(i.ReductionSingleton().to_wavelen.wav_high)")
+          .trimmed());
   const QString wav_step =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_wavelen.wav_step)").trimmed();
+          "print(i.ReductionSingleton().to_wavelen.wav_step)")
+          .trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
   // RCut WCut
-  dbl_param = runReduceScriptFunction(
-                  "print(i.ReductionSingleton().to_Q.r_cut)").toDouble();
+  dbl_param =
+      runReduceScriptFunction("print(i.ReductionSingleton().to_Q.r_cut)")
+          .toDouble();
   m_uiForm.r_cut_line_edit->setText(QString::number(dbl_param * unit_conv));
 
-  dbl_param = runReduceScriptFunction(
-                  "print(i.ReductionSingleton().to_Q.w_cut)").toDouble();
+  dbl_param =
+      runReduceScriptFunction("print(i.ReductionSingleton().to_Q.w_cut)")
+          .toDouble();
   m_uiForm.w_cut_line_edit->setText(QString::number(dbl_param));
 
   // Q
@@ -950,20 +948,24 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.frontDetRescale->setText(
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.scale)").trimmed());
+                              "FRONT').rescaleAndShift.scale)")
+          .trimmed());
   m_uiForm.frontDetShift->setText(
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.shift)").trimmed());
+                              "FRONT').rescaleAndShift.shift)")
+          .trimmed());
 
   QString fitScale =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.fitScale)").trimmed();
+                              "FRONT').rescaleAndShift.fitScale)")
+          .trimmed();
   QString fitShift =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.fitShift)").trimmed();
+                              "FRONT').rescaleAndShift.fitShift)")
+          .trimmed();
 
   if (fitScale == "True")
     m_uiForm.frontDetRescaleCB->setChecked(true);
@@ -985,28 +987,33 @@ bool SANSRunWindow::loadUserFile() {
     m_uiForm.frontDetQmin->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.qMin)").trimmed());
+                                "'FRONT').rescaleAndShift.qMin)")
+            .trimmed());
     m_uiForm.frontDetQmax->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.qMax)").trimmed());
+                                "'FRONT').rescaleAndShift.qMax)")
+            .trimmed());
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
 
   QString qMergeRangeUserSelected =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').mergeRange.q_merge_range)").trimmed();
+                              "FRONT').mergeRange.q_merge_range)")
+          .trimmed();
   if (qMergeRangeUserSelected == "True") {
     m_uiForm.mergeQRangeOnOff->setChecked(true);
     m_uiForm.mergeQMin->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').mergeRange.q_min)").trimmed());
+                                "'FRONT').mergeRange.q_min)")
+            .trimmed());
     m_uiForm.mergeQMax->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').mergeRange.q_max)").trimmed());
+                                "'FRONT').mergeRange.q_max)")
+            .trimmed());
   } else
     m_uiForm.mergeQRangeOnOff->setChecked(false);
 
@@ -1056,15 +1063,15 @@ bool SANSRunWindow::loadUserFile() {
       m_uiForm.enableFrontFlood_ck->checkState() == Qt::Checked);
 
   // Scale factor
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton()._corr_and_scale.rescale)").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton()._corr_and_scale.rescale)")
+                  .toDouble();
   m_uiForm.scale_factor->setText(QString::number(dbl_param / 100.));
 
   // Sample offset if one has been specified
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().instrument.SAMPLE_Z_CORR)").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().instrument.SAMPLE_Z_CORR)")
+                  .toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param * unit_conv));
 
   // Centre coordinates
@@ -1100,9 +1107,9 @@ bool SANSRunWindow::loadUserFile() {
                   .toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
   // Gravity switch
-  QString param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_Q.get_gravity())").trimmed();
+  QString param = runReduceScriptFunction(
+                      "print(i.ReductionSingleton().to_Q.get_gravity())")
+                      .trimmed();
   if (param == "True") {
     m_uiForm.gravity_check->setChecked(true);
   } else {
@@ -1112,14 +1119,16 @@ bool SANSRunWindow::loadUserFile() {
   // Read the extra length for the gravity correction
   const double extraLengthParam =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_Q.get_extra_length())").toDouble();
+          "print(i.ReductionSingleton().to_Q.get_extra_length())")
+          .toDouble();
   m_uiForm.gravity_extra_length_line_edit->setText(
       QString::number(extraLengthParam));
 
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().instrument.det_selection)").trimmed();
+          "print(i.ReductionSingleton().instrument.det_selection)")
+          .trimmed();
 
   if (detName == "REAR" || detName == "MAIN") {
     m_uiForm.detbank_sel->setCurrentIndex(0);
@@ -1330,8 +1339,9 @@ void SANSRunWindow::updateMaskTable() {
       m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(reardet_name));
       if (arm_x != "None" && arm_y != "None")
         m_uiForm.mask_table->setItem(
-            row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle +
-                                         " " + arm_x + " " + arm_y));
+            row, 2,
+            new QTableWidgetItem("LINE " + arm_width + " " + arm_angle + " " +
+                                 arm_x + " " + arm_y));
       else
         m_uiForm.mask_table->setItem(
             row, 2,
@@ -1670,9 +1680,9 @@ void SANSRunWindow::addUserMaskStrings(QString &exec_script,
   }
 }
 /** This method applys mask to a given workspace
-  * @param wsName name of the workspace
-  * @param time_pixel  true if time mask needs to be applied
-*/
+ * @param wsName name of the workspace
+ * @param time_pixel  true if time mask needs to be applied
+ */
 void SANSRunWindow::applyMask(const QString &wsName, bool time_pixel) {
   QString script = "mask= isis_reduction_steps.Mask_ISIS()\n";
   QString str;
@@ -1863,7 +1873,7 @@ void SANSRunWindow::setGeometryDetails() {
  * Set SANS2D geometry info
  * @param workspace :: The workspace
  * @param wscode :: 0 for sample, 1 for can, others not defined
-*/
+ */
 void SANSRunWindow::setSANS2DGeometry(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
     int wscode) {
@@ -2004,8 +2014,8 @@ void SANSRunWindow::selectCSVFile() {
     setProcessingState(Ready);
 }
 /** Raises a browse dialog and inserts the selected file into the
-*  save text edit box, outfile_edit
-*/
+ *  save text edit box, outfile_edit
+ */
 void SANSRunWindow::saveFileBrowse() {
   QString title = "Save output workspace as";
 
@@ -2013,9 +2023,11 @@ void SANSRunWindow::saveFileBrowse() {
   prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   // use their previous directory first and go to their default if that fails
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultsave.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultsave.directory")))
+          .toString();
 
   const QString filter = ";;AllFiles (*)";
 
@@ -2210,9 +2222,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
 }
 
 /** Queries the number of periods from the Python object whose name was passed
-*  @param RunStep name of the RunStep Python object
-*  @param output where the number will be displayed
-*/
+ *  @param RunStep name of the RunStep Python object
+ *  @param output where the number will be displayed
+ */
 void SANSRunWindow::readNumberOfEntries(const QString &RunStep,
                                         API::MWRunFiles *const output) {
   QString periods = runReduceScriptFunction("print(i.ReductionSingleton()." +
@@ -2370,8 +2382,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
   }
   // Set the Front detector Rescale and Shift
   QString fdArguments = "scale=" + m_uiForm.frontDetRescale->text().trimmed() +
-                        "," + "shift=" +
-                        m_uiForm.frontDetShift->text().trimmed();
+                        "," +
+                        "shift=" + m_uiForm.frontDetShift->text().trimmed();
   if (m_uiForm.frontDetRescaleCB->isChecked())
     fdArguments += ", fitScale=True";
   if (m_uiForm.frontDetShiftCB->isChecked())
@@ -2681,10 +2693,10 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   }
 }
 /** Iterates through the validators and stops if it finds one that is shown and
-* enabled
-*  @param check the validator set to check
-*  @return true if there are no validator problems if false if it finds one
-*/
+ * enabled
+ *  @param check the validator set to check
+ *  @return true if there are no validator problems if false if it finds one
+ */
 bool SANSRunWindow::entriesAreValid(const ValCheck check) {
   if (check == LOAD || check == ALL) {
     return entriesAreValid(m_loadValids) && runFilesAreValid();
@@ -2714,9 +2726,9 @@ bool SANSRunWindow::entriesAreValid(ValMap &vals) {
   return true;
 }
 /** Loop through all the m_runFiles file widgets and check they are all in the
-*  no error state
-*  @return true if there are no red stars on any run widgets, false otherwise
-*/
+ *  no error state
+ *  @return true if there are no red stars on any run widgets, false otherwise
+ */
 bool SANSRunWindow::runFilesAreValid() {
   std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
   for (; it != m_runFiles.end(); ++it) {
@@ -2733,8 +2745,8 @@ bool SANSRunWindow::runFilesAreValid() {
   return true;
 }
 /** Generates the code that can run a reduction chain (and then reset it)
-*  @return Python code that can be passed to a Python interpreter
-*/
+ *  @return Python code that can be passed to a Python interpreter
+ */
 QString SANSRunWindow::reduceSingleRun() const {
   QString reducer_code;
   if (m_uiForm.wav_dw_opt->currentText().toUpper().startsWith("RANGE")) {
@@ -2879,9 +2891,9 @@ void SANSRunWindow::handleRunFindCentre() {
   py_code +=
       "from centre_finder import FindDirectionEnum as FindDirectionEnum \n";
   // Find centre function
-  py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" +
-             m_uiForm.beam_rmax->text() + ",MaxIter=" +
-             m_uiForm.beam_iter->text() + ",";
+  py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() +
+             ",rupp=" + m_uiForm.beam_rmax->text() +
+             ",MaxIter=" + m_uiForm.beam_iter->text() + ",";
 
   if (m_uiForm.beamstart_box->currentIndex() == 0) {
     py_code += "xstart = None, ystart = None";
@@ -2956,7 +2968,8 @@ void SANSRunWindow::handleRunFindCentre() {
   QString errors =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().user_settings.execute(i."
-                              "ReductionSingleton()))").trimmed();
+                              "ReductionSingleton()))")
+          .trimmed();
 
   g_centreFinderLog.notice() << result.toStdString() << "\n";
 
@@ -2969,8 +2982,8 @@ void SANSRunWindow::handleRunFindCentre() {
   setProcessingState(Ready);
 }
 /** Save the output workspace from a single run reduction (i.e. the
-*  workspace m_outputWS) in all the user selected formats
-*/
+ *  workspace m_outputWS) in all the user selected formats
+ */
 void SANSRunWindow::handleDefSaveClick() {
   const QString fileBase = m_uiForm.outfile_edit->text();
   if (fileBase.isEmpty()) {
@@ -3023,8 +3036,9 @@ void SANSRunWindow::handleDefSaveClick() {
       auto geometryID = m_uiForm.sample_geomid->currentText();
       // Remove the first three characters, since they are unwanted
       auto geometryName = geometryID.mid(3);
-      saveCommand += ", Geometry='" + geometryName + "', SampleHeight=" +
-                     sampleHeight + ", SampleWidth=" + sampleWidth +
+      saveCommand += ", Geometry='" + geometryName +
+                     "', SampleHeight=" + sampleHeight +
+                     ", SampleWidth=" + sampleWidth +
                      ", SampleThickness=" + sampleThickness;
       saveCommand += ")\n";
     } else if ((*alg) == "SaveNXcanSAS") {
@@ -3073,12 +3087,11 @@ bool SANSRunWindow::areSaveSettingsValid(const QString &workspaceName) {
       AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
           workspaceName.toStdString());
   auto is1D = ws->getNumberHistograms() == 1;
-  auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
   auto isCanSAS = m_uiForm.saveCan_check->isChecked();
 
   QString message;
 
-  auto isValid = checkSaveOptions(message, is1D, isCanSAS, isNistQxy);
+  auto isValid = checkSaveOptions(message, is1D, isCanSAS);
 
   // Print the error message if there are any
   if (!message.isEmpty()) {
@@ -3206,7 +3219,8 @@ void SANSRunWindow::handleInstrumentChange() {
       "print(i.ReductionSingleton().instrument.cur_detector().name())");
   QString detectorSelection =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().instrument.det_selection)").trimmed();
+          "print(i.ReductionSingleton().instrument.det_selection)")
+          .trimmed();
   int ind = m_uiForm.detbank_sel->findText(detect);
   // We set the detector selection only if nothing is set yet.
   // Previously, we didn't handle merged and both at this point
@@ -3260,14 +3274,14 @@ void SANSRunWindow::handleInstrumentChange() {
 }
 
 /** Record if the user has changed the default filename, because then we don't
-*  change it
-*/
+ *  change it
+ */
 void SANSRunWindow::setUserFname() { m_userFname = true; }
 
 /** Enables or disables the floodFile run widget
-*  @param state :: Qt::CheckState enum value, Checked means enable otherwise
-* disabled
-*/
+ *  @param state :: Qt::CheckState enum value, Checked means enable otherwise
+ * disabled
+ */
 void SANSRunWindow::prepareFlood(int state) {
   if (sender() == m_uiForm.enableRearFlood_ck)
     m_uiForm.floodRearFile->setEnabled(state == Qt::Checked);
@@ -3275,9 +3289,9 @@ void SANSRunWindow::prepareFlood(int state) {
     m_uiForm.floodFrontFile->setEnabled(state == Qt::Checked);
 }
 /**Enables  the default save button, saveDefault_Btn, if there is an output
-* workspace
-* stored in m_outputWS and text in outfile_edit
-*/
+ * workspace
+ * stored in m_outputWS and text in outfile_edit
+ */
 void SANSRunWindow::enableOrDisableDefaultSave() {
   if (m_outputWS.isEmpty()) { // setEnabled(false) gets run below
   } else if (m_uiForm.outfile_edit->text()
@@ -3294,11 +3308,11 @@ void SANSRunWindow::enableOrDisableDefaultSave() {
   m_uiForm.saveDefault_btn->setEnabled(false);
 }
 /** connected to the Multi-period check box it shows or hides the multi-period
-* boxes
-*  on the file widgets
-*  @param tickState an enum (Qt::CheckState) that indicates if check box was
-* ticked or not
-*/
+ * boxes
+ *  on the file widgets
+ *  @param tickState an enum (Qt::CheckState) that indicates if check box was
+ * ticked or not
+ */
 void SANSRunWindow::disOrEnablePeriods(const int tickState) {
   const bool enable = tickState == Qt::Checked;
   std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
@@ -3308,8 +3322,8 @@ void SANSRunWindow::disOrEnablePeriods(const int tickState) {
 }
 
 /**
-* Enable or disable the controls that corrospond to batch or single run mode
-*/
+ * Enable or disable the controls that corrospond to batch or single run mode
+ */
 void SANSRunWindow::switchMode() {
   const RunMode modeId =
       m_uiForm.single_mode_btn->isChecked() ? SingleMode : BatchMode;
@@ -3452,7 +3466,7 @@ void SANSRunWindow::updateTransInfo(int state) {
 }
 
 /** A slot to validate entries for Python lists and tupples
-*/
+ */
 void SANSRunWindow::checkList() {
   // may be a need to generalise this
   QLineEdit *toValdate = m_uiForm.wavRanges;
@@ -3489,9 +3503,9 @@ void SANSRunWindow::setLoggerTabTitleToWarn() {
 }
 
 /** Record the output workspace name, if there is no output
-*  workspace pass an empty string or an empty argument list
-*  @param wsName :: the name of the output workspace or empty for no output
-*/
+ *  workspace pass an empty string or an empty argument list
+ *  @param wsName :: the name of the output workspace or empty for no output
+ */
 void SANSRunWindow::resetDefaultOutput(const QString &wsName) {
   m_outputWS = wsName;
   enableOrDisableDefaultSave();
@@ -3504,13 +3518,13 @@ void SANSRunWindow::resetDefaultOutput(const QString &wsName) {
   }
 }
 /** Passes information about the selected transmission runs to the Python
-* objects
-*  @param trans run widget box with the selected transmission (run with a sample
-* present) file
-*  @param direct run widget box with the selected direct (run with no sample
-* present) file
-*  @param assignFn this is different for can or sample
-*/
+ * objects
+ *  @param trans run widget box with the selected transmission (run with a
+ * sample present) file
+ *  @param direct run widget box with the selected direct (run with no sample
+ * present) file
+ *  @param assignFn this is different for can or sample
+ */
 bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
                                      API::MWRunFiles &direct,
                                      const QString &assignFn) {
@@ -3608,11 +3622,11 @@ bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
   return !base_workspace.isEmpty();
 }
 /** Gets the detectors that the instrument has and fills the
-*  combination box with these, there must exactly two detectors
-*  @param output [out] this combination box will be cleared and filled with the
-* new names
-*  @throw runtime_error if there aren't exactly two detectors
-*/
+ *  combination box with these, there must exactly two detectors
+ *  @param output [out] this combination box will be cleared and filled with the
+ * new names
+ *  @throw runtime_error if there aren't exactly two detectors
+ */
 void SANSRunWindow::fillDetectNames(QComboBox *output) {
   QString detsTuple = runReduceScriptFunction(
       "print(i.ReductionSingleton().instrument.listDetectors())");
@@ -3662,14 +3676,14 @@ void SANSRunWindow::fillDetectNames(QComboBox *output) {
   }
 }
 /** Checks if the workspace is a group and returns the first member of group,
-* throws
-*  if nothing can be retrived
-*  @param in [in] the group to examine
-*  @param member [in] entry or period number of the requested workspace, these
-* start at 1
-*  @return the first member of the passed group
-*  @throw NotFoundError if a workspace can't be returned
-*/
+ * throws
+ *  if nothing can be retrived
+ *  @param in [in] the group to examine
+ *  @param member [in] entry or period number of the requested workspace, these
+ * start at 1
+ *  @return the first member of the passed group
+ *  @throw NotFoundError if a workspace can't be returned
+ */
 Mantid::API::MatrixWorkspace_sptr
 SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in,
                               const int member) const {
@@ -3704,8 +3718,8 @@ SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in,
   return memberWS;
 }
 /** Find which save formats have been selected by the user
-*  @return save algorithm names
-*/
+ *  @return save algorithm names
+ */
 QStringList SANSRunWindow::getSaveAlgs() {
   QStringList checked;
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
@@ -3745,7 +3759,7 @@ QString SANSRunWindow::formatDouble(double value, const QString &colour,
  * Raise a message if current status allows
  * @param msg :: The message to include in the box
  * @param index :: The tab index to set as current
-*/
+ */
 void SANSRunWindow::raiseOneTimeMessage(const QString &msg, int index) {
   if (m_warnings_issued)
     return;
@@ -3803,7 +3817,7 @@ void SANSRunWindow::cleanup() {
  * Add a csv line to the batch grid
  * @param csv_line :: Add a line of csv text to the grid
  * @param separator :: An optional separator, default = ","
-*/
+ */
 int SANSRunWindow::addBatchLine(QString csv_line, QString separator) {
   // Try to detect separator if one is not specified
   if (separator.isEmpty()) {
@@ -3849,7 +3863,7 @@ int SANSRunWindow::addBatchLine(QString csv_line, QString separator) {
  * Save the batch file to a CSV file.
  * @param filename :: An optional filename. If none is given then a temporary
  * file is used and its name returned
-*/
+ */
 QString SANSRunWindow::saveBatchGrid(const QString &filename) {
   QString csv_filename = filename;
   if (csv_filename.isEmpty()) {
@@ -3894,8 +3908,8 @@ QString SANSRunWindow::saveBatchGrid(const QString &filename) {
 }
 
 /** Display the first data search and the number of data directorys to users and
-*  update our input directory
-*/
+ *  update our input directory
+ */
 void SANSRunWindow::upDateDataDir() {
   const std::vector<std::string> &dirs =
       ConfigService::Instance().getDataSearchDirs();
@@ -3916,10 +3930,10 @@ void SANSRunWindow::upDateDataDir() {
   }
 }
 /** Update the input directory labels if the Mantid system input
-*  directories have changed
-*  @param pDirInfo :: a pointer to an object with the output directory name in
-* it
-*/
+ *  directories have changed
+ *  @param pDirInfo :: a pointer to an object with the output directory name in
+ * it
+ */
 void SANSRunWindow::handleInputDirChange(
     Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo) {
   if (pDirInfo->key() == "datasearch.directories") {
@@ -3928,7 +3942,7 @@ void SANSRunWindow::handleInputDirChange(
 }
 
 /** Slot when phi masking changed in GUI
-*/
+ */
 void SANSRunWindow::phiMaskingChanged() { updateMaskTable(); }
 
 /** Slot when phi masking changed in GUI
@@ -3956,7 +3970,8 @@ void SANSRunWindow::loadTransmissionSettings() {
   QString transMin =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().transmission_calculator."
-                              "lambdaMin('SAMPLE'))").trimmed();
+                              "lambdaMin('SAMPLE'))")
+          .trimmed();
   if (transMin == "None") {
     m_uiForm.transFit_ck->setChecked(false);
   } else {
@@ -3965,13 +3980,15 @@ void SANSRunWindow::loadTransmissionSettings() {
     m_uiForm.trans_max->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().transmission_"
-                                "calculator.lambdaMax('SAMPLE'))").trimmed());
+                                "calculator.lambdaMax('SAMPLE'))")
+            .trimmed());
   }
 
   QString text =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().transmission_calculator."
-                              "fitMethod('SAMPLE'))").trimmed();
+                              "fitMethod('SAMPLE'))")
+          .trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
   if (index >= 0) {
     m_uiForm.trans_opt->setCurrentIndex(index);
@@ -3983,7 +4000,8 @@ void SANSRunWindow::loadTransmissionSettings() {
 
   transMin = runReduceScriptFunction("print("
                                      "i.ReductionSingleton().transmission_"
-                                     "calculator.lambdaMin('CAN'))").trimmed();
+                                     "calculator.lambdaMin('CAN'))")
+                 .trimmed();
   if (transMin == "None") {
     m_uiForm.transFit_ck_can->setChecked(false);
   } else {
@@ -3992,11 +4010,13 @@ void SANSRunWindow::loadTransmissionSettings() {
     m_uiForm.trans_max_can->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().transmission_"
-                                "calculator.lambdaMax('CAN'))").trimmed());
+                                "calculator.lambdaMax('CAN'))")
+            .trimmed());
   }
   text = runReduceScriptFunction("print("
                                  "i.ReductionSingleton().transmission_"
-                                 "calculator.fitMethod('CAN'))").trimmed();
+                                 "calculator.fitMethod('CAN'))")
+             .trimmed();
   index = m_uiForm.trans_opt_can->findText(text, Qt::MatchFixedString);
   if (index >= 0) {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
@@ -4504,18 +4524,18 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(
     auto roi = m_uiForm.trans_roi_files_line_edit->text();
     if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
       roi = "'" + roi.simplified() + "'";
-      roi = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
-                              roi + "))",
-                          false);
+      roi = runPythonCode(
+          "\nprint(i.ConvertToPythonStringList(to_convert=" + roi + "))",
+          false);
       pythonCode += "i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
     }
     // Handle Mask
     auto mask = m_uiForm.trans_masking_line_edit->text();
     if (!mask.isEmpty()) {
       mask = "'" + mask.simplified() + "'";
-      mask = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
-                               mask + "))",
-                           false);
+      mask = runPythonCode(
+          "\nprint(i.ConvertToPythonStringList(to_convert=" + mask + "))",
+          false);
       pythonCode += "i.SetTransmissionMask(trans_mask_files=" + mask + ")\n";
     }
 
@@ -4630,16 +4650,13 @@ bool SANSRunWindow::areSettingsValid(States type) {
   }
 
   // Check save format consistency for batch mode reduction
-  // 1D --> cannot be Nist Qxy
   // 2D --> cannot be CanSAS
   auto isBatchMode = !m_uiForm.single_mode_btn->isChecked();
   if (isBatchMode) {
     auto is1D = type == OneD;
     auto isCanSAS = m_uiForm.saveCan_check->isChecked();
-    auto isNistQxy = m_uiForm.saveNIST_Qxy_check->isChecked();
     QString saveMessage;
-    auto isValidSaveOption =
-        checkSaveOptions(saveMessage, is1D, isCanSAS, isNistQxy);
+    auto isValidSaveOption = checkSaveOptions(saveMessage, is1D, isCanSAS);
     if (!isValidSaveOption) {
       isValid = false;
       message += saveMessage;
@@ -4733,9 +4750,9 @@ void SANSRunWindow::setBeamFinderDetails() {
   auto instrumentName = m_uiForm.inst_opt->currentText();
 
   // Set the labels according to the instrument
-  auto requiresAngle =
-      runReduceScriptFunction(
-          "print(i.is_current_workspace_an_angle_workspace())").simplified();
+  auto requiresAngle = runReduceScriptFunction(
+                           "print(i.is_current_workspace_an_angle_workspace())")
+                           .simplified();
   QString labelPosition;
   if (requiresAngle == m_constants.getPythonTrueKeyword()) {
     labelPosition = "Current ( " + QString(QChar(0x03B2)) + " , y ) [";
@@ -5110,9 +5127,9 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
 
   auto createPythonScript = [](bool isTime, bool isMon, QString component) {
     return "i.get_background_correction(is_time = " +
-           convertBoolToPythonBoolString(isTime) + ", is_mon=" +
-           convertBoolToPythonBoolString(isMon) + ", component='" + component +
-           "')";
+           convertBoolToPythonBoolString(isTime) +
+           ", is_mon=" + convertBoolToPythonBoolString(isMon) +
+           ", component='" + component + "')";
   };
 
   for (auto &command : commandMap) {

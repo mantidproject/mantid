@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
-                                           get_output_name, get_base_name_from_multi_period_name)
+                                           get_output_name, get_base_name_from_multi_period_name, get_transmission_output_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode)
 from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
@@ -55,7 +55,6 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
     # sliced times for example.
     # ------------------------------------------------------------------------------------------------------------------
     reduction_packages = get_reduction_packages(state, workspaces, monitors)
-
     # ------------------------------------------------------------------------------------------------------------------
     # Run reductions (one at a time)
     # ------------------------------------------------------------------------------------------------------------------
@@ -93,6 +92,14 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
                                                                                "OutputWorkspaceHABCanCount")
         reduction_package.reduced_hab_can_norm = get_workspace_from_algorithm(reduction_alg,
                                                                               "OutputWorkspaceHABCanNorm")
+        reduction_package.calculated_transmission = get_workspace_from_algorithm(reduction_alg,
+                                                                                 "OutputWorkspaceCalculatedTransmission")
+        reduction_package.unfitted_transmission = get_workspace_from_algorithm(reduction_alg,
+                                                                               "OutputWorkspaceUnfittedTransmission")
+        reduction_package.calculated_transmission_can = get_workspace_from_algorithm(reduction_alg,
+                                                                                     "OutputWorkspaceCalculatedTransmissionCan")
+        reduction_package.unfitted_transmission_can = get_workspace_from_algorithm(reduction_alg,
+                                                                                   "OutputWorkspaceUnfittedTransmissionCan")
         if plot_results and mantidplot:
             plot_workspace(reduction_package, output_graph)
         # -----------------------------------
@@ -625,9 +632,12 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     :param workspace_to_monitor: a workspace to monitor map
     """
     def _set_output_name(_reduction_alg, _reduction_package, _is_group, _reduction_mode, _property_name,
-                         _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None):
-        _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
-                                                    multi_reduction_type=multi_reduction_type)
+                         _attr_out_name, _atrr_out_name_base, multi_reduction_type, _suffix=None, transmission=False):
+        if not transmission:
+            _out_name, _out_name_base = get_output_name(_reduction_package.state, _reduction_mode, _is_group,
+                                                        multi_reduction_type=multi_reduction_type)
+        else:
+            _out_name, _out_name_base = get_transmission_output_name(_reduction_package.state, _reduction_mode)
 
         if _suffix is not None:
             _out_name += _suffix
@@ -736,6 +746,24 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         _set_hab(reduction_alg, reduction_package, is_group)
     else:
         raise RuntimeError("The reduction mode {0} is not known".format(reduction_mode))
+
+    #-------------------------------------------------------------------------------------------------------------------
+    # Set the output workspaces for the calculated and unfitted transmission
+    #-------------------------------------------------------------------------------------------------------------------
+    if state.adjustment.show_transmission:
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceCalculatedTransmission", "calculated_transmission_name",
+                         "calculated_transmission_base_name",multi_reduction_type, transmission=True)
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceUnfittedTransmission", "unfitted_transmission_name",
+                         "unfitted_transmission_base_name",multi_reduction_type, transmission=True, _suffix="_unfitted")
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceCalculatedTransmissionCan", "calculated_transmission_can_name",
+                         "calculated_transmission_can_base_name", multi_reduction_type, transmission=True, _suffix="_can")
+        _set_output_name(reduction_alg, reduction_package, is_group, reduction_mode,
+                         "OutputWorkspaceUnfittedTransmissionCan", "unfitted_transmission_can_name",
+                         "unfitted_transmission_can_base_name", multi_reduction_type, transmission=True,
+                         _suffix="_unfitted_can")
 
 
 def get_workspace_from_algorithm(alg, output_property_name):
@@ -930,32 +958,18 @@ def get_all_names_to_save(reduction_packages):
     """
     names_to_save = []
     for reduction_package in reduction_packages:
-        is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-        is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-        is_group = is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
-
         reduced_lab = reduction_package.reduced_lab
         reduced_hab = reduction_package.reduced_hab
         reduced_merged = reduction_package.reduced_merged
 
         # If we have merged reduction then store the
         if reduced_merged:
-            if is_group:
-                names_to_save.append(reduction_package.reduced_merged_base_name)
-            else:
-                names_to_save.append(reduced_merged.name())
+            names_to_save.append(reduced_merged.name())
         else:
             if reduced_lab:
-                if is_group:
-                    names_to_save.append(reduction_package.reduced_lab_base_name)
-                else:
-                    names_to_save.append(reduced_lab.name())
-
+                names_to_save.append(reduced_lab.name())
             if reduced_hab:
-                if is_group:
-                    names_to_save.append(reduction_package.reduced_hab_base_name)
-                else:
-                    names_to_save.append(reduced_hab.name())
+                names_to_save.append(reduced_hab.name())
 
     # We might have some workspaces as duplicates (the group workspaces), so make them unique
     return set(names_to_save)

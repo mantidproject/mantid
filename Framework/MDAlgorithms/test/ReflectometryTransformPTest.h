@@ -1,11 +1,11 @@
 #ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMPTEST_H_
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMPTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;

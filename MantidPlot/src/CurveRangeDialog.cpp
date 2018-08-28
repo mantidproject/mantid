@@ -27,15 +27,15 @@
  *                                                                         *
  ***************************************************************************/
 #include "CurveRangeDialog.h"
-#include "PlotCurve.h"
 #include "Graph.h"
+#include "PlotCurve.h"
 #include "Table.h"
 
 #include <QGroupBox>
-#include <QMessageBox>
-#include <QLayout>
-#include <QPushButton>
 #include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QSpinBox>
 
 CurveRangeDialog::CurveRangeDialog(QWidget *parent, Qt::WFlags fl)

@@ -19,6 +19,8 @@ const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
 
 namespace {
 
+const std::string UNNORM = "_unNorm";
+
 // Convert input string plot type to PlotType.
 Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
   if (plotType == "Counts") {
@@ -78,9 +80,10 @@ void ApplyMuonDetectorGrouping::init() {
           PropertyMode::Mandatory),
       "The workspace group to which the output will be added.");
 
-  declareProperty("GroupName", emptyString, "The name of the group. Must "
-                                            "contain at least one alphanumeric "
-                                            "character.",
+  declareProperty("GroupName", emptyString,
+                  "The name of the group. Must "
+                  "contain at least one alphanumeric "
+                  "character.",
                   Direction::Input);
   declareProperty("Grouping", std::to_string(1),
                   "The grouping of detectors, comma separated list of detector "
@@ -172,12 +175,6 @@ std::map<std::string, std::string> ApplyMuonDetectorGrouping::validateInputs() {
   if (tmin > tmax) {
     errors["TimeMin"] = "TimeMin > TimeMax";
   }
-  if (tmin < 0) {
-    errors["TimeMin"] = "Time values are negative.";
-  }
-  if (tmax < 0) {
-    errors["TimeMax"] = "Time values are negative.";
-  }
 
   WorkspaceGroup_sptr groupedWS = getProperty("InputWorkspaceGroup");
   Workspace_sptr inputWS = getProperty("InputWorkspace");
@@ -214,8 +211,8 @@ void ApplyMuonDetectorGrouping::exec() {
   const std::string wsRawName = wsName + "_Raw";
   std::vector<std::string> wsNames = {wsName, wsRawName};
 
-  const std::string wsunNormName = wsName + "_unNorm";
-  const std::string wsunNormRawName = wsRawName + "_unNorm";
+  const std::string wsunNormName = wsName + UNNORM;
+  const std::string wsunNormRawName = wsName + UNNORM + "_Raw";
 
   auto ws = createAnalysisWorkspace(inputWS, false, options);
   if (getPropertyValue("AnalysisType") == "Asymmetry") {
