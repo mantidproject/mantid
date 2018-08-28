@@ -57,8 +57,8 @@ const Kernel::Material MeshObject::material() const { return m_material; }
  */
 bool MeshObject::hasValidShape() const {
   // May enclose volume if there are at
-  // at least 2 triangles and 4 vertices
-  return (numberOfTriangles() >= 2 && numberOfVertices() >= 4);
+  // at least 4 triangles and 4 vertices (Tetrahedron)
+  return (numberOfTriangles() >= 4 && numberOfVertices() >= 4);
 }
 
 /**
