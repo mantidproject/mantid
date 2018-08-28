@@ -39,24 +39,21 @@ void SaveReflectometryAscii::init() {
       "The name of the workspace containing the data you want to save.");
   declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
                   "The output filename");
-  std::vector<std::string> extension = {".mft", ".txt", ".dat",
-                                        "Defined via Filename property"};
+  std::vector<std::string> extension = {".mft", ".txt", ".dat", ""};
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
-  declareProperty("WriteHeader", true, "Whether to write header lines.");
+  declareProperty("WriteHeader", false, "Whether to write header lines.");
   setPropertySettings("WriteHeader", Kernel::make_unique<VisibleWhenProperty>(
-                                         "FileExtension", IS_EQUAL_TO,
-                                         "Defined via Filename property"));
+                                         "FileExtension", IS_EQUAL_TO, ""));
   std::vector<std::string> separator = {"comma", "space", "tab"};
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns");
   setPropertySettings("Separator", Kernel::make_unique<VisibleWhenProperty>(
-                                       "FileExtension", IS_EQUAL_TO,
-                                       "Defined via Filename property"));
+                                       "FileExtension", IS_EQUAL_TO, ""));
 }
 
 /// Input validation for single MatrixWorkspace
@@ -74,6 +71,7 @@ std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
     m_filename = getPropertyValue("Filename");
     if (m_filename.empty())
       issues["InputWorkspace"] = "Provide a file name";
+    m_filename.append(getPropertyValue("FileExtension"));
     return issues;
   } catch (std::runtime_error &) {
     return issues;
@@ -201,7 +199,8 @@ void SaveReflectometryAscii::checkFile(const std::string filename) {
 /// Execute the algorithm
 void SaveReflectometryAscii::exec() {
   checkFile(m_filename);
-  if (getProperty("WriteHeader"))
+  const std::string ext = getProperty("FileExtension");
+  if (getProperty("WriteHeader") || !ext.compare(".mft"))
     header();
   data();
   m_file.close();
@@ -253,6 +252,8 @@ bool SaveReflectometryAscii::processGroups() {
       ending = filename.substr(filename.find("."));
     } catch (...) {
     }
+    if (ending.empty())
+      ending = getPropertyValue("FileExtension");
     m_filename = filename.substr(0, filename.find(".")) + m_wsName[i] + ending;
     this->exec();
   }

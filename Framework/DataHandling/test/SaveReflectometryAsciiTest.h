@@ -63,7 +63,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -100,7 +100,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -153,7 +153,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
     std::ifstream in(filename);
     // Total number of lines
     TS_ASSERT(not_empty(in))
@@ -179,7 +179,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
     std::vector<std::string> data;
     data.reserve(5);
     data.emplace_back("MFT");
@@ -215,11 +215,11 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".txt"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".txt")).exists())
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("       3.300000000000000e-01       "
@@ -252,16 +252,17 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".txt"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".txt"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".txt")).exists())
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("       3.300000000000000e-01       "
@@ -296,7 +297,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -354,7 +355,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
+    TS_ASSERT(Poco::File(filename.append(".mft")).exists())
     std::ifstream in(filename);
     std::string line;
     std::getline(in, line);
@@ -411,17 +412,12 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "group"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".txt"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     const std::string filename = alg.getPropertyValue("Filename");
-    std::string ending{""};
-    try {
-      ending = filename.substr(filename.find("."));
-    } catch (...) {
-    }
-    std::string f1 = filename.substr(0, filename.find(".")) + "ws1" + ending;
-    std::string f2 = filename.substr(0, filename.find(".")) + "ws2" + ending;
+    std::string f1 = filename + "ws1.txt";
+    std::string f2 = filename + "ws2.txt";
     TS_ASSERT(Poco::File(f1).exists())
     std::vector<std::string> data1;
     data1.reserve(2);
