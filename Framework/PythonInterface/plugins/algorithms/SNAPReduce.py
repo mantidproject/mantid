@@ -4,8 +4,8 @@ from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidato
     IntArrayProperty, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
     MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
-from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
-    ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
+from mantid.simpleapi import AlignAndFocusPowder, CloneWorkspace, \
+    ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, \
     Divide, EditInstrumentGeometry, GetIPTS, Load, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
     MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
     RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
@@ -246,24 +246,6 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         return issues
 
-    def _alignAndFocus(self, params, calib, cal_File, group):
-        # loading the ISAW detcal file will override the default instrument
-        if calib == 'DetCal File':
-            LoadIsawDetCal(InputWorkspace='WS', Filename=cal_File)
-
-        if calib in ['Convert Units', 'DetCal File']:
-            ConvertUnits(InputWorkspace='WS',
-                         Target='dSpacing', OutputWorkspace='WS_d')
-        else:
-            self.log().notice("\n calibration file : %s" % cal_File)
-            AlignDetectors(InputWorkspace='WS', CalibrationFile=cal_File,
-                           Outputworkspace='WS_d')
-
-        Rebin(InputWorkspace='WS_d', Params=params, Outputworkspace='WS_d')
-
-        DiffractionFocussing(InputWorkspace='WS_d', GroupingWorkspace=group,
-                             PreserveEvents=False, OutputWorkspace='WS_red')
-
     def _getMaskWSname(self):
         masking = self.getProperty("Masking").value
         maskWSname = None
@@ -288,6 +270,8 @@ class SNAPReduce(DataProcessorAlgorithm):
         if maskFile is not None:
             LoadMask(InputFile=maskFile, Instrument='SNAP', OutputWorkspace=maskWSname)
 
+        if maskWSname is None:
+            maskWSname = ''
         return maskWSname
 
     def _generateNormalization(self, WS, normType, normWS):
@@ -301,15 +285,9 @@ class SNAPReduce(DataProcessorAlgorithm):
             peak_clip_WS = CloneWorkspace(InputWorkspace=WS, OutputWorkspace='peak_clip_WS')
             n_histo = peak_clip_WS.getNumberHistograms()
 
-            x = peak_clip_WS.extractX()
-            y = peak_clip_WS.extractY()
-            e = peak_clip_WS.extractE()
-
             for h in range(n_histo):
-                peak_clip_WS.setX(h, x[h])
-                peak_clip_WS.setY(h, self.peak_clip(y[h], win=window, decrese=True,
+                peak_clip_WS.setY(h, self.peak_clip(peak_clip_WS.readY(h), win=window, decrese=True,
                                                     LLS=True, smooth_window=smooth_range))
-                peak_clip_WS.setE(h, e[h])
             return 'peak_clip_WS'
         else: # other values are already held in normWS
             return normWS
@@ -417,25 +395,33 @@ class SNAPReduce(DataProcessorAlgorithm):
                 Tag = 'Live'
                 raise RuntimeError('Live data is not currently supported')
             else:
-                Load(Filename='SNAP' + str(r), OutputWorkspace='WS')
-            progress.report('loaded data')
+                Load(Filename='SNAP' + str(r), OutputWorkspace='WS_red')
 
-            CompressEvents(InputWorkspace='WS', OutputWorkspace='WS')
-            progress.report('compressed')
-            CropWorkspace(InputWorkspace='WS', OutputWorkspace='WS', XMax=50000)
-            progress.report('cropped in tof')
-            RemovePromptPulse(InputWorkspace='WS', OutputWorkspace='WS',
-                              Width='1600')
-            progress.report('remove prompt pulse')
-
-            if maskWSname is not None:
-                MaskDetectors(Workspace='WS', MaskedWorkspace=maskWSname)
-                progress.report('masked detectors')
+            # overwrite geometry with detcal files
+            if calib == 'DetCal File':
+                LoadIsawDetCal(InputWorkspace='WS_red', Filename=cal_File)
+            if Process_Mode == "Set-Up":
+                unfocussedWksp = 'WS_d'
             else:
-                progress.report('')
+                unfocussedWksp = ''
 
-            self._alignAndFocus(params, calib, cal_File, group)
-            progress.report('align and focus')
+            # TODO the right thing with the calibration information
+            AlignAndFocusPowder(InputWorkspace='WS_red', OutputWorkspace='WS_red',
+                                TMax=50000,
+                                Params=params,  # binning parameters in d-space
+                                RemovePromptPulseWidth=1600,
+                                MaskWorkspace=maskWSname,  # can be empty string
+                                GroupingWorkspace=group,
+                                UnfocussedWorkspace=unfocussedWksp,  # can be empty string
+                                PreserveEvents=False,
+                                Dspacing=True,  # bin in d-spacing
+                                )
+            # AlignAndFocusPowder leaves the data in time-of-flight
+            ConvertUnits(InputWorkspace='WS_red', OutputWorkspace='WS_red', Target='dSpacing', EMode='Elastic')
+
+            # AlignAndFocus doesn't necessarily rebin the data correctly
+            if Process_Mode == "Set-Up":
+                Rebin(InputWorkspace='WS_d', Params=params, Outputworkspace='WS_d')
 
             NormaliseByCurrent(InputWorkspace='WS_red', OutputWorkspace='WS_red')
 
@@ -474,9 +460,6 @@ class SNAPReduce(DataProcessorAlgorithm):
             # Save requested formats
             basename = '%s_%s_%s' % (new_Tag, r, group)
             self._save(r, basename, norm)
-
-            # temporary workspace no longer needed
-            DeleteWorkspace(Workspace='WS')
 
             # rename everything as appropriate and determine output workspace name
             RenameWorkspace(Inputworkspace='WS_d',
