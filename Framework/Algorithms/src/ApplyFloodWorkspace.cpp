@@ -29,7 +29,7 @@ const std::string ApplyFloodWorkspace::summary() const {
 int ApplyFloodWorkspace::version() const { return 1; }
 
 const std::vector<std::string> ApplyFloodWorkspace::seeAlso() const {
-  return {"ReflectometryReductionOneAuto"};
+  return {"ReflectometryReductionOneAuto", "CreateFloodWorkspace"};
 }
 
 const std::string ApplyFloodWorkspace::category() const {

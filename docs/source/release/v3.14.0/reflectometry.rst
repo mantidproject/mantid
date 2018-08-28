@@ -16,6 +16,7 @@ New
 ###
 
 - Added algorithm :ref:`algm-CreateFloodWorkspace` which makes a workspace for subsequent flood corrections.
+- Added algorithm :ref:`algm-ApplyFloodWorkspace` which applies flood corrections to a workspace.
 
 Liquids Reflectometer
 ---------------------
