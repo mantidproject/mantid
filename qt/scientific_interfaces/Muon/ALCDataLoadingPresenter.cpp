@@ -194,6 +194,17 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     m_loadedData = alg->getProperty("OutputWorkspace");
 
+	IAlgorithm_sptr sortAlg =
+		AlgorithmManager::Instance().create("SortXAxis");
+	sortAlg->setChild(true); // Don't want workspaces in the ADS
+	sortAlg->setProperty("InputWorkspace", m_loadedData);
+	sortAlg->setProperty("Ordering", "Ascending");
+	sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
+
+	sortAlg->execute();
+	m_loadedData = sortAlg->getProperty("OutputWorkspace");
+
+
     // If errors are properly caught, shouldn't happen
     assert(m_loadedData);
     // If subtract is not checked, only one spectrum,
