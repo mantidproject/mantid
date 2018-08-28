@@ -902,6 +902,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotMdiSubWindowTest.py
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
+    TSVSerialiserTest.py
 )
 
 if ( MAKE_VATES )

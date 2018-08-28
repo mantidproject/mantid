@@ -2263,8 +2263,7 @@ class TSVSerialiser
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 %End
 private:
-TSVSerialiser(const TSVSerialiser &);
-TSVSerialiser(const TSVSerialiser &, const std::string &lines);
+TSVSerialiser(const MantidQt::API::TSVSerialiser &);
 
 public:
 TSVSerialiser();
@@ -2274,7 +2273,7 @@ void clear();
 std::string outputLines();
 std::vector<std::string> sections(const std::string &name);
 
-TSVSerialiser writeLine(const std::string &name);
+MantidQt::API::TSVSerialiser writeLine(const std::string &name);
 void writeSection(const std::string &name, const std::string &body);
 
 
@@ -2290,6 +2289,8 @@ double readDouble();
 int readInt();
 std::string readString();
 bool readBool();
+std::string lineAsString(const std::string &name);
+std::vector<std::string> values(const std::string &name);
 };
 
 class WidgetScrollbarDecorator
