@@ -1,4 +1,4 @@
-#include "MantidQtWidgets/InstrumentView/OneCurvePlot.h"
+#include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
 #include <MantidQtWidgets/LegacyQwt/qwt_compat.h>
@@ -21,7 +21,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-OneCurvePlot::OneCurvePlot(QWidget *parent)
+MiniPlotQwt::MiniPlotQwt(QWidget *parent)
     : QwtPlot(parent), m_curve(nullptr), m_xUnits("") {
   const QFont &font = parent->font();
   setAxisFont(QwtPlot::xBottom, font);
@@ -49,14 +49,14 @@ OneCurvePlot::OneCurvePlot(QWidget *parent)
 /**
  * Destructor.
  */
-OneCurvePlot::~OneCurvePlot() { clearAll(); }
+MiniPlotQwt::~MiniPlotQwt() { clearAll(); }
 
 /**
  * Set the scale of the horizontal axis
  * @param from :: Minimum value
  * @param to :: Maximum value
  */
-void OneCurvePlot::setXScale(double from, double to) {
+void MiniPlotQwt::setXScale(double from, double to) {
   QFontMetrics fm(axisFont(QwtPlot::xBottom));
   int n = from != 0.0 ? abs(static_cast<int>(floor(log10(fabs(from))))) : 0;
   int n1 = to != 0.0 ? abs(static_cast<int>(floor(log10(fabs(to))))) : 0;
@@ -153,7 +153,7 @@ void OneCurvePlot::setXScale(double from, double to) {
  * @param from :: Minimum value
  * @param to :: Maximum value
  */
-void OneCurvePlot::setYScale(double from, double to) {
+void MiniPlotQwt::setYScale(double from, double to) {
   if (isYLogScale()) {
     if (from == 0 && to == 0) {
       from = 1;
@@ -196,8 +196,8 @@ void OneCurvePlot::setYScale(double from, double to) {
  * @param dataSize :: The size of the data
  * @param xUnits :: Units for the data
  */
-void OneCurvePlot::setData(const double *x, const double *y, int dataSize,
-                           const std::string &xUnits) {
+void MiniPlotQwt::setData(const double *x, const double *y, int dataSize,
+                          const std::string &xUnits) {
   m_xUnits = xUnits;
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
@@ -222,12 +222,12 @@ void OneCurvePlot::setData(const double *x, const double *y, int dataSize,
 /**
  * Set a label which will identify the curve when it is stored.
  */
-void OneCurvePlot::setLabel(const QString &label) { m_label = label; }
+void MiniPlotQwt::setLabel(const QString &label) { m_label = label; }
 
 /**
  * Remove the curve. Rescale the axes if there are stored curves.
  */
-void OneCurvePlot::clearCurve() {
+void MiniPlotQwt::clearCurve() {
   // remove the curve
   if (m_curve) {
     m_curve->attach(nullptr);
@@ -259,7 +259,7 @@ void OneCurvePlot::clearCurve() {
   }
 }
 
-void OneCurvePlot::resizeEvent(QResizeEvent *e) {
+void MiniPlotQwt::resizeEvent(QResizeEvent *e) {
   QwtPlot::resizeEvent(e);
   recalcAxisDivs();
 }
@@ -267,7 +267,7 @@ void OneCurvePlot::resizeEvent(QResizeEvent *e) {
 /**
  * Recalculate axis divisions to make sure that tick labels don't overlap
  */
-void OneCurvePlot::recalcAxisDivs() {
+void MiniPlotQwt::recalcAxisDivs() {
   recalcXAxisDivs();
   recalcYAxisDivs();
 }
@@ -275,7 +275,7 @@ void OneCurvePlot::recalcAxisDivs() {
 /**
  * Recalculate x-axis divisions to make sure that tick labels don't overlap
  */
-void OneCurvePlot::recalcXAxisDivs() {
+void MiniPlotQwt::recalcXAxisDivs() {
   const QwtScaleDiv *div0 = axisScaleDiv(QwtPlot::xBottom);
   double from = div0->lBound();
   double to = div0->hBound();
@@ -285,19 +285,19 @@ void OneCurvePlot::recalcXAxisDivs() {
 /**
  * Recalculate y-axis divisions to make sure that tick labels don't overlap
  */
-void OneCurvePlot::recalcYAxisDivs() {
+void MiniPlotQwt::recalcYAxisDivs() {
   const QwtScaleDiv *div0 = axisScaleDiv(QwtPlot::yLeft);
   double from = div0->lBound();
   double to = div0->hBound();
   setYScale(from, to);
 }
 
-void OneCurvePlot::contextMenuEvent(QContextMenuEvent *e) {
+void MiniPlotQwt::contextMenuEvent(QContextMenuEvent *e) {
   // context menu will be handled with mouse events
   e->accept();
 }
 
-void OneCurvePlot::mousePressEvent(QMouseEvent *e) {
+void MiniPlotQwt::mousePressEvent(QMouseEvent *e) {
   if (e->buttons() & Qt::RightButton) {
     if (m_zoomer->zoomRectIndex() == 0) {
       e->accept();
@@ -313,7 +313,7 @@ void OneCurvePlot::mousePressEvent(QMouseEvent *e) {
   }
 }
 
-void OneCurvePlot::mouseReleaseEvent(QMouseEvent *e) {
+void MiniPlotQwt::mouseReleaseEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {
     if (m_x0 == e->x() && m_y0 == e->y()) { // there were no dragging
       emit clickedAt(invTransform(xBottom, e->x() - canvas()->x()),
@@ -322,14 +322,14 @@ void OneCurvePlot::mouseReleaseEvent(QMouseEvent *e) {
   }
 }
 
-void OneCurvePlot::setYAxisLabelRotation(double degrees) {
+void MiniPlotQwt::setYAxisLabelRotation(double degrees) {
   axisScaleDraw(yLeft)->setLabelRotation(degrees);
 }
 
 /**
  * Set the log scale on the y axis
  */
-void OneCurvePlot::setYLogScale() {
+void MiniPlotQwt::setYLogScale() {
   const QwtScaleDiv *div = axisScaleDiv(QwtPlot::yLeft);
   double from = div->lBound();
   double to = div->hBound();
@@ -343,7 +343,7 @@ void OneCurvePlot::setYLogScale() {
 /**
  * Set the linear scale on the y axis
  */
-void OneCurvePlot::setYLinearScale() {
+void MiniPlotQwt::setYLinearScale() {
   QwtLinearScaleEngine *engine = new QwtLinearScaleEngine();
   setAxisScaleEngine(yLeft, engine);
   replot();
@@ -351,9 +351,9 @@ void OneCurvePlot::setYLinearScale() {
 
 /**
  * Add new peak label
- * @param marker :: A pointer to a PeakLabel, becomes owned by OneCurvePlot
+ * @param marker :: A pointer to a PeakLabel, becomes owned by MiniPlotQwt
  */
-void OneCurvePlot::addPeakLabel(const PeakMarker2D *marker) {
+void MiniPlotQwt::addPeakLabel(const PeakMarker2D *marker) {
   PeakLabel *label = new PeakLabel(marker, this);
   label->attach(this);
   m_peakLabels.append(label);
@@ -362,7 +362,7 @@ void OneCurvePlot::addPeakLabel(const PeakMarker2D *marker) {
 /**
  * Removes all peak labels.
  */
-void OneCurvePlot::clearPeakLabels() {
+void MiniPlotQwt::clearPeakLabels() {
   foreach (PeakLabel *label, m_peakLabels) {
     label->detach();
     delete label;
@@ -373,12 +373,12 @@ void OneCurvePlot::clearPeakLabels() {
 /**
  * Returns true if the current curve isn't NULL
  */
-bool OneCurvePlot::hasCurve() const { return m_curve != nullptr; }
+bool MiniPlotQwt::hasCurve() const { return m_curve != nullptr; }
 
 /**
  * Store current curve.
  */
-void OneCurvePlot::store() {
+void MiniPlotQwt::store() {
   if (m_curve) {
     removeCurve(m_label);
     m_stored.insert(m_label, m_curve);
@@ -393,9 +393,9 @@ void OneCurvePlot::store() {
 /**
  * Returns true if there are some stored curves.
  */
-bool OneCurvePlot::hasStored() const { return !m_stored.isEmpty(); }
+bool MiniPlotQwt::hasStored() const { return !m_stored.isEmpty(); }
 
-QStringList OneCurvePlot::getLabels() const {
+QStringList MiniPlotQwt::getLabels() const {
   QStringList out;
   QMap<QString, QwtPlotCurve *>::const_iterator it = m_stored.begin();
   for (; it != m_stored.end(); ++it) {
@@ -408,7 +408,7 @@ QStringList OneCurvePlot::getLabels() const {
  * Return the colour of a stored curve.
  * @param label :: The label of that curve.
  */
-QColor OneCurvePlot::getCurveColor(const QString &label) const {
+QColor MiniPlotQwt::getCurveColor(const QString &label) const {
   if (m_stored.contains(label)) {
     return m_stored[label]->pen().color();
   }
@@ -419,7 +419,7 @@ QColor OneCurvePlot::getCurveColor(const QString &label) const {
  * Remove a stored curve.
  * @param label :: The label of a curve to remove.
  */
-void OneCurvePlot::removeCurve(const QString &label) {
+void MiniPlotQwt::removeCurve(const QString &label) {
   QMap<QString, QwtPlotCurve *>::iterator it = m_stored.find(label);
   if (it != m_stored.end()) {
     it.value()->detach();
@@ -431,7 +431,7 @@ void OneCurvePlot::removeCurve(const QString &label) {
 /**
  * Does the y axis have the log scale?
  */
-bool OneCurvePlot::isYLogScale() const {
+bool MiniPlotQwt::isYLogScale() const {
   const QwtScaleEngine *engine = axisScaleEngine(yLeft);
   return dynamic_cast<const QwtLog10ScaleEngine *>(engine) != nullptr;
 }
@@ -439,7 +439,7 @@ bool OneCurvePlot::isYLogScale() const {
 /**
  * Remove all displayable objects from the plot.
  */
-void OneCurvePlot::clearAll() {
+void MiniPlotQwt::clearAll() {
   QMap<QString, QwtPlotCurve *>::const_iterator it = m_stored.begin();
   for (; it != m_stored.end(); ++it) {
     it.value()->detach();

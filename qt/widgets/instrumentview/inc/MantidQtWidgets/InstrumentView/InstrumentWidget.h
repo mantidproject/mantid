@@ -44,7 +44,6 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
-class OneCurvePlot;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;

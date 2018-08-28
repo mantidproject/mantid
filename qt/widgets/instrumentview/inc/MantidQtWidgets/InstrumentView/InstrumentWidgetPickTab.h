@@ -25,7 +25,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
-class OneCurvePlot;
+class MiniPlotQwt;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
@@ -53,8 +53,7 @@ public:
   ///   marker and
   ///            a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to
-  ///   select peak
-  ///               markers. Selected peaks can be deleted by pressing the
+  ///   select peak ///               markers. Selected peaks can be deleted by pressing the
   ///               Delete key.
   enum SelectionType {
     Single = 0,
@@ -122,7 +121,7 @@ private:
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
-  OneCurvePlot *m_plot; ///< Miniplot to display data in the detectors
+  MiniPlotQwt *m_plot; ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode
@@ -234,7 +233,7 @@ public:
   };
 
   DetectorPlotController(InstrumentWidgetPickTab *tab,
-                         InstrumentWidget *instrWidget, OneCurvePlot *plot);
+                         InstrumentWidget *instrWidget, MiniPlotQwt *plot);
   void setEnabled(bool on) { m_enabled = on; }
   void setPlotData(size_t pickID);
   void setPlotData(const std::vector<size_t> &detIndices);
@@ -274,7 +273,7 @@ private:
 
   InstrumentWidgetPickTab *m_tab;
   InstrumentWidget *m_instrWidget;
-  OneCurvePlot *m_plot;
+  MiniPlotQwt *m_plot;
 
   PlotType m_plotType;
   bool m_enabled;

@@ -19,13 +19,13 @@
 #include <QToolTip>
 #include <QVBoxLayout>
 
-#include <qwt_scale_engine.h>
-#include <qwt_scale_widget.h>
-
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
-#include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+
+#include <qwt_scale_engine.h>
+#include <qwt_scale_widget.h>
+#include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
 
 #include <limits>
 

@@ -1,5 +1,5 @@
-#ifndef ONECURVEPLOT_H_
-#define ONECURVEPLOT_H_
+#ifndef MiniPlotQwt_H_
+#define MiniPlotQwt_H_
 
 #include <QList>
 #include <QMap>
@@ -19,11 +19,11 @@ class PeakMarker2D;
  * Implements a simple widget for plotting a single curve.
  * Allows to keep more than one curve.
  */
-class OneCurvePlot : public QwtPlot {
+class MiniPlotQwt : public QwtPlot {
   Q_OBJECT
 public:
-  explicit OneCurvePlot(QWidget *parent);
-  ~OneCurvePlot() override;
+  explicit MiniPlotQwt(QWidget *parent);
+  ~MiniPlotQwt() override;
   void setData(const double *x, const double *y, int dataSize,
                const std::string &xUnits = "");
   void setLabel(const QString &label);
@@ -74,16 +74,16 @@ private:
 
 class PeakLabel : public QwtPlotItem {
 public:
-  PeakLabel(const PeakMarker2D *m, const OneCurvePlot *plot)
+  PeakLabel(const PeakMarker2D *m, const MiniPlotQwt *plot)
       : m_marker(m), m_plot(plot) {}
   void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             const QRect &canvasRect) const override;
 
 private:
   const PeakMarker2D *m_marker;
-  const OneCurvePlot *m_plot;
+  const MiniPlotQwt *m_plot;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /*ONECURVEPLOT_H_*/
+#endif /*MiniPlotQwt_H_*/
