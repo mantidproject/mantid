@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/IO/EventParser.cpp
 	src/IO/EventsListsShmemManager.cpp
 	src/IO/EventsListsShmemStorage.cpp
+        src/IO/MultiProcessEventLoader.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
@@ -22,6 +23,7 @@ set ( INC_FILES
 	inc/MantidParallel/IO/EventParser.h
 	inc/MantidParallel/IO/EventsListsShmemManager.h
 	inc/MantidParallel/IO/EventsListsShmemStorage.h
+        inc/MantidParallel/IO/MultiProcessEventLoader.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
 	inc/MantidParallel/IO/PulseTimeGenerator.h
@@ -42,6 +44,7 @@ set ( TEST_FILES
 	EventsListsShmemManagerTest.h
 	EventsListsShmemStorageTest.h
 	ExecutionModeTest.h
+        MultiProcessEventLoaderTest.h
 	NonblockingTest.h
 	ParallelRunnerTest.h
 	PulseTimeGeneratorTest.h
