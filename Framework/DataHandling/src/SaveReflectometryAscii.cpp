@@ -62,18 +62,22 @@ void SaveReflectometryAscii::init() {
 /// Input validation for single MatrixWorkspace
 std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   std::map<std::string, std::string> issues;
-  m_ws = getProperty("InputWorkspace");
-  if (!m_ws)
-    issues["InputWorkspace"] = "InputWorkspace must be a MatrixWorkspace";
   try {
-    m_ws->y(0).size();
-  } catch (std::range_error) {
-    issues["InputWorkspace"] = "InputWorkspace does not contain data";
+    m_ws = getProperty("InputWorkspace");
+    if (!m_ws)
+      issues["InputWorkspace"] = "InputWorkspace must be a MatrixWorkspace";
+    try {
+      m_ws->y(0).size();
+    } catch (std::range_error &) {
+      issues["InputWorkspace"] = "InputWorkspace does not contain data";
+    }
+    m_filename = getPropertyValue("Filename");
+    if (m_filename.empty())
+      issues["InputWorkspace"] = "Provide a file name";
+    return issues;
+  } catch (std::runtime_error &) {
+    return issues;
   }
-  m_filename = getPropertyValue("Filename");
-  if (m_filename.empty())
-    issues["InputWorkspace"] = "Provide a file name";
-  return issues;
 }
 
 /// Write data to file
@@ -118,7 +122,7 @@ std::string SaveReflectometryAscii::sampleInfo(const std::string &logName) {
   auto run = m_ws->run();
   try {
     return boost::lexical_cast<std::string>(run.getLogData(logName)->value());
-  } catch (Exception::NotFoundError) {
+  } catch (Exception::NotFoundError &) {
   }
   return "Not defined";
 }
@@ -209,6 +213,8 @@ bool SaveReflectometryAscii::checkGroups() {
     WorkspaceGroup_const_sptr group =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             getPropertyValue("InputWorkspace"));
+    if (!group)
+      return false;
     for (auto i : group->getAllItems()) {
       if (i->getName().empty())
         g_log.warning("InputWorkspace must have a name, skip");
@@ -219,7 +225,7 @@ bool SaveReflectometryAscii::checkGroups() {
               "WorkspaceGroup must contain MatrixWorkspaces"));
         try {
           m_ws->y(0).size();
-        } catch (std::range_error) {
+        } catch (std::range_error &) {
           throw(std::runtime_error("InputWorkspace does not contain data"));
         }
         m_group.emplace_back(m_ws);
