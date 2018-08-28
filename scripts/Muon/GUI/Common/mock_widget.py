@@ -1,4 +1,3 @@
-
 import PyQt4.QtGui as QtGui
 
 

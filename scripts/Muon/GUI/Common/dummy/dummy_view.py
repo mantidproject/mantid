@@ -1,19 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
+from qtpy import QtWidgets
+from qtpy.QtCore import Signal
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
 
-
-class DummyView(QtGui.QWidget):
-
-    buttonSignal = QtCore.pyqtSignal(object)
+class DummyView(QtWidgets.QWidget):
+    buttonSignal = Signal(object)
 
     def __init__(self, name, parent=None):
         super(DummyView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtWidgets.QGridLayout(self)
         self.message = name
-        btn = QtGui.QPushButton(name, self)
+        btn = QtWidgets.QPushButton(name, self)
         self.grid.addWidget(btn)
         btn.clicked.connect(self.buttonClick)
 

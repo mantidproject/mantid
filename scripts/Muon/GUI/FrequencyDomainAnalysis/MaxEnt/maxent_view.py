@@ -1,31 +1,32 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore, QtGui
+from qtpy import QtCore, QtWidgets
+from qtpy.QtCore import Signal
 
 from Muon.GUI.Common import table_utils
 
 
-class MaxEntView(QtGui.QWidget):
+class MaxEntView(QtWidgets.QWidget):
 
     """
     The view for the MaxEnt widget. This
     creates the look of the widget
     """
     # signals
-    maxEntButtonSignal = QtCore.pyqtSignal()
-    cancelSignal = QtCore.pyqtSignal()
-    phaseSignal = QtCore.pyqtSignal(object, object)
+    maxEntButtonSignal = Signal()
+    cancelSignal = Signal()
+    phaseSignal = Signal(object, object)
 
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
-        self.grid = QtGui.QVBoxLayout(self)
+        self.grid = QtWidgets.QVBoxLayout(self)
 
         # add splitter for resizing
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
 
         self.run = None
         # make table
-        self.table = QtGui.QTableWidget(self)
+        self.table = QtWidgets.QTableWidget(self)
         self.table.resize(800, 800)
 
         self.table.setRowCount(11)
@@ -87,9 +88,9 @@ class MaxEntView(QtGui.QWidget):
         self.table.resizeRowsToContents()
 
         # advanced options table
-        self.advancedLabel = QtGui.QLabel("\n  Advanced Options")
+        self.advancedLabel = QtWidgets.QLabel("\n  Advanced Options")
         # make table
-        self.tableA = QtGui.QTableWidget(self)
+        self.tableA = QtWidgets.QTableWidget(self)
         self.tableA.resize(800, 800)
 
         self.tableA.setRowCount(7)
@@ -132,9 +133,9 @@ class MaxEntView(QtGui.QWidget):
         self.tableA.setMinimumSize(40, 207)
 
         # make buttons
-        self.button = QtGui.QPushButton('Calculate MaxEnt', self)
+        self.button = QtWidgets.QPushButton('Calculate MaxEnt', self)
         self.button.setStyleSheet("background-color:lightgrey")
-        self.cancel = QtGui.QPushButton('Cancel', self)
+        self.cancel = QtWidgets.QPushButton('Cancel', self)
         self.cancel.setStyleSheet("background-color:lightgrey")
         self.cancel.setEnabled(False)
         # connects
@@ -142,7 +143,7 @@ class MaxEntView(QtGui.QWidget):
         self.cancel.clicked.connect(self.cancelClick)
         self.table.cellClicked.connect(self.phaseBoxClick)
         # button layout
-        self.buttonLayout = QtGui.QHBoxLayout()
+        self.buttonLayout = QtWidgets.QHBoxLayout()
         self.buttonLayout.addWidget(self.button)
         self.buttonLayout.addWidget(self.cancel)
         # add to layout

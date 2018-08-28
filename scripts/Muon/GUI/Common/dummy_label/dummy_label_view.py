@@ -1,16 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
 
+from qtpy import QtWidgets
 
-from PyQt4 import QtGui
 
-
-class DummyLabelView(QtGui.QWidget):
+class DummyLabelView(QtWidgets.QWidget):
 
     def __init__(self, name, parent=None):
         super(DummyLabelView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtWidgets.QGridLayout(self)
 
-        self.label = QtGui.QLabel(name)
+        self.label = QtWidgets.QLabel(name)
         self.grid.addWidget(self.label)
 
     def getLayout(self):

@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtCore
-from PyQt4 import QtGui
+from qtpy import QtCore, QtWidgets
 
 
-class DockView(QtGui.QMainWindow):
+class DockView(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
         super(DockView, self).__init__(parent)
@@ -15,7 +14,7 @@ class DockView(QtGui.QMainWindow):
         # add widget
         self.widgets.append(widget)
         # make an empty dock for widget
-        self.docks.append(QtGui.QDockWidget(name))
+        self.docks.append(QtWidgets.QDockWidget(name))
         # add widget to dock
         self.docks[-1].setWidget(self.widgets[-1])
         # add dock to view
@@ -31,7 +30,7 @@ class DockView(QtGui.QMainWindow):
         # put tabs on the top of the page
         self.setTabPosition(
             QtCore.Qt.LeftDockWidgetArea,
-            QtGui.QTabWidget.North)
+            QtWidgets.QTabWidget.North)
         # open to first tab
         self.docks[0].show()
         self.docks[0].raise_()
@@ -39,7 +38,7 @@ class DockView(QtGui.QMainWindow):
     def keepDocksOpen(self):
         for j in range(0, len(self.docks), 1):
             self.docks[j].setFeatures(
-                QtGui.QDockWidget.DockWidgetClosable and QtGui.QDockWidget.DockWidgetFloatable)
+                QtWidgets.QDockWidget.DockWidgetClosable and QtWidgets.QDockWidget.DockWidgetFloatable)
 
     def closeEvent(self, event):
         for j in range(len(self.docks) - 1, -1, -1):
