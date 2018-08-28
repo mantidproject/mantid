@@ -11,6 +11,8 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
+#include <array>
+
 using namespace Mantid;
 
 class FindReflectometryLines2Test : public CxxTest::TestSuite {
