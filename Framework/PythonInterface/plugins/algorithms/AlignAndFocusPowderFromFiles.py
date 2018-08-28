@@ -96,6 +96,18 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
         self.copyProperties('PDDetermineCharacterizations', PROPS_FOR_PD_CHARACTER)
 
+    def validateInputs(self):
+        errors = dict()
+
+        unfocusname = self.getPropertyValue('UnfocussedWorkspace')
+        if len(unfocusname) > 0:
+            finalname = self.getPropertyValue('OutputWorkspace')
+            if unfocusname == finalname:
+                errors["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace"
+                errors["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace"
+
+        return errors
+
     def _getLinearizedFilenames(self, propertyName):
         runnumbers = self.getProperty(propertyName).value
         linearizedRuns = []
@@ -258,7 +270,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
         self.charac = self.getProperty('Characterizations').value
-        finalname = self.getProperty('OutputWorkspace').valueAsStr
+        finalname = self.getPropertyValue('OutputWorkspace')
         useCaching = len(self.getProperty('CacheDir').value) > 0
 
         # accumulate the unfocused workspace if it was requested
