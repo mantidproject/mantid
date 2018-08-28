@@ -19,9 +19,8 @@ Kernel::V3D surfaceNormal(const std::vector<Kernel::V3D> &vertices) {
   auto v0 = vertices[1] - vertices[0];
   Kernel::V3D normal{0, 0, 0};
   // Look for normal amongst first 3 non-colinear points
-  auto v1 = vertices[2] - vertices[1];
   for (size_t i = 1; i < vertices.size() - 1; ++i) {
-    v1 = vertices[i + 1] - vertices[i];
+    auto v1 = vertices[i + 1] - vertices[i];
     normal = v0.cross_prod(v1);
     if (normal.norm2() != 0) {
       break;
