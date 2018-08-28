@@ -20,8 +20,6 @@ class IteratorWithException(object):
         self.max = len(iterable)
         self.iterable = iter(iterable)
 
-        self.mutex = QtCore.QMutex()
-
         self.throw_indices = [index for index in throw_on_index if index <= self.max]
 
     def __iter__(self):
@@ -29,18 +27,14 @@ class IteratorWithException(object):
         return self
 
     def __next__(self):
-        self.mutex.lock()
         if self.n in self.throw_indices:
             next(self.iterable)
             self.n += 1
-            self.mutex.unlock()
             raise ValueError()
         elif self.n == self.max:
-            self.mutex.unlock()
             raise StopIteration()
         else:
             self.n += 1
-            self.mutex.unlock()
             return next(self.iterable)
 
 
