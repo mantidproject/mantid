@@ -13,7 +13,7 @@ class EventWorkspace;
 namespace DataHandling {
 
 /** Loader for event data from Nexus files with parallelism based on multiple
-  processes (MPI) for performance. This class provides integration of the low
+  processes (MPI or MultiProcessing) for performance. This class provides integration of the low
   level loader component Parallel::IO::EventLoader with higher level concepts
   such as DataObjects::EventWorkspace and the instrument.
 
@@ -43,10 +43,15 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL ParallelEventLoader {
 public:
-  static void load(DataObjects::EventWorkspace &ws, const std::string &filename,
-                   const std::string &groupName,
-                   const std::vector<std::string> &bankNames,
-                   const bool eventIDIsSpectrumNumber);
+  static void loadMPI(DataObjects::EventWorkspace &ws, const std::string &filename,
+                      const std::string &groupName,
+                      const std::vector<std::string> &bankNames,
+                      const bool eventIDIsSpectrumNumber);
+
+  static void loadMultiProcess(DataObjects::EventWorkspace &ws, const std::string &filename,
+                               const std::string &groupName,
+                               const std::vector<std::string> &bankNames,
+                               const bool eventIDIsSpectrumNumber);
 };
 
 } // namespace DataHandling

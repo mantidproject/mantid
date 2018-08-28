@@ -33,7 +33,7 @@ makeAnyEventIdToBankMap(const std::string &filename,
   return idToBank;
 }
 
-/// Load events from given banks into event lists.
+/// Load events from given banks into event lists using MPI.
 void load(const Communicator &comm, const std::string &filename,
           const std::string &groupName,
           const std::vector<std::string> &bankNames,
@@ -44,6 +44,16 @@ void load(const Communicator &comm, const std::string &filename,
   load(readDataType(group, bankNames, "event_time_offset"), comm, group,
        bankNames, bankOffsets, std::move(eventLists));
 }
+
+/// Load events from given banks into event lists.
+void load(const std::string &filename,
+          const std::string &groupName,
+          const std::vector<std::string> &bankNames,
+          const std::vector<int32_t> &bankOffsets,
+          std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
+}
+
+
 } // namespace EventLoader
 
 } // namespace IO

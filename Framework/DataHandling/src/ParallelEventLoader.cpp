@@ -74,22 +74,49 @@ std::vector<int32_t> bankOffsetsSpectrumNumbers(
   return bankOffsets;
 }
 
-/// Load events from given banks into given EventWorkspace.
-void ParallelEventLoader::load(DataObjects::EventWorkspace &ws,
+std::vector<std::vector<Types::Event::TofEvent> *> getResultVector(DataObjects::EventWorkspace &ws) {
+  const size_t size = ws.getNumberHistograms();
+
+  std::vector<std::vector<Types::Event::TofEvent> *> eventLists(size, nullptr);
+  for (size_t i = 0; i < size; ++i)
+    getEventsFrom(ws.getSpectrum(i), eventLists[i]);
+  return eventLists;
+}
+
+std::vector<int32_t> getOffsets(const DataObjects::EventWorkspace &ws,
+                                const std::string &filename,
+                                const std::string &groupName,
+                                const std::vector<std::string> &bankNames,
+                                const bool eventIDIsSpectrumNumber) {
+  const auto offsets =
+      eventIDIsSpectrumNumber
+      ? bankOffsetsSpectrumNumbers(ws, filename, groupName, bankNames)
+      : bankOffsets(ws, filename, groupName, bankNames);
+  return offsets;
+}
+
+/// Load events from given banks into given EventWorkspace using MPI.
+void ParallelEventLoader::loadMPI(DataObjects::EventWorkspace &ws,
                                const std::string &filename,
                                const std::string &groupName,
                                const std::vector<std::string> &bankNames,
                                const bool eventIDIsSpectrumNumber) {
-  const size_t size = ws.getNumberHistograms();
-  std::vector<std::vector<Types::Event::TofEvent> *> eventLists(size, nullptr);
-  for (size_t i = 0; i < size; ++i)
-    DataObjects::getEventsFrom(ws.getSpectrum(i), eventLists[i]);
-  const auto offsets =
-      eventIDIsSpectrumNumber
-          ? bankOffsetsSpectrumNumbers(ws, filename, groupName, bankNames)
-          : bankOffsets(ws, filename, groupName, bankNames);
-
+  std::vector<std::vector<Types::Event::TofEvent> *> eventLists = getResultVector(ws);
+  std::vector<int32_t> offsets = getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
   Parallel::IO::EventLoader::load(ws.indexInfo().communicator(), filename,
+                                  groupName, bankNames, offsets,
+                                  std::move(eventLists));
+}
+
+/// Load events from given banks into given EventWorkspace using .
+void ParallelEventLoader::loadMultiProcess(DataObjects::EventWorkspace &ws,
+                                           const std::string &filename,
+                                           const std::string &groupName,
+                                           const std::vector<std::string> &bankNames,
+                                           const bool eventIDIsSpectrumNumber) {
+  std::vector<std::vector<Types::Event::TofEvent> *> eventLists = getResultVector(ws);
+  std::vector<int32_t> offsets = getOffsets(ws, filename, groupName, bankNames, eventIDIsSpectrumNumber);
+  Parallel::IO::EventLoader::load(filename,
                                   groupName, bankNames, offsets,
                                   std::move(eventLists));
 }
