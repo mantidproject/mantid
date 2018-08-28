@@ -16,11 +16,6 @@ from sans.test_helper.test_director import TestDirector
 from sans.state.data import StateData
 from sans.state.save import get_save_builder
 
-if sys.version_info.major > 2:
-    from unittest import mock
-else:
-    import mock
-
 
 class SANSFunctionsTest(unittest.TestCase):
     @staticmethod
