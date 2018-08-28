@@ -76,6 +76,9 @@ void Q1DWeighted::init() {
   declareProperty(
       "ErrorWeighting", false,
       "Choose whether each pixel contribution will be weighted by 1/error^2.");
+
+  declareProperty("AsymmetricWedges", false,
+                  "Choose to produce the results for asymmetric wedges.");
 }
 
 void Q1DWeighted::exec() {
@@ -135,11 +138,20 @@ void Q1DWeighted::exec() {
   const int nWedges = getProperty("NumberOfWedges");
   const double wedgeOffset = getProperty("WedgeOffset");
   const double wedgeAngle = getProperty("WedgeAngle");
+  const bool asymmWedges = getProperty("AsymmetricWedges");
+
+  // When symmetric wedges are requested (default), we need to divide
+  // 180/nWedges. When asymmetric wedges are requested, we need to divide
+  // 360/nWedges
+  double wedgeFullAngle = 180.;
+  if (asymmWedges) {
+    wedgeFullAngle *= 2;
+  }
 
   // Create wedge workspaces
   std::vector<MatrixWorkspace_sptr> wedgeWorkspaces;
   for (int iWedge = 0; iWedge < nWedges; iWedge++) {
-    double center_angle = 180.0 / nWedges * iWedge;
+    double center_angle = wedgeFullAngle / nWedges * iWedge;
     center_angle += wedgeOffset;
 
     MatrixWorkspace_sptr wedge_ws =
@@ -262,12 +274,16 @@ void Q1DWeighted::exec() {
             // Fill in the wedge data
             for (int iWedge = 0; iWedge < nWedges; iWedge++) {
               double center_angle = M_PI / nWedges * iWedge;
+              if (asymmWedges) {
+                center_angle *= 2;
+              }
               center_angle += deg2rad * wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle(
                   V3D(cos(center_angle), sin(center_angle), 0.0)));
               if (angle < deg2rad * wedgeAngle * 0.5 ||
-                  fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5) {
+                  (!asymmWedges &&
+                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
                 wedge_lambda_iq[iWedge][iq] += YIn[j] * w;
                 wedge_lambda_iq_err[iWedge][iq] += w * w * EIn[j] * EIn[j];
                 wedge_XNorm[iWedge][iq] += w;
