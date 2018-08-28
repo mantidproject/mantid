@@ -744,7 +744,7 @@ class TestManager(object):
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
                  quiet=False, testsInclude=None, testsExclude=None,
                  exclude_in_pr_builds=None, showSkipped=False,
-                 output_on_failure=False,clean=False,
+                 output_on_failure=False, clean=False,
                  test_count=[0,0,0], process_number=0, ncores=1):
         '''Initialize a class instance'''
 
@@ -1108,12 +1108,12 @@ def envAsString():
 # Function to spawn one test manager per core
 #########################################################################
 def testProcess(testDir, saveDir, options, res_array,
-                stat_dict, test_count, process_number, nc, do_cleanup):
+                stat_dict, test_count, process_number):
 
     reporter = XmlResultReporter(showSkipped=options.showskipped)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
-                        escape_quotes=True, clean=do_cleanup)
+                        escape_quotes=True, clean=options.clean)
 
     mgr = TestManager(testDir,runner,
                       output=[reporter],
@@ -1125,7 +1125,8 @@ def testProcess(testDir, saveDir, options, res_array,
                       output_on_failure=options.output_on_failure,
                       test_count=test_count,
                       process_number=process_number,
-                      ncores=nc,clean=do_cleanup)
+                      ncores=options.ncores,
+                      clean=options.clean)
     try:
         mgr.executeTests()
     except KeyboardInterrupt:
@@ -1133,9 +1134,9 @@ def testProcess(testDir, saveDir, options, res_array,
 
     # Update the test results in the array shared accross cores
     res_array[process_number] = mgr.skippedTests
-    res_array[process_number + nc] = mgr.failedTests
-    res_array[process_number + 2*nc] = mgr.totalTests
-    res_array[process_number + 3*nc] = int(reporter.reportStatus())
+    res_array[process_number + options.ncores] = mgr.failedTests
+    res_array[process_number + 2*options.ncores] = mgr.totalTests
+    res_array[process_number + 3*options.ncores] = int(reporter.reportStatus())
 
     # Report the errors
     local_dict = dict()

@@ -47,7 +47,7 @@ loglevelChoices=["error", "warning", "notice", "information", "debug"]
 parser.add_option("-l", "--loglevel", dest="loglevel",
                   choices=loglevelChoices,
                   help="Set the log level for test running: [" + ', '.join(loglevelChoices) + "]")
-parser.add_option("-j", "--parallel", dest="parallel", action="store", type="int",
+parser.add_option("-j", "--parallel", dest="ncores", action="store", type="int",
                   help="The number of instances to run in parallel, like the -j option in ctest. Default is 1.")
 parser.add_option("-q", "--quiet", dest="quiet", action="store_true",
                   help="Prints detailed log to terminal.")
@@ -66,7 +66,7 @@ parser.add_option("", "--archivesearch", dest="archivesearch", action="store_tru
 parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
                   help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
-                    loglevel="information", parallel="1", quiet=False, output_on_failure=False, clean=False)
+                    loglevel="information", ncores=1, quiet=False, output_on_failure=False, clean=False)
 (options, args) = parser.parse_args()
 
 # import the stress testing framework
@@ -100,17 +100,16 @@ if options.makeprop:
 #########################################################################
 
 # Multi-core processes
-ncores = int(options.parallel)
 processes = [] # an array to hold the processes
-results_array = Array('i', 4*ncores) # shared array to hold skipped, failed and total number of tests + status
+results_array = Array('i', 4*options.ncores) # shared array to hold skipped, failed and total number of tests + status
 test_counter = Array('i', [0, 0, 0]) # shared array for number of executed tests, total number and max name length
 manager = Manager() # a manager to create a shared dict to store names of skipped and failed tests
 status_dict = manager.dict() # a shared dict to store names of skipped and failed tests
 
 # Prepare ncores processes
-for ip in range(ncores):
+for ip in range(options.ncores):
     processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
-                     options, results_array, status_dict, test_counter, ip, ncores, options.clean)))
+                     options, results_array, status_dict, test_counter, ip)))
 # Start and join processes
 for p in processes:
     p.start()
@@ -119,11 +118,11 @@ for p in processes:
 
 
 # Gather results
-skippedTests = sum(results_array[:ncores])
-failedTests = sum(results_array[ncores:2*ncores])
-totalTests = sum(results_array[2*ncores:3*ncores])
+skippedTests = sum(results_array[:options.ncores])
+failedTests = sum(results_array[options.ncores:2*options.ncores])
+totalTests = sum(results_array[2*options.ncores:3*options.ncores])
 # Find minimum of status: if min == 0, then success is False
-success = bool(min(results_array[3*ncores:4*ncores]))
+success = bool(min(results_array[3*options.ncores:4*options.ncores]))
 
 #########################################################################
 # Cleanup
@@ -137,7 +136,7 @@ if options.makeprop:
 # Output summary to terminal (skip if this was a cleanup run)
 #########################################################################
 
-if (not option.clean):
+if (not options.clean):
     nwidth = 80
     banner = "#" * nwidth
     print()
