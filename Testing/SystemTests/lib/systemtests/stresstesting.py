@@ -499,7 +499,6 @@ class ResultReporter(object):
         '''
         Print the results to standard out
         '''
-
         if ((result.status == 'skipped') and (not self._show_skipped)):
             pass
         else:
@@ -515,7 +514,7 @@ class ResultReporter(object):
                        + ": " + time_taken + "s)"
             if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
                 nstars = 80
-                console_output += ('*' * nstars) + '\n'
+                console_output += '\n' + ('*' * nstars) + '\n'
                 print_list = ['test_name','filename','test_date','host_name','environment',
                               'status','time_taken','memory footprint increase','output','err']
                 for key in print_list:
@@ -620,21 +619,20 @@ class TestScript(object):
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
     def asString(self, clean=False):
-        code = '''import sys
-sys.path.append('{0}')
-sys.path.append('{1}')
-from {2} import {3}
-systest = {3}()
-if {5}:
-    systest.excludeInPullRequests = lambda: False\n'''
-        if clean:
-            code += "systest.cleanup()\n"
+        code = "import sys\n" + \
+               ("sys.path.append('%s')\n" % TESTING_FRAMEWORK_DIR) + \
+               ("sys.path.append('%s')\n" % self._test_dir) + \
+               ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
+               ("systest = %s()\n" % self._test_cls_name) + \
+               ("if %r:\n" % self._exclude_in_pr_builds) + \
+               ("    systest.excludeInPullRequests = lambda: False\n")
+        if (not clean):
+            code += "systest.execute()\n" + \
+                    ("exitcode = systest.returnValidationCode(%i)\n" % TestRunner.VALIDATION_FAIL_CODE)
         else:
-            code += "systest.execute()\n"
-        code += "exitcode = systest.returnValidationCode({4})\nsys.exit(exitcode)"
-        return code.format(TESTING_FRAMEWORK_DIR, self._test_dir, self._modname,
-                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE,
-                           self._exclude_in_pr_builds)
+            code += "exitcode = 0\n"
+        code += "systest.cleanup()\nsys.exit(exitcode)\n"
+        return code
 
 #########################################################################
 # A class to tie together a test and its results
@@ -719,7 +717,7 @@ class TestSuite(object):
         if PY3:
             if isinstance(output, bytes):
                 output = output.decode()
-        self._result.output = output
+        self._result.output = '\n' + output
         all_lines = output.split('\n')
         # Find the test results
         for line in all_lines:
@@ -746,7 +744,7 @@ class TestManager(object):
     def __init__(self, test_loc, runner, output = [TextResultReporter()],
                  quiet=False, testsInclude=None, testsExclude=None,
                  exclude_in_pr_builds=None, showSkipped=False,
-                 output_on_failure=False,
+                 output_on_failure=False,clean=False,
                  test_count=[0,0,0], process_number=0, ncores=1):
         '''Initialize a class instance'''
 
@@ -757,7 +755,7 @@ class TestManager(object):
             r._quiet = quiet
             r._output_on_failure = output_on_failure
         self._test_count = test_count
-        # self._tests = []
+        self._clean = clean
 
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
@@ -774,15 +772,12 @@ class TestManager(object):
             runner.setTestDir(test_dir)
             full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
 
-        # full_test_list = full_test_list[:10]
-
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
         # flag to exclude slow tests from pull requests
         self._exclude_in_pr_builds = exclude_in_pr_builds
 
         # Gather statistics on full test list
-        # self._test_count = [0,0,0]
         reduced_test_list = []
         tid = 0
         for t in full_test_list:
@@ -790,29 +785,10 @@ class TestManager(object):
                 reduced_test_list.append(t)
                 tid += 1
                 t._id = tid
-                # print(self._test_count[1],ncores,self._test_count[1] % ncores,process_number,t._fqtestname)
-                # if (self._test_count[1] % ncores) == process_number:
-                #     (self._tests).append(t)
-                #     self._test_count[1] += 1
-                #     self._test_count[2] = max(self._test_count[2],len(t._fqtestname))
-                
-
-                # indices.append()
-        # print(process_number,self._test_count)
-
-
-
 
         self._test_count[1] = len(reduced_test_list)
         for t in reduced_test_list:
             self._test_count[2] = max(self._test_count[2],len(t._fqtestname))
-
-        # indices = range(process_number,len(reduced_test_list),ncores)
-        # # print(indices)
-        # # random.shuffle(indices)
-        # # print(indices)
-        
-        # self._tests = [reduced_test_list[i] for i in indices]
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes into groups instead of test by test, to avoid issues
@@ -834,7 +810,7 @@ class TestManager(object):
         modcounts = dict()
         modtests = dict()
         # This is the length of characters to match at the start of test name
-        min_length_for_group_name = 8 
+        min_length_for_group_name = 4
         for t in reduced_test_list:
             not_found = True
             for key in modcounts.keys():
@@ -847,26 +823,6 @@ class TestManager(object):
                 key = (t._modname)[:min_length_for_group_name]
                 modcounts[key] = 1
                 modtests[key] = [t]
-
-
-
-
-            # if t._modname in modcounts.keys():
-            #     modcounts[t._modname] += 1
-            #     modtests[t._modname].append(t)
-            # else:
-            #     modcounts[t._modname] = 1
-            #     modtests[t._modname] = [t]
-
-        ## Print groups
-        # count = 0
-        # for key in modcounts.keys():
-        #     count += 1
-        #     print(("Group %i has %i tests: "%(count,modcounts[key]))+key)
-        #     for t in modtests[key]:
-        #         print("  - " + t._fqtestname)
-        # exit()
-
 
         # Now we distribute the tests to each core
         # This is done by sorting the modules by descending order of number of tests
@@ -888,30 +844,20 @@ class TestManager(object):
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
             exit(2)
 
-        # if not quiet:
-        if True:
+        if (not quiet) and (not clean):
             hline = "========================================"
             out_string = hline + "\n"
             out_string += "Core %i will execute %i tests:\n" % (process_number,len(self._tests))
-            # count = 0
             for t in self._tests:
-                # count += 1
                 out_string += ("%3i. " % t._id) + t._fqtestname + "\n"
             out_string += hline
             print(out_string)
-            sys.stdout.flush()
-
-        # exit()
+        sys.stdout.flush()
 
         self._passedTests = 0
         self._skippedTests = 0
         self._failedTests = 0
         self._lastTestRun = 0
-
-        # self._testsInclude = testsInclude
-        # self._testsExclude = testsExclude
-        # # flag to exclude slow tests from pull requests
-        # self._exclude_in_pr_builds = exclude_in_pr_builds
 
     totalTests = property(lambda self: len(self._tests))
     skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
@@ -929,7 +875,7 @@ class TestManager(object):
                 return False
         return True
 
-    def executeTests(self, clean=False):
+    def executeTests(self):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
@@ -941,7 +887,7 @@ class TestManager(object):
             else:
                 self._failedTests += 1
             self._test_count[0] += 1
-            if not clean:
+            if not self._clean:
                 suite.reportResults(self._reporters, self._test_count)
             self._lastTestRun += 1
 
@@ -1126,7 +1072,7 @@ class MantidFrameworkConfig:
         config['filefinder.casesensitive'] = 'Off'
 
         # Maximum number of threads
-        config['MultiThreaded.MaxCores'] = '2'
+        config['MultiThreaded.MaxCores'] = '4'
 
         # datasearch
         if self.__datasearch:
@@ -1164,23 +1110,10 @@ def envAsString():
 def testProcess(testDir, saveDir, options, res_array,
                 stat_dict, test_count, process_number, nc, do_cleanup):
 
-    # mtdconf = MantidFrameworkConfig(loglevel=options.loglevel,
-    #                                 data_dirs=testDir,
-    #                                 save_dir=saveDir+("/core-%i"%process_number),
-    #                                 archivesearch=options.archivesearch)
-    # if options.makeprop:
-    #     mtdconf.config()
-
     reporter = XmlResultReporter(showSkipped=options.showskipped)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
                         escape_quotes=True, clean=do_cleanup)
-
-    # try:
-    #     os.mkdir(saveDir+("/core_id_%i" % process_number))
-    # except OSError:
-    #     pass
-
 
     mgr = TestManager(testDir,runner,
                       output=[reporter],
@@ -1192,9 +1125,9 @@ def testProcess(testDir, saveDir, options, res_array,
                       output_on_failure=options.output_on_failure,
                       test_count=test_count,
                       process_number=process_number,
-                      ncores=nc)
+                      ncores=nc,clean=do_cleanup)
     try:
-        mgr.executeTests(clean=do_cleanup)
+        mgr.executeTests()
     except KeyboardInterrupt:
         mgr.markSkipped("KeyboardInterrupt")
 
