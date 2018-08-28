@@ -80,6 +80,8 @@ void checkIntersectsWithRectangularBank(Track &testRay,
   std::cout << "BASEPOINT : " << basePoint << std::endl;
   std::cout << "HORIZONTAL : " << horizontal << std::endl;
   std::cout << "VERTICAL : " << vertical << std::endl;
+  std::cout << "xpixels : " << corners.nX << std::endl;
+  std::cout << "ypixels : " << corners.nY << std::endl;
 
   // The beam direction
   V3D beam = testRay.direction();
@@ -128,10 +130,13 @@ void checkIntersectsWithRectangularBank(Track &testRay,
   // TODO: Do I need to put something smart here for the first 3 parameters?
   // componentInfo.componentID();
   // componentInfo.shape();
-  testRay.addLink(intersec, intersec, 0.0, componentInfo.shape(componentIndex),
-                  componentInfo.componentID(componentIndex)->getComponentID());
 
-  std::cout << testRay.count() << std::endl;
+  //auto comp = getAtXY(xIndex, yIndex);
+
+  testRay.addLink(intersec, intersec, 0.0, componentInfo.shape(xIndex),
+                  componentInfo.componentID(xIndex)->getComponentID());
+
+  std::cout << "Number of Links RD: " << testRay.count() << std::endl;
 }
 
 void interceptSurface(Track &track, const ComponentInfo &componentInfo,
@@ -174,7 +179,7 @@ void interceptSurface(Track &track, const ComponentInfo &componentInfo,
                   componentInfo.componentID(componentIndex)->getComponentID());
   }
 
-  std::cout << track.count() << std::endl;
+  std::cout << "Number of Links OC: " << track.count() << std::endl;
 }
 
 } // namespace IntersectionHelpers
@@ -207,6 +212,11 @@ void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
                 << componentInfo.componentID(i)->getFullName() << std::endl;
 
       auto childComponentType = componentInfo.componentType(i);
+
+      if (childComponentType == Types::Detector && componentInfo.componentType(componentInfo.parent(i)) == Types::Rectangular) {
+        std::cout << componentInfo.componentID(componentInfo.parent(i))->getFullName() << std::endl;
+      }
+      std::cout << componentInfo.componentID(componentInfo.parent(i))->getFullName() << std::endl;
 
       if (childComponentType == Types::Rectangular) {
         IntersectionHelpers::checkIntersectsWithRectangularBank(

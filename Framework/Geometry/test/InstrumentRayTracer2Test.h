@@ -163,13 +163,19 @@ public:
 
     // Get the last result
     Link res = *results.begin();
+    std::cout << "\n Number of results: " << results.size() << std::endl;
+    for (auto r : results) {
+      std::cout << "Component ID: " << r.componentID->getFullName() << std::endl;
+    }
+
     IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
       m_testInstrumentRectangular->getComponentByID(res.componentID));
 
-    std::cout << "\n DET NAME THING\n " << m_testInstrumentRectangular->getComponentByID(res.componentID)->getFullName() << std::endl;
+    std::cout << "\n COMPONENT FULL NAME \n " << m_testInstrumentRectangular->getComponentByID(res.componentID)->getFullName() << std::endl;
 
     if (!det) {
-      std::cout << "DET IS NOT INITIALISED" << std::endl;
+      std::cout << "\n DET IS NOT INITIALISED " << std::endl;
+      std::cout << "\n COMPONENT FOUND IS: ";
       std::cout << m_testInstrumentRectangular->getComponentByID(res.componentID)->getFullName() << std::endl;
     }
 
@@ -197,7 +203,8 @@ public:
     // Towards the detector lower-left corner
     double w = 0.008;
     doTestRectangularDetector("Pixel (0,0)", V3D(0.0, 0.0, 5.0), 0, 0);
-    // Move over some pixels
+
+    //// Move over some pixels
     //doTestRectangularDetector("Pixel (1,0)", V3D(w * 1, w * 0, 5.0), 1,0);
     //doTestRectangularDetector("Pixel (1,2)", V3D(w * 1, w * 2, 5.0), 1,2);
     //doTestRectangularDetector("Pixel (0.95, 0.95)",V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
@@ -210,6 +217,7 @@ public:
     //doTestRectangularDetector("Beam parallel to panel",V3D(1.0, 0.0, 0.0), -1, -1);
     //doTestRectangularDetector("Beam parallel to panel",V3D(0.0, 1.0, 0.0), -1, -1);
     //doTestRectangularDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
+
     std::cout << "\n DONE TEST 3 \n" << std::endl;
   }
 
