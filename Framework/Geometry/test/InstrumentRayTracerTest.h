@@ -175,10 +175,16 @@ public:
 
     // Get the first result
     Link res = *results.begin();
+
+    std::cout << "\n Number of results: " << results.size() << std::endl;
+    for (auto r : results) {
+      std::cout << "Component ID: " << r.componentID->getFullName() << std::endl;
+    }
+
     IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(
         inst->getComponentByID(res.componentID));
 
-    std::cout << "\n DET NAME THING\n " << inst->getComponentByID(res.componentID)->getFullName() << std::endl;
+    std::cout << "\n COMPONENT FULL NAME \n " << inst->getComponentByID(res.componentID)->getFullName() << std::endl;
 
 
     // Parent bank
@@ -200,29 +206,19 @@ public:
     // Towards the detector lower-left corner
     double w = 0.008;
     doTestRectangularDetector("Pixel (0,0)", inst, V3D(0.0, 0.0, 5.0), 0, 0);
-    // Move over some pixels
-
-    //doTestRectangularDetector("Pixel (1,0)", inst, V3D(w * 1, w * 0, 5.0), 1,
-    //                          0);
-    //doTestRectangularDetector("Pixel (1,2)", inst, V3D(w * 1, w * 2, 5.0), 1,
-    //                          2);
-    //doTestRectangularDetector("Pixel (0.95, 0.95)", inst,
-    //                          V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
-    //doTestRectangularDetector("Pixel (1.05, 2.05)", inst,
-                              //V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
-    //doTestRectangularDetector("Pixel (99,99)", inst, V3D(w * 99, w * 99, 5.0),
-    //                          99, 99);
-
+    
+    //// Move over some pixels
+    //doTestRectangularDetector("Pixel (1,0)", inst, V3D(w * 1, w * 0, 5.0), 1, 0);
+    //doTestRectangularDetector("Pixel (1,2)", inst, V3D(w * 1, w * 2, 5.0), 1, 2);
+    //doTestRectangularDetector("Pixel (0.95, 0.95)", inst, V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
+    //doTestRectangularDetector("Pixel (1.05, 2.05)", inst, V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
+    //doTestRectangularDetector("Pixel (99,99)", inst, V3D(w * 99, w * 99, 5.0), 99, 99);
     //doTestRectangularDetector("Off to left", inst, V3D(-w, 0, 5.0), -1, -1);
     //doTestRectangularDetector("Off to bottom", inst, V3D(0, -w, 5.0), -1, -1);
     //doTestRectangularDetector("Off to top", inst, V3D(0, w * 100, 5.0), -1, -1);
-    //doTestRectangularDetector("Off to right", inst, V3D(w * 100, w, 5.0), -1,
-    //                          -1);
-
-    //doTestRectangularDetector("Beam parallel to panel", inst,
-    //                          V3D(1.0, 0.0, 0.0), -1, -1);
-    //doTestRectangularDetector("Beam parallel to panel", inst,
-    //                          V3D(0.0, 1.0, 0.0), -1, -1);
+    //doTestRectangularDetector("Off to right", inst, V3D(w * 100, w, 5.0), -1, -1);
+    //doTestRectangularDetector("Beam parallel to panel", inst, V3D(1.0, 0.0, 0.0), -1, -1);
+    //doTestRectangularDetector("Beam parallel to panel", inst, V3D(0.0, 1.0, 0.0), -1, -1);
     //doTestRectangularDetector("Zero-beam", inst, V3D(0.0, 0.0, 0.0), -1, -1);
 
     std::cout << "\n DONE TEST 3 \n" << std::endl;
