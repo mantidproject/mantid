@@ -137,12 +137,9 @@ void Q1DWeighted::exec() {
   const double wedgeAngle = getProperty("WedgeAngle");
 
   // Create wedge workspaces
-  bool isCone = false;
   std::vector<MatrixWorkspace_sptr> wedgeWorkspaces;
   for (int iWedge = 0; iWedge < nWedges; iWedge++) {
     double center_angle = 180.0 / nWedges * iWedge;
-    if (isCone)
-      center_angle *= 2.0;
     center_angle += wedgeOffset;
 
     MatrixWorkspace_sptr wedge_ws =
@@ -265,17 +262,12 @@ void Q1DWeighted::exec() {
             // Fill in the wedge data
             for (int iWedge = 0; iWedge < nWedges; iWedge++) {
               double center_angle = M_PI / nWedges * iWedge;
-              // For future option: if we set isCone to true, we can average
-              // only over a forward-going cone
-              if (isCone)
-                center_angle *= 2.0;
               center_angle += deg2rad * wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle(
                   V3D(cos(center_angle), sin(center_angle), 0.0)));
               if (angle < deg2rad * wedgeAngle * 0.5 ||
-                  (!isCone &&
-                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
+                  fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5) {
                 wedge_lambda_iq[iWedge][iq] += YIn[j] * w;
                 wedge_lambda_iq_err[iWedge][iq] += w * w * EIn[j] * EIn[j];
                 wedge_XNorm[iWedge][iq] += w;
@@ -327,20 +319,21 @@ void Q1DWeighted::exec() {
     }
   }
 
-  // Create workspace group that holds output workspaces
-  auto wsgroup = boost::make_shared<WorkspaceGroup>();
-
-  for (auto &wedgeWorkspace : wedgeWorkspaces) {
-    wsgroup->addWorkspace(wedgeWorkspace);
+  if (nWedges != 0) {
+    // Create workspace group that holds output workspaces
+    auto wsgroup = boost::make_shared<WorkspaceGroup>();
+    for (auto &wedgeWorkspace : wedgeWorkspaces) {
+      wsgroup->addWorkspace(wedgeWorkspace);
+    }
+    // set the output property
+    std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
+    if (outputWSGroupName.empty()) {
+      std::string outputWSName = getPropertyValue("OutputWorkspace");
+      outputWSGroupName = outputWSName + "_wedges";
+      setPropertyValue("WedgeWorkspace", outputWSGroupName);
+    }
+    setProperty("WedgeWorkspace", wsgroup);
   }
-  // set the output property
-  std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");
-  if (outputWSGroupName.empty()) {
-    std::string outputWSName = getPropertyValue("OutputWorkspace");
-    outputWSGroupName = outputWSName + "_wedges";
-    setPropertyValue("WedgeWorkspace", outputWSGroupName);
-  }
-  setProperty("WedgeWorkspace", wsgroup);
 }
 
 } // namespace Algorithms
