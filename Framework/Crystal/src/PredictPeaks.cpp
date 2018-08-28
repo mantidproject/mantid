@@ -296,7 +296,6 @@ void PredictPeaks::exec() {
 
   if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
-    int seqNum = 1;
 
     double wavelength = getProperty("Wavelength");
     if (wavelength == DBL_MAX) {
@@ -324,8 +323,7 @@ void PredictPeaks::exec() {
         g_log.information() << "Found goniometer rotation to be "
                             << goniometer.getEulerAngles()[0]
                             << " degrees for HKL = " << possibleHKL << "\n";
-        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR(),
-                                 seqNum);
+        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR());
         ++allowedPeakCount;
       }
       prog.report();
@@ -343,7 +341,6 @@ void PredictPeaks::exec() {
       HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
 
       size_t allowedPeakCount = 0;
-      int seqNum = 1;
 
       bool useExtendedDetectorSpace =
           getProperty("PredictPeaksOutsideDetectors");
@@ -355,8 +352,7 @@ void PredictPeaks::exec() {
 
       for (auto &possibleHKL : possibleHKLs) {
         if (lambdaFilter.isAllowed(possibleHKL)) {
-          calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix,
-                                   seqNum);
+          calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
           ++allowedPeakCount;
         }
         prog.report();
@@ -366,6 +362,17 @@ void PredictPeaks::exec() {
     }
   }
 
+  // Sort peaks by run number so that peaks with equal goniometer matrices are
+  // adjacent
+  std::vector<std::pair<std::string, bool>> criteria;
+  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  m_pw->sort(criteria);
+
+  auto &peaks = m_pw->getPeaks();
+  for (int i = 0; i < static_cast<int>(m_pw->getNumberPeaks()); ++i) {
+    peaks[i].setPeakNumber(i);
+  }
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
@@ -544,12 +551,10 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param hkl
  * @param orientedUB
  * @param goniometerMatrix
- * @param seqNum
  */
 void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
                                             const DblMatrix &orientedUB,
-                                            const DblMatrix &goniometerMatrix,
-                                            int &seqNum) {
+                                            const DblMatrix &goniometerMatrix) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
@@ -610,8 +615,6 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
   peak->setHKL(hkl * m_qConventionFactor);
-  peak->setPeakNumber(seqNum);
-  seqNum++;
 
   if (m_sfCalculator) {
     peak->setIntensity(m_sfCalculator->getFSquared(hkl));

@@ -5,8 +5,17 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+ISIS SANS Interface
+----------------------------
+New
+###
+
+Improved
+########
+
+Bug fixes
+#########
+* Fixed an issue where the run tab was difficult to select.
+* Changed the geometry names from CylinderAxisUP, Cuboid and CylinderAxisAlong to Cylinder, FlatPlate and Disc
 
 :ref:`Release 3.14.0 <v3.14.0>`
