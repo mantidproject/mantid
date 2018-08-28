@@ -59,23 +59,25 @@ void SaveReflectometryAscii::init() {
 /// Input validation for single MatrixWorkspace
 std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   std::map<std::string, std::string> issues;
-  try {
-    m_ws = getProperty("InputWorkspace");
-    if (!m_ws)
-      issues["InputWorkspace"] = "InputWorkspace must be a MatrixWorkspace";
+  m_filename = getPropertyValue("Filename");
+  if (m_filename.empty())
+    issues["InputWorkspace"] = "Provide a file name";
+  m_filename.append(getPropertyValue("FileExtension"));
+  m_ws = getProperty("InputWorkspace");
+  if (!m_ws) {
+    WorkspaceGroup_const_sptr group =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            getPropertyValue("InputWorkspace"));
+    if (!group)
+      issues["InputWorkspace"] = "Must be a MatrixWorkspace";
+  } else {
     try {
       m_ws->y(0).size();
     } catch (std::range_error &) {
-      issues["InputWorkspace"] = "InputWorkspace does not contain data";
+      issues["InputWorkspace"] = "Workspace does not contain data";
     }
-    m_filename = getPropertyValue("Filename");
-    if (m_filename.empty())
-      issues["InputWorkspace"] = "Provide a file name";
-    m_filename.append(getPropertyValue("FileExtension"));
-    return issues;
-  } catch (std::runtime_error &) {
-    return issues;
   }
+  return issues;
 }
 
 /// Write data to file
@@ -218,17 +220,18 @@ bool SaveReflectometryAscii::checkGroups() {
       if (i->getName().empty())
         g_log.warning("InputWorkspace must have a name, skip");
       else {
-        m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
-        if (!m_ws)
-          throw(std::runtime_error(
-              "WorkspaceGroup must contain MatrixWorkspaces"));
-        try {
-          m_ws->y(0).size();
-        } catch (std::range_error &) {
-          throw(std::runtime_error("InputWorkspace does not contain data"));
+        const auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
+        if (!ws)
+          g_log.warning("WorkspaceGroup must contain MatrixWorkspaces, skip");
+        else {
+          try {
+            ws->y(0).size();
+          } catch (std::range_error &) {
+            throw(std::runtime_error("InputWorkspace does not contain data"));
+          }
+          m_group.emplace_back(ws);
+          m_wsName.emplace_back(i->getName()); // since we lost names
         }
-        m_group.emplace_back(m_ws);
-        m_wsName.emplace_back(i->getName()); // since we lost names
       }
     }
     if (group->isEmpty())

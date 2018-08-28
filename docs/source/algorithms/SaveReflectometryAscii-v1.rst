@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm saves the first spectrum of a workspace in ASCII format and can be used by software like Motofit.
+This algorithm saves the first spectrum of a workspace or a workspace group in ASCII format and can be used by software like Motofit.
 The choice of file extension defines the file format.
 In case of histogrammed input data, the resulting file will contain the bin centre for the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
@@ -38,8 +38,8 @@ Stores first the number of lines followed by three columns of data.
 Custom File Format (Empty Field)
 --------------------------------
 
-Enables a choice to write header lines, to select the separator and the number of columns to write, i.e. three or four.
-Only user-defined log values are added to the file header.
+Enables a selection to write header lines and to select the separator and the number of columns to write, i.e. three or four.
+Only user-defined log values as well as the number of data lines are added to the file header.
 Please consider to directly provide the file extension of you choice via the input of `Filename`.
 
 Usage
