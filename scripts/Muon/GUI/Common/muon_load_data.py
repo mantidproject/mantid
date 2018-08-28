@@ -10,7 +10,7 @@ class MuonLoadData:
     - Can be used as an iterator, with elements being dictionaries of parameter:value pairs.
 
     The keywords in all methods are "greedy" and will match any entries, with an OR like behaviour for
-    multiple keywords. So for example "run=1234, filename ="file.nxs" would match to an entry with run=1234 and
+    multiple keywords. So for example "run=1234, filename ="file.nxs" would match to an entry with run=1234 or
     filename = "file2.nxs".
 
     - Clients responsibility to prevent duplicated entries.

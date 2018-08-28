@@ -69,11 +69,10 @@ def file_path_for_instrument_and_run(instrument, run):
 
 
 def parse_user_input_to_files(input_text, extensions=allowed_extensions):
-    """Parse user input from load file widget into list of filenames"""
+    """Parse user input from load file widget into list of filenames."""
     input_list = input_text.split(";")
     filenames = []
     for text in input_list:
-        # remove whitespace
         if os.path.splitext(text)[-1].lower() in ["." + ext for ext in extensions]:
             filenames += [text]
     return filenames

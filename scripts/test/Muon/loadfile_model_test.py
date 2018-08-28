@@ -81,8 +81,7 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         load_return_vals = [(files[i], [1, 2, 3], 19489 + i) for i in range(3)]
 
         model = BrowseFileWidgetModel(MuonLoadData())
-        model.load_workspace_from_filename = mock.Mock()
-        model.load_workspace_from_filename.side_effect = load_return_vals
+        model.load_workspace_from_filename = mock.Mock(side_effect = iter(load_return_vals))
 
         model.load_with_multithreading(filenames=files)
         self.Runner(model.thread_manager)
