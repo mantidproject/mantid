@@ -58,8 +58,6 @@ public:
       return;
     }
 
-
-    /*
     Links::const_iterator resultItr = results.begin();
     Link firstIntersect = *resultItr;
 
@@ -93,7 +91,7 @@ public:
     // Results vector should be empty after first getResults call
     //results = tracker.getResults();
     //TS_ASSERT_EQUALS(results.size(), 0);
-    */
+
     std::cout << "\n DONE TEST 1\n " << std::endl;
   }
 
@@ -115,7 +113,7 @@ public:
     const IComponent *interceptedPixel =
       m_testInstrument->getComponentByName("pixel-(1;0)").get();
 
-    /*
+
     Link intersect = results.front();
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);
     TS_ASSERT_DELTA(intersect.distInsideObject, 0.006931, 1e-6);
@@ -134,7 +132,7 @@ public:
     // Results vector should be empty after first getResults call
     //results = tracker.getResults();
     //TS_ASSERT_EQUALS(results.size(), 0);
-    */
+
     std::cout << "\n DONE TEST 2 \n" << std::endl;
   }
 
@@ -204,19 +202,19 @@ public:
     double w = 0.008;
     doTestRectangularDetector("Pixel (0,0)", V3D(0.0, 0.0, 5.0), 0, 0);
 
-    //// Move over some pixels
-    //doTestRectangularDetector("Pixel (1,0)", V3D(w * 1, w * 0, 5.0), 1,0);
-    //doTestRectangularDetector("Pixel (1,2)", V3D(w * 1, w * 2, 5.0), 1,2);
-    //doTestRectangularDetector("Pixel (0.95, 0.95)",V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
-    //doTestRectangularDetector("Pixel (1.05, 2.05)",V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
-    //doTestRectangularDetector("Pixel (99,99)", V3D(w * 99, w * 99, 5.0),99, 99);
-    //doTestRectangularDetector("Off to left", V3D(-w, 0, 5.0), -1, -1);
-    //doTestRectangularDetector("Off to bottom", V3D(0, -w, 5.0), -1, -1);
-    //doTestRectangularDetector("Off to top", V3D(0, w * 100, 5.0), -1, -1);
-    //doTestRectangularDetector("Off to right", V3D(w * 100, w, 5.0), -1,-1);
-    //doTestRectangularDetector("Beam parallel to panel",V3D(1.0, 0.0, 0.0), -1, -1);
-    //doTestRectangularDetector("Beam parallel to panel",V3D(0.0, 1.0, 0.0), -1, -1);
-    //doTestRectangularDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
+    // Move over some pixels
+    doTestRectangularDetector("Pixel (1,0)", V3D(w * 1, w * 0, 5.0), 1,0);
+    doTestRectangularDetector("Pixel (1,2)", V3D(w * 1, w * 2, 5.0), 1,2);
+    doTestRectangularDetector("Pixel (0.95, 0.95)",V3D(w * 0.45, w * 0.45, 5.0), 0, 0);
+    doTestRectangularDetector("Pixel (1.05, 2.05)",V3D(w * 0.55, w * 1.55, 5.0), 1, 2);
+    doTestRectangularDetector("Pixel (99,99)", V3D(w * 99, w * 99, 5.0),99, 99);
+    doTestRectangularDetector("Off to left", V3D(-w, 0, 5.0), -1, -1);
+    doTestRectangularDetector("Off to bottom", V3D(0, -w, 5.0), -1, -1);
+    doTestRectangularDetector("Off to top", V3D(0, w * 100, 5.0), -1, -1);
+    doTestRectangularDetector("Off to right", V3D(w * 100, w, 5.0), -1,-1);
+    doTestRectangularDetector("Beam parallel to panel",V3D(1.0, 0.0, 0.0), -1, -1);
+    doTestRectangularDetector("Beam parallel to panel",V3D(0.0, 1.0, 0.0), -1, -1);
+    doTestRectangularDetector("Zero-beam", V3D(0.0, 0.0, 0.0), -1, -1);
 
     std::cout << "\n DONE TEST 3 \n" << std::endl;
   }

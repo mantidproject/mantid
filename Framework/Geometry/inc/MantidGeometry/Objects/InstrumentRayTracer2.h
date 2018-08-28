@@ -132,9 +132,14 @@ void checkIntersectsWithRectangularBank(Track &testRay,
   // componentInfo.shape();
 
   //auto comp = getAtXY(xIndex, yIndex);
+  auto childrenX = componentInfo.children(componentIndex);
+  auto childrenY = componentInfo.children(childrenX[xIndex]);
 
-  testRay.addLink(intersec, intersec, 0.0, componentInfo.shape(xIndex),
-                  componentInfo.componentID(xIndex)->getComponentID());
+  testRay.addLink(intersec, intersec, 0.0, componentInfo.shape(childrenY[yIndex]),
+                  componentInfo.componentID(childrenY[yIndex])->getComponentID());
+
+  std::cout << "xIndex: " << xIndex << std::endl;
+  std::cout << "yIndex: " << yIndex << std::endl;
 
   std::cout << "Number of Links RD: " << testRay.count() << std::endl;
 }
@@ -212,11 +217,11 @@ void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
                 << componentInfo.componentID(i)->getFullName() << std::endl;
 
       auto childComponentType = componentInfo.componentType(i);
+      auto grandParent = componentInfo.componentType(componentInfo.parent(componentInfo.parent(i)));
 
-      if (childComponentType == Types::Detector && componentInfo.componentType(componentInfo.parent(i)) == Types::Rectangular) {
-        std::cout << componentInfo.componentID(componentInfo.parent(i))->getFullName() << std::endl;
+      if (childComponentType == Types::Detector && grandParent == Types::Rectangular) {
+        continue;
       }
-      std::cout << componentInfo.componentID(componentInfo.parent(i))->getFullName() << std::endl;
 
       if (childComponentType == Types::Rectangular) {
         IntersectionHelpers::checkIntersectsWithRectangularBank(
