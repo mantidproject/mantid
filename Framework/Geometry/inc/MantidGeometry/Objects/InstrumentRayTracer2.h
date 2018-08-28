@@ -54,37 +54,38 @@ using Types = Mantid::Beamline::ComponentType;
 
 namespace IntersectionHelpers {
 
-void checkIntersectsWithRectangularBank(Track &testRay,
-                                        const ComponentInfo &componentInfo,
-                                        size_t componentIndex) {
-  /// Base point (x,y,z) = position of pixel 0,0
+/**
+ * Tests the intersection of the ray with a rectangular bank of detectors.
+ * Uses the knowledge of the RectangularDetector shape to significantly speed up
+ * tracking.
+ *
+ * @param track :: Track under test. The results are stored here.
+ */
+void checkIntersectionWithRectangularBank(Track &track,
+                                          const ComponentInfo &componentInfo,
+                                          size_t componentIndex) {
+
+  // Base point (x,y,z) = position of pixel 0,0
   V3D basePoint;
 
-  /// Vertical (y-axis) basis vector of the detector
+  // Vertical (y-axis) basis vector of the detector
   V3D vertical;
 
-  /// Horizontal (x-axis) basis vector of the detector
+  // Horizontal (x-axis) basis vector of the detector
   V3D horizontal;
 
   // Get the corners of the detector
   auto corners = componentInfo.quadrilateralComponent(componentIndex);
 
+  // Set up locations
   basePoint = componentInfo.position(corners.bottomLeft);
-
   V3D bottomRight = componentInfo.position(corners.bottomRight);
   V3D topLeft = componentInfo.position(corners.topLeft);
-
   horizontal = bottomRight - basePoint;
   vertical = topLeft - basePoint;
 
-  std::cout << "BASEPOINT : " << basePoint << std::endl;
-  std::cout << "HORIZONTAL : " << horizontal << std::endl;
-  std::cout << "VERTICAL : " << vertical << std::endl;
-  std::cout << "xpixels : " << corners.nX << std::endl;
-  std::cout << "ypixels : " << corners.nY << std::endl;
-
   // The beam direction
-  V3D beam = testRay.direction();
+  V3D beam = track.direction();
 
   // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4,
   // 2011),
@@ -96,7 +97,7 @@ void checkIntersectsWithRectangularBank(Track &testRay,
   mat.Invert();
 
   // Multiply by the inverted matrix to find t,u,v
-  V3D tuv = mat * (testRay.startPoint() - basePoint);
+  V3D tuv = mat * (track.startPoint() - basePoint);
   //  std::cout << tuv << "\n";
 
   // Intersection point
@@ -107,11 +108,8 @@ void checkIntersectsWithRectangularBank(Track &testRay,
   // u,v = coordinates along horizontal, vertical
   // (and correct for it being between 0, xpixels-1).  The +0.5 is because the
   // base point is at the CENTER of pixel 0,0.
-
   double u = (double(corners.nX - 1) * tuv[1] + 0.5);
   double v = (double(corners.nY - 1) * tuv[2] + 0.5);
-
-  std::cout << "\n U V Values: " << u << ", " << v << "\n";
 
   // In indices
   int xIndex = int(u);
@@ -127,79 +125,84 @@ void checkIntersectsWithRectangularBank(Track &testRay,
   if (yIndex >= corners.nY)
     return;
 
-  // TODO: Do I need to put something smart here for the first 3 parameters?
-  // componentInfo.componentID();
-  // componentInfo.shape();
-
-  //auto comp = getAtXY(xIndex, yIndex);
+  // Get the componentIndex of the component in the assembly at the (X, Y) pixel
+  // position.
   auto childrenX = componentInfo.children(componentIndex);
   auto childrenY = componentInfo.children(childrenX[xIndex]);
 
-  testRay.addLink(intersec, intersec, 0.0, componentInfo.shape(childrenY[yIndex]),
-                  componentInfo.componentID(childrenY[yIndex])->getComponentID());
-
-  std::cout << "xIndex: " << xIndex << std::endl;
-  std::cout << "yIndex: " << yIndex << std::endl;
-
-  std::cout << "Number of Links RD: " << testRay.count() << std::endl;
+  // Create a link and add it to the track
+  track.addLink(intersec, intersec, 0.0, componentInfo.shape(childrenY[yIndex]),
+                componentInfo.componentID(childrenY[yIndex])->getComponentID());
 }
 
-void interceptSurface(Track &track, const ComponentInfo &componentInfo,
-                      size_t componentIndex) {
+/**
+ * Checks whether the track given will pass through the given Component.
+ *
+ * @param track :: Track under test. The results are stored here.
+ * @param componentInfo :: ComponentInfo object to use to help find components.
+ * @param componentIndex :: The component to be checked.
+ */
+void checkIntersectionWithComponent(Track &track,
+                                    const ComponentInfo &componentInfo,
+                                    size_t componentIndex) {
 
-  // TODO: If scaling parameters are ever enabled, would they need need to be
-  // used here?
+  // First subtract the component's position, then undo the rotation
   V3D factored = track.startPoint() - componentInfo.position(componentIndex);
+
+  // Get the total rotation of this component and calculate the inverse (reverse
+  // rotation)
   Quat unrotate = componentInfo.rotation(componentIndex);
   unrotate.inverse();
   unrotate.rotate(factored);
   V3D trkStart = factored;
 
-  V3D factored2 = track.direction();
+  // Get the total rotation of this component and calculate the inverse (reverse
+  // rotation)
+  V3D direction = track.direction();
   Quat unrotate2 = componentInfo.rotation(componentIndex);
   unrotate2.inverse();
-  unrotate2.rotate(factored2);
-  V3D trkDirection = factored2;
+  unrotate2.rotate(direction);
+  V3D trkDirection = direction;
 
+  // Create a new track and store number of surface interceptions
   Track probeTrack(trkStart, trkDirection);
-  int intercepts =
-      componentInfo.shape(componentIndex).interceptSurface(probeTrack);
+  int intercepts = componentInfo.shape(componentIndex).interceptSurface(probeTrack);
 
+  // Iterate over track
   Track::LType::const_iterator it;
   for (it = probeTrack.cbegin(); it != probeTrack.cend(); ++it) {
+    // Starting position
     V3D in = it->entryPoint;
     componentInfo.rotation(componentIndex).rotate(in);
 
-    // use the scale factor
+    // Use the scale factor
     in *= componentInfo.scaleFactor(componentIndex);
     in += componentInfo.position(componentIndex);
     V3D out = it->exitPoint;
     componentInfo.rotation(componentIndex).rotate(out);
 
-    // use the scale factor
+    // Use the scale factor
     out *= componentInfo.scaleFactor(componentIndex);
     out += componentInfo.position(componentIndex);
+
+    // Create a link and add it to the track
     track.addLink(in, out, out.distance(track.startPoint()),
                   componentInfo.shape(componentIndex),
                   componentInfo.componentID(componentIndex)->getComponentID());
   }
-
-  std::cout << "Number of Links OC: " << track.count() << std::endl;
 }
-
 } // namespace IntersectionHelpers
-
 
 /**
  * Fire the test ray at the instrument and perform a bread-first search of the
  * object tree to find the objects that were intersected.
- * @param componentInfo :: The object that will provide access to the bounding
- * boxes
+ *
  * @param testRay :: An input/output parameter that defines the track and
- * accumulates the intersection results
+ * accumulates the intersection results.
+ * @param componentInfo :: The object that will provide access to component
+ * information.
  */
-void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
-
+void fireRay(Track &track, const ComponentInfo &componentInfo) {
   // Cast size of componentInfo to int
   int size = static_cast<int>(componentInfo.size());
   --size;
@@ -211,23 +214,27 @@ void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
     BoundingBox box = componentInfo.boundingBox(i);
 
     // Test for intersection
-    if (box.doesLineIntersect(testRay)) {
+    if (box.doesLineIntersect(track)) {
 
-      std::cout << "IRT Component Name: "
-                << componentInfo.componentID(i)->getFullName() << std::endl;
-
+      // Store the type of the child component
       auto childComponentType = componentInfo.componentType(i);
-      auto grandParent = componentInfo.componentType(componentInfo.parent(componentInfo.parent(i)));
+      // Store the type of the child's grandparent
+      auto grandParent = componentInfo.componentType(
+          componentInfo.parent(componentInfo.parent(i)));
 
-      if (childComponentType == Types::Detector && grandParent == Types::Rectangular) {
+      // Don't want to count the bank and the detector
+      if (grandParent == Types::Rectangular &&
+          childComponentType == Types::Detector) {
         continue;
       }
 
+      // Process a rectangular bank or normal component
       if (childComponentType == Types::Rectangular) {
-        IntersectionHelpers::checkIntersectsWithRectangularBank(
-            testRay, componentInfo, i);
+        IntersectionHelpers::checkIntersectionWithRectangularBank(
+            track, componentInfo, i);
       } else {
-        IntersectionHelpers::interceptSurface(testRay, componentInfo, i);
+        IntersectionHelpers::checkIntersectionWithComponent(track,
+                                                            componentInfo, i);
       }
     }
   }
@@ -235,6 +242,7 @@ void fireRay(Track &testRay, const ComponentInfo &componentInfo) {
 
 /**
  * Return the results of any trace() calls since the last call to getResults.
+ *
  * @return A collection of links defining intersection information
  */
 Links getResults(Track &resultsTrack) {
@@ -249,6 +257,7 @@ Links getResults(Track &resultsTrack) {
 
 /**
  * Trace a given track from the source in the given direction.
+ *
  * @param dir :: A directional vector. The starting point is defined by the
  * instrument source.
  * @param componentInfo :: The object used to access the source position.
@@ -268,6 +277,7 @@ Links traceFromSource(const Kernel::V3D &dir,
 
 /**
  * Trace a given track from the sample position in the given direction.
+ *
  * @param dir :: A directional vector. The starting point is defined by the
  * source.
  * @param componentInfo :: The object used to access the source position.
@@ -288,6 +298,7 @@ Links traceFromSample(const Kernel::V3D &dir,
 /**
  * Gets the results of the trace, then returns the first detector
  * index found in the results.
+ *
  * @return size_t index value or throws an error if index is invalid
  */
 size_t getDetectorResult(const ComponentInfo &componentInfo,
