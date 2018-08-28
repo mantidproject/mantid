@@ -440,6 +440,23 @@ class MantidStressTest(unittest.TestCase):
         if (value <= expected):
             raise Exception(msg)
 
+    def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
+        """
+        Check that a callable raises an exception when called.
+        """
+        was_raised = True
+        try:
+            callableObj(*args, **kwargs)
+            was_raised = False
+        except excClass:
+            pass
+        except Exception as e:
+            msg = 'Expected {0} but raised {1} instead.'
+            raise Exception(msg.format(excClass.__name__, e.__class__.__name__))
+
+        if not was_raised:
+            raise Exception('{} not raised'.format(excClass.__name__))
+
 
 #########################################################################
 # A class to store the results of a test
