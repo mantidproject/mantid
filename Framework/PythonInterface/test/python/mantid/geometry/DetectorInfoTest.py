@@ -100,6 +100,38 @@ class DetectorInfoTest(unittest.TestCase):
 
 
     """
+    ---------------
+    Iteration
+    ---------------
+    """
+
+    def test_iteration_for_isMonitor(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.isMonitor), bool)
+
+    def test_iteration_for_isMasked(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.isMasked), bool)
+
+    def test_iteration_for_twoTheta(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.twoTheta), float)
+
+    def test_iteration_for_position(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.position), V3D)
+
+    def test_iteration_for_rotation(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.rotation), Quat)
+
+
+    """
     ----------------------------------------------------------------------------
     Extreme Tests
     ----------------------------------------------------------------------------
