@@ -446,9 +446,6 @@ const BoundingBox &MeshObject::getBoundingBox() const {
         minZ = std::min(minZ, vz);
         maxZ = std::max(maxZ, vz);
       }
-      if (minZ == maxZ)
-        maxZ += 0.001;
-
       // Cache bounding box, so we do not need to repeat calculation
       m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
     }
