@@ -1,7 +1,3 @@
-//----------------
-// Includes
-//----------------
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument.h"
@@ -132,8 +128,8 @@ public:
       sin(theta)    0    cos(theta)      U.M.z
       0             0    0               1
      */
-    auto expectedPosition = affine * offset;
-    TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
+    Eigen::Vector3d expectedPosition = affine * offset;
+    TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-6));
   }
 
   void test_shape_cylinder_shape() {

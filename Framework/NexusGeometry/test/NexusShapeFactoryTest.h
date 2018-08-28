@@ -1,7 +1,3 @@
-//----------------
-// Includes
-//----------------
-
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"

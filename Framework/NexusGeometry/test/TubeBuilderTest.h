@@ -1,10 +1,6 @@
 #ifndef TUBE_TEST_H_
 #define TUBE_TEST_H_
 
-//---------------------------
-// Includes
-//---------------------------
-
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"

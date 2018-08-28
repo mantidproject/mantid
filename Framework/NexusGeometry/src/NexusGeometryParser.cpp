@@ -633,9 +633,8 @@ extractInstrument(const H5File &file, const Group &root) {
     // Extract shape
     auto detShape = parseNexusShape(detectorGroup, searchTubes);
 
-    std::vector<detail::TubeBuilder> tubes;
     if (searchTubes) {
-      tubes =
+      auto tubes =
           TubeHelpers::findAndSortTubes(*detShape, detectorPixels, detectorIds);
       builder.addTubes(bankName, tubes, detShape);
     } else {

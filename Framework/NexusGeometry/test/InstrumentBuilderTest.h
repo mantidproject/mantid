@@ -1,10 +1,6 @@
 #ifndef INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_
 #define INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_
 
-//---------------------------
-// Includes
-//---------------------------
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidBeamline/ComponentInfo.h"
