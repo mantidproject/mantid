@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_LATTICEFUNCTION_H_
 #define MANTID_CURVEFITTING_LATTICEFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidKernel/System.h"
 
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 

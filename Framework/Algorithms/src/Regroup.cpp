@@ -16,19 +16,19 @@
 #include <numeric>
 
 namespace Mantid {
+using HistogramData::HistogramE;
 using HistogramData::HistogramX;
 using HistogramData::HistogramY;
-using HistogramData::HistogramE;
 namespace Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
+using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init() {
@@ -232,5 +232,5 @@ int Regroup::newAxis(const std::vector<double> &params,
   // return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

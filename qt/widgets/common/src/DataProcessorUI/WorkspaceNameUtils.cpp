@@ -141,15 +141,15 @@ QString getReducedWorkspaceName(
     throw std::invalid_argument("Can't find reduced workspace name");
 
   /* This method calculates, for a given row, the name of the output
-  * (processed)
-  * workspace. This is done using the white list, which contains information
-  * about the columns that should be included to create the ws name. In
-  * Reflectometry for example, we want to include values in the 'Run(s)' and
-  * 'Transmission Run(s)' columns. We may also use a prefix associated with
-  * the column when specified. Finally, to construct the ws name we may also
-  * use a 'global' prefix associated with the processing algorithm (for
-  * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
-  * this method */
+   * (processed)
+   * workspace. This is done using the white list, which contains information
+   * about the columns that should be included to create the ws name. In
+   * Reflectometry for example, we want to include values in the 'Run(s)' and
+   * 'Transmission Run(s)' columns. We may also use a prefix associated with
+   * the column when specified. Finally, to construct the ws name we may also
+   * use a 'global' prefix associated with the processing algorithm (for
+   * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
+   * this method */
 
   // Temporary vector of strings to construct the name
   QStringList names;
@@ -217,6 +217,6 @@ OptionsMap getCanonicalOptions(const RowData_sptr data,
                       prefixes);
   return options;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

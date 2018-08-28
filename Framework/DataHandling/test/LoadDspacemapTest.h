@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
 #define MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"

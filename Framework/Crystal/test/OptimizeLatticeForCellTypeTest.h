@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_OptimizeLatticeForCellType_TEST_H_
 #define MANTID_CRYSTAL_OptimizeLatticeForCellType_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingFFT.h"
 #include "MantidCrystal/LoadIsawUB.h"

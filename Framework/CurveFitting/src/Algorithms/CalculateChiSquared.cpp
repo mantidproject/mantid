@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 
@@ -53,7 +53,7 @@ void calcChiSquared(const API::IFunction &fun, size_t nParams,
     dof = 1.0;
   }
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -96,8 +96,9 @@ void CalculateChiSquared::initConcrete() {
                   "number of  data points).",
                   Direction::Output);
   declareProperty("Output", "", "A base name for output workspaces.");
-  declareProperty("Weighted", false, "Option to use the weighted chi squared "
-                                     "in error estimation. Default is false.");
+  declareProperty("Weighted", false,
+                  "Option to use the weighted chi squared "
+                  "in error estimation. Default is false.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -306,7 +307,7 @@ private:
   /// The data variance.
   double m_sigma2;
 };
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Examine the chi squared as a function of fitting parameters and estimate

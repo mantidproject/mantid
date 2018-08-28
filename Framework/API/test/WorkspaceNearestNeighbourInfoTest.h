@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
-#include "MantidAPI/SpectrumInfo.h"
 
 using Mantid::API::WorkspaceNearestNeighbourInfo;
 

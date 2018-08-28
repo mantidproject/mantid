@@ -1,6 +1,6 @@
+#include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
-#include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 
@@ -8,17 +8,17 @@ namespace Mantid {
 namespace DataHandling {
 
 /** Constructor
-*
-* @param loader :: Handle to the main loader
-* @param entry_name :: The pathname of the bank to load
-* @param entry_type :: The classtype of the entry to load
-* @param numEvents :: The number of events in the bank.
-* @param oldNeXusFileNames :: Identify if file is of old variety.
-* @param prog :: an optional Progress object
-* @param ioMutex :: a mutex shared for all Disk I-O tasks
-* @param scheduler :: the ThreadScheduler that runs this task.
-* @param framePeriodNumbers :: Period numbers corresponding to each frame
-*/
+ *
+ * @param loader :: Handle to the main loader
+ * @param entry_name :: The pathname of the bank to load
+ * @param entry_type :: The classtype of the entry to load
+ * @param numEvents :: The number of events in the bank.
+ * @param oldNeXusFileNames :: Identify if file is of old variety.
+ * @param prog :: an optional Progress object
+ * @param ioMutex :: a mutex shared for all Disk I-O tasks
+ * @param scheduler :: the ThreadScheduler that runs this task.
+ * @param framePeriodNumbers :: Period numbers corresponding to each frame
+ */
 LoadBankFromDiskTask::LoadBankFromDiskTask(
     DefaultEventLoader &loader, const std::string &entry_name,
     const std::string &entry_type, const std::size_t numEvents,
@@ -27,9 +27,8 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(
     const std::vector<int> &framePeriodNumbers)
     : m_loader(loader), entry_name(entry_name), entry_type(entry_type),
       prog(prog), scheduler(scheduler), m_loadError(false),
-      m_oldNexusFileNames(oldNeXusFileNames), m_event_id(nullptr),
-      m_event_time_of_flight(nullptr), m_have_weight(false),
-      m_event_weight(nullptr), m_framePeriodNumbers(framePeriodNumbers) {
+      m_oldNexusFileNames(oldNeXusFileNames), m_have_weight(false),
+      m_framePeriodNumbers(framePeriodNumbers) {
   setMutex(ioMutex);
   m_cost = static_cast<double>(numEvents);
   m_min_id = std::numeric_limits<uint32_t>::max();
@@ -37,8 +36,8 @@ LoadBankFromDiskTask::LoadBankFromDiskTask(
 }
 
 /** Load the pulse times, if needed. This sets
-* thisBankPulseTimes to the right pointer.
-* */
+ * thisBankPulseTimes to the right pointer.
+ * */
 void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
   try {
     // First, get info about the event_time_zero field in this bank
@@ -72,18 +71,17 @@ void LoadBankFromDiskTask::loadPulseTimes(::NeXus::File &file) {
 }
 
 /** Load the event_index field
-(a list of size of # of pulses giving the index in the event list for that
-pulse)
-
-* @param file :: File handle for the NeXus file
-* @param event_index :: ref to the vector
-*/
-void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
-                                          std::vector<uint64_t> &event_index) {
+ * (a list of size of # of pulses giving the index in the event list for that
+    pulse)
+ * @param file :: File handle for the NeXus file
+ */
+std::vector<uint64_t>
+LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file) {
   // Get the event_index (a list of size of # of pulses giving the index in
   // the event list for that pulse)
   file.openData("event_index");
   // Must be uint64
+  std::vector<uint64_t> event_index;
   if (file.getInfo().type == ::NeXus::UINT64)
     file.getData(event_index);
   else {
@@ -99,24 +97,24 @@ void LoadBankFromDiskTask::loadEventIndex(::NeXus::File &file,
     if (event_index[0] == 0) {
       // One entry, only zero. This means NO events in this bank.
       m_loadError = true;
-      m_loader.alg->getLogger().debug() << "Bank " << entry_name
-                                        << " is empty.\n";
+      m_loader.alg->getLogger().debug()
+          << "Bank " << entry_name << " is empty.\n";
     }
   }
+  return event_index;
 }
 
 /** Open the event_id field and validate the contents
-*
-* @param file :: File handle for the NeXus file
-* @param start_event :: set to the index of the first event
-* @param stop_event :: set to the index of the last event + 1
-* @param event_index ::  (a list of size of # of pulses giving the index in
-*the event list for that pulse)
-*/
-void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
-                                          int64_t &start_event,
-                                          int64_t &stop_event,
-                                          std::vector<uint64_t> &event_index) {
+ *
+ * @param file :: File handle for the NeXus file
+ * @param start_event :: set to the index of the first event
+ * @param stop_event :: set to the index of the last event + 1
+ * @param event_index ::  (a list of size of # of pulses giving the index in
+ *the event list for that pulse)
+ */
+void LoadBankFromDiskTask::prepareEventId(
+    ::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
+    const std::vector<uint64_t> &event_index) {
   // Get the list of pixel ID's
   if (m_oldNexusFileNames)
     file.openData("event_pixel_id");
@@ -174,20 +172,23 @@ void LoadBankFromDiskTask::prepareEventId(::NeXus::File &file,
   if (stop_event > dim0)
     stop_event = dim0;
 
-  m_loader.alg->getLogger().debug() << entry_name << ": start_event "
-                                    << start_event << " stop_event "
-                                    << stop_event << "\n";
+  m_loader.alg->getLogger().debug()
+      << entry_name << ": start_event " << start_event << " stop_event "
+      << stop_event << "\n";
 }
 
-/** Load the event_id field, which has been open
-*/
-void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
+/** Load the event_id field, which has been opened
+ * @param file An NeXus::File object opened at the correct group
+ * @returns A new array containing the event Ids for this bank
+ */
+std::unique_ptr<uint32_t[]>
+LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   // This is the data size
   ::NeXus::Info id_info = file.getInfo();
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Now we allocate the required arrays
-  m_event_id = new uint32_t[m_loadSize[0]];
+  auto event_id = std::make_unique<uint32_t[]>(m_loadSize[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -204,7 +205,7 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   if (!m_loadError) {
     // Must be uint32
     if (id_info.type == ::NeXus::UINT32)
-      file.getSlab(m_event_id, m_loadStart, m_loadSize);
+      file.getSlab(event_id.get(), m_loadStart, m_loadSize);
     else {
       m_loader.alg->getLogger().warning()
           << "Entry " << entry_name
@@ -214,12 +215,12 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     file.closeData();
 
     // determine the range of pixel ids
-    for (auto i = 0; i < m_loadSize[0]; ++i) {
-      uint32_t temp = m_event_id[i];
-      if (temp < m_min_id)
-        m_min_id = temp;
-      if (temp > m_max_id)
-        m_max_id = temp;
+    for (int64_t i = 0; i < m_loadSize[0]; ++i) {
+      const auto id = event_id[i];
+      if (id < m_min_id)
+        m_min_id = id;
+      if (id > m_max_id)
+        m_max_id = id;
     }
 
     if (m_min_id > static_cast<uint32_t>(m_loader.eventid_max)) {
@@ -241,15 +242,16 @@ void LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
     if (m_max_id > static_cast<uint32_t>(m_loader.eventid_max))
       m_max_id = static_cast<uint32_t>(m_loader.eventid_max);
   }
+  return event_id;
 }
 
 /** Open and load the times-of-flight data
-*/
-void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
+ * @param file An NeXus::File object opened at the correct group
+ * @returns A new array containing the time of flights for this bank
+ */
+std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto temp = new float[m_loadSize[0]];
-  delete[] m_event_time_of_flight;
-  m_event_time_of_flight = temp;
+  auto event_time_of_flight = std::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   if (!m_oldNexusFileNames)
@@ -262,14 +264,15 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
   if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning()
-        << "Entry " << entry_name << "'s event_time_offset field is too small "
-                                     "to load the desired data.\n";
+        << "Entry " << entry_name
+        << "'s event_time_offset field is too small "
+           "to load the desired data.\n";
     m_loadError = true;
   }
 
   // Check that the type is what it is supposed to be
   if (tof_info.type == ::NeXus::FLOAT32)
-    file.getSlab(m_event_time_of_flight, m_loadStart, m_loadSize);
+    file.getSlab(event_time_of_flight.get(), m_loadStart, m_loadSize);
   else {
     m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
@@ -282,32 +285,36 @@ void LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
     file.getAttr("units", units);
     if (units != "microsecond") {
       m_loader.alg->getLogger().warning()
-          << "Entry " << entry_name << "'s event_time_offset field's units are "
-                                       "not microsecond. It will be skipped.\n";
+          << "Entry " << entry_name
+          << "'s event_time_offset field's units are "
+             "not microsecond. It will be skipped.\n";
       m_loadError = true;
     }
     file.closeData();
   } // no error
+  return event_time_of_flight;
 }
 
-/** Load weight of weigthed events
-*/
-void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
+/** Load weight of weigthed events if they exist
+ * @param file An NeXus::File object opened at the correct group
+ * @returns A new array containing the weights or a nullptr if the weights
+ * are not present
+ */
+std::unique_ptr<float[]>
+LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   try {
     // First, get info about the event_weight field in this bank
     file.openData("event_weight");
   } catch (::NeXus::Exception &) {
     // Field not found error is most likely.
     m_have_weight = false;
-    return;
+    return std::unique_ptr<float[]>();
   }
   // OK, we've got them
   m_have_weight = true;
 
   // Allocate the array
-  auto temp = new float[m_loadSize[0]];
-  delete[] m_event_weight;
-  m_event_weight = temp;
+  auto event_weight = std::make_unique<float[]>(m_loadSize[0]);
 
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
@@ -320,7 +327,7 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
 
   // Check that the type is what it is supposed to be
   if (weight_info.type == ::NeXus::FLOAT32)
-    file.getSlab(m_event_weight, m_loadStart, m_loadSize);
+    file.getSlab(event_weight.get(), m_loadStart, m_loadSize);
   else {
     m_loader.alg->getLogger().warning()
         << "Entry " << entry_name
@@ -331,27 +338,25 @@ void LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   if (!m_loadError) {
     file.closeData();
   }
+  return event_weight;
 }
 
 void LoadBankFromDiskTask::run() {
-  // The vectors we will be filling
-  auto event_index_ptr = new std::vector<uint64_t>();
-  std::vector<uint64_t> &event_index = *event_index_ptr;
-
   // These give the limits in each file as to which events we actually load
   // (when filtering by time).
   m_loadStart.resize(1, 0);
   m_loadSize.resize(1, 0);
 
-  // Data arrays
-  m_event_id = nullptr;
-  m_event_time_of_flight = nullptr;
-  m_event_weight = nullptr;
-
   m_loadError = false;
   m_have_weight = m_loader.m_haveWeights;
 
   prog->report(entry_name + ": load from disk");
+
+  // arrays to load into
+  std::unique_ptr<uint32_t[]> event_id;
+  std::unique_ptr<float[]> event_time_of_flight;
+  std::unique_ptr<float[]> event_weight;
+  std::vector<uint64_t> event_index;
 
   // Open the file
   ::NeXus::File file(m_loader.alg->m_filename);
@@ -362,7 +367,7 @@ void LoadBankFromDiskTask::run() {
     file.openGroup(entry_name, entry_type);
 
     // Load the event_index field.
-    this->loadEventIndex(file, event_index);
+    event_index = this->loadEventIndex(file);
 
     if (!m_loadError) {
       // Load and validate the pulse times
@@ -387,18 +392,18 @@ void LoadBankFromDiskTask::run() {
 
       if ((m_loadSize[0] > 0) && (m_loadStart[0] >= 0)) {
         // Load pixel IDs
-        this->loadEventId(file);
+        event_id = this->loadEventId(file);
         if (m_loader.alg->getCancel()) {
-          m_loader.alg->getLogger().error() << "Loading bank " << entry_name
-                                            << " is cancelled.\n";
+          m_loader.alg->getLogger().error()
+              << "Loading bank " << entry_name << " is cancelled.\n";
           m_loadError = true; // To allow cancelling the algorithm
         }
 
         // And TOF.
         if (!m_loadError) {
-          this->loadTof(file);
+          event_time_of_flight = this->loadTof(file);
           if (m_have_weight) {
-            this->loadEventWeights(file);
+            event_weight = this->loadEventWeights(file);
           }
         }
       } // Size is at least 1
@@ -416,13 +421,13 @@ void LoadBankFromDiskTask::run() {
 
   } // try block
   catch (std::exception &e) {
-    m_loader.alg->getLogger().error() << "Error while loading bank "
-                                      << entry_name << ":\n";
+    m_loader.alg->getLogger().error()
+        << "Error while loading bank " << entry_name << ":\n";
     m_loader.alg->getLogger().error() << e.what() << '\n';
     m_loadError = true;
   } catch (...) {
-    m_loader.alg->getLogger().error() << "Unspecified error while loading bank "
-                                      << entry_name << '\n';
+    m_loader.alg->getLogger().error()
+        << "Unspecified error while loading bank " << entry_name << '\n';
     m_loadError = true;
   }
 
@@ -432,13 +437,6 @@ void LoadBankFromDiskTask::run() {
 
   // Abort if anything failed
   if (m_loadError) {
-    delete[] m_event_id;
-    delete[] m_event_time_of_flight;
-    if (m_have_weight) {
-      delete[] m_event_weight;
-    }
-    delete event_index_ptr;
-
     return;
   }
 
@@ -483,11 +481,13 @@ void LoadBankFromDiskTask::run() {
   size_t numEvents = static_cast<size_t>(m_loadSize[0]);
   size_t startAt = static_cast<size_t>(m_loadStart[0]);
 
-  // convert things to shared_arrays
-  boost::shared_array<uint32_t> event_id_shrd(m_event_id);
-  boost::shared_array<float> event_time_of_flight_shrd(m_event_time_of_flight);
-  boost::shared_array<float> event_weight_shrd(m_event_weight);
-  boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
+  // convert things to shared_arrays to share between tasks
+  boost::shared_array<uint32_t> event_id_shrd(event_id.release());
+  boost::shared_array<float> event_time_of_flight_shrd(
+      event_time_of_flight.release());
+  boost::shared_array<float> event_weight_shrd(event_weight.release());
+  auto event_index_shrd =
+      boost::make_shared<std::vector<uint64_t>>(std::move(event_index));
 
   ProcessBankData *newTask1 = new ProcessBankData(
       m_loader, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
@@ -504,11 +504,11 @@ void LoadBankFromDiskTask::run() {
 }
 
 /**
-* Interpret the value describing the number of events. If the number is
-* positive return it unchanged.
-* If the value is negative (can happen at ISIS) add 2^32 to it.
-* @param size :: The size of events value.
-*/
+ * Interpret the value describing the number of events. If the number is
+ * positive return it unchanged.
+ * If the value is negative (can happen at ISIS) add 2^32 to it.
+ * @param size :: The size of events value.
+ */
 int64_t LoadBankFromDiskTask::recalculateDataSize(const int64_t &size) {
   if (size < 0) {
     const int64_t shift = int64_t(1) << 32;

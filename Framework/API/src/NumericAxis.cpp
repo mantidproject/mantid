@@ -26,7 +26,7 @@ public:
 private:
   double m_tolerance;
 };
-}
+} // namespace
 
 namespace Mantid {
 namespace API {

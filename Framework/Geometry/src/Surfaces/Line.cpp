@@ -1,10 +1,10 @@
 #include "MantidGeometry/Surfaces/Line.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
 #include <iostream>
 
@@ -279,6 +279,6 @@ Print statement for debugging
   std::cout << "Line == " << Origin << " :: " << Direct << '\n';
 }
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

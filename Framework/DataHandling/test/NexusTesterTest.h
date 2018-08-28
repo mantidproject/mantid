@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_NEXUSTESTERTEST_H_
 #define MANTID_DATAHANDLING_NEXUSTESTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/NexusTester.h"
 #include <Poco/File.h>

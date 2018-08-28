@@ -3,11 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/Stitch1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/Histogram.h"
@@ -17,11 +16,12 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Points.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <math.h>
-#include <boost/tuple/tuple.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <math.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -69,7 +69,7 @@ MatrixWorkspace_sptr create1DWorkspace(const HistogramX &xData,
 
   return outWS;
 }
-}
+} // namespace
 
 class Stitch1DTest : public CxxTest::TestSuite {
 private:
@@ -341,8 +341,8 @@ public:
     MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
     const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
-    const std::vector<double> y_values{1., 5. * scaleFactor, 2.,
-                                       6. * scaleFactor, 3., 7. * scaleFactor};
+    const std::vector<double> y_values{
+        1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     const std::vector<double> dx_values{3., 9., 2., 9., 1., 9.};
     TS_ASSERT_EQUALS(stitched->dx(0).rawData(), dx_values);
@@ -373,8 +373,8 @@ public:
     MatrixWorkspace_const_sptr stitched = alg.getProperty("OutputWorkspace");
     const std::vector<double> x_values{1., 1.5, 2., 2.5, 3., 3.5};
     TS_ASSERT_EQUALS(stitched->x(0).rawData(), x_values);
-    const std::vector<double> y_values{1., 5. * scaleFactor, 2.,
-                                       6. * scaleFactor, 3., 7. * scaleFactor};
+    const std::vector<double> y_values{
+        1., 5. * scaleFactor, 2., 6. * scaleFactor, 3., 7. * scaleFactor};
     TS_ASSERT_EQUALS(stitched->y(0).rawData(), y_values);
     TS_ASSERT(!stitched->hasDx(0));
   }

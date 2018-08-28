@@ -13,13 +13,12 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/Exception.h>
 #include <Poco/Path.h>
 #include <Poco/String.h>
@@ -381,9 +380,8 @@ void LoadDetectorsGroupingFile::generateNoInstrumentGroupWorkspace() {
 LoadGroupXMLFile::LoadGroupXMLFile()
     : m_instrumentName(""), m_userGiveInstrument(false), m_date(""),
       m_userGiveDate(false), m_description(""), m_userGiveDescription(false),
-      m_pDoc(nullptr), m_pRootElem(nullptr), m_groupComponentsMap(),
-      m_groupDetectorsMap(), m_groupSpectraMap(), m_startGroupID(1),
-      m_groupNamesMap() {}
+      m_pDoc(), m_groupComponentsMap(), m_groupDetectorsMap(),
+      m_groupSpectraMap(), m_startGroupID(1), m_groupNamesMap() {}
 
 void LoadGroupXMLFile::loadXMLFile(std::string xmlfilename) {
 
@@ -407,9 +405,7 @@ void LoadGroupXMLFile::initializeXMLParser(const std::string &filename) {
   } catch (...) {
     throw Kernel::Exception::FileError("Unable to parse File:", filename);
   }
-  // Get pointer to root element
-  m_pRootElem = m_pDoc->documentElement();
-  if (!m_pRootElem->hasChildNodes()) {
+  if (!m_pDoc->documentElement()->hasChildNodes()) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "No root element in XML instrument file", filename);
   }
@@ -723,5 +719,5 @@ bool LoadGroupMapFile::nextDataLine(std::string &line) {
   return false;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

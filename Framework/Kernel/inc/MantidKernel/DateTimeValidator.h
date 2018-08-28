@@ -2,8 +2,8 @@
 #define MANTID_KERNEL_DATETIMEVALIDATOR_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/IValidator.h"
+#include "MantidKernel/TypedValidator.h"
 #include <string>
 
 namespace Mantid {
@@ -49,7 +49,7 @@ private:
   /// Allows for an empty string to be accepted as input
   bool m_allowedEmpty;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /** DATETIMEVALIDATOR */

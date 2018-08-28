@@ -11,6 +11,6 @@ class MANTID_HISTOGRAMDATA_DLL InvalidBinEdgesError
 public:
   InvalidBinEdgesError(const char *what);
 };
-}
-}
-}
+} // namespace Exception
+} // namespace HistogramData
+} // namespace Mantid

@@ -8,18 +8,18 @@
 #include <MantidQtWidgets/Common/MantidDisplayBase.h>
 
 using namespace MantidQt::MantidWidgets;
-using Mantid::API::WorkspaceGroup_const_sptr;
-using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::WorkspaceGroup_const_sptr;
+using Mantid::API::WorkspaceGroup_sptr;
 
 /**Compare two CurveSpecs to sort according to log value and
-* if equal by workspace index.
-* @param lhs left hand comparee
-* @param rhs right hand comparee
-* @returns true if right hand comparee has greater log value than left hand
-* comparee
-*/
+ * if equal by workspace index.
+ * @param lhs left hand comparee
+ * @param rhs right hand comparee
+ * @returns true if right hand comparee has greater log value than left hand
+ * comparee
+ */
 bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs) {
   if (lhs.logVal == rhs.logVal)
     return (lhs.index < rhs.index);
@@ -54,13 +54,13 @@ double getSingleWorkspaceLogValue(
 }
 
 /**
-* Gets the custom, user-provided log value of the given index.
-* i.e. the nth in order from smallest to largest.
-* If the index is outside the range, returns 0.
-* @param wsIndex :: [input] Index of log value to use
-* @param logValues :: [input] User-provided set of log values
-* @returns Numeric log value
-*/
+ * Gets the custom, user-provided log value of the given index.
+ * i.e. the nth in order from smallest to largest.
+ * If the index is outside the range, returns 0.
+ * @param wsIndex :: [input] Index of log value to use
+ * @param logValues :: [input] User-provided set of log values
+ * @returns Numeric log value
+ */
 double getSingleWorkspaceLogValue(size_t wsIndex,
                                   const std::set<double> &logValues) {
   if (wsIndex >= logValues.size())

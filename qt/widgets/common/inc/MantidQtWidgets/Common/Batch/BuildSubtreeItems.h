@@ -28,8 +28,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QStandardItem>
 
 namespace MantidQt {

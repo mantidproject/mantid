@@ -93,8 +93,9 @@ void SaveRKH::writeHeader() {
   std::string month =
       Poco::DateTimeFormatter::format(timestamp, std::string("%b"));
   std::transform(month.begin(), month.end(), month.begin(), toupper);
-  m_outRKH << month << "-" << Poco::DateTimeFormatter::format(
-                                  timestamp, std::string("%Y %H:%M"))
+  m_outRKH << month << "-"
+           << Poco::DateTimeFormatter::format(timestamp,
+                                              std::string("%Y %H:%M"))
            << " Workspace: " << getPropertyValue("InputWorkspace") << "\n";
 
   if (m_2d) {

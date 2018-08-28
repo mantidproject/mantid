@@ -3,8 +3,8 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 
-#include "Shape2D.h"
 #include "RectF.h"
+#include "Shape2D.h"
 
 #include <QList>
 #include <QTransform>
@@ -18,27 +18,26 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 /**
-* Class Shape2DCollection is a collection of 2D shapes.
-* It supports operations on teh shapes such as adding, removing, and aditting
-*either
-* with the mouse via control points (CPs) or via properties.
-*
-* The shapes operate in two coordinate systems:
-* 1. 'Real' or logical coordinates
-* 2. Transformed screen coordinates
-*
-* Shape2DCollection must know the boundaries of the drawing area in logical and
-*transformed screen coords.
-* They are set by calling setWindow(...) method. The first argument is the
-*logical drawing rectangle and
-* the second one is the corresponding screen viewport in pixels. The individual
-*shapes draw themselves in the
-* logical coords and unaware of the screen ones at all. If the size of the
-*screen/widget changes setWindow
-* must be called again. Changing the logical drawing bounds translates and zooms
-*the picture.
-* The transformation is done by Qt's QTransform object.
-*/
+ * Class Shape2DCollection is a collection of 2D shapes.
+ * It supports operations on teh shapes such as adding, removing, and aditting
+ *either
+ * with the mouse via control points (CPs) or via properties.
+ *
+ * The shapes operate in two coordinate systems:
+ * 1. 'Real' or logical coordinates
+ * 2. Transformed screen coordinates
+ *
+ * Shape2DCollection must know the boundaries of the drawing area in logical and
+ *transformed screen coords.
+ * They are set by calling setWindow(...) method. The first argument is the
+ *logical drawing rectangle and
+ * the second one is the corresponding screen viewport in pixels. The individual
+ *shapes draw themselves in the
+ * logical coords and unaware of the screen ones at all. If the size of the
+ *screen/widget changes setWindow
+ * must be called again. Changing the logical drawing bounds translates and
+ *zooms the picture. The transformation is done by Qt's QTransform object.
+ */
 class Shape2DCollection : public QObject, public Shape2D {
   Q_OBJECT
 public:
@@ -155,7 +154,7 @@ protected:
       m_selectedShapes; ///< A list of selected shapes (can be moved or deleted)
   bool m_overridingCursor;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDPLOT_SHAPE2DCOLLECTION_H_*/

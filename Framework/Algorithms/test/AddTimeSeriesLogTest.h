@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_ADDTIMESERIESLOGTEST_H_
 #define MANTID_ALGORITHMS_ADDTIMESERIESLOGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 class AddTimeSeriesLogTest : public CxxTest::TestSuite {
 private:
@@ -153,8 +153,8 @@ private:
                                const std::string &logName,
                                const std::string &logTime, const T logValue,
                                const size_t position) {
-    using Mantid::Types::Core::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
+    using Mantid::Types::Core::DateAndTime;
 
     const auto &run = testWS->run();
     TSM_ASSERT("Run does not contain the expected log entry",

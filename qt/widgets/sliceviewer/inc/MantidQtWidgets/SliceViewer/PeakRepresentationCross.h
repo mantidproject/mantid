@@ -12,7 +12,7 @@ struct PeakDrawInformationPeak {
   double peakOpacityAtDistance;
   Mantid::Kernel::V3D peakOrigin;
 };
-}
+} // namespace
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -101,6 +101,6 @@ private:
   /// Current slice point.
   double m_slicePoint;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

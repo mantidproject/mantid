@@ -63,7 +63,7 @@ private:
   }
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif // MANTID_ALGORITHMS_DELETEWORKSPACE_H_

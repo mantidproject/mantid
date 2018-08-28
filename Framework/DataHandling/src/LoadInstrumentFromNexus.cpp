@@ -2,13 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidNexus/MuonNexusReader.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 #include <fstream>
 
@@ -74,15 +74,14 @@ void LoadInstrumentFromNexus::exec() {
       new Geometry::ObjComponent("Unknown", instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
-  double l1 = 0.0;
   // If user has provided an L1, use that
-  if (!Kernel::ConfigService::Instance().getValue("instrument.L1", l1)) {
-    // Otherwise try and get it from the nexus file - but not there at present!
-    // l1 = nxload.ivpb.i_l1;
-    // Default to 10 if the file doesn't have it set
-    if (l1 == 0)
-      l1 = 10.0;
-  }
+  auto l1ConfigVal =
+      Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
+  // Otherwise try and get it from the nexus file - but not there at present!
+  // l1 = nxload.ivpb.i_l1;
+  // Default to 10 if the file doesn't have it set
+  double l1 = l1ConfigVal.get_value_or(10.0);
+
   source->setPos(0.0, -1.0 * l1, 0.0);
   localWorkspace->setInstrument(instrument);
   progress(1.0);

@@ -6,11 +6,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include <QStringList>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -133,7 +133,7 @@ protected:
     commands.push_back(std::move(command));
   }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H */

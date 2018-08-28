@@ -65,7 +65,7 @@ std::vector<Mantid::Geometry::MDHistoDimension_sptr> get_dimensions_collection(
 
   return dimensions;
 }
-}
+} // namespace
 
 class SliceViewerFunctionsTest : public CxxTest::TestSuite {
 public:

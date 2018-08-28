@@ -16,7 +16,7 @@ namespace Prop {
 const static std::string FILENAME{"Filename"};
 const static std::string OUT_WS{"OutputWorkspace"};
 const static std::string REF_WS{"WavelengthReference"};
-}
+} // namespace Prop
 
 /// A struct holding the due of number arrays in the IDL files.
 struct FactorDefinition {
@@ -216,13 +216,13 @@ void setUnits(Mantid::API::MatrixWorkspace &ws) {
   xAxis->setUnit("Wavelength");
   ws.setYUnit("Polarization efficiency");
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadILLPolarizationFactors)

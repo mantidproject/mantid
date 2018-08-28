@@ -24,8 +24,8 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using HistogramData::BinEdges;
-using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
     : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),
@@ -165,9 +165,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                         " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information() << "Loading signal " << m_signalNo << ", "
-                                      << m_dataField << " with axis "
-                                      << m_axisField << '\n';
+                  g_log.information()
+                      << "Loading signal " << m_signalNo << ", " << m_dataField
+                      << " with axis " << m_axisField << '\n';
                   file->closeData();
                   break;
                 } // Data has a 'signal' attribute
@@ -275,7 +275,7 @@ private:
   specnum_t m_max;
   detid2index_map m_id_to_wi;
 };
-}
+} // namespace
 
 /** Load a single bank into the workspace
  *

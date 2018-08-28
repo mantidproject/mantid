@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Run.h"
 #include <Poco/Path.h>
 #include <vector>
 

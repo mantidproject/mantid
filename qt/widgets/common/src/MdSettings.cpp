@@ -73,9 +73,10 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor =
-      settings.value(m_lblUserSettingBackgroundColor,
-                     m_mdConstants.getDefaultBackgroundColor()).value<QColor>();
+  QColor backgroundColor = settings
+                               .value(m_lblUserSettingBackgroundColor,
+                                      m_mdConstants.getDefaultBackgroundColor())
+                               .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -93,9 +94,10 @@ QColor MdSettings::getLastSessionBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor =
-      settings.value(m_lblLastSessionBackgroundColor,
-                     m_mdConstants.getDefaultBackgroundColor()).value<QColor>();
+  QColor backgroundColor = settings
+                               .value(m_lblLastSessionBackgroundColor,
+                                      m_mdConstants.getDefaultBackgroundColor())
+                               .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -138,9 +140,10 @@ QString MdSettings::getGeneralMdColorMapName() {
   QSettings settings;
 
   settings.beginGroup(m_generalMdGroup);
-  QString colorMap =
-      settings.value(m_lblGeneralMdColorMapName,
-                     m_mdConstants.getGeneralMdColorMap()).toString();
+  QString colorMap = settings
+                         .value(m_lblGeneralMdColorMapName,
+                                m_mdConstants.getGeneralMdColorMap())
+                         .toString();
   settings.endGroup();
 
   return colorMap;
@@ -194,9 +197,10 @@ QString MdSettings::getUserSettingInitialView() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QString initialView =
-      settings.value(m_lblUserSettingInitialView,
-                     m_mdConstants.getTechniqueDependence()).toString();
+  QString initialView = settings
+                            .value(m_lblUserSettingInitialView,
+                                   m_mdConstants.getTechniqueDependence())
+                            .toString();
   settings.endGroup();
 
   return initialView;

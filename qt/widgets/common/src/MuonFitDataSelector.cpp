@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/Common/MuonFitDataSelector.h"
 #include "MantidKernel/Logger.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include <QFileInfo>
 
 namespace {
@@ -33,7 +33,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
  * @param parent :: [input] Parent dialog for the widget
  * @param runNumber :: [input] Run number of initial workspace
  * @param instName :: [input] Name of instrument from initial workspace
-*/
+ */
 MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                          const QString &instName) /*
   * numPeriods :: [input] Number of periods from initial workspace
@@ -194,7 +194,6 @@ void MuonFitDataSelector::setWorkspaceDetails(
  * Defaults copy those previously used in muon fit property browser
  */
 void MuonFitDataSelector::setDefaultValues() {
-  const QChar muMicro{0x03BC}; // mu in Unicode
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   m_ui.txtSimFitLabel->setText("0");
@@ -217,15 +216,15 @@ QStringList MuonFitDataSelector::getChosenGroups() const {
 }
 
 /**
-*Gets user input in the form of a QVariant
-*
-*This is implemented as the "standard" way of getting input from a
-*MantidWidget. In practice it is probably easier to get the input
-*using other methods.
-*
-*The returned QVariant is a QVariantMap of (parameter, value) pairs.
-*@returns :: QVariant containing a QVariantMap
-*/
+ *Gets user input in the form of a QVariant
+ *
+ *This is implemented as the "standard" way of getting input from a
+ *MantidWidget. In practice it is probably easier to get the input
+ *using other methods.
+ *
+ *The returned QVariant is a QVariantMap of (parameter, value) pairs.
+ *@returns :: QVariant containing a QVariantMap
+ */
 QVariant MuonFitDataSelector::getUserInput() const {
   QVariant ret(QVariant::Map);
   auto map = ret.toMap();

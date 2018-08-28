@@ -30,9 +30,9 @@
 #ifndef SELECTION_MOVE_RESIZER_H
 #define SELECTION_MOVE_RESIZER_H
 
-#include <QWidget>
 #include <QList>
 #include <QRect>
+#include <QWidget>
 
 class QPoint;
 class QwtPlotMarker;

@@ -6,8 +6,8 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 
@@ -28,12 +28,12 @@ public:
     AffineMatrixType product = parameter->getAffineMatrix();
 
     // Check that matrix is recovered.
-    TSM_ASSERT(1, product[0][0]);
-    TSM_ASSERT(2, product[0][1]);
-    TSM_ASSERT(3, product[1][0]);
-    TSM_ASSERT(4, product[1][1]);
-    TSM_ASSERT(5, product[2][0]);
-    TSM_ASSERT(6, product[2][1]);
+    TS_ASSERT_EQUALS(1, product[0][0]);
+    TS_ASSERT_EQUALS(2, product[0][1]);
+    TS_ASSERT_EQUALS(3, product[1][0]);
+    TS_ASSERT_EQUALS(4, product[1][1]);
+    TS_ASSERT_EQUALS(5, product[2][0]);
+    TS_ASSERT_EQUALS(6, product[2][1]);
 
     delete parameter;
   }
@@ -53,15 +53,15 @@ public:
     AffineMatrixType product = parameter->getAffineMatrix();
 
     // Check that matrix is recovered.
-    TSM_ASSERT(1, product[0][0]);
-    TSM_ASSERT(2, product[0][1]);
-    TSM_ASSERT(3, product[0][2]);
-    TSM_ASSERT(4, product[1][0]);
-    TSM_ASSERT(5, product[1][1]);
-    TSM_ASSERT(6, product[1][2]);
-    TSM_ASSERT(7, product[2][0]);
-    TSM_ASSERT(8, product[2][1]);
-    TSM_ASSERT(9, product[2][2]);
+    TS_ASSERT_EQUALS(1, product[0][0]);
+    TS_ASSERT_EQUALS(2, product[0][1]);
+    TS_ASSERT_EQUALS(3, product[0][2]);
+    TS_ASSERT_EQUALS(4, product[1][0]);
+    TS_ASSERT_EQUALS(5, product[1][1]);
+    TS_ASSERT_EQUALS(6, product[1][2]);
+    TS_ASSERT_EQUALS(7, product[2][0]);
+    TS_ASSERT_EQUALS(8, product[2][1]);
+    TS_ASSERT_EQUALS(9, product[2][2]);
 
     delete parameter;
   }
@@ -81,18 +81,18 @@ public:
     AffineMatrixType product = parameter->getAffineMatrix();
 
     // Check that matrix is recovered.
-    TSM_ASSERT(1, product[0][0]);
-    TSM_ASSERT(2, product[0][1]);
-    TSM_ASSERT(3, product[0][2]);
-    TSM_ASSERT(4, product[0][3]);
-    TSM_ASSERT(5, product[1][0]);
-    TSM_ASSERT(6, product[1][1]);
-    TSM_ASSERT(7, product[1][2]);
-    TSM_ASSERT(8, product[1][3]);
-    TSM_ASSERT(9, product[2][0]);
-    TSM_ASSERT(10, product[2][1]);
-    TSM_ASSERT(11, product[2][2]);
-    TSM_ASSERT(12, product[2][3]);
+    TS_ASSERT_EQUALS(1, product[0][0]);
+    TS_ASSERT_EQUALS(2, product[0][1]);
+    TS_ASSERT_EQUALS(3, product[0][2]);
+    TS_ASSERT_EQUALS(4, product[0][3]);
+    TS_ASSERT_EQUALS(5, product[1][0]);
+    TS_ASSERT_EQUALS(6, product[1][1]);
+    TS_ASSERT_EQUALS(7, product[1][2]);
+    TS_ASSERT_EQUALS(8, product[1][3]);
+    TS_ASSERT_EQUALS(9, product[2][0]);
+    TS_ASSERT_EQUALS(10, product[2][1]);
+    TS_ASSERT_EQUALS(11, product[2][2]);
+    TS_ASSERT_EQUALS(12, product[2][3]);
 
     delete parameter;
   }

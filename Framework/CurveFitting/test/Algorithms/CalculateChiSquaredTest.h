@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -13,10 +12,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidKernel/EmptyValues.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 using Mantid::CurveFitting::Algorithms::CalculateChiSquared;

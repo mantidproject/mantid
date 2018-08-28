@@ -2,8 +2,8 @@
 #define MDCONSTANTS_H_
 
 #include "DllOption.h"
-#include <QString>
 #include <QColor>
+#include <QString>
 #include <QStringList>
 
 namespace MantidQt {
@@ -99,7 +99,7 @@ private:
   const double m_colorScaleStandardMax;
   const double m_logScaleDefaultValue;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif

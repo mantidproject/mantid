@@ -1,7 +1,7 @@
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -88,5 +88,5 @@ void DisplayNormalizationSetter::applyNormalizationMDEvent(
   ws->setDisplayNormalization(displayNormalization);
   ws->setDisplayNormalizationHisto(displayNormalizationHisto);
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

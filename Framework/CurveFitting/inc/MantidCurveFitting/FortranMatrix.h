@@ -137,8 +137,7 @@ void FortranMatrix<MatrixClass>::allocate(const int nx, const int ny) {
 /// The "index" operator
 template <class MatrixClass>
 typename FortranMatrix<MatrixClass>::ElementConstType
-    FortranMatrix<MatrixClass>::
-    operator()(int i, int j) const {
+FortranMatrix<MatrixClass>::operator()(int i, int j) const {
   return this->MatrixClass::operator()(static_cast<size_t>(i - m_base1),
                                        static_cast<size_t>(j - m_base2));
 }

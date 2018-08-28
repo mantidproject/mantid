@@ -1,3 +1,5 @@
+.. _MantidStandards:
+
 ================
 Mantid Standards
 ================
@@ -106,7 +108,7 @@ Parameter names must:
 - Start with a capital letter
 - Have a capital letter for each new word (e.g. 'InputWorkspace')
 - Use alphanumeric characters only (i.e. cannot contain any of these ``/,._-'\"`` or whitespace)
-- Can contain numbers but only allowed after the first character. 
+- Can contain numbers but only allowed after the first character.
 
 Notable exceptions to these rules are lattice constants (i.e. a, b, c,
 alpha, beta, gamma).

@@ -102,6 +102,6 @@ bool QtTreeCursorNavigation::isNotLastRowInThisNode(
     QModelIndex const &index) const {
   return hasRowBelow(index);
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
