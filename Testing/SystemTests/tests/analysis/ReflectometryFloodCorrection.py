@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 import stresstesting
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateFloodWorkspace
 
 
 class ReflectometryCreateFloodWorkspaceNoExclude(stresstesting.MantidStressTest):
@@ -12,7 +12,7 @@ class ReflectometryCreateFloodWorkspaceNoExclude(stresstesting.MantidStressTest)
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return self.flood_ws_name,'ReflFloodFileNoExclude.nxs'
+        return self.flood_ws_name,'ReflectometryCreateFloodWorkspaceNoExclude.nxs'
 
 
 class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
@@ -25,7 +25,7 @@ class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return self.flood_ws_name,'ReflFloodFileExclude.nxs'
+        return self.flood_ws_name,'ReflectometryCreateFloodWorkspaceExclude.nxs'
 
 
 class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest):
@@ -38,4 +38,4 @@ class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest)
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return self.flood_ws_name,'ReflFloodFileQuadratic.nxs'
+        return self.flood_ws_name,'ReflectometryCreateFloodWorkspaceQuadratic.nxs'

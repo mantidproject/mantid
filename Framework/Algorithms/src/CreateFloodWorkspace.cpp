@@ -9,6 +9,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
+#include <limits>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -22,7 +24,7 @@ std::string const EXCLUDE("Exclude");
 std::string const BACKGROUND("Background");
 } // namespace Prop
 
-double const VERY_BIG_VALUE = 10000.0;
+double const VERY_BIG_VALUE = std::numeric_limits<double>::max();
 std::map<std::string, std::string> const funMap{
     {"Linear", "name=LinearBackground"}, {"Quadratic", "name=Quadratic"}};
 
@@ -92,7 +94,12 @@ MatrixWorkspace_sptr CreateFloodWorkspace::getInputWorkspace() {
   alg->setProperty("OutputWorkspace", "dummy");
   alg->execute();
   Workspace_sptr ws = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  auto input = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  if (!input) {
+    throw std::invalid_argument(
+        "Loaded files do not produce a single MatrixWorkspace as expected.");
+  }
+  return input;
 }
 
 std::string CreateFloodWorkspace::getBackgroundFunction() {
@@ -164,8 +171,10 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   // and scale to values around 1
   MatrixWorkspace_sptr bkgWS = alg->getProperty("OutputWorkspace");
   auto const &bkg = bkgWS->y(1);
-  auto const nHisto = ws->getNumberHistograms();
-  for (size_t i = 0; i < nHisto; ++i) {
+  auto const nHisto = static_cast<int>(ws->getNumberHistograms());
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *bkgWS))
+  for (int i = 0; i < nHisto; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     auto const xVal = x[i];
     if (isExcluded(xVal)) {
       ws->mutableY(i)[0] = VERY_BIG_VALUE;
@@ -175,7 +184,8 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
       if (background <= 0.0) {
         throw std::runtime_error(
             "Background is expected to be positive, found value " +
-            std::to_string(background));
+            std::to_string(background) + " at spectrum with workspace index " +
+            std::to_string(i));
       }
       ws->mutableY(i)[0] /= background;
       ws->mutableE(i)[0] /= background;
@@ -183,7 +193,9 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
       ws->mutableY(i)[0] = 1.0;
       ws->mutableE(i)[0] = 0.0;
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Remove the logs
   ws->setSharedRun(make_cow<Run>());
