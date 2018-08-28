@@ -83,7 +83,7 @@
 	src/LoadNXSPE.cpp
 	src/LoadNXcanSAS.cpp
 	src/LoadNexus.cpp
-        src/LoadNexusLogs.cpp
+	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusMonitors2.cpp
 	src/LoadNexusProcessed.cpp
