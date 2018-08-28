@@ -229,10 +229,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 namespace {
-std::set<std::string> toStdStringSet(std::set<QString> in) {
-  auto out = std::set<std::string>();
-  std::transform(
-      in.cbegin(), in.cend(), std::inserter(out, out.begin()),
+std::vector<std::string> toStdStringVector(std::set<QString> in) {
+  auto out = std::vector<std::string>();
+  std::transform(in.cbegin(), in.cend(), std::back_inserter(out),
       [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
@@ -287,7 +286,8 @@ void GenericDataProcessorPresenter::acceptViews(
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(m_processor.name().toStdString());
   m_view->setOptionsHintStrategy(
-      new AlgorithmHintStrategy(alg, toStdStringSet(m_processor.blacklist())),
+      new AlgorithmHintStrategy(alg,
+                                toStdStringVector(m_processor.blacklist())),
       static_cast<int>(m_whitelist.size()) - 2);
 
   // Start with a blank table

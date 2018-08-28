@@ -25,17 +25,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ASSERTORTHROW_H_
 #define MANTIDQTMANTIDWIDGETS_ASSERTORTHROW_H_
-#include <stdexcept>
 #include <string>
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+#include <stdexcept>
 
 inline void assertOrThrow(bool condition, std::string const &message) {
   if (!condition)
     throw std::runtime_error(message);
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+
 #endif

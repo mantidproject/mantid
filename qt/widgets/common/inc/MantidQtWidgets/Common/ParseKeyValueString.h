@@ -30,9 +30,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
+#include "DllOption.h"
 #include <QString>
 #include <map>
 #include <string>
+#include <sstream>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,8 +48,10 @@ void trimWhitespaceAndQuotes(const QString &valueIn);
 // Trim whitespace, quotes and empty values from a string list
 void trimWhitespaceQuotesAndEmptyValues(QStringList &values);
 /// Convert an options map to a string
-QString DLLExport
+QString EXPORT_OPT_MANTIDQT_COMMON
 convertMapToString(const std::map<QString, QString> &optionsMap);
+std::string EXPORT_OPT_MANTIDQT_COMMON
+optionsToString(std::map<std::string, std::string> const &options);
 } // namespace MantidWidgets
 } // namespace MantidQt
 

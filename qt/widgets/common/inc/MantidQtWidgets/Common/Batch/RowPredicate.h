@@ -26,6 +26,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
 #define MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "MantidKernel/make_unique.h"
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,7 +40,27 @@ public:
 protected:
   virtual bool rowMeetsCriteria(RowLocation const &row) const = 0;
 };
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+
+template <typename LambdaPredicate>
+class LambdaRowPredicate : public RowPredicate {
+public:
+  LambdaRowPredicate(LambdaPredicate predicate)
+      : m_predicate(std::move(predicate)) {}
+
+protected:
+  bool rowMeetsCriteria(RowLocation const &row) const override {
+    return m_predicate(row);
+  }
+
+private:
+  LambdaPredicate m_predicate;
+};
+
+template <typename Predicate>
+std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
+  return Mantid::Kernel::make_unique<LambdaRowPredicate<Predicate>>(predicate);
+}
+}
+}
+}
 #endif // MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
