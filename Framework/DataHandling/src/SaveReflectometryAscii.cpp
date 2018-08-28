@@ -10,6 +10,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/make_unique.h"
 
 #include <Poco/File.h>
@@ -36,43 +37,39 @@ void SaveReflectometryAscii::init() {
       make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
       "The name of the workspace containing the data you want to save.");
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".mft"),
-      "The output filename.");
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
+                  "The output filename");
+  std::vector<std::string> extension = {".mft", ".txt", ".dat",
+                                        "Defined via Filename property"};
+  declareProperty("FileExtension", ".mft",
+                  boost::make_shared<StringListValidator>(extension),
+                  "Choose the file extension according to the file format");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   declareProperty("WriteHeader", true, "Whether to write header lines.");
-}
-
-/// Validate single MatrixWorkspace
-void validateMatrix(std::map<std::string, std::string> &issuesMatrixWS,
-                    MatrixWorkspace_const_sptr &ws) {
-  if (!ws)
-    issuesMatrixWS["InputWorkspace"] =
-        "InputWorkspace must be a MatrixWorkspace";
-  try {
-    ws->y(0).size();
-  } catch (std::range_error) {
-    issuesMatrixWS["InputWorkspace"] = "InputWorkspace does not contain data";
-  }
-}
-
-/// Validate single MatrixWorkspace
-void validateMatrix(MatrixWorkspace_const_sptr &ws) {
-  if (!ws)
-    throw(std::runtime_error("WorkspaceGroup must contain MatrixWorkspaces"));
-  try {
-    ws->y(0).size();
-  } catch (std::range_error) {
-    throw(std::runtime_error("InputWorkspace does not contain data"));
-  }
+  setPropertySettings("WriteHeader", Kernel::make_unique<VisibleWhenProperty>(
+                                         "FileExtension", IS_EQUAL_TO,
+                                         "Defined via Filename property"));
+  std::vector<std::string> separator = {"comma", "space", "tab"};
+  declareProperty("Separator", "tab",
+                  boost::make_shared<StringListValidator>(separator),
+                  "The separator used for splitting data columns");
+  setPropertySettings("Separator", Kernel::make_unique<VisibleWhenProperty>(
+                                       "FileExtension", IS_EQUAL_TO,
+                                       "Defined via Filename property"));
 }
 
 /// Input validation for single MatrixWorkspace
 std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   std::map<std::string, std::string> issues;
   m_ws = getProperty("InputWorkspace");
-  validateMatrix(issues, m_ws);
+  if (!m_ws)
+    issues["InputWorkspace"] = "InputWorkspace must be a MatrixWorkspace";
+  try {
+    m_ws->y(0).size();
+  } catch (std::range_error) {
+    issues["InputWorkspace"] = "InputWorkspace does not contain data";
+  }
   m_filename = getPropertyValue("Filename");
   if (m_filename.empty())
     issues["InputWorkspace"] = "Provide a file name";
@@ -217,7 +214,14 @@ bool SaveReflectometryAscii::checkGroups() {
         g_log.warning("InputWorkspace must have a name, skip");
       else {
         m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
-        validateMatrix(m_ws);
+        if (!m_ws)
+          throw(std::runtime_error(
+              "WorkspaceGroup must contain MatrixWorkspaces"));
+        try {
+          m_ws->y(0).size();
+        } catch (std::range_error) {
+          throw(std::runtime_error("InputWorkspace does not contain data"));
+        }
         m_group.emplace_back(m_ws);
         m_wsName.emplace_back(i->getName()); // since we lost names
       }
