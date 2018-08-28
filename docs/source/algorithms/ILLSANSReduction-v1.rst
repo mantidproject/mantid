@@ -139,7 +139,7 @@ Output:
 .. testoutput:: ExILLSANSReduction
 
     Water container transmission is 0.945
-    Water transmission is 0.501
+    Water transmission is 0.500
     Sample container transmission is 0.665
     Sample transmission is 0.640
 
