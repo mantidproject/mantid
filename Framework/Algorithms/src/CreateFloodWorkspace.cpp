@@ -90,7 +90,9 @@ MatrixWorkspace_sptr CreateFloodWorkspace::getInputWorkspace() {
   std::string fileName = getProperty(Prop::FILENAME);
   auto alg = createChildAlgorithm("Load", 0, 0.8);
   alg->setProperty("Filename", fileName);
-  alg->setProperty("LoadMonitors", false);
+  if (alg->existsProperty("LoadMonitors")) {
+    alg->setProperty("LoadMonitors", false);
+  }
   alg->setProperty("OutputWorkspace", "dummy");
   alg->execute();
   Workspace_sptr ws = alg->getProperty("OutputWorkspace");
