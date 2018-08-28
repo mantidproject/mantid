@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_
 
 #include "IEventView.h"
-#include "ui_ReflEventTabWidget.h"
+#include "ui_EventWidget.h"
 #include "QWidgetGroup.h"
 #include <memory>
 
@@ -90,7 +90,7 @@ private:
   QWidgetGroup<5> m_sliceTypeRadioButtons;
 
   /// The widget
-  Ui::ReflEventTabWidget m_ui;
+  Ui::EventWidget m_ui;
   EventTabViewSubscriber *m_notifyee;
 };
 
