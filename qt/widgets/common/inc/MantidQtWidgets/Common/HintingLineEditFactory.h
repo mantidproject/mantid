@@ -50,7 +50,7 @@ public:
     Q_UNUSED(index);
 
     auto editor = new HintingLineEdit(parent, m_strategy->createHints());
-    editor->setFrame(true);
+    editor->setFrame(false);
 
     return editor;
   }
