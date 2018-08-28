@@ -126,14 +126,6 @@ This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1
     # Convert to I(Q)
     Q1DWeighted(InputWorkspace='sample_flux', OutputBinning='0.0027,0.0004,0.033', OutputWorkspace='iq')
 
-    # Print the output
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
-    ax.plot(mtd['iq'],'-')
-    ax.set_ylabel('I [cm-1]')
-    #uncomment the next line to plot the figure
-    #fig.show()
-
 Output:
 
 .. testoutput:: ExILLSANSReduction
@@ -146,6 +138,16 @@ Output:
 .. testcleanup:: ExILLSANSReduction
 
     mtd.clear()
+
+Print the I(Q):
+
+.. code-block:: python
+
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+    ax.plot(mtd['iq'],'-')
+    ax.set_ylabel('I [cm-1]')
+    fig.show()
 
 .. plot::
 
