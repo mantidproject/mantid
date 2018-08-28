@@ -57,7 +57,7 @@ public:
   virtual std::string getStitchOptions() const = 0;
   virtual void
   createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
-  
+
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
   virtual std::map<std::string,

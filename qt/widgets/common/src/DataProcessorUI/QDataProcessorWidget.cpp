@@ -472,8 +472,9 @@ void QDataProcessorWidget::setOptionsHintStrategy(
     MantidQt::MantidWidgets::HintStrategy *hintStrategy, int column) {
   auto delegate_pointer = ui.viewTable->itemDelegate();
   ui.viewTable->setItemDelegateForColumn(
-      column, new HintingLineEditFactory(delegate_pointer,
-                                 std::unique_ptr<HintStrategy>(hintStrategy),ui.viewTable));
+      column, new HintingLineEditFactory(
+                  delegate_pointer, std::unique_ptr<HintStrategy>(hintStrategy),
+                  ui.viewTable));
 }
 
 /**

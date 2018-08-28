@@ -40,8 +40,7 @@ public:
   HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate,
                          std::unique_ptr<HintStrategy> hintStrategy,
                          QObject *parent = nullptr)
-      : QStyledItemDelegate(parent),
-        m_strategy(std::move(hintStrategy)),
+      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)),
         m_cellPainterDelegate(cellPainterDelegate){};
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,

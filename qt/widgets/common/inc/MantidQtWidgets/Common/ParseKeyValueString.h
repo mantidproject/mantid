@@ -28,13 +28,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "DllOption.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
-#include "DllOption.h"
 #include <QString>
 #include <map>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace MantidQt {
 namespace MantidWidgets {

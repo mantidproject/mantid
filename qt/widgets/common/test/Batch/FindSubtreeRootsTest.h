@@ -219,7 +219,7 @@ public:
     TS_ASSERT(!roots.is_initialized())
   }
 
-    void testForDocumentationFailTree() {
+  void testForDocumentationFailTree() {
     auto findSubtreeRoots = FindSubtreeRoots();
     // clang-format off
     auto region = std::vector<RowLocation>({

@@ -25,8 +25,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
 #define MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <memory>
 
 namespace MantidQt {
@@ -60,7 +60,7 @@ template <typename Predicate>
 std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
   return Mantid::Kernel::make_unique<LambdaRowPredicate<Predicate>>(predicate);
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_

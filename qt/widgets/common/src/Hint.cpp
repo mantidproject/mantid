@@ -14,5 +14,5 @@ bool operator==(Hint const &lhs, Hint const &rhs) {
 }
 
 bool operator!=(Hint const &lhs, Hint const &rhs) { return !(lhs == rhs); }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

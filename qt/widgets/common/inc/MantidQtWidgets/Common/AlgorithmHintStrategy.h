@@ -52,8 +52,9 @@ public:
     auto properties = m_algorithm->getProperties();
     properties.erase(
         std::remove_if(properties.begin(), properties.end(),
-                       [this](Mantid::Kernel::Property *property)
-                           -> bool { return isBlacklisted(property->name()); }),
+                       [this](Mantid::Kernel::Property *property) -> bool {
+                         return isBlacklisted(property->name());
+                       }),
         properties.end());
     hints.reserve(properties.size());
     std::transform(properties.cbegin(), properties.cend(),
@@ -69,7 +70,7 @@ private:
   Mantid::API::IAlgorithm_sptr m_algorithm;
   std::vector<std::string> m_blacklist;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGY_H */
