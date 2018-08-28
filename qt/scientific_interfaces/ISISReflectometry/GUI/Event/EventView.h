@@ -63,7 +63,7 @@ public:
   int uniformSliceCount() const override;
   double uniformSliceLength() const override;
 
-  void subscribe(EventTabViewSubscriber *notifyee) override;
+  void subscribe(EventViewSubscriber *notifyee) override;
 
 public slots:
   void toggleUniform(bool isChecked);
@@ -91,7 +91,7 @@ private:
 
   /// The widget
   Ui::EventWidget m_ui;
-  EventTabViewSubscriber *m_notifyee;
+  EventViewSubscriber *m_notifyee;
 };
 
 } // namespace Mantid

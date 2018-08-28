@@ -13,7 +13,7 @@ EventView::EventView(QWidget *parent) {
   initLayout();
 }
 
-void EventView::subscribe(EventTabViewSubscriber *notifyee) {
+void EventView::subscribe(EventViewSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 

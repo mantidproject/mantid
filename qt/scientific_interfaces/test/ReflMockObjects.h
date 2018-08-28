@@ -243,7 +243,7 @@ public:
   ~MockEventPresenter() override{};
 };
 
-class MockEventTabPresenter : public IEventPresenter {
+class MockEventPresenter : public IEventPresenter {
 public:
   std::string getTimeSlicingValues(int) const override { return std::string(); }
   std::string getTimeSlicingType(int) const override { return std::string(); }
@@ -252,7 +252,7 @@ public:
   MOCK_METHOD1(onReductionPaused, void(int));
   MOCK_METHOD1(onReductionResumed, void(int));
 
-  ~MockEventTabPresenter() override{};
+  ~MockEventPresenter() override{};
 };
 
 class MockSettingsPresenter : public IReflSettingsPresenter {

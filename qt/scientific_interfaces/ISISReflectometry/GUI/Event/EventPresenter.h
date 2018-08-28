@@ -38,7 +38,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL EventPresenter
     : public IEventPresenter,
-      public EventTabViewSubscriber {
+      public EventViewSubscriber {
 public:
   EventPresenter(IEventView *view);
 

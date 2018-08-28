@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL EventTabViewSubscriber {
+class MANTIDQT_ISISREFLECTOMETRY_DLL EventViewSubscriber {
 public:
   virtual void notifySliceTypeChanged(SliceType newSliceType) = 0;
   virtual void notifyUniformSliceCountChanged(int sliceCount) = 0;
@@ -48,7 +48,7 @@ public:
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL IEventView {
 public:
-  virtual void subscribe(EventTabViewSubscriber *notifyee) = 0;
+  virtual void subscribe(EventViewSubscriber *notifyee) = 0;
   virtual ~IEventView() = default;
 
   virtual std::string logBlockName() const = 0;

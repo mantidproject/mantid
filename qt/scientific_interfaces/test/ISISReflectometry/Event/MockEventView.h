@@ -9,7 +9,7 @@ namespace CustomInterfaces {
 
 class MockEventView : public IEventView {
 public:
-  MOCK_METHOD1(subscribe, void(EventTabViewSubscriber *));
+  MOCK_METHOD1(subscribe, void(EventViewSubscriber *));
 
   MOCK_CONST_METHOD0(logBlockName, std::string());
   MOCK_CONST_METHOD0(logBreakpoints, std::string());
