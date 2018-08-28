@@ -36,11 +36,16 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   const auto nx = normal[0];
   const auto ny = normal[1];
   const auto nz = normal[2];
-  auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
+  const auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
+  const auto denom = normal.norm();
+  const static double tolerance =
+      1e-9; // Fixed Tolerance. Too expensive to calculate
+            // based on machine uncertaintly for each
+            // vertex.
 
   for (const auto &vertex : vertices) {
-    auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k);
-    if (d != 0) {
+    auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k) / denom;
+    if (d > tolerance || d < -1 * tolerance) {
       in_plane = false;
       break;
     }
