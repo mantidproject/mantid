@@ -14,12 +14,15 @@ max_run_list_size = 100
 def _remove_duplicates_from_list(run_list):
     return list(set(run_list))
 
+
 # Python compatibility, Python 3 does not support tuple parameter unpacking
 def star(f):
     @functools.wraps(f)
     def f_inner(args):
         return f(*args)
+
     return f_inner
+
 
 def run_list_to_string(run_list):
     """
@@ -34,7 +37,7 @@ def run_list_to_string(run_list):
         raise IndexError("Too many runs (" + str(len(run_list)) + ") must be <" + str(max_run_list_size))
 
     range_list = []
-    for k, g in groupby(enumerate(run_list), key= star(lambda i, x: i - x)):
+    for k, g in groupby(enumerate(run_list), key=star(lambda i, x: i - x)):
         concurrent_range = list(map(itemgetter(1), g))
         if len(concurrent_range) > 1:
             range_list += [str(concurrent_range[0]) + range_separator + str(concurrent_range[-1])]
