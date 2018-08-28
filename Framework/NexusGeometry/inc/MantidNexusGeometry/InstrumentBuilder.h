@@ -1,6 +1,7 @@
 #ifndef MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
 #define MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
 
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include "MantidNexusGeometry/TubeBuilder.h"
@@ -55,15 +56,16 @@ public:
                 boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(
-      const std::string &detName, int detId, const Eigen::Vector3d &position,
+      const std::string &detName, detid_t detId,
+      const Eigen::Vector3d &position,
       boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Adds detector to the last registered bank
   void addDetectorToLastBank(
-      const std::string &detName, int detId,
+      const std::string &detName, detid_t detId,
       const Eigen::Vector3d &relativeOffset,
       boost::shared_ptr<const Mantid::Geometry::IObject> shape);
   /// Adds detector to instrument
-  void addMonitor(const std::string &detName, int detId,
+  void addMonitor(const std::string &detName, detid_t detId,
                   const Eigen::Vector3d &position,
                   boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Add sample

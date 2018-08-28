@@ -106,7 +106,7 @@ void InstrumentBuilder::doAddTube(
 }
 
 void InstrumentBuilder::addDetectorToLastBank(
-    const std::string &detName, int detId,
+    const std::string &detName, detid_t detId,
     const Eigen::Vector3d &relativeOffset,
     boost::shared_ptr<const Geometry::IObject> shape) {
   verifyMutable();
@@ -126,7 +126,7 @@ void InstrumentBuilder::addDetectorToLastBank(
 
 /// Adds detector to instrument
 void InstrumentBuilder::addDetectorToInstrument(
-    const std::string &detName, int detId, const Eigen::Vector3d &position,
+    const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
     boost::shared_ptr<const Geometry::IObject> &shape) {
   verifyMutable();
   auto *detector(new Geometry::Detector(
@@ -141,7 +141,7 @@ void InstrumentBuilder::addDetectorToInstrument(
 }
 
 void InstrumentBuilder::addMonitor(
-    const std::string &detName, int detId, const Eigen::Vector3d &position,
+    const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
     boost::shared_ptr<const Geometry::IObject> &shape) {
   verifyMutable();
   auto *detector(new Geometry::Detector(

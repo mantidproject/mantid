@@ -63,7 +63,7 @@ GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
 #endif
 }
 
-GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> &&obj)
+GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> obj)
     : m_isTriangulated(false), m_meshObj(std::move(obj)) {}
 
 GeometryTriangulator::~GeometryTriangulator() {}
