@@ -218,9 +218,6 @@ Print the I(Q):
     ax.set_ylabel('I [cm-1]')
     fig.show()
 
-    # Clear the ADS
-    mtd.clear()
-
 .. note::
 
   For transmission calculation, the beam run and the transmission run have to be recorded at the same instrument configuration.
