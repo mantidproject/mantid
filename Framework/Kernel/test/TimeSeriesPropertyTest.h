@@ -835,8 +835,7 @@ public:
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.push_back(new TimeSeriesProperty<int>("target"));
     }
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
@@ -845,6 +844,8 @@ public:
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 0);
+      delete out_i;
+      outputs[i] = nullptr;
     }
 
     return;
@@ -889,8 +890,7 @@ public:
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
     }
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
@@ -899,6 +899,8 @@ public:
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 1);
+      delete out_i;
+      outputs[i] = nullptr;
     }
   }
 
@@ -941,39 +943,18 @@ public:
     // Initialze the 10 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 10; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.push_back(new TimeSeriesProperty<int>("target"));
     }
-
-    /*
-    size_t num_splits = vec_split_target.size();
-    for (size_t i = 0; i < num_splits; ++i) {
-      std::cout << "s[" << i << "]  start = " << vec_split_times[i]
-                << ", stop = " << vec_split_times[i + 1]
-                << ":  target = " << vec_split_target[i] << "\n";
-    }
-    */
 
     // split time series property
     log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
-    // TODO/FIXME/ - continue to debug from here!
-    /*
-    TimeSeriesProperty<int> *out0 = outputs[0];
-    for (int i = 0; i < out0->size(); ++i) {
-      std::cout << i << "-th: " << out0->nthTime(i) << ", " << out0->nthValue(i)
-                << "\n";
-    }
-    */
-
     // test
-    for (auto it : outputs) {
+    for (auto &it : outputs) {
       TS_ASSERT_EQUALS(it->size(), 2);
-    }
-
-    // cleanup
-    for (auto &it : outputs)
       delete it;
+      it = nullptr;
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -1005,18 +986,26 @@ public:
 
     // create the target vector
     std::vector<int> split_target_vec(5);
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t i = 0; i < 5; ++i) {
       split_target_vec[i] = (i + 1) % 2;
+    }
 
     // Initialze the 2 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 2; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.push_back(new TimeSeriesProperty<int>("target"));
     }
 
     // split
     int_log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    // check
+    for (int i = 0; i < 2; ++i) {
+      TimeSeriesProperty<int> *out_i = outputs[i];
+      TS_ASSERT_EQUALS(out_i->size(), 1);
+      delete out_i;
+      outputs[i] = nullptr;
+    }
 
     return;
   }

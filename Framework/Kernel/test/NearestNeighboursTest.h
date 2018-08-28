@@ -9,6 +9,12 @@ using namespace Eigen;
 
 class NearestNeighboursTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static NearestNeighboursTest *createSuite() {
+    return new NearestNeighboursTest();
+  }
+  static void destroySuite(NearestNeighboursTest *suite) { delete suite; }
+
   NearestNeighboursTest() {}
 
   void test_construct() {

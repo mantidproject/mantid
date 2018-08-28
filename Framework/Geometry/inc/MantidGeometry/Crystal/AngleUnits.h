@@ -33,10 +33,10 @@ namespace Geometry {
  */
 
 /// Degrees to radians conversion factor
-const double deg2rad = M_PI / 180.;
+constexpr double deg2rad = M_PI / 180.;
 
 /// Radians to degrees conversion factor
-const double rad2deg = 180. / M_PI;
+constexpr double rad2deg = 180. / M_PI;
 
 /// Flag for angle units used in UnitCell class
 enum AngleUnits { angDegrees, angRadians };

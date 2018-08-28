@@ -10,7 +10,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
