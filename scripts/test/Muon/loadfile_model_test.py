@@ -22,20 +22,23 @@ class IteratorWithException(object):
 
         self.throw_indices = [index for index in throw_on_index if index <= self.max]
 
+        self.lock = QtCore.QMutex()
+
     def __iter__(self):
         self.n = 0
         return self
 
     def __next__(self):
-        if self.n in self.throw_indices:
-            next(self.iterable)
-            self.n += 1
-            raise ValueError()
-        elif self.n == self.max:
-            raise StopIteration()
-        else:
-            self.n += 1
-            return next(self.iterable)
+        with QtCore.QMutexLocker(self.lock):
+            if self.n == self.max:
+                raise StopIteration()
+            if self.n in self.throw_indices:
+                next(self.iterable)
+                self.n += 1
+                raise ValueError(str(self.n) )
+            else:
+                self.n += 1
+                return next(self.iterable)
 
 
     # Python 3 compatibility
@@ -110,7 +113,8 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
         model = BrowseFileWidgetModel(MuonLoadData())
         model.load_workspace_from_filename = mock.Mock()
-        model.load_workspace_from_filename.side_effect = iter(IteratorWithException(load_return_vals, [1]))
+        iterator = IteratorWithException(load_return_vals, [1])
+        model.load_workspace_from_filename.side_effect = iter(iterator)
 
         model.load_with_multithreading(filenames=files)
         self.Runner(model.thread_manager)

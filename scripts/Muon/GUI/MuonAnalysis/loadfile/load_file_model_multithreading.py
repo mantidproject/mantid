@@ -46,9 +46,12 @@ class BrowseFileWidgetModel(object):
 
     def load_with_multithreading(self, filenames,
                                  callback_finished=lambda: 0, callback_progress=lambda dbl: 0,
-                                 callback_exception=empty_function, callback_cancelled=lambda: 0):
+                                 callback_exception=empty_function, callback_cancelled=lambda: 0, num_threads=1):
         # TODO : add sensible thread number
-        n_threads = min(4, max(len(filenames), 1))
+        if num_threads ==1:
+            n_threads = min(4, max(len(filenames), 1))
+        else:
+            n_threads = num_threads
         # n_threads = min(10,len(filenames))
         if self.thread_manager:
             self.thread_manager.clear()

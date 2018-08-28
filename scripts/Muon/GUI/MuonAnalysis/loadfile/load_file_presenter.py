@@ -25,10 +25,7 @@ class BrowseFileWidgetPresenter(object):
         directory = ""
         filenames = self._view.show_file_browser_and_return_selection(file_filter, [directory],
                                                                       multiple_files=self._multiple_files)
-        filenames = self.validate_filenames_selection(filenames)
-        return filenames
-
-    def validate_filenames_selection(self, filenames):
+        # validate
         filenames = file_utils.parse_user_input_to_files(";".join(filenames))
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
         return filenames
