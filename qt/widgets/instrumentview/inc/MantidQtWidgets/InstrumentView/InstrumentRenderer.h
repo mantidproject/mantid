@@ -6,6 +6,7 @@
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QString>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {

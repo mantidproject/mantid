@@ -5,10 +5,8 @@
 // Includes
 //---------------------------------------------
 #include "DllOption.h"
-#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "qwt_color_map.h"
-#include <boost/shared_ptr.hpp>
 
 /**
    The class inherits from QwtColorMap and implements reading a color color map

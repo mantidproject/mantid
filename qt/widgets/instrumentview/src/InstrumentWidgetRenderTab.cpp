@@ -23,9 +23,7 @@
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
-#include <qwt_scale_engine.h>
-#include <qwt_scale_widget.h>
-#include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
+#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
 
 #include <limits>
 
@@ -185,7 +183,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   QFrame *axisViewFrame = setupAxisFrame();
 
   // Colormap widget
-  m_colorMapWidget = new ColorMapWidget(0, this);
+  m_colorMapWidget = new DraggableColorBarWidget(0, this);
   connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
           SLOT(changeScaleType(int)));
   connect(m_colorMapWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,

@@ -1,19 +1,17 @@
-#include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
-#include "MantidQtWidgets/Common/DoubleSpinBox.h"
-#include "MantidQtWidgets/Common/GraphOptions.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+
 #include <QApplication>
 #include <QComboBox>
-#include <QGridLayout>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMouseEvent>
 #include <QVBoxLayout>
-#include <qwt_scale_engine.h>
 #include <qwt_scale_widget.h>
 
 namespace MantidQt {
@@ -24,8 +22,8 @@ namespace MantidWidgets {
  * @param parent A parent widget
  * @param minPositiveValue A minimum positive value for the Log10 scale
  */
-ColorMapWidget::ColorMapWidget(int type, QWidget *parent,
-                               const double &minPositiveValue)
+DraggableColorBarWidget::DraggableColorBarWidget(int type, QWidget *parent,
+                                                 const double &minPositiveValue)
     : QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false),
       m_y(0), m_dtype(), m_nth_power(2.0) {
   m_scaleWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
@@ -87,7 +85,7 @@ ColorMapWidget::ColorMapWidget(int type, QWidget *parent,
   this->setLayout(colourmap_layout);
 }
 
-void ColorMapWidget::scaleOptionsChanged(int i) {
+void DraggableColorBarWidget::scaleOptionsChanged(int i) {
   if (m_scaleOptions->itemData(i).toUInt() == 2) {
     m_dspnN->setEnabled(true);
   } else
@@ -96,7 +94,7 @@ void ColorMapWidget::scaleOptionsChanged(int i) {
   emit scaleTypeChanged(m_scaleOptions->itemData(i).toUInt());
 }
 
-void ColorMapWidget::nPowerChanged(double nth_power) {
+void DraggableColorBarWidget::nPowerChanged(double nth_power) {
   emit nthPowerChanged(nth_power);
 }
 
@@ -104,7 +102,8 @@ void ColorMapWidget::nPowerChanged(double nth_power) {
  * Set up a new colour map.
  * @param colorMap :: Reference to the new colour map.
  */
-void ColorMapWidget::setupColorBarScaling(const MantidColorMap &colorMap) {
+void DraggableColorBarWidget::setupColorBarScaling(
+    const MantidColorMap &colorMap) {
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
 
@@ -151,12 +150,12 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap &colorMap) {
 }
 
 /// Send the minValueChanged signal
-void ColorMapWidget::minValueChanged() {
+void DraggableColorBarWidget::minValueChanged() {
   emit minValueChanged(m_minValueBox->text().toDouble());
 }
 
 /// Send the maxValueChanged signal
-void ColorMapWidget::maxValueChanged() {
+void DraggableColorBarWidget::maxValueChanged() {
   emit maxValueChanged(m_maxValueBox->text().toDouble());
 }
 
@@ -164,7 +163,7 @@ void ColorMapWidget::maxValueChanged() {
  * Set a new min value and update the widget.
  * @param value :: The new value
  */
-void ColorMapWidget::setMinValue(double value) {
+void DraggableColorBarWidget::setMinValue(double value) {
   setMinValueText(value);
   updateScale();
   if (!m_minValueBox->signalsBlocked()) {
@@ -176,7 +175,7 @@ void ColorMapWidget::setMinValue(double value) {
  * Set a new max value and update the widget.
  * @param value :: The new value
  */
-void ColorMapWidget::setMaxValue(double value) {
+void DraggableColorBarWidget::setMaxValue(double value) {
   setMaxValueText(value);
   updateScale();
   if (!m_maxValueBox->signalsBlocked()) {
@@ -187,23 +186,29 @@ void ColorMapWidget::setMaxValue(double value) {
 /**
  * returns the min value as QString
  */
-QString ColorMapWidget::getMinValue() const { return m_minValueBox->text(); }
+QString DraggableColorBarWidget::getMinValue() const {
+  return m_minValueBox->text();
+}
 
 /**
  * returns the min value as QString
  */
-QString ColorMapWidget::getMaxValue() const { return m_maxValueBox->text(); }
+QString DraggableColorBarWidget::getMaxValue() const {
+  return m_maxValueBox->text();
+}
 
 /**
  * returns the mnth powder as QString
  */
-QString ColorMapWidget::getNth_power() const { return m_dspnN->text(); }
+QString DraggableColorBarWidget::getNth_power() const {
+  return m_dspnN->text();
+}
 
 /**
  * Update the min value text box.
  * @param value :: Value to be displayed in the text box.
  */
-void ColorMapWidget::setMinValueText(double value) {
+void DraggableColorBarWidget::setMinValueText(double value) {
   m_minValueBox->setText(QString::number(value));
 }
 
@@ -211,7 +216,7 @@ void ColorMapWidget::setMinValueText(double value) {
  * Update the max value text box.
  * @param value :: Value to be displayed in the text box.
  */
-void ColorMapWidget::setMaxValueText(double value) {
+void DraggableColorBarWidget::setMaxValueText(double value) {
   m_maxValueBox->setText(QString::number(value));
 }
 
@@ -219,32 +224,32 @@ void ColorMapWidget::setMaxValueText(double value) {
  * Set the minimum positive value for use with the Log10 scale. Values below
  * this will not be displayed on a Log10 scale.
  */
-void ColorMapWidget::setMinPositiveValue(double value) {
+void DraggableColorBarWidget::setMinPositiveValue(double value) {
   m_minPositiveValue = value;
 }
 
 /**
  * Return the scale type: Log10 or Linear.
  */
-int ColorMapWidget::getScaleType() const {
+int DraggableColorBarWidget::getScaleType() const {
   return m_scaleOptions->itemData(m_scaleOptions->currentIndex()).toUInt();
 }
 
 /**
  * Set the scale type: Log10 or Linear.
  */
-void ColorMapWidget::setScaleType(int type) {
+void DraggableColorBarWidget::setScaleType(int type) {
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
 }
 
-void ColorMapWidget::setNthPower(double nth_power) {
+void DraggableColorBarWidget::setNthPower(double nth_power) {
   m_dspnN->setValue(nth_power);
 }
 
 /**
  * Update the colour scale after the range changes.
  */
-void ColorMapWidget::updateScale() {
+void DraggableColorBarWidget::updateScale() {
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
   GraphOptions::ScaleType type = (GraphOptions::ScaleType)m_scaleOptions
@@ -275,7 +280,7 @@ void ColorMapWidget::updateScale() {
  * Respond to a mouse press event. Start dragging to modify the range (min or
  * max value).
  */
-void ColorMapWidget::mousePressEvent(QMouseEvent *e) {
+void DraggableColorBarWidget::mousePressEvent(QMouseEvent *e) {
   QRect rect = m_scaleWidget->rect();
   if (e->x() > rect.left() && e->x() < rect.right()) {
     m_dragging = true;
@@ -289,7 +294,7 @@ void ColorMapWidget::mousePressEvent(QMouseEvent *e) {
  * Respond to mouse move event. If the left button is down change the min or
  * max.
  */
-void ColorMapWidget::mouseMoveEvent(QMouseEvent *e) {
+void DraggableColorBarWidget::mouseMoveEvent(QMouseEvent *e) {
   if (!m_dragging)
     return;
 
@@ -310,7 +315,7 @@ void ColorMapWidget::mouseMoveEvent(QMouseEvent *e) {
 /**
  * Respond to a mouse release event. Finish all dragging.
  */
-void ColorMapWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
+void DraggableColorBarWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
   if (!m_dragging)
     return;
   if (m_dtype == Bottom) {
@@ -326,7 +331,7 @@ void ColorMapWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
  * Save the state of the color map widget to a project file.
  * @return string representing the current state of the color map widget.
  */
-std::string ColorMapWidget::saveToProject() const {
+std::string DraggableColorBarWidget::saveToProject() const {
   API::TSVSerialiser tsv;
   tsv.writeLine("ScaleType") << getScaleType();
   tsv.writeLine("Power") << getNth_power();
@@ -340,7 +345,7 @@ std::string ColorMapWidget::saveToProject() const {
  * @param lines :: string representing the current state of the color map
  * widget.
  */
-void ColorMapWidget::loadFromProject(const std::string &lines) {
+void DraggableColorBarWidget::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
 
   int scaleType;

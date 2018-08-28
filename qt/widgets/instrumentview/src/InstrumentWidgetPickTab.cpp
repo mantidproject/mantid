@@ -3,11 +3,12 @@
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
+
+#include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -21,10 +22,6 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
-
-#include "qwt_scale_div.h"
-#include "qwt_scale_engine.h"
-#include "qwt_scale_widget.h"
 
 #include <QAction>
 #include <QActionGroup>

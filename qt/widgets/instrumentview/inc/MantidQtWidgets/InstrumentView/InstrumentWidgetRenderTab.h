@@ -22,7 +22,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
 class BinDialog;
-class ColorMapWidget;
+class DraggableColorBarWidget;
 
 /**
  * Implements the Render tab in InstrumentWidget.
@@ -90,7 +90,7 @@ private:
 
   QPushButton *m_surfaceTypeButton;
   QPushButton *mSaveImage;
-  ColorMapWidget *m_colorMapWidget;
+  DraggableColorBarWidget *m_colorMapWidget;
   QFrame *m_resetViewFrame;
   QComboBox *mAxisCombo;
   QCheckBox *m_flipCheckBox;

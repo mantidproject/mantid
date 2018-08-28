@@ -2,7 +2,6 @@ set ( SRC_FILES
   src/BankRenderingHelpers.cpp
   src/BinDialog.cpp
   src/CollapsiblePanel.cpp
-  src/ColorMapWidget.cpp
   src/DetXMLFile.cpp
   src/GLColor.cpp
   src/GLObject.cpp
@@ -18,7 +17,6 @@ set ( SRC_FILES
   src/InstrumentWidgetTreeTab.cpp
   src/MantidGLWidget.cpp
   src/MaskBinsData.cpp
-  src/MiniPlotQwt.cpp
   src/OpenGLError.cpp
   src/PanelsSurface.cpp
   src/PeakMarker2D.cpp
@@ -39,10 +37,13 @@ set ( SRC_FILES
   src/XIntegrationControl.cpp
 )
 
+set ( QT4_SRC_FILES
+  src/MiniPlotQwt.cpp
+)
+
 set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/BinDialog.h
   inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
-  inc/MantidQtWidgets/InstrumentView/ColorMapWidget.h
   inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
   inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
@@ -53,7 +54,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
   inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
   inc/MantidQtWidgets/InstrumentView/MantidGLWidget.h
-  inc/MantidQtWidgets/InstrumentView/MiniPlotQwt.h
   inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
   inc/MantidQtWidgets/InstrumentView/Projection3D.h
   inc/MantidQtWidgets/InstrumentView/ProjectionSurface.h
@@ -63,8 +63,11 @@ set ( MOC_FILES
   inc/MantidQtWidgets/InstrumentView/XIntegrationControl.h
 )
 
+set ( QT4_MOC_FILES
+  inc/MantidQtWidgets/InstrumentView/MiniPlotQwt.h
+)
+
 set ( INC_FILES
-  ${MOC_FILES}
   inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
   inc/MantidQtWidgets/InstrumentView/DetXMLFile.h
   inc/MantidQtWidgets/InstrumentView/DllOption.h
@@ -93,8 +96,12 @@ set ( UI_FILES
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   QT_VERSION 4
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
+  SRC
+    ${SRC_FILES}
+    ${QT4_SRC_FILES}
+  MOC
+    ${MOC_FILES}
+    ${QT4_MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS
