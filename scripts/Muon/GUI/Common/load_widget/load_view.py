@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 from qtpy import QtWidgets
 
-from mantidqtpython import MantidQt
+
+# from mantidqtpython import MantidQt
 
 
 class LoadView(QtWidgets.QWidget):
