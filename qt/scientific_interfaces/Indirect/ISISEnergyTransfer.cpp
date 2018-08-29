@@ -376,7 +376,7 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 }
 
 void ISISEnergyTransfer::removeGroupingOption(const QString &option) {
-  for (auto i = 0u; i < m_uiForm.cbGroupingOptions->count(); ++i)
+  for (auto i = 0; i < m_uiForm.cbGroupingOptions->count(); ++i)
     if (m_uiForm.cbGroupingOptions->itemText(i) == option) {
       m_uiForm.cbGroupingOptions->removeItem(i);
       return;
