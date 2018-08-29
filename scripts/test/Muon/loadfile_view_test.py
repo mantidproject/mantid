@@ -1,6 +1,6 @@
 import unittest
 
-from qtpy.QtWidgets import QApplication
+from PyQt4.QtGui import QApplication
 
 from Muon.GUI.MuonAnalysis.loadfile.load_file_view import BrowseFileWidgetView
 

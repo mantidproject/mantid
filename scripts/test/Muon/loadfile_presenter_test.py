@@ -14,7 +14,7 @@ from Muon.GUI.MuonAnalysis.loadfile.load_file_model import BrowseFileWidgetModel
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
-from qtpy import QtWidgets
+from PyQt4.QtGui import QApplication
 
 
 def wait_for_thread(thread, timeout=10):
@@ -54,12 +54,15 @@ class IteratorWithException:
 
     next = __next__
 
+# Gobal QApplication (get errors if >1 in the code)
+QT_APP = QApplication([])
+
 
 class LoadFileWidgetPresenterTest(unittest.TestCase):
     class Runner:
-        QT_APP = QtWidgets.QApplication([])
 
         def __init__(self, thread):
+            self.QT_APP = QT_APP
             if thread:
                 self._thread = thread
                 self._thread.finished.connect(self.finished)
@@ -343,18 +346,17 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
 class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
     class Runner:
-        QT_APP = QtWidgets.QApplication([])
 
         def __init__(self, thread):
             if thread:
                 self._thread = thread
                 self._thread.finished.connect(self.finished)
                 if self._thread.isRunning():
-                    self.QT_APP.exec_()
+                    QT_APP.exec_()
 
         def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
+            QT_APP.processEvents()
+            QT_APP.exit(0)
 
     def setUp(self):
         self.data = MuonLoadData()
@@ -498,8 +500,6 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
 
         self.presenter.on_browse_button_clicked()
         self.Runner(self.presenter._load_thread)
-
-        print("Got to here!")
 
         six.assertCountEqual(self, self.model.loaded_filenames,
                              ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir1/file3.nxs"])

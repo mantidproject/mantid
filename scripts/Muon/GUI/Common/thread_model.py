@@ -18,7 +18,10 @@ class ThreadModel(QThread):
         self.model = model
 
     def __del__(self):
-        self.wait()
+        try:
+            self.wait()
+        except RuntimeError:
+            pass
 
     def run(self):
         self.user_cancel = False

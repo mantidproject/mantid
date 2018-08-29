@@ -1,14 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, QtCore
-from qtpy.QtCore import Signal
+from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import pyqtSignal
 
 
-class BrowseFileWidgetView(QtWidgets.QWidget):
+class BrowseFileWidgetView(QtGui.QWidget):
     # signals for use by parent widgets
-    loadingStarted = Signal()
-    loadingFinished = Signal()
-    dataChanged = Signal()
+    loadingStarted = pyqtSignal()
+    loadingFinished = pyqtSignal()
+    dataChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super(BrowseFileWidgetView, self).__init__(parent)
@@ -27,9 +27,9 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.setObjectName("BrowseFileWidget")
         self.resize(500, 100)
 
-        self.browse_button = QtWidgets.QPushButton(self)
+        self.browse_button = QtGui.QPushButton(self)
 
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         size_policy.setHeightForWidth(self.browse_button.sizePolicy().hasHeightForWidth())
@@ -39,9 +39,9 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.browse_button.setObjectName("browseButton")
         self.browse_button.setText("Browse")
 
-        self.file_path_edit = QtWidgets.QLineEdit(self)
+        self.file_path_edit = QtGui.QLineEdit(self)
 
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
         size_policy.setHeightForWidth(self.file_path_edit.sizePolicy().hasHeightForWidth())
@@ -51,7 +51,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.file_path_edit.setToolTip("")
         self.file_path_edit.setObjectName("filePathEdit")
 
-        self.horizontal_layout = QtWidgets.QHBoxLayout(self)
+        self.horizontal_layout = QtGui.QHBoxLayout(self)
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.file_path_edit)
         self.horizontal_layout.addWidget(self.browse_button)
@@ -67,12 +67,12 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
     def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
         if multiple_files:
-            chosen_files, _ = QtWidgets.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
-                                                                     file_filter)
+            chosen_files, _ = QtGui.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
+                                                                 file_filter)
             return [str(chosen_file) for chosen_file in chosen_files]
         else:
-            chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select file", default_directory,
-                                                                   file_filter)
+            chosen_file, _ = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
+                                                               file_filter)
             return [str(chosen_file)]
 
     def disable_loading(self):
@@ -101,9 +101,9 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
     def get_file_edit_text(self):
         if self._store_edit_text:
-            return self._stored_edit_text
+            return str(self._stored_edit_text)
         else:
-            return self.file_path_edit.text()
+            return str(self.file_path_edit.text())
 
     def set_file_edit(self, text, store=False):
         if store:
@@ -126,4 +126,4 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
     def warning_popup(self, message):
         # TODO : limit the number of warnings to prevent spamming if a list of bad files is selected.
-        QtWidgets.QMessageBox.warning(self, "Error", str(message))
+        QtGui.QMessageBox.warning(self, "Error", str(message))
