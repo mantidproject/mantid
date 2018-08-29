@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/GeometryHandler.h"
 
 namespace Mantid {
 namespace Geometry {

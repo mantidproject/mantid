@@ -32,14 +32,14 @@
 #include "ApplicationWindow.h"
 
 #include <QCloseEvent>
-#include <QStackedWidget>
-#include <QImageWriter>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QGridLayout>
-#include <QPrinter>
-#include <QLabel>
 #include <QComboBox>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QImageWriter>
+#include <QLabel>
+#include <QPrinter>
+#include <QPushButton>
+#include <QStackedWidget>
 
 ImageExportDialog::ImageExportDialog(QWidget *parent, bool vector_options,
                                      bool extended, Qt::WFlags flags)

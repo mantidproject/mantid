@@ -23,7 +23,7 @@
 namespace {
 // Track number of attachments to generate a unique channel name
 int ATTACH_COUNT = 0;
-}
+} // namespace
 
 using Mantid::Kernel::ConfigService;
 
@@ -53,9 +53,8 @@ void MessageDisplay::readSettings(const QSettings &storage) {
  * @param storage A pointer to an existing QSettings instance opened
  * at the group where the values should be stored.
  */
-void MessageDisplay::writeSettings(QSettings *storage) {
-  Q_ASSERT(storage);
-  storage->setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
+void MessageDisplay::writeSettings(QSettings &storage) const {
+  storage.setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
 }
 
 /**
@@ -362,5 +361,5 @@ void MessageDisplay::setupTextArea() {
 QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

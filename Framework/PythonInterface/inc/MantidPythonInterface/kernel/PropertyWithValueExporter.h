@@ -28,15 +28,24 @@
 #include "MantidPythonInterface/kernel/Converters/ContainerDtype.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/python/class.hpp>
 #include <boost/python/bases.hpp>
-#include <boost/python/return_value_policy.hpp>
+#include <boost/python/class.hpp>
 #include <boost/python/return_by_value.hpp>
+#include <boost/python/return_value_policy.hpp>
 #endif
 
 // Call the dtype helper function
 template <typename HeldType>
 std::string dtype(Mantid::Kernel::PropertyWithValue<HeldType> &self) {
+  // Check for the special case of a string
+  if (std::is_same<HeldType, std::string>::value) {
+    std::stringstream ss;
+    std::string val = self.value();
+    ss << "S" << val.size();
+    std::string ret_val = ss.str();
+    return ret_val;
+  }
+
   return Mantid::PythonInterface::Converters::dtype(self);
 }
 
@@ -61,7 +70,7 @@ struct PropertyWithValueExporter {
         .def("dtype", &dtype<HeldType>, arg("self"));
   }
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PROPERTYWITHVALUEEXPORTER_H_ */

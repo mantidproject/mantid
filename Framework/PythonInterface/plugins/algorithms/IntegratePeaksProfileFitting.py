@@ -43,12 +43,9 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
         self.declareProperty("RunNumber", defaultValue=0,
                              doc="Run Number to integrate")
-        self.declareProperty("DQPixel", defaultValue=0.003, validator=FloatBoundedValidator(lower=0., exclusive=True),
-                             doc="The side length of each voxel in the non-MD histogram used for fitting (1/Angstrom)")
-
         self.declareProperty(FileProperty(name="UBFile",defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".mat"]),
-                             doc="File containing the UB Matrix in ISAW format.")
+                             doc="File containing the UB Matrix in ISAW format. Leave blank to use loaded UB Matrix.")
         self.declareProperty(FileProperty(name="ModeratorCoefficientsFile",
                              defaultValue="",action=FileAction.OptionalLoad,
                              extensions=[".dat"]),
@@ -59,22 +56,13 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.declareProperty("IntensityCutoff", defaultValue=0., doc="Minimum number of counts to force a profile")
         edgeDocString = 'Pixels within EdgeCutoff from a detector edge will be have a profile forced.  Currently for 256x256 cameras only.'
         self.declareProperty("EdgeCutoff", defaultValue=0., doc=edgeDocString)
-        self.declareProperty("FracHKL", defaultValue=0.5, validator=FloatBoundedValidator(lower=0., exclusive=True),
-                             doc="Fraction of HKL to consider for profile fitting.")
         self.declareProperty("FracStop", defaultValue=0.05, validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Fraction of max counts to include in peak selection.")
 
         self.declareProperty("MinpplFrac", defaultValue=0.9, doc="Min fraction of predicted background level to check")
         self.declareProperty("MaxpplFrac", defaultValue=1.1, doc="Max fraction of predicted background level to check")
-        mindtBinWidthDocString = "Smallest spacing (in microseconds) between data points for TOF profile fitting."
-        self.declareProperty("MindtBinWidth", defaultValue=15, doc=mindtBinWidthDocString)
-
-        self.declareProperty("NTheta", defaultValue=50, doc="Number of bins for bivarite Gaussian along the scattering angle.")
-        self.declareProperty("NPhi", defaultValue=50,  doc="Number of bins for bivariate Gaussian along the azimuthal angle.")
 
         self.declareProperty("DQMax", defaultValue=0.15, doc="Largest total side length (in Angstrom) to consider for profile fitting.")
-        self.declareProperty("DtSpread", defaultValue=0.03, validator=FloatBoundedValidator(lower=0., exclusive=True),
-                             doc="The fraction of the peak TOF to consider for TOF profile fitting.")
         self.declareProperty("PeakNumber", defaultValue=-1,  doc="Which Peak to fit.  Leave negative for all.")
 
     def PyExec(self):
@@ -83,10 +71,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve
-
         MDdata = self.getProperty('InputWorkspace').value
         peaks_ws = self.getProperty('PeaksWorkspace').value
-        fracHKL = self.getProperty('FracHKL').value
         fracStop = self.getProperty('FracStop').value
         dQMax = self.getProperty('DQMax').value
         UBFile = self.getProperty('UBFile').value
@@ -96,11 +82,17 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         edgeCutoff = self.getProperty('EdgeCutoff').value
         peakNumberToFit = self.getProperty('PeakNumber').value
 
-        LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+        if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
+            logger.information("Using UB file already available in PeaksWorkspace")
+        else:
+            try:
+                LoadIsawUB(InputWorkspace=peaks_ws, FileName=UBFile)
+            except:
+                logger.error("peaks_ws does not have a UB matrix loaded.  Must provide a file")
+
         UBMatrix = peaks_ws.sample().getOrientedLattice().getUB()
         dQ = np.abs(ICCFT.getDQFracHKL(UBMatrix, frac=0.5))
         dQ[dQ>dQMax] = dQMax
-        dQPixel = self.getProperty('DQPixel').value
         q_frame='lab'
         mtd['MDdata'] = MDdata
 
@@ -113,21 +105,40 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         else:
             strongPeakParams = None #This will not force any profiles
 
-        nTheta = self.getProperty('NTheta').value
-        nPhi = self.getProperty('NPhi').value
         zBG = 1.96
-        mindtBinWidth = self.getProperty('MindtBinWidth').value
         pplmin_frac = self.getProperty('MinpplFrac').value
         pplmax_frac = self.getProperty('MaxpplFrac').value
         sampleRun = self.getProperty('RunNumber').value
+
+        # There are a few instrument specific parameters that we define here.  In some cases,
+        # it may improve fitting to set tweak these parameters, but for simplicity we define these here
+        # The default values are good for MaNDi - new instruments can be added by adding a different elif
+        # statement.
+        # If you change these values or add an instrument, documentation should also be changed.
+        try:
+            nTheta = peaks_ws.getInstrument().getIntParameter("numBinsTheta")[0]
+            nPhi = peaks_ws.getInstrument().getIntParameter("numBinsPhi")[0]
+            mindtBinWidth = peaks_ws.getInstrument().getNumberParameter("mindtBinWidth")[0]
+            maxdtBinWidth = peaks_ws.getInstrument().getNumberParameter("maxdtBinWidth")[0]
+            fracHKL = peaks_ws.getInstrument().getNumberParameter("fracHKL")[0]
+            dQPixel = peaks_ws.getInstrument().getNumberParameter("dQPixel")[0]
+            peakMaskSize = peaks_ws.getInstrument().getIntParameter("peakMaskSize")[0]
+
+        except:
+            raise
+            logger.error("Cannot find all parameters in instrument parameters file.")
+            sys.exit(1)
+
         neigh_length_m=3
         qMask = ICCFT.getHKLMask(UBMatrix, frac=fracHKL, dQPixel=dQPixel,dQ=dQ)
+
+        iccFitDict = ICCFT.parseConstraints(peaks_ws) #Contains constraints and guesses for ICC Fitting
 
         numgood = 0
         numerrors = 0
 
         # Create the parameters workspace
-        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'dQ', 'KConv', 'MuPH',
+        keys =  ['peakNumber','Alpha', 'Beta', 'R', 'T0', 'bgBVG', 'chiSq3d', 'chiSq', 'dQ', 'KConv', 'MuPH',
                  'MuTH', 'newQ', 'Scale', 'scale3d', 'SigP', 'SigX', 'SigY', 'Intens3d', 'SigInt3d']
         datatypes = ['float']*len(keys)
         datatypes[np.where(np.array(keys)=='newQ')[0][0]] = 'V3D'
@@ -153,13 +164,16 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     box = ICCFT.getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber,
                                               dQ, fracHKL=0.5, dQPixel=dQPixel, q_frame=q_frame)
                     # Will force weak peaks to be fit using a neighboring peak profile
-                    Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, box, padeCoefficients,qMask,
+                    Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
                                                                       nTheta=nTheta, nPhi=nPhi, plotResults=False,
                                                                       zBG=zBG,fracBoxToHistogram=1.0,bgPolyOrder=1,
                                                                       strongPeakParams=strongPeakParams,
                                                                       q_frame=q_frame, mindtBinWidth=mindtBinWidth,
+                                                                      maxdtBinWidth=maxdtBinWidth,
                                                                       pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
-                                                                      forceCutoff=forceCutoff, edgeCutoff=edgeCutoff)
+                                                                      forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
+                                                                      peakMaskSize=peakMaskSize,
+                                                                      iccFitDict=iccFitDict)
 
                     # First we get the peak intensity
                     peakIDX = Y3D/Y3D.max() > fracStop

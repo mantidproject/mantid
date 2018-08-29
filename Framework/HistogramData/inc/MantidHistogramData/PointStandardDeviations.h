@@ -2,8 +2,8 @@
 #define MANTID_HISTOGRAMDATA_POINTSTANDARDDEVIATIONS_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/StandardDeviationVectorOf.h"
 #include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/StandardDeviationVectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -48,8 +48,7 @@ public:
   using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx,
                                   PointVariances>::StandardDeviationVectorOf;
   using StandardDeviationVectorOf<PointStandardDeviations, HistogramDx,
-                                  PointVariances>::
-  operator=;
+                                  PointVariances>::operator=;
   /// Default constructor, creates a NULL object.
   PointStandardDeviations() = default;
   // The copy and move constructor and assignment are not captured properly by
@@ -60,9 +59,9 @@ public:
   PointStandardDeviations(PointStandardDeviations &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
   PointStandardDeviations &
-  operator=(const PointStandardDeviations &)& = default;
+  operator=(const PointStandardDeviations &) & = default;
   /// Move assignment.
-  PointStandardDeviations &operator=(PointStandardDeviations &&)& = default;
+  PointStandardDeviations &operator=(PointStandardDeviations &&) & = default;
 };
 
 } // namespace HistogramData

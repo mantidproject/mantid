@@ -1,10 +1,10 @@
 #ifndef MANTIDQT_API_MANTIDCOLORMAPTEST_H_
 #define MANTIDQT_API_MANTIDCOLORMAPTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
-#include <limits>
 #include <QRgb>
+#include <cxxtest/TestSuite.h>
+#include <limits>
 
 class MantidColorMapTest : public CxxTest::TestSuite {
 public:

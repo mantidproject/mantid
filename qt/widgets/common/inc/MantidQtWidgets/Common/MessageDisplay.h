@@ -42,7 +42,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget,
 public:
   // Configurable interface
   void readSettings(const QSettings &storage) override;
-  void writeSettings(QSettings *storage) override;
+  void writeSettings(QSettings &storage) const override;
 
 public:
   /// Default constructor with optional parent
@@ -122,7 +122,7 @@ private:
   /// Log level actions
   QAction *m_error, *m_warning, *m_notice, *m_information, *m_debug;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MESSAGEDISPLAY_H_

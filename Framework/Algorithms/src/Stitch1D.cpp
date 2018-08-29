@@ -1,10 +1,10 @@
-#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidHistogramData/HistogramE.h"
+#include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -14,9 +14,9 @@
 #include "MantidKernel/RebinParamsValidator.h"
 
 #include <algorithm>
-#include <boost/tuple/tuple.hpp>
 #include <boost/format.hpp>
 #include <boost/math/special_functions.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <map>
 
 using namespace Mantid::API;
@@ -35,40 +35,7 @@ MinMaxTuple calculateXIntersection(MatrixWorkspace_const_sptr &lhsWS,
 
 /// Check if a double is not zero and returns a bool indicating success
 bool isNonzero(double i) { return (0 != i); }
-
-/** Sort x axis (Dx will be handled only for point data)
- @param ws :: Input workspace
- @return A shared pointer to the resulting MatrixWorkspace
- */
-void sortXAxis(MatrixWorkspace_sptr &ws) {
-  // using a std::multimap (keys are sorted)
-  std::multimap<double, double> sorter;
-  double x_value;
-  const int nHists = static_cast<int>(ws->getNumberHistograms());
-  for (int i = 0; i < nHists; ++i) {
-    for (size_t k = 0; k < ws->size(); ++k) {
-      x_value = ws->x(i)[k];
-      sorter.insert(std::pair<double, double>(x_value, ws->y(i)[k]));
-      sorter.insert(std::pair<double, double>(x_value, ws->e(i)[k]));
-      // histograms: no recalculation of Dx implemented -> skip
-      if (ws->hasDx(i) && !ws->isHistogramData())
-        sorter.insert(std::pair<double, double>(x_value, ws->dx(i)[k]));
-    }
-    int l = 0;
-    auto it = sorter.cbegin();
-    while (it != sorter.cend()) {
-      ws->mutableX(i)[l] = it->first;
-      ws->mutableY(i)[l] = it->second;
-      ws->mutableE(i)[l] = (++it)->second;
-      // histograms: no recalculation of Dx implemented -> skip
-      if (ws->hasDx(i) && !ws->isHistogramData())
-        ws->mutableDx(i)[l] = (++it)->second;
-      ++l;
-      ++it;
-    }
-  }
-}
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -232,8 +199,9 @@ double Stitch1D::getStartOverlap(const double intesectionMin,
   if (startOverlapProp->isDefault() || startOverlapBeyondRange) {
     if (!startOverlapProp->isDefault() && startOverlapBeyondRange) {
       char message[200];
-      std::sprintf(message, "StartOverlap is outside range at %0.4f, Min is "
-                            "%0.4f, Max is %0.4f . Forced to be: %0.4f",
+      std::sprintf(message,
+                   "StartOverlap is outside range at %0.4f, Min is "
+                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
                    startOverlapVal, intesectionMin, intesectionMax,
                    intesectionMin);
       g_log.warning(std::string(message));
@@ -263,8 +231,9 @@ double Stitch1D::getEndOverlap(const double intesectionMin,
   if (endOverlapProp->isDefault() || endOverlapBeyondRange) {
     if (!endOverlapProp->isDefault() && endOverlapBeyondRange) {
       char message[200];
-      std::sprintf(message, "EndOverlap is outside range at %0.4f, Min is "
-                            "%0.4f, Max is %0.4f . Forced to be: %0.4f",
+      std::sprintf(message,
+                   "EndOverlap is outside range at %0.4f, Min is "
+                   "%0.4f, Max is %0.4f . Forced to be: %0.4f",
                    endOverlapVal, intesectionMin, intesectionMax,
                    intesectionMax);
       g_log.warning(std::string(message));
@@ -655,7 +624,12 @@ void Stitch1D::exec() {
     result = conjoinXAxis(lhs, rhs);
     if (!result)
       g_log.error("Could not retrieve joined workspace.");
-    sortXAxis(result);
+
+    // Sort the X Axis
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("SortXAxis");
+    childAlg->setProperty("InputWorkspace", result);
+    childAlg->execute();
+    result = childAlg->getProperty("OutputWorkspace");
   }
   setProperty("OutputWorkspace", result);
   setProperty("OutScaleFactor", m_scaleFactor);

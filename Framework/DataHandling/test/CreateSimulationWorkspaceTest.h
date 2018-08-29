@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/CreateSimulationWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/CreateSimulationWorkspace.h"
 #include "MantidKernel/Unit.h"
 
 using Mantid::DataHandling::CreateSimulationWorkspace;

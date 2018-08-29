@@ -95,8 +95,8 @@ void IndirectSassena::plotClicked() {
 }
 
 /**
-* Handle saving of workspace
-*/
+ * Handle saving of workspace
+ */
 void IndirectSassena::saveClicked() {
   if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
     addSaveWorkspaceToQueue(m_outWsName);

@@ -7,8 +7,8 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-#include <vector>
 #include <initializer_list>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -107,6 +107,6 @@ private:
   std::string m_currentInstrumentName;
   int m_group;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H */

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/MultiFileNameParser.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiFileNameParser.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
 #include <Poco/Path.h>

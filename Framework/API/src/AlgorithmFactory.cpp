@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <sstream>
-#include <boost/algorithm/string.hpp>
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/LibraryManager.h"
+#include <boost/algorithm/string.hpp>
+#include <sstream>
 
 #include "MantidKernel/StringTokenizer.h"
 
@@ -15,7 +15,7 @@ namespace API {
 namespace {
 /// static logger instance
 Kernel::Logger g_log("AlgorithmFactory");
-}
+} // namespace
 
 AlgorithmFactoryImpl::AlgorithmFactoryImpl()
     : Kernel::DynamicFactory<Algorithm>(), m_vmap() {
@@ -29,10 +29,10 @@ AlgorithmFactoryImpl::AlgorithmFactoryImpl()
 AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
 
 /** Creates an instance of an algorithm
-* @param name :: the name of the Algrorithm to create
-* @param version :: the version of the algroithm to create
-* @returns a shared pointer to the created algorithm
-*/
+ * @param name :: the name of the Algrorithm to create
+ * @param version :: the version of the algroithm to create
+ * @returns a shared pointer to the created algorithm
+ */
 boost::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::create(const std::string &name,
                              const int &version) const {
@@ -115,10 +115,10 @@ bool AlgorithmFactoryImpl::exists(const std::string &algorithmName,
 }
 
 /** Creates a mangled name for interal storage
-* @param name :: the name of the Algrorithm
-* @param version :: the version of the algroithm
-* @returns a mangled name string
-*/
+ * @param name :: the name of the Algrorithm
+ * @param version :: the version of the algroithm
+ * @returns a mangled name string
+ */
 std::string AlgorithmFactoryImpl::createName(const std::string &name,
                                              const int &version) const {
   std::ostringstream oss;
@@ -127,9 +127,9 @@ std::string AlgorithmFactoryImpl::createName(const std::string &name,
 }
 
 /** Decodes a mangled name for interal storage
-* @param mangledName :: the mangled name of the Algrorithm
-* @returns a pair of the name and version
-*/
+ * @param mangledName :: the mangled name of the Algrorithm
+ * @returns a pair of the name and version
+ */
 std::pair<std::string, int>
 AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
   std::string::size_type seperatorPosition = mangledName.find('|');
@@ -162,13 +162,13 @@ const std::vector<std::string> AlgorithmFactoryImpl::getKeys() const {
 }
 
 /**
-* Return the keys used for identifying algorithms. This includes those within
-* the Factory itself and
-* any cleanly constructed algorithms stored here.
-* @param includeHidden true includes the hidden algorithm names and is faster,
-* the default is false
-* @returns The strings used to identify individual algorithms
-*/
+ * Return the keys used for identifying algorithms. This includes those within
+ * the Factory itself and
+ * any cleanly constructed algorithms stored here.
+ * @param includeHidden true includes the hidden algorithm names and is faster,
+ * the default is false
+ * @returns The strings used to identify individual algorithms
+ */
 const std::vector<std::string>
 AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
   // Start with those subscribed with the factory and add the cleanly
@@ -235,12 +235,12 @@ int AlgorithmFactoryImpl::highestVersion(
 }
 
 /**
-  * Return the categories of the algorithms. This includes those within the
+ * Return the categories of the algorithms. This includes those within the
  * Factory itself and
-  * any cleanly constructed algorithms stored here.
-  * @returns The map of the categories, together with a true false value
+ * any cleanly constructed algorithms stored here.
+ * @returns The map of the categories, together with a true false value
  * difining if they are hidden
-  */
+ */
 const std::map<std::string, bool>
 AlgorithmFactoryImpl::getCategoriesWithState() const {
   std::map<std::string, bool> resultCategories;
@@ -281,13 +281,13 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
 }
 
 /**
-* Return the categories of the algorithms. This includes those within the
-* Factory itself and
-* any cleanly constructed algorithms stored here.
-* @param includeHidden true includes the hidden algorithm names and is faster,
-* the default is false
-* @returns The category strings
-*/
+ * Return the categories of the algorithms. This includes those within the
+ * Factory itself and
+ * any cleanly constructed algorithms stored here.
+ * @param includeHidden true includes the hidden algorithm names and is faster,
+ * the default is false
+ * @returns The category strings
+ */
 const std::unordered_set<std::string>
 AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
   std::unordered_set<std::string> validCategories;
@@ -307,14 +307,14 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
 }
 
 /**
-* Get a list of descriptor objects used to order the algorithms in the stored
-* map
-* where an algorithm has multiple categories it will be represented using
-* multiple descriptors.
-* @param includeHidden true includes the hidden algorithm names and is faster,
-* the default is false
-* @returns A vector of descriptor objects
-*/
+ * Get a list of descriptor objects used to order the algorithms in the stored
+ * map
+ * where an algorithm has multiple categories it will be represented using
+ * multiple descriptors.
+ * @param includeHidden true includes the hidden algorithm names and is faster,
+ * the default is false
+ * @returns A vector of descriptor objects
+ */
 std::vector<AlgorithmDescriptor>
 AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
   // algorithm names
@@ -396,31 +396,31 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
 }
 
 /** Extract the name of an algorithm
-* @param alg :: the Algrorithm to use
-* @returns the name of the algroithm
-*/
+ * @param alg :: the Algrorithm to use
+ * @returns the name of the algroithm
+ */
 const std::string AlgorithmFactoryImpl::extractAlgName(
     const boost::shared_ptr<IAlgorithm> alg) const {
   return alg->name();
 }
 
 /** Extract the version of an algorithm
-* @param alg :: the Algrorithm to use
-* @returns the version of the algroithm
-*/
+ * @param alg :: the Algrorithm to use
+ * @returns the version of the algroithm
+ */
 int AlgorithmFactoryImpl::extractAlgVersion(
     const boost::shared_ptr<IAlgorithm> alg) const {
   return alg->version();
 }
 
 /**
-* Create a shared pointer to an algorithm object with the given name and
-* version. If the algorithm is one registered with a clean pointer rather than
-* an instantiator then a clone is returned.
-* @param name :: Algorithm name
-* @param version :: Algorithm version
-* @returns A shared pointer to the algorithm object
-*/
+ * Create a shared pointer to an algorithm object with the given name and
+ * version. If the algorithm is one registered with a clean pointer rather than
+ * an instantiator then a clone is returned.
+ * @param name :: Algorithm name
+ * @param version :: Algorithm version
+ * @returns A shared pointer to the algorithm object
+ */
 boost::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::createAlgorithm(const std::string &name,
                                       const int version) const {

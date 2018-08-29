@@ -12,10 +12,19 @@ The Mantid framework is configured using up to three simple text ``*.properties`
 2. ``/etc/mantid.local.properties`` is an optional, linux only file that sets shared defaults on a shared system. This is commonly used for setting the ``default.facility``, ``default.instrument``, and ``datasearch.searcharchive`` properties.
 3. Home directory ``Mantid.user.properties`` is where users may override any property setting in Mantid. Any Property setting in this file will override anything set in the ``Mantid.properties`` file. Simply either enter the property you wish to override in this file together with it's new value. The change will take effect the next time Mantid is started. Subsequent installs or upgrades of Mantid will never alter this file.
 
+The user properties file, ``Mantid.user.properties``, can be found
+
+* windows: ``$MantidInstallDirectory\bin\Mantid.user.properties``
+* linux and mac-os: ``$HOME/.mantid/Mantid.user.properties``
+
+
 The Properties
 --------------
 
 .. note:: Use forward slash (``/``) or double up on the number of backslash (``\``) characters for all paths
+
+
+.. note:: Boolean properties evaluate ``true``, ``1``, and ``on`` (case insensitive) as ``true``, all other values as ``false``.
 
 
 General properties
@@ -24,11 +33,11 @@ General properties
 +----------------------------------+--------------------------------------------------+-------------------+
 |Property                          |Description                                       | Example value     |
 +==================================+==================================================+===================+
-| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``            |
-|                                  | memory for refence in scripts.                   |                   |
-+----------------------------------+--------------------------------------------------+-------------------+
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing`` |
 |                                  | algorithms that should be hidden in Mantid.      |                   |
++----------------------------------+--------------------------------------------------+-------------------+
+| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``            |
+|                                  | memory for refence in scripts.                   |                   |
 +----------------------------------+--------------------------------------------------+-------------------+
 | ``MultiThreaded.MaxCores``       | Sets the maximum number of cores available to be | ``0``             |
 |                                  | used for threads for                             |                   |
@@ -63,6 +72,8 @@ Directory Properties
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 |Property                              |Description                                        |Example value                        |
 +======================================+===================================================+=====================================+
+| ``colormaps.directory``              | The directory where colormaps are located         | ``/opt/mantid/colormaps``           |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``datasearch.directories``           | A semi-colon(``;``) separated list of directories | ``../data;\\\\isis\\isis$\\ndxgem`` |
 |                                      | to use to search for data.                        |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
@@ -74,7 +85,16 @@ Directory Properties
 | ``defaultsave.directory``            | A default directory to use for saving files.      | ``../data``                         |
 |                                      | the data archive                                  |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``framework.plugins.directory``      | The path to the directory that contains the       | ``../plugins``                      |
+|                                      | Mantid plugin libraries                           |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``framework.plugins.exclude``        | A list of substrings to allow libraries to be     | ``Qt4;Qt5``                         |
+|                                      | skipped                                           |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``instrumentDefinition.directory``   | Where to load instrument definition files from    | ``../Test/Instrument``              |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``mantidqt.plugins.directory``       | The path to the directory containing the          | ``../plugins/qtX``                  |
+|                                      | Mantid Qt-based plugin libraries                  |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``parameterDefinition.directory``    | Where to load parameter definition files from     | ``../Test/Instrument``              |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
@@ -87,15 +107,6 @@ Directory Properties
 | ``requiredpythonscript.directories`` | A list of directories containing Python scripts   | N/A                                 |
 |                                      | that Mantid requires to function correctly.       |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
-+--------------------------------------+---------------------------------------------------+-------------------------------------+
-| ``framework.plugins.directory``      | The path to the directory that contains the       | ``../plugins``                      |
-|                                      | Mantid plugin libraries                           |                                     |
-+--------------------------------------+---------------------------------------------------+-------------------------------------+
-| ``framework.plugins.exclude``        | A list of substrings to allow libraries to be     | ``Qt4;Qt5``                         |
-|                                      | skipped                                           |                                     |
-+--------------------------------------+---------------------------------------------------+-------------------------------------+
-| ``mantidqt.plugins.directory``       | The path to the directory containing the          | ``../plugins/qtX``                  |
-|                                      | Mantid Qt-based plugin libraries                  |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``requiredpythonscript.directories`` | A list of directories containing Python scripts   | N/A                                 |
 |                                      | that Mantid requires to function correctly.       |                                     |
@@ -141,11 +152,16 @@ MantidPlot Properties
 +--------------------------------------------+---------------------------------------------------+-----------------+
 |Property                                    |Description                                        |Example value    |
 +============================================+===================================================+=================+
-| ``MantidOptions.InvisibleWorkspaces``      |Do not show 'invisible' workspaces                 | ``0``, ``1``    |
+| ``cluster.submission``                     |Enable cluster submission elements in GUIs         | ``On``, ``Off`` |
 +--------------------------------------------+---------------------------------------------------+-----------------+
 | ``MantidOptions.InstrumentView.UseOpenGL`` |Controls the use of OpenGL in rendering the        | ``On``, ``Off`` |
 |                                            |"unwrapped" (flat) instrument views.               |                 |
 +--------------------------------------------+---------------------------------------------------+-----------------+
+| ``MantidOptions.InvisibleWorkspaces``      |Do not show 'invisible' workspaces                 | ``0``, ``1``    |
++--------------------------------------------+---------------------------------------------------+-----------------+
+| ``PeakColumn.hklPrec``                     |Precision of hkl values shown in tables            | ``2``           |
++--------------------------------------------+---------------------------------------------------+-----------------+
+
 
 Network Properties
 ******************
@@ -153,8 +169,13 @@ Network Properties
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 |Property                                   |Description                                        |Example value                    |
 +===========================================+===================================================+=================================+
+| ``catalog.timeout.value``                 | Network timeout for ICAT4 requests                | ``30``                          |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``CheckMantidVersion.OnStartup``          | Check if there is a newer version available and   |                                 |
 |                                           | logs a message at ``information`` level           | ``1``                           |
++-------------------------------------------+---------------------------------------------------+---------------------------------+
+| ``ISISDAE.Timeout``                       | Timeout for network requests when reading live    |  ``100``                        |
+|                                           | data from ISIS (in seconds)                       |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``network.default.timeout``               |Defines the default timeout for all network        | ``30``                          |
 |                                           |operations (in seconds).                           |                                 |
@@ -181,8 +202,6 @@ Network Properties
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 
 
-
-
 ScriptRepository Properties
 ***************************
 
@@ -193,11 +212,27 @@ ScriptRepository Properties
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 | ``ScriptRepository``       |Base URL for the remote script repository.     | ``http://download.mantidproject.org/scriptrepository/``              |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
-| ``UploaderWebServer``      |URL for uploading scripts.                     | ``http://upload.mantidproject.org/scriptrepository/payload/publish`` |
-+----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 | ``ScriptRepositoryIgnore`` |CSV patterns for paths that should not be      | ``*pyc;``                                                            |
 |                            |listed at ScriptRepository.                    |                                                                      |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
+| ``UploaderWebServer``      |URL for uploading scripts.                     | ``http://upload.mantidproject.org/scriptrepository/payload/publish`` |
++----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
+
+
+Project Recovery
+****************
+
+See :ref:`project recovery <Project Recovery>` for more details.
+
++-----------------------------------------+-----------------------------------------------+------------------+
+|Property                                 |Description                                    |Example value     |
++=========================================+===============================================+==================+
+| ``projectRecovery.enabled``             |Whether project recovery is enabled            |  ``On``, ``Off`` |
++-----------------------------------------+-----------------------------------------------+------------------+
+| ``projectRecovery.numberOfCheckpoints`` |How many checkpoints/backups to keep           | ``5``            |
++-----------------------------------------+-----------------------------------------------+------------------+
+| ``projectRecovery.secondsBetween``      |How often to save checkpoints in seconds       | ``60``           |
++-----------------------------------------+-----------------------------------------------+------------------+
 
 
 Getting access to Mantid properties

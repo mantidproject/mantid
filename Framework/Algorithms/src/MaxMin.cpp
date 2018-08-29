@@ -94,8 +94,8 @@ void MaxMin::exec() {
     PARALLEL_START_INTERUPT_REGION
     int newindex = i - MinSpec;
     // Copy over spectrum and detector number info
-    outputWorkspace->getSpectrum(newindex)
-        .copyInfoFrom(localworkspace->getSpectrum(i));
+    outputWorkspace->getSpectrum(newindex).copyInfoFrom(
+        localworkspace->getSpectrum(i));
 
     // Retrieve the spectrum into a vector
     auto &X = localworkspace->x(i);

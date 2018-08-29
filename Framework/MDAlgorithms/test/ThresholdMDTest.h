@@ -5,8 +5,8 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidMDAlgorithms/ThresholdMD.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidMDAlgorithms/ThresholdMD.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

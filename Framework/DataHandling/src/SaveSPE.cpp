@@ -26,13 +26,14 @@ namespace DataHandling {
 DECLARE_ALGORITHM(SaveSPE)
 
 /** A Macro wrapping std::fprintf in order to throw an exception when there is a
-* fault writing to disk
-*  @param stream :: the file object to write to
-*  @param format :: C string that contains the text to be written to the stream.
-*  @param ... :: Additional arguments to fill format specifiers
-*  @throws std::runtime_error :: throws when there is a problem writing to disk,
-* usually disk space or permissions based
-*/
+ * fault writing to disk
+ *  @param stream :: the file object to write to
+ *  @param format :: C string that contains the text to be written to the
+ * stream.
+ *  @param ... :: Additional arguments to fill format specifiers
+ *  @throws std::runtime_error :: throws when there is a problem writing to
+ * disk, usually disk space or permissions based
+ */
 
 // use macro on platforms without variadic templates.
 #if defined(__INTEL_COMPILER) || (defined(_MSC_VER) && _MSC_VER < 1800)
@@ -58,7 +59,7 @@ void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format, vargs... args) {
 void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format) {
   FPRINTF_WITH_EXCEPTION(stream, format, "");
 }
-}
+} // namespace
 #endif
 
 using namespace Kernel;
@@ -85,8 +86,8 @@ SaveSPE::SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(0) {}
 // Private member functions
 //---------------------------------------------------
 /**
-* Initialize the algorithm
-*/
+ * Initialize the algorithm
+ */
 void SaveSPE::init() {
   // Data must be in Energy Transfer and common bins
   auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
@@ -101,8 +102,8 @@ void SaveSPE::init() {
 }
 
 /**
-* Execute the algorithm
-*/
+ * Execute the algorithm
+ */
 void SaveSPE::exec() {
   using namespace Mantid::API;
   // Retrieve the input workspace
@@ -135,9 +136,9 @@ void SaveSPE::exec() {
 }
 
 /** Write the data to the SPE file
-*  @param outSPEFile :: the file object to write to
-*  @param inputWS :: the workspace to be saved
-*/
+ *  @param outSPEFile :: the file object to write to
+ *  @param inputWS :: the workspace to be saved
+ */
 void SaveSPE::writeSPEFile(FILE *outSPEFile,
                            const API::MatrixWorkspace_const_sptr &inputWS) {
   const size_t nHist = inputWS->getNumberHistograms();
@@ -206,9 +207,9 @@ void SaveSPE::writeSPEFile(FILE *outSPEFile,
 }
 
 /** Write the bin values and errors for all histograms to the file
-*  @param WS :: the workspace to be saved
-*  @param outFile :: the file object to write to
-*/
+ *  @param WS :: the workspace to be saved
+ *  @param outFile :: the file object to write to
+ */
 void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
                          FILE *const outFile) {
   // We write out values NUM_PER_LINE at a time, so will need to do extra work
@@ -281,10 +282,10 @@ void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
 }
 
 /** Write the bin values and errors in a single histogram spectra to the file
-*  @param WS :: the workspace to being saved
-*  @param outFile :: the file object to write to
-*  @param wsIn :: the index number of the histogram to write
-*/
+ *  @param WS :: the workspace to being saved
+ *  @param outFile :: the file object to write to
+ *  @param wsIn :: the index number of the histogram to write
+ */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
                         FILE *const outFile, const int wsIn) const {
   check_and_copy_spectra(WS->y(wsIn), WS->e(wsIn), m_tSignal, m_tError);
@@ -295,8 +296,8 @@ void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
   writeBins(m_tError, outFile);
 }
 /** Write the mask flags for in a histogram entry
-*  @param outFile :: the file object to write to
-*/
+ *  @param outFile :: the file object to write to
+ */
 void SaveSPE::writeMaskFlags(FILE *const outFile) const {
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeValue(MASK_FLAG, outFile);
@@ -305,9 +306,10 @@ void SaveSPE::writeMaskFlags(FILE *const outFile) const {
   writeValue(MASK_ERROR, outFile);
 }
 /** Write the values in the array to the file in the correct format
-*  @param Vs :: the array of values to write (must have length given by m_nbins)
-*  @param outFile :: the file object to write to
-*/
+ *  @param Vs :: the array of values to write (must have length given by
+ * m_nbins)
+ *  @param outFile :: the file object to write to
+ */
 void SaveSPE::writeBins(const std::vector<double> &Vs,
                         FILE *const outFile) const {
 
@@ -324,9 +326,9 @@ void SaveSPE::writeBins(const std::vector<double> &Vs,
   }
 }
 /** Write the  value the file a number of times given by m_nbins
-*  @param value :: the value that will be written continually
-*  @param outFile :: the file object to write to
-*/
+ *  @param value :: the value that will be written continually
+ *  @param outFile :: the file object to write to
+ */
 void SaveSPE::writeValue(const double value, FILE *const outFile) const {
   for (size_t j = NUM_PER_LINE - 1; j < m_nBins;
        j += NUM_PER_LINE) { // output a whole line of numbers at once
@@ -341,12 +343,12 @@ void SaveSPE::writeValue(const double value, FILE *const outFile) const {
   }
 }
 /**Write a summary information about what the algorithm had managed to save to
-* the
-*  file
-*  @param inds :: the indices of histograms whose detectors couldn't be found
-*  @param nonMasked :: the number of histograms saved successfully
-*  @param masked :: the number of histograms for which mask values were written
-*/
+ * the
+ *  file
+ *  @param inds :: the indices of histograms whose detectors couldn't be found
+ *  @param nonMasked :: the number of histograms saved successfully
+ *  @param masked :: the number of histograms for which mask values were written
+ */
 void SaveSPE::logMissingMasked(const std::vector<int> &inds,
                                const size_t nonMasked, const int masked) const {
   if (inds.cbegin() != inds.cend()) {
@@ -359,5 +361,5 @@ void SaveSPE::logMissingMasked(const std::vector<int> &inds,
   g_log.debug() << "Wrote " << nonMasked << " histograms and " << masked
                 << " masked histograms to the output SPE file\n";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

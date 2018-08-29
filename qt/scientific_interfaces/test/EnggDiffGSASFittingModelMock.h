@@ -6,7 +6,7 @@
 
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -36,14 +36,14 @@ public:
   MOCK_CONST_METHOD3(
       saveRefinementResultsToHDF5,
       void(Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-           const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-               refinementResultSets,
+           const std::vector<GSASIIRefineFitPeaksOutputProperties>
+               &refinementResultSets,
            const std::string &filename));
 
   MOCK_METHOD1(setObserver,
                void(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H_

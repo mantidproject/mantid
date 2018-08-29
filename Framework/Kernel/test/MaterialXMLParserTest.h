@@ -5,10 +5,10 @@
 
 #include "MantidKernel/MaterialXMLParser.h"
 #include "Poco/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/SAX/InputSource.h"
 #include <sstream>
 
 using Mantid::Kernel::MaterialXMLParser;

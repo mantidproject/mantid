@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Kernel {
 class Property;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace API {
@@ -125,6 +125,6 @@ private:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_ALGORITHMPROPERTIESWIDGET_H_ */

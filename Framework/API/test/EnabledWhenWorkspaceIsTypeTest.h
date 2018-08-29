@@ -1,15 +1,15 @@
 #ifndef MANTID_API_ENABLEDWHENWORKSPACEISTYPETEST_H_
 #define MANTID_API_ENABLEDWHENWORKSPACEISTYPETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
-#include "MantidKernel/PropertyManagerOwner.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/PropertyManagerOwner.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

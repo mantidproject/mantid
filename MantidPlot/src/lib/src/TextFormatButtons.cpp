@@ -31,10 +31,10 @@
 
 #include "TextFormatButtons.h"
 #include "SymbolDialog.h"
-#include <QTextEdit>
-#include <QPushButton>
 #include <QHBoxLayout>
+#include <QPushButton>
 #include <QString>
+#include <QTextEdit>
 
 TextFormatButtons::TextFormatButtons(QTextEdit *textEdit, Buttons buttons,
                                      QWidget *parent)

@@ -232,10 +232,7 @@ class PythonFileInterpreterPresenter(QObject):
         else:
             code_str = editor.text()
             line_from = 0
-        # Pad code out with empty lines so that reported line numbers
-        # do not have to be adjusted
-        padded = '\n'*line_from + code_str
-        return padded, line_from
+        return code_str, line_from
 
     def _on_exec_success(self, task_result):
         self.view.editor.updateCompletionAPI(self.model.generate_calltips())
@@ -245,9 +242,9 @@ class PythonFileInterpreterPresenter(QObject):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
         if hasattr(exc_value, 'lineno'):
-            lineno = exc_value.lineno
+            lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
-            lineno = exc_stack[-1][1]
+            lineno = exc_stack[-1][1] + self._code_start_offset
         else:
             lineno = -1
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')

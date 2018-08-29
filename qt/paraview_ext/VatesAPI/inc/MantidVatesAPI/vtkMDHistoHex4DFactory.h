@@ -84,7 +84,7 @@ private:
   /// Time mapper.
   TimeMapper m_timeMapper;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

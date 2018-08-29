@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/EventWorkspaceAccess.h"
+#include "MantidAlgorithms/MatrixWorkspaceAccess.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAlgorithms/MatrixWorkspaceAccess.h"
-#include "MantidAlgorithms/EventWorkspaceAccess.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -54,5 +54,5 @@ void ChangeBinOffset::exec() {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

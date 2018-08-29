@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/GenerateEventsFilter.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -211,7 +211,7 @@ void GenerateEventsFilter::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process user properties
-  */
+ */
 void GenerateEventsFilter::processInOutWorkspaces() {
   // Input data workspace
   m_dataWS = this->getProperty("InputWorkspace");
@@ -256,7 +256,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
 
 //----------------------------------------------------------------------------------------------
 /** Process the input for time.  A smart but complicated default rule
-  * (1) Input time can be in multiple format: absolute time (ISO), relative time
+ * (1) Input time can be in multiple format: absolute time (ISO), relative time
  * (double)
  */
 void GenerateEventsFilter::processInputTime() {
@@ -490,8 +490,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
 
 //----------------------------------------------------------------------------------------------
 /** Generate filters by log values.
-  * @param logname :: name of the log to filter with
-  */
+ * @param logname :: name of the log to filter with
+ */
 void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
   // Obtain reference of sample log to filter with
   m_dblLog = dynamic_cast<TimeSeriesProperty<double> *>(
@@ -625,13 +625,13 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
 
 //----------------------------------------------------------------------------------------------
 /** Generate filters by single log value
-  * @param minvalue :: minimum value of the allowed log value;
-  * @param maxvalue :: maximum value of the allowed log value;
-  * @param filterincrease :: if true, log value in the increasing curve should
+ * @param minvalue :: minimum value of the allowed log value;
+ * @param maxvalue :: maximum value of the allowed log value;
+ * @param filterincrease :: if true, log value in the increasing curve should
  * be included;
-  * @param filterdecrease :: if true, log value in the decreasing curve should
+ * @param filterdecrease :: if true, log value in the decreasing curve should
  * be included;
-  */
+ */
 void GenerateEventsFilter::processSingleValueFilter(double minvalue,
                                                     double maxvalue,
                                                     bool filterincrease,
@@ -673,12 +673,12 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
 
 //----------------------------------------------------------------------------------------------
 /** Generate filters from multiple values
-  * @param minvalue :: minimum value of the allowed log value;
-  * @param valueinterval :: step of the log value for a series of filter
-  * @param maxvalue :: maximum value of the allowed log value;
-  * @param filterincrease :: if true, log value in the increasing curve should
+ * @param minvalue :: minimum value of the allowed log value;
+ * @param valueinterval :: step of the log value for a series of filter
+ * @param maxvalue :: maximum value of the allowed log value;
+ * @param filterincrease :: if true, log value in the increasing curve should
  * be included;
-  * @param filterdecrease :: if true, log value in the decreasing curve should
+ * @param filterdecrease :: if true, log value in the decreasing curve should
  * be included;
  */
 void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
@@ -894,12 +894,12 @@ void GenerateEventsFilter::makeFilterBySingleValue(
 //----------------------------------------------------------------------------------------------
 /** Identify a log entry whether it can be included in the splitter for
  * filtering by single log value
-  * - Direction: direction of changing value will be determined by the current
+ * - Direction: direction of changing value will be determined by the current
  * log entry and next entry
-  *              because the boundary should be set at the first value with new
+ *              because the boundary should be set at the first value with new
  * direction (as well as last value
-  *              with the old direction)
-  */
+ *              with the old direction)
+ */
 bool GenerateEventsFilter::identifyLogEntry(
     const int &index, const Types::Core::DateAndTime &currT,
     const bool &lastgood, const double &minvalue, const double &maxvalue,
@@ -1112,7 +1112,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
             errss << "Previous vector of group index set (" << (i - 1)
                   << ") is equal to -1. "
                   << "It is not likely to happen!  Size of previous vector of "
-                     "group is " << m_vecGroupIndexSet[i - 1].size()
+                     "group is "
+                  << m_vecGroupIndexSet[i - 1].size()
                   << ". \nSuggest to use sequential mode. ";
             throw runtime_error(errss.str());
           }
@@ -1165,7 +1166,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
 
 //----------------------------------------------------------------------------------------------
 /** Make filters by multiple log values of partial log
-  */
+ */
 void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
     std::vector<int> &vecSplitGroup, map<size_t, int> indexwsindexmap,
@@ -1406,12 +1407,12 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
 
 //-----------------------------------------------------------------------------------------------
 /** Generate filters for an integer log
-  * @param minvalue :: minimum allowed log value
-  * @param maxvalue :: maximum allowed log value
-  * @param filterIncrease :: include log value increasing period;
-  * @param filterDecrease :: include log value decreasing period
-  * @param runend :: end of run date and time
-  */
+ * @param minvalue :: minimum allowed log value
+ * @param maxvalue :: maximum allowed log value
+ * @param filterIncrease :: include log value increasing period;
+ * @param filterDecrease :: include log value decreasing period
+ * @param runend :: end of run date and time
+ */
 void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
                                                      bool filterIncrease,
                                                      bool filterDecrease,
@@ -1610,7 +1611,7 @@ size_t GenerateEventsFilter::searchValue(const std::vector<double> &sorteddata,
 
 //----------------------------------------------------------------------------------------------
 /** Determine starting value changing direction
-  */
+ */
 int GenerateEventsFilter::determineChangingDirection(int startindex) {
   int direction = 0;
 
@@ -1650,7 +1651,7 @@ int GenerateEventsFilter::determineChangingDirection(int startindex) {
 
 //----------------------------------------------------------------------------------------------
 /** Add a new splitter to vector of splitters.  It is used by FilterByTime only.
-  */
+ */
 void GenerateEventsFilter::addNewTimeFilterSplitter(
     Types::Core::DateAndTime starttime, Types::Core::DateAndTime stoptime,
     int wsindex, string info) {
@@ -1691,8 +1692,8 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
 
 //----------------------------------------------------------------------------------------------
 /** Create a splitter and add to the vector of time splitters
-  * This method will be called intensively.
-  */
+ * This method will be called intensively.
+ */
 DateAndTime GenerateEventsFilter::makeSplitterInVector(
     std::vector<Types::Core::DateAndTime> &vecSplitTime,
     std::vector<int> &vecGroupIndex, Types::Core::DateAndTime start,
@@ -1736,7 +1737,7 @@ DateAndTime GenerateEventsFilter::makeSplitterInVector(
 
 //----------------------------------------------------------------------------------------------
 /** Create a matrix workspace for filter from vector of splitter time and group
-  */
+ */
 void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
   g_log.information() << "Size of splitter vector: " << m_vecSplitterTime.size()
                       << ", " << m_vecSplitterGroup.size() << "\n";
@@ -1766,8 +1767,8 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
 //----------------------------------------------------------------------------------------------
 /** Generate matrix workspace for splitters from vector of splitter time and
  * group
-  * in the parallel-version
-  */
+ * in the parallel-version
+ */
 void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
   // Determine size of output matrix workspace
   size_t numtimes = 0;
@@ -1807,7 +1808,7 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
 
 //----------------------------------------------------------------------------------------------
 /** Convert splitters vector to splitters and add to SplittersWorskpace
-  */
+ */
 void GenerateEventsFilter::generateSplittersInSplitterWS() {
   for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i) {
     int groupindex = m_vecSplitterGroup[i];
@@ -1823,15 +1824,15 @@ void GenerateEventsFilter::generateSplittersInSplitterWS() {
 //----------------------------------------------------------------------------------------------
 /** Find run end time.  Here is how the run end time is defined ranked from
  * highest priority
-  * 1. Run.endTime()
-  * 2. Last proton charge log time
-  * 3. Last event time
-  * In order to consider the events in the last pulse,
-  * 1. if proton charge does exist, then run end time will be extended by 1
+ * 1. Run.endTime()
+ * 2. Last proton charge log time
+ * 3. Last event time
+ * In order to consider the events in the last pulse,
+ * 1. if proton charge does exist, then run end time will be extended by 1
  * pulse time
-  * 2. otherwise, extended by 0.1 second (10 Hz)
-  * Exception: None of the 3 conditions is found to determine run end time
-  */
+ * 2. otherwise, extended by 0.1 second (10 Hz)
+ * Exception: None of the 3 conditions is found to determine run end time
+ */
 DateAndTime GenerateEventsFilter::findRunEnd() {
   // Try to get the run end from Run object
   DateAndTime runendtime(0);
@@ -1903,5 +1904,5 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   return runendtime;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

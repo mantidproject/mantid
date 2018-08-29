@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/MuonFInteraction.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/MuonFInteraction.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

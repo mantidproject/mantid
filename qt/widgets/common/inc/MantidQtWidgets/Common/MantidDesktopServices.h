@@ -40,7 +40,7 @@ public:
                             const char *method);
   static void unsetUrlHandler(const QString &scheme);
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQT_API_MANTIDDESKTOPSERVICES_H_

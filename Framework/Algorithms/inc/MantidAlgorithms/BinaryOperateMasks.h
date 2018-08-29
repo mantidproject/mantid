@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_BINARYOPERATEMASKS_H_
 #define MANTID_ALGORITHMS_BINARYOPERATEMASKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

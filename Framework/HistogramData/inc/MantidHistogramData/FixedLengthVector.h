@@ -4,8 +4,8 @@
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Validation.h"
 
-#include <numeric>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 
@@ -57,13 +57,11 @@ public:
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
-  FixedLengthVector(InputIt first, InputIt last)
-      : m_data(first, last) {}
+  FixedLengthVector(InputIt first, InputIt last) : m_data(first, last) {}
   template <class Generator,
             class = typename std::enable_if<
                 !std::is_convertible<Generator, double>::value>::type>
-  FixedLengthVector(size_t count, const Generator &g)
-      : m_data(count) {
+  FixedLengthVector(size_t count, const Generator &g) : m_data(count) {
     std::generate(m_data.begin(), m_data.end(), g);
   }
 
@@ -105,6 +103,10 @@ public:
   FixedLengthVector &operator=(const double value) {
     m_data.assign(m_data.size(), value);
     return *this;
+  }
+
+  bool operator==(const FixedLengthVector<T> &rhs) const {
+    return this->rawData() == rhs.rawData();
   }
 
   bool empty() const { return m_data.empty(); }

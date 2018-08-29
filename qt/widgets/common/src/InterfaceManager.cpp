@@ -3,17 +3,17 @@
 //----------------------------------
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/InterfaceFactory.h"
 #include "MantidQtWidgets/Common/GenericDialog.h"
+#include "MantidQtWidgets/Common/InterfaceFactory.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/VatesViewerInterface.h"
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
 #include <QStringList>
@@ -27,14 +27,14 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 
 // Load libraries once
 std::once_flag DLLS_LOADED;
-}
+} // namespace
 
 // initialise VATES factory
-Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *
-    InterfaceManager::m_vatesGuiFactory = nullptr;
+Mantid::Kernel::AbstractInstantiator<VatesViewerInterface>
+    *InterfaceManager::m_vatesGuiFactory = nullptr;
 // initialise HelpWindow factory
-Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *
-    InterfaceManager::m_helpViewer = nullptr;
+Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
+    *InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions

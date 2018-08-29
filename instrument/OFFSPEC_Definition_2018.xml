@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="OFFSPEC"
+            valid-from   ="1900-01-31 23:59:59"
+            valid-to     ="1900-01-31 23:59:59"
+	    last-modified="2018-08-07 11:00:00">
+
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+    <components-are-facing x="0.0" y="0.0" z="0.0" />
+  </defaults>
+ 
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-23.83" />
+  </component>
+  <type name="source" is="Source">
+    <properties>
+      40mm(H) x 60mm(W)
+    </properties>
+  </type>
+   
+  <component type="some-surface-holder">
+    <location x="0.0" y="0.0" z="0.0" />
+  </component>
+  <type name="some-surface-holder" is="SamplePos"/>
+  
+<!-- source and sample-position components END=============================== -->
+
+
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- detector components (including monitors) -->
+  
+<!-- ================MONITOR 1 START========================================= -->
+  <component type="monitor1" idlist="monitor1">
+    <location r="11.38" t="180.0" />
+  </component>
+  
+  <type name="monitor1" is="monitor">
+    <percent-transparency val="95" />
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.02" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" /> 
+      <radius val="0.015" />
+      <height val="0.04" />
+    </cylinder> 
+    <algebra val="shape" />
+  </type>  
+<!-- ================MONITOR 1 END=========================================== -->
+  
+<!-- ================MONITOR 2 START========================================= -->  
+  <component type="monitor2" idlist="monitor2">
+    <location r="5.62" t="180.0" />
+  </component>  
+  
+  <type name="monitor2" is="monitor">
+    <percent-transparency val="95" />
+    <cylinder id="shape">
+      <centre-of-bottom-base x="-0.02" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.015" />
+      <height val="0.04" />
+    </cylinder> 
+    <algebra val="shape" />
+  </type>  
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================MONITOR 3 START========================================= -->  
+  <component type="monitor3" idlist="monitor3">
+  <!--  <location r="0.4" t="180.0" /> -->
+    <location r="0.55" t="180.0" />
+  </component>  
+  
+  <type name="monitor3" is="monitor">
+    <percent-transparency val="95" />
+	<cylinder id="top">
+      <centre-of-bottom-base x="0.0" y="-0.05" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" /> 
+      <radius val="0.04" />
+      <height val="0.1" />
+    </cylinder> 
+        
+    <cylinder id="base">
+      <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" /> 
+      <radius val="0.02" />
+      <height val="0.1" />
+    </cylinder> 
+    
+    <algebra val="base : top" />
+  </type>  
+<!-- ================MONITOR 2 END=========================================== -->
+
+<!-- ================DETECTORs START==================================== -->  
+  <component type="DetectorBench" idlist="DetectorBench">
+    <location z="0.0" /> 
+    <parameter name="rotx">
+      <logfile id="Theta" eq="-2*value" extract-single-value-as="last_value"/>
+    </parameter>
+  <!--   <facing x="0" y="0" z="0"/> </location -->
+  </component>
+
+  <type name="DetectorBench">
+   <component type="point-detector">
+    <!-- <location z="3.2" />  -->
+     <location z="3.19" /> 
+   </component>   
+   <component type="LinearDetector">
+   <!--  <location z="3.65" />  -->
+     <location z="3.65" /> 
+   </component>    
+   <component type="LarmorDetectorSection">
+     <location  z=" 3.52 " />
+   </component>
+   <component type="WLSFDetector">
+     <location  z=" 3.62 " />
+   </component>
+  </type>
+
+  <type name="point-detector" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="-0.05" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0.0" /> 
+      <radius val="0.005" />
+      <height val="0.1" />
+    </cylinder> 
+	<algebra val="shape" />
+ </type>    
+
+ 
+ 
+  <type name="LinearDetector">
+ <component type="pixel">
+   <locations y="-0.1301" y-end="0.1771" n-elements="256" />
+ </component>
+ </type>
+  
+  <type name="pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.025" y="-0.0006" z="0.0"  />
+      <left-front-top-point  x="-0.025" y="0.0006" z="0.0"  />
+      <left-back-bottom-point  x="-0.025" y="-0.0006" z="0.05"  />
+      <right-front-bottom-point  x="0.025" y="-0.0006" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>    
+  
+  <!-- Larmor Detector Section 8 tubes -->
+  
+<type name="LarmorDetectorSection">
+ <properties />
+ <component type="tube">
+<location  x="   0.0028    "  y="-0.00703125" name="tube001" />
+<location  x="   0.0020    "  y="0.000234375"  name="tube002" />
+<location  x="   0.0012    "  y="-0.00703125"  name="tube003" />
+<location  x="   0.004    "  y="0.000234375"  name="tube004" />
+<location  x="   -0.004    "  y="-0.000234375"  name="tube005" />
+<location  x="   -0.0012    "  y="0.000234375"  name="tube006" />
+<location  x="   -0.0020    "  y="-0.000234375"  name="tube007" />
+<location  x="   -0.0028    "  y="0.00703125"  name="tube008" />
+ </component>
+ </type>
+ 
+ <type name="tube" outline="yes">
+ <component type="tubepixel">
+   <location y="    -0.2133  "/>
+   <location y="-0.21212813  "/>
+   <location y="-0.21095625  "/>
+   <location y="-0.20978438  "/>
+   <location y=" -0.2086125  "/>
+   <location y="-0.20744063  "/>
+   <location y="-0.20626875  "/>
+   <location y="-0.20509688  "/>
+   <location y="  -0.203925  "/>
+   <location y="-0.20275313  "/>
+   <location y="-0.20158125  "/>
+   <location y="-0.20040938  "/>
+   <location y=" -0.1992375  "/>
+   <location y="-0.19806563  "/>
+   <location y="-0.19689375  "/>
+   <location y="-0.19572188  "/>
+   <location y="   -0.19455  "/>
+   <location y="-0.19337813  "/>
+   <location y="-0.19220625  "/>
+   <location y="-0.19103438  "/>
+   <location y=" -0.1898625  "/>
+   <location y="-0.18869063  "/>
+   <location y="-0.18751875  "/>
+   <location y="-0.18634688  "/>
+   <location y="  -0.185175  "/>
+   <location y="-0.18400313  "/>
+   <location y="-0.18283125  "/>
+   <location y="-0.18165938  "/>
+   <location y=" -0.1804875  "/>
+   <location y="-0.17931563  "/>
+   <location y="-0.17814375  "/>
+   <location y="-0.17697188  "/>
+   <location y="    -0.1758  "/>
+   <location y="-0.17462813  "/>
+   <location y="-0.17345625  "/>
+   <location y="-0.17228438  "/>
+   <location y=" -0.1711125  "/>
+   <location y="-0.16994063  "/>
+   <location y="-0.16876875  "/>
+   <location y="-0.16759688  "/>
+   <location y="  -0.166425  "/>
+   <location y="-0.16525313  "/>
+   <location y="-0.16408125  "/>
+   <location y="-0.16290938  "/>
+   <location y=" -0.1617375  "/>
+   <location y="-0.16056563  "/>
+   <location y="-0.15939375  "/>
+   <location y="-0.15822188  "/>
+   <location y="   -0.15705  "/>
+   <location y="-0.15587813  "/>
+   <location y="-0.15470625  "/>
+   <location y="-0.15353438  "/>
+   <location y=" -0.1523625  "/>
+   <location y="-0.15119063  "/>
+   <location y="-0.15001875  "/>
+   <location y="-0.14884688  "/>
+   <location y="  -0.147675  "/>
+   <location y="-0.14650313  "/>
+   <location y="-0.14533125  "/>
+   <location y="-0.14415938  "/>
+   <location y=" -0.1429875  "/>
+   <location y="-0.14181563  "/>
+   <location y="-0.14064375  "/>
+   <location y="-0.13947188  "/>
+   <location y="    -0.1383  "/>
+   <location y="-0.13712813  "/>
+   <location y="-0.13595625  "/>
+   <location y="-0.13478438  "/>
+   <location y=" -0.1336125  "/>
+   <location y="-0.13244063  "/>
+   <location y="-0.13126875  "/>
+   <location y="-0.13009688  "/>
+   <location y="  -0.128925  "/>
+   <location y="-0.12775313  "/>
+   <location y="-0.12658125  "/>
+   <location y="-0.12540938  "/>
+   <location y=" -0.1242375  "/>
+   <location y="-0.12306563  "/>
+   <location y="-0.12189375  "/>
+   <location y="-0.12072188  "/>
+   <location y="   -0.11955  "/>
+   <location y="-0.11837813  "/>
+   <location y="-0.11720625  "/>
+   <location y="-0.11603438  "/>
+   <location y=" -0.1148625  "/>
+   <location y="-0.11369063  "/>
+   <location y="-0.11251875  "/>
+   <location y="-0.11134688  "/>
+   <location y="  -0.110175  "/>
+   <location y="-0.10900313  "/>
+   <location y="-0.10783125  "/>
+   <location y="-0.10665938  "/>
+   <location y=" -0.1054875  "/>
+   <location y="-0.10431563  "/>
+   <location y="-0.10314375  "/>
+   <location y="-0.10197188  "/>
+   <location y="    -0.1008  "/>
+   <location y="-0.09962813  "/>
+   <location y="-0.09845625  "/>
+   <location y="-0.09728438  "/>
+   <location y=" -0.0961125  "/>
+   <location y="-0.09494063  "/>
+   <location y="-0.09376875  "/>
+   <location y="-0.09259688  "/>
+   <location y="  -0.091425  "/>
+   <location y="-0.09025313  "/>
+   <location y="-0.08908125  "/>
+   <location y="-0.08790938  "/>
+   <location y=" -0.0867375  "/>
+   <location y="-0.08556563  "/>
+   <location y="-0.08439375  "/>
+   <location y="-0.08322188  "/>
+   <location y="   -0.08205  "/>
+   <location y="-0.08087813  "/>
+   <location y="-0.07970625  "/>
+   <location y="-0.07853438  "/>
+   <location y=" -0.0773625  "/>
+   <location y="-0.07619063  "/>
+   <location y="-0.07501875  "/>
+   <location y="-0.07384688  "/>
+   <location y="  -0.072675  "/>
+   <location y="-0.07150313  "/>
+   <location y="-0.07033125  "/>
+   <location y="-0.06915938  "/>
+   <location y=" -0.0679875  "/>
+   <location y="-0.06681563  "/>
+   <location y="-0.06564375  "/>
+   <location y="-0.06447188  "/>
+   <location y="    -0.0633  "/>
+   <location y="-0.06212813  "/>
+   <location y="-0.06095625  "/>
+   <location y="-0.05978438  "/>
+   <location y=" -0.0586125  "/>
+   <location y="-0.05744063  "/>
+   <location y="-0.05626875  "/>
+   <location y="-0.05509688  "/>
+   <location y="  -0.053925  "/>
+   <location y="-0.05275313  "/>
+   <location y="-0.05158125  "/>
+   <location y="-0.05040938  "/>
+   <location y=" -0.0492375  "/>
+   <location y="-0.04806563  "/>
+   <location y="-0.04689375  "/>
+   <location y="-0.04572188  "/>
+   <location y="   -0.04455  "/>
+   <location y="-0.04337813  "/>
+   <location y="-0.04220625  "/>
+   <location y="-0.04103438  "/>
+   <location y=" -0.0398625  "/>
+   <location y="-0.03869063  "/>
+   <location y="-0.03751875  "/>
+   <location y="-0.03634688  "/>
+   <location y="  -0.035175  "/>
+   <location y="-0.03400313  "/>
+   <location y="-0.03283125  "/>
+   <location y="-0.03165938  "/>
+   <location y=" -0.0304875  "/>
+   <location y="-0.02931563  "/>
+   <location y="-0.02814375  "/>
+   <location y="-0.02697188  "/>
+   <location y="    -0.0258  "/>
+   <location y="-0.02462813  "/>
+   <location y="-0.02345625  "/>
+   <location y="-0.02228438  "/>
+   <location y=" -0.0211125  "/>
+   <location y="-0.01994063  "/>
+   <location y="-0.01876875  "/>
+   <location y="-0.01759688  "/>
+   <location y="  -0.016425  "/>
+   <location y="-0.01525313  "/>
+   <location y="-0.01408125  "/>
+   <location y="-0.01290938  "/>
+   <location y=" -0.0117375  "/>
+   <location y="-0.01056563  "/>
+   <location y="-0.00939375  "/>
+   <location y="-0.00822188  "/>
+   <location y="   -0.00705  "/>
+   <location y="-0.00587813  "/>
+   <location y="-0.00470625  "/>
+   <location y="-0.00353438  "/>
+   <location y=" -0.0023625  "/>
+   <location y="-0.00119063  "/>
+   <location y=" -1.875E-05  "/>
+   <location y="0.001153125  "/>
+   <location y="   0.002325  "/>
+   <location y="0.003496875  "/>
+   <location y=" 0.00466875  "/>
+   <location y="0.005840625  "/>
+   <location y="  0.0070125  "/>
+   <location y="0.008184375  "/>
+   <location y=" 0.00935625  "/>
+   <location y="0.010528125  "/>
+   <location y="     0.0117  "/>
+   <location y="0.012871875  "/>
+   <location y=" 0.01404375  "/>
+   <location y="0.015215625  "/>
+   <location y="  0.0163875  "/>
+   <location y="0.017559375  "/>
+   <location y=" 0.01873125  "/>
+   <location y="0.019903125  "/>
+   <location y="   0.021075  "/>
+   <location y="0.022246875  "/>
+   <location y=" 0.02341875  "/>
+   <location y="0.024590625  "/>
+   <location y="  0.0257625  "/>
+   <location y="0.026934375  "/>
+   <location y=" 0.02810625  "/>
+   <location y="0.029278125  "/>
+   <location y="    0.03045  "/>
+   <location y="0.031621875  "/>
+   <location y=" 0.03279375  "/>
+   <location y="0.033965625  "/>
+   <location y="  0.0351375  "/>
+   <location y="0.036309375  "/>
+   <location y=" 0.03748125  "/>
+   <location y="0.038653125  "/>
+   <location y="   0.039825  "/>
+   <location y="0.040996875  "/>
+   <location y=" 0.04216875  "/>
+   <location y="0.043340625  "/>
+   <location y="  0.0445125  "/>
+   <location y="0.045684375  "/>
+   <location y=" 0.04685625  "/>
+   <location y="0.048028125  "/>
+   <location y="     0.0492  "/>
+   <location y="0.050371875  "/>
+   <location y=" 0.05154375  "/>
+   <location y="0.052715625  "/>
+   <location y="  0.0538875  "/>
+   <location y="0.055059375  "/>
+   <location y=" 0.05623125  "/>
+   <location y="0.057403125  "/>
+   <location y="   0.058575  "/>
+   <location y="0.059746875  "/>
+   <location y=" 0.06091875  "/>
+   <location y="0.062090625  "/>
+   <location y="  0.0632625  "/>
+   <location y="0.064434375  "/>
+   <location y=" 0.06560625  "/>
+   <location y="0.066778125  "/>
+   <location y="    0.06795  "/>
+   <location y="0.069121875  "/>
+   <location y=" 0.07029375  "/>
+   <location y="0.071465625  "/>
+   <location y="  0.0726375  "/>
+   <location y="0.073809375  "/>
+   <location y=" 0.07498125  "/>
+   <location y="0.076153125  "/>
+   <location y="   0.077325  "/>
+   <location y="0.078496875  "/>
+   <location y=" 0.07966875  "/>
+   <location y="0.080840625  "/>
+   <location y="  0.0820125  "/>
+   <location y="0.083184375  "/>
+   <location y=" 0.08435625  "/>
+   <location y="0.085528125  "/>
+   <location y="     0.0867  "/>
+   <location y="0.087871875  "/>
+   <location y=" 0.08904375  "/>
+   <location y="0.090215625  "/>
+   <location y="  0.0913875  "/>
+   <location y="0.092559375  "/>
+   <location y=" 0.09373125  "/>
+   <location y="0.094903125  "/>
+   <location y="   0.096075  "/>
+   <location y="0.097246875  "/>
+   <location y=" 0.09841875  "/>
+   <location y="0.099590625  "/>
+   <location y="  0.1007625  "/>
+   <location y="0.101934375  "/>
+   <location y=" 0.10310625  "/>
+   <location y="0.104278125  "/>
+   <location y="    0.10545  "/>
+   <location y="0.106621875  "/>
+   <location y=" 0.10779375  "/>
+   <location y="0.108965625  "/>
+   <location y="  0.1101375  "/>
+   <location y="0.111309375  "/>
+   <location y=" 0.11248125  "/>
+   <location y="0.113653125  "/>
+   <location y="   0.114825  "/>
+   <location y="0.115996875  "/>
+   <location y=" 0.11716875  "/>
+   <location y="0.118340625  "/>
+   <location y="  0.1195125  "/>
+   <location y="0.120684375  "/>
+   <location y=" 0.12185625  "/>
+   <location y="0.123028125  "/>
+   <location y="     0.1242  "/>
+   <location y="0.125371875  "/>
+   <location y=" 0.12654375  "/>
+   <location y="0.127715625  "/>
+   <location y="  0.1288875  "/>
+   <location y="0.130059375  "/>
+   <location y=" 0.13123125  "/>
+   <location y="0.132403125  "/>
+   <location y="   0.133575  "/>
+   <location y="0.134746875  "/>
+   <location y=" 0.13591875  "/>
+   <location y="0.137090625  "/>
+   <location y="  0.1382625  "/>
+   <location y="0.139434375  "/>
+   <location y=" 0.14060625  "/>
+   <location y="0.141778125  "/>
+   <location y="    0.14295  "/>
+   <location y="0.144121875  "/>
+   <location y=" 0.14529375  "/>
+   <location y="0.146465625  "/>
+   <location y="  0.1476375  "/>
+   <location y="0.148809375  "/>
+   <location y=" 0.14998125  "/>
+   <location y="0.151153125  "/>
+   <location y="   0.152325  "/>
+   <location y="0.153496875  "/>
+   <location y=" 0.15466875  "/>
+   <location y="0.155840625  "/>
+   <location y="  0.1570125  "/>
+   <location y="0.158184375  "/>
+   <location y=" 0.15935625  "/>
+   <location y="0.160528125  "/>
+   <location y="     0.1617  "/>
+   <location y="0.162871875  "/>
+   <location y=" 0.16404375  "/>
+   <location y="0.165215625  "/>
+   <location y="  0.1663875  "/>
+   <location y="0.167559375  "/>
+   <location y=" 0.16873125  "/>
+   <location y="0.169903125  "/>
+   <location y="   0.171075  "/>
+   <location y="0.172246875  "/>
+   <location y=" 0.17341875  "/>
+   <location y="0.174590625  "/>
+   <location y="  0.1757625  "/>
+   <location y="0.176934375  "/>
+   <location y=" 0.17810625  "/>
+   <location y="0.179278125  "/>
+   <location y="    0.18045  "/>
+   <location y="0.181621875  "/>
+   <location y=" 0.18279375  "/>
+   <location y="0.183965625  "/>
+   <location y="  0.1851375  "/>
+   <location y="0.186309375  "/>
+   <location y=" 0.18748125  "/>
+   <location y="0.188653125  "/>
+   <location y="   0.189825  "/>
+   <location y="0.190996875  "/>
+   <location y=" 0.19216875  "/>
+   <location y="0.193340625  "/>
+   <location y="  0.1945125  "/>
+   <location y="0.195684375  "/>
+   <location y=" 0.19685625  "/>
+   <location y="0.198028125  "/>
+   <location y="     0.1992  "/>
+   <location y="0.200371875  "/>
+   <location y=" 0.20154375  "/>
+   <location y="0.202715625  "/>
+   <location y="  0.2038875  "/>
+   <location y="0.205059375  "/>
+   <location y=" 0.20623125  "/>
+   <location y="0.207403125  "/>
+   <location y="   0.208575  "/>
+   <location y="0.209746875  "/>
+   <location y=" 0.21091875  "/>
+   <location y="0.212090625  "/>
+   <location y="  0.2132625  "/>
+   <location y="0.214434375  "/>
+   <location y=" 0.21560625  "/>
+   <location y="0.216778125  "/>
+   <location y="    0.21795  "/>
+   <location y="0.219121875  "/>
+   <location y=" 0.22029375  "/>
+   <location y="0.221465625  "/>
+   <location y="  0.2226375  "/>
+   <location y="0.223809375  "/>
+   <location y=" 0.22498125  "/>
+   <location y="0.226153125  "/>
+   <location y="   0.227325  "/>
+   <location y="0.228496875  "/>
+   <location y=" 0.22966875  "/>
+   <location y="0.230840625  "/>
+   <location y="  0.2320125  "/>
+   <location y="0.233184375  "/>
+   <location y=" 0.23435625  "/>
+   <location y="0.235528125  "/>
+   <location y="     0.2367  "/>
+   <location y="0.237871875  "/>
+   <location y=" 0.23904375  "/>
+   <location y="0.240215625  "/>
+   <location y="  0.2413875  "/>
+   <location y="0.242559375  "/>
+   <location y=" 0.24373125  "/>
+   <location y="0.244903125  "/>
+   <location y="   0.246075  "/>
+   <location y="0.247246875  "/>
+   <location y=" 0.24841875  "/>
+   <location y="0.249590625  "/>
+   <location y="  0.2507625  "/>
+   <location y="0.251934375  "/>
+   <location y=" 0.25310625  "/>
+   <location y="0.254278125  "/>
+   <location y="    0.25545  "/>
+   <location y="0.256621875  "/>
+   <location y=" 0.25779375  "/>
+   <location y="0.258965625  "/>
+   <location y="  0.2601375  "/>
+   <location y="0.261309375  "/>
+   <location y=" 0.26248125  "/>
+   <location y="0.263653125  "/>
+   <location y="   0.264825  "/>
+   <location y="0.265996875  "/>
+   <location y=" 0.26716875  "/>
+   <location y="0.268340625  "/>
+   <location y="  0.2695125  "/>
+   <location y="0.270684375  "/>
+   <location y=" 0.27185625  "/>
+   <location y="0.273028125  "/>
+   <location y="     0.2742  "/>
+   <location y="0.275371875  "/>
+   <location y=" 0.27654375  "/>
+   <location y="0.277715625  "/>
+   <location y="  0.2788875  "/>
+   <location y="0.280059375  "/>
+   <location y=" 0.28123125  "/>
+   <location y="0.282403125  "/>
+   <location y="   0.283575  "/>
+   <location y="0.284746875  "/>
+   <location y=" 0.28591875  "/>
+   <location y="0.287090625  "/>
+   <location y="  0.2882625  "/>
+   <location y="0.289434375  "/>
+   <location y=" 0.29060625  "/>
+   <location y="0.291778125  "/>
+   <location y="    0.29295  "/>
+   <location y="0.294121875  "/>
+   <location y=" 0.29529375  "/>
+   <location y="0.296465625  "/>
+   <location y="  0.2976375  "/>
+   <location y="0.298809375  "/>
+   <location y=" 0.29998125  "/>
+   <location y="0.301153125  "/>
+   <location y="   0.302325  "/>
+   <location y="0.303496875  "/>
+   <location y=" 0.30466875  "/>
+   <location y="0.305840625  "/>
+   <location y="  0.3070125  "/>
+   <location y="0.308184375  "/>
+   <location y=" 0.30935625  "/>
+   <location y="0.310528125  "/>
+   <location y="     0.3117  "/>
+   <location y="0.312871875  "/>
+   <location y=" 0.31404375  "/>
+   <location y="0.315215625  "/>
+   <location y="  0.3163875  "/>
+   <location y="0.317559375  "/>
+   <location y=" 0.31873125  "/>
+   <location y="0.319903125  "/>
+   <location y="   0.321075  "/>
+   <location y="0.322246875  "/>
+   <location y=" 0.32341875  "/>
+   <location y="0.324590625  "/>
+   <location y="  0.3257625  "/>
+   <location y="0.326934375  "/>
+   <location y=" 0.32810625  "/>
+   <location y="0.329278125  "/>
+   <location y="    0.33045  "/>
+   <location y="0.331621875  "/>
+   <location y=" 0.33279375  "/>
+   <location y="0.333965625  "/>
+   <location y="  0.3351375  "/>
+   <location y="0.336309375  "/>
+   <location y=" 0.33748125  "/>
+   <location y="0.338653125  "/>
+   <location y="   0.339825  "/>
+   <location y="0.340996875  "/>
+   <location y=" 0.34216875  "/>
+   <location y="0.343340625  "/>
+   <location y="  0.3445125  "/>
+   <location y="0.345684375  "/>
+   <location y=" 0.34685625  "/>
+   <location y="0.348028125  "/>
+   <location y="     0.3492  "/>
+   <location y="0.350371875  "/>
+   <location y=" 0.35154375  "/>
+   <location y="0.352715625  "/>
+   <location y="  0.3538875  "/>
+   <location y="0.355059375  "/>
+   <location y=" 0.35623125  "/>
+   <location y="0.357403125  "/>
+   <location y="   0.358575  "/>
+   <location y="0.359746875  "/>
+   <location y=" 0.36091875  "/>
+   <location y="0.362090625  "/>
+   <location y="  0.3632625  "/>
+   <location y="0.364434375  "/>
+   <location y=" 0.36560625  "/>
+   <location y="0.366778125  "/>
+   <location y="    0.36795  "/>
+   <location y="0.369121875  "/>
+   <location y=" 0.37029375  "/>
+   <location y="0.371465625  "/>
+   <location y="  0.3726375  "/>
+   <location y="0.373809375  "/>
+   <location y=" 0.37498125  "/>
+   <location y="0.376153125  "/>
+   <location y="   0.377325  "/>
+   <location y="0.378496875  "/>
+   <location y=" 0.37966875  "/>
+   <location y="0.380840625  "/>
+   <location y="  0.3820125  "/>
+   <location y="0.383184375  "/>
+   <location y=" 0.38435625  "/>
+   <location y="0.385528125  "/>
+ </component>
+ </type>
+
+ <type name="tubepixel" is="detector">
+    <cylinder id="cyl-approx">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.2" z="0.0" />
+      <radius val="0.004" />
+      <height val="1.171875e-3" />
+    </cylinder>
+    <algebra val="cyl-approx" />
+  </type>
+
+  <!--  <type name="WLSFDetector">
+   <locations y="-0.19975" y-end="0.18425" n-elements="768" />
+   <locations y="-0.200" y-end="0.184" n-elements="768" />
+   <locations y="-0.19775" y-end="0.18225" n-elements="768" />
+   <locations y="-0.202325" y-end="0.186145" n-elements="768" />
+-->
+  <type name="WLSFDetector">
+ <component type="wlsfpixel">
+   <locations y="-0.2074" y-end="0.190808" n-elements="768" />
+ </component>
+ </type>
+ 
+  <type name="wlsfpixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.025" y="-0.00025925" z="0.0"  />
+      <left-front-top-point  x="-0.025" y="0.00025925" z="0.0"  />
+      <left-back-bottom-point  x="-0.025" y="-0.00025925" z="0.05"  />
+      <right-front-bottom-point  x="0.025" y="-0.00025925" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>    
+  
+  <!-- other components -->  
+
+  <component type="slit" name="slit1">
+    <location z="-5.5474"/> 
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap"> 
+      <logfile id="s1vgap" extract-single-value-as="last_value" />
+    </parameter>
+  </component>
+  
+  <component type="slit" name="slit2">  
+    <location z="-0.3853"/>
+    <!-- This log file stores the vertical opening of this. Note this
+     slit can also be translated in the z. However this info not stored
+     in log file since it is not used in the data analysis process. -->
+    <parameter name="vertical gap">
+      <logfile id="s2vgap" extract-single-value-as="last_value" />         
+    </parameter>
+  </component>    
+  
+  <component type="slit" name="slit3">   
+    <location z="0.5"/>
+    <!-- This log file stores the vertical opening of slit -->  
+    <parameter name="vertical gap">
+      <logfile id="s3vgap" extract-single-value-as="last_value" />        
+    </parameter>
+  </component>    
+  
+  
+  <type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+  <component type="supermirror">
+    <location z="28.52"/>  <!-- x=32.0-3.480   -->
+  </component>  
+  <type name="supermirror" /> 
+
+
+    
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+  
+  <idlist idname="monitor2">
+    <id val="2" />  
+  </idlist>
+
+  <idlist idname="monitor3">
+    <id val="3" />  
+  </idlist>
+
+  <!-- detector IDs required NOT spectrum numbers (See documentation) -->
+
+  <idlist idname="DetectorBench">
+    <id val="4" />
+    <id start="2001" end="2240" />
+    <id start="2501" end="2516" />
+    <id start="1106000" end="1106511" />
+    <id start="1107000" end="1107511" />
+    <id start="1108000" end="1108511" />
+    <id start="1111000" end="1111511" />
+    <id start="1112000" end="1112511" />
+    <id start="1113000" end="1113511" />
+    <id start="1114000" end="1114511" />
+    <id start="1116000" end="1116511" />
+    <id start="3001" end="3768" />
+  </idlist>
+ 
+</instrument>
