@@ -572,7 +572,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         """
         if self._tof_range is not None:
             self.validate_tof_range(ws_event_data)
-            return self._tof_range
+            return
 
         tof_step = self.getProperty("TimeAxisStep").value
         crop_TOF = self.getProperty("CutTimeAxis").value
@@ -593,8 +593,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             self._tof_range = [tof_min, tof_max]
             logger.notice("Determining range: %g %g" % (tof_min, tof_max))
 
-        return self._tof_range
-
     def validate_tof_range(self, ws_event_data):
         """
             Validate that the TOF range we previously stored is consistent with
@@ -610,7 +608,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 error_msg += "[%g, %g] found [%g, %g]" % (self._tof_range[0], self._tof_range[1],
                                                           tof_min, tof_max)
                 raise RuntimeError(error_msg)
-        return True
 
     def write_meta_data(self, workspace):
         """
