@@ -23,9 +23,7 @@ public:
     TS_ASSERT(radial_average.isInitialized())
   }
 
-  void setUp() override {
-      loadAndMove();
-  }
+  void setUp() override { loadAndMove(); }
 
   void testExec() {
 
