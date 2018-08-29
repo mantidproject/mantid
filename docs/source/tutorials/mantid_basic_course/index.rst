@@ -13,6 +13,7 @@ Mantid Basic Course
    algorithms_workspaces_and_histories/index
    loading_and_displaying_data/index
    connecting_data_to_instruments/index
+   fitting_data/index
 
 **Sections** 
 
@@ -20,4 +21,5 @@ Mantid Basic Course
 * :ref:`loading_and_displaying_data`
 * :ref:`algorithms_workspaces_and_histories`
 * :ref:`connecting_data_to_instruments`  
+* :ref:`fitting_data`
 
