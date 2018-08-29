@@ -16,7 +16,6 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
 namespace RayTracer = Mantid::Geometry::BeamlineRayTracer;
-using Links = Track::LType;
 
 class BeamlineRayTracerTest : public CxxTest::TestSuite {
 public:

@@ -8,11 +8,11 @@
 // Includes
 //-------------------------------------------------------------
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/V3D.h"
 #include <deque>
 #include <iterator>
 
@@ -37,7 +37,8 @@ InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument)
   if (!m_instrument) {
     std::ostringstream lexer;
     lexer << "Cannot create a InstrumentRayTracer, invalid instrument given. "
-             "Input = " << m_instrument.get() << "\n";
+             "Input = "
+          << m_instrument.get() << "\n";
     throw std::invalid_argument(lexer.str());
   }
   if (!m_instrument->getSource()) {
@@ -178,5 +179,5 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 //  */
 // void slowIntersectCheck(boost::shared_ptr<IComponent> component, Track &
 // testRay) const;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
