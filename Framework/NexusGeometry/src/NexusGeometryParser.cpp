@@ -578,7 +578,8 @@ void parseAndAddSample(const H5File &file, const Group &root,
   builder.addSample(sampleName, samplePos);
 }
 
-void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
+void parseMonitors(const H5File &file, const H5::Group &root,
+                   InstrumentBuilder &builder) {
   std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
@@ -591,9 +592,10 @@ void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
         bool proxy = false;
         auto monitorShape = parseNexusShape(monitor, proxy);
-        builder.addMonitor(std::to_string(detectorId),
-                           static_cast<int32_t>(detectorId),
-                           Eigen::Vector3d{0, 0, 0}, monitorShape);
+        auto monitorTransforms = getTransformations(file, monitor);
+        builder.addMonitor(
+            std::to_string(detectorId), static_cast<int32_t>(detectorId),
+            monitorTransforms * Eigen::Vector3d{0, 0, 0}, monitorShape);
       }
     }
   }
@@ -652,7 +654,7 @@ extractInstrument(const H5File &file, const Group &root) {
   // Parse source and sample and add to instrument
   parseAndAddSample(file, root, builder);
   parseAndAddSource(file, root, builder);
-  parseMonitors(root, builder);
+  parseMonitors(file, root, builder);
   return builder.createInstrument();
 }
 } // namespace

@@ -1043,6 +1043,33 @@ public:
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
   }
 
+  void test_compare_wish_idf_vs_nexus() {
+    // Now rerun
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("Filename", "WISH_Definition_10Panels.hdf5");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    Mantid::API::MatrixWorkspace_sptr wish_nexus =
+        alg.getProperty("OutputWorkspace");
+
+    // Now re-run
+    alg.setPropertyValue("Filename", "WISH_Definition_10Panels.xml");
+    alg.execute();
+    Mantid::API::MatrixWorkspace_sptr wish_xml =
+        alg.getProperty("OutputWorkspace");
+
+    const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
+    const auto &wish_xml_detinfo = wish_xml->detectorInfo();
+    TS_ASSERT_EQUALS(wish_nexus_detinfo.size(), wish_xml_detinfo.size());
+    for (size_t i = 0; i < wish_nexus_detinfo.size(); ++i) {
+      TSM_ASSERT_EQUALS("Detector position mismatch",
+                        wish_nexus_detinfo.position(i),
+                        wish_xml_detinfo.position(i));
+    }
+  }
+
 private:
   std::string inputFile;
   std::string wsName;
