@@ -89,6 +89,10 @@ set ( INC_FILES
   inc/MantidQtWidgets/InstrumentView/Viewport.h
 )
 
+set ( QT4_INC_FILES
+  inc/MantidQtWidgets/InstrumentView/ColorMap.h
+)
+
 set ( UI_FILES
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui
 )
@@ -102,7 +106,9 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   MOC
     ${MOC_FILES}
     ${QT4_MOC_FILES}
-  NOMOC ${INC_FILES}
+  NOMOC
+    ${INC_FILES}
+    ${QT4_INC_FILES}
   UI ${UI_FILES}
   DEFS
     IN_MANTIDQT_INSTRUMENTVIEW

@@ -1,12 +1,11 @@
 #ifndef INSTRUMENTWIDGETRENDERTAB_H_
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
+#include "ColorMap.h"
 #include "InstrumentWidgetTab.h"
 
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
-
-class MantidColorMap;
 
 class QPushButton;
 class QLineEdit;
@@ -36,12 +35,11 @@ public:
   void initSurface() override;
   void saveSettings(QSettings &) const override;
   void loadSettings(const QSettings &) override;
-  void setupColorBarScaling(const MantidColorMap &, double);
   GraphOptions::ScaleType getScaleType() const;
   void setScaleType(GraphOptions::ScaleType type);
   void setAxis(const QString &axisName);
   bool areAxesOn() const;
-  void setupColorBar(const MantidColorMap &, double, double, double, bool);
+  void setupColorBar(const ColorMap &, double, double, double, bool);
   /// Load the render window tab settings from file.
   virtual void loadFromProject(const std::string &lines) override;
   /// Save the render window tab settings to file.

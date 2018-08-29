@@ -355,7 +355,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
   return sharedWorkspace->getInstrument();
 }
 
-const MantidColorMap &InstrumentActor::getColorMap() const {
+const ColorMap &InstrumentActor::getColorMap() const {
   return m_renderer->getColorMap();
 }
 

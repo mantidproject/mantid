@@ -1,14 +1,16 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
+#include "ColorMap.h"
 #include "DllOption.h"
 #include "GLColor.h"
+
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
+
 #include <boost/weak_ptr.hpp>
 #include <vector>
 
@@ -92,7 +94,7 @@ public:
   void clearMasks();
 
   /// Get the color map.
-  const MantidColorMap &getColorMap() const;
+  const ColorMap &getColorMap() const;
   /// Load a new color map from a file
   void loadColorMap(const QString &, bool reset_colors = true);
   /// Change the colormap scale type.

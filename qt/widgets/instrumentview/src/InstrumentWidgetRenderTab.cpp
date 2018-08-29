@@ -322,15 +322,6 @@ void InstrumentWidgetRenderTab::initSurface() {
 }
 
 /**
- *
- */
-void InstrumentWidgetRenderTab::setupColorBarScaling(const MantidColorMap &cmap,
-                                                     double minPositive) {
-  m_colorMapWidget->setMinPositiveValue(minPositive);
-  m_colorMapWidget->setupColorBarScaling(cmap);
-}
-
-/**
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
  */
@@ -508,7 +499,7 @@ void InstrumentWidgetRenderTab::saveImage(QString filename) {
  * @param minPositive :: A new minimum positive value for the log scale.
  * @param autoscaling :: Flag to set autoscaling of the color
  */
-void InstrumentWidgetRenderTab::setupColorBar(const MantidColorMap &cmap,
+void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap,
                                               double minValue, double maxValue,
                                               double minPositive,
                                               bool autoscaling) {

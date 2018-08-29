@@ -517,8 +517,8 @@ void InstrumentWidget::changeColormap(const QString &filename) {
   QString fileselection;
   // Use a file dialog if no parameter is passed
   if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(
-        m_instrumentActor->getCurrentColorMap(), this);
+    fileselection =
+        ColorMap::loadMapDialog(m_instrumentActor->getCurrentColorMap(), this);
     if (fileselection.isEmpty())
       return;
   } else {
