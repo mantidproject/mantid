@@ -31,7 +31,6 @@ from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
-from sans.sans_batch import SANSBatchReduction
 
 try:
     import mantidplot
