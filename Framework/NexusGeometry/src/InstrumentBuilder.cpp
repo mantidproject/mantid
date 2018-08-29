@@ -34,19 +34,10 @@ InstrumentBuilder::InstrumentBuilder(const std::string &instrumentName)
   m_instrument->setRot(Kernel::Quat());
 }
 
-void InstrumentBuilder::verifyMutable() const {
-  if (m_finalized)
-    throw std::runtime_error("You cannot modify this instance since "
-                             "createInstrument already called");
-  // This should really be std::abort() as is not recoverable programmatic
-  // error.
-}
-
 /// Adds component to instrument
 Geometry::IComponent *
 InstrumentBuilder::addComponent(const std::string &compName,
                                 const Eigen::Vector3d &position) {
-  verifyMutable();
   Geometry::IComponent *component(new Geometry::ObjCompAssembly(compName));
   component->setPos(position(0), position(1), position(2));
   m_instrument->add(component);
@@ -73,7 +64,6 @@ void InstrumentBuilder::addTubes(
 void InstrumentBuilder::doAddTube(
     const std::string &compName, const detail::TubeBuilder &tube,
     boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape) {
-  verifyMutable();
   auto *objComp(new Geometry::ObjCompAssembly(compName));
   const auto &pos = tube.tubePosition();
   objComp->setPos(pos(0), pos(1), pos(2));
@@ -95,7 +85,6 @@ void InstrumentBuilder::addDetectorToLastBank(
     const std::string &detName, detid_t detId,
     const Eigen::Vector3d &relativeOffset,
     boost::shared_ptr<const Geometry::IObject> shape) {
-  verifyMutable();
   if (!m_lastBank)
     throw std::runtime_error("No bank to add the detector to");
   auto *detector = new Geometry::Detector(
@@ -113,7 +102,6 @@ void InstrumentBuilder::addDetectorToLastBank(
 void InstrumentBuilder::addDetectorToInstrument(
     const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
     boost::shared_ptr<const Geometry::IObject> &shape) {
-  verifyMutable();
   auto *detector(new Geometry::Detector(
       detName, detId,
       const_cast<Geometry::IComponent *>(m_instrument->getBaseComponent())));
@@ -128,7 +116,6 @@ void InstrumentBuilder::addDetectorToInstrument(
 void InstrumentBuilder::addMonitor(
     const std::string &detName, detid_t detId, const Eigen::Vector3d &position,
     boost::shared_ptr<const Geometry::IObject> &shape) {
-  verifyMutable();
   auto *detector(new Geometry::Detector(
       detName, detId,
       const_cast<Geometry::IComponent *>(m_instrument->getBaseComponent())));
@@ -142,21 +129,18 @@ void InstrumentBuilder::addMonitor(
 
 /// Sorts detectors
 void InstrumentBuilder::sortDetectors() const {
-  verifyMutable();
   m_instrument->markAsDetectorFinalize();
 }
 
 /// Add sample
 void InstrumentBuilder::addSample(const std::string &sampleName,
                                   const Eigen::Vector3d &position) {
-  verifyMutable();
   auto *sample(this->addComponent(sampleName, position));
   m_instrument->markAsSamplePos(sample);
 }
 /// Add source
 void InstrumentBuilder::addSource(const std::string &sourceName,
                                   const Eigen::Vector3d &position) {
-  verifyMutable();
   auto *source(this->addComponent(sourceName, position));
   m_instrument->markAsSource(source);
 }
@@ -164,7 +148,6 @@ void InstrumentBuilder::addSource(const std::string &sourceName,
 void InstrumentBuilder::addBank(const std::string &localName,
                                 const Eigen::Vector3d &position,
                                 const Eigen::Quaterniond &rotation) {
-  verifyMutable();
   auto *assembly =
       new Geometry::CompAssembly(m_instrument->getBaseComponent(), nullptr);
   assembly->setName(localName);
@@ -175,11 +158,14 @@ void InstrumentBuilder::addBank(const std::string &localName,
 }
 
 std::unique_ptr<const Geometry::Instrument>
-InstrumentBuilder::createInstrument() const {
-  verifyMutable();
+InstrumentBuilder::createInstrument() {
   sortDetectors();
-  m_finalized = true;
-  return std::unique_ptr<const Geometry::Instrument>(std::move(m_instrument));
+  // Create the new replacement first incase it throws
+  auto temp = Mantid::Kernel::make_unique<Geometry::Instrument>(
+      m_instrument->getName());
+  auto product = std::move(m_instrument);
+  m_instrument = std::move(temp);
+  return product;
 }
 } // namespace NexusGeometry
 } // namespace Mantid

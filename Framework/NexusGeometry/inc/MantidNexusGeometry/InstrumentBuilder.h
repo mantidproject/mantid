@@ -81,7 +81,7 @@ public:
                const Eigen::Quaterniond &rotation);
 
   /// Returns underlying instrument
-  std::unique_ptr<const Geometry::Instrument> createInstrument() const;
+  std::unique_ptr<const Geometry::Instrument> createInstrument();
 
 private:
   /// Add a single tube to the last registed bank
@@ -89,14 +89,10 @@ private:
                  boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
   /// Sorts detectors
   void sortDetectors() const;
-  /// Check that this instance is not locked
-  void verifyMutable() const;
   /// product
-  mutable std::unique_ptr<Geometry::Instrument> m_instrument;
+  std::unique_ptr<Geometry::Instrument> m_instrument;
   /// Last bank added. The instrument is the owner of the bank.
   Geometry::ICompAssembly *m_lastBank = nullptr;
-  /// completed
-  mutable bool m_finalized = false;
 };
 } // namespace NexusGeometry
 } // namespace Mantid
