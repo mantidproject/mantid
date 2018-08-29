@@ -832,7 +832,8 @@ class TestManager(object):
         # inside the module it has just received.
         ntests_per_core = [0] * ncores
         self._tests = []
-        for key, value in sorted(modcounts.iteritems(), key=lambda (k,v): (v,k),reverse=True):
+        reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
+        for key, value in reverse_sorted_dict:
             for i in range(ncores):
                 if(ntests_per_core[i] == min(ntests_per_core)):
                     ntests_per_core[i] += value

@@ -99,6 +99,9 @@ if options.makeprop:
 # Run the tests
 #########################################################################
 
+if options.clean:
+    print("Performing cleanup run")
+
 # Multi-core processes
 processes = [] # an array to hold the processes
 results_array = Array('i', 4*options.ncores) # shared array to hold skipped, failed and total number of tests + status
