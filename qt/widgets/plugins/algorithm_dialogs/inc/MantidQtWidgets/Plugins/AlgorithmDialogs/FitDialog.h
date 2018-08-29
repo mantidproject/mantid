@@ -95,8 +95,6 @@ private:
   /// Get the domain type: Simple, Sequential, or Parallel
   QString getDomainTypeString() const;
 
-  /// Return property value stored in history
-  QString getStoredPropertyValue(const QString &propName) const;
   /// Get allowed values for a property
   QStringList getAllowedPropertyValues(const QString &propName) const;
   /// Set i-th workspace name
@@ -123,7 +121,7 @@ public:
   InputWorkspaceWidget(FitDialog *parent, int domainIndex = 0);
   /// Return property value stored in history
   QString getStoredPropertyValue(const QString &propName) const {
-    return m_fitDialog->getStoredPropertyValue(propName);
+    return m_fitDialog->getPreviousValue(propName);
   }
   /// Get allowed values for a property
   QStringList getAllowedPropertyValues(const QString &propName) const {

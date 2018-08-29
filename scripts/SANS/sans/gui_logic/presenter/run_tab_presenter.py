@@ -158,9 +158,9 @@ class RunTabPresenter(object):
 
         # Set the geometry options. This needs to include the option to read the sample shape from file.
         sample_shape = ["Read from file",
-                        SampleShape.to_string(SampleShape.CylinderAxisUp),
-                        SampleShape.to_string(SampleShape.Cuboid),
-                        SampleShape.to_string(SampleShape.CylinderAxisAlong)]
+                        SampleShape.Cylinder,
+                        SampleShape.FlatPlate,
+                        SampleShape.Disc]
         self._view.sample_shape = sample_shape
 
         # Set the q range

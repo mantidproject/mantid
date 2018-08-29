@@ -28,7 +28,7 @@ class StateScale(StateBase):
         super(StateScale, self).__init__()
 
         # The default geometry
-        self.shape_from_file = SampleShape.CylinderAxisAlong
+        self.shape_from_file = SampleShape.Disc
 
         # The default values are 1mm
         self.thickness_from_file = 1.

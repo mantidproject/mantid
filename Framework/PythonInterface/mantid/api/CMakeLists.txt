@@ -77,6 +77,7 @@ set ( EXPORT_FILES
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
   src/Exports/MultiDomainFunction.cpp
+  src/Exports/SpectrumDefinition.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
@@ -109,6 +110,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
+  ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
 )
 
 set ( PY_FILES
