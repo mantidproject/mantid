@@ -883,7 +883,8 @@ def add_to_group(workspace, name_of_group_workspace):
     if AnalysisDataService.doesExist(name_of_group_workspace):
         group_workspace = AnalysisDataService.retrieve(name_of_group_workspace)
         if type(group_workspace) is WorkspaceGroup:
-            group_workspace.add(name_of_workspace)
+            if not group_workspace.contains(name_of_workspace):
+                group_workspace.add(name_of_workspace)
         else:
             group_name = "GroupWorkspaces"
             group_options = {"InputWorkspaces": [name_of_workspace],
