@@ -54,7 +54,6 @@ class testModel:
         pass
 
     def execute(self):
-        print("EXECUTE")
         pass
 
 
@@ -142,6 +141,58 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         thread = ThreadModel(model)
         with self.assertRaises(AttributeError):
             thread.loadData(None)
+
+    # def test_that_tearDown_function_disconnects_callbacks(self):
+    #     start_slot = mock.Mock()
+    #     end_slot = mock.Mock()
+    #
+    #     self.thread.threadWrapperSetUp(start_slot, end_slot)
+    #
+    #     self.thread.start()
+    #     self.Runner(self.thread)
+    #
+    #     self.thread.threadWrapperTearDown(start_slot, end_slot)
+    #
+    #     self.thread.start()
+    #     self.Runner(self.thread)
+    #
+    #     self.assertEqual(start_slot.call_count, 1)
+    #     self.assertEqual(end_slot.call_count, 1)
+
+    def test_that_tearDown_function_called_automatically(self):
+        start_slot = mock.Mock()
+        end_slot = mock.Mock()
+
+        self.thread.threadWrapperSetUp(start_slot, end_slot)
+
+        self.thread.start()
+        self.Runner(self.thread)
+
+        self.thread.start()
+        self.Runner(self.thread)
+
+        self.assertEqual(start_slot.call_count, 1)
+        self.assertEqual(end_slot.call_count, 1)
+
+    @mock.patch("Muon.GUI.Common.message_box.warning")
+    def test_that_message_box_called_when_execute_throws_even_without_setup_and_teardown_methods(self, mock_box):
+        # Need to instantiate a new thread for patch to work
+        self.thread = ThreadModel(self.model)
+
+        def raise_error():
+            raise ValueError()
+
+        self.model.execute = mock.Mock(side_effect=raise_error)
+
+        self.thread.start()
+        self.Runner(self.thread)
+
+        self.assertEqual(mock_box.call_count, 1)
+
+    def test_that_passing_non_callables_to_setUp_throws(self):
+
+        with self.assertRaises(AssertionError):
+            self.thread.threadWrapperSetUp(1, 2)
 
 
 if __name__ == '__main__':

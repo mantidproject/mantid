@@ -16,7 +16,11 @@ class ThreadModel(QThread):
         QThread.__init__(self)
         self.model = model
 
+        self.start_slot = None
+        self.end_slot = None
+
         self.check_model_has_correct_attributes()
+        self.exceptionSignal.connect(message_box.warning)
 
     def check_model_has_correct_attributes(self):
         if hasattr(self.model, "execute") and hasattr(self.model, "output"):
@@ -64,11 +68,14 @@ class ThreadModel(QThread):
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self, startSlot, endSlot):
-        self.started.connect(startSlot)
-        self.finished.connect(endSlot)
-        self.exceptionSignal.connect(message_box.warning)
+        assert hasattr(startSlot, '__call__')
+        assert hasattr(endSlot, '__call__')
+        self.start_slot, self.end_slot = startSlot, endSlot
+        self.started.connect(self.start_slot)
+        self.finished.connect(self.end_slot)
 
-    def threadWrapperTearDown(self, startSlot, endSlot):
-        self.started.disconnect(startSlot)
-        self.finished.disconnect(endSlot)
-        self.exceptionSignal.disconnect(message_box.warning)
+        self.finished.connect(self.threadWrapperTearDown)
+
+    def threadWrapperTearDown(self):
+        self.started.disconnect(self.start_slot)
+        self.finished.disconnect(self.end_slot)
