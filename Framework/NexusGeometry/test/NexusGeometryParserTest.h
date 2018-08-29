@@ -105,9 +105,9 @@ public:
         detectorInfo->position(detectorInfo->indexOf(2100000)));
     Eigen::Vector3d unitVectorTranslation(
         0.2651564830210424, 0.0,
-        0.9642053928037905);         // Fixed in file location vector attribute
-    const double magnitude = 4.148;  // Fixed in file location value
-    const double rotation = -15.376; // Fixed in file orientation value
+        0.9642053928037905); // Fixed in file location vector attribute
+    const double magnitude = 4.148493; // Fixed in file location value
+    const double rotation = -15.37625; // Fixed in file orientation value
     Eigen::Vector3d rotationAxis(
         0, -1, 0); // Fixed in file orientation vector attribute
     Eigen::Vector3d offset(-0.498, -0.200, 0.00); // All offsets for pixel x,
@@ -129,7 +129,7 @@ public:
       0             0    0               1
      */
     Eigen::Vector3d expectedPosition = affine * offset;
-    TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-6));
+    TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-5));
   }
 
   void test_shape_cylinder_shape() {
