@@ -4,6 +4,8 @@ from PyQt4.QtGui import QApplication
 
 from Muon.GUI.MuonAnalysis.loadfile.load_file_view import BrowseFileWidgetView
 
+QT_APP = QApplication([])
+
 
 class LoadFileWidgetViewTest(unittest.TestCase):
 
@@ -43,6 +45,4 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    QT_APP = QApplication([])
     unittest.main(buffer=False, verbosity=2)
-    QT_APP.exec_()
