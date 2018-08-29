@@ -65,7 +65,7 @@ void removeWorkspacesFromADS(std::vector<std::string> const &workspaceNames) {
   for (auto workspaceName : workspaceNames)
     AnalysisDataService::Instance().remove(workspaceName);
 }
-} // anonymous
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOneAuto2)
