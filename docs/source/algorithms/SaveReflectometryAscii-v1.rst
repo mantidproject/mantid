@@ -9,7 +9,9 @@
 Description
 -----------
 
-This algorithm saves the first spectrum of a workspace or a workspace group in ASCII format and can be used by software like Motofit.
+This algorithm saves the first spectrum of a workspace in ASCII format and can be used by software like Motofit.
+It is possible to provide a group of workspaces as input.
+In this case, each filename contains a corresponding workspace name.
 The choice of file extension defines the file format.
 In case of histogrammed input data, the resulting file will contain the bin centre for the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
@@ -62,7 +64,7 @@ Usage
 
     # Create an absolute path by joining the proposed filename to a directory
     # os.path.expanduser("~") used in this case returns the home directory of the current user
-    file = os.path.join(os.path.expanduser("~"), "ws.mft")
+    file = os.path.join(os.path.expanduser("~"), "ws")
 
     # Add Sample Log entries
     # Add a Title entry which will be automatically used
