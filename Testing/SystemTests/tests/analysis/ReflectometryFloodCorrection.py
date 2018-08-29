@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 import stresstesting
-from mantid.simpleapi import CreateFloodWorkspace, CreateWorkspace, SaveNexus
+from mantid.simpleapi import CreateFloodWorkspace, ApplyFloodWorkspace, CreateWorkspace, SaveNexus, Load, Rebin
 import os
 import tempfile
 
@@ -67,9 +67,24 @@ class ReflectometryApplyFloodWorkspace(stresstesting.MantidStressTest):
         flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
                                      Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
         data = Load('OFFSPEC00044998.nxs')
-        data = Rebin(data, [0,1000,100000], PreserveEvents=False)
         ApplyFloodWorkspace(InputWorkspace=data, FloodWorkspace=flood, OutputWorkspace=self.out_ws_name)
 
     def validate(self):
         self.disableChecking.append('Instrument')
         return self.out_ws_name,'ReflectometryApplyFloodWorkspace.nxs'
+
+
+class ReflectometryApplyFloodWorkspaceRebinned(stresstesting.MantidStressTest):
+
+    out_ws_name = 'out'
+
+    def runTest(self):
+        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
+                                     Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
+        data = Load('OFFSPEC00044998.nxs')
+        data = Rebin(data, [0,1000,100000], PreserveEvents=False)
+        ApplyFloodWorkspace(InputWorkspace=data, FloodWorkspace=flood, OutputWorkspace=self.out_ws_name)
+
+    def validate(self):
+        self.disableChecking.append('Instrument')
+        return self.out_ws_name,'ReflectometryApplyFloodWorkspaceRebinned.nxs'

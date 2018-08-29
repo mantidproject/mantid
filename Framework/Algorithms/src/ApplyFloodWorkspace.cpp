@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -10,6 +11,19 @@ std::string const INPUT_WORKSPACE("InputWorkspace");
 std::string const FLOOD_WORKSPACE("FloodWorkspace");
 std::string const OUTPUT_WORKSPACE("OutputWorkspace");
 } // namespace Prop
+
+/// The division operation on event workspaces can make
+/// a mixture of TOF and WEIGHTED events. This function
+/// will switch all events to WEIGHTED.
+void correctEvents(MatrixWorkspace *ws) {
+  auto eventWS = dynamic_cast<IEventWorkspace*>(ws);
+  if (eventWS) {
+    auto const nSpec = eventWS->getNumberHistograms();
+    for(size_t i = 0; i < nSpec; ++i) {
+      eventWS->getSpectrum(i).switchTo(EventType::WEIGHTED);
+    }
+  }
+}
 } // namespace
 
 namespace Mantid {
@@ -60,6 +74,7 @@ void ApplyFloodWorkspace::exec() {
   divide->setProperty("OutputWorkspace", "dummy");
   divide->execute();
   MatrixWorkspace_sptr output = divide->getProperty("OutputWorkspace");
+  correctEvents(output.get());
   setProperty(Prop::OUTPUT_WORKSPACE, output);
 }
 
