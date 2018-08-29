@@ -33,3 +33,13 @@ Bugfixes
 ########
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
+
+
+Total Scattering
+----------------
+
+Improvements
+############
+
+- :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+
