@@ -2,7 +2,6 @@
 #define INSTRUMENTWIDGETTREETAB_H_
 
 #include "InstrumentWidgetTab.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include <QModelIndex>
 

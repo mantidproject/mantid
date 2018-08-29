@@ -2,7 +2,6 @@
 #define INSTRUMENTWIDGETRENDERTAB_H_
 
 #include "InstrumentWidgetTab.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"

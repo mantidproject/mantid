@@ -3,7 +3,6 @@
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -53,7 +52,8 @@ public:
   ///   marker and
   ///            a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to
-  ///   select peak ///               markers. Selected peaks can be deleted by pressing the
+  ///   select peak ///               markers. Selected peaks can be deleted by
+  ///   pressing the
   ///               Delete key.
   enum SelectionType {
     Single = 0,
@@ -121,7 +121,7 @@ private:
   QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
-  MiniPlotQwt *m_plot; ///< Miniplot to display data in the detectors
+  MiniPlotQwt *m_plot;  ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_zoom;  ///< Button switching on navigation mode
   QPushButton *m_one;   ///< Button switching on single detector selection mode

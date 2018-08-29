@@ -2,7 +2,6 @@
 #define INSTRUMENTWIDGETTAB_H
 
 #include "InstrumentWidgetTypes.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include <QFrame>
 #include <boost/shared_ptr.hpp>

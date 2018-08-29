@@ -4,7 +4,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
-#include <MantidQtWidgets/Common/WidgetDllOption.h>
 
 #include <QFrame>
 #include <QMap>
