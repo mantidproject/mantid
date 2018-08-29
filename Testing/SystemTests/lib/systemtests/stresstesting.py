@@ -840,7 +840,7 @@ class TestManager(object):
                         self._tests.extend(modtests[key])
                     break
 
-        if len(self._tests) == 0:
+        if len(reduced_test_list) == 0:
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
             exit(2)
 
