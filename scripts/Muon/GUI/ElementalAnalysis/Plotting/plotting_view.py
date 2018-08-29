@@ -165,11 +165,11 @@ class PlotView(QtGui.QWidget):
         self._set_bounds(name)
 
     def plot_workspace_errors(self, name, workspace):
-        subplot = self.plots[name]
+        subplot = self.get_subplot(name)
         plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
 
     def plot_workspace(self, name, workspace):
-        subplot = self.plots[name]
+        subplot = self.get_subplot(name)
         plots.plotfunctions.plot(subplot, workspace, specNum=1)
 
     def get_subplot(self, name):
@@ -181,11 +181,11 @@ class PlotView(QtGui.QWidget):
     def add_subplot(self, name):
         """ will raise KeyError if: plots exceed 4 """
         self._update_gridspec(len(self.plots) + 1, last=name)
-        return self.plots[name]
+        return self.get_subplot(name)
 
     def remove_subplot(self, name):
         """ will raise KeyError if: 'name' isn't a plot; there are no plots """
-        self.figure.delaxes(self.plots[name])
+        self.figure.delaxes(self.get_subplot(name))
         del self.plots[name]
         del self.workspaces[name]
         del self.plot_additions[name]
