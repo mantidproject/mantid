@@ -94,6 +94,15 @@ public:
                                                   // z defaults to 0
     Eigen::Vector3d expectedDet0Position = offset + (magnitude * unitVector);
     TS_ASSERT(det0Position.isApprox(expectedDet0Position));
+
+    // Test monitor position
+    Mantid::detid_t monitorDetId = 1;
+    auto mon0Position = Kernel::toVector3d(
+        detectorInfo->position(detectorInfo->indexOf(monitorDetId)));
+    // Sanity check that this is a monitor
+    TS_ASSERT(detectorInfo->isMonitor(detectorInfo->indexOf(monitorDetId)));
+    // Check against location in file
+    TS_ASSERT(mon0Position.isApprox(Eigen::Vector3d{0, 0, -12.064}));
   }
 
   void test_complex_translation() {
