@@ -1063,8 +1063,8 @@ public:
     // Sanity check that we are not comparing the same instrument (i.e. via some
     // smart caching)
     TSM_ASSERT("Premise of comparision test broken!",
-               wish_xml->getInstrument().get() !=
-                   wish_nexus->getInstrument().get());
+               wish_xml->getInstrument()->baseInstrument().get() !=
+                   wish_nexus->getInstrument()->baseInstrument().get());
 
     const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
     const auto &wish_xml_detinfo = wish_xml->detectorInfo();
