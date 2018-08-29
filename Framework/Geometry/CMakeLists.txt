@@ -272,7 +272,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
-	inc/MantidGeometry/Objects/InstrumentRayTracer2.h
+	inc/MantidGeometry/Objects/BeamlineRayTracer.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
 	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
@@ -342,7 +342,7 @@ set ( TEST_FILES
 	IndexingUtilsTest.h
 	InstrumentDefinitionParserTest.h
 	InstrumentRayTracerTest.h
-	InstrumentRayTracer2Test.h
+	BeamlineRayTracerTest.h
 	InstrumentTest.h
 	InstrumentVisitorTest.h
 	IsotropicAtomBraggScattererTest.h

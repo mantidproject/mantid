@@ -8,11 +8,11 @@
 // Includes
 //-------------------------------------------------------------
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Exception.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Exception.h"
 #include <deque>
 #include <iterator>
 
@@ -37,8 +37,7 @@ InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument)
   if (!m_instrument) {
     std::ostringstream lexer;
     lexer << "Cannot create a InstrumentRayTracer, invalid instrument given. "
-             "Input = "
-          << m_instrument.get() << "\n";
+             "Input = " << m_instrument.get() << "\n";
     throw std::invalid_argument(lexer.str());
   }
   if (!m_instrument->getSource()) {
@@ -149,9 +148,6 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 
     // Quick test. If this suceeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
-
-      std::cout << "IRT Component Name: " << node->getFullName() << std::endl;
-
       if (ICompAssembly_const_sptr assembly =
               boost::dynamic_pointer_cast<const ICompAssembly>(node)) {
         assembly->testIntersectionWithChildren(testRay, nodeQueue);
@@ -182,5 +178,5 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 //  */
 // void slowIntersectCheck(boost::shared_ptr<IComponent> component, Track &
 // testRay) const;
-} // namespace Geometry
-} // namespace Mantid
+}
+}

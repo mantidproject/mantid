@@ -1,11 +1,11 @@
-#ifndef INSTRUMENTRAYTRACER2TEST_H_
-#define INSTRUMENTRAYTRACER2TEST_H_
+#ifndef BEAMLINERAYTRACERTEST_H_
+#define BEAMLINERAYTRACERTEST_H_
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer2.h"
+#include "MantidGeometry/Objects/BeamlineRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -15,19 +15,19 @@
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using namespace ComponentCreationHelper;
-namespace IRT2 = Mantid::Geometry::InstrumentRayTracer2;
+namespace RayTracer = Mantid::Geometry::BeamlineRayTracer;
 using Links = Track::LType;
 
-class InstrumentRayTracer2Test : public CxxTest::TestSuite {
+class BeamlineRayTracerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentRayTracer2Test *createSuite() {
-    return new InstrumentRayTracer2Test();
+  static BeamlineRayTracerTest *createSuite() {
+    return new BeamlineRayTracerTest();
   }
-  static void destroySuite(InstrumentRayTracer2Test *suite) { delete suite; }
+  static void destroySuite(BeamlineRayTracerTest *suite) { delete suite; }
 
-  InstrumentRayTracer2Test() {
+  BeamlineRayTracerTest() {
     // Start logging framework
     Mantid::Kernel::ConfigService::Instance();
   }
@@ -41,7 +41,7 @@ public:
     V3D testDir(0., 0., 1);
 
     // Do a trace and store the results
-    Links results = IRT2::traceFromSource(testDir, *m_compInfo);
+    Links results = RayTracer::traceFromSource(testDir, *m_compInfo);
 
     // Check size
     TS_ASSERT_EQUALS(results.size(), 2);
@@ -101,7 +101,7 @@ public:
     V3D testDir(0.010, 0.0, 15.004);
 
     // Do a trace and store the results
-    Links results = IRT2::traceFromSource(testDir, *m_compInfo);
+    Links results = RayTracer::traceFromSource(testDir, *m_compInfo);
 
     // Check size
     TS_ASSERT_EQUALS(results.size(), 1);
@@ -124,7 +124,7 @@ public:
   }
 
   /**
-   * Test ray tracing into a rectangular detector
+   * Test ray tracing into a rectangular detector.
    *
    * @param message :: a string for debug information
    * @param testDir :: direction of track
@@ -138,7 +138,7 @@ public:
     testDir.normalize();
 
     // Do a trace and store the results
-    Links results = IRT2::traceFromSample(testDir, *m_compInfoRectangular);
+    Links results = RayTracer::traceFromSample(testDir, *m_compInfoRectangular);
 
     // Expect no intersection
     if (expectX == -1) {
@@ -266,4 +266,4 @@ private:
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoRectangular;
 };
 
-#endif /* INSTRUMENTRAYTRACER2TEST_H_ */
+#endif /* BEAMLINERAYTRACERTEST_H_ */

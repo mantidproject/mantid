@@ -1,5 +1,5 @@
-#ifndef MANTID_GEOMETRY_INSTRUMENTRAYTRACER2_H_
-#define MANTID_GEOMETRY_INSTRUMENTRAYTRACER2_H_
+#ifndef MANTID_GEOMETRY_BEAMLINERAYTRACER_H_
+#define MANTID_GEOMETRY_BEAMLINERAYTRACER_H_
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -13,7 +13,7 @@
 #include <list>
 
 /**
-InstrumentRayTracer2 contains a set of free functions that are responsible for
+BeamlineRayTracer contains a set of free functions that are responsible for
 tracking rays and accumulating a list of objects that are intersected along the
 way. These methods have been adapted from the original InstrumentRayTracer.
 
@@ -44,7 +44,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 namespace Mantid {
 namespace Geometry {
-namespace InstrumentRayTracer2 {
+namespace BeamlineRayTracer {
 
 using Kernel::Matrix;
 using Kernel::Quat;
@@ -166,7 +166,8 @@ void checkIntersectionWithComponent(Track &track,
 
   // Create a new track and store number of surface interceptions
   Track probeTrack(trkStart, trkDirection);
-  int intercepts = componentInfo.shape(componentIndex).interceptSurface(probeTrack);
+  int intercepts =
+      componentInfo.shape(componentIndex).interceptSurface(probeTrack);
 
   // Iterate over track
   Track::LType::const_iterator it;
@@ -327,8 +328,8 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
   }
 }
 
-} // namespace InstrumentRayTracer2
+} // namespace BeamlineRayTracer
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_INSTRUMENTRAYTRACER2_H_ */
+#endif /* MANTID_GEOMETRY_BEAMLINERAYTRACER_H_ */
