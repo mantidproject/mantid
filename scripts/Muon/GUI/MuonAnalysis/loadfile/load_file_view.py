@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtWidgets, QtCore
 from qtpy.QtCore import Signal
 
 
@@ -16,20 +16,12 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.horizontal_layout = None
         self.browse_button = None
         self.file_path_edit = None
-        self.copy_button = None
-        self.cancel_button = None
 
         self.setup_interface_layout()
-
-        self.copy_button.clicked.connect(self.copy_line_edit_to_clipboard)
 
         self._store_edit_text = False
         self._stored_edit_text = ""
         self._cached_text = ""
-
-        # progress tracking if many files being loaded
-        self.progress_bar = None
-        self.progress_widget = None
 
     def setup_interface_layout(self):
         self.setObjectName("BrowseFileWidget")
@@ -59,18 +51,10 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         self.file_path_edit.setToolTip("")
         self.file_path_edit.setObjectName("filePathEdit")
 
-        self.copy_button = QtWidgets.QToolButton(self)
-        self.copy_button.setMinimumSize(QtCore.QSize(50, 50))
-        self.copy_button.setToolTip("Copy current files to clipboard")
-        self.copy_button.setText("...")
-        self.copy_button.setIcon(QtGui.QIcon(":/copy.png"))
-        self.copy_button.setObjectName("copyButton")
-
         self.horizontal_layout = QtWidgets.QHBoxLayout(self)
         self.horizontal_layout.setObjectName("horizontalLayout")
-        self.horizontal_layout.addWidget(self.browse_button)
         self.horizontal_layout.addWidget(self.file_path_edit)
-        self.horizontal_layout.addWidget(self.copy_button)
+        self.horizontal_layout.addWidget(self.browse_button)
 
         self.setLayout(self.horizontal_layout)
 
@@ -79,11 +63,6 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
 
     def on_file_edit_changed(self, slot):
         self.file_path_edit.returnPressed.connect(slot)
-
-    def copy_line_edit_to_clipboard(self):
-        cb = QtWidgets.QApplication.clipboard()
-        cb.clear(mode=cb.Clipboard)
-        cb.setText(self.get_file_edit_text(), mode=cb.Clipboard)
 
     def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
@@ -148,33 +127,3 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
     def warning_popup(self, message):
         # TODO : limit the number of warnings to prevent spamming if a list of bad files is selected.
         QtWidgets.QMessageBox.warning(self, "Error", str(message))
-
-    def show_progress_bar(self, cancel_slot):
-        self.progress_bar = QtWidgets.QProgressBar(self)
-        self.progress_bar.setMinimumSize(QtCore.QSize(150, 50))
-
-        self.cancel_button = QtWidgets.QToolButton(self)
-        self.cancel_button.setMinimumSize(QtCore.QSize(50, 50))
-        self.cancel_button.setText("X")
-        # TODO : get correct icon
-        # self.cancel_button.setIcon(QtGui.QIcon("..."))
-        self.cancel_button.setObjectName("cancelButton")
-
-        self.cancel_button.clicked.connect(cancel_slot)
-
-        self.horizontal_layout.addWidget(self.cancel_button)
-        self.horizontal_layout.addWidget(self.progress_bar)
-        self.setLayout(self.horizontal_layout)
-
-    def remove_progress_bar(self):
-        if self.progress_bar:
-            self.horizontal_layout.removeWidget(self.progress_bar)
-            self.progress_bar.deleteLater()
-            self.cancel_button.deleteLater()
-            self.progress_bar = None
-            self.cancel_button = None
-            self.setLayout(self.horizontal_layout)
-
-    def set_progress_bar(self, progress):
-        if self.progress_bar:
-            self.progress_bar.setValue(progress)
