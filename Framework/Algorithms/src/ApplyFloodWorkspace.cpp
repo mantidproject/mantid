@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/ApplyFloodWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -16,10 +16,10 @@ std::string const OUTPUT_WORKSPACE("OutputWorkspace");
 /// a mixture of TOF and WEIGHTED events. This function
 /// will switch all events to WEIGHTED.
 void correctEvents(MatrixWorkspace *ws) {
-  auto eventWS = dynamic_cast<IEventWorkspace*>(ws);
+  auto eventWS = dynamic_cast<IEventWorkspace *>(ws);
   if (eventWS) {
     auto const nSpec = eventWS->getNumberHistograms();
-    for(size_t i = 0; i < nSpec; ++i) {
+    for (size_t i = 0; i < nSpec; ++i) {
       eventWS->getSpectrum(i).switchTo(EventType::WEIGHTED);
     }
   }
