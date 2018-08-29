@@ -12,11 +12,20 @@ Description
 This algorithm saves the first spectrum of a workspace in ASCII format and can be used by software like Motofit.
 It is possible to provide a group of workspaces as input.
 In this case, each filename contains a corresponding workspace name.
-The choice of file extension defines the file format.
+The choice of file extension (`.mft`, `.txt`, `.dat` or custom ``) defines the file format.
 In case of histogrammed input data, the resulting file will contain the bin centre for the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
 A file can be loaded back into Mantid by :ref:`algm-LoadAscii`, which will not have an instrument defined and `Sample Logs` are missing.
 This algorithm writes data in scientific exponential notation (E-notation) of double-precision.
+
+Computation of resolution values
+--------------------------------
+
+For the custom and the `.txt` file format, the option `WriteResolution` enables the computation of the resolution values from existing x-values (points):
+
+:math:`x_i \dot \frac{x_{1} - x_{0}}{x_{1}}`,
+
+where the bin centre :math:`x_i` will be multiplied by the qutient from first and second bin centre :math:`x_{0}` and :math:`x_{1}`, respectively.
 
 MFT File Format
 ---------------

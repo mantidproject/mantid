@@ -70,6 +70,8 @@ private:
   void data();
   /// Print a double value to file
   void outputval(double val);
+  /// Write a string value
+  bool writeString(bool write, std::string s);
   /// Print a string value to file
   void outputval(std::string val);
   /// Retrieve sample log information
@@ -78,8 +80,14 @@ private:
   void writeInfo(const std::string logName, const std::string logValue = "");
   /// Write header
   void header();
+  /// Determine the separator
+  void separator();
+  /// Separator
+  char m_sep{'\0'};
   /// Filename
   std::string m_filename;
+  /// File extension
+  std::string m_ext;
   /// Input workspace
   API::MatrixWorkspace_const_sptr m_ws;
   /// Input workspace group
