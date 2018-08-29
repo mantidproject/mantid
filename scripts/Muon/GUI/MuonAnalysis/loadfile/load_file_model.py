@@ -49,6 +49,7 @@ class BrowseFileWidgetModel(object):
             except ValueError:
                 failed_files += [filename]
                 continue
+            self._loaded_data_store.remove_data(run=run)
             self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
         if failed_files:
             message = self.exception_message_for_failed_files(failed_files)

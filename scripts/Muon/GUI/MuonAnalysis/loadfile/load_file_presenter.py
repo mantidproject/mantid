@@ -54,6 +54,7 @@ class BrowseFileWidgetPresenter(object):
 
     def on_browse_button_clicked(self):
         filenames = self.get_filenames_from_user()
+        filenames = file_utils.remove_duplicated_files_from_list(filenames)
         if not self._multiple_files and len(filenames) > 1:
             self._view.warning_popup("Multiple files selected in single file mode")
             self._view.reset_edit_to_cached_value()
@@ -65,6 +66,7 @@ class BrowseFileWidgetPresenter(object):
         user_input = self._view.get_file_edit_text()
         filenames = file_utils.parse_user_input_to_files(user_input)
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
+        print("FILENAMES : ", filenames)
         if not filenames:
             self._view.reset_edit_to_cached_value()
             return
