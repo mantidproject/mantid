@@ -40,6 +40,7 @@ from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.work_handler import WorkHandler
+from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 
 DEFAULT_BIN_SETTINGS = \
     '5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0'
@@ -1884,6 +1885,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def insert_empty_row(self, row_index):
         self.data_processor_table.insertChildRowOf(self.row([]), row_index)
+
+    def set_hinting_line_edit_for_column(self, column, hint_strategy):
+        self.data_processor_table.setHintsForColumn(column, hint_strategy)
 
     def _run_python_code(self, text):
         """

@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
+from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 
 
 class TableModelTest(unittest.TestCase):
@@ -114,6 +115,22 @@ class TableModelTest(unittest.TestCase):
 
         self.assertEqual(table_model.get_number_of_rows(), 1)
         self.assertEqual(table_model.get_table_entry(0), empty_row)
+
+    def test_that_OptionsColumnModel_get_permissable_properties_returns_correct_properties(self):
+        permissable_properties = OptionsColumnModel._get_permissible_properties()
+
+        self.assertEqual(permissable_properties, {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str})
+
+    def test_that_OptionsColumnModel_get_hint_strategy(self):
+        hint_strategy = OptionsColumnModel.get_hint_strategy()
+        expected_hint_strategy = BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
+                                  "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "EventSlices": 'The event slices to reduce.'
+                                  ' The format is the same as for the event slices'
+                                  ' box in settings, however if a comma separated list is given '
+                                  'it must be enclosed in quotes'})
+
+        self.assertEqual(expected_hint_strategy, hint_strategy)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

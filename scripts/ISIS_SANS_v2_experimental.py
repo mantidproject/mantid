@@ -22,5 +22,5 @@ ui = sans_data_processor_gui.SANSDataProcessorGui()
 run_tab_presenter.set_view(ui)
 
 # Show
-if ui.setup_layout():
-    ui.show()
+# if ui.setup_layout():
+ui.show()
