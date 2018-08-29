@@ -212,6 +212,86 @@ e.g.
 
 would run all of the tests whose name contains SNS.
 
+Running the tests on multiple cores
+-----------------------------------
+
+Running the System Tests can be sped up by distributing the list of
+tests across multiple cores. This is done in a similar way to ``ctest``
+using the ``-j N`` option, where ``N`` is the number of cores you want
+to use, e.g.
+
+.. code-block:: sh
+   ./systemtest -j 8
+
+would run the tests on 8 cores.
+
+Some tests write or delete in the same directories, using the same file
+names, which causes issues when running in parallel. To resolve this,
+the tests are grouped in lists where all modules starting with the
+same 4 letters are given to one core. This worsens the load balance
+between cores (with 8 cores, core 1 performs 93 tests while core 8 only
+has 44). This is not ideal but allows the suite to complete without
+failures. The runtime using 8 cores still goes down from 2h to 30 min.
+
+This also means that in the case of running a subset of tests with the
+``-R`` option, if the number of groups created from this is smaller
+than the number of cores being used, some cores will have no tests to
+run. Using the ``-j`` option is only really advantageous when running
+a large list of tests. It does not bring much speedup up for a small
+subset of tests, as these are likely to be put inside the same group
+and run on the same core.
+
+Reducing the size of console output
+-----------------------------------
+
+The ``systemtests`` can be run in "quiet" mode using the ``-q`` or
+``--quiet`` option. This will print only one line per test instead of
+the full log.
+
+.. code-block:: sh
+   ./systemtest --quiet
+   Updating testing data...
+   [100%] Built target StandardTestData
+   [100%] Built target SystemTestData
+   Running tests...
+   FrameworkManager-[Notice] Welcome to Mantid 3.13.20180820.2132
+   FrameworkManager-[Notice] Please cite: http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release: http://dx.doi.org/10.5286/Software/Mantid
+   [  0%]   1/435 : DOSTest.DOSCastepTest ............................................... (success: 0.05s)
+   [  0%]   2/435 : ISISIndirectBayesTest.JumpCETest .................................... (success: 0.06s)
+   [  0%]   3/435 : ISISIndirectInelastic.IRISCalibration ............................... (success: 0.03s)
+   [  0%]   4/435 : HFIRTransAPIv2.HFIRTrans1 ........................................... (success: 1.30s)
+   [  1%]   5/435 : DOSTest.DOSIRActiveTest ............................................. (success: 0.04s)
+   [  1%]   6/435 : ISISIndirectBayesTest.JumpFickTest .................................. (success: 0.06s)
+   [  1%]   7/435 : AbinsTest.AbinsBinWidth ............................................. (success: 1.65s)
+   [  1%]   8/435 : ISIS_PowderPearlTest.CreateCalTest .................................. (success: 1.65s)
+   [  2%]   9/435 : ISISIndirectInelastic.IRISConvFit ................................... (success: 0.56s)
+   [  2%]  10/435 : LiquidsReflectometryReductionWithBackgroundTest.BadDataTOFRangeTest . (success: 2.94s)
+   [  2%]  11/435 : DOSTest.DOSPartialCrossSectionScaleTest ............................. (success: 0.23s)
+   [  2%]  12/435 : ISISIndirectBayesTest.JumpHallRossTest .............................. (success: 0.07s)
+   [  2%]  13/435 : ISISIndirectInelastic.IRISDiagnostics ............................... (success: 0.03s)
+   [  3%]  14/435 : HFIRTransAPIv2.HFIRTrans2 ........................................... (success: 0.83s)
+   [  3%]  15/435 : DOSTest.DOSPartialSummedContributionsCrossSectionScaleTest .......... (success: 0.15s)
+   [  3%]  16/435 : ISISIndirectBayesTest.JumpTeixeiraTest .............................. (success: 0.07s)
+   [  3%]  17/435 : ISISIndirectInelastic.IRISElwinAndMSDFit ............................ (success: 0.29s)
+   [  4%]  18/435 : MagnetismReflectometryReductionTest.MRFilterCrossSectionsTest ....... (success: 5.30s)
+   [  4%]  19/435 : DOSTest.DOSPartialSummedContributionsTest ........................... (success: 0.16s)
+
+One can recover the full log when a test fails by using the ``--ouptut-on-failure`` option.
+
+Running a cleanup run
+---------------------
+
+A cleanup run will go through all the tests and call the
+``.cleanup()`` function for each test. It will not run the tests
+(i.e. call the ``execute()`` function) themselves. This is achieved
+by using the ``-c`` or ``--clean`` option, e.g.
+
+.. code-block:: sh
+   ./systemtest -c
+
+This is useful if some old data is left over from a previous run,
+where some tests were not cleanly exited.
+
 Adding New Data & References Files
 ----------------------------------
 
