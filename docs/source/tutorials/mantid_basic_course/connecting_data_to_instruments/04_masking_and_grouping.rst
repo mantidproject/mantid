@@ -20,9 +20,13 @@ functions.
 .. figure:: /images/MaskOrGroup.png
    :alt: MaskOrGroup.png
 
-The shapes ready for masking have red border |MaskRedRing.png|
+The shapes ready for masking have red border 
 
-The shapes ready for grouping have blue border |GroupBlueRing.png|
+|MaskRedRing.png|
+
+The shapes ready for grouping have blue border 
+
+|GroupBlueRing.png|
 
 Grouping
 ========

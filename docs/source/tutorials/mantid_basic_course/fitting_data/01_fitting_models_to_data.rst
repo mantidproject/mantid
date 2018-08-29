@@ -108,7 +108,7 @@ setting properties including:
 -  Plot Difference: When the result of a fit is displayed optionally the
    difference between the model and the fit can also be displayed
 
-More documentation of these is available from `Fit <Fit>`__.
+More documentation of these is available from :ref:`Fitting`.
 
 Setting up a fit model
 ----------------------

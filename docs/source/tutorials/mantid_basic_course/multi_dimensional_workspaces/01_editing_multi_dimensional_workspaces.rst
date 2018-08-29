@@ -9,7 +9,7 @@ relatively new set of MDWorkspace (multi-dimensional workspace) types.
 MDWorkspaces come in two forms :ref:`MDEventWorkspace`,
 which are analogous to :ref:`EventWorkspace` and the
 :ref:`MDHistoWorkspace`, which is analogous to the
-:re:`Workspace2D`.
+:ref:`Workspace2D`.
 
 MDEventWorkspaces
 =================

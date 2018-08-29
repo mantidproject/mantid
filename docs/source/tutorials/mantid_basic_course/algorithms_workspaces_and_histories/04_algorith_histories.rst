@@ -1,8 +1,8 @@
 .. _04_algorith_histories:
 
-==================
-Algorith Histories 
-==================
+====================
+Algorithim Histories 
+====================
 
 Algorithm History
 =================
@@ -16,7 +16,9 @@ the GUI.
    open up the Algorihm History window. In the left-hand side Algorithms
    panel click on the arrow in front of Rebin v.1 and should see the
    following:
+
    |HistoryRebinOfCNCS_7860_event.PNG|
+   
    This reveals the history done to this workspace, i.e. Load to load
    the workspace, SumSpectra, and three Rebins.
    To replay the history do:
