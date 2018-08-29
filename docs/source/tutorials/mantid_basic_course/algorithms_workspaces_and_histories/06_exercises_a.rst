@@ -1,4 +1,4 @@
-.. _06_exercises:
+.. _06_exercises_a:
 
 =========
 Exercises 
@@ -18,7 +18,7 @@ Exercise 1
 #. Events in a EventWorkspace may get filtered according to other
    recorded events during the experiments. At perhaps the simplest level
    you can filter out events between specific times. Use
-   `FilterByTime <FilterByTime>`__ for this. It has a parameter called
+   :ref:`FilterByTime>` for this. It has a parameter called
    **StartTime**, which is the start time, in seconds, since the start
    of the run. Events before this time are filtered out. Run
    **FilterByTime** with **StartTime**\ =\ *4000* and call the

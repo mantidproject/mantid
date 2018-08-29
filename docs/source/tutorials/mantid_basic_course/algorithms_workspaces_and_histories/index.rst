@@ -14,7 +14,7 @@ Workspaces And Histories
    03_workspaces
    04_algorith_histories
    05_interfaces
-   06_exercises
+   06_exercises_a
 
 **Sections** 
 
@@ -23,5 +23,5 @@ Workspaces And Histories
 * :ref:`03_workspaces`
 * :ref:`04_algorith_histories`
 * :ref:`05_interfaces`
-* :ref:`06_exercises`
+* :ref:`06_exercises_a`
 
