@@ -204,7 +204,6 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 	sortAlg->execute();
 	m_loadedData = sortAlg->getProperty("OutputWorkspace");
 
-
     // If errors are properly caught, shouldn't happen
     assert(m_loadedData);
     // If subtract is not checked, only one spectrum,
