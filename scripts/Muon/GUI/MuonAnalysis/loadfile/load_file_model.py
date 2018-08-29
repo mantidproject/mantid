@@ -77,5 +77,5 @@ class BrowseFileWidgetModel(object):
         dirs = [filename if os.path.isdir(filename) else "" for filename in dirs]
         dirs = list(set(dirs))
         if dirs:
-            for dir in dirs:
-                ConfigService.Instance().appendDataSearchDir(dir.encode('ascii', 'ignore'))
+            for directory in dirs:
+                ConfigService.Instance().appendDataSearchDir(directory.encode('ascii', 'ignore'))

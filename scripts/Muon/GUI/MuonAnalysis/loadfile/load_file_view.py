@@ -109,7 +109,7 @@ class BrowseFileWidgetView(QtWidgets.QWidget):
         if store:
             self._store_edit_text = True
             self._stored_edit_text = text
-            self.file_path_edit.setText("(... more than 10 files, use copy button)")
+            self.file_path_edit.setText("(... more than 10 files, use right-click -> copy)")
         else:
             self.file_path_edit.setText(text)
         self._cached_text = self.get_file_edit_text()

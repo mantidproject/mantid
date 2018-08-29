@@ -6,13 +6,6 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.muon_file_utils as file_utils
 
 
-def filter_for_extensions(extensions):
-    str_list = ["*." + str(ext) for ext in extensions]
-    return "Files (" + ", ".join(str_list) + ")"
-
-
-# TODO : If files > 3, display "..." in the edit and change the tooltip to suggest to use the copy button
-
 class BrowseFileWidgetPresenter(object):
 
     def __init__(self, view, model):
@@ -66,7 +59,6 @@ class BrowseFileWidgetPresenter(object):
         user_input = self._view.get_file_edit_text()
         filenames = file_utils.parse_user_input_to_files(user_input)
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
-        print("FILENAMES : ", filenames)
         if not filenames:
             self._view.reset_edit_to_cached_value()
             return
@@ -93,6 +85,7 @@ class BrowseFileWidgetPresenter(object):
 
     def on_loading_finished(self):
         file_list = self._model.loaded_filenames
+        print(file_list)
         self.set_file_edit(file_list)
         self._view.notify_loading_finished()
         self.enable_loading()
