@@ -91,7 +91,7 @@ protected:
   bool useHistogram{false};
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_UNARYOPERATION_H_*/

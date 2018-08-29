@@ -1,7 +1,4 @@
 #include "MantidMDAlgorithms/TransposeMD.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -10,13 +7,16 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MultiThreaded.h"
 
-#include <vector>
 #include <algorithm>
-#include <numeric>
-#include <memory>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <numeric>
+#include <vector>
 
 namespace Mantid {
 namespace MDAlgorithms {

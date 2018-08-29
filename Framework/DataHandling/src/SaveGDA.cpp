@@ -158,7 +158,12 @@ void SaveGDA::exec() {
     const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 
     const auto &d = matrixWS->x(0);
-    const auto &bankCalibParams = calibParams[groupingScheme[i] - 1];
+    const size_t bankIndex(groupingScheme[i] - 1);
+    if (bankIndex >= calibParams.size()) {
+      throw Kernel::Exception::IndexError(bankIndex, calibParams.size(),
+                                          "Bank number out of range");
+    }
+    const auto &bankCalibParams = calibParams[bankIndex];
 
     // For historic reasons, TOF is scaled by 32 in MAUD
     const static double tofScale = 32;
@@ -263,5 +268,5 @@ std::vector<SaveGDA::CalibrationParams> SaveGDA::parseParamsFile() const {
   return calibParams;
 }
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid

@@ -5,11 +5,11 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/IMDNode.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -123,7 +123,7 @@ private:
   IMDEventWorkspace *doCloneEmpty() const override = 0;
 };
 
-} // namespace MDEvents
+} // namespace API
 
 } // namespace Mantid
 

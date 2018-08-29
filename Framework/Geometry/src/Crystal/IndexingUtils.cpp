@@ -1,33 +1,31 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/NiggliCell.h"
-#include "MantidKernel/Quat.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include <algorithm>
-#include <cmath>
+#include "MantidKernel/Quat.h"
+
 #include <boost/math/special_functions/round.hpp>
 #include <boost/numeric/conversion/cast.hpp>
-#include <stdexcept>
-#include <Eigen/Geometry>
 
-extern "C" {
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_real.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_sys.h>
 #include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_fft_real.h>
-}
+
+#include <algorithm>
+#include <cmath>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Matrix;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Matrix;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 namespace {
 const constexpr double DEG_TO_RAD = M_PI / 180.;
 const constexpr double RAD_TO_DEG = 180. / M_PI;
-}
+} // namespace
 
 /**
   STATIC method Find_UB: Calculates the matrix that most nearly indexes
@@ -1206,8 +1204,8 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
                                             double min_d, double max_d,
                                             double required_tolerance,
                                             double degrees_per_step) {
-#define N_FFT_STEPS 512
-#define HALF_FFT_STEPS 256
+  constexpr size_t N_FFT_STEPS = 512;
+  constexpr size_t HALF_FFT_STEPS = 256;
 
   double fit_error;
   int max_indexed = 0;
@@ -1285,7 +1283,8 @@ size_t IndexingUtils::FFTScanFor_Directions(std::vector<V3D> &directions,
     GetMagFFT(q_vectors, temp_dir, N_FFT_STEPS, projections, index_factor,
               magnitude_fft);
 
-    double position = GetFirstMaxIndex(magnitude_fft, N_FFT_STEPS, threshold);
+    double position =
+        GetFirstMaxIndex(magnitude_fft, HALF_FFT_STEPS, threshold);
     if (position > 0) {
       double q_val = max_mag_Q / position;
       double d_val = 1 / q_val;
@@ -1474,7 +1473,7 @@ double IndexingUtils::GetFirstMaxIndex(const double magnitude_fft[], size_t N,
   if (found_max) {
     double sum = 0;
     double w_sum = 0;
-    for (size_t j = i - 2; j <= i + 2; j++) {
+    for (size_t j = i - 2; j < std::min(N, i + 3); j++) {
       sum += static_cast<double>(j) * magnitude_fft[j];
       w_sum += magnitude_fft[j];
     }

@@ -1,19 +1,19 @@
 #ifndef WEIGHTEDEVENTTEST_H_
 #define WEIGHTEDEVENTTEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
+using Mantid::Types::Event::TofEvent;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using Mantid::Types::Event::TofEvent;
 
 //==========================================================================================
 class WeightedEventTest : public CxxTest::TestSuite {

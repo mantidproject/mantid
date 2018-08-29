@@ -26,5 +26,5 @@ bool InstrumentParameters::hasMissingValues() const {
 std::string const &MissingInstrumentParameterValue::parameterName() const {
   return m_parameterName;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

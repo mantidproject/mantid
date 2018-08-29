@@ -87,8 +87,8 @@ void SaveNXTomo::exec() {
 }
 
 /**
-* Run instead of exec when operating on groups
-*/
+ * Run instead of exec when operating on groups
+ */
 bool SaveNXTomo::processGroups() {
   try {
     std::string name = getPropertyValue("InputWorkspaces");

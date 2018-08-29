@@ -1,20 +1,20 @@
 #ifndef RECTANGULAR_DETECTOR_TEST_H
 #define RECTANGULAR_DETECTOR_TEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidKernel/Quat.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class RectangularDetectorTest : public CxxTest::TestSuite {
 public:

@@ -7,7 +7,6 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Rebin.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <algorithm>
 #include <random>

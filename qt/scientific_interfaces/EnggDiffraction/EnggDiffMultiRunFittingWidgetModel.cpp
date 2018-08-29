@@ -54,5 +54,5 @@ void EnggDiffMultiRunFittingWidgetModel::removeRun(const RunLabel &runLabel) {
   }
 }
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt

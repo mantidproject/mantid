@@ -20,7 +20,7 @@ default.instrument =
 Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS_v2_experimental.py Muon/Frequency_Domain_Analysis.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS_v2_experimental.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py
 
 # Directory containing the above startup scripts
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
@@ -169,16 +169,11 @@ graph1d.autodistribution = On
 
 # logging configuration
 # root level message filter (This sets a minimal level possible for any channel)
-logging.loggers.root.level = information
+logging.loggers.root.level = notice
 
 # splitting the messages to many logging channels
 logging.loggers.root.channel.class = SplitterChannel
-logging.loggers.root.channel.channel1 = consoleFilterChannel
-
-# specific filter for the console channel raising the level to notice (drop to debug for debugging)
-logging.channels.consoleFilterChannel.class= FilterChannel
-logging.channels.consoleFilterChannel.channel= consoleChannel
-logging.channels.consoleFilterChannel.level= notice
+logging.loggers.root.channel.channel1 = consoleChannel
 
 # output to the console - primarily for console based apps
 logging.channels.consoleChannel.class = @CONSOLECHANNELCLASS@
@@ -188,24 +183,6 @@ logging.channels.consoleChannel.formatter = f1
 logging.formatters.f1.class = PatternFormatter
 logging.formatters.f1.pattern = @CONSOLEPATTERN@
 logging.formatters.f1.times = local
-
-# specific filter for the file channel raising the level to information (drop to debug for debugging)
-logging.loggers.root.channel.channel2 = @FILELOGGER_CHANNEL@
-logging.channels.fileFilterChannel.class= FilterChannel
-logging.channels.fileFilterChannel.channel= fileChannel
-logging.channels.fileFilterChannel.level= information
-# output to a file (For error capturing and debugging)
-logging.channels.fileChannel.class = FileChannel
-# Blank entry uses default path of HOME/.mantid/mantid.log on Linux/OSX and %APPDATA%\\mantidproject\\mantid
-logging.channels.fileChannel.path =
-# Do not flush file buffers for each newline
-logging.channels.fileChannel.flush = false
-logging.channels.fileChannel.rotation = 1 M
-logging.channels.fileChannel.purgeCount = 9
-logging.channels.fileChannel.formatter.class = PatternFormatter
-logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
-logging.channels.fileChannel.formatter.times = local
-
 
 workspace.sendto.SansView.arguments=[file]
 workspace.sendto.SansView.saveusing=SaveCanSAS1D

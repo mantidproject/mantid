@@ -12,12 +12,10 @@
 #include <numpy/arrayobject.h>
 
 using boost::python::extract;
-using boost::python::object;
 using boost::python::len;
+using boost::python::object;
 
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 
 namespace Mantid {
 namespace PythonInterface {
@@ -69,6 +67,6 @@ Kernel::VMD PyObjectToVMD::operator()() {
   }
   return ret;
 }
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

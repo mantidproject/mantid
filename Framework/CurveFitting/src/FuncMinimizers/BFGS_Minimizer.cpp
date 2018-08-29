@@ -14,7 +14,7 @@ namespace FuncMinimisers {
 namespace {
 /// static logger object
 Kernel::Logger g_log("BFGS_Minimizer");
-}
+} // namespace
 
 DECLARE_FUNCMINIMIZER(BFGS_Minimizer, BFGS)
 

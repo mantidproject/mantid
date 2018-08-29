@@ -8,8 +8,8 @@
 #include <QFile>
 #elif defined(Q_OS_WIN)
 #define WIN32_LEAN_AND_MEAN
-#include <Psapi.h>
 #include "MantidQtWidgets/Common/QStringUtils.h"
+#include <Psapi.h>
 #elif defined(Q_OS_MAC)
 #include <cstdlib>
 #include <libproc.h>
@@ -36,11 +36,11 @@ bool isOtherInstance(int64_t otherPID, QString otherExeName) {
 namespace Process {
 
 /**
-  * Returns true is another instance of Mantid is running
-  * on this machine
-  * @return True if another instance is running
-  * @throws std::runtime_error if this cannot be determined
-  */
+ * Returns true is another instance of Mantid is running
+ * on this machine
+ * @return True if another instance is running
+ * @throws std::runtime_error if this cannot be determined
+ */
 #ifdef Q_OS_LINUX
 bool isAnotherInstanceRunning() {
   // Inspired by psutil._pslinux.Process.exe:
@@ -133,7 +133,7 @@ bool isAnotherInstanceRunning() {
   void *memory{nullptr};
   while (attempts-- > 0) {
     size_t size = 0;
-    if (sysctl((int *)sysctlQuery, 3, NULL, &size, NULL, 0) == -1) {
+    if (sysctl((int *)sysctlQuery, 3, nullptr, &size, nullptr, 0) == -1) {
       throw std::runtime_error("Unable to retrieve process list");
     }
     const size_t size2 =
@@ -150,7 +150,7 @@ bool isAnotherInstanceRunning() {
     if (memory == nullptr)
       throw std::runtime_error(
           "Unable to allocate memory to retrieve process list");
-    if (sysctl((int *)sysctlQuery, 3, memory, &size, NULL, 0) == -1) {
+    if (sysctl((int *)sysctlQuery, 3, memory, &size, nullptr, 0) == -1) {
       free(memory);
       throw std::runtime_error("Unable to retrieve process list");
     } else {

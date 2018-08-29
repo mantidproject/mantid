@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConjoinWorkspaces.h"
-#include "MantidAlgorithms/CropWorkspace.h"
-#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/ConjoinWorkspaces.h"
+#include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

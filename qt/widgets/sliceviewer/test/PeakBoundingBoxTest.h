@@ -1,8 +1,8 @@
 #ifndef SLICE_VIEWER_PEAKBOUNDINGBOX_TEST_H_
 #define SLICE_VIEWER_PEAKBOUNDINGBOX_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 

@@ -272,9 +272,9 @@ const std::vector<std::string> QENSFitSimultaneous::seeAlso() const {
 
 void QENSFitSimultaneous::initConcrete() {
   declareProperty("Ties", "", Kernel::Direction::Input);
-  getPointerToProperty("Ties")
-      ->setDocumentation("Math expressions defining ties between parameters of "
-                         "the fitting function.");
+  getPointerToProperty("Ties")->setDocumentation(
+      "Math expressions defining ties between parameters of "
+      "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();

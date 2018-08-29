@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidKernel/System.h"
 
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Algorithms {
@@ -196,5 +196,5 @@ GaussianWeightingnD::calculateGaussian(const double normalisedDistanceSq) {
   return std::exp(-normalisedDistanceSq / m_twiceSigmaSquared);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

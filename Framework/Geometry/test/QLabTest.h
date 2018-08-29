@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/MDUnit.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidKernel/MDUnit.h"
 
 using Mantid::Geometry::QLab;
 using namespace Mantid::Kernel;

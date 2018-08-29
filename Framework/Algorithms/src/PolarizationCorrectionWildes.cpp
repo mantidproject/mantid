@@ -225,8 +225,9 @@ double twoInputsErrorEstimate01(const double i00, const double e00,
                    ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (f2 * i11 * p1 * (1. - 2. * p2) +
        f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-       2. * f1 * i00 * (-f2 * pow<2>(1. - 2. * p2) +
-                        pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
+       2. * f1 * i00 *
+           (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+            (-1. + p2) * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
            f1 * (-1. + 2. * p1) *
                ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
@@ -236,8 +237,9 @@ double twoInputsErrorEstimate01(const double i00, const double e00,
               (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
                (-1. + p2) * p2)) *
          (f2 * (2. - 2. * p1) * p1 +
-          f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
-                                  f2 * (-1. + 2. * p2)))) /
+          f1 * (-1. + 2. * p1) *
+              (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
+               f2 * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
                    ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
@@ -552,19 +554,19 @@ void PolarizationCorrectionWildes::checkConsistentX(
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
   // A local helper function to check a HistogramX against F1.
-  auto checkX =
-      [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
-        if (x.size() != F1x.size()) {
-          throw std::runtime_error(
-              "Mismatch of histogram lengths between F1 and " + tag + '.');
-        }
-        for (size_t i = 0; i != x.size(); ++i) {
-          if (x[i] != F1x[i]) {
-            throw std::runtime_error("Mismatch of X data between F1 and " +
-                                     tag + '.');
-          }
-        }
-      };
+  auto checkX = [&F1x](const HistogramData::HistogramX &x,
+                       const std::string &tag) {
+    if (x.size() != F1x.size()) {
+      throw std::runtime_error("Mismatch of histogram lengths between F1 and " +
+                               tag + '.');
+    }
+    for (size_t i = 0; i != x.size(); ++i) {
+      if (x[i] != F1x[i]) {
+        throw std::runtime_error("Mismatch of X data between F1 and " + tag +
+                                 '.');
+      }
+    }
+  };
   const auto &F2x = efficiencies.F2->x();
   checkX(F2x, "F2");
   const auto &P1x = efficiencies.P1->x();
@@ -572,13 +574,13 @@ void PolarizationCorrectionWildes::checkConsistentX(
   const auto &P2x = efficiencies.P2->x();
   checkX(P2x, "P2");
   // A local helper function to check an input workspace against F1.
-  auto checkWS =
-      [&checkX](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
-        const auto nHist = ws->getNumberHistograms();
-        for (size_t i = 0; i != nHist; ++i) {
-          checkX(ws->x(i), tag);
-        }
-      };
+  auto checkWS = [&checkX](const API::MatrixWorkspace_sptr &ws,
+                           const std::string &tag) {
+    const auto nHist = ws->getNumberHistograms();
+    for (size_t i = 0; i != nHist; ++i) {
+      checkX(ws->x(i), tag);
+    }
+  };
   if (inputs.mmWS) {
     checkWS(inputs.mmWS, Flippers::OffOff);
   }

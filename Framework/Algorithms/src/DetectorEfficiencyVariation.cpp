@@ -259,5 +259,5 @@ int DetectorEfficiencyVariation::doDetectorTests(
   return numFailed;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

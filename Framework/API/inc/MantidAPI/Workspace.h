@@ -1,8 +1,8 @@
 #ifndef MANTID_API_WORKSPACE_H_
 #define MANTID_API_WORKSPACE_H_
 
-#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
 #include "MantidParallel/StorageMode.h"
@@ -89,6 +89,7 @@ public:
   const std::string &getComment() const;
   const std::string &getName() const override;
   bool isDirty(const int n = 1) const;
+  virtual bool isGroup() const { return false; }
   /// Get the footprint in memory in bytes.
   virtual size_t getMemorySize() const = 0;
   /// Returns the memory footprint in sensible units

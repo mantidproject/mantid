@@ -406,7 +406,7 @@ private:
                               const std::string &action);
   void handleAllWorkspacesRemoved(const std::string &action);
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H*/

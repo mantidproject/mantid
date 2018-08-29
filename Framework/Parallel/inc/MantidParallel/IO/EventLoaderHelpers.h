@@ -140,7 +140,7 @@ template <class... T> void load(const H5::DataType &type, T &&... args) {
   throw std::runtime_error(
       "Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
-}
+} // namespace EventLoader
 
 } // namespace IO
 } // namespace Parallel

@@ -22,7 +22,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <Poco/Path.h>
@@ -33,14 +32,14 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
-using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::Types::Event::TofEvent;
+using Mantid::detid_t;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:

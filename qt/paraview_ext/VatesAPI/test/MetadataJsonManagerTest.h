@@ -7,10 +7,10 @@
 #pragma warning(disable : 4251)
 #endif
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/MetadataJsonManager.h"
-#include <string>
+#include <cxxtest/TestSuite.h>
 #include <json/reader.h>
+#include <string>
 
 using Mantid::VATES::MetadataJsonManager;
 

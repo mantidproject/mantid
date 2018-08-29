@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SAVEPARAMETERFILE_H_
 #define MANTID_ALGORITHMS_SAVEPARAMETERFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidKernel/System.h"
 namespace Mantid {
 
 namespace DataHandling {
@@ -54,7 +54,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_SAVEPARAMETERFILE_H_ */

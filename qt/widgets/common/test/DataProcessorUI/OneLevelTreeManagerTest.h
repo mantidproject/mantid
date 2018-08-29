@@ -8,7 +8,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
@@ -18,6 +17,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h"
@@ -327,12 +327,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
     TS_ASSERT_EQUALS(data.size(), 4);
-    QStringList firstRow = {"12345", "0.5",                       "20000",
-                            "0.1",   "0.2",                       "0.04",
-                            "5",     "CorrectDetectorPositions=1"};
-    QStringList secondRow = {"12346", "0.6",                       "20001",
-                             "0.1",   "0.2",                       "0.04",
-                             "4",     "CorrectDetectorPositions=0"};
+    QStringList firstRow = {
+        "12345", "0.5",  "20000", "0.1",
+        "0.2",   "0.04", "5",     "CorrectDetectorPositions=1"};
+    QStringList secondRow = {
+        "12346", "0.6",  "20001", "0.1",
+        "0.2",   "0.04", "4",     "CorrectDetectorPositions=0"};
     QStringList thirdRow = {"12347", "0.7",  "20003", "0.3",
                             "0.4",   "0.01", "3",     ""};
     QStringList fourthRow = {"12348", "0.8",  "20004", "0.4",

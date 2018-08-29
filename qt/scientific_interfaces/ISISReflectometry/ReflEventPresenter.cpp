@@ -8,16 +8,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param view :: The view we are handling
-* @param group :: The group on the parent tab this belongs to
-*/
+ * @param view :: The view we are handling
+ * @param group :: The group on the parent tab this belongs to
+ */
 ReflEventPresenter::ReflEventPresenter(IReflEventView *view, int group)
     : m_view(view), m_sliceType(SliceType::UniformEven), m_group(group) {
   m_view->enableSliceType(m_sliceType);
 }
 
 /** Destructor
-*/
+ */
 ReflEventPresenter::~ReflEventPresenter() {}
 
 void ReflEventPresenter::acceptTabPresenter(
@@ -26,8 +26,8 @@ void ReflEventPresenter::acceptTabPresenter(
 }
 
 /** Returns the time-slicing values
-* @return :: The time-slicing values
-*/
+ * @return :: The time-slicing values
+ */
 std::string ReflEventPresenter::getTimeSlicingValues() const {
   switch (m_sliceType) {
   case SliceType::UniformEven:
@@ -55,8 +55,8 @@ std::string ReflEventPresenter::logFilterAndSliceValues(
 }
 
 /** Returns the time-slicing type
-* @return :: The time-slicing type
-*/
+ * @return :: The time-slicing type
+ */
 std::string ReflEventPresenter::getTimeSlicingType() const {
   switch (m_sliceType) {
   case SliceType::UniformEven:
@@ -91,5 +91,5 @@ void ReflEventPresenter::notifySliceTypeChanged(SliceType newSliceType) {
 void ReflEventPresenter::notifySettingsChanged() {
   m_tabPresenter->settingsChanged(m_group);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

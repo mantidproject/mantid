@@ -75,7 +75,7 @@ namespace {
 std::string const OUTPUT_WORKSPACE_BINNED_DEFAULT_PREFIX("IvsQ_binned");
 std::string const OUTPUT_WORKSPACE_DEFAULT_PREFIX("IvsQ");
 std::string const OUTPUT_WORKSPACE_WAVELENGTH_DEFAULT_PREFIX("IvsLam");
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 

@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -250,8 +250,9 @@ private:
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         "<facilities>"
         "  <facility name=\"MyFacility\" FileExtensions=\".xyz\">" +
-        instStr + "  </facility>"
-                  "</facilities>";
+        instStr +
+        "  </facility>"
+        "</facilities>";
 
     return createFacility(xmlStr);
   }

@@ -1,9 +1,9 @@
 #ifndef MANTID_API_SIGNALBLOCKERTEST_H_
 #define MANTID_API_SIGNALBLOCKERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include <QObject>
+#include <cxxtest/TestSuite.h>
 
 using MantidQt::API::SignalBlocker;
 

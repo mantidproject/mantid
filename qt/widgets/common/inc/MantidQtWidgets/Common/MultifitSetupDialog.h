@@ -62,7 +62,7 @@ private:
   /// A list with parameter ties
   QStringList m_ties;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MULTIFITSETUPTDIALOG_H */
