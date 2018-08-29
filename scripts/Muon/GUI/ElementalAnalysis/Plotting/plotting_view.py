@@ -20,6 +20,7 @@ class PlotView(QtGui.QWidget):
     def __init__(self):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
+        self.errors_list = set()
         self.workspaces = {}
         self.plot_additions = {}
         self.current_grid = None
@@ -34,6 +35,7 @@ class PlotView(QtGui.QWidget):
         self.canvas = FigureCanvas(self.figure)
 
         self.plot_selector = QtGui.QComboBox()
+        self._update_plot_selector()
         self.plot_selector.currentIndexChanged[str].connect(self._set_bounds)
 
         button_layout = QtGui.QHBoxLayout()
@@ -81,44 +83,78 @@ class PlotView(QtGui.QWidget):
             func(self, name, *args, **kwargs)
         return wraps
 
+    def _silent_checkbox_check(self, state):
+        self.errors.blockSignals(True)
+        self.errors.setChecked(state)
+        self.errors.blockSignals(False)
+
+    def _set_plot_bounds(self, name, plot):
+        self.x_axis_changer.set_bounds(plot.get_xlim())
+        self.y_axis_changer.set_bounds(plot.get_ylim())
+        self._silent_checkbox_check(name in self.errors_list)
+
     def _set_bounds(self, new_plot):
-        if new_plot:
-            plot = self.plots[str(new_plot)]
-            self.x_axis_changer.set_bounds(plot.get_xlim())
-            self.y_axis_changer.set_bounds(plot.get_ylim())
-        else:
+        new_plot = str(new_plot)
+        if new_plot and new_plot != "All":
+            plot = self.plots[new_plot]
+            self._set_plot_bounds(new_plot, plot)
+        elif not new_plot:
             self.x_axis_changer.clear_bounds()
             self.y_axis_changer.clear_bounds()
 
-    def _get_current_plot(self):
-        return self.plots[str(self.plot_selector.currentText())]
+    def _get_current_plot_name(self):
+        return str(self.plot_selector.currentText())
+
+    def _get_current_plots(self):
+        name = self._get_current_plot_name()
+        return self.plots.values() if name == "All" else [self.plots[name]]
 
     @_redo_layout
     def _update_x_axis(self, bounds):
         try:
-            self._get_current_plot().set_xlim(bounds)
+            for plot in self._get_current_plots():
+                plot.set_xlim(bounds)
         except KeyError:
             return
 
     @_redo_layout
     def _update_y_axis(self, bounds):
         try:
-            self._get_current_plot().set_ylim(bounds)
+            for plot in self._get_current_plots():
+                plot.set_ylim(bounds)
         except KeyError:
             return
 
+    def _modify_errors_list(self, name, state):
+        if state:
+            self.errors_list.add(name)
+        else:
+            try:
+                self.errors_list.remove(name)
+            except KeyError:
+                return
+
+    def _change_plot_errors(self, name, plot, state):
+        self._modify_errors_list(name, state)
+        workspaces = self.workspaces[name]
+        self.workspaces[name] = []
+        x, y = plot.get_xlim(), plot.get_ylim()
+        plot.clear()
+        for workspace in workspaces:
+            self.plot(name, workspace)
+        plot.set_xlim(x)
+        plot.set_ylim(y)
+        self._replay_additions(name)
+
     @_redo_layout
     def _errors_changed(self, state):
-        for name, plot in iteritems(self.plots):
-            workspaces = self.workspaces[name]
-            self.workspaces[name] = []
-            x, y = plot.get_xlim(), plot.get_ylim()
-            plot.clear()
-            for workspace in workspaces:
-                self.plot(name, workspace)
-            plot.set_xlim(x)
-            plot.set_ylim(y)
-            self._replay_additions(name)
+        current_name = self._get_current_plot_name()
+        if current_name == "All":
+            for name, plot in iteritems(self.plots):
+                self._change_plot_errors(name, plot, state)
+        else:
+            self._change_plot_errors(
+                current_name, self.get_subplot(current_name), state)
 
     def _replay_additions(self, name):
         for func, name, args, kwargs in self.plot_additions[name]:
@@ -146,6 +182,7 @@ class PlotView(QtGui.QWidget):
 
     def _update_plot_selector(self):
         self.plot_selector.clear()
+        self.plot_selector.addItem("All")
         self.plot_selector.addItems(self.plots.keys())
 
     def _add_workspace_name(self, name, workspace):
@@ -158,7 +195,7 @@ class PlotView(QtGui.QWidget):
     @_redo_layout
     def plot(self, name, workspace):
         self._add_workspace_name(name, workspace)
-        if self.errors.isChecked():
+        if name in self.errors_list:
             self.plot_workspace_errors(name, workspace)
         else:
             self.plot_workspace(name, workspace)
