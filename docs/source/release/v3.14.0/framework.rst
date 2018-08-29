@@ -42,7 +42,8 @@ New Algorithms
 
 Improvements
 ############
-
+- :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
+- :ref:`Live Data <algm-StartLiveData>` for events in PreserveEvents mode now produces workspaces that have bin boundaries which encompass the total x-range (TOF) for all events across all spectra.
 
 Bugfixes
 ########
@@ -55,7 +56,20 @@ Python
 New
 ###
 
- - New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
+- New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
+
+- We have been making major performance improvements to geometry access in Mantid over the last few releases. We are now exposing these features via Python to give our users direct access to the same benefits as part of their scripts. The newly exposed objects are now available via workspaces and include:
+
+ * :class:`mantid.geometry.ComponentInfo`
+ * :class:`mantid.geometry.DetectorInfo`
+ * :class:`mantid.api.SpectrumInfo`
+
+- :class:`mantid.geometry.ComponentInfo` is exposed to allow the user to access geometric information about the components which are part of a beamline.
+
+- :class:`mantid.geometry.DetectorInfo` offers the user the ability to access geometric information about the detector(s) which are part of a beamline. ``DetectorInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops.
+
+- :class:`mantid.api.SpectrumInfo` allows the user to access information about the spectra being used in a beamline. ``SpectrumInfo`` has also been given an iterator to allow users to write more Pythonic loops rather than normal index based loops. In addition to this ``SpectrumDefinition`` objects can also be accessed via a :class:`mantid.api.SpectrumInfo` object. The ``SpectrumDefinition`` object can be used to obtain information about the spectrum to detector mapping and provides a definition of what a spectrum comprises, i.e. indices of all detectors that contribute to the data stored in the spectrum.
+
 
 
 Improvements
@@ -68,5 +82,3 @@ Bugfixes
 
 
 :ref:`Release 3.14.0 <v3.14.0>`
-
-

@@ -89,6 +89,7 @@ public:
   const std::string &getComment() const;
   const std::string &getName() const override;
   bool isDirty(const int n = 1) const;
+  virtual bool isGroup() const { return false; }
   /// Get the footprint in memory in bytes.
   virtual size_t getMemorySize() const = 0;
   /// Returns the memory footprint in sensible units

@@ -9,7 +9,6 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using Mantid::Algorithms::InterpolationOption;
 using namespace Mantid::HistogramData;

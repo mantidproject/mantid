@@ -944,7 +944,7 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
   }
 }
 
-QString AlgorithmDialog::getPreviousValue(const QString &propName) {
+QString AlgorithmDialog::getPreviousValue(const QString &propName) const {
   QString value;
 
   if (!isForScript()) {

@@ -89,6 +89,7 @@ set ( SRC_FILES
   src/Registry/TypeRegistry.cpp
   src/Environment/ErrorHandling.cpp
   src/Environment/GlobalInterpreterLock.cpp
+  src/Environment/ReleaseGlobalInterpreterLock.cpp
   src/Environment/WrapperHelpers.cpp
 )
 
