@@ -221,6 +221,7 @@ using the ``-j N`` option, where ``N`` is the number of cores you want
 to use, e.g.
 
 .. code-block:: sh
+
    ./systemtest -j 8
 
 would run the tests on 8 cores.
@@ -249,6 +250,7 @@ The ``systemtests`` can be run in "quiet" mode using the ``-q`` or
 the full log.
 
 .. code-block:: sh
+
    ./systemtest --quiet
    Updating testing data...
    [100%] Built target StandardTestData
@@ -287,6 +289,7 @@ A cleanup run will go through all the tests and call the
 by using the ``-c`` or ``--clean`` option, e.g.
 
 .. code-block:: sh
+
    ./systemtest -c
 
 This is useful if some old data is left over from a previous run,
