@@ -3,7 +3,14 @@ from __future__ import (absolute_import, division, print_function)
 import os
 
 allowed_instruments = ["EMU", "MUSR", "CHRONUS", "HIFI"]
-allowed_extensions =["nxs"]
+allowed_extensions = ["nxs"]
+
+
+def filter_for_extensions(extensions):
+    """Filter for file browser"""
+    str_list = ["*." + str(ext) for ext in extensions]
+    return "Files (" + ", ".join(str_list) + ")"
+
 
 def get_instrument_directory(instrument):
     """
@@ -19,6 +26,10 @@ def get_instrument_directory(instrument):
         return None
 
 
+def check_file_exists(filename):
+    return os.path.isfile(filename)
+
+
 def get_current_run_filename(instrument):
     """
     If instrument is supported, attempts to find the file on the ISIS network which
@@ -29,107 +40,46 @@ def get_current_run_filename(instrument):
     if instrument_directory is None:
         return ""
 
-    autosave_file = "\\\\" + instrument_directory + "\\data\\autosave.run"
+    autosave_file = os.sep + os.sep + instrument_directory + os.sep + "data" + os.sep + "autosave.run"
     autosave_points_to = ""
+    if not check_file_exists(autosave_file):
+        raise ValueError("Cannot find file : " + autosave_file)
     with open(autosave_file, 'r') as f:
         for line in f:
             if len(line.split('.')) == 2:
                 autosave_points_to = line
     if autosave_points_to == "":
-        psudoDAE = "\\\\" + instrument_directory + "\\data\\" + instrument_directory + "auto_A.tmp";
+        current_run_filename = os.sep + os.sep + instrument_directory + os.sep + "data" \
+                               + os.sep + instrument_directory + "auto_A.tmp"
     else:
-        psudoDAE = "\\\\" + instrument_directory + "\\data\\" + autosave_points_to
-    return psudoDAE
+        current_run_filename = os.sep + os.sep + instrument_directory + os.sep + "data" \
+                               + os.sep + autosave_points_to
+    return current_run_filename
 
 
 def format_run_for_file(run):
     return "{0:08d}".format(run)
 
+
 def file_path_for_instrument_and_run(instrument, run):
-    base_dir = "\\\\" +get_instrument_directory(instrument) + "\\data"
+    """Returns the path to the data file for a given instrument/run"""
+    base_dir = os.sep + os.sep + get_instrument_directory(instrument) + os.sep + "data"
     file_name = instrument + format_run_for_file(run) + ".nxs"
-    return base_dir.lower() + "\\" + file_name
+    return base_dir.lower() + os.sep + file_name
 
 
-# Allow any filepath, only allow .nxs files separated by commas
-def parse_input_text_to_files(text, separator = ','):
-    files = text.split(separator)
-    for file in files:
-        try:
-            filestem = file.split(".")[-1]
-        except:
-            raise ValueError("Please supply a valid list of files")
-        if filestem != "nxs":
-            raise ValueError("Only .nxs files supported")
-    return files
-
-
-# Fill in digits to make num2 the same as num1
-def fill_digits(num1, num2):
-    extraDigits = len(str(num1)) - len(str(num2))
-    return int(str(num1)[0:extraDigits] + str(num2))
-
-
-def parse_range_string(text):
-    rangeList = text.split("-")
-    if len(rangeList) == 1:
-        return [int(rangeList[0])]
-    if len(rangeList) == 2:
-        minRange = int(rangeList[0])
-        maxRange = int(rangeList[1])
-        if minRange > maxRange:
-            # Assume the second number is truncated
-            maxRange = fill_digits(minRange, maxRange)
-        if maxRange - minRange > 500:
-            raise ValueError("Range from " + str(minRange) + " to " + str(maxRange) + " is too large")
-        return [minRange + i for i in range(maxRange - minRange + 1)]
-
-
-# return ordered and unique.
-def parse_run_string(text):
-    runs = []
-    ranges = text.split(",")
-    for runRange in ranges:
-        runs += parse_range_string(runRange)
-    return list(set(runs))
-
-
-def parse_run_list_to_filenames(runList, instrument):
-    files = []
-    for run in runList:
-        # pad to 8 zeros
-        files += [instrument + '{:08d}'.format(run) + '.nxs']
-    return files
-
-    # print(fill_digits(1234, 35))
-    # print(parse_range_string("1234-1245"))
-    # print(parse_range_string("1234-45"))
-    # print(parse_range_string("1234-9"))
-    #
-    # print(parse_run_string("1,2,3,4-10"))
-    #
-    # print(parse_run_string("1,2,3,4-10"))
-    #
-    # print(parse_run_string("26,27,1-25,6"))
-    #
-    # runList = parse_run_string("1234-1250")
-    # print(parse_run_list_to_filenames(runList, "EMU"))
-
-
-def parse_user_input_to_files(input_text, allowed_extensions=[".nxs"]):
+def parse_user_input_to_files(input_text, extensions=allowed_extensions):
+    """Parse user input from load file widget into list of filenames."""
     input_list = input_text.split(";")
     filenames = []
     for text in input_list:
-        # remove whitespace
-        if os.path.splitext(text)[-1].lower() in allowed_extensions:
-
+        if os.path.splitext(text)[-1].lower() in ["." + ext for ext in extensions]:
             filenames += [text]
     return filenames
 
 
 def remove_duplicated_files_from_list(file_list):
-    # first occurance of a given file is taken
+    # first occurrence of a given file is taken
     files = [os.path.basename(full_path) for full_path in file_list]
     unique_files = [file_list[n] for n, file_name in enumerate(files) if file_name not in files[:n]]
     return unique_files
-

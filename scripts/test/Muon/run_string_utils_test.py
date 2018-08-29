@@ -39,7 +39,7 @@ class RunStringUtilsListToStringTest(unittest.TestCase):
         run_list = [i for i in range(150)]
         with self.assertRaises(IndexError) as context:
             utils.run_list_to_string(run_list)
-        self.assertTrue("Too many runs (150) must be <100" in context.exception)
+            self.assertTrue("Too many runs (150) must be <100" in context.exception)
 
 
 class RunStringUtilsStringToListTest(unittest.TestCase):
@@ -89,14 +89,14 @@ class RunStringUtilsStringToListTest(unittest.TestCase):
         for run_string in run_strings:
             with self.assertRaises(IndexError) as context:
                 utils.run_string_to_list(run_string)
-            self.assertTrue(run_string + " is not a valid run string" in context.exception)
+                self.assertTrue(run_string + " is not a valid run string" in context.exception)
 
     def test_run_string_to_list_throws_for_incorrectly_placed_delimiter(self):
         run_strings = [",1,2,3", "1,2,3,"]
         for run_string in run_strings:
             with self.assertRaises(IndexError) as context:
                 utils.run_string_to_list(run_string)
-            self.assertTrue(run_string + " is not a valid run string" in context.exception)
+                self.assertTrue(run_string + " is not a valid run string" in context.exception)
 
     def test_run_string_to_list_handles_non_consecutive_runs(self):
         run_lists = [[1, 3, 4, 5], [0, 1, 2, 3, 8, 9, 199, 200]]
@@ -185,8 +185,9 @@ class RunStringUtilsIncrementAndDecrementRunStrings(unittest.TestCase):
     def test_cannot_decrement_list_below_zero(self):
         run_string = "0-2"
         increment = 1
-        with self.assertRaises(ValueError):
-            utils.decrement_run_string(run_string, increment)
+        decremented_run_string = utils.decrement_run_string(run_string, increment)
+
+        self.assertEqual(decremented_run_string, run_string)
 
 
 if __name__ == '__main__':
