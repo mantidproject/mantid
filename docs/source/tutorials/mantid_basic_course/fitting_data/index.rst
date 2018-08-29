@@ -1,8 +1,8 @@
 .. _fitting_data: 
 
-====
-Data 
-====
+============
+Fitting Data 
+============
 
 .. toctree:: 
    :hidden: 

@@ -1,8 +1,8 @@
 .. _connecting_data_to_instruments: 
 
-===================
-Data To Instruments 
-===================
+==============================
+Connecting Data To Instruments 
+==============================
 
 .. toctree:: 
    :hidden: 
@@ -18,7 +18,7 @@ Data To Instruments
 
 **Sections** 
 
-* :ref:`01_introduction`
+* :ref:`01_introduction_conn`
 * :ref:`02_displaying_and_navigating`
 * :ref:`03_investigating_data`
 * :ref:`04_masking_and_grouping`

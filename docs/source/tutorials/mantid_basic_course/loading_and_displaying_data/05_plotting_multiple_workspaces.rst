@@ -134,7 +134,9 @@ Plot of 2 spectra with Custom Log
 
 Then one gets (after moving the legend to a convenient place):
 
-|centre| Here the legend shows both the log value and the spectrum
+|centre| 
+
+Here the legend shows both the log value and the spectrum
 number.
 
 1D and Tiled Plots

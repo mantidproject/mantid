@@ -94,6 +94,7 @@ Draw an ellipse
 
 .. figure:: /images/DrawingEllipse.png
    :alt: DrawingEllipse.png
+   :width: 300px
 
 Edit a shape
 ------------
@@ -108,12 +109,14 @@ To select multiple shapes draw a rubber band around them.
 
 .. figure:: /images/SelectMuplipleShapes.png
    :alt: SelectMuplipleShapes.png
+   :width: 300px
 
 The selected shapes are indicated by drawing a bounding box around each
 of them.
 
 .. figure:: /images/SelectedMuplipleShapes.png
    :alt: SelectedMuplipleShapes.png
+   :width: 300px
 
 Only translation is possible for a multiple selection.
 

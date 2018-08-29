@@ -1,8 +1,8 @@
 .. _algorithms_workspaces_and_histories: 
 
-========================
-Workspaces And Histories 
-========================
+===================================
+Algorithms Workspaces and Histories 
+===================================
 
 .. toctree:: 
    :hidden: 
@@ -18,7 +18,7 @@ Workspaces And Histories
 
 **Sections** 
 
-* :ref:`01_introduction`
+* :ref:`01_introduction_awh`
 * :ref:`02_algorithms`
 * :ref:`03_workspaces`
 * :ref:`04_algorith_histories`

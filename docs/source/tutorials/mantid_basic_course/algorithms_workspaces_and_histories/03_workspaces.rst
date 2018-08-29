@@ -20,11 +20,13 @@ A Workspace2D consists of a workspace with 1 or more spectra. Typically,
 each spectrum will be a histogram. For each spectrum X, Y (counts) and E
 (error) data is stored as a separate array.
 
-| |MBC_Workspace2D.png|
-| Each workspace has two axes, the Spectrum axis and the X-axis. Where
-  an axis holds a known unit type, it may be converted to another set of
-  units.
-| |MBC_axes_annotated.png|
+|MBC_Workspace2D.png|
+
+Each workspace has two axes, the Spectrum axis and the X-axis. Where
+an axis holds a known unit type, it may be converted to another set of
+units.
+
+|MBC_axes_annotated.png|
 
 Rebinning a Workspace2D is a one-way process when the rebinning leads to
 a coarser structure.
@@ -42,17 +44,20 @@ Rebin to the Ragged workspace structure, as the example below shows.
 #. run **ConvertUnits** on *ws* setting **OutputWorkspace** to *lambda*,
    **Target**\ =\ *Wavelength*, **EMode**\ =\ *Elastic*. Plotting this
    in the *Color Fill Plot* demonstrates the ragged X-bins.
+
    |MBC_Ragged.png|
+
 #. run **Rebin** on *lambda* setting **Params** to *0.5* and
    **OutputWorkspace** to *Rebinned*. Plotting this in the *Color Fill
    Plot* demonstrates that uniform binning across all spectra has been
    achieved.
+
    |MBC_Rebinned.png|
 
 Event Workspaces
 ================
 
-An `EventWorkspace <EventWorkspace>`__ stores information about each
+An :ref:`EventWorkspace` stores information about each
 individual event observation in detectors. More specifically, at a
 neutron spallation source, this means that the time of arrival and
 detector ID of each individual neutron is recorded. Only fairly recent
@@ -95,12 +100,17 @@ Example of Workspace usage
 #. Load the event data HYS_11388_event.nxs
 #. Execute the 'SumSpectra' algorithm
 #. Rebin with Params=300 and plot, ensure PreserveEvents=True
+
    |MBC_Rebin_Coarse.png|
+
 #. Rebin with Params=100, the plot will automatically update, ensure
    PreserveEvents=True
+
    |MBC_Rebin_MED.png|
+
 #. Rebin with Params=10 the plot will automatically update, ensure
    PreserveEvents=True
+
    |MBC_Rebin_Fine.png|
 
 Keep the workspace open for the next section.
