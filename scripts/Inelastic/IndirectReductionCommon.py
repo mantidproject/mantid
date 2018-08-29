@@ -575,6 +575,40 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 # -------------------------------------------------------------------------------
 
 
+def get_group_from_string(grouping_string):
+    if '-' in grouping_string:
+        return list(create_range_from(grouping_string, '-'))
+    elif ':' in grouping_string:
+        return list(create_range_from(grouping_string, ':'))
+    elif '+' in grouping_string:
+        return [int(i) for i in grouping_string.split('+')]
+    else:
+        return [int(grouping_string)]
+
+
+def create_group_from_string(input_workspace, grouping_string):
+    from mantid.simpleapi import GroupDetectors
+    return GroupDetectors(InputWorkspace=input_workspace,
+                          Behaviour='Average',
+                          SpectraList=get_group_from_string(grouping_string),
+                          StoreInADS=False)
+
+
+def conjoin_workspaces(*workspaces):
+    from mantid.simpleapi import AppendSpectra
+
+    conjoined = workspaces[0]
+    for workspace in workspaces[1:]:
+        conjoined = AppendSpectra(conjoined, workspace, StoreInADS=False)
+    return conjoined
+
+
+def group_on_string(input_workspace, grouping_string):
+    grouping_string.replace(' ', '')
+    groups = [create_group_from_string(input_workspace, group) for group in grouping_string.split(',')]
+    return conjoin_workspaces(*groups)
+
+
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
@@ -667,7 +701,10 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     elif grouping_method == 'Custom':
-        group_detectors.setProperty("GroupingPattern", group_string)
+        # Mask detectors if required
+        if len(masked_detectors) > 0:
+            _mask_detectors(workspace, masked_detectors)
+        return group_on_string(workspace, group_string)
 
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
