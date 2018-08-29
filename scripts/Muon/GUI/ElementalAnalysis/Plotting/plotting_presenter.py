@@ -46,9 +46,6 @@ class PlotPresenter(object):
         """
         return self.view.call_plot_method(name, func, *args, **kwargs)
 
-    def call_plot_method(self, name, func, *args, **kwargs):
-        return self.view.call_plot_method(name, func, *args, **kwargs)
-
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         """
         Adds a vertical line to a plot.

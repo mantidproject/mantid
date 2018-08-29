@@ -5,10 +5,6 @@ from collections import OrderedDict
 
 from PyQt4 import QtGui
 
-from mantid import plots
-
-from PyQt4 import QtGui
-
 from matplotlib.figure import Figure
 from matplotlib import gridspec
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -110,23 +106,6 @@ class PlotView(QtGui.QWidget):
             self._get_current_plot().set_ylim(bounds)
         except KeyError:
             return
-
-    @_redo_layout
-    def _errors_changed(self, state):
-        for name, plot in iteritems(self.plots):
-            workspaces = self.workspaces[name]
-            self.workspaces[name] = []
-            x, y = plot.get_xlim(), plot.get_ylim()
-            plot.clear()
-            for workspace in workspaces:
-                self.plot(name, workspace)
-            plot.set_xlim(x)
-            plot.set_ylim(y)
-            self._replay_additions(name)
-
-    def _replay_additions(self, name):
-        for func, name, args, kwargs in self.plot_additions[name]:
-            func(self, name, *args, **kwargs)
 
     @_redo_layout
     def _errors_changed(self, state):
