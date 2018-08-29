@@ -2,29 +2,29 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/Matrix.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
+#include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace {
 /**
- * Return the number of pixels to make a texture in, given the
- * desired pixel size. A texture has to have 2^n pixels per side.
- * @param desired :: the requested pixel size
- * @return number of pixels for texture
- */
+* Return the number of pixels to make a texture in, given the
+* desired pixel size. A texture has to have 2^n pixels per side.
+* @param desired :: the requested pixel size
+* @return number of pixels for texture
+*/
 int getOneTextureSize(int desired) {
   int size = 2;
   while (desired > size) {
@@ -37,8 +37,8 @@ int getOneTextureSize(int desired) {
 namespace Mantid {
 namespace Geometry {
 
-using Kernel::Matrix;
 using Kernel::V3D;
+using Kernel::Matrix;
 
 /** Empty constructor
  */
@@ -457,7 +457,7 @@ void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the minimum detector id
- * @return minimum detector id
+  * @return minimum detector id
  */
 int RectangularDetector::minDetectorID() {
   if (m_map)
@@ -467,7 +467,7 @@ int RectangularDetector::minDetectorID() {
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the maximum detector id
- * @return maximum detector id
+  * @return maximum detector id
  */
 int RectangularDetector::maxDetectorID() {
   if (m_map)
@@ -510,9 +510,6 @@ RectangularDetector::getComponentByName(const std::string &cname,
  */
 void RectangularDetector::testIntersectionWithChildren(
     Track &testRay, std::deque<IComponent_const_sptr> & /*searchQueue*/) const {
-
-  std::cout << "RectangularDetector Component Name: " << getFullName() << std::endl;
-
   /// Base point (x,y,z) = position of pixel 0,0
   V3D basePoint;
 
@@ -525,10 +522,6 @@ void RectangularDetector::testIntersectionWithChildren(
   basePoint = getAtXY(0, 0)->getPos();
   horizontal = getAtXY(xpixels() - 1, 0)->getPos() - basePoint;
   vertical = getAtXY(0, ypixels() - 1)->getPos() - basePoint;
-
-  std::cout << "BASEPOINT : " << basePoint << std::endl;
-  std::cout << "HORIZONTAL : " << horizontal << std::endl;
-  std::cout << "VERTICAL : " << vertical << std::endl;
 
   // The beam direction
   V3D beam = testRay.direction();
@@ -557,9 +550,7 @@ void RectangularDetector::testIntersectionWithChildren(
   double u = (double(xpixels() - 1) * tuv[1] + 0.5);
   double v = (double(ypixels() - 1) * tuv[2] + 0.5);
 
-  std::cout << "xpixels : " << xpixels() << std::endl;
-  std::cout << "ypixels : " << ypixels() << std::endl;
-  std::cout << "\n U V Values: " << u << ", " << v << "\n";
+  //  std::cout << u << ", " << v << "\n";
 
   // In indices
   int xIndex = int(u);
@@ -579,8 +570,6 @@ void RectangularDetector::testIntersectionWithChildren(
   auto comp = getAtXY(xIndex, yIndex);
   testRay.addLink(intersec, intersec, 0.0, *(comp->shape()),
                   comp->getComponentID());
-
-  std::cout << "Number of Links RD: " << testRay.count() << std::endl;
 }
 
 //-------------------------------------------------------------------------------------------------
