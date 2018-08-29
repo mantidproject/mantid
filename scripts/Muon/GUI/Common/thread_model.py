@@ -1,37 +1,24 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy.QtCore import QThread
-from qtpy import QtWidgets
+from PyQt4.QtCore import QThread
+from PyQt4 import QtCore
+from Muon.GUI.Common import message_box
 
-from PyQt5.QtCore import pyqtSignal
-
-def warning(error):
-    print("WARNING FUNCTION")
-    QtWidgets.QMessageBox.warning(QtWidgets.QWidget(), "Error", str(error))
 
 class ThreadModel(QThread):
+
     """
     A wrapper to allow threading with
     the MaxEnt models.
     """
-    exceptionSignal = pyqtSignal(object)
+    exceptionSignal = QtCore.pyqtSignal(object)
 
     def __init__(self, model):
-        super(ThreadModel, self).__init__()
+        QThread.__init__(self)
         self.model = model
-    #     self.started.connect(self.do_a_print)
-    #     self.finished.connect(self.do_a_print_fin)
-    #
-    # def do_a_print(self):
-    #     print("started signal emitted!")
-    # def do_a_print_fin(self):
-    #     print("finished signal emitted!")
 
     def __del__(self):
-        try:
-            self.wait()
-        except RuntimeError:
-            pass
+        self.wait()
 
     def run(self):
         self.user_cancel = False
@@ -46,7 +33,6 @@ class ThreadModel(QThread):
             else:
                 self.sendSignal(error)
             pass
-
 
     def sendSignal(self, error):
         self.exceptionSignal.emit(error)
@@ -68,13 +54,11 @@ class ThreadModel(QThread):
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self, startSlot, endSlot):
-        #print("\tSetting up thread wrapper")
         self.started.connect(startSlot)
         self.finished.connect(endSlot)
-        self.exceptionSignal.connect(warning)
+        self.exceptionSignal.connect(message_box.warning)
 
     def threadWrapperTearDown(self, startSlot, endSlot):
-        #print("\tTearing down thread wrapper")
         self.started.disconnect(startSlot)
         self.finished.disconnect(endSlot)
-        self.exceptionSignal.disconnect(warning)
+        self.exceptionSignal.disconnect(message_box.warning)

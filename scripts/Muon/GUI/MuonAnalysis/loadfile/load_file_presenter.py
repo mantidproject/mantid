@@ -85,7 +85,6 @@ class BrowseFileWidgetPresenter(object):
 
     def on_loading_finished(self):
         file_list = self._model.loaded_filenames
-        print(file_list)
         self.set_file_edit(file_list)
         self._view.notify_loading_finished()
         self.enable_loading()

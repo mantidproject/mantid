@@ -56,11 +56,9 @@ class BrowseFileWidgetModel(object):
             raise ValueError(message)
 
     def exception_message_for_failed_files(self, failed_file_list):
-        print("Exception in execute!")
         return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
 
     def load_workspace_from_filename(self, filename):
-        print("Loading file : ", filename)
         try:
             workspace = mantid.Load(Filename=filename)
             run = int(workspace[0].getRunNumber())
@@ -72,7 +70,6 @@ class BrowseFileWidgetModel(object):
         self._loaded_data_store.clear()
 
     def add_directories_to_config_service(self, file_list):
-        print(file_list)
         dirs = [os.path.dirname(filename) for filename in file_list]
         dirs = [filename if os.path.isdir(filename) else "" for filename in dirs]
         dirs = list(set(dirs))
