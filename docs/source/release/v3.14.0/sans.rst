@@ -12,6 +12,7 @@ New
 
 Improved
 ########
+* Updated workspace nameing scheme for new backend
 
 Bug fixes
 #########

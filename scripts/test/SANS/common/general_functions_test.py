@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import sys
 from mantid.kernel import (V3D, Quat)
 from mantid.api import AnalysisDataService
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
@@ -14,7 +13,6 @@ from sans.common.enums import (ISISReductionMode, ReductionDimensionality, Outpu
                                SANSInstrument, DetectorType, SANSFacility, DataType)
 from sans.test_helper.test_director import TestDirector
 from sans.state.data import StateData
-from sans.state.save import get_save_builder
 
 
 class SANSFunctionsTest(unittest.TestCase):
