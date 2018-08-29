@@ -105,6 +105,7 @@ set ( SRC_FILES
 	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
         src/Objects/MeshObject2D.cpp
+	src/Objects/BeamlineRayTracer.cpp
 	src/Objects/MeshObject.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
