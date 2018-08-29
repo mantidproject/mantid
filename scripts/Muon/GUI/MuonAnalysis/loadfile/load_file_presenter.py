@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+import copy
+
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.muon_file_utils as file_utils
 
@@ -75,7 +77,6 @@ class BrowseFileWidgetPresenter(object):
     def handle_load_thread_start(self, filenames):
         if self._load_thread:
             return
-        print("Load thread started, Model : ", self._model.loaded_filenames)
         self._view.notify_loading_started()
         self._load_thread = self.create_load_thread()
         self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
@@ -83,16 +84,13 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        print("Load thread finished : ", self._load_thread.currentThreadId(), " Model : ", self._model.loaded_filenames)
         self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
         self.on_loading_finished()
 
     def on_loading_finished(self):
-        print("on_loading_finished")
         file_list = self._model.loaded_filenames
-        print(file_list)
         self.set_file_edit(file_list)
         self._view.notify_loading_finished()
         self.enable_loading()
@@ -123,6 +121,7 @@ class BrowseFileWidgetPresenter(object):
         return self._model.loaded_runs
 
     def set_file_edit(self, file_list):
+        file_list = sorted(copy.copy(file_list))
         self._view.set_file_edit(";".join(file_list), False)
 
     # used by parent widget

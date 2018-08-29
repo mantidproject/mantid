@@ -34,16 +34,16 @@ if __name__ == "__main__":
     import sys
 
     app = QtWidgets.QApplication(sys.argv)
-    ui = BrowseFileWidgetPresenter(BrowseFileWidgetView(), BrowseFileWidgetModel(MuonLoadData()))
+    #ui = BrowseFileWidgetPresenter(BrowseFileWidgetView(), BrowseFileWidgetModel(MuonLoadData()))
     # ui = LoadRunWidgetPresenter(LoadRunWidgetView(), LoadRunWidgetModel(MuonLoadData()))
     #
-    # data = MuonLoadData()
-    # load_file_view = BrowseFileWidgetView()
-    # load_run_view = LoadRunWidgetView()
-    #
-    # ui = LoadWidgetPresenter(LoadWidgetView(load_file_view=load_file_view, load_run_view=load_run_view), LoadWidgetModel(data))
-    # ui.set_load_file_widget(BrowseFileWidgetPresenter(load_file_view, BrowseFileWidgetModel(data)))
-    # ui.set_load_run_widget(LoadRunWidgetPresenter(load_run_view, LoadRunWidgetModel(data)))
+    data = MuonLoadData()
+    load_file_view = BrowseFileWidgetView()
+    load_run_view = LoadRunWidgetView()
+
+    ui = LoadWidgetPresenter(LoadWidgetView(load_file_view=load_file_view, load_run_view=load_run_view), LoadWidgetModel(data))
+    ui.set_load_file_widget(BrowseFileWidgetPresenter(load_file_view, BrowseFileWidgetModel(data)))
+    ui.set_load_run_widget(LoadRunWidgetPresenter(load_run_view, LoadRunWidgetModel(data)))
 
     ui.show()
     sys.exit(app.exec_())

@@ -4,13 +4,13 @@ import os
 
 import mantid.simpleapi as mantid
 from mantid.kernel import ConfigService
-from mantid import config as cf
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
+
 class BrowseFileWidgetModel(object):
 
-    def __init__(self, loaded_data_store = MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData()):
         # Temporary list of filenames used for load thread
         self._filenames = []
 
@@ -49,7 +49,7 @@ class BrowseFileWidgetModel(object):
             except ValueError:
                 failed_files += [filename]
                 continue
-            self._loaded_data_store.add_data(run = run, workspace = ws, filename=filename)
+            self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
         if failed_files:
             message = self.exception_message_for_failed_files(failed_files)
             raise ValueError(message)
@@ -78,7 +78,3 @@ class BrowseFileWidgetModel(object):
         if dirs:
             for dir in dirs:
                 ConfigService.Instance().appendDataSearchDir(dir.encode('ascii', 'ignore'))
-        # print("Dirs : ", dirs)
-        # print("Data search : ", ConfigService.Instance().getDataSearchDirs())
-        # print("config : ", cf.getDataSearchDirs())
-        # print(cf["datasearch.directories"])
