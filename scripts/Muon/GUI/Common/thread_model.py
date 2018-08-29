@@ -6,7 +6,6 @@ from Muon.GUI.Common import message_box
 
 
 class ThreadModel(QThread):
-
     """
     A wrapper to allow threading with
     the MaxEnt models.
@@ -16,6 +15,14 @@ class ThreadModel(QThread):
     def __init__(self, model):
         QThread.__init__(self)
         self.model = model
+
+        self.check_model_has_correct_attributes()
+
+    def check_model_has_correct_attributes(self):
+        if hasattr(self.model, "execute") and hasattr(self.model, "output"):
+            return
+        raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
+                             " execute() and output() methods")
 
     def __del__(self):
         self.wait()
@@ -51,6 +58,9 @@ class ThreadModel(QThread):
 
     # if there are multiple inputs (alg>1)
     def loadData(self, inputs):
+        if not hasattr(self.model, "loadData"):
+            raise AttributeError("The model passed to ThreadModel has not implemented"
+                                 " loadData() method, which it is attempting to call.")
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self, startSlot, endSlot):
