@@ -745,7 +745,7 @@ class TestManager(object):
                  quiet=False, testsInclude=None, testsExclude=None,
                  exclude_in_pr_builds=None, showSkipped=False,
                  output_on_failure=False, clean=False,
-                 test_count=[0,0,0], process_number=0, ncores=1):
+                 test_count=None, process_number=0, ncores=1):
         '''Initialize a class instance'''
 
         # Runners and reporters

@@ -80,7 +80,7 @@ try:
     run_test_cmd = '%s %s %s/runSystemTests.py --loglevel=%s --executable="%s" --exec-args="%s"' % \
                 (installer.python_cmd, installer.python_args, THIS_MODULE_DIR,
                 options.log_level, installer.python_cmd, installer.python_args)
-    run_test_cmd += " -j=%i --quiet --output-on-failure" % options.ncores
+    run_test_cmd += " -j%i --quiet --output-on-failure" % options.ncores
     if options.test_regex is not None:
         run_test_cmd += " -R " + options.test_regex
     if options.archivesearch:
