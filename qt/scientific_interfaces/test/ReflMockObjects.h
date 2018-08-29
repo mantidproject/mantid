@@ -146,8 +146,8 @@ public:
                     std::vector<MissingInstrumentParameterValue> const &));
   MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
-  void
-  createStitchHints(const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
+  void createStitchHints(
+      const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
     UNUSED_ARG(hints);
   };
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }
