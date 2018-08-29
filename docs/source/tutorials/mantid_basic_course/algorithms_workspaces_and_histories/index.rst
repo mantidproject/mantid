@@ -1,8 +1,8 @@
 .. _algorithms_workspaces_and_histories: 
 
-========================
-Workspaces And Histories 
-========================
+===================================
+Algorithms Workspaces and Histories 
+===================================
 
 .. toctree:: 
    :hidden: 

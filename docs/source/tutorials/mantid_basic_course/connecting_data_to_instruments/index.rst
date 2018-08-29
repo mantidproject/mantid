@@ -1,8 +1,8 @@
 .. _connecting_data_to_instruments: 
 
-===================
-Data To Instruments 
-===================
+==============================
+Connecting Data To Instruments 
+==============================
 
 .. toctree:: 
    :hidden: 
