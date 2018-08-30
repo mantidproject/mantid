@@ -33,3 +33,5 @@ Bugfixes
 ########
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
+
+- :ref:`FindPeaksMD <algm-FindPeaksMD>` now finds peaks correctly with the crystallography convention setting and is tested in the system tests.
