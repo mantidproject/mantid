@@ -74,6 +74,7 @@ set ( SRC_FILES
 	src/CreateDummyCalFile.cpp
 	src/CreateEPP.cpp
 	src/CreateFlatEventWorkspace.cpp
+	src/CreateFloodWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
 	src/CreateLogTimeCorrection.cpp
@@ -399,6 +400,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateDummyCalFile.h
 	inc/MantidAlgorithms/CreateEPP.h
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
+	inc/MantidAlgorithms/CreateFloodWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h

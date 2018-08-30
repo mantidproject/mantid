@@ -9,6 +9,14 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms
+----------
+
+New
+###
+
+- Added algorithm :ref:`algm-CreateFloodWorkspace` which makes a workspace for subsequent flood corrections.
+
 Liquids Reflectometer
 ---------------------
 
@@ -16,6 +24,35 @@ Liquids Reflectometer
 
 ISIS Reflectometry Interface
 ----------------------------
+
+New
+###
+
+
+
+Improved
+########
+
+- The interface now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+
+Bug fixes
+#########
+
+
+
+Algorithms
+----------
+
+
+New
+###
+
+
+
+Improved
+########
+
+- :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
 
 Bug fixes
 #########
