@@ -145,7 +145,8 @@ set ( SRC_FILES
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
-
+	src/FunctionBrowser/FunctionProperties.cpp
+	src/FunctionBrowser/MultiDomainFunctionModel.cpp
 	src/QtPropertyBrowser/qtpropertybrowser.cpp
 	src/QtPropertyBrowser/qtpropertymanager.cpp
 	src/QtPropertyBrowser/qteditorfactory.cpp
@@ -385,6 +386,9 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
+  inc/MantidQtWidgets/Common/FunctionBrowser/IFunctionModel.h
+  inc/MantidQtWidgets/Common/FunctionBrowser/FunctionProperties.h
+  inc/MantidQtWidgets/Common/FunctionBrowser/MultiDomainFunctionModel.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
@@ -581,6 +585,8 @@ set( TEST_FILES
   test/ProjectSavePresenterTest.h
   test/WorkspacePresenter/ADSAdapterTest.h
   test/WorkspacePresenter/WorkspacePresenterTest.h
+
+  test/FunctionBrowser/MultiDomainFunctionModelTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
