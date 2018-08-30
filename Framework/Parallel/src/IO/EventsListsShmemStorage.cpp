@@ -4,6 +4,7 @@
 
 namespace Mantid {
 namespace Parallel {
+namespace IO {
 
 EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
                                                  const std::string &elName,
@@ -41,5 +42,6 @@ std::ostream &operator<<(std::ostream &os,
   return os;
 }
 
+} // namespace IO
 } // namespace Parallel
 } // namespace Mantid

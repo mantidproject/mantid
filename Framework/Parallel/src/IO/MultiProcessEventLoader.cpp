@@ -1,12 +1,18 @@
 #include <chrono>
 #include <iomanip>
 #include <thread>
+#include <MantidParallel/IO/MultiProcessEventLoader.h>
+#include <numeric>
+#include <H5Cpp.h>
 
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidTypes/Event/TofEvent.h"
+#include "MantidParallel/IO/NXEventDataLoader.h"
+
 
 namespace Mantid {
 namespace Parallel {
+namespace IO {
 
 MultiProcessEventLoader::MultiProcessEventLoader(unsigned int numPixels,
                                                  unsigned int numProcesses,
@@ -50,12 +56,12 @@ void MultiProcessEventLoader::assembleFromShared(std::vector<std::vector<Mantid:
   for (unsigned i = 0; i < numThreads; ++i) {
     workers.emplace_back([&cnt, this, &result]() {
       std::vector<ip::managed_shared_memory> segments;
-      std::vector<Mantid::Parallel::Chunks *> chunksPtrs;
+      std::vector<Mantid::Parallel::IO::Chunks *> chunksPtrs;
       for (unsigned i = 0; i < numThreads; ++i) {
         segments.emplace_back(ip::open_read_only, segmentNames[i].c_str());
         chunksPtrs.emplace_back(
             segments[i]
-                .find<Mantid::Parallel::Chunks>(storageName.c_str())
+                .find<Mantid::Parallel::IO::Chunks>(storageName.c_str())
                 .first);
       }
 
@@ -75,5 +81,19 @@ void MultiProcessEventLoader::assembleFromShared(std::vector<std::vector<Mantid:
     worker.join();
 }
 
+void MultiProcessEventLoader::fillFromFile(EventsListsShmemStorage &storage,
+                                           const std::string &filename,
+                                           const std::string &groupname,
+                                           const std::vector<std::string> &bankNames,
+                                           const std::vector<int32_t> &bankOffsets,
+                                           unsigned from, unsigned to) {
+  H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
+  auto instrument = file.openGroup(groupname);
+
+  auto dataType = EventLoader::readDataType(instrument, bankNames, "event_time_offset");
+
+}
+
+} // namespace IO
 } // namespace Parallel
 } // namespace Mantid

@@ -7,6 +7,7 @@
 
 namespace Mantid {
 namespace Parallel {
+namespace IO {
 
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
                                                  const std::string &elName)
@@ -17,7 +18,7 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
       std::make_shared<VoidAllocator>(m_segment->get_segment_manager());
   m_chunks = m_segment->find<Chunks>(m_chunksName.c_str()).first;
   if (!m_chunks)
-    throw("No event lists found.");
+    throw ("No event lists found.");
 }
 
 EventsListsShmemManager::~EventsListsShmemManager() {}
@@ -79,5 +80,6 @@ const VoidAllocator &EventsListsShmemManager::alloc() const {
   return *m_allocatorInstance.get();
 }
 
+} // namespace IO
 } // namespace Parallel
 } // namespace Mantid

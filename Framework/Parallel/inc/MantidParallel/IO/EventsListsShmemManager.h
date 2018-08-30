@@ -19,6 +19,7 @@ class TofEvent;
 } // namespace Types
 
 namespace Parallel {
+namespace IO {
 
 /** EventsListsShmemManager : Operates with event list in shared memory in
   multiprocess environment; NOT an !!!OWNER of shared memory!!!
@@ -102,6 +103,7 @@ protected:
   Chunks *m_chunks;
 };
 
+} // namespace IO
 } // namespace Parallel
 } // namespace Mantid
 

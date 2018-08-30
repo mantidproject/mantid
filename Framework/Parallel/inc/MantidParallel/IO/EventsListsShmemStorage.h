@@ -9,6 +9,7 @@ namespace ip = boost::interprocess;
 
 namespace Mantid {
 namespace Parallel {
+namespace IO {
 
 /** EventsListsShmemStorage : Owner of shared memory for
   parallel (multiple processes) loading from the Nexus file.
@@ -53,6 +54,7 @@ private:
   const bool destroyShared;
 };
 
+} // namespace IO
 } // namespace Parallel
 } // namespace Mantid
 
