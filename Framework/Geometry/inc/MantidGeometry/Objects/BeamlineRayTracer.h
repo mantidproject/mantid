@@ -49,10 +49,6 @@ using Links = Track::LType;
 namespace BeamlineRayTracer {
 
 /**
- * Methods for BeamlineRayTracer
- */
-
-/**
  * Trace a given track from the instrument source in the given direction
  * and compile a list of results that this track intersects.
  */
@@ -66,6 +62,10 @@ MANTID_GEOMETRY_DLL Links traceFromSource(const Kernel::V3D &dir,
 MANTID_GEOMETRY_DLL Links traceFromSample(const Kernel::V3D &dir,
                                           const ComponentInfo &componentInfo);
 
+/**
+ * Using the results of the trace, return the first detector
+ * (that is NOT a monitor) found in the results.
+ */
 MANTID_GEOMETRY_DLL size_t getDetectorResult(const ComponentInfo &componentInfo,
                                              const DetectorInfo &detectorInfo,
                                              Track &resultsTrack);
@@ -85,10 +85,17 @@ void fireRay(Track &track, const ComponentInfo &componentInfo);
  */
 Links getResults(Track &resultsTrack);
 
+/**
+ * Tests the intersection of the ray with a rectangular bank of detectors.
+ * Adds links to the track.
+ */
 void checkIntersectionWithRectangularBank(Track &track,
                                           const ComponentInfo &componentInfo,
                                           size_t componentIndex);
 
+/**
+ * Tests the intersection of the ray with the given component.
+ */
 void checkIntersectionWithComponent(Track &track,
                                     const ComponentInfo &componentInfo,
                                     size_t componentIndex);
