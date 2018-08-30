@@ -5,9 +5,9 @@
  *      Author: Vickie Lynch
  */
 #include "MantidCrystal/PredictSatellitePeaks.h"
+#include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
@@ -33,56 +33,57 @@ DECLARE_ALGORITHM(PredictSatellitePeaks)
 void PredictSatellitePeaks::init() {
   auto latticeValidator = boost::make_shared<OrientedLatticeValidator>();
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace> >(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "Peaks", "", Direction::Input, latticeValidator),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace> >("SatellitePeaks", "",
-                                                      Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("SatellitePeaks", "",
+                                                     Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double> >(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector1"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double> >(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector2"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
-  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double> >(
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       string("ModVector3"), "0.0,0.0,0.0"),
                   "Offsets for h, k, l directions ");
   declareProperty(
-      make_unique<PropertyWithValue<int> >("MaxOrder", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply ModVectors. Default = 0");
 
   declareProperty("GetModVectorsFromUB", true,
                   "If false Modulation Vectors will be read from input");
 
-  declareProperty(make_unique<PropertyWithValue<bool> >("CrossTerms", false,
-                                                        Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,
+                                                       Direction::Input),
                   "Include cross terms (false)");
 
   declareProperty(
       "IncludeIntegerHKL", true,
       "If false order 0 peaks are not included in workspace (integer HKL)");
 
-  declareProperty("IncludeAllPeaksInRange", false, "If false only offsets from "
-                                                   "peaks from Peaks workspace "
-                                                   "in input are used");
+  declareProperty("IncludeAllPeaksInRange", false,
+                  "If false only offsets from "
+                  "peaks from Peaks workspace "
+                  "in input are used");
 
-  declareProperty(make_unique<PropertyWithValue<double> >("WavelengthMin", 0.1,
-                                                          Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>("WavelengthMin", 0.1,
+                                                         Direction::Input),
                   "Minimum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
-  declareProperty(make_unique<PropertyWithValue<double> >(
-                      "WavelengthMax", 100.0, Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>("WavelengthMax", 100.0,
+                                                         Direction::Input),
                   "Maximum wavelength limit at which to start looking for "
                   "single-crystal peaks.");
-  declareProperty(make_unique<PropertyWithValue<double> >("MinDSpacing", 0.1,
-                                                          Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>("MinDSpacing", 0.1,
+                                                         Direction::Input),
                   "Minimum d-spacing of peaks to consider. Default = 1.0");
-  declareProperty(make_unique<PropertyWithValue<double> >("MaxDSpacing", 100.0,
-                                                          Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>("MaxDSpacing", 100.0,
+                                                         Direction::Input),
                   "Maximum d-spacing of peaks to consider");
 
   setPropertySettings(
@@ -180,15 +181,15 @@ void PredictSatellitePeaks::exec() {
   auto &UB = lattice.getUB();
   goniometer = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
-  vector<vector<int> > AlreadyDonePeaks;
+  vector<vector<int>> AlreadyDonePeaks;
   auto orientedUB = goniometer * UB;
   HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
-  outPeaks->mutableRun().addProperty<std::vector<double> >("Offset1", offsets1,
-                                                           true);
-  outPeaks->mutableRun().addProperty<std::vector<double> >("Offset2", offsets2,
-                                                           true);
-  outPeaks->mutableRun().addProperty<std::vector<double> >("Offset3", offsets3,
-                                                           true);
+  outPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
+                                                          true);
+  outPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
+                                                          true);
+  outPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
+                                                          true);
   for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
     V3D hkl = *it;
     if (crossTerms) {
@@ -198,14 +199,11 @@ void PredictSatellitePeaks::exec() {
                                    AlreadyDonePeaks);
     } else {
       predictOffsets(Peaks, outPeaks, 0, offsets1, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, includeOrderZero,
-                     AlreadyDonePeaks);
+                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
       predictOffsets(Peaks, outPeaks, 1, offsets2, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, includeOrderZero,
-                     AlreadyDonePeaks);
+                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
       predictOffsets(Peaks, outPeaks, 2, offsets3, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, includeOrderZero,
-                     AlreadyDonePeaks);
+                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
     }
   }
   // Sort peaks by run number so that peaks with equal goniometer matrices are
@@ -255,14 +253,14 @@ void PredictSatellitePeaks::exec_peaks() {
   outPeaks->setInstrument(instrument);
   outPeaks->mutableSample().setOrientedLattice(&lattice);
 
-  vector<vector<int> > AlreadyDonePeaks;
+  vector<vector<int>> AlreadyDonePeaks;
   HKLFilterWavelength lambdaFilter(DblMatrix(3, 3, true), 0.1, 100.);
-  outPeaks->mutableRun().addProperty<std::vector<double> >("Offset1", offsets1,
-                                                           true);
-  outPeaks->mutableRun().addProperty<std::vector<double> >("Offset2", offsets2,
-                                                           true);
-  outPeaks->mutableRun().addProperty<std::vector<double> >("Offset3", offsets3,
-                                                           true);
+  outPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1,
+                                                          true);
+  outPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2,
+                                                          true);
+  outPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3,
+                                                          true);
   std::vector<Peak> peaks = Peaks->getPeaks();
   for (auto it = peaks.begin(); it != peaks.end(); ++it) {
     auto peak = *it;
@@ -274,8 +272,7 @@ void PredictSatellitePeaks::exec_peaks() {
                                    AlreadyDonePeaks);
     } else {
       predictOffsets(Peaks, outPeaks, 0, offsets1, maxOrder, hkl, lambdaFilter,
-                     includePeaksInRange, includeOrderZero,
-                     AlreadyDonePeaks);
+                     includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
       predictOffsets(Peaks, outPeaks, 1, offsets2, maxOrder, hkl, lambdaFilter,
                      includePeaksInRange, false, AlreadyDonePeaks);
       predictOffsets(Peaks, outPeaks, 2, offsets3, maxOrder, hkl, lambdaFilter,
@@ -304,7 +301,7 @@ void PredictSatellitePeaks::predictOffsets(
     boost::shared_ptr<Mantid::API::IPeaksWorkspace> &outPeaks, int iVector,
     V3D offsets, int &maxOrder, V3D &hkl, HKLFilterWavelength &lambdaFilter,
     bool &includePeaksInRange, bool includeOrderZero,
-    vector<vector<int> > &AlreadyDonePeaks) {
+    vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets == V3D(0, 0, 0))
     return;
   const Kernel::DblMatrix &UB = Peaks->sample().getOrientedLattice().getUB();
@@ -333,10 +330,9 @@ void PredictSatellitePeaks::predictOffsets(
 
     if (!peak->findDetector(tracer))
       continue;
-    vector<int> SavPk{ RunNumber,
-                       boost::math::iround(1000.0 * satelliteHKL[0]),
-                       boost::math::iround(1000.0 * satelliteHKL[1]),
-                       boost::math::iround(1000.0 * satelliteHKL[2]) };
+    vector<int> SavPk{RunNumber, boost::math::iround(1000.0 * satelliteHKL[0]),
+                      boost::math::iround(1000.0 * satelliteHKL[1]),
+                      boost::math::iround(1000.0 * satelliteHKL[2])};
 
     bool foundPeak =
         binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
@@ -362,8 +358,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
     boost::shared_ptr<Mantid::API::IPeaksWorkspace> &outPeaks, V3D offsets1,
     V3D offsets2, V3D offsets3, int &maxOrder, V3D &hkl,
     HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
-    bool &includeOrderZero,
-    vector<vector<int> > &AlreadyDonePeaks) {
+    bool &includeOrderZero, vector<vector<int>> &AlreadyDonePeaks) {
   if (offsets1 == V3D(0, 0, 0) && offsets2 == V3D(0, 0, 0) &&
       offsets3 == V3D(0, 0, 0))
     return;
@@ -408,10 +403,10 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
 
         if (!peak->findDetector(tracer))
           continue;
-        vector<int> SavPk{ RunNumber,
-                           boost::math::iround(1000.0 * satelliteHKL[0]),
-                           boost::math::iround(1000.0 * satelliteHKL[1]),
-                           boost::math::iround(1000.0 * satelliteHKL[2]) };
+        vector<int> SavPk{RunNumber,
+                          boost::math::iround(1000.0 * satelliteHKL[0]),
+                          boost::math::iround(1000.0 * satelliteHKL[1]),
+                          boost::math::iround(1000.0 * satelliteHKL[2])};
 
         bool foundPeak = binary_search(AlreadyDonePeaks.begin(),
                                        AlreadyDonePeaks.end(), SavPk);
