@@ -68,11 +68,11 @@ class BrowseFileWidgetView(QtGui.QWidget):
         default_directory = search_directories[0]
         if multiple_files:
             chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
-                                                                 file_filter)
+                                                              file_filter)
             return [str(chosen_file) for chosen_file in chosen_files]
         else:
             chosen_file = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
-                                                               file_filter)
+                                                            file_filter)
             return [str(chosen_file)]
 
     def disable_loading(self):
