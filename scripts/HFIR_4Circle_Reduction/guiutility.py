@@ -564,4 +564,3 @@ def show_message(parent=None, message='show message here!', message_type='info')
     # Dialog object: dialog still exists after exec_()
 
     return result
-

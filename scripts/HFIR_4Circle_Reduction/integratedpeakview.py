@@ -365,7 +365,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         # add the line
         if vec_fwhm is not None:
             self._2thetaFWHM = self.add_plot_1d(vec_2theta, vec_fwhm, x_label='$2\theta$', y_label='FWHM',
-                                               color='black', update_plot=True, label='Observed')
+                                                color='black', update_plot=True, label='Observed')
 
         if vec_model is not None:
             self._2thetaModelID = self.add_plot_1d(vec_2theta, vec_model, x_label='$2\theta$', y_label='FWHM',
