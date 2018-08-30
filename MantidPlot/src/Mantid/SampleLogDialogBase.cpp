@@ -326,15 +326,15 @@ void SampleLogDialogBase::init() {
       treeItem->setData(0, Qt::UserRole,
                         QString::fromStdString((*pItr)->value()));
       treeItem->setText(2, QString::fromStdString((*pItr)->value()));
-    } else if (dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
-               dynamic_cast<ArrayProperty<double> *>(*pItr) ||
-               dynamic_cast<
-                   Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(
-                   *pItr) ||
-               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>>
-                                *>(*pItr)||
-               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<long>>
-                                *>(*pItr)) {
+    } else if (
+        dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
+        dynamic_cast<ArrayProperty<double> *>(*pItr) ||
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(
+            *pItr) ||
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(
+            *pItr) ||
+        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<long>> *>(
+            *pItr)) {
       treeItem->setText(1, "numeric array");
       treeItem->setData(
           1, Qt::UserRole,
