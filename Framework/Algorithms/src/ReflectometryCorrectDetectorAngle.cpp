@@ -300,7 +300,7 @@ double ReflectometryCorrectDetectorAngle::offsetAngleFromCentre(
     API::MatrixWorkspace const &ws, double const l2,
     double const linePosition) {
   auto const &spectrumInfo = ws.spectrumInfo();
-  if (linePosition > spectrumInfo.size() - 1) {
+  if (linePosition + 1. > static_cast<double>(spectrumInfo.size())) {
     std::ostringstream msg;
     msg << Prop::LINE_POS << " is greater than the maximum workspace index "
         << spectrumInfo.size() - 1;
