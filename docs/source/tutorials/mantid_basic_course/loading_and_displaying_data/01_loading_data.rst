@@ -4,8 +4,8 @@
 Loading Data 
 ============
 
-.. figure:: /images/ShowLoadandWorkspaceAreaInMantidPlot.PNG
-   :alt: ShowLoadandWorkspaceAreaInMantidPlot.PNG
+.. figure:: /images/ShowLoadandWorkspaceAreaInMantidPlot.png
+   :alt: ShowLoadandWorkspaceAreaInMantidPlot.png
 
 Loading a File
 ==============
@@ -43,7 +43,7 @@ Other equivalent methods exist for loading files in MantidPlot:
 -  Clicking the Load File Button toolbar button.
 -  Using the Load Algorithm. (More on this later!)
 
-.. figure:: /images/300px-LoadAlgorithmsSep2013.PNG
+.. figure:: /images/300px-LoadAlgorithmsSep2013.png
    :alt: The list of Load algorithms for Mantid v2.6.
    :width: 300px
 

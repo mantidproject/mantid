@@ -23,7 +23,7 @@ Part 2
    'spectrum' axis is momentum transfer Qy.
 #. Plot this data as a colour fill plot to get the following result:
 
-.. figure:: /images/Sans2Dcolourfillplot_exercise1MBC.PNG
+.. figure:: /images/Sans2Dcolourfillplot_exercise1MBC.png
    :alt: centre
    :width: 600px
 

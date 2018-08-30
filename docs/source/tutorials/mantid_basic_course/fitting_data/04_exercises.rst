@@ -53,10 +53,10 @@ This exercise will mainly quiz about fitting.
    the three peaks
 #. Associate the plot with the Fit Function panel and set fitting range
    to be between approximately 2270 and 5000 microseconds
-#. Right click on plot and select 'Add background...' then
-   :ref:`FlatBackground`
+#. Right click on plot and select Add background... then
+   FlatBackground
 #. Right click on plot and add peak
-   :ref:`IkedaCarpenterPV`. This is peak function where
+   IkedaCarpenterPV. This is peak function where
    some parameters of the peak function may be related to instrument
    geometry. As of this writing scientist(s) of the GEM instrument
    modified the file MantidInstall/instrument/GEM_Parameters.xml such
@@ -67,14 +67,14 @@ This exercise will mainly quiz about fitting.
 #. Hold down shift key and click on top of the two other peaks
 #. Plot (fitting) guess and what you should see is something similar to
 
-      |ExerciseFittingMBCguess.PNG|
+      |ExerciseFittingMBCguess.png|
       where the red line is the guess
 
 #. Remove plot guess
 #. Fit the data with the model, where the output should be something
    similar to
 
-      |ExerciseFittingMBCfit.PNG|
+      |ExerciseFittingMBCfit.png|
       where the red line is here the fit
 
 #. clear the model
@@ -83,7 +83,7 @@ This exercise will mainly quiz about fitting.
    region between about 2000 and 9400 microseconds, and obtain a result
    similar to
 
-      |ExerciseFittingMBCfit_2.PNG|
+      |ExerciseFittingMBCfit_2.png|
       **Note** this will take a while as it is a fit with almost 40
       independent parameters to optimise.
 
@@ -115,9 +115,9 @@ Exercise 3
    :width: 400px
 .. |FittedGaussian.png| image:: /images/FittedGaussian.png
    :width: 400px
-.. |ExerciseFittingMBCguess.PNG| image:: /images/ExerciseFittingMBCguess.PNG
+.. |ExerciseFittingMBCguess.png| image:: /images/ExerciseFittingMBCguess.png
    :width: 400px
-.. |ExerciseFittingMBCfit.PNG| image:: /images/ExerciseFittingMBCfit.PNG
+.. |ExerciseFittingMBCfit.png| image:: /images/ExerciseFittingMBCfit.png
    :width: 400px
-.. |ExerciseFittingMBCfit_2.PNG| image:: /images/ExerciseFittingMBCfit_2.PNG
+.. |ExerciseFittingMBCfit_2.png| image:: /images/ExerciseFittingMBCfit_2.png
    :width: 400px

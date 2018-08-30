@@ -17,7 +17,7 @@ the GUI.
    panel click on the arrow in front of Rebin v.1 and should see the
    following:
 
-   |HistoryRebinOfCNCS_7860_event.PNG|
+   |HistoryRebinOfCNCS_7860_event.png|
    
    This reveals the history done to this workspace, i.e. Load to load
    the workspace, SumSpectra, and three Rebins.
@@ -39,4 +39,4 @@ the GUI.
 
    {{SlideNavigationLinks|MBC_Workspaces|Mantid_Basic_Course|MBC_Interfaces}}
 
-.. |HistoryRebinOfCNCS_7860_event.PNG| image:: /images/HistoryRebinOfCNCS_7860_event.PNG
+.. |HistoryRebinOfCNCS_7860_event.png| image:: /images/HistoryRebinOfCNCS_7860_event.png

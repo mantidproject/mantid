@@ -96,8 +96,8 @@ together with a flag showing which are monitors. If a spectrum contains
 a group of detectors then the position shown will be the average
 position of those detectors.
 
-.. figure:: /images/Showmar11060detectortable.PNG
-   :alt: Showmar11060detectortable.PNG
+.. figure:: /images/Showmar11060detectortable.png
+   :alt: Showmar11060detectortable.png
 
 In the example above, the first three spectra correspond to data from
 monitors. The fourth spectrum (with a Spectrum Number of -1) loaded from

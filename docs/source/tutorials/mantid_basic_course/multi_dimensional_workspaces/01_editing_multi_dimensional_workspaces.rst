@@ -6,7 +6,7 @@
 
 Where multi-dimensional capabilities are required, Mantid provides a
 relatively new set of MDWorkspace (multi-dimensional workspace) types.
-MDWorkspaces come in two forms :ref:`MDEventWorkspace`,
+MDWorkspaces come in two forms MD Event Workspaces,
 which are analogous to :ref:`EventWorkspace` and the
 :ref:`MDHistoWorkspace`, which is analogous to the
 :ref:`Workspace2D`.
@@ -28,7 +28,7 @@ multi-dimensional data. These are image-only.
 Creating MDWorkspaces
 =====================
 
-:ref:`ConvertToMD` is an umbrella algorithm that provides a
+:ref:`algm-ConvertToMD` is an umbrella algorithm that provides a
 large number of conversions. The details of all the available options
 are outside the scope of this course.
 
