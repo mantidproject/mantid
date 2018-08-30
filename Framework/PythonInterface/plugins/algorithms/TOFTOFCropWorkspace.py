@@ -64,14 +64,13 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         """ Main execution body
         """
         inputws = self.getProperty("InputWorkspace").value
-        outputws = self.getProperty("OutputWorkspace").value
 
         run = inputws.getRun()
         channel_width = float(run.getLogData('channel_width').value)
         full_channels = float(run.getLogData('full_channels').value)
         tof1 = float(run.getLogData('TOF1').value)
 
-        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width + tof1, OutputWorkspace=outputws)
+        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width + tof1, StoreInADS=False)
         self.setProperty("OutputWorkspace", outputws)
 
 

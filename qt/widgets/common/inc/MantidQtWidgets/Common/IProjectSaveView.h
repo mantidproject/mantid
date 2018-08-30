@@ -69,6 +69,6 @@ public:
   virtual void
   removeFromExcludedWindowsList(const std::vector<std::string> &windows) = 0;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /* MANTID_CUSTOMINTERFACES_IPROJECTSAVEVIEW_H */

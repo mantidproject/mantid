@@ -87,25 +87,25 @@ std::string validateAlgorithmInputs(IAlgorithm_sptr alg) {
   }
   return error;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
 
 /**
-* Constructor
-* @param whitelist : The set of properties we want to show as columns
-* @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A ProcessingAlgorithm
-* @param postprocessor : A PostprocessingAlgorithm
-* workspaces
-* @param group : The zero based index of this presenter within the tab
-* (reflectometry).
-* @param postprocessMap : A map containing instructions for post-processing.
-* This map links column name to properties of the post-processing algorithm
-* @param loader : The algorithm responsible for loading data
-*/
+ * Constructor
+ * @param whitelist : The set of properties we want to show as columns
+ * @param preprocessMap : A map containing instructions for pre-processing
+ * @param processor : A ProcessingAlgorithm
+ * @param postprocessor : A PostprocessingAlgorithm
+ * workspaces
+ * @param group : The zero based index of this presenter within the tab
+ * (reflectometry).
+ * @param postprocessMap : A map containing instructions for post-processing.
+ * This map links column name to properties of the post-processing algorithm
+ * @param loader : The algorithm responsible for loading data
+ */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
@@ -165,14 +165,14 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 }
 
 /**
-* Delegating constructor (no pre-processing needed)
-* @param whitelist : The set of properties we want to show as columns
-* @param processor : A ProcessingAlgorithm
-* @param postprocessor : A PostprocessingAlgorithm
-* workspaces
-* @param group : The zero based index of this presenter within the tab
-* (reflectometry).
-*/
+ * Delegating constructor (no pre-processing needed)
+ * @param whitelist : The set of properties we want to show as columns
+ * @param processor : A ProcessingAlgorithm
+ * @param postprocessor : A PostprocessingAlgorithm
+ * workspaces
+ * @param group : The zero based index of this presenter within the tab
+ * (reflectometry).
+ */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor,
     PostprocessingAlgorithm postprocessor, int group)
@@ -193,14 +193,14 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           ProcessingAlgorithm(), PostprocessingAlgorithm(), group) {}
 
 /**
-* Delegating constructor (no post-processing needed)
-* @param whitelist : The set of properties we want to show as columns
-* @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A ProcessingAlgorithm
-* workspaces
-* @param group : The zero based index of this presenter within the tab
-* (reflectometry)
-*/
+ * Delegating constructor (no post-processing needed)
+ * @param whitelist : The set of properties we want to show as columns
+ * @param preprocessMap : A map containing instructions for pre-processing
+ * @param processor : A ProcessingAlgorithm
+ * workspaces
+ * @param group : The zero based index of this presenter within the tab
+ * (reflectometry)
+ */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
@@ -210,13 +210,13 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           PostprocessingAlgorithm(), group) {}
 
 /**
-* Delegating constructor (no pre-processing needed, no post-processing needed)
-* @param whitelist : The set of properties we want to show as columns
-* @param processor : A ProcessingAlgorithm
-* workspaces
-* @param group : The zero based index of this presenter within the tab
-* (reflectometry)
-*/
+ * Delegating constructor (no pre-processing needed, no post-processing needed)
+ * @param whitelist : The set of properties we want to show as columns
+ * @param processor : A ProcessingAlgorithm
+ * workspaces
+ * @param group : The zero based index of this presenter within the tab
+ * (reflectometry)
+ */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor, int group)
     : GenericDataProcessorPresenter(
@@ -224,8 +224,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           std::move(processor), PostprocessingAlgorithm(), group) {}
 
 /**
-* Destructor
-*/
+ * Destructor
+ */
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 namespace {
@@ -236,12 +236,12 @@ std::vector<std::string> toStdStringVector(std::set<QString> in) {
                      -> std::string { return inStr.toStdString(); });
   return out;
 }
-}
+} // namespace
 /**
-* Sets the views this presenter is going to handle
-* @param tableView : The table view
-* @param progressView : The progress view
-*/
+ * Sets the views this presenter is going to handle
+ * @param tableView : The table view
+ * @param progressView : The progress view
+ */
 void GenericDataProcessorPresenter::acceptViews(
     DataProcessorView *tableView, ProgressableView *progressView) {
 
@@ -352,12 +352,14 @@ void GenericDataProcessorPresenter::setGroupError(const int groupIndex,
 
 void GenericDataProcessorPresenter::setRowIsProcessed(RowData_sptr rowData,
                                                       const bool isProcessed) {
-  rowData->setProcessed(isProcessed);
+  if (rowData)
+    rowData->setProcessed(isProcessed);
 }
 
 void GenericDataProcessorPresenter::setRowError(RowData_sptr rowData,
                                                 const std::string &error) {
-  rowData->setError(error);
+  if (rowData)
+    rowData->setError(error);
 }
 
 /** Return true if the given workspace name is the output of a current
@@ -422,6 +424,9 @@ void GenericDataProcessorPresenter::handleAllWorkspacesRemoved(
 
 bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
     const GroupData &groupData, const std::string &workspaceName) const {
+  if (groupData.size() == 0)
+    return false;
+
   return hasPostprocessing() &&
          getPostprocessedWorkspaceName(groupData).toStdString() ==
              workspaceName;
@@ -429,6 +434,9 @@ bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
 
 bool GenericDataProcessorPresenter::workspaceIsOutputOfRow(
     RowData_sptr rowData, const std::string &workspaceName) const {
+  if (!rowData)
+    return false;
+
   // Only check the default output workspace (other output workspaces are
   // optional)
   return rowData->hasOutputWorkspaceWithNameAndPrefix(
@@ -878,11 +886,11 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
                                                     preprocessor.separator());
 
   /* Ideally, this should be executed as a child algorithm to keep the ADS
-  * tidy,
-  * but that doesn't preserve history nicely, so we'll just take care of
-  * tidying
-  * up in the event of failure.
-  */
+   * tidy,
+   * but that doesn't preserve history nicely, so we'll just take care of
+   * tidying
+   * up in the event of failure.
+   */
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(preprocessor.name().toStdString());
   alg->initialize();
@@ -1097,7 +1105,7 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
 
 /** Perform preprocessing on algorithm property values where applicable
  * @param data : the data in the row
-*/
+ */
 void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {
   auto options = data->options();
   // Loop through all columns (excluding the Options and Hidden options
@@ -1603,8 +1611,8 @@ void GenericDataProcessorPresenter::pasteSelected() {
 }
 
 /** Transfers the selected runs in the search results to the processing table
-* @param runs : [input] the set of runs to transfer as a vector of maps
-*/
+ * @param runs : [input] the set of runs to transfer as a vector of maps
+ */
 void GenericDataProcessorPresenter::transfer(
     const std::vector<std::map<QString, QString>> &runs) {
 
@@ -1776,7 +1784,7 @@ void GenericDataProcessorPresenter::applyDefaultOptions(
 }
 
 /** Tells the view which of the actions should be added to the toolbar
-*/
+ */
 void GenericDataProcessorPresenter::addCommands() {
 
   auto commands = m_manager->publishCommands();
@@ -1810,7 +1818,7 @@ void GenericDataProcessorPresenter::pause() {
 }
 
 /** Resumes reduction if currently paused
-*/
+ */
 void GenericDataProcessorPresenter::resume() {
   m_pauseReduction = false;
   m_reductionPaused = false;
@@ -1833,25 +1841,25 @@ void GenericDataProcessorPresenter::confirmReductionPaused() {
 }
 
 /**
-* Tells the view to load a table workspace
-* @param name : [input] The workspace's name
-*/
+ * Tells the view to load a table workspace
+ * @param name : [input] The workspace's name
+ */
 void GenericDataProcessorPresenter::setModel(QString const &name) {
   m_view->setModel(name);
 }
 
 /**
-* Sets whether to prompt user when getting selected runs
-* @param allowPrompt : [input] Enable setting user prompt
-*/
+ * Sets whether to prompt user when getting selected runs
+ * @param allowPrompt : [input] Enable setting user prompt
+ */
 void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
   m_promptUser = allowPrompt;
 }
 
 /**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
+ * Publishes a list of available commands
+ * @return : The list of available commands
+ */
 std::vector<std::unique_ptr<Command>>
 GenericDataProcessorPresenter::publishCommands() {
 
@@ -1865,8 +1873,8 @@ GenericDataProcessorPresenter::publishCommands() {
 }
 
 /** Register a workspace receiver
-* @param mainPresenter : [input] The outer presenter
-*/
+ * @param mainPresenter : [input] The outer presenter
+ */
 void GenericDataProcessorPresenter::accept(
     DataProcessorMainPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
@@ -1880,8 +1888,8 @@ void GenericDataProcessorPresenter::accept(
 }
 
 /** Returs the list of valid workspaces currently in the ADS
-* @return : The vector of workspaces (as commands)
-*/
+ * @return : The vector of workspaces (as commands)
+ */
 std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
 
   std::vector<Command_uptr> workspaces;
@@ -1930,8 +1938,8 @@ void GenericDataProcessorPresenter::giveUserWarning(
 }
 
 /** Checks whether data reduction is still in progress or not
-* @return :: the reduction state
-*/
+ * @return :: the reduction state
+ */
 bool GenericDataProcessorPresenter::isProcessing() const {
   return !m_reductionPaused;
 }
@@ -1951,7 +1959,7 @@ void GenericDataProcessorPresenter::setForcedReProcessing(
  * @param parentRow : the row index of the parent item
  * @param parentColumn : the column index of the parent item
  * @param value : the new value
-*/
+ */
 void GenericDataProcessorPresenter::setCell(int row, int column, int parentRow,
                                             int parentColumn,
                                             const std::string &value) {
@@ -1966,7 +1974,7 @@ void GenericDataProcessorPresenter::setCell(int row, int column, int parentRow,
  * @param parentRow : the row index of the parent item
  * @param parentColumn : the column index of the parent item
  * @return : the value in the cell
-*/
+ */
 std::string GenericDataProcessorPresenter::getCell(int row, int column,
                                                    int parentRow,
                                                    int parentColumn) {
@@ -1983,16 +1991,16 @@ int GenericDataProcessorPresenter::getNumberOfRows() {
 }
 
 /**
-  * Clear the table
+ * Clear the table
  **/
 void GenericDataProcessorPresenter::clearTable() { m_manager->deleteRow(); }
 
 /**
-  * Flag used to stop processing
-**/
+ * Flag used to stop processing
+ **/
 void GenericDataProcessorPresenter::skipProcessing() {
   m_skipProcessing = true;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

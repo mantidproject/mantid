@@ -1,9 +1,9 @@
 #include <QLineEdit>
 
-#include "MantidQtWidgets/SpectrumViewer/RangeHandler.h"
-#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
-#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/SpectrumViewer/QtUtils.h"
+#include "MantidQtWidgets/SpectrumViewer/RangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("SpectrumView");

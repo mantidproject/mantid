@@ -55,20 +55,19 @@ def _get_analysis_data_service():
     import mantid
     return mantid.AnalysisDataService.Instance()
 
-
 # -------------------------- Wrapped MantidPlot functions -----------------
 
-def runPythonScript(code, async=False, quiet=False, redirect=True):
+def runPythonScript(code, asynchronous=False, quiet=False, redirect=True):
     """
         Redirects the runPythonScript method to the app object
         @param code :: A string of code to execute
-        @param async :: If the true the code is executed in a separate thread
+        @param asynchronous :: If the true the code is executed in a separate thread
         @param quiet :: If true no messages reporting status are issued
         @param redirect :: If true then output is redirected to MantidPlot
     """
-    if async and QtCore.QThread.currentThread() != QtGui.qApp.thread():
-        async = False
-    threadsafe_call(_qti.app.runPythonScript, code, async, quiet, redirect)
+    if asynchronous and QtCore.QThread.currentThread() != QtGui.qApp.thread():
+        asynchronous = False
+    threadsafe_call(_qti.app.runPythonScript, code, asynchronous, quiet, redirect)
 
 
 # Overload for consistency with qtiplot table(..) & matrix(..) commands

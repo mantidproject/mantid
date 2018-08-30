@@ -1,11 +1,11 @@
 #include "MantidDataHandling/LoadDspacemap.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -274,10 +274,10 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     offset = difc_pixel/difc_parent*(pow(10.0, -vulcan_factor))-1.0;
     ***/
 
-    offset =
-        difc_pixel / difcRef * (pow(10.0, -(vulcan_factor + intermoduleoffset +
-                                            interstackoffset))) -
-        1.0;
+    offset = difc_pixel / difcRef *
+                 (pow(10.0, -(vulcan_factor + intermoduleoffset +
+                              interstackoffset))) -
+             1.0;
 
     // Save in the map
     try {
@@ -362,5 +362,5 @@ void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
   }
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

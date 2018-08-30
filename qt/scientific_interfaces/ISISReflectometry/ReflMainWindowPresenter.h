@@ -59,6 +59,6 @@ private:
   ReflBatchPresenterFactory m_batchPresenterFactory;
   std::vector<std::unique_ptr<IReflBatchPresenter>> m_batchPresenters;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLMAINWINDOWPRESENTER_H */

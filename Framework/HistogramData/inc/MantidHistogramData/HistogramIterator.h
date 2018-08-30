@@ -15,7 +15,7 @@ class Histogram;
 
 /** HistogramIterator
 
-  HistogramIterator implements an the iterator interface for HistogramData.
+  HistogramIterator implements an iterator interface for HistogramData.
   At each position the iterator will point to an instance of a HistogramItem.
   This item provides direct access to the values at a particular index.
 
@@ -54,21 +54,39 @@ public:
 private:
   friend class boost::iterator_core_access;
 
-  void increment() { m_item.incrementIndex(); }
+  void advance(int64_t delta) {
+    m_item.m_index =
+        delta < 0 ? std::max(static_cast<uint64_t>(0),
+                             static_cast<uint64_t>(m_item.m_index) + delta)
+                  : std::min(m_item.m_histogram.size(),
+                             m_item.m_index + static_cast<size_t>(delta));
+  }
+
+  void increment() {
+    if (m_item.m_index < m_item.m_histogram.size()) {
+      ++m_item.m_index;
+    }
+  }
+
+  void decrement() {
+    if (m_item.m_index > 0) {
+      --m_item.m_index;
+    }
+  }
+
+  size_t getIndex() const { return m_item.m_index; }
+
+  void setIndex(const size_t index) { m_item.m_index = index; }
 
   bool equal(const HistogramIterator &other) const {
-    return m_item.getIndex() == other.m_item.getIndex();
+    return getIndex() == other.getIndex();
   }
 
   const HistogramItem &dereference() const { return m_item; }
 
-  void decrement() { m_item.decrementIndex(); }
-
-  void advance(int64_t delta) { m_item.advance(delta); }
-
   uint64_t distance_to(const HistogramIterator &other) const {
-    return static_cast<uint64_t>(other.m_item.getIndex()) -
-           static_cast<uint64_t>(m_item.getIndex());
+    return static_cast<uint64_t>(other.getIndex()) -
+           static_cast<uint64_t>(getIndex());
   }
 
   HistogramItem m_item;

@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_SAVEMD_H_
 #define MANTID_MDALGORITHMS_SAVEMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -78,7 +78,7 @@ private:
                   std::string tag = "");
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_SAVEMD_H_ */

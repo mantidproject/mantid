@@ -1,16 +1,16 @@
 #include "MantidQtWidgets/Common/ProcessingAlgoWidget.h"
-#include <Qsci/qscilexerpython.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <iosfwd>
-#include <fstream>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
+#include <Qsci/qscilexerpython.h>
+#include <fstream>
+#include <iosfwd>
 
-using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
+using Mantid::API::Algorithm_sptr;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -162,5 +162,5 @@ void ProcessingAlgoWidget::setScriptText(QString text) {
   ui.editor->setText(text);
 }
 
-} // namespace
-} // namespace
+} // namespace MantidWidgets
+} // namespace MantidQt

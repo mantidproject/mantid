@@ -45,14 +45,14 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
 template <class Base>
 class DLLExport XMLAbstractInstantiator
-    /// The base class for XML instantiators
-    {
+/// The base class for XML instantiators
+{
 public:
   /// Creates the XMLAbstractInstantiator.
   XMLAbstractInstantiator() {}

@@ -73,6 +73,6 @@ public:
   virtual bool requestClose() const = 0;
   virtual void settingsChanged() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLBATCHPRESENTER_H */

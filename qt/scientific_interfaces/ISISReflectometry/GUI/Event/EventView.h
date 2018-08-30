@@ -94,7 +94,7 @@ private:
   EventViewSubscriber *m_notifyee;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLEVENTVIEW_H_ */

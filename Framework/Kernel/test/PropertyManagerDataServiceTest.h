@@ -1,10 +1,10 @@
 #ifndef PROPERTYMANAGERDATASERVICETEST_H_
 #define PROPERTYMANAGERDATASERVICETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 

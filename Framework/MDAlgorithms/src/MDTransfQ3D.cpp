@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -8,7 +8,7 @@ namespace MDAlgorithms {
 DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 
 /** method returns number of matrix dimensions calculated by this class
-* as function of energy analysis mode   */
+ * as function of energy analysis mode   */
 unsigned int
 MDTransfQ3D::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
                                   API::MatrixWorkspace_const_sptr inWS) const {
@@ -107,6 +107,7 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(
 
   return true;
 }
+
 /** function calculates workspace-dependent coordinates in elastic case.
 * Namely, it calculates module of Momentum transfer
 * put it into specified (0) position in the Coord vector
@@ -137,20 +138,30 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
     qz = -qz;
   }
 
+  // Dimension limits have to be converted to coord_t, otherwise floating point
+  // error will cause valid events to be discarded.
+  std::vector<coord_t> dim_min;
+  std::vector<coord_t> dim_max;
+  for (auto &v : m_DimMin) {
+    dim_min.push_back(static_cast<coord_t>(v));
+  }
+  for (auto &v : m_DimMax) {
+    dim_max.push_back(static_cast<coord_t>(v));
+  }
+
   Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
                                   m_RotMat[2] * qz);
-
-  if (Coord[0] < m_DimMin[0] || Coord[0] >= m_DimMax[0])
+  if (Coord[0] < dim_min[0] || Coord[0] >= dim_max[0])
     return false;
 
   Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
                                   m_RotMat[5] * qz);
-  if (Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1])
+  if (Coord[1] < dim_min[1] || Coord[1] >= dim_max[1])
     return false;
 
   Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
                                   m_RotMat[8] * qz);
-  if (Coord[2] < m_DimMin[2] || Coord[2] >= m_DimMax[2])
+  if (Coord[2] < dim_min[2] || Coord[2] >= dim_max[2])
     return false;
 
   if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +
@@ -181,13 +192,13 @@ std::vector<double> MDTransfQ3D::getExtremumPoints(const double xMin,
 }
 
 /** Method updates the value of preprocessed detector coordinates in Q-space,
-*used by other functions
-* @param Coord -- vector of MD coordinates with filled in momentum and energy
-*transfer
-* @param i -- index of the detector, which corresponds to the spectra to
-*process.
-*
-*/
+ *used by other functions
+ * @param Coord -- vector of MD coordinates with filled in momentum and energy
+ *transfer
+ * @param i -- index of the detector, which corresponds to the spectra to
+ *process.
+ *
+ */
 bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
   UNUSED_ARG(Coord);
   m_ex = (m_DetDirecton + i)->X();
@@ -315,10 +326,10 @@ MDTransfQ3D::getDefaultDimID(Kernel::DeltaEMode::Type dEmode,
 }
 
 /**function returns units ID-s which this transformation prodiuces its ouptut.
-* @param dEmode   -- energy conversion mode
-* @param inWS -- input workspace
-* @return
-* It is Momentum and DelteE in inelastic modes   */
+ * @param dEmode   -- energy conversion mode
+ * @param inWS -- input workspace
+ * @return
+ * It is Momentum and DelteE in inelastic modes   */
 std::vector<std::string>
 MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
                           API::MatrixWorkspace_const_sptr inWS) const {
@@ -343,5 +354,5 @@ MDTransfQ3D::MDTransfQ3D()
     : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(),
       m_SinThetaSq(0.), m_AbsMin(0.) {}
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid

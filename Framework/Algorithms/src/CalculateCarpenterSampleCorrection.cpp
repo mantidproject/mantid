@@ -33,38 +33,22 @@ using namespace Geometry;
 namespace { // anonymous
 static const double CHEBYSHEV[] = {
     // l= 0       1         2          3         4          5       // (m,n)
-    0.730284,  -0.249987, 0.019448, -0.000006,
-    0.000249,  -0.000004, // (1,1)
-    0.848859,  -0.452690, 0.056557, -0.000009,
-    0.000000,  -0.000006, // (1,2)
-    1.133129,  -0.749962, 0.118245, -0.000018,
-    -0.001345, -0.000012, // (1,3)
-    1.641112,  -1.241639, 0.226247, -0.000045,
-    -0.004821, -0.000030, // (1,4)
-    0.848859,  -0.452690, 0.056557, -0.000009,
-    0.000000,  -0.000006, // (2,1)
-    1.000006,  -0.821100, 0.166645, -0.012096,
-    0.000008,  -0.000126, // (2,2)
-    1.358113,  -1.358076, 0.348199, -0.038817,
-    0.000022,  -0.000021, // (2,3)
-    0.0,       0.0,       0.0,      0.0,
-    0.0,       0.0, // (2,4)
-    1.133129,  -0.749962, 0.118245, -0.000018,
-    -0.001345, -0.000012, // (3,1)
-    1.358113,  -1.358076, 0.348199, -0.038817,
-    0.000022,  -0.000021, // (3,2)
-    0.0,       0.0,       0.0,      0.0,
-    0.0,       0.0, // (3,3)
-    0.0,       0.0,       0.0,      0.0,
-    0.0,       0.0, // (3,4)
-    1.641112,  -1.241639, 0.226247, -0.000045,
-    -0.004821, -0.000030, // (4,1)
-    0.0,       0.0,       0.0,      0.0,
-    0.0,       0.0, // (4,2)
-    0.0,       0.0,       0.0,      0.0,
-    0.0,       0.0, // (4,3)
-    0.0,       0.0,       0.0,      0.0,
-    0.0,       0.0 // (4,4)
+    0.730284, -0.249987, 0.019448, -0.000006, 0.000249,  -0.000004, // (1,1)
+    0.848859, -0.452690, 0.056557, -0.000009, 0.000000,  -0.000006, // (1,2)
+    1.133129, -0.749962, 0.118245, -0.000018, -0.001345, -0.000012, // (1,3)
+    1.641112, -1.241639, 0.226247, -0.000045, -0.004821, -0.000030, // (1,4)
+    0.848859, -0.452690, 0.056557, -0.000009, 0.000000,  -0.000006, // (2,1)
+    1.000006, -0.821100, 0.166645, -0.012096, 0.000008,  -0.000126, // (2,2)
+    1.358113, -1.358076, 0.348199, -0.038817, 0.000022,  -0.000021, // (2,3)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (2,4)
+    1.133129, -0.749962, 0.118245, -0.000018, -0.001345, -0.000012, // (3,1)
+    1.358113, -1.358076, 0.348199, -0.038817, 0.000022,  -0.000021, // (3,2)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (3,3)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (3,4)
+    1.641112, -1.241639, 0.226247, -0.000045, -0.004821, -0.000030, // (4,1)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (4,2)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0,       // (4,3)
+    0.0,      0.0,       0.0,      0.0,       0.0,       0.0        // (4,4)
 };
 
 static const int Z_size = 36; // Caution, this must be updated if the
@@ -85,7 +69,7 @@ static const double LAMBDA_REF =
 // scattering correction factor.
 static const double COEFF4 = 1.1967;
 static const double COEFF5 = -0.8667;
-} // end of anonymous
+} // namespace
 
 const std::string CalculateCarpenterSampleCorrection::name() const {
   return "CalculateCarpenterSampleCorrection";
@@ -114,12 +98,14 @@ void CalculateCarpenterSampleCorrection::init() {
                   "Basename of the output workspace group for corrections."
                   "Absorption suffix = '_abs'. "
                   "Multiple Scattering suffix = '_ms'. ");
-  declareProperty("AttenuationXSection", 2.8, "Coefficient 1, absorption cross "
-                                              "section / 1.81 if not set with "
-                                              "SetSampleMaterial");
-  declareProperty("ScatteringXSection", 5.1, "Coefficient 3, total scattering "
-                                             "cross section if not set with "
-                                             "SetSampleMaterial");
+  declareProperty("AttenuationXSection", 2.8,
+                  "Coefficient 1, absorption cross "
+                  "section / 1.81 if not set with "
+                  "SetSampleMaterial");
+  declareProperty("ScatteringXSection", 5.1,
+                  "Coefficient 3, total scattering "
+                  "cross section if not set with "
+                  "SetSampleMaterial");
   declareProperty("SampleNumberDensity", 0.0721,
                   "Coefficient 2, density if not set with SetSampleMaterial");
   declareProperty("CylinderSampleRadius", 0.3175, "Sample radius, in cm");
@@ -319,10 +305,10 @@ double calculate_abs_factor(const double radius, const double Q2,
   const double sigabs = Q2 * wavelength;
   const double sigir = (sigabs + sigsct) * radius;
   /**
-  * By setting the incident and scattered cross sections to be equal
-  * we implicitly assume elastic scattering because in general these will
-  * vary with neutron energy.
-  **/
+   * By setting the incident and scattered cross sections to be equal
+   * we implicitly assume elastic scattering because in general these will
+   * vary with neutron energy.
+   **/
   const double sigsr = sigir;
 
   return AttFac(sigir, sigsr, Z);
@@ -335,10 +321,10 @@ double calculate_ms_factor(const double radius, const double Q2,
   const double sigabs = Q2 * wavelength;
   const double sigir = (sigabs + sigsct) * radius;
   /**
-  * By setting the incident and scattered cross sections to be equal
-  * we implicitly assume elastic scattering because in general these will
-  * vary with neutron energy.
-  **/
+   * By setting the incident and scattered cross sections to be equal
+   * we implicitly assume elastic scattering because in general these will
+   * vary with neutron energy.
+   **/
   const double sigsr = sigir;
 
   const double delta = COEFF4 * sigir + COEFF5 * sigir * sigir;
@@ -361,7 +347,7 @@ double calculate_ms_factor(const double radius, const double Q2,
  *  @param coeff2 ::      The density
  *  @param coeff3 ::      The total scattering cross section
  *  @param wavelength ::          Array of wavelengths at bin boundaries
-    *                     (or bin centers) for the spectrum, in Angstroms
+ *                     (or bin centers) for the spectrum, in Angstroms
  *  @param y_val ::       The spectrum values
  */
 void CalculateCarpenterSampleCorrection::calculate_abs_correction(
@@ -453,5 +439,5 @@ void CalculateCarpenterSampleCorrection::deleteWorkspace(
   alg->execute();
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

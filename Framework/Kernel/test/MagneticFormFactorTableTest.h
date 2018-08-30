@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_MAGNETICFORMFACTORTABLETEST_H_
 #define MANTID_KERNEL_MAGNETICFORMFACTORTABLETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/MagneticFormFactorTable.h"
 #include "MantidKernel/MagneticIon.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
 

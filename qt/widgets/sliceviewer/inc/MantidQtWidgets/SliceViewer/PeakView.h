@@ -1,6 +1,7 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_VIEW_H_
 #define MANTID_SLICEVIEWER_PEAK_VIEW_H_
 
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayInteractive.h"
 #include "PeakRepresentation.h"
 
@@ -59,6 +60,9 @@ public:
   /// existing origin indexes.
   void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void
+  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                            NonOrthogonalAxis &info) override;
 
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
@@ -131,7 +135,7 @@ private:
   /// Largeste effective radius of all sub-representations
   double m_largestEffectiveRadius;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

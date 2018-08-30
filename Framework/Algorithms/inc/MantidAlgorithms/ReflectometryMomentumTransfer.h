@@ -8,7 +8,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /** Converts wavelength to momentum transfer and calculates the Qz
-  resolution for reflectometers at continuous beam sources."
+  resolution for reflectometers at continuous beam sources.
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

@@ -31,14 +31,14 @@ class ComponentInfoController;
 class DetectorPlotController;
 
 /**
-* Implements the Pick tab in InstrumentWidget.
-* Contains a set of tools which allow one to:
-*
-*  - pick a detector or a tube and display the data in it and some info
-*  - add a peak to a peaks workspace and display an overlay of markers
-*  - select and remove peaks
-*
-*/
+ * Implements the Pick tab in InstrumentWidget.
+ * Contains a set of tools which allow one to:
+ *
+ *  - pick a detector or a tube and display the data in it and some info
+ *  - add a peak to a peaks workspace and display an overlay of markers
+ *  - select and remove peaks
+ *
+ */
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab
     : public InstrumentWidgetTab {
   Q_OBJECT
@@ -133,14 +133,14 @@ private:
   QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
   QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
   /// selection region
-  QPushButton *
-      m_ellipse; ///< Button switching on drawing a elliptical selection region
+  QPushButton
+      *m_ellipse; ///< Button switching on drawing a elliptical selection region
   QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical
   /// ring selection region
   QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
   /// ring selection region
-  QPushButton *
-      m_free_draw; ///< Button switching on drawing a region of arbitrary shape
+  QPushButton
+      *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit; ///< Button switching on edditing the selection region
   bool m_plotSum;
 
@@ -180,9 +180,9 @@ private:
 };
 
 /**
-* Class containing the logic of displaying info on the selected
-* component(s) in the info text widget.
-*/
+ * Class containing the logic of displaying info on the selected
+ * component(s) in the info text widget.
+ */
 class ComponentInfoController : public QObject {
   Q_OBJECT
 public:
@@ -218,8 +218,8 @@ private:
 };
 
 /**
-* Class contining the logic of plotting the data in detectors/tubes.
-*/
+ * Class contining the logic of plotting the data in detectors/tubes.
+ */
 class DetectorPlotController : public QObject {
   Q_OBJECT
 
@@ -283,7 +283,7 @@ private:
   size_t m_currentPickID;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGETPICKTAB_H_*/

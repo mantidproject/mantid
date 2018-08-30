@@ -60,6 +60,6 @@ ConstColumnIterator &ConstColumnIterator::operator-=(difference_type n) {
   m_isKey -= n;
   return (*this);
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

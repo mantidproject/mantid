@@ -1,15 +1,15 @@
 #ifndef CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
 #define CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::Muon::ConvertFitFunctionForMuonTFAsymmetry;
@@ -18,7 +18,7 @@ const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
 
 namespace {
 
-const std::string NORM_PARAM{"f0.f0.f0.A0"};
+const std::string NORM_PARAM{"f0.f0.A0"};
 const std::string OFFSET_PARAM{"f0.f1.f0.A0"};
 const std::string USER_FUNC{"f0.f1.f1."};
 const std::string EXP_PARAM{"f1.A"};
@@ -62,7 +62,7 @@ IAlgorithm_sptr setUpAlg(std::vector<std::string> wsNames,
   asymmAlg->setChild(true);
   asymmAlg->setProperty("WorkspaceList", wsNames);
   ITableWorkspace_sptr table = genTable();
-  asymmAlg->setProperty("NormalisationTable", table);
+  asymmAlg->setProperty("NormalizationTable", table);
   asymmAlg->setProperty("InputFunction", func);
   return asymmAlg;
 }
@@ -91,7 +91,7 @@ IFunction_sptr doFit(const IFunction_sptr &func, int iterations,
   std::string funcString = fit->getPropertyValue("Function");
   return FunctionFactory::Instance().createInitialized(funcString);
 }
-}
+} // namespace
 
 class ConvertFitFunctionForMuonTFAsymmetryTest : public CxxTest::TestSuite {
 public:

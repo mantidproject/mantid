@@ -3,9 +3,9 @@
 
 #include <iosfwd>
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -48,8 +48,9 @@ private:
   void init() override;
   void exec() override;
   std::vector<std::string> getFilenames();
-  void readFocusInfo(std::ifstream &file);
-  void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp);
+  int readFocusInfo(std::ifstream &file, const std::string filename);
+  void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp,
+                    const std::string &filename, int linenum);
   void readVersion0(const std::string &filename,
                     API::ITableWorkspace_sptr &wksp);
   void readVersion1(const std::string &filename,

@@ -2,6 +2,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <boost/regex.hpp>
+#include "ReflTransferStrategy.h"
 #include <QColor>
 
 namespace MantidQt {
@@ -64,6 +65,10 @@ void ReflSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
     const std::string description = tableWorkspace->String(i, 6);
     const std::string location = tableWorkspace->String(i, 1);
     newRunDetails.emplace_back(run, description, location);
+  }
+
+  if (newRunDetails.empty()) {
+    return;
   }
 
   // To append, insert the new runs after the last element in the model
@@ -196,4 +201,4 @@ SearchResult const &ReflSearchModel::operator[](int index) const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

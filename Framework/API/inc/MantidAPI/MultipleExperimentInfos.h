@@ -1,8 +1,8 @@
 #ifndef MANTID_API_MULTIPLEEXPERIMENTINFOS_H_
 #define MANTID_API_MULTIPLEEXPERIMENTINFOS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

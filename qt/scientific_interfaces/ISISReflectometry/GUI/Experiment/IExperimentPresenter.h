@@ -37,6 +37,6 @@ class IExperimentPresenter {
 public:
   virtual ~IExperimentPresenter() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H */

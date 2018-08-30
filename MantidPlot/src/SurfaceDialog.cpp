@@ -27,23 +27,23 @@
  *                                                                         *
  ***************************************************************************/
 #include "SurfaceDialog.h"
-#include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "Graph3D.h"
+#include "MyParser.h"
 #include "UserFunction.h"
 
-#include <QMessageBox>
-#include <QLayout>
-#include <QGroupBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
-#include <QComboBox>
+#include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QCompleter>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QSpinBox>
 #include <QStackedWidget>
-#include <QCompleter>
-#include <QApplication>
 
 SurfaceDialog::SurfaceDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {

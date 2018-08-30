@@ -51,7 +51,7 @@ public:
 
   size_t operator()(double timeStep) const;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

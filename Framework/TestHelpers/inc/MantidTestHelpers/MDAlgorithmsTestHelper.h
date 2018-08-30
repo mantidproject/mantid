@@ -23,8 +23,8 @@ DataObjects::MDEventWorkspace3Lean::sptr makeFileBackedMDEWwithMDFrame(
     const Mantid::Geometry::MDFrame &frame, long numEvents = 10000,
     Kernel::SpecialCoordinateSystem coord = Kernel::None);
 
-} // namespace
-}
-}
+} // namespace MDAlgorithmsTestHelper
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

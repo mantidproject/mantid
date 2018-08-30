@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IReflMainWindowView.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_ReflMainWindowWidget.h"
 #include "IReflMainWindowPresenter.h"
 #include "ReflMainWindowPresenter.h"
@@ -71,6 +71,6 @@ private:
   boost::optional<ReflMainWindowPresenter> m_presenter;
   std::vector<IReflBatchView*> m_batchViews;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H */

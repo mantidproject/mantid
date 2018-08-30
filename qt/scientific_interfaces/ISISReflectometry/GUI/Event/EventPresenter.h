@@ -70,6 +70,6 @@ private:
   IReflBatchPresenter *m_mainPresenter;
   SliceType m_sliceType;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

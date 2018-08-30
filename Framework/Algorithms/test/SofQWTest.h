@@ -1,16 +1,16 @@
 #ifndef SOFQWTEST_H_
 #define SOFQWTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQW.h"
-#include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/Unit.h"
+#include "MantidAlgorithms/SofQCommon.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/make_shared.hpp>
 

@@ -179,7 +179,7 @@ private:
   ReflSettingsTabViewSubscriber *m_notifyee;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLSETTINGSTABVIEW_H_ */

@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
+
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
 from isis_powder.routines import absorb_corrections, common, instrument_settings
@@ -21,12 +23,14 @@ class Gem(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(
             run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
+        self._switch_texture_mode_specific_inst_settings(kwargs.get("texture_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
@@ -54,6 +58,59 @@ class Gem(AbstractInst):
 
     def _generate_output_file_name(self, run_number_string):
         return self._generate_input_file_name(run_number_string)
+
+    def _generate_out_file_paths(self, run_details):
+        out_file_names = super(Gem, self)._generate_out_file_paths(run_details)
+
+        nxs_filename = out_file_names["nxs_filename"]
+        filename_stub = ".".join(nxs_filename.split(".")[:-1])
+
+        if self._inst_settings.save_maud:
+            maud_filename = filename_stub + "_MAUD.gem"
+            out_file_names["maud_filename"] = maud_filename
+
+        if self._inst_settings.save_angles:
+            angles_filename = filename_stub + "_grouping.new"
+            out_file_names["angles_filename"] = angles_filename
+
+        if self._inst_settings.save_maud_calib:
+            maud_calib_filename = filename_stub + ".maud"
+            out_file_names["maud_calib_filename"] = maud_calib_filename
+
+        return out_file_names
+
+    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
+        """
+        Takes a list of focused workspace banks and saves them out in an instrument appropriate format.
+        :param processed_spectra: The list of workspace banks to save out
+        :param run_details: The run details associated with this run
+        :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
+        :return: d-spacing and TOF groups of the processed output workspaces
+        """
+        d_spacing_group, tof_group = super(Gem, self)._output_focused_ws(processed_spectra=processed_spectra,
+                                                                         run_details=run_details,
+                                                                         output_mode=output_mode)
+
+        output_paths = self._generate_out_file_paths(run_details=run_details)
+        if "maud_filename" in output_paths:
+            gem_algs.save_maud(d_spacing_group, output_paths["maud_filename"])
+
+        if "angles_filename" in output_paths:
+            gem_algs.save_angles(d_spacing_group, output_paths["angles_filename"])
+
+        if "maud_calib_filename" in output_paths:
+            gsas_calib_file_path = os.path.join(self._inst_settings.calibration_dir,
+                                                self._inst_settings.gsas_calib_filename)
+            if not os.path.exists(gsas_calib_file_path):
+                raise RuntimeWarning("Could not save MAUD calibration file, as GSAS calibration file was not found. "
+                                     "It should be present at " + gsas_calib_file_path)
+            else:
+                gem_algs.save_maud_calib(d_spacing_group=d_spacing_group,
+                                         output_path=output_paths["maud_calib_filename"],
+                                         gsas_calib_filename=gsas_calib_file_path,
+                                         grouping_scheme=self._inst_settings.maud_grouping_scheme)
+
+        return d_spacing_group, tof_group
 
     @staticmethod
     def _generate_input_file_name(run_number):
@@ -88,6 +145,12 @@ class Gem(AbstractInst):
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
+
+    def _switch_texture_mode_specific_inst_settings(self, mode):
+        if mode is None and hasattr(self._inst_settings, "texture_mode"):
+            mode = self._inst_settings.texture_mode
+        self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode),
+                                              suppress_warnings=True)
 
 
 def _gem_generate_inst_name(run_number):

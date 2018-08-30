@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H
 
 #include "DllConfig.h"
+#include "IReflAsciiSaver.h"
 #include "IReflSaveTabPresenter.h"
 #include "IReflSaveTabView.h"
 #include <vector>
@@ -93,6 +94,6 @@ private:
   IReflBatchPresenter *m_mainPresenter;
   bool m_shouldAutosave;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H */

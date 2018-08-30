@@ -75,6 +75,6 @@ public:
   virtual void cannotSaveWorkspaces() = 0;
   virtual void cannotSaveWorkspaces(std::string const& fullError) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSAVETABVIEW_H */

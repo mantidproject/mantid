@@ -3,8 +3,8 @@
 
 #include "MantidDataHandling/DllConfig.h"
 #include <boost/optional.hpp>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {

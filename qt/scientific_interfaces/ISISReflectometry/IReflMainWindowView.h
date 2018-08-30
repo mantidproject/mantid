@@ -53,6 +53,6 @@ public:
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
   virtual ~IReflMainWindowView() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWVIEW_H */

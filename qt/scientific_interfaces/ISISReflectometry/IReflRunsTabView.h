@@ -1,8 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 
+#include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include "GUI/RunsTable/IRunsTableView.h"
 #include "DllConfig.h"
@@ -14,7 +16,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 class Command;
 }
-}
+} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
@@ -95,6 +97,6 @@ public:
   // Start an ICAT search
   virtual void startIcatSearch() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H */

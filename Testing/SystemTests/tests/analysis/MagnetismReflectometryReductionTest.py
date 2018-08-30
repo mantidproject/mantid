@@ -2,46 +2,10 @@
 import stresstesting
 from mantid import *
 from mantid.simpleapi import *
+import math
 
 
 class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
-    def runTest(self):
-        MagnetismReflectometryReduction(RunNumbers=['24949',],
-                                        NormalizationRunNumber=24945,
-                                        SignalPeakPixelRange=[125, 129],
-                                        SubtractSignalBackground=True,
-                                        SignalBackgroundPixelRange=[15, 105],
-                                        ApplyNormalization=True,
-                                        NormPeakPixelRange=[201, 205],
-                                        SubtractNormBackground=True,
-                                        NormBackgroundPixelRange=[10,127],
-                                        CutLowResDataAxis=True,
-                                        LowResDataAxisPixelRange=[91, 161],
-                                        CutLowResNormAxis=True,
-                                        LowResNormAxisPixelRange=[86, 174],
-                                        CutTimeAxis=True,
-                                        UseWLTimeAxis=False,
-                                        QMin=0.005,
-                                        QStep=-0.01,
-                                        TimeAxisStep=40,
-                                        TimeAxisRange=[25000, 54000],
-                                        SpecularPixel=126.9,
-                                        ConstantQBinning=False,
-                                        EntryName='entry-Off_Off',
-                                        OutputWorkspace="r_24949")
-
-    def validate(self):
-        # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.
-        self.disableChecking.append('Instrument')
-        self.disableChecking.append('Sample')
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
-
-
-class MRFilterCrossSectionsTest(stresstesting.MantidStressTest):
-    """ Test data loading and cross-section extraction """
     def runTest(self):
         wsg = MRFilterCrossSections(Filename="REF_M_24949")
         MagnetismReflectometryReduction(InputWorkspace=wsg[0],
@@ -65,7 +29,105 @@ class MRFilterCrossSectionsTest(stresstesting.MantidStressTest):
                                         TimeAxisRange=[25000, 54000],
                                         SpecularPixel=126.9,
                                         ConstantQBinning=False,
-                                        EntryName='entry-Off_Off',
+                                        OutputWorkspace="r_24949")
+
+    def validate(self):
+        # Be more tolerant with the output, mainly because of the errors.
+        # The following tolerance check the errors up to the third digit.
+        self.disableChecking.append('Instrument')
+        self.disableChecking.append('Sample')
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Axes')
+        return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
+
+
+class MagnetismReflectometryReductionConstQTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        wsg = MRFilterCrossSections(Filename="REF_M_24949")
+        MagnetismReflectometryReduction(InputWorkspace=wsg[0],
+                                        NormalizationRunNumber=24945,
+                                        SignalPeakPixelRange=[125, 129],
+                                        SubtractSignalBackground=True,
+                                        SignalBackgroundPixelRange=[15, 105],
+                                        ApplyNormalization=True,
+                                        NormPeakPixelRange=[201, 205],
+                                        SubtractNormBackground=True,
+                                        NormBackgroundPixelRange=[10,127],
+                                        CutLowResDataAxis=True,
+                                        LowResDataAxisPixelRange=[91, 161],
+                                        CutLowResNormAxis=True,
+                                        LowResNormAxisPixelRange=[86, 174],
+                                        CutTimeAxis=True,
+                                        UseWLTimeAxis=False,
+                                        QMin=0.005,
+                                        QStep=-0.01,
+                                        TimeAxisStep=40,
+                                        TimeAxisRange=[25000, 54000],
+                                        SpecularPixel=126.9,
+                                        ConstantQBinning=True,
+                                        OutputWorkspace="r_24949")
+
+    def validate(self):
+        refl = mtd["r_24949"].dataY(0)
+        return math.fabs(refl[1] - 0.648596877775159) < 0.002
+
+
+class MagnetismReflectometryReductionConstQWLCutTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        wsg = MRFilterCrossSections(Filename="REF_M_24949")
+        MagnetismReflectometryReduction(InputWorkspace=wsg[0],
+                                        NormalizationRunNumber=24945,
+                                        SignalPeakPixelRange=[125, 129],
+                                        SubtractSignalBackground=True,
+                                        SignalBackgroundPixelRange=[15, 105],
+                                        ApplyNormalization=True,
+                                        NormPeakPixelRange=[201, 205],
+                                        SubtractNormBackground=True,
+                                        NormBackgroundPixelRange=[10,127],
+                                        CutLowResDataAxis=True,
+                                        LowResDataAxisPixelRange=[91, 161],
+                                        CutLowResNormAxis=True,
+                                        LowResNormAxisPixelRange=[86, 174],
+                                        CutTimeAxis=True,
+                                        UseWLTimeAxis=True,
+                                        QMin=0.005,
+                                        QStep=-0.01,
+                                        TimeAxisStep=0.007,
+                                        TimeAxisRange=[4.5, 10.5],
+                                        SpecularPixel=126.9,
+                                        ConstantQBinning=True,
+                                        OutputWorkspace="r_24949")
+
+    def validate(self):
+        refl = mtd["r_24949"].dataY(0)
+        return math.fabs(refl[1] - 0.648596877775159) < 0.002
+
+
+class MRFilterCrossSectionsTest(stresstesting.MantidStressTest):
+    """ Test data loading and cross-section extraction """
+    def runTest(self):
+        wsg = MRFilterCrossSections(Filename="REF_M_24949")
+        MagnetismReflectometryReduction(InputWorkspace=str(wsg[0]),
+                                        NormalizationRunNumber=24945,
+                                        SignalPeakPixelRange=[125, 129],
+                                        SubtractSignalBackground=True,
+                                        SignalBackgroundPixelRange=[15, 105],
+                                        ApplyNormalization=True,
+                                        NormPeakPixelRange=[201, 205],
+                                        SubtractNormBackground=True,
+                                        NormBackgroundPixelRange=[10,127],
+                                        CutLowResDataAxis=True,
+                                        LowResDataAxisPixelRange=[91, 161],
+                                        CutLowResNormAxis=True,
+                                        LowResNormAxisPixelRange=[86, 174],
+                                        CutTimeAxis=True,
+                                        UseWLTimeAxis=False,
+                                        QMin=0.005,
+                                        QStep=-0.01,
+                                        TimeAxisStep=40,
+                                        TimeAxisRange=[25000, 54000],
+                                        SpecularPixel=126.9,
+                                        ConstantQBinning=False,
                                         OutputWorkspace="r_24949")
 
     def validate(self):
@@ -116,7 +178,6 @@ class MRFilterCrossSectionsWithWorkspaceTest(stresstesting.MantidStressTest):
                                         TimeAxisRange=[25000, 54000],
                                         SpecularPixel=126.9,
                                         ConstantQBinning=False,
-                                        EntryName='entry-Off_Off',
                                         OutputWorkspace="r_24949")
 
     def validate(self):
@@ -157,7 +218,46 @@ class MRNormaWorkspaceTest(stresstesting.MantidStressTest):
                                         TimeAxisRange=[25000, 54000],
                                         SpecularPixel=126.9,
                                         ConstantQBinning=False,
-                                        EntryName='entry-Off_Off',
+                                        OutputWorkspace="r_24949")
+
+    def validate(self):
+        # Be more tolerant with the output, mainly because of the errors.
+        # The following tolerance check the errors up to the third digit.
+        self.disableChecking.append('Instrument')
+        self.disableChecking.append('Sample')
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Axes')
+        return "r_24949", 'MagnetismReflectometryReductionTest.nxs'
+
+
+class MROutputTest(stresstesting.MantidStressTest):
+    """ Test the MR output algorithm """
+    def runTest(self):
+        wsg = MRFilterCrossSections(Filename="REF_M_24949")
+        ws_norm = LoadEventNexus(Filename="REF_M_24945",
+                                 NXentryName="entry-Off_Off",
+                                 OutputWorkspace="r_24945")
+        MagnetismReflectometryReduction(InputWorkspace=wsg[0],
+                                        NormalizationWorkspace=ws_norm,
+                                        SignalPeakPixelRange=[125, 129],
+                                        SubtractSignalBackground=True,
+                                        SignalBackgroundPixelRange=[15, 105],
+                                        ApplyNormalization=True,
+                                        NormPeakPixelRange=[201, 205],
+                                        SubtractNormBackground=True,
+                                        NormBackgroundPixelRange=[10,127],
+                                        CutLowResDataAxis=True,
+                                        LowResDataAxisPixelRange=[91, 161],
+                                        CutLowResNormAxis=True,
+                                        LowResNormAxisPixelRange=[86, 174],
+                                        CutTimeAxis=True,
+                                        UseWLTimeAxis=False,
+                                        QMin=0.005,
+                                        QStep=-0.01,
+                                        TimeAxisStep=40,
+                                        TimeAxisRange=[25000, 54000],
+                                        SpecularPixel=126.9,
+                                        ConstantQBinning=False,
                                         OutputWorkspace="r_24949")
 
     def validate(self):
@@ -180,3 +280,19 @@ class MRInspectionTest(stresstesting.MantidStressTest):
     def validate(self):
         # Simple test to verify that we flagged the data correctly
         return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
+
+
+class MRGetThetaTest(stresstesting.MantidStressTest):
+    """ Test that the MRGetTheta algorithm produces correct results """
+    def runTest(self):
+        nxs_data = LoadEventNexus(Filename="REF_M_24949",
+                                  NXentryName="entry-Off_Off",
+                                  OutputWorkspace="r_24949")
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data, UseSANGLE=True), 0.606127/180.0*math.pi)
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data, UseSANGLE=True, AngleOffset=math.pi), 180.606127/180.0*math.pi)
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data, SpecularPixel=126.1), 0.61249193272/180.0*math.pi)
+        # In the present case, DANGLE = DANGLE0, so we expect 0 if nothing else is passed
+        self.assertAlmostEqual(MRGetTheta(Workspace=nxs_data), 0.0)
+
+    def validate(self):
+        return True

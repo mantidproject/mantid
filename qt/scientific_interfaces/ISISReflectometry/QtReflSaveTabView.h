@@ -124,7 +124,7 @@ private:
   Ui::ReflSaveTabWidget m_ui;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLSAVETABVIEW_H_ */

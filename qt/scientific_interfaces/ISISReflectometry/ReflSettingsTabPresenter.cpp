@@ -30,10 +30,10 @@ void ReflSettingsTabPresenter::settingsChanged() {
 }
 
 /** Sets the current instrument name and changes accessibility status of
-* the polarisation corrections option in the view accordingly
-*
-* @param instName :: [input] The name of the instrument to set to
-*/
+ * the polarisation corrections option in the view accordingly
+ *
+ * @param instName :: [input] The name of the instrument to set to
+ */
 void ReflSettingsTabPresenter::setInstrumentName(const std::string &instName) {
   //  for (auto presenter : m_settingsPresenters)
   //    presenter->setInstrumentName(instName);
@@ -48,11 +48,11 @@ void ReflSettingsTabPresenter::onReductionResumed() { m_view->disableAll(); }
 void ReflSettingsTabPresenter::onReductionPaused() { m_view->enableAll(); }
 
 /** Returns values passed for 'Transmission run(s)'
-*
-* @param group :: The group from which to get the values
-* @param angle :: the run angle to look up transmission runs for
-* @return :: Values passed for 'Transmission run(s)'
-*/
+ *
+ * @param group :: The group from which to get the values
+ * @param angle :: the run angle to look up transmission runs for
+ * @return :: Values passed for 'Transmission run(s)'
+ */
 OptionsQMap
 ReflSettingsTabPresenter::getOptionsForAngle(const double angleToFind) const {
   OptionsQMap result;

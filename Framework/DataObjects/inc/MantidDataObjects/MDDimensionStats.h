@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAOBJECTS_MDDIMENSIONSTATS_H_
 #define MANTID_DATAOBJECTS_MDDIMENSIONSTATS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -60,7 +60,7 @@ public:
   size_t numPoints;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDDIMENSIONSTATS_H_ */

@@ -1,9 +1,9 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_
 #define MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_
 
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/DataProcessorAlgorithm.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {

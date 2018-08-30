@@ -1,25 +1,25 @@
 #ifndef MANTID_SLICEVIEWER_COMPOSITEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_COMPOSITEPEAKSPRESENTER_H_
 
-#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
+#include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include "MantidQtWidgets/SliceViewer/ZoomableOnDemand.h"
-#include <vector>
-#include <stdexcept>
-#include <boost/shared_ptr.hpp>
+#include "MantidQtWidgets/SliceViewer/ZoomablePeaksView.h"
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace API {
 // Forward declaration
 class IPeaksWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -38,7 +38,8 @@ public:
   // Overrriden methods from Peaks Presenter
   void update() override;
   void updateWithSlicePoint(const PeakBoundingBox &) override;
-  bool changeShownDim() override;
+  bool changeShownDim(size_t dimX, size_t dimY) override;
+  void setNonOrthogonal(bool nonOrthogonalEnabled) override;
   bool isLabelOfFreeAxis(const std::string &label) const override;
   SetPeaksWorkspaces presentedWorkspaces() const override;
   virtual void setForegroundColor(const PeakViewColor) override {
@@ -192,7 +193,7 @@ private:
   /// index of peak zoomed in on.
   int m_zoomedPeakIndex;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif

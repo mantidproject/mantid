@@ -53,10 +53,10 @@
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string">
-			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
+			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2, wavelength, FC.rotation_speed, BC1.rotation_speed" />
 		</parameter>
 		<parameter name="sample_logs_fail_tolerances" type="string">
-			<value val="0, 0, 0" />
+			<value val="0, 0, 0, 0.02, 5, 5" />
 		</parameter>
 
 	</component-link>

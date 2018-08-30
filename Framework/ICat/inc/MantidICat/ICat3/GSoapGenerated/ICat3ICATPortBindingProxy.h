@@ -65,7 +65,7 @@ public:
   /// Web service operation 'login' (returns error code or SOAP_OK)
   virtual int login(ns1__login *ns1__login_,
                     ns1__loginResponse *ns1__loginResponse_) {
-    return this->login(NULL, NULL, ns1__login_, ns1__loginResponse_);
+    return this->login(nullptr, nullptr, ns1__login_, ns1__loginResponse_);
   }
   virtual int login(const char *endpoint, const char *soap_action,
                     ns1__login *ns1__login_,
@@ -75,7 +75,7 @@ public:
   virtual int
   loginLifetime(ns1__loginLifetime *ns1__loginLifetime_,
                 ns1__loginLifetimeResponse *ns1__loginLifetimeResponse_) {
-    return this->loginLifetime(NULL, NULL, ns1__loginLifetime_,
+    return this->loginLifetime(nullptr, nullptr, ns1__loginLifetime_,
                                ns1__loginLifetimeResponse_);
   }
   virtual int
@@ -86,7 +86,7 @@ public:
   /// Web service operation 'logout' (returns error code or SOAP_OK)
   virtual int logout(ns1__logout *ns1__logout_,
                      ns1__logoutResponse *ns1__logoutResponse_) {
-    return this->logout(NULL, NULL, ns1__logout_, ns1__logoutResponse_);
+    return this->logout(nullptr, nullptr, ns1__logout_, ns1__logoutResponse_);
   }
   virtual int logout(const char *endpoint, const char *soap_action,
                      ns1__logout *ns1__logout_,
@@ -96,7 +96,7 @@ public:
   virtual int
   getUserDetails(ns3__getUserDetails *ns1__getUserDetails,
                  ns3__getUserDetailsResponse *ns1__getUserDetailsResponse) {
-    return this->getUserDetails(NULL, NULL, ns1__getUserDetails,
+    return this->getUserDetails(nullptr, nullptr, ns1__getUserDetails,
                                 ns1__getUserDetailsResponse);
   }
   virtual int
@@ -108,7 +108,7 @@ public:
   virtual int
   isSessionValid(ns1__isSessionValid *ns1__isSessionValid_,
                  ns1__isSessionValidResponse *ns1__isSessionValidResponse_) {
-    return this->isSessionValid(NULL, NULL, ns1__isSessionValid_,
+    return this->isSessionValid(nullptr, nullptr, ns1__isSessionValid_,
                                 ns1__isSessionValidResponse_);
   }
   virtual int
@@ -120,7 +120,7 @@ public:
   virtual int getKeywordsForUser(
       ns1__getKeywordsForUser *ns1__getKeywordsForUser_,
       ns1__getKeywordsForUserResponse *ns1__getKeywordsForUserResponse_) {
-    return this->getKeywordsForUser(NULL, NULL, ns1__getKeywordsForUser_,
+    return this->getKeywordsForUser(nullptr, nullptr, ns1__getKeywordsForUser_,
                                     ns1__getKeywordsForUserResponse_);
   }
   virtual int getKeywordsForUser(
@@ -132,24 +132,25 @@ public:
   /// or SOAP_OK)
   virtual int getKeywordsForUserStartWithMax(
       ns1__getKeywordsForUserStartWithMax *ns1__getKeywordsForUserStartWithMax_,
-      ns1__getKeywordsForUserStartWithMaxResponse *
-          ns1__getKeywordsForUserStartWithMaxResponse_) {
+      ns1__getKeywordsForUserStartWithMaxResponse
+          *ns1__getKeywordsForUserStartWithMaxResponse_) {
     return this->getKeywordsForUserStartWithMax(
-        NULL, NULL, ns1__getKeywordsForUserStartWithMax_,
+        nullptr, nullptr, ns1__getKeywordsForUserStartWithMax_,
         ns1__getKeywordsForUserStartWithMaxResponse_);
   }
   virtual int getKeywordsForUserStartWithMax(
       const char *endpoint, const char *soap_action,
       ns1__getKeywordsForUserStartWithMax *ns1__getKeywordsForUserStartWithMax_,
-      ns1__getKeywordsForUserStartWithMaxResponse *
-          ns1__getKeywordsForUserStartWithMaxResponse_);
+      ns1__getKeywordsForUserStartWithMaxResponse
+          *ns1__getKeywordsForUserStartWithMaxResponse_);
 
   /// Web service operation 'getKeywordsForUserMax' (returns error code or
   /// SOAP_OK)
   virtual int getKeywordsForUserMax(
       ns1__getKeywordsForUserMax *ns1__getKeywordsForUserMax_,
       ns1__getKeywordsForUserMaxResponse *ns1__getKeywordsForUserMaxResponse_) {
-    return this->getKeywordsForUserMax(NULL, NULL, ns1__getKeywordsForUserMax_,
+    return this->getKeywordsForUserMax(nullptr, nullptr,
+                                       ns1__getKeywordsForUserMax_,
                                        ns1__getKeywordsForUserMaxResponse_);
   }
   virtual int getKeywordsForUserMax(
@@ -161,23 +162,23 @@ public:
   /// SOAP_OK)
   virtual int getKeywordsForUserType(
       ns1__getKeywordsForUserType *ns1__getKeywordsForUserType_,
-      ns1__getKeywordsForUserTypeResponse *
-          ns1__getKeywordsForUserTypeResponse_) {
-    return this->getKeywordsForUserType(NULL, NULL,
+      ns1__getKeywordsForUserTypeResponse
+          *ns1__getKeywordsForUserTypeResponse_) {
+    return this->getKeywordsForUserType(nullptr, nullptr,
                                         ns1__getKeywordsForUserType_,
                                         ns1__getKeywordsForUserTypeResponse_);
   }
   virtual int getKeywordsForUserType(
       const char *endpoint, const char *soap_action,
       ns1__getKeywordsForUserType *ns1__getKeywordsForUserType_,
-      ns1__getKeywordsForUserTypeResponse *
-          ns1__getKeywordsForUserTypeResponse_);
+      ns1__getKeywordsForUserTypeResponse
+          *ns1__getKeywordsForUserTypeResponse_);
 
   /// Web service operation 'getAllKeywords' (returns error code or SOAP_OK)
   virtual int
   getAllKeywords(ns1__getAllKeywords *ns1__getAllKeywords_,
                  ns1__getAllKeywordsResponse *ns1__getAllKeywordsResponse_) {
-    return this->getAllKeywords(NULL, NULL, ns1__getAllKeywords_,
+    return this->getAllKeywords(nullptr, nullptr, ns1__getAllKeywords_,
                                 ns1__getAllKeywordsResponse_);
   }
   virtual int
@@ -189,7 +190,7 @@ public:
   virtual int searchByAdvanced(
       ns1__searchByAdvanced *ns1__searchByAdvanced_,
       ns1__searchByAdvancedResponse *ns1__searchByAdvancedResponse_) {
-    return this->searchByAdvanced(NULL, NULL, ns1__searchByAdvanced_,
+    return this->searchByAdvanced(nullptr, nullptr, ns1__searchByAdvanced_,
                                   ns1__searchByAdvancedResponse_);
   }
   virtual int searchByAdvanced(
@@ -201,23 +202,23 @@ public:
   /// SOAP_OK)
   virtual int searchByAdvancedPagination(
       ns1__searchByAdvancedPagination *ns1__searchByAdvancedPagination_,
-      ns1__searchByAdvancedPaginationResponse *
-          ns1__searchByAdvancedPaginationResponse_) {
+      ns1__searchByAdvancedPaginationResponse
+          *ns1__searchByAdvancedPaginationResponse_) {
     return this->searchByAdvancedPagination(
-        NULL, NULL, ns1__searchByAdvancedPagination_,
+        nullptr, nullptr, ns1__searchByAdvancedPagination_,
         ns1__searchByAdvancedPaginationResponse_);
   }
   virtual int searchByAdvancedPagination(
       const char *endpoint, const char *soap_action,
       ns1__searchByAdvancedPagination *ns1__searchByAdvancedPagination_,
-      ns1__searchByAdvancedPaginationResponse *
-          ns1__searchByAdvancedPaginationResponse_);
+      ns1__searchByAdvancedPaginationResponse
+          *ns1__searchByAdvancedPaginationResponse_);
 
   /// Web service operation 'searchByKeywords' (returns error code or SOAP_OK)
   virtual int searchByKeywords(
       ns1__searchByKeywords *ns1__searchByKeywords_,
       ns1__searchByKeywordsResponse *ns1__searchByKeywordsResponse_) {
-    return this->searchByKeywords(NULL, NULL, ns1__searchByKeywords_,
+    return this->searchByKeywords(nullptr, nullptr, ns1__searchByKeywords_,
                                   ns1__searchByKeywordsResponse_);
   }
   virtual int searchByKeywords(
@@ -230,7 +231,8 @@ public:
   virtual int searchByKeywordsAll(
       ns1__searchByKeywordsAll *ns1__searchByKeywordsAll_,
       ns1__searchByKeywordsAllResponse *ns1__searchByKeywordsAllResponse_) {
-    return this->searchByKeywordsAll(NULL, NULL, ns1__searchByKeywordsAll_,
+    return this->searchByKeywordsAll(nullptr, nullptr,
+                                     ns1__searchByKeywordsAll_,
                                      ns1__searchByKeywordsAllResponse_);
   }
   virtual int searchByKeywordsAll(
@@ -243,7 +245,8 @@ public:
   virtual int getMyInvestigations(
       ns1__getMyInvestigations *ns1__getMyInvestigations_,
       ns1__getMyInvestigationsResponse *ns1__getMyInvestigationsResponse_) {
-    return this->getMyInvestigations(NULL, NULL, ns1__getMyInvestigations_,
+    return this->getMyInvestigations(nullptr, nullptr,
+                                     ns1__getMyInvestigations_,
                                      ns1__getMyInvestigationsResponse_);
   }
   virtual int getMyInvestigations(
@@ -255,41 +258,41 @@ public:
   /// SOAP_OK)
   virtual int getMyInvestigationsIncludes(
       ns1__getMyInvestigationsIncludes *ns1__getMyInvestigationsIncludes_,
-      ns1__getMyInvestigationsIncludesResponse *
-          ns1__getMyInvestigationsIncludesResponse_) {
+      ns1__getMyInvestigationsIncludesResponse
+          *ns1__getMyInvestigationsIncludesResponse_) {
     return this->getMyInvestigationsIncludes(
-        NULL, NULL, ns1__getMyInvestigationsIncludes_,
+        nullptr, nullptr, ns1__getMyInvestigationsIncludes_,
         ns1__getMyInvestigationsIncludesResponse_);
   }
   virtual int getMyInvestigationsIncludes(
       const char *endpoint, const char *soap_action,
       ns1__getMyInvestigationsIncludes *ns1__getMyInvestigationsIncludes_,
-      ns1__getMyInvestigationsIncludesResponse *
-          ns1__getMyInvestigationsIncludesResponse_);
+      ns1__getMyInvestigationsIncludesResponse
+          *ns1__getMyInvestigationsIncludesResponse_);
 
   /// Web service operation 'getMyInvestigationsIncludesPagination' (returns
   /// error code or SOAP_OK)
   virtual int getMyInvestigationsIncludesPagination(
-      ns1__getMyInvestigationsIncludesPagination *
-          ns1__getMyInvestigationsIncludesPagination_,
-      ns1__getMyInvestigationsIncludesPaginationResponse *
-          ns1__getMyInvestigationsIncludesPaginationResponse_) {
+      ns1__getMyInvestigationsIncludesPagination
+          *ns1__getMyInvestigationsIncludesPagination_,
+      ns1__getMyInvestigationsIncludesPaginationResponse
+          *ns1__getMyInvestigationsIncludesPaginationResponse_) {
     return this->getMyInvestigationsIncludesPagination(
-        NULL, NULL, ns1__getMyInvestigationsIncludesPagination_,
+        nullptr, nullptr, ns1__getMyInvestigationsIncludesPagination_,
         ns1__getMyInvestigationsIncludesPaginationResponse_);
   }
   virtual int getMyInvestigationsIncludesPagination(
       const char *endpoint, const char *soap_action,
-      ns1__getMyInvestigationsIncludesPagination *
-          ns1__getMyInvestigationsIncludesPagination_,
-      ns1__getMyInvestigationsIncludesPaginationResponse *
-          ns1__getMyInvestigationsIncludesPaginationResponse_);
+      ns1__getMyInvestigationsIncludesPagination
+          *ns1__getMyInvestigationsIncludesPagination_,
+      ns1__getMyInvestigationsIncludesPaginationResponse
+          *ns1__getMyInvestigationsIncludesPaginationResponse_);
 
   /// Web service operation 'searchByUserID' (returns error code or SOAP_OK)
   virtual int
   searchByUserID(ns1__searchByUserID *ns1__searchByUserID_,
                  ns1__searchByUserIDResponse *ns1__searchByUserIDResponse_) {
-    return this->searchByUserID(NULL, NULL, ns1__searchByUserID_,
+    return this->searchByUserID(nullptr, nullptr, ns1__searchByUserID_,
                                 ns1__searchByUserIDResponse_);
   }
   virtual int
@@ -301,24 +304,25 @@ public:
   /// SOAP_OK)
   virtual int searchByUserIDPagination(
       ns1__searchByUserIDPagination *ns1__searchByUserIDPagination_,
-      ns1__searchByUserIDPaginationResponse *
-          ns1__searchByUserIDPaginationResponse_) {
+      ns1__searchByUserIDPaginationResponse
+          *ns1__searchByUserIDPaginationResponse_) {
     return this->searchByUserIDPagination(
-        NULL, NULL, ns1__searchByUserIDPagination_,
+        nullptr, nullptr, ns1__searchByUserIDPagination_,
         ns1__searchByUserIDPaginationResponse_);
   }
   virtual int searchByUserIDPagination(
       const char *endpoint, const char *soap_action,
       ns1__searchByUserIDPagination *ns1__searchByUserIDPagination_,
-      ns1__searchByUserIDPaginationResponse *
-          ns1__searchByUserIDPaginationResponse_);
+      ns1__searchByUserIDPaginationResponse
+          *ns1__searchByUserIDPaginationResponse_);
 
   /// Web service operation 'searchByUserSurname' (returns error code or
   /// SOAP_OK)
   virtual int searchByUserSurname(
       ns1__searchByUserSurname *ns1__searchByUserSurname_,
       ns1__searchByUserSurnameResponse *ns1__searchByUserSurnameResponse_) {
-    return this->searchByUserSurname(NULL, NULL, ns1__searchByUserSurname_,
+    return this->searchByUserSurname(nullptr, nullptr,
+                                     ns1__searchByUserSurname_,
                                      ns1__searchByUserSurnameResponse_);
   }
   virtual int searchByUserSurname(
@@ -330,23 +334,23 @@ public:
   /// or SOAP_OK)
   virtual int searchByUserSurnamePagination(
       ns1__searchByUserSurnamePagination *ns1__searchByUserSurnamePagination_,
-      ns1__searchByUserSurnamePaginationResponse *
-          ns1__searchByUserSurnamePaginationResponse_) {
+      ns1__searchByUserSurnamePaginationResponse
+          *ns1__searchByUserSurnamePaginationResponse_) {
     return this->searchByUserSurnamePagination(
-        NULL, NULL, ns1__searchByUserSurnamePagination_,
+        nullptr, nullptr, ns1__searchByUserSurnamePagination_,
         ns1__searchByUserSurnamePaginationResponse_);
   }
   virtual int searchByUserSurnamePagination(
       const char *endpoint, const char *soap_action,
       ns1__searchByUserSurnamePagination *ns1__searchByUserSurnamePagination_,
-      ns1__searchByUserSurnamePaginationResponse *
-          ns1__searchByUserSurnamePaginationResponse_);
+      ns1__searchByUserSurnamePaginationResponse
+          *ns1__searchByUserSurnamePaginationResponse_);
 
   /// Web service operation 'listInstruments' (returns error code or SOAP_OK)
   virtual int
   listInstruments(ns1__listInstruments *ns1__listInstruments_,
                   ns1__listInstrumentsResponse *ns1__listInstrumentsResponse_) {
-    return this->listInstruments(NULL, NULL, ns1__listInstruments_,
+    return this->listInstruments(nullptr, nullptr, ns1__listInstruments_,
                                  ns1__listInstrumentsResponse_);
   }
   virtual int
@@ -358,7 +362,7 @@ public:
   virtual int getAllInstruments(
       ns1__getAllInstruments *ns1__getAllInstruments_,
       ns1__getAllInstrumentsResponse *ns1__getAllInstrumentsResponse_) {
-    return this->getAllInstruments(NULL, NULL, ns1__getAllInstruments_,
+    return this->getAllInstruments(nullptr, nullptr, ns1__getAllInstruments_,
                                    ns1__getAllInstrumentsResponse_);
   }
   virtual int getAllInstruments(
@@ -369,7 +373,7 @@ public:
   /// Web service operation 'listRoles' (returns error code or SOAP_OK)
   virtual int listRoles(ns1__listRoles *ns1__listRoles_,
                         ns1__listRolesResponse *ns1__listRolesResponse_) {
-    return this->listRoles(NULL, NULL, ns1__listRoles_,
+    return this->listRoles(nullptr, nullptr, ns1__listRoles_,
                            ns1__listRolesResponse_);
   }
   virtual int listRoles(const char *endpoint, const char *soap_action,
@@ -380,7 +384,7 @@ public:
   virtual int
   listParameters(ns1__listParameters *ns1__listParameters_,
                  ns1__listParametersResponse *ns1__listParametersResponse_) {
-    return this->listParameters(NULL, NULL, ns1__listParameters_,
+    return this->listParameters(nullptr, nullptr, ns1__listParameters_,
                                 ns1__listParametersResponse_);
   }
   virtual int
@@ -392,7 +396,7 @@ public:
   virtual int listFacilityCycles(
       ns1__listFacilityCycles *ns1__listFacilityCycles_,
       ns1__listFacilityCyclesResponse *ns1__listFacilityCyclesResponse_) {
-    return this->listFacilityCycles(NULL, NULL, ns1__listFacilityCycles_,
+    return this->listFacilityCycles(nullptr, nullptr, ns1__listFacilityCycles_,
                                     ns1__listFacilityCyclesResponse_);
   }
   virtual int listFacilityCycles(
@@ -403,90 +407,90 @@ public:
   /// Web service operation 'getFacilityCyclesWithDataForInstrument' (returns
   /// error code or SOAP_OK)
   virtual int getFacilityCyclesWithDataForInstrument(
-      ns1__getFacilityCyclesWithDataForInstrument *
-          ns1__getFacilityCyclesWithDataForInstrument_,
-      ns1__getFacilityCyclesWithDataForInstrumentResponse *
-          ns1__getFacilityCyclesWithDataForInstrumentResponse_) {
+      ns1__getFacilityCyclesWithDataForInstrument
+          *ns1__getFacilityCyclesWithDataForInstrument_,
+      ns1__getFacilityCyclesWithDataForInstrumentResponse
+          *ns1__getFacilityCyclesWithDataForInstrumentResponse_) {
     return this->getFacilityCyclesWithDataForInstrument(
-        NULL, NULL, ns1__getFacilityCyclesWithDataForInstrument_,
+        nullptr, nullptr, ns1__getFacilityCyclesWithDataForInstrument_,
         ns1__getFacilityCyclesWithDataForInstrumentResponse_);
   }
   virtual int getFacilityCyclesWithDataForInstrument(
       const char *endpoint, const char *soap_action,
-      ns1__getFacilityCyclesWithDataForInstrument *
-          ns1__getFacilityCyclesWithDataForInstrument_,
-      ns1__getFacilityCyclesWithDataForInstrumentResponse *
-          ns1__getFacilityCyclesWithDataForInstrumentResponse_);
+      ns1__getFacilityCyclesWithDataForInstrument
+          *ns1__getFacilityCyclesWithDataForInstrument_,
+      ns1__getFacilityCyclesWithDataForInstrumentResponse
+          *ns1__getFacilityCyclesWithDataForInstrumentResponse_);
 
   /// Web service operation 'getInstrumentsWithData' (returns error code or
   /// SOAP_OK)
   virtual int getInstrumentsWithData(
       ns1__getInstrumentsWithData *ns1__getInstrumentsWithData_,
-      ns1__getInstrumentsWithDataResponse *
-          ns1__getInstrumentsWithDataResponse_) {
-    return this->getInstrumentsWithData(NULL, NULL,
+      ns1__getInstrumentsWithDataResponse
+          *ns1__getInstrumentsWithDataResponse_) {
+    return this->getInstrumentsWithData(nullptr, nullptr,
                                         ns1__getInstrumentsWithData_,
                                         ns1__getInstrumentsWithDataResponse_);
   }
   virtual int getInstrumentsWithData(
       const char *endpoint, const char *soap_action,
       ns1__getInstrumentsWithData *ns1__getInstrumentsWithData_,
-      ns1__getInstrumentsWithDataResponse *
-          ns1__getInstrumentsWithDataResponse_);
+      ns1__getInstrumentsWithDataResponse
+          *ns1__getInstrumentsWithDataResponse_);
 
   /// Web service operation 'listInvestigationTypes' (returns error code or
   /// SOAP_OK)
   virtual int listInvestigationTypes(
       ns1__listInvestigationTypes *ns1__listInvestigationTypes_,
-      ns1__listInvestigationTypesResponse *
-          ns1__listInvestigationTypesResponse_) {
-    return this->listInvestigationTypes(NULL, NULL,
+      ns1__listInvestigationTypesResponse
+          *ns1__listInvestigationTypesResponse_) {
+    return this->listInvestigationTypes(nullptr, nullptr,
                                         ns1__listInvestigationTypes_,
                                         ns1__listInvestigationTypesResponse_);
   }
   virtual int listInvestigationTypes(
       const char *endpoint, const char *soap_action,
       ns1__listInvestigationTypes *ns1__listInvestigationTypes_,
-      ns1__listInvestigationTypesResponse *
-          ns1__listInvestigationTypesResponse_);
+      ns1__listInvestigationTypesResponse
+          *ns1__listInvestigationTypesResponse_);
 
   /// Web service operation 'searchSamplesBySampleName' (returns error code or
   /// SOAP_OK)
   virtual int searchSamplesBySampleName(
       ns1__searchSamplesBySampleName *ns1__searchSamplesBySampleName_,
-      ns1__searchSamplesBySampleNameResponse *
-          ns1__searchSamplesBySampleNameResponse_) {
+      ns1__searchSamplesBySampleNameResponse
+          *ns1__searchSamplesBySampleNameResponse_) {
     return this->searchSamplesBySampleName(
-        NULL, NULL, ns1__searchSamplesBySampleName_,
+        nullptr, nullptr, ns1__searchSamplesBySampleName_,
         ns1__searchSamplesBySampleNameResponse_);
   }
   virtual int searchSamplesBySampleName(
       const char *endpoint, const char *soap_action,
       ns1__searchSamplesBySampleName *ns1__searchSamplesBySampleName_,
-      ns1__searchSamplesBySampleNameResponse *
-          ns1__searchSamplesBySampleNameResponse_);
+      ns1__searchSamplesBySampleNameResponse
+          *ns1__searchSamplesBySampleNameResponse_);
 
   /// Web service operation 'searchDatasetsBySample' (returns error code or
   /// SOAP_OK)
   virtual int searchDatasetsBySample(
       ns1__searchDatasetsBySample *ns1__searchDatasetsBySample_,
-      ns1__searchDatasetsBySampleResponse *
-          ns1__searchDatasetsBySampleResponse_) {
-    return this->searchDatasetsBySample(NULL, NULL,
+      ns1__searchDatasetsBySampleResponse
+          *ns1__searchDatasetsBySampleResponse_) {
+    return this->searchDatasetsBySample(nullptr, nullptr,
                                         ns1__searchDatasetsBySample_,
                                         ns1__searchDatasetsBySampleResponse_);
   }
   virtual int searchDatasetsBySample(
       const char *endpoint, const char *soap_action,
       ns1__searchDatasetsBySample *ns1__searchDatasetsBySample_,
-      ns1__searchDatasetsBySampleResponse *
-          ns1__searchDatasetsBySampleResponse_);
+      ns1__searchDatasetsBySampleResponse
+          *ns1__searchDatasetsBySampleResponse_);
 
   /// Web service operation 'listDatasetTypes' (returns error code or SOAP_OK)
   virtual int listDatasetTypes(
       ns1__listDatasetTypes *ns1__listDatasetTypes_,
       ns1__listDatasetTypesResponse *ns1__listDatasetTypesResponse_) {
-    return this->listDatasetTypes(NULL, NULL, ns1__listDatasetTypes_,
+    return this->listDatasetTypes(nullptr, nullptr, ns1__listDatasetTypes_,
                                   ns1__listDatasetTypesResponse_);
   }
   virtual int listDatasetTypes(
@@ -498,7 +502,7 @@ public:
   virtual int listDatasetStatus(
       ns1__listDatasetStatus *ns1__listDatasetStatus_,
       ns1__listDatasetStatusResponse *ns1__listDatasetStatusResponse_) {
-    return this->listDatasetStatus(NULL, NULL, ns1__listDatasetStatus_,
+    return this->listDatasetStatus(nullptr, nullptr, ns1__listDatasetStatus_,
                                    ns1__listDatasetStatusResponse_);
   }
   virtual int listDatasetStatus(
@@ -510,7 +514,7 @@ public:
   virtual int searchByRunNumber(
       ns1__searchByRunNumber *ns1__searchByRunNumber_,
       ns1__searchByRunNumberResponse *ns1__searchByRunNumberResponse_) {
-    return this->searchByRunNumber(NULL, NULL, ns1__searchByRunNumber_,
+    return this->searchByRunNumber(nullptr, nullptr, ns1__searchByRunNumber_,
                                    ns1__searchByRunNumberResponse_);
   }
   virtual int searchByRunNumber(
@@ -522,24 +526,25 @@ public:
   /// SOAP_OK)
   virtual int searchByRunNumberPagination(
       ns1__searchByRunNumberPagination *ns1__searchByRunNumberPagination_,
-      ns1__searchByRunNumberPaginationResponse *
-          ns1__searchByRunNumberPaginationResponse_) {
+      ns1__searchByRunNumberPaginationResponse
+          *ns1__searchByRunNumberPaginationResponse_) {
     return this->searchByRunNumberPagination(
-        NULL, NULL, ns1__searchByRunNumberPagination_,
+        nullptr, nullptr, ns1__searchByRunNumberPagination_,
         ns1__searchByRunNumberPaginationResponse_);
   }
   virtual int searchByRunNumberPagination(
       const char *endpoint, const char *soap_action,
       ns1__searchByRunNumberPagination *ns1__searchByRunNumberPagination_,
-      ns1__searchByRunNumberPaginationResponse *
-          ns1__searchByRunNumberPaginationResponse_);
+      ns1__searchByRunNumberPaginationResponse
+          *ns1__searchByRunNumberPaginationResponse_);
 
   /// Web service operation 'listDatafileFormats' (returns error code or
   /// SOAP_OK)
   virtual int listDatafileFormats(
       ns1__listDatafileFormats *ns1__listDatafileFormats_,
       ns1__listDatafileFormatsResponse *ns1__listDatafileFormatsResponse_) {
-    return this->listDatafileFormats(NULL, NULL, ns1__listDatafileFormats_,
+    return this->listDatafileFormats(nullptr, nullptr,
+                                     ns1__listDatafileFormats_,
                                      ns1__listDatafileFormatsResponse_);
   }
   virtual int listDatafileFormats(
@@ -551,7 +556,7 @@ public:
   virtual int getInvestigation(
       ns1__getInvestigation *ns1__getInvestigation_,
       ns1__getInvestigationResponse *ns1__getInvestigationResponse_) {
-    return this->getInvestigation(NULL, NULL, ns1__getInvestigation_,
+    return this->getInvestigation(nullptr, nullptr, ns1__getInvestigation_,
                                   ns1__getInvestigationResponse_);
   }
   virtual int getInvestigation(
@@ -563,23 +568,23 @@ public:
   /// SOAP_OK)
   virtual int getInvestigationIncludes(
       ns1__getInvestigationIncludes *ns1__getInvestigationIncludes_,
-      ns1__getInvestigationIncludesResponse *
-          ns1__getInvestigationIncludesResponse_) {
+      ns1__getInvestigationIncludesResponse
+          *ns1__getInvestigationIncludesResponse_) {
     return this->getInvestigationIncludes(
-        NULL, NULL, ns1__getInvestigationIncludes_,
+        nullptr, nullptr, ns1__getInvestigationIncludes_,
         ns1__getInvestigationIncludesResponse_);
   }
   virtual int getInvestigationIncludes(
       const char *endpoint, const char *soap_action,
       ns1__getInvestigationIncludes *ns1__getInvestigationIncludes_,
-      ns1__getInvestigationIncludesResponse *
-          ns1__getInvestigationIncludesResponse_);
+      ns1__getInvestigationIncludesResponse
+          *ns1__getInvestigationIncludesResponse_);
 
   /// Web service operation 'getInvestigations' (returns error code or SOAP_OK)
   virtual int getInvestigations(
       ns1__getInvestigations *ns1__getInvestigations_,
       ns1__getInvestigationsResponse *ns1__getInvestigationsResponse_) {
-    return this->getInvestigations(NULL, NULL, ns1__getInvestigations_,
+    return this->getInvestigations(nullptr, nullptr, ns1__getInvestigations_,
                                    ns1__getInvestigationsResponse_);
   }
   virtual int getInvestigations(
@@ -591,24 +596,25 @@ public:
   /// SOAP_OK)
   virtual int getInvestigationsIncludes(
       ns1__getInvestigationsIncludes *ns1__getInvestigationsIncludes_,
-      ns1__getInvestigationsIncludesResponse *
-          ns1__getInvestigationsIncludesResponse_) {
+      ns1__getInvestigationsIncludesResponse
+          *ns1__getInvestigationsIncludesResponse_) {
     return this->getInvestigationsIncludes(
-        NULL, NULL, ns1__getInvestigationsIncludes_,
+        nullptr, nullptr, ns1__getInvestigationsIncludes_,
         ns1__getInvestigationsIncludesResponse_);
   }
   virtual int getInvestigationsIncludes(
       const char *endpoint, const char *soap_action,
       ns1__getInvestigationsIncludes *ns1__getInvestigationsIncludes_,
-      ns1__getInvestigationsIncludesResponse *
-          ns1__getInvestigationsIncludesResponse_);
+      ns1__getInvestigationsIncludesResponse
+          *ns1__getInvestigationsIncludesResponse_);
 
   /// Web service operation 'createInvestigation' (returns error code or
   /// SOAP_OK)
   virtual int createInvestigation(
       ns1__createInvestigation *ns1__createInvestigation_,
       ns1__createInvestigationResponse *ns1__createInvestigationResponse_) {
-    return this->createInvestigation(NULL, NULL, ns1__createInvestigation_,
+    return this->createInvestigation(nullptr, nullptr,
+                                     ns1__createInvestigation_,
                                      ns1__createInvestigationResponse_);
   }
   virtual int createInvestigation(
@@ -621,7 +627,8 @@ public:
   virtual int deleteInvestigation(
       ns1__deleteInvestigation *ns1__deleteInvestigation_,
       ns1__deleteInvestigationResponse *ns1__deleteInvestigationResponse_) {
-    return this->deleteInvestigation(NULL, NULL, ns1__deleteInvestigation_,
+    return this->deleteInvestigation(nullptr, nullptr,
+                                     ns1__deleteInvestigation_,
                                      ns1__deleteInvestigationResponse_);
   }
   virtual int deleteInvestigation(
@@ -634,7 +641,8 @@ public:
   virtual int removeInvestigation(
       ns1__removeInvestigation *ns1__removeInvestigation_,
       ns1__removeInvestigationResponse *ns1__removeInvestigationResponse_) {
-    return this->removeInvestigation(NULL, NULL, ns1__removeInvestigation_,
+    return this->removeInvestigation(nullptr, nullptr,
+                                     ns1__removeInvestigation_,
                                      ns1__removeInvestigationResponse_);
   }
   virtual int removeInvestigation(
@@ -645,7 +653,7 @@ public:
   /// Web service operation 'addKeyword' (returns error code or SOAP_OK)
   virtual int addKeyword(ns1__addKeyword *ns1__addKeyword_,
                          ns1__addKeywordResponse *ns1__addKeywordResponse_) {
-    return this->addKeyword(NULL, NULL, ns1__addKeyword_,
+    return this->addKeyword(nullptr, nullptr, ns1__addKeyword_,
                             ns1__addKeywordResponse_);
   }
   virtual int addKeyword(const char *endpoint, const char *soap_action,
@@ -656,7 +664,7 @@ public:
   virtual int
   addInvestigator(ns1__addInvestigator *ns1__addInvestigator_,
                   ns1__addInvestigatorResponse *ns1__addInvestigatorResponse_) {
-    return this->addInvestigator(NULL, NULL, ns1__addInvestigator_,
+    return this->addInvestigator(nullptr, nullptr, ns1__addInvestigator_,
                                  ns1__addInvestigatorResponse_);
   }
   virtual int
@@ -667,7 +675,7 @@ public:
   /// Web service operation 'addSample' (returns error code or SOAP_OK)
   virtual int addSample(ns1__addSample *ns1__addSample_,
                         ns1__addSampleResponse *ns1__addSampleResponse_) {
-    return this->addSample(NULL, NULL, ns1__addSample_,
+    return this->addSample(nullptr, nullptr, ns1__addSample_,
                            ns1__addSampleResponse_);
   }
   virtual int addSample(const char *endpoint, const char *soap_action,
@@ -678,7 +686,7 @@ public:
   virtual int
   addPublication(ns1__addPublication *ns1__addPublication_,
                  ns1__addPublicationResponse *ns1__addPublicationResponse_) {
-    return this->addPublication(NULL, NULL, ns1__addPublication_,
+    return this->addPublication(nullptr, nullptr, ns1__addPublication_,
                                 ns1__addPublicationResponse_);
   }
   virtual int
@@ -690,7 +698,7 @@ public:
   virtual int addSampleParameter(
       ns1__addSampleParameter *ns1__addSampleParameter_,
       ns1__addSampleParameterResponse *ns1__addSampleParameterResponse_) {
-    return this->addSampleParameter(NULL, NULL, ns1__addSampleParameter_,
+    return this->addSampleParameter(nullptr, nullptr, ns1__addSampleParameter_,
                                     ns1__addSampleParameterResponse_);
   }
   virtual int addSampleParameter(
@@ -702,7 +710,7 @@ public:
   virtual int deleteInvestigator(
       ns1__deleteInvestigator *ns1__deleteInvestigator_,
       ns1__deleteInvestigatorResponse *ns1__deleteInvestigatorResponse_) {
-    return this->deleteInvestigator(NULL, NULL, ns1__deleteInvestigator_,
+    return this->deleteInvestigator(nullptr, nullptr, ns1__deleteInvestigator_,
                                     ns1__deleteInvestigatorResponse_);
   }
   virtual int deleteInvestigator(
@@ -714,7 +722,7 @@ public:
   virtual int
   deleteKeyword(ns1__deleteKeyword *ns1__deleteKeyword_,
                 ns1__deleteKeywordResponse *ns1__deleteKeywordResponse_) {
-    return this->deleteKeyword(NULL, NULL, ns1__deleteKeyword_,
+    return this->deleteKeyword(nullptr, nullptr, ns1__deleteKeyword_,
                                ns1__deleteKeywordResponse_);
   }
   virtual int
@@ -726,7 +734,7 @@ public:
   virtual int deletePublication(
       ns1__deletePublication *ns1__deletePublication_,
       ns1__deletePublicationResponse *ns1__deletePublicationResponse_) {
-    return this->deletePublication(NULL, NULL, ns1__deletePublication_,
+    return this->deletePublication(nullptr, nullptr, ns1__deletePublication_,
                                    ns1__deletePublicationResponse_);
   }
   virtual int deletePublication(
@@ -738,7 +746,7 @@ public:
   virtual int
   deleteSample(ns1__deleteSample *ns1__deleteSample_,
                ns1__deleteSampleResponse *ns1__deleteSampleResponse_) {
-    return this->deleteSample(NULL, NULL, ns1__deleteSample_,
+    return this->deleteSample(nullptr, nullptr, ns1__deleteSample_,
                               ns1__deleteSampleResponse_);
   }
   virtual int
@@ -751,7 +759,8 @@ public:
   virtual int deleteSampleParameter(
       ns1__deleteSampleParameter *ns1__deleteSampleParameter_,
       ns1__deleteSampleParameterResponse *ns1__deleteSampleParameterResponse_) {
-    return this->deleteSampleParameter(NULL, NULL, ns1__deleteSampleParameter_,
+    return this->deleteSampleParameter(nullptr, nullptr,
+                                       ns1__deleteSampleParameter_,
                                        ns1__deleteSampleParameterResponse_);
   }
   virtual int deleteSampleParameter(
@@ -764,7 +773,8 @@ public:
   virtual int modifyInvestigation(
       ns1__modifyInvestigation *ns1__modifyInvestigation_,
       ns1__modifyInvestigationResponse *ns1__modifyInvestigationResponse_) {
-    return this->modifyInvestigation(NULL, NULL, ns1__modifyInvestigation_,
+    return this->modifyInvestigation(nullptr, nullptr,
+                                     ns1__modifyInvestigation_,
                                      ns1__modifyInvestigationResponse_);
   }
   virtual int modifyInvestigation(
@@ -776,7 +786,7 @@ public:
   virtual int modifyInvestigator(
       ns1__modifyInvestigator *ns1__modifyInvestigator_,
       ns1__modifyInvestigatorResponse *ns1__modifyInvestigatorResponse_) {
-    return this->modifyInvestigator(NULL, NULL, ns1__modifyInvestigator_,
+    return this->modifyInvestigator(nullptr, nullptr, ns1__modifyInvestigator_,
                                     ns1__modifyInvestigatorResponse_);
   }
   virtual int modifyInvestigator(
@@ -788,7 +798,7 @@ public:
   virtual int
   modifySample(ns1__modifySample *ns1__modifySample_,
                ns1__modifySampleResponse *ns1__modifySampleResponse_) {
-    return this->modifySample(NULL, NULL, ns1__modifySample_,
+    return this->modifySample(nullptr, nullptr, ns1__modifySample_,
                               ns1__modifySampleResponse_);
   }
   virtual int
@@ -800,7 +810,7 @@ public:
   virtual int modifyPublication(
       ns1__modifyPublication *ns1__modifyPublication_,
       ns1__modifyPublicationResponse *ns1__modifyPublicationResponse_) {
-    return this->modifyPublication(NULL, NULL, ns1__modifyPublication_,
+    return this->modifyPublication(nullptr, nullptr, ns1__modifyPublication_,
                                    ns1__modifyPublicationResponse_);
   }
   virtual int modifyPublication(
@@ -813,7 +823,8 @@ public:
   virtual int modifySampleParameter(
       ns1__modifySampleParameter *ns1__modifySampleParameter_,
       ns1__modifySampleParameterResponse *ns1__modifySampleParameterResponse_) {
-    return this->modifySampleParameter(NULL, NULL, ns1__modifySampleParameter_,
+    return this->modifySampleParameter(nullptr, nullptr,
+                                       ns1__modifySampleParameter_,
                                        ns1__modifySampleParameterResponse_);
   }
   virtual int modifySampleParameter(
@@ -825,7 +836,7 @@ public:
   virtual int
   removeKeyword(ns1__removeKeyword *ns1__removeKeyword_,
                 ns1__removeKeywordResponse *ns1__removeKeywordResponse_) {
-    return this->removeKeyword(NULL, NULL, ns1__removeKeyword_,
+    return this->removeKeyword(nullptr, nullptr, ns1__removeKeyword_,
                                ns1__removeKeywordResponse_);
   }
   virtual int
@@ -837,7 +848,7 @@ public:
   virtual int removeInvestigator(
       ns1__removeInvestigator *ns1__removeInvestigator_,
       ns1__removeInvestigatorResponse *ns1__removeInvestigatorResponse_) {
-    return this->removeInvestigator(NULL, NULL, ns1__removeInvestigator_,
+    return this->removeInvestigator(nullptr, nullptr, ns1__removeInvestigator_,
                                     ns1__removeInvestigatorResponse_);
   }
   virtual int removeInvestigator(
@@ -849,7 +860,7 @@ public:
   virtual int removePublication(
       ns1__removePublication *ns1__removePublication_,
       ns1__removePublicationResponse *ns1__removePublicationResponse_) {
-    return this->removePublication(NULL, NULL, ns1__removePublication_,
+    return this->removePublication(nullptr, nullptr, ns1__removePublication_,
                                    ns1__removePublicationResponse_);
   }
   virtual int removePublication(
@@ -861,7 +872,7 @@ public:
   virtual int
   removeSample(ns1__removeSample *ns1__removeSample_,
                ns1__removeSampleResponse *ns1__removeSampleResponse_) {
-    return this->removeSample(NULL, NULL, ns1__removeSample_,
+    return this->removeSample(nullptr, nullptr, ns1__removeSample_,
                               ns1__removeSampleResponse_);
   }
   virtual int
@@ -874,7 +885,8 @@ public:
   virtual int removeSampleParameter(
       ns1__removeSampleParameter *ns1__removeSampleParameter_,
       ns1__removeSampleParameterResponse *ns1__removeSampleParameterResponse_) {
-    return this->removeSampleParameter(NULL, NULL, ns1__removeSampleParameter_,
+    return this->removeSampleParameter(nullptr, nullptr,
+                                       ns1__removeSampleParameter_,
                                        ns1__removeSampleParameterResponse_);
   }
   virtual int removeSampleParameter(
@@ -885,7 +897,7 @@ public:
   /// Web service operation 'getDataset' (returns error code or SOAP_OK)
   virtual int getDataset(ns1__getDataset *ns1__getDataset_,
                          ns1__getDatasetResponse *ns1__getDatasetResponse_) {
-    return this->getDataset(NULL, NULL, ns1__getDataset_,
+    return this->getDataset(nullptr, nullptr, ns1__getDataset_,
                             ns1__getDatasetResponse_);
   }
   virtual int getDataset(const char *endpoint, const char *soap_action,
@@ -896,7 +908,7 @@ public:
   virtual int getDatasetIncludes(
       ns1__getDatasetIncludes *ns1__getDatasetIncludes_,
       ns1__getDatasetIncludesResponse *ns1__getDatasetIncludesResponse_) {
-    return this->getDatasetIncludes(NULL, NULL, ns1__getDatasetIncludes_,
+    return this->getDatasetIncludes(nullptr, nullptr, ns1__getDatasetIncludes_,
                                     ns1__getDatasetIncludesResponse_);
   }
   virtual int getDatasetIncludes(
@@ -907,7 +919,7 @@ public:
   /// Web service operation 'getDatasets' (returns error code or SOAP_OK)
   virtual int getDatasets(ns1__getDatasets *ns1__getDatasets_,
                           ns1__getDatasetsResponse *ns1__getDatasetsResponse_) {
-    return this->getDatasets(NULL, NULL, ns1__getDatasets_,
+    return this->getDatasets(nullptr, nullptr, ns1__getDatasets_,
                              ns1__getDatasetsResponse_);
   }
   virtual int getDatasets(const char *endpoint, const char *soap_action,
@@ -918,7 +930,7 @@ public:
   virtual int
   createDataSet(ns1__createDataSet *ns1__createDataSet_,
                 ns1__createDataSetResponse *ns1__createDataSetResponse_) {
-    return this->createDataSet(NULL, NULL, ns1__createDataSet_,
+    return this->createDataSet(nullptr, nullptr, ns1__createDataSet_,
                                ns1__createDataSetResponse_);
   }
   virtual int
@@ -930,7 +942,7 @@ public:
   virtual int
   createDataSets(ns1__createDataSets *ns1__createDataSets_,
                  ns1__createDataSetsResponse *ns1__createDataSetsResponse_) {
-    return this->createDataSets(NULL, NULL, ns1__createDataSets_,
+    return this->createDataSets(nullptr, nullptr, ns1__createDataSets_,
                                 ns1__createDataSetsResponse_);
   }
   virtual int
@@ -942,7 +954,7 @@ public:
   virtual int
   deleteDataSet(ns1__deleteDataSet *ns1__deleteDataSet_,
                 ns1__deleteDataSetResponse *ns1__deleteDataSetResponse_) {
-    return this->deleteDataSet(NULL, NULL, ns1__deleteDataSet_,
+    return this->deleteDataSet(nullptr, nullptr, ns1__deleteDataSet_,
                                ns1__deleteDataSetResponse_);
   }
   virtual int
@@ -954,23 +966,23 @@ public:
   /// SOAP_OK)
   virtual int deleteDataSetParameter(
       ns1__deleteDataSetParameter *ns1__deleteDataSetParameter_,
-      ns1__deleteDataSetParameterResponse *
-          ns1__deleteDataSetParameterResponse_) {
-    return this->deleteDataSetParameter(NULL, NULL,
+      ns1__deleteDataSetParameterResponse
+          *ns1__deleteDataSetParameterResponse_) {
+    return this->deleteDataSetParameter(nullptr, nullptr,
                                         ns1__deleteDataSetParameter_,
                                         ns1__deleteDataSetParameterResponse_);
   }
   virtual int deleteDataSetParameter(
       const char *endpoint, const char *soap_action,
       ns1__deleteDataSetParameter *ns1__deleteDataSetParameter_,
-      ns1__deleteDataSetParameterResponse *
-          ns1__deleteDataSetParameterResponse_);
+      ns1__deleteDataSetParameterResponse
+          *ns1__deleteDataSetParameterResponse_);
 
   /// Web service operation 'modifyDataSet' (returns error code or SOAP_OK)
   virtual int
   modifyDataSet(ns1__modifyDataSet *ns1__modifyDataSet_,
                 ns1__modifyDataSetResponse *ns1__modifyDataSetResponse_) {
-    return this->modifyDataSet(NULL, NULL, ns1__modifyDataSet_,
+    return this->modifyDataSet(nullptr, nullptr, ns1__modifyDataSet_,
                                ns1__modifyDataSetResponse_);
   }
   virtual int
@@ -982,23 +994,23 @@ public:
   /// SOAP_OK)
   virtual int modifyDataSetParameter(
       ns1__modifyDataSetParameter *ns1__modifyDataSetParameter_,
-      ns1__modifyDataSetParameterResponse *
-          ns1__modifyDataSetParameterResponse_) {
-    return this->modifyDataSetParameter(NULL, NULL,
+      ns1__modifyDataSetParameterResponse
+          *ns1__modifyDataSetParameterResponse_) {
+    return this->modifyDataSetParameter(nullptr, nullptr,
                                         ns1__modifyDataSetParameter_,
                                         ns1__modifyDataSetParameterResponse_);
   }
   virtual int modifyDataSetParameter(
       const char *endpoint, const char *soap_action,
       ns1__modifyDataSetParameter *ns1__modifyDataSetParameter_,
-      ns1__modifyDataSetParameterResponse *
-          ns1__modifyDataSetParameterResponse_);
+      ns1__modifyDataSetParameterResponse
+          *ns1__modifyDataSetParameterResponse_);
 
   /// Web service operation 'setDataSetSample' (returns error code or SOAP_OK)
   virtual int setDataSetSample(
       ns1__setDataSetSample *ns1__setDataSetSample_,
       ns1__setDataSetSampleResponse *ns1__setDataSetSampleResponse_) {
-    return this->setDataSetSample(NULL, NULL, ns1__setDataSetSample_,
+    return this->setDataSetSample(nullptr, nullptr, ns1__setDataSetSample_,
                                   ns1__setDataSetSampleResponse_);
   }
   virtual int setDataSetSample(
@@ -1011,7 +1023,8 @@ public:
   virtual int addDataSetParameter(
       ns1__addDataSetParameter *ns1__addDataSetParameter_,
       ns1__addDataSetParameterResponse *ns1__addDataSetParameterResponse_) {
-    return this->addDataSetParameter(NULL, NULL, ns1__addDataSetParameter_,
+    return this->addDataSetParameter(nullptr, nullptr,
+                                     ns1__addDataSetParameter_,
                                      ns1__addDataSetParameterResponse_);
   }
   virtual int addDataSetParameter(
@@ -1024,7 +1037,8 @@ public:
   virtual int addDataSetParameters(
       ns1__addDataSetParameters *ns1__addDataSetParameters_,
       ns1__addDataSetParametersResponse *ns1__addDataSetParametersResponse_) {
-    return this->addDataSetParameters(NULL, NULL, ns1__addDataSetParameters_,
+    return this->addDataSetParameters(nullptr, nullptr,
+                                      ns1__addDataSetParameters_,
                                       ns1__addDataSetParametersResponse_);
   }
   virtual int addDataSetParameters(
@@ -1036,7 +1050,7 @@ public:
   virtual int
   removeDataSet(ns1__removeDataSet *ns1__removeDataSet_,
                 ns1__removeDataSetResponse *ns1__removeDataSetResponse_) {
-    return this->removeDataSet(NULL, NULL, ns1__removeDataSet_,
+    return this->removeDataSet(nullptr, nullptr, ns1__removeDataSet_,
                                ns1__removeDataSetResponse_);
   }
   virtual int
@@ -1048,22 +1062,22 @@ public:
   /// SOAP_OK)
   virtual int removeDataSetParameter(
       ns1__removeDataSetParameter *ns1__removeDataSetParameter_,
-      ns1__removeDataSetParameterResponse *
-          ns1__removeDataSetParameterResponse_) {
-    return this->removeDataSetParameter(NULL, NULL,
+      ns1__removeDataSetParameterResponse
+          *ns1__removeDataSetParameterResponse_) {
+    return this->removeDataSetParameter(nullptr, nullptr,
                                         ns1__removeDataSetParameter_,
                                         ns1__removeDataSetParameterResponse_);
   }
   virtual int removeDataSetParameter(
       const char *endpoint, const char *soap_action,
       ns1__removeDataSetParameter *ns1__removeDataSetParameter_,
-      ns1__removeDataSetParameterResponse *
-          ns1__removeDataSetParameterResponse_);
+      ns1__removeDataSetParameterResponse
+          *ns1__removeDataSetParameterResponse_);
 
   /// Web service operation 'getDatafile' (returns error code or SOAP_OK)
   virtual int getDatafile(ns1__getDatafile *ns1__getDatafile_,
                           ns1__getDatafileResponse *ns1__getDatafileResponse_) {
-    return this->getDatafile(NULL, NULL, ns1__getDatafile_,
+    return this->getDatafile(nullptr, nullptr, ns1__getDatafile_,
                              ns1__getDatafileResponse_);
   }
   virtual int getDatafile(const char *endpoint, const char *soap_action,
@@ -1074,7 +1088,7 @@ public:
   virtual int
   getDatafiles(ns1__getDatafiles *ns1__getDatafiles_,
                ns1__getDatafilesResponse *ns1__getDatafilesResponse_) {
-    return this->getDatafiles(NULL, NULL, ns1__getDatafiles_,
+    return this->getDatafiles(nullptr, nullptr, ns1__getDatafiles_,
                               ns1__getDatafilesResponse_);
   }
   virtual int
@@ -1086,7 +1100,7 @@ public:
   virtual int
   createDataFile(ns1__createDataFile *ns1__createDataFile_,
                  ns1__createDataFileResponse *ns1__createDataFileResponse_) {
-    return this->createDataFile(NULL, NULL, ns1__createDataFile_,
+    return this->createDataFile(nullptr, nullptr, ns1__createDataFile_,
                                 ns1__createDataFileResponse_);
   }
   virtual int
@@ -1098,7 +1112,7 @@ public:
   virtual int
   createDataFiles(ns1__createDataFiles *ns1__createDataFiles_,
                   ns1__createDataFilesResponse *ns1__createDataFilesResponse_) {
-    return this->createDataFiles(NULL, NULL, ns1__createDataFiles_,
+    return this->createDataFiles(nullptr, nullptr, ns1__createDataFiles_,
                                  ns1__createDataFilesResponse_);
   }
   virtual int
@@ -1110,7 +1124,7 @@ public:
   virtual int
   deleteDataFile(ns1__deleteDataFile *ns1__deleteDataFile_,
                  ns1__deleteDataFileResponse *ns1__deleteDataFileResponse_) {
-    return this->deleteDataFile(NULL, NULL, ns1__deleteDataFile_,
+    return this->deleteDataFile(nullptr, nullptr, ns1__deleteDataFile_,
                                 ns1__deleteDataFileResponse_);
   }
   virtual int
@@ -1122,7 +1136,7 @@ public:
   virtual int
   modifyDataFile(ns1__modifyDataFile *ns1__modifyDataFile_,
                  ns1__modifyDataFileResponse *ns1__modifyDataFileResponse_) {
-    return this->modifyDataFile(NULL, NULL, ns1__modifyDataFile_,
+    return this->modifyDataFile(nullptr, nullptr, ns1__modifyDataFile_,
                                 ns1__modifyDataFileResponse_);
   }
   virtual int
@@ -1135,7 +1149,8 @@ public:
   virtual int addDataFileParameter(
       ns1__addDataFileParameter *ns1__addDataFileParameter_,
       ns1__addDataFileParameterResponse *ns1__addDataFileParameterResponse_) {
-    return this->addDataFileParameter(NULL, NULL, ns1__addDataFileParameter_,
+    return this->addDataFileParameter(nullptr, nullptr,
+                                      ns1__addDataFileParameter_,
                                       ns1__addDataFileParameterResponse_);
   }
   virtual int addDataFileParameter(
@@ -1148,7 +1163,8 @@ public:
   virtual int addDataFileParameters(
       ns1__addDataFileParameters *ns1__addDataFileParameters_,
       ns1__addDataFileParametersResponse *ns1__addDataFileParametersResponse_) {
-    return this->addDataFileParameters(NULL, NULL, ns1__addDataFileParameters_,
+    return this->addDataFileParameters(nullptr, nullptr,
+                                       ns1__addDataFileParameters_,
                                        ns1__addDataFileParametersResponse_);
   }
   virtual int addDataFileParameters(
@@ -1160,39 +1176,39 @@ public:
   /// SOAP_OK)
   virtual int modifyDataFileParameter(
       ns1__modifyDataFileParameter *ns1__modifyDataFileParameter_,
-      ns1__modifyDataFileParameterResponse *
-          ns1__modifyDataFileParameterResponse_) {
-    return this->modifyDataFileParameter(NULL, NULL,
+      ns1__modifyDataFileParameterResponse
+          *ns1__modifyDataFileParameterResponse_) {
+    return this->modifyDataFileParameter(nullptr, nullptr,
                                          ns1__modifyDataFileParameter_,
                                          ns1__modifyDataFileParameterResponse_);
   }
   virtual int modifyDataFileParameter(
       const char *endpoint, const char *soap_action,
       ns1__modifyDataFileParameter *ns1__modifyDataFileParameter_,
-      ns1__modifyDataFileParameterResponse *
-          ns1__modifyDataFileParameterResponse_);
+      ns1__modifyDataFileParameterResponse
+          *ns1__modifyDataFileParameterResponse_);
 
   /// Web service operation 'deleteDataFileParameter' (returns error code or
   /// SOAP_OK)
   virtual int deleteDataFileParameter(
       ns1__deleteDataFileParameter *ns1__deleteDataFileParameter_,
-      ns1__deleteDataFileParameterResponse *
-          ns1__deleteDataFileParameterResponse_) {
-    return this->deleteDataFileParameter(NULL, NULL,
+      ns1__deleteDataFileParameterResponse
+          *ns1__deleteDataFileParameterResponse_) {
+    return this->deleteDataFileParameter(nullptr, nullptr,
                                          ns1__deleteDataFileParameter_,
                                          ns1__deleteDataFileParameterResponse_);
   }
   virtual int deleteDataFileParameter(
       const char *endpoint, const char *soap_action,
       ns1__deleteDataFileParameter *ns1__deleteDataFileParameter_,
-      ns1__deleteDataFileParameterResponse *
-          ns1__deleteDataFileParameterResponse_);
+      ns1__deleteDataFileParameterResponse
+          *ns1__deleteDataFileParameterResponse_);
 
   /// Web service operation 'removeDataFile' (returns error code or SOAP_OK)
   virtual int
   removeDataFile(ns1__removeDataFile *ns1__removeDataFile_,
                  ns1__removeDataFileResponse *ns1__removeDataFileResponse_) {
-    return this->removeDataFile(NULL, NULL, ns1__removeDataFile_,
+    return this->removeDataFile(nullptr, nullptr, ns1__removeDataFile_,
                                 ns1__removeDataFileResponse_);
   }
   virtual int
@@ -1204,23 +1220,23 @@ public:
   /// SOAP_OK)
   virtual int removeDataFileParameter(
       ns1__removeDataFileParameter *ns1__removeDataFileParameter_,
-      ns1__removeDataFileParameterResponse *
-          ns1__removeDataFileParameterResponse_) {
-    return this->removeDataFileParameter(NULL, NULL,
+      ns1__removeDataFileParameterResponse
+          *ns1__removeDataFileParameterResponse_) {
+    return this->removeDataFileParameter(nullptr, nullptr,
                                          ns1__removeDataFileParameter_,
                                          ns1__removeDataFileParameterResponse_);
   }
   virtual int removeDataFileParameter(
       const char *endpoint, const char *soap_action,
       ns1__removeDataFileParameter *ns1__removeDataFileParameter_,
-      ns1__removeDataFileParameterResponse *
-          ns1__removeDataFileParameterResponse_);
+      ns1__removeDataFileParameterResponse
+          *ns1__removeDataFileParameterResponse_);
 
   /// Web service operation 'getAuthorisations' (returns error code or SOAP_OK)
   virtual int getAuthorisations(
       ns1__getAuthorisations *ns1__getAuthorisations_,
       ns1__getAuthorisationsResponse *ns1__getAuthorisationsResponse_) {
-    return this->getAuthorisations(NULL, NULL, ns1__getAuthorisations_,
+    return this->getAuthorisations(nullptr, nullptr, ns1__getAuthorisations_,
                                    ns1__getAuthorisationsResponse_);
   }
   virtual int getAuthorisations(
@@ -1232,7 +1248,7 @@ public:
   virtual int addAuthorisation(
       ns1__addAuthorisation *ns1__addAuthorisation_,
       ns1__addAuthorisationResponse *ns1__addAuthorisationResponse_) {
-    return this->addAuthorisation(NULL, NULL, ns1__addAuthorisation_,
+    return this->addAuthorisation(nullptr, nullptr, ns1__addAuthorisation_,
                                   ns1__addAuthorisationResponse_);
   }
   virtual int addAuthorisation(
@@ -1245,7 +1261,8 @@ public:
   virtual int deleteAuthorisation(
       ns1__deleteAuthorisation *ns1__deleteAuthorisation_,
       ns1__deleteAuthorisationResponse *ns1__deleteAuthorisationResponse_) {
-    return this->deleteAuthorisation(NULL, NULL, ns1__deleteAuthorisation_,
+    return this->deleteAuthorisation(nullptr, nullptr,
+                                     ns1__deleteAuthorisation_,
                                      ns1__deleteAuthorisationResponse_);
   }
   virtual int deleteAuthorisation(
@@ -1258,7 +1275,8 @@ public:
   virtual int removeAuthorisation(
       ns1__removeAuthorisation *ns1__removeAuthorisation_,
       ns1__removeAuthorisationResponse *ns1__removeAuthorisationResponse_) {
-    return this->removeAuthorisation(NULL, NULL, ns1__removeAuthorisation_,
+    return this->removeAuthorisation(nullptr, nullptr,
+                                     ns1__removeAuthorisation_,
                                      ns1__removeAuthorisationResponse_);
   }
   virtual int removeAuthorisation(
@@ -1271,7 +1289,8 @@ public:
   virtual int updateAuthorisation(
       ns1__updateAuthorisation *ns1__updateAuthorisation_,
       ns1__updateAuthorisationResponse *ns1__updateAuthorisationResponse_) {
-    return this->updateAuthorisation(NULL, NULL, ns1__updateAuthorisation_,
+    return this->updateAuthorisation(nullptr, nullptr,
+                                     ns1__updateAuthorisation_,
                                      ns1__updateAuthorisationResponse_);
   }
   virtual int updateAuthorisation(
@@ -1283,7 +1302,7 @@ public:
   virtual int
   ingestMetadata(ns1__ingestMetadata *ns1__ingestMetadata_,
                  ns1__ingestMetadataResponse *ns1__ingestMetadataResponse_) {
-    return this->ingestMetadata(NULL, NULL, ns1__ingestMetadata_,
+    return this->ingestMetadata(nullptr, nullptr, ns1__ingestMetadata_,
                                 ns1__ingestMetadataResponse_);
   }
   virtual int
@@ -1295,7 +1314,7 @@ public:
   virtual int downloadDatafile(
       ns1__downloadDatafile *ns1__downloadDatafile_,
       ns1__downloadDatafileResponse *ns1__downloadDatafileResponse_) {
-    return this->downloadDatafile(NULL, NULL, ns1__downloadDatafile_,
+    return this->downloadDatafile(nullptr, nullptr, ns1__downloadDatafile_,
                                   ns1__downloadDatafileResponse_);
   }
   virtual int downloadDatafile(
@@ -1307,7 +1326,7 @@ public:
   virtual int
   downloadDataset(ns1__downloadDataset *ns1__downloadDataset_,
                   ns1__downloadDatasetResponse *ns1__downloadDatasetResponse_) {
-    return this->downloadDataset(NULL, NULL, ns1__downloadDataset_,
+    return this->downloadDataset(nullptr, nullptr, ns1__downloadDataset_,
                                  ns1__downloadDatasetResponse_);
   }
   virtual int
@@ -1319,7 +1338,7 @@ public:
   virtual int downloadDatafiles(
       ns1__downloadDatafiles *ns1__downloadDatafiles_,
       ns1__downloadDatafilesResponse *ns1__downloadDatafilesResponse_) {
-    return this->downloadDatafiles(NULL, NULL, ns1__downloadDatafiles_,
+    return this->downloadDatafiles(nullptr, nullptr, ns1__downloadDatafiles_,
                                    ns1__downloadDatafilesResponse_);
   }
   virtual int downloadDatafiles(
@@ -1331,39 +1350,39 @@ public:
   /// SOAP_OK)
   virtual int checkDatafileDownloadAccess(
       ns1__checkDatafileDownloadAccess *ns1__checkDatafileDownloadAccess_,
-      ns1__checkDatafileDownloadAccessResponse *
-          ns1__checkDatafileDownloadAccessResponse_) {
+      ns1__checkDatafileDownloadAccessResponse
+          *ns1__checkDatafileDownloadAccessResponse_) {
     return this->checkDatafileDownloadAccess(
-        NULL, NULL, ns1__checkDatafileDownloadAccess_,
+        nullptr, nullptr, ns1__checkDatafileDownloadAccess_,
         ns1__checkDatafileDownloadAccessResponse_);
   }
   virtual int checkDatafileDownloadAccess(
       const char *endpoint, const char *soap_action,
       ns1__checkDatafileDownloadAccess *ns1__checkDatafileDownloadAccess_,
-      ns1__checkDatafileDownloadAccessResponse *
-          ns1__checkDatafileDownloadAccessResponse_);
+      ns1__checkDatafileDownloadAccessResponse
+          *ns1__checkDatafileDownloadAccessResponse_);
 
   /// Web service operation 'checkDatasetDownloadAccess' (returns error code or
   /// SOAP_OK)
   virtual int checkDatasetDownloadAccess(
       ns1__checkDatasetDownloadAccess *ns1__checkDatasetDownloadAccess_,
-      ns1__checkDatasetDownloadAccessResponse *
-          ns1__checkDatasetDownloadAccessResponse_) {
+      ns1__checkDatasetDownloadAccessResponse
+          *ns1__checkDatasetDownloadAccessResponse_) {
     return this->checkDatasetDownloadAccess(
-        NULL, NULL, ns1__checkDatasetDownloadAccess_,
+        nullptr, nullptr, ns1__checkDatasetDownloadAccess_,
         ns1__checkDatasetDownloadAccessResponse_);
   }
   virtual int checkDatasetDownloadAccess(
       const char *endpoint, const char *soap_action,
       ns1__checkDatasetDownloadAccess *ns1__checkDatasetDownloadAccess_,
-      ns1__checkDatasetDownloadAccessResponse *
-          ns1__checkDatasetDownloadAccessResponse_);
+      ns1__checkDatasetDownloadAccessResponse
+          *ns1__checkDatasetDownloadAccessResponse_);
 
   /// Web service operation 'getICATAPIVersion' (returns error code or SOAP_OK)
   virtual int getICATAPIVersion(
       ns1__getICATAPIVersion *ns1__getICATAPIVersion_,
       ns1__getICATAPIVersionResponse *ns1__getICATAPIVersionResponse_) {
-    return this->getICATAPIVersion(NULL, NULL, ns1__getICATAPIVersion_,
+    return this->getICATAPIVersion(nullptr, nullptr, ns1__getICATAPIVersion_,
                                    ns1__getICATAPIVersionResponse_);
   }
   virtual int getICATAPIVersion(
@@ -1374,266 +1393,266 @@ public:
   /// Web service operation 'getFacilityUserByFacilityUserId' (returns error
   /// code or SOAP_OK)
   virtual int getFacilityUserByFacilityUserId(
-      ns1__getFacilityUserByFacilityUserId *
-          ns1__getFacilityUserByFacilityUserId_,
-      ns1__getFacilityUserByFacilityUserIdResponse *
-          ns1__getFacilityUserByFacilityUserIdResponse_) {
+      ns1__getFacilityUserByFacilityUserId
+          *ns1__getFacilityUserByFacilityUserId_,
+      ns1__getFacilityUserByFacilityUserIdResponse
+          *ns1__getFacilityUserByFacilityUserIdResponse_) {
     return this->getFacilityUserByFacilityUserId(
-        NULL, NULL, ns1__getFacilityUserByFacilityUserId_,
+        nullptr, nullptr, ns1__getFacilityUserByFacilityUserId_,
         ns1__getFacilityUserByFacilityUserIdResponse_);
   }
   virtual int getFacilityUserByFacilityUserId(
       const char *endpoint, const char *soap_action,
-      ns1__getFacilityUserByFacilityUserId *
-          ns1__getFacilityUserByFacilityUserId_,
-      ns1__getFacilityUserByFacilityUserIdResponse *
-          ns1__getFacilityUserByFacilityUserIdResponse_);
+      ns1__getFacilityUserByFacilityUserId
+          *ns1__getFacilityUserByFacilityUserId_,
+      ns1__getFacilityUserByFacilityUserIdResponse
+          *ns1__getFacilityUserByFacilityUserIdResponse_);
 
   /// Web service operation 'getFacilityUserByFederalId' (returns error code or
   /// SOAP_OK)
   virtual int getFacilityUserByFederalId(
       ns1__getFacilityUserByFederalId *ns1__getFacilityUserByFederalId_,
-      ns1__getFacilityUserByFederalIdResponse *
-          ns1__getFacilityUserByFederalIdResponse_) {
+      ns1__getFacilityUserByFederalIdResponse
+          *ns1__getFacilityUserByFederalIdResponse_) {
     return this->getFacilityUserByFederalId(
-        NULL, NULL, ns1__getFacilityUserByFederalId_,
+        nullptr, nullptr, ns1__getFacilityUserByFederalId_,
         ns1__getFacilityUserByFederalIdResponse_);
   }
   virtual int getFacilityUserByFederalId(
       const char *endpoint, const char *soap_action,
       ns1__getFacilityUserByFederalId *ns1__getFacilityUserByFederalId_,
-      ns1__getFacilityUserByFederalIdResponse *
-          ns1__getFacilityUserByFederalIdResponse_);
+      ns1__getFacilityUserByFederalIdResponse
+          *ns1__getFacilityUserByFederalIdResponse_);
 
   /// Web service operation 'searchInvestigationByParameterCondition' (returns
   /// error code or SOAP_OK)
   virtual int searchInvestigationByParameterCondition(
-      ns1__searchInvestigationByParameterCondition *
-          ns1__searchInvestigationByParameterCondition_,
-      ns1__searchInvestigationByParameterConditionResponse *
-          ns1__searchInvestigationByParameterConditionResponse_) {
+      ns1__searchInvestigationByParameterCondition
+          *ns1__searchInvestigationByParameterCondition_,
+      ns1__searchInvestigationByParameterConditionResponse
+          *ns1__searchInvestigationByParameterConditionResponse_) {
     return this->searchInvestigationByParameterCondition(
-        NULL, NULL, ns1__searchInvestigationByParameterCondition_,
+        nullptr, nullptr, ns1__searchInvestigationByParameterCondition_,
         ns1__searchInvestigationByParameterConditionResponse_);
   }
   virtual int searchInvestigationByParameterCondition(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByParameterCondition *
-          ns1__searchInvestigationByParameterCondition_,
-      ns1__searchInvestigationByParameterConditionResponse *
-          ns1__searchInvestigationByParameterConditionResponse_);
+      ns1__searchInvestigationByParameterCondition
+          *ns1__searchInvestigationByParameterCondition_,
+      ns1__searchInvestigationByParameterConditionResponse
+          *ns1__searchInvestigationByParameterConditionResponse_);
 
   /// Web service operation 'searchDatafileByParameterCondition' (returns error
   /// code or SOAP_OK)
   virtual int searchDatafileByParameterCondition(
-      ns1__searchDatafileByParameterCondition *
-          ns1__searchDatafileByParameterCondition_,
-      ns1__searchDatafileByParameterConditionResponse *
-          ns1__searchDatafileByParameterConditionResponse_) {
+      ns1__searchDatafileByParameterCondition
+          *ns1__searchDatafileByParameterCondition_,
+      ns1__searchDatafileByParameterConditionResponse
+          *ns1__searchDatafileByParameterConditionResponse_) {
     return this->searchDatafileByParameterCondition(
-        NULL, NULL, ns1__searchDatafileByParameterCondition_,
+        nullptr, nullptr, ns1__searchDatafileByParameterCondition_,
         ns1__searchDatafileByParameterConditionResponse_);
   }
   virtual int searchDatafileByParameterCondition(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatafileByParameterCondition *
-          ns1__searchDatafileByParameterCondition_,
-      ns1__searchDatafileByParameterConditionResponse *
-          ns1__searchDatafileByParameterConditionResponse_);
+      ns1__searchDatafileByParameterCondition
+          *ns1__searchDatafileByParameterCondition_,
+      ns1__searchDatafileByParameterConditionResponse
+          *ns1__searchDatafileByParameterConditionResponse_);
 
   /// Web service operation 'searchDatasetByParameterCondition' (returns error
   /// code or SOAP_OK)
   virtual int searchDatasetByParameterCondition(
-      ns1__searchDatasetByParameterCondition *
-          ns1__searchDatasetByParameterCondition_,
-      ns1__searchDatasetByParameterConditionResponse *
-          ns1__searchDatasetByParameterConditionResponse_) {
+      ns1__searchDatasetByParameterCondition
+          *ns1__searchDatasetByParameterCondition_,
+      ns1__searchDatasetByParameterConditionResponse
+          *ns1__searchDatasetByParameterConditionResponse_) {
     return this->searchDatasetByParameterCondition(
-        NULL, NULL, ns1__searchDatasetByParameterCondition_,
+        nullptr, nullptr, ns1__searchDatasetByParameterCondition_,
         ns1__searchDatasetByParameterConditionResponse_);
   }
   virtual int searchDatasetByParameterCondition(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatasetByParameterCondition *
-          ns1__searchDatasetByParameterCondition_,
-      ns1__searchDatasetByParameterConditionResponse *
-          ns1__searchDatasetByParameterConditionResponse_);
+      ns1__searchDatasetByParameterCondition
+          *ns1__searchDatasetByParameterCondition_,
+      ns1__searchDatasetByParameterConditionResponse
+          *ns1__searchDatasetByParameterConditionResponse_);
 
   /// Web service operation 'searchSampleByParameterCondition' (returns error
   /// code or SOAP_OK)
   virtual int searchSampleByParameterCondition(
-      ns1__searchSampleByParameterCondition *
-          ns1__searchSampleByParameterCondition_,
-      ns1__searchSampleByParameterConditionResponse *
-          ns1__searchSampleByParameterConditionResponse_) {
+      ns1__searchSampleByParameterCondition
+          *ns1__searchSampleByParameterCondition_,
+      ns1__searchSampleByParameterConditionResponse
+          *ns1__searchSampleByParameterConditionResponse_) {
     return this->searchSampleByParameterCondition(
-        NULL, NULL, ns1__searchSampleByParameterCondition_,
+        nullptr, nullptr, ns1__searchSampleByParameterCondition_,
         ns1__searchSampleByParameterConditionResponse_);
   }
   virtual int searchSampleByParameterCondition(
       const char *endpoint, const char *soap_action,
-      ns1__searchSampleByParameterCondition *
-          ns1__searchSampleByParameterCondition_,
-      ns1__searchSampleByParameterConditionResponse *
-          ns1__searchSampleByParameterConditionResponse_);
+      ns1__searchSampleByParameterCondition
+          *ns1__searchSampleByParameterCondition_,
+      ns1__searchSampleByParameterConditionResponse
+          *ns1__searchSampleByParameterConditionResponse_);
 
   /// Web service operation 'searchInvestigationByParameterComparison' (returns
   /// error code or SOAP_OK)
   virtual int searchInvestigationByParameterComparison(
-      ns1__searchInvestigationByParameterComparison *
-          ns1__searchInvestigationByParameterComparison_,
-      ns1__searchInvestigationByParameterComparisonResponse *
-          ns1__searchInvestigationByParameterComparisonResponse_) {
+      ns1__searchInvestigationByParameterComparison
+          *ns1__searchInvestigationByParameterComparison_,
+      ns1__searchInvestigationByParameterComparisonResponse
+          *ns1__searchInvestigationByParameterComparisonResponse_) {
     return this->searchInvestigationByParameterComparison(
-        NULL, NULL, ns1__searchInvestigationByParameterComparison_,
+        nullptr, nullptr, ns1__searchInvestigationByParameterComparison_,
         ns1__searchInvestigationByParameterComparisonResponse_);
   }
   virtual int searchInvestigationByParameterComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByParameterComparison *
-          ns1__searchInvestigationByParameterComparison_,
-      ns1__searchInvestigationByParameterComparisonResponse *
-          ns1__searchInvestigationByParameterComparisonResponse_);
+      ns1__searchInvestigationByParameterComparison
+          *ns1__searchInvestigationByParameterComparison_,
+      ns1__searchInvestigationByParameterComparisonResponse
+          *ns1__searchInvestigationByParameterComparisonResponse_);
 
   /// Web service operation 'searchDatafileByParameterComparison' (returns error
   /// code or SOAP_OK)
   virtual int searchDatafileByParameterComparison(
-      ns1__searchDatafileByParameterComparison *
-          ns1__searchDatafileByParameterComparison_,
-      ns1__searchDatafileByParameterComparisonResponse *
-          ns1__searchDatafileByParameterComparisonResponse_) {
+      ns1__searchDatafileByParameterComparison
+          *ns1__searchDatafileByParameterComparison_,
+      ns1__searchDatafileByParameterComparisonResponse
+          *ns1__searchDatafileByParameterComparisonResponse_) {
     return this->searchDatafileByParameterComparison(
-        NULL, NULL, ns1__searchDatafileByParameterComparison_,
+        nullptr, nullptr, ns1__searchDatafileByParameterComparison_,
         ns1__searchDatafileByParameterComparisonResponse_);
   }
   virtual int searchDatafileByParameterComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatafileByParameterComparison *
-          ns1__searchDatafileByParameterComparison_,
-      ns1__searchDatafileByParameterComparisonResponse *
-          ns1__searchDatafileByParameterComparisonResponse_);
+      ns1__searchDatafileByParameterComparison
+          *ns1__searchDatafileByParameterComparison_,
+      ns1__searchDatafileByParameterComparisonResponse
+          *ns1__searchDatafileByParameterComparisonResponse_);
 
   /// Web service operation 'searchDatasetByParameterComparison' (returns error
   /// code or SOAP_OK)
   virtual int searchDatasetByParameterComparison(
-      ns1__searchDatasetByParameterComparison *
-          ns1__searchDatasetByParameterComparison_,
-      ns1__searchDatasetByParameterComparisonResponse *
-          ns1__searchDatasetByParameterComparisonResponse_) {
+      ns1__searchDatasetByParameterComparison
+          *ns1__searchDatasetByParameterComparison_,
+      ns1__searchDatasetByParameterComparisonResponse
+          *ns1__searchDatasetByParameterComparisonResponse_) {
     return this->searchDatasetByParameterComparison(
-        NULL, NULL, ns1__searchDatasetByParameterComparison_,
+        nullptr, nullptr, ns1__searchDatasetByParameterComparison_,
         ns1__searchDatasetByParameterComparisonResponse_);
   }
   virtual int searchDatasetByParameterComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatasetByParameterComparison *
-          ns1__searchDatasetByParameterComparison_,
-      ns1__searchDatasetByParameterComparisonResponse *
-          ns1__searchDatasetByParameterComparisonResponse_);
+      ns1__searchDatasetByParameterComparison
+          *ns1__searchDatasetByParameterComparison_,
+      ns1__searchDatasetByParameterComparisonResponse
+          *ns1__searchDatasetByParameterComparisonResponse_);
 
   /// Web service operation 'searchSampleByParameterComparison' (returns error
   /// code or SOAP_OK)
   virtual int searchSampleByParameterComparison(
-      ns1__searchSampleByParameterComparison *
-          ns1__searchSampleByParameterComparison_,
-      ns1__searchSampleByParameterComparisonResponse *
-          ns1__searchSampleByParameterComparisonResponse_) {
+      ns1__searchSampleByParameterComparison
+          *ns1__searchSampleByParameterComparison_,
+      ns1__searchSampleByParameterComparisonResponse
+          *ns1__searchSampleByParameterComparisonResponse_) {
     return this->searchSampleByParameterComparison(
-        NULL, NULL, ns1__searchSampleByParameterComparison_,
+        nullptr, nullptr, ns1__searchSampleByParameterComparison_,
         ns1__searchSampleByParameterComparisonResponse_);
   }
   virtual int searchSampleByParameterComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchSampleByParameterComparison *
-          ns1__searchSampleByParameterComparison_,
-      ns1__searchSampleByParameterComparisonResponse *
-          ns1__searchSampleByParameterComparisonResponse_);
+      ns1__searchSampleByParameterComparison
+          *ns1__searchSampleByParameterComparison_,
+      ns1__searchSampleByParameterComparisonResponse
+          *ns1__searchSampleByParameterComparisonResponse_);
 
   /// Web service operation 'searchInvestigationByParameter' (returns error code
   /// or SOAP_OK)
   virtual int searchInvestigationByParameter(
       ns1__searchInvestigationByParameter *ns1__searchInvestigationByParameter_,
-      ns1__searchInvestigationByParameterResponse *
-          ns1__searchInvestigationByParameterResponse_) {
+      ns1__searchInvestigationByParameterResponse
+          *ns1__searchInvestigationByParameterResponse_) {
     return this->searchInvestigationByParameter(
-        NULL, NULL, ns1__searchInvestigationByParameter_,
+        nullptr, nullptr, ns1__searchInvestigationByParameter_,
         ns1__searchInvestigationByParameterResponse_);
   }
   virtual int searchInvestigationByParameter(
       const char *endpoint, const char *soap_action,
       ns1__searchInvestigationByParameter *ns1__searchInvestigationByParameter_,
-      ns1__searchInvestigationByParameterResponse *
-          ns1__searchInvestigationByParameterResponse_);
+      ns1__searchInvestigationByParameterResponse
+          *ns1__searchInvestigationByParameterResponse_);
 
   /// Web service operation 'searchDatafileByParameter' (returns error code or
   /// SOAP_OK)
   virtual int searchDatafileByParameter(
       ns1__searchDatafileByParameter *ns1__searchDatafileByParameter_,
-      ns1__searchDatafileByParameterResponse *
-          ns1__searchDatafileByParameterResponse_) {
+      ns1__searchDatafileByParameterResponse
+          *ns1__searchDatafileByParameterResponse_) {
     return this->searchDatafileByParameter(
-        NULL, NULL, ns1__searchDatafileByParameter_,
+        nullptr, nullptr, ns1__searchDatafileByParameter_,
         ns1__searchDatafileByParameterResponse_);
   }
   virtual int searchDatafileByParameter(
       const char *endpoint, const char *soap_action,
       ns1__searchDatafileByParameter *ns1__searchDatafileByParameter_,
-      ns1__searchDatafileByParameterResponse *
-          ns1__searchDatafileByParameterResponse_);
+      ns1__searchDatafileByParameterResponse
+          *ns1__searchDatafileByParameterResponse_);
 
   /// Web service operation 'searchDatasetByParameter' (returns error code or
   /// SOAP_OK)
   virtual int searchDatasetByParameter(
       ns1__searchDatasetByParameter *ns1__searchDatasetByParameter_,
-      ns1__searchDatasetByParameterResponse *
-          ns1__searchDatasetByParameterResponse_) {
+      ns1__searchDatasetByParameterResponse
+          *ns1__searchDatasetByParameterResponse_) {
     return this->searchDatasetByParameter(
-        NULL, NULL, ns1__searchDatasetByParameter_,
+        nullptr, nullptr, ns1__searchDatasetByParameter_,
         ns1__searchDatasetByParameterResponse_);
   }
   virtual int searchDatasetByParameter(
       const char *endpoint, const char *soap_action,
       ns1__searchDatasetByParameter *ns1__searchDatasetByParameter_,
-      ns1__searchDatasetByParameterResponse *
-          ns1__searchDatasetByParameterResponse_);
+      ns1__searchDatasetByParameterResponse
+          *ns1__searchDatasetByParameterResponse_);
 
   /// Web service operation 'searchSampleByParameter' (returns error code or
   /// SOAP_OK)
   virtual int searchSampleByParameter(
       ns1__searchSampleByParameter *ns1__searchSampleByParameter_,
-      ns1__searchSampleByParameterResponse *
-          ns1__searchSampleByParameterResponse_) {
-    return this->searchSampleByParameter(NULL, NULL,
+      ns1__searchSampleByParameterResponse
+          *ns1__searchSampleByParameterResponse_) {
+    return this->searchSampleByParameter(nullptr, nullptr,
                                          ns1__searchSampleByParameter_,
                                          ns1__searchSampleByParameterResponse_);
   }
   virtual int searchSampleByParameter(
       const char *endpoint, const char *soap_action,
       ns1__searchSampleByParameter *ns1__searchSampleByParameter_,
-      ns1__searchSampleByParameterResponse *
-          ns1__searchSampleByParameterResponse_);
+      ns1__searchSampleByParameterResponse
+          *ns1__searchSampleByParameterResponse_);
 
   /// Web service operation 'getParameterByNameUnits' (returns error code or
   /// SOAP_OK)
   virtual int getParameterByNameUnits(
       ns1__getParameterByNameUnits *ns1__getParameterByNameUnits_,
-      ns1__getParameterByNameUnitsResponse *
-          ns1__getParameterByNameUnitsResponse_) {
-    return this->getParameterByNameUnits(NULL, NULL,
+      ns1__getParameterByNameUnitsResponse
+          *ns1__getParameterByNameUnitsResponse_) {
+    return this->getParameterByNameUnits(nullptr, nullptr,
                                          ns1__getParameterByNameUnits_,
                                          ns1__getParameterByNameUnitsResponse_);
   }
   virtual int getParameterByNameUnits(
       const char *endpoint, const char *soap_action,
       ns1__getParameterByNameUnits *ns1__getParameterByNameUnits_,
-      ns1__getParameterByNameUnitsResponse *
-          ns1__getParameterByNameUnitsResponse_);
+      ns1__getParameterByNameUnitsResponse
+          *ns1__getParameterByNameUnitsResponse_);
 
   /// Web service operation 'getParameterByName' (returns error code or SOAP_OK)
   virtual int getParameterByName(
       ns1__getParameterByName *ns1__getParameterByName_,
       ns1__getParameterByNameResponse *ns1__getParameterByNameResponse_) {
-    return this->getParameterByName(NULL, NULL, ns1__getParameterByName_,
+    return this->getParameterByName(nullptr, nullptr, ns1__getParameterByName_,
                                     ns1__getParameterByNameResponse_);
   }
   virtual int getParameterByName(
@@ -1645,24 +1664,25 @@ public:
   /// SOAP_OK)
   virtual int getParameterByRestriction(
       ns1__getParameterByRestriction *ns1__getParameterByRestriction_,
-      ns1__getParameterByRestrictionResponse *
-          ns1__getParameterByRestrictionResponse_) {
+      ns1__getParameterByRestrictionResponse
+          *ns1__getParameterByRestrictionResponse_) {
     return this->getParameterByRestriction(
-        NULL, NULL, ns1__getParameterByRestriction_,
+        nullptr, nullptr, ns1__getParameterByRestriction_,
         ns1__getParameterByRestrictionResponse_);
   }
   virtual int getParameterByRestriction(
       const char *endpoint, const char *soap_action,
       ns1__getParameterByRestriction *ns1__getParameterByRestriction_,
-      ns1__getParameterByRestrictionResponse *
-          ns1__getParameterByRestrictionResponse_);
+      ns1__getParameterByRestrictionResponse
+          *ns1__getParameterByRestrictionResponse_);
 
   /// Web service operation 'getParameterByUnits' (returns error code or
   /// SOAP_OK)
   virtual int getParameterByUnits(
       ns1__getParameterByUnits *ns1__getParameterByUnits_,
       ns1__getParameterByUnitsResponse *ns1__getParameterByUnitsResponse_) {
-    return this->getParameterByUnits(NULL, NULL, ns1__getParameterByUnits_,
+    return this->getParameterByUnits(nullptr, nullptr,
+                                     ns1__getParameterByUnits_,
                                      ns1__getParameterByUnitsResponse_);
   }
   virtual int getParameterByUnits(
@@ -1673,372 +1693,372 @@ public:
   /// Web service operation 'searchDatasetByParameterRestriction' (returns error
   /// code or SOAP_OK)
   virtual int searchDatasetByParameterRestriction(
-      ns1__searchDatasetByParameterRestriction *
-          ns1__searchDatasetByParameterRestriction_,
-      ns1__searchDatasetByParameterRestrictionResponse *
-          ns1__searchDatasetByParameterRestrictionResponse_) {
+      ns1__searchDatasetByParameterRestriction
+          *ns1__searchDatasetByParameterRestriction_,
+      ns1__searchDatasetByParameterRestrictionResponse
+          *ns1__searchDatasetByParameterRestrictionResponse_) {
     return this->searchDatasetByParameterRestriction(
-        NULL, NULL, ns1__searchDatasetByParameterRestriction_,
+        nullptr, nullptr, ns1__searchDatasetByParameterRestriction_,
         ns1__searchDatasetByParameterRestrictionResponse_);
   }
   virtual int searchDatasetByParameterRestriction(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatasetByParameterRestriction *
-          ns1__searchDatasetByParameterRestriction_,
-      ns1__searchDatasetByParameterRestrictionResponse *
-          ns1__searchDatasetByParameterRestrictionResponse_);
+      ns1__searchDatasetByParameterRestriction
+          *ns1__searchDatasetByParameterRestriction_,
+      ns1__searchDatasetByParameterRestrictionResponse
+          *ns1__searchDatasetByParameterRestrictionResponse_);
 
   /// Web service operation 'searchSampleByParameterRestriction' (returns error
   /// code or SOAP_OK)
   virtual int searchSampleByParameterRestriction(
-      ns1__searchSampleByParameterRestriction *
-          ns1__searchSampleByParameterRestriction_,
-      ns1__searchSampleByParameterRestrictionResponse *
-          ns1__searchSampleByParameterRestrictionResponse_) {
+      ns1__searchSampleByParameterRestriction
+          *ns1__searchSampleByParameterRestriction_,
+      ns1__searchSampleByParameterRestrictionResponse
+          *ns1__searchSampleByParameterRestrictionResponse_) {
     return this->searchSampleByParameterRestriction(
-        NULL, NULL, ns1__searchSampleByParameterRestriction_,
+        nullptr, nullptr, ns1__searchSampleByParameterRestriction_,
         ns1__searchSampleByParameterRestrictionResponse_);
   }
   virtual int searchSampleByParameterRestriction(
       const char *endpoint, const char *soap_action,
-      ns1__searchSampleByParameterRestriction *
-          ns1__searchSampleByParameterRestriction_,
-      ns1__searchSampleByParameterRestrictionResponse *
-          ns1__searchSampleByParameterRestrictionResponse_);
+      ns1__searchSampleByParameterRestriction
+          *ns1__searchSampleByParameterRestriction_,
+      ns1__searchSampleByParameterRestrictionResponse
+          *ns1__searchSampleByParameterRestrictionResponse_);
 
   /// Web service operation 'searchDatafileByParameterRestriction' (returns
   /// error code or SOAP_OK)
   virtual int searchDatafileByParameterRestriction(
-      ns1__searchDatafileByParameterRestriction *
-          ns1__searchDatafileByParameterRestriction_,
-      ns1__searchDatafileByParameterRestrictionResponse *
-          ns1__searchDatafileByParameterRestrictionResponse_) {
+      ns1__searchDatafileByParameterRestriction
+          *ns1__searchDatafileByParameterRestriction_,
+      ns1__searchDatafileByParameterRestrictionResponse
+          *ns1__searchDatafileByParameterRestrictionResponse_) {
     return this->searchDatafileByParameterRestriction(
-        NULL, NULL, ns1__searchDatafileByParameterRestriction_,
+        nullptr, nullptr, ns1__searchDatafileByParameterRestriction_,
         ns1__searchDatafileByParameterRestrictionResponse_);
   }
   virtual int searchDatafileByParameterRestriction(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatafileByParameterRestriction *
-          ns1__searchDatafileByParameterRestriction_,
-      ns1__searchDatafileByParameterRestrictionResponse *
-          ns1__searchDatafileByParameterRestrictionResponse_);
+      ns1__searchDatafileByParameterRestriction
+          *ns1__searchDatafileByParameterRestriction_,
+      ns1__searchDatafileByParameterRestrictionResponse
+          *ns1__searchDatafileByParameterRestrictionResponse_);
 
   /// Web service operation 'searchInvestigationByParameterRestriction' (returns
   /// error code or SOAP_OK)
   virtual int searchInvestigationByParameterRestriction(
-      ns1__searchInvestigationByParameterRestriction *
-          ns1__searchInvestigationByParameterRestriction_,
-      ns1__searchInvestigationByParameterRestrictionResponse *
-          ns1__searchInvestigationByParameterRestrictionResponse_) {
+      ns1__searchInvestigationByParameterRestriction
+          *ns1__searchInvestigationByParameterRestriction_,
+      ns1__searchInvestigationByParameterRestrictionResponse
+          *ns1__searchInvestigationByParameterRestrictionResponse_) {
     return this->searchInvestigationByParameterRestriction(
-        NULL, NULL, ns1__searchInvestigationByParameterRestriction_,
+        nullptr, nullptr, ns1__searchInvestigationByParameterRestriction_,
         ns1__searchInvestigationByParameterRestrictionResponse_);
   }
   virtual int searchInvestigationByParameterRestriction(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByParameterRestriction *
-          ns1__searchInvestigationByParameterRestriction_,
-      ns1__searchInvestigationByParameterRestrictionResponse *
-          ns1__searchInvestigationByParameterRestrictionResponse_);
+      ns1__searchInvestigationByParameterRestriction
+          *ns1__searchInvestigationByParameterRestriction_,
+      ns1__searchInvestigationByParameterRestrictionResponse
+          *ns1__searchInvestigationByParameterRestrictionResponse_);
 
   /// Web service operation 'searchInvestigationByRestriction' (returns error
   /// code or SOAP_OK)
   virtual int searchInvestigationByRestriction(
-      ns1__searchInvestigationByRestriction *
-          ns1__searchInvestigationByRestriction_,
-      ns1__searchInvestigationByRestrictionResponse *
-          ns1__searchInvestigationByRestrictionResponse_) {
+      ns1__searchInvestigationByRestriction
+          *ns1__searchInvestigationByRestriction_,
+      ns1__searchInvestigationByRestrictionResponse
+          *ns1__searchInvestigationByRestrictionResponse_) {
     return this->searchInvestigationByRestriction(
-        NULL, NULL, ns1__searchInvestigationByRestriction_,
+        nullptr, nullptr, ns1__searchInvestigationByRestriction_,
         ns1__searchInvestigationByRestrictionResponse_);
   }
   virtual int searchInvestigationByRestriction(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByRestriction *
-          ns1__searchInvestigationByRestriction_,
-      ns1__searchInvestigationByRestrictionResponse *
-          ns1__searchInvestigationByRestrictionResponse_);
+      ns1__searchInvestigationByRestriction
+          *ns1__searchInvestigationByRestriction_,
+      ns1__searchInvestigationByRestrictionResponse
+          *ns1__searchInvestigationByRestrictionResponse_);
 
   /// Web service operation 'searchDatasetByRestriction' (returns error code or
   /// SOAP_OK)
   virtual int searchDatasetByRestriction(
       ns1__searchDatasetByRestriction *ns1__searchDatasetByRestriction_,
-      ns1__searchDatasetByRestrictionResponse *
-          ns1__searchDatasetByRestrictionResponse_) {
+      ns1__searchDatasetByRestrictionResponse
+          *ns1__searchDatasetByRestrictionResponse_) {
     return this->searchDatasetByRestriction(
-        NULL, NULL, ns1__searchDatasetByRestriction_,
+        nullptr, nullptr, ns1__searchDatasetByRestriction_,
         ns1__searchDatasetByRestrictionResponse_);
   }
   virtual int searchDatasetByRestriction(
       const char *endpoint, const char *soap_action,
       ns1__searchDatasetByRestriction *ns1__searchDatasetByRestriction_,
-      ns1__searchDatasetByRestrictionResponse *
-          ns1__searchDatasetByRestrictionResponse_);
+      ns1__searchDatasetByRestrictionResponse
+          *ns1__searchDatasetByRestrictionResponse_);
 
   /// Web service operation 'searchDatafileByRestriction' (returns error code or
   /// SOAP_OK)
   virtual int searchDatafileByRestriction(
       ns1__searchDatafileByRestriction *ns1__searchDatafileByRestriction_,
-      ns1__searchDatafileByRestrictionResponse *
-          ns1__searchDatafileByRestrictionResponse_) {
+      ns1__searchDatafileByRestrictionResponse
+          *ns1__searchDatafileByRestrictionResponse_) {
     return this->searchDatafileByRestriction(
-        NULL, NULL, ns1__searchDatafileByRestriction_,
+        nullptr, nullptr, ns1__searchDatafileByRestriction_,
         ns1__searchDatafileByRestrictionResponse_);
   }
   virtual int searchDatafileByRestriction(
       const char *endpoint, const char *soap_action,
       ns1__searchDatafileByRestriction *ns1__searchDatafileByRestriction_,
-      ns1__searchDatafileByRestrictionResponse *
-          ns1__searchDatafileByRestrictionResponse_);
+      ns1__searchDatafileByRestrictionResponse
+          *ns1__searchDatafileByRestrictionResponse_);
 
   /// Web service operation 'searchSampleByRestriction' (returns error code or
   /// SOAP_OK)
   virtual int searchSampleByRestriction(
       ns1__searchSampleByRestriction *ns1__searchSampleByRestriction_,
-      ns1__searchSampleByRestrictionResponse *
-          ns1__searchSampleByRestrictionResponse_) {
+      ns1__searchSampleByRestrictionResponse
+          *ns1__searchSampleByRestrictionResponse_) {
     return this->searchSampleByRestriction(
-        NULL, NULL, ns1__searchSampleByRestriction_,
+        nullptr, nullptr, ns1__searchSampleByRestriction_,
         ns1__searchSampleByRestrictionResponse_);
   }
   virtual int searchSampleByRestriction(
       const char *endpoint, const char *soap_action,
       ns1__searchSampleByRestriction *ns1__searchSampleByRestriction_,
-      ns1__searchSampleByRestrictionResponse *
-          ns1__searchSampleByRestrictionResponse_);
+      ns1__searchSampleByRestrictionResponse
+          *ns1__searchSampleByRestrictionResponse_);
 
   /// Web service operation 'searchInvestigationByRestrictionComparasion'
   /// (returns error code or SOAP_OK)
   virtual int searchInvestigationByRestrictionComparasion(
-      ns1__searchInvestigationByRestrictionComparasion *
-          ns1__searchInvestigationByRestrictionComparasion_,
-      ns1__searchInvestigationByRestrictionComparasionResponse *
-          ns1__searchInvestigationByRestrictionComparasionResponse_) {
+      ns1__searchInvestigationByRestrictionComparasion
+          *ns1__searchInvestigationByRestrictionComparasion_,
+      ns1__searchInvestigationByRestrictionComparasionResponse
+          *ns1__searchInvestigationByRestrictionComparasionResponse_) {
     return this->searchInvestigationByRestrictionComparasion(
-        NULL, NULL, ns1__searchInvestigationByRestrictionComparasion_,
+        nullptr, nullptr, ns1__searchInvestigationByRestrictionComparasion_,
         ns1__searchInvestigationByRestrictionComparasionResponse_);
   }
   virtual int searchInvestigationByRestrictionComparasion(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByRestrictionComparasion *
-          ns1__searchInvestigationByRestrictionComparasion_,
-      ns1__searchInvestigationByRestrictionComparasionResponse *
-          ns1__searchInvestigationByRestrictionComparasionResponse_);
+      ns1__searchInvestigationByRestrictionComparasion
+          *ns1__searchInvestigationByRestrictionComparasion_,
+      ns1__searchInvestigationByRestrictionComparasionResponse
+          *ns1__searchInvestigationByRestrictionComparasionResponse_);
 
   /// Web service operation 'searchDatasetByRestrictionComparison' (returns
   /// error code or SOAP_OK)
   virtual int searchDatasetByRestrictionComparison(
-      ns1__searchDatasetByRestrictionComparison *
-          ns1__searchDatasetByRestrictionComparison_,
-      ns1__searchDatasetByRestrictionComparisonResponse *
-          ns1__searchDatasetByRestrictionComparisonResponse_) {
+      ns1__searchDatasetByRestrictionComparison
+          *ns1__searchDatasetByRestrictionComparison_,
+      ns1__searchDatasetByRestrictionComparisonResponse
+          *ns1__searchDatasetByRestrictionComparisonResponse_) {
     return this->searchDatasetByRestrictionComparison(
-        NULL, NULL, ns1__searchDatasetByRestrictionComparison_,
+        nullptr, nullptr, ns1__searchDatasetByRestrictionComparison_,
         ns1__searchDatasetByRestrictionComparisonResponse_);
   }
   virtual int searchDatasetByRestrictionComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatasetByRestrictionComparison *
-          ns1__searchDatasetByRestrictionComparison_,
-      ns1__searchDatasetByRestrictionComparisonResponse *
-          ns1__searchDatasetByRestrictionComparisonResponse_);
+      ns1__searchDatasetByRestrictionComparison
+          *ns1__searchDatasetByRestrictionComparison_,
+      ns1__searchDatasetByRestrictionComparisonResponse
+          *ns1__searchDatasetByRestrictionComparisonResponse_);
 
   /// Web service operation 'searchDatafileByRestrictionComparison' (returns
   /// error code or SOAP_OK)
   virtual int searchDatafileByRestrictionComparison(
-      ns1__searchDatafileByRestrictionComparison *
-          ns1__searchDatafileByRestrictionComparison_,
-      ns1__searchDatafileByRestrictionComparisonResponse *
-          ns1__searchDatafileByRestrictionComparisonResponse_) {
+      ns1__searchDatafileByRestrictionComparison
+          *ns1__searchDatafileByRestrictionComparison_,
+      ns1__searchDatafileByRestrictionComparisonResponse
+          *ns1__searchDatafileByRestrictionComparisonResponse_) {
     return this->searchDatafileByRestrictionComparison(
-        NULL, NULL, ns1__searchDatafileByRestrictionComparison_,
+        nullptr, nullptr, ns1__searchDatafileByRestrictionComparison_,
         ns1__searchDatafileByRestrictionComparisonResponse_);
   }
   virtual int searchDatafileByRestrictionComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatafileByRestrictionComparison *
-          ns1__searchDatafileByRestrictionComparison_,
-      ns1__searchDatafileByRestrictionComparisonResponse *
-          ns1__searchDatafileByRestrictionComparisonResponse_);
+      ns1__searchDatafileByRestrictionComparison
+          *ns1__searchDatafileByRestrictionComparison_,
+      ns1__searchDatafileByRestrictionComparisonResponse
+          *ns1__searchDatafileByRestrictionComparisonResponse_);
 
   /// Web service operation 'searchSampleByRestrictionComparison' (returns error
   /// code or SOAP_OK)
   virtual int searchSampleByRestrictionComparison(
-      ns1__searchSampleByRestrictionComparison *
-          ns1__searchSampleByRestrictionComparison_,
-      ns1__searchSampleByRestrictionComparisonResponse *
-          ns1__searchSampleByRestrictionComparisonResponse_) {
+      ns1__searchSampleByRestrictionComparison
+          *ns1__searchSampleByRestrictionComparison_,
+      ns1__searchSampleByRestrictionComparisonResponse
+          *ns1__searchSampleByRestrictionComparisonResponse_) {
     return this->searchSampleByRestrictionComparison(
-        NULL, NULL, ns1__searchSampleByRestrictionComparison_,
+        nullptr, nullptr, ns1__searchSampleByRestrictionComparison_,
         ns1__searchSampleByRestrictionComparisonResponse_);
   }
   virtual int searchSampleByRestrictionComparison(
       const char *endpoint, const char *soap_action,
-      ns1__searchSampleByRestrictionComparison *
-          ns1__searchSampleByRestrictionComparison_,
-      ns1__searchSampleByRestrictionComparisonResponse *
-          ns1__searchSampleByRestrictionComparisonResponse_);
+      ns1__searchSampleByRestrictionComparison
+          *ns1__searchSampleByRestrictionComparison_,
+      ns1__searchSampleByRestrictionComparisonResponse
+          *ns1__searchSampleByRestrictionComparisonResponse_);
 
   /// Web service operation 'searchSampleByRestrictionLogical' (returns error
   /// code or SOAP_OK)
   virtual int searchSampleByRestrictionLogical(
-      ns1__searchSampleByRestrictionLogical *
-          ns1__searchSampleByRestrictionLogical_,
-      ns1__searchSampleByRestrictionLogicalResponse *
-          ns1__searchSampleByRestrictionLogicalResponse_) {
+      ns1__searchSampleByRestrictionLogical
+          *ns1__searchSampleByRestrictionLogical_,
+      ns1__searchSampleByRestrictionLogicalResponse
+          *ns1__searchSampleByRestrictionLogicalResponse_) {
     return this->searchSampleByRestrictionLogical(
-        NULL, NULL, ns1__searchSampleByRestrictionLogical_,
+        nullptr, nullptr, ns1__searchSampleByRestrictionLogical_,
         ns1__searchSampleByRestrictionLogicalResponse_);
   }
   virtual int searchSampleByRestrictionLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchSampleByRestrictionLogical *
-          ns1__searchSampleByRestrictionLogical_,
-      ns1__searchSampleByRestrictionLogicalResponse *
-          ns1__searchSampleByRestrictionLogicalResponse_);
+      ns1__searchSampleByRestrictionLogical
+          *ns1__searchSampleByRestrictionLogical_,
+      ns1__searchSampleByRestrictionLogicalResponse
+          *ns1__searchSampleByRestrictionLogicalResponse_);
 
   /// Web service operation 'searchDatasetByRestrictionLogical' (returns error
   /// code or SOAP_OK)
   virtual int searchDatasetByRestrictionLogical(
-      ns1__searchDatasetByRestrictionLogical *
-          ns1__searchDatasetByRestrictionLogical_,
-      ns1__searchDatasetByRestrictionLogicalResponse *
-          ns1__searchDatasetByRestrictionLogicalResponse_) {
+      ns1__searchDatasetByRestrictionLogical
+          *ns1__searchDatasetByRestrictionLogical_,
+      ns1__searchDatasetByRestrictionLogicalResponse
+          *ns1__searchDatasetByRestrictionLogicalResponse_) {
     return this->searchDatasetByRestrictionLogical(
-        NULL, NULL, ns1__searchDatasetByRestrictionLogical_,
+        nullptr, nullptr, ns1__searchDatasetByRestrictionLogical_,
         ns1__searchDatasetByRestrictionLogicalResponse_);
   }
   virtual int searchDatasetByRestrictionLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatasetByRestrictionLogical *
-          ns1__searchDatasetByRestrictionLogical_,
-      ns1__searchDatasetByRestrictionLogicalResponse *
-          ns1__searchDatasetByRestrictionLogicalResponse_);
+      ns1__searchDatasetByRestrictionLogical
+          *ns1__searchDatasetByRestrictionLogical_,
+      ns1__searchDatasetByRestrictionLogicalResponse
+          *ns1__searchDatasetByRestrictionLogicalResponse_);
 
   /// Web service operation 'searchInvestigationByRestrictionLogical' (returns
   /// error code or SOAP_OK)
   virtual int searchInvestigationByRestrictionLogical(
-      ns1__searchInvestigationByRestrictionLogical *
-          ns1__searchInvestigationByRestrictionLogical_,
-      ns1__searchInvestigationByRestrictionLogicalResponse *
-          ns1__searchInvestigationByRestrictionLogicalResponse_) {
+      ns1__searchInvestigationByRestrictionLogical
+          *ns1__searchInvestigationByRestrictionLogical_,
+      ns1__searchInvestigationByRestrictionLogicalResponse
+          *ns1__searchInvestigationByRestrictionLogicalResponse_) {
     return this->searchInvestigationByRestrictionLogical(
-        NULL, NULL, ns1__searchInvestigationByRestrictionLogical_,
+        nullptr, nullptr, ns1__searchInvestigationByRestrictionLogical_,
         ns1__searchInvestigationByRestrictionLogicalResponse_);
   }
   virtual int searchInvestigationByRestrictionLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByRestrictionLogical *
-          ns1__searchInvestigationByRestrictionLogical_,
-      ns1__searchInvestigationByRestrictionLogicalResponse *
-          ns1__searchInvestigationByRestrictionLogicalResponse_);
+      ns1__searchInvestigationByRestrictionLogical
+          *ns1__searchInvestigationByRestrictionLogical_,
+      ns1__searchInvestigationByRestrictionLogicalResponse
+          *ns1__searchInvestigationByRestrictionLogicalResponse_);
 
   /// Web service operation 'searchDatafileByRestrictionLogical' (returns error
   /// code or SOAP_OK)
   virtual int searchDatafileByRestrictionLogical(
-      ns1__searchDatafileByRestrictionLogical *
-          ns1__searchDatafileByRestrictionLogical_,
-      ns1__searchDatafileByRestrictionLogicalResponse *
-          ns1__searchDatafileByRestrictionLogicalResponse_) {
+      ns1__searchDatafileByRestrictionLogical
+          *ns1__searchDatafileByRestrictionLogical_,
+      ns1__searchDatafileByRestrictionLogicalResponse
+          *ns1__searchDatafileByRestrictionLogicalResponse_) {
     return this->searchDatafileByRestrictionLogical(
-        NULL, NULL, ns1__searchDatafileByRestrictionLogical_,
+        nullptr, nullptr, ns1__searchDatafileByRestrictionLogical_,
         ns1__searchDatafileByRestrictionLogicalResponse_);
   }
   virtual int searchDatafileByRestrictionLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatafileByRestrictionLogical *
-          ns1__searchDatafileByRestrictionLogical_,
-      ns1__searchDatafileByRestrictionLogicalResponse *
-          ns1__searchDatafileByRestrictionLogicalResponse_);
+      ns1__searchDatafileByRestrictionLogical
+          *ns1__searchDatafileByRestrictionLogical_,
+      ns1__searchDatafileByRestrictionLogicalResponse
+          *ns1__searchDatafileByRestrictionLogicalResponse_);
 
   /// Web service operation 'searchInvestigationByParameterLogical' (returns
   /// error code or SOAP_OK)
   virtual int searchInvestigationByParameterLogical(
-      ns1__searchInvestigationByParameterLogical *
-          ns1__searchInvestigationByParameterLogical_,
-      ns1__searchInvestigationByParameterLogicalResponse *
-          ns1__searchInvestigationByParameterLogicalResponse_) {
+      ns1__searchInvestigationByParameterLogical
+          *ns1__searchInvestigationByParameterLogical_,
+      ns1__searchInvestigationByParameterLogicalResponse
+          *ns1__searchInvestigationByParameterLogicalResponse_) {
     return this->searchInvestigationByParameterLogical(
-        NULL, NULL, ns1__searchInvestigationByParameterLogical_,
+        nullptr, nullptr, ns1__searchInvestigationByParameterLogical_,
         ns1__searchInvestigationByParameterLogicalResponse_);
   }
   virtual int searchInvestigationByParameterLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchInvestigationByParameterLogical *
-          ns1__searchInvestigationByParameterLogical_,
-      ns1__searchInvestigationByParameterLogicalResponse *
-          ns1__searchInvestigationByParameterLogicalResponse_);
+      ns1__searchInvestigationByParameterLogical
+          *ns1__searchInvestigationByParameterLogical_,
+      ns1__searchInvestigationByParameterLogicalResponse
+          *ns1__searchInvestigationByParameterLogicalResponse_);
 
   /// Web service operation 'searchDatafileByParameterLogical' (returns error
   /// code or SOAP_OK)
   virtual int searchDatafileByParameterLogical(
-      ns1__searchDatafileByParameterLogical *
-          ns1__searchDatafileByParameterLogical_,
-      ns1__searchDatafileByParameterLogicalResponse *
-          ns1__searchDatafileByParameterLogicalResponse_) {
+      ns1__searchDatafileByParameterLogical
+          *ns1__searchDatafileByParameterLogical_,
+      ns1__searchDatafileByParameterLogicalResponse
+          *ns1__searchDatafileByParameterLogicalResponse_) {
     return this->searchDatafileByParameterLogical(
-        NULL, NULL, ns1__searchDatafileByParameterLogical_,
+        nullptr, nullptr, ns1__searchDatafileByParameterLogical_,
         ns1__searchDatafileByParameterLogicalResponse_);
   }
   virtual int searchDatafileByParameterLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatafileByParameterLogical *
-          ns1__searchDatafileByParameterLogical_,
-      ns1__searchDatafileByParameterLogicalResponse *
-          ns1__searchDatafileByParameterLogicalResponse_);
+      ns1__searchDatafileByParameterLogical
+          *ns1__searchDatafileByParameterLogical_,
+      ns1__searchDatafileByParameterLogicalResponse
+          *ns1__searchDatafileByParameterLogicalResponse_);
 
   /// Web service operation 'searchDatasetByParameterLogical' (returns error
   /// code or SOAP_OK)
   virtual int searchDatasetByParameterLogical(
-      ns1__searchDatasetByParameterLogical *
-          ns1__searchDatasetByParameterLogical_,
-      ns1__searchDatasetByParameterLogicalResponse *
-          ns1__searchDatasetByParameterLogicalResponse_) {
+      ns1__searchDatasetByParameterLogical
+          *ns1__searchDatasetByParameterLogical_,
+      ns1__searchDatasetByParameterLogicalResponse
+          *ns1__searchDatasetByParameterLogicalResponse_) {
     return this->searchDatasetByParameterLogical(
-        NULL, NULL, ns1__searchDatasetByParameterLogical_,
+        nullptr, nullptr, ns1__searchDatasetByParameterLogical_,
         ns1__searchDatasetByParameterLogicalResponse_);
   }
   virtual int searchDatasetByParameterLogical(
       const char *endpoint, const char *soap_action,
-      ns1__searchDatasetByParameterLogical *
-          ns1__searchDatasetByParameterLogical_,
-      ns1__searchDatasetByParameterLogicalResponse *
-          ns1__searchDatasetByParameterLogicalResponse_);
+      ns1__searchDatasetByParameterLogical
+          *ns1__searchDatasetByParameterLogical_,
+      ns1__searchDatasetByParameterLogicalResponse
+          *ns1__searchDatasetByParameterLogicalResponse_);
 
   /// Web service operation 'searchSampleByParameterLogical' (returns error code
   /// or SOAP_OK)
   virtual int searchSampleByParameterLogical(
       ns1__searchSampleByParameterLogical *ns1__searchSampleByParameterLogical_,
-      ns1__searchSampleByParameterLogicalResponse *
-          ns1__searchSampleByParameterLogicalResponse_) {
+      ns1__searchSampleByParameterLogicalResponse
+          *ns1__searchSampleByParameterLogicalResponse_) {
     return this->searchSampleByParameterLogical(
-        NULL, NULL, ns1__searchSampleByParameterLogical_,
+        nullptr, nullptr, ns1__searchSampleByParameterLogical_,
         ns1__searchSampleByParameterLogicalResponse_);
   }
   virtual int searchSampleByParameterLogical(
       const char *endpoint, const char *soap_action,
       ns1__searchSampleByParameterLogical *ns1__searchSampleByParameterLogical_,
-      ns1__searchSampleByParameterLogicalResponse *
-          ns1__searchSampleByParameterLogicalResponse_);
+      ns1__searchSampleByParameterLogicalResponse
+          *ns1__searchSampleByParameterLogicalResponse_);
 
   /// Web service operation 'searchFacilityUserByRestriction' (returns error
   /// code or SOAP_OK)
   virtual int searchFacilityUserByRestriction(
-      ns1__searchFacilityUserByRestriction *
-          ns1__searchFacilityUserByRestriction_,
-      ns1__searchFacilityUserByRestrictionResponse *
-          ns1__searchFacilityUserByRestrictionResponse_) {
+      ns1__searchFacilityUserByRestriction
+          *ns1__searchFacilityUserByRestriction_,
+      ns1__searchFacilityUserByRestrictionResponse
+          *ns1__searchFacilityUserByRestrictionResponse_) {
     return this->searchFacilityUserByRestriction(
-        NULL, NULL, ns1__searchFacilityUserByRestriction_,
+        nullptr, nullptr, ns1__searchFacilityUserByRestriction_,
         ns1__searchFacilityUserByRestrictionResponse_);
   }
   virtual int searchFacilityUserByRestriction(
       const char *endpoint, const char *soap_action,
-      ns1__searchFacilityUserByRestriction *
-          ns1__searchFacilityUserByRestriction_,
-      ns1__searchFacilityUserByRestrictionResponse *
-          ns1__searchFacilityUserByRestrictionResponse_);
+      ns1__searchFacilityUserByRestriction
+          *ns1__searchFacilityUserByRestriction_,
+      ns1__searchFacilityUserByRestrictionResponse
+          *ns1__searchFacilityUserByRestrictionResponse_);
 };
 
 } // namespace ICat3

@@ -44,9 +44,9 @@ void SimpleWidget::updateDetectors() {
 }
 
 /**
-* Save widget content to a file.
-* @param filename :: A file to save to.
-*/
+ * Save widget content to a file.
+ * @param filename :: A file to save to.
+ */
 void SimpleWidget::saveToFile(const QString &filename) {
   QPixmap image(size());
   render(&image);
@@ -66,11 +66,11 @@ void SimpleWidget::resizeEvent(QResizeEvent *) {
 }
 
 /**
-* Mouse press callback method, It implements mouse button press initialize
-* methods.
-* @param event :: This is the event variable which has the position and button
-* states
-*/
+ * Mouse press callback method, It implements mouse button press initialize
+ * methods.
+ * @param event :: This is the event variable which has the position and button
+ * states
+ */
 void SimpleWidget::mousePressEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mousePressEvent(event);
@@ -79,12 +79,11 @@ void SimpleWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 /**
-* This is mouse move callback method. It implements the actions to be taken when
-* the mouse is
-* moved with a particular button is pressed.
-* @param event :: This is the event variable which has the position and button
-* states
-*/
+ * This is mouse move callback method. It implements the actions to be taken
+ * when the mouse is moved with a particular button is pressed.
+ * @param event :: This is the event variable which has the position and button
+ * states
+ */
 void SimpleWidget::mouseMoveEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseMoveEvent(event);
@@ -93,11 +92,11 @@ void SimpleWidget::mouseMoveEvent(QMouseEvent *event) {
 }
 
 /**
-* This is mouse button release callback method. This resets the cursor to
-* pointing hand cursor
-* @param event :: This is the event variable which has the position and button
-* states
-*/
+ * This is mouse button release callback method. This resets the cursor to
+ * pointing hand cursor
+ * @param event :: This is the event variable which has the position and button
+ * states
+ */
 void SimpleWidget::mouseReleaseEvent(QMouseEvent *event) {
   if (m_surface) {
     m_surface->mouseReleaseEvent(event);
@@ -106,9 +105,9 @@ void SimpleWidget::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 /**
-* Mouse wheel event to set the zooming in and out
-* @param event :: This is the event variable which has the status of the wheel
-*/
+ * Mouse wheel event to set the zooming in and out
+ * @param event :: This is the event variable which has the status of the wheel
+ */
 void SimpleWidget::wheelEvent(QWheelEvent *event) {
   if (m_surface) {
     m_surface->wheelEvent(event);
@@ -117,10 +116,10 @@ void SimpleWidget::wheelEvent(QWheelEvent *event) {
 }
 
 /**
-* Key press event
-* @param event :: This is the event variable which has the status of the
-* keyboard
-*/
+ * Key press event
+ * @param event :: This is the event variable which has the status of the
+ * keyboard
+ */
 void SimpleWidget::keyPressEvent(QKeyEvent *event) {
   if (m_surface) {
     m_surface->keyPressEvent(event);
@@ -145,5 +144,5 @@ void SimpleWidget::leaveEvent(QEvent *event) {
   }
   update();
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

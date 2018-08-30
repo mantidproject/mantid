@@ -115,5 +115,5 @@ void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
     event->ignore();
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

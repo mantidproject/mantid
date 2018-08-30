@@ -6,14 +6,16 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/HistogramBuilder.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 
-#include <algorithm>
 #include "boost/make_shared.hpp"
+#include <algorithm>
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,20 +28,16 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
-using Mantid::DataObjects::create;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::Points;
+using Mantid::DataObjects::create;
+using Mantid::HistogramData::HistogramBuilder;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::ListValidator;
-using Mantid::Kernel::make_unique;
 using Mantid::Kernel::MandatoryValidator;
+using Mantid::Kernel::make_unique;
 
 namespace {
 /// An enum specifying a line profile orientation.
@@ -49,13 +47,13 @@ enum class LineDirection { horizontal, vertical };
 namespace DirectionChoices {
 const static std::string HORIZONTAL{"Horizontal"};
 const static std::string VERTICAL{"Vertical"};
-}
+} // namespace DirectionChoices
 
 /// A private namespace for the mode options.
 namespace ModeChoices {
 const static std::string AVERAGE{"Average"};
 const static std::string SUM{"Sum"};
-}
+} // namespace ModeChoices
 
 /// A private namespace for property names.
 namespace PropertyNames {
@@ -69,7 +67,7 @@ const static std::string IGNORE_NANS{"IgnoreNans"};
 const static std::string MODE{"Mode"};
 const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string START{"Start"};
-}
+} // namespace PropertyNames
 
 /// A convenience struct for rectangular constraints.
 struct Box {
@@ -86,6 +84,27 @@ struct IndexLimits {
   size_t widthStart;
   size_t widthEnd;
 };
+
+/**
+ * Create the profile workspace.
+ * @param ws The parent workspace.
+ * @param Xs Profile's X values.
+ * @param Ys Profile's Y values.
+ * @param Es Profile's E values.
+ * @return A single histogram profile workspace.
+ */
+Workspace2D_sptr makeOutput(const MatrixWorkspace &parent,
+                            const LineDirection direction,
+                            std::vector<double> &&Xs, std::vector<double> &&Ys,
+                            std::vector<double> &&Es) {
+  HistogramBuilder builder;
+  builder.setX(std::move(Xs));
+  builder.setY(std::move(Ys));
+  builder.setE(std::move(Es));
+  builder.setDistribution(direction == LineDirection::horizontal &&
+                          parent.isDistribution());
+  return create<Workspace2D>(parent, 1, builder.build());
+}
 
 /**
  * Set correct units and vertical axis binning.
@@ -206,12 +225,14 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
     for (size_t j = limits.widthStart; j < limits.widthEnd; ++j) {
       const size_t iHor = dir == LineDirection::horizontal ? i : j;
       const size_t iVert = dir == LineDirection::horizontal ? j : i;
-      const double y = ws.y(iVert)[iHor];
+      auto iter = ws.histogram(iVert).begin();
+      std::advance(iter, iHor);
+      const double y = iter->counts();
       if ((ignoreNans && std::isnan(y)) || (ignoreInfs && std::isinf(y))) {
         continue;
       }
+      const double e = iter->countStandardDeviation();
       ySum += y;
-      const double e = ws.e(iVert)[iHor];
       eSqSum += e * e;
       ++n;
     }
@@ -258,7 +279,14 @@ auto createMode(const std::string &modeName) noexcept {
   }
   return sumMode;
 }
+
+void divideByBinHeight(MatrixWorkspace &ws) {
+  const BinEdgeAxis &axis = *static_cast<BinEdgeAxis *>(ws.getAxis(1));
+  const auto height = axis.getMax() - axis.getMin();
+  ws.mutableY(0) /= height;
+  ws.mutableE(0) /= height;
 }
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LineProfile)
@@ -399,16 +427,8 @@ void LineProfile::exec() {
             verticalIsBinEdges, mode, ignoreNans, ignoreInfs);
   }
   // Prepare and set output.
-  Workspace2D_sptr outWS;
-  if (Xs.size() > profileYs.size()) {
-    outWS =
-        create<Workspace2D>(1, Histogram(BinEdges(Xs), Counts(profileYs),
-                                         CountStandardDeviations(profileEs)));
-  } else {
-    outWS =
-        create<Workspace2D>(1, Histogram(Points(Xs), Counts(profileYs),
-                                         CountStandardDeviations(profileEs)));
-  }
+  auto outWS = makeOutput(*ws, dir, std::move(Xs), std::move(profileYs),
+                          std::move(profileEs));
   // The actual profile might be of different size than what user
   // specified.
   Box actualBounds;
@@ -421,6 +441,9 @@ void LineProfile::exec() {
                            ? horizontalBins[horInterval.second]
                            : horizontalBins.back();
   setAxesAndUnits(*outWS, *ws, actualBounds, dir);
+  if (dir == LineDirection::vertical && ws->isDistribution()) {
+    divideByBinHeight(*outWS);
+  }
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
 }
 

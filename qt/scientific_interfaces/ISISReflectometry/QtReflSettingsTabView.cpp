@@ -672,4 +672,4 @@ bool QtReflSettingsTabView::instrumentSettingsEnabled() const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

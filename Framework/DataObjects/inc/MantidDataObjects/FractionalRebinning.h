@@ -5,8 +5,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidDataObjects/DllConfig.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 
 namespace Mantid {
 //------------------------------------------------------------------------------

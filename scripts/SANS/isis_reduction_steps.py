@@ -1156,7 +1156,11 @@ class LoadSample(LoadRun):
         # applies on_load_sample for all the workspaces (single or groupworkspace)
         num = 0
         while True:
-            reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
+            if reducer.instrument.name() == 'LOQ':
+                reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample,
+                                                  other_centre=reducer.get_beam_center(reducer.instrument.other_detector().name()))
+            else:
+                reducer.instrument.on_load_sample(self.wksp_name, reducer.get_beam_center(), isSample)
             reducer.update_beam_center()
             num += 1
             if num == self.periods_in_file:
@@ -1509,14 +1513,12 @@ class DarkRunSubtraction(object):
                 alg_load_monitors.initialize()
                 alg_load_monitors.setChild(True)
                 alg_load_monitors.setProperty("Filename", dark_run_file_path)
-                alg_load_monitors.setProperty("MonitorsAsEvents", False)
-                alg_load_monitors.setProperty("OutputWorkspace", monitors_name)
+                alg_load_monitors.setProperty('LoadOnly', 'Histogram')
+                alg_load_monitors.setProperty('OutputWorkspace', monitors_name)
                 alg_load_monitors.execute()
                 monitor_ws = alg_load_monitors.getProperty("OutputWorkspace").value
-            except:
-                raise RuntimeError("DarkRunSubtration: The monitor workspace for the specified dark run "
-                                   "file cannot be found or loaded. "
-                                   "Please make sure that that it exists in your search directory.")
+            except RuntimeError as e:
+                raise RuntimeError("DarkRunSubtration: Failed to load monitor for the specified dark run: " + e.message)
         return monitor_ws
 
     def _get_dark_run_name_and_path(self, setting):
@@ -1568,9 +1570,8 @@ class DarkRunSubtraction(object):
                 alg_load.setProperty("OutputWorkspace", dark_run_ws_name)
                 alg_load.execute()
                 dark_run_ws= alg_load.getProperty("OutputWorkspace").value
-            except:
-                raise RuntimeError("DarkRunSubtration: The specified dark run file cannot be found or loaded. "
-                                   "Please make sure that that it exists in your search directory.")
+            except RuntimeError as e:
+                raise RuntimeError("DarkRunSubtration: The specified dark run file failed to load: " + e.message)
 
         # Crop the workspace if this is required
         if dark_run_ws.getNumberHistograms() != (end_spec_index - start_spec_index + 1):

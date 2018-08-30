@@ -2,12 +2,12 @@
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADER_H_
 
 #include "DllConfig.h"
-#include "MuonAnalysisHelper.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MuonAnalysisHelper.h"
 #include <QMap>
 #include <QRegExp>
 #include <QStringList>
@@ -40,6 +40,7 @@ struct AnalysisOptions {
   std::string groupPairName; /// Name of group or pair to use
   const Mantid::API::Grouping grouping; /// Grouping to use
   PlotType plotType = {};               /// Type of analysis to perform
+  std::string wsName = "";              /// Name of the ws
   explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g) {}
 };
 } // namespace Muon

@@ -78,6 +78,6 @@ private:
 using ReflSearchModel_sptr = boost::shared_ptr<ReflSearchModel>;
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_ */

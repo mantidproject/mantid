@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_MULTIPLYMD_H_
 #define MANTID_MDALGORITHMS_MULTIPLYMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDAlgorithms/BinaryOperationMD.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

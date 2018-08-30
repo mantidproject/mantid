@@ -95,6 +95,6 @@ private:
   IReflBatchPresenter *m_mainPresenter;
 
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSTABPRESENTER_H */

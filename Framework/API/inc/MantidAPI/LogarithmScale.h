@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include <cmath>
+#include <vector>
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITransformScale.h"

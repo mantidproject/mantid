@@ -43,6 +43,6 @@ private:
   double m_thetaTolerance;
   WorkspaceNamesFactory m_workspaceNamesFactory;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_

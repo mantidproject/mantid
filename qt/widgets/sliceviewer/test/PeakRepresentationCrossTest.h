@@ -1,9 +1,9 @@
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 using namespace testing;
@@ -210,8 +210,8 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.push_back(boost::make_shared<
-              MantidQt::SliceViewer::PeakRepresentationCross>(peakOrigin, maxZ,
-                                                              minZ));
+                            MantidQt::SliceViewer::PeakRepresentationCross>(
+              peakOrigin, maxZ, minZ));
         }
       }
     }

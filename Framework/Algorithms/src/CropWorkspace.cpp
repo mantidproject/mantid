@@ -1,5 +1,5 @@
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -21,13 +21,15 @@ void CropWorkspace::init() {
                                                    Direction::Output),
                   "Name of the output workspace");
 
-  declareProperty("XMin", EMPTY_DBL(), "An X value that is within the first "
-                                       "(lowest X value) bin that will be "
-                                       "retained\n"
-                                       "(default: workspace min)");
-  declareProperty("XMax", EMPTY_DBL(), "An X value that is in the highest X "
-                                       "value bin to be retained (default: max "
-                                       "X)");
+  declareProperty("XMin", EMPTY_DBL(),
+                  "An X value that is within the first "
+                  "(lowest X value) bin that will be "
+                  "retained\n"
+                  "(default: workspace min)");
+  declareProperty("XMax", EMPTY_DBL(),
+                  "An X value that is in the highest X "
+                  "value bin to be retained (default: max "
+                  "X)");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,

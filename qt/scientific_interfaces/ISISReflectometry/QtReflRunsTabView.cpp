@@ -1,9 +1,14 @@
 #include "QtReflRunsTabView.h"
+#include "IReflRunsTabPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "IReflRunsTabPresenter.h"
+#include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/SlitCalculator.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
@@ -99,10 +104,10 @@ void QtReflRunsTabView::missingRunsToTransfer() {
 }
 
 /**
-* Updates actions in the menus to be enabled or disabled
-* according to whether processing is running or not.
-* @param isProcessing: Whether processing is running
-*/
+ * Updates actions in the menus to be enabled or disabled
+ * according to whether processing is running or not.
+ * @param isProcessing: Whether processing is running
+ */
 void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
 
   for (auto &command : m_commands) {
@@ -111,36 +116,36 @@ void QtReflRunsTabView::updateMenuEnabledState(bool isProcessing) {
 }
 
 /**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Autoreduce" button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 
   ui.buttonAutoreduce->setEnabled(enabled);
 }
 
 /**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Autoreduce" button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setAutoreducePauseButtonEnabled(bool enabled) {
 
   ui.buttonAutoreducePause->setEnabled(enabled);
 }
 
 /**
-* Sets the "Transfer" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Transfer" button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setTransferButtonEnabled(bool enabled) {
 
   ui.buttonTransfer->setEnabled(enabled);
 }
 
 /**
-* Sets the "Instrument" combo box enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the "Instrument" combo box enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
 
   ui.comboSearchInstrument->setEnabled(enabled);
@@ -156,9 +161,9 @@ void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
 }
 
 /**
-* Sets the search button enabled or disabled
-* @param enabled : Whether to enable or disable the button
-*/
+ * Sets the search button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
 void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 
   ui.buttonSearch->setEnabled(enabled);
@@ -198,8 +203,8 @@ void QtReflRunsTabView::setProgress(int progress) {
 }
 
 /**
-* Clear the progress
-*/
+ * Clear the progress
+ */
 void QtReflRunsTabView::clearProgress() { ui.progressBar->reset(); }
 
 /**
@@ -373,4 +378,4 @@ std::string QtReflRunsTabView::getSearchString() const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

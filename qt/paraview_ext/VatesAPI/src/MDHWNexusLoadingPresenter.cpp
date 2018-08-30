@@ -7,8 +7,10 @@
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 #include "MantidAPI/AlgorithmManager.h"
 #include <vtkUnstructuredGrid.h>
 
@@ -172,5 +174,5 @@ void MDHWNexusLoadingPresenter::loadWorkspace(
   m_histoWs = AnalysisDataService::Instance()
                   .retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

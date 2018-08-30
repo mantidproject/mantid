@@ -6,11 +6,34 @@
 TOFTOF reduction workflow gui.
 """
 from __future__ import (absolute_import, division, print_function)
-import xml.dom.minidom
 
+from itertools import repeat, compress
+import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
 # -------------------------------------------------------------------------------
+
+
+class OptionalFloat(object):
+    """value can be either a float or None. if value is None, str(self) == '' """
+    def __init__(self, value=None):
+        super(OptionalFloat, self).__init__()
+        self.value = float(value) if value else None
+
+    def _bind(self, function, default=None):
+        return function(self.value) if self.value is not None else default
+
+    def __str__(self):
+        return self._bind(str, default = '')
+
+    def __format__(self, format_spec):
+        return self._bind(lambda v: v.__format__(format_spec), default = '')
+
+    def __bool__(self):
+        return self.value is not None
+
+    def __nonzero__(self):
+        return self.__bool__()
 
 
 class TOFTOFScriptElement(BaseScriptElement):
@@ -46,11 +69,11 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
-    DEF_saveSofQW  = False
-    DEF_saveSofTW  = False
-    DEF_saveNXSPE  = False
-    DEF_saveNexus  = False
-    DEF_saveAscii  = False
+    DEF_saveSofTWNxspe  = False
+    DEF_saveSofTWNexus  = False
+    DEF_saveSofTWAscii  = False
+    DEF_saveSofQWNexus  = False
+    DEF_saveSofQWAscii  = False
 
     XML_TAG = 'TOFTOFReduction'
 
@@ -67,12 +90,14 @@ class TOFTOFScriptElement(BaseScriptElement):
         # vanadium runs & comment
         self.vanRuns  = ''
         self.vanCmnt  = ''
+        self.vanTemp  = OptionalFloat()
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
+        self.ecTemp   = OptionalFloat()
         self.ecFactor = self.DEF_ecFactor
 
-        # data runs: [(runs,comment), ...]
+        # data runs: [(runs,comment, temperature), ...]
         self.dataRuns = []
 
         # additional parameters
@@ -98,11 +123,11 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # save data
         self.saveDir      = ''
-        self.saveSofQW    = self.DEF_saveSofQW
-        self.saveSofTW    = self.DEF_saveSofTW
-        self.saveNXSPE    = self.DEF_saveNXSPE
-        self.saveNexus    = self.DEF_saveNexus
-        self.saveAscii    = self.DEF_saveAscii
+        self.saveSofTWNxspe = self.DEF_saveSofTWNxspe
+        self.saveSofTWNexus = self.DEF_saveSofTWNexus
+        self.saveSofTWAscii = self.DEF_saveSofTWAscii
+        self.saveSofQWNexus = self.DEF_saveSofQWNexus
+        self.saveSofQWAscii = self.DEF_saveSofQWAscii
 
     def to_xml(self):
         res = ['']
@@ -113,15 +138,18 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('prefix',      self.prefix)
         put('data_dir',    self.dataDir)
 
-        put('van_runs',    self.vanRuns)
-        put('van_comment', self.vanCmnt)
+        put('van_runs',        self.vanRuns)
+        put('van_comment',     self.vanCmnt)
+        put('van_temperature', self.vanTemp)
 
         put('ec_runs',     self.ecRuns)
+        put('ec_temp',     self.ecTemp)
         put('ec_factor',   self.ecFactor)
 
-        for (runs, cmnt) in self.dataRuns:
+        for (runs, cmnt, temp) in self.dataRuns:
             put('data_runs',    runs)
             put('data_comment', cmnt)
+            put('data_temperature', temp)
 
         put('rebin_energy_on',    self.binEon)
         put('rebin_energy_start', self.binEstart)
@@ -143,11 +171,11 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('keep_steps',     self.keepSteps)
 
         put('save_dir',      self.saveDir)
-        put('save_sofqw',    self.saveSofQW)
-        put('save_softw',    self.saveSofTW)
-        put('save_nxspe',    self.saveNXSPE)
-        put('save_nexus',    self.saveNexus)
-        put('save_ascii',    self.saveAscii)
+        put('saveSofTWNxspe', self.saveSofTWNxspe)
+        put('saveSofTWNexus', self.saveSofTWNexus)
+        put('saveSofTWAscii', self.saveSofTWAscii)
+        put('saveSofQWNexus', self.saveSofQWNexus)
+        put('saveSofQWAscii', self.saveSofQWAscii)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -163,6 +191,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             def get_str(tag, default=''):
                 return BaseScriptElement.getStringElement(dom, tag, default=default)
 
+            def get_optFloat(tag, default=None):
+                return OptionalFloat(BaseScriptElement.getStringElement(dom, tag, default=default))
+
             def get_int(tag, default):
                 return BaseScriptElement.getIntElement(dom, tag, default=default)
 
@@ -172,6 +203,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             def get_strlst(tag):
                 return BaseScriptElement.getStringList(dom, tag)
 
+            def get_optFloat_list(tag):
+                return map(OptionalFloat, get_strlst(tag))
+
             def get_bol(tag, default):
                 return BaseScriptElement.getBoolElement(dom, tag, default=default)
 
@@ -180,14 +214,26 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             self.vanRuns  = get_str('van_runs')
             self.vanCmnt  = get_str('van_comment')
+            self.vanTemp  = get_optFloat('van_temperature')
 
             self.ecRuns   = get_str('ec_runs')
+            self.ecTemp   = get_optFloat('ec_temp')
             self.ecFactor = get_flt('ec_factor', self.DEF_ecFactor)
 
             dataRuns = get_strlst('data_runs')
             dataCmts = get_strlst('data_comment')
-            for i in range(min(len(dataRuns), len(dataCmts))):
-                self.dataRuns.append((dataRuns[i], dataCmts[i]))
+            dataTemps = get_optFloat_list('data_temperature')
+
+            # make sure the lengths of these lists match
+            assert(len(dataRuns) == len(dataCmts))
+            if dataTemps:
+                assert(len(dataRuns) == len(dataTemps))
+            else:
+                # no temperatures in xml file, so generate empty OptionalFloats:
+                dataTemps = (OptionalFloat() for _ in repeat(''))
+
+            for dataRun in zip(dataRuns, dataCmts, dataTemps):
+                self.dataRuns.append(list(dataRun))
 
             self.binEon    = get_bol('rebin_energy_on',    self.DEF_binEon)
             self.binEstart = get_flt('rebin_energy_start', self.DEF_binEstart)
@@ -209,11 +255,19 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.keepSteps     = get_bol('keep_steps',     self.DEF_keepSteps)
 
             self.saveDir     = get_str('save_dir')
-            self.saveSofQW   = get_bol('save_sofqw',   self.DEF_saveSofQW)
-            self.saveSofTW   = get_bol('save_softw',   self.DEF_saveSofTW)
-            self.saveNXSPE   = get_bol('save_nxspe',   self.DEF_saveNXSPE)
-            self.saveNexus   = get_bol('save_nexus',   self.DEF_saveNexus)
-            self.saveAscii   = get_bol('save_ascii',   self.DEF_saveAscii)
+
+            # for backwards compatibility:
+            SofQW   = get_bol('save_sofqw', False)
+            SofTW   = get_bol('save_softw', False)
+            NXSPE   = get_bol('save_nxspe', False)
+            Nexus   = get_bol('save_nexus', False)
+            Ascii   = get_bol('save_ascii', False)
+
+            self.saveSofTWNxspe = get_bol('saveSofTWNxspe', (SofTW and NXSPE) or self.DEF_saveSofTWNxspe)
+            self.saveSofTWNexus = get_bol('saveSofTWNexus', (SofTW and Nexus) or self.DEF_saveSofTWNexus)
+            self.saveSofTWAscii = get_bol('saveSofTWAscii', (SofTW and Ascii) or self.DEF_saveSofTWAscii)
+            self.saveSofQWNexus = get_bol('saveSofQWNexus', (SofQW and Nexus) or self.DEF_saveSofQWNexus)
+            self.saveSofQWAscii = get_bol('saveSofQWAscii', (SofQW and Ascii) or self.DEF_saveSofQWAscii)
 
     def validate_inputs(self):
         # must have vanadium for TOF correction
@@ -247,15 +301,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.error('missing vanadium comment')
 
         # saving settings must be consistent
-        if self.saveNXSPE or self.saveNexus or self.saveAscii:
-            if not self.saveDir:
-                self.error('missing directory to save the data')
-            elif not (self.saveSofQW or self.saveSofTW):
-                self.error('you must select workspaces to save')
-        elif self.saveSofQW or self.saveSofTW:
-            if not self.saveDir:
-                self.error('missing directory to save the data')
-            self.error('missing data format to save')
+        if any([self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii,
+                self.saveSofQWNexus, self.saveSofQWAscii]   ) and not self.saveDir:
+            self.error('missing directory to save the data')
 
     @staticmethod
     def error(message):
@@ -265,11 +313,14 @@ class TOFTOFScriptElement(BaseScriptElement):
     def get_log(workspace, tag):
         return "{}.getRun().getLogData('{}').value".format(workspace, tag)
 
-    def merge_runs(self, ws_raw, raw_runs, outws, comment):
+    def merge_runs(self, ws_raw, raw_runs, outws, comment, temperature=None):
         self.l("{} = Load(Filename='{}')" .format(ws_raw, raw_runs))
         self.l("{} = MergeRuns({})" .format(outws, ws_raw))
         self.l("{}.setComment('{}')" .format(outws, comment))
-        self.l("temperature = np.mean({})".format(self.get_log(outws,'temperature')))
+        if not temperature:
+            self.l("temperature = np.mean({})".format(self.get_log(outws,'temperature')))
+        else:
+            self.l("temperature = {}".format(temperature))
         self.l("AddSampleLog({}, LogName='temperature', LogText=str(temperature), LogType='Number', LogUnit='K')"
                .format(outws))
         if not self.keepSteps:
@@ -284,7 +335,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsVan    = self.prefix + 'Van'
 
             self.l("# vanadium runs")
-            self.merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt)
+            self.merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt, self.vanTemp)
             allGroup.append(wsVan)
 
         # empty can runs
@@ -293,11 +344,11 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsEC    = self.prefix + 'EC'
 
             self.l("# empty can runs")
-            self.merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC')
+            self.merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC', self.ecTemp)
             allGroup.append(wsEC)
 
         # data runs
-        for i, (runs, cmnt) in enumerate(self.dataRuns):
+        for i, (runs, cmnt, temp) in enumerate(self.dataRuns):
             if not runs:
                 self.error('missing data runs value')
             if not cmnt:
@@ -313,7 +364,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             allGroup.append(wsData)
 
             self.l("# data runs {}"           .format(postfix))
-            self.merge_runs(wsRawData, runs, wsData, cmnt)
+            self.merge_runs(wsRawData, runs, wsData, cmnt, temp)
 
     def delete_workspaces(self, workspaces):
         if not self.keepSteps:
@@ -335,14 +386,21 @@ class TOFTOFScriptElement(BaseScriptElement):
     def get_time(self, workspace):
         return self.get_log(workspace, 'duration')
 
-    def save_wsgroup(self, wsgroup, suffix):
+    allowed_save_formats = ['nxspe', 'nexus', 'ascii']
+
+    def save_wsgroup(self, wsgroup, suffix, spectrumMetaData, saveFormats):
+        assert(saveFormats <= set(self.allowed_save_formats))
+        if len(saveFormats) == 0:
+            return
         self.l("# save {}".format(wsgroup))
         self.l("for ws in {}:".format(wsgroup))
         self.l("    name = ws.getComment() + {}".format(suffix))
-        if self.saveNXSPE and self.binEon:
-            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
-        if self.saveNexus:
+        if 'nxspe' in saveFormats:
+            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir,))
+        if 'nexus' in saveFormats:
             self.l("    SaveNexus(ws, join(r'{}', name + '.nxs'))".format(self.saveDir))
+        if 'ascii' in saveFormats:
+            self.l("    SaveAscii(ws, join(r'{}', name + '.txt'), SpectrumMetaData='{}')".format(self.saveDir, spectrumMetaData))
         self.l()
 
     def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
@@ -606,20 +664,26 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("DeleteWorkspaces('step1,step2,step3')")
             self.l()
 
-        if self.saveSofTW:
-            suf = "'_Ei_{}'.format(round(Ei,2))"
-            self.save_wsgroup(gLast, suf)
+        # save S(2theta, w):
+        suf = "'_Ei_{}'.format(round(Ei,2))"
+        #nxspe only if self.binEon
+        saveFormats = set(compress(self.allowed_save_formats, [self.saveSofTWNxspe, self.saveSofTWNexus, self.saveSofTWAscii]))
+        self.save_wsgroup(gLast, suf, 'Angle', saveFormats)
 
         if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
             self.l("# calculate momentum transfer Q for sample data")
             self.l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
                    .format(self.binQstart, self.binQstep, self.binQend))
-            self.l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs={})"
-                   .format(gDataBinQ, gLast, self.replaceNaNs))
+            self.l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs=False)"
+                   .format(gDataBinQ, gLast))
+            if self.replaceNaNs:
+                self.l("{} = ReplaceSpecialValues({}, NaNValue=0, NaNError=1)".format(gDataBinQ, gDataBinQ))
             self.l()
-            if self.saveSofQW:
-                self.save_wsgroup(gDataBinQ, "'_SQW'")
+
+            # save S(Q, w)
+            saveFormats = set(compress(self.allowed_save_formats, [False, self.saveSofQWNexus, self.saveSofQWAscii]))
+            self.save_wsgroup(gDataBinQ, "'_SQW'", 'Q', saveFormats)
 
         self.rename_workspaces(gData)
 

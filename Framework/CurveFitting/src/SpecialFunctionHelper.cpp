@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
-#include <limits>
 #include <gsl/gsl_math.h>
+#include <limits>
 
 namespace Mantid {
 namespace CurveFitting {

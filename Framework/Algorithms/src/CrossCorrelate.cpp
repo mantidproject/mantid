@@ -257,5 +257,5 @@ void CrossCorrelate::exec() {
   setProperty("OutputWorkspace", out);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

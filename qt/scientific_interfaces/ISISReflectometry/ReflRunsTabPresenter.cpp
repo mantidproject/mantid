@@ -20,13 +20,13 @@
 #include "ReflSearchModel.h"
 
 #include <QStringList>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 
 #include "Reduction/WorkspaceNamesFactory.h"
 #include "Reduction/ValidateRow.h"
@@ -82,8 +82,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 }
 
 /** Accept a main presenter
-* @param mainPresenter :: [input] A main presenter
-*/
+ * @param mainPresenter :: [input] A main presenter
+ */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
@@ -192,8 +192,8 @@ bool ReflRunsTabPresenter::search() {
 }
 
 /** Populates the search results table
-* @param searchAlg : [input] The search algorithm
-*/
+ * @param searchAlg : [input] The search algorithm
+ */
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (!searchAlg->isExecuted())
     return;
@@ -215,8 +215,8 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
-* runs to table and processes them. Clears any existing table data first.
-*/
+ * runs to table and processes them. Clears any existing table data first.
+ */
 void ReflRunsTabPresenter::startNewAutoreduction() {
   // if (requireNewAutoreduction()) {
   //   // If starting a brand new autoreduction, delete all rows / groups in
@@ -237,9 +237,9 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number, transfer method or instrument has changed
-* @return : Boolean on whether to start a new autoreduction
-*/
+ * either the search number, transfer method or instrument has changed
+ * @return : Boolean on whether to start a new autoreduction
+ */
 bool ReflRunsTabPresenter::requireNewAutoreduction() const {
   bool searchNumChanged =
       m_autoreduction.searchStringChanged(m_view->getSearchString());
@@ -386,7 +386,7 @@ RunDescriptionMetadata metadataFromDescription(std::string const &description) {
  * @param matchType : an enum specifying how strictly to match runs against
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
-*/
+ */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
                                     const TransferMatch) {
   if (validateRowsToTransfer(rowsToTransfer)) {

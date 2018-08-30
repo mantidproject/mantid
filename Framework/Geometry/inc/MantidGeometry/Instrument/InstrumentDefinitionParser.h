@@ -1,20 +1,20 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
 
-#include <string>
-#include <vector>
-#include <Poco/AutoPtr.h>
-#include <Poco/DOM/Document.h>
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <string>
+#include <vector>
 
 namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -395,9 +395,9 @@ private:
 
   /** Stripped down vector that holds position in terms of spherical
    * coordinates,
-    *  Needed when processing instrument definition files that use the 'Ariel
+   *  Needed when processing instrument definition files that use the 'Ariel
    * format'
-    */
+   */
   struct SphVec {
     ///@cond Exclude from doxygen documentation
     double r, theta, phi;

@@ -43,6 +43,6 @@ public:
   virtual bool isProcessing() const = 0;
   virtual ~IReflMainWindowPresenter() = default;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLMAINWINDOWPRESENTER_H */

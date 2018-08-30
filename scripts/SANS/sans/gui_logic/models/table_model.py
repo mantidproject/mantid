@@ -61,6 +61,9 @@ class TableModel(object):
     def clear_table_entries(self):
         self._table_entries = {}
 
+    def get_number_of_rows(self):
+        return len(self._table_entries)
+
 
 class TableIndexModel(object):
     def __init__(self, index, sample_scatter, sample_scatter_period,

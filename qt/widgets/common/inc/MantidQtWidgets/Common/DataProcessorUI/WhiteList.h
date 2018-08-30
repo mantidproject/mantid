@@ -74,7 +74,7 @@ private:
   std::vector<QString> m_descriptions;
   std::vector<bool> m_isKey;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H*/

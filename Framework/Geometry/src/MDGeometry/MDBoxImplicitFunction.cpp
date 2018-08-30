@@ -98,8 +98,9 @@ double MDBoxImplicitFunction::volume() const { return m_volume; }
  * @param boxExtents to get fraction for
  * @return fraction 0 to 1
  */
-double MDBoxImplicitFunction::fraction(const std::vector<
-    boost::tuple<Mantid::coord_t, Mantid::coord_t>> &boxExtents) const {
+double MDBoxImplicitFunction::fraction(
+    const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t>>
+        &boxExtents) const {
 
   size_t nd = m_min.size();
   coord_t frac = 1;
@@ -127,5 +128,5 @@ double MDBoxImplicitFunction::fraction(const std::vector<
   return frac;
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

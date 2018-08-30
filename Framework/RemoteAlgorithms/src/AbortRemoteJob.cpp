@@ -1,11 +1,11 @@
 #include "MantidRemoteAlgorithms/AbortRemoteJob.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 

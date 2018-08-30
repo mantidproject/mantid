@@ -5,10 +5,10 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <Qsci/qsciscintilla.h>
+#include "DllOption.h"
 #include <QDialog>
 #include <QTextDocument>
-#include "DllOption.h"
+#include <Qsci/qsciscintilla.h>
 
 //----------------------------------
 // Forward declarations
@@ -17,6 +17,7 @@ class FindReplaceDialog;
 
 class QAction;
 class QMenu;
+class QMimeData;
 class QKeyEvent;
 class QMouseEvent;
 class QsciAPIs;
@@ -158,6 +159,8 @@ protected:
   void dropEvent(QDropEvent *de) override;
   void dragMoveEvent(QDragMoveEvent *de) override;
   void dragEnterEvent(QDragEnterEvent *de) override;
+  QByteArray fromMimeData(const QMimeData *source,
+                          bool &rectangular) const override;
 
 private slots:
 

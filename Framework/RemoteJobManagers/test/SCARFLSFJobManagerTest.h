@@ -9,8 +9,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidRemoteJobManagers/SCARFLSFJobManager.h"
 
-#include <boost/make_shared.hpp>
 #include <Poco/File.h>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::RemoteJobManagers;
@@ -130,7 +130,8 @@ protected:
              "<Jobs><Job><cmd>python /work/imat/webservice_test/test.py.py "
              "/work/imat/webservice_test/test_out/</cmd><extStatus>-</"
              "extStatus>"
-             "<id>" << jobID << "</id><name>" << jobName
+             "<id>"
+          << jobID << "</id><name>" << jobName
           << "</name><status>Running</status>"
              "</Job></Jobs>";
     }

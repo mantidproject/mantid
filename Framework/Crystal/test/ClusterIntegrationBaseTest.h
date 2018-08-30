@@ -8,16 +8,16 @@
 #ifndef CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_
 #define CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/UnitLabelTypes.h"
-#include "MantidKernel/V3D.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/tuple/tuple.hpp>
 #include <set>
@@ -29,10 +29,10 @@ using namespace Mantid::Geometry;
 
 // Helper typedef
 using MDHistoPeaksWSTuple =
-    boost::tuple<IMDHistoWorkspace_sptr, IPeaksWorkspace_sptr>;
+    boost::tuple<IMDHistoWorkspace_sptr, PeaksWorkspace_sptr>;
 // Helper typedef
 using MDEventPeaksWSTuple =
-    boost::tuple<IMDEventWorkspace_sptr, IPeaksWorkspace_sptr>;
+    boost::tuple<IMDEventWorkspace_sptr, PeaksWorkspace_sptr>;
 
 class ClusterIntegrationBaseTest {
 protected:
@@ -102,7 +102,7 @@ protected:
     coordsAlg->execute();
 
     // --- Make a fake PeaksWorkspace ---
-    IPeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
     peakWS->setInstrument(inst);
 
     // --- Set speical coordinates on fake PeaksWorkspace --
