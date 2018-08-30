@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 
 
 @requires_qapp

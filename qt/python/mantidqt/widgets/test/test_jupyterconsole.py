@@ -26,7 +26,7 @@ from qtpy import QT_VERSION
 
 # local package imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import requires_qapp
 
 
 PRE_IPY5_PY3_QT5 = (sys.version_info.major == 3 and IPython.version_info[0] < 5 and int(QT_VERSION[0]) == 5)

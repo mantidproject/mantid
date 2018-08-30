@@ -9,6 +9,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -668,13 +669,11 @@ void SaveGSS::openFileStream(const std::string &outFilePath,
   // Have to wrap this in a unique pointer as GCC 4.x (RHEL 7) does
   // not support the move operator on iostreams
   outStream.open(outFilePath, mode);
-
   if (outStream.fail()) {
     // Get the error message from library and log before throwing
     const std::string error = strerror(errno);
-    g_log.error("Failed to open file. Error was: " + error);
-    throw std::runtime_error("Could not open the file at the following path: " +
-                             outFilePath);
+    throw Kernel::Exception::FileError(
+        "Failed to open file. Error was: " + error, outFilePath);
   }
 
   // Stream is good at this point
@@ -751,21 +750,6 @@ std::map<std::string, std::string> SaveGSS::validateInputs() {
   return result;
 }
 
-namespace { // anonymous
-// throw an exception if file cannot be written
-void checkWritable(const std::string &filename) {
-  const auto fileobj = Poco::File(filename);
-  if (fileobj.exists()) {
-    if (!fileobj.canWrite())
-      throw std::runtime_error("Cannot write to " + filename);
-  } else {
-    const auto pathobj = Poco::Path(filename).makeAbsolute().parent();
-    if (!Poco::File(pathobj.toString()).canWrite())
-      throw std::runtime_error("Cannot write to " + pathobj.toString());
-  }
-}
-} // namespace
-
 /**
  * Writes all the spectra to the file(s) from the buffer to the
  * list of output file paths.
@@ -782,13 +766,10 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
 
   const auto numOutFilesInt64 = static_cast<int64_t>(numOutFiles);
 
-  // verify that all paths can be written to
-  for (const auto &filename : m_outFileNames) {
-    checkWritable(filename);
-  }
-
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t fileIndex = 0; fileIndex < numOutFilesInt64; fileIndex++) {
+    PARALLEL_START_INTERUPT_REGION
+
     // Open each file when there are multiple
     std::ofstream fileStream;
     openFileStream(m_outFileNames[fileIndex], fileStream);
@@ -807,7 +788,9 @@ void SaveGSS::writeBufferToFile(size_t numOutFiles, size_t numSpectra) {
           "Failed to close the file at " + m_outFileNames[fileIndex] +
           " - this file may be empty, corrupted or incorrect.");
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 void SaveGSS::writeRALFHeader(std::stringstream &out, int bank,
@@ -850,7 +833,6 @@ void SaveGSS::writeRALF_ALTdata(std::stringstream &out, const int bank,
   std::vector<std::unique_ptr<std::stringstream>> outLines;
   outLines.resize(numberOfOutLines);
 
-  PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < numberOfOutLines; i++) {
     outLines[i] = makeStringStream();
     auto &outLine = *outLines[i];

@@ -30,7 +30,6 @@
 
 #include <string>
 
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;

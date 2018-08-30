@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from Muon.GUI.Common import message_box
+
 
 class PeriodicTablePresenter(object):
     def __init__(self, view, model):
@@ -17,6 +19,7 @@ class PeriodicTablePresenter(object):
 
     def set_buttons(self):
         for el in self.view.ptable.elements:
+            self.view.ptable.silentSetElementSelected(el.symbol, False)
             if el.symbol in self.model.peak_data:
                 self.view.ptable.enableElementButton(el.symbol)
             else:
@@ -41,16 +44,32 @@ class PeriodicTablePresenter(object):
         self.view.on_table_changed(slot)
 
     def unregister_table_changed(self, slot):
-        self.view.unreg_on_table_changed(slot)
+        try:
+            self.view.unreg_on_table_changed(slot)
+        except TypeError:
+            return
 
     def register_table_lclicked(self, slot):
         self.view.on_table_lclicked(slot)
 
     def unregister_table_lclicked(self, slot):
-        self.view.unreg_on_table_lclicked(slot)
+        try:
+            self.view.unreg_on_table_lclicked(slot)
+        except TypeError:
+            return
 
     def register_table_rclicked(self, slot):
         self.view.on_table_rclicked(slot)
 
     def unregister_table_rclicked(self, slot):
-        self.view.unreg_on_table_rclicked(slot)
+        try:
+            self.view.unreg_on_table_rclicked(slot)
+        except TypeError:
+            return
+
+    def set_peak_datafile(self, filename):
+        try:
+            self.model.peak_data_file = filename
+            self.set_buttons()
+        except Exception as error:
+            message_box.warning(error)
