@@ -21,9 +21,9 @@ PyCharm should be opened using ``pycharm.bat`` which can be found in the build d
 
 2. In the ``Project Interpreter`` sub menu, at the top select the options button and click ``Add...``, a new window should appear titled "Add Python Interpreter". In the menu on the left, select "System Interpreter" (a version of Python with all the correct variables set already exists within Mantid). Click on the ``...`` to open a file browser, and navigate to;
 
-    .. code-block:: sh
+   .. code-block:: sh
 
-        <Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe
+      <Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe
 
    This is the interpreter, so select "Ok" and apply the changes. This should bring up a list of all the packages associated to the interpreter. There should be many packages, however you should not see PyQt (but instead QtPy).
 
@@ -31,20 +31,20 @@ PyCharm should be opened using ``pycharm.bat`` which can be found in the build d
 
    Within the source directory add the following to your sources;
 
-    .. code-block:: sh
+   .. code-block:: sh
 
-        <Mantid Source Directory>/scripts
-        <Mantid Source Directory>/external/src/ThirdParty/lib
+       <Mantid Source Directory>/scripts
+       <Mantid Source Directory>/external/src/ThirdParty/lib
 
    The first folder can be replaced with the folder that contains your code, if you aren't writing code in ``scripts/``. In the Mantid build directory add the following as source folders;
 
-    .. code-block:: sh
+   .. code-block:: sh
 
-        <Mantid Build Directory>/bin/Debug
+       <Mantid Build Directory>/bin/Debug
 
    here we are setting up PyCharm for the Debug build, you would use ``/bin/Release`` instead if you are building mantid in release mode.
 
-NOTE : In some cases, imports in the code will still be highlighted red when they come from folders within the ``script/`` folder, or from other folders entirely. To fix this simply add the relevant folder that contains the module you are importing in the same fashion as step 3 above. 
+NOTE : In some cases, imports in the code will still be highlighted red when they come from folders within the ``script/`` folder, or from other folders entirely. To fix this simply add the relevant folder that contains the module you are importing in the same fashion as step 3 above.
 
 Running Files in the Debugger
 -----------------------------
@@ -55,13 +55,13 @@ As an example, create a new file in ``<Mantid Source Directory>/scripts/`` calle
 
 4. To edit the configurations go to ``Run->Run...`` and select ``Edit Configurations``. This should open up a sub window. Hit the green ``+`` in the top left to create a new configuration and name it. In order to tell PyCharm where to look for python modules and libraries we need to add some folders to the ``PATH`` environment variable. Click on the ``...`` next to the *Environment Variables* box, and hit the ``+`` icon. In the Name column enter "PATH", in the value column enter the following;
 
-    .. code-block:: sh
+   .. code-block:: sh
 
-        <Mantid Build Directory>\bin\Debug;
-        <Mantid Source Directory>\external\src\ThirdParty\bin;
-        <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\bin;
-        <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
-        %PATH%
+       <Mantid Build Directory>\bin\Debug;
+       <Mantid Source Directory>\external\src\ThirdParty\bin;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt4\bin;
+       <Mantid Source Directory>\external\src\ThirdParty\lib\qt5\bin;
+       %PATH%
 
    The semi-colon delimited list of paths should end in ``;%PATH%`` so that we prepend to the existing list of paths rather than overwriting them. The last two lines will allow imports of PyQt4 and PyQt5 modules.
 
