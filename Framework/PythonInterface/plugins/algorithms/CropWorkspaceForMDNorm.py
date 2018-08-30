@@ -59,6 +59,14 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc='Output workspace')
 
+    def validateInputs(self):
+        issues = dict()
+        xmin = self.getProperty('XMin').value
+        xmax = self.getProperty('XMax').value
+        if (xmax <= xmin):
+            issues["XMax"] = "The limits for cropping are invalid (XMax >= XMin)."
+        return issues
+
     def PyExec(self):
         xmin = self.getProperty('XMin').value
         xmax = self.getProperty('XMax').value
@@ -97,7 +105,7 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
                 raise RuntimeError("Could not compare old and new values for 'MDNorm_high' log. "+
                                    "Make sure the length of the old data is equal to the number of spectra")
         run_obj.addProperty('MDNorm_high', [xmax]*num_spectra, True)
-        run_obj.addProperty('MDNorm_spectra_index', numpy.arange(num_spectra,dtype='float').tolist(), True)
+        run_obj.addProperty('MDNorm_spectra_index', numpy.arange(num_spectra).tolist(), True)
         self.setProperty('OutputWorkspace', out_ws)
 
 # Register algorithm with Mantid.

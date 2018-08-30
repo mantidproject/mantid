@@ -332,6 +332,8 @@ void SampleLogDialogBase::init() {
                    Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(
                    *pItr) ||
                dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>>
+                                *>(*pItr)||
+               dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<long>>
                                 *>(*pItr)) {
       treeItem->setText(1, "numeric array");
       treeItem->setData(
