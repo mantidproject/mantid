@@ -64,29 +64,48 @@ public:
 
     // Iterate through the results
     Links::const_iterator resultItr = results.begin();
+
+    // First intersection
     Link firstIntersect = *resultItr;
 
-    // Checks
+    // Based on our test ray, the first intersection should occur at these
+    // distances.
     TS_ASSERT_DELTA(firstIntersect.distFromStart, 10.001, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.distInsideObject, 0.002, 1e-6);
+
+    // These should be the correct entry point coordinates
     TS_ASSERT_DELTA(firstIntersect.entryPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.entryPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.entryPoint.Z(), -0.001, 1e-6);
+
+    // These should be the correct exit point coordinates
     TS_ASSERT_DELTA(firstIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(firstIntersect.exitPoint.Z(), 0.001, 1e-6);
+
+    // Component that should have been intersected
     TS_ASSERT_EQUALS(firstIntersect.componentID, sampleComp->getComponentID());
 
+    // Second intersection
     ++resultItr;
     Link secondIntersect = *resultItr;
+
+    // Based on our test ray, the second intersection should occur at these
+    // distances.
     TS_ASSERT_DELTA(secondIntersect.distFromStart, 15.004, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.distInsideObject, 0.008, 1e-6);
+
+    // These should be the correct entry point coordinates
     TS_ASSERT_DELTA(secondIntersect.entryPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.entryPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.entryPoint.Z(), 4.996, 1e-6);
+
+    // These should be the correct exit point coordinates
     TS_ASSERT_DELTA(secondIntersect.exitPoint.X(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(secondIntersect.exitPoint.Z(), 5.004, 1e-6);
+
+    // Component that should have been intersected
     TS_ASSERT_EQUALS(secondIntersect.componentID,
                      centralPixel->getComponentID());
   }
@@ -109,16 +128,25 @@ public:
     const IComponent *interceptedPixel =
         m_testInstrument->getComponentByName("pixel-(1;0)").get();
 
-    // Checks
+    // First (and only) intersection
     Link intersect = results.front();
+
+    // Based on our test ray, the second intersection should occur at these
+    // distances.
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);
     TS_ASSERT_DELTA(intersect.distInsideObject, 0.006931, 1e-6);
+
+    // These should be the correct entry point coordinates
     TS_ASSERT_DELTA(intersect.entryPoint.X(), 0.009995, 1e-6);
     TS_ASSERT_DELTA(intersect.entryPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(intersect.entryPoint.Z(), 4.996533, 1e-6);
+
+    // These should be the correct exit point coordinates
     TS_ASSERT_DELTA(intersect.exitPoint.X(), 0.01, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Y(), 0.0, 1e-6);
     TS_ASSERT_DELTA(intersect.exitPoint.Z(), 5.003464, 1e-6);
+
+    // Component that should have been intersected
     TS_ASSERT_EQUALS(intersect.componentID, interceptedPixel->getComponentID());
   }
 
