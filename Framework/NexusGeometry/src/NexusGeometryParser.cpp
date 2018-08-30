@@ -574,7 +574,7 @@ void parseAndAddSample(const H5File &file, const Group &root,
   H5std_string samplePath = "raw_data_1/sample";
   Group sampleGroup = root.openGroup(samplePath);
   auto sampleTransforms = getTransformations(file, sampleGroup);
-  auto samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
+  Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSample(sampleName, samplePos);
 }
 

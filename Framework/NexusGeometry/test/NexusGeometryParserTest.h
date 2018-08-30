@@ -35,6 +35,13 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
 } // namespace
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NexusGeometryParserTest *createSuite() {
+    return new NexusGeometryParserTest();
+  }
+  static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
+
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
     H5std_string nexusFilename = "SMALLFAKE_example_geometry.hdf5";
     const auto fullpath = Kernel::ConfigService::Instance().getFullPath(

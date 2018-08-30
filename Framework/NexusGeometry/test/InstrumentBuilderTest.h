@@ -19,6 +19,13 @@ using namespace NexusGeometry;
 
 class InstrumentBuilderTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentBuilderTest *createSuite() {
+    return new InstrumentBuilderTest();
+  }
+  static void destroySuite(InstrumentBuilderTest *suite) { delete suite; }
+
   void testAddComponent() {
     InstrumentBuilder builder(this->iTestName);
 
