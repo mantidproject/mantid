@@ -46,6 +46,11 @@ void AlignAndFocusPowder::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "UnfocussedWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Treated data in d-spacing before focussing (optional). This will likely "
+      "need rebinning.");
   // declareProperty(
   //   new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "",
   //   Direction::Output, PropertyMode::Optional),
@@ -125,7 +130,7 @@ void AlignAndFocusPowder::init() {
                                                          Direction::Input),
                   "Compress events (in "
                   "microseconds) within this "
-                  "tolerance. (Default 0.01)");
+                  "tolerance. (Default 1e-5)");
   declareProperty(
       make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
                                              EMPTY_DBL(), mustBePositive,
@@ -179,6 +184,20 @@ void AlignAndFocusPowder::init() {
                   "Otherwise, the low resolution spectra will have spectrum "
                   "IDs offset from normal ones. ");
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
+}
+
+std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault("UnfocussedWorkspace")) {
+    if (getPropertyValue("OutputWorkspace") ==
+        getPropertyValue("UnfocussedWorkspace")) {
+      result["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace";
+      result["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace";
+    }
+  }
+
+  return result;
 }
 
 template <typename NumT> struct RegLowVectorPair {
@@ -617,6 +636,13 @@ void AlignAndFocusPowder::exec() {
   if (m_processLowResTOF)
     doSortEvents(m_lowResW);
   m_progress->report();
+
+  // copy the output workspace just before `DiffractionFocusing`
+  // this probably should be binned by callers before inspecting
+  if (!isDefault("UnfocussedWorkspace")) {
+    auto wkspCopy = m_outputW->clone();
+    setProperty("UnfocussedWorkspace", std::move(wkspCopy));
+  }
 
   // Diffraction focus
   m_outputW = diffractionFocus(m_outputW);
