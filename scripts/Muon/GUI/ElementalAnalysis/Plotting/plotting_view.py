@@ -96,7 +96,7 @@ class PlotView(QtGui.QWidget):
     def _set_bounds(self, new_plot):
         new_plot = str(new_plot)
         if new_plot and new_plot != "All":
-            plot = self.plots[new_plot]
+            plot = self.get_subplot(new_plot)
             self._set_plot_bounds(new_plot, plot)
         elif not new_plot:
             self.x_axis_changer.clear_bounds()
@@ -107,7 +107,8 @@ class PlotView(QtGui.QWidget):
 
     def _get_current_plots(self):
         name = self._get_current_plot_name()
-        return self.plots.values() if name == "All" else [self.plots[name]]
+        return self.plots.values() if name == "All" else [
+            self.get_subplot(name)]
 
     @_redo_layout
     def _update_x_axis(self, bounds):
@@ -183,7 +184,7 @@ class PlotView(QtGui.QWidget):
     def _update_plot_selector(self):
         self.plot_selector.clear()
         self.plot_selector.addItem("All")
-        self.plot_selector.addItems(self.plots.keys())
+        self.plot_selector.addItems(list(self.plots.keys()))
 
     def _add_workspace_name(self, name, workspace):
         try:
@@ -239,12 +240,14 @@ class PlotView(QtGui.QWidget):
     @_redo_layout
     @_save_addition
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
-        return self.plots[plot_name].axvline(x_value, y_min, y_max, **kwargs)
+        return self.get_subplot(plot_name).axvline(
+            x_value, y_min, y_max, **kwargs)
 
     @_redo_layout
     @_save_addition
     def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
-        return self.plots[plot_name].axhline(y_value, x_min, x_max, **kwargs)
+        return self.get_subplot(plot_name).axhline(
+            y_value, x_min, x_max, **kwargs)
 
     @_redo_layout
     @_save_addition
