@@ -15,6 +15,11 @@ using namespace NexusGeometryTestHelpers;
 
 class TubeBuilderTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TubeBuilderTest *createSuite() { return new TubeBuilderTest(); }
+  static void destroySuite(TubeBuilderTest *suite) { delete suite; }
+
   void test_constructor() {
     auto shape = createShape();
     const auto &shapeInfo = shape->getGeometryHandler()->shapeInfo();

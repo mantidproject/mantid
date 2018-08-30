@@ -25,6 +25,13 @@ using ScopedFileHelper::ScopedFile;
 
 class LoadEmptyInstrumentTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadEmptyInstrumentTest *createSuite() {
+    return new LoadEmptyInstrumentTest();
+  }
+  static void destroySuite(LoadEmptyInstrumentTest *suite) { delete suite; }
+
   /// Helper that checks that each spectrum has one detector
   void check_workspace_detectors(MatrixWorkspace_sptr output,
                                  size_t numberDetectors) {
