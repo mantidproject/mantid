@@ -1,13 +1,17 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import numpy as np
 from collections import namedtuple
 from contextlib import contextmanager
 
 from mantid import config as mantid_config
 from mantid.api import (AnalysisDataService, DataProcessorAlgorithm,
-                        AlgorithmFactory)
+                        AlgorithmFactory, FileProperty, FileAction,
+                        WorkspaceProperty, PropertyMode)
 from mantid.simpleapi import (DeleteWorkspace)
+from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty,
+                           Direction)
 
 @contextmanager
 def pyexec_setup(new_options):
@@ -63,6 +67,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
         self._lambda_range = [5.86, 6.75]  # units of inverse Angstroms
+        self._default_qbins = [0.1, 0.05, 2.1]  # inverse Angstroms
         self._short_inst = "BSS"
         self._long_inst = "BASIS"
         self._run_list = None
@@ -91,7 +96,61 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         return ['BASISReduction', 'BASISCrystalDiffraction']
 
     def PyInit(self):
-        pass
+        # Input validators
+        array_length_three = FloatArrayLengthValidator(3)
+
+        # Properties
+        self.declareProperty('RunNumbers', '', 'Sample run numbers')
+
+        self.declareProperty(FloatArrayProperty('MomentumTransferBins',
+                                                self._default_qbins,
+                                                direction=Direction.Input),
+                             'Momentum transfer binning scheme')
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                                               optional=PropertyMode.Mandatory,
+                                               direction=Direction.Output),
+                             doc='Output Workspace. If background is '+
+                                 'subtracted, _data and _background '+
+                                 'workspaces will also be generated')
+        #
+        # Common Properties
+        #
+        required_title = 'Required Properties'
+
+        self.declareProperty(FileProperty(name='MaskFile',
+                                          defaultValue=self._mask_file,
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['.xml']),
+                             doc='See documentation for latest mask files.')
+
+        self.declareProperty(FloatArrayProperty('LambdaRange',
+                                                self._lambda_range,
+                                                direction=Direction.Input),
+                             doc='Incoming neutron wavelength range')
+
+        self.declareProperty('MonitorNormalization', True,
+                             'Normalization with wavelength-dependent '
+                             'monitor counts')
+        for a_property in ('MaskFile', 'LambdaRange', 'MonitorNormalization'):
+            self.setPropertyGroup(a_property, required_title)
+        #
+        # Background for the sample runs
+        #
+        background_title = 'Background runs'
+        self.declareProperty('BackgroundRuns', '', 'Background run numbers')
+        self.setPropertyGroup('BackgroundRuns', background_title)
+        self.declareProperty("BackgroundScale", 1.0,
+                             doc='The background will be scaled by this '+
+                                 'number before being subtracted.')
+        self.setPropertyGroup('BackgroundScale', background_title)
+        #
+        # Vanadium
+        #
+        vanadium_title = 'Vanadium runs'
+        self.declareProperty('VanadiumRuns', '', 'Vanadium run numbers')
+        self.setPropertyGroup('VanadiumRuns', vanadium_title)
+
 
     def PyExec(self):
         pass
