@@ -36,7 +36,7 @@ std::unique_ptr<const Geometry::IObject> createCylinderShape(
   shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
                            boundingBox[1], boundingBox[3], boundingBox[5]);
   shape->getGeometryHandler()->setShapeInfo(std::move(shapeInfo));
-  return shape;
+  return std::unique_ptr<const Geometry::IObject>(shape.release());
 }
 
 void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,

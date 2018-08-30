@@ -161,9 +161,9 @@ InstrumentBuilder::createInstrument() {
   sortDetectors();
   // Create the new replacement first incase it throws
   auto temp = std::make_unique<Geometry::Instrument>(m_instrument->getName());
-  auto product = std::move(m_instrument);
+  auto *product = m_instrument.release();
   m_instrument = std::move(temp);
-  return product;
+  return std::unique_ptr<const Geometry::Instrument>(product);
 }
 } // namespace NexusGeometry
 } // namespace Mantid
