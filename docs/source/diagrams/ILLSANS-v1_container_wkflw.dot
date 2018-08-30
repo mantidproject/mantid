@@ -26,7 +26,7 @@ digraph Container {
     Minus
     MoveInstrumentComponent
     ApplyTransmissionCorrection
-    SANSSolidAngleCorrection
+    SolidAngle
   }
 
   Run -> LoadAndMerge
@@ -36,8 +36,8 @@ digraph Container {
   AbsorberInputWorkspace -> Minus
   Minus -> MoveInstrumentComponent
   BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SANSSolidAngleCorrection
-  SANSSolidAngleCorrection -> ApplyTransmissionCorrection
+  MoveInstrumentComponent -> SolidAngle [label="Divide"]
+  SolidAngle -> ApplyTransmissionCorrection
   TransmissionInputWorkspace -> ApplyTransmissionCorrection
   ApplyTransmissionCorrection -> OutputWorkspace
 }

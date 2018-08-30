@@ -259,13 +259,10 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                         transmission_err = mtd[transmission_ws].readE(0)[0]
                         ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
                                                     TransmissionError=transmission_err, OutputWorkspace=ws)
-                    SANSSolidAngleCorrection(InputWorkspace=ws, OutputWorkspace=ws)
-                    # normalise by pixel solid angle, take the D(2t=0)
-                    run = mtd[ws].getRun()
-                    l2 = run.getLogData('L2').value
-                    dx = run.getLogData('pixel_width').value
-                    dy = run.getLogData('pixel_height').value
-                    Scale(InputWorkspace=ws, Factor=(l2 * l2) / (dx * dy), OutputWorkspace=ws)
+                    solid_angle = ws + '_sa'
+                    SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                    Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws)
+                    DeleteWorkspace(solid_angle)
                     if process != 'Container':
                         container = self.getPropertyValue('ContainerInputWorkspace')
                         if container:

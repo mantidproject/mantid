@@ -30,7 +30,7 @@ digraph Reference {
     Minus
     MoveInstrumentComponent
     ApplyTransmissionCorrection
-    SANSSolidAngleCorrection
+    SolidAngle
     Minus2 [label="Minus"]
     CalculateEfficiency
     MaskDetectors
@@ -44,8 +44,8 @@ digraph Reference {
   AbsorberInputWorkspace -> Minus
   Minus -> MoveInstrumentComponent
   BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SANSSolidAngleCorrection
-  SANSSolidAngleCorrection -> ApplyTransmissionCorrection
+  MoveInstrumentComponent -> SolidAngle [label="Divide"]
+  SolidAngle -> ApplyTransmissionCorrection
   TransmissionInputWorkspace -> ApplyTransmissionCorrection
   ApplyTransmissionCorrection -> Minus2
   ContainerInputWorkspace -> Minus2

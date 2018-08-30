@@ -32,7 +32,7 @@ digraph Sample {
     Minus
     MoveInstrumentComponent
     ApplyTransmissionCorrection
-    SANSSolidAngleCorrection
+    SolidAngle
     Minus2 [label="Minus"]
     MaskDetectors
     NormaliseByThickness
@@ -53,8 +53,8 @@ digraph Sample {
   AbsorberInputWorkspace -> Minus
   Minus -> MoveInstrumentComponent
   BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SANSSolidAngleCorrection
-  SANSSolidAngleCorrection -> ApplyTransmissionCorrection
+  MoveInstrumentComponent -> SolidAngle [label="Divide"]
+  SolidAngle -> ApplyTransmissionCorrection
   TransmissionInputWorkspace -> ApplyTransmissionCorrection
   ApplyTransmissionCorrection -> Minus2
   ContainerInputWorkspace -> Minus2
