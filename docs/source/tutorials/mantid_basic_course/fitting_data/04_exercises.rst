@@ -54,7 +54,7 @@ This exercise will mainly quiz about fitting.
 #. Associate the plot with the Fit Function panel and set fitting range
    to be between approximately 2270 and 5000 microseconds
 #. Right click on plot and select Add background... then
-   :ref:`FlatBackground`
+   FlatBackground
 #. Right click on plot and add peak
    IkedaCarpenterPV. This is peak function where
    some parameters of the peak function may be related to instrument
