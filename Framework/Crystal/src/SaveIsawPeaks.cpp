@@ -274,20 +274,6 @@ void SaveIsawPeaks::exec() {
   // =========================================
 
   // Go in order of run numbers
-  /*
-  std::vector<double> offset1, offset2, offset3;
-  if (m_isModulatedStructure) {
-      Sample &sample = ws->mutableSample();
-      offset1 = sample.getOrientedLattice().getModVec(0);
-      offset2 = sample.getOrientedLattice().getModVec(1);
-      offset3 = sample.getOrientedLattice().getModVec(2);
-      out << "9  MODVECTOR ";
-      writeOffsets(out, qSign, offset1);
-      writeOffsets(out, qSign, offset2);
-      writeOffsets(out, qSign, offset3);
-      out << "\n";
-  }
-  */
   int maxPeakNumb = 0;
   int appendPeakNumb = 0;
   runMap_t::iterator runMap_it;

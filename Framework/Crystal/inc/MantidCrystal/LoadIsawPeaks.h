@@ -56,7 +56,7 @@ private:
 
   /// Reads first line of peaks file and returns first word of next line
   std::string readHeader(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
-                         std::ifstream &in, double &T0, double &qSign);
+                         std::ifstream &in, double &T0);
 
   /// Read a single peak from peaks file
   DataObjects::Peak readPeak(DataObjects::PeaksWorkspace_sptr outWS,

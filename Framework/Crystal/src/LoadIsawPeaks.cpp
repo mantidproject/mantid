@@ -118,12 +118,10 @@ void LoadIsawPeaks::exec() {
  * @param outWS :: the workspace in which to place the information
  * @param in :: stream of the input file
  * @param T0 :: Time offset
- * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return the first word on the next line
  */
 std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
-                                      std::ifstream &in, double &T0,
-                                      double &qSign) {
+                                      std::ifstream &in, double &T0) {
   std::string tag;
   std::string r = getWord(in, false);
 
@@ -197,16 +195,6 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     Strings::convert(getWord(in, false), bank);
     if (s == "5")
       det.push_back(bank);
-    /*
-    if (s == "9") {
-        std::string offsetName1 = "Offset1";
-        getOffsets(in, outWS, m_offset1, offsetName1, qSign);
-        std::string offsetName2 = "Offset2";
-        getOffsets(in, outWS, m_offset2, offsetName2, qSign);
-        std::string offsetName3 = "Offset3";
-        getOffsets(in, outWS, m_offset3, offsetName3, qSign);
-    }
-     */
   }
   // Find bank numbers in instument that are not in header lines
   std::string maskBanks;
@@ -497,7 +485,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
 
   // Read the header, load the instrument
   double T0;
-  auto s = readHeader(outWS, in, T0, qSign);
+  auto s = readHeader(outWS, in, T0);
   // set T0 in the run parameters
   API::Run &m_run = outWS->mutableRun();
   m_run.addProperty<double>("T0", T0, true);

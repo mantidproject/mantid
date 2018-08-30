@@ -76,8 +76,8 @@ Integrate3DEvents::Integrate3DEvents(
       m_useOnePercentBackgroundCorrection(useOnePercentBackgroundCorrection) {
   for (size_t it = 0; it != peak_q_list.size(); ++it) {
     int64_t hklmnp_key =
-        getHklMnpKey(hkl_list[it][0], hkl_list[it][1], hkl_list[it][2],
-                     mnp_list[it][0], mnp_list[it][1], mnp_list[it][2]);
+        getHklMnpKey(boost::math::iround<double>(hkl_list[it][0]), boost::math::iround<double>(hkl_list[it][1]), boost::math::iround<double>(hkl_list[it][2]),
+                     boost::math::iround<double>(mnp_list[it][0]), boost::math::iround<double>(mnp_list[it][1]), boost::math::iround<double>(mnp_list[it][2]));
     if (hklmnp_key != 0) // only save if hkl != (0,0,0)
       m_peak_qs[hklmnp_key] = peak_q_list[it].second;
   }
@@ -471,7 +471,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(
   sigi = 0.0; // is wrong with the peak.
 
   int64_t hkl_key =
-      getHklMnpKey(hkl[0], hkl[1], hkl[2], mnp[0], mnp[1], mnp[2]);
+      getHklMnpKey(boost::math::iround<double>(hkl[0]), boost::math::iround<double>(hkl[1]), boost::math::iround<double>(hkl[2]), boost::math::iround<double>(mnp[0]), boost::math::iround<double>(mnp[1]), boost::math::iround<double>(mnp[2]));
 
   if (hkl_key == 0) {
     return boost::make_shared<NoShape>();
