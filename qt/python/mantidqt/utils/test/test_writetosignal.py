@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.utils.writetosignal import WriteToSignal
 
 
@@ -34,8 +34,7 @@ class Receiver(QObject):
         self.captured_txt = txt
 
 
-@requires_qapp
-class WriteToSignalTest(unittest.TestCase):
+class WriteToSignalTest(GuiTest):
 
     def test_connected_receiver_receives_text(self):
         recv = Receiver()

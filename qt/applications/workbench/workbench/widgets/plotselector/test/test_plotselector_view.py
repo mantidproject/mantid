@@ -16,11 +16,10 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import absolute_import, division, print_function
 
+from mantidqt.utils.qt.test import GuiTest
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtTest import QTest
-
-from mantidqt.utils.qt.test import requires_qapp
 
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import EXPORT_TYPES, PlotSelectorView, Column
@@ -32,8 +31,7 @@ except ImportError:
     import mock
 
 
-@requires_qapp
-class PlotSelectorWidgetTest(unittest.TestCase):
+class PlotSelectorWidgetTest(GuiTest):
 
     def setUp(self):
         self.presenter = mock.Mock(spec=PlotSelectorPresenter)
