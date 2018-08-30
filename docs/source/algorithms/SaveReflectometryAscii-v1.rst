@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm saves the first spectrum of a workspace in ASCII format and can be used by software like Motofit.
+This algorithm saves the first spectrum of a workspace in ASCII format in order to be processed by software, e.g. Motofit.
 It is possible to provide a group of workspaces as input.
-In this case, each filename contains a corresponding workspace name.
-The choice of file extension (`.mft`, `.txt`, `.dat` or custom ``) defines the file format.
-In case of histogrammed input data, the resulting file will contain the bin centre for the quantity `q`.
+In this case, each filename contains the corresponding workspace name.
+The choice of the file extension (`.mft`, `.txt`, `.dat`) defines the file format and appends the `Filename` with the correponding extension except for the blank field, which represents a custom format where the `Filename` can be choosen freely.
+In case of histogrammed input data, the resulting file will contain the bin centre for the x-values representing the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
 A file can be loaded back into Mantid by :ref:`algm-LoadAscii`, which will not have an instrument defined and `Sample Logs` are missing.
 This algorithm writes data in scientific exponential notation (E-notation) of double-precision.
@@ -21,37 +21,41 @@ This algorithm writes data in scientific exponential notation (E-notation) of do
 Computation of resolution values
 --------------------------------
 
-For the custom and the `.txt` file format, the option `WriteResolution` enables the computation of the resolution values from existing x-values (points):
+For the `Custom File Format (Empty Field)`_ and the `TXT File Format`_ file format, the option `WriteResolution` enables the computation of the resolution values from existing x-values (points):
 
 :math:`x_i \dot \frac{x_{1} - x_{0}}{x_{1}}`,
 
-where the bin centre :math:`x_i` will be multiplied by the qutient from first and second bin centre :math:`x_{0}` and :math:`x_{1}`, respectively.
+where the bin centre :math:`x_i` will be multiplied by the qutient of first and second bin centre :math:`x_{0}` and :math:`x_{1}`, respectively.
 
 MFT File Format
 ---------------
 
 The file contains minimum 21 header lines each separating its name and value by a colon, followed by an empty line and a line describing the quantities of each column which are `q`, `refl`, `refl_error` and eventually `q_res (FWHM)`, if present, and the data.
 The header lines contain the following information: `Instrument`, `User-local contact`, `Title`, `Subtitle`, `Start date + time`, `End date + time`, `Theta 1 + dir + ref numbers`, `Theta 2 + dir + ref numbers`, `Theta 3 + dir + ref numbers`, (foreseen potentially added angle(s),) followed by 9 user defined parameter lines, followed by potentially added user defined parameter lines, `Number of file format`, `Number of data points`.
-The version of the file format is set randomly to a higher value (40) in order to exceed all ILL Cosmos versions.
-For the ILL instruments D17 and FIGARO, obligatory header lines will be automatically filled by using the workspaces `Sample Logs` information which can be modified as shown in the example.
+The version of the file format is set randomly to the high value 40 in order to exceed all ILL Cosmos versions.
+For the ILL instruments D17 and FIGARO, obligatory header lines will be automatically filled by using the workspaces `Sample Logs` information which can be modified as shown in the `Usage`_.
+The options `WriteHeader`, `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
 
 TXT File Format
 ---------------
 
-This file format (also called ANSTO Ascii format) writes four columns of data without any additional information.
-If the resolution values are not present, they can be optionally computed.
+This file format (ANSTO Ascii format) writes four columns of data without any additional information.
+If the resolution values are not present will be optionally computed, see `Computation of resolution values`_.
+The options `WriteHeader`, `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
 
 DAT File Format
 ---------------
 
 Stores first the number of lines followed by three columns of data.
+The option `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
 
 Custom File Format (Empty Field)
 --------------------------------
 
-Enables a selection to write header lines and to select the separator and the number of columns to write, i.e. three or four.
-Only user-defined log values as well as the number of data lines are added to the file header.
-Please consider to directly provide the file extension of you choice via the input of `Filename`.
+Enables a selection to write header lines via the option `WriteHeader` and the separator via the option `Separator` aa well as the number of columns to write, i.e. three or four via the option `WriteResolution`.
+The header follows the specification of the `MFT File format`_, if enabled.
+Please consider to directly provide the desired file extension via the input `Filename`.
+All options are taken into account and are visible in the user interface.
 
 Usage
 -----
