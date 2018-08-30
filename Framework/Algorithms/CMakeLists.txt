@@ -138,6 +138,7 @@ set ( SRC_FILES
 	src/FindEPP.cpp
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
+	src/FindReflectometryLines2.cpp
 	src/FitPeak.cpp
 	src/FitPeaks.cpp
 	src/FixGSASInstrumentFile.cpp
@@ -464,6 +465,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindEPP.h
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
+	inc/MantidAlgorithms/FindReflectometryLines2.h
 	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FitPeaks.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
@@ -801,6 +803,7 @@ set ( TEST_FILES
 	FindEPPTest.h
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
+	FindReflectometryLines2Test.h
 	FitPeakTest.h
 	FitPeaksTest.h
 	FixGSASInstrumentFileTest.h
