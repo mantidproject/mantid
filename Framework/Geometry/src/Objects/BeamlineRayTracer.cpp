@@ -81,11 +81,74 @@ using Mantid::Kernel::Quat;
 using Types = Mantid::Beamline::ComponentType;
 
 /**
+ * Return the results of any trace() calls since the last call to getResults.
+ *
+ * @return A collection of links defining intersection information
+ */
+Links getResults(Track &resultsTrack) {
+  // Create a list of the results
+  Links results(resultsTrack.cbegin(), resultsTrack.cend());
+
+  // Clear intersection results
+  resultsTrack.clearIntersectionResults();
+
+  return results;
+}
+
+/**
+ * Fire the test ray at the instrument and perform a bread-first search of the
+ * object tree to find the objects that were intersected.
+ *
+ * @param testRay :: An input/output parameter that defines the track and
+ * accumulates the intersection results.
+ * @param componentInfo :: The object that will provide access to component
+ * information.
+ */
+void fireRay(Track &track, const ComponentInfo &componentInfo) {
+  // Cast size of componentInfo to int
+  int size = static_cast<int>(componentInfo.size());
+  --size;
+
+  // Loop through the bounding boxes in reverse
+  // (essentially a breadth first search)
+  for (int i = size; i >= 0; --i) {
+    // Store the bounding box
+    BoundingBox box = componentInfo.boundingBox(i);
+
+    // Test for intersection
+    if (box.doesLineIntersect(track)) {
+
+      // Store the type of the child component
+      auto childComponentType = componentInfo.componentType(i);
+      // Store the type of the child's grandparent
+      auto grandParent = componentInfo.componentType(
+          componentInfo.parent(componentInfo.parent(i)));
+
+      // Don't want to count the bank and the detector
+      if (grandParent == Types::Rectangular &&
+          childComponentType == Types::Detector) {
+        continue;
+      }
+
+      // Process a rectangular bank or normal component
+      if (childComponentType == Types::Rectangular) {
+        checkIntersectionWithRectangularBank(track, componentInfo, i);
+      } else {
+        checkIntersectionWithComponent(track, componentInfo, i);
+      }
+    }
+  }
+}
+
+/**
  * Tests the intersection of the ray with a rectangular bank of detectors.
  * Uses the knowledge of the RectangularDetector shape to significantly speed
  * up tracking.
  *
  * @param track :: Track under test. The results are stored here.
+ * @param componentInfo :: The object that will provide access to component
+ * information.
+ * @param componentIndex :: The component to be checked.
  */
 void checkIntersectionWithRectangularBank(Track &track,
                                           const ComponentInfo &componentInfo,
@@ -211,67 +274,6 @@ void checkIntersectionWithComponent(Track &track,
                   componentInfo.componentID(componentIndex)->getComponentID());
   }
 }
-
-/**
- * Return the results of any trace() calls since the last call to getResults.
- *
- * @return A collection of links defining intersection information
- */
-Links getResults(Track &resultsTrack) {
-  // Create a list of the results
-  Links results(resultsTrack.cbegin(), resultsTrack.cend());
-
-  // Clear intersection results
-  resultsTrack.clearIntersectionResults();
-
-  return results;
-}
-
-/**
- * Fire the test ray at the instrument and perform a bread-first search of the
- * object tree to find the objects that were intersected.
- *
- * @param testRay :: An input/output parameter that defines the track and
- * accumulates the intersection results.
- * @param componentInfo :: The object that will provide access to component
- * information.
- */
-void fireRay(Track &track, const ComponentInfo &componentInfo) {
-  // Cast size of componentInfo to int
-  int size = static_cast<int>(componentInfo.size());
-  --size;
-
-  // Loop through the bounding boxes in reverse
-  // (essentially a breadth first search)
-  for (int i = size; i >= 0; --i) {
-    // Store the bounding box
-    BoundingBox box = componentInfo.boundingBox(i);
-
-    // Test for intersection
-    if (box.doesLineIntersect(track)) {
-
-      // Store the type of the child component
-      auto childComponentType = componentInfo.componentType(i);
-      // Store the type of the child's grandparent
-      auto grandParent = componentInfo.componentType(
-          componentInfo.parent(componentInfo.parent(i)));
-
-      // Don't want to count the bank and the detector
-      if (grandParent == Types::Rectangular &&
-          childComponentType == Types::Detector) {
-        continue;
-      }
-
-      // Process a rectangular bank or normal component
-      if (childComponentType == Types::Rectangular) {
-        checkIntersectionWithRectangularBank(track, componentInfo, i);
-      } else {
-        checkIntersectionWithComponent(track, componentInfo, i);
-      }
-    }
-  }
-}
-
 } // namespace
 
 } // namespace Geometry
