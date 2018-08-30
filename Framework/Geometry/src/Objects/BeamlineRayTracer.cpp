@@ -249,8 +249,9 @@ void checkIntersectionWithComponent(Track &track,
 
   // Create a new track and store number of surface interceptions
   Track probeTrack(trkStart, trkDirection);
-  int intercepts =
-      componentInfo.shape(componentIndex).interceptSurface(probeTrack);
+  
+  // Returns an int but we don't need to store it
+  componentInfo.shape(componentIndex).interceptSurface(probeTrack);
 
   // Iterate over track
   for (auto it = probeTrack.cbegin(); it != probeTrack.cend(); ++it) {
