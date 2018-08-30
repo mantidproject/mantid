@@ -64,7 +64,7 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
         xmin = self.getProperty('XMin').value
         xmax = self.getProperty('XMax').value
         if (xmax <= xmin):
-            issues["XMax"] = "The limits for cropping are invalid (XMax >= XMin)."
+            issues["XMax"] = "The limits for cropping are invalid (XMax <= XMin)."
         return issues
 
     def PyExec(self):
