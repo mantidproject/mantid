@@ -87,7 +87,6 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
 
     def on_mouse_release_event(self, event):
         """
-
         :param event:
         :return:
         """
@@ -203,7 +202,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         super(GeneralPurposedPlotView, self).__init__(parent)
 
         # define interaction with the canvas
-        self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
+        # self._myCanvas.mpl_connect('button_press_event', self.on_mouse_press_event)
 
         # class variables
         self._currentDataID = None
@@ -212,20 +211,19 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
 
         return
 
-    def on_mouse_press_event(self, event):
-        """
-
-        :param event:
-        :return:
-        """
-
-        return
+    # def on_mouse_press_event(self, event):
+    #     """ Handling the event as the mouse button is pressed
+    #     :param event:
+    #     :return:
+    #     """
+    #     return
 
     def plot_data(self, vec_x, vec_y, vec_e, title, label_x, label_y):
         """
         plot current data
         :param vec_x:
         :param vec_y:
+        :param vec_e:
         :param title:
         :param label_x:
         :param label_y:
@@ -294,6 +292,7 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         self._rawDataID = None
         self._fitDataID = None
         self._2thetaModelID = None
+        self._2thetaFwhmID = None  # line ID for 2theta-fwhm plot
 
         self._parent_window = None
 
@@ -351,10 +350,10 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
         return
 
     def plot_2theta_model(self, vec_2theta, vec_fwhm, vec_model):
-        """
-        plot 2theta model
-        :param vec_x:
-        :param vec_y:
+        """ plot 2theta model
+        :param vec_2theta:
+        :param vec_fwhm:
+        :param vec_model:
         :return:
         """
         # remove previous plot
@@ -364,8 +363,8 @@ class SinglePtIntegrationView(mplgraphicsview.MplGraphicsView):
 
         # add the line
         if vec_fwhm is not None:
-            self._2thetaFWHM = self.add_plot_1d(vec_2theta, vec_fwhm, x_label='$2\theta$', y_label='FWHM',
-                                                color='black', update_plot=True, label='Observed')
+            self._2thetaFwhmID = self.add_plot_1d(vec_2theta, vec_fwhm, x_label='$2\theta$', y_label='FWHM',
+                                                  color='black', update_plot=True, label='Observed')
 
         if vec_model is not None:
             self._2thetaModelID = self.add_plot_1d(vec_2theta, vec_model, x_label='$2\theta$', y_label='FWHM',
