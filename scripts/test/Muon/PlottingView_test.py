@@ -63,6 +63,10 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view.x_axis_changer = mock.create_autospec(AxisChangerPresenter)
         self.view.y_axis_changer = mock.create_autospec(AxisChangerPresenter)
 
+        self.view.errors = mock.Mock()
+        self.view.errors.blockSignals = mock.Mock()
+        self.view.errors.setChecked = mock.Mock()
+
     def test_redo_layout_with_plots_not_equal_to_zero(self):
         self.view.plots = [mock.Mock() for i in range(3)]
         self.view.call_plot_method(
@@ -101,47 +105,114 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.assertEquals(
             self.view.plot_additions[self.mock_name][1][1:], output)
 
-    def test_set_bounds_when_new_plots(self):
-        self.view.plots = {self.plot_name: self.mock_plot}
-        self.view._set_bounds(self.plot_name)
+    def test_silent_checkbox_check(self):
+        test_state = mock.Mock()
+        self.view._silent_checkbox_check(test_state)
+        self.view.errors.blockSignals.assert_has_calls(
+            [mock.call(True), mock.call(False)])
+        self.view.errors.setChecked.assert_called_once_with(test_state)
+
+    def test_get_current_plot_name(self):
+        self.assertEquals(self.view._get_current_plot_name(), self.plot_name)
+
+    def _common_set_plot_bounds(self, result):
+        self.view._silent_checkbox_check = mock.Mock()
+        self.view._set_plot_bounds(self.plot_name, self.mock_plot)
         self.view.x_axis_changer.set_bounds.assert_called_once_with(
             self.mock_plot.get_xlim())
         self.view.y_axis_changer.set_bounds.assert_called_once_with(
             self.mock_plot.get_ylim())
+        self.view._silent_checkbox_check.assert_called_once_with(result)
 
-    def test_set_bounds_when_not_new_plots(self):
-        self.plot_name = ""
+    def test_set_plot_bounds_in_errors_list(self):
+        self.view.errors_list = [self.plot_name]
+        self._common_set_plot_bounds(True)
+
+    def test_set_plot_bounds_not_in_errors_list(self):
+        self._common_set_plot_bounds(False)
+
+    def test_set_bounds_when_new_plots(self):
+        self.view._set_plot_bounds = mock.Mock()
+        self.view.get_subplot = mock.Mock(return_value=self.mock_plot)
+        self.view.plots = {self.plot_name: self.mock_plot}
         self.view._set_bounds(self.plot_name)
+        self.view.get_subplot.assert_called_once_with(self.plot_name)
+        self.view._set_plot_bounds.assert_called_once_with(
+            self.plot_name, self.mock_plot)
+
+    def common_set_bounds_else_statement(self, plot_name):
+        self.view._set_bounds(plot_name)
         self.assertEquals(self.view.x_axis_changer.clear_bounds.call_count, 1)
         self.assertEquals(self.view.y_axis_changer.clear_bounds.call_count, 1)
 
-    def test_get_current_plot(self):
-        self.assertEquals(
-            self.view._get_current_plot(),
-            self.plots_return_value)
+    def test_set_bounds_when_not_new_plots(self):
+        self.common_set_bounds_else_statement("")
 
-    def test_get_current_plot_raises_key_error(self):
+    def test_set_bounds_when_all(self):
+        self.common_set_bounds_else_statement("")
+
+    def test_get_current_plots(self):
+        self.assertEquals(
+            self.view._get_current_plots(),
+            [self.plots_return_value])
+
+    def test_get_current_plots_raises_key_error(self):
         self.view.plots = {}
         with self.assertRaises(KeyError):
-            self.view._get_current_plot()
+            self.view._get_current_plots()
 
     def test_update_x_axis(self):
         self.view._update_x_axis(self.mock_bounds)
-        self.view._get_current_plot().set_xlim.assert_called_once_with(self.mock_bounds)
+        plot, = self.view._get_current_plots()
+        plot.set_xlim.assert_called_once_with(self.mock_bounds)
 
     def test_update_y_axis(self):
         self.view._update_y_axis(self.mock_bounds)
-        self.view._get_current_plot().set_ylim.assert_called_once_with(self.mock_bounds)
+        plot, = self.view._get_current_plots()
+        plot.set_ylim.assert_called_once_with(self.mock_bounds)
+
+    def test_modify_errors_list_state_is_true(self):
+        self.view._modify_errors_list(self.plot_name, True)
+        self.assertEquals(self.view.errors_list, set([self.plot_name]))
+
+    def test_modify_errors_list_state_is_false(self):
+        self.view.errors_list = set([self.plot_name])
+        self.view._modify_errors_list(self.plot_name, False)
+        self.assertEquals(len(self.view.errors_list), 0)
+
+    def test_modify_errors_list_keyerror_thrown(self):
+        test_set = set(["test"])
+        self.view.errors_list = test_set
+        self.view._modify_errors_list(self.plot_name, False)
+        self.assertEquals(self.view.errors_list, test_set)
+
+    def test_errors_changed_all(self):
+        mock_state = True
+        self.view._get_current_plot_name = mock.Mock(return_value="All")
+        self.view._change_plot_errors = mock.Mock()
+        self.view._errors_changed(mock_state)
+        self.view._change_plot_errors.assert_called_once_with(
+            self.plot_name, self.plots_return_value, mock_state)
 
     def test_errors_changed(self):
+        mock_state = True
+        self.view._get_current_plot_name = mock.Mock(
+            return_value=self.plot_name)
+        self.view._change_plot_errors = mock.Mock()
+        self.view._errors_changed(mock_state)
+        self.view._change_plot_errors.assert_called_once_with(
+            self.plot_name, self.plots_return_value, mock_state)
+
+    def test_change_plot_errors(self):
+        args = [self.plot_name, self.plots_return_value, True]
+        self.view._modify_errors_list = mock.Mock()
         self.view.plot = mock.Mock()
-        self.view._set_bounds = mock.Mock()
         self.view._replay_additions = mock.Mock()
-        self.view._errors_changed(None)
+        self.view._change_plot_errors(*args)
+        self.view._modify_errors_list.assert_called_once_with(*args[::2])
         self.assertEquals(self.plots_return_value.clear.call_count, 1)
         self.view.plot.assert_called_once_with(
             self.plot_name, self.plots_return_value)
-        self.view._set_bounds.assert_called_once_with(self.plot_name)
         self.view._replay_additions.assert_called_once_with(self.plot_name)
 
     def test_replay_additions(self):
@@ -245,15 +316,15 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view.workspaces = {self.plot_name: self.plots_return_value}
         self.view.plot_additions = {self.plot_name: self.plots_return_value}
 
-    def test_plot_errors_checked(self):
+    def test_plot_errors_in_errors_list(self):
+        self.view.errors_list = [self.plot_name]
         self.view.plot_workspace_errors = mock.Mock()
         self.view.plot(self.plot_name, self.mock_workspace)
         self.view.plot_workspace_errors.assert_called_once_with(
             self.plot_name, self.mock_workspace)
         self.view._set_bounds.assert_called_once_with(self.plot_name)
 
-    def test_plot_errors_unchecked(self):
-        self.view.errors.isChecked = mock.Mock(return_value=False)
+    def test_plot_errors_not_in_errors_list(self):
         self.view.plot_workspace = mock.Mock()
         self.view.plot(self.plot_name, self.mock_workspace)
         self.view.plot_workspace.assert_called_once_with(
