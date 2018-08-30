@@ -267,7 +267,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.view._update_plot_selector()
         self.assertEquals(self.view.plot_selector.clear.call_count, 1)
         self.view.plot_selector.addItems.assert_called_once_with(
-            self.view.plots.keys())
+            list(self.view.plots.keys()))
 
     def test_add_workspace_name_if_not_in_workspaces(self):
         self.view._add_workspace_name(self.plot_name, self.mock_workspace)
