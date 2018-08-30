@@ -251,7 +251,7 @@ information. Note that the geometry information is in millimetres.
 +-------+--------------------+------------------------------------------------------------------+
 | **2** | **Geometry**       | A geometry selection. *Read from file* will use the settings     |
 |       |                    | that are stored in the data file. The other options are          |
-|       |                    | *Cylinder AxisUp*, *Cuboid* and *Cylinder AxisAlong*.            |
+|       |                    | *Cylinder*, *FlatPlate* and *Disc*.                              |
 +-------+--------------------+------------------------------------------------------------------+
 | **3** | **Height**         | The sample height. If this is not specified,                     |
 |       |                    | the information from the file will be used.                      |

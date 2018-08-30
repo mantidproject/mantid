@@ -252,12 +252,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.sample_height = 1.6
         state_gui_model.sample_thickness = 1.8
         state_gui_model.z_offset = 1.78
-        state_gui_model.sample_shape = SampleShape.Cuboid
+        state_gui_model.sample_shape = SampleShape.FlatPlate
         self.assertTrue(state_gui_model.sample_width == 1.2)
         self.assertTrue(state_gui_model.sample_height == 1.6)
         self.assertTrue(state_gui_model.sample_thickness == 1.8)
         self.assertTrue(state_gui_model.z_offset == 1.78)
-        self.assertTrue(state_gui_model.sample_shape is SampleShape.Cuboid)
+        self.assertTrue(state_gui_model.sample_shape is SampleShape.FlatPlate)
 
     # ==================================================================================================================
     # ==================================================================================================================
