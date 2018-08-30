@@ -5,14 +5,6 @@ from collections import OrderedDict
 
 from qtpy import QtWidgets
 
-from six import iteritems
-
-from collections import OrderedDict
-
-from six import iteritems
-
-from collections import OrderedDict
-
 from matplotlib.figure import Figure
 from matplotlib import gridspec
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -41,7 +33,6 @@ class PlotView(QtWidgets.QWidget):
         self.figure = Figure()
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
-        self.last_positions = []
 
         self.plot_selector = QtWidgets.QComboBox()
         self._update_plot_selector()
@@ -220,9 +211,6 @@ class PlotView(QtWidgets.QWidget):
             if last is not None:
                 # label is necessary to fix
                 # https://github.com/matplotlib/matplotlib/issues/4786
-                #print(type(positions), positions)
-                print(type(self.current_grid), self.current_grid)
-                #print(positions[-1][0], positions[-1][1])
                 pos = self.current_grid[positions[-1][0], positions[-1][1]]
                 self.plots[last] = self.figure.add_subplot(pos, label=last)
                 self.plots[last].set_subplotspec(pos)
