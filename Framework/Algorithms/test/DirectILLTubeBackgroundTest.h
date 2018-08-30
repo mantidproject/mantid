@@ -1,0 +1,209 @@
+#ifndef MANTID_ALGORITHMS_DIRECTILLTUBEBACKGROUNDTEST_H_
+#define MANTID_ALGORITHMS_DIRECTILLTUBEBACKGROUNDTEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+#include "MantidAlgorithms/DirectILLTubeBackground.h"
+
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+using namespace Mantid;
+
+class DirectILLTubeBackgroundTest : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static DirectILLTubeBackgroundTest *createSuite() {
+    return new DirectILLTubeBackgroundTest();
+  }
+  static void destroySuite(DirectILLTubeBackgroundTest *suite) { delete suite; }
+
+  DirectILLTubeBackgroundTest() : CxxTest::TestSuite() {
+    API::FrameworkManager::Instance();
+  }
+
+  void test_Init() {
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+  }
+
+  void test_Nondistribution() {
+    constexpr int numBanks{2};
+    constexpr int numPixels{2};
+    constexpr int numBins{9};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    TS_ASSERT(inWS->isHistogramData())
+    TS_ASSERT(!inWS->isDistribution())
+    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
+        Ys = bankBkgs[i];
+        Ys[numBins / 2] = 1090.; // Peak.
+      }
+    }
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      // Peak covers the middle bin of all histograms.
+      row.peakCentre = static_cast<double>(numBins) / 2.;
+      row.sigma = 1.1 / 6.;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> const components{"bank1", "bank2"};
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
+    TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto const &Ys = outWS->y(i * numPixels * numPixels + j);
+        auto const &Es = outWS->e(i * numPixels * numPixels + j);
+        for (size_t k = 0; k < Ys.size(); ++k) {
+          TS_ASSERT_EQUALS(Ys[k], bankBkgs[i])
+          TS_ASSERT_EQUALS(Es[k], 0.)
+        }
+      }
+    }
+  }
+
+  void test_Distribution() {
+    constexpr int numBanks{2};
+    constexpr int numPixels{2};
+    constexpr int numBins{9};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    TS_ASSERT(inWS->isHistogramData())
+    TS_ASSERT(!inWS->isDistribution())
+    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto histogram = inWS->histogram(i * numPixels * numPixels + j);
+        auto &Ys = histogram.mutableY();
+        Ys = bankBkgs[i];
+        Ys[numBins / 2] = 1090.; // Peak.
+        // Non-equidistant binning.
+        auto &Xs = inWS->mutableX(i * numPixels * numPixels + j);
+        Xs[0] = 9.;
+        for (size_t k = 1; k < Xs.size(); ++k) {
+          Xs[k] = Xs[k - 1] + static_cast<double>(k + 1) * 0.57;
+        }
+        histogram.convertToFrequencies();
+      }
+    }
+    inWS->setDistribution(true);
+    TS_ASSERT(inWS->isDistribution())
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      // Peak covers the middle bin of all histograms.
+      row.peakCentre = static_cast<double>(numBins) / 2.;
+      row.sigma = 1.1 / 6.;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> const components{"bank1", "bank2"};
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
+    TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
+    auto subtractedWS = inWS - outWS;
+    for (size_t i = 0; i < subtractedWS->getNumberHistograms(); ++i) {
+      auto const &Ys = subtractedWS->y(i);
+      for (size_t j = 0; j < Ys.size(); ++j) {
+        if (j != numBins / 2) {
+          TS_ASSERT_EQUALS(Ys[j], 0);
+        }
+      }
+    }
+  }
+
+  void test_DiagnosticsWorkspace() {
+    constexpr int numBanks{2};
+    constexpr int numPixels{2};
+    constexpr int numBins{9};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    TS_ASSERT(inWS->isHistogramData())
+    TS_ASSERT(!inWS->isDistribution())
+    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
+        Ys = bankBkgs[i];
+        Ys[numBins / 2] = 1090.; // Peak.
+      }
+    }
+    auto maskWS =
+        Kernel::make_unique<DataObjects::MaskWorkspace>(inWS->getInstrument());
+    maskWS->setMaskedIndex(1);
+    inWS->mutableY(1) = -600;
+    maskWS->setMaskedIndex(6);
+    inWS->mutableY(6) = 900;
+    API::MatrixWorkspace_sptr diagnosticsWS(maskWS.release());
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      // Peak covers the middle bin of all histograms.
+      row.peakCentre = static_cast<double>(numBins) / 2.;
+      row.sigma = 1.1 / 6.;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> const components{"bank1", "bank2"};
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("DiagnosticsWorkspace", diagnosticsWS))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
+    TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto const &Ys = outWS->y(i * numPixels * numPixels + j);
+        auto const &Es = outWS->e(i * numPixels * numPixels + j);
+        for (size_t k = 0; k < Ys.size(); ++k) {
+          TS_ASSERT_EQUALS(Ys[k], bankBkgs[i])
+          TS_ASSERT_EQUALS(Es[k], 0.)
+        }
+      }
+    }
+  }
+};
+
+#endif /* MANTID_ALGORITHMS_DIRECTILLTUBEBACKGROUNDTEST_H_ */

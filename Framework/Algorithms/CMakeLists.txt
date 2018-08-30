@@ -102,6 +102,7 @@ set ( SRC_FILES
 	src/DiffractionEventCalibrateDetectors.cpp
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
+	src/DirectILLTubeBackground.cpp
 	src/Divide.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
@@ -427,6 +428,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
+	inc/MantidAlgorithms/DirectILLTubeBackground.h
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
@@ -768,6 +770,7 @@ set ( TEST_FILES
 	DiffractionEventCalibrateDetectorsTest.h
 	DiffractionFocussing2Test.h
 	DiffractionFocussingTest.h
+	DirectILLTubeBackgroundTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
