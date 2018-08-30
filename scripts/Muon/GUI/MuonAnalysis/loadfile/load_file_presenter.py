@@ -15,6 +15,7 @@ class BrowseFileWidgetPresenter(object):
         # Whether to allow single or multiple files to be loaded
         self._multiple_files = True
 
+        self._use_threading = True
         self._load_thread = None
 
         self._view.on_browse_clicked(self.on_browse_button_clicked)
@@ -48,7 +49,7 @@ class BrowseFileWidgetPresenter(object):
             self._view.reset_edit_to_cached_value()
             return
         if filenames:
-            self.handle_load_thread_start(filenames)
+            self.handle_loading(filenames, self._use_threading)
 
     def handle_file_changed_by_user(self):
         user_input = self._view.get_file_edit_text()
@@ -61,7 +62,23 @@ class BrowseFileWidgetPresenter(object):
             self._view.warning_popup("Multiple files selected in single file mode")
             self._view.reset_edit_to_cached_value()
             return
-        self.handle_load_thread_start(filenames)
+        self.handle_loading(filenames, self._use_threading)
+
+    def handle_loading(self, filenames, threaded=True):
+        if threaded:
+            self.handle_load_thread_start(filenames)
+        else:
+            self.handle_load_no_threading(filenames)
+
+    def handle_load_no_threading(self, filenames):
+        self._view.notify_loading_started()
+        self.disable_loading()
+        self._model.loadData(filenames)
+        try:
+            self._model.execute()
+        except ValueError as e:
+            self._view.warning_popup(e.args[0])
+        self.on_loading_finished()
 
     def handle_load_thread_start(self, filenames):
         if self._load_thread:

@@ -50,8 +50,7 @@ class BrowseFileWidgetModel(object):
         for filename in self._filenames:
             try:
                 ws, run = self.load_workspace_from_filename(filename)
-            except Exception as e:
-                print(e)
+            except Exception:
                 failed_files += [filename]
                 continue
             self._loaded_data_store.remove_data(run=run)
