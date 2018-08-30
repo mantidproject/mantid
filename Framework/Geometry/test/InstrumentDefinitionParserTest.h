@@ -568,7 +568,7 @@ public:
     TS_ASSERT_EQUALS(bank1->getAtXY(0, 1)->getID(), 1001);
     TS_ASSERT_EQUALS(bank1->getAtXY(1, 0)->getID(), 1300);
     TS_ASSERT_EQUALS(bank1->getAtXY(1, 1)->getID(), 1301);
-    
+
     // Check that spacial ordering is maintained
     int idValue = bank1->idstart();
     for (int i = 0; i < 100; i++) {
