@@ -67,11 +67,11 @@ class BrowseFileWidgetView(QtGui.QWidget):
     def show_file_browser_and_return_selection(self, file_filter, search_directories, multiple_files=False):
         default_directory = search_directories[0]
         if multiple_files:
-            chosen_files, _ = QtGui.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
+            chosen_files = QtGui.QFileDialog.getOpenFileNames(self, "Select files", default_directory,
                                                                  file_filter)
             return [str(chosen_file) for chosen_file in chosen_files]
         else:
-            chosen_file, _ = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
+            chosen_file = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
                                                                file_filter)
             return [str(chosen_file)]
 

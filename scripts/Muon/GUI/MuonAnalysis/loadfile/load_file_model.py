@@ -8,6 +8,10 @@ from mantid.kernel import ConfigService
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
+def exception_message_for_failed_files(failed_file_list):
+    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+
+
 class BrowseFileWidgetModel(object):
 
     def __init__(self, loaded_data_store=MuonLoadData()):
@@ -46,25 +50,41 @@ class BrowseFileWidgetModel(object):
         for filename in self._filenames:
             try:
                 ws, run = self.load_workspace_from_filename(filename)
-            except ValueError:
+            except Exception as e:
+                print(e)
                 failed_files += [filename]
                 continue
             self._loaded_data_store.remove_data(run=run)
             self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
         if failed_files:
-            message = self.exception_message_for_failed_files(failed_files)
+            message = exception_message_for_failed_files(failed_files)
             raise ValueError(message)
 
-    def exception_message_for_failed_files(self, failed_file_list):
-        return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
-
     def load_workspace_from_filename(self, filename):
+        alg = mantid.AlgorithmManager.create("Load")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(False)
+        alg.setProperty("OutputWorkspace", "__notUsed")
+
         try:
-            workspace = mantid.Load(Filename=filename)
-            run = int(workspace[0].getRunNumber())
-        except ValueError as e:
-            raise ValueError(e.args)
+            alg.setProperty("Filename", filename)
+            alg.execute()
+            workspace = alg.getProperty("OutputWorkspace").value
+            run = int(workspace.getRunNumber())
+        except Exception:
+            # let Load search for the file
+            alg.setProperty("Filename", filename.split(os.sep)[-1])
+            alg.execute()
+            workspace = alg.getProperty("OutputWorkspace").value
+            run = int(workspace.getRunNumber())
+
         return workspace, run
+        # try:
+        #     workspace = mantid.Load(Filename=filename)
+        #     run = int(workspace[0].getRunNumber())
+        # except ValueError as e:
+        #     raise ValueError(e.args)
+        # return workspace, run
 
     def clear(self):
         self._loaded_data_store.clear()

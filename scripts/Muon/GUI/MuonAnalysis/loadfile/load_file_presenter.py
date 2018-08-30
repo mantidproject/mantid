@@ -40,11 +40,6 @@ class BrowseFileWidgetPresenter(object):
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
         return filenames
 
-    def validate_filenames_selection(self, filenames):
-        filenames = file_utils.parse_user_input_to_files(";".join(filenames))
-        filenames = file_utils.remove_duplicated_files_from_list(filenames)
-        return filenames
-
     def on_browse_button_clicked(self):
         filenames = self.get_filenames_from_user()
         filenames = file_utils.remove_duplicated_files_from_list(filenames)
@@ -102,9 +97,6 @@ class BrowseFileWidgetPresenter(object):
 
     def enable_multiple_files(self, enabled):
         self._multiple_files = enabled
-
-    def get_loaded_filenames(self):
-        return self._model.loaded_filenames
 
     @property
     def workspaces(self):

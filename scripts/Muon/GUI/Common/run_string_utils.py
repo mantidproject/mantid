@@ -15,11 +15,15 @@ def _remove_duplicates_from_list(run_list):
     return list(set(run_list))
 
 
-# Python compatibility, Python 3 does not support tuple parameter unpacking
-def star(f):
-    @functools.wraps(f)
+# Python 3 does not support tuple parameter unpacking
+# e.g. lambda (x,y): x+y
+# throws in Python 3 but is ok in 2, use this wrapper to avoid the error
+# e.g. lambda_tuple_unpacking( lambda x,y: x+y)
+# works in Python 2/3
+def lambda_tuple_unpacking(lam):
+    @functools.wraps(lam)
     def f_inner(args):
-        return f(*args)
+        return lam(*args)
 
     return f_inner
 
@@ -37,8 +41,9 @@ def run_list_to_string(run_list):
         raise IndexError("Too many runs (" + str(len(run_list)) + ") must be <" + str(max_run_list_size))
 
     range_list = []
-    for k, g in groupby(enumerate(run_list), key=star(lambda i, x: i - x)):
-        concurrent_range = list(map(itemgetter(1), g))
+    # use groupby to group run_list into sublists of sequential integers
+    for _, grouped_list in groupby(enumerate(run_list), key=lambda_tuple_unpacking(lambda i, x: i - x)):
+        concurrent_range = list(map(itemgetter(1), grouped_list))
         if len(concurrent_range) > 1:
             range_list += [str(concurrent_range[0]) + range_separator + str(concurrent_range[-1])]
         else:

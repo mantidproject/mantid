@@ -8,10 +8,11 @@ class MuonLoadData:
 
     - Can be extended to add as many parameters as needed; all getting/setting is done through keyword arguments.
     - Can be used as an iterator, with elements being dictionaries of parameter:value pairs.
+        see for example Iterator Types (https://docs.python.org/3/library/stdtypes.html)
 
     The keywords in all methods are "greedy" and will match any entries, with an OR like behaviour for
-    multiple keywords. So for example "run=1234, filename ="file.nxs" would match to an entry with run=1234 or
-    filename = "file2.nxs".
+    multiple keywords. So for example "run=1234, filename ="file.nxs" would match to an entry with run=1234 OR
+    filename = "file.nxs".
 
     - Clients responsibility to prevent duplicated entries.
     - Clients responsibility to ensure the entries are correct (i.e. no validation is performed).
@@ -28,6 +29,8 @@ class MuonLoadData:
         """
         self.params = {"run": [], "workspace": [], "filename": []}
         self.defaults = {"run": 0, "workspace": [], "filename": ""}
+        if self.params.keys() != self.defaults.keys():
+            raise AttributeError("params and defaults dictionaries do not have the same keys.")
 
     def __iter__(self):
         self._n = -1
@@ -41,6 +44,7 @@ class MuonLoadData:
         else:
             raise StopIteration
 
+    # for Python 2/3 compatibility
     next = __next__
 
     # Getters
@@ -68,23 +72,31 @@ class MuonLoadData:
     def clear(self):
         self.params = {key: [] for key, _ in self.params.items()}
 
+    def remove_nth_last_entry(self, n):
+        """Remove the nth last entry given to the instance by add_data, n=1 refers to the most
+        recently added."""
+        keep_indices = [i for i in range(self.num_items()) if i != self.num_items() - n]
+        for key, vals in self.params.items():
+            self.params[key] = [vals[i] for i in keep_indices]
+
     def remove_current_data(self):
         """Remove the most recently added data item"""
-        indices = [i for i in range(self.num_items()) if i != self.num_items() - 1]
-        for key, vals in self.params.items():
-            self.params[key] = [vals[i] for i in indices]
+        self.remove_nth_last_entry(1)
 
     def remove_last_added_data(self):
         """Remove the data item before the current one"""
-        indices = [i for i in range(self.num_items()) if i != self.num_items() - 2]
-        for key, vals in self.params.items():
-            self.params[key] = [vals[i] for i in indices]
+        self.remove_nth_last_entry(2)
 
     # Searching
 
     def _matches(self, **kwargs):
+        # If kwarg given which is not in params default checks to True, as we want to
+        # match to every data item in that case
         checks = [kwargs.get(key, True) for key in self.params.keys()]
-        return [True if sum([x == y for (x, y) in zip(list(args), checks)]) > 0 else False for args in
+        return [True if
+                sum([data_value == search_value for (data_value, search_value) in zip(list(data_values), checks)]) > 0
+                else False
+                for data_values in
                 zip(*self.params.values())]
 
     def contains_n(self, **kwargs):

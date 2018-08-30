@@ -40,15 +40,16 @@ def get_current_run_filename(instrument):
     if instrument_directory is None:
         return ""
 
-    autosave_file = os.sep + os.sep + instrument_directory + os.sep + "data" + os.sep + "autosave.run"
+    autosave_file_name = _instrument_data_directory(instrument) + os.sep + "autosave.run"
     autosave_points_to = ""
-    if not check_file_exists(autosave_file):
-        raise ValueError("Cannot find file : " + autosave_file)
-    with open(autosave_file, 'r') as f:
-        for line in f:
-            if len(line.split('.')) == 2:
+    if not check_file_exists(autosave_file_name):
+        raise ValueError("Cannot find file : " + autosave_file_name)
+    with open(autosave_file_name, 'r') as autosave_file:
+        for line in autosave_file:
+            if os.path.isfile(line):
                 autosave_points_to = line
     if autosave_points_to == "":
+        # Default to auto_A (replicates MuonAnalysis 1.0 behaviour)
         current_run_filename = os.sep + os.sep + instrument_directory + os.sep + "data" \
                                + os.sep + instrument_directory + "auto_A.tmp"
     else:
@@ -61,25 +62,50 @@ def format_run_for_file(run):
     return "{0:08d}".format(run)
 
 
+def _instrument_data_directory(instrument):
+    """The directory which stores the data for a particular instrument"""
+    return os.sep + os.sep + get_instrument_directory(instrument) + os.sep + "data"
+
+
 def file_path_for_instrument_and_run(instrument, run):
     """Returns the path to the data file for a given instrument/run"""
-    base_dir = os.sep + os.sep + get_instrument_directory(instrument) + os.sep + "data"
+    base_dir = _instrument_data_directory(instrument)
     file_name = instrument + format_run_for_file(run) + ".nxs"
     return base_dir.lower() + os.sep + file_name
 
 
+def remove_duplicated_files_from_list(file_list):
+    """
+    Split filenames from their paths, and remove duplicates, keeping the
+    first ocurrence in the list.
+
+    Example
+
+    input :
+        ["C:\dir1\file1.nxs","C:\dir1\file2.nxs","C:\dir1\dir2\file1.nxs"]
+
+    output :
+        ["C:\dir1\file1.nxs","C:\dir1\file2.nxs"]
+    """
+    files = [os.path.basename(full_path) for full_path in file_list]
+    unique_files = [file_list[n] for n, file_name in enumerate(files) if file_name not in files[:n]]
+    return unique_files
+
+
 def parse_user_input_to_files(input_text, extensions=allowed_extensions):
-    """Parse user input from load file widget into list of filenames."""
+    """
+    Parse user input from load file widget into list of filenames.
+
+    Example
+
+    input_text = "C:\dir1\dir2\file1.nxs;C:\dir1\file2.nxs"
+
+    output :
+        ["file1.nxs", "file2.nxs"]
+    """
     input_list = input_text.split(";")
     filenames = []
     for text in input_list:
         if os.path.splitext(text)[-1].lower() in ["." + ext for ext in extensions]:
             filenames += [text]
     return filenames
-
-
-def remove_duplicated_files_from_list(file_list):
-    # first occurrence of a given file is taken
-    files = [os.path.basename(full_path) for full_path in file_list]
-    unique_files = [file_list[n] for n, file_name in enumerate(files) if file_name not in files[:n]]
-    return unique_files

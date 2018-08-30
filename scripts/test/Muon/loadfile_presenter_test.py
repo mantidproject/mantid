@@ -1,6 +1,5 @@
-import sys
-import time
 import six
+import sys
 import unittest
 
 if sys.version_info.major == 3:
@@ -8,23 +7,12 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+from PyQt4.QtGui import QApplication
+
 from Muon.GUI.MuonAnalysis.loadfile.load_file_view import BrowseFileWidgetView
 from Muon.GUI.MuonAnalysis.loadfile.load_file_presenter import BrowseFileWidgetPresenter
 from Muon.GUI.MuonAnalysis.loadfile.load_file_model import BrowseFileWidgetModel
-
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-
-from PyQt4.QtGui import QApplication
-
-
-def wait_for_thread(thread, timeout=10):
-    print("waiting")
-    start = time.time()
-    while (time.time() - start < timeout):
-        time.sleep(0.1)
-        if thread.isFinished():
-            return True
-    return False
 
 
 class IteratorWithException:
@@ -55,7 +43,7 @@ class IteratorWithException:
     next = __next__
 
 
-# Gobal QApplication (get errors if >1 in the code)
+# global QApplication (get errors if > 1 instance in the code)
 QT_APP = QApplication([])
 
 
@@ -75,18 +63,16 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
-        self.view = mock.create_autospec(BrowseFileWidgetView, spec_set=True)
+        self.view = BrowseFileWidgetView()
 
-        # self.mock_view = BrowseFileWidgetView()
         self.view.on_browse_clicked = mock.Mock()
         self.view.set_file_edit = mock.Mock()
+        self.view.reset_edit_to_cached_value = mock.Mock()
         self.view.show_file_browser_and_return_selection = mock.Mock(
             return_value=["C:/dir1/file1.nxs", "C:/dir2/file2.nxs"])
 
-        # self.model = mock.create_autospec(BrowseFileWidgetModel, spec_set=True)
         self.data = MuonLoadData()
         self.model = BrowseFileWidgetModel(self.data)
-        # self.model.execute = mock.Mock()
         self.model.exception_message_for_failed_files = mock.Mock()
 
         self.view.disable_load_buttons = mock.Mock()
@@ -104,6 +90,13 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
     def mock_model_to_load_workspaces(self, workspaces, runs):
         self.model.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs))
+
+    def load_workspaces_into_model_and_view_from_browse(self, workspaces, runs, files):
+        self.mock_model_to_load_workspaces(workspaces, runs)
+        self.mock_browse_button_to_return_files(files)
+
+        self.presenter.on_browse_button_clicked()
+        self.Runner(self.presenter._load_thread)
 
     def load_failure(self):
         raise ValueError("Error text")
@@ -237,12 +230,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.reset_edit_to_cached_value.call_count, 0)
 
     def test_that_view_reverts_to_previous_text_if_users_supplies_invalid_text(self):
-        self.mock_model_to_load_workspaces([[1]], [1234])
-        self.view.set_file_edit = mock.Mock()
-        self.view.reset_edit_to_cached_value = mock.Mock()
-
-        self.presenter.handle_file_changed_by_user()
-        self.Runner(self.presenter._load_thread)
+        self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         invalid_user_input = ["some random text", "1+1=2", "..."]
 
@@ -257,13 +245,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
             self.assertEqual(self.view.reset_edit_to_cached_value.call_count, call_count)
 
     def test_that_model_and_interface_revert_to_previous_values_if_load_fails_from_browse(self):
-        self.mock_model_to_load_workspaces([[1]], [1234])
-        self.mock_browse_button_to_return_files(["C:/dir1/EMU0001234.nxs"])
-
-        self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
-
-        self.assertEqual(self.model.loaded_filenames, ["C:/dir1/EMU0001234.nxs"])
+        self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
@@ -279,13 +261,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         # self.assertEqual(self.view.get_file_edit_text.calls, "C:/dir1/EMU0001234.nxs")
 
     def test_that_model_and_interface_revert_to_previous_values_if_load_fails_from_user_input(self):
-        self.mock_model_to_load_workspaces([[1]], [1234])
-        self.mock_browse_button_to_return_files(["C:/dir1/EMU0001234.nxs"])
-
-        self.presenter.on_browse_button_clicked()
-        self.Runner(self.presenter._load_thread)
-
-        self.assertEqual(self.model.loaded_filenames, ["C:/dir1/EMU0001234.nxs"])
+        self.load_workspaces_into_model_and_view_from_browse([[1]], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
         self.view.set_file_edit("C:\dir2\EMU000123.nxs")
@@ -326,8 +302,7 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.presenter.enable_multiple_files(True)
 
     def mock_loading_multiple_files_from_browse(self, runs, workspaces, filenames):
-        self.view.show_file_browser_and_return_selection = mock.Mock(
-            return_value=filenames)
+        self.view.show_file_browser_and_return_selection = mock.Mock(return_value=filenames)
         self.model.load_workspace_from_filename = mock.Mock(side_effect=zip(workspaces, runs))
 
     # ------------------------------------------------------------------------------------------------------------------
