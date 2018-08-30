@@ -49,6 +49,10 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
                            WORKING_DIRECTORY ${_working_dir}
                            ENVIRONMENT "${_test_environment}"
                            TIMEOUT ${TESTING_TIMEOUT} )
+    if ( PYUNITTEST_RUN_SERIAL )
+      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
+                             RUN_SERIAL 1 )
+    endif ()
   endforeach ( part ${ARGN} )
 endfunction ()
 
