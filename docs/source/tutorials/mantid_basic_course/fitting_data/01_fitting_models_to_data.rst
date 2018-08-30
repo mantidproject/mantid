@@ -65,7 +65,7 @@ Activating the fitting tools
    ticked.
 
 | What you should now see is something similar to
-| |FirstStartMantidPlotFitting_MBC.PNG|
+| |FirstStartMantidPlotFitting_MBC.png|
 
 Three things happens when you click on the Fit Function toolbar button
 
@@ -297,7 +297,7 @@ matrix normalized to 100.
 .. |RunFitOption.png| image:: /images/RunFitOption.png
 .. |MUSRDataSetFittingResults.png| image:: /images/MUSRDataSetFittingResults.png
    :width: 500px
-.. |FirstStartMantidPlotFitting_MBC.PNG| image:: /images/FirstStartMantidPlotFitting_MBC.PNG
+.. |FirstStartMantidPlotFitting_MBC.png| image:: /images/FirstStartMantidPlotFitting_MBC.png
    :width: 500px
 .. |JustAddedPeak.png| image:: /images/JustAddedPeak.png
    :width: 400px

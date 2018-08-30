@@ -31,14 +31,14 @@ Another way to plot
    actually loading 101 spectra, starting at 100.
 #. Display the matrix window to view the data:
 
-.. figure:: /images/ShowMatrixOfMar11060.PNG
+.. figure:: /images/ShowMatrixOfMar11060.png
    :alt: centre
    :width: 300px
 
 #. In the matrix window highlight rows 0-2 and bring up the right-click
    menu:
 
-.. figure:: /images/300px-MatrixDisplayRightClickOptions.PNG
+.. figure:: /images/300px-MatrixDisplayRightClickOptions.png
    :alt: centre
    :width: 300px
 

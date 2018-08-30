@@ -27,7 +27,7 @@ Surface Plot
 
 Then we get the following surface plot:
 
-.. figure:: /images/ArtSurfacePlotN1.PNG
+.. figure:: /images/ArtSurfacePlotN1.png
    :alt: centre
    :width: 500px
 
@@ -41,14 +41,14 @@ Plot with Value of Chosen Log
 
 and the "Temp" log appears on an axis in place of workspace index:
 
-.. figure:: /images/ArtSurfacePlotT1.PNG
+.. figure:: /images/ArtSurfacePlotT1.png
    :alt: centre
    :width: 500px
 
 Plot with Custom Log
 --------------------
 
-.. figure:: /images/ArtRightGUISurfaceCustomSq1.PNG
+.. figure:: /images/ArtRightGUISurfaceCustomSq1.png
    :alt: centre
    :width: 250px
 
@@ -58,7 +58,7 @@ Plot with Custom Log
 Then one gets the following with custom log "Square" shown in an axis in
 place of Workspace index:
 
-.. figure:: /images/ArtSurfacePlotCSq1.PNG
+.. figure:: /images/ArtSurfacePlotCSq1.png
    :alt: centre
    :width: 500px
 
@@ -79,7 +79,7 @@ Waterfall Plot
 
 Then one gets (after moving the legend to a convenient place):
 
-.. figure:: /images/ArtWaterfallN1.PNG
+.. figure:: /images/ArtWaterfallN1.png
    :alt: centre
    :width: 600px
 
@@ -96,7 +96,7 @@ Plot with Value of Chosen Log
 
 Then one gets (after moving the legend to a convenient place):
 
-.. figure:: /images/ArtWaterfallT1.PNG
+.. figure:: /images/ArtWaterfallT1.png
    :alt: centre
    :width: 600px
 
@@ -116,7 +116,7 @@ Plot with Custom Log
 
 Then one gets (after moving the legend to a convenient place):
 
-.. figure:: /images/ArtWaterfallC1.PNG
+.. figure:: /images/ArtWaterfallC1.png
    :alt: centre
    :width: 600px
 
@@ -125,7 +125,7 @@ The custom log values are shown in the legend.
 Plot of 2 spectra with Custom Log
 ---------------------------------
 
-.. figure:: /images/ArtRightGUIWaterfallCustom2sp1.PNG
+.. figure:: /images/ArtRightGUIWaterfallCustom2sp1.png
    :alt: centre
    :width: 400px
 
@@ -149,5 +149,5 @@ Waterfall plots, but with the appropriate choice of "Plot Type".
 
    {{SlideNavigationLinks|MBC_Displaying_data_2D|Mantid_Basic_Course|MBC_Displaying_data_Formatting}}
 
-.. |centre| image:: /images/ArtWaterfallCustom2sp1.PNG
+.. |centre| image:: /images/ArtWaterfallCustom2sp1.png
    :width: 600px

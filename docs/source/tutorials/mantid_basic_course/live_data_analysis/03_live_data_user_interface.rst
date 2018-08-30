@@ -11,7 +11,7 @@ How to Start a live data stream
 ===============================
 
 To start a live data stream into Mantid you need to use the
-:ref:`StartLiveData` algorithm. You can do this the same
+:ref:`algm-StartLiveData` algorithm. You can do this the same
 way as any other algorithm using the Algorithms toolbox, or you can
 select the Live Data option under the Load button.
 

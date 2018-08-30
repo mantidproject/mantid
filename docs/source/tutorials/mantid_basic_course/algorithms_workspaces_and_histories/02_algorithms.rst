@@ -7,8 +7,8 @@ Algorithms
 Algorithms
 ==========
 
-.. figure:: /images/DemoLocationAlgorithmsPanel_MBC.PNG
-   :alt: DemoLocationAlgorithmsPanel_MBC.PNG
+.. figure:: /images/DemoLocationAlgorithmsPanel_MBC.png
+   :alt: DemoLocationAlgorithmsPanel_MBC.png
 
 Algorithms are the verbs of Mantid - they are the "doing" objects. If
 you want to manipulate your data in any way it will be done through an

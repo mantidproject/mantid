@@ -20,8 +20,8 @@ Here we will show how to visually inspect entire datasets.
 #. Finally, right-clicking on the colour bar and selecting 'Rescale to
    show all' will give a more meaningful result:
 
-.. figure:: /images/ColourFillPlotMar11060.PNG
-   :alt: ColourFillPlotMar11060.PNG
+.. figure:: /images/ColourFillPlotMar11060.png
+   :alt: ColourFillPlotMar11060.png
 
 Plotting from the Matrix View
 =============================
