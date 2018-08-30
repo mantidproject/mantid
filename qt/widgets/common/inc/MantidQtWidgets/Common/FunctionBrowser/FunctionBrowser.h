@@ -49,10 +49,10 @@ class FunctionBrowserSubscriber;
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace QENS {
+namespace Function {
 
-class MANTIDQT_INDIRECT_DLL FunctionBrowser : public QWidget,
-                                              public IFunctionBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser : public QWidget,
+                                                   public IFunctionBrowser {
   Q_OBJECT
 public:
   /// To keep QtProperty and its QtBrowserItem in one place
@@ -366,7 +366,7 @@ private:
   QtProperty *m_selectedProperty;
 };
 
-} // namespace QENS
+} // namespace Function
 } // namespace MantidWidgets
 } // namespace MantidQt
 

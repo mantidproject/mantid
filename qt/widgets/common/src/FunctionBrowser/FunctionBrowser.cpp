@@ -42,7 +42,7 @@ std::vector<T> getVectorFromProperty(QtProperty *prop,
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace QENS {
+namespace Function {
 
 FunctionBrowser::FunctionBrowser(QWidget *parent) : QWidget(parent) {}
 
@@ -1186,6 +1186,6 @@ void FunctionBrowser::connectEditorCloseToBrowser(
   connect(editor, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
 }
 
-} // namespace QENS
+} // namespace Function
 } // namespace MantidWidgets
 } // namespace MantidQt

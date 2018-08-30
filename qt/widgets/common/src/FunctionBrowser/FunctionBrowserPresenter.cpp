@@ -9,10 +9,10 @@
 
 #include <numeric>
 
-namespace {
-using MantidQt::MantidWidgets::QENS::IFunctionBrowser;
+using MantidQt::MantidWidgets::Function::IFunctionBrowser;
 using MantidQt::MantidWidgets::IFunctionModel;
 
+namespace {
 Mantid::API::IFunction_sptr
 createFunctionFromString(std::string const &functionString) {
   return Mantid::API::FunctionFactory::Instance().createInitialized(
@@ -273,7 +273,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FunctionBrowserPresenter::FunctionBrowserPresenter(
-    QENS::IFunctionBrowser *browser, IFunctionModel *model)
+    IFunctionBrowser *browser, IFunctionModel *model)
     : m_browser(browser), m_model(model),
       m_subscriber(&FunctionBrowserPresenter::g_defaultSubscriber) {
   browser->subscribe(this);
@@ -425,10 +425,6 @@ void FunctionBrowserPresenter::displayParameterMenu(
   bool const isTied = m_model->isParameterTied(parameter);
   bool const isConstrained = m_model->isParameterConstrained(parameter);
   m_browser->displayParameterMenu(isTied, isConstrained);
-}
-
-void FunctionBrowserPresenter::editParameter(std::string const &parameter) {
-  m_subscriber->editParameter(parameter);
 }
 
 void FunctionBrowserPresenter::updateAttributesInBrowser() {
