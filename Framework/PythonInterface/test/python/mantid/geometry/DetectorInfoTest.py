@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import mantid
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
@@ -97,6 +98,38 @@ class DetectorInfoTest(unittest.TestCase):
         info = self._ws.detectorInfo()
         self.assertEquals(type(info.rotation(0)), Quat)
         self.assertEquals(type(info.rotation(1)), Quat)
+
+
+    """
+    ---------------
+    Iteration
+    ---------------
+    """
+
+    def test_iteration_for_isMonitor(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.isMonitor), bool)
+
+    def test_iteration_for_isMasked(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.isMasked), bool)
+
+    def test_iteration_for_twoTheta(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.twoTheta), float)
+
+    def test_iteration_for_position(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.position), V3D)
+
+    def test_iteration_for_rotation(self):
+        info = self._ws.detectorInfo()
+        for detInfo in info:
+            self.assertEquals(type(detInfo.rotation), Quat)
 
 
     """

@@ -181,7 +181,7 @@ namespace CxxTest
         }
         _TS_CATCH_ABORT( { return false; } );
 
-        return (suite() != 0);
+        return (suite() != 0) && !suite()->skipTests();
     }
 
     template<class S>

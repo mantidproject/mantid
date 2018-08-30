@@ -220,6 +220,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/Instrument_fwd.h
+	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
+	inc/MantidGeometry/Instrument/DetectorInfoItem.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
 	inc/MantidGeometry/MDGeometry/HKL.h
@@ -415,6 +417,7 @@ set ( TEST_FILES
 	UnitCellTest.h
 	V3RTest.h
 	XMLInstrumentParameterTest.h
+	DetectorInfoIteratorTest.h
 )
 
 set ( GMOCK_TEST_FILES

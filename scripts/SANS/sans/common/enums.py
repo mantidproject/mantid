@@ -283,7 +283,7 @@ class FitType(object):
 #  SampleShape
 # --------------------------
 @string_convertible
-@serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
+@serializable_enum("Cylinder", "FlatPlate", "Disc")
 class SampleShape(object):
     """
     Defines the sample shape types

@@ -27,8 +27,19 @@ Improvements
 ############
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+- :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 
 Bugfixes
 ########
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD>` now updates peak bin counts.
+
+
+Total Scattering
+----------------
+
+Improvements
+############
+
+- :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+
