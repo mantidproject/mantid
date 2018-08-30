@@ -36,6 +36,8 @@ std::unique_ptr<const Geometry::IObject> createCylinderShape(
   shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
                            boundingBox[1], boundingBox[3], boundingBox[5]);
   shape->getGeometryHandler()->setShapeInfo(std::move(shapeInfo));
+  // Some older compilers (Apple clang 7) don't support copy construction
+  // std::unique_ptr<const T>(const std::ptr<T>&)
   return std::unique_ptr<const Geometry::IObject>(shape.release());
 }
 
