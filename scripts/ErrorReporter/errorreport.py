@@ -62,6 +62,21 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         else:
             self.nonIDShareButton.setEnabled(False)
 
+    def display_message_box(self, title, message, details):
+        msg = QtGui.QMessageBox()
+        msg.setIcon(QtGui.QMessageBox.Warning)
+
+        message_length = len(message)
+
+        # This is to ensure that the QMessage box if wide enough to display nicely.
+        msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
+        msg.setWindowTitle(title)
+        msg.setDetailedText(details)
+        msg.setStandardButtons(QtGui.QMessageBox.Ok)
+        msg.setDefaultButton(QtGui.QMessageBox.Ok)
+        msg.setEscapeButton(QtGui.QMessageBox.Ok)
+        msg.exec_()
+
     @property
     def input_name(self):
         return self.get_simple_line_edit_field(line_edit="input_name_line_edit", expected_type=str)
