@@ -17,6 +17,35 @@ Liquids Reflectometer
 ISIS Reflectometry Interface
 ----------------------------
 
+New
+###
+
+
+
+Improved
+########
+
+- The interface now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+
+Bug fixes
+#########
+
+
+
+Algorithms
+----------
+
+
+New
+###
+
+
+
+Improved
+########
+
+- :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+
 Bug fixes
 #########
 

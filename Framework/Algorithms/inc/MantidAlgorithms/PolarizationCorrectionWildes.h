@@ -91,7 +91,6 @@ private:
                              const WorkspaceMap &inputs,
                              const EfficiencyMap &efficiencies);
 };
-
 } // namespace Algorithms
 } // namespace Mantid
 
