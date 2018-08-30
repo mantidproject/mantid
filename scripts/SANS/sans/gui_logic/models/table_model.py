@@ -67,9 +67,19 @@ class TableModel(object):
     def remove_table_entries(self, rows):
         # For speed rows should be a Set here but don't think it matters for the list sizes involved.
         self._table_entries[:] = [item for i,item in enumerate(self._table_entries) if i not in rows]
+        if not self._table_entries:
+            row_index_model = self.create_empty_row()
+            self.append_table_entry(row_index_model)
+
+    def replace_table_entries(self, row_to_replace_index, rows_to_insert):
+        self.remove_table_entries(row_to_replace_index)
+        for row_entry in reversed(rows_to_insert):
+            self.add_table_entry(row_to_replace_index[0], row_entry)
 
     def clear_table_entries(self):
         self._table_entries = []
+        row_index_model = self.create_empty_row()
+        self.append_table_entry(row_index_model)
 
     def get_number_of_rows(self):
         return len(self._table_entries)
@@ -79,6 +89,11 @@ class TableModel(object):
 
     def is_empty_row(self, row):
         return self._table_entries[row].is_empty()
+
+    @staticmethod
+    def create_empty_row():
+        row = [''] * 16
+        return TableIndexModel(*row)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -134,7 +149,7 @@ class TableIndexModel(object):
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
 
-    def toList(self):
+    def to_list(self):
         return [self.sample_scatter, self._string_period(self.sample_scatter_period), self.sample_transmission,
                 self._string_period(self.sample_transmission_period),self.sample_direct,
                 self._string_period(self.sample_direct_period), self.can_scatter,
