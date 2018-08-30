@@ -89,8 +89,8 @@ Usage
     # to the first parameter field.
     SaveReflectometryAscii(InputWorkspace=ws, Filename=file, LogList=['Title', 'd'])
 
-    if os.path.exists(file):
-      myFile = open(file, 'r')
+    if os.path.exists(file + ".mft"):
+      myFile = open((file + ".mft"), 'r')
       print(myFile.read())
 
 .. testoutput:: SaveReflectometryAscii_general_usage
@@ -125,9 +125,9 @@ Usage
 
 .. testcleanup:: SaveReflectometryAscii_general_usage
 
-   if os.path.exists(file):
+   if os.path.exists(file + ".mft"):
      # Delete file
-     os.remove(file)
+     os.remove(file + ".mft")
 
 .. categories::
 
