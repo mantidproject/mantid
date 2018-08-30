@@ -1,28 +1,36 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import (SimpleShapeMonteCarloAbsorption, Load, ConvertUnits,
-                              CompareWorkspaces, SetSampleMaterial, CreateSampleWorkspace,
+                              CompareWorkspaces, SetSampleMaterial,
                               DeleteWorkspace)
-from mantid.kernel import *
-from mantid.api import *
-
 import unittest
 
 
 class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     def setUp(self):
         red_ws = Load('irs26176_graphite002_red.nxs')
-        red_ws = ConvertUnits(InputWorkspace=red_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
+        red_ws = ConvertUnits(
+            InputWorkspace=red_ws,
+            Target='Wavelength',
+            EMode='Indirect',
+            EFixed=1.845)
+
+        self._red_ws = red_ws
 
         self._arguments = {'ChemicalFormula': 'H2-O',
                            'DensityType': 'Mass Density',
                            'Density': 1.0,
-                           'EventsPerPoint': 200,
+                           'EventsPerPoint': 50,
                            'BeamHeight': 3.5,
                            'BeamWidth': 4.0,
                            'Height': 2.0}
 
-        self._red_ws = red_ws
+        self._annulus_arguments = self._arguments.copy()
+        self._annulus_arguments.update({
+            'InputWorkspace': self._red_ws,
+            'Shape': 'Annulus',
+            'OuterRadius': 2.0
+        })
 
         corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
                                                     Shape='FlatPlate',
@@ -30,7 +38,8 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     Thickness=2.0,
                                                     **self._arguments)
 
-        # store the basic flat plate workspace so it can be compared with others
+        # store the basic flat plate workspace so it can be compared with
+        # others
         self._corrected_flat_plate = corrected
 
     def _test_corrections_workspace(self, corr_ws):
@@ -41,7 +50,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         self.assertEquals(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
-        self.assertEquals(num_hists, 10)
+        self.assertEquals(num_hists, 51)
 
         blocksize = corr_ws.blocksize()
         self.assertEquals(blocksize, 1905)
@@ -76,11 +85,8 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     def test_annulus(self):
         # Test annulus shape
 
-        kwargs = self._arguments
-        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
-                                                    Shape='Annulus',
-                                                    InnerRadius=1.0,
-                                                    OuterRadius=2.0,
+        kwargs = self._annulus_arguments
+        corrected = SimpleShapeMonteCarloAbsorption(InnerRadius=1.0,
                                                     **kwargs)
 
         self._test_corrections_workspace(corrected)
@@ -101,7 +107,10 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                         **kwargs)
 
         # _corrected_flat_plate is with mass density 1.0
-        CompareWorkspaces(self._corrected_flat_plate, corrected_num, Tolerance=1e-6)
+        CompareWorkspaces(
+            self._corrected_flat_plate,
+            corrected_num,
+            Tolerance=1e-6)
         DeleteWorkspace(corrected_num)
 
     def test_material_already_defined(self):
@@ -117,16 +126,24 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                                                     Height=2.0,
                                                     Shape='FlatPlate',
                                                     Width=2.0,
-                                                    Thickness=2.0)
+                                                    Thickness=2.0,
+                                                    MaxScatterPtAttempts=10)
 
         self._test_corrections_workspace(corrected)
-        CompareWorkspaces(self._corrected_flat_plate, corrected, Tolerance=1e-6)
+        CompareWorkspaces(
+            self._corrected_flat_plate,
+            corrected,
+            Tolerance=1e-6)
 
     def test_ILL_reduced(self):
 
         ill_red_ws = Load('ILL/IN16B/091515_red.nxs')
 
-        ill_red_ws = ConvertUnits(ill_red_ws, Target='Wavelength', EMode='Indirect', EFixed=1.845)
+        ill_red_ws = ConvertUnits(
+            ill_red_ws,
+            Target='Wavelength',
+            EMode='Indirect',
+            EFixed=1.845)
 
         kwargs = self._arguments
         corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=ill_red_ws,
@@ -149,9 +166,26 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         DeleteWorkspace(ill_red_ws)
 
+    def test_max_scatter_point_attempts_similar(self):
+        """
+        Tests that an almost identical workspace is yielded when MaxScatterPtAttempts is non-default and not too small.
+        """
+
+        kwargs = self._arguments
+        output_workspace = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+                                                           Shape='FlatPlate',
+                                                           Width=2.0,
+                                                           Thickness=2.0,
+                                                           MaxScatterPtAttempts=3000,
+                                                           **kwargs)
+
+        matching, _ = CompareWorkspaces(
+            self._corrected_flat_plate, output_workspace, Tolerance=1e-6)
+        self.assertEquals(matching, True)
+
     # TODO: add test for powder diffraction data
 
-    # ------------------------------------- Failure Cases ----------------------------------------
+    # ------------------------------------- Failure Cases --------------------
 
     def test_no_chemical_formula(self):
         kwargs = {'InputWorkspace': self._red_ws,
@@ -166,7 +200,8 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                   'Width': 1.4,
                   'Thickness': 2.1}
 
-        self.assertRaises(RuntimeError, SimpleShapeMonteCarloAbsorption, **kwargs)
+        with self.assertRaises(RuntimeError):
+            SimpleShapeMonteCarloAbsorption(**kwargs)
 
     def test_flat_plate_no_params(self):
         # If the shape is flat plate but the relevant parameters haven't been entered this should throw
@@ -181,7 +216,8 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                   'BeamWidth': 4.0,
                   'Shape': 'FlatPlate'}
 
-        self.assertRaises(RuntimeError, SimpleShapeMonteCarloAbsorption, **kwargs)
+        with self.assertRaises(RuntimeError):
+            SimpleShapeMonteCarloAbsorption(**kwargs)
 
     def test_not_in_wavelength(self):
         red_ws_not_wavelength = Load('irs26176_graphite002_red.nxs')
@@ -198,8 +234,36 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
                   'Width': 1.4,
                   'Thickness': 2.1}
 
-        self.assertRaises(RuntimeError, SimpleShapeMonteCarloAbsorption, **kwargs)
+        with self.assertRaises(RuntimeError):
+            SimpleShapeMonteCarloAbsorption(**kwargs)
+
         DeleteWorkspace(red_ws_not_wavelength)
+
+    def test_no_max_scatter_point_attempts(self):
+        """
+        Tests that an error is thrown for zero MaxScatterPtAttempts entered.
+        :raise RuntimeError: if MaxScatterPtAttempts is zero
+        """
+
+        kwargs = self._annulus_arguments
+        kwargs['InnerRadius'] = 1.0
+        kwargs['MaxScatterPtAttempts'] = 0
+
+        with self.assertRaises(RuntimeError):
+            SimpleShapeMonteCarloAbsorption(**kwargs)
+
+    def test_small_max_scatter_point_attempts(self):
+        """
+        Tests that an error is thrown for a small MaxScatterPtAttempts if the selected shape is a thin annulus.
+        :raise RuntimeError: if a scatter point is not generated within the shape
+        """
+
+        kwargs = self._annulus_arguments
+        kwargs['InnerRadius'] = 1.99999
+        kwargs['MaxScatterPtAttempts'] = 1
+
+        with self.assertRaises(RuntimeError):
+            SimpleShapeMonteCarloAbsorption(**kwargs)
 
 
 if __name__ == "__main__":
