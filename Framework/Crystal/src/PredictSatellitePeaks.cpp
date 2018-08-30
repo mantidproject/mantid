@@ -7,6 +7,7 @@
 #include "MantidCrystal/PredictSatellitePeaks.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
@@ -30,9 +31,10 @@ DECLARE_ALGORITHM(PredictSatellitePeaks)
 
 /// Initialise the properties
 void PredictSatellitePeaks::init() {
+  auto latticeValidator = boost::make_shared<OrientedLatticeValidator>();
   declareProperty(
       make_unique<WorkspaceProperty<PeaksWorkspace>>("Peaks", "",
-                                                     Direction::Input),
+                                                     Direction::Input, latticeValidator),
       "Workspace of Peaks with orientation matrix that indexed the peaks and "
       "instrument loaded");
 
