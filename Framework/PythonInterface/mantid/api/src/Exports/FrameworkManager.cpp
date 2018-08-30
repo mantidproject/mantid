@@ -1,11 +1,11 @@
 #include "MantidAPI/FrameworkManager.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/reference_existing_object.hpp>
+#include <boost/python/return_value_policy.hpp>
 
-using Mantid::API::FrameworkManagerImpl;
 using Mantid::API::FrameworkManager;
+using Mantid::API::FrameworkManagerImpl;
 using namespace boost::python;
 
 void export_FrameworkManager() {

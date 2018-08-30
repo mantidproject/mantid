@@ -1,10 +1,10 @@
 #ifndef MANTID_CURVEFITTING_PEAKPARAMETERFUNCTION_H_
 #define MANTID_CURVEFITTING_PEAKPARAMETERFUNCTION_H_
 
-#include "MantidCurveFitting/DllConfig.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACEMRUTEST_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACEMRUTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 

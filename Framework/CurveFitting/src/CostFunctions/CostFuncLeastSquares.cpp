@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IConstraint.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Logger.h"
@@ -18,7 +18,7 @@ namespace CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncLeastSquares");
-}
+} // namespace
 
 DECLARE_COSTFUNCTION(CostFuncLeastSquares, Least squares)
 
@@ -369,10 +369,10 @@ void CostFuncLeastSquares::drop() {
 }
 
 /**
-  * Calculates covariance matrix for fitting function's active parameters.
-  * @param covar :: Output cavariance matrix.
-  * @param epsrel :: Tolerance.
-  */
+ * Calculates covariance matrix for fitting function's active parameters.
+ * @param covar :: Output cavariance matrix.
+ * @param epsrel :: Tolerance.
+ */
 void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
                                                      double epsrel) {
   UNUSED_ARG(epsrel);

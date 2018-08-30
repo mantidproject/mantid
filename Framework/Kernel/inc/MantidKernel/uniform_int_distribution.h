@@ -200,13 +200,13 @@ __independent_bits_engine<_Engine, _UIntType>::__independent_bits_engine(
 
 template <class _Engine, class _UIntType>
 inline _UIntType
-    __independent_bits_engine<_Engine, _UIntType>::__eval(std::false_type) {
+__independent_bits_engine<_Engine, _UIntType>::__eval(std::false_type) {
   return static_cast<result_type>(__e_() & __mask0_);
 }
 
 template <class _Engine, class _UIntType>
 _UIntType
-    __independent_bits_engine<_Engine, _UIntType>::__eval(std::true_type) {
+__independent_bits_engine<_Engine, _UIntType>::__eval(std::true_type) {
   const size_t _WRt = std::numeric_limits<result_type>::digits;
   result_type _Sp = 0;
   for (size_t __k = 0; __k < __n0_; ++__k) {
@@ -308,8 +308,8 @@ public:
 template <class _IntType>
 template <class _URNG>
 typename uniform_int_distribution<_IntType>::result_type
-    uniform_int_distribution<_IntType>::
-    operator()(_URNG &__g, const param_type &__p) {
+uniform_int_distribution<_IntType>::operator()(_URNG &__g,
+                                               const param_type &__p) {
   typedef typename std::conditional<sizeof(result_type) <= sizeof(uint32_t),
                                     uint32_t, uint64_t>::type _UIntType;
   const _UIntType _Rp = __p.b() - __p.a() + _UIntType(1);

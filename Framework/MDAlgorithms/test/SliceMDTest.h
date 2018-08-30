@@ -1,12 +1,12 @@
 #ifndef MANTID_MDEVENTS_SLICEMDTEST_H_
 #define MANTID_MDEVENTS_SLICEMDTEST_H_
 
-#include "MantidKernel/IPropertySettings.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidMDAlgorithms/SliceMD.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -197,9 +197,9 @@ public:
   }
 
   /** Test the algo
-  * @param nameX : name of the axis
-  * @param expectedNumPoints :: how many points in the output
-  */
+   * @param nameX : name of the axis
+   * @param expectedNumPoints :: how many points in the output
+   */
   template <typename MDE, size_t nd>
   void do_test_exec(const std::string &name1, const std::string &name2,
                     const std::string &name3, const std::string &name4,
@@ -300,10 +300,10 @@ public:
 
   /** Test the algorithm, with a coordinate transformation.
    *
-  * @param lengthX : length to keep in each direction
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  */
+   * @param lengthX : length to keep in each direction
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   */
   void do_test_transform(double lengthX, double lengthY, double lengthZ,
                          size_t expected_numBins) {
     SliceMD alg;

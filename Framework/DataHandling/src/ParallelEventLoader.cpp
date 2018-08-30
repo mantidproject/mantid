@@ -3,8 +3,8 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/IO/EventLoader.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidTypes/Event/TofEvent.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace DataHandling {

@@ -4,8 +4,8 @@
 #include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/FixedLengthVector.h"
-#include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Multipliable.h"
+#include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Scalable.h"
 
 namespace Mantid {
@@ -16,7 +16,7 @@ class HistogramY;
 namespace detail {
 template <class Counts, class HistogramY> class VectorOf;
 template <class Frequencies, class HistogramY> class VectorOf;
-}
+} // namespace detail
 
 /** HistogramY
 
@@ -62,8 +62,8 @@ public:
   // the using declaration above, so we need them here explicitly.
   HistogramY(const HistogramY &) = default;
   HistogramY(HistogramY &&) = default;
-  HistogramY &operator=(const HistogramY &)& = default;
-  HistogramY &operator=(HistogramY &&)& = default;
+  HistogramY &operator=(const HistogramY &) & = default;
+  HistogramY &operator=(HistogramY &&) & = default;
   // Multiple inheritance causes ambiguous overload, bring operators into scope.
   using detail::Addable<HistogramY>::operator+;
   using detail::Addable<HistogramY>::operator+=;

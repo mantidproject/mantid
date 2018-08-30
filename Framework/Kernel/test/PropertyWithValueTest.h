@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::Kernel;
 
@@ -445,8 +445,9 @@ public:
     TS_ASSERT_EQUALS(p.isValid(), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS(p.setValue("I'm here"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
-    TS_ASSERT_EQUALS(p.setValue(""),
-                     "A value must be entered for this parameter");
+    TS_ASSERT(
+        p.setValue("").find("A value must be entered for this parameter") !=
+        std::string::npos);
     TS_ASSERT_EQUALS(p.value(), "I'm here");
   }
 
@@ -459,15 +460,16 @@ public:
     PropertyWithValue<int> pi("test", 11,
                               boost::make_shared<BoundedValidator<int>>(1, 10));
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT_EQUALS(pi.setValue("0"), start + "0" + lessThan + "1" + end);
+    TS_ASSERT(pi.setValue("0").find(start + "0" + lessThan + "1" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pi.value(), "11");
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS(pi.setValue("1"), "");
     TS_ASSERT_EQUALS(pi.isValid(), "");
     TS_ASSERT_EQUALS(pi.setValue("10"), "");
     TS_ASSERT_EQUALS(pi.isValid(), "");
-    TS_ASSERT_EQUALS(pi.setValue("11"),
-                     start + "11" + greaterThan + "10" + end);
+    TS_ASSERT(pi.setValue("11").find(start + "11" + greaterThan + "10" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pi.value(), "10");
     TS_ASSERT_EQUALS(pi.isValid(), "");
     std::string errorMsg = pi.setValue("");
@@ -482,15 +484,16 @@ public:
     PropertyWithValue<double> pd(
         "test", 11.0, boost::make_shared<BoundedValidator<double>>(1.0, 10.0));
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT_EQUALS(pd.setValue("0.9"), start + "0.9" + lessThan + "1" + end);
+    TS_ASSERT(pd.setValue("0.9").find(start + "0.9" + lessThan + "1" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pd.value(), "11");
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT_EQUALS(pd.setValue("1"), "");
     TS_ASSERT_EQUALS(pd.isValid(), "");
     TS_ASSERT_EQUALS(pd.setValue("10"), "");
     TS_ASSERT_EQUALS(pd.isValid(), "");
-    TS_ASSERT_EQUALS(pd.setValue("10.1"),
-                     start + "10.1" + greaterThan + "10" + end);
+    TS_ASSERT(pd.setValue("10.1").find(start + "10.1" + greaterThan + "10" +
+                                       end) != std::string::npos);
     TS_ASSERT_EQUALS(pd.value(), "10");
     TS_ASSERT_EQUALS(pd.isValid(), "");
 
@@ -499,14 +502,16 @@ public:
         "test", "",
         boost::make_shared<BoundedValidator<std::string>>("B", "T"));
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
-    TS_ASSERT_EQUALS(ps.setValue("AZ"), start + "AZ" + lessThan + "B" + end);
+    TS_ASSERT(ps.setValue("AZ").find(start + "AZ" + lessThan + "B" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(ps.value(), "");
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
     TS_ASSERT_EQUALS(ps.setValue("B"), "");
     TS_ASSERT_EQUALS(ps.isValid(), "");
     TS_ASSERT_EQUALS(ps.setValue("T"), "");
     TS_ASSERT_EQUALS(ps.isValid(), "");
-    TS_ASSERT_EQUALS(ps.setValue("TA"), start + "TA" + greaterThan + "T" + end);
+    TS_ASSERT(ps.setValue("TA").find(start + "TA" + greaterThan + "T" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(ps.value(), "T");
     TS_ASSERT_EQUALS(ps.isValid(), "");
 
@@ -516,15 +521,16 @@ public:
         boost::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
     TS_ASSERT_EQUALS(pl.isValid(), start + "987987987987" + greaterThan +
                                        "789789789789" + end);
-    TS_ASSERT_EQUALS(pl.setValue("-1"), start + "-1" + lessThan + "0" + end);
+    TS_ASSERT(pl.setValue("-1").find(start + "-1" + lessThan + "0" + end) !=
+              std::string::npos);
     TS_ASSERT_EQUALS(pl.value(), "987987987987");
     TS_ASSERT_EQUALS(pl.setValue("0"), "");
     TS_ASSERT_EQUALS(pl.isValid(), "");
     TS_ASSERT_EQUALS(pl.setValue("789789789789"), "");
     TS_ASSERT_EQUALS(pl.isValid(), "");
-    TS_ASSERT_EQUALS(pl.setValue("789789789790"), start + "789789789790" +
-                                                      greaterThan +
-                                                      "789789789789" + end);
+    TS_ASSERT(pl.setValue("789789789790")
+                  .find(start + "789789789790" + greaterThan + "789789789789" +
+                        end) != std::string::npos);
     TS_ASSERT_EQUALS(pl.value(), "789789789789");
   }
 
@@ -545,9 +551,9 @@ public:
     TS_ASSERT_EQUALS(p.isValid(), "");
     TS_ASSERT_EQUALS(p.setValue("two"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
-    TS_ASSERT_EQUALS(
-        p.setValue("three"),
-        "The value \"three\" is not in the list of allowed values");
+    TS_ASSERT(p.setValue("three").find(
+                  "The value \"three\" is not in the list of allowed values") !=
+              std::string::npos);
     TS_ASSERT_EQUALS(p.value(), "two");
     TS_ASSERT_EQUALS(p.isValid(), "");
     std::vector<std::string> s;

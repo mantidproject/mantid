@@ -1,11 +1,11 @@
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Algorithm.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/init.hpp>
 
-using Mantid::API::Progress;
 using Mantid::API::Algorithm;
+using Mantid::API::Progress;
 using Mantid::Kernel::ProgressBase;
 using namespace boost::python;
 

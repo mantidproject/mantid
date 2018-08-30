@@ -156,9 +156,10 @@ void Matrix::initTable(int rows, int cols) {
   initTableView();
 
   // resize the table
-  setGeometry(50, 50, qMin(_Matrix_initial_columns_, cols) *
-                              d_table_view->horizontalHeader()->sectionSize(0) +
-                          55,
+  setGeometry(50, 50,
+              qMin(_Matrix_initial_columns_, cols) *
+                      d_table_view->horizontalHeader()->sectionSize(0) +
+                  55,
               (qMin(_Matrix_initial_rows_, rows) + 1) *
                   d_table_view->verticalHeader()->sectionSize(0));
 }
@@ -647,9 +648,9 @@ void Matrix::pasteSelection() {
 
   double *clipboardBuffer = (double *)malloc(rows * cols * sizeof(double));
   if (!clipboardBuffer) {
-    QMessageBox::critical(this, tr("MantidPlot") + " - " +
-                                    tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        this, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
     QApplication::restoreOverrideCursor();
     return;
   }
@@ -1081,9 +1082,9 @@ void Matrix::range(double *min, double *max) {
 double **Matrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
-    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                       tr("Memory Allocation Error"),
-                          tr("Not enough memory, operation aborted!"));
+    QMessageBox::critical(
+        nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+        tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
 
@@ -1094,9 +1095,9 @@ double **Matrix::allocateMatrixData(int rows, int columns) {
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                         tr("Memory Allocation Error"),
-                            tr("Not enough memory, operation aborted!"));
+      QMessageBox::critical(
+          nullptr, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
+          tr("Not enough memory, operation aborted!"));
       return nullptr;
     }
   }
@@ -1192,8 +1193,9 @@ void Matrix::displayImage(const QImage &image) {
   QImage im(imageLabel->size(), QImage::Format_RGB32);
   im.fill(0);
   QPainter p(&im);
-  p.drawImage(0, 0, image.scaled(imageLabel->size(), Qt::KeepAspectRatio,
-                                 Qt::SmoothTransformation));
+  p.drawImage(0, 0,
+              image.scaled(imageLabel->size(), Qt::KeepAspectRatio,
+                           Qt::SmoothTransformation));
   p.end();
   imageLabel->setPixmap(QPixmap::fromImage(im));
 }
@@ -1389,8 +1391,8 @@ QwtDoubleRect Matrix::boundingRect() {
 
   return QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
                        qMin(y_start, y_end) - 0.5 * dy,
-                       fabs(x_end - x_start) + dx,
-                       fabs(y_end - y_start) + dy).normalized();
+                       fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
+      .normalized();
 }
 
 void Matrix::fft(bool inverse) {
@@ -1415,7 +1417,8 @@ bool Matrix::exportASCII(const QString &fname, const QString &separator,
     QMessageBox::critical(
         this, tr("MantidPlot - ASCII Export Error"),
         tr("Could not write to file: <br><h4>%1</h4><p>Please verify that you "
-           "have the right to write to this location!").arg(fname));
+           "have the right to write to this location!")
+            .arg(fname));
     return false;
   }
 
@@ -1652,8 +1655,8 @@ std::string Matrix::saveToProject(ApplicationWindow *app) {
   MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<matrix>");
-  tsv.writeLine(objectName().toStdString()) << numRows() << numCols()
-                                            << birthDate();
+  tsv.writeLine(objectName().toStdString())
+      << numRows() << numCols() << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));
 
   tsv.writeLine("ColWidth") << d_column_width;

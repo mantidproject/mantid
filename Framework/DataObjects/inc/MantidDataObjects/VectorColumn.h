@@ -5,8 +5,8 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace DataObjects {

@@ -5,8 +5,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-using Mantid::API::Workspace_sptr;
 using Mantid::API::WorkspaceGroup;
+using Mantid::API::Workspace_sptr;
 
 namespace Mantid {
 namespace DataHandling {
@@ -73,5 +73,5 @@ void LoadNexusMonitors::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // end DataHandling
-} // end Mantid
+} // namespace DataHandling
+} // namespace Mantid

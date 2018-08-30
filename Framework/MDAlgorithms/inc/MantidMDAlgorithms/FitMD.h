@@ -14,7 +14,7 @@ class FunctionDomainMD;
 class IMDWorkspace;
 class IMDEventWorkspace;
 class IMDHistoWorkspace;
-}
+} // namespace API
 
 namespace MDAlgorithms {
 /**

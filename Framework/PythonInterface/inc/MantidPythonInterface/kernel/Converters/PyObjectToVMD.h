@@ -46,8 +46,8 @@ private:
   /// Is the object a wrapped instance of VMD
   bool m_alreadyVMD;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINERFACE_PYOBJECTTOVMD_H_ */

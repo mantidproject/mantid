@@ -4,12 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
+#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidBeamline/SpectrumInfo.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -24,7 +25,7 @@ constexpr size_t GroupOfDets1And2 = 1;
 constexpr size_t GroupOfDets1And4 = 2;
 constexpr size_t GroupOfDets4And5 = 3;
 constexpr size_t GroupOfAllDets = 4;
-}
+} // namespace
 
 class SpectrumInfoTest : public CxxTest::TestSuite {
 public:
@@ -481,6 +482,103 @@ public:
     det2group_map mapping{{1, {1, 2}}};
     TS_ASSERT_THROWS(m_workspace.cacheDetectorGroupings(mapping),
                      std::runtime_error);
+  }
+
+  /**
+   * Tests for Iterator Functionality
+   **/
+
+  void test_iterator_begin() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Check we start at the correct place
+    TS_ASSERT(iter != spectrumInfo.end());
+  }
+
+  void test_iterator_end() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.end();
+
+    // Check we start at the correct place
+    TS_ASSERT(iter != spectrumInfo.begin());
+  }
+
+  void test_iterator_increment_and_hasUniqueDetector() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Check that we start at the beginning
+    TS_ASSERT(iter == spectrumInfo.begin());
+
+    // Increment iterator and check hasUniqueDetector
+    for (size_t i = 0; i < m_workspace.spectrumInfo().size(); ++i) {
+      TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+      ++iter;
+    }
+
+    // Check we've reached the end
+    TS_ASSERT(iter == spectrumInfo.end());
+  }
+
+  void test_iterator_decrement_and_hasUniqueDetector() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.end();
+
+    // Check that we start at the end
+    TS_ASSERT(iter == spectrumInfo.end());
+
+    // Decrement iterator and check hasUniqueDetector
+    for (size_t i = m_workspace.spectrumInfo().size(); i > 0; --i) {
+      --iter;
+      TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+    }
+
+    // Check we've reached the beginning
+    TS_ASSERT(iter == spectrumInfo.begin());
+  }
+
+  void test_iterator_advance_and_hasUniqueDetector() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Advance 3 places
+    std::advance(iter, 3);
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+
+    // Go backwards
+    std::advance(iter, -2);
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+
+    // Go to the start
+    std::advance(iter, -1);
+    TS_ASSERT(iter == spectrumInfo.begin());
+  }
+
+  void test_copy_iterator_and_hasUniqueDetector() {
+    // Get the SpectrumInfo object
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    auto iter = spectrumInfo.begin();
+
+    // Create a copy
+    auto iterCopy = SpectrumInfoIterator(iter);
+
+    // Check
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+    TS_ASSERT_EQUALS(iterCopy->hasUniqueDetector(), true);
+
+    // Increment
+    ++iter;
+    ++iterCopy;
+
+    // Check again
+    TS_ASSERT_EQUALS(iter->hasUniqueDetector(), true);
+    TS_ASSERT_EQUALS(iterCopy->hasUniqueDetector(), true);
   }
 
 private:

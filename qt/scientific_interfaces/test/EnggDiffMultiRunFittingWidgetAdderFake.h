@@ -17,7 +17,7 @@ operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) {
   UNUSED_ARG(owner);
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETADDER_H_

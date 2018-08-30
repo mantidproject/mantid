@@ -175,9 +175,9 @@
 #define VALGRIND_DO_CLIENT_REQUEST_STMT(_zzq_request, _zzq_arg1, _zzq_arg2,    \
                                         _zzq_arg3, _zzq_arg4, _zzq_arg5)       \
   do {                                                                         \
-    (void) VALGRIND_DO_CLIENT_REQUEST_EXPR(0, (_zzq_request), (_zzq_arg1),     \
-                                           (_zzq_arg2), (_zzq_arg3),           \
-                                           (_zzq_arg4), (_zzq_arg5));          \
+    (void)VALGRIND_DO_CLIENT_REQUEST_EXPR(0, (_zzq_request), (_zzq_arg1),      \
+                                          (_zzq_arg2), (_zzq_arg3),            \
+                                          (_zzq_arg4), (_zzq_arg5));           \
   } while (0)
 
 #if defined(NVALGRIND)
@@ -232,7 +232,9 @@
 #if defined(PLAT_x86_linux) || defined(PLAT_x86_darwin) ||                     \
     (defined(PLAT_x86_win32) && defined(__GNUC__))
 
-typedef struct { unsigned int nraddr; /* where's the code? */ } OrigFn;
+typedef struct {
+  unsigned int nraddr; /* where's the code? */
+} OrigFn;
 
 #define __SPECIAL_INSTRUCTION_PREAMBLE                                         \
   "roll $3,  %%edi ; roll $13, %%edi\n\t"                                      \
@@ -281,7 +283,9 @@ typedef struct { unsigned int nraddr; /* where's the code? */ } OrigFn;
 
 #if defined(PLAT_x86_win32) && !defined(__GNUC__)
 
-typedef struct { unsigned int nraddr; /* where's the code? */ } OrigFn;
+typedef struct {
+  unsigned int nraddr; /* where's the code? */
+} OrigFn;
 
 #if defined(_MSC_VER)
 
@@ -314,7 +318,8 @@ valgrind_do_client_request_expr(uintptr_t _zzq_default, uintptr_t _zzq_request,
     /* %EDX = client_request ( %EAX ) */
             __asm xchg ebx,ebx
             __asm mov _zzq_result, edx
-  } return _zzq_result;
+  }
+  return _zzq_result;
 }
 
 #define VALGRIND_GET_NR_CONTEXT(_zzq_rlval)                                    \
@@ -323,7 +328,8 @@ valgrind_do_client_request_expr(uintptr_t _zzq_default, uintptr_t _zzq_request,
     volatile unsigned int __addr;                                              \
     __asm { __SPECIAL_INSTRUCTION_PREAMBLE /* %EAX = guest_NRADDR */                             \
             __asm xchg ecx,ecx                                    \
-            __asm mov __addr, eax} _zzq_orig->nraddr = __addr;              \
+            __asm mov __addr, eax}                                          \
+    _zzq_orig->nraddr = __addr;                                                \
   }
 
 #define VALGRIND_CALL_NOREDIR_EAX ERROR
@@ -334,7 +340,7 @@ valgrind_do_client_request_expr(uintptr_t _zzq_default, uintptr_t _zzq_request,
 
 #endif /* PLAT_x86_win32 */
 
-/* ------------------------ amd64-{linux,darwin} --------------- */
+  /* ------------------------ amd64-{linux,darwin} --------------- */
 
 #if defined(PLAT_amd64_linux) || defined(PLAT_amd64_darwin)
 
@@ -389,7 +395,9 @@ typedef struct {
 
 #if defined(PLAT_ppc32_linux)
 
-typedef struct { unsigned int nraddr; /* where's the code? */ } OrigFn;
+typedef struct {
+  unsigned int nraddr; /* where's the code? */
+} OrigFn;
 
 #define __SPECIAL_INSTRUCTION_PREAMBLE                                         \
   "rlwinm 0,0,3,0,0  ; rlwinm 0,0,13,0,0\n\t"                                  \
@@ -513,7 +521,9 @@ typedef struct {
 
 #if defined(PLAT_arm_linux)
 
-typedef struct { unsigned int nraddr; /* where's the code? */ } OrigFn;
+typedef struct {
+  unsigned int nraddr; /* where's the code? */
+} OrigFn;
 
 #define __SPECIAL_INSTRUCTION_PREAMBLE                                         \
   "mov r12, r12, ror #3  ; mov r12, r12, ror #13 \n\t"                         \
@@ -631,7 +641,9 @@ typedef struct {
 
 #if defined(PLAT_mips32_linux)
 
-typedef struct { unsigned int nraddr; /* where's the code? */ } OrigFn;
+typedef struct {
+  unsigned int nraddr; /* where's the code? */
+} OrigFn;
 
 /* .word  0x342
  * .word  0x742
@@ -4073,7 +4085,7 @@ typedef enum {
    running under Valgrind which is running under another Valgrind,
    etc. */
 #define RUNNING_ON_VALGRIND                                                    \
-  (unsigned) VALGRIND_DO_CLIENT_REQUEST_EXPR(                                  \
+  (unsigned)VALGRIND_DO_CLIENT_REQUEST_EXPR(                                   \
       0 /* if not */, VG_USERREQ__RUNNING_ON_VALGRIND, 0, 0, 0, 0, 0)
 
 /* Discard translation of code in the range [_qzz_addr .. _qzz_addr +
@@ -4203,7 +4215,7 @@ static int
    the tool must record the errors with VG_(maybe_record_error)() or
    VG_(unique_error)() for them to be counted. */
 #define VALGRIND_COUNT_ERRORS                                                  \
-  (unsigned) VALGRIND_DO_CLIENT_REQUEST_EXPR(                                  \
+  (unsigned)VALGRIND_DO_CLIENT_REQUEST_EXPR(                                   \
       0 /* default return */, VG_USERREQ__COUNT_ERRORS, 0, 0, 0, 0, 0)
 
 /* Several Valgrind tools (Memcheck, Massif, Helgrind, DRD) rely on knowing
@@ -4360,13 +4372,13 @@ static int
 
 /* Return 1 if a mempool exists, else 0. */
 #define VALGRIND_MEMPOOL_EXISTS(pool)                                          \
-  (unsigned) VALGRIND_DO_CLIENT_REQUEST_EXPR(0, VG_USERREQ__MEMPOOL_EXISTS,    \
-                                             pool, 0, 0, 0, 0)
+  (unsigned)VALGRIND_DO_CLIENT_REQUEST_EXPR(0, VG_USERREQ__MEMPOOL_EXISTS,     \
+                                            pool, 0, 0, 0, 0)
 
 /* Mark a piece of memory as being a stack. Returns a stack id. */
 #define VALGRIND_STACK_REGISTER(start, end)                                    \
-  (unsigned) VALGRIND_DO_CLIENT_REQUEST_EXPR(0, VG_USERREQ__STACK_REGISTER,    \
-                                             start, end, 0, 0, 0)
+  (unsigned)VALGRIND_DO_CLIENT_REQUEST_EXPR(0, VG_USERREQ__STACK_REGISTER,     \
+                                            start, end, 0, 0, 0)
 
 /* Unmark the piece of memory associated with a stack id as being a
    stack. */
@@ -4388,8 +4400,8 @@ static int
    result will be dumped in there and is guaranteed to be zero
    terminated.  If no info is found, the first byte is set to zero. */
 #define VALGRIND_MAP_IP_TO_SRCLOC(addr, buf64)                                 \
-  (unsigned) VALGRIND_DO_CLIENT_REQUEST_EXPR(0, VG_USERREQ__MAP_IP_TO_SRCLOC,  \
-                                             addr, buf64, 0, 0, 0)
+  (unsigned)VALGRIND_DO_CLIENT_REQUEST_EXPR(0, VG_USERREQ__MAP_IP_TO_SRCLOC,   \
+                                            addr, buf64, 0, 0, 0)
 
 /* Disable error reporting for this thread.  Behaves in a stack like
    way, so you can safely call this multiple times provided that

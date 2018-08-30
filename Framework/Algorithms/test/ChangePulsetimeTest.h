@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
 #define MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,7 +34,7 @@ execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
   EventWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
   return out_ws;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------
 // Unit Tests

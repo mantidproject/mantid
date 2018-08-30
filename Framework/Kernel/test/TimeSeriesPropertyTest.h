@@ -1,17 +1,17 @@
 #ifndef TIMESERIESPROPERTYTEST_H_
 #define TIMESERIESPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
-#include <cmath>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -619,14 +619,6 @@ public:
     const double intMean = intLog->timeAverageValue();
     TS_ASSERT_DELTA(intMean, 2.5, .0001);
 
-    // average is unchanged, standard deviation within tolerance
-    const auto dblPair = dblLog->timeAverageValueAndStdDev();
-    TS_ASSERT_EQUALS(dblPair.first, dblMean);
-    TS_ASSERT_DELTA(dblPair.second, 1.8156, .0001);
-    const auto intPair = intLog->timeAverageValueAndStdDev();
-    TS_ASSERT_EQUALS(intPair.first, intMean);
-    TS_ASSERT_DELTA(intPair.second, 1.1180, .0001);
-
     // Clean up
     delete dblLog;
     delete intLog;
@@ -843,8 +835,7 @@ public:
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.push_back(new TimeSeriesProperty<int>("target"));
     }
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
@@ -853,6 +844,8 @@ public:
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 0);
+      delete out_i;
+      outputs[i] = nullptr;
     }
 
     return;
@@ -897,8 +890,7 @@ public:
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
     }
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
@@ -907,6 +899,8 @@ public:
     for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 1);
+      delete out_i;
+      outputs[i] = nullptr;
     }
   }
 
@@ -949,39 +943,18 @@ public:
     // Initialze the 10 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 10; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.push_back(new TimeSeriesProperty<int>("target"));
     }
-
-    /*
-    size_t num_splits = vec_split_target.size();
-    for (size_t i = 0; i < num_splits; ++i) {
-      std::cout << "s[" << i << "]  start = " << vec_split_times[i]
-                << ", stop = " << vec_split_times[i + 1]
-                << ":  target = " << vec_split_target[i] << "\n";
-    }
-    */
 
     // split time series property
     log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
-    // TODO/FIXME/ - continue to debug from here!
-    /*
-    TimeSeriesProperty<int> *out0 = outputs[0];
-    for (int i = 0; i < out0->size(); ++i) {
-      std::cout << i << "-th: " << out0->nthTime(i) << ", " << out0->nthValue(i)
-                << "\n";
-    }
-    */
-
     // test
-    for (auto it : outputs) {
+    for (auto &it : outputs) {
       TS_ASSERT_EQUALS(it->size(), 2);
-    }
-
-    // cleanup
-    for (auto &it : outputs)
       delete it;
+      it = nullptr;
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -1013,18 +986,26 @@ public:
 
     // create the target vector
     std::vector<int> split_target_vec(5);
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t i = 0; i < 5; ++i) {
       split_target_vec[i] = (i + 1) % 2;
+    }
 
     // Initialze the 2 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 2; ++itarget) {
-      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.push_back(new TimeSeriesProperty<int>("target"));
     }
 
     // split
     int_log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    // check
+    for (int i = 0; i < 2; ++i) {
+      TimeSeriesProperty<int> *out_i = outputs[i];
+      TS_ASSERT_EQUALS(out_i->size(), 1);
+      delete out_i;
+      outputs[i] = nullptr;
+    }
 
     return;
   }
@@ -1055,6 +1036,8 @@ public:
     TS_ASSERT_DELTA(stats.duration, 100.0, 1e-3);
     TS_ASSERT_DELTA(stats.standard_deviation, 3.1622, 1e-3);
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_mean, 5.5, 1e-3);
+    TS_ASSERT_DELTA(stats.time_standard_deviation, 2.872, 1e-3);
 
     delete log;
   }
@@ -1068,6 +1051,8 @@ public:
     TS_ASSERT(std::isnan(stats.median));
     TS_ASSERT(std::isnan(stats.mean));
     TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.time_mean));
+    TS_ASSERT(std::isnan(stats.time_standard_deviation));
     TS_ASSERT(std::isnan(stats.duration));
 
     delete log;
@@ -1971,9 +1956,9 @@ public:
   }
 
   /*
-    * Test filterWith() on different boundary conditions
-    * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
-    */
+   * Test filterWith() on different boundary conditions
+   * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
+   */
   void test_filterBoundary2() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
@@ -2023,9 +2008,9 @@ public:
   }
 
   /*
-    * Test filterWith() on different boundary conditions
-    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
-    */
+   * Test filterWith() on different boundary conditions
+   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
+   */
   void test_filterBoundary3() {
     // 1. Create a base property
     Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
@@ -2085,7 +2070,7 @@ public:
   /*
    * Test filterWith() on different boundary conditions
    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
-  */
+   */
 
   void test_filterBoundary4() {
     // 1. Create a base property
@@ -2259,7 +2244,7 @@ public:
   //----------------------------------------------------------------------------
 
   /** A test for filter nothing
-    */
+   */
   void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 

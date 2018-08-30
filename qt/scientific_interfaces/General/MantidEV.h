@@ -1,17 +1,17 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 #define MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 
-#include <QWidget>
+#include <Poco/NObserver.h>
 #include <QActionGroup>
 #include <QRunnable>
-#include <Poco/NObserver.h>
+#include <QWidget>
 
 #include <MantidKernel/System.h>
 
-#include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_MantidEV.h"
 
 class QSettings;
 class QThreadPool;

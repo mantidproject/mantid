@@ -1,16 +1,16 @@
 #include "MantidAlgorithms/ChangeTimeZero.h"
-#include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidAlgorithms/ChangePulsetime.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/ChangePulsetime.h"
+#include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
@@ -39,7 +39,7 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
   }
   return isTimeSeries;
 }
-}
+} // namespace
 
 /** Initialize the algorithm's properties.
  */
@@ -357,5 +357,5 @@ bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
   return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <string>
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <string>
 
 using Mantid::Algorithms::SetInstrumentParameter;
 
@@ -153,14 +153,9 @@ public:
   void test_bool() {
     const std::string paramName = "TestParam";
     const std::string paramType = "Bool";
-    const std::map<std::string, bool> paramValues = {{"true", true},
-                                                     {"TRUE", true},
-                                                     {"True", true},
-                                                     {"1", true},
-                                                     {"false", false},
-                                                     {"FALSE", false},
-                                                     {"False", false},
-                                                     {"0", false}};
+    const std::map<std::string, bool> paramValues = {
+        {"true", true},   {"TRUE", true},   {"True", true},   {"1", true},
+        {"false", false}, {"FALSE", false}, {"False", false}, {"0", false}};
 
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);

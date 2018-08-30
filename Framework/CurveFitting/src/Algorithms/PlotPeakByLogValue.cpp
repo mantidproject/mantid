@@ -1,33 +1,33 @@
+#include <MantidKernel/StringTokenizer.h>
+#include <algorithm>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cmath>
-#include <vector>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
-#include <MantidKernel/StringTokenizer.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/replace.hpp>
+#include <vector>
 
-#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/CostFunctionFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
@@ -44,8 +44,8 @@ using namespace API;
 DECLARE_ALGORITHM(PlotPeakByLogValue)
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void PlotPeakByLogValue::init() {
   declareProperty(
       "Input", "", boost::make_shared<MandatoryValidator<std::string>>(),
@@ -73,16 +73,19 @@ void PlotPeakByLogValue::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The fitting function, common for all workspaces in the "
                   "input WorkspaceGroup");
-  declareProperty("LogValue", "", "Name of the log value to plot the "
-                                  "parameters against. Default: use spectra "
-                                  "numbers.");
-  declareProperty("StartX", EMPTY_DBL(), "A value of x in, or on the low x "
-                                         "boundary of, the first bin to "
-                                         "include in\n"
-                                         "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(), "A value in, or on the high x boundary "
-                                       "of, the last bin the fitting range\n"
-                                       "(default the highest value of x)");
+  declareProperty("LogValue", "",
+                  "Name of the log value to plot the "
+                  "parameters against. Default: use spectra "
+                  "numbers.");
+  declareProperty("StartX", EMPTY_DBL(),
+                  "A value of x in, or on the low x "
+                  "boundary of, the first bin to "
+                  "include in\n"
+                  "the fit (default lowest value of x)");
+  declareProperty("EndX", EMPTY_DBL(),
+                  "A value in, or on the high x boundary "
+                  "of, the last bin the fitting range\n"
+                  "(default the highest value of x)");
 
   std::vector<std::string> fitOptions{"Sequential", "Individual"};
   declareProperty("FitType", "Sequential",
@@ -124,9 +127,10 @@ void PlotPeakByLogValue::init() {
                   "(FWHM) that fit into the interval on each side from the "
                   "centre. The default value of 0 means the whole x axis.");
 
-  declareProperty("CreateOutput", false, "Set to true to create output "
-                                         "workspaces with the results of the "
-                                         "fit(default is false).");
+  declareProperty("CreateOutput", false,
+                  "Set to true to create output "
+                  "workspaces with the results of the "
+                  "fit(default is false).");
 
   declareProperty("OutputCompositeMembers", false,
                   "If true and CreateOutput is true then the value of each "
@@ -155,8 +159,8 @@ void PlotPeakByLogValue::init() {
 }
 
 /**
-*   Executes the algorithm
-*/
+ *   Executes the algorithm
+ */
 void PlotPeakByLogValue::exec() {
 
   // Create a list of the input workspace
@@ -407,9 +411,9 @@ void PlotPeakByLogValue::exec() {
 }
 
 /** Get a workspace identified by an InputData structure.
-  * @param data :: InputData with name and either spec or i fields defined.
-  * @return InputData structure with the ws field set if everything was OK.
-  */
+ * @param data :: InputData with name and either spec or i fields defined.
+ * @return InputData structure with the ws field set if everything was OK.
+ */
 PlotPeakByLogValue::InputData
 PlotPeakByLogValue::getWorkspace(const InputData &data) {
   InputData out(data);
@@ -517,12 +521,12 @@ PlotPeakByLogValue::getWorkspace(const InputData &data) {
 }
 
 /**
-  * Set any WorkspaceIndex attributes in the fitting function. If the function
+ * Set any WorkspaceIndex attributes in the fitting function. If the function
  * is composite
-  * try all its members.
-  * @param fun :: The fitting function
-  * @param wsIndex :: Value for WorkspaceIndex attributes to set.
-  */
+ * try all its members.
+ * @param fun :: The fitting function
+ * @param wsIndex :: Value for WorkspaceIndex attributes to set.
+ */
 void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
                                                     int wsIndex) const {
   const std::string attName = "WorkspaceIndex";

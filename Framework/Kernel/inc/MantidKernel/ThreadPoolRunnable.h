@@ -42,7 +42,7 @@ private:
   double m_waitSec;
 };
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_THREADPOOLRUNNABLE_H_ */

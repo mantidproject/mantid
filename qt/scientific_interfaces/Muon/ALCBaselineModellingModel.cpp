@@ -221,4 +221,4 @@ MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
