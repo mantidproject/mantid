@@ -43,18 +43,15 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetPickTab
   Q_OBJECT
 public:
   /// Activity type the tab can be in:
-  ///   Single:  select and display info for a single detector when pointed by
-  ///   the mouse
-  ///   Tube:    select and display info for a tube of detectors. The immediate
-  ///   parent
-  ///            of a detector is considered a tube
+  ///   Single: select and display info for a single detector when pointed by
+  ///           the mouse
+  ///   Tube: select and display info for a tube of detectors. The immediate
+  ///         parent of a detector is considered a tube
   ///   AddPeak: Click on a detector and then on the miniplot to add a peak
-  ///   marker and
-  ///            a peak to the attached peaks workspace
+  ///            marker and a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to
-  ///   select peak ///               markers. Selected peaks can be deleted by
-  ///   pressing the
-  ///               Delete key.
+  ///               select peak markers. Selected peaks can be deleted by
+  ///               pressing the delete key.
   enum SelectionType {
     Single = 0,
     AddPeak,
