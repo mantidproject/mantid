@@ -50,7 +50,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
         self.assertEquals(y_unit, 'Attenuation factor')
 
         num_hists = corr_ws.getNumberHistograms()
-        self.assertEquals(num_hists, 51)
+        self.assertEquals(num_hists, 10)
 
         blocksize = corr_ws.blocksize()
         self.assertEquals(blocksize, 1905)
