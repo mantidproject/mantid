@@ -56,7 +56,7 @@ class ILLSANSReductionTest(unittest.TestCase):
         self.assertTrue(ws.isHistogramData())
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), "Wavelength")
         self.assertEqual(ws.blocksize(), 1)
-        self.assertEqual(ws.getNumberHistograms(), 128 * 128 + 2)
+        self.assertEqual(ws.getNumberHistograms(), 128 * 128)
         self.assertTrue(ws.getInstrument())
         self.assertTrue(ws.getRun())
         self.assertTrue(ws.getSampleDetails())

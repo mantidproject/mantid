@@ -177,7 +177,10 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         normalise_by = self.getPropertyValue('NormaliseBy')
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
-            ExtractSpectra(InputWorkspace=ws, DetectorList=100000, OutputWorkspace=mon)
+            monID = 100000
+            if mtd[ws].getInstrument().getName() == 'D33':
+                monID = 500000
+            ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
             if mtd[mon].readY(0)[0] == 0:
                 raise RuntimeError('Normalise to monitor requested, but monitor has 0 counts.')
             else:
@@ -211,7 +214,12 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         MoveInstrumentComponent(Workspace=ws, X=-beam_x, Y=-beam_y, ComponentName='detector')
         integral = self._integrate_in_radius(ws, radius)
         run = mtd[ws].getRun()
-        att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
+        att_coeff = 1.
+        if run.hasProperty('attenuator.attenuation_coefficient'):
+            att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
+        elif run.hasProperty('attenuator.attenuation_value'):
+            att_coeff = run.getLogData('attenuator.attenuation_value').value
+        self.log().notice('Found attenuator coefficient/value: {0}'.format(att_coeff))
         Scale(InputWorkspace=integral, Factor=att_coeff, OutputWorkspace=integral)
         AddSampleLog(Workspace=ws, LogName='BeamFluxValue', LogText=str(mtd[integral].readY(0)[0]), LogType='Number')
         AddSampleLog(Workspace=ws, LogName='BeamFluxError', LogText=str(mtd[integral].readE(0)[0]), LogType='Number')
@@ -229,6 +237,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         LoadAndMerge(Filename=self.getPropertyValue('Run').replace(',','+'), LoaderName='LoadILLSANS', OutputWorkspace=ws)
         self._normalise(ws)
+        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws)
         if process != 'Absorber':
             absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
             if absorber_ws:
