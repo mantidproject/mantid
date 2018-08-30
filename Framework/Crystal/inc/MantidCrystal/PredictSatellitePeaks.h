@@ -41,7 +41,9 @@ namespace Crystal {
 class DLLExport PredictSatellitePeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "PredictSatellitePeaks"; };
+  const std::string name() const override {
+    return "PredictSatellitePeaks";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "The offsets can be from hkl values in a range of hkl values or "
@@ -49,9 +51,11 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override {
+    return 1;
+  };
   const std::vector<std::string> seeAlso() const override {
-    return {"PredictPeaks"};
+    return { "PredictPeaks" };
   }
 
   /// Algorithm's category for identification
@@ -71,17 +75,16 @@ private:
                       int iVector, Kernel::V3D offsets, int &maxOrder,
                       Kernel::V3D &hkl,
                       Geometry::HKLFilterWavelength &lambdaFilter,
-                      bool &includePeaksInRange, bool &includeOrderZero,
-                      int &seqNum,
-                      std::vector<std::vector<int>> &AlreadyDonePeaks);
+                      bool &includePeaksInRange, bool includeOrderZero,
+                      std::vector<std::vector<int> > &AlreadyDonePeaks);
   void predictOffsetsWithCrossTerms(
       DataObjects::PeaksWorkspace_sptr Peaks,
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &OutPeaks,
       Kernel::V3D offsets1, Kernel::V3D offsets2, Kernel::V3D offsets3,
       int &maxOrder, Kernel::V3D &hkl,
       Geometry::HKLFilterWavelength &lambdaFilter, bool &includePeaksInRange,
-      bool &includeOrderZero, int &seqNum,
-      std::vector<std::vector<int>> &AlreadyDonePeaks);
+      bool &includeOrderZero,
+      std::vector<std::vector<int> > &AlreadyDonePeaks);
 };
 
 } // namespace Crystal
