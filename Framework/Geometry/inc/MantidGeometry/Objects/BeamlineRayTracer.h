@@ -71,37 +71,6 @@ MANTID_GEOMETRY_DLL size_t getDetectorResult(const ComponentInfo &componentInfo,
                                              Track &resultsTrack);
 } // namespace BeamlineRayTracer
 
-// Anonymous namespace for making these functions somewhat private
-namespace {
-
-/**
- * Fire the given track at the instrument.
- */
-void fireRay(Track &track, const ComponentInfo &componentInfo);
-
-/**
- * Get the results of the intersection tests that have been updated
- * since the previous call to trace
- */
-Links getResults(Track &resultsTrack);
-
-/**
- * Tests the intersection of the ray with a rectangular bank of detectors.
- * Adds links to the track.
- */
-void checkIntersectionWithRectangularBank(Track &track,
-                                          const ComponentInfo &componentInfo,
-                                          size_t componentIndex);
-
-/**
- * Tests the intersection of the ray with the given component.
- */
-void checkIntersectionWithComponent(Track &track,
-                                    const ComponentInfo &componentInfo,
-                                    size_t componentIndex);
-
-} // namespace
-
 } // namespace Geometry
 } // namespace Mantid
 

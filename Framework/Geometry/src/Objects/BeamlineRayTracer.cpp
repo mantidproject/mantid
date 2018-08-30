@@ -8,137 +8,12 @@ namespace Geometry {
 using Kernel::V3D;
 using Links = Track::LType;
 
-namespace BeamlineRayTracer {
-
-/**
- * Trace a given track from the source in the given direction.
- *
- * @param dir :: A directional vector. The starting point is defined by the
- * instrument source.
- * @param componentInfo :: The object used to access the source position.
- * @return Links :: A collection of links defining intersection information.
- */
-MANTID_GEOMETRY_DLL Links traceFromSource(const Kernel::V3D &dir,
-                                          const ComponentInfo &componentInfo) {
-
-  // Create a results track
-  Track resultsTrack(componentInfo.sourcePosition(), dir);
-
-  // Fire the test ray at the instrument
-  fireRay(resultsTrack, componentInfo);
-
-  return getResults(resultsTrack);
-}
-
-/**
- * Trace a given track from the sample position in the given direction.
- *
- * @param dir :: A directional vector. The starting point is defined by the
- * source.
- * @param componentInfo :: The object used to access the source position.
- * @return Links :: A collection of links defining intersection information.
- */
-MANTID_GEOMETRY_DLL Links traceFromSample(const Kernel::V3D &dir,
-                                          const ComponentInfo &componentInfo) {
-
-  // Create a new results track
-  Track resultsTrack(componentInfo.samplePosition(), dir);
-
-  // Fire the test ray at the instrument
-  fireRay(resultsTrack, componentInfo);
-
-  return getResults(resultsTrack);
-}
-
-/**
- * Gets the results of the trace, then returns the first detector
- * index found in the results.
- *
- * @param componentInfo :: The object used to access the source position.
- * @param detectorInfo :: The object used to check if a component is a monitor.
- * @param resultsTrack :: Track under test. The results are stored here.
- * @return size_t index value or throws an error if index is invalid
- */
-MANTID_GEOMETRY_DLL size_t getDetectorResult(const ComponentInfo &componentInfo,
-                                             const DetectorInfo &detectorInfo,
-                                             Track &resultsTrack) {
-
-  for (auto result : getResults(resultsTrack)) {
-    auto component = componentInfo.indexOf(result.componentID);
-    if (componentInfo.isDetector(component)) {
-      if (!detectorInfo.isMonitor(component)) {
-        return component;
-      }
-    }
-  }
-}
-
-} // namespace BeamlineRayTracer
-
+// Anonymous namespace
+// Contains helper functions
 namespace {
 using Mantid::Kernel::Matrix;
 using Mantid::Kernel::Quat;
 using Types = Mantid::Beamline::ComponentType;
-
-/**
- * Return the results of any trace() calls since the last call to getResults.
- *
- * @return A collection of links defining intersection information
- */
-Links getResults(Track &resultsTrack) {
-  // Create a list of the results
-  Links results(resultsTrack.cbegin(), resultsTrack.cend());
-
-  // Clear intersection results
-  resultsTrack.clearIntersectionResults();
-
-  return results;
-}
-
-/**
- * Fire the test ray at the instrument and perform a bread-first search of the
- * object tree to find the objects that were intersected.
- *
- * @param testRay :: An input/output parameter that defines the track and
- * accumulates the intersection results.
- * @param componentInfo :: The object that will provide access to component
- * information.
- */
-void fireRay(Track &track, const ComponentInfo &componentInfo) {
-  // Cast size of componentInfo to int
-  int size = static_cast<int>(componentInfo.size());
-  --size;
-
-  // Loop through the bounding boxes in reverse
-  // (essentially a breadth first search)
-  for (int i = size; i >= 0; --i) {
-    // Store the bounding box
-    BoundingBox box = componentInfo.boundingBox(i);
-
-    // Test for intersection
-    if (box.doesLineIntersect(track)) {
-
-      // Store the type of the child component
-      auto childComponentType = componentInfo.componentType(i);
-      // Store the type of the child's grandparent
-      auto grandParent = componentInfo.componentType(
-          componentInfo.parent(componentInfo.parent(i)));
-
-      // Don't want to count the bank and the detector
-      if (grandParent == Types::Rectangular &&
-          childComponentType == Types::Detector) {
-        continue;
-      }
-
-      // Process a rectangular bank or normal component
-      if (childComponentType == Types::Rectangular) {
-        checkIntersectionWithRectangularBank(track, componentInfo, i);
-      } else {
-        checkIntersectionWithComponent(track, componentInfo, i);
-      }
-    }
-  }
-}
 
 /**
  * Tests the intersection of the ray with a rectangular bank of detectors.
@@ -275,7 +150,134 @@ void checkIntersectionWithComponent(Track &track,
                   componentInfo.componentID(componentIndex)->getComponentID());
   }
 }
+
+/**
+ * Return the results of any trace() calls since the last call to getResults.
+ *
+ * @return A collection of links defining intersection information
+ */
+Links getResults(Track &resultsTrack) {
+  // Create a list of the results
+  Links results(resultsTrack.cbegin(), resultsTrack.cend());
+
+  // Clear intersection results
+  resultsTrack.clearIntersectionResults();
+
+  return results;
+}
+
+/**
+ * Fire the test ray at the instrument and perform a bread-first search of the
+ * object tree to find the objects that were intersected.
+ *
+ * @param testRay :: An input/output parameter that defines the track and
+ * accumulates the intersection results.
+ * @param componentInfo :: The object that will provide access to component
+ * information.
+ */
+void fireRay(Track &track, const ComponentInfo &componentInfo) {
+  // Cast size of componentInfo to int
+  int size = static_cast<int>(componentInfo.size());
+  --size;
+
+  // Loop through the bounding boxes in reverse
+  // (essentially a breadth first search)
+  for (int i = size; i >= 0; --i) {
+    // Store the bounding box
+    BoundingBox box = componentInfo.boundingBox(i);
+
+    // Test for intersection
+    if (box.doesLineIntersect(track)) {
+
+      // Store the type of the child component
+      auto childComponentType = componentInfo.componentType(i);
+      // Store the type of the child's grandparent
+      auto grandParent = componentInfo.componentType(
+          componentInfo.parent(componentInfo.parent(i)));
+
+      // Don't want to count the bank and the detector
+      if (grandParent == Types::Rectangular &&
+          childComponentType == Types::Detector) {
+        continue;
+      }
+
+      // Process a rectangular bank or normal component
+      if (childComponentType == Types::Rectangular) {
+        checkIntersectionWithRectangularBank(track, componentInfo, i);
+      } else {
+        checkIntersectionWithComponent(track, componentInfo, i);
+      }
+    }
+  }
+}
 } // namespace
+
+namespace BeamlineRayTracer {
+
+/**
+ * Trace a given track from the source in the given direction.
+ *
+ * @param dir :: A directional vector. The starting point is defined by the
+ * instrument source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSource(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+
+  // Create a results track
+  Track resultsTrack(componentInfo.sourcePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(resultsTrack, componentInfo);
+
+  return getResults(resultsTrack);
+}
+
+/**
+ * Trace a given track from the sample position in the given direction.
+ *
+ * @param dir :: A directional vector. The starting point is defined by the
+ * source.
+ * @param componentInfo :: The object used to access the source position.
+ * @return Links :: A collection of links defining intersection information.
+ */
+Links traceFromSample(const Kernel::V3D &dir,
+                      const ComponentInfo &componentInfo) {
+
+  // Create a new results track
+  Track resultsTrack(componentInfo.samplePosition(), dir);
+
+  // Fire the test ray at the instrument
+  fireRay(resultsTrack, componentInfo);
+
+  return getResults(resultsTrack);
+}
+
+/**
+ * Gets the results of the trace, then returns the first detector
+ * index found in the results.
+ *
+ * @param componentInfo :: The object used to access the source position.
+ * @param detectorInfo :: The object used to check if a component is a monitor.
+ * @param resultsTrack :: Track under test. The results are stored here.
+ * @return size_t index value or throws an error if index is invalid
+ */
+size_t getDetectorResult(const ComponentInfo &componentInfo,
+                         const DetectorInfo &detectorInfo,
+                         Track &resultsTrack) {
+
+  for (auto result : getResults(resultsTrack)) {
+    auto component = componentInfo.indexOf(result.componentID);
+    if (componentInfo.isDetector(component)) {
+      if (!detectorInfo.isMonitor(component)) {
+        return component;
+      }
+    }
+  }
+}
+
+} // namespace BeamlineRayTracer
 
 } // namespace Geometry
 } // namespace Mantid
