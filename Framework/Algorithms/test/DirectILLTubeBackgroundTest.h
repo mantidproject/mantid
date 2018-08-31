@@ -206,4 +206,48 @@ public:
   }
 };
 
+class DirectILLTubeBackgroundTestPerformance : public CxxTest::TestSuite {
+public:
+  static DirectILLTubeBackgroundTestPerformance *createSuite() {
+    return new DirectILLTubeBackgroundTestPerformance();
+  }
+  static void destroySuite(DirectILLTubeBackgroundTestPerformance *suite) {
+    delete suite;
+  }
+
+  DirectILLTubeBackgroundTestPerformance() : CxxTest::TestSuite() {
+    API::FrameworkManager::Instance();
+  }
+
+  void testPerformance() {
+    constexpr int numBanks{256};
+    constexpr int numPixels{20};
+    constexpr int numBins{512};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      row.peakCentre = static_cast<double>(numBins) / 2.;
+      row.sigma = 5;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> components(numBanks);
+    for (size_t i = 0; i < components.size(); ++i) {
+      components[i] = "bank" + std::to_string(i + 1);
+    }
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setPropertyValue("OutputWorkspace", "_unused");
+    alg.setProperty("Components", components);
+    alg.setProperty("EPPWorkspace", eppWS);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted())
+  }
+};
+
 #endif /* MANTID_ALGORITHMS_DIRECTILLTUBEBACKGROUNDTEST_H_ */
