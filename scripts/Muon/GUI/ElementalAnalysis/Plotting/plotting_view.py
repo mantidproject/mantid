@@ -145,6 +145,7 @@ class PlotView(QtGui.QWidget):
             self.plot(name, workspace)
         plot.set_xlim(x)
         plot.set_ylim(y)
+        self._set_bounds(name)
         self._replay_additions(name)
 
     @_redo_layout
