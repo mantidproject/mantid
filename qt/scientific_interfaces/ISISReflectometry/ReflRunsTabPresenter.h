@@ -2,15 +2,16 @@
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
 #include "DllConfig.h"
-#include "IReflRunsTabPresenter.h"
-#include "IReflBatchPresenter.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "GUI/RunsTable/RunsTablePresenterFactory.h"
+#include "IReflBatchPresenter.h"
+#include "IReflRunsTabPresenter.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "ReflAutoreduction.h"
-#include <boost/shared_ptr.hpp>
 #include "SearchResult.h"
+#include <boost/shared_ptr.hpp>
 
 class ProgressPresenter;
 

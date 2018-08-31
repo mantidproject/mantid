@@ -5,7 +5,7 @@
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,5 +28,5 @@ public:
 };
 }
 }
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif // MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_

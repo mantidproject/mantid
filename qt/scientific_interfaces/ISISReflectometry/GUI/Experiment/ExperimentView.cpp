@@ -149,10 +149,10 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.polCorrComboBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(*m_ui.CRhoEdit, "CRho", alg);
-  registerSettingWidget(*m_ui.CAlphaEdit, "CAlpha", alg);
-  registerSettingWidget(*m_ui.CApEdit, "CAp", alg);
-  registerSettingWidget(*m_ui.CPpEdit, "CPp", alg);
+  registerSettingWidget(*m_ui.CRhoEdit, "Rho", alg);
+  registerSettingWidget(*m_ui.CAlphaEdit, "Alpha", alg);
+  registerSettingWidget(*m_ui.CApEdit, "Ap", alg);
+  registerSettingWidget(*m_ui.CPpEdit, "Pp", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
 }
 

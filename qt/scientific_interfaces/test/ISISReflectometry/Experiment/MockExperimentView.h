@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include "MantidKernel/WarningSuppressions.h"
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -56,4 +56,4 @@ public:
 };
 }
 }
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE

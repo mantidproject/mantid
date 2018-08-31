@@ -2,7 +2,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <boost/regex.hpp>
-#include "ReflTransferStrategy.h"
 #include <QColor>
 
 namespace MantidQt {

@@ -16,9 +16,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IEventView
+/** @class IExperimentView
 
-IReflSettingsView is the base view class for the Reflectometry settings. It
+IExperimentView is the base view class for the Reflectometry experiment
+settings. It
 contains no QT specific functionality as that should be handled by a subclass.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

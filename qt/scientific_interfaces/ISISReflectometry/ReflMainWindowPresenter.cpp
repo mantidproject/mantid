@@ -1,5 +1,4 @@
 #include "ReflMainWindowPresenter.h"
-#include "IReflEventTabPresenter.h"
 #include "IReflMainWindowView.h"
 #include "IReflRunsTabPresenter.h"
 #include "GUI/Event/IEventPresenter.h"
