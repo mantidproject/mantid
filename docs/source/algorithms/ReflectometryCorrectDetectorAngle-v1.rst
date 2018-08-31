@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm adjusts the detector angle of a reflectometer instrument. The detector component is rotated around the sample position to a desired specular angle while keeping the sample-to-detector distance constant and ensuring the detector centre normal faces the sample. 
+This algorithm adjusts the detector angle of a reflectometer instrument. The detector component is rotated around the sample position to a desired specular angle while keeping the sample-to-detector distance constant and ensuring the detector centre normal faces the sample. Compared to :ref:`SpecularReflectionPositionCorrect <algm-SpecularReflectionPositionCorrect>`, this algorithm supports rotation with regards to selected detector pixel and angle calibration by a direct beam measurement.
 
 The name of the detector component to rotate is given by the *DetectorComponent* property.
 
@@ -25,6 +25,10 @@ Supplying the algorithm with *TwoTheta*, *LinePosition* and *PixelSize* enables 
 .. figure:: ../images/ReflectometryCorrectDetectorAngle_correction2.png
    :alt: Schematic representation of angle correction when TwoTheta and LinePosition are given.
    :scale: 100%
+
+.. note::
+
+   The line position can be acquired from Gaussian fitting using :ref:`FindReflectometryLines <algm-FindReflectometryLines>`.
 
 A direct beam reference can be used to calibrate the detector angle when *PixelSize*, *DirectLinePosition* and *DirectBeamWorkspace* are given. In this case, the algorithm calculates the deviation angle between the measured direct beam and the nominal beam direction (usually the :math:`Z` axis). The resulting offset angle is then applied to the detector angle as is schematically shown below. *DirectLinePosition* is a floating point number which can be obtained from a reflectometry line fitting algorithm.
 

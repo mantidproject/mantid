@@ -79,6 +79,11 @@ const std::string FindReflectometryLines2::category() const {
   return "Reflectometry;ILL\\Reflectometry";
 }
 
+/// Return a list of related algorithms.
+const std::vector<std::string> FindReflectometryLines2::seeAlso() const {
+  return {"ReflectometryCorrectDetectorAngle"};
+}
+
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string FindReflectometryLines2::summary() const {
   return "Finds fractional workspace index corresponding to reflected or "

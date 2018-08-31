@@ -136,7 +136,7 @@ const std::string ReflectometryCorrectDetectorAngle::category() const {
 /// Return a vector of related algorithm names.
 const std::vector<std::string>
 ReflectometryCorrectDetectorAngle::seeAlso() const {
-  return {"SpecularReflectionPositionCorrect"};
+  return {"SpecularReflectionPositionCorrect", "FindReflectometryLines"};
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
