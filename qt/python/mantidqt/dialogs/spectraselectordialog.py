@@ -20,10 +20,10 @@ from __future__ import (absolute_import, unicode_literals)
 
 # 3rd party imports
 from mantid.api import MatrixWorkspace
-import qtawesome as qta
 from qtpy.QtWidgets import QDialogButtonBox
 
 # local imports
+from mantidqt.icons import get_icon
 from mantidqt.utils.qt import load_ui
 
 # Constants
@@ -35,7 +35,7 @@ RED_ASTERISK = None
 def red_asterisk():
     global RED_ASTERISK
     if RED_ASTERISK is None:
-        RED_ASTERISK = qta.icon('fa.asterisk', color='red', scale_factor=0.6)
+        RED_ASTERISK = get_icon('fa.asterisk', color='red', scale_factor=0.6)
     return RED_ASTERISK
 
 
