@@ -204,6 +204,65 @@ public:
       }
     }
   }
+
+  void test_FailedEPPRowsAreIgnored() {
+    constexpr int numBanks{2};
+    constexpr int numPixels{2};
+    constexpr int numBins{9};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    TS_ASSERT(inWS->isHistogramData())
+    TS_ASSERT(!inWS->isDistribution())
+    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
+        Ys = bankBkgs[i];
+        Ys[numBins / 2] = 1090.; // Peak.
+      }
+    }
+    inWS->mutableY(1) = -600;
+    inWS->mutableY(6) = 900;
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      // Peak covers the middle bin of all histograms.
+      row.peakCentre = static_cast<double>(numBins) / 2.;
+      row.sigma = 1.1 / 6.;
+    }
+    // Fail the rows given special Y values above.
+    eppRows[1].fitStatus =
+        WorkspaceCreationHelper::EPPTableRow::FitStatus::FAILURE;
+    eppRows[6].fitStatus =
+        WorkspaceCreationHelper::EPPTableRow::FitStatus::FAILURE;
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> const components{"bank1", "bank2"};
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
+    TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto const &Ys = outWS->y(i * numPixels * numPixels + j);
+        auto const &Es = outWS->e(i * numPixels * numPixels + j);
+        for (size_t k = 0; k < Ys.size(); ++k) {
+          TS_ASSERT_EQUALS(Ys[k], bankBkgs[i])
+          TS_ASSERT_EQUALS(Es[k], 0.)
+        }
+      }
+    }
+  }
 };
 
 class DirectILLTubeBackgroundTestPerformance : public CxxTest::TestSuite {

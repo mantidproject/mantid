@@ -12,6 +12,7 @@
 #include "MantidKernel/BoundedValidator.h"
 
 namespace {
+/// Namespace containing the algorithm's property names.
 namespace Prop {
 const std::string COMPONENTS{"Components"};
 const std::string DIAGNOSTICS_WS{"DiagnosticsWorkspace"};
@@ -21,15 +22,22 @@ const std::string OUTPUT_WS{"OutputWorkspace"};
 const std::string SIGMA_MULTIPLIER{"NonBkgRegionInSigmas"};
 } // namespace Prop
 
+/**
+ * @brief Returns a vector of ws index [begin, end) pairs.
+ * @param ws a workspace
+ * @param statuses
+ * @return
+ */
 std::vector<double> bkgFittingRanges(Mantid::API::MatrixWorkspace const &ws,
-                                     Mantid::API::Column const &statuses) {
+                                     Mantid::API::Column const &statuses,
+                                     size_t const firstColumnIndex) {
   std::vector<double> ranges;
   auto const &spectrumInfo = ws.spectrumInfo();
   bool needsRangeStart{true};
   bool needsRangeEnd{false};
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
     if (spectrumInfo.isMasked(i) ||
-        statuses.cell<std::string>(i) != "success") {
+        statuses.cell<std::string>(i + firstColumnIndex) != "success") {
       if (needsRangeEnd) {
         needsRangeStart = true;
         needsRangeEnd = false;
@@ -211,11 +219,13 @@ std::map<std::string, std::string> DirectILLTubeBackground::validateInputs() {
         "Wrong EPP workspace? The number of the table rows "
         "does not match the number of histograms in InputWorkspace.";
   }
-  API::MatrixWorkspace_sptr maskWS = getProperty(Prop::DIAGNOSTICS_WS);
-  if (inWS->getNumberHistograms() != maskWS->getNumberHistograms()) {
-    issues[Prop::EPP_WS] =
-        "Wrong diagnostics workspace? The number of histograms "
-        "does not match with InputWorkspace.";
+  if (!isDefault(Prop::DIAGNOSTICS_WS)) {
+    API::MatrixWorkspace_sptr maskWS = getProperty(Prop::DIAGNOSTICS_WS);
+    if (inWS->getNumberHistograms() != maskWS->getNumberHistograms()) {
+      issues[Prop::EPP_WS] =
+          "Wrong diagnostics workspace? The number of histograms "
+          "does not match with InputWorkspace.";
+    }
   }
   return issues;
 }
@@ -243,11 +253,12 @@ void DirectILLTubeBackground::exec() {
     progress.report("Processing " + componentName);
     checkComponentExists(componentName, *instrument);
     auto componentWS = cropToComponent(ws, componentName);
-    auto const bkgRanges = bkgFittingRanges(*componentWS, *fitStatusColumn);
+    auto const wsIndexRange = componentWSIndexRange(*componentWS, *ws);
+    auto const bkgRanges =
+        bkgFittingRanges(*componentWS, *fitStatusColumn, wsIndexRange.first);
     if (bkgRanges.empty()) {
       continue;
     }
-    auto const wsIndexRange = componentWSIndexRange(*componentWS, *ws);
     auto const bounds =
         peakBounds(wsIndexRange.first, wsIndexRange.last, sigmaMultiplier,
                    *peakCentreColumn, *sigmaColumn, *fitStatusColumn);
