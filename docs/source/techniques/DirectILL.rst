@@ -7,7 +7,7 @@ Data reduction for ILL's direct geometry instruments
 .. contents:: Table of contents
     :local:
 
-There are six workflow algorithms supporting data reduction at ILL's time-of-flight instruments. These algorithms are:
+There are seven workflow algorithms supporting data reduction at ILL's time-of-flight instruments. These algorithms are:
 
 :ref:`algm-DirectILLCollectData`
     Loads data from disk and applies some simple reduction steps. The starting point of all reductions, as most of the other DirectILL algorithms expect their input data to originate from here.
@@ -26,6 +26,9 @@ There are six workflow algorithms supporting data reduction at ILL's time-of-fli
 
 :ref:`algm-DirectILLApplySelfShielding`
     Applies absorption corrections and subtracts an empty container measurement.
+
+:ref:`algm-DirectILLTubeBackground`
+    Calculates a per-tube backgrounds for position sensitive tubes such as found in IN5.
 
 The algorithms can be used as flexible building blocks in Python scripts. Not all of them need to be necessarily used in a reduction: the simplest script could call :ref:`algm-DirectILLCollectData` and :ref:`algm-DirectILLReduction` only.
 
@@ -120,6 +123,76 @@ Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides t
     ...
 
 As shown above, these optional outputs are sometimes named similarly the corresponding inputs giving a hint were they are supposed to be used.
+
+Time-independent background for position sensitive tubes
+========================================================
+
+The flat background subtraction in :ref:`algm-DirectILLCollectData` does not work properly for instruments such as IN5. Another algorithm, :ref:`algm-DirectILLTubeBackground` should be used instead. For this algorithm, one should run :ref:`algm-DirectILLDiagnostics` to utilize the default hard mask and beam stop masking in the background determination.
+
+.. code-block:: python
+
+    # Add a temporary data search directory.
+    mantid.config.appendDataSearchDir('/data/')
+
+    # Vanadium
+    DirectILLCollectData(
+        Run='0100-0109',
+        OutputWorkspace='vanadium',
+        OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
+    )
+
+    DirectILLDiagnostics(
+        InputWorkspace='vanadium-raw',
+        OutputWorkspace='diagnostics',
+    )
+
+    # Determine time-independent background
+    DirectILLTubeBackground(
+        InputWorkspace='vanadium',
+        OutputWorkspace='vanadium-background'
+        EPPWorkspace='vanadiums-epps',
+        DiagnosticsWorkspace='diagnostics'
+    )
+    # Subtract the background
+    Subtract(
+        LHSWorkspace='vanadium'
+        RHSWorkspace='vanadium-background',
+        OutputWorkspace='vanadium-bkgsubtr'
+    )
+
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium-bkgsubtr',  # Integrate background subtracted data
+        OutputWorkspace='integrated',
+        EPPWorkspace='vanadium-epps'
+    )
+
+    # Sample
+    DirectILLCollectData(
+        Run='0201+0205+0209-0210',
+        OutputWorkspace='sample',
+        OutputEPPWorkspace='sample-epps'
+    )
+
+    # Determine time-independent background
+    DirectILLTubeBackground(
+        InputWorkspace='sample',
+        OutputWorkspace='sample-background',
+        EPPWorkspace='sample-epps',
+        DiagnosticsWorkspace='diagnostics'
+    )
+    Subtract(
+        LHSWorkspace='sample',
+        RHSWorkspace='sample-background',
+        OutputWorkspace='sample-bkgsubtr'
+    )
+
+    DirectILLReduction(
+        InputWorkspace='sample-bkgsubtr',
+        OutputWorkspace='SofQW',
+        IntegratedVanadiumWorkspace='integrated'
+        DiagnosticsWorkspace='diagnostics'
+    )
+
 
 Self-shielding corrections
 ==========================
