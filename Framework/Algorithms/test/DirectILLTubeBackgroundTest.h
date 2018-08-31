@@ -40,7 +40,7 @@ public:
             numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
-    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
     for (size_t i = 0; i < numBanks; ++i) {
       for (size_t j = 0; j < numPixels * numPixels; ++j) {
         auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
@@ -92,7 +92,7 @@ public:
             numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
-    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
     for (size_t i = 0; i < numBanks; ++i) {
       for (size_t j = 0; j < numPixels * numPixels; ++j) {
         auto histogram = inWS->histogram(i * numPixels * numPixels + j);
@@ -197,7 +197,7 @@ public:
             numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
-    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
     for (size_t i = 0; i < numBanks; ++i) {
       for (size_t j = 0; j < numPixels * numPixels; ++j) {
         auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
@@ -258,7 +258,7 @@ public:
             numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
-    std::array<double, numBanks> bankBkgs{2.33, 4.22};
+    std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
     for (size_t i = 0; i < numBanks; ++i) {
       for (size_t j = 0; j < numPixels * numPixels; ++j) {
         auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
