@@ -35,6 +35,9 @@ void IndexPeaks::init() {
                                              mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 
+  this->declareProperty("RoundHKLs", true,
+                        "Round H, K and L values to integers");
+
   this->declareProperty("CommonUBForAll", false,
                         "Index all orientations with a common UB");
 
@@ -85,6 +88,7 @@ void IndexPeaks::exec() {
         "ERROR: The stored UB is not a valid orientation matrix");
   }
 
+  bool round_hkls = this->getProperty("RoundHKLs");
   bool commonUB = this->getProperty("CommonUBForAll");
 
   std::vector<Peak> &peaks = ws->getPeaks();
@@ -202,8 +206,11 @@ void IndexPeaks::exec() {
       if (o_lattice.getMaxOrder() ==
           0) // If data not modulated, recalculate fractional HKL
       {
-        num_indexed = IndexingUtils::CalculateMillerIndices(
-            tempUB, q_vectors, tolerance, miller_indices, average_error);
+        if (!round_hkls) // If user wants fractional hkls, recalculate them
+        {
+          num_indexed = IndexingUtils::CalculateMillerIndices(
+              tempUB, q_vectors, tolerance, miller_indices, average_error);
+        }
         total_indexed += num_indexed;
         total_error += average_error * num_indexed;
 

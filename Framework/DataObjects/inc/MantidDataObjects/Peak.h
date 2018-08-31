@@ -254,7 +254,9 @@ private:
   Mantid::Kernel::V3D m_modulatedStructure;
 
   /// integer HKL of the peak
-  std::array<int, 3> m_intHKL;
+  int m_intH;
+  int m_intK;
+  int m_intL;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
