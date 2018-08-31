@@ -3,6 +3,7 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/numeric/conversion/cast.hpp>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -37,7 +38,10 @@ IndirectFitPlotView::~IndirectFitPlotView() {}
 std::size_t IndirectFitPlotView::getSelectedSpectrum() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
     return m_plotForm->spPlotSpectrum->value();
-  return m_plotForm->cbPlotSpectrum->currentIndex();
+  if (m_plotForm->cbPlotSpectrum->count() != 0)
+    return boost::numeric_cast<std::size_t>(
+        std::stoi(m_plotForm->cbPlotSpectrum->currentText().toStdString()));
+  return 0;
 }
 
 int IndirectFitPlotView::getSelectedSpectrumIndex() const {
