@@ -109,10 +109,15 @@ test_counter = Array('i', [0, 0, 0]) # shared array for number of executed tests
 manager = Manager() # a manager to create a shared dict to store names of skipped and failed tests
 status_dict = manager.dict() # a shared dict to store names of skipped and failed tests
 
+# print(mtdconf.testDir)
+# print(mtdconf.dataDir)
+# print(mtdconf.saveDir)
+# exit()
+
 # Prepare ncores processes
 for ip in range(options.ncores):
     processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
-                     options, results_array, status_dict, test_counter, ip)))
+                     mtdconf.dataDir, options, results_array, status_dict, test_counter, ip)))
 # Start and join processes
 for p in processes:
     p.start()

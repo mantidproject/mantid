@@ -31,6 +31,7 @@ import numpy
 import platform
 import re
 import subprocess
+import shutil
 import sys
 import tempfile
 import time
@@ -70,6 +71,15 @@ class MantidStressTest(unittest.TestCase):
         mantid.api.FrameworkManager.clear()
         from mantid.kernel import MemoryStats
         self.memory = MemoryStats().residentMem()/1024
+
+    def setSearchSaveDirectories(self, core_id, searchDir, saveDir):
+        from mantid.kernel import config
+        config['datasearch.directories'] += "/core-%i" % (core_id)
+        config['defaultsave.directory'] = "%s/core-%i" % (saveDir,core_id)
+        # print("in here")
+        # print(config['datasearch.directories'])
+        # print(config['defaultsave.directory'])
+        return
 
     def runTest(self):
         raise NotImplementedError('"runTest(self)" should be overridden in a derived class')
@@ -586,12 +596,16 @@ class TestRunner(object):
     SKIP_TEST = 97
 
 
-    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False):
+    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False, core_id=0,
+                 searchDir=None, saveDir=None):
         self._executable = executable
         self._exec_args = exec_args
         self._test_dir = ''
         self._escape_quotes = escape_quotes
         self._clean = clean
+        self._core_id = core_id
+        self._searchDir = searchDir
+        self._saveDir = saveDir
 
     def getTestDir(self):
         return self._test_dir
@@ -617,7 +631,8 @@ class TestRunner(object):
             exec_call += ' '  + self._exec_args
         # write script to temporary file and execute this file
         tmp_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        tmp_file.write(script.asString(clean=self._clean))
+        tmp_file.write(script.asString(clean=self._clean, core_id=self._core_id,
+                                       searchDir=self._searchDir, saveDir=self._saveDir))
         tmp_file.close()
         cmd = exec_call + ' ' + tmp_file.name
         results = self.spawnSubProcess(cmd)
@@ -635,12 +650,13 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
-    def asString(self, clean=False):
+    def asString(self, clean=False, core_id=0, searchDir=None, saveDir=None):
         code = "import sys\n" + \
                ("sys.path.append('%s')\n" % TESTING_FRAMEWORK_DIR) + \
                ("sys.path.append('%s')\n" % self._test_dir) + \
                ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
                ("systest = %s()\n" % self._test_cls_name) + \
+               ("systest.setSearchSaveDirectories(%i,'%s','%s')\n" % (core_id, searchDir, saveDir)) + \
                ("if %r:\n" % self._exclude_in_pr_builds) + \
                ("    systest.excludeInPullRequests = lambda: False\n")
         if (not clean):
@@ -789,6 +805,8 @@ class TestManager(object):
             runner.setTestDir(test_dir)
             full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
 
+        
+
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
         # flag to exclude slow tests from pull requests
@@ -798,6 +816,7 @@ class TestManager(object):
         reduced_test_list = []
         tid = 0
         for t in full_test_list:
+            # print(t._fqtestname)
             if self.__shouldTest(t) or showSkipped:
                 reduced_test_list.append(t)
                 tid += 1
@@ -827,7 +846,7 @@ class TestManager(object):
         modcounts = dict()
         modtests = dict()
         # This is the length of characters to match at the start of test name
-        min_length_for_group_name = 4
+        min_length_for_group_name = 40
         for t in reduced_test_list:
             not_found = True
             for key in modcounts.keys():
@@ -851,6 +870,8 @@ class TestManager(object):
         self._tests = []
         reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
         for key, value in reverse_sorted_dict:
+            if process_number == 0:
+                print(key,value)
             for i in range(ncores):
                 if(ntests_per_core[i] == min(ntests_per_core)):
                     ntests_per_core[i] += value
@@ -862,7 +883,8 @@ class TestManager(object):
             print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
             exit(2)
 
-        if (not quiet) and (not clean):
+        # if (not quiet) and (not clean):
+        if True:
             hline = "========================================"
             out_string = hline + "\n"
             out_string += "Core %i will execute %i tests:\n" % (process_number,len(self._tests))
@@ -1040,16 +1062,18 @@ class MantidFrameworkConfig:
 
     def __moveFile(self, src, dst):
         if os.path.exists(src):
-            import shutil
+            # import shutil
             shutil.move(src, dst)
 
     def __copyFile(self, src, dst):
         if os.path.exists(src):
-            import shutil
+            # import shutil
             shutil.copyfile(src, dst)
 
     saveDir = property(lambda self: self.__saveDir)
     testDir = property(lambda self: self.__testDir)
+    dataDir = property(lambda self: self.__dataDirs)
+
 
     def config(self):
 
@@ -1125,13 +1149,18 @@ def envAsString():
 #########################################################################
 # Function to spawn one test manager per core
 #########################################################################
-def testProcess(testDir, saveDir, options, res_array,
+def testProcess(testDir, saveDir, dataDir, options, res_array,
                 stat_dict, test_count, process_number):
 
     reporter = XmlResultReporter(showSkipped=options.showskipped)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
-                        escape_quotes=True, clean=options.clean)
+                        escape_quotes=True, clean=options.clean, core_id=process_number,
+                        searchDir=dataDir, saveDir=saveDir)
+
+    save_dir_for_this_core = saveDir + "/core-%i" % process_number
+    shutil.rmtree(save_dir_for_this_core, ignore_errors=True)
+    os.mkdir(save_dir_for_this_core)
 
     mgr = TestManager(testDir,runner,
                       output=[reporter],

@@ -32,10 +32,17 @@ class ISIS_ReductionWebLike(stresstesting.MantidStressTest):
     def runTest(self):
         # run reduction using saved variables like web variables
         web_var_folder = config['defaultsave.directory']
+        print("NVAYTET1",web_var_folder)
         sys.path.insert(0,web_var_folder)
+        print("NVAYTET2",web_var_folder)
+        
         reload(mr)
 
         # change these variables to save result as nxs workspace
+        print("NVAYTET3",mr)
+        run_dir = os.path.dirname(os.path.realpath(__file__))
+        print("NEIL",run_dir)
+        # exit()
         mr.web_var.advanced_vars['save_format']='nxs'
         # web services currently needs input file to be defined
         input_file = 'MAR11001.RAW'

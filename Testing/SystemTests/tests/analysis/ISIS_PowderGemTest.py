@@ -31,7 +31,7 @@ spline_rel_path = os.path.join("17_1", "VanSplined_83608_offsets_2011_cycle111b.
 working_dir = os.path.join(DIRS[0], working_folder_name)
 
 input_dir = os.path.join(working_dir, input_folder_name)
-output_dir = os.path.join(working_dir, output_folder_name)
+output_dir = os.path.join(config['defaultsave.directory'], output_folder_name)
 
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)

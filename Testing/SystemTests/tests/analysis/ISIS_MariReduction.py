@@ -6,6 +6,8 @@ from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
 except:
+    print("web_var is none")
+    
     web_var = None
 
 
