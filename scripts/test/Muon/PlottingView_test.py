@@ -161,15 +161,41 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.view._get_current_plots()
 
+    def test_update_x_axis_lower(self):
+        self.view._update_x_axis = mock.Mock()
+        self.view._update_x_axis_lower(self.mock_bounds)
+        self.view._update_x_axis.assert_called_once_with(
+            {"left": self.mock_bounds})
+
+    def test_update_x_axis_upper(self):
+        self.view._update_x_axis = mock.Mock()
+        self.view._update_x_axis_upper(self.mock_bounds)
+        self.view._update_x_axis.assert_called_once_with(
+            {"right": self.mock_bounds})
+
     def test_update_x_axis(self):
-        self.view._update_x_axis(self.mock_bounds)
+        test_arg = {"left": self.mock_bounds}
+        self.view._update_x_axis(test_arg)
         plot, = self.view._get_current_plots()
-        plot.set_xlim.assert_called_once_with(self.mock_bounds)
+        plot.set_xlim.assert_called_once_with(left=self.mock_bounds)
+
+    def test_update_y_axis_lower(self):
+        self.view._update_y_axis = mock.Mock()
+        self.view._update_y_axis_lower(self.mock_bounds)
+        self.view._update_y_axis.assert_called_once_with(
+            {"bottom": self.mock_bounds})
+
+    def test_update_y_axis_upper(self):
+        self.view._update_y_axis = mock.Mock()
+        self.view._update_y_axis_upper(self.mock_bounds)
+        self.view._update_y_axis.assert_called_once_with(
+            {"top": self.mock_bounds})
 
     def test_update_y_axis(self):
-        self.view._update_y_axis(self.mock_bounds)
+        test_arg = {"top": self.mock_bounds}
+        self.view._update_y_axis(test_arg)
         plot, = self.view._get_current_plots()
-        plot.set_ylim.assert_called_once_with(self.mock_bounds)
+        plot.set_ylim.assert_called_once_with(top=self.mock_bounds)
 
     def test_modify_errors_list_state_is_true(self):
         self.view._modify_errors_list(self.plot_name, True)
