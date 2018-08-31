@@ -39,7 +39,7 @@ void SaveReflectometryAscii::init() {
       "The name of the workspace containing the data you want to save.");
   declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
                   "The output filename");
-  std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
+  std::vector<std::string> extension = {".mft", ".txt", ".dat", ""};
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
