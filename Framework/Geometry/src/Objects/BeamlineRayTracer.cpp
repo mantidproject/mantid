@@ -74,10 +74,6 @@ void checkIntersectionWithRectangularBank(Track &track,
   size_t yIndex = size_t(v);
 
   // Out of range?
-  if (xIndex < 0)
-    return;
-  if (yIndex < 0)
-    return;
   if (xIndex >= corners.nX)
     return;
   if (yIndex >= corners.nY)
