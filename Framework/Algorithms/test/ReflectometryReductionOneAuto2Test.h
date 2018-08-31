@@ -1075,6 +1075,9 @@ public:
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
+    
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
 
     TS_ASSERT_EQUALS(outQGroup.size(), 4);
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
