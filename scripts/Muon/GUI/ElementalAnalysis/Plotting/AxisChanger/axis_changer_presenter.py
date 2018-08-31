@@ -11,11 +11,20 @@ class AxisChangerPresenter(object):
     def clear_bounds(self):
         self.view.clear_bounds()
 
-    def on_bounds_changed(self, slot):
-        self.view.on_bounds_changed(slot)
+    def on_upper_bound_changed(self, slot):
+        self.view.on_upper_bound_changed(slot)
 
-    def unreg_on_bounds_changed(self, slot):
+    def on_lower_bound_changed(self, slot):
+        self.view.on_lower_bound_changed(slot)
+
+    def unreg_on_lower_bound_changed(self, slot):
         try:
-            self.view.unreg_on_bounds_changed(slot)
+            self.view.unreg_on_lower_bound_changed(slot)
+        except TypeError:
+            return
+
+    def unreg_on_upper_bound_changed(self, slot):
+        try:
+            self.view.unreg_on_upper_bound_changed(slot)
         except TypeError:
             return

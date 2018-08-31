@@ -2,7 +2,8 @@ from PyQt4 import QtGui, QtCore
 
 
 class AxisChangerView(QtGui.QWidget):
-    sig_bounds_changed = QtCore.pyqtSignal(object)
+    sig_lower_bound_changed = QtCore.pyqtSignal(object)
+    sig_upper_bound_changed = QtCore.pyqtSignal(object)
 
     def __init__(self, label):
         super(AxisChangerView, self).__init__()
@@ -11,11 +12,11 @@ class AxisChangerView(QtGui.QWidget):
 
         self.lower_bound = QtGui.QLineEdit()
         self.lower_bound.setValidator(QtGui.QDoubleValidator())
-        self.lower_bound.returnPressed.connect(self._bounds_changed)
+        self.lower_bound.returnPressed.connect(self._lower_bound_changed)
 
         self.upper_bound = QtGui.QLineEdit()
         self.upper_bound.setValidator(QtGui.QDoubleValidator())
-        self.upper_bound.returnPressed.connect(self._bounds_changed)
+        self.upper_bound.returnPressed.connect(self._upper_bound_changed)
 
         layout.addWidget(self.lower_bound)
         layout.addWidget(QtGui.QLabel("to"))
@@ -36,11 +37,20 @@ class AxisChangerView(QtGui.QWidget):
         self.lower_bound.clear()
         self.upper_bound.clear()
 
-    def _bounds_changed(self):
-        self.sig_bounds_changed.emit(self.get_bounds())
+    def _lower_bound_changed(self):
+        self.sig_lower_bound_changed.emit(self.get_bounds()[0])
 
-    def on_bounds_changed(self, slot):
-        self.sig_bounds_changed.connect(slot)
+    def _upper_bound_changed(self):
+        self.sig_upper_bound_changed.emit(self.get_bounds()[1])
 
-    def unreg_on_bounds_changed(self, slot):
-        self.sig_bounds_changed.disconnect(slot)
+    def on_lower_bound_changed(self, slot):
+        self.sig_lower_bound_changed.connect(slot)
+
+    def on_upper_bound_changed(self, slot):
+        self.sig_upper_bound_changed.connect(slot)
+
+    def unreg_on_lower_bound_changed(self, slot):
+        self.sig_lower_bound_changed.disconnect(slot)
+
+    def unreg_on_upper_bound_changed(self, slot):
+        self.sig_upper_bound_changed.disconnect(slot)
