@@ -44,7 +44,7 @@ public:
   MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
                           unsigned int numThreads, const std::string &binary);
   void
-  load(const std::string &filename, const std::string &groupName,
+  load(const std::string &filename, const std::string &groupname,
        const std::vector<std::string> &bankNames,
        const std::vector<int32_t> &bankOffsets,
        std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const;
@@ -72,12 +72,12 @@ private:
       std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
 
 private:
-  unsigned numPixels;
-  unsigned numProcesses;
-  unsigned numThreads;
-  std::string binaryToLaunch;
-  std::vector<std::string> segmentNames;
-  std::string storageName;
+  unsigned m_numPixels;
+  unsigned m_numProcesses;
+  unsigned m_numThreads;
+  std::string m_binaryToLaunch;
+  std::vector<std::string> m_segmentNames;
+  std::string m_storageName;
 };
 
 template<typename T>

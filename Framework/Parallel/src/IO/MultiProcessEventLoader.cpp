@@ -20,8 +20,8 @@ MultiProcessEventLoader::MultiProcessEventLoader(unsigned int numPixels,
                                                  unsigned int numProcesses,
                                                  unsigned int numThreads,
                                                  const std::string &binary)
-    : numPixels(numPixels), numProcesses(numProcesses), numThreads(numThreads), binaryToLaunch(binary),
-      segmentNames(GenerateSegmentsName(numProcesses)), storageName(GenerateStoragename()) {}
+    : m_numPixels(numPixels), m_numProcesses(numProcesses), m_numThreads(numThreads), m_binaryToLaunch(binary),
+      m_segmentNames(GenerateSegmentsName(numProcesses)), m_storageName(GenerateStoragename()) {}
 
 std::vector<std::string> MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
   std::vector<std::string> res(procNum, GenerateTimeBasedPrefix() + "_mantid_multiprocess_NXloader_segment_");
@@ -56,24 +56,24 @@ void MultiProcessEventLoader::load(const std::string &filename,
   auto bkSz = EventLoader::readBankSizes(instrument, bankNames);
   auto numEvents = std::accumulate(bkSz.begin(), bkSz.end(), 0);
 
-  std::size_t storageSize = 3000000000000 / numProcesses; //TODO
+  std::size_t storageSize = 3000000000000 / m_numProcesses; //TODO
 
   std::string storageName = GenerateStoragename();
-  std::vector<std::string> segmentNames = GenerateSegmentsName(numProcesses);
-  std::size_t evPerPr = numEvents / numProcesses;
+  std::vector<std::string> segmentNames = GenerateSegmentsName(m_numProcesses);
+  std::size_t evPerPr = numEvents / m_numProcesses;
 
   std::vector<bp::child> vChilds;
 
-  for (unsigned i = 1; i < numProcesses; ++i) {
+  for (unsigned i = 1; i < m_numProcesses; ++i) {
     std::string command;
-    command += binaryToLaunch + " ";
+    command += m_binaryToLaunch + " ";
     command += segmentNames[i] + " ";                       // segment name
     command += storageName + " ";                           // storage name
     command += std::to_string(i) + " ";                     // proc id
     command += std::to_string(evPerPr * i) + " ";           // first event to load
     command += std::to_string(std::min<std::size_t>
                                   (evPerPr * (i + 1), numEvents)) + " ";                // upper bound to load
-    command += std::to_string(numPixels) + " ";             // pixel count
+    command += std::to_string(m_numPixels) + " ";             // pixel count
     command += std::to_string(storageSize) + " ";           // memory size
     command += filename + " ";                              // nexus file name
     command += groupname + " ";                             // instrument group name
@@ -91,8 +91,8 @@ void MultiProcessEventLoader::load(const std::string &filename,
   }
 
   EventsListsShmemStorage storage(segmentNames[0], storageName, storageSize, 1,
-                                  numPixels, false);
-  fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0, numEvents / numProcesses);
+                                  m_numPixels, false);
+  fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0, numEvents / m_numProcesses);
 
   for (auto &c : vChilds)
     c.wait();
@@ -107,22 +107,22 @@ void MultiProcessEventLoader::assembleFromShared(std::vector<std::vector<Mantid:
   std::vector<std::thread> workers;
   std::atomic<int> cnt{0};
 
-  for (unsigned i = 0; i < numThreads; ++i) {
+  for (unsigned i = 0; i < m_numThreads; ++i) {
     workers.emplace_back([&cnt, this, &result]() {
       std::vector<ip::managed_shared_memory> segments;
       std::vector<Mantid::Parallel::IO::Chunks *> chunksPtrs;
-      for (unsigned i = 0; i < numThreads; ++i) {
-        segments.emplace_back(ip::open_read_only, segmentNames[i].c_str());
+      for (unsigned i = 0; i < m_numThreads; ++i) {
+        segments.emplace_back(ip::open_read_only, m_segmentNames[i].c_str());
         chunksPtrs.emplace_back(
             segments[i]
-                .find<Mantid::Parallel::IO::Chunks>(storageName.c_str())
+                .find<Mantid::Parallel::IO::Chunks>(m_storageName.c_str())
                 .first);
       }
 
-      for (unsigned pixel = atomic_fetch_add(&cnt, 1); pixel < numPixels;
+      for (unsigned pixel = atomic_fetch_add(&cnt, 1); pixel < m_numPixels;
            pixel = atomic_fetch_add(&cnt, 1)) {
         auto &res = result[pixel];
-        for (unsigned i = 0; i < numThreads; ++i) {
+        for (unsigned i = 0; i < m_numThreads; ++i) {
           for (auto &chunk : *chunksPtrs[i]) {
             res->insert(res->end(), chunk[pixel].begin(), chunk[pixel].end());
           }

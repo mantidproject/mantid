@@ -1,8 +1,10 @@
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
+#include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 #include <H5Cpp.h>
+#include <thread>
 
 namespace Mantid {
 namespace Parallel {
@@ -46,14 +48,15 @@ void load(const Communicator &comm, const std::string &filename,
 }
 
 /// Load events from given banks into event lists.
-void load(const std::string &filename,
-          const std::string &groupName,
+void load(const std::string &filename, const std::string &groupname,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
-
+  auto num = std::thread::hardware_concurrency();
+  MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()), num,
+                                 num, "");
+  loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
-
 
 } // namespace EventLoader
 
