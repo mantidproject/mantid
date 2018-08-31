@@ -53,7 +53,7 @@ public:
   }
   /// Constructor
   SaveANSTOAscii() {
-    this->useAlgorithm("SaveMFT");
+    this->useAlgorithm("SaveReflectometryAscii");
     this->deprecatedDate("2018-06-29");
   }
 

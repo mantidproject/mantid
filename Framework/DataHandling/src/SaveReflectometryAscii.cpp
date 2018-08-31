@@ -70,9 +70,10 @@ void SaveReflectometryAscii::init() {
   declareProperty("WriteHeader", false, "Whether to write header lines.");
   setPropertySettings("WriteHeader", std::move(mfttxt2));
   std::vector<std::string> separator = {"comma", "space", "tab"};
-  declareProperty("WriteResolution", true,
-                  "Whether to compute resolution values and write them (fourth "
-                  "data column).");
+  declareProperty(
+      "WriteResolution", true,
+      "Whether to compute resolution values and write them as fourth "
+      "data column.");
   setPropertySettings("WriteResolution", std::move(mftdat));
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(separator),
@@ -120,8 +121,10 @@ void SaveReflectometryAscii::data() {
         (!m_ext.compare(".mft")) || (!m_ext.compare(".txt"))) {
       if (m_ws->hasDx(0))
         outputval(m_ws->dx(0)[i]);
-
-      // else: outputval(points[i] * ((points[1] + points[0]) / points[1]));
+      else {
+        if (m_ext.compare(".mft"))
+          outputval(points[i] * ((points[1] + points[0]) / points[1]));
+      }
     }
     m_file << '\n';
   }
@@ -201,51 +204,47 @@ void SaveReflectometryAscii::writeInfo(const std::string logName,
 
 /// Write header lines
 void SaveReflectometryAscii::header() {
-  if (!m_ext.compare(".mft") || m_ext.empty()) {
-    m_file << std::setfill(' ');
-    m_file << "MFT\n";
-    std::map<std::string, std::string> logs;
-    logs["Instrument"] = "instrument.name";
-    logs["User-local contact"] = "user.namelocalcontact";
-    logs["Title"] = "title";
-    logs["Subtitle"] = "";
-    logs["Start date + time"] = "start_time";
-    logs["End date + time"] = "end_time";
-    logs["Theta 1 + dir + ref numbers"] = "";
-    logs["Theta 2 + dir + ref numbers"] = "";
-    logs["Theta 3 + dir + ref numbers"] = "";
-    writeInfo("Instrument", "instrument.name");
-    writeInfo("User-local contact", "user.namelocalcontact");
-    writeInfo("Title", "title");
-    writeInfo("Subtitle", "");
-    writeInfo("Start date + time", "start_time");
-    writeInfo("End date + time", "end_time");
-    writeInfo("Theta 1 + dir + ref numbers", "");
-    writeInfo("Theta 2 + dir + ref numbers", "");
-    writeInfo("Theta 3 + dir + ref numbers", "");
-    const std::vector<std::string> logList = getProperty("LogList");
-    int nlogs = 0;
-    for (const auto &log : logList) {
-      if (logs.find(log) == logs.end()) {
-        writeInfo(log);
-        ++nlogs;
-      }
+  m_file << std::setfill(' ');
+  m_file << "MFT\n";
+  std::map<std::string, std::string> logs;
+  logs["Instrument"] = "instrument.name";
+  logs["User-local contact"] = "user.namelocalcontact";
+  logs["Title"] = "title";
+  logs["Subtitle"] = "";
+  logs["Start date + time"] = "start_time";
+  logs["End date + time"] = "end_time";
+  logs["Theta 1 + dir + ref numbers"] = "";
+  logs["Theta 2 + dir + ref numbers"] = "";
+  logs["Theta 3 + dir + ref numbers"] = "";
+  writeInfo("Instrument", "instrument.name");
+  writeInfo("User-local contact", "user.namelocalcontact");
+  writeInfo("Title", "title");
+  writeInfo("Subtitle", "");
+  writeInfo("Start date + time", "start_time");
+  writeInfo("End date + time", "end_time");
+  writeInfo("Theta 1 + dir + ref numbers", "");
+  writeInfo("Theta 2 + dir + ref numbers", "");
+  writeInfo("Theta 3 + dir + ref numbers", "");
+  const std::vector<std::string> logList = getProperty("LogList");
+  int nlogs = 0;
+  for (const auto &log : logList) {
+    if (logs.find(log) == logs.end()) {
+      writeInfo(log);
+      ++nlogs;
     }
-    for (auto i = nlogs + 1; i < 10; ++i)
-      writeInfo("Parameter ");
-    m_file << "Number of file format : "
-           << "40\n";
-    m_file << "Number of data points : " << m_ws->y(0).size() << '\n';
-    m_file << '\n';
-    outputval("q");
-    outputval("refl");
-    outputval("refl_err");
-    if (m_ws->hasDx(0))
-      outputval("q_res (FWHM)");
-    m_file << "\n";
-  } else if (!m_ext.compare(".dat")) {
-    m_file << m_ws->y(0).size();
   }
+  for (auto i = nlogs + 1; i < 10; ++i)
+    writeInfo("Parameter ");
+  m_file << "Number of file format : "
+         << "40\n";
+  m_file << "Number of data points : " << m_ws->y(0).size() << '\n';
+  m_file << '\n';
+  outputval("q");
+  outputval("refl");
+  outputval("refl_err");
+  if (m_ws->hasDx(0))
+    outputval("q_res (FWHM)");
+  m_file << "\n";
 }
 
 /// Check file
@@ -269,9 +268,10 @@ void SaveReflectometryAscii::checkFile(const std::string filename) {
 void SaveReflectometryAscii::exec() {
   checkFile(m_filename);
   separator();
-  if ((getProperty("WriteHeader") || !m_ext.compare(".mft")) &&
-      m_ext.compare(".txt"))
+  if ((getProperty("WriteHeader") && m_ext.empty()) || !m_ext.compare(".mft"))
     header();
+  else if (!m_ext.compare(".dat"))
+    m_file << m_ws->y(0).size() << "\n";
   data();
   m_file.close();
 }

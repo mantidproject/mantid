@@ -203,7 +203,7 @@ public:
     }
   }
 
-  void test_no_header() {
+  void test_txt() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
@@ -223,9 +223,11 @@ public:
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("       3.300000000000000e-01       "
-                      "3.000000000000000e+00       1.732050807568877e+00");
+                      "3.000000000000000e+00       1.732050807568877e+00       "
+                      "6.502941176470588e-01");
     data.emplace_back("       3.400000000000000e-01       "
-                      "6.600000000000000e+00       2.569046515733026e+00");
+                      "6.600000000000000e+00       2.569046515733026e+00       "
+                      "6.700000000000000e-01");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;
@@ -236,7 +238,7 @@ public:
     TS_ASSERT(in.eof())
   }
 
-  void test_override_existing_file() {
+  void test_override_existing_file_txt() {
     const auto &x1 = Mantid::HistogramData::Points({4.36, 6.32});
     const auto &y1 = Mantid::HistogramData::Counts({4., 7.6});
     Mantid::HistogramData::Histogram histogram1(x1, y1);
@@ -253,7 +255,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".txt"))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws2))
@@ -266,9 +267,11 @@ public:
     std::vector<std::string> data;
     data.reserve(2);
     data.emplace_back("       3.300000000000000e-01       "
-                      "3.000000000000000e+00       1.732050807568877e+00");
+                      "3.000000000000000e+00       1.732050807568877e+00       "
+                      "6.502941176470588e-01");
     data.emplace_back("       3.400000000000000e-01       "
-                      "6.600000000000000e+00       2.569046515733026e+00");
+                      "6.600000000000000e+00       2.569046515733026e+00       "
+                      "6.700000000000000e-01");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;
@@ -422,9 +425,11 @@ public:
     std::vector<std::string> data1;
     data1.reserve(2);
     data1.emplace_back("       4.360000000000000e+00       "
-                       "4.000000000000000e+00       2.000000000000000e+00");
+                       "4.000000000000000e+00       2.000000000000000e+00      "
+                       " 7.367848101265823e+00");
     data1.emplace_back("       6.320000000000000e+00       "
-                       "7.600000000000000e+00       2.756809750418044e+00");
+                       "7.600000000000000e+00       2.756809750418044e+00      "
+                       " 1.068000000000000e+01");
     std::ifstream in1(f1);
     TS_ASSERT(not_empty(in1))
     std::string fullline;
@@ -437,9 +442,11 @@ public:
     std::vector<std::string> data2;
     data2.reserve(2);
     data2.emplace_back("       3.300000000000000e-01       "
-                       "3.000000000000000e+00       1.732050807568877e+00");
+                       "3.000000000000000e+00       1.732050807568877e+00      "
+                       " 6.502941176470588e-01");
     data2.emplace_back("       3.400000000000000e-01       "
-                       "6.600000000000000e+00       2.569046515733026e+00");
+                       "6.600000000000000e+00       2.569046515733026e+00      "
+                       " 6.700000000000000e-01");
     std::ifstream in2(f2);
     TS_ASSERT(not_empty(in2))
     auto it2 = data2.begin();
@@ -447,6 +454,192 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it2++));
     }
     TS_ASSERT(in2.eof())
+  }
+
+  void test_point_data_dat() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ".dat"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename.append(".dat")).exists())
+    std::vector<std::string> data;
+    data.reserve(3);
+    data.emplace_back("2");
+    data.emplace_back("       3.300000000000000e-01       "
+                      "3.000000000000000e+00       1.732050807568877e+00");
+    data.emplace_back("       3.400000000000000e-01       "
+                      "6.600000000000000e+00       2.569046515733026e+00");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      TS_ASSERT_EQUALS(fullline, *(it++));
+    }
+    TS_ASSERT(in.eof())
+  }
+
+  void test_dx_values_with_header_custom() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    histogram.setPointStandardDeviations(std::vector<double>{1.1, 1.3});
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", true))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists())
+    std::vector<std::string> data;
+    data.reserve(5);
+    data.emplace_back("MFT");
+    data.emplace_back("");
+    data.emplace_back("                           q                        "
+                      "refl                    refl_err                q_res "
+                      "(FWHM)");
+    data.emplace_back("\t3.300000000000000e-01\t"
+                      "3.000000000000000e+00\t1.732050807568877e+00\t"
+                      "1.100000000000000e+00");
+    data.emplace_back("\t3.400000000000000e-01\t"
+                      "6.600000000000000e+00\t2.569046515733026e+00\t"
+                      "1.300000000000000e+00");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      if (fullline.find(" : ") == std::string::npos)
+        TS_ASSERT_EQUALS(fullline, *(it++))
+    }
+  }
+
+  void test_dx_values_no_header_custom() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    histogram.setPointStandardDeviations(std::vector<double>{1.1, 1.3});
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists())
+    std::vector<std::string> data;
+    data.reserve(2);
+    data.emplace_back("\t3.300000000000000e-01\t"
+                      "3.000000000000000e+00\t1.732050807568877e+00\t"
+                      "1.100000000000000e+00");
+    data.emplace_back("\t3.400000000000000e-01\t"
+                      "6.600000000000000e+00\t2.569046515733026e+00\t"
+                      "1.300000000000000e+00");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      TS_ASSERT_EQUALS(fullline, *(it++))
+    }
+  }
+
+  void test_no_header_no_resolution_separator_custom() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    histogram.setPointStandardDeviations(std::vector<double>{1.1, 1.3});
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteResolution", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "space"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists())
+    std::vector<std::string> data;
+    data.reserve(2);
+    data.emplace_back(" 3.300000000000000e-01 "
+                      "3.000000000000000e+00 1.732050807568877e+00");
+    data.emplace_back(" 3.400000000000000e-01 "
+                      "6.600000000000000e+00 2.569046515733026e+00");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      TS_ASSERT_EQUALS(fullline, *(it++))
+    }
+  }
+
+  void test_custom_with_mft_extension_nan_values() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0. / 0.});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "space"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists())
+    std::vector<std::string> data;
+    data.reserve(2);
+    data.emplace_back(" 3.300000000000000e-01 "
+                      "3.000000000000000e+00 1.732050807568877e+00 "
+                      "nan");
+    data.emplace_back(" nan "
+                      "6.600000000000000e+00 2.569046515733026e+00 "
+                      "nan");
+    // explanation : the resolution values are not given and will be computed,
+    // however, the second point is nan resulting in an overall nan resolution
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      TS_ASSERT_EQUALS(fullline, *(it++))
+    }
   }
 
 private:

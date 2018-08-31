@@ -11,7 +11,8 @@
 namespace Mantid {
 namespace DataHandling {
 /**
-Saves a file in MFT Ascii format from a 2D workspace.
+Saves a file of desired (mft, txt, dat or custom) Ascii format from a 2D
+workspace.
 
 Copyright &copy; 2007-18 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
