@@ -43,6 +43,7 @@ public:
 
 private:
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   API::MatrixWorkspace_sptr applyDiagnostics(API::MatrixWorkspace_sptr ws);
   std::vector<std::string> components(Geometry::Instrument const &instrument);

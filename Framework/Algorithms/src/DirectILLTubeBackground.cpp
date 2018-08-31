@@ -107,6 +107,35 @@ void checkComponentExists(std::string const &componentName,
   }
 }
 
+struct Range {
+  size_t first{0};
+  size_t last{0};
+};
+
+Range componentWSIndexRange(Mantid::API::MatrixWorkspace const &componentWS,
+                            Mantid::API::MatrixWorkspace const &originalWS) {
+  Range range;
+  auto const firstComponentSpectrumNo =
+      componentWS.getSpectrum(0).getSpectrumNo();
+  range.first = originalWS.getIndexFromSpectrumNumber(firstComponentSpectrumNo);
+  auto const nComponentHistograms = componentWS.getNumberHistograms();
+  auto const lastComponentSpectrumNo =
+      componentWS.getSpectrum(nComponentHistograms - 1).getSpectrumNo();
+  range.last = originalWS.getIndexFromSpectrumNumber(lastComponentSpectrumNo);
+  return range;
+}
+
+void writeComponentBackgroundToOutput(
+    Mantid::API::MatrixWorkspace const &componentBkgWS,
+    Mantid::API::MatrixWorkspace &targetWS, size_t const firstTargetWSIndex) {
+  auto const &ys = componentBkgWS.y(0);
+  auto const &es = componentBkgWS.e(0);
+  for (size_t i = 0; i < ys.size(); ++i) {
+    targetWS.mutableY(firstTargetWSIndex + i) = ys[i];
+    targetWS.mutableE(firstTargetWSIndex + i) = es[i];
+  }
+}
+
 } // namespace
 
 namespace Mantid {
@@ -168,8 +197,27 @@ void DirectILLTubeBackground::init() {
       "the elastic peaks in multiplies of 'Sigma' in the EPP table.'.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-          Prop::DIAGNOSTICS_WS, "", Kernel::Direction::Input, API::PropertyMode::Optional),
+          Prop::DIAGNOSTICS_WS, "", Kernel::Direction::Input,
+          API::PropertyMode::Optional),
       "Detector diagnostics workspace for masking.");
+}
+
+std::map<std::string, std::string> DirectILLTubeBackground::validateInputs() {
+  std::map<std::string, std::string> issues;
+  API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
+  API::ITableWorkspace_sptr eppWS = getProperty(Prop::EPP_WS);
+  if (inWS->getNumberHistograms() != eppWS->rowCount()) {
+    issues[Prop::EPP_WS] =
+        "Wrong EPP workspace? The number of the table rows "
+        "does not match the number of histograms in InputWorkspace.";
+  }
+  API::MatrixWorkspace_sptr maskWS = getProperty(Prop::DIAGNOSTICS_WS);
+  if (inWS->getNumberHistograms() != maskWS->getNumberHistograms()) {
+    issues[Prop::EPP_WS] =
+        "Wrong diagnostics workspace? The number of histograms "
+        "does not match with InputWorkspace.";
+  }
+  return issues;
 }
 
 /** Execute the algorithm.
@@ -188,36 +236,29 @@ void DirectILLTubeBackground::exec() {
   auto instrument = ws->getInstrument();
   std::vector<std::string> const componentNames = components(*instrument);
   API::Progress progress(this, 0.0, 1.0, componentNames.size());
-  for (auto const &componentName : componentNames) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  for (int64_t i = 0; static_cast<size_t>(i) < componentNames.size(); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    auto const &componentName = componentNames[static_cast<size_t>(i)];
     progress.report("Processing " + componentName);
     checkComponentExists(componentName, *instrument);
-    API::MatrixWorkspace_sptr componentWS = cropToComponent(ws, componentName);
+    auto componentWS = cropToComponent(ws, componentName);
     auto const bkgRanges = bkgFittingRanges(*componentWS, *fitStatusColumn);
     if (bkgRanges.empty()) {
       continue;
     }
-    auto const firstComponentSpectrumNo =
-        componentWS->getSpectrum(0).getSpectrumNo();
-    auto const firstIndex =
-        ws->getIndexFromSpectrumNumber(firstComponentSpectrumNo);
-    auto const nComponentHistograms = componentWS->getNumberHistograms();
-    auto const lastComponentSpectrumNo =
-        componentWS->getSpectrum(nComponentHistograms - 1).getSpectrumNo();
-    auto const lastIndex =
-        ws->getIndexFromSpectrumNumber(lastComponentSpectrumNo);
+    auto const wsIndexRange = componentWSIndexRange(*componentWS, *ws);
     auto const bounds =
-        peakBounds(firstIndex, lastIndex, sigmaMultiplier, *peakCentreColumn,
-                   *sigmaColumn, *fitStatusColumn);
-    auto averageWS = peakExcludingAverage(*componentWS, bounds.peakStarts, bounds.peakEnds);
-    API::MatrixWorkspace_sptr fittedComponentBkg =
-        fitComponentBackground(averageWS, bkgRanges);
-    auto const &bkgYs = fittedComponentBkg->y(0);
-    auto const &bkgEs = fittedComponentBkg->e(0);
-    for (size_t i = 0; i < bkgYs.size(); ++i) {
-      bkgWS->mutableY(firstIndex + i) = bkgYs[i];
-      bkgWS->mutableE(firstIndex + i) = bkgEs[i];
-    }
+        peakBounds(wsIndexRange.first, wsIndexRange.last, sigmaMultiplier,
+                   *peakCentreColumn, *sigmaColumn, *fitStatusColumn);
+    auto averageWS =
+        peakExcludingAverage(*componentWS, bounds.peakStarts, bounds.peakEnds);
+    auto fittedComponentBkg = fitComponentBackground(averageWS, bkgRanges);
+    writeComponentBackgroundToOutput(*fittedComponentBkg, *bkgWS,
+                                     wsIndexRange.first);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   setProperty(Prop::OUTPUT_WS, bkgWS);
 }
 
