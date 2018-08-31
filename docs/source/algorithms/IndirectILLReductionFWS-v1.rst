@@ -66,7 +66,7 @@ Output:
 
 .. testcleanup:: ExFixedWindowScans
 
-   DeleteWorkspace('ws_red')
+   mtd.clear()
 
 .. categories::
 
