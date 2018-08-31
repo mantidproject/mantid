@@ -19,14 +19,15 @@ const std::string DIAGNOSTICS_WS{"DiagnosticsWorkspace"};
 const std::string EPP_WS{"EPPWorkspace"};
 const std::string INPUT_WS{"InputWorkspace"};
 const std::string OUTPUT_WS{"OutputWorkspace"};
+const std::string POLYNOMIAL_DEGREE{"Degree"};
 const std::string SIGMA_MULTIPLIER{"NonBkgRegionInSigmas"};
 } // namespace Prop
 
 /**
- * @brief Returns a vector of ws index [begin, end) pairs.
+ * @brief Returns the background fitting range in workspace indices.
  * @param ws a workspace
- * @param statuses
- * @return
+ * @param statuses the fit status column of a EPP workspace
+ * @return a vector of [begin, end) pairs
  */
 std::vector<double> bkgFittingRanges(Mantid::API::MatrixWorkspace const &ws,
                                      Mantid::API::Column const &statuses,
@@ -58,11 +59,24 @@ std::vector<double> bkgFittingRanges(Mantid::API::MatrixWorkspace const &ws,
   return ranges;
 }
 
+/// A list of peak limits.
 struct PeakBounds {
+  /// A vector of peak's lower X limits.
   std::vector<double> peakStarts;
+  /// A vector of peak's upper X limits.
   std::vector<double> peakEnds;
 };
 
+/**
+ * @brief Make a list of peak lower and upper X limits.
+ * @param firstIndex first row to consider
+ * @param lastIndex last row to consider
+ * @param sigmaMultiplier half-width sigma multiplier for peak width
+ * @param peakCentreColumn a column of peak centres
+ * @param sigmaColumn a column of sigma values (measures of peak width)
+ * @param fitStatusColumn a column of EPP fit statuses
+ * @return a PeakBounds object containing the peak limits
+ */
 PeakBounds peakBounds(size_t const firstIndex, size_t const lastIndex,
                       double const sigmaMultiplier,
                       Mantid::API::Column const &peakCentreColumn,
@@ -87,6 +101,13 @@ PeakBounds peakBounds(size_t const firstIndex, size_t const lastIndex,
   return bounds;
 }
 
+/**
+ * @brief Check if the given columns are nullptr
+ * @param centreColumn an EPP peak centre column
+ * @param sigmaColumn an EPP sigma column
+ * @param statusColumn an EPP fit status column
+ * @throw NotFoundError if any of the parameters is nullptr
+ */
 void checkEPPColumnsExist(Mantid::API::Column_sptr const &centreColumn,
                           Mantid::API::Column_sptr const &sigmaColumn,
                           Mantid::API::Column_sptr const &statusColumn) {
@@ -105,6 +126,12 @@ void checkEPPColumnsExist(Mantid::API::Column_sptr const &centreColumn,
   }
 }
 
+/**
+ * @brief Check if given component exists in the instrument.
+ * @param componentName the name of the component
+ * @param instrument an instrument
+ * @throw NotFoundError if the instrument does not contain the component
+ */
 void checkComponentExists(std::string const &componentName,
                           Mantid::Geometry::Instrument const &instrument) {
   using namespace Mantid::Kernel::Exception;
@@ -115,11 +142,20 @@ void checkComponentExists(std::string const &componentName,
   }
 }
 
+/// An inclusive workspace index range.
 struct Range {
+  /// First workspace index.
   size_t first{0};
+  /// Last workspace index.
   size_t last{0};
 };
 
+/**
+ * @brief Find the corresponding ws indices from the original workspace.
+ * @param componentWS a component workspace cropped from originalWS
+ * @param originalWS the original workspace
+ * @return a Range of workspace indices
+ */
 Range componentWSIndexRange(Mantid::API::MatrixWorkspace const &componentWS,
                             Mantid::API::MatrixWorkspace const &originalWS) {
   Range range;
@@ -133,6 +169,12 @@ Range componentWSIndexRange(Mantid::API::MatrixWorkspace const &componentWS,
   return range;
 }
 
+/**
+ * @brief Write Y values and errors to targetWS
+ * @param componentBkgWS the source workspace
+ * @param targetWS the target workspace
+ * @param firstTargetWSIndex begin writing at this workspace index
+ */
 void writeComponentBackgroundToOutput(
     Mantid::API::MatrixWorkspace const &componentBkgWS,
     Mantid::API::MatrixWorkspace &targetWS, size_t const firstTargetWSIndex) {
@@ -203,6 +245,10 @@ void DirectILLTubeBackground::init() {
       Prop::SIGMA_MULTIPLIER, 6., positiveDouble,
       "Half width of the range excluded from background around "
       "the elastic peaks in multiplies of 'Sigma' in the EPP table.'.");
+  auto nonnegativeInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  nonnegativeInt->setLower(0);
+  declareProperty(Prop::POLYNOMIAL_DEGREE, 0, nonnegativeInt,
+                  "The degree of the background polynomial.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::DIAGNOSTICS_WS, "", Kernel::Direction::Input,
@@ -210,6 +256,7 @@ void DirectILLTubeBackground::init() {
       "Detector diagnostics workspace for masking.");
 }
 
+/// Validate input properties.
 std::map<std::string, std::string> DirectILLTubeBackground::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr inWS = getProperty(Prop::INPUT_WS);
@@ -273,6 +320,11 @@ void DirectILLTubeBackground::exec() {
   setProperty(Prop::OUTPUT_WS, bkgWS);
 }
 
+/**
+ * @brief Apply a mask workspace (if given) to ws.
+ * @param ws a workspace to apply the mask to
+ * @return a masked workspace
+ */
 API::MatrixWorkspace_sptr
 DirectILLTubeBackground::applyDiagnostics(API::MatrixWorkspace_sptr ws) {
   if (isDefault(Prop::DIAGNOSTICS_WS)) {
@@ -286,6 +338,12 @@ DirectILLTubeBackground::applyDiagnostics(API::MatrixWorkspace_sptr ws) {
   return ws;
 }
 
+/**
+ * @brief Return a list of component names for the algorithm to process.
+ * @param instrument an instrument
+ * @return a list of comopnent names
+ * @throw std::runtime_error if the names cannot be found anywhere
+ */
 std::vector<std::string>
 DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {
   if (isDefault(Prop::COMPONENTS)) {
@@ -303,6 +361,12 @@ DirectILLTubeBackground::components(Geometry::Instrument const &instrument) {
   return getProperty(Prop::COMPONENTS);
 }
 
+/**
+ * @brief Crop a component workspace out of ws.
+ * @param ws a workspace to crop
+ * @param componentName name of the component to crop
+ * @return a component workspace
+ */
 API::MatrixWorkspace_sptr
 DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr &ws,
                                          std::string const &componentName) {
@@ -314,17 +378,32 @@ DirectILLTubeBackground::cropToComponent(API::MatrixWorkspace_sptr &ws,
   return crop->getProperty("OutputWorkspace");
 }
 
+/**
+ * @brief Fits a polynomial background.
+ * @param ws a workspace to fit the background to
+ * @param xRanges fitting ranges
+ * @return the fitted backgrounds
+ */
 API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(
     API::MatrixWorkspace_sptr &ws, std::vector<double> const &xRanges) {
+  int const degree = getProperty(Prop::POLYNOMIAL_DEGREE);
   auto calculateBkg = createChildAlgorithm("CalculatePolynomialBackground");
   calculateBkg->setProperty("InputWorkspace", ws);
   calculateBkg->setProperty("OutputWorkspace", "_unused");
+  calculateBkg->setProperty("Degree", degree);
   calculateBkg->setProperty("XRanges", xRanges);
   calculateBkg->setProperty("CostFunction", "Unweighted least squares");
   calculateBkg->execute();
   return calculateBkg->getProperty("OutputWorkspace");
 }
 
+/**
+ * @brief Average the histograms of a workspace.
+ * @param ws a workspace to average
+ * @param peakStarts start X values of an exclusion range
+ * @param peakEnds end X values of an exclusion range
+ * @return a single column workspace containing the averages
+ */
 API::MatrixWorkspace_sptr DirectILLTubeBackground::peakExcludingAverage(
     API::MatrixWorkspace const &ws, std::vector<double> const &peakStarts,
     std::vector<double> const &peakEnds) {

@@ -144,6 +144,50 @@ public:
     }
   }
 
+  void test_HigherDegreePolynomial() {
+    constexpr int numBanks{2};
+    constexpr int numPixels{2};
+    constexpr int numBins{9};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    for (size_t i = 0; i < inWS->getNumberHistograms(); ++i) {
+      auto &Ys = inWS->mutableY(i);
+      Ys = static_cast<double>(i);
+      Ys[numBins / 2] = 1090.; // Peak.
+    }
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      // Peak covers the middle bin of all histograms.
+      row.peakCentre = static_cast<double>(numBins) / 2.;
+      row.sigma = 1.1 / 6.;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> const components{"bank1", "bank2"};
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Degree", 1))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
+    TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
+    for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
+      auto const &Ys = outWS->y(i);
+      auto const &Es = outWS->e(i);
+      TS_ASSERT_DELTA(Ys[i], static_cast<double>(i), 1e-10)
+      TS_ASSERT_EQUALS(Es[i], 0.)
+    }
+  }
+
   void test_DiagnosticsWorkspace() {
     constexpr int numBanks{2};
     constexpr int numPixels{2};
