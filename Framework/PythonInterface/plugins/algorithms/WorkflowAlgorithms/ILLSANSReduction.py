@@ -281,7 +281,11 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                             Minus(LHSWorkspace=ws, RHSWorkspace=container, OutputWorkspace=ws)
                         mask = self.getPropertyValue('MaskedInputWorkspace')
                         if mask:
-                            MaskDetectors(Workspace=ws, MaskedWorkspace=mask)
+                            masked_ws = ws + '_mask'
+                            CloneWorkspace(InputWorkspace=mask, OutputWorkspace=masked_ws)
+                            ExtractMonitors(InputWorkspace=masked_ws, DetectorWorkspace=masked_ws)
+                            MaskDetectors(Workspace=ws, MaskedWorkspace=masked_ws)
+                            DeleteWorkspace(masked_ws)
                         thickness = self.getProperty('SampleThickness').value
                         NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
                         if process == 'Reference':
