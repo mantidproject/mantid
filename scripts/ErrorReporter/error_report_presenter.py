@@ -14,7 +14,6 @@ class ErrorReporterPresenter(object):
             errorReporter = ErrorReporter(
                 "mantidplot", UsageService.getUpTime(), self._exit_code, True, str(name), str(email), str(textBox))
             errorReporter.sendErrorReport()
-            print str(textBox)
         elif share == 1:
             errorReporter = ErrorReporter(
                 "mantidplot", UsageService.getUpTime(), self._exit_code, False, str(name), str(email), str(textBox))
