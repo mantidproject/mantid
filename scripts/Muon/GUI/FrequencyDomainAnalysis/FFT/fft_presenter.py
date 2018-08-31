@@ -125,7 +125,6 @@ class FFTPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.thread.threadWrapperTearDown(self.deactivate,self.handleFinished)
         self.thread.deleteLater()
         self.thread = None
 

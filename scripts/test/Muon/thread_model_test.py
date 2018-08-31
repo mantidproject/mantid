@@ -1,6 +1,5 @@
 import unittest
 import sys
-import time
 
 if sys.version_info.major == 3:
     from unittest import mock
@@ -86,6 +85,10 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         model.output = mock.Mock()
         return model
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # TESTS
+    # ------------------------------------------------------------------------------------------------------------------
+
     def test_that_loadData_called_in_model_with_correct_inputs(self):
         self.model.loadData = mock.Mock()
 
@@ -111,18 +114,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.assertEqual(self.model.output.call_count, 1)
 
-    def test_that_attribute_error_raised_if_model_does_not_contain_execute_method(self):
-        model = testModelWithoutExecute()
-
-        with self.assertRaises(AttributeError):
-            ThreadModel(model)
-
-    def test_that_attribute_error_raised_if_model_does_not_contain_output_method(self):
-        model = testModelWithoutOutput
-
-        with self.assertRaises(AttributeError):
-            ThreadModel(model)
-
     def test_that_starting_and_finishing_callbacks_are_called_when_thread_starts_and_finishes(self):
         start_slot = mock.Mock()
         end_slot = mock.Mock()
@@ -142,22 +133,17 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             thread.loadData(None)
 
-    # def test_that_tearDown_function_disconnects_callbacks(self):
-    #     start_slot = mock.Mock()
-    #     end_slot = mock.Mock()
-    #
-    #     self.thread.threadWrapperSetUp(start_slot, end_slot)
-    #
-    #     self.thread.start()
-    #     self.Runner(self.thread)
-    #
-    #     self.thread.threadWrapperTearDown(start_slot, end_slot)
-    #
-    #     self.thread.start()
-    #     self.Runner(self.thread)
-    #
-    #     self.assertEqual(start_slot.call_count, 1)
-    #     self.assertEqual(end_slot.call_count, 1)
+    def test_that_attribute_error_raised_if_model_does_not_contain_execute_method(self):
+        model = testModelWithoutExecute()
+
+        with self.assertRaises(AttributeError):
+            ThreadModel(model)
+
+    def test_that_attribute_error_raised_if_model_does_not_contain_output_method(self):
+        model = testModelWithoutOutput
+
+        with self.assertRaises(AttributeError):
+            ThreadModel(model)
 
     def test_that_tearDown_function_called_automatically(self):
         start_slot = mock.Mock()
@@ -189,7 +175,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.assertEqual(mock_box.call_count, 1)
 
-    def test_that_passing_non_callables_to_setUp_throws(self):
+    def test_that_passing_non_callables_to_setUp_throws_AssertionError(self):
 
         with self.assertRaises(AssertionError):
             self.thread.threadWrapperSetUp(1, 2)
