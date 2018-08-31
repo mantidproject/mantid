@@ -30,8 +30,8 @@ Peak::Peak()
       m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_modulatedStructure(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_modulatedStructure(V3D(0, 0, 0)), m_intH(0), m_intK(0),
+      m_intL(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
@@ -178,8 +178,8 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakNumber(0), m_modulatedStructure(V3D(0, 0, 0)), m_intH(0), m_intK(0), m_intL(0),
-      m_peakShape(boost::make_shared<NoShape>()) {
+      m_peakNumber(0), m_modulatedStructure(V3D(0, 0, 0)), m_intH(0), m_intK(0),
+      m_intL(0), m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
@@ -208,8 +208,8 @@ Peak::Peak(const Peak &other)
       samplePos(other.samplePos), detPos(other.detPos),
       m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
       m_orig_L(other.m_orig_L), m_peakNumber(other.m_peakNumber),
-      m_modulatedStructure(other.m_modulatedStructure),
-      m_intH(other.m_intH), m_intK(other.m_intK),m_intL(other.m_intL), m_detIDs(other.m_detIDs),
+      m_modulatedStructure(other.m_modulatedStructure), m_intH(other.m_intH),
+      m_intK(other.m_intK), m_intL(other.m_intL), m_detIDs(other.m_detIDs),
       m_peakShape(other.m_peakShape->clone()), convention(other.convention) {}
 
 //----------------------------------------------------------------------------------------------
@@ -773,7 +773,7 @@ Mantid::Kernel::V3D Peak::getIntHKL() const {
 //----------------------------------------------------------------------------------------------
 /** Set the H index of this peak
  * @param m_H :: index to set   */
-void Peak::setH(double m_H) { 
+void Peak::setH(double m_H) {
   this->m_H = m_H;
   this->m_intH = boost::math::iround(m_H);
 }
@@ -1080,7 +1080,7 @@ Peak &Peak::operator=(const Peak &other) {
     m_orig_K = other.m_orig_K;
     m_orig_L = other.m_orig_L;
     m_detIDs = other.m_detIDs;
-           convention = other.convention;
+    convention = other.convention;
     m_peakShape.reset(other.m_peakShape->clone());
   }
   return *this;
