@@ -1,5 +1,6 @@
 #include "MantidGeometry/Objects/BeamlineRayTracer.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -69,8 +70,8 @@ void checkIntersectionWithRectangularBank(Track &track,
   double v = (double(corners.nY - 1) * tuv[2] + 0.5);
 
   // In indices
-  int xIndex = int(u);
-  int yIndex = int(v);
+  size_t xIndex = size_t(u);
+  size_t yIndex = size_t(v);
 
   // Out of range?
   if (xIndex < 0)
@@ -275,6 +276,10 @@ size_t getDetectorResult(const ComponentInfo &componentInfo,
       }
     }
   }
+
+  // Return an invalid index
+  // If no detector is found
+  return -1;
 }
 
 } // namespace BeamlineRayTracer
