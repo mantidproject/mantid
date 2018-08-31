@@ -849,7 +849,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   groupAlg->setProperty("InputWorkspaces", IvsQUnbinnedGroup);
   groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
   groupAlg->execute();
-  
+
   // Set other properties so they can be updated in the Reflectometry interface
   setPropertyValue("ThetaIn", alg->getPropertyValue("ThetaIn"));
   setPropertyValue("MomentumTransferMin",
