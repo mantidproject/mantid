@@ -102,7 +102,7 @@ public:
   /// Change the colormap power scale exponent.
   void changeNthPower(double);
   /// Get the file name of the current color map.
-  QString getCurrentColorMap() const { return m_currentColorMapFilename; }
+  QString getCurrentColorMap() const { return m_currentCMap; }
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool);
   /// extracts a mask workspace from the visualised workspace
@@ -229,7 +229,7 @@ private:
   mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// A helper object that keeps bin masking data.
   mutable MaskBinsData m_maskBinsData;
-  QString m_currentColorMapFilename;
+  QString m_currentCMap;
   /// integrated spectra
   std::vector<double> m_specIntegrs;
   /// The workspace data and bin range limits

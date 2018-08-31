@@ -36,6 +36,10 @@
 class EXPORT_OPT_MANTIDQT_LEGACYQWT MantidColorMap : public QwtColorMap {
 
 public:
+  static QString chooseColorMap(QString previousFile, QWidget *parent);
+  static QString exists(const QString &filename);
+
+public:
   MantidColorMap();
   explicit MantidColorMap(const QString &filename,
                           GraphOptions::ScaleType type);
@@ -49,8 +53,6 @@ public:
   double getNthPower() const { return m_nth_power; };
 
   bool loadMap(const QString &filename);
-
-  static QString loadMapDialog(QString previousFile, QWidget *parent);
 
   void setNanColor(int r, int g, int b);
 

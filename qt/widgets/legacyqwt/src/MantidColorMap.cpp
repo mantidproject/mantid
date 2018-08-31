@@ -24,6 +24,45 @@ const double LOG_ZERO_CUTOFF = 1e-15;
 } // namespace
 
 //--------------------------------------
+// Public static member functions
+//--------------------------------------
+
+/** Static convenience method for loading a color map.
+ * Points to the "colormaps.directory" mantid property
+ *
+ * @param previousFile :: last open .map file. Used to set the initial directory
+ * @param parent :: widget owner of the dialog
+ * @return QString of the filename
+ */
+QString MantidColorMap::chooseColorMap(QString previousFile, QWidget *parent) {
+  QString fileselection;
+  // Get the installed color maps directory.
+  QString colormapdir = QString::fromStdString(
+      ConfigService::Instance().getString("colormaps.directory"));
+  if (colormapdir.isEmpty())
+    colormapdir = QFileInfo(previousFile).absoluteFilePath();
+  // Ask the user to point to the .map file
+  fileselection = QFileDialog::getOpenFileName(
+      parent, "Pick a Colormap", colormapdir, "Colormaps (*.map *.MAP)");
+  return fileselection;
+}
+
+/**
+ * Does the given colormap exist
+ * @param filename A filename to check
+ * @return The full file path if it exists
+ * @throws std::invalid_argument if the colormap does not exist
+ */
+QString MantidColorMap::exists(const QString &filename) {
+  QFileInfo info(filename);
+  if (info.exists())
+    return info.absoluteFilePath();
+  else
+    throw std::invalid_argument("Colormap file does not exist " +
+                                filename.toStdString());
+}
+
+//--------------------------------------
 // Public member functions
 //--------------------------------------
 /**
@@ -129,27 +168,6 @@ bool MantidColorMap::loadMap(const QString &filename) {
   }
 
   return is_success;
-}
-
-//-------------------------------------------------------------------------------------------------
-/** Static convenience method for loading a color map.
- * Points to the "colormaps.directory" mantid property
- *
- * @param previousFile :: last open .map file
- * @param parent :: widget owner of the dialog
- * @return QString of the filename
- */
-QString MantidColorMap::loadMapDialog(QString previousFile, QWidget *parent) {
-  QString fileselection;
-  // Get the installed color maps directory.
-  QString colormapdir = QString::fromStdString(
-      ConfigService::Instance().getString("colormaps.directory"));
-  if (colormapdir.isEmpty())
-    colormapdir = QFileInfo(previousFile).absoluteFilePath();
-  // Ask the user to point to the .map file
-  fileselection = QFileDialog::getOpenFileName(
-      parent, "Pick a Colormap", colormapdir, "Colormaps (*.map *.MAP)");
-  return fileselection;
 }
 
 //-------------------------------------------------------------------------------------------------

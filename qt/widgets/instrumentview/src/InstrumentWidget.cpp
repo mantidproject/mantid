@@ -510,28 +510,30 @@ void InstrumentWidget::tabChanged(int) { updateInfoText(); }
 /**
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
+ * @param cmapNameOrPath Name of a color map or a file path
  */
-void InstrumentWidget::changeColormap(const QString &filename) {
+void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
   if (!m_instrumentActor)
     return;
-  QString fileselection;
-  // Use a file dialog if no parameter is passed
-  if (filename.isEmpty()) {
-    fileselection =
-        ColorMap::loadMapDialog(m_instrumentActor->getCurrentColorMap(), this);
-    if (fileselection.isEmpty())
+  const auto currentCMap = m_instrumentActor->getCurrentColorMap();
+  QString selection;
+  if (cmapNameOrPath.isEmpty()) {
+    // ask user
+    selection = ColorMap::chooseColorMap(currentCMap, this);
+    if (selection.isEmpty()) {
+      // assume cancelled request
       return;
+    }
   } else {
-    fileselection = QFileInfo(filename).absoluteFilePath();
-    if (!QFileInfo(fileselection).exists())
-      return;
+    selection = ColorMap::exists(cmapNameOrPath);
   }
 
-  if (!m_instrumentActor->getCurrentColorMap().isEmpty() &&
-      (fileselection == m_instrumentActor->getCurrentColorMap()))
+  if (selection == m_instrumentActor->getCurrentColorMap()) {
+    // selection matches current
     return;
+  }
+  m_instrumentActor->loadColorMap(selection);
 
-  m_instrumentActor->loadColorMap(fileselection);
   if (this->isVisible()) {
     setupColorMap();
     updateInstrumentView();
