@@ -13,6 +13,7 @@
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
 #include <boost/make_shared.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <iterator>
 
@@ -503,7 +504,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", "custom"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", true))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -545,7 +546,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", "custom"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted());
@@ -581,7 +582,7 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", "custom"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteResolution", false))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "space"))
@@ -595,44 +596,6 @@ public:
                       "3.000000000000000e+00 1.732050807568877e+00");
     data.emplace_back(" 3.400000000000000e-01 "
                       "6.600000000000000e+00 2.569046515733026e+00");
-    std::ifstream in(filename);
-    TS_ASSERT(not_empty(in))
-    std::string fullline;
-    auto it = data.begin();
-    while (std::getline(in, fullline)) {
-      TS_ASSERT_EQUALS(fullline, *(it++))
-    }
-  }
-
-  void test_custom_with_mft_extension_nan_values() {
-    const auto &x1 = Mantid::HistogramData::Points({0.33, 0. / 0.});
-    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
-    Mantid::HistogramData::Histogram histogram(x1, y1);
-    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
-    auto outputFileHandle = Poco::TemporaryFile();
-    const std::string file = outputFileHandle.path();
-    SaveReflectometryAscii alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", ""))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", false))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Separator", "space"))
-    TS_ASSERT_THROWS_NOTHING(alg.execute())
-    TS_ASSERT(alg.isExecuted());
-    std::string filename = alg.getPropertyValue("Filename");
-    TS_ASSERT(Poco::File(filename).exists())
-    std::vector<std::string> data;
-    data.reserve(2);
-    data.emplace_back(" 3.300000000000000e-01 "
-                      "3.000000000000000e+00 1.732050807568877e+00 "
-                      "nan");
-    data.emplace_back(" nan "
-                      "6.600000000000000e+00 2.569046515733026e+00 "
-                      "nan");
-    // explanation : the resolution values are not given and will be computed,
-    // however, the second point is nan resulting in an overall nan resolution
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
     std::string fullline;

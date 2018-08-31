@@ -22,8 +22,6 @@ ReflAsciiSaver::algorithmForFormat(NamedFormat format) {
     return create("SaveANSTOAscii");
   case NamedFormat::ILLCosmos:
     return create("SaveILLCosmosAscii");
-  case NamedFormat::MFT:
-    return create("SaveMFT");
   default:
     throw std::runtime_error("Unknown save format.");
   }
@@ -38,8 +36,6 @@ std::string ReflAsciiSaver::extensionForFormat(NamedFormat format) {
   case NamedFormat::ANSTO:
     return ".txt";
   case NamedFormat::ILLCosmos:
-    return ".mft";
-  case NamedFormat::MFT:
     return ".mft";
   default:
     throw std::runtime_error("Unknown save format.");

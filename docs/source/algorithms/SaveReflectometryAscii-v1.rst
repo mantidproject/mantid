@@ -12,7 +12,7 @@ Description
 This algorithm saves the first spectrum of a workspace in ASCII format in order to be processed by software, e.g. Motofit.
 It is possible to provide a group of workspaces as input.
 In this case, each filename contains the corresponding workspace name.
-The choice of the file extension (`.mft`, `.txt`, `.dat`) defines the file format and appends the `Filename` with the correponding extension except for the blank field, which represents a custom format where the `Filename` can be choosen freely.
+The choice of the file extension (`.mft`, `.txt`, `.dat`) defines the file format and appends the `Filename` with the correponding extension except for the `custom` field, which represents a custom format where the `Filename` can be choosen freely.
 In case of histogrammed input data, the resulting file will contain the bin centre for the x-values representing the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
 A file can be loaded back into Mantid by :ref:`algm-LoadAscii`, which will not have an instrument defined and `Sample Logs` are missing.
@@ -41,18 +41,18 @@ TXT File Format
 
 This file format (ANSTO Ascii format) writes four columns of data without any additional information.
 If the resolution values are not present will be optionally computed, see `Computation of resolution values`_.
-The options `WriteHeader`, `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
+The options `LogList`, `WriteHeader`, `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
 
 DAT File Format
 ---------------
 
 Stores first the number of lines followed by three columns of data.
-The option `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
+The option `LogList`, `WriteResolution` and `Separator` do not have any effect and are not visible in the user interface.
 
 Custom File Format (Empty Field)
 --------------------------------
 
-Enables a selection to write header lines via the option `WriteHeader` and the separator via the option `Separator` aa well as the number of columns to write, i.e. three or four via the option `WriteResolution`.
+Enables a selection to write header lines via the option `WriteHeader` and the separator via the option `Separator` as well as the number of columns to write, i.e. three or four via the option `WriteResolution`.
 The header follows the specification of the `MFT File format`_, if enabled.
 Please consider to directly provide the desired file extension via the input `Filename`.
 All options are taken into account and are visible in the user interface.

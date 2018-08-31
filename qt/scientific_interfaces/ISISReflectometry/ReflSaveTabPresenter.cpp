@@ -224,8 +224,6 @@ NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
     return NamedFormat::ANSTO;
   case 3:
     return NamedFormat::ILLCosmos;
-  case 4:
-    return NamedFormat::MFT;
   default:
     throw std::runtime_error("Unknown save format.");
   }

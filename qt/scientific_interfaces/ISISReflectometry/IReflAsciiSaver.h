@@ -7,7 +7,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, MFT };
+enum class NamedFormat { Custom, ThreeColumn, ANSTO, ILLCosmos, };
 
 class FileFormatOptions {
 public:

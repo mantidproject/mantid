@@ -39,46 +39,37 @@ void SaveReflectometryAscii::init() {
       "The name of the workspace containing the data you want to save.");
   declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
                   "The output filename");
-  std::vector<std::string> extension = {".mft", ".txt", ".dat", ""};
+  std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
+  auto mft =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, ".mft");
+  auto cus =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  auto vis1 =
+      make_unique<VisibleWhenProperty>(std::move(mft), std::move(cus), OR);
+  auto vis2 =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  auto vis3 =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  auto vis4 =
+      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
-  auto mft = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".mft");
-  auto mf2 = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".mft");
-  auto mf3 = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".mft");
-  auto txt = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".txt");
-  auto tx2 = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".txt");
-  auto dat = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".dat");
-  auto da2 = make_unique<VisibleWhenProperty>("FileExtension", IS_NOT_EQUAL_TO,
-                                              ".dat");
-  auto mfttxt =
-      make_unique<VisibleWhenProperty>(std::move(mft), std::move(txt), AND);
-  auto mfttxtdat =
-      make_unique<VisibleWhenProperty>(std::move(mfttxt), std::move(dat), AND);
-  auto mftdat =
-      make_unique<VisibleWhenProperty>(std::move(mf2), std::move(da2), AND);
-  auto mfttxt2 =
-      make_unique<VisibleWhenProperty>(std::move(mf3), std::move(tx2), AND);
+  setPropertySettings("LogList", std::move(vis1));
   declareProperty("WriteHeader", false, "Whether to write header lines.");
-  setPropertySettings("WriteHeader", std::move(mfttxt2));
+  setPropertySettings("WriteHeader", std::move(vis2));
   std::vector<std::string> separator = {"comma", "space", "tab"};
   declareProperty(
       "WriteResolution", true,
       "Whether to compute resolution values and write them as fourth "
       "data column.");
-  setPropertySettings("WriteResolution", std::move(mftdat));
+  setPropertySettings("WriteResolution", std::move(vis3));
   declareProperty("Separator", "tab",
                   boost::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
-  setPropertySettings("Separator", std::move(mfttxtdat));
+  setPropertySettings("Separator", std::move(vis4));
 }
 
 /// Input validation for single MatrixWorkspace
@@ -88,7 +79,8 @@ std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   if (m_filename.empty())
     issues["InputWorkspace"] = "Provide a file name";
   m_ext = getPropertyValue("FileExtension");
-  m_filename.append(m_ext);
+  if (m_ext.compare("custom"))
+    m_filename.append(m_ext);
   m_ws = getProperty("InputWorkspace");
   if (!m_ws) {
     WorkspaceGroup_const_sptr group =
@@ -117,7 +109,7 @@ void SaveReflectometryAscii::data() {
     outputval(points[i]);
     outputval(yData[i]);
     outputval(eData[i]);
-    if ((m_ext.empty() && getProperty("WriteResolution")) ||
+    if ((!m_ext.compare("custom") && getProperty("WriteResolution")) ||
         (!m_ext.compare(".mft")) || (!m_ext.compare(".txt"))) {
       if (m_ws->hasDx(0))
         outputval(m_ws->dx(0)[i]);
@@ -132,7 +124,7 @@ void SaveReflectometryAscii::data() {
 
 /// Determine separator
 void SaveReflectometryAscii::separator() {
-  if (m_ext.empty()) {
+  if (!m_ext.compare("custom")) {
     const std::string sepOption = getProperty("Separator");
     if (sepOption == "tab" || !m_ext.compare(".txt"))
       m_sep = '\t';
@@ -268,7 +260,8 @@ void SaveReflectometryAscii::checkFile(const std::string filename) {
 void SaveReflectometryAscii::exec() {
   checkFile(m_filename);
   separator();
-  if ((getProperty("WriteHeader") && m_ext.empty()) || !m_ext.compare(".mft"))
+  if ((getProperty("WriteHeader") && !m_ext.compare("custom")) ||
+      !m_ext.compare(".mft"))
     header();
   else if (!m_ext.compare(".dat"))
     m_file << m_ws->y(0).size() << "\n";
