@@ -3,12 +3,14 @@
 #include <thread>
 #include <MantidParallel/IO/MultiProcessEventLoader.h>
 #include <numeric>
-#include <H5Cpp.h>
+#include <boost/process/child.hpp>
+
 
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidTypes/Event/TofEvent.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
+namespace bp = boost::process;
 
 namespace Mantid {
 namespace Parallel {
@@ -16,8 +18,9 @@ namespace IO {
 
 MultiProcessEventLoader::MultiProcessEventLoader(unsigned int numPixels,
                                                  unsigned int numProcesses,
-                                                 unsigned int numThreads)
-    : numPixels(numPixels), numProcesses(numProcesses), numThreads(numThreads),
+                                                 unsigned int numThreads,
+                                                 const std::string &binary)
+    : numPixels(numPixels), numProcesses(numProcesses), numThreads(numThreads), binaryToLaunch(binary),
       segmentNames(GenerateSegmentsName(numProcesses)), storageName(GenerateStoragename()) {}
 
 std::vector<std::string> MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
@@ -42,11 +45,62 @@ std::string MultiProcessEventLoader::GenerateTimeBasedPrefix() {
 }
 
 void MultiProcessEventLoader::load(const std::string &filename,
-                                   const std::string &groupName,
+                                   const std::string &groupname,
                                    const std::vector<std::string> &bankNames,
                                    const std::vector<int32_t> &bankOffsets,
                                    std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const {
 
+  H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
+  auto instrument = file.openGroup(groupname);
+
+  auto bkSz = EventLoader::readBankSizes(instrument, bankNames);
+  auto numEvents = std::accumulate(bkSz.begin(), bkSz.end(), 0);
+
+  std::size_t storageSize = 3000000000000 / numProcesses; //TODO
+
+  std::string storageName = GenerateStoragename();
+  std::vector<std::string> segmentNames = GenerateSegmentsName(numProcesses);
+  std::size_t evPerPr = numEvents / numProcesses;
+
+  std::vector<bp::child> vChilds;
+
+  for (unsigned i = 1; i < numProcesses; ++i) {
+    std::string command;
+    command += binaryToLaunch + " ";
+    command += segmentNames[i] + " ";                       // segment name
+    command += storageName + " ";                           // storage name
+    command += std::to_string(i) + " ";                     // proc id
+    command += std::to_string(evPerPr * i) + " ";           // first event to load
+    command += std::to_string(std::min<std::size_t>
+                                  (evPerPr * (i + 1), numEvents)) + " ";                // upper bound to load
+    command += std::to_string(numPixels) + " ";             // pixel count
+    command += std::to_string(storageSize) + " ";           // memory size
+    command += filename + " ";                              // nexus file name
+    command += groupname + " ";                             // instrument group name
+    for (unsigned j = 0; j < bankNames.size(); ++j) {
+      command += bankNames[j] + " ";                        // bank name
+      command += std::to_string(bankOffsets[j]) + " ";      // bank size
+    }
+
+    try {
+      vChilds.emplace_back(command.c_str());
+    } catch (std::exception const &ex) {
+      std::cout << "Can't start child process: " << ex.what() << std::endl;
+      std::rethrow_if_nested(ex);
+    }
+  }
+
+  EventsListsShmemStorage storage(segmentNames[0], storageName, storageSize, 1,
+                                  numPixels, false);
+  fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0, numEvents / numProcesses);
+
+  for (auto &c : vChilds)
+    c.wait();
+
+  assembleFromShared(eventLists);
+
+  for (const auto &name : segmentNames)
+    ip::shared_memory_object::remove(name.c_str());
 }
 
 void MultiProcessEventLoader::assembleFromShared(std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const {
@@ -90,7 +144,22 @@ void MultiProcessEventLoader::fillFromFile(EventsListsShmemStorage &storage,
   H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
   auto instrument = file.openGroup(groupname);
 
-  auto dataType = EventLoader::readDataType(instrument, bankNames, "event_time_offset");
+  auto type = EventLoader::readDataType(instrument, bankNames, "event_time_offset");
+
+  if (type == H5::PredType::NATIVE_INT32)
+    return loadFromGroup<int32_t>(storage, instrument, bankNames, bankOffsets, from, to);
+  if (type == H5::PredType::NATIVE_INT64)
+    return loadFromGroup<int64_t>(storage, instrument, bankNames, bankOffsets, from, to);
+  if (type == H5::PredType::NATIVE_UINT32)
+    return loadFromGroup<uint32_t>(storage, instrument, bankNames, bankOffsets, from, to);
+  if (type == H5::PredType::NATIVE_UINT64)
+    return loadFromGroup<uint64_t>(storage, instrument, bankNames, bankOffsets, from, to);
+  if (type == H5::PredType::NATIVE_FLOAT)
+    return loadFromGroup<float>(storage, instrument, bankNames, bankOffsets, from, to);
+  if (type == H5::PredType::NATIVE_DOUBLE)
+    return loadFromGroup<double>(storage, instrument, bankNames, bankOffsets, from, to);
+  throw std::runtime_error(
+      "Unsupported H5::DataType for event_time_offset in NXevent_data");
 
 }
 

@@ -67,6 +67,8 @@ public:
                          const TimeOffsetType *eventTimeOffset,
                          const Chunker::LoadRange &range) = 0;
 
+  virtual Types::Core::DateAndTime next() = 0;
+
 protected:
   const int m_numWorkers;
 };
@@ -86,6 +88,7 @@ public:
                  const TimeOffsetType *eventTimeOffset,
                  const Chunker::LoadRange &range) override;
 
+  Types::Core::DateAndTime next() override { return m_pulseTimes.next(); }
 private:
   PulseTimeGenerator<IndexType, TimeZeroType> m_pulseTimes;
 };
