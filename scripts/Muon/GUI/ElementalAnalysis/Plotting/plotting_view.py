@@ -40,10 +40,12 @@ class PlotView(QtGui.QWidget):
 
         button_layout = QtGui.QHBoxLayout()
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
-        self.x_axis_changer.on_bounds_changed(self._update_x_axis)
+        self.x_axis_changer.on_upper_bound_changed(self._update_x_axis_upper)
+        self.x_axis_changer.on_lower_bound_changed(self._update_x_axis_lower)
 
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
-        self.y_axis_changer.on_bounds_changed(self._update_y_axis)
+        self.y_axis_changer.on_upper_bound_changed(self._update_y_axis_upper)
+        self.y_axis_changer.on_lower_bound_changed(self._update_y_axis_lower)
 
         self.errors = QtGui.QCheckBox("Errors")
         self.errors.stateChanged.connect(self._errors_changed)
@@ -111,20 +113,32 @@ class PlotView(QtGui.QWidget):
             self.get_subplot(name)]
 
     @_redo_layout
-    def _update_x_axis(self, bounds):
+    def _update_x_axis(self, bound):
         try:
             for plot in self._get_current_plots():
-                plot.set_xlim(bounds)
+                plot.set_xlim(**bound)
         except KeyError:
             return
 
+    def _update_x_axis_lower(self, bound):
+        self._update_x_axis({"left": bound})
+
+    def _update_x_axis_upper(self, bound):
+        self._update_x_axis({"right": bound})
+
     @_redo_layout
-    def _update_y_axis(self, bounds):
+    def _update_y_axis(self, bound):
         try:
             for plot in self._get_current_plots():
-                plot.set_ylim(bounds)
+                plot.set_ylim(**bound)
         except KeyError:
             return
+
+    def _update_y_axis_lower(self, bound):
+        self._update_y_axis({"bottom": bound})
+
+    def _update_y_axis_upper(self, bound):
+        self._update_y_axis({"top": bound})
 
     def _modify_errors_list(self, name, state):
         if state:
