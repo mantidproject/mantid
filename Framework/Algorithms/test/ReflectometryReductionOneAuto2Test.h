@@ -55,7 +55,9 @@ private:
     return MatrixWorkspace_sptr();
   };
 
-  void momentumTransferHelper(ReflectometryReductionOneAuto2 &alg, MatrixWorkspace_sptr &inter,const double &theta){
+  void momentumTransferHelper(ReflectometryReductionOneAuto2 &alg,
+                              MatrixWorkspace_sptr &inter,
+                              const double &theta) {
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);
     alg.setProperty("ThetaIn", theta);
@@ -939,7 +941,7 @@ public:
                             "A monitor is expected at spectrum index 1");
   }
 
-  void test_QStep_QMin_and_QMax(){
+  void test_QStep_QMin_and_QMax() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -956,10 +958,17 @@ public:
     auto outX = outQBin->x(0);
     auto outY = outQBin->y(0);
 
-    auto x = 1;
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[24], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outY[23], 0, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 25);
+    TS_ASSERT_EQUALS(outY.size(), 24);
   }
 
-  void test_QMin_alone(){
+  void test_QMin_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -973,15 +982,23 @@ public:
 
     auto outX = outQbinned->x(0);
     auto outY = outQbinned->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[1], 0.1018, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 2);
+    TS_ASSERT_EQUALS(outY.size(), 1);
   }
 
-  void test_QMax_alone(){
+  void test_QMax_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
-    momentumTransferHelper(alg, inter, theta);    
+    momentumTransferHelper(alg, inter, theta);
     alg.setProperty("MomentumTransferMax", 0.1);
     alg.execute();
 
@@ -989,9 +1006,18 @@ public:
 
     auto outX = outQBin->x(0);
     auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0006, 0.0001);
+
+    TS_ASSERT_DELTA(outX[72], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[71], 3.8e-06, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 73);
+    TS_ASSERT_EQUALS(outY.size(), 72);
   }
 
-  void test_QMax_and_QMin(){
+  void test_QMax_and_QMin() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -1006,9 +1032,18 @@ public:
 
     auto outX = outQBin->x(0);
     auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[69], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outY[68], 0.0, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 70);
+    TS_ASSERT_EQUALS(outY.size(), 69);
   }
 
-  void test_QStep_alone(){
+  void test_QStep_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -1022,9 +1057,18 @@ public:
 
     auto outX = outQBin->x(0);
     auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
+
+    TS_ASSERT_DELTA(outX[26], 0.1018, 0.0001);
+    TS_ASSERT_DELTA(outY[25], 4.4e-06, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 27);
+    TS_ASSERT_EQUALS(outY.size(), 26);
   }
 
-  void test_QStep_QMin_alone(){
+  void test_QStep_QMin_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -1039,9 +1083,17 @@ public:
 
     auto outX = outQBin->x(0);
     auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[1], 0.1018, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 2);
+    TS_ASSERT_EQUALS(outY.size(), 1);
   }
 
-  void test_QStep_QMax_alone(){
+  void test_QStep_QMax_alone() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
 
@@ -1056,8 +1108,16 @@ public:
 
     auto outX = outQBin->x(0);
     auto outY = outQBin->y(0);
-  }
 
+    TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
+
+    TS_ASSERT_DELTA(outX[25], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[24], 2.3e-05, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 26);
+    TS_ASSERT_EQUALS(outY.size(), 25);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */
