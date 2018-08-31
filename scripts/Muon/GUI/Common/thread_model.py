@@ -21,12 +21,16 @@ class ThreadModel(QThread):
 
         self.check_model_has_correct_attributes()
         self.exceptionSignal.connect(message_box.warning)
+        self.finished.connect(self.disconnect_exception_slot)
 
     def check_model_has_correct_attributes(self):
         if hasattr(self.model, "execute") and hasattr(self.model, "output"):
             return
         raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
                              " execute() and output() methods")
+
+    def disconnect_exception_slot(self):
+        self.exceptionSignal.disconnect(message_box.warning)
 
     def __del__(self):
         self.wait()
