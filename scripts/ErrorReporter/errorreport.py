@@ -11,6 +11,7 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+        self.input_text = ""
         if not show_continue_terminate:
             self.continue_terminate_frame.hide()
             self.adjustSize()
@@ -25,6 +26,7 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_button_status)
+        self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
 
 #  The options on what to do after closing the window (exit/continue)
         self.radioButtonContinue.setChecked(True)     # Set continue to be checked by default
@@ -57,13 +59,17 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         value_as_string = gui_element.text()
         return expected_type(value_as_string) if value_as_string else ''
 
-    def get_plain_text_edit_field(self, expected_type, text_edit):
+    def set_plain_text_edit_field(self):
+        self.input_text = self.get_plain_text_edit_field(text_edit="input_free_text", expected_type=str)
+
+    def get_plain_text_edit_field(self, text_edit, expected_type):
         gui_element = getattr(self, text_edit)
         value_as_string = gui_element.toPlainText()
+
         return expected_type(value_as_string) if value_as_string else ''
 
     def set_button_status(self):
-        if not self.input_name and not self.input_email:
+        if self.input_text == '' and not self.input_name and not self.input_email:
             self.nonIDShareButton.setEnabled(True)
         else:
             self.nonIDShareButton.setEnabled(False)
@@ -75,10 +81,6 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
     @property
     def input_email(self):
         return self.get_simple_line_edit_field(line_edit="input_email_line_edit", expected_type=str)
-
-    @property
-    def input_text(self):
-        return self.get_plain_text_edit_field(text_edit="input_free_text", expected_type=str)
 
     @property
     def continue_working(self):
