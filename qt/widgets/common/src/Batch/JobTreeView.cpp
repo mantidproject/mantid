@@ -487,6 +487,7 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     if (event->modifiers() & Qt::ControlModifier) {
       cutSelectedRequested();
     }
+  } else {
     QTreeView::keyPressEvent(event);
   }
 }
