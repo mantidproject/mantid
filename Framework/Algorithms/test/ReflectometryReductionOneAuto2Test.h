@@ -1052,9 +1052,9 @@ public:
 
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
-    
+
     ADS.clear()
-  }    
+  }
 
   void test_polarization_correction_default_Wildes() {
 
@@ -1075,7 +1075,7 @@ public:
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
-    
+
     TS_ASSERT_EQUALS(outQGroup.size(), 4);
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
 
