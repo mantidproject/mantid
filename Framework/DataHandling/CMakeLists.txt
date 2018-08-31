@@ -1,4 +1,4 @@
-set ( SRC_FILES
+﻿set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
 	src/BankPulseTimes.cpp
@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/DownloadInstrument.cpp
 	src/EventWorkspaceCollection.cpp
 	src/ExtractMonitorWorkspace.cpp
+	src/ExtractPolarizationEfficiencies.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
 	src/FindDetectorsPar.cpp
@@ -60,7 +61,7 @@ set ( SRC_FILES
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-	src/LoadILLSANS.cpp
+        src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
@@ -209,6 +210,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DownloadInstrument.h
 	inc/MantidDataHandling/EventWorkspaceCollection.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
+	inc/MantidDataHandling/ExtractPolarizationEfficiencies.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/FindDetectorsPar.h
@@ -393,6 +395,7 @@ set ( TEST_FILES
 	DownloadInstrumentTest.h
 	EventWorkspaceCollectionTest.h
 	ExtractMonitorWorkspaceTest.h
+	ExtractPolarizationEfficienciesTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
 	FindDetectorsParTest.h

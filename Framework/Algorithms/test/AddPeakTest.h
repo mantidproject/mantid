@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_ADDPEAKTEST_H_
 #define MANTID_ALGORITHMS_ADDPEAKTEST_H_
 
-#include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"

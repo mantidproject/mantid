@@ -100,6 +100,11 @@ private:
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
                                         const std::string &groupWSName);
+
+  /// 26/06/18
+  /// Give the "tmp_unNorm" workspace which is added to the ADS the correct
+  /// name
+  bool renameAndMoveUnNormWorkspace(const std::string &newName);
 };
 
 } // namespace Muon

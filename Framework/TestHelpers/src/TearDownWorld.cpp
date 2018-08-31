@@ -18,7 +18,7 @@ ClearAlgorithmManager clearAlgManager;
 ClearADS clearADS;
 /// Definition of single ClearPropertyManagerDataService object
 ClearPropertyManagerDataService clearPropSvc;
-}
+} // namespace
 
 //-----------------------------------------------------------------------------
 // ClearAlgorithmManager

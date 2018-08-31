@@ -12,12 +12,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/ConfigService.h"
 
-#include <boost/tuple/tuple.hpp>
 #include <Poco/Path.h>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -25,6 +25,15 @@ using namespace Mantid::Kernel;
 using VerticalHorizontalOffsetType = boost::tuple<double, double>;
 
 class SpecularReflectionAlgorithmTest {
+public:
+  // This means the constructor isn't called when running other tests
+  static SpecularReflectionAlgorithmTest *createSuite() {
+    return new SpecularReflectionAlgorithmTest();
+  }
+  static void destroySuite(SpecularReflectionAlgorithmTest *suite) {
+    delete suite;
+  }
+
 protected:
   MatrixWorkspace_sptr pointDetectorWS;
 

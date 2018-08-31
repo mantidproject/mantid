@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_WS_DESCRIPTION_H
 #define MANTID_MDALGORITHMS_WS_DESCRIPTION_H
 
-#include "MantidAPI/LogManager.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidAPI/LogManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -210,6 +210,6 @@ private:
   /// Frame key. For frame to use.
   std::string m_frameKey;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 #endif

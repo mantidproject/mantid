@@ -8,24 +8,24 @@
 #include "ScriptFileInterpreter.h"
 #include "ScriptOutputDisplay.h"
 
+#include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptingLangDialog.h"
-#include "MultiTabScriptInterpreter.h"
 
 #include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
-#include <QPoint>
 #include <QAction>
+#include <QContextMenuEvent>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFontDatabase>
+#include <QListWidget>
 #include <QMenu>
 #include <QMessageBox>
-#include <QContextMenuEvent>
-#include <QTabBar>
-#include <QFileInfo>
-#include <QFileDialog>
-#include <QListWidget>
+#include <QPoint>
 #include <QSpinBox>
-#include <QFontDatabase>
+#include <QTabBar>
 
 //***************************************************************************
 //
@@ -197,7 +197,7 @@ void MultiTabScriptInterpreter::closeAllTabs() {
 /**
  *  This method is useful for saving the currently opened script files to
  * project file
-*/
+ */
 QString MultiTabScriptInterpreter::saveToString() {
   int nscripts = 0;
   QString fileNames;
@@ -272,8 +272,8 @@ void MultiTabScriptInterpreter::uncomment() { m_current->uncomment(); }
  * Execute the highlighted code from the current tab
  * *@param mode :: The mode used to execute
  */
-void MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) {
-  m_current->executeAll(mode);
+bool MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) {
+  return m_current->executeAll(mode);
 }
 
 /** Execute the highlighted code from the current tab using the
@@ -754,9 +754,9 @@ void MultiTabScriptInterpreter::updateRecentScriptList(
 }
 
 /**
-* This method returns the recent scripts list
-* @returns a list containing the name of the recent scripts.
-*/
+ * This method returns the recent scripts list
+ * @returns a list containing the name of the recent scripts.
+ */
 QStringList MultiTabScriptInterpreter::recentScripts() {
   return m_recentScriptList;
 }

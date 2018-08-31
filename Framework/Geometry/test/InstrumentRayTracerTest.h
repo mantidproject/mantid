@@ -1,8 +1,8 @@
 #ifndef INSTRUMENTRAYTRACERTEST_H_
 #define INSTRUMENTRAYTRACERTEST_H_
 
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/make_shared.hpp>

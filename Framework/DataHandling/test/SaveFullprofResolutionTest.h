@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SaveFullprofResolution.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/SaveFullprofResolution.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include <Poco/File.h>
 
@@ -37,7 +37,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test save profile 10
-    */
+   */
   void test_write1BankProfl10() {
     // Create input workspace
     std::string prof10tablewsname("Bank1InstrumentParameterTable");
@@ -78,7 +78,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test writing out a single bank in a multiple bank table workspace
-    */
+   */
   void test_write1BankInMultiBankTableProf9() {
     // Generate test table workspace
     string parwsname("HRPD2BankParameterTableWS");
@@ -121,7 +121,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test writing out a single bank in a multiple bank table workspace
-    */
+   */
   void test_appendBankInMultiBankTableProf9() {
     // Generate test table workspace
     string parwsname("HRPD2BankParameterTableWS");
@@ -178,7 +178,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Find out number of lines in a text file
-    */
+   */
   int getFileLines(std::string filename) {
     ifstream infile;
     infile.open(filename.c_str());
@@ -199,8 +199,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Write out a TableWorkspace contain 2 banks' parameters
-    * ISIS HRPD Data
-    */
+   * ISIS HRPD Data
+   */
   void create2BankProf9Table(string workspacename) {
     TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
     partablews->addColumn("str", "Name");
@@ -254,38 +254,21 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create instrument geometry parameter/LeBail parameter workspaces of profil
    * 10
-    * Source data is from POWGEN's bank 1 calibrated
+   * Source data is from POWGEN's bank 1 calibrated
    */
   void createProfile10TableWS(std::string wsname) {
     // Create a map of string/double for parameters of profile 10
-    std::map<std::string, double> parammap{{"BANK", 1.},
-                                           {"Alph0", 1.88187},
-                                           {"Alph0t", 64.4102},
-                                           {"Alph1", 0.},
-                                           {"Alph1t", 0.},
-                                           {"Beta0", 6.2511},
-                                           {"Beta0t", 85.9189},
-                                           {"Beta1", 0.},
-                                           {"Beta1t", 0.},
-                                           {"CWL", 0.533},
-                                           {"Dtt1", 22584.5},
-                                           {"Dtt1t", 22604.9},
-                                           {"Dtt2", 0.},
-                                           {"Dtt2t", 0.3},
-                                           {"Gam0", 0.},
-                                           {"Gam1", 5.744},
-                                           {"Gam2", 0.},
-                                           {"Sig0", 0.},
-                                           {"Sig1", 3.16228},
-                                           {"Sig2", 16.7331},
-                                           {"Tcross", 0.356},
-                                           {"Width", 1.0521},
-                                           {"Zero", 0.},
-                                           {"Zerot", 11.3175},
-                                           {"step", 4.0002},
-                                           {"tof-max", 51000.},
-                                           {"tof-min", 5000.23},
-                                           {"twotheta", 90.0}};
+    std::map<std::string, double> parammap{
+        {"BANK", 1.},        {"Alph0", 1.88187},  {"Alph0t", 64.4102},
+        {"Alph1", 0.},       {"Alph1t", 0.},      {"Beta0", 6.2511},
+        {"Beta0t", 85.9189}, {"Beta1", 0.},       {"Beta1t", 0.},
+        {"CWL", 0.533},      {"Dtt1", 22584.5},   {"Dtt1t", 22604.9},
+        {"Dtt2", 0.},        {"Dtt2t", 0.3},      {"Gam0", 0.},
+        {"Gam1", 5.744},     {"Gam2", 0.},        {"Sig0", 0.},
+        {"Sig1", 3.16228},   {"Sig2", 16.7331},   {"Tcross", 0.356},
+        {"Width", 1.0521},   {"Zero", 0.},        {"Zerot", 11.3175},
+        {"step", 4.0002},    {"tof-max", 51000.}, {"tof-min", 5000.23},
+        {"twotheta", 90.0}};
 
     // Crate table workspace
     DataObjects::TableWorkspace_sptr geomws =

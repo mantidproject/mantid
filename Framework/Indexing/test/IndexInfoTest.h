@@ -5,8 +5,8 @@
 
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidParallel/Communicator.h"
 #include "MantidKernel/make_cow.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ParallelRunner.h"
@@ -137,7 +137,7 @@ void run_globalSpectrumIndicesFromDetectorIndices_missing(
       const std::runtime_error &e, std::string(e.what()),
       "Some of the requested detectors do not have a corresponding spectrum");
 }
-}
+} // namespace
 
 class IndexInfoTest : public CxxTest::TestSuite {
 public:

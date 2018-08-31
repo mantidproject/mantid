@@ -44,5 +44,5 @@ void SignalOverError::performUnaryOperation(const double XIn, const double YIn,
   EOut = 0.0;
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

@@ -1,11 +1,11 @@
 #ifndef CONVERTFROMDISTRIBUTIONTEST_H_
 #define CONVERTFROMDISTRIBUTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertFromDistribution.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/ConvertFromDistribution.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::ConvertFromDistribution;

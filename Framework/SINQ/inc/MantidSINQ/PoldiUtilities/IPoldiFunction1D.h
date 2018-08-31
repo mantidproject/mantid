@@ -1,9 +1,9 @@
 #ifndef MANTID_SINQ_IPOLDIFUNCTION1D_H_
 #define MANTID_SINQ_IPOLDIFUNCTION1D_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidSINQ/DllConfig.h"
 
 namespace Mantid {
 namespace Poldi {

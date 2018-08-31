@@ -30,8 +30,8 @@
 #include "Matrix.h"
 #include "MatrixCommand.h"
 
-#include <QPushButton>
 #include <QLayout>
+#include <QPushButton>
 
 ColorMapDialog::ColorMapDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), applyBtn(nullptr), closeBtn(nullptr),

@@ -10,7 +10,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {

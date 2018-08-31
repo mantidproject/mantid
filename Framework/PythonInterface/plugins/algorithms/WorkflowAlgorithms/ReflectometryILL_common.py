@@ -16,8 +16,8 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
     else:
-        firstChopper = sampleLogs.getProperty('ChopperSettings.firstChopper').value
-        secondChopper = sampleLogs.getProperty('ChopperSettings.secondChopper').value
+        firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
+        secondChopper = int(sampleLogs.getProperty('ChopperSetting.secondChopper').value)
         phase1Entry = 'CH{}.phase'.format(firstChopper)
         phase2Entry = 'CH{}.phase'.format(secondChopper)
         chopper1Phase = sampleLogs.getProperty(phase1Entry).value
@@ -31,7 +31,7 @@ def chopperPairDistance(sampleLogs, instrumentName):
     if instrumentName == 'D17':
         return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
     else:
-        return sampleLogs.getProperty('ChopperSettings.distSeparationChopperPair').value * 1e-2
+        return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-2
 
 
 def chopperSpeed(sampleLogs, instrumentName):
@@ -39,7 +39,7 @@ def chopperSpeed(sampleLogs, instrumentName):
     if instrumentName == 'D17':
         return sampleLogs.getProperty('VirtualChopper.chopper1_speed_average').value
     else:
-        firstChopper = sampleLogs.getProperty('ChopperSettings.firstChopper').value
+        firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
         speedEntry = 'CH{}.rotation_speed'.format(firstChopper)
         return sampleLogs.getProperty(speedEntry).value
 

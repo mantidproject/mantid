@@ -4,10 +4,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Instrument.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -138,5 +138,5 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(
   return outWS;
 }
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid

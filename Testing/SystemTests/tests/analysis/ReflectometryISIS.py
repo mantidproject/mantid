@@ -42,7 +42,7 @@ class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest))
         I=mtd['I'][0]
 
         # Automatically determine the SC and averageDB
-        FindReflectometryLines(InputWorkspace=I, StartWavelength=10, OutputWorkspace='spectrum_numbers')
+        FindReflectometryLines(InputWorkspace=I, StartWavelength=10, OutputWorkspace='spectrum_numbers', Version=1)
         spectrum_table = mtd['spectrum_numbers']
         self.assertTrue(2 == spectrum_table.columnCount())
         self.assertTrue(1 == spectrum_table.rowCount())

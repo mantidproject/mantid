@@ -142,8 +142,8 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         directForeground = self._foreground(directWS.run())
         logs = ws.run()
         instrumentName = ws.getInstrument().getName()
-        if instrumentName != 'D17' and instrumentName != 'Figaro':
-            raise RuntimeError('Unrecognized instrument {}. Only D17 and Figaro are supported.'.format(instrumentName))
+        if instrumentName != 'D17' and instrumentName != 'FIGARO':
+            raise RuntimeError('Unrecognized instrument {}. Only D17 and FIGARO are supported.'.format(instrumentName))
         sumType = logs.getProperty(common.SampleLogs.SUM_TYPE).value
         polarized = self.getProperty(Prop.POLARIZED).value
         pixelSize = 0.001195 if instrumentName == 'D17' else 0.0012

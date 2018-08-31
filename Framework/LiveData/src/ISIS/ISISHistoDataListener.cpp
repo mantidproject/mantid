@@ -21,9 +21,7 @@
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
-// clang-format off
-GCC_DIAG_OFF(unused-variable)
-// clang-format on
+GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
@@ -45,7 +43,7 @@ DECLARE_LISTENER(ISISHistoDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISHistoDataListener");
-}
+} // namespace
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
@@ -72,11 +70,11 @@ ISISHistoDataListener::~ISISHistoDataListener() {
 }
 
 /** Function called by IDC routines to report an error. Passes the error through
-* to the logger
-* @param status ::  The status code of the error (disregarded)
-* @param code ::    The error code (disregarded)
-* @param message :: The error message - passed to the logger at error level
-*/
+ * to the logger
+ * @param status ::  The status code of the error (disregarded)
+ * @param code ::    The error code (disregarded)
+ * @param message :: The error message - passed to the logger at error level
+ */
 void ISISHistoDataListener::IDCReporter(int status, int code,
                                         const char *message) {
   (void)status;
@@ -85,11 +83,11 @@ void ISISHistoDataListener::IDCReporter(int status, int code,
 }
 
 /** Connect to the specified address and checks that is valid
-  *  @param address   The IP address and port to contact (port is ignored).
-  * @param args A ConnectionArgs object used to supply additional arguments
-  * required for the connection
-  *  @return True if the connection was successfully established
-  */
+ *  @param address   The IP address and port to contact (port is ignored).
+ * @param args A ConnectionArgs object used to supply additional arguments
+ * required for the connection
+ *  @return True if the connection was successfully established
+ */
 bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 
   m_daeName = address.toString();
@@ -125,6 +123,16 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   loadSpectraMap();
 
   loadTimeRegimes();
+
+  // Create dummy workspace to store instrument data
+  m_bufferWorkspace =
+      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+  m_bufferWorkspace->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("TOF");
+  m_bufferWorkspace->setYUnit("Counts");
+
+  runLoadInstrument(m_bufferWorkspace, getString("NAME"));
 
   return true;
 }
@@ -198,13 +206,9 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
 
   // Create the 2D workspace for the output
   auto localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
+      m_bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
       m_numberOfBins[m_timeRegime]);
 
-  // Set the unit on the workspace to TOF
-  localWorkspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
-  localWorkspace->setYUnit("Counts");
   localWorkspace->updateSpectraUsing(
       SpectrumDetectorMapping(m_specIDs, m_detIDs));
 
@@ -234,8 +238,6 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
     }
 
     if (period == firstPeriod) {
-      // Only run the Child Algorithms once
-      runLoadInstrument(localWorkspace, getString("NAME"));
       if (m_numberOfPeriods > 1) {
         // adding first ws to the group after loading instrument
         // otherwise ws can be lost.
@@ -289,8 +291,8 @@ std::string ISISHistoDataListener::getString(const std::string &par) const {
 
 /** Sets a list of spectra to be extracted. Default is reading all available
  * spectra.
-  * @param specList :: A vector with spectra indices.
-  */
+ * @param specList :: A vector with spectra indices.
+ */
 void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
   // after listener has created its first workspace the spectra numbers cannot
   // be changed
@@ -301,8 +303,8 @@ void ISISHistoDataListener::setSpectra(const std::vector<specnum_t> &specList) {
 
 /** Sets a list of periods to be extracted. Default is reading all available
  * periods.
-  * @param periodList :: A vector with period numbers.
-  */
+ * @param periodList :: A vector with period numbers.
+ */
 void ISISHistoDataListener::setPeriods(
     const std::vector<specnum_t> &periodList) {
   // after listener has created its first workspace the period numbers cannot be

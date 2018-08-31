@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include <vector>
 #include "MantidKernel/System.h"
+#include <vector>
 
 namespace Mantid {
 
@@ -53,7 +53,7 @@ public:
 
   virtual std::string toXMLString() const = 0;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

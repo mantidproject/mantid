@@ -10,15 +10,15 @@ namespace Mantid {
 namespace Geometry {
 
 /** MDHistoDimensionBuilder :
-*
-* A builder for the MDHistogram workspace. Required to construct a valid
-*MDHistogram dimension, where values can
-* cannot easily be brought togeter at once. Also allows potential construction
-*values to be overwritten simply.
-*
-* @author Owen Arnold @ Tessella/ISIS
-* @date 13/July/2011
-*/
+ *
+ * A builder for the MDHistogram workspace. Required to construct a valid
+ *MDHistogram dimension, where values can
+ * cannot easily be brought togeter at once. Also allows potential construction
+ *values to be overwritten simply.
+ *
+ * @author Owen Arnold @ Tessella/ISIS
+ * @date 13/July/2011
+ */
 
 class MANTID_GEOMETRY_DLL MDHistoDimensionBuilder {
 public:
@@ -80,7 +80,7 @@ private:
 
 /// Handy typedef for collection of builders.
 using Vec_MDHistoDimensionBuilder = std::vector<MDHistoDimensionBuilder>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

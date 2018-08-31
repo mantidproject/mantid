@@ -19,8 +19,8 @@ class HTTPResponse;
 class HTTPRequest;
 class HostNotFoundException;
 class HTMLForm;
-}
-}
+} // namespace Net
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {

@@ -1,7 +1,7 @@
 #include "MantidICat/CatalogLogin.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
@@ -72,5 +72,5 @@ void CatalogLogin::exec() {
     setProperty("KeepAlive", keepAliveAlgorithm);
   }
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

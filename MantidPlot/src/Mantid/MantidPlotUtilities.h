@@ -4,8 +4,8 @@
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
 /**
-* These utilities assist with plotting in Mantid
-*/
+ * These utilities assist with plotting in Mantid
+ */
 /// Structure to aid ordering of plots
 struct CurveSpec {
   double logVal;

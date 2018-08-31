@@ -5,8 +5,8 @@
 #include "ui_IndirectInstrumentConfig.h"
 
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>
 
@@ -53,10 +53,10 @@ class EXPORT_OPT_MANTIDQT_COMMON IndirectInstrumentConfig
   Q_PROPERTY(QStringList disabledInstruments READ getDisabledInstruments WRITE
                  setDisabledInstruments)
   Q_PROPERTY(QString facility READ getFacility WRITE setFacility)
-  Q_PROPERTY(bool enableDiffraction READ isDiffractionEnabled WRITE
-                 enableDiffraction)
-  Q_PROPERTY(bool forceDiffraction READ isDiffractionForced WRITE
-                 forceDiffraction)
+  Q_PROPERTY(
+      bool enableDiffraction READ isDiffractionEnabled WRITE enableDiffraction)
+  Q_PROPERTY(
+      bool forceDiffraction READ isDiffractionForced WRITE forceDiffraction)
   Q_PROPERTY(bool showInstrumentLabel READ isInstrumentLabelShown WRITE
                  setShowInstrumentLabel)
 

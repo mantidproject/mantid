@@ -1,11 +1,11 @@
 #ifndef MANTID_ICAT_SEARCHHELPER_H_
 #define MANTID_ICAT_SEARCHHELPER_H_
 
-#include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
-#include "MantidICat/CatalogSearchParam.h"
 #include "MantidAPI/CatalogSession.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidICat/CatalogSearchParam.h"
+#include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
 
 namespace Mantid {
 namespace ICat {
@@ -144,6 +144,6 @@ private:
   // Stores the session details for a specific catalog.
   API::CatalogSession_sptr m_session;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 #endif

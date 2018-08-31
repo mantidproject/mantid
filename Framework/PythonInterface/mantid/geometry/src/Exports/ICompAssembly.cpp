@@ -1,5 +1,5 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/ICompAssembly.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
@@ -17,6 +17,6 @@ void export_ICompAssembly() {
       .def("nelements", &ICompAssembly::nelements, arg("self"),
            "Returns the number of elements in the assembly")
       .def("__getitem__",
-           &ICompAssembly::operator[], (arg("self"), arg("index")),
+           &ICompAssembly::operator[],(arg("self"), arg("index")),
            "Return the component at the given index");
 }

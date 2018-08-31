@@ -24,8 +24,8 @@ using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace ::NeXus;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -174,10 +174,10 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     else
       ws->setHistogram(wsIndex, BinEdges(x), Counts(beg, end));
 
-    ws->getSpectrum(wsIndex)
-        .setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
-    ws->getSpectrum(wsIndex)
-        .setDetectorID(static_cast<detid_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setSpectrumNo(
+        static_cast<specnum_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setDetectorID(
+        static_cast<detid_t>(yData[wsIndex]));
   }
 
   ws->setYUnit("Counts");
@@ -351,8 +351,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
   info->mutableSample().setName(sample);
 
   /**
-  * load all the extras into the Run information
-  */
+   * load all the extras into the Run information
+   */
   Run &r = info->mutableRun();
   auto specialMap = populateSpecialMap();
   for (it = dictionary.begin(); it != dictionary.end(); ++it) {

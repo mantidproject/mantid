@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/SpectraAxis.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;

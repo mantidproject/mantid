@@ -1,8 +1,8 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/System.h"
 
 using std::size_t;
 using namespace Mantid::API;
@@ -87,8 +87,8 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
   }
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

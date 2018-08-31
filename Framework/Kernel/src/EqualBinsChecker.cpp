@@ -1,14 +1,14 @@
 #include "MantidKernel/EqualBinsChecker.h"
 #include "MantidKernel/Logger.h"
-#include <ostream>
 #include <cmath>
+#include <ostream>
 #include <stdexcept>
 #include <vector>
 
 namespace {
 // Initialize the logger
 Mantid::Kernel::Logger g_log("EqualBinsChecker");
-}
+} // namespace
 
 namespace Mantid {
 namespace Kernel {

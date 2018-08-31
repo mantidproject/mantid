@@ -34,11 +34,13 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/FileComparisonHelper.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp
+			                  ../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/ParallelRunner.cpp
+                        ../../TestHelpers/src/ReflectometryHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}

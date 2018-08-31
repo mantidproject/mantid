@@ -1,7 +1,7 @@
 #include <sstream>
 
-#include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
+#include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 

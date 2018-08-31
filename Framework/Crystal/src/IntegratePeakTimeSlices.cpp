@@ -9,11 +9,11 @@
  */
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -86,7 +86,7 @@ const double MinGoodRatioFitvsExpIntenisites = .25;
 const double MinGoodIoverSigI = 3.0;
 const double MinVariationInXYvalues = .6; // Peak spans one pixel only
 const double MaxCorrCoeffinXY = .9;       // otherwise all data on one line
-}
+} // namespace
 
 IntegratePeakTimeSlices::IntegratePeakTimeSlices()
     : Algorithm(), m_R0(-1), m_ROW(0.), m_COL(0.), m_cellWidth(0.),
@@ -357,8 +357,9 @@ void IntegratePeakTimeSlices::exec() {
           } else
             done = true;
 
-          if (t >= 3 && (m_AttributeValues->StatBaseVals(IIntensities) <
-                         MaxCounts / 2.0) &&
+          if (t >= 3 &&
+              (m_AttributeValues->StatBaseVals(IIntensities) <
+               MaxCounts / 2.0) &&
               MaxCounts >= 0)
             done = true;
         }
@@ -648,14 +649,14 @@ void IntegratePeakTimeSlices::exec() {
 }
 
 /**
-   * Finds all neighbors within a given Radius of the Center on the given
+ * Finds all neighbors within a given Radius of the Center on the given
  * component.
-   * @param comp -The component of interest
-   * @param Center- the center of the neighbors
-   * @param Radius - The radius from the center of neighbors to be included
-   * @param ArryofID -The detector ID's of the neighbors. The id of the pixel at
+ * @param comp -The component of interest
+ * @param Center- the center of the neighbors
+ * @param Radius - The radius from the center of neighbors to be included
+ * @param ArryofID -The detector ID's of the neighbors. The id of the pixel at
  * the center may be included.
-   */
+ */
 bool IntegratePeakTimeSlices::getNeighborPixIDs(
     boost::shared_ptr<Geometry::IComponent> comp, Kernel::V3D &Center,
     double &Radius, int *&ArryofID) {
@@ -1884,8 +1885,9 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
       max<double>(1.0, Intensity_calc / (TotIntensity - ncells * back_calc));
   str << max<double>(0.0, back_calc - NSigs * (1 + relError) * sqrt(backVar))
       << "<Background<" << (back + NSigs * (1.8 + relError) * sqrt(backVar))
-      << "," << max<double>(0.0, Intensity_calc -
-                                     NSigs * (1 + relError) * sqrt(IntensVar))
+      << ","
+      << max<double>(0.0,
+                     Intensity_calc - NSigs * (1 + relError) * sqrt(IntensVar))
       << "<Intensity<"
       << Intensity_calc + NSigs * (1 + relError) * sqrt(IntensVar);
 
@@ -2034,8 +2036,8 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       errs.push_back(0);
     }
 
-  } catch (std::exception &
-               Ex1) // ties or something else went wrong in BivariateNormal
+  } catch (std::exception
+               &Ex1) // ties or something else went wrong in BivariateNormal
   {
     done = true;
     g_log.error() << "Bivariate Error for PeakNum="
@@ -2085,7 +2087,7 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
  * Not used. Did 3 Fit Algorithm calls and returned the one with the smallest
  * chiSqOverDOF.
  * Did not work well
-  * @param Data    The workspace with experimental results
+ * @param Data    The workspace with experimental results
  * @param chisqOverDOF  the chi squared over degrees of freedom result from the
  * Fit Algorithm
  * @param done   Usually true except if there is not enough data or Fit
@@ -2201,7 +2203,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
                   << m_AttributeValues->StatBaseVals(IIntensities) -
-                         params[Ibk] * ncells << '\n';
+                         params[Ibk] * ncells
+                  << '\n';
     ;
     return false;
   }
@@ -2216,7 +2219,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
                    // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
-                     "Intensity(-back) too different. ratio=" << x << '\n';
+                     "Intensity(-back) too different. ratio="
+                  << x << '\n';
 
     return false;
   }

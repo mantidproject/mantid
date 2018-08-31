@@ -16,34 +16,34 @@
 #include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
 
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/CompositeEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QMenu>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QSettings>
-#include <QFileInfo>
 #include <QApplication>
 #include <QClipboard>
-#include <QSignalMapper>
+#include <QFileInfo>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QMenu>
+#include <QMessageBox>
 #include <QMetaMethod>
+#include <QPushButton>
+#include <QSettings>
+#include <QSignalMapper>
 #include <QTreeWidget>
+#include <QVBoxLayout>
 
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
-}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -365,9 +365,8 @@ void FunctionBrowser::removeProperty(QtProperty *prop) {
 FunctionBrowser::AProperty
 FunctionBrowser::addFunctionProperty(QtProperty *parent, QString funName) {
   // check that parent is a function property
-  if (parent &&
-      dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) !=
-          parent->propertyManager()) {
+  if (parent && dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) !=
+                    parent->propertyManager()) {
     throw std::runtime_error("Unexpected error in FunctionBrowser [2]");
   }
   QtProperty *prop = m_functionManager->addProperty(funName);
@@ -385,9 +384,8 @@ FunctionBrowser::AProperty
 FunctionBrowser::addParameterProperty(QtProperty *parent, QString paramName,
                                       QString paramDesc, double paramValue) {
   // check that parent is a function property
-  if (!parent ||
-      dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) !=
-          parent->propertyManager()) {
+  if (!parent || dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) !=
+                     parent->propertyManager()) {
     throw std::runtime_error("Unexpected error in FunctionBrowser [3]");
   }
   QtProperty *prop = m_parameterManager->addProperty(paramName);
@@ -744,7 +742,21 @@ QStringList FunctionBrowser::getGlobalParameters() const {
   }
   return out;
 }
-
+/**
+ * Get a list of names of global parameters
+ */
+void FunctionBrowser::setGlobalParameters(QStringList &globals) {
+  for (auto propIt = m_properties.begin(); propIt != m_properties.end();
+       ++propIt) {
+    QtProperty *prop = propIt->prop;
+    QString tmp = getIndex(prop) + prop->propertyName();
+    for (auto &global : globals) {
+      if (tmp == global) {
+        prop->setOption(globalOptionName, true);
+      }
+    }
+  }
+}
 /**
  * Get a list of names of local parameters
  */
@@ -765,9 +777,8 @@ QStringList FunctionBrowser::getLocalParameters() const {
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isFunction(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(m_functionManager) ==
+                     prop->propertyManager();
 }
 
 /**
@@ -791,9 +802,8 @@ bool FunctionBrowser::isStringAttribute(QtProperty *prop) const {
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isDoubleAttribute(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_attributeDoubleManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(
+                     m_attributeDoubleManager) == prop->propertyManager();
 }
 
 /**
@@ -801,9 +811,8 @@ bool FunctionBrowser::isDoubleAttribute(QtProperty *prop) const {
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isIntAttribute(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_attributeIntManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(
+                     m_attributeIntManager) == prop->propertyManager();
 }
 
 /**
@@ -811,9 +820,8 @@ bool FunctionBrowser::isIntAttribute(QtProperty *prop) const {
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isBoolAttribute(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_attributeBoolManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(
+                     m_attributeBoolManager) == prop->propertyManager();
 }
 
 /**
@@ -821,9 +829,8 @@ bool FunctionBrowser::isBoolAttribute(QtProperty *prop) const {
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isVectorAttribute(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_attributeVectorManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(
+                     m_attributeVectorManager) == prop->propertyManager();
 }
 
 /**
@@ -841,9 +848,8 @@ bool FunctionBrowser::isAttribute(QtProperty *prop) const {
  * @param prop :: Property to check
  */
 bool FunctionBrowser::isParameter(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_parameterManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(
+                     m_parameterManager) == prop->propertyManager();
 }
 
 /**
@@ -859,9 +865,8 @@ double FunctionBrowser::getParameter(QtProperty *prop) const {
  * @param prop :: A property
  */
 bool FunctionBrowser::isIndex(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_indexManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(m_indexManager) ==
+                     prop->propertyManager();
 }
 
 /**
@@ -980,9 +985,8 @@ bool FunctionBrowser::hasTie(QtProperty *prop) const {
  * @param prop :: A property
  */
 bool FunctionBrowser::isTie(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_tieManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(m_tieManager) ==
+                     prop->propertyManager();
 }
 
 /**
@@ -1097,9 +1101,8 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
  * @param prop :: Property to check.
  */
 bool FunctionBrowser::isConstraint(QtProperty *prop) const {
-  return prop &&
-         dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) ==
-             prop->propertyManager();
+  return prop && dynamic_cast<QtAbstractPropertyManager *>(
+                     m_constraintManager) == prop->propertyManager();
 }
 
 /**
@@ -1719,8 +1722,8 @@ void FunctionBrowser::addTie() {
     return;
 
   bool ok;
-  QString tie = QInputDialog::getText(this, "Add a tie", "Tie:",
-                                      QLineEdit::Normal, "", &ok);
+  QString tie = QInputDialog::getText(this, "Add a tie",
+                                      "Tie:", QLineEdit::Normal, "", &ok);
   if (ok && !tie.isEmpty()) {
     try {
       addTieProperty(prop, tie);
@@ -1843,14 +1846,15 @@ void FunctionBrowser::removeConstraint() {
   QtProperty *prop = item->property();
   if (!isConstraint(prop))
     return;
-  removeProperty(prop);
-  if (isLocalParameterProperty(getParentParameterProperty(prop))) {
-    auto parName = getParameterName(prop);
+  auto paramProp = getParentParameterProperty(prop);
+  if (isLocalParameterProperty(paramProp)) {
+    auto parName = getParameterName(paramProp);
     checkLocalParameter(parName);
     auto &localValue = m_localParameterValues[parName][m_currentDataset];
     localValue.lowerBound = "";
     localValue.upperBound = "";
   }
+  removeProperty(prop);
 }
 
 void FunctionBrowser::updateCurrentFunctionIndex() {
@@ -2439,5 +2443,5 @@ void FunctionBrowser::setErrorsEnabled(bool enabled) {
  */
 void FunctionBrowser::clearErrors() { m_parameterManager->clearErrors(); }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

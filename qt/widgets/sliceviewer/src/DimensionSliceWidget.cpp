@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
-#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidKernel/UnitLabel.h"
-#include <iosfwd>
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include <QLayout>
+#include <iosfwd>
 
 namespace MantidQt {
 using API::toQStringInternal;
@@ -228,5 +228,5 @@ void DimensionSliceWidget::spinThicknessChanged() {
 void DimensionSliceWidget::spinBinsChanged() {
   emit changedNumBins(m_dimIndex, this->getNumBins());
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -19,14 +19,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using Mantid::detid_t;
 using Mantid::Types::Core::DateAndTime;
+using Mantid::detid_t;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite {
 public:

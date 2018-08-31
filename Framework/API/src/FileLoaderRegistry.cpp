@@ -66,7 +66,7 @@ searchForLoader(const std::string &filename,
   }
   return bestLoader;
 }
-} // end anonymous
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 // Public members

@@ -4,28 +4,28 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidGeometry/Math/Algebra.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
-#include <ctime>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
+#include "boost/shared_ptr.hpp"
 
-#include <gmock/gmock.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -37,7 +37,7 @@ namespace {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -48,14 +48,14 @@ public:
   MOCK_METHOD2(setRange, void(const double, const double));
   MOCK_CONST_METHOD0(min, double());
   MOCK_CONST_METHOD0(max, double());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
   /**
-  * Create cube of side length size with specified centre,
-  * parellel to axes and non-negative vertex coordinates.
-  */
+   * Create cube of side length size with specified centre,
+   * parellel to axes and non-negative vertex coordinates.
+   */
   double min = 0.0 - 0.5 * size;
   double max = 0.5 * size;
   std::vector<V3D> vertices;
@@ -96,16 +96,16 @@ std::unique_ptr<MeshObject> createCube(const double size, const V3D &centre) {
 
 std::unique_ptr<MeshObject> createCube(const double size) {
   /**
-  * Create cube of side length size with vertex at origin,
-  * parellel to axes and non-negative vertex coordinates.
-  */
+   * Create cube of side length size with vertex at origin,
+   * parellel to axes and non-negative vertex coordinates.
+   */
   return createCube(size, V3D(0.5 * size, 0.5 * size, 0.5 * size));
 }
 
 std::unique_ptr<MeshObject> createOctahedron() {
   /**
-  * Create octahedron with vertices on the axes at -1 & +1.
-  */
+   * Create octahedron with vertices on the axes at -1 & +1.
+   */
   // The octahedron is made slightly bigger than this to
   // ensure interior points are not rounded to be outside
   // Opposite vertices have indices differing by 3.
@@ -144,10 +144,10 @@ std::unique_ptr<MeshObject> createOctahedron() {
 
 std::unique_ptr<MeshObject> createLShape() {
   /**
-  * Create an L shape with vertices at
-  * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
-  *  where Z = 0 or 1.
-  */
+   * Create an L shape with vertices at
+   * (0,0,Z) (2,0,Z) (2,1,Z) (1,1,Z) (1,2,Z) & (0,2,Z),
+   *  where Z = 0 or 1.
+   */
   std::vector<V3D> vertices;
   vertices.emplace_back(V3D(0, 0, 0));
   vertices.emplace_back(V3D(2, 0, 0));
@@ -195,7 +195,7 @@ std::unique_ptr<MeshObject> createLShape() {
       std::move(triangles), std::move(vertices), Mantid::Kernel::Material());
   return retVal;
 }
-}
+} // namespace
 
 class MeshObjectTest : public CxxTest::TestSuite {
 
@@ -224,7 +224,9 @@ public:
 
   void testClone() {
     auto geom_obj = createOctahedron();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->clone());
+    std::unique_ptr<IObject> cloned;
+    TS_ASSERT_THROWS_NOTHING(cloned.reset(geom_obj->clone()));
+    TS_ASSERT(cloned);
   }
 
   void testTooManyVertices() {
@@ -268,8 +270,9 @@ public:
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createOctahedron();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
-    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    std::unique_ptr<IObject> cloned_obj;
+    TS_ASSERT_THROWS_NOTHING(
+        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      cloned_obj->material().numberDensity(), 1e-12);
   }

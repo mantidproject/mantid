@@ -6,11 +6,11 @@
 //----------------------------------
 #include "AlgorithmDialog.h"
 
+#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include <QHash>
 #include <QVariant>
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Property.h"
-#include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 
 //----------------------------------
 // Forward declarations
@@ -71,7 +71,7 @@ private:
   /// Widget containing all the PropertyWidgets
   AlgorithmPropertiesWidget *m_algoPropertiesWidget;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQT_API_GENERICDIALOG_H_

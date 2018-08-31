@@ -177,5 +177,5 @@ Getter for the workspace type name.
 @return Workspace Type Name
 */
 std::string SQWLoadingPresenter::getWorkspaceTypeName() { return m_wsTypeName; }
-}
-}
+} // namespace VATES
+} // namespace Mantid

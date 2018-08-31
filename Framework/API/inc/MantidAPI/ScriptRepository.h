@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
 #include <vector>
 
 namespace Mantid {
@@ -606,7 +606,7 @@ public:
 
 /// shared pointer to the function base class
 using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_SCRIPTREPOSITORY_H_
