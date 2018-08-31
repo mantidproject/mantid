@@ -95,12 +95,17 @@ set ( MANTIDLIBS ${MANTIDLIBS} Indexing )
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 set ( MANTIDLIBS ${MANTIDLIBS} Beamline )
 
-include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages
 include_directories ( ${MUPARSER_INCLUDE_DIR} )
 set ( MANTIDLIBS ${MANTIDLIBS} ${MUPARSER_LIBRARIES} )
+
+include_directories (Geometry/inc)
 add_subdirectory (Geometry)
 set ( MANTIDLIBS ${MANTIDLIBS} Geometry )
+
+include_directories (NexusGeometry/inc)
+add_subdirectory (NexusGeometry)
+set ( MANTIDLIBS ${MANTIDLIBS} NexusGeometry )
 
 include_directories (API/inc)
 add_subdirectory (API)
@@ -145,7 +150,7 @@ add_subdirectory (ScriptRepository)
 ###########################################################################
 
 set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
-                     PythonInterface DataHandling Nexus Algorithms CurveFitting ICat
+                     PythonInterface DataHandling Nexus NexusGeometry Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData RemoteAlgorithms RemoteJobManagers
                      SINQ Muon

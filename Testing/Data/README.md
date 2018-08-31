@@ -1,4 +1,4 @@
-This directory stores references to the Test data. The real data is stored on a remote file server and CMake's [ExternalData](http://www.cmake.org/cmake/help/v3.0/module/Extern
+This directory stores references to the Test data. The real data is stored on a remote file server and CMake's [ExternalData](https://cmake.org/cmake/help/v3.5/module/ExternalData.html)
 
 ### Directories
 

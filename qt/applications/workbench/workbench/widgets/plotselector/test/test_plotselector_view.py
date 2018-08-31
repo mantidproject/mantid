@@ -17,9 +17,8 @@
 from __future__ import absolute_import, division, print_function
 
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QIcon
 from qtpy.QtTest import QTest
-
-import qtawesome as qta
 
 from mantidqt.utils.qt.test import requires_qapp
 
@@ -41,6 +40,11 @@ class PlotSelectorWidgetTest(unittest.TestCase):
         self.presenter.get_plot_name_from_number = mock.Mock(side_effect=self.se_plot_name)
         self.presenter.get_initial_last_active_value = mock.Mock(side_effect=self.se_get_initial_last_active_value)
         self.presenter.is_shown_by_filter = mock.Mock(side_effect=self.se_is_shown_by_filter)
+
+        patcher = mock.patch('workbench.widgets.plotselector.view.get_icon')
+        self.mock_get_icon = patcher.start()
+        self.mock_get_icon.return_value = QIcon()
+        self.addCleanup(patcher.stop)
 
         self.view = PlotSelectorView(self.presenter)
         self.view.table_widget.setSortingEnabled(False)
@@ -285,24 +289,18 @@ class PlotSelectorWidgetTest(unittest.TestCase):
     def test_set_visibility_icon_to_visible(self):
         plot_numbers = [0, 1, 2]
         self.view.set_plot_list(plot_numbers)
-
+        self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, True)
 
-        name_widget = self.view.table_widget.cellWidget(0, Column.Name)
-        icon = name_widget.hide_button.icon()
-        self.assertEqual(icon.pixmap(50, 50).toImage(),
-                         qta.icon('fa.eye').pixmap(50, 50).toImage())
+        self.mock_get_icon.assert_called_once_with('fa.eye')
 
     def test_set_visibility_icon_to_hidden(self):
         plot_numbers = [0, 1, 2]
         self.view.set_plot_list(plot_numbers)
-
+        self.mock_get_icon.reset_mock()
         self.view.set_visibility_icon(0, False)
 
-        name_widget = self.view.table_widget.cellWidget(0, Column.Name)
-        icon = name_widget.hide_button.icon()
-        self.assertEqual(icon.pixmap(50, 50).toImage(),
-                         qta.icon('fa.eye', color='lightgrey').pixmap(50, 50).toImage())
+        self.mock_get_icon.assert_called_once_with('fa.eye', color='lightgrey')
 
     # ------------------------ Plot Renaming ------------------------
 

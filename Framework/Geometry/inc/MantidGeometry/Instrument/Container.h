@@ -57,10 +57,6 @@ public:
   bool isOnSide(const Kernel::V3D &p) const override {
     return m_shape->isOnSide(p);
   }
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override {
-    return m_shape->calcValidType(Pt, uVec);
-  }
   bool hasValidShape() const override { return m_shape->hasValidShape(); }
 
   IObject *clone() const override { return new Container(*this); }

@@ -12,11 +12,12 @@ Reflectometry Changes
 Algorithms
 ----------
 
-New Algorithms
-##############
+New
+###
 
+- Added algorithm :ref:`algm-CreateFloodWorkspace` which makes a workspace for subsequent flood corrections.
+- :ref:`FindReflectometryLines <algm-FindReflectometryLines-v2>` has been rewritten and updated to version 2. The new version finds a single line by a Gaussian fit. Version 1 has been deprecated and will be removed in a future release.
 - :ref:`ReflectometryCorrectDetectorAngle <algm-ReflectometryCorrectDetectorAngle>` can be used to rotate the detector to given :math:`2 \theta` angle or correct the detector angle using a direct beam reference.
-
 
 Liquids Reflectometer
 ---------------------
@@ -25,6 +26,35 @@ Liquids Reflectometer
 
 ISIS Reflectometry Interface
 ----------------------------
+
+New
+###
+
+
+
+Improved
+########
+
+- The interface now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+
+Bug fixes
+#########
+
+
+
+Algorithms
+----------
+
+
+New
+###
+
+
+
+Improved
+########
+
+- :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
 
 Bug fixes
 #########
