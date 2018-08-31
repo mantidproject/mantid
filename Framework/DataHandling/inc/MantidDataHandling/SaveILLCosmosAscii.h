@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace DataHandling {
 /**
-This algorithm is deprecated. Please use SaveMFT instead.
+This algorithm is deprecated. Please use SaveReflectometryAscii instead.
 
 Saves a file in ILL Cosmos format  from a 2D workspace
 (Workspace2D class). SaveILLCosmosAscii is an algorithm but inherits from the
@@ -54,7 +54,7 @@ public:
     return {"SaveAscii"};
   }
   SaveILLCosmosAscii() {
-    this->useAlgorithm("SaveMFT");
+    this->useAlgorithm("SaveReflectometryAscii");
     this->deprecatedDate("2018-06-29");
   }
 

@@ -46,7 +46,7 @@ public:
   }
   /// Summary of algorithms purpose. @see Algorithm::summary
   const std::string summary() const override {
-    return "Saves a 2D workspace to a ascii file of format mft";
+    return "Saves a 2D workspace to an ascii file";
   }
   /// Algorithm's with similar purpose. @see Algorithm::seeAlso
   const std::vector<std::string> seeAlso() const override {

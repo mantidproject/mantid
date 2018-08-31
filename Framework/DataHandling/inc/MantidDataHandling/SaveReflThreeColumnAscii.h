@@ -58,7 +58,7 @@ public:
   /// Algorithm's version for data output overriding a virtual method
   void data(std::ofstream &file, bool exportDeltaQ = false) override;
   SaveReflThreeColumnAscii() {
-    this->useAlgorithm("SaveMFT");
+    this->useAlgorithm("SaveReflectometryAscii");
     this->deprecatedDate("2018-06-29");
   }
 
