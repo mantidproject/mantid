@@ -101,7 +101,6 @@ std::string ErrorReporter::generateErrorMessage() {
 
   message["exitCode"] = m_exitCode;
 
-
   if (m_share) {
     message["textBox"] = m_textbox;
     message["email"] = m_email;

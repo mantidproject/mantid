@@ -35,7 +35,8 @@ MantidApplication::MantidApplication(int &argc, char **argv)
 }
 
 void MantidApplication::errorHandling(bool continueWork, int share,
-                                      QString name, QString email, QString textbox) {
+                                      QString name, QString email,
+                                      QString textbox) {
   if (share == 0) {
     Mantid::Kernel::ErrorReporter errorReporter(
         "mantidplot", Mantid::Kernel::UsageService::Instance().getUpTime(), "",
