@@ -56,19 +56,19 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
         self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
-        ws, directWS = self._inputWS()
+        ws, directWS, directForegroundWS = self._inputWS()
 
         ws = self._correctForChopperOpenings(ws, directWS)
-        ws = self._convertToMomentumTransfer(ws)
-        if directWS is not None:
-            directWS = self._sameQAndDQ(ws, directWS, 'direct_')
+        ws = self._convertToMomentumTransfer(ws, directWS)
+        if directForegroundWS is not None:
+            directForegroundWS = self._sameQAndDQ(ws, directForegroundWS, 'direct_')
         ws = self._toPointData(ws)
         ws = self._groupPoints(ws)
 
-        if directWS is not None:
-            directWS = self._toPointData(directWS, 'direct_')
-            directWS = self._groupPoints(directWS, 'direct_')
-            ws = self._divideByDirect(ws, directWS)
+        if directForegroundWS is not None:
+            directForegroundWS = self._toPointData(directForegroundWS, 'direct_')
+            directForegroundWS = self._groupPoints(directForegroundWS, 'direct_')
+            ws = self._divideByDirect(ws, directForegroundWS)
 
         self._finalize(ws)
 
@@ -134,11 +134,10 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'Binning does not match with InputWorkspace.'
         return issues
 
-    def _convertToMomentumTransfer(self, ws):
+    def _convertToMomentumTransfer(self, ws, directWS):
         """Convert the X units of ws to momentum transfer."""
         reflectedWS = self.getProperty(Prop.REFLECTED_WS).value
         reflectedForeground = self._foreground(reflectedWS.run())
-        directWS = self.getProperty(Prop.DIRECT_WS).value
         directForeground = self._foreground(directWS.run())
         logs = ws.run()
         instrumentName = ws.getInstrument().getName()
@@ -191,15 +190,15 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         self._cleanup.cleanup(ws)
         self._cleanup.finalCleanup()
 
-    def _divideByDirect(self, ws, directWS):
+    def _divideByDirect(self, ws, directForegroundWS):
         """Divide ws by the direct beam."""
         reflectivityWSName = self._names.withSuffix('reflectivity')
         reflectivityWS = Divide(LHSWorkspace=ws,
-                                RHSWorkspace=directWS,
+                                RHSWorkspace=directForegroundWS,
                                 OutputWorkspace=reflectivityWSName,
                                 EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
-        self._cleanup.cleanup(directWS)
+        self._cleanup.cleanup(directForegroundWS)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
         return reflectivityWS
@@ -261,23 +260,25 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         """Return the input workspace."""
         ws = self.getProperty(Prop.INPUT_WS).value
         self._cleanup.protect(ws)
-        directWS = None
+        directWS = self.getProperty(Prop.DIRECT_WS).value
+        self._cleanup.protect(directWS)
+        directForegroundWS = None
         if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
-            directWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
-            self._cleanup.protect(directWS)
-        return ws, directWS
+            directForegroundWS = self.getProperty(Prop.DIRECT_FOREGROUND_WS).value
+            self._cleanup.protect(directForegroundWS)
+        return ws, directWS, directForegroundWS
 
-    def _sameQAndDQ(self, ws, directWS, extraLabel=''):
-        """Create a new workspace with Y and E from directWS and X and DX data from ws."""
+    def _sameQAndDQ(self, ws, directForegroundWS, extraLabel=''):
+        """Create a new workspace with Y and E from directForegroundWS and X and DX data from ws."""
         qWSName = self._names.withSuffix(extraLabel + 'in_momentum_transfer')
         qWS = CreateWorkspace(
             OutputWorkspace=qWSName,
             DataX=ws.readX(0),
-            DataY=directWS.readY(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
-            DataE=directWS.readE(0)[::-1],
+            DataY=directForegroundWS.readY(0)[::-1],  # Invert data because wavelength is inversely proportional to Q.
+            DataE=directForegroundWS.readE(0)[::-1],
             Dx=ws.readDx(0),
             UnitX=ws.getAxis(0).getUnit().unitID(),
-            ParentWorkspace=directWS,
+            ParentWorkspace=directForegroundWS,
             EnableLogging=self._subalgLogging)
         return qWS
 

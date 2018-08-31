@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import (CreateWorkspace, DeleteWorkspace, mtd, Multiply)
 import scipy.constants as constants
 
+
 def chopperOpeningAngle(sampleLogs, instrumentName):
     """Return the chopper opening angle in degrees."""
     if instrumentName == 'D17':

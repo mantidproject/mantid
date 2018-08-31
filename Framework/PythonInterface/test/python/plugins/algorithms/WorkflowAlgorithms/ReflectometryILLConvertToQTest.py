@@ -16,6 +16,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         dirWS = illhelpers.create_poor_mans_d17_workspace()
         mtd.add('dirWS', dirWS)
         illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
+        illhelpers.add_chopper_configuration_D17(dirWS)
         illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
         dirWS = illhelpers.refl_preprocess('dirWS', dirWS, 'dirBeamPosWS')
         reflWS = illhelpers.create_poor_mans_d17_workspace()
