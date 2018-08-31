@@ -35,12 +35,15 @@ IndirectFitPlotView::IndirectFitPlotView(QWidget *parent)
 
 IndirectFitPlotView::~IndirectFitPlotView() {}
 
+std::string IndirectFitPlotView::getSpectrumText() const {
+  return m_plotForm->cbPlotSpectrum->currentText().toStdString();
+}
+
 std::size_t IndirectFitPlotView::getSelectedSpectrum() const {
   if (m_plotForm->swPlotSpectrum->currentIndex() == 0)
     return m_plotForm->spPlotSpectrum->value();
-  if (m_plotForm->cbPlotSpectrum->count() != 0)
-    return boost::numeric_cast<std::size_t>(
-        std::stoi(m_plotForm->cbPlotSpectrum->currentText().toStdString()));
+  else if (m_plotForm->cbPlotSpectrum->count() != 0)
+    return std::stoull(getSpectrumText());
   return 0;
 }
 
