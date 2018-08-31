@@ -6,7 +6,8 @@
 namespace Mantid {
 namespace HistogramData {
 
-/** LinearGenerator : TODO: DESCRIPTION
+/** LinearGenerator : A helper functor to generate linearly increasing
+  series of double values.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

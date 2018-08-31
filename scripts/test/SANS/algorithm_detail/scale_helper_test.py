@@ -46,7 +46,7 @@ class ScaleHelperTest(unittest.TestCase):
         # Arrange
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024, height=8.0,
-                                                   width=8.0, thickness=1.0, shape=SampleShape.CylinderAxisAlong)
+                                                   width=8.0, thickness=1.0, shape=SampleShape.Disc)
         data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("SANS2D00022024")
         data_state = data_builder.build()
@@ -90,7 +90,7 @@ class ScaleHelperTest(unittest.TestCase):
         width = 10.
         height = 5.
         thickness = 2.
-        scale_builder.set_shape(SampleShape.CylinderAxisAlong)
+        scale_builder.set_shape(SampleShape.Disc)
         scale_builder.set_thickness(thickness)
         scale_builder.set_width(width)
         scale_builder.set_height(height)

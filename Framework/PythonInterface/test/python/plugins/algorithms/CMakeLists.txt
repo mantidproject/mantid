@@ -54,6 +54,7 @@ set ( TEST_PY_FILES
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
+  LoadGudrunOutputTest.py
   LoadLiveDataTest.py
   LoadLampTest.py
   LoadLogPropertyTableTest.py

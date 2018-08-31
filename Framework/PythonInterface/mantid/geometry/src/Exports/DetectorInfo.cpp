@@ -1,15 +1,34 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfoItem.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidPythonInterface/api/DetectorInfoPythonIterator.h"
+
+#include <boost/iterator/iterator_facade.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/copy_non_const_reference.hpp>
+#include <boost/python/iterator.hpp>
+#include <boost/python/return_by_value.hpp>
 #include <boost/python/return_value_policy.hpp>
+#include <iterator>
 
 using Mantid::Geometry::DetectorInfo;
+using Mantid::Geometry::DetectorInfoItem;
+using Mantid::Geometry::DetectorInfoIterator;
+using Mantid::PythonInterface::DetectorInfoPythonIterator;
+
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
 
+// Helper method to make the python iterator
+DetectorInfoPythonIterator make_pyiterator(const DetectorInfo &detectorInfo) {
+  return DetectorInfoPythonIterator(detectorInfo);
+}
+
+// Export DetectorInfo
 void export_DetectorInfo() {
 
   // Function pointers to distinguish between overloaded versions
@@ -32,6 +51,9 @@ void export_DetectorInfo() {
 
   // Export to Python
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
+
+      .def("__iter__", make_pyiterator)
+
       .def("__len__", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")

@@ -125,8 +125,9 @@ public:
 
     auto error = indexProp.setValue("30:35");
 
-    TS_ASSERT_EQUALS(error,
-                     "Indices provided to IndexProperty are out of range.");
+    TS_ASSERT(
+        error.find("Indices provided to IndexProperty are out of range.") !=
+        std::string::npos);
   }
 
   void testIndexAccessWithOperator() {
