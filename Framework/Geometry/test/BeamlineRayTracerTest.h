@@ -3,17 +3,23 @@
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BeamlineRayTracer.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ProgressText.h"
+#include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::ProgressText;
 using Mantid::Kernel::V3D;
+using namespace Mantid::Kernel::Strings;
 using namespace ComponentCreationHelper;
 namespace RayTracer = Mantid::Geometry::BeamlineRayTracer;
 
@@ -269,15 +275,6 @@ private:
   }
 
   /**
-   * Getters
-   */
-  Instrument_sptr get_instrument() { return m_testInstrument; }
-
-  Mantid::Geometry::ComponentInfo *get_componentInfo() {
-    return m_compInfo.get();
-  }
-
-  /**
    * Member variables
    */
   // Holds the Instrument
@@ -293,4 +290,133 @@ private:
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoRectangular;
 };
 
+/*
+class BeamlineRayTracerTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static BeamlineRayTracerTestPerformance *createSuite() {
+    return new BeamlineRayTracerTestPerformance();
+  }
+  static void destroySuite(BeamlineRayTracerTestPerformance *suite) {
+    delete suite;
+  }
+
+  BeamlineRayTracerTestPerformance() {
+    // Instrument
+    m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
+    
+    // Create an instrument visitor
+    InstrumentVisitor visitor = (m_inst);
+
+    // Visit everything
+    visitor.walkInstrument();
+
+    // Get ComponentInfo and DetectorInfo objects and set them
+    auto infos = InstrumentVisitor::makeWrappers(*m_inst, nullptr);
+
+    // Unpack the pair
+    m_compInfo = std::move(infos.first);
+    m_detInfo = std::move(infos.second);
+
+    //std::cout << "IN SETUP" << std::endl;
+    // Parse test file
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
+                           "TOPAZ_Definition_2010.xml";
+    std::string xmlText = Mantid::Kernel::Strings::loadFile(filename);
+    InstrumentDefinitionParser IDP(filename, "UnitTesting", xmlText);
+
+    //std::cout << "DONE IDP" << std::endl;
+
+    // Get the instrument
+    m_instTopaz = IDP.parseXML(nullptr);
+    //std::cout << "GOT INSTRUMENT" << std::endl;
+
+    // Create an instrument visitor
+    InstrumentVisitor visitor2 = (m_instTopaz);
+    //std::cout << "DONE VISITOR" << std::endl;
+
+    // Visit everything
+    visitor2.walkInstrument();
+    //std::cout << "DONE WALKTHROUGH" << std::endl;
+
+    // Get ComponentInfo and DetectorInfo objects and set them
+    auto infos2 = InstrumentVisitor::makeWrappers(*m_instTopaz, nullptr);
+    //std::cout << "GOT INFOS" << std::endl;
+
+    // Unpack the pair
+    m_compInfoTopaz = std::move(infos2.first);
+    m_detInfoTopaz = std::move(infos2.second);
+    //std::cout << "UNPACKED INFOS" << std::endl;
+    //std::cout << "DONE SETUP" << std::endl;
+  }
+
+  void test_RectangularDetector() {
+    //std::cout << "IN Rec Det" << std::endl;
+
+    // Directly in Z+ = towards the detector center
+    V3D testDir(0.0, 0.0, 1.0);
+    for (size_t i = 0; i < 100; i++) {
+      //std::cout << "TEST " << i << std::endl;
+      Links results = RayTracer::traceFromSample(testDir, *m_compInfo);
+      TS_ASSERT_EQUALS(results.size(), 3);
+    }
+  }
+
+  void test_TOPAZ() {
+    // Debugging flag
+    bool verbose = false;
+
+    // Directly in Z+ = towards the detector center
+    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
+      for (int elev = -89; elev < 89; elev += 3) {
+        // Make a vector pointing in every direction
+        V3D testDir;
+        testDir.spherical(1, double(elev), double(azimuth));
+
+        // For debugging
+        if (verbose) {
+          std::cout << testDir << " : ";
+        }
+
+        // Track it
+        Links results = RayTracer::traceFromSample(testDir, *m_compInfoTopaz);
+
+        // For debugging
+        if (verbose) {
+          showResults(results);
+        }
+      }
+    }
+  }
+
+private:
+  // For Rectangular instrument
+  Instrument_sptr m_inst;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfo;
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfo;
+
+  // For Topaz
+  Instrument_sptr m_instTopaz;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoTopaz;
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoTopaz;
+
+  // Helper method for debugging
+  void showResults(Links &results) {
+    Links::const_iterator resultItr = results.begin();
+    for (; resultItr != results.end(); resultItr++) {
+      std::cout << resultItr->componentID->getFullName() << ", ";
+    }
+    std::cout << "\n";
+
+    // Links::const_iterator resultItr = results.begin();
+    // for (; resultItr != results.end(); resultItr++) {
+    //  IComponent_const_sptr component =
+    //    inst->getComponentByID(resultItr->componentID);
+    //  std::cout << component->getName() << ", ";
+    //}
+    // std::cout << "\n";
+  }
+};
+*/
 #endif /* BEAMLINERAYTRACERTEST_H_ */
