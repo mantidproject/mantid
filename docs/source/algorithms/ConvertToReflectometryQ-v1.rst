@@ -16,7 +16,7 @@ algorithm corrects the detector position to an angle :math:`\theta_f`, where
 
 For conversion of single histogram workspaces to :math:`Q_{z}`, see
 :ref:`ConvertUnits <algm-ConvertUnits>` or
-:ref:`ReflectometryConvertToQ <algm-ReflectometryMomentumTransfer>`.
+:ref:`ReflectometryMomentumTransfer <algm-ReflectometryMomentumTransfer>`.
 
 Prerequisites
 #############
