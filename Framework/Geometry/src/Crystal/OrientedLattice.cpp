@@ -122,7 +122,7 @@ void OrientedLattice::setUB(const DblMatrix &newUB) {
 }
 
 /** Sets the Modulation UB matrix
- @param newUB :: the new Modulation UB matrix*/
+ @param newModUB :: the new Modulation UB matrix*/
 
 void OrientedLattice::setModUB(const DblMatrix &newModUB) {
   ModUB = newModUB;

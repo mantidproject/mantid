@@ -747,6 +747,9 @@ int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
  *  @param  h        The first Miller index
  *  @param  k        The second Miller index
  *  @param  l        The third  Miller index
+ *  @param  m        The first modulation index
+ *  @param  n        The second modulation index
+ *  @param  p        The third  modulation index
  */
 
 int64_t Integrate3DEvents::getHklMnpKey(int h, int k, int l, int m, int n,

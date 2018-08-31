@@ -124,7 +124,7 @@ void IndexPeaks::exec() {
     double total_error = 0;
     double total_main_error = 0;
     double total_sate_error = 0;
-    double satetolerance = this->getProperty("Tolerance for Satellite");
+    double satetolerance = this->getProperty("ToleranceForSatellite");
 
     // get list of run numbers in this peaks workspace
     std::vector<int> run_numbers;
