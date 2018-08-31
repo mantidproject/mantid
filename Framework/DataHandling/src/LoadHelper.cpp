@@ -68,7 +68,8 @@ std::vector<double> LoadHelper::getTimeBinningFromNexusPath(
 
   float *timeBinning_p = &timeBinningNexus[0];
   std::vector<double> timeBinning(numberOfBins);
-  timeBinning.assign(timeBinning_p, timeBinning_p + numberOfBins);
+  std::copy(timeBinning_p, timeBinning_p + timeBinningNexus.dim0(),
+            std::begin(timeBinning));
   // calculate the extra bin at the end
   timeBinning[numberOfBins - 1] =
       timeBinning[numberOfBins - 2] + timeBinning[1] - timeBinning[0];

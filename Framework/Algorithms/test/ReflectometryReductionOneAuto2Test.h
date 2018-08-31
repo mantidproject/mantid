@@ -897,6 +897,52 @@ public:
     ADS.clear();
   }
 
+  void test_polarization_correction_default_Wildes() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    applyPolarizationEfficiencies(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9368, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.7813, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.6797, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.5242, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.9368, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.7813, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.6797, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.5242, 0.0001);
+
+    ADS.clear();
+  }
+
   void test_monitor_index_in_group() {
     std::string const name = "input";
     prepareInputGroup(name);
