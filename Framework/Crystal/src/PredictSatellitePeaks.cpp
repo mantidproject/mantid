@@ -55,7 +55,7 @@ void PredictSatellitePeaks::init() {
       make_unique<PropertyWithValue<int>>("MaxOrder", 0, Direction::Input),
       "Maximum order to apply ModVectors. Default = 0");
 
-  declareProperty("GetModVectorsFromUB", true,
+  declareProperty("GetModVectorsFromUB", false,
                   "If false Modulation Vectors will be read from input");
 
   declareProperty(make_unique<PropertyWithValue<bool>>("CrossTerms", false,

@@ -31,7 +31,7 @@ void IndexPeaks::init() {
       "Indexing Tolerance (0.15)");
 
   this->declareProperty(
-      make_unique<PropertyWithValue<double>>("Tolerance for Satellite", 0.15,
+      make_unique<PropertyWithValue<double>>("ToleranceForSatellite", 0.15,
                                              mustBePositive, Direction::Input),
       "Satellite Indexing Tolerance (0.15)");
 

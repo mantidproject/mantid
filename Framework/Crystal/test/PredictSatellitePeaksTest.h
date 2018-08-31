@@ -81,6 +81,7 @@ public:
     alg.setProperty("SatellitePeaks", std::string("SatellitePeaks"));
     alg.setProperty("ModVector1", "0.5,0,.2");
     alg.setProperty("MaxOrder", "1");
+    alg.setProperty("GetModVectorsFromUB", false);
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
     alg.setPropertyValue("SatellitePeaks", "SatellitePeaks");
@@ -109,6 +110,7 @@ public:
     alg4.setProperty("ModVector1", "0.5,0,.2");
     alg4.setProperty("MaxOrder", "1");
     alg4.setProperty("IncludeAllPeaksInRange", true);
+    alg4.setProperty("GetModVectorsFromUB", false);
     alg4.setProperty("MinDSpacing", "3");
     alg4.setProperty("MaxDSpacing", "16");
     alg4.setProperty("WavelengthMin", "0.5");
