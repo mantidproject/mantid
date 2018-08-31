@@ -186,10 +186,9 @@ MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
   auto ws = WorkspaceCreationHelper::
       create2DWorkspaceWithReflectometryInstrumentMultiDetector(
           startX, 0.0, Mantid::Kernel::V3D(0, 0, 0),
-          Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0,
-          Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(14, 0, 0),
-          Mantid::Kernel::V3D(15, 0, 0), Mantid::Kernel::V3D(20, (20 - 15), 0),
-          2, nBins, deltaX);
+          Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0, Mantid::Kernel::V3D(0, 0, 0),
+          Mantid::Kernel::V3D(14, 0, 0), Mantid::Kernel::V3D(15, 0, 0),
+          Mantid::Kernel::V3D(20, (20 - 15), 0), 2, nBins, deltaX);
 
   for (auto i = 0u; i < ws->y(0).size(); ++i) {
     ws->mutableY(0)[i] = yValues[i];
@@ -205,12 +204,11 @@ MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
   auto ws = WorkspaceCreationHelper::
       create2DWorkspaceWithReflectometryInstrumentMultiDetector(
           startX, 0.0, Mantid::Kernel::V3D(0, 0, 0),
-          Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0,
-          Mantid::Kernel::V3D(0, 0, 0), Mantid::Kernel::V3D(14, 0, 0),
-          Mantid::Kernel::V3D(15, 0, 0), Mantid::Kernel::V3D(20, (20 - 15), 0),
-          2, nBins, deltaX);
-  
-  ws->mutableRun().addProperty<std::string > ("run_number", "1234");
+          Mantid::Kernel::V3D(0, 0, 1), 0.5, 1.0, Mantid::Kernel::V3D(0, 0, 0),
+          Mantid::Kernel::V3D(14, 0, 0), Mantid::Kernel::V3D(15, 0, 0),
+          Mantid::Kernel::V3D(20, (20 - 15), 0), 2, nBins, deltaX);
+
+  ws->mutableRun().addProperty<std::string>("run_number", "1234");
   return ws;
 }
 } // namespace TestHelpers

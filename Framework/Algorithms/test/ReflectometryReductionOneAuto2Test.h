@@ -927,7 +927,8 @@ public:
         createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("input", input);
 
-    MatrixWorkspace_sptr input2 = createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    MatrixWorkspace_sptr input2 =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
     ADS.addOrReplace("input2", input2);
 
     MatrixWorkspace_sptr first =
@@ -983,7 +984,7 @@ public:
     ADS.clear();
   }
 
-  void test_second_transmissionrun(){
+  void test_second_transmissionrun() {
     const double startX = 1000;
     const int nBins = 3;
     const double deltaX = 1000;
