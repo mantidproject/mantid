@@ -36,7 +36,7 @@ public:
   virtual void boolAttributeChanged(std::string const &name, bool value) = 0;
   virtual void
   vectorDoubleAttributeChanged(std::string const &name,
-                               const std::vector<double> &value) = 0;
+                               std::vector<double> const &value) = 0;
   virtual void vectorSizeAttributeChanged(std::string const &name,
                                           std::size_t size) = 0;
   virtual void copyFunctionToClipboard() = 0;

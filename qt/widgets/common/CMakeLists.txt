@@ -145,6 +145,8 @@ set ( SRC_FILES
 	src/WorkspaceSelector.cpp
 	src/pqHelpWindow.cxx
 	src/pythonCalc.cpp
+	src/FunctionBrowser/FunctionBrowser.cpp
+	src/FunctionBrowser/FunctionBrowserPresenter.cpp
 	src/FunctionBrowser/FunctionProperties.cpp
 	src/FunctionBrowser/MultiDomainFunctionModel.cpp
 	src/QtPropertyBrowser/qtpropertybrowser.cpp
@@ -255,6 +257,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/FindFilesWorker.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
+  inc/MantidQtWidgets/Common/FunctionBrowser/FunctionBrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/ButtonEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h
