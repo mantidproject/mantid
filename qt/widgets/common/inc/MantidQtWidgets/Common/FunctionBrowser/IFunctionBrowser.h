@@ -7,7 +7,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace QENS {
+namespace Function {
 
 class MANTIDQT_INDIRECT_DLL IFunctionBrowser {
 public:
@@ -84,7 +84,7 @@ public:
   virtual void displayParameterMenu(bool isTied, bool isConstrained) = 0;
 };
 
-} // namespace QENS
+} // namespace Function
 } // namespace MantidWidgets
 } // namespace MantidQt
 

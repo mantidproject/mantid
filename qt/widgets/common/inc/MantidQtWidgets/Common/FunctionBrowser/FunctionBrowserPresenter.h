@@ -17,7 +17,6 @@ public:
   virtual void parameterValueChanged(std::string const &parameter,
                                      double value) = 0;
   virtual void attributeChanged(std::string const &attribute) = 0;
-  virtual void editParameter(std::string const &parameter) = 0;
 };
 
 class FunctionBrowserPresenter : public FunctionBrowserSubscriber {
@@ -57,7 +56,6 @@ public:
   void copyFunctionToClipboard() = 0;
   void displayFunctionMenu(std::vector<std::size_t> const &position) override;
   void displayParameterMenu(std::string const &parameter) override;
-  void editParameter(std::string const &parameter) override;
 
   void updateAttributesInBrowser();
   void updateAttributeInBrowser(std::string const &name);
@@ -80,7 +78,7 @@ private:
 
   FunctionBrowserPresenterSubscriber *m_subscriber;
   IFunctionModel *m_model;
-  QENS::IFunctionBrowser *m_browser;
+  Function::IFunctionBrowser *m_browser;
 
   class EmptySubscriber;
   static EmptySubscriber g_defaultSubscriber;
@@ -92,7 +90,6 @@ public:
   void functionChanged() override {}
   void parameterValueChanged(std::string const &, double) override {}
   void attributeChanged(std::string const &) override {}
-  void editParameter(std::string const &) override {}
 };
 
 } // namespace MantidWidgets

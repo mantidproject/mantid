@@ -36,11 +36,10 @@ public:
   virtual void boolAttributeChanged(std::string const &name, bool value) = 0;
   virtual void
   vectorDoubleAttributeChanged(std::string const &name,
-                               const std::vector<double> &value) = 0;
+                               std::vector<double> const &value) = 0;
   virtual void vectorSizeAttributeChanged(std::string const &name,
                                           std::size_t size) = 0;
   virtual void copyFunctionToClipboard() = 0;
-  virtual void editParameter(std::string const &name) = 0;
   virtual void
   displayFunctionMenu(std::vector<std::size_t> const &position) = 0;
   virtual void displayParameterMenu(std::string const &parameter) = 0;
