@@ -41,23 +41,13 @@ namespace IO {
 */
 namespace EventLoader {
 /// Read number of events in given banks from file.
-inline std::vector<size_t>
+std::vector<size_t>
 readBankSizes(const H5::Group &group,
-              const std::vector<std::string> &bankNames) {
-  std::vector<size_t> bankSizes;
-  for (const auto &bankName : bankNames) {
-    const H5::DataSet dataset = group.openDataSet(bankName + "/event_id");
-    const H5::DataSpace dataSpace = dataset.getSpace();
-    bankSizes.push_back(dataSpace.getSelectNpoints());
-  }
-  return bankSizes;
-}
+              const std::vector<std::string> &bankNames);
 
-inline H5::DataType readDataType(const H5::Group &group,
-                                 const std::vector<std::string> &bankNames,
-                                 const std::string &name) {
-  return group.openDataSet(bankNames.front() + "/" + name).getDataType();
-}
+H5::DataType readDataType(const H5::Group &group,
+                          const std::vector<std::string> &bankNames,
+                          const std::string &name);
 
 template <class T> class ThreadWaiter {
 public:

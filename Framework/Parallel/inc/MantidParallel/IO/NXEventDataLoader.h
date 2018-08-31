@@ -109,13 +109,8 @@ void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
   read(buffer, dataSet, start, count);
 }
 
-inline std::string readAttribute(const H5::DataSet &dataSet,
-                                 const std::string &attributeName) {
-  const auto &attr = dataSet.openAttribute(attributeName);
-  std::string value;
-  attr.read(attr.getDataType(), value);
-  return value;
-}
+std::string readAttribute(const H5::DataSet &dataSet,
+                          const std::string &attributeName);
 
 template <class TimeOffsetType, class IndexType, class TimeZeroType>
 std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>

@@ -6,11 +6,12 @@ set ( SRC_FILES
 	src/IO/EventParser.cpp
 	src/IO/EventsListsShmemManager.cpp
 	src/IO/EventsListsShmemStorage.cpp
-        src/IO/MultiProcessEventLoader.cpp
+		src/IO/MultiProcessEventLoader.cpp
+		src/IO/NXEventDataLoader.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
-)
+		src/IO/EventLoaderHelpers.cpp)
 
 set ( INC_FILES
 	inc/MantidParallel/Collectives.h
