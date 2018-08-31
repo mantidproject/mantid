@@ -8,10 +8,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CalculatePolynomialBackground, CloneWorkspace,
-                              CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace,
-                              Divide, ExtractMonitors, FindEPP, GetEiMonDet, Integration, LoadAndMerge, Minus, NormaliseToMonitor,
-                              Plus, RenameWorkspace, Scale, Transpose)
+from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP,
+                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors,
+                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
 import numpy
 
 
@@ -435,8 +434,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
-                             doc="Running average window width (in bins) " +
-                                 "for flat background, unused in 'Flat Bkg Over Tubes'.")
+                             doc='Running average window width (in bins) for flat background.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_FLAT_BKG_WS,
