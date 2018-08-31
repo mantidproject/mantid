@@ -20,6 +20,7 @@ import unittest
 
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from mantidqt.utils.qt.test import GuiTest
+import sip
 
 
 class WorkspaceWidgetTest(GuiTest):
@@ -28,6 +29,7 @@ class WorkspaceWidgetTest(GuiTest):
     def test_widget_creation(self):
         widget = WorkspaceTreeWidget()
         self.assertTrue(widget is not None)
+        sip.delete(widget)
 
 
 if __name__ == "__main__":
