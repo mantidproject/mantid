@@ -10,10 +10,11 @@ class Instrument;
 }
 namespace Algorithms {
 
-/** DirectILLTubeBackground : TODO: DESCRIPTION
+/** DirectILLTubeBackground : Fits polynomial backgrounds over the pixels of
+  position sensitive tubes.
 
-  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
+  Copyright &copy; 2018 ISIS Rutherford Appleton
+  Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
