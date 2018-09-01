@@ -76,10 +76,10 @@ namespace Algorithms {
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
-    const Mantid::HistogramData::Histogram &inputHist)
-    : m_pars(params), m_histogram(inputHist), m_tofVals(inputHist.points()),
-      m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
-      m_rng(new MersenneTwister(1)) {
+    HistogramData::Histogram inputHist)
+    : m_pars(params), m_histogram(std::move(inputHist)),
+      m_tofVals(m_histogram.points()), m_histoYSize(m_histogram.y().size()),
+      m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
 
   const auto &xVals = m_histogram.x();
   if (!(xVals.front() < xVals.back())) {
