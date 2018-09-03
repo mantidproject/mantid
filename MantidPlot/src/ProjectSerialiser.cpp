@@ -71,18 +71,20 @@ PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
     PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
     PyErr_Fetch(&exception, &value, &traceback);
     PyErr_Clear();
-    auto msg = PyObject_Str(value);
-    auto msgAsCstr = TO_CSTRING(msg);
-    Py_DecRef(msg);
-    const auto lineno(
-        reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
-    Py_XDECREF(traceback);
+    auto pyMsg = PyObject_Str(value);
+    std::ostringstream msg;
+    msg << TO_CSTRING(pyMsg);
+    Py_DecRef(pyMsg);
+    if (traceback) {
+      const auto lineno(
+          reinterpret_cast<PyTracebackObject *>(traceback)->tb_lineno);
+      msg << " at line " + std::to_string(lineno);
+      Py_DECREF(traceback);
+    }
     Py_XDECREF(value);
     Py_XDECREF(exception);
-    throw std::runtime_error(std::string(msgAsCstr) + " at line " +
-                             std::to_string(lineno));
+    throw std::runtime_error(msg.str());
   };
-
   PyObject *launcher(nullptr), *moduleAttr(nullptr), *callResult(nullptr);
   try {
     launcher = throwIfPythonError(
