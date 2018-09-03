@@ -23,7 +23,7 @@ class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
 
     def runTest(self):
         CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
-                             Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
+                             ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
         self.disableChecking.append('Instrument')
@@ -36,7 +36,7 @@ class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest)
 
     def runTest(self):
         CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=10, Background='Quadratic',
-                             Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
+                             ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
         self.disableChecking.append('Instrument')
@@ -101,5 +101,22 @@ class ReflectometryCreateFloodWorkspaceIntegrationRange(stresstesting.MantidStre
             self.assertAlmostEqual(out.readY(3)[0], 5.0/4)
             self.assertAlmostEqual(out.readY(4)[0], 6.0/4)
             self.assertAlmostEqual(out.readY(5)[0], 7.0/4)
+        finally:
+            os.unlink(input_file)
+
+
+class ReflectometryCreateFloodWorkspaceDivisionByZero(stresstesting.MantidStressTest):
+
+    flood_ws_name = 'flood'
+
+    def runTest(self):
+        try:
+            input_file = tempfile.gettempdir() + '/__refl_flood_cor_temp.nxs'
+            x = [0, 5, 6, 10] * 6
+            y = [1, 2, 1] + [9, 3, 9] + [8, 0, 8] + [3, 5, 3] + [14, 6, 14] + [15, 7, 15]
+            ws = CreateWorkspace(x, y, NSpec=6)
+            SaveNexus(ws, input_file)
+            self.assertRaises(RuntimeError, CreateFloodWorkspace, input_file,
+                              CentralPixelSpectrum=2, RangeLower=3, RangeUpper=7, OutputWorkspace=self.flood_ws_name)
         finally:
             os.unlink(input_file)

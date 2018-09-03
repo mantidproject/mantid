@@ -239,6 +239,9 @@ MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_s
   }
   auto scaleFactor = ws->y(centralIndex).front();
   g_log.information() << "Scale to central pixel, factor = " << scaleFactor << '\n';
+  if (scaleFactor <= 0.0) {
+    throw std::runtime_error("Scale factor muhst be > 0, found " + std::to_string(scaleFactor));
+  }
   for (int i = 0; i < nHisto; ++i) {
       ws->mutableY(i)[0] /= scaleFactor;
       ws->mutableE(i)[0] /= scaleFactor;
