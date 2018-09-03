@@ -115,18 +115,24 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
-        # load a single run
+        self.data = MuonLoadData()
+        self.view = LoadRunWidgetView()
+        self.model = LoadRunWidgetModel(self.data)
+        self.presenter = LoadRunWidgetPresenter(self.view, self.model)
+
+        self.view.warning_popup = mock.Mock()
+        self.presenter.enable_multiple_files(False)
+
+        self.load_single_run()
+
+    def load_single_run(self):
         self._loaded_run = 1234
         self._loaded_filename = "EMU00001234.nxs"
         self._loaded_workspace = [1, 2, 3]
 
-        self.view = LoadRunWidgetView()
-        self.model = LoadRunWidgetModel(MuonLoadData())
-        self.presenter = LoadRunWidgetPresenter(self.view, self.model)
         self.model.load_workspace_from_filename = mock.Mock(
             return_value=(self._loaded_workspace, self._loaded_filename, self._loaded_run))
         self.view.set_run_edit_text(str(self._loaded_run))
-        self.view.warning_popup = mock.Mock()
         self.presenter.handle_run_changed_by_user()
         self.Runner(self.presenter._load_thread)
 
@@ -142,26 +148,28 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         raise ValueError("Error text")
 
     # ------------------------------------------------------------------------------------------------------------------
-    # TESTS
+    # TESTS : Test the increment/decrement buttons in single file mode (can only load one run at a time)
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_that_decrement_run_attempts_to_load_the_correct_run(self):
         new_filename = "EMU00001233.nxs"
+        load_call_count = self.model.load_workspace_from_filename.call_count
 
         self.presenter.handle_decrement_run()
         self.Runner(self.presenter._load_thread)
 
-        self.model.load_workspace_from_filename.assert_called_once()
+        self.assertEqual(self.model.load_workspace_from_filename.call_count, load_call_count + 1)
         filename = self.model.load_workspace_from_filename.call_args[0][0]
         self.assertEqual(os.path.basename(filename), new_filename)
 
     def test_that_increment_run_attempts_to_load_the_correct_run(self):
         new_filename = "EMU00001235.nxs"
+        load_call_count = self.model.load_workspace_from_filename.call_count
 
         self.presenter.handle_increment_run()
         self.Runner(self.presenter._load_thread)
 
-        self.model.load_workspace_from_filename.assert_called_once()
+        self.assertEqual(self.model.load_workspace_from_filename.call_count, load_call_count + 1)
         filename = self.model.load_workspace_from_filename.call_args[0][0]
         self.assertEqual(os.path.basename(filename), new_filename)
 
@@ -422,14 +430,14 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.Runner(self.presenter._load_thread)
         self.assertEqual(self.view.get_run_edit_text(), "1234")
 
-    def test_load_current_run_displays_error_message_if_fails_to_load(self):
+    @mock.patch("Muon.GUI.Common.message_box.warning")
+    def test_load_current_run_displays_error_message_if_fails_to_load(self, mock_warning):
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_load_current_run()
         self.Runner(self.presenter._load_thread)
 
-        self.view.warning_popup.assert_called_once()
-        self.view.disable_load_buttons.assert_not_called()
+        self.assertEqual(mock_warning.call_count, 1)
 
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
         # set up previous data
@@ -473,7 +481,6 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.Runner(self.presenter._load_thread)
 
         self.assertEqual(self.view.warning_popup.call_count, 1)
-        self.view.disable_load_buttons.assert_not_called()
 
 
 if __name__ == '__main__':
