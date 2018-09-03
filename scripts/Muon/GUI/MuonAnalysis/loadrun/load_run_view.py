@@ -1,13 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal
+from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import pyqtSignal as Signal
 
 import Muon.GUI.Common.run_string_utils as runUtils
 
 
-class LoadRunWidgetView(QtWidgets.QWidget):
-
+class LoadRunWidgetView(QtGui.QWidget):
     # signals for parent widgets
     loadingStarted = Signal()
     loadingFinished = Signal()
@@ -25,41 +24,41 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         Form.setObjectName("Form")
         Form.resize(468, 45)
 
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self)
+        self.horizontalLayout = QtGui.QHBoxLayout(self)
         self.horizontalLayout.setObjectName("horizontalLayout")
 
-        self.loadCurrentRunButton = QtWidgets.QPushButton(Form)
+        self.loadCurrentRunButton = QtGui.QPushButton(Form)
         self.loadCurrentRunButton.setText("Load Current Run")
         self.loadCurrentRunButton.setMinimumSize(QtCore.QSize(100, 25))
         self.loadCurrentRunButton.setToolTip("Load the current run for the current instrument")
         self.loadCurrentRunButton.setObjectName("loadCurrentRunButton")
 
-        self.incrementRunButton = QtWidgets.QToolButton(Form)
+        self.incrementRunButton = QtGui.QToolButton(Form)
         self.incrementRunButton.setText(">")
         self.incrementRunButton.setMinimumSize(QtCore.QSize(25, 25))
         self.incrementRunButton.setToolTip("Increment the run")
         self.incrementRunButton.setObjectName("incrementRunButton")
 
-        self.decrementRunButton = QtWidgets.QToolButton(Form)
+        self.decrementRunButton = QtGui.QToolButton(Form)
         self.decrementRunButton.setText("<")
         self.decrementRunButton.setMinimumSize(QtCore.QSize(25, 25))
         self.decrementRunButton.setToolTip("Decrement the run")
         self.decrementRunButton.setObjectName("decrementRunButton")
 
-        self.instrumentLabel = QtWidgets.QLabel(Form)
+        self.instrumentLabel = QtGui.QLabel(Form)
         self.instrumentLabel.setText("Instrument")
         self.instrumentLabel.setToolTip("")
         self.instrumentLabel.setObjectName("instrumentLabel")
 
-        self.runEdit = QtWidgets.QLineEdit(Form)
+        self.runEdit = QtGui.QLineEdit(Form)
         self.runEdit.setMinimumSize(QtCore.QSize(0, 25))
         self.runEdit.setToolTip(
             "Enter run number using " + runUtils.delimiter
             + " and " + runUtils.range_separator + " as delimiter and range-separator respectively")
         self.runEdit.setObjectName("runEdit")
 
-        spacerItem = QtWidgets.QSpacerItem(25, 25, QtWidgets.QSizePolicy.Minimum,
-                                           QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtGui.QSpacerItem(25, 25, QtGui.QSizePolicy.Minimum,
+                                       QtGui.QSizePolicy.Minimum)
 
         self.horizontalLayout.addWidget(self.loadCurrentRunButton)
         self.horizontalLayout.addWidget(self.decrementRunButton)
@@ -135,7 +134,7 @@ class LoadRunWidgetView(QtWidgets.QWidget):
 
     def warning_popup(self, message):
         self._warning_window = None
-        self._warning_window = QtWidgets.QMessageBox.warning(self, "Error", str(message))
+        self._warning_window = QtGui.QMessageBox.warning(self, "Error", str(message))
 
     def clear(self):
         self.set_run_edit_text("")
