@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 import stresstesting
-from mantid.simpleapi import CreateFloodWorkspace, CreateWorkspace, SaveNexus
+from mantid.simpleapi import CreateFloodWorkspace, CreateWorkspace, SaveNexus, mtd
 import os
 import tempfile
 
@@ -55,5 +55,28 @@ class ReflectometryCreateFloodWorkspaceNegativeBackground(stresstesting.MantidSt
             ws = CreateWorkspace(x, y, NSpec=6)
             SaveNexus(ws, input_file)
             self.assertRaises(RuntimeError, CreateFloodWorkspace, input_file, Background='Quadratic', OutputWorkspace=self.flood_ws_name)
+        finally:
+            os.unlink(input_file)
+
+
+class ReflectometryCreateFloodWorkspaceCentralPixel(stresstesting.MantidStressTest):
+
+    flood_ws_name = 'flood'
+
+    def runTest(self):
+        try:
+            input_file = tempfile.gettempdir() + '/__refl_flood_cor_temp.nxs'
+            x = [0, 100000, 0, 100000, 0, 100000, 0, 100000, 0, 100000, 0, 100000]
+            y = [1, 9, 8, 3, 14, 15]
+            ws = CreateWorkspace(x, y, NSpec=6)
+            SaveNexus(ws, input_file)
+            CreateFloodWorkspace(input_file, CentralPixelSpectrum=2, OutputWorkspace=self.flood_ws_name)
+            out = mtd[self.flood_ws_name]
+            self.assertAlmostEqual(out.readY(0)[0], 1.0/8)
+            self.assertAlmostEqual(out.readY(1)[0], 9.0/8)
+            self.assertAlmostEqual(out.readY(2)[0], 1.0)
+            self.assertAlmostEqual(out.readY(3)[0], 3.0/8)
+            self.assertAlmostEqual(out.readY(4)[0], 14.0/8)
+            self.assertAlmostEqual(out.readY(5)[0], 15.0/8)
         finally:
             os.unlink(input_file)

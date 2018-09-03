@@ -22,6 +22,7 @@ std::string const START_X("StartSpectrumIndex");
 std::string const END_X("EndSpectrumIndex");
 std::string const EXCLUDE("Exclude");
 std::string const BACKGROUND("Background");
+std::string const CENTRAL_PIXEL("CentralPixelSpectrum");
 } // namespace Prop
 
 double const VERY_BIG_VALUE = std::numeric_limits<double>::max();
@@ -72,6 +73,9 @@ void CreateFloodWorkspace::init() {
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
                   "Spectra to exclude");
+
+  declareProperty(Prop::CENTRAL_PIXEL, EMPTY_INT(),
+                  "A spectrum index of the centre pixel.");
 
   std::vector<std::string> allowedValues;
   for (auto i : funMap)
@@ -124,8 +128,13 @@ MatrixWorkspace_sptr CreateFloodWorkspace::transpose(MatrixWorkspace_sptr ws) {
   return alg->getProperty("OutputWorkspace");
 }
 
+bool CreateFloodWorkspace::shouldRemoveBackground() {
+  return isDefault(Prop::CENTRAL_PIXEL);
+}
+
 API::MatrixWorkspace_sptr
 CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
+  g_log.information() << "Remove background\n";
   auto fitWS = transpose(ws);
   auto const &x = fitWS->x(0);
 
@@ -205,6 +214,24 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   return ws;
 }
 
+MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_sptr ws) {
+  int centralIndex = getProperty(Prop::CENTRAL_PIXEL);
+  auto const nHisto = static_cast<int>(ws->getNumberHistograms());
+  if (centralIndex >= nHisto) {
+    throw std::invalid_argument(
+        "Spectrum index " + std::to_string(centralIndex) +
+        " passed to property " + Prop::CENTRAL_PIXEL +
+        " is outside the range 0-" + std::to_string(nHisto - 1));
+  }
+  auto scaleFactor = ws->y(centralIndex).front();
+  g_log.information() << "Scale to central pixel, factor = " << scaleFactor << '\n';
+  for (int i = 0; i < nHisto; ++i) {
+      ws->mutableY(i)[0] /= scaleFactor;
+      ws->mutableE(i)[0] /= scaleFactor;
+  }
+  return ws;
+}
+
 /** Execute the algorithm.
  */
 void CreateFloodWorkspace::exec() {
@@ -212,7 +239,11 @@ void CreateFloodWorkspace::exec() {
   auto ws = getInputWorkspace();
   ws = integrate(ws);
   progress(0.9);
-  ws = removeBackground(ws);
+  if (shouldRemoveBackground()) {
+    ws = removeBackground(ws);
+  } else {
+    ws = scaleToCentralPixel(ws);
+  }
   progress(1.0);
   setProperty(Prop::OUTPUT_WORKSPACE, ws);
 }

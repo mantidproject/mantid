@@ -47,7 +47,9 @@ private:
   std::string getBackgroundFunction();
   API::MatrixWorkspace_sptr integrate(API::MatrixWorkspace_sptr ws);
   API::MatrixWorkspace_sptr transpose(API::MatrixWorkspace_sptr ws);
+  bool shouldRemoveBackground();
   API::MatrixWorkspace_sptr removeBackground(API::MatrixWorkspace_sptr ws);
+  API::MatrixWorkspace_sptr scaleToCentralPixel(API::MatrixWorkspace_sptr ws);
 };
 
 } // namespace Algorithms
