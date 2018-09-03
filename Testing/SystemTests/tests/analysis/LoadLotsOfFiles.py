@@ -114,6 +114,15 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Fe-alpha.cif',
                 'Sm2O3.cif',
                 'template_ENGINX_241391_236516_North_bank.prm',
+                'test_data_Iqxy.dat',
+                'BioSANS_test_data_Iqxy.dat',
+                'BioSANS_exp61_scan0004_0001_Iqxy.dat',
+                'test_data_Iq.xml',
+                'BioSANS_exp61_scan0004_0001_Iq.xml',
+                'BioSANS_test_data_Iq.xml',
+                'BioSANS_exp61_scan0004_0001_Iq.txt',
+                'test_data_Iq.txt',
+                'BioSANS_test_data_Iq.txt'
                 ]
 
 EXPECTED_EXT = '.expected'
