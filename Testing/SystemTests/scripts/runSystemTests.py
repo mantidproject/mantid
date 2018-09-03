@@ -96,6 +96,23 @@ if options.makeprop:
     mtdconf.config()
 
 #########################################################################
+# Generate list of tests
+#########################################################################
+
+tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir, quiet=options.quiet,
+                   testsInclude=options.testsInclude, testsExclude=options.testsExclude,
+                   exclude_in_pr_builds=options.exclude_in_pr_builds)
+
+test_counts, test_list = tmgr.generateMasterTestList()
+
+reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+for key, value in reverse_sorted_dict:
+    print("Test module "+key+" has %i tests:"%value)
+    for t in test_list[key]:
+        print(" - "+t._fqtestname)
+exit()
+
+#########################################################################
 # Run the tests
 #########################################################################
 

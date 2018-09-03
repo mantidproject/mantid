@@ -31,12 +31,25 @@ spline_rel_path = os.path.join("17_1", "VanSplined_98472_tt70_pearl_offset_16_4.
 working_dir = os.path.join(DIRS[0], working_folder_name)
 
 input_dir = os.path.join(working_dir, input_folder_name)
-output_dir = os.path.join(working_dir, output_folder_name)
+# output_dir = os.path.join(working_dir, output_folder_name)
+
 
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
+
+
+
+# output_dir = os.path.join(config['defaultsave.directory'], output_folder_name)
+# spline_rel_path = os.path.join(config['defaultsave.directory'], "VanSplined_Neil.nxs")
+# spline_path = spline_rel_path
+
+
+# print(calibration_map_path)
+# print(calibration_dir)
+# print(spline_path)
+# exit()
 
 class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
@@ -65,7 +78,7 @@ class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     def cleanup(self):
         try:
-            _try_delete(output_dir)
+            _try_delete(os.path.join(config['defaultsave.directory'], output_folder_name))
             _try_delete(spline_path)
         finally:
             mantid.mtd.clear()
@@ -124,7 +137,7 @@ class FocusTest(stresstesting.MantidStressTest):
     def cleanup(self):
         try:
             _try_delete(spline_path)
-            _try_delete(output_dir)
+            _try_delete(os.path.join(config['defaultsave.directory'], output_folder_name))
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -148,7 +161,7 @@ class FocusWithAbsorbCorrectionsTest(stresstesting.MantidStressTest):
     def cleanup(self):
         try:
             _try_delete(spline_path)
-            _try_delete(output_dir)
+            _try_delete(os.path.join(config['defaultsave.directory'], output_folder_name))
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -177,7 +190,7 @@ class CreateCalTest(stresstesting.MantidStressTest):
     def cleanup(self):
         try:
             _try_delete(spline_path)
-            _try_delete(output_dir)
+            _try_delete(os.path.join(config['defaultsave.directory'], output_folder_name))
         finally:
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
@@ -217,6 +230,8 @@ def run_focus(inst_object, tt_mode):
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
+    print("NVAYTET",original_splined_path,spline_path)
+
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
                              perform_attenuation=True, attenuation_file_path=attenuation_path, tt_mode=tt_mode)
 
@@ -236,8 +251,9 @@ def setup_inst_object(tt_mode, focus_mode):
     user_name = "Test"
 
     inst_obj = Pearl(user_name=user_name, calibration_mapping_file=calibration_map_path, long_mode=False,
-                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=tt_mode,
-                     focus_mode=focus_mode)
+                     calibration_directory=calibration_dir,
+                     output_directory=os.path.join(config['defaultsave.directory'], output_folder_name),
+                     tt_mode=tt_mode, focus_mode=focus_mode)
     return inst_obj
 
 

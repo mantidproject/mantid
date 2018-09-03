@@ -76,6 +76,7 @@ class MantidStressTest(unittest.TestCase):
         from mantid.kernel import config
         config['datasearch.directories'] += "/core-%i" % (core_id)
         config['defaultsave.directory'] = "%s/core-%i" % (saveDir,core_id)
+        sys.path.insert(0, config['defaultsave.directory'])
         # print("in here")
         # print(config['datasearch.directories'])
         # print(config['defaultsave.directory'])
@@ -774,7 +775,7 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
 
-    def __init__(self, test_loc, runner, output = [TextResultReporter()],
+    def __init__(self, test_loc=None, runner=None, output = [TextResultReporter()],
                  quiet=False, testsInclude=None, testsExclude=None,
                  exclude_in_pr_builds=None, showSkipped=False,
                  output_on_failure=False, clean=False,
@@ -790,21 +791,40 @@ class TestManager(object):
         self._test_count = test_count
         self._clean = clean
 
+        self._testDir = test_loc
+        self._quiet = quiet
+        self._testsInclude=testsInclude,
+        self._testsExclude=testsExclude,
+        self._exclude_in_pr_builds=exclude_in_pr_builds
+
+        self._passedTests = 0
+        self._skippedTests = 0
+        self._failedTests = 0
+        self._lastTestRun = 0
+        self._totalTests = 0
+
+        self._testsInclude = None
+        self._testsExclude = None
+
+
+    def generateMasterTestList(self):
+
         # If given option is a directory
-        if os.path.isdir(test_loc) == True:
-            test_dir = os.path.abspath(test_loc).replace('\\','/')
+        if os.path.isdir(self._testDir) == True:
+            test_dir = os.path.abspath(self._testDir).replace('\\','/')
             sys.path.append(test_dir)
-            runner.setTestDir(test_dir)
+            # runner.setTestDir(test_dir)
             full_test_list = self.loadTestsFromDir(test_dir)
         else:
-            if os.path.exists(test_loc) == False:
-                print('Cannot find file ' + test_loc + '.py. Please check the path.')
+            if os.path.exists(self._testDir) == False:
+                print('Cannot find file ' + self._testDir + '.py. Please check the path.')
                 exit(2)
-            test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
+            test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\','/')
             sys.path.append(test_dir)
-            runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
-
+            # runner.setTestDir(test_dir)
+            full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
+        if self._runner is not None:
+            self._runner.setTestDir(test_dir)
         
 
         self._testsInclude = testsInclude
@@ -826,6 +846,10 @@ class TestManager(object):
         for t in reduced_test_list:
             self._test_count[2] = max(self._test_count[2],len(t._fqtestname))
 
+        # # Simple even distribution of tests
+        # indices = range(process_number,len(reduced_test_list),ncores)
+        # self._tests = [reduced_test_list[i] for i in indices]
+
         # When using multiprocessing, we have to split the list of tests among
         # the processes into groups instead of test by test, to avoid issues
         # with data being cleaned up before another process has finished.
@@ -846,7 +870,7 @@ class TestManager(object):
         modcounts = dict()
         modtests = dict()
         # This is the length of characters to match at the start of test name
-        min_length_for_group_name = 40
+        min_length_for_group_name = 400
         for t in reduced_test_list:
             not_found = True
             for key in modcounts.keys():
@@ -860,49 +884,51 @@ class TestManager(object):
                 modcounts[key] = 1
                 modtests[key] = [t]
 
-        # Now we distribute the tests to each core
-        # This is done by sorting the modules by descending order of number of tests
-        # We then iterate through that list and give all the tests inside a given module
-        # to the core which currently has the lowest number of tests.
-        # The number of tests for that core is then incremented by the number of tests
-        # inside the module it has just received.
-        ntests_per_core = [0] * ncores
-        self._tests = []
-        reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
-        for key, value in reverse_sorted_dict:
-            if process_number == 0:
-                print(key,value)
-            for i in range(ncores):
-                if(ntests_per_core[i] == min(ntests_per_core)):
-                    ntests_per_core[i] += value
-                    if (i == process_number):
-                        self._tests.extend(modtests[key])
-                    break
+        # # Now we distribute the tests to each core
+        # # This is done by sorting the modules by descending order of number of tests
+        # # We then iterate through that list and give all the tests inside a given module
+        # # to the core which currently has the lowest number of tests.
+        # # The number of tests for that core is then incremented by the number of tests
+        # # inside the module it has just received.
+        # ntests_per_core = [0] * ncores
+        # self._tests = []
+        # reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
+        # for key, value in reverse_sorted_dict:
+        #     if process_number == 0:
+        #         print(key,value)
+        #     for i in range(ncores):
+        #         if(ntests_per_core[i] == min(ntests_per_core)):
+        #             ntests_per_core[i] += value
+        #             if (i == process_number):
+        #                 self._tests.extend(modtests[key])
+        #             break
 
-        if len(reduced_test_list) == 0:
-            print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
-            exit(2)
+        # if len(reduced_test_list) == 0:
+        #     print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
+        #     exit(2)
 
-        # if (not quiet) and (not clean):
-        if True:
-            hline = "========================================"
-            out_string = hline + "\n"
-            out_string += "Core %i will execute %i tests:\n" % (process_number,len(self._tests))
-            for t in self._tests:
-                out_string += ("%3i. " % t._id) + t._fqtestname + "\n"
-            out_string += hline
-            print(out_string)
-        sys.stdout.flush()
+        # # if (not quiet) and (not clean):
+        # if True:
+        #     hline = "========================================"
+        #     out_string = hline + "\n"
+        #     out_string += "Core %i will execute %i tests:\n" % (process_number,len(self._tests))
+        #     for t in self._tests:
+        #         out_string += ("%3i. " % t._id) + t._fqtestname + "\n"
+        #     out_string += hline
+        #     print(out_string)
+        # sys.stdout.flush()
 
-        self._passedTests = 0
-        self._skippedTests = 0
-        self._failedTests = 0
-        self._lastTestRun = 0
+        return modcounts, modtests
 
-    totalTests = property(lambda self: len(self._tests))
-    skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
-    passedTests = property(lambda self: self._passedTests)
-    failedTests = property(lambda self: self._failedTests)
+        # self._passedTests = 0
+        # self._skippedTests = 0
+        # self._failedTests = 0
+        # self._lastTestRun = 0
+
+    # totalTests = property(lambda self: len(self._tests))
+    # skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
+    # passedTests = property(lambda self: self._passedTests)
+    # failedTests = property(lambda self: self._failedTests)
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -1178,6 +1204,9 @@ def testProcess(testDir, saveDir, dataDir, options, res_array,
         mgr.executeTests()
     except KeyboardInterrupt:
         mgr.markSkipped("KeyboardInterrupt")
+
+    shutil.rmtree(save_dir_for_this_core, ignore_errors=True)
+    
 
     # Update the test results in the array shared accross cores
     res_array[process_number] = mgr.skippedTests

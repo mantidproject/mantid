@@ -118,6 +118,10 @@ class ReductionWrapper(object):
         if not FileName:
             FileName = 'reduce_vars.py'
 
+        # FileName = 'reduce_vars11.py'
+        run_dir = os.path.dirname(os.path.realpath(__file__))
+        print("NEIL11",run_dir)
+
         f = open(FileName,'w')
         f.write("standard_vars = {\n")
         str_wrapper = '         '
