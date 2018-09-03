@@ -375,7 +375,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   // Restart project recovery when the async part finishes
   clearAllCheckpoints();
   startProjectSaving();
-}
+} // namespace MantidQt
 
 /**
  * Compiles the project recovery script from a given checkpoint
@@ -472,8 +472,8 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
                                  Qt::BlockingQueuedConnection,
                                  Q_RETURN_ARG(bool, saveCompleted),
                                  Q_ARG(const std::string, projectDestFile))) {
-    throw std::runtime_error(
-        "Project Recovery: Failed to save project windows - Qt binding failed");
+    throw std::runtime_error("Project Recovery: Failed to save project "
+                             "windows - Qt binding failed");
   }
 
   if (!saveCompleted) {
