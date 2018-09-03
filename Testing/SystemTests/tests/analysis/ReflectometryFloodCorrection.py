@@ -10,7 +10,7 @@ class ReflectometryCreateFloodWorkspaceNoExclude(stresstesting.MantidStressTest)
     flood_ws_name = 'flood'
 
     def runTest(self):
-        CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=265, EndSpectrumIndex=500, OutputWorkspace=self.flood_ws_name)
+        CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=265, EndSpectrum=500, OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
         self.disableChecking.append('Instrument')
@@ -22,7 +22,7 @@ class ReflectometryCreateFloodWorkspaceExclude(stresstesting.MantidStressTest):
     flood_ws_name = 'flood'
 
     def runTest(self):
-        CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
+        CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=250, EndSpectrum=600,
                              ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
@@ -35,7 +35,7 @@ class ReflectometryCreateFloodWorkspaceQuadratic(stresstesting.MantidStressTest)
     flood_ws_name = 'flood'
 
     def runTest(self):
-        CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=10, Background='Quadratic',
+        CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=10, Background='Quadratic',
                              ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace=self.flood_ws_name)
 
     def validate(self):
@@ -156,7 +156,7 @@ class ReflectometryCreateFloodWorkspaceCentralPixelRange(stresstesting.MantidStr
             y = [1, 9, 8, 3, 14, 15]
             ws = CreateWorkspace(x, y, NSpec=6)
             SaveNexus(ws, input_file)
-            CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, StartSpectrumIndex=2, EndSpectrumIndex=4, OutputWorkspace=self.flood_ws_name)
+            CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, StartSpectrum=2, EndSpectrum=4, OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
             self.assertAlmostEqual(out.readY(0)[0], 1.0)
             self.assertAlmostEqual(out.readY(1)[0], 9.0/8)

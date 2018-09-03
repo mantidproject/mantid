@@ -19,8 +19,8 @@ namespace {
 namespace Prop {
 std::string const FILENAME("Filename");
 std::string const OUTPUT_WORKSPACE("OutputWorkspace");
-std::string const START_X("StartSpectrumIndex");
-std::string const END_X("EndSpectrumIndex");
+std::string const START_X("StartSpectrum");
+std::string const END_X("EndSpectrum");
 std::string const EXCLUDE("ExcludeSpectra");
 std::string const BACKGROUND("Background");
 std::string const CENTRAL_PIXEL("CentralPixelSpectrum");
@@ -84,7 +84,7 @@ void CreateFloodWorkspace::init() {
                   "The upper integration limit (an X value).");
 
   declareProperty(Prop::CENTRAL_PIXEL, EMPTY_INT(),
-                  "A spectrum index of the centre pixel.");
+                  "A spectrum number of the central pixel.");
 
   std::vector<std::string> allowedValues;
   for (auto i : funMap)

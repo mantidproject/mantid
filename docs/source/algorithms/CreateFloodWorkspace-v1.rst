@@ -10,7 +10,7 @@ Description
 -----------
 
 The algorithm takes a measured flood run (or runs) and converts it to a workspace that can be used for flood correction of reflectometry measurements.
-If `StartSpectrumIndex1 and `EndSpectrumIndex` are given then they specify a range of detectors for which the flood will be calculated, for all other
+If `StartSpectrum` and `EndSpectrum` are given then they specify a range of detectors for which the flood will be calculated, for all other
 detectors it will be assumed 1. For detectors given in the `ExcludeSpectra` property the flood value will be set to a very large number that will have an effect 
 of excluding these detectors from analysis.
 
