@@ -105,7 +105,7 @@ Output:
 
 .. testcleanup:: ExIndirectILLReductionQENS
 
-   mtd.clear()
+   DeleteWorkspace(ws)
 
 .. categories::
 
