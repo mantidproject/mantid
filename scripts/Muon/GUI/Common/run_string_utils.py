@@ -74,6 +74,8 @@ def run_string_to_list(run_string):
     if not validate_run_string(run_string):
         raise IndexError(run_string + " is not a valid run string")
     run_list = []
+    if run_string == "":
+        return run_list
     run_string_list = run_string.split(delimiter)
     for runs in run_string_list:
         split_runs = runs.split(range_separator)
