@@ -5,7 +5,7 @@ import mantid.simpleapi as mantid
 from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 
 
-class LoadModel(object):
+class LoadModel(lutils.LModel):
     def __init__(self):
         super(LoadModel, self).__init__()
 

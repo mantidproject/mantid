@@ -56,19 +56,37 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.setWindowTitle("Elemental Analysis")
 
         self.element_widgets = {}
+        self.element_data = {}
         self._generate_element_widgets()
+        self._generate_element_data()
+
+    def _generate_element_data(self):
+        for element in self.ptable.peak_data:
+            if element in ["Gammas", "Electrons"]:
+                continue
+            try:
+                self.element_data[element] = self.ptable.peak_data[element]["Primary"]
+                self.element_data[element].update(
+                    self.ptable.peak_data[element]["Secondary"])
+            except KeyError:
+                continue
+
+    def _update_peak_data(self, element, data):
+        self.element_data[element] = data
 
     def _generate_element_widgets(self):
         self.element_widgets = {}
         for element in self.ptable.peak_data:
-            if element not in ["Gammas", "Electrons"]:
-                data = self.ptable.element_data(element)
-                widget = PeakSelectorPresenter(PeakSelectorView(data, element))
-                self.element_widgets[element] = widget
+            if element in ["Gammas", "Electrons"]:
+                continue
+            data = self.ptable.element_data(element)
+            widget = PeakSelectorPresenter(PeakSelectorView(data, element))
+            widget.on_okay_pressed(self._update_peak_data)
+            self.element_widgets[element] = widget
 
     def table_left_clicked(self, item):
         print("Element Left Clicked: {}".format(
-            self.ptable.element_data(item.symbol)))
+            self.element_data[item.symbol]))
 
     def table_right_clicked(self, item):
         self.element_widgets[item.symbol].view.show()
@@ -82,6 +100,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         if filename:
             self.ptable.set_peak_datafile(filename)
         self._generate_element_widgets()
+        self._generate_element_data()
 
 
 def qapp():
