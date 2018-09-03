@@ -3,7 +3,6 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <boost/numeric/conversion/cast.hpp>
-#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
