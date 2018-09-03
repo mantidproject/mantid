@@ -6,10 +6,9 @@ if sys.version_info.major == 3:
 else:
     import mock
 
-from PyQt4.QtGui import QApplication
-
 from Muon.GUI.Common.thread_model import ThreadModel
 from Muon.GUI.Common import mock_widget
+from PyQt4.QtGui import QApplication
 
 
 class testModelWithoutExecute:
@@ -68,6 +67,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
             if thread:
                 self._thread = thread
                 self._thread.finished.connect(self.finished)
+                self._thread.start()
                 if self._thread.isRunning():
                     self.QT_APP.exec_()
 
@@ -101,7 +101,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
     def test_that_execute_is_called_in_model_when_thread_is_started(self):
         self.model.execute = mock.Mock()
 
-        self.thread.start()
         self.Runner(self.thread)
 
         self.assertEqual(self.model.execute.call_count, 1)
@@ -110,7 +109,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock()
         self.model.output = mock.Mock()
 
-        self.thread.start()
         self.Runner(self.thread)
 
         self.assertEqual(self.model.output.call_count, 1)
@@ -121,7 +119,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
-        self.thread.start()
         self.Runner(self.thread)
 
         self.assertEqual(start_slot.call_count, 1)
@@ -152,10 +149,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
-        self.thread.start()
         self.Runner(self.thread)
-
-        self.thread.start()
         self.Runner(self.thread)
 
         self.assertEqual(start_slot.call_count, 1)
@@ -171,7 +165,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.model.execute = mock.Mock(side_effect=raise_error)
 
-        self.thread.start()
         self.Runner(self.thread)
 
         self.assertEqual(mock_box.call_count, 1)

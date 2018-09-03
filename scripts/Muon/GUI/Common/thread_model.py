@@ -20,8 +20,6 @@ class ThreadModel(QThread):
         self.end_slot = None
 
         self.check_model_has_correct_attributes()
-        self.exceptionSignal.connect(message_box.warning)
-        self.finished.connect(self.disconnect_exception_slot)
 
     def check_model_has_correct_attributes(self):
         if hasattr(self.model, "execute") and hasattr(self.model, "output"):
@@ -29,13 +27,20 @@ class ThreadModel(QThread):
         raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
                              " execute() and output() methods")
 
+    def connect_exception_slot(self):
+        self.exceptionSignal.connect(message_box.warning)
+
     def disconnect_exception_slot(self):
         self.exceptionSignal.disconnect(message_box.warning)
 
     def __del__(self):
-        self.wait()
+        try:
+            self.wait()
+        except RuntimeError:
+            pass
 
     def run(self):
+        self.connect_exception_slot()
         self.user_cancel = False
         try:
             self.model.execute()
@@ -48,6 +53,8 @@ class ThreadModel(QThread):
             else:
                 self.sendSignal(error)
             pass
+        finally:
+            self.disconnect_exception_slot()
 
     def sendSignal(self, error):
         self.exceptionSignal.emit(error)
@@ -77,9 +84,11 @@ class ThreadModel(QThread):
         self.start_slot, self.end_slot = startSlot, endSlot
         self.started.connect(self.start_slot)
         self.finished.connect(self.end_slot)
-
         self.finished.connect(self.threadWrapperTearDown)
 
     def threadWrapperTearDown(self):
         self.started.disconnect(self.start_slot)
         self.finished.disconnect(self.end_slot)
+        self.finished.disconnect(self.threadWrapperTearDown)
+        self.start_slot = None
+        self.end_slot = None
