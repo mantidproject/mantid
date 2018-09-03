@@ -206,8 +206,8 @@ private:
   std::vector<std::unique_ptr<PeakContainer>>
   getAllPeaks(const HistogramData::HistogramX &x,
               const HistogramData::HistogramY &y, Bound low, Bound high,
-              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy *
-                  backgroundStrategy) const;
+              const Mantid::Crystal::FindSXPeaksHelper::BackgroundStrategy
+                  *backgroundStrategy) const;
   PeakList
   convertToSXPeaks(const HistogramData::HistogramX &x,
                    const HistogramData::HistogramY &y,

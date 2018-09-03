@@ -56,6 +56,8 @@ public:
 private:
   void init() override;
   void exec() override;
+  // Set default names for output workspaces
+  void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
   std::vector<std::string>
   getDetectorNames(const std::string &instructions,
@@ -76,6 +78,10 @@ private:
   void populateAlgorithmicCorrectionProperties(
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument);
+  /// Get a polarization efficiencies workspace.
+  std::tuple<API::MatrixWorkspace_sptr, std::string, std::string>
+  getPolarizationEfficiencies();
+  void applyPolarizationCorrection(std::string const &outputIvsLam);
 };
 
 } // namespace Algorithms

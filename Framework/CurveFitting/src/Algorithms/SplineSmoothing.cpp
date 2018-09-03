@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
@@ -209,9 +209,9 @@ SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
 }
 
 /**
-* Converts the output workspace back to histogram data if it was
-* converted to point data previously
-*/
+ * Converts the output workspace back to histogram data if it was
+ * converted to point data previously
+ */
 void SplineSmoothing::convertToHistogram() {
   auto alg = createChildAlgorithm("ConvertToHistogram");
   alg->setProperty("InputWorkspace", m_outputWorkspace);

@@ -203,9 +203,9 @@ void Folder::removeWindow(MdiSubWindow *w) {
 }
 
 /**
-  * Returns true if this folder contains a sub-window.
-  * @param w :: A sub-window to check.
-  */
+ * Returns true if this folder contains a sub-window.
+ * @param w :: A sub-window to check.
+ */
 bool Folder::hasWindow(MdiSubWindow *w) const { return lstWindows.contains(w); }
 
 QString Folder::sizeToString() {

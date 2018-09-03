@@ -6,11 +6,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include <QStringList>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -63,6 +63,8 @@ public:
   virtual void deleteRow() = 0;
   /// Delete a group
   virtual void deleteGroup() = 0;
+  /// Delete all rows and groups
+  virtual void deleteAll() = 0;
   /// Group rows
   virtual void groupRows() = 0;
   /// Expand selection
@@ -83,6 +85,8 @@ public:
 
   /// Return selected data
   virtual TreeData selectedData(bool prompt = false) = 0;
+  /// Return all data
+  virtual TreeData allData(bool prompt = false) = 0;
   /// Transfer new data to model
   virtual void
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
@@ -97,6 +101,13 @@ public:
   /// Set the 'processed' status of a data item
   virtual void setProcessed(bool processed, int position) = 0;
   virtual void setProcessed(bool processed, int position, int parent) = 0;
+  /// Check whether reduction failed for a data item
+  virtual bool reductionFailed(int position) const = 0;
+  virtual bool reductionFailed(int position, int parent) const = 0;
+  /// Set the error message for a data item
+  virtual void setError(const std::string &error, int position) = 0;
+  virtual void setError(const std::string &error, int position, int parent) = 0;
+  /// Reset the processed/error state of all items
   virtual void invalidateAllProcessed() = 0;
   /// Access cells
   virtual void setCell(int row, int column, int parentRow, int parentColumn,
@@ -122,7 +133,7 @@ protected:
     commands.push_back(std::move(command));
   }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H */

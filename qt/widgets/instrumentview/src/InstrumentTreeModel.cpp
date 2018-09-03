@@ -3,15 +3,11 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidKernel/Exception.h"
-#include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-using Mantid::Geometry::IComponent;
-using Mantid::Geometry::ICompAssembly;
-using Mantid::Geometry::IObjComponent;
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidKernel/Exception.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,16 +24,16 @@ InstrumentTreeModel::InstrumentTreeModel(const InstrumentWidget *instrWidget,
 }
 
 /**
-* Destructor for instrument display tree
-*/
+ * Destructor for instrument display tree
+ */
 InstrumentTreeModel::~InstrumentTreeModel() {}
 
 /**
-* Column count for the instrument tree.
-*  Returns a count of 1 for the Component Assembly = I think this means "I have
-* child nodes"
-*  Returns 0 for the ObjComponent = I'm an end point.
-*/
+ * Column count for the instrument tree.
+ *  Returns a count of 1 for the Component Assembly = I think this means "I have
+ * child nodes"
+ *  Returns 0 for the ObjComponent = I'm an end point.
+ */
 int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
   if (!parent.isValid())
     return 1;
@@ -52,9 +48,9 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const {
 }
 
 /**
-* Returns the string corresponding to the component name. the root of tree
-* string will be instrument name
-*/
+ * Returns the string corresponding to the component name. the root of tree
+ * string will be instrument name
+ */
 QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole)
     return QVariant();
@@ -70,17 +66,17 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const {
 }
 
 /**
-* Flags whether node in the tree is selectable or not. In instrument tree all
-* components are selectable.
-*/
+ * Flags whether node in the tree is selectable or not. In instrument tree all
+ * components are selectable.
+ */
 Qt::ItemFlags InstrumentTreeModel::flags(const QModelIndex &index) const {
   (void)index; // avoid compiler warning
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 /**
-* Instrument header. returns nothing. no header for tree
-*/
+ * Instrument header. returns nothing. no header for tree
+ */
 QVariant InstrumentTreeModel::headerData(int section,
                                          Qt::Orientation orientation,
                                          int role) const {
@@ -91,8 +87,8 @@ QVariant InstrumentTreeModel::headerData(int section,
 }
 
 /**
-* Returns the ModelIndex at a give row and column and the parent.
-*/
+ * Returns the ModelIndex at a give row and column and the parent.
+ */
 QModelIndex InstrumentTreeModel::index(int row, int column,
                                        const QModelIndex &parent) const {
   const auto &componentInfo =
@@ -112,8 +108,8 @@ QModelIndex InstrumentTreeModel::index(int row, int column,
 }
 
 /**
-* Returns the parent model index.
-*/
+ * Returns the parent model index.
+ */
 QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
   if (!index.isValid()) // the index corresponds to root so there is no parent
                         // for root return empty.
@@ -144,9 +140,9 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const {
 }
 
 /**
-* Return the row count. the number of elements in the component. for
-* ObjComponent row count will be 0.
-*/
+ * Return the row count. the number of elements in the component. for
+ * ObjComponent row count will be 0.
+ */
 int InstrumentTreeModel::rowCount(const QModelIndex &parent) const {
   if (!parent.isValid()) // Root node row count is one.
     return 1;
@@ -165,5 +161,5 @@ size_t InstrumentTreeModel::extractIndex(const QModelIndex &index) {
   auto indexPtr = static_cast<size_t *>(index.internalPointer());
   return *indexPtr;
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

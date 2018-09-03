@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflEventPresenter.h"
+#include "IReflEventTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,7 +41,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflEventPresenter
     : public IReflEventPresenter {
 public:
   /// Constructor
-  ReflEventPresenter(IReflEventView *view);
+  ReflEventPresenter(IReflEventView *view, int group);
   /// Destructor
   ~ReflEventPresenter() override;
 
@@ -52,14 +53,19 @@ public:
   void onReductionPaused() override;
   void onReductionResumed() override;
   void notifySliceTypeChanged(SliceType newSliceType) override;
+  void notifySettingsChanged() override;
+
+  void acceptTabPresenter(IReflEventTabPresenter *tabPresenter) override;
 
 private:
   std::string logFilterAndSliceValues(std::string const &slicingValues,
                                       std::string const &logFilter) const;
   /// The view we are managing
   IReflEventView *m_view;
+  IReflEventTabPresenter *m_tabPresenter;
   SliceType m_sliceType;
+  int m_group;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

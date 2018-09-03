@@ -1,9 +1,9 @@
 #ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 #define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
 
-#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
-#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
+#include "MantidQtWidgets/SliceViewer/PeakRepresentation.h"
 namespace MantidQt {
 namespace SliceViewer {
 
@@ -47,6 +47,12 @@ public:
   /// Transform the coordinates.
   void
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  void
+  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                            NonOrthogonalAxis &info) override {
+    (void)info;
+    movePosition(peakTransform);
+  }
   /// Get the bounding box.
   PeakBoundingBox getBoundingBox() const override;
   /// Set the size of the cross peak in the viewing plane
@@ -123,6 +129,6 @@ private:
   std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
       m_calculator;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

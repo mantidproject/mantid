@@ -1,15 +1,15 @@
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Unit.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -319,5 +319,5 @@ void ConvertToDetectorFaceMD::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

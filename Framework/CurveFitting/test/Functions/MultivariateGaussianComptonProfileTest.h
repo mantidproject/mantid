@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_
 #define MANTID_CURVEFITTING_MULTIVARIATEGAUSSIANCOMPTONPROFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h"
+#include <cxxtest/TestSuite.h>
 
 #include "ComptonProfileTestHelpers.h"
 

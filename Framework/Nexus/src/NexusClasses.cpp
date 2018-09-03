@@ -280,9 +280,9 @@ int NXClass::getInt(const std::string &name) const {
   return *number();
 }
 /** Returns whether an individual group (or group) is present
-*  @param query :: the class name to search for
-*  @return true if the name is found and false otherwise
-*/
+ *  @param query :: the class name to search for
+ *  @return true if the name is found and false otherwise
+ */
 bool NXClass::containsGroup(const std::string &query) const {
   std::vector<NXClassInfo>::const_iterator end = m_groups->end();
   for (std::vector<NXClassInfo>::const_iterator i = m_groups->begin(); i != end;
@@ -295,10 +295,10 @@ bool NXClass::containsGroup(const std::string &query) const {
 }
 
 /**
-  *  Returns NXInfo for a dataset
-  *  @param name :: The name of the dataset
-  *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
-  */
+ *  Returns NXInfo for a dataset
+ *  @param name :: The name of the dataset
+ *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
+ */
 NXInfo NXClass::getDataSetInfo(const std::string &name) const {
   NXInfo info;
   for (std::vector<NXInfo>::const_iterator it = datasets().begin();
@@ -311,8 +311,8 @@ NXInfo NXClass::getDataSetInfo(const std::string &name) const {
 }
 
 /**
-  * Returns whether an individual dataset is present.
-  */
+ * Returns whether an individual dataset is present.
+ */
 bool NXClass::containsDataSet(const std::string &query) const {
   return getDataSetInfo(query).stat != NX_ERROR;
 }
@@ -656,8 +656,8 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time,
     times.load();
     std::string units = times.attributes("units");
     if (units == "minutes") {
-      std::transform(times(), times() + times.dim0(), times(),
-                     std::bind2nd(std::multiplies<float>(), 60));
+      std::for_each(times(), times() + times.dim0(),
+                    [](float &val) { val *= 60.0f; });
     } else if (!units.empty() && units.substr(0, 6) != "second") {
       return nullptr;
     }
@@ -667,5 +667,5 @@ Kernel::Property *NXLog::createTimeSeries(const std::string &start_time,
   return nullptr;
 }
 
-} // namespace DataHandling
+} // namespace NeXus
 } // namespace Mantid

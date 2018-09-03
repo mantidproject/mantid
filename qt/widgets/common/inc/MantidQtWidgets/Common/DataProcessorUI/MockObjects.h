@@ -29,7 +29,7 @@ const int ScaleCol = 7;
 const int OptionsCol = 8;
 const int HiddenOptionsCol = 9;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
@@ -91,7 +91,8 @@ public:
 
   // Calls we don't care about
   void showTable(boost::shared_ptr<
-      MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>) override{};
+                 MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>)
+      override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};
@@ -107,7 +108,7 @@ public:
   ~MockMainPresenter() override {}
 
   // Notify
-  MOCK_METHOD1(notifyADSChanged, void(const QSet<QString> &));
+  MOCK_METHOD2(notifyADSChanged, void(const QSet<QString> &, int));
 
   // Prompt methods
   MOCK_METHOD3(askUserString,
@@ -118,20 +119,21 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, QString(const QString &));
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptions, ColumnOptionsQMap());
-  MOCK_CONST_METHOD0(getProcessingOptions, OptionsQMap());
-  MOCK_CONST_METHOD0(getPostprocessingOptionsAsString, QString());
-  MOCK_CONST_METHOD0(getTimeSlicingOptions, QString());
+  MOCK_CONST_METHOD1(getPreprocessingOptions, ColumnOptionsQMap(int));
+  MOCK_CONST_METHOD1(getProcessingOptions, OptionsQMap(int));
+  MOCK_CONST_METHOD1(getPostprocessingOptionsAsString, QString(int));
+  MOCK_CONST_METHOD1(getTimeSlicingOptions, QString(int));
 
   // Event handling
-  MOCK_CONST_METHOD0(getTimeSlicingValues, QString());
-  MOCK_CONST_METHOD0(getTimeSlicingType, QString());
+  MOCK_CONST_METHOD1(getTimeSlicingValues, QString(int));
+  MOCK_CONST_METHOD1(getTimeSlicingType, QString(int));
 
   // Data reduction paused/resumed handling
-  MOCK_CONST_METHOD0(pause, void());
-  MOCK_CONST_METHOD0(resume, void());
+  MOCK_METHOD1(pause, void(int));
+  MOCK_CONST_METHOD1(resume, void(int));
 
   // Calls we don't care about
+  MOCK_METHOD1(confirmReductionCompleted, void(int));
   MOCK_METHOD1(confirmReductionPaused, void(int));
   MOCK_METHOD1(confirmReductionResumed, void(int));
 };
@@ -154,8 +156,10 @@ public:
                      void(const QString &prompt, const QString &title));
   MOCK_METHOD0(publishCommandsMocked, void());
   MOCK_METHOD0(skipProcessing, void());
+  MOCK_METHOD1(setPromptUser, void(const bool));
   MOCK_METHOD1(setForcedReProcessing, void(bool));
   MOCK_METHOD0(settingsChanged, void());
+  MOCK_METHOD1(transfer, void(const std::vector<std::map<QString, QString>> &));
 
 private:
   // Calls we don't care about
@@ -173,7 +177,6 @@ private:
   std::set<QString> getTableList() const { return std::set<QString>(); };
   // Calls we don't care about
   void setOptions(const std::map<QString, QVariant> &) override {}
-  void transfer(const std::vector<std::map<QString, QString>> &) override {}
   void setInstrumentList(const QStringList &, const QString &) override {}
   // void accept(WorkspaceReceiver *) {};
   void acceptViews(DataProcessorView *, ProgressableView *) override{};
@@ -192,6 +195,7 @@ public:
   MockTreeManager(){};
   ~MockTreeManager() override{};
   MOCK_METHOD1(selectedData, TreeData(bool));
+  MOCK_METHOD1(allData, TreeData(bool));
   // Calls we don't care about
   std::vector<std::unique_ptr<Command>> publishCommands() override {
     return std::vector<std::unique_ptr<Command>>();
@@ -201,6 +205,7 @@ public:
   void appendGroup() override{};
   void deleteRow() override{};
   void deleteGroup() override{};
+  void deleteAll() override{};
   void groupRows() override{};
   std::set<int> expandSelection() override { return std::set<int>(); };
   void clearSelected() override{};
@@ -217,6 +222,10 @@ public:
   bool isProcessed(int, int) const override { return false; };
   void setProcessed(bool, int) override{};
   void setProcessed(bool, int, int) override{};
+  bool reductionFailed(int) const override { return false; };
+  bool reductionFailed(int, int) const override { return false; };
+  void setError(const std::string &, int) override{};
+  void setError(const std::string &, int, int) override{};
   void invalidateAllProcessed() override{};
   void setCell(int, int, int, int, const std::string &) override{};
   std::string getCell(int, int, int, int) const override {
@@ -234,6 +243,6 @@ public:
   };
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H*/

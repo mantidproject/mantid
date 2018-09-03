@@ -42,6 +42,11 @@ class FigureTypeTest(TestCase):
         ax.plot([1])
         self.assertEqual(FigureType.Line, figure_type(ax.figure))
 
+    def test_error_plot_returns_error(self):
+        ax = plt.subplot(111)
+        ax.errorbar([1], [1], yerr=[0.01])
+        self.assertEqual(FigureType.Errorbar, figure_type(ax.figure))
+
     def test_image_plot_returns_image(self):
         ax = plt.subplot(111)
         ax.imshow([[1],[1]])

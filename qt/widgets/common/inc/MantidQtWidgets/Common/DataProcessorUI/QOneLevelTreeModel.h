@@ -60,7 +60,7 @@ public:
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
   // Get row metadata
-  RowData_sptr rowData(const QModelIndex &index) override;
+  RowData_sptr rowData(const QModelIndex &index) const override;
   // Row count
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   // Get the index for a given column, row and parent
@@ -69,6 +69,10 @@ public:
   // Get the 'processed' status of a row
   bool isProcessed(int position,
                    const QModelIndex &parent = QModelIndex()) const override;
+  // Check wheter reduction failed for a row
+  bool
+  reductionFailed(int position,
+                  const QModelIndex &parent = QModelIndex()) const override;
   // Get the underlying data structure
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
@@ -86,9 +90,14 @@ public:
   // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
+  // Remove all rows from the model
+  bool removeAll();
   // Set the 'processed' status of a row
   bool setProcessed(bool processed, int position,
                     const QModelIndex &parent = QModelIndex()) override;
+  // Set the error message for a row
+  bool setError(const std::string &error, int position,
+                const QModelIndex &parent = QModelIndex()) override;
   // Transfer rows into the table
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
 private slots:
@@ -111,6 +120,6 @@ using QOneLevelTreeModel_sptr = boost::shared_ptr<QOneLevelTreeModel>;
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_ */

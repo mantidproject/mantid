@@ -1,11 +1,13 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
 
-#include "MantidKernel/V2D.h"
+#include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidKernel/V2D.h"
+#include "MantidQtWidgets/SliceViewer/NonOrthogonalAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
-#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include <QPointF>
 #include <boost/shared_ptr.hpp>
 
@@ -52,6 +54,10 @@ public:
   movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) = 0;
   /// Show the background radius
   virtual void showBackgroundRadius(const bool) {}
+  virtual void
+  movePositionNonOrthogonal(Mantid::Geometry::PeakTransform_sptr peakTransform,
+                            NonOrthogonalAxis &info) = 0;
+  /// Show the background radius
   /// Changes the size of the overlay to be the requested fraction of the
   /// current view width.
   virtual void changeOccupancyInView(const double fraction) = 0;
@@ -93,7 +99,7 @@ public:
 
 using PeakOverlayView_const_sptr = boost::shared_ptr<const PeakOverlayView>;
 using PeakOverlayView_sptr = boost::shared_ptr<PeakOverlayView>;
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_ */

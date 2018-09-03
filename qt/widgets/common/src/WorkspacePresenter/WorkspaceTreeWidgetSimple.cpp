@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
+#include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include <MantidQtWidgets/Common/MantidTreeWidget.h>
 #include <MantidQtWidgets/Common/MantidTreeWidgetItem.h>
-#include "MantidQtWidgets/Common/MantidTreeModel.h"
 
 #include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/FileProperty.h>
@@ -58,17 +58,26 @@ void WorkspaceTreeWidgetSimple::popupContextMenu() {
     menu = new QMenu(this);
     menu->setObjectName("WorkspaceContextMenu");
 
-    // plot submenu first
-    QMenu *plotSubMenu(new QMenu("Plot", menu));
-    plotSubMenu->addAction(m_plotSpectrum);
-    plotSubMenu->addAction(m_overplotSpectrum);
-    plotSubMenu->addAction(m_plotSpectrumWithErrs);
-    plotSubMenu->addAction(m_overplotSpectrumWithErrs);
-    plotSubMenu->addSeparator();
-    plotSubMenu->addAction(m_plotColorfill);
-    menu->addMenu(plotSubMenu);
-
-    menu->addSeparator();
+    // plot submenu first for MatrixWorkspace.
+    // Check is defensive just in case the workspace has disappeared
+    Workspace_sptr workspace;
+    try {
+      workspace = AnalysisDataService::Instance().retrieve(
+          selectedWsName.toStdString());
+    } catch (Exception::NotFoundError &) {
+      return;
+    }
+    if (boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
+      QMenu *plotSubMenu(new QMenu("Plot", menu));
+      plotSubMenu->addAction(m_plotSpectrum);
+      plotSubMenu->addAction(m_overplotSpectrum);
+      plotSubMenu->addAction(m_plotSpectrumWithErrs);
+      plotSubMenu->addAction(m_overplotSpectrumWithErrs);
+      plotSubMenu->addSeparator();
+      plotSubMenu->addAction(m_plotColorfill);
+      menu->addMenu(plotSubMenu);
+      menu->addSeparator();
+    }
     menu->addAction(m_rename);
     menu->addAction(m_saveNexus);
 

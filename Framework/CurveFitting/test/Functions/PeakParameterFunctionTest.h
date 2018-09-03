@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/PeakParameterFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/Functions/PeakParameterFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 
 using namespace Mantid::CurveFitting;

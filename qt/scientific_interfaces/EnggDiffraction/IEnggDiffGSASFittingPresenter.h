@@ -34,8 +34,8 @@ public:
 
   void notifyRefinementsComplete(
       Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-          refinementResultSets) override = 0;
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets) override = 0;
 
   void notifyRefinementSuccessful(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,

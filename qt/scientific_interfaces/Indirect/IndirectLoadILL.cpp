@@ -1,9 +1,9 @@
+#include "IndirectLoadILL.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "IndirectLoadILL.h"
 
 #include <QFileInfo>
 #include <QStringList>
@@ -107,8 +107,9 @@ void IndirectLoadILL::run() {
     pyInput += "from IndirectNeutron import " + pyFunc + "\n";
     pyInput += pyFunc + "('" + instrument + "','" + filename + "','" +
                analyser + "','" + reflection + "'," + rejectZero + "," +
-               useMap + ",'" + mapPath + "'"
-                                         ",'" +
+               useMap + ",'" + mapPath +
+               "'"
+               ",'" +
                plot + "'," + save + ")";
   }
   runPythonScript(pyInput);

@@ -1,8 +1,8 @@
 #ifndef MDHW_IN_MEMORY_LOADING_PRESENTER_TEST_H
 #define MDHW_IN_MEMORY_LOADING_PRESENTER_TEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -27,12 +27,12 @@ private:
   // Helper type. Mocks a Workspace Provider.
   class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider {
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(canProvideWorkspace, bool(std::string));
     MOCK_CONST_METHOD1(fetchWorkspace,
                        Mantid::API::Workspace_sptr(std::string));
     MOCK_CONST_METHOD1(disposeWorkspace, void(std::string));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // Helper method. Generates and returns a valid IMDHistoWorkspace

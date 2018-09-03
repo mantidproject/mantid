@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCONSTCOLUMNITERATOR_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCONSTCOLUMNITERATOR_H
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Column.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
 #include <vector>
 namespace MantidQt {
@@ -48,7 +48,7 @@ public:
   using difference_type = typename QStringIterator::difference_type;
   ConstColumnIterator(QStringIterator names, QStringIterator descriptions,
                       QStringIterator algorithmProperties, BoolIterator isShown,
-                      QStringIterator prefixes);
+                      QStringIterator prefixes, BoolIterator isKey);
 
   ConstColumnIterator &operator++();
   ConstColumnIterator operator++(int);
@@ -64,21 +64,18 @@ private:
   QStringIterator m_algorithmProperties;
   BoolIterator m_isShown;
   QStringIterator m_prefixes;
+  BoolIterator m_isKey;
 };
 
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
-operator+(const ConstColumnIterator &lhs,
-          ConstColumnIterator::difference_type n);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
-operator+(ConstColumnIterator::difference_type n,
-          const ConstColumnIterator &rhs);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
-operator-(const ConstColumnIterator &lhs,
-          ConstColumnIterator::difference_type n);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
-operator-(ConstColumnIterator::difference_type n,
-          const ConstColumnIterator &rhs);
-}
-}
-}
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(
+    const ConstColumnIterator &lhs, ConstColumnIterator::difference_type n);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(
+    ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(
+    const ConstColumnIterator &lhs, ConstColumnIterator::difference_type n);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(
+    ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs);
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORCONSTCOLUMNITERATOR_H

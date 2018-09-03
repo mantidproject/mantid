@@ -2,8 +2,8 @@
 #define MANTID_HISTOGRAMDATA_STANDARDDEVIATIONVECTOROF_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
 #include "MantidHistogramData/Iterable.h"
+#include "MantidHistogramData/VectorOf.h"
 
 #include <cmath>
 
@@ -63,17 +63,18 @@ public:
   StandardDeviationVectorOf(const StandardDeviationVectorOf &) = default;
   StandardDeviationVectorOf(StandardDeviationVectorOf &&) = default;
   StandardDeviationVectorOf &
-  operator=(const StandardDeviationVectorOf &)& = default;
-  StandardDeviationVectorOf &operator=(StandardDeviationVectorOf &&)& = default;
+  operator=(const StandardDeviationVectorOf &) & = default;
+  StandardDeviationVectorOf &
+  operator=(StandardDeviationVectorOf &&) & = default;
 
   /// Copy construct from variances, taking the square-root of each variance.
   StandardDeviationVectorOf(const Variances &variances);
   /// Move construct from variances, taking the square-root of each variance.
   StandardDeviationVectorOf(Variances &&variances);
   /// Copy assignment from variances, taking the square-root of each variance.
-  StandardDeviationVectorOf &operator=(const Variances &variances) & ;
+  StandardDeviationVectorOf &operator=(const Variances &variances) &;
   /// Move assignment from variances, taking the square-root of each variance.
-  StandardDeviationVectorOf &operator=(Variances &&variances) & ;
+  StandardDeviationVectorOf &operator=(Variances &&variances) &;
 
 protected:
   // This is used as base class only, cannot delete polymorphically, so
@@ -110,8 +111,8 @@ StandardDeviationVectorOf<T, CowType, Variances>::StandardDeviationVectorOf(
 
 template <class T, class CowType, class Variances>
 StandardDeviationVectorOf<T, CowType, Variances> &
-    StandardDeviationVectorOf<T, CowType, Variances>::
-    operator=(const Variances &variances) & {
+StandardDeviationVectorOf<T, CowType, Variances>::
+operator=(const Variances &variances) & {
   StandardDeviationVectorOf<T, CowType, Variances> tmp(variances);
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());
@@ -120,8 +121,8 @@ StandardDeviationVectorOf<T, CowType, Variances> &
 
 template <class T, class CowType, class Variances>
 StandardDeviationVectorOf<T, CowType, Variances> &
-    StandardDeviationVectorOf<T, CowType, Variances>::
-    operator=(Variances &&variances) & {
+StandardDeviationVectorOf<T, CowType, Variances>::
+operator=(Variances &&variances) & {
   StandardDeviationVectorOf<T, CowType, Variances> tmp(std::move(variances));
   auto &derived = static_cast<T &>(*this);
   derived.operator=(tmp.cowData());

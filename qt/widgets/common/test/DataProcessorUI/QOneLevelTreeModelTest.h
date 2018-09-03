@@ -14,6 +14,12 @@ using namespace Mantid::API;
 class QOneLevelTreeModelTest : public CxxTest::TestSuite {
 
 public:
+  // This means the constructor isn't called when running other tests
+  static QOneLevelTreeModelTest *createSuite() {
+    return new QOneLevelTreeModelTest();
+  }
+  static void destroySuite(QOneLevelTreeModelTest *suite) { delete suite; }
+
   // Create a white list
   QOneLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");
@@ -236,7 +242,7 @@ public:
     TS_ASSERT_EQUALS(model.data(model.index(0, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
-                     "#00b300");
+                     Colour::SUCCESS);
     TS_ASSERT_EQUALS(model.data(model.index(1, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
@@ -244,7 +250,7 @@ public:
     TS_ASSERT_EQUALS(model.data(model.index(2, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),
-                     "#00b300");
+                     Colour::SUCCESS);
     TS_ASSERT_EQUALS(model.data(model.index(3, 0), Qt::BackgroundRole)
                          .toString()
                          .toStdString(),

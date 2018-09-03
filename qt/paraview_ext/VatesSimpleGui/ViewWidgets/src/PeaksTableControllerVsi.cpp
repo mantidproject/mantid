@@ -1,24 +1,24 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 
-#include "MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
-#include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidKernel/Logger.h"
-#include "MantidVatesAPI/ViewFrustum.h"
-#include "MantidVatesAPI/PeaksPresenterVsi.h"
-#include "MantidVatesAPI/NullPeaksPresenterVsi.h"
-#include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
-#include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
-#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/V3D.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/SliceViewer/PeakPalette.h"
+#include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
+#include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
+#include "MantidVatesAPI/NullPeaksPresenterVsi.h"
+#include "MantidVatesAPI/PeaksPresenterVsi.h"
+#include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -27,27 +27,27 @@
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqObjectBuilder.h>
-#include <pqPipelineSource.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
 #include <pqRenderView.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
-#include <vtkSMSourceProxy.h>
+#include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
-#include <vtkSMDoubleVectorProperty.h>
+#include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
 #endif
 
-#include <QString>
-#include <QPointer>
-#include <QVBoxLayout>
+#include <QColor>
 #include <QLayout>
 #include <QLayoutItem>
-#include <QColor>
+#include <QPointer>
+#include <QString>
+#include <QVBoxLayout>
 
 #include <algorithm>
 #include <boost/make_shared.hpp>
@@ -123,11 +123,12 @@ void PeaksTableControllerVsi::addWorkspace(pqPipelineSource *source,
     }
 
     // Get the pointer to the peaks workspace
-    std::string wsName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName",
-                                           true).GetAsString());
-    std::string peaksFrame(vtkSMPropertyHelper(source->getProxy(),
-                                               "Peak Dimensions",
-                                               true).GetAsString());
+    std::string wsName(
+        vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true)
+            .GetAsString());
+    std::string peaksFrame(
+        vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions", true)
+            .GetAsString());
 
     // Get dimensions from splattersource
     std::vector<std::string> dimInfo = extractFrameFromSource(splatSource);
@@ -289,8 +290,9 @@ PeaksTableControllerVsi::extractFrameFromSource(pqPipelineSource *splatSource) {
     throw std::invalid_argument("The original source cannot be found.");
   }
 
-  std::string wsName(vtkSMPropertyHelper(originalSource->getProxy(),
-                                         "WorkspaceName", true).GetAsString());
+  std::string wsName(
+      vtkSMPropertyHelper(originalSource->getProxy(), "WorkspaceName", true)
+          .GetAsString());
   Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
       Mantid::API::AnalysisDataService::Instance()
           .retrieveWS<Mantid::API::IMDEventWorkspace>(wsName);
@@ -346,11 +348,12 @@ void PeaksTableControllerVsi::createTable() {
       QObject::connect(
           widget, SIGNAL(zoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)),
           this, SLOT(onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr, int)));
-      QObject::connect(
-          widget, SIGNAL(sortPeaks(const std::string &, const bool,
-                                   Mantid::API::IPeaksWorkspace_sptr)),
-          this, SLOT(onPeaksSorted(const std::string &, const bool,
-                                   Mantid::API::IPeaksWorkspace_sptr)));
+      QObject::connect(widget,
+                       SIGNAL(sortPeaks(const std::string &, const bool,
+                                        Mantid::API::IPeaksWorkspace_sptr)),
+                       this,
+                       SLOT(onPeaksSorted(const std::string &, const bool,
+                                          Mantid::API::IPeaksWorkspace_sptr)));
       // Initialize the viewablePeaks to be true
       std::map<std::string, std::vector<bool>> viewablePeaks =
           m_presenter->getInitializedViewablePeaks();
@@ -374,9 +377,9 @@ void PeaksTableControllerVsi::createTable() {
 }
 
 /**
-* Remove the layout
-* @param widget
-*/
+ * Remove the layout
+ * @param widget
+ */
 void PeaksTableControllerVsi::removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
   if (layout) {
@@ -650,6 +653,6 @@ void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
     }
   }
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

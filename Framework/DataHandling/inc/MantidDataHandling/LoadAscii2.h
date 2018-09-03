@@ -2,8 +2,8 @@
 #define MANTID_DATAHANDLING_LoadAscii2_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/Histogram1D.h"
 
 #include <list>
 
@@ -120,7 +120,7 @@ private:
   size_t m_spectrumIDcount;
   size_t m_lineNo;
   std::vector<DataObjects::Histogram1D> m_spectra;
-  DataObjects::Histogram1D *m_curSpectra;
+  std::unique_ptr<DataObjects::Histogram1D> m_curSpectra;
   std::vector<double> m_curDx;
 };
 

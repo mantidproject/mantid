@@ -8,8 +8,8 @@
 #ifndef MDEVENTSTEST_HELPER_H
 #define MDEVENTSTEST_HELPER_H
 
-#include "MantidAPI/BoxController.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -113,10 +113,9 @@ void addData(
         // Put an event in the middle of each box
         Mantid::coord_t centers[nd];
         for (size_t d = 0; d < nd; d++)
-          centers[d] = min +
-                       (static_cast<Mantid::coord_t>(index[d]) + 0.5f) *
-                           (max - min) /
-                           static_cast<Mantid::coord_t>(splitInto);
+          centers[d] = min + (static_cast<Mantid::coord_t>(index[d]) + 0.5f) *
+                                 (max - min) /
+                                 static_cast<Mantid::coord_t>(splitInto);
         out->addEvent(MDE(1.0, 1.0, centers));
       }
 
@@ -128,7 +127,7 @@ void addData(
   auto ei = Mantid::API::ExperimentInfo_sptr(new Mantid::API::ExperimentInfo());
   out->addExperimentInfo(ei);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataObjects {
@@ -503,8 +502,8 @@ void checkAndDeleteFile(std::string filename);
 //==================================
 //=====================================================================================
 
-} // namespace
-}
-}
+} // namespace MDEventsTestHelper
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif

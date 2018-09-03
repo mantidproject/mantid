@@ -1,10 +1,10 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GridDelegate.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QClipboard>
 #include <QFileDialog>
@@ -25,9 +25,9 @@ namespace DataProcessor {
 using namespace Mantid::API;
 
 /** Constructor
-* @param presenter :: [input] A unique ptr to the presenter
-* @param parent :: [input] The parent of this view
-*/
+ * @param presenter :: [input] A unique ptr to the presenter
+ * @param parent :: [input] The parent of this view
+ */
 QDataProcessorWidget::QDataProcessorWidget(
     std::unique_ptr<DataProcessorPresenter> presenter, QWidget *parent)
     : MantidWidget(parent), m_presenter(std::move(presenter)),
@@ -52,12 +52,12 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
           parent) {}
 
 /** Delegating constructor
-* @param whitelist :: [input] The white list
-* @param algorithm :: [input] The processing algorithm
-* @param parent :: [input] The parent of this view
-* @param group :: [input] The zero based index of this widget within the parent
-* presenter (reflectometry).
-*/
+ * @param whitelist :: [input] The white list
+ * @param algorithm :: [input] The processing algorithm
+ * @param parent :: [input] The parent of this view
+ * @param group :: [input] The zero based index of this widget within the parent
+ * presenter (reflectometry).
+ */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const ProcessingAlgorithm &algorithm,
                                            QWidget *parent, int group)
@@ -67,13 +67,13 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
           parent) {}
 
 /** Delegating constructor: pre-processing, no post-processing
-* @param whitelist :: [input] The white list
-* @param preprocessMap :: [input] Pre-processing instructions as a map
-* @param algorithm :: [input] The processing algorithm
-* @param parent :: [input] The parent of this view
-* @param group :: [input] The zero based index of this widget within the parent
-* presenter (reflectometry).
-*/
+ * @param whitelist :: [input] The white list
+ * @param preprocessMap :: [input] Pre-processing instructions as a map
+ * @param algorithm :: [input] The processing algorithm
+ * @param parent :: [input] The parent of this view
+ * @param group :: [input] The zero based index of this widget within the parent
+ * presenter (reflectometry).
+ */
 QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
                                            const PreprocessMap &preprocessMap,
                                            const ProcessingAlgorithm &algorithm,
@@ -84,13 +84,13 @@ QDataProcessorWidget::QDataProcessorWidget(const WhiteList &whitelist,
           parent) {}
 
 /** Delegating constructor: no pre-processing, post-processing
-* @param whitelist :: [input] The white list
-* @param algorithm :: [input] The processing algorithm
-* @param postprocessor :: [input] The post-processing algorithm
-* @param parent :: [input] The parent of this view
-* @param group :: [input] The zero based index of this widget within the parent
-* presenter (reflectometry).
-*/
+ * @param whitelist :: [input] The white list
+ * @param algorithm :: [input] The processing algorithm
+ * @param postprocessor :: [input] The post-processing algorithm
+ * @param parent :: [input] The parent of this view
+ * @param group :: [input] The zero based index of this widget within the parent
+ * presenter (reflectometry).
+ */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const ProcessingAlgorithm &algorithm,
     const PostprocessingAlgorithm &postprocessor, QWidget *parent, int group)
@@ -100,14 +100,14 @@ QDataProcessorWidget::QDataProcessorWidget(
           parent) {}
 
 /** Delegating constructor: pre-processing, post-processing
-* @param whitelist :: [input] The white list
-* @param preprocessMap :: [input] Pre-processing instructions as a map
-* @param algorithm :: [input] The processing algorithm
-* @param postprocessor :: [input] The post-processing algorithm
-* @param parent :: [input] The parent of this view
-* @param group :: [input] The zero based index of this widget within the parent
-* presenter (reflectometry).
-*/
+ * @param whitelist :: [input] The white list
+ * @param preprocessMap :: [input] Pre-processing instructions as a map
+ * @param algorithm :: [input] The processing algorithm
+ * @param postprocessor :: [input] The post-processing algorithm
+ * @param parent :: [input] The parent of this view
+ * @param group :: [input] The zero based index of this widget within the parent
+ * presenter (reflectometry).
+ */
 QDataProcessorWidget::QDataProcessorWidget(
     const WhiteList &whitelist, const PreprocessMap &preprocessMap,
     const ProcessingAlgorithm &algorithm,
@@ -119,7 +119,7 @@ QDataProcessorWidget::QDataProcessorWidget(
           parent) {}
 
 /** Destructor
-*/
+ */
 QDataProcessorWidget::~QDataProcessorWidget() {}
 
 /**
@@ -152,8 +152,8 @@ void QDataProcessorWidget::createTable() {
 }
 
 /** Add actions to the toolbar
-* @param commands :: A vector of actions (commands)
-*/
+ * @param commands :: A vector of actions (commands)
+ */
 void QDataProcessorWidget::addActions(
     std::vector<std::unique_ptr<Command>> commands) {
 
@@ -321,10 +321,10 @@ Select all rows/groups
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
 /**
-* Update menu items to be enabled/disabled according to whether processing
-* is in progress or not
-* @param isProcessing :: true if processing is in progress
-*/
+ * Update menu items to be enabled/disabled according to whether processing
+ * is in progress or not
+ * @param isProcessing :: true if processing is in progress
+ */
 void QDataProcessorWidget::updateMenuEnabledState(const bool isProcessing) {
   for (const auto &command : m_commands) {
     command->updateEnabledState(isProcessing);
@@ -332,25 +332,25 @@ void QDataProcessorWidget::updateMenuEnabledState(const bool isProcessing) {
 }
 
 /**
-* Sets the "Process" button to be enabled or disabled
-* @param enabled :: true if it should be enabled
-*/
+ * Sets the "Process" button to be enabled or disabled
+ * @param enabled :: true if it should be enabled
+ */
 void QDataProcessorWidget::setProcessButtonEnabled(const bool enabled) {
   ui.buttonProcess->setEnabled(enabled);
 }
 
 /**
-* Sets the "Instrument" combo to be enabled or disabled
-* @param enabled :: true if it should be enabled
-*/
+ * Sets the "Instrument" combo to be enabled or disabled
+ * @param enabled :: true if it should be enabled
+ */
 void QDataProcessorWidget::setInstrumentComboEnabled(const bool enabled) {
   ui.comboProcessInstrument->setEnabled(enabled);
 }
 
 /**
-* Sets the table/tree widget to be enabled or disabled
-* @param enabled :: true if it should be enabled
-*/
+ * Sets the table/tree widget to be enabled or disabled
+ * @param enabled :: true if it should be enabled
+ */
 void QDataProcessorWidget::setTreeEnabled(const bool enabled) {
   // Remember the original edit triggers so that we can revert
   // back to them when re-enabling
@@ -363,9 +363,9 @@ void QDataProcessorWidget::setTreeEnabled(const bool enabled) {
 }
 
 /**
-* Sets the "Output Notebook" widget to be enabled or disabled
-* @param enabled :: true if it should be enabled
-*/
+ * Sets the "Output Notebook" widget to be enabled or disabled
+ * @param enabled :: true if it should be enabled
+ */
 void QDataProcessorWidget::setOutputNotebookEnabled(const bool enabled) {
   ui.checkEnableNotebook->setEnabled(enabled);
 }
@@ -403,6 +403,7 @@ Set the range of the progress bar
 */
 void QDataProcessorWidget::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
+  ProgressableView::setProgressRange(min, max);
 }
 
 /**
@@ -549,44 +550,44 @@ QString QDataProcessorWidget::getClipboard() const {
 }
 
 /**
-* Clear the progress
-*/
+ * Clear the progress
+ */
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
 
 /** Forward a main presenter to this view's presenter
-* @param mainPresenter :: the main presenter
-*/
+ * @param mainPresenter :: the main presenter
+ */
 void QDataProcessorWidget::accept(DataProcessorMainPresenter *mainPresenter) {
 
   m_presenter->accept(mainPresenter);
 }
 
 /** Shows a critical error dialog
-*
-* @param prompt : The prompt to appear on the dialog
-* @param title : The text for the title bar of the dialog
-*/
+ *
+ * @param prompt : The prompt to appear on the dialog
+ * @param title : The text for the title bar of the dialog
+ */
 void QDataProcessorWidget::giveUserCritical(QString prompt, QString title) {
 
   QMessageBox::critical(this, title, prompt, QMessageBox::Ok, QMessageBox::Ok);
 }
 
 /** Shows a warning dialog
-*
-* @param prompt : The prompt to appear on the dialog
-* @param title : The text for the title bar of the dialog
-*/
+ *
+ * @param prompt : The prompt to appear on the dialog
+ * @param title : The text for the title bar of the dialog
+ */
 void QDataProcessorWidget::giveUserWarning(QString prompt, QString title) {
 
   QMessageBox::warning(this, title, prompt, QMessageBox::Ok, QMessageBox::Ok);
 }
 
 /** Asks the user a Yes/No question
-*
-* @param prompt : The prompt to appear on the dialog
-* @param title : The text for the title bar of the dialog
-* @returns a boolean true if Yes, false if No
-*/
+ *
+ * @param prompt : The prompt to appear on the dialog
+ * @param title : The text for the title bar of the dialog
+ * @returns a boolean true if Yes, false if No
+ */
 bool QDataProcessorWidget::askUserYesNo(QString prompt, QString title) {
 
   auto response = QMessageBox::question(this, title, prompt,
@@ -599,12 +600,12 @@ bool QDataProcessorWidget::askUserYesNo(QString prompt, QString title) {
 }
 
 /** Asks the user to enter a string.
-*
-* @param prompt : The prompt to appear on the dialog
-* @param title : The text for the title bar of the dialog
-* @param defaultValue : The default value entered.
-* @returns The user's string if submitted, or an empty string
-*/
+ *
+ * @param prompt : The prompt to appear on the dialog
+ * @param title : The text for the title bar of the dialog
+ * @param defaultValue : The default value entered.
+ * @returns The user's string if submitted, or an empty string
+ */
 QString QDataProcessorWidget::askUserString(const QString &prompt,
                                             const QString &title,
                                             const QString &defaultValue) {
@@ -616,10 +617,10 @@ QString QDataProcessorWidget::askUserString(const QString &prompt,
 }
 
 /** Runs python code
-*
-* @param pythonCode :: the python code to run
-* @return :: output from execution
-*/
+ *
+ * @param pythonCode :: the python code to run
+ * @return :: output from execution
+ */
 QString QDataProcessorWidget::runPythonAlgorithm(const QString &pythonCode) {
 
   QString output = runPythonCode(pythonCode);
@@ -665,7 +666,7 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
  * @param parentRow : the row index of the parent
  * @param parentColumn : the row index of the parent
  * @return : the value in the cell as a string
-*/
+ */
 QString QDataProcessorWidget::getCell(int row, int column, int parentRow,
                                       int parentColumn) {
 
@@ -680,7 +681,7 @@ QString QDataProcessorWidget::getCell(int row, int column, int parentRow,
  * @param column : the column index
  * @param parentRow : the row index of the parent
  * @param parentColumn : the row index of the parent
-*/
+ */
 void QDataProcessorWidget::setCell(const QString &value, int row, int column,
                                    int parentRow, int parentColumn) {
 
@@ -720,4 +721,4 @@ void QDataProcessorWidget::disableGrouping() {
 }
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt

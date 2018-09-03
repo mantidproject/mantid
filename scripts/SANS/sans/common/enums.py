@@ -220,6 +220,18 @@ class DetectorType(object):
 
 
 # --------------------------
+#  Transmission Type
+# --------------------------
+@string_convertible
+@serializable_enum("Calculated", "Unfitted")
+class TransmissionType(object):
+    """
+    Defines the detector type
+    """
+    pass
+
+
+# --------------------------
 #  Ranges
 # --------------------------
 @string_convertible
@@ -271,7 +283,7 @@ class FitType(object):
 #  SampleShape
 # --------------------------
 @string_convertible
-@serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
+@serializable_enum("Cylinder", "FlatPlate", "Disc")
 class SampleShape(object):
     """
     Defines the sample shape types

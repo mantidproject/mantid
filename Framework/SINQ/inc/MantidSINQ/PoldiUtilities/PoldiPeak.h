@@ -2,8 +2,8 @@
 #define MANTID_SINQ_POLDIPEAK_H
 
 #include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
+#include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid {
@@ -96,7 +96,7 @@ private:
   UncertainValue m_intensity;
   UncertainValue m_fwhmRelative;
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_POLDIPEAK_H

@@ -27,33 +27,33 @@
  *                                                                         *
  ***************************************************************************/
 #include "Plot3DDialog.h"
-#include "TextDialog.h"
-#include "MyParser.h"
-#include "SymbolDialog.h"
 #include "ApplicationWindow.h"
 #include "ColorButton.h"
+#include "MyParser.h"
+#include "SymbolDialog.h"
+#include "TextDialog.h"
 #include "TextFormatButtons.h"
 
-#include <QListWidget>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QLayout>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QMessageBox>
-#include <QComboBox>
-#include <QWidgetList>
-#include <QGroupBox>
-#include <QFontDialog>
 #include <QApplication>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QFontDialog>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QStackedWidget>
+#include <QTextEdit>
+#include <QWidget>
+#include <QWidgetList>
 
-#include <qwt3d_color.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include <qwt3d_color.h>
 
 using Mantid::Kernel::ConfigService;
 

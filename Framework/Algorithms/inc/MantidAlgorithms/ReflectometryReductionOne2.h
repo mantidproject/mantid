@@ -15,7 +15,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
@@ -71,6 +71,8 @@ private:
   void exec() override;
   // Validate inputs
   std::map<std::string, std::string> validateInputs() override;
+  // Set default names for output workspaces
+  void setDefaultOutputWorkspaceNames();
   // Create a direct beam workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeDirectBeamWS(Mantid::API::MatrixWorkspace_sptr inputWS);
@@ -139,7 +141,8 @@ private:
   void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,
                                const std::vector<size_t> &detectors,
-                               double &lambdaTop, double &lambdaBot);
+                               double &lambdaTop, double &lambdaBot,
+                               const bool outerCorners = true);
   // Check whether two spectrum maps match
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
@@ -157,6 +160,14 @@ private:
   size_t twoThetaRDetectorIdx(const std::vector<size_t> &detectors);
   double wavelengthMin() { return m_wavelengthMin; };
   double wavelengthMax() { return m_wavelengthMax; };
+  size_t findIvsLamRangeMinDetector(const std::vector<size_t> &detectors);
+  size_t findIvsLamRangeMaxDetector(const std::vector<size_t> &detectors);
+  double findIvsLamRangeMin(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                            const std::vector<size_t> &detectors,
+                            const double lambda);
+  double findIvsLamRangeMax(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                            const std::vector<size_t> &detectors,
+                            const double lambda);
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -173,6 +184,8 @@ private:
   // versions of these if summing in Q
   double m_wavelengthMin;
   double m_wavelengthMax;
+  // True if partial bins should be included in the summation in Q
+  bool m_partialBins;
 };
 
 } // namespace Algorithms

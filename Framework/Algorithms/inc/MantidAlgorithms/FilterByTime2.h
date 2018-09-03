@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_FILTERBYTIME2_H_
 #define MANTID_ALGORITHMS_FILTERBYTIME2_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

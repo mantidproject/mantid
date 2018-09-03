@@ -3,23 +3,25 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using namespace ScopedFileHelper;
 using Mantid::Types::Core::DateAndTime;
 
 class LoadLogTest : public CxxTest::TestSuite {
@@ -133,6 +135,37 @@ public:
                      "2007-Nov-16 13:25:48   END");
 
     AnalysisDataService::Instance().remove(outputSpace);
+  }
+
+  void test_log_file_has_error() {
+    std::string logFileText("2007-11-16T13:25:48 i1 0 \n"
+                            "2007-11-16T13:29:36 str1  a\n"
+                            "2007-11-16T13:29:49 i2 1\n"
+                            "2007-11-16T13:30:21 str2  b\n"
+                            "2007-11-16T13:32:38 num1 3\n"
+                            "2007-11-16T13:43:40 nspectra 12\n"
+                            "2007-11-16T13:44:33 num2 4\n"
+                            "2007-11-16T14:00:21 str3 c\n");
+    ScopedFile file(logFileText, "test_log_file.log");
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    ws->mutableRun().addProperty("nspectra", 1);
+    // "nspectra" is already in the logs when LoadLog runs
+    LoadLog alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", file.getFileName());
+    alg.setProperty("Workspace", ws);
+    alg.execute();
+    auto props = ws->run().getProperties();
+    TS_ASSERT_EQUALS(props.size(), 8);
+    TS_ASSERT(ws->run().hasProperty("nspectra"));
+    TS_ASSERT(ws->run().hasProperty("i1"));
+    TS_ASSERT(ws->run().hasProperty("i2"));
+    TS_ASSERT(ws->run().hasProperty("num1"));
+    TS_ASSERT(ws->run().hasProperty("num2"));
+    TS_ASSERT(ws->run().hasProperty("str1"));
+    TS_ASSERT(ws->run().hasProperty("str2"));
+    TS_ASSERT(ws->run().hasProperty("str3"));
   }
 
   void do_test_SNSTextFile(std::string names, std::string units, bool willFail,

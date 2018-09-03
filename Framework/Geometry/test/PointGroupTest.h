@@ -4,13 +4,13 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidKernel/Timer.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/Timer.h"
 #include <boost/lexical_cast.hpp>
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -169,25 +169,37 @@ public:
     }
     {
       V3D equiv[] = {
-          V3D(1, 2, 3), V3D(-1, -2, 3), V3D(-1, 2, -3), V3D(1, -2, -3),
+          V3D(1, 2, 3),
+          V3D(-1, -2, 3),
+          V3D(-1, 2, -3),
+          V3D(1, -2, -3),
       };
       check_point_group("222", V3D(1, 2, 3), 4, equiv);
     }
     {
       V3D equiv[] = {
-          V3D(1, 2, 3), V3D(-1, -2, 3), V3D(1, -2, 3), V3D(-1, 2, 3),
+          V3D(1, 2, 3),
+          V3D(-1, -2, 3),
+          V3D(1, -2, 3),
+          V3D(-1, 2, 3),
       };
       check_point_group("mm2", V3D(1, 2, 3), 4, equiv);
     }
     {
       V3D equiv[] = {
-          V3D(1, 2, 3), V3D(-1, -2, 3), V3D(-2, 1, 3), V3D(2, -1, 3),
+          V3D(1, 2, 3),
+          V3D(-1, -2, 3),
+          V3D(-2, 1, 3),
+          V3D(2, -1, 3),
       };
       check_point_group("4", V3D(1, 2, 3), 4, equiv);
     }
     {
       V3D equiv[] = {
-          V3D(1, 2, 3), V3D(-1, -2, 3), V3D(2, -1, -3), V3D(-2, 1, -3),
+          V3D(1, 2, 3),
+          V3D(-1, -2, 3),
+          V3D(2, -1, -3),
+          V3D(-2, 1, -3),
       };
       check_point_group("-4", V3D(1, 2, 3), 4, equiv);
     }

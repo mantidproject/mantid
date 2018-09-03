@@ -1,7 +1,7 @@
 #include "ReflSearchModel.h"
-#include "ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "ReflTransferStrategy.h"
 #include <QColor>
 
 namespace MantidQt {
@@ -17,7 +17,21 @@ using namespace Mantid::API;
 ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
                                  ITableWorkspace_sptr tableWorkspace,
                                  const std::string &instrument) {
+  if (tableWorkspace)
+    addDataFromTable(transferMethod, tableWorkspace, instrument);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+ReflSearchModel::~ReflSearchModel() {}
+
+void ReflSearchModel::addDataFromTable(
+    const ReflTransferStrategy &transferMethod,
+    ITableWorkspace_sptr tableWorkspace, const std::string &instrument) {
+
   // Copy the data from the input table workspace
+  SearchResultMap newRunDetails;
   for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
     const std::string runFile = tableWorkspace->String(i, 0);
 
@@ -37,23 +51,31 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
       numZeros++;
     run = run.substr(numZeros, run.size() - numZeros);
 
-    if (transferMethod.knownFileType(runFile)) {
-      m_runs.push_back(run);
-      const std::string description = tableWorkspace->String(i, 6);
-      m_descriptions[run] = description;
-      const std::string location = tableWorkspace->String(i, 1);
-      m_locations[run] = location;
-    }
+    if (!transferMethod.knownFileType(runFile))
+      continue;
+
+    // Ignore if the run already exists
+    if (runHasDetails(run))
+      continue;
+
+    // Ok, add the run details to the list
+    const std::string description = tableWorkspace->String(i, 6);
+    const std::string location = tableWorkspace->String(i, 1);
+    newRunDetails[run] = SearchResult{description, location};
   }
 
-  // By sorting the vector of runs, we sort the entire table
-  std::sort(m_runs.begin(), m_runs.end());
-}
+  // To append, insert the new runs after the last element in the model
+  const auto first = static_cast<int>(m_runs.size());
+  const auto last = static_cast<int>(m_runs.size() + newRunDetails.size() - 1);
+  beginInsertRows(QModelIndex(), first, last);
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflSearchModel::~ReflSearchModel() {}
+  for (auto &runKvp : newRunDetails)
+    m_runs.push_back(runKvp.first);
+
+  m_runDetails.insert(newRunDetails.begin(), newRunDetails.end());
+
+  endInsertRows();
+}
 
 /**
 @return the row count.
@@ -81,31 +103,20 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
   if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runs.size()))
     return QVariant();
 
-  const std::string run = m_runs[rowNumber];
+  const auto run = m_runs[rowNumber];
 
   /*SETTING TOOL TIP AND BACKGROUND FOR INVALID RUNS*/
   if (role != Qt::DisplayRole) {
     if (role == Qt::ToolTipRole) {
       // setting the tool tips for any unsuccessful transfers
-      for (auto errorRow = m_errors.begin(); errorRow != m_errors.end();
-           ++errorRow) {
-        if (errorRow->find(run) != errorRow->end()) {
-          // get the error message from the unsuccessful transfer
-          std::string errorMessage =
-              "Invalid transfer: " + errorRow->find(run)->second;
-          // set the message as the tooltip
-          return QString::fromStdString(errorMessage);
-        }
+      if (runHasError(run)) {
+        auto errorMessage = "Invalid transfer: " + runError(run);
+        return QString::fromStdString(errorMessage);
       }
     } else if (role == Qt::BackgroundRole) {
       // setting the background colour for any unsuccessful transfers
-      for (auto errorRow = m_errors.begin(); errorRow != m_errors.end();
-           ++errorRow) {
-        if (errorRow->find(run) != errorRow->end()) {
-          // return the colour yellow for any successful runs
-          return QColor("#FF8040");
-        }
-      }
+      if (runHasError(run))
+        return QColor("#accbff");
     } else {
       // we have no unsuccessful transfers so return empty QVariant
       return QVariant();
@@ -116,10 +127,10 @@ QVariant ReflSearchModel::data(const QModelIndex &index, int role) const {
     return QString::fromStdString(run);
 
   if (colNumber == 1)
-    return QString::fromStdString(m_descriptions.find(run)->second);
+    return QString::fromStdString(runDescription(run));
 
   if (colNumber == 2)
-    return QString::fromStdString(m_locations.find(run)->second);
+    return QString::fromStdString(runLocation(run));
 
   return QVariant();
 }
@@ -170,11 +181,95 @@ void ReflSearchModel::clear() {
   beginResetModel();
 
   m_runs.clear();
-  m_descriptions.clear();
-  m_locations.clear();
+  m_runDetails.clear();
 
   endResetModel();
 }
 
+/**
+Add details about errors
+@param run : the run number to set the error for
+@param errorMessage : the error message
+*/
+void ReflSearchModel::addError(const std::string &run,
+                               const std::string &errorMessage) {
+  // Add the error if we have details for this run (ignore it if not)
+  if (runHasDetails(run))
+    m_runDetails[run].issues = errorMessage;
+}
+
+/** Clear any error messages for the given run
+@param run : the run number to clear the error for
+ */
+void ReflSearchModel::clearError(const std::string &run) {
+  if (runHasError(run))
+    m_runDetails[run].issues = "";
+}
+
+bool ReflSearchModel::runHasDetails(const std::string &run) const {
+  return (m_runDetails.find(run) != m_runDetails.end());
+}
+
+/** Get the details for a given run.
+@param run : the run number
+@return : the details associated with this run
+*/
+SearchResult ReflSearchModel::runDetails(const std::string &run) const {
+  if (!runHasDetails(run))
+    return SearchResult();
+
+  return m_runDetails.find(run)->second;
+}
+
+/** Check whether a run has any error messages
+@param run : the run number
+@return : true if there is at least one error for this run
+*/
+bool ReflSearchModel::runHasError(const std::string &run) const {
+  if (!runHasDetails(run))
+    return false;
+
+  if (runDetails(run).issues.empty())
+    return false;
+
+  return true;
+}
+
+/** Get the error message for a given run.
+@param run : the run number
+@return : the error associated with this run, or an empty string
+if there is no error
+*/
+std::string ReflSearchModel::runError(const std::string &run) const {
+  if (!runHasError(run))
+    return std::string();
+
+  return runDetails(run).issues;
+}
+
+/** Get the description for a given run.
+@param run : the run number
+@return : the description associated with this run, or an empty string
+if there is no error
+*/
+std::string ReflSearchModel::runDescription(const std::string &run) const {
+  if (!runHasDetails(run))
+    return std::string();
+
+  return runDetails(run).description;
+}
+
+/** Get the file location for a given run.
+@param run : the run number
+@return : the location associated with this run, or an empty string
+if there is no error
+*/
+std::string ReflSearchModel::runLocation(const std::string &run) const {
+  if (!runHasDetails(run))
+    return std::string();
+
+  return runDetails(run).location;
+}
+
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

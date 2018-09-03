@@ -1,0 +1,141 @@
+name: MAPS
+# Input file for PyChop2 for the MAPS spectrometer at ISIS.
+
+chopper_system:
+  name: MAPS chopper system
+  chop_sam: 1.9                 # Distance (x1) from final chopper to sample (m)
+  sam_det: 6.0                  # Distance (x2) from sample to detector (m)
+  aperture_width: 0.094         # Width of aperture at moderator face (m)
+  aperture_height: 0.094        # Height of aperture at moderator face (m)
+  choppers:
+    -                           # Each entry must have a dash on an otherwise empty line!
+      name: MAPS Disk
+      distance: 8.831           # Distance from moderator to this chopper in metres
+      slot_width: 68            # Slot width in mm
+      guide_width: 50           # Width of guide after chopper in mm
+      nslot: 4                  # Number of slots. If slot_ang_pos is specified can ommit this entry
+                                # Next line has the angular position of the slots in degrees
+                                #   Must be monotonically increasing. Can omit if nslot is specifed,
+                                #   in which case it will be assumed that the slits are equally spaced.
+      slot_ang_pos: [-180., -39.1, 0., 39.1]
+      radius: 375               # Disk radius
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: True  # Is this disk to be phased independently?
+      defaultPhase: "1"         # What is the default phase for this disk (either a time in microseconds
+                                #   or a slot index [as a string] for the desired rep to go through)
+      phaseName: 'Multirep mode number'
+    -
+      name: MAPS Fermi
+      distance: 10.1            # Distance from moderator to this chopper in metres
+      aperture_distance: 8.27   # Distance from aperture (moderator face) to this chopper (only for Fermi)
+      packages:                 # A hash of chopper packages
+        A:
+          name: MAPS A (500meV)
+          pslit: 1.087          # Neutron transparent slit width (mm)
+          pslat: 0.534          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 1300.0           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        B:
+          name: MAPS B (200meV)
+          pslit: 1.812          # Neutron transparent slit width (mm)
+          pslat: 0.534          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 920.0            # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+        S:
+          name: MAPS S (Sloppy)
+          pslit: 2.899          # Neutron transparent slit width (mm)
+          pslat: 0.534          # Neutron absorbing slat width (mm)
+          radius: 49.0          # Chopper package radius (mm)
+          rho: 1300.0           # Chopper package curvature (mm)
+          tjit: 0.0             # Jitter time (us)
+          fluxcorr: 2.5         # (Empirical/Fudge) factor to scale calculated flux by
+          isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+  # Now define how the frequencies of the choppers should be related
+  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
+  frequency_matrix:
+    [[0, 1],                    # f1 is the Fermi frequency
+     [1, 0]]                    # f2 is the Disk frequency
+  frequency_names:
+    - 'Fermi frequency'
+    - 'Disk frequency'
+  max_frequencies:
+    [600, 100]                  # Maximum frequencies (Hz)
+  default_frequencies:
+    [400, 50]
+  overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
+  ei_limits: [0, 2000]          # Limits on ei for multirep calculations (reps outside range ignored)
+
+sample: 
+  name: MAPS Sample Can
+  isam: 0                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
+  sx: 2.0                       # Thickness (mm) 
+  sy: 48.0                      # Width (mm)
+  sz: 48.0                      # Height (mm)
+  gamma: 0.0                    # Angle of x-axis to ki (degrees)
+
+detector:
+  name: He3 PSD tubes
+  idet: 2                       # Detector type: 1==He tube binned together, 2==He tube
+  dd: 0.025                     # Detector depth (diameter for tube) in metres
+  tbin: 0.0                     # Detector time bins (microseconds)
+  phi: 0.0                      # Detector scattering angle (degrees)
+  tthlims: [3.0, 19.8, 21.1, 29.8, 31.1, 39.8, 41.1, 49.8, 51.1, 59.8]
+
+moderator:
+  name: AP                      # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
+                                # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
+  imod: 2                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2
+  mod_pars: [38.6, 0.5226]      # Parameters for time profile
+  mod_scale_fn: soft_hat        # Function to modify the parameters depending on energy (ommit or leave blank for no modification)
+  mod_scale_par: [1.0, 0.0, 0.0, 150.0, 0.01, 70.0]
+  theta: 32.0                   # Angle beamline makes with moderator face (degrees)
+  source_rep: 50                # Frequency of source (Hz)
+  measured_width:               # Table of measured moderator time widths in microseconds. If present will overide imod and mod_pars
+    isSigma: False              # Indicates measurements are FWHM
+    wavelength: [3.81593, 5.39537, 2.2052, 2.70006, 3.25499, 1.70813, 3.11649, 1.44378, 2.41516, 1.91018, 2.47745, 1.27303, 2.07872, 1.05928, 1.55951]
+    width: [54, 62, 40, 44, 48, 35, 47, 30, 41, 37, 40, 25, 38, 20, 31]
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+    wavelength: [0.0181, 0.0511, 0.0841, 0.1170, 0.1500, 0.1829, 0.2159, 0.2489, 0.2818, 0.3148, 0.3477, 0.3807, 0.4137, 0.4466, 0.4796, 
+                 0.5126, 0.5455, 0.5785, 0.6114, 0.6444, 0.6774, 0.7103, 0.7433, 0.7762, 0.8092, 0.8422, 0.8751, 0.9081, 0.9411, 0.9740, 
+                 1.0070, 1.0399, 1.0729, 1.1059, 1.1388, 1.1718, 1.2047, 1.2377, 1.2707, 1.3036, 1.3366, 1.3696, 1.4025, 1.4355, 1.4684, 
+                 1.5014, 1.5344, 1.5673, 1.6003, 1.6332, 1.6662, 1.6992, 1.7321, 1.7651, 1.7980, 1.8310, 1.8640, 1.8969, 1.9299, 1.9629, 
+                 1.9958, 2.0288, 2.0617, 2.0947, 2.1277, 2.1606, 2.1936, 2.2266, 2.2595, 2.2925, 2.3254, 2.3584, 2.3914, 2.4243, 2.4573, 
+                 2.4902, 2.5232, 2.5562, 2.5891, 2.6221, 2.6551, 2.6880, 2.7210, 2.7539, 2.7869, 2.8199, 2.8528, 2.8858, 2.9187, 2.9517, 
+                 2.9847, 3.0176, 3.0506, 3.0835, 3.1165, 3.1495, 3.1824, 3.2154, 3.2484, 3.2813, 3.3143, 3.3472, 3.3802, 3.4132, 3.4461, 
+                 3.4791, 3.5120, 3.5450, 3.5780, 3.6109, 3.6439, 3.6769, 3.7098, 3.7428, 3.7757, 3.8087, 3.8417, 3.8746, 3.9076, 3.9406, 
+                 3.9735, 4.0065, 4.0394, 4.0724, 4.1054, 4.1383, 4.1713, 4.2042, 4.2372, 4.2702, 4.3031, 4.3361, 4.3690, 4.4020, 4.4350, 
+                 4.4679, 4.5009, 4.5339, 4.5668, 4.5998, 4.6327, 4.6657, 4.6987, 4.7316, 4.7646, 4.7976, 4.8305, 4.8635, 4.8964, 4.9294, 
+                 4.9624, 4.9953, 5.0283, 5.0612, 5.0942, 5.1272, 5.1601, 5.1931, 5.2260, 5.2590, 5.2920, 5.3249, 5.3579, 5.3909, 5.4238, 
+                 5.4568, 5.4897, 5.5227, 5.5557, 5.5886, 5.6216, 5.6546, 5.6875, 5.7205, 5.7534, 5.7864, 5.8194, 5.8523, 5.8853, 5.9182, 
+                 5.9512, 5.9842, 6.0171, 6.0501, 6.0831, 6.1160, 6.1490, 6.1819, 6.2149, 6.2479, 6.2808, 6.3138, 6.3467, 6.3797, 6.4127, 
+                 6.4456, 6.4786, 6.5115, 6.5445, 6.5750]
+    flux: [2.60775e+08, 8.08616e+07, 4.59455e+07, 3.16183e+07, 2.37830e+07, 1.91458e+07, 1.58204e+07, 1.36088e+07, 1.19225e+07, 
+           1.06105e+07, 9.55533e+06, 8.77411e+06, 8.21901e+06, 7.67656e+06, 7.15055e+06, 6.70757e+06, 6.39276e+06, 6.22826e+06, 
+           6.19798e+06, 6.27731e+06, 6.47994e+06, 6.91604e+06, 7.50573e+06, 8.09035e+06, 8.76875e+06, 9.49975e+06, 1.01658e+07, 
+           1.07548e+07, 1.13597e+07, 1.19941e+07, 1.25374e+07, 1.28821e+07, 1.31248e+07, 1.32727e+07, 1.32305e+07, 1.30834e+07, 
+           1.27595e+07, 1.24351e+07, 1.20115e+07, 1.15789e+07, 1.11218e+07, 1.07191e+07, 1.03272e+07, 9.93856e+06, 9.59376e+06, 
+           9.19836e+06, 8.81571e+06, 8.50457e+06, 8.29274e+06, 8.05058e+06, 7.88437e+06, 7.63907e+06, 7.32047e+06, 6.99681e+06, 
+           6.68968e+06, 6.45270e+06, 6.24161e+06, 6.01323e+06, 5.74713e+06, 5.48816e+06, 5.27153e+06, 5.01780e+06, 4.76127e+06, 
+           4.48172e+06, 4.21345e+06, 3.97093e+06, 3.74819e+06, 3.53683e+06, 3.32935e+06, 3.12404e+06, 2.92801e+06, 2.74479e+06, 
+           2.61634e+06, 2.48606e+06, 2.38826e+06, 2.29410e+06, 2.17636e+06, 2.07461e+06, 1.97063e+06, 1.87220e+06, 1.77780e+06, 
+           1.70202e+06, 1.62584e+06, 1.55763e+06, 1.48989e+06, 1.42924e+06, 1.37959e+06, 1.34056e+06, 1.31926e+06, 1.28573e+06, 
+           1.25559e+06, 1.22426e+06, 1.18988e+06, 1.15714e+06, 1.13032e+06, 1.09423e+06, 1.06161e+06, 1.02650e+06, 9.95519e+05, 
+           9.56437e+05, 9.24815e+05, 8.90446e+05, 8.56656e+05, 8.28196e+05, 8.01094e+05, 7.79358e+05, 7.56306e+05, 7.35949e+05, 
+           7.24375e+05, 7.02174e+05, 6.86458e+05, 6.65894e+05, 6.43176e+05, 6.24539e+05, 6.01304e+05, 5.82505e+05, 5.61653e+05, 
+           5.41996e+05, 5.25903e+05, 5.10613e+05, 4.96677e+05, 4.82118e+05, 4.64661e+05, 4.65809e+05, 4.68617e+05, 4.56137e+05, 
+           4.42141e+05, 4.27460e+05, 4.10041e+05, 3.98628e+05, 3.84161e+05, 3.71166e+05, 3.57501e+05, 3.45980e+05, 3.35925e+05, 
+           3.23733e+05, 3.13815e+05, 3.03413e+05, 2.91757e+05, 2.82348e+05, 2.72917e+05, 2.57271e+05, 2.41863e+05, 2.58619e+05, 
+           2.53316e+05, 2.43464e+05, 2.35779e+05, 2.29787e+05, 2.22481e+05, 2.14144e+05, 2.08181e+05, 2.01866e+05, 1.95864e+05, 
+           1.89808e+05, 1.84740e+05, 1.78016e+05, 1.73397e+05, 1.68777e+05, 1.65549e+05, 1.61071e+05, 1.56594e+05, 1.52364e+05, 
+           1.49546e+05, 1.46162e+05, 1.43155e+05, 1.40167e+05, 1.37583e+05, 1.35294e+05, 1.32192e+05, 1.30639e+05, 1.27633e+05, 
+           1.25179e+05, 1.23187e+05, 1.21203e+05, 1.18074e+05, 1.15095e+05, 1.12187e+05, 1.10561e+05, 1.08411e+05, 1.05109e+05, 
+           1.03695e+05, 1.01165e+05, 9.87797e+04, 9.77841e+04, 9.40768e+04, 9.27353e+04, 9.14937e+04, 8.88289e+04, 8.74353e+04, 
+           8.53251e+04, 8.30339e+04, 8.22249e+04, 7.94099e+04, 7.79037e+04, 7.62865e+04, 7.47047e+04, 7.38535e+04, 7.17228e+04, 
+           6.98927e+04, 6.89509e+04]

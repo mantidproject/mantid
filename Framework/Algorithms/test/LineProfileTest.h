@@ -5,10 +5,10 @@
 
 #include "MantidAlgorithms/LineProfile.h"
 
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

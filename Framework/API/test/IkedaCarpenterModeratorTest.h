@@ -3,8 +3,8 @@
 
 #include "MantidAPI/IkedaCarpenterModerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 class IkedaCarpenterModeratorTest : public CxxTest::TestSuite {
 public:

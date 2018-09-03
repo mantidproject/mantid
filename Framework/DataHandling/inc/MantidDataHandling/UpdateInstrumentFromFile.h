@@ -3,13 +3,16 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"
-#include <nexus/NeXusFile.hpp>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 namespace Geometry {
 class DetectorInfo;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /**

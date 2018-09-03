@@ -2,8 +2,8 @@
 #define MANTID_DATAOBJECTS_COORDTRANSFORMPARSERTEST_H_
 
 #include "MantidAPI/CoordTransform.h"
-#include "MantidDataObjects/CoordTransformAffineParser.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffineParser.h"
 
 #include <cxxtest/TestSuite.h>
 

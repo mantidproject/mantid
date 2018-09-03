@@ -30,6 +30,7 @@
 ///@cond nodoc
 
 #include "isisds_command.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include <cstdio>
 
@@ -159,6 +160,26 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     closesocket(s);
     return INVALID_SOCKET;
   }
+
+  auto timeoutInSecConfigVal =
+      Mantid::Kernel::ConfigService::Instance().getValue<int>(
+          "ISISDAE.Timeout");
+  int timeoutinSec = timeoutInSecConfigVal.get_value_or(
+      120); // Default to  120 seconds if not specified
+
+#ifdef WIN32
+  // WINDOWS
+  DWORD timeout = timeoutinSec * 1000;
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout,
+             sizeof(timeout));
+#else
+  // LINUX
+  struct timeval tv;
+  tv.tv_sec = timeoutinSec; /* 30 Secs Timeout */
+  tv.tv_usec = 0;           // Not init'ing this can cause strange errors
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv,
+             sizeof(struct timeval));
+#endif // WIN
 
   /* socket connected */
   op.ver_major = ISISDS_MAJOR_VER;
@@ -302,8 +323,10 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
   }
   n = recv_all(s, *data, len_data, 0);
   if (n != len_data) {
-    free(*data);
-    *data = nullptr;
+    if (do_alloc) {
+      free(*data);
+      *data = nullptr;
+    }
     len_data = 0;
     return -1;
   }
@@ -373,8 +396,8 @@ int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
 int isisds_send_close(SOCKET s) {
   /*	shutdown((*pfh)->s, SD_SEND);   indicate no more data to send SHUT_WR
    * check for FD_READ and recv any other stuff from server
-*check for FD_CLOSE and closesocket()
-*/
+   *check for FD_CLOSE and closesocket()
+   */
   closesocket(s);
   return 0;
 }

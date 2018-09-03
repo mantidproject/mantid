@@ -1,9 +1,9 @@
 #ifndef MANTID_API_IEVENTWORKSPACE_H_
 #define MANTID_API_IEVENTWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 
@@ -67,6 +67,9 @@ public:
                          MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override = 0;
 
+  virtual void setAllX(const HistogramData::BinEdges &x) = 0;
+  virtual void resetAllXToSingleBin() = 0;
+
   virtual void clearMRU() const = 0;
 
 protected:
@@ -79,7 +82,7 @@ private:
   IEventWorkspace *doClone() const override = 0;
   IEventWorkspace *doCloneEmpty() const override = 0;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_IEVENTWORKSPACE_H_

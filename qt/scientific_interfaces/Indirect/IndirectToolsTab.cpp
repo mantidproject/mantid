@@ -1,5 +1,5 @@
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectToolsTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,5 +23,5 @@ IndirectToolsTab::~IndirectToolsTab() {}
 void IndirectToolsTab::runPythonScript(const QString &pyInput) {
   emit executePythonScript(pyInput, false);
 }
-}
+} // namespace CustomInterfaces
 } // namespace MantidQt
