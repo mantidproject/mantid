@@ -11,11 +11,14 @@ from Muon.GUI.Common import message_box
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
-from Muon.GUI.ElementalAnalysis.LoadWidget.load_presenter import LoadPresenter
+
 from Muon.GUI.ElementalAnalysis.Detectors.detectors_presenter import DetectorsPresenter
 from Muon.GUI.ElementalAnalysis.Detectors.detectors_view import DetectorsView
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_presenter import PeaksPresenter
 from Muon.GUI.ElementalAnalysis.Peaks.peaks_view import PeaksView
+
+from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_presenter import PeakSelectorPresenter
+from Muon.GUI.ElementalAnalysis.PeriodicTable.PeakSelector.peak_selector_view import PeakSelectorView
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -38,21 +41,12 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             LoadView(), LoadModel(), CoLoadModel())
         self.widget_list = QtGui.QVBoxLayout()
 
-        self.widget_list.addWidget(self.checkbox.view)
-
-        self.detectors_widget = CheckboxPresenter(
-            self.detector_view, CheckboxModel())
-        self.widget_list.addWidget(self.detectors_widget.view)
-
-        self.widget_list.addWidget(self.load_widget.view)
-
         self.detectors = DetectorsPresenter(DetectorsView())
         self.peaks = PeaksPresenter(PeaksView())
 
         self.widget_list.addWidget(self.peaks.view)
         self.widget_list.addWidget(self.detectors.view)
         self.widget_list.addWidget(self.load_widget.view)
-
 
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
@@ -61,11 +55,23 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
 
+        self.element_widgets = {}
+        self._generate_element_widgets()
+
+    def _generate_element_widgets(self):
+        self.element_widgets = {}
+        for element in self.ptable.peak_data:
+            if element not in ["Gammas", "Electrons"]:
+                data = self.ptable.element_data(element)
+                widget = PeakSelectorPresenter(PeakSelectorView(data, element))
+                self.element_widgets[element] = widget
+
     def table_left_clicked(self, item):
         print("Element Left Clicked: {}".format(
             self.ptable.element_data(item.symbol)))
 
     def table_right_clicked(self, item):
+        self.element_widgets[item.symbol].view.show()
         print("Element Right Clicked: {}".format(item.symbol))
 
     def table_changed(self, items):
@@ -75,6 +81,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
+        self._generate_element_widgets()
 
 
 def qapp():
