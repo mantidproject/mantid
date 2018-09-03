@@ -78,7 +78,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.presenter.handle_run_changed_by_user()
         self.Runner(self.presenter._load_thread)
 
-        self.view.warning_popup.assert_called_once()
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_data_reverts_to_previous_entry_if_user_enters_multiple_files_in_single_file_mode(self):
         self.presenter.enable_multiple_files(False)

@@ -116,7 +116,7 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.instrumentLabel.setText(instrument)
 
     def get_run_edit_text(self):
-        return self.runEdit.text()
+        return str(self.runEdit.text())
 
     # Signal/slot connections called by presenter
 
