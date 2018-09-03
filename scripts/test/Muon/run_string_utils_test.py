@@ -127,9 +127,9 @@ class RunStringUtilsIncrementAndDecrementRunLists(unittest.TestCase):
 
     def test_can_correctly_decrement_run_list_by_one(self):
         run_list = [2, 3, 4, 5]
-        increment = 1
+        decrement = 1
         decremented_run_list = [2, 3, 4, 5, 1]
-        self.assertEqual(utils.decrement_run_list(run_list, increment), decremented_run_list)
+        self.assertEqual(utils.decrement_run_list(run_list, decrement), decremented_run_list)
 
     def test_can_correctly_increment_run_list_by_five(self):
         run_list = [1, 2, 3, 4, 5]
@@ -139,9 +139,9 @@ class RunStringUtilsIncrementAndDecrementRunLists(unittest.TestCase):
 
     def test_can_correctly_decrement_run_list_by_five(self):
         run_list = [5, 6, 7, 8, 9, 10]
-        increment = 5
+        decrement = 5
         decremented_run_list = [5, 6, 7, 8, 9, 10, 4, 3, 2, 1, 0]
-        self.assertEqual(utils.decrement_run_list(run_list, increment), decremented_run_list)
+        self.assertEqual(utils.decrement_run_list(run_list, decrement), decremented_run_list)
 
     def test_cannot_decrement_list_below_zero(self):
         run_list = [0, 1, 2]
