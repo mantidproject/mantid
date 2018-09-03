@@ -13,6 +13,6 @@ class PeaksView(QtGui.QWidget):
         self.minor = Checkbox("Minor Peaks")
         self.gamma = Checkbox("Gamma Peaks")
         self.electron = Checkbox("Electron Peaks")
-        for p in [self.major, self.minor, self.gamma, self.electron]:
-            self.list.addWidget(p)
+        for peak_type in [self.major, self.minor, self.gamma, self.electron]:
+            self.list.addWidget(peak_type)
         self.setLayout(self.list)

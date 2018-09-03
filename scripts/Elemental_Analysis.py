@@ -65,9 +65,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             if element in ["Gammas", "Electrons"]:
                 continue
             try:
-                self.element_data[element] = self.ptable.peak_data[element]["Primary"]
-                self.element_data[element].update(
-                    self.ptable.peak_data[element]["Secondary"])
+                self.element_data[element] = self.ptable.peak_data[element]["Primary"].copy(
+                )
             except KeyError:
                 continue
 
@@ -81,7 +80,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                 continue
             data = self.ptable.element_data(element)
             widget = PeakSelectorPresenter(PeakSelectorView(data, element))
-            widget.on_okay_pressed(self._update_peak_data)
+            widget.on_finished(self._update_peak_data)
             self.element_widgets[element] = widget
 
     def table_left_clicked(self, item):

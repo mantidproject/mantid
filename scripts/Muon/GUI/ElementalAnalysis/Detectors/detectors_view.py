@@ -15,6 +15,6 @@ class DetectorsView(QtGui.QWidget):
         self.GE4 = Checkbox("GE4")
 
         self.list.addWidget(QtGui.QLabel("Detectors"))
-        for g in [self.GE1, self.GE2, self.GE3, self.GE4]:
-            self.list.addWidget(g)
+        for detector in [self.GE1, self.GE2, self.GE3, self.GE4]:
+            self.list.addWidget(detector)
         self.setLayout(self.list)
