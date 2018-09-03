@@ -49,7 +49,7 @@ class BrowseFileWidgetPresenter(object):
             self._view.reset_edit_to_cached_value()
             return
         if filenames:
-            self.handle_loading(filenames, self._use_threading)
+            self.handle_loading(filenames)
 
     def handle_file_changed_by_user(self):
         user_input = self._view.get_file_edit_text()
@@ -62,10 +62,10 @@ class BrowseFileWidgetPresenter(object):
             self._view.warning_popup("Multiple files selected in single file mode")
             self._view.reset_edit_to_cached_value()
             return
-        self.handle_loading(filenames, self._use_threading)
+        self.handle_loading(filenames)
 
-    def handle_loading(self, filenames, threaded=True):
-        if threaded:
+    def handle_loading(self, filenames):
+        if self._use_threading:
             self.handle_load_thread_start(filenames)
         else:
             self.handle_load_no_threading(filenames)

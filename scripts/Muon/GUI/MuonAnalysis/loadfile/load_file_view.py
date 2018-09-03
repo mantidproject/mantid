@@ -83,7 +83,6 @@ class BrowseFileWidgetView(QtGui.QWidget):
     def enable_loading(self):
         self.enable_load_buttons()
         self.loadingFinished.emit()
-        self.dataChanged.emit()
 
     def notify_loading_started(self):
         self.loadingStarted.emit()
