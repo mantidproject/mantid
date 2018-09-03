@@ -46,8 +46,6 @@ class LoadRunWidgetPresenter(object):
         self._model.clear_loaded_data()
 
     def handle_run_changed_by_user(self):
-        print("User has updated runs!")
-
         run_string = self._view.get_run_edit_text()
         run_list = runUtils.run_string_to_list(run_string)
         file_names = [fileUtils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
@@ -188,10 +186,6 @@ class LoadRunWidgetPresenter(object):
         self._model.clear_loaded_data()
 
     def enable_multiple_files(self, enabled):
-        if enabled:
-            print("Enabling multiple files (run widget)")
-        else:
-            print("Disabling multiple files (run widget)")
         self._load_multiple_runs = enabled
 
     @property
@@ -208,5 +202,4 @@ class LoadRunWidgetPresenter(object):
 
     # used by parent widget
     def update_view_from_model(self, run_list):
-        print("run update_view_from_model")
         self.set_run_edit_from_list(run_list)

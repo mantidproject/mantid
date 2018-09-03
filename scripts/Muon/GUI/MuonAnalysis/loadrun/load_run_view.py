@@ -109,7 +109,6 @@ class LoadRunWidgetView(QtWidgets.QWidget):
         self._cached_text = self.get_run_edit_text()
 
     def reset_run_edit_from_cache(self):
-        print("Reset to cache : ",self._cached_text )
         tmp = self._cached_text
         self.set_run_edit_text(tmp)
         self._cached_text = tmp

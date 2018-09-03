@@ -1,6 +1,6 @@
 import sys
 
-from Muon.GUI.MuonAnalysis.loadrun.load_run_model_multithreading import LoadRunWidgetModel
+from Muon.GUI.MuonAnalysis.loadrun.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 import unittest
@@ -24,7 +24,7 @@ class IteratorWithException:
         self.n = 0
         return self
 
-    def next(self):
+    def __next__(self):
 
         if self.n in self.throw_indices:
             next(self.iterable)
@@ -35,6 +35,9 @@ class IteratorWithException:
         else:
             self.n += 1
             return next(self.iterable)
+
+    # python 2/3 compatibility
+    next = __next__
 
 
 class LoadRunWidgetModelTest(unittest.TestCase):
@@ -105,6 +108,7 @@ class LoadRunWidgetModelTest(unittest.TestCase):
         self.assertEqual(model.loaded_filenames[1], files[2])
         self.assertEqual(model.loaded_runs[0], 19489)
         self.assertEqual(model.loaded_runs[1], 19491)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

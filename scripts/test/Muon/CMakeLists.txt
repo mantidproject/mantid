@@ -5,6 +5,8 @@
 set ( TEST_PY_FILES
    FFTPresenter_test.py
    FFTModel_test.py
+   loadrun_model_test.py
+   loadrun_presenter_test.py
    MaxEntPresenter_test.py
    MaxEntModel_test.py
    transformWidget_test.py
