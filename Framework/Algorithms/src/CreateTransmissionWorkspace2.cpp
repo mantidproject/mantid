@@ -153,7 +153,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
     const MatrixWorkspace_sptr IvsTOF) {
 
   // Detector workspace
-  MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsTOF);
+  MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsTOF, getPropertyValue("ProcessingInstructions"));
 
   // Monitor workspace
   // Only if I0MonitorIndex, MonitorBackgroundWavelengthMin

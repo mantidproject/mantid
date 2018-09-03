@@ -168,6 +168,12 @@ private:
   double findIvsLamRangeMax(Mantid::API::MatrixWorkspace_sptr detectorWS,
                             const std::vector<size_t> &detectors,
                             const double lambda);
+  std::string
+  workspaceIndexesToSpecNum(const std::string &num,
+                            Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  std::string convertProcessingInstructionsToWorkspaceIndexes(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -186,6 +192,7 @@ private:
   double m_wavelengthMax;
   // True if partial bins should be included in the summation in Q
   bool m_partialBins;
+  std::string m_processingInstructions;
 };
 
 } // namespace Algorithms

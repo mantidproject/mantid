@@ -413,11 +413,9 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
  * @return :: the detector workspace in wavelength
  */
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
-                                           const bool convert) {
-
-  const std::string processingCommands =
-      getPropertyValue("ProcessingInstructions");
+ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS, const std::string processingCommands,
+                                           const bool convert
+                                           ) {
   auto groupAlg = createChildAlgorithm("GroupDetectors");
   groupAlg->initialize();
   groupAlg->setProperty("GroupingPattern", processingCommands);

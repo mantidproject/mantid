@@ -69,7 +69,7 @@ protected:
                  const double argMax = 0.0);
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
+  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS, const std::string processingCommands,
                  const bool convert = true);
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr

@@ -259,7 +259,7 @@ void ReflectometryReductionOne2::init() {
                       "ProcessingInstructions", "",
                       boost::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
-                  "Grouping pattern on workspace indexes to yield only "
+                  "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
   // Minimum wavelength
@@ -344,6 +344,9 @@ void ReflectometryReductionOne2::exec() {
   // Get input properties
   m_runWS = getProperty("InputWorkspace");
   const auto xUnitID = m_runWS->getAxis(0)->unit()->unitID();
+
+  //Handle processing instructions conversion from spectra number to workspace indexes
+  m_processingInstructions = convertProcessingInstructionsToWorkspaceIndexes(getPropertyValue("ProcessingInstructions"), m_runWS);
 
   // Neither TOF or Lambda? Abort.
   if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))
@@ -518,7 +521,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   } else {
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_convertUnits);
+      result = makeDetectorWS(result, m_processingInstructions, m_convertUnits);
       outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -622,7 +625,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     // Processing instructions for transmission workspace. If strict spectrum
     // checking is not enabled then just use the same processing instructions
     // that were passed in.
-    std::string transmissionCommands = getProperty("ProcessingInstructions");
+    std::string transmissionCommands = m_processingInstructions;
     if (strictSpectrumChecking) {
       // If we have strict spectrum checking, we should have the same
       // spectrum numbers in both workspaces, but not necessarily with the
@@ -773,7 +776,7 @@ bool ReflectometryReductionOne2::summingInQ() {
  * Find and cache the indicies of the detectors of interest
  */
 void ReflectometryReductionOne2::findDetectorGroups() {
-  std::string instructions = getPropertyValue("ProcessingInstructions");
+  std::string instructions = m_processingInstructions;
 
   m_detectorGroups = Kernel::Strings::parseGroups<size_t>(instructions);
 
@@ -1338,6 +1341,32 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
       g_log.warning(message);
     }
   }
+}
+
+std::string ReflectometryReductionOne2::convertProcessingInstructionsToWorkspaceIndexes(const std::string &instructions, MatrixWorkspace_const_sptr ws) const {
+  std::string converted = "";
+  std::string currentNumber = "";
+  std::string ignoreThese = "-,:+";
+  for (auto i = 0u; i<instructions.size(); ++i){
+    if(std::find(ignoreThese.begin(), ignoreThese.end(), instructions[i]) != ignoreThese.end()){
+      //Found a spacer so add currentNumber to converted + seperator before
+      converted.append(workspaceIndexesToSpecNum(currentNumber, ws));
+      converted.push_back(instructions[i]);
+      //reset currentNumber
+      currentNumber = "";
+    } else {
+      currentNumber.push_back(instructions[i]);
+    }
+  }
+  //Add currentNumber onto converted
+  converted.append(workspaceIndexesToSpecNum(currentNumber, ws));
+  return converted;
+}
+
+std::string ReflectometryReductionOne2::workspaceIndexesToSpecNum(const std::string &num, MatrixWorkspace_const_sptr ws) const{
+  auto specNum = atoi(num.c_str());
+  std::string wsIdx = std::to_string(ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
+  return wsIdx;
 }
 
 } // namespace Algorithms
