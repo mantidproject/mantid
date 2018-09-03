@@ -93,7 +93,7 @@ class BrowseFileWidgetModel(object):
         # handle multi-period data
         if is_workspace_group(workspace):
             workspaces = [ws for ws in workspace]
-            run = self.get_run_from_multi_period_data(workspaces)
+            run = get_run_from_multi_period_data(workspaces)
         else:
             workspaces = [workspace]
             run = int(workspace.getRunNumber())
