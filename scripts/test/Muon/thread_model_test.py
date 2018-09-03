@@ -9,6 +9,7 @@ else:
 from PyQt4.QtGui import QApplication
 
 from Muon.GUI.Common.thread_model import ThreadModel
+from Muon.GUI.Common import mock_widget
 
 
 class testModelWithoutExecute:
@@ -61,7 +62,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         """This runner class creates a main event loop for threaded code to run within (otherwise the threaded
         code will not connect signals/slots properly).
         The finished signal of a QThread is connected to the finished method below"""
-        QT_APP = QApplication([])
+        QT_APP = mock_widget.mockQapp()
 
         def __init__(self, thread):
             if thread:
