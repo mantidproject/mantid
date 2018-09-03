@@ -249,21 +249,20 @@ std::pair<size_t, size_t> getCorrectedTextureSize(const size_t width,
 void renderGridBankLayer(const Mantid::Geometry::ComponentInfo &compInfo,
                          size_t index, size_t layer) {
   auto layerIndex = compInfo.children(index)[layer];
-  auto baseIndex = compInfo.children(index).back();
   auto c = findCorners(compInfo, layerIndex);
-  auto baseBank = compInfo.quadrilateralComponent(baseIndex);
   auto bank = compInfo.quadrilateralComponent(layerIndex);
   const auto &detShape = compInfo.shape(bank.bottomLeft);
   const auto &shapeInfo = detShape.getGeometryHandler()->shapeInfo();
   auto steps = findSteps(shapeInfo.points());
   auto xstep = std::get<0>(steps);
   auto ystep = std::get<1>(steps);
+  auto baseCorner = findGridCorners(compInfo, index, GridTextureFace::Front);
 
   render2DTexture(c, bank.nX, bank.nY, V3D((xstep * -0.5), (ystep * -0.5), 0.0),
                   V3D((xstep * 0.5), (ystep * -0.5), 0.0),
                   V3D((xstep * 0.5), (ystep * 0.5), 0.0),
                   V3D((xstep * -0.5), (ystep * 0.5), 0.0),
-                  compInfo.position(baseBank.bottomLeft));
+                  baseCorner.bottomLeft());
 }
 
 void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
