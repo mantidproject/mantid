@@ -48,13 +48,13 @@ QT_APP = QApplication([])
 
 
 class LoadFileWidgetPresenterTest(unittest.TestCase):
-    def run_test_with_and_without_threading(f):
+    def run_test_with_and_without_threading(test_function):
 
         def run_twice(self):
-            f(self)
+            test_function(self)
             self.setUp()
             self.presenter._use_threading = False
-            f(self)
+            test_function(self)
 
         return run_twice
 
@@ -243,11 +243,11 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
-        cc = self.view.set_file_edit.call_count
+        set_file_edit_count = self.view.set_file_edit.call_count
         self.presenter.on_browse_button_clicked()
         self.Runner(self.presenter._load_thread)
 
-        self.assertEqual(self.view.set_file_edit.call_count, cc)
+        self.assertEqual(self.view.set_file_edit.call_count, set_file_edit_count)
         self.assertEqual(self.view.reset_edit_to_cached_value.call_count, 0)
 
     @run_test_with_and_without_threading
@@ -301,13 +301,13 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
 
 
 class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
-    def run_test_with_and_without_threading(f):
+    def run_test_with_and_without_threading(test_function):
 
         def run_twice(self):
-            f(self)
+            test_function(self)
             self.setUp()
             self.presenter._use_threading = False
-            f(self)
+            test_function(self)
 
         return run_twice
 

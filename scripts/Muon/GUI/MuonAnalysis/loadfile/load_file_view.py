@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal
+import Muon.GUI.Common.message_box as message_box
 
 
 class BrowseFileWidgetView(QtGui.QWidget):
@@ -126,4 +127,4 @@ class BrowseFileWidgetView(QtGui.QWidget):
 
     def warning_popup(self, message):
         # TODO : limit the number of warnings to prevent spamming if a list of bad files is selected.
-        QtGui.QMessageBox.warning(self, "Error", str(message))
+        message_box.warning(str(message))
