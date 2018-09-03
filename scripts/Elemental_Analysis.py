@@ -82,6 +82,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
+        self._generate_element_widgets()
 
     def spinbox_changed(self, val):
         print("SpinBox Value Changed: {}".format(val))

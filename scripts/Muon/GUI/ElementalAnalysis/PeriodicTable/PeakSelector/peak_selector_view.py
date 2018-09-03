@@ -5,16 +5,18 @@ from six import iteritems
 from Muon.GUI.Common.checkbox import Checkbox
 
 
-class PeakSelectorView(QtGui.QWidget):
+class PeakSelectorView(QtGui.QListWidget):
     sig_finished_selection = QtCore.pyqtSignal(object, object)
 
     def __init__(self, peak_data, element, parent=None):
         super(PeakSelectorView, self).__init__(parent)
+        widget = QtGui.QWidget()
+
         self.new_data = {}
         self.update_new_data(peak_data)
         self.element = element
         self.setWindowTitle(element)
-        self.list = QtGui.QVBoxLayout()
+        self.list = QtGui.QVBoxLayout(self)
 
         primary = peak_data["Primary"]
         self._create_checkbox_list("Primary", primary)
@@ -25,7 +27,16 @@ class PeakSelectorView(QtGui.QWidget):
         self.list.addWidget(self.okay_button)
         self.okay_button.clicked.connect(self._finished_selection)
 
-        self.setLayout(self.list)
+        widget.setLayout(self.list)
+        scroll = QtGui.QScrollArea()
+        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        scroll.setWidgetResizable(False)
+        scroll.setWidget(widget)
+
+        scroll_layout = QtGui.QVBoxLayout(self)
+        scroll_layout.addWidget(scroll)
+
+        self.setLayout(scroll_layout)
 
     def update_new_data(self, data):
         for el, values in iteritems(data):
