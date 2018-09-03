@@ -19,7 +19,7 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
 
         self.quit_signal.connect(QtGui.QApplication.instance().quit)
 
-        #self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
+        self.icon.setPixmap(QtGui.QPixmap(":/crying_mantid.png"))
 
         self.requestTextBrowser.anchorClicked.connect(MantidQt.API.MantidDesktopServices.openUrl)
 
