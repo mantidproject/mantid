@@ -17,20 +17,6 @@ def exception_message_for_failed_files(failed_file_list):
     return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
 
 
-def add_directories_to_config_service(self, file_list):
-    """
-    Parses file_list into the unique directories containing the files, and adds these
-    to the global config service. These directories will then be automatically searched in
-    all subsequent Load calls.
-    """
-    dirs = [os.path.dirname(filename) for filename in file_list]
-    dirs = [filename if os.path.isdir(filename) else "" for filename in dirs]
-    dirs = list(set(dirs))
-    if dirs:
-        for directory in dirs:
-            ConfigService.Instance().appendDataSearchDir(directory.encode('ascii', 'ignore'))
-
-
 def get_run_from_multi_period_data(workspace_list):
     """Checks if multi-period data has a single consistent run number and returns it, otherwise raises ValueError."""
     runs = [ws.getRunNumber() for ws in workspace_list]
@@ -116,3 +102,16 @@ class BrowseFileWidgetModel(object):
 
     def clear(self):
         self._loaded_data_store.clear()
+
+    def add_directories_to_config_service(self, file_list):
+        """
+        Parses file_list into the unique directories containing the files, and adds these
+        to the global config service. These directories will then be automatically searched in
+        all subsequent Load calls.
+        """
+        dirs = [os.path.dirname(filename) for filename in file_list]
+        dirs = [filename if os.path.isdir(filename) else "" for filename in dirs]
+        dirs = list(set(dirs))
+        if dirs:
+            for directory in dirs:
+                ConfigService.Instance().appendDataSearchDir(directory.encode('ascii', 'ignore'))
