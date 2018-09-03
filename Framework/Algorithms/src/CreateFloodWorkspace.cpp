@@ -20,7 +20,7 @@ std::string const FILENAME("Filename");
 std::string const OUTPUT_WORKSPACE("OutputWorkspace");
 std::string const START_X("StartSpectrumIndex");
 std::string const END_X("EndSpectrumIndex");
-std::string const EXCLUDE("Exclude");
+std::string const EXCLUDE("ExcludeSpectra");
 std::string const BACKGROUND("Background");
 std::string const CENTRAL_PIXEL("CentralPixelSpectrum");
 std::string const RANGE_LOWER("RangeLower");
