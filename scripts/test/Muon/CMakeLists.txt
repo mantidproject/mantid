@@ -6,7 +6,8 @@ set ( TEST_PY_FILES
    FFTPresenter_test.py
    FFTModel_test.py
    loadfile_model_test.py
-   loadfile_presenter_test.py
+   loadfile_presenter_single_file_test.py
+   loadfile_presenter_multiple_file_test.py
    loadfile_view_test.py
    MaxEntPresenter_test.py
    MaxEntModel_test.py
