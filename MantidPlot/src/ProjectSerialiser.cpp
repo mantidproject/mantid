@@ -90,14 +90,13 @@ PyObject *callPythonModuleAttr(const char *moduleName, const char *attrName,
     moduleAttr = throwIfPythonError(
         PyObject_GetAttrString(launcher, const_cast<char *>(attrName)));
     callResult = throwIfPythonError(PyObject_CallObject(moduleAttr, arg));
-    Py_DECREF(callResult);
-    Py_DECREF(moduleAttr);
-    Py_DECREF(launcher);
+    Py_XDECREF(moduleAttr);
+    Py_XDECREF(launcher);
     return callResult;
   } catch (std::runtime_error &) {
-    Py_DECREF(callResult);
-    Py_DECREF(moduleAttr);
-    Py_DECREF(launcher);
+    Py_XDECREF(callResult);
+    Py_XDECREF(moduleAttr);
+    Py_XDECREF(launcher);
     throw;
   }
 }
@@ -1067,13 +1066,17 @@ void ProjectSerialiser::loadPythonInterface(
 
   ScopedGIL<PythonGIL> gil;
   PyObject *fnArg = Py_BuildValue("(s)", pySection.c_str());
+  PyObject *result(nullptr);
   try {
-    callPythonModuleAttr(launcherModuleName.c_str(), "loadFromProject", fnArg);
+    result = callPythonModuleAttr(launcherModuleName.c_str(), "loadFromProject",
+                                  fnArg);
   } catch (std::runtime_error &) {
     Py_DECREF(fnArg);
+    Py_XDECREF(result);
     throw;
   }
   Py_DECREF(fnArg);
+  Py_XDECREF(result);
 }
 
 /**
