@@ -23,6 +23,8 @@ private:
   mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
   std::vector<double> m_specIntegrs;
   MantidColorMap m_colorMap;
+  bool m_isUsingLayers;
+  size_t m_layer;
 
 public:
   InstrumentRenderer(const InstrumentActor &actor);
@@ -40,6 +42,8 @@ public:
   const MantidColorMap &getColorMap() const { return m_colorMap; }
 
   GLColor getColor(size_t index) const;
+
+  void enableGridBankLayers(bool on, size_t layer);
 
   static GLColor makePickColor(size_t pickID);
 

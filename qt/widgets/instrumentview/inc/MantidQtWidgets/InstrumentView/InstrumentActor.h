@@ -195,8 +195,12 @@ public:
   /// Returns indices of all non-detector components in Instrument.
   const std::vector<size_t> &components() const { return m_components; }
 
+  bool hasGridBank() const;
+  size_t getNumberOfGridLayers() const;
+  void setGridLayer(bool isUsingLayer, int layer) const;
+
 signals:
-  void colorMapChanged();
+  void colorMapChanged() const;
 
 private:
   void setUpWorkspace(
@@ -250,6 +254,10 @@ private:
   GraphOptions::ScaleType m_scaleType;
   /// Position to refer to when detector not found
   const Mantid::Kernel::V3D m_defaultPos;
+  /// Flag which stores whether or not a 3D GridBank is present
+  bool m_hasGrid;
+  /// Stores the number of grid Layers
+  size_t m_numGridLayers;
 
   /// Colors in order of component info
   std::vector<size_t> m_monitors;

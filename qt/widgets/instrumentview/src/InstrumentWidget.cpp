@@ -145,6 +145,8 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   setBackgroundColor(
       settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
 
+  m_instrumentActor.reset(
+      new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   // Create the b=tabs
   createTabs(settings);
 

@@ -36,7 +36,7 @@ void updateVisited(std::vector<bool> &visited,
 } // namespace
 
 InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
-    : m_actor(actor) {
+    : m_actor(actor), m_isUsingLayers(false) {
 
   m_displayListId[0] = 0;
   m_displayListId[1] = 0;
@@ -162,24 +162,29 @@ void InstrumentRenderer::drawGridBank(size_t bankIndex, bool picking) {
   auto ti = m_reverseTextureIndexMap[bankIndex];
   auto &tex = m_textures[ti];
   tex.bindTextures(picking);
-  tex.uploadTextures(picking, detail::GridTextureFace::Front);
-  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                           detail::GridTextureFace::Front);
-  tex.uploadTextures(picking, detail::GridTextureFace::Back);
-  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                           detail::GridTextureFace::Back);
-  tex.uploadTextures(picking, detail::GridTextureFace::Left);
-  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                           detail::GridTextureFace::Left);
-  tex.uploadTextures(picking, detail::GridTextureFace::Right);
-  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                           detail::GridTextureFace::Right);
-  tex.uploadTextures(picking, detail::GridTextureFace::Top);
-  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                           detail::GridTextureFace::Top);
-  tex.uploadTextures(picking, detail::GridTextureFace::Bottom);
-  BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
-                                           detail::GridTextureFace::Bottom);
+  if (m_isUsingLayers) { // Render single layer
+    tex.uploadTextures(picking);
+    BankRenderingHelpers::renderGridBankLayer(compInfo, bankIndex, m_layer);
+  } else { // Render 6 faces representing grid box
+    tex.uploadTextures(picking, detail::GridTextureFace::Front);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                             detail::GridTextureFace::Front);
+    tex.uploadTextures(picking, detail::GridTextureFace::Back);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                             detail::GridTextureFace::Back);
+    tex.uploadTextures(picking, detail::GridTextureFace::Left);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                             detail::GridTextureFace::Left);
+    tex.uploadTextures(picking, detail::GridTextureFace::Right);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                             detail::GridTextureFace::Right);
+    tex.uploadTextures(picking, detail::GridTextureFace::Top);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                             detail::GridTextureFace::Top);
+    tex.uploadTextures(picking, detail::GridTextureFace::Bottom);
+    BankRenderingHelpers::renderGridBankFull(compInfo, bankIndex,
+                                             detail::GridTextureFace::Bottom);
+  }
   tex.unbindTextures();
   glPopMatrix();
 }
@@ -291,8 +296,8 @@ void InstrumentRenderer::reset() {
   resetPickColors();
 
   for (auto &texture : m_textures) {
-    texture.buildColorTextures(m_colors);
-    texture.buildPickTextures(m_pickColors);
+    texture.buildColorTextures(m_colors, m_isUsingLayers, m_layer);
+    texture.buildPickTextures(m_pickColors, m_isUsingLayers, m_layer);
   }
 
   /// Invalidate the OpenGL display lists to force full re-drawing of the
@@ -364,6 +369,11 @@ GLColor InstrumentRenderer::getColor(size_t index) const {
     return m_colors.at(index);
 
   return m_colors.front();
+}
+
+void InstrumentRenderer::enableGridBankLayers(bool on, size_t layer) {
+  m_isUsingLayers = on;
+  m_layer = layer;
 }
 
 GLColor InstrumentRenderer::makePickColor(size_t pickID) {

@@ -84,11 +84,18 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
         "InstrumentActor passed a workspace that isn't a MatrixWorkspace");
   setupPhysicalInstrumentIfExists();
 
+  m_hasGrid = false;
+  m_numGridLayers = 0;
   for (size_t i = 0; i < componentInfo().size(); ++i) {
     if (!componentInfo().isDetector(i))
       m_components.push_back(i);
     else if (detectorInfo().isMonitor(i))
       m_monitors.push_back(i);
+    if (componentInfo().componentType(i) ==
+        Mantid::Beamline::ComponentType::Grid) {
+      m_hasGrid = true;
+      m_numGridLayers = componentInfo().children(i).size();
+    }
   }
 
   m_isCompVisible.assign(componentInfo().size(), true);
@@ -1187,6 +1194,18 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
     tsv >> binMaskLines;
     m_maskBinsData.loadFromProject(binMaskLines);
   }
+}
+
+bool InstrumentActor::hasGridBank() const { return m_hasGrid; }
+
+size_t InstrumentActor::getNumberOfGridLayers() const {
+  return m_numGridLayers;
+}
+
+void InstrumentActor::setGridLayer(bool isUsingLayer, int layer) const {
+  m_renderer->enableGridBankLayers(isUsingLayer, layer);
+  m_renderer->reset();
+  emit colorMapChanged();
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
