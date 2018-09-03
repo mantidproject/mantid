@@ -83,6 +83,10 @@ DLLExport std::string
 generatePeriodAlgebraString(std::vector<int> summedPeriods,
                             std::vector<int> subtractedPeriods);
 
+DLLExport void
+periodStringVectorToIntVector(std::vector<std::string> &periodStrings,
+                              std::vector<int> &periods);
+
 /// Generate new analysis workspace name
 DLLExport std::string generateWorkspaceName(const Muon::DatasetParams &params);
 

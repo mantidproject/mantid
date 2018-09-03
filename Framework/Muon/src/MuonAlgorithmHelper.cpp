@@ -223,6 +223,19 @@ void groupWorkspaces(const std::string &groupName,
   }
 }
 
+void periodStringVectorToIntVector(std::vector<std::string> &periodStrings,
+                                   std::vector<int> &periods) {
+  transform(periodStrings.begin(), periodStrings.end(), back_inserter(periods),
+            [](const std::string &period) {
+              if (std::all_of(period.begin(), period.end(), ::isdigit)) {
+                return std::stoi(period);
+              } else {
+                throw std::invalid_argument(
+                    "List contains a non-integer value : " + period);
+              }
+            });
+}
+
 /**
  * Generate a string (to be included in workspace names) to signify the
  * period algebra.
@@ -250,30 +263,14 @@ std::string generatePeriodAlgebraString(std::string summedPeriods,
   boost::split(summedPeriodStrVec, summedPeriods,
                [delimeter](char c) { return c == delimeter; });
   if (!summedPeriodStrVec[0].empty()) {
-    transform(summedPeriodStrVec.begin(), summedPeriodStrVec.end(),
-              back_inserter(summedPeriodVec), [](const std::string &p) {
-                if (std::all_of(p.begin(), p.end(), ::isdigit)) {
-                  return std::stoi(p);
-                } else {
-                  throw std::invalid_argument(
-                      "List contains a non-integer value : " + p);
-                }
-              });
+    periodStringVectorToIntVector(summedPeriodStrVec, summedPeriodVec);
   }
 
   std::vector<std::string> subtractedPeriodStrVec;
   boost::split(subtractedPeriodStrVec, subtractedPeriods,
                [delimeter](char c) { return c == delimeter; });
   if (!subtractedPeriodStrVec[0].empty()) {
-    transform(subtractedPeriodStrVec.begin(), subtractedPeriodStrVec.end(),
-              back_inserter(subtractedPeriodVec), [](const std::string &p) {
-                if (std::all_of(p.begin(), p.end(), ::isdigit)) {
-                  return std::stoi(p);
-                } else {
-                  throw std::invalid_argument(
-                      "List contains a non-integer value : " + p);
-                }
-              });
+    periodStringVectorToIntVector(subtractedPeriodStrVec, subtractedPeriodVec);
   }
 
   return generatePeriodAlgebraString(summedPeriodVec, subtractedPeriodVec);
@@ -286,7 +283,8 @@ std::string generatePeriodAlgebraString(std::vector<int> summedPeriods,
     return "";
   }
   // the default for single period data
-  if (summedPeriods[0] == 1 && subtractedPeriods.empty() && summedPeriods.size()==1) {
+  if (summedPeriods[0] == 1 && subtractedPeriods.empty() &&
+      summedPeriods.size() == 1) {
     return "";
   }
 
