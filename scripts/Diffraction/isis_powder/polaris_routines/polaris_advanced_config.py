@@ -94,10 +94,9 @@ variables = {
 
 def get_mode_specific_dict(mode):
     if mode is None:
-        err_text = "The parameter with name: 'mode' is required but "
-        err_text += "was not set or passed.\n"
-        err_text += "Acceptable values for this parameter are: PDF, Rietveld."
-        raise RuntimeError(err_text)
+        raise RuntimeError("The parameter with name: 'mode' is required but "
+                           "was not set or passed.\n"
+                           "Acceptable values for this parameter are: PDF, Rietveld.")
 
     mode = mode.lower()
     if mode == "pdf":
