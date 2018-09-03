@@ -21,15 +21,12 @@ for this course.
 *Extending Mantid with Python* demonstrates how you can become a power user and really stretch the
 capabilities of Mantid, by developing your own scripts.
 
-*ILL training* gives an ILL site-specific introduction to many of the features of Mantid.
-
 .. toctree::
    :hidden:
    :glob:
    :maxdepth: 3
 
    mantid_basic_course/index
-   ill_training/index
 
 **Sections:**
 
