@@ -23,6 +23,8 @@ std::string const END_X("EndSpectrumIndex");
 std::string const EXCLUDE("Exclude");
 std::string const BACKGROUND("Background");
 std::string const CENTRAL_PIXEL("CentralPixelSpectrum");
+std::string const RANGE_LOWER("RangeLower");
+std::string const RANGE_UPPER("RangeUpper");
 } // namespace Prop
 
 double const VERY_BIG_VALUE = std::numeric_limits<double>::max();
@@ -74,6 +76,12 @@ void CreateFloodWorkspace::init() {
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
                   "Spectra to exclude");
 
+  declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(),
+                  "The lower integration limit (an X value).");
+
+  declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(),
+                  "The upper integration limit (an X value).");
+
   declareProperty(Prop::CENTRAL_PIXEL, EMPTY_INT(),
                   "A spectrum index of the centre pixel.");
 
@@ -116,6 +124,12 @@ MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
   auto alg = createChildAlgorithm("Integration");
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("OutputWorkspace", "dummy");
+  if (!isDefault(Prop::RANGE_LOWER)) {
+    alg->setProperty("RangeLower", static_cast<double>(getProperty(Prop::RANGE_LOWER)));
+  }
+  if (!isDefault(Prop::RANGE_UPPER)) {
+    alg->setProperty("RangeUpper", static_cast<double>(getProperty(Prop::RANGE_UPPER)));
+  }
   alg->execute();
   return alg->getProperty("OutputWorkspace");
 }
@@ -134,7 +148,7 @@ bool CreateFloodWorkspace::shouldRemoveBackground() {
 
 API::MatrixWorkspace_sptr
 CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
-  g_log.information() << "Remove background\n";
+  g_log.information() << "Remove background " << getPropertyValue(Prop::BACKGROUND) << '\n';
   auto fitWS = transpose(ws);
   auto const &x = fitWS->x(0);
 
