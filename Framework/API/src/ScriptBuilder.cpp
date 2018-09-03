@@ -90,7 +90,7 @@ void ScriptBuilder::writeHistoryToStream(
     // create the string for this algorithm
     if (!m_ignoreGroups) {
       createStringForAlg(os, algHistory);
-    } 
+    }
     if (m_ignoreGroups && algHistory->name() != "GroupWorkspaces") {
       createStringForAlg(os, algHistory);
     }
