@@ -140,8 +140,7 @@ class LoadRunWidgetPresenter(object):
             return
         new_run = min(run_list)
 
-        instr = self.get_current_instrument()
-        file_name = fileUtils.file_path_for_instrument_and_run(instr, new_run)
+        file_name = fileUtils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
         self.handle_load_thread_start([file_name])
 
     def disable_loading(self):
