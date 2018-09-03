@@ -305,7 +305,7 @@ public:
   BeamlineRayTracerTestPerformance() {
     // Instrument
     m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
-    
+
     // Create an instrument visitor
     InstrumentVisitor visitor = (m_inst);
 
