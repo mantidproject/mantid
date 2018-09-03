@@ -250,12 +250,17 @@ void LoadEventNexus::init() {
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
 
-
+  std::vector<std::string> loadType{"default", "multiprocess"};
+  std::map<std::string, std::string> alias{{"default", "Automatic loader"},
+                                           {"multiprocess", "Multiprocess loader"}};
 #ifdef MPI_EXPERIMENTAL
-  declareProperty(make_unique<PropertyWithValue<bool>>("UseParallelLoader",
-                                                       true, Direction::Input),
-                  "Use experimental parallel loader for loading event data.");
+  loadType.emplace_back("MPI");
+  alias.insert(std::make_pair("MPI", "MPI loader"));
 #endif
+  auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType, alias);
+  declareProperty(
+      "Load type", "default", loadTypeValidator, "Set type of loader"
+  );
 }
 
 //----------------------------------------------------------------------------------------------
@@ -791,25 +796,38 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   longest_tof = 0.;
 
   bool loaded{false};
-  if (canUseParallelLoader(haveWeights, oldNeXusFileNames, classType)) {
+  auto loaderType = defineLoaderType(haveWeights, oldNeXusFileNames, classType);
+  if (loaderType != LoaderType::DEFAULT) {
     auto ws = m_ws->getSingleHeldWorkspace();
     m_file->close();
-    try {
-      ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name, bankNames,
-                                   event_id_is_spec);
-      g_log.information() << "Used ParallelEventLoader.\n";
-      loaded = true;
-      shortest_tof = 0.0;
-      longest_tof = 1e10;
-    } catch (const std::runtime_error &) {
-      g_log.warning()
-          << "ParallelEventLoader failed, falling back to default loader.\n";
+    if (loaderType == LoaderType::MPI) {
+      try {
+        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name, bankNames,
+                                     event_id_is_spec);
+        g_log.information() << "Used ParallelEventLoader.\n";
+        loaded = true;
+        shortest_tof = 0.0;
+        longest_tof = 1e10;
+      } catch (const std::runtime_error &) {
+        g_log.warning()
+            << "MPI event loader failed, falling back to default loader.\n";
+      }
+    } else {
+      try {
+        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name, bankNames,
+                                              event_id_is_spec);
+        g_log.information() << "Used ParallelEventLoader.\n";
+        loaded = true;
+        shortest_tof = 0.0;
+        longest_tof = 1e10;
+      } catch (const std::runtime_error &) {
+        g_log.warning()
+            << "Multiprocess event loader failed, falling back to default loader.\n";
+      }
     }
+
     safeOpenFile(m_filename);
   }
-
-  //TODO multiprocess loader
-
 
   if (!loaded) {
     bool precount = getProperty("Precount");
@@ -1327,37 +1345,33 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
 
 /// The parallel loader currently has no support for a series of special cases,
 /// as indicated by the return value of this method.
-bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
-                                          const bool oldNeXusFileNames,
-                                          const std::string &classType) const {
-#ifndef MPI_EXPERIMENTAL
-  // Actually the parallel loader would work also in non-MPI builds but it is
-  // likely to be slower than the default loader and may also exhibit unusual
-  // behavior for non-standard Nexus files.
-  return false;
-#else
-  bool useParallelLoader = getProperty("UseParallelLoader");
-  if (!useParallelLoader)
-    return false;
-#endif
-  if (m_ws->nPeriods() != 1)
-    return false;
-  if (haveWeights)
-    return false;
-  if (oldNeXusFileNames)
-    return false;
-  if (filter_tof_min != -1e20 || filter_tof_max != 1e20)
-    return false;
-  if (filter_time_start != Types::Core::DateAndTime::minimum() ||
-      filter_time_stop != Types::Core::DateAndTime::maximum())
-    return false;
-  if (!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeights,
+                                                            const bool oldNeXusFileNames,
+                                                            const std::string &classType) const {
+  auto propVal = getPropertyValue("Load type");
+  if (propVal == "default")
+    return LoaderType::DEFAULT;
+
+  bool noParallelConstrictions = true;
+  noParallelConstrictions &= !(m_ws->nPeriods() != 1);
+  noParallelConstrictions &= !haveWeights;
+  noParallelConstrictions &= !oldNeXusFileNames;
+  noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
+      filter_time_stop != Types::Core::DateAndTime::maximum()));
+  noParallelConstrictions &= !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
       !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
-      !isDefault("ChunkNumber"))
-    return false;
-  if (classType != "NXevent_data")
-    return false;
-  return true;
+      !isDefault("ChunkNumber")));
+  noParallelConstrictions &= !(classType != "NXevent_data");
+
+  if (!noParallelConstrictions)
+    return LoaderType::DEFAULT;
+
+#ifndef MPI_EXPERIMENTAL
+  return LoaderType::MULTIPROCESS;
+#else
+  return propVal == "MPI" ? LoaderType::MPI : LoaderType::MULTIPROCESS;
+#endif
 }
 
 Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(

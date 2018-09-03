@@ -54,7 +54,7 @@ void load(const std::string &filename, const std::string &groupname,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
   auto num = std::thread::hardware_concurrency();
   MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()), num,
-                                 num, "");
+                                 num, "./bin/MantidNexusParallelLoader");
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
 

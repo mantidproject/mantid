@@ -5,14 +5,22 @@ set(SRC_FILES
         EventLoaderChild.cpp
         EventsListsShmemManager.cpp
         EventsListsShmemStorage.cpp
+        MultiProcessEventLoader.cpp
+        EventLoaderHelpers.cpp
+        NXEventDataLoader.cpp
+        EventParser.cpp
         )
 
 set(INC_FILES
         ../../inc/MantidParallel/IO/EventsListsShmemManager.h
         ../../inc/MantidParallel/IO/EventsListsShmemStorage.h
+        ../../inc/MantidParallel/IO/MultiProcessEventLoader.h
+        ../../inc/MantidParallel/IO/EventLoaderHelpers.h
+        ../../inc/MantidParallel/IO/NXEventDataLoader.h
+        ../../inc/MantidParallel/IO/EventParser.h
         )
 
-
+include_directories(${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 #Add executable for Nexus parallel loader child process
 add_executable(EventParallelLoader ${SRC_FILES} ${INC_FILES})
 #set the name of generated executable

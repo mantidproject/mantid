@@ -5,7 +5,7 @@
 
 #include "MantidParallel/IO/EventsListsShmemManager.h"
 
-using Mantid::Parallel::EventsListsShmemManager;
+using Mantid::Parallel::IO::EventsListsShmemManager;
 
 class EventsListsShmemManagerTest : public CxxTest::TestSuite {
 public:

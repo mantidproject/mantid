@@ -179,15 +179,22 @@ protected:
       const override;
 
 private:
+  /// Possible loaders types
+  enum LoaderType {
+    MPI,
+    MULTIPROCESS,
+    DEFAULT
+  };
+
   /// Intialisation code
   void init() override;
 
   /// Execution code
   void exec() override;
 
-  bool canUseParallelLoader(const bool haveWeights,
-                            const bool oldNeXusFileNames,
-                            const std::string &classType) const;
+  LoadEventNexus::LoaderType defineLoaderType(const bool haveWeights,
+                                              const bool oldNeXusFileNames,
+                                              const std::string &classType) const;
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 

@@ -1,9 +1,10 @@
 #ifndef MANTID_PARALLEL_MULTIPROCESSEVENTLOADER_H_
 #define MANTID_PARALLEL_MULTIPROCESSEVENTLOADER_H_
 
-#include <H5Cpp.h>
+
 #include <string>
 #include <vector>
+//#include "H5Cpp.h"
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"

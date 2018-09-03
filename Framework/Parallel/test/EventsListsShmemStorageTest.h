@@ -18,7 +18,7 @@
 #define NUM_EVENTS 22000000
 #define STORAGE_CNT 1
 
-using Mantid::Parallel::EventsListsShmemStorage;
+using Mantid::Parallel::IO::EventsListsShmemStorage;
 namespace bp = boost::process;
 
 class EventsListsShmemStorageTest : public CxxTest::TestSuite {
@@ -65,7 +65,7 @@ public:
 
     EventsListsShmemStorage storage(segmentNames[0], storageName, storageSize,
                                     1, NUM_PIXELS, false);
-    Mantid::Parallel::EventsListsShmemManager::appendEventsDeterm(
+    Mantid::Parallel::IO::EventsListsShmemManager::appendEventsDeterm(
         NUM_EVENTS / NUM_PROCESSES, NUM_PIXELS, 0, storage);
 
     for (auto &c : vChilds)
@@ -89,12 +89,12 @@ public:
     for (unsigned i = 0; i < NUM_PROCESSES; ++i)
       workers.emplace_back([&cnt, &segmentNames, &storageName, &result]() {
         std::vector<ip::managed_shared_memory> segments;
-        std::vector<Mantid::Parallel::Chunks *> chunksPtrs;
+        std::vector<Mantid::Parallel::IO::Chunks *> chunksPtrs;
         for (unsigned i = 0; i < NUM_PROCESSES; ++i) {
           segments.emplace_back(ip::open_read_only, segmentNames[i].c_str());
           chunksPtrs.emplace_back(
               segments[i]
-                  .find<Mantid::Parallel::Chunks>(storageName.c_str())
+                  .find<Mantid::Parallel::IO::Chunks>(storageName.c_str())
                   .first);
         }
 
