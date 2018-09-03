@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtGui, QtCore, QtWidgets
-from mantid.simpleapi import *
+from qtpy import QtWidgets
 
 from Muon.GUI.MuonAnalysis.loadrun.load_run_model import LoadRunWidgetModel
 from Muon.GUI.MuonAnalysis.loadrun.load_run_view import LoadRunWidgetView

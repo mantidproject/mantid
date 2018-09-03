@@ -181,10 +181,6 @@ class LoadRunWidgetPresenter(object):
         # TODO : implement
         pass
 
-    def clear_loaded_data(self):
-        self._view.set_run_edit_text("")
-        self._model.clear_loaded_data()
-
     def enable_multiple_files(self, enabled):
         self._load_multiple_runs = enabled
 
