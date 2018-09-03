@@ -62,7 +62,9 @@ class PlotView(QtGui.QWidget):
 
     def _redo_layout(func):
         """
-        Simple decorator to call tight_layout() on plots, and to redraw the canvas.
+        Simple decorator (@_redo_layout) to call tight_layout() on plots
+         and to redraw the canvas.
+        (https://www.python.org/dev/peps/pep-0318/)
         """
 
         def wraps(self, *args, **kwargs):
@@ -74,7 +76,9 @@ class PlotView(QtGui.QWidget):
 
     def _save_addition(func):
         """
-        'Saves' the function call to be replayed later when the plots are cleared.
+        Simple decorator (@_save_addition) to 'Save' the function call to be
+        replayed later when the plots are cleared.
+        (https://www.python.org/dev/peps/pep-0318/)
         """
 
         def wraps(self, name, *args, **kwargs):
