@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -146,6 +147,15 @@ bool CreateFloodWorkspace::shouldRemoveBackground() {
   return isDefault(Prop::CENTRAL_PIXEL);
 }
 
+void CreateFloodWorkspace::collectExcludedSpectra() {
+  m_excludedSpectra = getProperty(Prop::EXCLUDE);
+}
+
+bool CreateFloodWorkspace::isExcludedSpectrum(double spec) const {
+  return std::find(m_excludedSpectra.begin(), m_excludedSpectra.end(), spec) !=
+         m_excludedSpectra.end();
+}
+
 API::MatrixWorkspace_sptr
 CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   g_log.information() << "Remove background " << getPropertyValue(Prop::BACKGROUND) << '\n';
@@ -170,14 +180,10 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   }
 
   // Exclude any bad detectors.
-  std::vector<double> const exclude = getProperty(Prop::EXCLUDE);
-  for (auto i : exclude) {
+  for (auto i : m_excludedSpectra) {
     excludeFromFit.push_back(i);
     excludeFromFit.push_back(i);
   }
-  auto isExcluded = [&exclude](double xVal) {
-    return std::find(exclude.begin(), exclude.end(), xVal) != exclude.end();
-  };
 
   std::string const function = getBackgroundFunction();
 
@@ -192,6 +198,12 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   alg->setProperty("Output", "fit");
   alg->execute();
 
+  IFunction_sptr func = alg->getProperty("Function");
+  g_log.information() << "Background function parameters:\n";
+  for(size_t i = 0; i < func->nParams(); ++i) {
+    g_log.information() << "    " << func->parameterName(i) << ": " << func->getParameter(i) << '\n';
+  }
+
   // Divide the workspace by the fitted curve to remove the background
   // and scale to values around 1
   MatrixWorkspace_sptr bkgWS = alg->getProperty("OutputWorkspace");
@@ -201,7 +213,7 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   for (int i = 0; i < nHisto; ++i) {
     PARALLEL_START_INTERUPT_REGION
     auto const xVal = x[i];
-    if (isExcluded(xVal)) {
+    if (isExcludedSpectrum(xVal)) {
       ws->mutableY(i)[0] = VERY_BIG_VALUE;
       ws->mutableE(i)[0] = 0.0;
     } else if (xVal >= startX && xVal <= endX) {
@@ -229,23 +241,42 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
 }
 
 MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_sptr ws) {
-  int centralIndex = getProperty(Prop::CENTRAL_PIXEL);
+  int const centralSpectrum = getProperty(Prop::CENTRAL_PIXEL);
   auto const nHisto = static_cast<int>(ws->getNumberHistograms());
-  if (centralIndex >= nHisto) {
+  if (centralSpectrum >= nHisto) {
     throw std::invalid_argument(
-        "Spectrum index " + std::to_string(centralIndex) +
+        "Spectrum index " + std::to_string(centralSpectrum) +
         " passed to property " + Prop::CENTRAL_PIXEL +
         " is outside the range 0-" + std::to_string(nHisto - 1));
   }
-  auto scaleFactor = ws->y(centralIndex).front();
+  auto const spectraMap = ws->getSpectrumToWorkspaceIndexMap();
+  auto const centralIndex = spectraMap.at(centralSpectrum);
+  auto const scaleFactor = ws->y(centralIndex).front();
   g_log.information() << "Scale to central pixel, factor = " << scaleFactor << '\n';
   if (scaleFactor <= 0.0) {
     throw std::runtime_error("Scale factor muhst be > 0, found " + std::to_string(scaleFactor));
   }
+  auto const axis = ws->getAxis(1);
+  auto const sa = dynamic_cast<const SpectraAxis*>(axis);
+  double const startX = isDefault(Prop::START_X) ? sa->getMin() : getProperty(Prop::START_X);
+  double const endX = isDefault(Prop::END_X) ? sa->getMax() : getProperty(Prop::END_X);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < nHisto; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    auto const spec = ws->getSpectrum(i).getSpectrumNo();
+    if (isExcludedSpectrum(spec)) {
+      ws->mutableY(i)[0] = VERY_BIG_VALUE;
+      ws->mutableE(i)[0] = 0.0;
+    } else if (spec >= startX && spec <= endX) {
       ws->mutableY(i)[0] /= scaleFactor;
       ws->mutableE(i)[0] /= scaleFactor;
+    } else {
+      ws->mutableY(i)[0] = 1.0;
+      ws->mutableE(i)[0] = 0.0;
+    }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   return ws;
 }
 
@@ -256,6 +287,7 @@ void CreateFloodWorkspace::exec() {
   auto ws = getInputWorkspace();
   ws = integrate(ws);
   progress(0.9);
+  collectExcludedSpectra();
   if (shouldRemoveBackground()) {
     ws = removeBackground(ws);
   } else {

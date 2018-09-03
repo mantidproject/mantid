@@ -70,7 +70,7 @@ class ReflectometryCreateFloodWorkspaceCentralPixel(stresstesting.MantidStressTe
             y = [1, 9, 8, 3, 14, 15]
             ws = CreateWorkspace(x, y, NSpec=6)
             SaveNexus(ws, input_file)
-            CreateFloodWorkspace(input_file, CentralPixelSpectrum=2, OutputWorkspace=self.flood_ws_name)
+            CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
             self.assertAlmostEqual(out.readY(0)[0], 1.0/8)
             self.assertAlmostEqual(out.readY(1)[0], 9.0/8)
@@ -93,7 +93,7 @@ class ReflectometryCreateFloodWorkspaceIntegrationRange(stresstesting.MantidStre
             y = [1, 2, 1] + [9, 3, 9] + [8, 4, 8] + [3, 5, 3] + [14, 6, 14] + [15, 7, 15]
             ws = CreateWorkspace(x, y, NSpec=6)
             SaveNexus(ws, input_file)
-            CreateFloodWorkspace(input_file, CentralPixelSpectrum=2, RangeLower=3, RangeUpper=7, OutputWorkspace=self.flood_ws_name)
+            CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, RangeLower=3, RangeUpper=7, OutputWorkspace=self.flood_ws_name)
             out = mtd[self.flood_ws_name]
             self.assertAlmostEqual(out.readY(0)[0], 2.0/4)
             self.assertAlmostEqual(out.readY(1)[0], 3.0/4)
@@ -117,6 +117,52 @@ class ReflectometryCreateFloodWorkspaceDivisionByZero(stresstesting.MantidStress
             ws = CreateWorkspace(x, y, NSpec=6)
             SaveNexus(ws, input_file)
             self.assertRaises(RuntimeError, CreateFloodWorkspace, input_file,
-                              CentralPixelSpectrum=2, RangeLower=3, RangeUpper=7, OutputWorkspace=self.flood_ws_name)
+                              CentralPixelSpectrum=3, RangeLower=3, RangeUpper=7, OutputWorkspace=self.flood_ws_name)
+        finally:
+            os.unlink(input_file)
+
+
+class ReflectometryCreateFloodWorkspaceCentralPixelExclude(stresstesting.MantidStressTest):
+
+    flood_ws_name = 'flood'
+
+    def runTest(self):
+        try:
+            input_file = tempfile.gettempdir() + '/__refl_flood_cor_temp.nxs'
+            x = [0, 100000, 0, 100000, 0, 100000, 0, 100000, 0, 100000, 0, 100000]
+            y = [1, 9, 8, 3, 14, 15]
+            ws = CreateWorkspace(x, y, NSpec=6)
+            SaveNexus(ws, input_file)
+            CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, ExcludeSpectra=[1, 5], OutputWorkspace=self.flood_ws_name)
+            out = mtd[self.flood_ws_name]
+            self.assertGreaterThan(out.readY(0)[0], 1.e100)
+            self.assertAlmostEqual(out.readY(1)[0], 9.0/8)
+            self.assertAlmostEqual(out.readY(2)[0], 1.0)
+            self.assertAlmostEqual(out.readY(3)[0], 3.0/8)
+            self.assertGreaterThan(out.readY(4)[0], 1.e100)
+            self.assertAlmostEqual(out.readY(5)[0], 15.0/8)
+        finally:
+            os.unlink(input_file)
+
+
+class ReflectometryCreateFloodWorkspaceCentralPixelRange(stresstesting.MantidStressTest):
+
+    flood_ws_name = 'flood'
+
+    def runTest(self):
+        try:
+            input_file = tempfile.gettempdir() + '/__refl_flood_cor_temp.nxs'
+            x = [0, 100000, 0, 100000, 0, 100000, 0, 100000, 0, 100000, 0, 100000]
+            y = [1, 9, 8, 3, 14, 15]
+            ws = CreateWorkspace(x, y, NSpec=6)
+            SaveNexus(ws, input_file)
+            CreateFloodWorkspace(input_file, CentralPixelSpectrum=3, StartSpectrumIndex=2, EndSpectrumIndex=4, OutputWorkspace=self.flood_ws_name)
+            out = mtd[self.flood_ws_name]
+            self.assertAlmostEqual(out.readY(0)[0], 1.0)
+            self.assertAlmostEqual(out.readY(1)[0], 9.0/8)
+            self.assertAlmostEqual(out.readY(2)[0], 1.0)
+            self.assertAlmostEqual(out.readY(3)[0], 3.0/8)
+            self.assertAlmostEqual(out.readY(4)[0], 1.0)
+            self.assertAlmostEqual(out.readY(5)[0], 1.0)
         finally:
             os.unlink(input_file)
