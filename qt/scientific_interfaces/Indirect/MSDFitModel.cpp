@@ -26,6 +26,8 @@ std::string MSDFitModel::singleFitOutputName(std::size_t index,
                                    spectrum);
 }
 
+std::string MSDFitModel::getResultXAxisUnit() const { return ""; }
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
