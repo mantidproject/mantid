@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtCore, QtWidgets, QtGui
+from PyQt4 import QtCore, QtGui
 
-#from mantidqtpython import MantidQt
 
-class LoadWidgetView(QtWidgets.QWidget):
+# from mantidqtpython import MantidQt
+
+class LoadWidgetView(QtGui.QWidget):
 
     def __init__(self, parent=None, load_run_view=None, load_file_view=None):
         super(LoadWidgetView, self).__init__(parent)
@@ -49,17 +50,17 @@ class LoadWidgetView(QtWidgets.QWidget):
 
     def setupUi(self):
 
-        self.clearButton = QtWidgets.QPushButton(self)
+        self.clearButton = QtGui.QPushButton(self)
         self.clearButton.setMinimumSize(QtCore.QSize(100, 25))
         self.clearButton.setObjectName("clearButton")
         self.clearButton.setToolTip("Clear the currently loaded data")
         self.clearButton.setText("Clear")
 
-        self.multiple_loading_label = QtWidgets.QLabel(self)
+        self.multiple_loading_label = QtGui.QLabel(self)
         self.multiple_loading_label.setObjectName("multiple_loading_label")
         self.multiple_loading_label.setText("Multiple loading : ")
 
-        self.multiple_loading_check = QtWidgets.QCheckBox()
+        self.multiple_loading_check = QtGui.QCheckBox()
         self.multiple_loading_check.setToolTip("Enable/disable loading multiple runs at once")
         self.multiple_loading_check.setChecked(False)
 
@@ -67,22 +68,22 @@ class LoadWidgetView(QtWidgets.QWidget):
         # self.load_behaviour_label.setObjectName("load_behaviour_label")
         # self.load_behaviour_label.setText("Load Behaviour : ")
 
-        self.load_behaviour_combo = QtWidgets.QComboBox(self)
+        self.load_behaviour_combo = QtGui.QComboBox(self)
         self.load_behaviour_combo.setObjectName("load_behaviour_combo")
         self.load_behaviour_combo.addItem("Co-Add")
         self.load_behaviour_combo.addItem("Simultaneous")
         self.load_behaviour_combo.setToolTip("The behaviour of the loaded data in multiple file mode")
         self.load_behaviour_combo.setEnabled(False)
 
-        self.manageDirectoriesButton = QtWidgets.QPushButton(self)
+        self.manageDirectoriesButton = QtGui.QPushButton(self)
         self.manageDirectoriesButton.setMinimumSize(QtCore.QSize(100, 25))
         self.manageDirectoriesButton.setObjectName("manageDirectoriesButton")
         self.manageDirectoriesButton.setText("Manage User Directories")
 
-        spacer = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacer = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
         # Set the layout of the tools at the bottom of the widget
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.addWidget(self.clearButton)
         self.horizontalLayout.addWidget(self.multiple_loading_label)
@@ -94,7 +95,7 @@ class LoadWidgetView(QtWidgets.QWidget):
         self.horizontalLayout.addItem(spacer)
 
         # Set the layout vertically
-        self.verticalLayout = QtWidgets.QVBoxLayout(self)
+        self.verticalLayout = QtGui.QVBoxLayout(self)
         self.verticalLayout.addWidget(self.load_file_widget)
         self.verticalLayout.addWidget(self.load_run_widget)
         self.verticalLayout.addLayout(self.horizontalLayout)

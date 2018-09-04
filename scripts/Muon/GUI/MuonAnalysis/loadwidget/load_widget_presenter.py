@@ -29,7 +29,7 @@ class LoadWidgetPresenter(object):
         self.view.on_clear_button_clicked(self.clear_data_and_view)
 
         self._view.on_multiple_loading_check_changed(self.handle_multiple_files_option_changed)
-        #self._view.on_multiple_loading_check_changed(self.clear_data_and_view)
+        # self._view.on_multiple_loading_check_changed(self.clear_data_and_view)
 
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
@@ -51,12 +51,10 @@ class LoadWidgetPresenter(object):
         self.load_file_widget.enable_multiple_files(enabled)
 
     def handle_file_widget_data_changed(self):
-        print("handle_file_widget_data_changed : ", self._model.runs)
         self.load_run_widget.update_view_from_model(self._model.runs)
         self.load_file_widget.update_view_from_model(self._model.filenames)
 
     def handle_run_widget_data_changed(self):
-        print("handle_run_widget_data_changed", self._model.runs)
         self.load_run_widget.update_view_from_model(self._model.runs)
         self.load_file_widget.update_view_from_model(self._model.filenames)
 
@@ -68,13 +66,11 @@ class LoadWidgetPresenter(object):
         pass
 
     def disable_loading(self):
-        print("Disabling loading")
         self.load_run_widget.disable_loading()
         self.load_file_widget.disable_loading()
         self._view.disable_loading()
 
     def enable_loading(self):
-        print("Enabling loading")
         self.load_run_widget.enable_loading()
         self.load_file_widget.enable_loading()
         self._view.enable_loading()

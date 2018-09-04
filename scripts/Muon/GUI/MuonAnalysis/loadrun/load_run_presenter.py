@@ -62,13 +62,13 @@ class LoadRunWidgetPresenter(object):
         self._view.notify_loading_started()
         self.disable_loading()
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished)
+        self._load_thread.threadWrapperSetUp(self.empty, self.handle_load_thread_finished)
         self._load_thread.loadData(filenames)
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
 
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
+        self._load_thread.threadWrapperTearDown(self.empty, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
 
@@ -81,6 +81,9 @@ class LoadRunWidgetPresenter(object):
 
         self._view.notify_loading_finished()
         self.enable_loading()
+
+    def empty(self):
+        pass
 
     def handle_load_current_run(self):
 
@@ -98,13 +101,13 @@ class LoadRunWidgetPresenter(object):
         self.disable_loading()
 
         self._load_thread = self.create_load_thread()
-        self._load_thread.threadWrapperSetUp(self.disable_loading, self.handle_load_thread_finished_current_run)
+        self._load_thread.threadWrapperSetUp(self.empty, self.handle_load_thread_finished_current_run)
         self._load_thread.loadData([current_run_file])
         self._load_thread.start()
 
     def handle_load_thread_finished_current_run(self):
 
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished_current_run)
+        self._load_thread.threadWrapperTearDown(self.empty, self.handle_load_thread_finished_current_run)
         self._load_thread.deleteLater()
         self._load_thread = None
 

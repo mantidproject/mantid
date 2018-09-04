@@ -2,13 +2,14 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
+
 class LoadWidgetModel(object):
     """
     The model is responsible for storing the currently loaded run or runs
     (both the nun numbers, filenames and workspaces) as well as loading new runs using a separate loading thread.
     """
 
-    def __init__(self, loaded_data_store = MuonLoadData()):
+    def __init__(self, loaded_data_store=MuonLoadData()):
         self._loaded_data_store = loaded_data_store
 
     def add_muon_data(self, filename, workspace, run):
