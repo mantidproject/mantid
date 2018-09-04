@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/GetEiMonDet3.h"
 
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -27,8 +27,7 @@ const static std::string FIT_STATUS_COLUMN("FitStatus");
 const static std::string PEAK_CENTRE_COLUMN("PeakCentre");
 /// Tag for successfully fitted rows in EPP tables
 const static std::string FIT_STATUS_SUCCESS("success");
-}
-
+} // namespace EPPTableLiterals
 
 /** A private namespace holding the property names of
  *  GetEiMonDet algorithm, version 2.
@@ -40,16 +39,16 @@ const static std::string DETECTOR_EPP_TABLE("DetectorEPPTable");
 const static std::string DETECTOR_WORKSPACE("DetectorWorkspace");
 /// Name of the incident energy output property
 const static std::string INCIDENT_ENERGY("IncidentEnergy");
-/// Name of the monitor index property
-const static std::string MONITOR("Monitor");
+/// Name of the monitor workspace index property
+const static std::string MONITOR("MonitorIndex");
 /// Name of the monitor epp table property
 const static std::string MONITOR_EPP_TABLE("MonitorEPPTable");
 /// Name of the monitor workspace property
 const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
 /// Name of the neutron pulse interval property
 const static std::string PULSE_INTERVAL("PulseInterval");
-}
-}
+} // namespace Prop
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -58,9 +57,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GetEiMonDet3)
 
 /// Returns algorithm's name for identification
-const std::string GetEiMonDet3::name() const {
-  return "GetEiMonDet";
-}
+const std::string GetEiMonDet3::name() const { return "GetEiMonDet"; }
 
 /// Returns a summary of algorithm's purpose
 const std::string GetEiMonDet3::summary() const {
@@ -70,25 +67,21 @@ const std::string GetEiMonDet3::summary() const {
 }
 
 /// Returns algorithm's version for identification
-int GetEiMonDet3::version() const {
-  return 3;
-}
+int GetEiMonDet3::version() const { return 3; }
 
 const std::vector<std::string> GetEiMonDet3::seeAlso() const {
   return {"GetEi"};
 }
 
 /// Algorithm's category for identification overriding a virtual method
-const std::string GetEiMonDet3::category() const {
-  return "Inelastic\\Ei";
-}
+const std::string GetEiMonDet3::category() const { return "Inelastic\\Ei"; }
 
 /** A private namespace holding names for sample log entries.
  */
 namespace SampleLogs {
 /// Name of the pulse interval sample log
 const static std::string PULSE_INTERVAL("pulse_interval");
-}
+} // namespace SampleLogs
 
 /** Initialized the algorithm.
  *
@@ -97,30 +90,34 @@ void GetEiMonDet3::init() {
   auto tofWorkspace = boost::make_shared<Kernel::CompositeValidator>();
   tofWorkspace->add<API::WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<API::InstrumentValidator>();
-  auto mandatoryIntProperty = boost::make_shared<Kernel::MandatoryValidator<int>>();
+  auto mandatoryIntProperty =
+      boost::make_shared<Kernel::MandatoryValidator<int>>();
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
-  declareWorkspaceInputProperties<API::MatrixWorkspace, API::IndexType::SpectrumNum | API::IndexType::WorkspaceIndex>(Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.", tofWorkspace);
+  declareWorkspaceInputProperties<API::MatrixWorkspace,
+                                  API::IndexType::SpectrumNum |
+                                      API::IndexType::WorkspaceIndex>(
+      Prop::DETECTOR_WORKSPACE, "A workspace containing the detector spectra.",
+      tofWorkspace);
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           Prop::DETECTOR_EPP_TABLE, "", Kernel::Direction::Input),
-      "An EPP table corresponding to " + Prop::DETECTOR_WORKSPACE +
-          ".");
+      "An EPP table corresponding to " + Prop::DETECTOR_WORKSPACE + ".");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       Prop::MONITOR_WORKSPACE.c_str(), "",
-                      Kernel::Direction::Input, API::PropertyMode::Optional, tofWorkspace),
+                      Kernel::Direction::Input, API::PropertyMode::Optional,
+                      tofWorkspace),
                   "A Workspace containing the monitor spectrum. If empty, " +
                       Prop::DETECTOR_WORKSPACE + " will be used.");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-                      Prop::MONITOR_EPP_TABLE.c_str(), "",
-                      Kernel::Direction::Input, API::PropertyMode::Optional),
-                  "An EPP table corresponding to " +
-                      Prop::MONITOR_WORKSPACE);
-  setPropertySettings(
-      Prop::MONITOR_EPP_TABLE,
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(Prop::MONITOR_WORKSPACE,
-                                       Kernel::IS_NOT_DEFAULT));
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          Prop::MONITOR_EPP_TABLE.c_str(), "", Kernel::Direction::Input,
+          API::PropertyMode::Optional),
+      "An EPP table corresponding to " + Prop::MONITOR_WORKSPACE);
+  setPropertySettings(Prop::MONITOR_EPP_TABLE,
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          Prop::MONITOR_WORKSPACE, Kernel::IS_NOT_DEFAULT));
   declareProperty(Prop::MONITOR, EMPTY_INT(), mandatoryIntProperty,
                   "Usable monitor's workspace index.");
   declareProperty(Prop::PULSE_INTERVAL, EMPTY_DBL(),
@@ -141,15 +138,19 @@ void GetEiMonDet3::exec() {
 
   m_detectorEPPTable = getProperty(Prop::DETECTOR_EPP_TABLE);
   m_monitorWs = getProperty(Prop::MONITOR_WORKSPACE);
+  const int monitorIndex = getProperty(Prop::MONITOR);
   if (!m_monitorWs) {
     m_monitorWs = m_detectorWs;
+    if (std::find(detectorIndices.begin(), detectorIndices.end(),
+                  monitorIndex) != detectorIndices.end()) {
+      throw std::runtime_error(
+          "MonitorIndex is also listed in DetectorWorkspaceIndexSet.");
+    }
   }
   m_monitorEPPTable = getProperty(Prop::MONITOR_EPP_TABLE);
   if (!m_monitorEPPTable) {
     m_monitorEPPTable = m_detectorEPPTable;
   }
-  const int monitorIndex = getProperty(Prop::MONITOR);
-
 
   double sampleToDetectorDistance;
   double detectorEPP;
@@ -181,7 +182,8 @@ void GetEiMonDet3::exec() {
  *  @param detectorEPP An output parameter for the average position
  *         of the detectors' elastic peak
  */
-void GetEiMonDet3::averageDetectorDistanceAndTOF(const Indexing::SpectrumIndexSet &detectorIndices,
+void GetEiMonDet3::averageDetectorDistanceAndTOF(
+    const Indexing::SpectrumIndexSet &detectorIndices,
     double &sampleToDetectorDistance, double &detectorEPP) {
   auto peakPositionColumn =
       m_detectorEPPTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
@@ -259,9 +261,13 @@ double GetEiMonDet3::computeTOF(const double detectorEPP,
         pulseInterval = m_detectorWs->run().getPropertyAsSingleValue(
             SampleLogs::PULSE_INTERVAL);
         pulseInterval *= 1e6; // To microseconds.
+      } else {
+        throw std::invalid_argument(
+            "PulseInterval not explicitly given nor found in the sample logs.");
       }
     }
-    g_log.notice() << "Frame delay of " << pulseInterval << " microseconds will be added to the time-of-flight.\n";
+    g_log.notice() << "Frame delay of " << pulseInterval
+                   << " microseconds will be added to the time-of-flight.\n";
     timeOfFlight += pulseInterval;
   }
   g_log.notice() << "Calculated time-of-flight: " << timeOfFlight << ".\n";

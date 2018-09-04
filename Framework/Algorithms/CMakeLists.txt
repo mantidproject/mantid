@@ -837,6 +837,7 @@ set ( TEST_FILES
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiMonDet2Test.h
+	GetEiMonDet3Test.h
 	GetEiTest.h
 	GetEiV1Test.h
 	GetQsInQENSDataTest.h

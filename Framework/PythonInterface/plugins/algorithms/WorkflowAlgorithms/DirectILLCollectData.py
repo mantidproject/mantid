@@ -78,7 +78,7 @@ def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEP
                              DetectorEPPTable=detEPPWorkspace,
                              MonitorWorkspace=monWorkspace,
                              MonitorEppTable=monEPPWorkspace,
-                             Monitor=eiCalibrationMon,
+                             MonitorIndex=eiCalibrationMon,
                              EnableLogging=algorithmLogging)
         eiWSName = wsNames.withSuffix('incident_energy')
         eiWorkspace = CreateSingleValuedWorkspace(OutputWorkspace=eiWSName,

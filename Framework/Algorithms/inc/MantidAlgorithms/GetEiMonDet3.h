@@ -49,6 +49,7 @@ public:
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
+
 private:
   /// Initializes the algorithm
   void init() override;
@@ -56,13 +57,12 @@ private:
   /// Executes the algorithm
   void exec() override;
   /// Calculates the average sample-to-detector distance and TOF
-  void averageDetectorDistanceAndTOF(const Indexing::SpectrumIndexSet &detectorIndices,
-                                     double &sampleToDetectorDistance,
-                                     double &detectorEPP);
+  void averageDetectorDistanceAndTOF(
+      const Indexing::SpectrumIndexSet &detectorIndices,
+      double &sampleToDetectorDistance, double &detectorEPP);
 
   /// Calculates the total TOF from monitor to detectors
-  double computeTOF(const double detectorEPP,
-                    const double monitorEPP);
+  double computeTOF(const double detectorEPP, const double monitorEPP);
 
   /// Sets the monitor-to-sample distance and TOF
   void monitorDistanceAndTOF(const size_t monitorIndex,
