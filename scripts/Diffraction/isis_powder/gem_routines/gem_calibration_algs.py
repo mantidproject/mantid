@@ -28,8 +28,18 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
 
     if calibration_ws.getAxis(0).getUnit().unitID() != WORKSPACE_UNITS.d_spacing:
         calibration_ws = mantid.ConvertUnits(InputWorkspace=calibration_ws, Target="dSpacing")
+    spectrum_list = []
+    for i in range(0, calibration_ws.getNumberHistograms()):
+        try:
+            calibration_ws.getDetector(i)
 
+        except RuntimeError:
+            pass
+        else:
+            spectrum_list.append(i)
+    calibration_ws = mantid.ExtractSpectra(InputWorkspace=calibration_ws, WorkspaceIndexList=spectrum_list)
     rebinned = mantid.Rebin(InputWorkspace=calibration_ws, Params=rebin_2_params)
+
     cross_correlated = mantid.CrossCorrelate(InputWorkspace=rebinned, **cross_correlate_params)
 
     offset_file = os.path.join(calibration_dir, offset_file_name)
