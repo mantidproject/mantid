@@ -29,27 +29,11 @@ spline_rel_path = os.path.join("17_1", "VanSplined_98472_tt70_pearl_offset_16_4.
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
 working_dir = os.path.join(DIRS[0], working_folder_name)
-
 input_dir = os.path.join(working_dir, input_folder_name)
-# output_dir = os.path.join(working_dir, output_folder_name)
-
 
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
-
-
-
-
-# output_dir = os.path.join(config['defaultsave.directory'], output_folder_name)
-# spline_rel_path = os.path.join(config['defaultsave.directory'], "VanSplined_Neil.nxs")
-# spline_path = spline_rel_path
-
-
-# print(calibration_map_path)
-# print(calibration_dir)
-# print(spline_path)
-# exit()
 
 class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
@@ -229,8 +213,6 @@ def run_focus(inst_object, tt_mode):
     attenuation_path = os.path.join(calibration_dir, attenuation_file_name)
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
-
-    print("NVAYTET",original_splined_path,spline_path)
 
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
                              perform_attenuation=True, attenuation_file_path=attenuation_path, tt_mode=tt_mode)

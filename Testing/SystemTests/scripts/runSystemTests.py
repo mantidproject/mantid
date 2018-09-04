@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import (absolute_import, division, print_function)
-from multiprocessing import Process, Array, Manager
+from multiprocessing import Process, Array, Manager, Value, Lock
 import optparse
 import os
 import sys
@@ -99,18 +99,17 @@ if options.makeprop:
 # Generate list of tests
 #########################################################################
 
-tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir, quiet=options.quiet,
+runner = stresstesting.TestRunner(executable=options.executable, exec_args=options.execargs,
+                        escape_quotes=True,
+                        searchDir=mtdconf.dataDir, saveDir=mtdconf.saveDir)
+
+tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir, runner=runner, quiet=options.quiet,
                    testsInclude=options.testsInclude, testsExclude=options.testsExclude,
                    exclude_in_pr_builds=options.exclude_in_pr_builds)
 
-test_counts, test_list = tmgr.generateMasterTestList()
+test_counts, test_list, test_stats = tmgr.generateMasterTestList()
 
-reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
-for key, value in reverse_sorted_dict:
-    print("Test module "+key+" has %i tests:"%value)
-    for t in test_list[key]:
-        print(" - "+t._fqtestname)
-exit()
+number_of_test_modules = len(test_list.keys())
 
 #########################################################################
 # Run the tests
@@ -119,35 +118,59 @@ exit()
 if options.clean:
     print("Performing cleanup run")
 
-# Multi-core processes
-processes = [] # an array to hold the processes
-results_array = Array('i', 4*options.ncores) # shared array to hold skipped, failed and total number of tests + status
-test_counter = Array('i', [0, 0, 0]) # shared array for number of executed tests, total number and max name length
-manager = Manager() # a manager to create a shared dict to store names of skipped and failed tests
-status_dict = manager.dict() # a shared dict to store names of skipped and failed tests
+# Multi-core processes --------------
+# An array to hold the processes
+processes = []
+# A shared array to hold skipped and failed tests + status
+results_array = Array('i', [0] * (3*options.ncores))
+# A shared array for number of executed tests, total number and max name length
+test_counter  = Array('i', [0] * len(test_stats))
+# A manager to create a shared dict to store names of skipped and failed tests
+manager = Manager()
+# A shared dict to store names of skipped and failed tests
+status_dict = manager.dict()
+# A shared dict to store the global list of tests
+tests_dict = manager.dict()
+# A shared array with 0s and 1s to keep track of completed tests
+tests_lock = Array('i', [0] * number_of_test_modules)
+# A shared value to count the number of remaining test modules
+tests_left = Value('i', number_of_test_modules)
 
-# print(mtdconf.testDir)
-# print(mtdconf.dataDir)
-# print(mtdconf.saveDir)
-# exit()
+# Store the global list of tests into the shared dictionaries and arrays
+for i in range(len(test_counter)):
+    test_counter[i] = test_stats[i]
+# Store in reverse number of number of tests in each module
+reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+counter = 0
+for key, value in reverse_sorted_dict:
+    tests_dict[str(counter)] = test_list[key]
+    counter += 1
+    if (not options.quiet):
+        print("Test module "+key+" has %i tests:"%value)
+        for t in test_list[key]:
+            print(" - "+t._fqtestname)
+        print()
+
+# Define a lock
+lock = Lock()
 
 # Prepare ncores processes
 for ip in range(options.ncores):
-    processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
-                     mtdconf.dataDir, options, results_array, status_dict, test_counter, ip)))
+    processes.append(Process(target=stresstesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
+                     mtdconf.dataDir, options, tests_dict, tests_lock, tests_left, results_array,
+                     status_dict, test_counter, ip, lock)))
 # Start and join processes
 for p in processes:
     p.start()
 for p in processes:
     p.join()
 
-
 # Gather results
-skippedTests = sum(results_array[:options.ncores])
+skippedTests = sum(results_array[:options.ncores]) + (test_stats[3] - test_stats[1])
 failedTests = sum(results_array[options.ncores:2*options.ncores])
-totalTests = sum(results_array[2*options.ncores:3*options.ncores])
+totalTests = test_stats[3]
 # Find minimum of status: if min == 0, then success is False
-success = bool(min(results_array[3*options.ncores:4*options.ncores]))
+success = bool(min(results_array[2*options.ncores:3*options.ncores]))
 
 #########################################################################
 # Cleanup

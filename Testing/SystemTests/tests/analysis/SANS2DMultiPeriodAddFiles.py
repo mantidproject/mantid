@@ -33,7 +33,6 @@ class SANS2DMultiPeriodAddFiles(stresstesting.MantidStressTest):
 
         paths = [os.path.join(config['defaultsave.directory'],'SANS2D00005512-add.nxs'),
                  os.path.join(config['defaultsave.directory'],'SANS2D00005512.log')]
-        # exit()
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)

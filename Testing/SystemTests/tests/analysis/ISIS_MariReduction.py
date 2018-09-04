@@ -6,9 +6,6 @@ from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
 except:
-    print("web_var is none")
-    run_dir = os.path.dirname(os.path.realpath(__file__))
-    print("NEIL",run_dir)
     web_var = None
 
 

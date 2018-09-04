@@ -779,7 +779,7 @@ class TestManager(object):
                  quiet=False, testsInclude=None, testsExclude=None,
                  exclude_in_pr_builds=None, showSkipped=False,
                  output_on_failure=False, clean=False,
-                 test_count=None, process_number=0, ncores=1):
+                 test_count=None, process_number=0, ncores=1,list_of_tests=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -790,22 +790,20 @@ class TestManager(object):
             r._output_on_failure = output_on_failure
         self._test_count = test_count
         self._clean = clean
+        self._showSkipped = showSkipped
 
         self._testDir = test_loc
         self._quiet = quiet
-        self._testsInclude=testsInclude,
-        self._testsExclude=testsExclude,
+        self._testsInclude=testsInclude
+        self._testsExclude=testsExclude
         self._exclude_in_pr_builds=exclude_in_pr_builds
 
         self._passedTests = 0
         self._skippedTests = 0
         self._failedTests = 0
         self._lastTestRun = 0
-        self._totalTests = 0
-
-        self._testsInclude = None
-        self._testsExclude = None
-
+        
+        self._tests = list_of_tests
 
     def generateMasterTestList(self):
 
@@ -813,7 +811,7 @@ class TestManager(object):
         if os.path.isdir(self._testDir) == True:
             test_dir = os.path.abspath(self._testDir).replace('\\','/')
             sys.path.append(test_dir)
-            # runner.setTestDir(test_dir)
+            self._runner.setTestDir(test_dir)
             full_test_list = self.loadTestsFromDir(test_dir)
         else:
             if os.path.exists(self._testDir) == False:
@@ -821,34 +819,20 @@ class TestManager(object):
                 exit(2)
             test_dir = os.path.abspath(os.path.dirname(self._testDir)).replace('\\','/')
             sys.path.append(test_dir)
-            # runner.setTestDir(test_dir)
-            full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
-        if self._runner is not None:
             self._runner.setTestDir(test_dir)
-        
-
-        self._testsInclude = testsInclude
-        self._testsExclude = testsExclude
-        # flag to exclude slow tests from pull requests
-        self._exclude_in_pr_builds = exclude_in_pr_builds
+            full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
 
         # Gather statistics on full test list
+        test_stats = [0, 0, 0, 0]
+        test_stats[3] = len(full_test_list)
         reduced_test_list = []
-        tid = 0
         for t in full_test_list:
-            # print(t._fqtestname)
-            if self.__shouldTest(t) or showSkipped:
+            if self.__shouldTest(t) or self._showSkipped:
                 reduced_test_list.append(t)
-                tid += 1
-                t._id = tid
 
-        self._test_count[1] = len(reduced_test_list)
+        test_stats[1] = len(reduced_test_list)
         for t in reduced_test_list:
-            self._test_count[2] = max(self._test_count[2],len(t._fqtestname))
-
-        # # Simple even distribution of tests
-        # indices = range(process_number,len(reduced_test_list),ncores)
-        # self._tests = [reduced_test_list[i] for i in indices]
+            test_stats[2] = max(test_stats[2],len(t._fqtestname))
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes into groups instead of test by test, to avoid issues
@@ -870,7 +854,7 @@ class TestManager(object):
         modcounts = dict()
         modtests = dict()
         # This is the length of characters to match at the start of test name
-        min_length_for_group_name = 400
+        min_length_for_group_name = 18
         for t in reduced_test_list:
             not_found = True
             for key in modcounts.keys():
@@ -884,51 +868,7 @@ class TestManager(object):
                 modcounts[key] = 1
                 modtests[key] = [t]
 
-        # # Now we distribute the tests to each core
-        # # This is done by sorting the modules by descending order of number of tests
-        # # We then iterate through that list and give all the tests inside a given module
-        # # to the core which currently has the lowest number of tests.
-        # # The number of tests for that core is then incremented by the number of tests
-        # # inside the module it has just received.
-        # ntests_per_core = [0] * ncores
-        # self._tests = []
-        # reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
-        # for key, value in reverse_sorted_dict:
-        #     if process_number == 0:
-        #         print(key,value)
-        #     for i in range(ncores):
-        #         if(ntests_per_core[i] == min(ntests_per_core)):
-        #             ntests_per_core[i] += value
-        #             if (i == process_number):
-        #                 self._tests.extend(modtests[key])
-        #             break
-
-        # if len(reduced_test_list) == 0:
-        #     print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
-        #     exit(2)
-
-        # # if (not quiet) and (not clean):
-        # if True:
-        #     hline = "========================================"
-        #     out_string = hline + "\n"
-        #     out_string += "Core %i will execute %i tests:\n" % (process_number,len(self._tests))
-        #     for t in self._tests:
-        #         out_string += ("%3i. " % t._id) + t._fqtestname + "\n"
-        #     out_string += hline
-        #     print(out_string)
-        # sys.stdout.flush()
-
-        return modcounts, modtests
-
-        # self._passedTests = 0
-        # self._skippedTests = 0
-        # self._failedTests = 0
-        # self._lastTestRun = 0
-
-    # totalTests = property(lambda self: len(self._tests))
-    # skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
-    # passedTests = property(lambda self: self._passedTests)
-    # failedTests = property(lambda self: self._failedTests)
+        return modcounts, modtests, test_stats
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -1173,46 +1113,74 @@ def envAsString():
     return env
 
 #########################################################################
-# Function to spawn one test manager per core
+# Function to keep a pool of threads active in a loop to run the tests
 #########################################################################
-def testProcess(testDir, saveDir, dataDir, options, res_array,
-                stat_dict, test_count, process_number):
-
+def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
+                    tests_lock, tests_left, res_array, stat_dict,
+                    test_count, process_number, lock):
+    
     reporter = XmlResultReporter(showSkipped=options.showskipped)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
                         escape_quotes=True, clean=options.clean, core_id=process_number,
                         searchDir=dataDir, saveDir=saveDir)
 
+    # Create temporary local work directory
     save_dir_for_this_core = saveDir + "/core-%i" % process_number
     shutil.rmtree(save_dir_for_this_core, ignore_errors=True)
     os.mkdir(save_dir_for_this_core)
 
-    mgr = TestManager(testDir,runner,
-                      output=[reporter],
-                      quiet=options.quiet,
-                      testsInclude=options.testsInclude,
-                      testsExclude=options.testsExclude,
-                      exclude_in_pr_builds=options.exclude_in_pr_builds,
-                      showSkipped=options.showskipped,
-                      output_on_failure=options.output_on_failure,
-                      test_count=test_count,
-                      process_number=process_number,
-                      ncores=options.ncores,
-                      clean=options.clean)
-    try:
-        mgr.executeTests()
-    except KeyboardInterrupt:
-        mgr.markSkipped("KeyboardInterrupt")
+    # Make sure the status is 1 to begin with as it will be replaced 
+    res_array[process_number + 2*options.ncores] = 1
 
-    shutil.rmtree(save_dir_for_this_core, ignore_errors=True)
-    
+    # Begin loop
+    while (tests_left.value > 0):
 
-    # Update the test results in the array shared accross cores
-    res_array[process_number] = mgr.skippedTests
-    res_array[process_number + options.ncores] = mgr.failedTests
-    res_array[process_number + 2*options.ncores] = mgr.totalTests
-    res_array[process_number + 3*options.ncores] = int(reporter.reportStatus())
+        lock.acquire()
+        for i in range(process_number,len(tests_lock)):
+            if tests_lock[i] == 0:
+                local_test_list = tests_dict[str(i)]
+                tests_lock[i] = 1
+                imodule = i
+                tests_left.value -= 1
+                break
+        lock.release()
+
+        if (not options.quiet):
+            print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
+                   % (process_number, imodule, local_test_list[0]._modname, len(local_test_list)))
+            sys.stdout.flush()
+
+        mgr = TestManager(test_loc=testDir,
+                          runner=runner,
+                          output=[reporter],
+                          quiet=options.quiet,
+                          testsInclude=options.testsInclude,
+                          testsExclude=options.testsExclude,
+                          exclude_in_pr_builds=options.exclude_in_pr_builds,
+                          showSkipped=options.showskipped,
+                          output_on_failure=options.output_on_failure,
+                          test_count=test_count,
+                          process_number=process_number,
+                          ncores=options.ncores,
+                          clean=options.clean,
+                          list_of_tests=local_test_list)
+
+        try:
+            mgr.executeTests()
+        except KeyboardInterrupt:
+            mgr.markSkipped("KeyboardInterrupt")
+
+        # Update the test results in the array shared accross cores
+        res_array[process_number] += mgr._skippedTests
+        res_array[process_number + options.ncores] += mgr._failedTests
+        res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
+            res_array[process_number + 2*options.ncores])
+        
+        # Delete the TestManager
+        del mgr
+
+    shutil.rmtree(save_dir_for_this_core, ignore_errors=True)    
 
     # Report the errors
     local_dict = dict()
