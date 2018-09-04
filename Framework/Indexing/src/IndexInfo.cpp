@@ -289,7 +289,8 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     for (int rank = 1; rank < communicator().size(); ++rank) {
       spectrumDefinitions[rank].resize(allSizes[rank]);
       auto buffer = reinterpret_cast<char *>(spectrumDefinitions[rank].data());
-      auto bytes = static_cast<int>(sizeof(int64_t) * allSizes[rank]);
+      auto bytes =
+          static_cast<int>(sizeof(std::pair<int64_t, size_t>) * allSizes[rank]);
       communicator().recv(rank, tag, buffer, bytes);
     }
     std::vector<size_t> currentIndex(communicator().size(), 0);
@@ -344,7 +345,7 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     }
   } else {
     auto buffer = reinterpret_cast<char *>(thisRankSpectrumDefinitions.data());
-    auto bytes = static_cast<int>(sizeof(int64_t) * size());
+    auto bytes = static_cast<int>(sizeof(std::pair<int64_t, size_t>) * size());
     communicator().send(0, tag, buffer, bytes);
     spectrumIndices.resize(detectorIndices.size());
     buffer = reinterpret_cast<char *>(spectrumIndices.data());
