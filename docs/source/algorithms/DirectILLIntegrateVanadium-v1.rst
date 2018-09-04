@@ -31,6 +31,11 @@ Usage
 
 **Example - Integrating vanadium**
 
+.. testsetup:: IN4Example
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: IN4Example
 
     DirectILLCollectData(

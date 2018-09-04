@@ -22,6 +22,11 @@ Usage
 
 **Example - Absorption corrections and empty container subtraction**
 
+.. testsetup:: IN4Example
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: IN4Example
 
     import numpy

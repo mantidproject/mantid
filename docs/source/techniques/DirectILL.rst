@@ -59,6 +59,11 @@ A very basic reduction would include a vanadium reference and a sample and follo
 
 On instruments like IN4 and IN6, these steps would translate to something like the following simple Python script:
 
+.. testsetup:: BasicIN4Reduction
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: BasicIN4Reduction
 
     # Uncomment to add a temporary data search directory.
@@ -187,6 +192,11 @@ A more complete reduction example would include corrections for self-shielding:
 
 The above workflow would translate to this kind of Python script for IN4 and IN6:
 
+.. testsetup:: SelfShieldingReduction
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: SelfShieldingReduction
 
     # Uncomment to add a temporary data search directory.
@@ -266,6 +276,11 @@ Mantid can be picky with binning when doing arithmetics between workspaces. This
 
 To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollectData` can be forced to use the same wavelength. The following Python script shows how to propagate the calibrated incident energy from the first loaded workspace into the rest:
 
+.. testsetup:: SampleContainerCompatibility
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: SampleContainerCompatibility
 
     # Sample
@@ -319,6 +334,11 @@ With empty container data, the steps to reduce the experimental data might look 
 #. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
 
 A corresponding Python script follows.
+
+.. testsetup:: ContainerSubtraction
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
 
 .. testcode:: ContainerSubtraction
 
@@ -401,6 +421,11 @@ Interpolation of container data to different temperatures
 
 Sometimes the empty container is not measured at all the experiment's temperature points. One can use Mantid's workspace arithmetics to perform simple linear interpolation in temperature:
 
+.. testsetup:: ContainerInterpolation
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: ContainerInterpolation
 
     import numpy
@@ -478,6 +503,11 @@ Lets put it all together into a complex Python script. The script below reduces 
 * Empty container measured at 1.5 and 100K.
 
   * Need to interpolate to 50K.
+
+.. testsetup:: FullExample
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
 
 .. testcode:: FullExample
 

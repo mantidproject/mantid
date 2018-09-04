@@ -24,6 +24,11 @@ Usage
 
 **Example - Calculating absorption corrections**
 
+.. testsetup:: IN4Example
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: IN4Example
 
     preprocessed = DirectILLCollectData(Run='ILL/IN4/087294-087295')

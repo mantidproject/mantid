@@ -120,6 +120,11 @@ Usage
 
 **Example - Basic usage as an advanced loader**
 
+.. testsetup:: IN4Example
+
+   config['default.facility'] = 'ILL'
+   config['default.instrument'] = 'IN4'
+
 .. testcode:: IN4Example
 
     # It is recommended to use DirectILLCollectData over the basic Load
