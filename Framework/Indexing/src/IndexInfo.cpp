@@ -296,14 +296,13 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
         if (detectorMap.size() > detectorIndex &&
             detectorMap[detectorIndex].first != 0) {
           spectrumIndices.push_back(i);
-          if (detectorMap[detectorIndex].second.size() <= timeIndex) {
-            detectorMap[detectorIndex].second.resize(timeIndex + 1, {0});
-            detectorMap[detectorIndex].second[timeIndex] = 1;
-          }
           if (detectorMap[detectorIndex].first == 1) {
             ++detectorMap[detectorIndex].first;
           }
-          if (detectorMap[detectorIndex].second[timeIndex] != 0) {
+          if (detectorMap[detectorIndex].second.size() <= timeIndex) {
+            detectorMap[detectorIndex].second.resize(timeIndex + 1, {0});
+            detectorMap[detectorIndex].second[timeIndex] = 1;
+          } else {
             ++detectorMap[detectorIndex].second[timeIndex];
           }
         }
@@ -329,7 +328,7 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     if (std::any_of(detectorMap.begin(), detectorMap.end(),
                     [](const std::pair<char, std::vector<char>> &p) {
                       return std::any_of(p.second.begin(), p.second.end(),
-                                         [](char c) { return c > 2; });
+                                         [](char c) { return c > 1; });
                     })) {
       throw std::runtime_error("Some of the spectra map to the same detector "
                                "at the same time index");
