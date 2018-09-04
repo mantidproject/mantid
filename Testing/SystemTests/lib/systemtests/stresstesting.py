@@ -853,20 +853,31 @@ class TestManager(object):
         # We also create on the fly a list of tests for each module
         modcounts = dict()
         modtests = dict()
-        # This is the length of characters to match at the start of test name
-        min_length_for_group_name = 18
         for t in reduced_test_list:
-            not_found = True
-            for key in modcounts.keys():
-                if (t._modname).startswith(key):
-                    modcounts[key] += 1
-                    modtests[key].append(t)
-                    not_found = False
-                    break
-            if not_found:
-                key = (t._modname)[:min_length_for_group_name]
+            key = t._modname
+            if key in modcounts.keys():
+                modcounts[key] += 1
+                modtests[key].append(t)
+            else:
                 modcounts[key] = 1
                 modtests[key] = [t]
+
+        # modcounts = dict()
+        # modtests = dict()
+        # # This is the length of characters to match at the start of test name
+        # min_length_for_group_name = 8
+        # for t in reduced_test_list:
+        #     not_found = True
+        #     for key in modcounts.keys():
+        #         if (t._modname).startswith(key):
+        #             modcounts[key] += 1
+        #             modtests[key].append(t)
+        #             not_found = False
+        #             break
+        #     if not_found:
+        #         key = (t._modname)[:min_length_for_group_name]
+        #         modcounts[key] = 1
+        #         modtests[key] = [t]
 
         return modcounts, modtests, test_stats
 
