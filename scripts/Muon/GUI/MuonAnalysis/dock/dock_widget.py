@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
 
+from Muon.GUI.Common.test.test_widget import TestWidget
 from Muon.GUI.Common.dummy.dummy_widget import DummyWidget
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.Common.dock.dock_view import DockView
@@ -23,6 +24,10 @@ class DockWidget(QtGui.QWidget):
         self.dockWidget = QtGui.QWidget()
 
         self.dock_view = DockView(self)
+
+        self.test = TestWidget(self)
+        self.dock_view.addDock(self.test.widget, "test")
+
 
         self.btn = DummyWidget("moo", self)
         self.dock_view.addDock(self.btn.widget, "first")
