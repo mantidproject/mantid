@@ -64,9 +64,12 @@ Usage
 .. plot::
    :include-source:
 
+    import mantid
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     import numpy as np
+    mantid.config['default.facility'] = 'ILL'
+    mantid.config['default.instrument'] = 'IN4'
     # Vanadium
     DirectILLCollectData(
         Run='ILL/IN4/085801+085802.nxs',
