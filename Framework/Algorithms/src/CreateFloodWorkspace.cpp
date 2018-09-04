@@ -127,10 +127,12 @@ MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("OutputWorkspace", "dummy");
   if (!isDefault(Prop::RANGE_LOWER)) {
-    alg->setProperty("RangeLower", static_cast<double>(getProperty(Prop::RANGE_LOWER)));
+    alg->setProperty("RangeLower",
+                     static_cast<double>(getProperty(Prop::RANGE_LOWER)));
   }
   if (!isDefault(Prop::RANGE_UPPER)) {
-    alg->setProperty("RangeUpper", static_cast<double>(getProperty(Prop::RANGE_UPPER)));
+    alg->setProperty("RangeUpper",
+                     static_cast<double>(getProperty(Prop::RANGE_UPPER)));
   }
   alg->execute();
   return alg->getProperty("OutputWorkspace");
@@ -159,7 +161,8 @@ bool CreateFloodWorkspace::isExcludedSpectrum(double spec) const {
 
 API::MatrixWorkspace_sptr
 CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
-  g_log.information() << "Remove background " << getPropertyValue(Prop::BACKGROUND) << '\n';
+  g_log.information() << "Remove background "
+                      << getPropertyValue(Prop::BACKGROUND) << '\n';
   auto fitWS = transpose(ws);
   auto const &x = fitWS->x(0);
 
@@ -201,8 +204,9 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
 
   IFunction_sptr func = alg->getProperty("Function");
   g_log.information() << "Background function parameters:\n";
-  for(size_t i = 0; i < func->nParams(); ++i) {
-    g_log.information() << "    " << func->parameterName(i) << ": " << func->getParameter(i) << '\n';
+  for (size_t i = 0; i < func->nParams(); ++i) {
+    g_log.information() << "    " << func->parameterName(i) << ": "
+                        << func->getParameter(i) << '\n';
   }
 
   // Divide the workspace by the fitted curve to remove the background
@@ -241,7 +245,8 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   return ws;
 }
 
-MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr
+CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_sptr ws) {
   int const centralSpectrum = getProperty(Prop::CENTRAL_PIXEL);
   auto const nHisto = static_cast<int>(ws->getNumberHistograms());
   if (centralSpectrum >= nHisto) {
@@ -253,14 +258,18 @@ MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_s
   auto const spectraMap = ws->getSpectrumToWorkspaceIndexMap();
   auto const centralIndex = spectraMap.at(centralSpectrum);
   auto const scaleFactor = ws->y(centralIndex).front();
-  g_log.information() << "Scale to central pixel, factor = " << scaleFactor << '\n';
+  g_log.information() << "Scale to central pixel, factor = " << scaleFactor
+                      << '\n';
   if (scaleFactor <= 0.0) {
-    throw std::runtime_error("Scale factor muhst be > 0, found " + std::to_string(scaleFactor));
+    throw std::runtime_error("Scale factor muhst be > 0, found " +
+                             std::to_string(scaleFactor));
   }
   auto const axis = ws->getAxis(1);
-  auto const sa = dynamic_cast<const SpectraAxis*>(axis);
-  double const startX = isDefault(Prop::START_X) ? sa->getMin() : getProperty(Prop::START_X);
-  double const endX = isDefault(Prop::END_X) ? sa->getMax() : getProperty(Prop::END_X);
+  auto const sa = dynamic_cast<const SpectraAxis *>(axis);
+  double const startX =
+      isDefault(Prop::START_X) ? sa->getMin() : getProperty(Prop::START_X);
+  double const endX =
+      isDefault(Prop::END_X) ? sa->getMax() : getProperty(Prop::END_X);
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < nHisto; ++i) {
     PARALLEL_START_INTERUPT_REGION
