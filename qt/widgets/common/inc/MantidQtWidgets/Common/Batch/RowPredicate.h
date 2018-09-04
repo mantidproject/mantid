@@ -40,8 +40,6 @@ public:
 protected:
   virtual bool rowMeetsCriteria(RowLocation const &row) const = 0;
 };
-}
-}
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
