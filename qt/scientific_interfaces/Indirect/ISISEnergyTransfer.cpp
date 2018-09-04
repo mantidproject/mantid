@@ -6,6 +6,8 @@
 
 #include <QFileInfo>
 
+#include <boost/algorithm/string.hpp>
+
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
@@ -46,6 +48,18 @@ std::string createDetectorGroupingString(std::size_t numberOfDetectors,
     return createRangeString(0, numberOfDetectors - 1);
   return createDetectorGroupingString(groupSize, numberOfGroups,
                                       numberOfDetectors);
+}
+
+std::vector<std::size_t>
+getCustomGroupingNumbers(std::string const &customString) {
+  std::vector<std::string> customGroupingStrings;
+  std::vector<std::size_t> customGroupingNumbers;
+  // Get the numbers from customString and store them in customGroupingStrings
+  boost::split(customGroupingStrings, customString, boost::is_any_of(" ,-+:"));
+  for (const auto &string : customGroupingStrings)
+    if (string != "")
+      customGroupingNumbers.emplace_back(std::stoull(string));
+  return customGroupingNumbers;
 }
 } // namespace
 
@@ -229,14 +243,36 @@ bool ISISEnergyTransfer::validate() {
   return uiv.isAllInputValid();
 }
 
-QString ISISEnergyTransfer::validateDetectorGrouping() {
+bool ISISEnergyTransfer::numberInCorrectRange(
+    std::size_t const &spectraNumber) const {
+  QMap<QString, QString> instDetails = getInstrumentDetails();
+  auto spectraMin =
+      static_cast<std::size_t>(instDetails["spectra-min"].toInt());
+  auto spectraMax =
+      static_cast<std::size_t>(instDetails["spectra-max"].toInt());
+  return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
+}
+
+QString ISISEnergyTransfer::checkCustomGroupingNumbersInRange(
+    std::vector<std::size_t> const &customGroupingNumbers) const {
+  for (const auto &number : customGroupingNumbers)
+    if (!numberInCorrectRange(number))
+      return "Please supply a custom grouping within the correct range";
+  return "";
+}
+
+QString ISISEnergyTransfer::validateDetectorGrouping() const {
   if (m_uiForm.cbGroupingOptions->currentText() == "File") {
     if (!m_uiForm.dsMapFile->isValid())
       return "Mapping file is invalid.";
-  }
-  if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
-    if (m_uiForm.leCustomGroups->text() == "")
+  } else if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
+    const std::string customString =
+        m_uiForm.leCustomGroups->text().toStdString();
+    if (customString == "")
       return "Please supply a custom grouping for detectors.";
+    else
+      return checkCustomGroupingNumbersInRange(
+          getCustomGroupingNumbers(customString));
   }
   return "";
 }

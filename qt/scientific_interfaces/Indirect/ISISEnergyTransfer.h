@@ -77,7 +77,10 @@ private:
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>
       m_outputWorkspaces; ///< get a vector of workspaces to plot
-  QString validateDetectorGrouping();
+  bool numberInCorrectRange(std::size_t const &spectraNumber) const;
+  QString checkCustomGroupingNumbersInRange(
+      std::vector<std::size_t> const &customGroupingNumbers) const;
+  QString validateDetectorGrouping() const;
   std::string getDetectorGroupingString() const;
 };
 } // namespace CustomInterfaces
