@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement, OptionalFloat
+import testhelpers
 import unittest
 
 import sys
@@ -12,21 +13,6 @@ except NameError:
 
 
 class TOFTOFScriptElementTest(unittest.TestCase):
-    def assertRaisesNothing(self, assertMessage):
-        class AssertRaisesNothingContextManager(object):
-            def __init__(self, testCase):
-                super(AssertRaisesNothingContextManager, self).__init__()
-                self._testCase = testCase
-                self._assertMessage = assertMessage
-
-            def __enter__(self):
-                pass
-
-            def __exit__(self, exc_type, exc_value, traceback):
-                if exc_type is not None:
-                    self._testCase.fail("{}\nThe exception was: '{}'.".format(self._assertMessage, exc_value))
-
-        return AssertRaisesNothingContextManager(self)
 
     @staticmethod
     def setMinimumValidInputs(scriptElement):
@@ -181,8 +167,12 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.createDiff    = True
         self.scriptElement.keepSteps     = True
 
-        with self.assertRaisesNothing("Generated reduction script cannot be executed."):
-            exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
+        def execScript(script):
+            exec(script, dict(), dict())
+
+        testhelpers.assertRaisesNothing(self, execScript, 'from mantid.simpleapi import *\n' + self.scriptElement.to_script())
+        #with self.assertRaisesNothing("Generated reduction script cannot be executed."):
+        #    exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
 
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False
