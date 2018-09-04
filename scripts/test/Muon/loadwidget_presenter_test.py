@@ -1,6 +1,12 @@
-import sys
-import os
-import time
+import unittest
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
+from PyQt4 import QtGui
+from PyQt4.QtGui import QApplication
 
 from Muon.GUI.MuonAnalysis.loadwidget.load_widget_model import LoadWidgetModel
 from Muon.GUI.MuonAnalysis.loadwidget.load_widget_view import LoadWidgetView
@@ -15,23 +21,10 @@ from Muon.GUI.MuonAnalysis.loadfile.load_file_presenter import BrowseFileWidgetP
 from Muon.GUI.MuonAnalysis.loadfile.load_file_view import BrowseFileWidgetView
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-import Muon.GUI.Common.muon_file_utils as fileUtils
-
-# TODO : Fix these tests so that they finish with exit code 0 (rather than hanging)
-
-import unittest
-
-if sys.version_info.major == 3:
-    from unittest import mock
-else:
-    import mock
-
-from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
+import Muon.GUI.Common.muon_file_utils as file_utils
 
 # global QApplication (get errors if > 1 instance in the code)
 QT_APP = QApplication([])
-
 
 
 class LoadRunWidgetPresenterTest(unittest.TestCase):
@@ -50,7 +43,9 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
+
         self.data = MuonLoadData()
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
@@ -58,13 +53,13 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.load_run_model = LoadRunWidgetModel(self.data)
 
         self.presenter = LoadWidgetPresenter(
-            LoadWidgetView(parent = self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view),
+            LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view),
             LoadWidgetModel(self.data))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 
         self.mock_loading_from_browse([1], "C:\dir1\dir2\dir3\EMU0001234.nxs", 1234)
-        fileUtils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
+        file_utils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
 
     def tearDown(self):
         self.obj = None
@@ -235,7 +230,9 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
             QT_APP.exit(0)
 
     def setUp(self):
+        # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QtGui.QWidget()
+
         self.data = MuonLoadData()
         self.load_file_view = BrowseFileWidgetView(self.obj)
         self.load_run_view = LoadRunWidgetView(self.obj)
@@ -243,7 +240,8 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.load_run_model = LoadRunWidgetModel(self.data)
 
         self.model = LoadWidgetModel(self.data)
-        self.view = LoadWidgetView(parent=self.obj, load_run_view=self.load_run_view, load_file_view=self.load_file_view)
+        self.view = LoadWidgetView(parent=self.obj, load_run_view=self.load_run_view,
+                                   load_file_view=self.load_file_view)
 
         self.presenter = LoadWidgetPresenter(view=self.view, model=self.model)
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
@@ -258,7 +256,7 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.Runner(self.presenter.load_file_widget._load_thread)
 
         self.mock_loading_to_throw()
-        fileUtils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
+        file_utils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
 
         self.load_file_view.warning_popup = mock.Mock()
         self.load_run_view.warning_popup = mock.Mock()
