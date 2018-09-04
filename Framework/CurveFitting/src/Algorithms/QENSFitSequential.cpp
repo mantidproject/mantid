@@ -563,6 +563,11 @@ QENSFitSequential::getAdditionalLogNumbers() const {
   return logs;
 }
 
+void QENSFitSequential::addAdditionalLogs(WorkspaceGroup_sptr resultWorkspace) {
+  for (const auto &workspace : *resultWorkspace)
+    addAdditionalLogs(workspace);
+}
+
 void QENSFitSequential::addAdditionalLogs(Workspace_sptr resultWorkspace) {
   auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   logAdder->setProperty("Workspace", resultWorkspace);
@@ -759,7 +764,14 @@ void QENSFitSequential::extractMembers(
 }
 
 void QENSFitSequential::copyLogs(
-    WorkspaceGroup_sptr resultWorkspace,
+    WorkspaceGroup_sptr resultWorkspaces,
+    const std::vector<MatrixWorkspace_sptr> &workspaces) {
+  for (const auto resultWorkspace : *resultWorkspaces)
+    copyLogs(resultWorkspace, workspaces);
+}
+
+void QENSFitSequential::copyLogs(
+    Workspace_sptr resultWorkspace,
     const std::vector<MatrixWorkspace_sptr> &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("OutputWorkspace", resultWorkspace->getName());
@@ -772,6 +784,12 @@ void QENSFitSequential::copyLogs(
 
 void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
                                  WorkspaceGroup_sptr resultGroup) {
+  for (const auto workspace : *resultGroup)
+    copyLogs(resultWorkspace, workspace);
+}
+
+void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
+                                 Workspace_sptr resultGroup) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("InputWorkspace", resultWorkspace);
   logCopier->setProperty("OutputWorkspace", resultGroup->getName());
