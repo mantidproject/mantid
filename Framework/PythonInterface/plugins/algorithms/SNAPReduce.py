@@ -386,27 +386,40 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         progStart = .25
         progDelta = (1.-progStart)/len(in_Runs)
-        for r in in_Runs:
+        for runnumber in in_Runs:
             progress = Progress(self, progStart, progStart+progDelta, 7)
 
-            self.log().notice("processing run %s" % r)
-            self.log().information(str(self.get_IPTS_Local(r)))
+            self.log().notice("processing run %s" % runnumber)
+            self.log().information(str(self.get_IPTS_Local(runnumber)))
+
+            # put together output names
+            new_Tag = Tag
+            if len(prefix) > 0:
+                new_Tag += '_' + prefix
+            basename = '%s_%s_%s' % (new_Tag, runnumber, group)
+
             if self.getProperty("LiveData").value:
                 Tag = 'Live'
+                # Need to update the new_Tag and basename variables
                 raise RuntimeError('Live data is not currently supported')
             else:
-                Load(Filename='SNAP' + str(r), OutputWorkspace='WS_red')
+                # TODO add progress bar nonsense
+                Load(Filename='SNAP' + str(runnumber), OutputWorkspace=basename + '_red')
+            redWS = basename + '_red'
 
             # overwrite geometry with detcal files
             if calib == 'DetCal File':
-                LoadIsawDetCal(InputWorkspace='WS_red', Filename=cal_File)
+                LoadIsawDetCal(InputWorkspace=redWS, Filename=cal_File)
+
+            # create unfocussed data if in set-up mode
             if Process_Mode == "Set-Up":
-                unfocussedWksp = 'WS_d'
+                unfocussedWksp = '{}_{}_d'.format(new_Tag, runnumber)
             else:
                 unfocussedWksp = ''
 
             # TODO the right thing with the calibration information
-            AlignAndFocusPowder(InputWorkspace='WS_red', OutputWorkspace='WS_red',
+            # TODO add progress bar nonsense
+            AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
                                 TMax=50000,
                                 Params=params,  # binning parameters in d-space
                                 RemovePromptPulseWidth=1600,
@@ -417,20 +430,20 @@ class SNAPReduce(DataProcessorAlgorithm):
                                 Dspacing=True,  # bin in d-spacing
                                 )
             # AlignAndFocusPowder leaves the data in time-of-flight
-            ConvertUnits(InputWorkspace='WS_red', OutputWorkspace='WS_red', Target='dSpacing', EMode='Elastic')
+            ConvertUnits(InputWorkspace=redWS, OutputWorkspace=redWS, Target='dSpacing', EMode='Elastic')
 
             # AlignAndFocus doesn't necessarily rebin the data correctly
             if Process_Mode == "Set-Up":
-                Rebin(InputWorkspace='WS_d', Params=params, Outputworkspace='WS_d')
+                Rebin(InputWorkspace=unfocussedWksp, Params=params, Outputworkspace=unfocussedWksp)
 
-            NormaliseByCurrent(InputWorkspace='WS_red', OutputWorkspace='WS_red')
+            NormaliseByCurrent(InputWorkspace=redWS, OutputWorkspace=redWS)
 
             # normalize the data as requested
-            normWS = self._generateNormalization('WS_red', norm, normWS)
+            normWS = self._generateNormalization(redWS, norm, normWS)
             WS_nor = None
             if normWS is not None:
                 WS_nor = 'WS_nor'
-                Divide(LHSWorkspace='WS_red', RHSWorkspace=normWS,
+                Divide(LHSWorkspace=redWS, RHSWorkspace=normWS,
                        OutputWorkspace='WS_nor')
                 ReplaceSpecialValues(Inputworkspace='WS_nor',
                                      OutputWorkspace='WS_nor',
@@ -440,16 +453,12 @@ class SNAPReduce(DataProcessorAlgorithm):
             else:
                 progress.report()
 
-            new_Tag = Tag
-            if len(prefix) > 0:
-                new_Tag += '_' + prefix
-
             # Edit instrument geomety to make final workspace smaller on disk
-            det_table = PreprocessDetectorsToMD(Inputworkspace='WS_red',
+            det_table = PreprocessDetectorsToMD(Inputworkspace=redWS,
                                                 OutputWorkspace='__SNAP_det_table')
             polar = np.degrees(det_table.column('TwoTheta'))
             azi = np.degrees(det_table.column('Azimuthal'))
-            EditInstrumentGeometry(Workspace='WS_red', L2=det_table.column('L2'),
+            EditInstrumentGeometry(Workspace=redWS, L2=det_table.column('L2'),
                                    Polar=polar, Azimuthal=azi)
             if WS_nor is not None:
                 EditInstrumentGeometry(Workspace='WS_nor', L2=det_table.column('L2'),
@@ -458,23 +467,18 @@ class SNAPReduce(DataProcessorAlgorithm):
             progress.report('simplify geometry')
 
             # Save requested formats
-            basename = '%s_%s_%s' % (new_Tag, r, group)
-            self._save(r, basename, norm)
+            self._save(runnumber, basename, norm)
 
             # rename everything as appropriate and determine output workspace name
-            RenameWorkspace(Inputworkspace='WS_d',
-                            OutputWorkspace='%s_%s_d' % (new_Tag, r))
-            RenameWorkspace(Inputworkspace='WS_red',
-                            OutputWorkspace=basename + '_red')
             if norm == 'None':
-                outputWksp = basename + '_red'
+                outputWksp = redWS
             else:
                 outputWksp = basename + '_nor'
                 RenameWorkspace(Inputworkspace='WS_nor',
                                 OutputWorkspace=basename + '_nor')
             if norm == "Extracted from Data":
                 RenameWorkspace(Inputworkspace='peak_clip_WS',
-                                OutputWorkspace='%s_%s_normalizer' % (new_Tag, r))
+                                OutputWorkspace='%s_%s_normalizer' % (new_Tag, runnumber))
 
             # set workspace as an output so it gets history
             propertyName = 'OutputWorkspace_'+str(outputWksp)
@@ -482,17 +486,15 @@ class SNAPReduce(DataProcessorAlgorithm):
                 propertyName, outputWksp, Direction.Output))
             self.setProperty(propertyName, outputWksp)
 
-            # delte some things in production
+            # delete some things in production
             if Process_Mode == "Production":
-                DeleteWorkspace(Workspace='%s_%s_d' % (new_Tag, r)) # was 'WS_d'
-
                 if norm != "None":
-                    DeleteWorkspace(Workspace=basename + '_red') # was 'WS_red'
+                    DeleteWorkspace(Workspace=redWS) # was 'WS_red'
                 elif norm == "Extracted from Data":
-                    DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, r)) # was 'peak_clip_WS'
+                    DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, runnumber)) # was 'peak_clip_WS'
             else: # TODO set them as workspace properties
                 propNames = ['OuputWorkspace_'+str(it) for it in ['d', 'norm', 'normalizer']]
-                wkspNames = ['%s_%s_d' % (new_Tag, r), basename + '_red', '%s_%s_normalizer' % (new_Tag, r)]
+                wkspNames = ['%s_%s_d' % (new_Tag, runnumber), basename + '_red', '%s_%s_normalizer' % (new_Tag, runnumber)]
                 for (propName, wkspName) in zip(propNames, wkspNames):
                     self.declareProperty(WorkspaceProperty(
                         propName, wkspName, Direction.Output))
