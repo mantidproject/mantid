@@ -58,7 +58,7 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.runEdit.setObjectName("runEdit")
 
         self.spacerItem = QtGui.QSpacerItem(25, 25, QtGui.QSizePolicy.Minimum,
-                                       QtGui.QSizePolicy.Minimum)
+                                            QtGui.QSizePolicy.Minimum)
 
         self.horizontalLayout.addWidget(self.loadCurrentRunButton)
         self.horizontalLayout.addWidget(self.decrementRunButton)
@@ -67,7 +67,7 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.horizontalLayout.addWidget(self.incrementRunButton)
         self.horizontalLayout.addItem(self.spacerItem)
 
-        #self.setLayout(self.horizontalLayout)
+        # self.setLayout(self.horizontalLayout)
 
     def set_run_edit_regex(self):
         regex = QtCore.QRegExp(runUtils.run_string_regex)  # "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"

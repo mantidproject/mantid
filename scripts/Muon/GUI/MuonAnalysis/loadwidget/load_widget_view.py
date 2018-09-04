@@ -82,13 +82,10 @@ class LoadWidgetView(QtGui.QWidget):
 
         self.spacer = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-
-
         # Set the layout vertically
         self.verticalLayout = QtGui.QVBoxLayout(Form)
 
         self.control_frame = QtGui.QFrame(self)
-
 
         # Set the layout of the tools at the bottom of the widget
         self.horizontalLayout = QtGui.QHBoxLayout()
@@ -98,7 +95,7 @@ class LoadWidgetView(QtGui.QWidget):
         self.horizontalLayout.addWidget(self.multiple_loading_check)
         # # self.horizontalLayout.addWidget(self.load_behaviour_label)
         self.horizontalLayout.addWidget(self.load_behaviour_combo)
-        #self.horizontalLayout.addItem(self.spacer)
+        # self.horizontalLayout.addItem(self.spacer)
         self.horizontalLayout.addWidget(self.manageDirectoriesButton)
         self.horizontalLayout.addItem(self.spacer)
 
@@ -107,7 +104,7 @@ class LoadWidgetView(QtGui.QWidget):
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.verticalLayout.addStretch(1)
 
-        #self.setLayout(self.verticalLayout)
+        # self.setLayout(self.verticalLayout)
 
     def disable_loading(self):
         self.clearButton.setEnabled(False)

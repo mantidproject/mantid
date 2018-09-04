@@ -16,7 +16,6 @@ from Muon.GUI.MuonAnalysis.loadwidget.load_widget_presenter import LoadWidgetPre
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
-
 if __name__ == "__main__":
     import sys
 
@@ -35,5 +34,3 @@ if __name__ == "__main__":
 
     ui.show()
     sys.exit(app.exec_())
-
-
