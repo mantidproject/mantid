@@ -17,6 +17,8 @@ public:
                                   std::size_t spectrum) const override;
 
 private:
+  std::string getResultXAxisUnit() const override;
+
   std::string m_fitType;
 };
 

@@ -103,17 +103,31 @@ of the input workspace group.
 Polarization Analysis On
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-If :literal:`PolarizationAnalysis` is set to :literal:`PA` or :literal:`PNR`
-the reduction continues and polarization corrections will be applied to
-the output workspace in wavelength. The algorithm will use the properties :literal:`PolarizationAnalysis`,
-:literal:`Pp`, :literal:`Ap`, :literal:`Rho` and :literal:`Alpha` to run :ref:`algm-PolarizationCorrectionFredrikze`.
-The result will be a new workspace in wavelength, which will override the previous one, that will
-be used as input to :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in Q, which
-in turn will override the existing workspaces in Q. Note that if transmission runs are provided in the form of workspace
-groups, the individual workspaces will be summed to produce a matrix workspace that will be used as the
-transmission run for all items in the input workspace group, as illustrated in the diagram below
-(note that, for the sake of clarity, the rebinned output workspace in Q, :literal:`OutputWorkspaceBinned`, is not
-represented but it is handled analogously to :literal:`OutputWorkspace`).
+If polarization analysis is enabled, the reduction continues and polarization
+corrections will be applied to the output workspace in wavelength.
+
+If :literal:`PolarizationAnalysis` is set to :literal:`PA` or :literal:`PNR`,
+the algorithm will use the properties :literal:`Pp`, :literal:`Ap`,
+:literal:`Rho` and :literal:`Alpha` to run
+:ref:`algm-PolarizationCorrectionFredrikze`.
+
+Alternatively, either Fredrikze or Wildes corrections can be performed using
+measured efficiencies by specifying the efficiencies and options in the
+instrument parameters file. Setting :literal:`PolarizationAnalysis` to
+:literal:`ParameterFile` will use the method and values specified in the
+parameters file to run :ref:`algm-PolarizationCorrectionFredrikze` or
+:ref:`algm-PolarizationCorrectionWildes` as appropriate.
+
+The result will be a new workspace in wavelength, which will override the
+previous one, that will be used as input to
+:ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in
+Q, which in turn will override the existing workspaces in Q. Note that if
+transmission runs are provided in the form of workspace groups, the individual
+workspaces will be summed to produce a matrix workspace that will be used as
+the transmission run for all items in the input workspace group, as illustrated
+in the diagram below (note that, for the sake of clarity, the rebinned output
+workspace in Q, :literal:`OutputWorkspaceBinned`, is not represented but it is
+handled analogously to :literal:`OutputWorkspace`).
 
 .. diagram:: ReflectometryReductionOneAuto-v2-Groups_PA_wkflw.dot
 

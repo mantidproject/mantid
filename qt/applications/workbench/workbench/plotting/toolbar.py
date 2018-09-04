@@ -22,7 +22,7 @@ from __future__ import (absolute_import, division, print_function,
 
 # third-party library imports
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-import qtawesome as qta
+from mantidqt.icons import get_icon
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 # local package imports
@@ -52,7 +52,7 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 self.addSeparator()
             else:
                 if fa_icon:
-                    a = self.addAction(qta.icon(fa_icon),
+                    a = self.addAction(get_icon(fa_icon),
                                        text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
