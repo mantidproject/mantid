@@ -171,8 +171,6 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             exec(script, dict(), dict())
 
         testhelpers.assertRaisesNothing(self, execScript, 'from mantid.simpleapi import *\n' + self.scriptElement.to_script())
-        #with self.assertRaisesNothing("Generated reduction script cannot be executed."):
-        #    exec('from mantid.simpleapi import *\n' + self.scriptElement.to_script(), dict(), dict())
 
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False
