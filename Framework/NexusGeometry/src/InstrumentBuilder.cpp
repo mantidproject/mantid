@@ -8,7 +8,6 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include <boost/make_shared.hpp>
-#include <memory>
 
 namespace Mantid {
 namespace NexusGeometry {

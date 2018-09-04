@@ -3,6 +3,7 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -188,7 +189,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
   int64_t dim0 = recalculateDataSize(id_info.dims[0]);
 
   // Now we allocate the required arrays
-  auto event_id = std::make_unique<uint32_t[]>(m_loadSize[0]);
+  auto event_id = Mantid::Kernel::make_unique<uint32_t[]>(m_loadSize[0]);
 
   // Check that the required space is there in the file.
   if (dim0 < m_loadSize[0] + m_loadStart[0]) {
@@ -251,7 +252,7 @@ LoadBankFromDiskTask::loadEventId(::NeXus::File &file) {
  */
 std::unique_ptr<float[]> LoadBankFromDiskTask::loadTof(::NeXus::File &file) {
   // Allocate the array
-  auto event_time_of_flight = std::make_unique<float[]>(m_loadSize[0]);
+  auto event_time_of_flight = Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
 
   // Get the list of event_time_of_flight's
   if (!m_oldNexusFileNames)
@@ -314,7 +315,7 @@ LoadBankFromDiskTask::loadEventWeights(::NeXus::File &file) {
   m_have_weight = true;
 
   // Allocate the array
-  auto event_weight = std::make_unique<float[]>(m_loadSize[0]);
+  auto event_weight = Mantid::Kernel::make_unique<float[]>(m_loadSize[0]);
 
   ::NeXus::Info weight_info = file.getInfo();
   int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
