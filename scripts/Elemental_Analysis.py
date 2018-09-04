@@ -37,6 +37,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
         self.load_widget = LoadPresenter(
             LoadView(), LoadModel(), CoLoadModel())
+
+        self.load_widget.on_loading_finished(self.loading_finished)
+
         self.plotting = PlotPresenter(PlotView())
         self.plotting.view.setFixedSize(self.plotting.view.sizeHint())
 
@@ -56,6 +59,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
         self.plotting.view.show()
+
+    def loading_finished(self):
+        print(self.load_widget.last_loaded_run())
 
     def table_left_clicked(self, item):
         print("Element Left Clicked: {}".format(

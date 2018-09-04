@@ -1,5 +1,7 @@
 from __future__ import absolute_import, print_function
 
+from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
+
 from Muon.GUI.Common import thread_model
 
 
@@ -63,3 +65,17 @@ class LoadPresenter(object):
 
     def new_thread(self, model):
         return thread_model.ThreadModel(model)
+
+    def last_loaded_run(self):
+        try:
+            if self.co_model.co_runs:
+                return lutils.hyphenise(self.co_model.co_runs)
+            return list(self.load_model.loaded_runs.keys())[-1]
+        except IndexError:
+            return None
+
+    def on_loading_finished(self, slot):
+        self.view.on_loading_finished(slot)
+
+    def unreg_on_loading_finished(self, slot):
+        self.view.unreg_on_loading_finished(slot)
