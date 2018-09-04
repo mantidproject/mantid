@@ -588,18 +588,13 @@ public:
     for (size_t i = 0; i < N_TUBES; ++i)
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
         auto counts = outWS->getSpectrum(j).y()[i];
-        // Tolerance on error is quite large, due to repeated rounding
         TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(counts), 0.001)
         totalCounts += counts;
       }
 
     TS_ASSERT_DELTA(totalCounts,
                     double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
-
-    // An analytic comparison is a little harder for this case, do a quick check
-    // of an arbitary value
     TS_ASSERT_DELTA(outWS->getSpectrum(8).y()[2], 2., 1e-6)
-
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
   }

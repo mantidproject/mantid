@@ -47,7 +47,7 @@ If the instrument parameter ``mirror_detector_angles`` is set to true, then outp
 SplitCounts
 +++++++++++
 
-The counts are split between bins, if the difference between to angles is larger than the scattering angle step times the ``ScatteringAngleTolerance``.
+The counts are split between bins, if the difference between two angles is larger than the scattering angle step multiplied by the ``ScatteringAngleTolerance``.
 By default there is no splitting.
 
 CropNegativeScatteringAngles
