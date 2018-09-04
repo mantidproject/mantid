@@ -247,7 +247,10 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
    * detector, regardless of time index. The second, which is a vector indexed
    * by time indices for the given detector, is only used to count and check
    * whether more than one spectra map to the same detector at the same time
-   * index.
+   * index. The first item in the pair means as follows:
+   * 0 : placeholder value, see the comment below
+   * 1 : the detector is requested (i.e. is in the detectorIndices)
+   * 2 : a matching spectrum has been found
    */
   std::vector<std::pair<char, std::vector<char>>> detectorMap;
   for (const auto &index : detectorIndices) {
