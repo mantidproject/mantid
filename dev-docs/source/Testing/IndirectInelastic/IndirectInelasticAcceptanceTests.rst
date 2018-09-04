@@ -154,3 +154,40 @@ Data analysis Conv Fit
 
 15.  Change the ``Fit type`` to different functions and run fits
 
+Data analysis I(Q, T)
+----------------------
+
+*Preparation*
+
+-  Access to ISIS sample data
+
+**Time required 3 - 5 minutes**
+
+--------------
+
+1.  Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+2.  Go to the ``I(Q, T)`` tab
+3.  Load the ``irs26176_graphite002_red.nxs`` file from the sample data
+4.  Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data 
+5.  Click ``Run``
+6.  A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 51 table. **NB** keep thiw workspace for the next test
+7. Click ``Plot Currnet View`` this should plot the same data as the preview window
+8. Click ``Plot Result`` this should give a plot with the title *irs26176_graphite002_iqt*   
+
+Data analysis I(Q, T) Fit
+-------------------------
+
+*Preparation*
+
+-  The ``_iqt`` workspace from the previous test
+
+**Time required 3 - 5 minutes**
+
+--------------
+
+1.  Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+2.  Go to the ``I(Q, T) Fit`` tab
+3.  Load the ``_iqt`` workspace from the previous test
+  
+
+
