@@ -283,6 +283,11 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
 
+    if pp_lambda_toCheck == []:
+        pp_lambda_toCheck = [meanBG*1.96]
+        print('Cannot find suitable background.  Consider adjusting MinpplFrac or MaxpplFrac')
+        
+
     chiSqList = 1.0e30*np.ones_like(pp_lambda_toCheck)
     ISIGList = 1.0e-30*np.ones_like(pp_lambda_toCheck)
     IList = 1.0e-30*np.ones_like(pp_lambda_toCheck)
