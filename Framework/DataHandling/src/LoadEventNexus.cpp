@@ -251,13 +251,10 @@ void LoadEventNexus::init() {
       "Load the Sample/DAS logs from the file (default True).");
 
   std::vector<std::string> loadType{"default", "multiprocess"};
-  std::map<std::string, std::string> alias{{"default", "Automatic loader"},
-                                           {"multiprocess", "Multiprocess loader"}};
 #ifdef MPI_EXPERIMENTAL
   loadType.emplace_back("MPI");
-  alias.insert(std::make_pair("MPI", "MPI loader"));
 #endif
-  auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType, alias);
+  auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
   declareProperty(
       "Load type", "default", loadTypeValidator, "Set type of loader"
   );
@@ -826,9 +823,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         loaded = true;
         shortest_tof = 0.0;
         longest_tof = 1e10;
-      } catch (const std::runtime_error &) {
+      } catch (const std::exception &e) {
         g_log.warning()
-            << "Multiprocess event loader failed, falling back to default loader.\n";
+            << std::string(e.what()) + "\nMultiprocess event loader failed, falling back to default loader.\n";
       }
     }
 
