@@ -15,6 +15,11 @@ set ( TEST_PY_FILES
    LoadWidgetView_test.py
    loadwidget_presenter_test.py
    loadwidget_presenter_multiple_file_test.py
+   AxisChangerView_test.py
+   AxisChangerPresenter_test.py
+   PlottingView_test.py
+   PlottingPresenter_test.py
+   PlottingUtils_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

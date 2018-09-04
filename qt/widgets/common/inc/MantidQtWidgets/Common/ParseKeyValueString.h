@@ -28,10 +28,12 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "DllOption.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include <QString>
 #include <map>
+#include <sstream>
 #include <string>
 
 namespace MantidQt {
@@ -46,8 +48,10 @@ void trimWhitespaceAndQuotes(const QString &valueIn);
 // Trim whitespace, quotes and empty values from a string list
 void trimWhitespaceQuotesAndEmptyValues(QStringList &values);
 /// Convert an options map to a string
-QString DLLExport
+QString EXPORT_OPT_MANTIDQT_COMMON
 convertMapToString(const std::map<QString, QString> &optionsMap);
+std::string EXPORT_OPT_MANTIDQT_COMMON
+optionsToString(std::map<std::string, std::string> const &options);
 } // namespace MantidWidgets
 } // namespace MantidQt
 
