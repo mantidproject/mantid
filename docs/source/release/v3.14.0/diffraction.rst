@@ -27,9 +27,7 @@ New
 
 - New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using offset vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
 
-- New algorithm :ref:`IndexPeakswithSatellites <algm-IndexPeakswithSatellites>` to index satellite peaks using offset vectors and maximum order of satellite from PeaksWorkspace.
-
-- New algorithm :ref:`FindUBUsingIndexedPeakswithSatellites <algm-FindUBUsingIndexedPeakswithSatellites>` to find UB matrix using the indexed peaks, offset vectors and maximum order of satellite from PeaksWorkspace.
+- New algorithm :ref:`FindUBUsingIndexedPeaksWithSatellites <algm-FindUBUsingIndexedPeaksWithSatellites>` to find UB matrix using the indexed peaks, offset vectors and maximum order of satellite from PeaksWorkspace and/or from input values.
 
 Improvements
 ############
@@ -40,6 +38,8 @@ Improvements
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
+
+- :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using offset vectors and maximum order of satellite from PeaksWorkspace.
 
 Bugfixes
 ########

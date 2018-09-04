@@ -57,11 +57,18 @@ Integrate3DEvents::Integrate3DEvents(
  * integrate the peaks.
  *
  * @param   peak_q_list  List of Q-vectors for peak centers.
+ * @param   hkl_list     The list of h,k,l
+ * @param   mnp_list     The list of satellite m,n,p
  * @param   UBinv        The matrix that maps Q-vectors to h,k,l
  * @param   ModHKL       The Modulation vectors
- * @param   radius       The maximum distance from a peak's Q-vector, for
+ * @param   radius_m     The maximum distance from a peak's Q-vector, for
  *                       an event to be stored in the list associated with
  *                       that peak.
+ * @param   radius_s     The maximum distance from a peak's Q-vector, for
+ *                       an event to be stored in the list associated with
+ *                       that satellite peak.
+ * @param   MaxO         The maximum order of satellite peaks.
+ * @param   CrossT       Switch for cross terms of satellites.
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  correction should be used.
  */
@@ -69,7 +76,7 @@ Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     DblMatrix const &UBinv, DblMatrix const &ModHKL, double radius_m,
-    double radius_s, int MaxO, bool CrossT,
+    double radius_s, int MaxO, const bool CrossT,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_ModHKL(ModHKL), m_radius(radius_m), s_radius(radius_s),
       maxOrder(MaxO), crossterm(CrossT),
