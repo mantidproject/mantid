@@ -149,16 +149,16 @@ void SumSpectra::init() {
                   "estimate the number of dropped values see the "
                   "description. ");
 
+  declareProperty("RemoveSpecialValues", false,
+                  "If enabled floating point special values such as NaN or Inf"
+                  " are removed before the spectra are summed.");
+
   declareProperty("MultiplyBySpectra", true,
                   "For unnormalized data one should multiply the weighted sum "
                   "by the number of spectra contributing to the bin.");
   setPropertySettings(
       "MultiplyBySpectra",
       make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
-
-  declareProperty("RemoveSpecialValues", false,
-                  "If enabled floating point special values such as NaN or Inf"
-                  " are removed before the spectra are summed.");
 }
 
 /*
