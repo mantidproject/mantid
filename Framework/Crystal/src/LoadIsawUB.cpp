@@ -65,6 +65,7 @@ void LoadIsawUB::exec() {
   Kernel::DblMatrix modub(3, 3);
   std::string s;
   double val;
+  bool valBool;
 
   // Read the ISAW UB matrix
   for (size_t row = 0; row < 3; row++) {
@@ -112,7 +113,7 @@ void LoadIsawUB::exec() {
     latVal = val;
   }
 
-  double ModVecErr[3][3] = {0};
+  double ModVecErr[3][3] = {{0}};
   if (ModDim > 0) {
     readToEndOfLine(in, true);
     readToEndOfLine(in, true);
@@ -141,7 +142,7 @@ void LoadIsawUB::exec() {
     readToEndOfLine(in, true);
     for (int j = 0; j < 3; j++)
       s = getWord(in, true);
-    if (!convert(s, val))
+    if (!convert(s, valBool))
       throw std::runtime_error("The string '" + s +
                                "' in the file was not understood as a number.");
     crossterm = val;
