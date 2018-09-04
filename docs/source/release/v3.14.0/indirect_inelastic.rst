@@ -21,3 +21,12 @@ Improvements
   to be selected. Allowed values: ['Linear', 'CSpline'].
 - Added 'MaxScatterPtAttempts' spinbox to Calculate Monte Carlo Absorption. This sets the maximum number of 
   tries to be made to generate a scattering point.
+
+Data Analysis Interfaces
+-------------------------
+
+Bugfixes
+########
+
+- The parameter values for a selected spectrum are now updated properly when a Fit is run using the Fit String 
+  option in ConvFit.
