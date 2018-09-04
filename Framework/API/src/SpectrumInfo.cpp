@@ -1,5 +1,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/SpectrumInfoIterator.h"
 #include "MantidBeamline/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -180,6 +181,16 @@ SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");
   return spectrumDefinition(index);
+}
+
+// Begin method for iterator
+SpectrumInfoIterator SpectrumInfo::begin() const {
+  return SpectrumInfoIterator(*this, 0);
+}
+
+// End method for iterator
+SpectrumInfoIterator SpectrumInfo::end() const {
+  return SpectrumInfoIterator(*this, size());
 }
 
 } // namespace API

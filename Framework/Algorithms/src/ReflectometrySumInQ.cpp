@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -462,9 +463,10 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
   if (twoThetaRange.min <= refAngles.horizon) {
     const auto twoTheta = (twoThetaRange.min + twoThetaRange.max) / 2.;
     throw std::runtime_error(
-        "Cannot process twoTheta=" + std::to_string(twoTheta * 180.0 / M_PI) +
+        "Cannot process twoTheta=" +
+        std::to_string(twoTheta * Geometry::rad2deg) +
         " as it is below the horizon angle=" +
-        std::to_string(refAngles.horizon * 180.0 / M_PI));
+        std::to_string(refAngles.horizon * Geometry::rad2deg));
   }
 
   // Calculate the projected wavelength range
@@ -481,8 +483,9 @@ ReflectometrySumInQ::projectedLambdaRange(const MinMax &wavelengthRange,
     const auto lambda = (wavelengthRange.min + wavelengthRange.max) / 2.;
     throw std::runtime_error(
         "Failed to project (lambda, twoTheta) = (" + std::to_string(lambda) +
-        "," + std::to_string(twoTheta * 180.0 / M_PI) + ") onto twoThetaR = " +
-        std::to_string(refAngles.twoTheta) + ": " + ex.what());
+        "," + std::to_string(twoTheta * Geometry::rad2deg) +
+        ") onto twoThetaR = " + std::to_string(refAngles.twoTheta) + ": " +
+        ex.what());
   }
   return range;
 }

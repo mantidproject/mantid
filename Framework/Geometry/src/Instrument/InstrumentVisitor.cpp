@@ -319,7 +319,6 @@ void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
  * @return Component index of this component
  */
 size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
-
   auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
   /* Already allocated we just need to index into the inital front-detector

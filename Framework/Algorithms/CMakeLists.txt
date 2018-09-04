@@ -74,6 +74,7 @@ set ( SRC_FILES
 	src/CreateDummyCalFile.cpp
 	src/CreateEPP.cpp
 	src/CreateFlatEventWorkspace.cpp
+	src/CreateFloodWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
 	src/CreateLogTimeCorrection.cpp
@@ -137,6 +138,7 @@ set ( SRC_FILES
 	src/FindEPP.cpp
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
+	src/FindReflectometryLines2.cpp
 	src/FitPeak.cpp
 	src/FitPeaks.cpp
 	src/FixGSASInstrumentFile.cpp
@@ -280,6 +282,7 @@ set ( SRC_FILES
 	src/SofQWPolygon.cpp
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
+	src/SortXAxis.cpp
 	src/SpatialGrouping.cpp
 	src/SpectrumAlgorithm.cpp
 	src/SpecularReflectionAlgorithm.cpp
@@ -398,6 +401,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateDummyCalFile.h
 	inc/MantidAlgorithms/CreateEPP.h
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
+	inc/MantidAlgorithms/CreateFloodWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h
@@ -461,6 +465,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindEPP.h
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
+	inc/MantidAlgorithms/FindReflectometryLines2.h
 	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FitPeaks.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
@@ -609,6 +614,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SofQWPolygon.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
+	inc/MantidAlgorithms/SortXAxis.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SpectrumAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
@@ -797,6 +803,7 @@ set ( TEST_FILES
 	FindEPPTest.h
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
+	FindReflectometryLines2Test.h
 	FitPeakTest.h
 	FitPeaksTest.h
 	FixGSASInstrumentFileTest.h
@@ -928,6 +935,7 @@ set ( TEST_FILES
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
+	SortXAxisTest.h
 	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateTheta2Test.h

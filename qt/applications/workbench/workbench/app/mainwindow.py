@@ -378,14 +378,20 @@ class MainWindow(QMainWindow):
             window_pos = QPoint(*window_pos)
 
         # make sure main window is smaller than the desktop
-        desktop_size = QDesktopWidget().screenGeometry().size()
-        w = min(desktop_size.width(), window_size.width())
-        h = min(desktop_size.height(), window_size.height())
+        desktop = QDesktopWidget()
+
+        # this gives the maximum screen number if the position is off screen
+        screen = desktop.screenNumber(window_pos)
+
+        # recalculate the window size
+        desktop_geom = desktop.screenGeometry(screen)
+        w = min(desktop_geom.size().width(), window_size.width())
+        h = min(desktop_geom.size().height(), window_size.height())
         window_size = QSize(w, h)
 
-        # and that it will be painted on screen
-        x = min(window_pos.x(), desktop_size.width() - window_size.width())
-        y = min(window_pos.y(), desktop_size.height() - window_size.height())
+        # and position it on the supplied desktop screen
+        x = max(window_pos.x(), desktop_geom.left())
+        y = max(window_pos.y(), desktop_geom.top())
         window_pos = QPoint(x, y)
 
         # set the geometry

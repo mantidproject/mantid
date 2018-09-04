@@ -1,4 +1,4 @@
-set ( SRC_FILES
+﻿set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
 	src/BankPulseTimes.cpp
@@ -61,7 +61,7 @@ set ( SRC_FILES
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-	src/LoadILLSANS.cpp
+        src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
