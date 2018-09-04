@@ -28,7 +28,8 @@ std::string const RANGE_LOWER("RangeLower");
 std::string const RANGE_UPPER("RangeUpper");
 } // namespace Prop
 
-double const VERY_BIG_VALUE = std::numeric_limits<double>::max();
+// Too large number makes mantid crash when trying to open a plot
+double const VERY_BIG_VALUE = 1.0e200;
 std::map<std::string, std::string> const funMap{
     {"Linear", "name=LinearBackground"}, {"Quadratic", "name=Quadratic"}};
 
