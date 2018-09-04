@@ -36,7 +36,7 @@ using Mantid::Kernel::V3D;
  *                       an event to be stored in the list associated with
  *                       that peak.
  * @param   useOnePercentBackgroundCorrection flag if one percent background
-                         correction should be used.
+ *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,
@@ -70,7 +70,7 @@ Integrate3DEvents::Integrate3DEvents(
  * @param   MaxO         The maximum order of satellite peaks.
  * @param   CrossT       Switch for cross terms of satellites.
  * @param   useOnePercentBackgroundCorrection flag if one percent background
-                         correction should be used.
+ *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
     std::vector<std::pair<double, V3D>> const &peak_q_list,

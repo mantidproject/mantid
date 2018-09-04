@@ -344,6 +344,18 @@ void UnitCell::setError(double _aerr, double _berr, double _cerr,
   }
 }
 
+/** Set modulation vectors for satellites
+ @param _dh1	offset for H for first vector
+ @param _dk1	offset for K for first vector
+ @param _dl1	offset for l for first vector
+ @param _dh2	offset for H for second vector
+ @param _dk2	offset for K for second vector
+ @param _dl2	offset for l for second vector
+ @param _dh3	offset for H for third vector
+ @param _dk3	offset for K for third vector
+ @param _dl3	offset for l for third vector
+ */
+
 void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
                          double _dk2, double _dl2, double _dh3, double _dk3,
                          double _dl3) {
@@ -358,11 +370,31 @@ void UnitCell::setModHKL(double _dh1, double _dk1, double _dl1, double _dh2,
   ModHKL[2][2] = _dl3;
 }
 
+/** Set modulation vectors for satellites
+ @param newModHKL modulation vectors for HKL for three vectors
+ */
+
 void UnitCell::setModHKL(const DblMatrix &newModHKL) { ModHKL = newModHKL; }
+
+/** Set modulation vectors for satellites
+ @param newErrorModHKL errors for modulation vectors for HKL for three vectors
+ */
 
 void UnitCell::setErrorModHKL(const DblMatrix &newErrorModHKL) {
   errorModHKL = newErrorModHKL;
 }
+
+/** Set modulation vectors for satellites
+ @param _dh1err	error for offset for H for first vector
+ @param _dk1err	error for offset for K for first vector
+ @param _dl1err	error for offset for l for first vector
+ @param _dh2err	error for offset for H for second vector
+ @param _dk2err	error for offset for K for second vector
+ @param _dl2err	error for offset for l for second vector
+ @param _dh3err	error for offset for H for third vector
+ @param _dk3err	error for offset for K for third vector
+ @param _dl3err	error for offset for l for third vector
+ */
 
 void UnitCell::setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
                               double _dh2err, double _dk2err, double _dl2err,
@@ -378,11 +410,23 @@ void UnitCell::setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
   errorModHKL[2][2] = _dl3err;
 }
 
+/** Set modulation vectors for satellites
+ @param _dh1	offset for H for first vector
+ @param _dk1	offset for K for first vector
+ @param _dl1	offset for l for first vector
+ */
+
 void UnitCell::setModVec1(double _dh1, double _dk1, double _dl1) {
   ModHKL[0][0] = _dh1;
   ModHKL[1][0] = _dk1;
   ModHKL[2][0] = _dl1;
 }
+
+/** Set modulation vectors for satellites
+ @param _dh2	offset for H for second vector
+ @param _dk2	offset for K for second vector
+ @param _dl2	offset for l for second vector
+ */
 
 void UnitCell::setModVec2(double _dh2, double _dk2, double _dl2) {
   ModHKL[0][1] = _dh2;
@@ -390,11 +434,21 @@ void UnitCell::setModVec2(double _dh2, double _dk2, double _dl2) {
   ModHKL[2][1] = _dl2;
 }
 
+/** Set modulation vectors for satellites
+ @param _dh3	offset for H for third vector
+ @param _dk3	offset for K for third vector
+ @param _dl3	offset for l for third vector
+ */
+
 void UnitCell::setModVec3(double _dh3, double _dk3, double _dl3) {
   ModHKL[0][2] = _dh3;
   ModHKL[1][2] = _dk3;
   ModHKL[2][2] = _dl3;
 }
+
+/** Set modulation vectors for satellites
+ @param newModVec modulation vectors for HKL for first vector
+ */
 
 void UnitCell::setModVec1(const V3D &newModVec) {
   ModHKL[0][0] = newModVec[0];
@@ -402,11 +456,19 @@ void UnitCell::setModVec1(const V3D &newModVec) {
   ModHKL[2][0] = newModVec[2];
 }
 
+/** Set modulation vectors for satellites
+ @param newModVec modulation vectors for HKL for second vector
+ */
+
 void UnitCell::setModVec2(const V3D &newModVec) {
   ModHKL[0][1] = newModVec[0];
   ModHKL[1][1] = newModVec[1];
   ModHKL[2][1] = newModVec[2];
 }
+
+/** Set modulation vectors for satellites
+ @param newModVec modulation vectors for HKL for third vector
+ */
 
 void UnitCell::setModVec3(const V3D &newModVec) {
   ModHKL[0][2] = newModVec[0];
@@ -414,11 +476,24 @@ void UnitCell::setModVec3(const V3D &newModVec) {
   ModHKL[2][2] = newModVec[2];
 }
 
+/** Set modulation vectors for satellites
+ @param i       index of vector to set
+ @param _dherr	error for offset for H for ith vector
+ @param _dkerr	error for offset for K for ith vector
+ @param _dlerr	error for offset for l for ith vector
+ */
+
 void UnitCell::setModerr(int i, double _dherr, double _dkerr, double _dlerr) {
   errorModHKL[0][i] = _dherr;
   errorModHKL[1][i] = _dkerr;
   errorModHKL[2][i] = _dlerr;
 }
+
+/** Set modulation vectors for satellites
+ @param _dherr	error for offset for H for first vector
+ @param _dkerr	error for offset for K for first vector
+ @param _dlerr	error for offset for l for first vector
+ */
 
 void UnitCell::setModerr1(double _dh1err, double _dk1err, double _dl1err) {
   errorModHKL[0][0] = _dh1err;
@@ -426,78 +501,120 @@ void UnitCell::setModerr1(double _dh1err, double _dk1err, double _dl1err) {
   errorModHKL[2][0] = _dl1err;
 }
 
+/** Set modulation vectors for satellites
+ @param _dherr	error for offset for H for second vector
+ @param _dkerr	error for offset for K for second vector
+ @param _dlerr	error for offset for l for second vector
+ */
+
 void UnitCell::setModerr2(double _dh2err, double _dk2err, double _dl2err) {
   errorModHKL[0][1] = _dh2err;
   errorModHKL[1][1] = _dk2err;
   errorModHKL[2][1] = _dl2err;
 }
 
+/** Set modulation vectors for satellites
+ @param _dherr	error for offset for H for third vector
+ @param _dkerr	error for offset for K for third vector
+ @param _dlerr	error for offset for l for third vector
+ */
+
 void UnitCell::setModerr3(double _dh3err, double _dk3err, double _dl3err) {
   errorModHKL[0][2] = _dh3err;
   errorModHKL[1][2] = _dk3err;
   errorModHKL[2][2] = _dl3err;
 }
+
+/** Set modulation vectors for satellites
+ @param MaxO    maximum order of modulation vectors
+ */
+
 void UnitCell::setMaxOrder(int MaxO) { MaxOrder = MaxO; }
+
+/** Set modulation vectors for satellites
+ @param CT      if true, use cross terms
+ */
+
 void UnitCell::setCrossTerm(bool CT) { CrossTerm = CT; }
+
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVec :: modulation vector
+ */
 
 const Kernel::V3D UnitCell::getModVec(int j) const {
   return V3D(getdh(j), getdk(j), getdl(j));
 }
 
+/** Get errors for modulation vectors for satellites
+ @param j       index of vector to get
+ @return VecErr :: error of modulation vector
+ */
+
 const Kernel::V3D UnitCell::getVecErr(int j) const {
   return V3D(getdherr(j), getdkerr(j), getdlerr(j));
 }
 
-/*
-const Kernel::V3D &UnitCell::getModVec2() const
-{
-    return V3D (getdh2(),getdk2(),getdl2());
-}
-
-const Kernel::V3D &UnitCell::getModVec3() const
-{
-    return V3D (getdh3(),getdk3(),getdl3());
-}
-*/
+/** Get modulation vectors for satellites
+ @return ModHKL :: modulation vectors
+ */
 
 const Kernel::DblMatrix &UnitCell::getModHKL() const { return ModHKL; }
 
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return dh :: dh of modulation vector
+ */
+
 double UnitCell::getdh(int j) const { return ModHKL[0][j - 1]; }
+
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVec :: modulation vector
+ */
 
 double UnitCell::getdk(int j) const { return ModHKL[1][j - 1]; }
 
+/** Get modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVec :: modulation vector
+ */
+
 double UnitCell::getdl(int j) const { return ModHKL[2][j - 1]; }
+
+/** Get error of modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVecErr :: error of modulation vector
+ */
 
 double UnitCell::getdherr(int j) const { return errorModHKL[0][j - 1]; }
 
+/** Get error of modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVecErr :: error of modulation vector
+ */
+
 double UnitCell::getdkerr(int j) const { return errorModHKL[1][j - 1]; }
+
+/** Get error  of modulation vectors for satellites
+ @param j       index of vector to get
+ @return ModVecErr :: error of modulation vector
+ */
 
 double UnitCell::getdlerr(int j) const { return errorModHKL[2][j - 1]; }
 
+/** Get max order
+ @return MaxOrder :: maximum order
+ */
+
 int UnitCell::getMaxOrder() const { return MaxOrder; }
+
+/** Get cross term boolean
+ @return CrossTerm :: if true, use cross terms
+ */
 
 bool UnitCell::getCrossTerm() const { return CrossTerm; }
 
-/*
-int UnitCell::getModDim()
-{
-    if (getdh(1)==0 && getdk(1)==0 && getdl(1)==0)
-}
-*/
-
-/*
-double UnitCell::getdh2() const { return ModHKL[0][1]; }
-
-double UnitCell::getdk2() const { return ModHKL[1][1]; }
-
-double UnitCell::getdl2() const { return ModHKL[2][1]; }
-
-double UnitCell::getdh3() const { return ModHKL[0][2]; }
-
-double UnitCell::getdk3() const { return ModHKL[1][2]; }
-
-double UnitCell::getdl3() const { return ModHKL[2][2]; }
-*/
 
 /** Set lattice parameter
  @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/

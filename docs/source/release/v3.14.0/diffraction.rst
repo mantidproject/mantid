@@ -25,21 +25,26 @@ Single Crystal Diffraction
 New
 ###
 
-- New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using offset vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
+- New algorithm :ref:`PredictSatellitePeaks <algm-PredictSatellitePeaks>` to predict satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace or range of wavelength and DSpacing.
 
-- New algorithm :ref:`FindUBUsingIndexedPeaksWithSatellites <algm-FindUBUsingIndexedPeaksWithSatellites>` to find UB matrix using the indexed peaks, offset vectors and maximum order of satellite from PeaksWorkspace and/or from input values.
+- New algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` to index peaks with satellites and set modulation vectors and maximum order of satellite from input values.
+
+- New algorithm :ref:`IntegrateEllipsoidsWithSatellites <algm-IntegrateEllipsoidsWithSatellites>` to integrate peaks using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace
 
 Improvements
 ############
 
-- :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the offset vectors in the header and the order of each satellite by the hkl of the nuclear peak.
+- :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` will load satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
 
-- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks with the offset vectors in the header and the order of each satellite by the hkl of the nuclear peak.
+- :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` will save satellite peaks using the order of each satellite by the hkl of the nuclear peak and the mnp of the satellite peak.
 
 - :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 
-- :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using offset vectors and maximum order of satellite from PeaksWorkspace.
+- :ref:`IndexPeaks <algm-IndexPeaks>` now will also index satellite peaks using modulation vectors and maximum order of satellite from PeaksWorkspace.
+
+- :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` finds UB matrix using the indexed peaks, modulation vectors and maximum order of satellite from PeaksWorkspace.
 
 Bugfixes
 ########

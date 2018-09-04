@@ -9,11 +9,11 @@
 
 namespace Mantid {
 namespace Crystal {
-/** CreatSatellitePeaks : Algorithm to create a PeaksWorkspace with peaks
+/** PredictSatellitePeaks : Algorithm to create a PeaksWorkspace with peaks
    corresponding
     to fractional h,k,and l values.
 
-    @author Vickie Lynch
+    @author Shiyun Liu/Vickie Lynch
     @date   2018-07-13
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory &
