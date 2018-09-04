@@ -240,6 +240,15 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(
     throw std::runtime_error("IndexInfo::"
                              "globalSpectrumIndicesFromDetectorIndices -- no "
                              "spectrum definitions available");
+  /*
+   * We need some way of keeping track of which time indices of given detector
+   * have a matching mapping. detectorMap holds pairs; first in the pair
+   * indicates the detector ID, used to check if there is mapping with the
+   * detector, regardless of time index. The second, which is a vector indexed
+   * by time indices for the given detector, is only used to count and check
+   * whether more than one spectra map to the same detector at the same time
+   * index.
+   */
   std::vector<std::pair<char, std::vector<char>>> detectorMap;
   for (const auto &index : detectorIndices) {
     // IndexInfo has no knowledge of the maximum detector index so we workaround
