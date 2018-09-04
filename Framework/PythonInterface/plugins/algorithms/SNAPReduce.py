@@ -282,42 +282,31 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             smooth_range = self.getProperty("SmoothingRange").value
 
-            peak_clip_WS = CloneWorkspace(InputWorkspace=WS, OutputWorkspace='peak_clip_WS')
+            peak_clip_WS = str(WS).replace('_red', '_normalizer')
+            peak_clip_WS = CloneWorkspace(InputWorkspace=WS, OutputWorkspace=peak_clip_WS)
             n_histo = peak_clip_WS.getNumberHistograms()
 
             for h in range(n_histo):
                 peak_clip_WS.setY(h, self.peak_clip(peak_clip_WS.readY(h), win=window, decrese=True,
                                                     LLS=True, smooth_window=smooth_range))
-            return 'peak_clip_WS'
+            return str(peak_clip_WS)
         else: # other values are already held in normWS
             return normWS
 
-    def _save(self, runnumber, basename, norm):
+    def _save(self, saveDir, basename, outputWksp):
         if not self.getProperty("SaveData").value:
             return
 
-        saveDir = self.getProperty("OutputDirectory").value.strip()
-        if len(saveDir) <= 0:
-            self.log().notice('Using default save location')
-            saveDir = os.path.join(
-                self.get_IPTS_Local(runnumber), 'shared', 'data')
         self.log().notice('Writing to \'' + saveDir + '\'')
 
-        if norm == 'None':
-            SaveNexusProcessed(InputWorkspace='WS_red',
-                               Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
-            SaveAscii(InputWorkspace='WS_red',
-                      Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
-            ConvertUnits(InputWorkspace='WS_red', OutputWorkspace='WS_tof',
-                         Target="TOF", AlignBins=False)
-        else:
-            SaveNexusProcessed(InputWorkspace='WS_nor',
-                               Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
-            SaveAscii(InputWorkspace='WS_nor',
-                      Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
-            ConvertUnits(InputWorkspace='WS_nor', OutputWorkspace='WS_tof',
-                         Target="TOF", AlignBins=False)
+        SaveNexusProcessed(InputWorkspace=outputWksp,
+                           Filename=os.path.join(saveDir, 'nexus', basename + '.nxs'))
+        SaveAscii(InputWorkspace=outputWksp,
+                  Filename=os.path.join(saveDir, 'd_spacing', basename + '.dat'))
+        ConvertUnits(InputWorkspace=outputWksp, OutputWorkspace='WS_tof',
+                     Target="TOF", AlignBins=False)
 
+        # GSAS and FullProf require data in time-of-flight
         SaveGSS(InputWorkspace='WS_tof',
                 Filename=os.path.join(saveDir, 'gsas', basename + '.gsa'),
                 Format='SLOG', SplitFiles=False, Append=False, ExtendedHeader=True)
@@ -354,14 +343,14 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         if norm == "From Processed Nexus":
             norm_File = self.getProperty("NormalizationFilename").value
-            LoadNexusProcessed(Filename=norm_File, OutputWorkspace='normWS')
-            normWS = 'normWS'
+            normalizationWS = 'normWS'
+            LoadNexusProcessed(Filename=norm_File, OutputWorkspace=normalizationWS)
             progress.report('loaded normalization')
         elif norm == "From Workspace":
-            normWS = str(self.getProperty("NormalizationWorkspace").value)
+            normalizationWS = str(self.getProperty("NormalizationWorkspace").value)
             progress.report('')
         else:
-            normWS = None
+            normalizationWS = None
             progress.report('')
 
         group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4Grouping'}
@@ -387,8 +376,6 @@ class SNAPReduce(DataProcessorAlgorithm):
         progStart = .25
         progDelta = (1.-progStart)/len(in_Runs)
         for runnumber in in_Runs:
-            progress = Progress(self, progStart, progStart+progDelta, 7)
-
             self.log().notice("processing run %s" % runnumber)
             self.log().information(str(self.get_IPTS_Local(runnumber)))
 
@@ -403,8 +390,9 @@ class SNAPReduce(DataProcessorAlgorithm):
                 # Need to update the new_Tag and basename variables
                 raise RuntimeError('Live data is not currently supported')
             else:
-                # TODO add progress bar nonsense
-                Load(Filename='SNAP' + str(runnumber), OutputWorkspace=basename + '_red')
+                Load(Filename='SNAP' + str(runnumber), OutputWorkspace=basename + '_red', startProgress=progStart,
+                     endProgress=progStart + .25 * progDelta)
+                progStart += .25 * progDelta
             redWS = basename + '_red'
 
             # overwrite geometry with detcal files
@@ -418,7 +406,6 @@ class SNAPReduce(DataProcessorAlgorithm):
                 unfocussedWksp = ''
 
             # TODO the right thing with the calibration information
-            # TODO add progress bar nonsense
             AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
                                 TMax=50000,
                                 Params=params,  # binning parameters in d-space
@@ -428,7 +415,14 @@ class SNAPReduce(DataProcessorAlgorithm):
                                 UnfocussedWorkspace=unfocussedWksp,  # can be empty string
                                 PreserveEvents=False,
                                 Dspacing=True,  # bin in d-spacing
-                                )
+                                startProgress = progStart,
+                                endProgress = progStart + .5 * progDelta
+            )
+            progStart += .5 * progDelta
+
+            # the rest takes up .25 percent of the run processing
+            progress = Progress(self, progStart, progStart+.25*progDelta, 2)
+
             # AlignAndFocusPowder leaves the data in time-of-flight
             ConvertUnits(InputWorkspace=redWS, OutputWorkspace=redWS, Target='dSpacing', EMode='Elastic')
 
@@ -439,14 +433,14 @@ class SNAPReduce(DataProcessorAlgorithm):
             NormaliseByCurrent(InputWorkspace=redWS, OutputWorkspace=redWS)
 
             # normalize the data as requested
-            normWS = self._generateNormalization(redWS, norm, normWS)
-            WS_nor = None
-            if normWS is not None:
-                WS_nor = 'WS_nor'
-                Divide(LHSWorkspace=redWS, RHSWorkspace=normWS,
-                       OutputWorkspace='WS_nor')
-                ReplaceSpecialValues(Inputworkspace='WS_nor',
-                                     OutputWorkspace='WS_nor',
+            normalizationWS = self._generateNormalization(redWS, norm, normalizationWS)
+            normalizedWS = None
+            if normalizationWS is not None:
+                normalizedWS = basename + '_nor'
+                Divide(LHSWorkspace=redWS, RHSWorkspace=normalizationWS,
+                       OutputWorkspace=normalizedWS)
+                ReplaceSpecialValues(Inputworkspace=normalizedWS,
+                                     OutputWorkspace=normalizedWS,
                                      NaNValue='0', NaNError='0',
                                      InfinityValue='0', InfinityError='0')
                 progress.report('normalized')
@@ -460,25 +454,30 @@ class SNAPReduce(DataProcessorAlgorithm):
             azi = np.degrees(det_table.column('Azimuthal'))
             EditInstrumentGeometry(Workspace=redWS, L2=det_table.column('L2'),
                                    Polar=polar, Azimuthal=azi)
-            if WS_nor is not None:
-                EditInstrumentGeometry(Workspace='WS_nor', L2=det_table.column('L2'),
+            if normalizedWS is not None:
+                EditInstrumentGeometry(Workspace=normalizedWS, L2=det_table.column('L2'),
                                        Polar=polar, Azimuthal=azi)
             mtd.remove('__SNAP_det_table')
             progress.report('simplify geometry')
 
-            # Save requested formats
-            self._save(runnumber, basename, norm)
-
             # rename everything as appropriate and determine output workspace name
-            if norm == 'None':
+            if normalizedWS is None:
                 outputWksp = redWS
             else:
-                outputWksp = basename + '_nor'
-                RenameWorkspace(Inputworkspace='WS_nor',
-                                OutputWorkspace=basename + '_nor')
-            if norm == "Extracted from Data":
-                RenameWorkspace(Inputworkspace='peak_clip_WS',
-                                OutputWorkspace='%s_%s_normalizer' % (new_Tag, runnumber))
+                outputWksp = normalizedWS
+
+                if norm == "Extracted from Data":
+
+                    if Process_Mode == "Production":
+                        DeleteWorkspace(Workspace=redWS)
+                        DeleteWorkspace(Workspace=normalizationWS)
+
+            # Save requested formats
+            saveDir = self.getPropertyValue("OutputDirectory").strip()
+            if len(saveDir) <= 0:
+                self.log().notice('Using default save location')
+                saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
+            self._save(saveDir, basename, outputWksp)
 
             # set workspace as an output so it gets history
             propertyName = 'OutputWorkspace_'+str(outputWksp)
@@ -486,19 +485,14 @@ class SNAPReduce(DataProcessorAlgorithm):
                 propertyName, outputWksp, Direction.Output))
             self.setProperty(propertyName, outputWksp)
 
-            # delete some things in production
-            if Process_Mode == "Production":
-                if norm != "None":
-                    DeleteWorkspace(Workspace=redWS) # was 'WS_red'
-                elif norm == "Extracted from Data":
-                    DeleteWorkspace(Workspace='%s_%s_normalizer' % (new_Tag, runnumber)) # was 'peak_clip_WS'
-            else: # TODO set them as workspace properties
+            # declare some things as extra outputs in set-up
+            if Process_Mode != "Production":  # TODO set them as workspace properties
                 propNames = ['OuputWorkspace_'+str(it) for it in ['d', 'norm', 'normalizer']]
                 wkspNames = ['%s_%s_d' % (new_Tag, runnumber), basename + '_red', '%s_%s_normalizer' % (new_Tag, runnumber)]
                 for (propName, wkspName) in zip(propNames, wkspNames):
-                    self.declareProperty(WorkspaceProperty(
-                        propName, wkspName, Direction.Output))
-                    self.setProperty(propName, wkspName)
+                    if mtd.doesExist(wkspName):
+                        self.declareProperty(WorkspaceProperty(propName, wkspName, Direction.Output))
+                        self.setProperty(propName, wkspName)
 
 
 AlgorithmFactory.subscribe(SNAPReduce)
