@@ -2,6 +2,8 @@
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidTypes/Event/TofEvent.h"
 
+#include <iostream>
+
 using namespace Mantid::Parallel::IO;
 using namespace Mantid::Types;
 

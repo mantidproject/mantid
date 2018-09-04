@@ -848,6 +848,12 @@ public:
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
+  void test_multiprocess_load() {
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("Load type", "multiprocess");
+  }
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };
