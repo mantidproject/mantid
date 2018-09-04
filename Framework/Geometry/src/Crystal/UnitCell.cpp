@@ -615,7 +615,6 @@ int UnitCell::getMaxOrder() const { return MaxOrder; }
 
 bool UnitCell::getCrossTerm() const { return CrossTerm; }
 
-
 /** Set lattice parameter
  @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
 void UnitCell::seta(double _a) {
