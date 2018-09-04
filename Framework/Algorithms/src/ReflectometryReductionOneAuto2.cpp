@@ -206,7 +206,7 @@ void ReflectometryReductionOneAuto2::init() {
   // Processing instructions
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
-                  "Grouping pattern of workspace indices to yield only the"
+                  "Grouping pattern of spectrum numbers to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
 
   // Theta
@@ -339,8 +339,22 @@ void ReflectometryReductionOneAuto2::exec() {
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  const auto instructions =
-      populateProcessingInstructions(alg, instrument, inputWS);
+  std::string instructions = "";
+  m_processingInstructions = getPropertyValue("ProcessingInstructions");
+  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
+    m_processingInstructionsWorkspaceIndex =
+        convertProcessingInstructionsToWorkspaceIndexes(
+            m_processingInstructions, inputWS);
+    instructions = m_processingInstructionsWorkspaceIndex;
+    alg->setProperty("ProcessingInstructions", m_processingInstructions);
+  } else {
+    m_processingInstructionsWorkspaceIndex =
+        populateProcessingInstructions(instrument, inputWS);
+    instructions = m_processingInstructionsWorkspaceIndex;
+    m_processingInstructions =
+        convertWorkspaceIndexProcInstToSpecNum(instructions, inputWS);
+    alg->setProperty("ProcessingInstructions", m_processingInstructions);
+  }
 
   // Now that we know the detectors of interest, we can move them if necessary
   // (i.e. if theta is given). If not, we calculate theta from the current

@@ -69,7 +69,7 @@ protected:
                  const double argMax = 0.0);
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS, const std::string processingCommands,
+  makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
                  const bool convert = true);
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
@@ -85,7 +85,6 @@ protected:
                             Mantid::Geometry::Instrument_const_sptr instrument);
   /// Populate processing instructions
   std::string populateProcessingInstructions(
-      Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument,
       Mantid::API::MatrixWorkspace_sptr inputWS) const;
   /// Populate transmission properties
@@ -95,6 +94,21 @@ protected:
                           const std::string &logName);
   // Retrieve the run number from the logs of the input workspace.
   std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
+  std::string
+  workspaceIndexesToSpecNum(const std::string &num,
+                            Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  std::string convertProcessingInstructionsToWorkspaceIndexes(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  std::string
+  specNumToWorkspaceIndexes(const std::string &num,
+                            Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  std::string convertWorkspaceIndexProcInstToSpecNum(
+      const std::string &instructions,
+      Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  std::string m_processingInstructionsWorkspaceIndex;
+  std::string m_processingInstructions;
 };
 } // namespace Algorithms
 } // namespace Mantid
