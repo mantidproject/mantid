@@ -84,7 +84,7 @@ private:
   /// Determine the separator
   void separator();
   /// Separator
-  char m_sep{'\0'};
+  char m_sep{'\t'};
   /// Filename
   std::string m_filename;
   /// File extension

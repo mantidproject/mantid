@@ -31,6 +31,10 @@ using namespace API;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveReflectometryAscii)
 
+auto visibleWhenFileExtension(const std::string s) {
+  return make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, s);
+}
+
 /// Initialise the algorithm
 void SaveReflectometryAscii::init() {
   declareProperty(
@@ -43,18 +47,13 @@ void SaveReflectometryAscii::init() {
   declareProperty("FileExtension", ".mft",
                   boost::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
-  auto mft =
-      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, ".mft");
-  auto cus =
-      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  auto mft = visibleWhenFileExtension(".mft");
+  auto cus = visibleWhenFileExtension("custom");
   auto vis1 =
       make_unique<VisibleWhenProperty>(std::move(mft), std::move(cus), OR);
-  auto vis2 =
-      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
-  auto vis3 =
-      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
-  auto vis4 =
-      make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO, "custom");
+  auto vis2 = visibleWhenFileExtension("custom");
+  auto vis3 = visibleWhenFileExtension("custom");
+  auto vis4 = visibleWhenFileExtension("custom");
   declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   setPropertySettings("LogList", std::move(vis1));
@@ -79,7 +78,7 @@ std::map<std::string, std::string> SaveReflectometryAscii::validateInputs() {
   if (m_filename.empty())
     issues["InputWorkspace"] = "Provide a file name";
   m_ext = getPropertyValue("FileExtension");
-  if (m_ext.compare("custom"))
+  if (m_ext != "custom")
     m_filename.append(m_ext);
   m_ws = getProperty("InputWorkspace");
   if (!m_ws) {
@@ -109,12 +108,12 @@ void SaveReflectometryAscii::data() {
     outputval(points[i]);
     outputval(yData[i]);
     outputval(eData[i]);
-    if ((!m_ext.compare("custom") && getProperty("WriteResolution")) ||
-        (!m_ext.compare(".mft")) || (!m_ext.compare(".txt"))) {
+    if ((m_ext == "custom" && getProperty("WriteResolution")) ||
+        (m_ext == ".mft") || (m_ext == ".txt")) {
       if (m_ws->hasDx(0))
         outputval(m_ws->dx(0)[i]);
       else {
-        if (m_ext.compare(".mft"))
+        if (m_ext != ".mft")
           outputval(points[i] * ((points[1] + points[0]) / points[1]));
       }
     }
@@ -124,15 +123,12 @@ void SaveReflectometryAscii::data() {
 
 /// Determine separator
 void SaveReflectometryAscii::separator() {
-  if (!m_ext.compare("custom")) {
+  if (m_ext == "custom") {
     const std::string sepOption = getProperty("Separator");
-    if (sepOption == "tab" || !m_ext.compare(".txt"))
-      m_sep = '\t';
-    if (sepOption == "comma") {
+    if (sepOption == "comma")
       m_sep = ',';
-    } else if (sepOption == "space") {
+    if (sepOption == "space")
       m_sep = ' ';
-    }
   }
 }
 
@@ -142,7 +138,7 @@ void SaveReflectometryAscii::separator() {
  */
 bool SaveReflectometryAscii::writeString(bool write, std::string s) {
   if (write) {
-    if (m_sep != '\0')
+    if (m_ext == "custom" || m_ext == ".txt")
       m_file << m_sep << s;
     else {
       m_file << std::setw(28);
@@ -159,7 +155,7 @@ void SaveReflectometryAscii::outputval(double val) {
   bool inf = writeString(std::isinf(val), "inf");
   bool nan = writeString(std::isnan(val), "nan");
   if (!inf && !nan) {
-    if (m_sep != '\0')
+    if (m_ext == "custom" || m_ext == ".txt")
       m_file << m_sep << val;
     else {
       m_file << std::setw(28);
@@ -260,10 +256,9 @@ void SaveReflectometryAscii::checkFile(const std::string filename) {
 void SaveReflectometryAscii::exec() {
   checkFile(m_filename);
   separator();
-  if ((getProperty("WriteHeader") && !m_ext.compare("custom")) ||
-      !m_ext.compare(".mft"))
+  if ((getProperty("WriteHeader") && m_ext == "custom") || m_ext == ".mft")
     header();
-  else if (!m_ext.compare(".dat"))
+  else if (m_ext == ".dat")
     m_file << m_ws->y(0).size() << "\n";
   data();
   m_file.close();
