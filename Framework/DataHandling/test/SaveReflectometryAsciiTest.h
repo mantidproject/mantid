@@ -223,11 +223,11 @@ public:
     TS_ASSERT(Poco::File(filename.append(".txt")).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("       3.300000000000000e-01       "
-                      "3.000000000000000e+00       1.732050807568877e+00       "
+    data.emplace_back("\t3.300000000000000e-01\t"
+                      "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "6.502941176470588e-01");
-    data.emplace_back("       3.400000000000000e-01       "
-                      "6.600000000000000e+00       2.569046515733026e+00       "
+    data.emplace_back("\t3.400000000000000e-01\t"
+                      "6.600000000000000e+00\t2.569046515733026e+00\t"
                       "6.700000000000000e-01");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
@@ -267,11 +267,11 @@ public:
     TS_ASSERT(Poco::File(filename.append(".txt")).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("       3.300000000000000e-01       "
-                      "3.000000000000000e+00       1.732050807568877e+00       "
+    data.emplace_back("\t3.300000000000000e-01\t"
+                      "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "6.502941176470588e-01");
-    data.emplace_back("       3.400000000000000e-01       "
-                      "6.600000000000000e+00       2.569046515733026e+00       "
+    data.emplace_back("\t3.400000000000000e-01\t"
+                      "6.600000000000000e+00\t2.569046515733026e+00\t"
                       "6.700000000000000e-01");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
@@ -425,12 +425,12 @@ public:
     TS_ASSERT(Poco::File(f1).exists())
     std::vector<std::string> data1;
     data1.reserve(2);
-    data1.emplace_back("       4.360000000000000e+00       "
-                       "4.000000000000000e+00       2.000000000000000e+00      "
-                       " 7.367848101265823e+00");
-    data1.emplace_back("       6.320000000000000e+00       "
-                       "7.600000000000000e+00       2.756809750418044e+00      "
-                       " 1.068000000000000e+01");
+    data1.emplace_back("\t4.360000000000000e+00\t"
+                       "4.000000000000000e+00\t2.000000000000000e+00\t"
+                       "7.367848101265823e+00");
+    data1.emplace_back("\t6.320000000000000e+00\t"
+                       "7.600000000000000e+00\t2.756809750418044e+00\t"
+                       "1.068000000000000e+01");
     std::ifstream in1(f1);
     TS_ASSERT(not_empty(in1))
     std::string fullline;
@@ -442,12 +442,12 @@ public:
     TS_ASSERT(Poco::File(f2).exists())
     std::vector<std::string> data2;
     data2.reserve(2);
-    data2.emplace_back("       3.300000000000000e-01       "
-                       "3.000000000000000e+00       1.732050807568877e+00      "
-                       " 6.502941176470588e-01");
-    data2.emplace_back("       3.400000000000000e-01       "
-                       "6.600000000000000e+00       2.569046515733026e+00      "
-                       " 6.700000000000000e-01");
+    data2.emplace_back("\t3.300000000000000e-01\t"
+                       "3.000000000000000e+00\t1.732050807568877e+00\t"
+                       "6.502941176470588e-01");
+    data2.emplace_back("\t3.400000000000000e-01\t"
+                       "6.600000000000000e+00\t2.569046515733026e+00\t"
+                       "6.700000000000000e-01");
     std::ifstream in2(f2);
     TS_ASSERT(not_empty(in2))
     auto it2 = data2.begin();
