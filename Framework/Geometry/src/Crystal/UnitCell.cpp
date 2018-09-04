@@ -490,9 +490,9 @@ void UnitCell::setModerr(int i, double _dherr, double _dkerr, double _dlerr) {
 }
 
 /** Set modulation vectors for satellites
- @param _dherr	error for offset for H for first vector
- @param _dkerr	error for offset for K for first vector
- @param _dlerr	error for offset for l for first vector
+ @param _dh1err	error for offset for H for first vector
+ @param _dk1err	error for offset for K for first vector
+ @param _dl1err	error for offset for l for first vector
  */
 
 void UnitCell::setModerr1(double _dh1err, double _dk1err, double _dl1err) {
@@ -502,9 +502,9 @@ void UnitCell::setModerr1(double _dh1err, double _dk1err, double _dl1err) {
 }
 
 /** Set modulation vectors for satellites
- @param _dherr	error for offset for H for second vector
- @param _dkerr	error for offset for K for second vector
- @param _dlerr	error for offset for l for second vector
+ @param _dh2err	error for offset for H for second vector
+ @param _dk2err	error for offset for K for second vector
+ @param _dl2err	error for offset for l for second vector
  */
 
 void UnitCell::setModerr2(double _dh2err, double _dk2err, double _dl2err) {
@@ -514,9 +514,9 @@ void UnitCell::setModerr2(double _dh2err, double _dk2err, double _dl2err) {
 }
 
 /** Set modulation vectors for satellites
- @param _dherr	error for offset for H for third vector
- @param _dkerr	error for offset for K for third vector
- @param _dlerr	error for offset for l for third vector
+ @param _dh3err	error for offset for H for third vector
+ @param _dk3err	error for offset for K for third vector
+ @param _dl3err	error for offset for l for third vector
  */
 
 void UnitCell::setModerr3(double _dh3err, double _dk3err, double _dl3err) {

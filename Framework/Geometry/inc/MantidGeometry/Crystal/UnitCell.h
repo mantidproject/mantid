@@ -103,7 +103,7 @@ public:
                  double _dk2, double _dl2, double _dh3, double _dk3,
                  double _dl3);
   void setModHKL(const Kernel::DblMatrix &newModHKL);
-  void setErrorModHKL(const Kernel::DblMatrix &newModHKL);
+  void setErrorModHKL(const Kernel::DblMatrix &newErrorModHKL);
   void setErrorModHKL(double _dh1err, double _dk1err, double _dl1err,
                       double _dh2err, double _dk2err, double _dl2err,
                       double _dh3err, double _dk3err, double _dl3err);
