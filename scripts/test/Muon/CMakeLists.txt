@@ -13,6 +13,8 @@ set ( TEST_PY_FILES
    LoadWidgetPresenter_test.py
    LoadWidgetModel_test.py
    LoadWidgetView_test.py
+   loadwidget_presenter_test.py
+   loadwidget_presenter_multiple_file_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
