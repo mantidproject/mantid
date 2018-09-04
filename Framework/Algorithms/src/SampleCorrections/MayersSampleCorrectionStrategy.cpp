@@ -78,8 +78,9 @@ MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
     HistogramData::Histogram inputHist)
     : m_pars(params), m_histogram(std::move(inputHist)),
-      m_tofVals(m_histogram.points()), m_histoYSize(m_histogram.y().size()),
-      m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
+      m_tofVals(m_histogram.points()), m_histoYSize(m_histogram.size()),
+      m_muRrange(calculateMuRange()),
+      m_rng(std::make_unique<MersenneTwister>(1)) {
 
   const auto &xVals = m_histogram.x();
   if (!(xVals.front() < xVals.back())) {
