@@ -15,9 +15,10 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               CropWorkspace, RenameWorkspace,
                               LoadNexusMonitors, OneMinusExponentialCor,
                               Scale, RebinToWorkspace, Divide, Rebin,
-                              MedianDetectorTest)
+                              MedianDetectorTest, SumSpectra)
 from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty,
                            Direction, IntArrayProperty)
+debug_flag = False
 
 @contextmanager
 def pyexec_setup(new_options):
@@ -45,6 +46,8 @@ def pyexec_setup(new_options):
         # reinstate the mantid options
         for key, value in previous_config.items():
             mantid_config[key] = value
+        if debug_flag is True:
+            return
         # delete temporary files
         for file_name in temps.files:
             os.remove(file_name)
@@ -71,7 +74,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
         self._wavelength_band = None
-        self._wavelength_nbins = 20
+        self._wavelength_nbins = 20  # for normalization by monitor
         self._qbins = None
         self._short_inst = "BSS"
         self._run_list = None
@@ -150,6 +153,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Output),
                              doc='Reduced workspace for background runs')
+        self.setPropertyGroup('OutputBackground', background_title)
         #
         # Vanadium
         #
@@ -188,16 +192,17 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         with pyexec_setup(config_new_options) as self._temps:
             runs = self.getProperty('RunNumbers').value
             _t_sample = self._load_runs(runs, '_t_sample')
-            self._apply_standard_corrections(_t_sample)
+            _t_sample = self._apply_corrections_vanadium(_t_sample)
             if self.getProperty('BackgroundRuns').value != '':
-                _t_bkg = self._substract_background(_t_sample)
+                _t_sample, _t_bkg = self._subtract_background(_t_sample)
                 if self.getPropertyValue('OutputBackground') != '':
-                    self._convert_to_q(_t_bkg)
+                    _t_bkg = self._convert_to_q(_t_bkg)
                     self._output_workspace(_t_bkg, 'OutputBackground')
-            self._convert_to_q(_t_sample)
-            self._output_workspace(_t_bkg, 'OutputWorkspace')
+            _t_sample = self._convert_to_q(_t_sample)
+            self._output_workspace(_t_sample, 'OutputWorkspace')
 
-    def _run_lists(self, runs, do_indiv=False):
+    @staticmethod
+    def _run_lists(runs):
         """
         Obtain all run numbers from input string `runs`
 
@@ -206,26 +211,22 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         runs: str
             Run numbers to be reduced. Symbol `;` separates the runs into
             substrings. Each substring represents a set of runs to be
-            reduced together
-        do_indiv: bool
-            Reduce each run number separately
+            reduced together.
         Returns
         -------
 
         """
         rl = list()
-        rlvals = runs.split(';')
-        for rlval in rlvals:
-            iap = IntArrayProperty("", rlval)  # split the substring
-            if do_indiv:
-                raise NotImplementedError(
-                    "Individual reduction not implemented")
-                rl.extend([[x] for x in iap.value])
+        rn = runs.replace(' ', '')  # remove spaces
+        for x in rn.split(','):
+            if '-' in x:
+                b, e = [int(y) for y in x.split('-')]
+                rl.extend([str(z) for z in range(b, e+1)])
             else:
-                rl.append(iap.value)
+                rl.append(x)
         return rl
 
-    def _load_runs(self, runs, w_name, do_indiv=False):
+    def _load_runs(self, runs, w_name):
         """
         Load all run event Nexus files into a single `EventWorkspace`
 
@@ -237,14 +238,12 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             reduced together
         w_name: str
             Name of output workspace
-        do_indiv: bool
-            Reduce each run number separately
 
         Returns
         -------
         Mantid.EventsWorkspace
         """
-        rl = self._run_lists(runs, do_indiv=do_indiv)
+        rl = self._run_lists(runs)
         #
         # Load files together
         #
@@ -258,8 +257,32 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             else:
                 _t_all_w += _t_w
         RenameWorkspace(_t_all_w, OutputWorkspace=w_name)
+        return _t_all_w
 
-    def _apply_standard_corrections(self, w, target='sample'):
+    def _apply_corrections_vanadium(self, w, target='sample'):
+        """
+        Apply a series of corrections and normalizations to the input
+        workspace, plus normalization by vanadium.
+
+        Parameters
+        ----------
+        w: Mantid.EventsWorkspace
+            Input workspace
+        target: str
+            Specify the entity the workspace refers to. Valid options are
+            'sample', 'background', and 'vanadium'
+
+        Returns
+        -------
+        Mantid.EventsWorkspace
+        """
+        _t_corr = self._apply_corrections(w, target=target)
+        if self.getProperty('VanadiumRuns').value != '':
+            _t_corr_van = self._sensitivity_correction(_t_corr)
+        RenameWorkspace(_t_corr_van, OutputWorkspace=w.name())
+        return _t_corr_van
+
+    def _apply_corrections(self, w, target='sample'):
         """
         Apply a series of corrections and normalizations to the input
         workspace
@@ -270,20 +293,22 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             Input workspace
         target: str
             Specify the entity the workspace refers to. Valid options are
-            'sample' and 'background'
+            'sample', 'background', and 'vanadium'
+
+        Returns
+        -------
+        Mantid.EventsWorkspace
         """
-        _t_w = MaskDetectors(w, MaskedWorkspace=self._t_mask)
-        _t_w = ModeratorTzeroLinear(_t_w)  # delayed emission from moderator
-        _t_w = ConvertUnits(_t_w, Target='Wavelength', Emode='Elastic')
-        _t_w = CropWorkspace(_t_w,
-                             XMin=self._wavelength_band[0],
-                             XMax=self._wavelength_band[1])
-        _t_w = Rebin(_t_w, Params=str(self._wavelength_nbins))
-        if self.getProperty('MonitorNorm').value is True:
-            self._monitor_normalization(_t_w, target)
-        if self.getProperty('VanadiumRuns').value != '':
-            self._sensitivity_correction(_t_w)
-        RenameWorkspace(_t_w, OutputWorkspace=w.name())
+        MaskDetectors(w, MaskedWorkspace=self._t_mask)
+        _t_corr = ModeratorTzeroLinear(w)  # delayed emission from moderator
+        _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic')
+        l_s, l_e = self._wavelength_band[0], self._wavelength_band[1]
+        _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e)
+        l_d = (l_e - l_s) / self._wavelength_nbins
+        _t_corr = Rebin(_t_corr, Params=[l_s, l_d, l_e])
+        if self.getProperty('MonitorNormalization').value is True:
+            _t_corr = self._monitor_normalization(_t_corr, target)
+        return _t_corr
 
     def _load_monitors(self, target):
         """
@@ -293,21 +318,22 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         ----------
         target: str
             Specify the entity the workspace refers to. Valid options are
-            'sample' and 'background'
+            'sample', 'background', and 'vanadium'
 
         Returns
         -------
         Mantid.EventWorkspace
         """
-        valid_targets = ('sample', 'background')
+        valid_targets = ('sample', 'background', 'vanadium')
         if target not in valid_targets:
             raise KeyError('Target must be one of ' + ', '.join(valid_targets))
-        target_to_runs = dict(sample='RunNumbers', background='BackgroundRuns')
+        target_to_runs = dict(sample='RunNumbers', background='BackgroundRuns',
+                              vanadium='VanadiumRuns')
         #
         # Load monitors files together
         #
-        rl = self._run_lists(target_to_runs[target], do_indiv=False)
-        t_all_w = None
+        rl = self._run_lists(self.getProperty('RunNumbers').value)
+        _t_all_w = None
         for run in rl:
             file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
             _t_w = LoadNexusMonitors(file_name)
@@ -327,18 +353,23 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             Input workspace
         target: str
             Specify the entity the workspace refers to. Valid options are
-            'sample' and 'background'
+            'sample', 'background', and 'vanadium'
+
+        Returns
+        -------
+        Mantid.EventWorkspace
         """
-        _t_w = self._load_monitors(target)
-        _t_w = ConvertUnits(_t_w, Target='Wavelength', Emode='Elastic')
-        _t_w = CropWorkspace(_t_w,
+        _t_mon = self._load_monitors(target)
+        _t_mon = ConvertUnits(_t_mon, Target='Wavelength', Emode='Elastic')
+        _t_mon = CropWorkspace(_t_mon,
                              XMin=self._wavelength_band[0],
                              XMax=self._wavelength_band[1])
-        _t_w = OneMinusExponentialCor(C='0.20749999999999999',
+        _t_mon = OneMinusExponentialCor(_t_mon, C='0.20749999999999999',
                                       C1='0.001276')
-        _t_w = Scale(_t_w, Factor='1e-06')
-        _t_w = RebinToWorkspace(_t_w, w)
-        Divide(w, _t_w, OutputWorkspace=w.name())
+        _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply')
+        _t_mon = RebinToWorkspace(_t_mon, w)
+        _t_w = Divide(w, _t_mon, OutputWorkspace=w.name())
+        return _t_w
 
     def _load_vanadium_runs(self):
         """
@@ -346,19 +377,17 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         pixels with low-counts.
         """
         runs = self.getProperty('VanadiumRuns').value
-        _t_w = self._load_runs(runs, '_t_w')
-        _t_w = MaskDetectors(_t_w, MaskedWorkspace=self._t_mask)
-        _t_w = ModeratorTzeroLinear(_t_w)
-        _t_w = ConvertUnits(_t_w, Target='Wavelength', Emode='Elastic')
-        _t_w = CropWorkspace(_t_w,
-                             XMin=self._wavelength_band[0],
-                             XMax=self._wavelength_band[1])
+        _t_van = self._load_runs(runs, '_t_van')
+        _t_van = self._apply_corrections(_t_van, target='vanadium')
+        RenameWorkspace(_t_van, OutputWorkspace='_t_van')
         wave_band = self._wavelength_band[1] - self._wavelength_band[0]
-        self._t_w = Rebin(_t_w, Params=[self._wavelength_band[0], wave_band,
-                                        self._wavelength_band[1]])
-        self._v_mask = MedianDetectorTest(_t_w, OutputWorkspace='_t_v_mask')
-        self._van = MaskDetectors(_t_w, MaskedWorkspace=self._v_mask,
-                                  OutputWorkspace='_t_van')
+        _t_van = Rebin(_t_van, PreserveEvents=False,
+                       Params=[self._wavelength_band[0], wave_band,
+                               self._wavelength_band[1]])
+        output = MedianDetectorTest(_t_van, OutputWorkspace='_t_v_mask')
+        self._v_mask = output.OutputWorkspace
+        MaskDetectors(_t_van, MaskedWorkspace=self._v_mask)
+        self._van = _t_van
 
     def _sensitivity_correction(self, w):
         """
@@ -367,9 +396,13 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Parameters
         ----------
         w: Events workspace in units of wavelength
+        Returns
+        -------
+        Mantid.EventWorkspace
         """
-        _t_w = MaskDetectors(w, MaskedWorkspace=self._v_mask)
-        Divide(_t_w, self._van, OutputWorkspace=w.name())
+        MaskDetectors(w, MaskedWorkspace=self._v_mask)
+        _t_w = Divide(w, self._van, OutputWorkspace=w.name())
+        return _t_w
 
     def _subtract_background(self, w):
         """
@@ -386,11 +419,11 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         runs = self.getProperty('BackgroundRuns').value
         _t_bkg = self._load_runs(runs, '_t_bkg')
-        self._apply_standard_corrections(_t_bkg, target='background')
+        _t_bkg = self._apply_corrections_vanadium(_t_bkg, target='background')
         x = self.getProperty('BackgroundScale').value
         _t_w = w - x * _t_bkg
         RenameWorkspace(_t_w, OutputWorkspace=w.name())
-        return _t_bkg
+        return _t_w, _t_bkg
 
     def _convert_to_q(self, w):
         """
@@ -405,10 +438,11 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         Mantid.MatrixWorkspace
         """
         _t_w = ConvertUnits(w, Target='MomentumTransfer', Emode='Elastic')
-        _t_w = Rebin(_t_w, Params=self._qbins, PreserveEvents=False,
-                     OutputWorkspace=w.name())
+        _t_w = Rebin(_t_w, Params=self._qbins, PreserveEvents=False)
+        _t_w = SumSpectra(_t_w, OutputWorkspace=w.name())
+        return _t_w
 
-    def output_workspace(self, w, prop):
+    def _output_workspace(self, w, prop):
         """
         Rename workspace and set the related output property
 
@@ -418,7 +452,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         prop: str
             Output property name
         """
-        w_name = self.getProperty(prop).value
+        w_name = self.getProperty(prop).valueAsStr
         RenameWorkspace(w, OutputWorkspace=w_name)
         self.setProperty(prop, w)
 
