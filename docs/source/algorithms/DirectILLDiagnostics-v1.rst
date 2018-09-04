@@ -101,97 +101,73 @@ The following settings are used when not explicitly overwritten by the algorithm
 Usage
 -----
 
-**Example - Diagnostics on fake IN4 workspace**
+.. include:: ../usagedata-note.txt
 
-.. testcode:: FakeIN4Example
+**Example - Diagnostics on IN4 workspace**
 
-    import numpy
-    import scipy.stats
-    
-    # Create a fake IN4 workspace.
-    # We need an instrument and a template first.
-    empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
-    nHist = empty_IN4.getNumberHistograms()
-    # Make TOF bin edges.
-    xs = numpy.arange(530.0, 2420.0, 4.0)
-    # Make some Gaussian spectra.
-    ys = 1000.0 * scipy.stats.norm.pdf(xs[:-1], loc=970, scale=60)
-    # Repeat data for each histogram.
-    xs = numpy.tile(xs, nHist)
-    ys = numpy.tile(ys, nHist)
-    ws = CreateWorkspace(
-        DataX=xs,
-        DataY=ys,
-        NSpec=nHist,
-        UnitX='TOF',
-        ParentWorkspace=empty_IN4
-    )
-    # Set some histograms to zero to see if the diagnostics can catch them.
-    ys = ws.dataY(13)
-    ys *= 0.0
-    ys = ws.dataY(101)
-    ys *= 0.0
-    
-    # Manually correct monitor spectrum number as LoadEmptyInstrument does
-    # not know about such details.
-    SetInstrumentParameter(
-        Workspace=ws,
-        ParameterName='default-incident-monitor-spectrum',
-        ParameterType='Number',
-        Value=str(1)
-    )
-    # Add incident energy information to sample logs.
-    AddSampleLog(
-        Workspace=ws,
-        LogName='Ei',
-        LogText=str(57),
-        LogType='Number',
-        LogUnit='meV',
-        NumberType='Double'
-    )
-    # Elastic channel information is missing in the sample logs.
-    # It can be given as single valued workspace, as well.
-    elasticChannelWS = CreateSingleValuedWorkspace(107)
-    
+.. testcode:: IN4Example
+
     DirectILLCollectData(
-        InputWorkspace=ws,
+        Run='ILL/IN4/087283-087290.nxs',
         OutputWorkspace='preprocessed',
-        ElasticChannelWorkspace=elasticChannelWS,
-        IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would do this for IN4.
-        OutputEPPWorkspace='epps' # Needed for the diagnostics.
+        OutputRawWorkspace='raw',  # Needed for the diagnostics
+        OutputEPPWorkspace='epps'  # Needed for the diagnostics
     )
     
     diagnostics = DirectILLDiagnostics(
-        InputWorkspace='preprocessed',
-        OutputWorkspace='diagnosed',
+        InputWorkspace='raw',  # Use 'raw' rather than 'preprocessed' for background diagnostics
+        OutputWorkspace='mask',  # A special MaskWorkspace
         EPPWorkspace='epps',
-        NoisyBkgLowThreshold=0.01,
+        MaskedComponents='rosace',
         OutputReportWorkspace='diagnostics_report'
     )
-    
     print(diagnostics.OutputReport)
-    print('Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.')
-    report = mtd['diagnostics_report']
-    I0 = report.cell('ElasticIntensity', 0)
-    I304 = report.cell('ElasticIntensity', 303)
-    print('Solid-angle corrected elastic intensity of spectrum 1: {:.8}'.format(I0))
-    print('vs. corrected intensity of spectrum 304: {:.8}'.format(I304))
 
 Output:
 
-.. testoutput:: FakeIN4Example
+.. testoutput:: IN4Example
 
     Spectra masked by default mask file:
     None
     Spectra masked by beam stop diagnostics:
     None
     Additional spectra marked as bad by elastic peak diagnostics:
-    14, 102, 302-305, 314-317, 326-329, 338-341, 350-353, 362-365, 374-377, 386-389
+    13, 40, 51, 64, 72-73, 78-79, 81-83, 100-101, 139, 150-151, 165, 173, 180-181, 183-184, 213, 239-240, 264, 272-273, 278-279, 281-283, 300-308, 313-320, 325-331, 337-344, 348-354, 361-366, 373-376, 378, 385-391
     Additional spectra marked as bad by flat background diagnostics:
-    14, 102
-    Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.
-    Solid-angle corrected elastic intensity of spectrum 1: 555524.7
-    vs. corrected intensity of spectrum 304: 1795774.9
+    13, 100-101, 132, 213, 300-309, 313-319, 321, 325-331, 337-343, 345, 348-357, 361-367, 373-378, 381, 385-391
+
+**Example - Diagnostics on IN5 workspace**
+
+.. testcode:: IN5Example
+
+    # On IN5 we don't usually diagnose the pixels, but apply
+    # a hark mask + beam stop mask.
+    DirectILLCollectData(
+        Run='ILL/IN5/104007.nxs',
+        OutputWorkspace='preprocessed',
+    )
+    DirectILLDiagnostics(
+        InputWorkspace='preprocessed',  # Any IN5 workspace goes, doesn't have to be 'raw'
+        OutputWorkspace='mask',  # A special MaskWorkspace
+        OutputReportWorkspace='report'
+    )
+    # Read some data from the report table workspace
+    report = mtd['report']
+    default_column = report.column('DefaultMask')
+    beam_stop_column = report.column('BeamStopMask')
+    print('Total number of pixels masked by default mask: {}'.format(int(sum(default_column))))
+    print('Total number of pixels masked under beam stop: {}'.format(int(sum(beam_stop_column))))
+
+.. testoutput:: IN5Example
+
+    Total number of pixels masked by default mask: 7261
+    Total number of pixels masked under beam stop: 2457
+
+The figure below shows the mask produced by the IN5 example script above. The green pixels show the default hard mask and the beam stop.
+
+.. figure:: ../images/DiagnosticsMaskIN5.png
+    :alt: Default and beam stop masks of IN5 spectrometer. 
+
 
 .. categories::
 

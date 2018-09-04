@@ -20,97 +20,49 @@ The correction factor contained within the *OutputWorkspace* can be further fed 
 Usage
 -----
 
-**Example - Absorption corrections of fake IN4 workspace**
+.. include:: ../usagedata-note.txt
 
-.. testcode:: FakeIN4Example
+**Example - Calculating absorption corrections**
 
-    import numpy
-    import scipy.stats
-    
-    # Create a fake IN4 workspace.
-    # We need an instrument and a template first.
-    empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
-    nHist = empty_IN4.getNumberHistograms()
-    # Make TOF bin edges.
-    xs = numpy.arange(530.0, 2420.0, 4.0)
-    # Make some Gaussian spectra.
-    ys = 1000.0 * scipy.stats.norm.pdf(xs[:-1], loc=970, scale=60)
-    # Repeat data for each histogram.
-    xs = numpy.tile(xs, nHist)
-    ys = numpy.tile(ys, nHist)
-    ws = CreateWorkspace(
-        DataX=xs,
-        DataY=ys,
-        NSpec=nHist,
-        UnitX='TOF',
-        ParentWorkspace=empty_IN4
-    )    
-    # Manually correct monitor spectrum number as LoadEmptyInstrument does
-    # not know about such details.
-    SetInstrumentParameter(
-        Workspace=ws,
-        ParameterName='default-incident-monitor-spectrum',
-        ParameterType='Number',
-        Value=str(1)
-    )
-    # Add incident energy information to sample logs.
-    AddSampleLog(
-        Workspace=ws,
-        LogName='Ei',
-        LogText=str(57),
-        LogType='Number',
-        LogUnit='meV',
-        NumberType='Double'
-    )
-    # Elastic channel information is missing in the sample logs.
-    # It can be given as single valued workspace, as well.
-    elasticChannelWS = CreateSingleValuedWorkspace(107)
-    
-    DirectILLCollectData(
-        InputWorkspace=ws,
-        OutputWorkspace='preprocessed',
-        ElasticChannelWorkspace=elasticChannelWS,
-        IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would do this for IN4.
-    )
-    
-    sampleGeometry = {
-        'Shape': 'Cylinder',
-        'Height': 8.0,
-        'Radius': 1.5,
+.. testcode:: IN4Example
+
+    preprocessed = DirectILLCollectData(Run='ILL/IN4/087294-087295')
+    geometry = {
+        'Shape': 'FlatPlate',
+        'Width': 4.0,
+        'Height': 3.0,
+        'Thick': 0.01,
+        'Angle': 45.0,
         'Center': [0.0, 0.0, 0.0]
     }
-    sampleMaterial = {
-        'ChemicalFormula': 'V',
-        'SampleNumberDensity': 0.05
+    material = {
+        'ChemicalFormula': 'Cd S',
+        'SampleNumberDensity': 0.01
     }
     SetSample(
-        InputWorkspace='preprocessed',
-        Geometry=sampleGeometry,
-        Material=sampleMaterial
+        InputWorkspace=preprocessed,
+        Geometry=geometry,
+        Material=material
     )
-    
     DirectILLSelfShielding(
-        InputWorkspace='preprocessed',
+        InputWorkspace=preprocessed,
         OutputWorkspace='absorption_corrections',
-        SimulationInstrument='Full Instrument', # IN4 is small enough.
         NumberOfSimulatedWavelengths=10
     )
-    # The correction factors should be applied using DirectILLApplySelfShielding.
     corrections = mtd['absorption_corrections']
     f_short = corrections.readY(0)[0]
     f_long = corrections.readY(0)[-1]
-    print('Absoprtion corrections factors for detector 1')
-    print('Short final wavelengths: {:.4f}'.format(f_short))
-    print('Long final wavelengths:  {:.4f}'.format(f_long))
+    print('Absoprtion correction factors for detector 1')
+    print('Short wavelengths: {:.2f}'.format(f_short))
+    print('Long wavelengths:  {:.2f}'.format(f_long))
 
 Output:
 
-.. testoutput:: FakeIN4Example
-   :options: +ELLIPSIS +NORMALIZE_WHITESPACE
+.. testoutput:: IN4Example
 
-    Absoprtion corrections factors for detector 1
-    Short final wavelengths: 0.4...
-    Long final wavelengths:  0.2...
+    Absoprtion correction factors for detector 1
+    Short wavelengths: 0.82
+    Long wavelengths:  0.55
 
 .. categories::
 

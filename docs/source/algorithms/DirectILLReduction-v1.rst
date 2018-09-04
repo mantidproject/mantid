@@ -57,126 +57,56 @@ After conversion to momentum transfer, the vertical axis of the data is in units
 Usage
 -----
 
-**Example - Fake IN4 workspace reduction**
+.. include:: ../usagedata-note.txt
 
-.. testcode:: FakeIN4Example
+**Example - Reduction without absorption corrections/empty container subtraction**
 
-    from mantid.kernel import DeltaEModeType, UnitConversion
-    import numpy
-    import scipy.stats
-    
-    # Create a fake IN4 workspace.
-    # We need an instrument and a template first.
-    empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
-    nHist = empty_IN4.getNumberHistograms()
-    # Make TOF bin edges.
-    xs = numpy.arange(530.0, 2420.0, 4.0)
-    # Make some Gaussian spectra.
-    ys = 1000.0 * scipy.stats.norm.pdf(xs[:-1], loc=970, scale=60)
-    # Repeat data for each histogram.
-    xs = numpy.tile(xs, nHist)
-    ys = numpy.tile(ys, nHist)
-    ws = CreateWorkspace(
-        DataX=xs,
-        DataY=ys,
-        NSpec=nHist,
-        UnitX='TOF',
-        ParentWorkspace=empty_IN4
-    )
-    # Set some histograms to zero for detector diagnostics.
-    ys = ws.dataY(13)
-    ys *= 0.0
-    ys = ws.dataY(101)
-    ys *= 0.0
-    
-    # Manually correct monitor spectrum number as LoadEmptyInstrument does
-    # not know about such details.
-    SetInstrumentParameter(
-        Workspace=ws,
-        ParameterName='default-incident-monitor-spectrum',
-        ParameterType='Number',
-        Value=str(1)
-    )
-    # Add incident energy information to sample logs.
-    AddSampleLog(
-        Workspace=ws,
-        LogName='Ei',
-        LogText=str(57),
-        LogType='Number',
-        LogUnit='meV',
-        NumberType='Double'
-    )
-    # Add wavelength to sample logs
-    wl = UnitConversion.run('Energy', 'Wavelength', 57.0, 0.0, 0.0, 0.0, DeltaEModeType.Direct, 0.0)
-    AddSampleLog(
-        Workspace=ws,
-        LogName='wavelength',
-        LogText=str(wl),
-        LogType='Number',
-        LogUnit='Angstrom',
-        NumberType='Double'
-    )
-    # Elastic channel information is missing in the sample logs.
-    # It can be given as single valued workspace, as well.
-    elasticChannelWS = CreateSingleValuedWorkspace(107)
-    
-    # Create a fake 'vanadium' reference workspace.
-    V_ws = Scale(
-        InputWorkspace=ws,
-        Factor=1.3
-    )
-    
-    # Process vanadium.
+.. plot::
+   :include-source:
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+    # Vanadium
     DirectILLCollectData(
-        InputWorkspace=V_ws,
+        Run='ILL/IN4/085801+085802.nxs',
         OutputWorkspace='vanadium',
-        ElasticChannelWorkspace=elasticChannelWS,
-        IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would do this for IN4.
-        OutputEPPWorkspace='epps' # Needed for diagnostics and integration.
+        OutputRawWorkspace='raw',  # For diagnostics
+        OutputEPPWorkspace='epps' # For diagnostics and integration.
     )
-    
     DirectILLDiagnostics(
-        InputWorkspace='vanadium',
-        OutputWorkspace='diagnostics_mask',
+        InputWorkspace='raw',
+        OutputWorkspace='mask',
         EPPWorkspace='epps',
-        MaskedComponents='rosace', #Exclude small-angle detectors.
+        MaskedComponents='rosace', #Exclude small-angle detectors of IN4.
     )
-    
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
         OutputWorkspace='vanadium_factors',
-        SubalgorithmLogging='Logging ON',
         EPPWorkspace='epps',
-        Temperature=273.0
+        DebyeWallerCorrection='Correction OFF'
     )
-    
-    # Process sample.
+    # Sample.
     DirectILLCollectData(
-        InputWorkspace=ws,
-        OutputWorkspace='preprocessed',
-        ElasticChannelWorkspace=elasticChannelWS,
-        IncidentEnergyCalibration='Energy Calibration OFF'
+        Run='ILL/IN4/087294-087295.nxs',
+        OutputWorkspace='sample',
     )
-    
-    # Absorption corrections and empty container subtractions could be added here.
-    
     DirectILLReduction(
-        InputWorkspace='preprocessed',
-        OutputWorkspace='SofQW',
+        InputWorkspace='sample',
+        OutputWorkspace='S_QW',
         IntegratedVanadiumWorkspace='vanadium_factors',
-        DiagnosticsWorkspace='diagnostics_mask'
+        DiagnosticsWorkspace='mask'
     )
-    
-    sofqw = mtd['SofQW']
-    nHist = sofqw.getNumberHistograms()
-    nBin = sofqw.blocksize()
-    print('Size of the final S(q,w) workspace: {} histograms, {} bins'.format(nHist, nBin))
-
-Output:
-
-.. testoutput:: FakeIN4Example
-
-    Size of the final S(q,w) workspace: 177 histograms, 260 bins
+    # Plot the resulting S(Q,W)
+    s_qw = mtd['S_QW']
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+    contours = ax.pcolor(s_qw, vmax=1)
+    fig.colorbar(contours)
+    ax.set_xlim(xmax=4)
+    ax.set_ylim(ymin=-2, ymax=8)
+    # Uncomment the line below to actually show the plot.
+    #fig.show()
+    mtd.clear()
 
 .. categories::
 

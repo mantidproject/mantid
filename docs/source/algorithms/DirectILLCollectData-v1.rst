@@ -116,70 +116,38 @@ The following settings are used when the :literal:`AUTO` keyword is encountered:
 Usage
 -----
 
-**Example - Fake IN4 workspace as input**
+.. include:: ../usagedata-note.txt
 
-.. testcode:: FakeIN4Example
+**Example - Basic usage as an advanced loader**
 
-    import numpy
-    import scipy.stats
-    
-    # Create a fake IN4 workspace.
-    # We need an instrument and a template first.
-    empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
-    nHist = empty_IN4.getNumberHistograms()
-    # Make TOF bin edges.
-    xs = numpy.arange(530.0, 2420.0, 4.0)
-    # Make some Gaussian spectra.
-    ys = 1000.0 * scipy.stats.norm.pdf(xs[:-1], loc=970, scale=60)
-    # Repeat data for each histogram.
-    xs = numpy.tile(xs, nHist)
-    ys = numpy.tile(ys, nHist)
-    ws = CreateWorkspace(
-        DataX=xs,
-        DataY=ys,
-        NSpec=nHist,
-        UnitX='TOF',
-        ParentWorkspace=empty_IN4
-    )
-    # Manually correct monitor spectrum number as LoadEmptyInstrument does
-    # not know about such details.
-    SetInstrumentParameter(
-        Workspace=ws,
-        ParameterName='default-incident-monitor-spectrum',
-        ParameterType='Number',
-        Value=str(1)
-    )
-    # Add incident energy information to sample logs.
-    AddSampleLog(
-        Workspace=ws,
-        LogName='Ei',
-        LogText=str(57),
-        LogType='Number',
-        LogUnit='meV',
-        NumberType='Double'
-    )
-    # Elastic channel information is missing in the sample logs.
-    # It can be given as single valued workspace, as well.
-    elasticChannelWS = CreateSingleValuedWorkspace(107)
-    
-    DirectILLCollectData(
-        InputWorkspace=ws,
-        OutputWorkspace='preprocessed',
-        ElasticChannelWorkspace=elasticChannelWS,
-        IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would enable this for IN4.
-    )
-    
-    # Notably, the TOF axis got adjusted in DirectILLCollectData
-    preprocessedWS = mtd['preprocessed']
-    print('TOF offset without corrections: {:.4} microseconds'.format(ws.readX(0)[0]))
-    print('Corrected TOF offset: {:.4} microseconds'.format(preprocessedWS.readX(0)[0]))
+.. testcode:: IN4Example
+
+    # It is recommended to use DirectILLCollectData over the basic Load
+    preprocessed = DirectILLCollectData('ILL/IN4/087294+087295.nxs')
+    # Compare to simply loading the data
+    raw = Load('ILL/IN4/087294+087295.nxs')
+    # The workspace loaded by 'Load' includes monitor data which
+    # makes 2D plotting difficult
+    nRaw = raw.getNumberHistograms()
+    print("Number of histograms in 'raw': {}".format(raw.getNumberHistograms())
+        + ", and in 'preprocessed': {}".format(preprocessed.getNumberHistograms()))
+    # Notably, DirectILLCollectData sets the workspace up such that conversion
+    # from TOF to wavelength produces the correct values
+    preprocessed_wl = ConvertUnits(preprocessed, 'Wavelength')
+    raw_wl = ConvertUnits(raw, 'Wavelength')
+    # Elastic peak is around channel 150
+    print('Wavelength from sample logs: {:.3}A'.format(raw.run().getProperty('wavelength').value))
+    print("'raw' wavelength at channel 150: {:.3}A (incorrect!)".format(raw_wl.readX(0)[149]))
+    print("'preprocessed' wavelength at channel 150: {:.3}A".format(preprocessed_wl.readX(0)[149]))
 
 Output:
 
-.. testoutput:: FakeIN4Example
+.. testoutput:: IN4Example
 
-    TOF offset without corrections: 530.0 microseconds
-    Corrected TOF offset: 380.1 microseconds
+    Number of histograms in 'raw': 397, and in 'preprocessed': 396
+    Wavelength from sample logs: 3.06A
+    'raw' wavelength at channel 150: 1.63A (incorrect!)
+    'preprocessed' wavelength at channel 150: 3.05A
 
 .. categories::
 

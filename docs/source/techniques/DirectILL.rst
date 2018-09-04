@@ -41,6 +41,8 @@ Some algorithm properties have the word 'AUTO' in their default value. This mean
 Reduction basics
 ================
 
+.. include:: ../usagedata-note.txt
+
 A very basic reduction would include a vanadium reference and a sample and follow the steps:
 
 #. Load vanadium data.
@@ -55,44 +57,84 @@ A very basic reduction would include a vanadium reference and a sample and follo
 
 #. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
 
-These steps would translate to something like the following simple Python script:
+On instruments like IN4 and IN6, these steps would translate to something like the following simple Python script:
 
-.. code-block:: python
+.. testcode:: BasicIN4Reduction
 
-    # Add a temporary data search directory.
-    mantid.config.appendDataSearchDir('/data/')
-
+    # Uncomment to add a temporary data search directory.
+    #mantid.config.appendDataSearchDir('/data/')
+    
     # Vanadium
     DirectILLCollectData(
-        Run='0100-0109',
+        Run='ILL/IN4/085801-085802.nxs',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
         OutputRawWorkspace='vanadium-raw'    # 'Raw' data for diagnostics.
     )
-
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
         OutputWorkspace='integrated',
         EPPWorkspace='vanadium-epps'
     )
-
     DirectILLDiagnostics(
         InputWorkspace='vanadium-raw',
         OutputWorkspace='diagnostics',
         EPPWorkspace='vanadium-epps',
-        RawWorkspace='vanadium-raw'
     )
-
     # Sample
     DirectILLCollectData(
-        Run='0201+0205+0209-0210',
+        Run='ILL/IN4/087294+087295.nxs',
         OutputWorkspace='sample'
     )
-
     DirectILLReduction(
         InputWorkspace='sample',
         OutputWorkspace='SofQW',
-        IntegratedVanadiumWorkspace='integrated'
+        IntegratedVanadiumWorkspace='integrated',
+        DiagnosticsWorkspace='diagnostics'
+    )
+    SofQW = mtd['SofQW']
+    qAxis = SofQW.readX(0)  # Vertical axis
+    eAxis = SofQW.getAxis(1)  # Horizontal axis
+    print('S(Q,W): Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
+        qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
+
+Output:
+
+.. testoutput:: BasicIN4Reduction
+
+    S(Q,W): Q range: 0.0...9.08A; W range -93.6...7.55meV
+
+The basic reduction for IN5 differs slightly with regards to the diagnostics step. In this case, the "raw" workspace is not needed, and it is not necessary to pass the EPP workspace to :ref:`algm-DirectILLDiagnostics`:
+
+.. code-block:: python
+
+    # Uncomment to add a temporary data search directory.
+    #mantid.config.appendDataSearchDir('/data/')
+    
+    # Vanadium
+    DirectILLCollectData(
+        Run='085801-085802',
+        OutputWorkspace='vanadium',
+        OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
+    )
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium',
+        OutputWorkspace='integrated',
+        EPPWorkspace='vanadium-epps'
+    )
+    DirectILLDiagnostics(
+        InputWorkspace='vanadium',
+        OutputWorkspace='diagnostics',
+    )
+    # Sample
+    DirectILLCollectData(
+        Run='087294+087295',
+        OutputWorkspace='sample'
+    )
+    DirectILLReduction(
+        InputWorkspace='sample',
+        OutputWorkspace='SofQW',
+        IntegratedVanadiumWorkspace='integrated',
         DiagnosticsWorkspace='diagnostics'
     )
 
@@ -104,18 +146,17 @@ Every ``DirectILL`` algorithm has an *OutputWorkspace* property which provides t
 .. code-block:: python
 
     ...
-    # Vanadium
     DirectILLCollectData(
         ...
-        OutputEPPWorkspace='vanadium-epps'  # This workspace...
+        OutputEPPWorkspace='epps'  # This workspace...
     )
     DirectILLIntegrateVanadium(
         ...
-        EPPWorkspace='vanadium-epps'        # ...is needed here...
+        EPPWorkspace='epps'        # ...is needed here...
     )
     DirectILLDiagnostics(
         ...
-        EPPWorkspace='vanadium-epps'        # ...and here.
+        EPPWorkspace='epps'        # ...and here.
     )
     ...
 
@@ -144,40 +185,35 @@ A more complete reduction example would include corrections for self-shielding:
 
 #. Reduce the data applying vanadium calibration coefficients and diagnostics mask.
 
-The above workflow would translate to this kind of Python script:
+The above workflow would translate to this kind of Python script for IN4 and IN6:
 
-.. code-block:: python
+.. testcode:: SelfShieldingReduction
 
-    # Add a temporary data search directory.
-    mantid.config.appendDataSearchDir('/data/')
-
+    # Uncomment to add a temporary data search directory.
+    #mantid.config.appendDataSearchDir('/data/')
+    
     # Vanadium
     DirectILLCollectData(
-        Run='0100-0109',
+        Run='ILL/IN4/085801-085801.nxs',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',  # Elastic peak positions.
         OutputRawWorkspace='vanadium-raw'    # 'Raw' data for diagnostics.
     )
-
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
         OutputWorkspace='integrated',
         EPPWorkspace='vanadium-epps'
     )
-
     DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw',
+        InputWorkspace='vanadium-raw',  # For IN5, 'vanadium' could be used
         OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps',
-        RawWorkspace='vanadium-raw'
+        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5
     )
-
     # Sample
     DirectILLCollectData(
-        Run='0201+0205+0209-0210',
+        Run='ILL/IN4/087294+087295.nxs',
         OutputWorkspace='sample',
     )
-
     geometry = {
         'Shape': 'FlatPlate',
         'Width': 4.0,
@@ -187,8 +223,8 @@ The above workflow would translate to this kind of Python script:
         'Angle': 45.0
     }
     material = {
-        'ChemicalFormula': 'Ni Cr Fe',
-        'SampleNumberDensity': 0.09
+        'ChemicalFormula': 'Cd S',
+        'SampleNumberDensity': 0.01
     }
     SetSample(
         InputWorkspace='sample',
@@ -197,60 +233,68 @@ The above workflow would translate to this kind of Python script:
     )
     DirectILLSelfShielding(
         InputWorkspace='sample',
-        OutputWorkspace='corrections'
+        OutputWorkspace='corrections',
+        NumberOfSimulatedWavelengths=10
     )
     DirectILLApplySelfShielding(
         InputWorkspace='sample',
         OutputWorkspace='sample-corrected',
         SelfShieldingCorrectionWorkspace='corrections',
     )
-
     DirectILLReduction(
         InputWorkspace='sample-corrected',
         OutputWorkspace='SofQW',
-        IntegratedVanadiumWorkspace='integrated'
+        IntegratedVanadiumWorkspace='integrated',
         DiagnosticsWorkspace='diagnostics'
     )
+    SofQW = mtd['SofQW']
+    qAxis = SofQW.readX(0)  # Vertical axis
+    eAxis = SofQW.getAxis(1)  # Horizontal axis
+    print('S(Q,W): Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
+        qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
+
+Output:
+
+.. testoutput:: SelfShieldingReduction
+
+    S(Q,W): Q range: 0.0...9.08A; W range -93.6...7.55meV
 
 Workspace compatibility
 =======================
 
-Mantid can be picky with binning when doing arithmetics between workspaces. This is an issue for the time-of-flight instruments at ILL as the time axis needs to be corrected to correspond to a physical flight distance. Even thought data is recorded with the same nominal wavelength, the actual value written in the NeXus files may differ between runs. Incident energy calibration further complicates matters. As the correction to the time-of-flight axis depends on the wavelength, two datasets loaded into Mantid with :ref:`algm-DirectILLCollectData` may have slightly different time-of-flight axis. This prevents arithmetics between the workspaces. The situation is most often encountered between sample and the corresponding empty container.
+Mantid can be picky with binning when doing arithmetics between workspaces. This is an issue for the time-of-flight instruments at ILL as the time axis needs to be corrected to correspond to a physical flight distance. Even thought data is recorded with the same nominal wavelength, the actual value written in the NeXus files may differ between runs. Incident energy calibration further complicates matters. As the correction to the time-of-flight axis depends on the wavelength, two datasets loaded into Mantid with :ref:`algm-DirectILLCollectData` may have slightly different time-of-flight axis. This prevents arithmetics between the workspaces. The situation is most often encountered between a sample and the corresponding empty container.
 
 To alleviate the situation, the output workspaces of :ref:`algm-DirectILLCollectData` can be forced to use the same wavelength. The following Python script shows how to propagate the calibrated incident energy from the first loaded workspace into the rest:
 
-.. code-block:: python
+.. testcode:: SampleContainerCompatibility
 
+    # Sample
     DirectILLCollectData(
-        Run='0100-0109',
-        OutputWorkspace='sample1',
+        Run='ILL/IN4/087294-087295.nxs',
+        OutputWorkspace='sample',
         OutputIncidentEnergyWorkspace='Ei'  # Get a common incident energy.
     )
-
     # Empty container.
     DirectILLCollectData(
-        Run='0201-0205',
+        Run='ILL/IN4/087306-087309.nxs',
         OutputWorkspace='container',
-        IncidentEnergyWorkspace='Ei'  # Empty container should have same TOF binning.
+        IncidentEnergyWorkspace='Ei'  # Ensure same TOF binning.
     )
+    x_sample = mtd['sample'].readX(0)
+    x_container = mtd['container'].readX(0)
+    print("Sample's TOF axis starts at {:.4}mus, container's at {:.4}mus".format(
+        x_sample[0], x_container[0]))
 
-    # More samples with same nominal wavelength and container as 'sample1'.
-    runs = ['0110-0119', '0253-0260']
-    index = 1
-    for run in runs:
-        DirectILLCollectData(
-            Run=run,
-            OutputWorkspace='sample{}'.format(index),
-            IncidentEnergyWorkspace='Ei'
-        )
-        index += 1
-    
-    # The empty container is now compatible with all the samples.
+Output:
 
-Container background subtraction
-================================
+.. testoutput:: SampleContainerCompatibility
 
-The container background subtraction is done perhaps a bit counterintuitively in :ref:`algm-DirectILLApplySelfShielding`. At the moment the self-shielding corrections and the empty container data do not have much to do with each other but this may change in the future if the so called Paalman-Pings corrections are used.
+    Sample's TOF axis starts at 974.8mus, container's at 974.8mus
+
+Container subtraction
+=====================
+
+The container subtraction is done perhaps a bit counterintuitively in :ref:`algm-DirectILLApplySelfShielding`. At the moment the self-shielding corrections and the empty container data do not have much to do with each other but this may change in the future if the so called Paalman-Pings corrections are used.
 
 With empty container data, the steps to reduce the experimental data might look like this:
 
@@ -276,138 +320,122 @@ With empty container data, the steps to reduce the experimental data might look 
 
 A corresponding Python script follows.
 
-.. code-block:: python
+.. testcode:: ContainerSubtraction
 
-    mantid.config.appendDataSearchDir('/data/')
-
+    # Uncomment to add a temporary data search directory.
+    #mantid.config.appendDataSearchDir('/data/')
+    
     # Vanadium
     DirectILLCollectData(
-        Run='0100-0109',
+        Run='ILL/IN4/085801-085802.nxs',
         OutputWorkspace='vanadium',
         OutputEPPWorkspace='vanadium-epps',
-        OutputRawWorkspace='vanadium-raw'
+        OutputRawWorkspace='vanadium-raw'  # Can be omitted for IN5
     )
-
     DirectILLIntegrateVanadium(
         InputWorkspace='vanadium',
         OutputWorkspace='integrated',
         EPPWorkspace='vanadium-epps'
     )
-
     DirectILLDiagnostics(
-        InputWorkspace='vanadium-raw',
+        InputWorkspace='vanadium-raw',  # IN5 can use 'vanadium'
         OutputWorkspace='diagnostics',
-        EPPWorkspace='vanadium-epps',
-        RawWorkspace='vanadium-raw'
+        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5
     )
-
     # Sample
     DirectILLCollectData(
-        Run='0201+0205+0209-0210',
+        Run='ILL/IN4/087294+087295.nxs',
         OutputWorkspace='sample',
-        OutputIncidentEnergyWorkspace='Ei'
+        OutputIncidentEnergyWorkspace='Ei'  # For empty container
     )
-
     # Container
     DirectILLCollectData(
-        Run='0333-0335',
+        Run='ILL/IN4/087306-087309.nxs',
         OutputWorkspace='container',
-        IncidentEnergyWorkspace='Ei'
+        IncidentEnergyWorkspace='Ei'  # Ensure common TOF axis
     )
-
-    # Container self-shielding.
-    # Geometry XML allows for very complex geometries.
-    containerShape = """
-        <hollow-cylinder id="inner-ring">
-          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
-          <axis x="0.0" y="1.0" z="0.0" />
-          <inner-radius val="0.017" />
-          <outer-radius val="0.018" />
-          <height val="0.08" />
-        </hollow-cylinder>
-        <hollow-cylinder id="outer-ring">
-          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
-          <axis x="0.0" y="1.0" z="0.0" />
-          <inner-radius val="0.02" />
-          <outer-radius val="0.021" />
-          <height val="0.08" />
-        </hollow-cylinder>
-        <algebra val="inner-ring : outer-ring" />
-    """
-    geometry = {
-        'Shape': 'CSG',
-        'Value': containerShape
-    }
-    material = {
-        'ChemicalFormula': 'Al',
-        'SampleNumberDensity': 0.09
-    }
-    SetSample(
-        InputWorkspace='container',
-        Geometry=geometry,
-        Material=material
-    )
-    DirectILLSelfShielding(
-        InputWorkspace='container',
-        OutputWorkspace='container-corrections'
-    )
-    DirectILLApplySelfShielding(
-        InputWorkspace='container',
-        OutputWorkspace='container-corrected',
-        SelfShieldingCorrectionWorkspace='container-corrections',
-    )
-
     # Sample self-shielding and container subtraction.
     geometry = {
         'Shape': 'HollowCylinder',
-        'Height': 8.0,
-        'InnerRadius': 1.8,
-        'OuterRadium': 2.0,
+        'Height': 4.0,
+        'InnerRadius': 1.9,
+        'OuterRadius': 2.0,
         'Center': [0.0, 0.0, 0.0]
     }
     material = {
-        'ChemicalFormula': 'C2 O D6',
-        'SampleNumberDensity': 0.1
+        'ChemicalFormula': 'Cd S',
+        'SampleNumberDensity': 0.01
     }
     SetSample('sample', geometry, material)
     DirectILLSelfShielding(
         InputWorkspace='sample',
-        OutputWorkspace='sample-corrections'
+        OutputWorkspace='sample-corrections',
+        NumberOfSimulatedWavelengths=10
     )
     DirectILLApplySelfShielding(
         InputWorkspace='sample',
         OutputWorkspace='sample-corrected',
         SelfShieldingCorrectionWorkspace='sample-corrections',
-        EmptyContainerWorkspace='container-corrected'
+        EmptyContainerWorkspace='container'  # Also subtract container
     )
-
     DirectILLReduction(
         InputWorkspace='sample-corrected',
         OutputWorkspace='SofQW',
-        IntegratedVanadiumWorkspace='integrated'
+        IntegratedVanadiumWorkspace='integrated',
         DiagnosticsWorkspace='diagnostics'
     )
+    SofQW = mtd['SofQW']
+    qAxis = SofQW.readX(0)  # Vertical axis
+    eAxis = SofQW.getAxis(1)  # Horizontal axis
+    print('S(Q,W): Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
+        qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
+
+Output:
+
+.. testoutput:: ContainerSubtraction
+
+    S(Q,W): Q range: 0.0...9.08A; W range -93.6...7.55meV
 
 Interpolation of container data to different temperatures
 ---------------------------------------------------------
 
 Sometimes the empty container is not measured at all the experiment's temperature points. One can use Mantid's workspace arithmetics to perform simple linear interpolation in temperature:
 
-.. code-block:: python
+.. testcode:: ContainerInterpolation
 
+    import numpy
+    DirectILLCollectData(
+        Run='ILL/IN4/087283-087290.nxs',
+        OutputWorkspace='sample_50K',
+        OutputIncidentEnergyWorkspace='E_i'
+    )
+    DirectILLCollectData(
+        Run='ILL/IN4/087306-087309.nxs',
+        OutputWorkspace='container_1.5K',
+        IncidentEnergyWorkspace='E_i'
+    )
+    DirectILLCollectData(
+        Run='ILL/IN4/087311-087314.nxs',
+        OutputWorkspace='container_100K',
+        IncidentEnergyWorkspace='E_i'
+    )
     # Container measurement temperatures.
-    T0 = 3.0
-    T1 = 250.0
+    T0 = 1.5
+    T1 = 100.0
     DT = T1 - T0
     # Target sample temperature.
-    Ts = 190.0
+    Ts = 50.0
     # Linear interpolation.
-    container_190 = (T1 - Ts) / DT * mtd['container_3'] + (Ts - T0) / DT * mtd['container_250']
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
+    T_sample_logs = container_50K.run().getProperty('sample.temperature').value
+    mean_T = numpy.mean(T_sample_logs)
+    print('Note, that the mean temperature from the sample logs is {:.4}K, a bit off.'.format(mean_T))
 
-    DirectILLApplySelfShielding(
-        InputWorkspace='sample',
-        EmptyContainerWorkspace=container_190
-    )
+Output:
+
+.. testoutput:: ContainerInterpolation
+
+    Note, that the mean temperature from the sample logs is 51.0K, a bit off.
 
 As usual, care should be taken when extrapolating the container data outside the measured range.
 
@@ -443,263 +471,123 @@ Lets put it all together into a complex Python script. The script below reduces 
 
 * Vanadium reference.
 
-* An empty vanadium container.
+* Sample measured at 1.5 and 50K.
 
-  * Same shape as the sample container.
-  * Complex shape: has to be given as XML.
+  * Share time-independent backgrounds from the measurement at 1.5K.
 
-* Sample measured at wavelength 1 at 50, 100 and 150K.
+* Empty container measured at 1.5 and 100K.
 
-  * Share time-independent backgrounds from the measurement at 50K.
+  * Need to interpolate to 50K.
 
-* Empty container measured at wavelength 1 at 50 and 150K.
+.. testcode:: FullExample
 
-  * Need to interpolate to 150K.
-
-* Sample measured at wavelength 2 at 50, 100 and 150K.
-
-  * Share time-independent backgrounds from the measurement at 50K.
-
-* Empty container measured at wavelength 2.
-
-
-
-.. code-block:: python
-
-    mantid.config.appendDataSearchDir('/data/')
-
-    # Gather dataset information.
-    containerRuns = '96+97'
-    vanadiumRuns = '100-103'
-    # Samples at 50K, 100K and 150K.
-    # Wavelength 1
-    containerRuns1 = {
-        50: '131-137',
-        150: '138-143'
-    }
-    runs1 = {
-        50: '105+107-110',
-        100: '112-117',
-        150: '119-123+125'
-    }
-    # Wavelength 2
-    containerRun2 = '166-170'
-    runs2 = {
-        50: '146+148+150',
-        100: '151-156',
-        150: '160-165'
-    }
-
-    # Vanadium & vanadium container.
-
+    # Uncomment to add a temporary data search directory.
+    #mantid.config.appendDataSearchDir('/data/')
+    
+    # Vanadium
     DirectILLCollectData(
-        Run=vanadiumRuns,
+        Run='ILL/IN4/085801-085802.nxs',
         OutputWorkspace='vanadium',
-        OutputEPPWorkspace='vanadium-epp',
-        OutputRawWorkspace='vanadium-raw',
-        OutputIncidentEnergyWorkspace='vanadium-Ei' # Use for container
+        OutputEPPWorkspace='vanadium-epps',
+        OutputRawWorkspace='vanadium-raw'  # Can be omitted for IN5
     )
-
+    DirectILLIntegrateVanadium(
+        InputWorkspace='vanadium',
+        OutputWorkspace='integrated',
+        EPPWorkspace='vanadium-epps'
+    )
+    DirectILLDiagnostics(
+        InputWorkspace='vanadium-raw',  # IN5 can use 'vanadium'
+        OutputWorkspace='diagnostics',
+        EPPWorkspace='vanadium-epps',  # Can be omitted for IN5
+    )
+    # Samples
     DirectILLCollectData(
-        Run=containerRuns,
-        OutputWorkspace='vanadium-container',
-        IncidentEnergyWorkspace='vanadium-Ei'
+        Run='ILL/IN4/087294+087295.nxs',
+        OutputWorkspace='sample_1.5K',
+        OutputIncidentEnergyWorkspace='Ei',  # For other datasets
+        OutputFlatBkgWorkspace='bkgs'  # For sample at 50K
     )
-
-    containerShape = """
-        <hollow-cylinder id="inner-ring">
-          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
-          <axis x="0.0" y="1.0" z="0.0" />
-          <inner-radius val="0.017" />
-          <outer-radius val="0.018" />
-          <height val="0.08" />
-        </hollow-cylinder>
-        <hollow-cylinder id="outer-ring">
-          <centre-of-bottom-base x="0.0" y="-0.04" z="0.0" />
-          <axis x="0.0" y="1.0" z="0.0" />
-          <inner-radius val="0.02" />
-          <outer-radius val="0.021" />
-          <height val="0.08" />
-        </hollow-cylinder>
-        <algebra val="inner-ring : outer-ring" />
-    """
-    containerGeometry = {
-        'CSG': containerShape
-    }
-    containerMaterial = {
-        'ChemicalFormula': 'Al',
-        'SampleNumberDensity': 0.1
-    }
-    SetSample('vanadium-container', containerGeometry, containerMaterial)
-    DirectILLSelfShielding(
-        InputWorkspace='vanadium-container',
-        OutputWorkspace='vanadium-container-self-shielding'
+    DirectILLCollectData(
+        Run='ILL/IN4/087283-087290.nxs',
+        OutputWorkspace='sample_50K',
+        IncidentEnergyWorkspace='Ei',  # Ensure common TOF axis
+        FlatBkgWorkspace='bkgs'  # Use flat backgrounds from 1.5K
     )
-    DirectILLApplySelfShielding(
-        InputWorkspace='vanadium-container',
-        OutputWorkspace='vanadium-container-corrected'
-        SelfShieldingCorrectionWorkspace='vanadium-container-self-shielding'
+    # Containers
+    DirectILLCollectData(
+        Run='ILL/IN4/087306-087309.nxs',
+        OutputWorkspace='container_1.5K',
+        IncidentEnergyWorkspace='Ei'  # Ensure common TOF axis
     )
-
-    sampleGeometry = {
+    DirectILLCollectData(
+        Run='ILL/IN4/087311-087314.nxs',
+        OutputWorkspace='container_100K',
+        IncidentEnergyWorkspace='Ei'  # Ensure common TOF axis
+    )    
+    # Sample self-shielding and container subtraction.
+    geometry = {
         'Shape': 'HollowCylinder',
-        'Height': 8.0,
-        'InnerRadius': 1.8,
-        'OuterRadium': 2.0,
+        'Height': 4.0,
+        'InnerRadius': 1.9,
+        'OuterRadius': 2.0,
         'Center': [0.0, 0.0, 0.0]
     }
-    vanadiumMaterial = {
-        'ChemicalFormula': 'V',
-        'SampleNumberDensity': 0.15
+    material = {
+        'ChemicalFormula': 'Cd S',
+        'SampleNumberDensity': 0.01
     }
-    SetSample('vanadium', sampleGeometry, vanadiumMaterial)
+    SetSample('sample_1.5K', geometry, material)
+    SetSample('sample_50K', geometry, material)
+    # Self-shielding corrections need to be calculated only once.
     DirectILLSelfShielding(
-        InputWorkspace='vanadium',
-        OutputWorkspace='vanadium-self-shielding'
+        InputWorkspace='sample_1.5K',
+        OutputWorkspace='corrections',
+        NumberOfSimulatedWavelengths=10
     )
     DirectILLApplySelfShielding(
-        InputWorkspace='vanadium',
-        OutputWorkspace='vanadium-corrected',
-        SelfShieldingCorrectionWorkspace='vanadium-self-shielding',
-        EmptyContainerWorkspace='vanadium-container-corrected'
+        InputWorkspace='sample_1.5K',
+        OutputWorkspace='corrected_1.5K',
+        SelfShieldingCorrectionWorkspace='corrections',
+        EmptyContainerWorkspace='container_1.5K'
     )
-
-    DirectILLIntegrateVanadium(
-        InputWorkspace='vanadium-corrected',
-        OutputWorkspace='vanadium-calibration',
-        EPPWorkspace='vanadium-epp'
-    )
-
-    diagnosticsResult = DirectILLDiagnoseDetectors(
-        InputWorkspace='vanadium-raw',
-        OutputWorkspace='mask',
-        EPPWorkspace='vanadium-epp',
-        OutputReportWorkspace='diagnostics-report'
-    )
-
-    # Sample and container at wavelength 1.
-
-    DirectILLCollectData(
-        Run=runs1[50],
-        OutputWorkspace='run1-50K',
-        OutputIncidentEnergyWorkspace='Ei1',
-        OutputFlatBkgWorkspace='bkg1-50K'
-    )
-
-    DirectILLCollectData(
-        Run=containerRuns1[50],
-        OutputWorkspace='container1-50K',
-        IncidentEnergyWorkspace='Ei1'
-    )
-
-    SetSample('container1-50K', containerGeometry, containerMaterial)
-    DirectILLSelfShielding(
-        InputWorkspace='container1-50K',
-        OutputWorkspace='container1-self-shielding'
-    )
-
-    DirectILLCollectData(
-        Run=containerRuns1[150],
-        OutputWorkspace='container1-150K',
-        IncidentEnergyWorkspace='Ei1'
-    )
-
-    interpolated = 0.5 * (mtd['container1-50K'] + mtd['container1-150K'])
-    RenameWorkspace(interpolated, 'container1-100K')
-
-    for T in [50, 100, 150]:
-        DirectILLApplySelfShielding(
-            InputWorkspace='container1-{}K'.format(T),
-            OutputWorkspace='container1-{}K-corrected'.format(T),
-            SelfShieldingCorrectionWorkspace='container1-self-shielding'
-        )
-
-    sampleMaterial = {
-        'ChemicalFormula': 'Fe 2 O 3',
-        'SampleNumberDensity': 0.23
-    }
-    SetSample('run1-50K', sampleGeometry, sampleMaterial)
-    DirectILLSelfShielding(
-        InputWorkspace='run1-50K',
-        OutputWorkspace='run1-self-shielding',
-    )
-
-    for T in runs1:
-        if T != 50:
-            # 50K data has been loaded already.
-            DirectILLCollectData(
-                Run=runs1[T],
-                OutputWorkspace='run1-{}K'.format(T),
-                IncidentEnergyWorkspace='Ei1',
-                FlatBkgWorkspace='bkg1-50K'
-            )
-        DirectILLApplySelfShielding(
-            InputWorkspace='run1-{}K'.format(T),
-            OutputWorkspace='run1-{}K-corrected'.format(T),
-            SelfShieldingCorrectionWorkspace='run1-self-shielding',
-            EmptyContainerWorkspace='container1-{}K-corrected'.format(T)
-        )
-        DirectILLReduction(
-            InputWorkspace='run1-{}K-corrected'.format(T),
-            OutputWorkspace='SofQW1-{}K'.format(T),
-            IntegratedVanadiumWorkspace='vanadium-calibration',
-            DiagnosticsWorkspace='mask'
-        )
-        SaveNexus('SofQW1-{}K'.format(T), '/data/output2-{}.nxs'.format(T))
-
-    # Sample and container at wavelength 2.
-
-    DirectILLCollectData(
-        Run=runs2[50],
-        OutputWorkspace='run2-50K',
-        OutputIncidentEnergyWorkspace=Ei2',
-        OutputFlatBkgWorkspace='bgk2-50K'
-    )
-
-    DirectILLCollectData(
-        Run=containerRun2,
-        OutputWorkspace='container2',
-        IncidentEnergyWorkspace='Ei2'
-    )
-
-    SetSample('container2', containerGeometry, containerMaterial)
-    DirectILLSelfShielding(
-        InputWorkspace='container2',
-        OutputWorkspace='container2-self-shielding'
-    )
+    # Need to interpolate container to 50K
+    T0 = 1.5
+    T1 = 100.0
+    DT = T1 - T0
+    Ts = 50.0 # Target T
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
     DirectILLApplySelfShielding(
-        InputWorkspace='container2',
-        OutputWorkspace='container2-corrected',
-        SelfShieldingCorrectionWorkspace='container2-self-shielding'
+        InputWorkspace='sample_50K',
+        OutputWorkspace='corrected_50K',
+        SelfShieldingCorrectionWorkspace='corrections',
+        EmptyContainerWorkspace=container_50K
     )
-
-    SetSample('run2-50K', sampleGeometry, sampleMaterial)
-    DirectILLSelfShielding(
-        InputWorkspace='run2-50K',
-        OutputWorkspace='run2-self-shielding'
+    DirectILLReduction(
+        InputWorkspace='corrected_1.5K',
+        OutputWorkspace='SofQW_1.5K',
+        IntegratedVanadiumWorkspace='integrated',
+        DiagnosticsWorkspace='diagnostics'
     )
+    DirectILLReduction(
+        InputWorkspace='corrected_50K',
+        OutputWorkspace='SofQW_50K',
+        IntegratedVanadiumWorkspace='integrated',
+        DiagnosticsWorkspace='diagnostics'
+    )
+    outputs = ['SofQW_1.5K', 'SofQW_50K']
+    for output in outputs:
+        SofQW = mtd[output]
+        qAxis = SofQW.readX(0)  # Vertical axis
+        eAxis = SofQW.getAxis(1)  # Horizontal axis
+        print('{}: Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
+            output, qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
 
-    for T in runs2:
-        if T != 50:
-            # 50K data has been loaded already.
-            DirectILLCollectData(
-                Run=runs2[T]
-                OuputWorkspace='run2-{}K'.format(T),
-                IncidentEnergyWorkspace='Ei2',
-                FlatBkgWorkspace='bkg2-50K
-            )
-        DirectILLApplySelfShielding(
-            InputWorkspace='run2-{}K'.format(T),
-            OutputWorkspace='run2-{}K-corrected'.format(T),
-            SelfShieldingCorrectionWorkspace='run2-self-shielding',
-            EmptyContainerWorkspace='container2'
-        )
-        DirectILLReduction(
-            InputWorkspace='run2-{}K-corrected'.format(T),
-            OutputWorkspace='SofQW2-{}K'.format(T),
-            IntegratedVanadiumWorkspace='vanadium-calibration',
-            DiagnosticsWorkspace='mask'
-        )
-        SaveNexus('SofQW2-{}K'.format(T), '/data/output2-{}.nxs'.format(T))
+Output:
+
+.. testoutput:: FullExample
+
+    SofQW_1.5K: Q range: 0.0...9.08A; W range -93.6...7.55meV
+    SofQW_50K: Q range: 0.0...9.08A; W range -93.6...7.55meV
 
 .. categories:: Techniques
