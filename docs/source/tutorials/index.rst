@@ -39,4 +39,3 @@ capabilities of Mantid, by developing your own scripts.
 * `Introduction To Python <http://www.mantidproject.org/Introduction_To_Python>`_
 * `Python in Mantid <http://www.mantidproject.org/Python_In_Mantid>`_
 * `Extending Mantid with Python <http://www.mantidproject.org/Extending_Mantid_With_Python>`_
-* :ref:`ill_training`
