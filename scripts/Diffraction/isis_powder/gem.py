@@ -81,7 +81,6 @@ class Gem(AbstractInst):
 
     # Private methods
 
-
     def _get_run_details(self, run_number_string):
         run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
                                                                        self._inst_settings.file_extension)
