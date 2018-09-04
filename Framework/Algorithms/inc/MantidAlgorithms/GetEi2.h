@@ -7,8 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 //----------------------------------------------------------------------
 // Forward Declarations
@@ -18,8 +18,8 @@ namespace HistogramData {
 class HistogramY;
 class HistogramX;
 class HistogramE;
-}
-}
+} // namespace HistogramData
+} // namespace Mantid
 namespace Mantid {
 namespace Algorithms {
 /** Requires an estimate for the initial neutron energy which it uses to

@@ -22,7 +22,7 @@ class ProgressableView;
 namespace DataProcessor {
 class DataProcessorPresenter;
 }
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -33,8 +33,8 @@ class IReflSearcher;
 class ReflSearchModel;
 class ReflTransferStrategy;
 
-using MantidWidgets::ProgressableView;
 using MantidWidgets::DataProcessor::DataProcessorPresenter;
+using MantidWidgets::ProgressableView;
 
 enum class TransferMatch {
   Any,        // any that match the regex
@@ -186,6 +186,6 @@ private:
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H */

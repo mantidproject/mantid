@@ -71,18 +71,18 @@ void LoadEventAndCompress::init() {
 
   copyProperty(algLoadEventNexus, "NXentryName");
   copyProperty(algLoadEventNexus, "LoadMonitors");
-  copyProperty(algLoadEventNexus, "MonitorsAsEvents");
+  copyProperty(algLoadEventNexus, "MonitorsLoadOnly");
   copyProperty(algLoadEventNexus, "FilterMonByTofMin");
   copyProperty(algLoadEventNexus, "FilterMonByTofMax");
   copyProperty(algLoadEventNexus, "FilterMonByTimeStart");
   copyProperty(algLoadEventNexus, "FilterMonByTimeStop");
 
   setPropertySettings(
-      "MonitorsAsEvents",
+      "MonitorsLoadOnly",
       make_unique<VisibleWhenProperty>("LoadMonitors", IS_EQUAL_TO, "1"));
   auto asEventsIsOn = [] {
     std::unique_ptr<IPropertySettings> settings =
-        make_unique<VisibleWhenProperty>("MonitorsAsEvents", IS_EQUAL_TO, "1");
+        make_unique<VisibleWhenProperty>("MonitorsLoadOnly", IS_EQUAL_TO, "1");
     return settings;
   };
   setPropertySettings("FilterMonByTofMin", asEventsIsOn());
@@ -92,7 +92,7 @@ void LoadEventAndCompress::init() {
 
   std::string grp4 = "Monitors";
   setPropertyGroup("LoadMonitors", grp4);
-  setPropertyGroup("MonitorsAsEvents", grp4);
+  setPropertyGroup("MonitorsLoadOnly", grp4);
   setPropertyGroup("FilterMonByTofMin", grp4);
   setPropertyGroup("FilterMonByTofMax", grp4);
   setPropertyGroup("FilterMonByTimeStart", grp4);
@@ -141,7 +141,7 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
 
   alg->setProperty<string>("NXentryName", getProperty("NXentryName"));
   alg->setProperty<bool>("LoadMonitors", getProperty("LoadMonitors"));
-  alg->setProperty<bool>("MonitorsAsEvents", getProperty("MonitorsAsEvents"));
+  alg->setProperty<string>("MonitorsLoadOnly", getProperty("MonitorsLoadOnly"));
   alg->setProperty<double>("FilterMonByTofMin",
                            getProperty("FilterMonByTofMin"));
   alg->setProperty<double>("FilterMonByTofMax",

@@ -122,12 +122,12 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.q_resolution_delta_r == 11.)
         self.assertTrue(view.q_resolution_collimation_length == 12.)
         self.assertTrue(view.q_resolution_moderator_file == "moderator_rkh_file.txt")
-        self.assertFalse(view.phi_limit_use_mirror)
+        self.assertTrue(view.phi_limit_use_mirror)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)
         self.assertFalse(view.compatibility_mode)
-        self.assertFalse(view.show_transmission)
+        self.assertTrue(view.show_transmission)
 
         # Assert that Beam Centre View is updated correctly
         self.assertEqual(view.beam_centre.lab_pos_1, 155.45)
@@ -136,11 +136,10 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
 
         # Assert certain function calls
-        self.assertEqual(view.get_user_file_path.call_count, 4)
-        self.assertEqual(view.get_batch_file_path.call_count, 3)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
-        self.assertEqual(view.get_cell.call_count, 101)
-
-        self.assertEqual(view.get_number_of_rows.call_count, 8)
+        self.assertEqual(view.get_user_file_path.call_count, 3)
+        self.assertEqual(view.get_batch_file_path.call_count, 2)
+        self.assertEqual(view.get_cell.call_count, 66)
+        self.assertEqual(view.get_number_of_rows.call_count, 3)
 
         # clean up
         remove_file(user_file_path)
@@ -169,17 +168,18 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertTrue(view.add_row.call_count == 2)
+        self.assertEqual(view.add_row.call_count, 2)
         if use_multi_period:
             expected_first_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:SANS2D00022048,stp:,SampleDirect:SANS2D00022048,sdp:," \
-                                 "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,User File:user_test_file,Sample Thickness:1.0"
+                                 "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file," \
+                                 "User File:user_test_file,Sample Thickness:1.00"
             expected_second_row = "SampleScatter:SANS2D00022024,ssp:,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                                  "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2,User File:,Sample Thickness:1.0"
+                                  "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2,User File:,Sample Thickness:1.00"
         else:
             expected_first_row = "SampleScatter:SANS2D00022024,SampleTrans:SANS2D00022048,SampleDirect:SANS2D00022048," \
-                                 "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file,User File:user_test_file,Sample Thickness:1.0"
+                                 "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file,User File:user_test_file,Sample Thickness:1.00"
             expected_second_row = "SampleScatter:SANS2D00022024,SampleTrans:,SampleDirect:," \
-                                  "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file2,User File:,Sample Thickness:1.0"
+                                  "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file2,User File:,Sample Thickness:1.00"
 
         calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
         view.add_row.assert_has_calls(calls)
@@ -213,7 +213,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.set_multi_period_view_mode.call_count, 1)
 
         expected_row = "SampleScatter:SANS2D00022024,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                       "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,User File:,Sample Thickness:1.0"
+                       "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file,User File:,Sample Thickness:1.00"
 
         calls = [mock.call(expected_row)]
         view.add_row.assert_has_calls(calls)
@@ -445,6 +445,27 @@ class RunTabPresenterTest(unittest.TestCase):
         result = presenter.get_processing_options()
 
         self.assertEqual(expected_result, result)
+
+    def test_on_data_changed_does_nothing_during_processing(self):
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
+        presenter._masking_table_presenter = mock.MagicMock()
+        presenter._beam_centre_presenter = mock.MagicMock()
+        presenter._processing = True
+
+        presenter.on_data_changed()
+
+        presenter._masking_table_presenter.on_update_rows.assert_not_called()
+        presenter._beam_centre_presenter.on_update_rows.assert_not_called()
+
+    def test_on_data_changed_calls_update_rows(self):
+        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
+        presenter._masking_table_presenter = mock.MagicMock()
+        presenter._beam_centre_presenter = mock.MagicMock()
+
+        presenter.on_data_changed()
+
+        presenter._masking_table_presenter.on_update_rows.assert_called_once_with()
+        presenter._beam_centre_presenter.on_update_rows.assert_called_once_with()
 
     @staticmethod
     def _clear_property_manager_data_service():

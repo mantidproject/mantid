@@ -1,9 +1,9 @@
 #include "ReflMainWindowPresenter.h"
+#include "IReflEventTabPresenter.h"
 #include "IReflMainWindowView.h"
 #include "IReflRunsTabPresenter.h"
-#include "IReflEventTabPresenter.h"
-#include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
+#include "IReflSettingsTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -12,13 +12,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 /** Constructor
-* @param view :: [input] The view we are managing
-* @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
-* @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
-* presenter
-* @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
-* @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
-*/
+ * @param view :: [input] The view we are managing
+ * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
+ * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
+ * presenter
+ * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
+ * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
+ */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view,
     std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
@@ -40,7 +40,7 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 }
 
 /** Destructor
-*/
+ */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
 void ReflMainWindowPresenter::completedGroupReductionSuccessfully(
@@ -89,11 +89,11 @@ void ReflMainWindowPresenter::settingsChanged(int group) {
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*options
-* @return :: Global options for 'CreateTransmissionWorkspaceAuto'
-*/
+ *
+ * @param group :: Index of the group in 'Settings' tab from which to get the
+ *options
+ * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
+ */
 OptionsQMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
@@ -102,11 +102,11 @@ OptionsQMap ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 }
 
 /** Returns global processing options
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*options
-* @return :: Global processing options
-*/
+ *
+ * @param group :: Index of the group in 'Settings' tab from which to get the
+ *options
+ * @return :: Global processing options
+ */
 OptionsQMap ReflMainWindowPresenter::getReductionOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
@@ -116,11 +116,11 @@ OptionsQMap ReflMainWindowPresenter::getReductionOptions(int group) const {
 }
 
 /** Returns global post-processing options
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*options
-* @return :: Global post-processing options
-*/
+ *
+ * @param group :: Index of the group in 'Settings' tab from which to get the
+ *options
+ * @return :: Global post-processing options
+ */
 std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
 
   checkSettingsPtrValid(m_settingsPresenter);
@@ -130,11 +130,11 @@ std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
 }
 
 /** Returns time-slicing values
-*
-* @param group :: Index of the group in 'Event Handling' tab from which to get
-*the values
-* @return :: Time-slicing values
-*/
+ *
+ * @param group :: Index of the group in 'Event Handling' tab from which to get
+ *the values
+ * @return :: Time-slicing values
+ */
 std::string ReflMainWindowPresenter::getTimeSlicingValues(int group) const {
 
   checkEventPtrValid(m_eventPresenter);
@@ -144,11 +144,11 @@ std::string ReflMainWindowPresenter::getTimeSlicingValues(int group) const {
 }
 
 /** Returns time-slicing type
-*
-* @param group :: Index of the group in 'Event Handling' tab from which to get
-*the type
-* @return :: Time-slicing type
-*/
+ *
+ * @param group :: Index of the group in 'Event Handling' tab from which to get
+ *the type
+ * @return :: Time-slicing type
+ */
 std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
 
   checkEventPtrValid(m_eventPresenter);
@@ -158,13 +158,13 @@ std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
 }
 
 /** Returns default values specified for 'Transmission run(s)' for the
-* given angle
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*values
-* @param angle :: the run angle to look up transmission runs for
-* @return :: Values passed for 'Transmission run(s)'
-*/
+ * given angle
+ *
+ * @param group :: Index of the group in 'Settings' tab from which to get the
+ *values
+ * @param angle :: the run angle to look up transmission runs for
+ * @return :: Values passed for 'Transmission run(s)'
+ */
 OptionsQMap
 ReflMainWindowPresenter::getOptionsForAngle(int group,
                                             const double angle) const {
@@ -243,8 +243,8 @@ bool ReflMainWindowPresenter::isProcessing(int group) const {
 }
 
 /** Checks for Settings Tab null pointer
-* @param pointer :: The pointer
-*/
+ * @param pointer :: The pointer
+ */
 void ReflMainWindowPresenter::checkSettingsPtrValid(
     IReflSettingsTabPresenter *pointer) const {
   if (pointer == nullptr)
@@ -252,12 +252,12 @@ void ReflMainWindowPresenter::checkSettingsPtrValid(
 }
 
 /** Checks for Event Handling Tab null pointer
-* @param pointer :: The pointer
-*/
+ * @param pointer :: The pointer
+ */
 void ReflMainWindowPresenter::checkEventPtrValid(
     IReflEventTabPresenter *pointer) const {
   if (pointer == nullptr)
     throw std::invalid_argument("Could not read event handling");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

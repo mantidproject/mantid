@@ -25,6 +25,7 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
                          TOFRange=[10008, 35000], TOFSteps=200,
                          SignalPeakPixelRange=[150, 160],
                          SignalBackgroundPixelRange=[147, 163],
+                         LowResolutionPixelRange=[94, 160],
                          ScalingFactorFile=self.cfg_file)
 
     def validate(self):

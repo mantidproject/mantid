@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_APPENDGEOMETRYTOSNSNEXUSTEST_H_
 #define MANTID_DATAHANDLING_APPENDGEOMETRYTOSNSNEXUSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/AppendGeometryToSNSNexus.h"
 

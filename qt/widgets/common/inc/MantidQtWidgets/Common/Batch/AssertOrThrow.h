@@ -25,7 +25,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ASSERTORTHROW_H_
 #define MANTIDQTMANTIDWIDGETS_ASSERTORTHROW_H_
-#include <string>
 #include <stdexcept>
 
 inline void assertOrThrow(bool condition, std::string const &message) {

@@ -66,6 +66,10 @@ void ReflSearchModel::addDataFromTable(ITableWorkspace_sptr tableWorkspace,
     newRunDetails.emplace_back(run, description, location);
   }
 
+  if (newRunDetails.empty()) {
+    return;
+  }
+
   // To append, insert the new runs after the last element in the model
   const auto first = static_cast<int>(m_runDetails.size());
   const auto last =
@@ -196,4 +200,4 @@ SearchResult const &ReflSearchModel::operator[](int index) const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

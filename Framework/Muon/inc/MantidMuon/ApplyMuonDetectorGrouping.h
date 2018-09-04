@@ -49,9 +49,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "DataHandling\\Grouping;Transforms\\Grouping";
-  }
+  const std::string category() const override { return "Muon\\DataHandling"; }
   /// Algorithm's summary for identification
   const std::string summary() const override {
     return "Group several muon detector IDs together and perform an analysis "
@@ -102,6 +100,11 @@ private:
   /// Generate the name of the new workspace
   const std::string getNewWorkspaceName(const Muon::AnalysisOptions &options,
                                         const std::string &groupWSName);
+
+  /// 26/06/18
+  /// Give the "tmp_unNorm" workspace which is added to the ADS the correct
+  /// name
+  bool renameAndMoveUnNormWorkspace(const std::string &newName);
 };
 
 } // namespace Muon

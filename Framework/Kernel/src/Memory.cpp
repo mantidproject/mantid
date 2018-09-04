@@ -6,21 +6,21 @@
 #include <sstream>
 
 #ifdef __linux__
-#include <unistd.h>
 #include <fstream>
 #include <malloc.h>
 #include <sys/resource.h>
+#include <unistd.h>
 #endif
 #ifdef __APPLE__
-#include <malloc/malloc.h>
-#include <sys/sysctl.h>
 #include <mach/mach.h>
 #include <mach/mach_host.h>
 #include <mach/task.h>
+#include <malloc/malloc.h>
+#include <sys/sysctl.h>
 #endif
 #ifdef _WIN32
-#include <windows.h>
 #include <Psapi.h>
+#include <windows.h>
 #endif
 
 using std::size_t;
@@ -31,7 +31,7 @@ namespace Kernel {
 namespace {
 /// static logger object
 Logger g_log("Memory");
-}
+} // namespace
 
 /// Utility function to convert memory in kiB into easy to read units.
 template <typename TYPE> string memToString(const TYPE mem_in_kiB) {
@@ -60,8 +60,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
 #ifdef __linux__
   // Adapted from
   // http://stackoverflow.com/questions/669438/how-to-get-memory-usage-at-run-time-in-c
-  using std::ios_base;
   using std::ifstream;
+  using std::ios_base;
 
   // 'file' stat seems to give the most reliable results
   ifstream stat_stream("/proc/self/stat", ios_base::in);
@@ -120,8 +120,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
 #endif
 }
 
-// ----------------------- functions associated with getting the memory of the
-// system
+  // ----------------------- functions associated with getting the memory of the
+  // system
 
 #ifdef __linux__
 /**
@@ -173,7 +173,7 @@ namespace { // Anonymous namespace
 
 MEMORYSTATUSEX
 memStatus; ///< A Windows structure holding information about memory usage
-}
+} // namespace
 #endif
 
 /** Attempts to read the system memory statistics.
@@ -287,22 +287,20 @@ void MemoryOptions::initAllocatorOptions() {
     return;
 #ifdef __linux__
   /* The line below tells malloc to use a different memory allocation system
-  * call (mmap) to the 'usual'
-  * one (sbrk) for requests above the threshold of the second argument (in
-  * bytes). The effect of this
-  * is that, for the current threshold value of 8*4096, storage for workspaces
-  * having 4096 or greater
-  * bins per spectrum will be allocated using mmap.
-  * This should have the effect that memory is returned to the kernel as soon as
-  * a workspace is deleted,
-  * preventing things going to managed workspaces when they shouldn't. This will
-  * also hopefully reduce
-  * memory fragmentation.
-  * Potential downsides to look out for are whether this memory allocation
-  * technique makes things
-  * noticeably slower and whether it wastes memory (mmap allocates in blocks of
-  * the system page size.
-  */
+   * call (mmap) to the 'usual'
+   * one (sbrk) for requests above the threshold of the second argument (in
+   * bytes). The effect of this
+   * is that, for the current threshold value of 8*4096, storage for workspaces
+   * having 4096 or greater
+   * bins per spectrum will be allocated using mmap.
+   * This should have the effect that memory is returned to the kernel as soon
+   * as a workspace is deleted, preventing things going to managed workspaces
+   * when they shouldn't. This will also hopefully reduce memory fragmentation.
+   * Potential downsides to look out for are whether this memory allocation
+   * technique makes things
+   * noticeably slower and whether it wastes memory (mmap allocates in blocks of
+   * the system page size.
+   */
   mallopt(M_MMAP_THRESHOLD, 8 * 4096);
 #elif _WIN32
   Logger memOptLogger("MemoryOptions");
@@ -504,7 +502,7 @@ size_t MemoryStats::getPeakRSS() const {
   GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
   return (size_t)info.PeakWorkingSetSize;
 
-#elif(defined(_AIX) || defined(__TOS__AIX__)) ||                               \
+#elif (defined(_AIX) || defined(__TOS__AIX__)) ||                              \
     (defined(__sun__) || defined(__sun) ||                                     \
      defined(sun) && (defined(__SVR4) || defined(__svr4__)))
   /* AIX and Solaris ------------------------------------------ */

@@ -25,8 +25,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_JOBTREEVIEWSIGNALADAPTER_H_
 #define MANTIDQTMANTIDWIDGETS_JOBTREEVIEWSIGNALADAPTER_H_
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
@@ -56,13 +56,13 @@ signals:
       MantidQt::MantidWidgets::Batch::RowLocation const &newRowLocation);
   void filterReset();
   void removeRowsRequested(
-      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-          locationsOfRowsToRemove);
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+          &locationsOfRowsToRemove);
   void copyRowsRequested();
   void pasteRowsRequested();
   void cutRowsRequested();
 };
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_JOBTREEVIEWSIGNALADAPTER_H_

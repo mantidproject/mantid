@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_LOGARITHMMD_H_
 #define MANTID_MDALGORITHMS_LOGARITHMMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/UnaryOperationMD.h"
 
 namespace Mantid {

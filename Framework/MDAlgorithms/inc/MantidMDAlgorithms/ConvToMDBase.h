@@ -7,10 +7,10 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/Logger.h"
 
-#include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid {

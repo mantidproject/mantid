@@ -1,16 +1,16 @@
 #ifndef SPATIALGROUPINGTEST_H_
 #define SPATIALGROUPINGTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SpatialGrouping.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <fstream>
 
 using namespace Mantid;
@@ -74,8 +74,9 @@ public:
         "?>",
         "<!-- XML Grouping File created by "
         "SpatialGrouping Algorithm -->",
-        "<detector-grouping>", "<group name=\"group1\"><detids "
-                               "val=\"1,2,3,4,5,6,7,8,9\"/></group>",
+        "<detector-grouping>",
+        "<group name=\"group1\"><detids "
+        "val=\"1,2,3,4,5,6,7,8,9\"/></group>",
         "<group name=\"group2\"><detids "
         "val=\"10,11,12,13,14,15,16,17,18\"/></"
         "group>",

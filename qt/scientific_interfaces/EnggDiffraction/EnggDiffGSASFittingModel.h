@@ -51,8 +51,8 @@ public:
 
   void saveRefinementResultsToHDF5(
       const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-          refinementResultSets,
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets,
       const std::string &filename) const override;
 
 protected:
@@ -75,13 +75,13 @@ protected:
 protected slots:
   void processRefinementsComplete(
       Mantid::API::IAlgorithm_sptr alg,
-      const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-          refinementResultSets);
+      const std::vector<GSASIIRefineFitPeaksOutputProperties>
+          &refinementResultSets);
 
   void processRefinementFailed(const std::string &failureMessage);
 
   void processRefinementSuccessful(
-      Mantid::API::IAlgorithm_sptr alg,
+      Mantid::API::IAlgorithm_sptr successfulAlgorithm,
       const GSASIIRefineFitPeaksOutputProperties &refinementResults);
 
   void processRefinementCancelled();
@@ -89,7 +89,7 @@ protected slots:
 private:
   static constexpr double DEFAULT_PAWLEY_DMIN = 1;
   static constexpr double DEFAULT_PAWLEY_NEGATIVE_WEIGHT = 0;
-  static const size_t MAX_BANKS = 2;
+  static const size_t MAX_BANKS = 3;
 
   RunMap<MAX_BANKS, double> m_gammaMap;
   RunMap<MAX_BANKS, Mantid::API::ITableWorkspace_sptr> m_latticeParamsMap;
@@ -123,7 +123,7 @@ private:
   }
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_

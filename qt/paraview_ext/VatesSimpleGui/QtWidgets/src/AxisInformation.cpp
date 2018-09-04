@@ -9,6 +9,6 @@ AxisInformation::AxisInformation() {
   this->minimum = -9999999.0;
   this->maximum = -9999999.0;
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

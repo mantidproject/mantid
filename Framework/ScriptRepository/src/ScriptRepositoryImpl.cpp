@@ -7,27 +7,27 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
-#include <utility>
 #include <unordered_set>
+#include <utility>
 
-using Mantid::Types::Core::DateAndTime;
-using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
+using Mantid::Kernel::Logger;
+using Mantid::Types::Core::DateAndTime;
 
 // from poco
-#include <Poco/Path.h>
+#include <Poco/Exception.h>
 #include <Poco/File.h>
+#include <Poco/Net/NetException.h>
+#include <Poco/Path.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
-#include <Poco/Exception.h>
-#include <Poco/Net/NetException.h>
 /*#include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 */
-#include <Poco/Net/HTMLForm.h>
 #include "Poco/Net/FilePartSource.h"
+#include <Poco/Net/HTMLForm.h>
 
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -43,14 +43,14 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/NullStream.h>
 #include <cstdlib>
 #endif
-#include <Poco/StreamCopier.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormatter.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/StreamCopier.h>
 
 // from boost
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 
 #include <json/json.h>
@@ -60,7 +60,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("ScriptRepositoryImpl");
-}
+} // namespace
 
 /// Default timeout
 int DEFAULT_TIMEOUT_SEC = 30;
@@ -360,7 +360,8 @@ void ScriptRepositoryImpl::ensureValidRepository() {
   if (!isValid()) {
     std::stringstream ss;
     ss << "ScriptRepository is not installed correctly. The current path for "
-          "ScriptRepository is " << local_repository
+          "ScriptRepository is "
+       << local_repository
        << " but some important files that are required are corrupted or not "
           "present."
        << "\nPlease, re-install the ScriptRepository!\n"
@@ -462,11 +463,12 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     // it will proceed in this situation.
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: " << ex.className() << ":> "
-                  << ex.displayText() << '\n';
+                     "repository. Details: "
+                  << ex.className() << ":> " << ex.displayText() << '\n';
   } catch (std::exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: " << ex.what() << '\n';
+                     "repository. Details: "
+                  << ex.what() << '\n';
   }
   std::vector<std::string> out(repo.size());
   size_t i = repo.size();
@@ -922,14 +924,14 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 }
 
 /*
-* Adds an entry to .repository.json
-* This is necessary when uploading a file to keep .repository.json and
-* .local.json in sync, and thus display correct file status in the GUI.
-* Requesting an updated .repository.json from the server is not viable
-* at such a time as it would create a race condition.
-* @param path: relative path of uploaded file
-* @param entry: the entry to add to the json file
-*/
+ * Adds an entry to .repository.json
+ * This is necessary when uploading a file to keep .repository.json and
+ * .local.json in sync, and thus display correct file status in the GUI.
+ * Requesting an updated .repository.json from the server is not viable
+ * at such a time as it would create a race condition.
+ * @param path: relative path of uploaded file
+ * @param entry: the entry to add to the json file
+ */
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
                                                 const RepositoryEntry &entry) {
 
@@ -1384,11 +1386,9 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
   // Configure Poco HTTP Client Session
   try {
     Kernel::InternetHelper inetHelper;
-    int timeout;
-    if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",
-                                            timeout)) {
-      timeout = DEFAULT_TIMEOUT_SEC;
-    }
+    auto timeoutConfigVal =
+        ConfigService::Instance().getValue<int>("network.scriptrepo.timeout");
+    int timeout = timeoutConfigVal.get_value_or(DEFAULT_TIMEOUT_SEC);
     inetHelper.setTimeout(timeout);
 
     // std::stringstream ss;
@@ -1763,6 +1763,6 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   return path;
 }
 
-} // END API
+} // namespace API
 
-} // END MANTID
+} // namespace Mantid

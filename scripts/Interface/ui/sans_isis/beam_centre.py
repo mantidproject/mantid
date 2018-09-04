@@ -38,6 +38,13 @@ class BeamCentre(QtGui.QWidget, ui_beam_centre.Ui_BeamCentre):
         # Attach validators
         self._attach_validators()
 
+        # This feature is currently broken and not strictly needed so I am hiding this part of the GUI.
+        self.Q_limits.hide()
+        self.Q_from.hide()
+        self.q_min_line_edit.hide()
+        self.q_max_line_edit.hide()
+        self.Q_to.hide()
+
     def _setup_log_widget(self):
         self.log_widget = MantidQt.MantidWidgets.MessageDisplay(self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))

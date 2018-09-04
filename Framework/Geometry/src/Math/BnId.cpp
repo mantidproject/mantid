@@ -1,13 +1,13 @@
-#include <fstream>
-#include <cmath>
-#include <vector>
-#include <set>
-#include <map>
-#include <stack>
-#include <sstream>
 #include <algorithm>
-#include <iterator>
+#include <cmath>
+#include <fstream>
 #include <functional>
+#include <iterator>
+#include <map>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <vector>
 
 #include "MantidGeometry/Math/BnId.h"
 

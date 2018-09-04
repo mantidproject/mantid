@@ -138,8 +138,8 @@ void EnggDiffGSASFittingPresenter::displayFitResults(const RunLabel &runLabel) {
     m_view->userError("Invalid run identifier",
                       "Unexpectedly tried to display fit results for invalid "
                       "run, run number = " +
-                          std::to_string(runLabel.runNumber) + ", bank ID = " +
-                          std::to_string(runLabel.bank) +
+                          std::to_string(runLabel.runNumber) +
+                          ", bank ID = " + std::to_string(runLabel.bank) +
                           ". Please contact the development team");
     return;
   }
@@ -157,8 +157,8 @@ void EnggDiffGSASFittingPresenter::doRefinements(
 
 void EnggDiffGSASFittingPresenter::notifyRefinementsComplete(
     Mantid::API::IAlgorithm_sptr alg,
-    const std::vector<GSASIIRefineFitPeaksOutputProperties> &
-        refinementResultSets) {
+    const std::vector<GSASIIRefineFitPeaksOutputProperties>
+        &refinementResultSets) {
   if (!m_viewHasClosed) {
     const auto numRuns = refinementResultSets.size();
 
@@ -195,7 +195,7 @@ void EnggDiffGSASFittingPresenter::notifyRefinementFailed(
 }
 
 void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
-    const Mantid::API::IAlgorithm_sptr alg,
+    const Mantid::API::IAlgorithm_sptr successfulAlgorithm,
     const GSASIIRefineFitPeaksOutputProperties &refinementResults) {
   if (!m_viewHasClosed) {
     m_view->showStatus("Saving refinement results");
@@ -203,7 +203,8 @@ void EnggDiffGSASFittingPresenter::notifyRefinementSuccessful(
         refinementResults.runLabel.runNumber);
 
     try {
-      m_model->saveRefinementResultsToHDF5(alg, {refinementResults}, filename);
+      m_model->saveRefinementResultsToHDF5(successfulAlgorithm,
+                                           {refinementResults}, filename);
     } catch (std::exception &e) {
       m_view->userWarning(
           "Could not save refinement results",
@@ -287,5 +288,5 @@ void EnggDiffGSASFittingPresenter::processStart() {
 
 void EnggDiffGSASFittingPresenter::processShutDown() { m_viewHasClosed = true; }
 
-} // MantidQt
-} // CustomInterfaces
+} // namespace CustomInterfaces
+} // namespace MantidQt

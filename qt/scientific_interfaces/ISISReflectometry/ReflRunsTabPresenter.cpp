@@ -20,13 +20,13 @@
 #include "ReflSearchModel.h"
 
 #include <QStringList>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <vector>
-#include <algorithm>
-#include <iterator>
 
 #include "Reduction/WorkspaceNamesFactory.h"
 #include "Reduction/ValidateRow.h"
@@ -83,8 +83,8 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 }
 
 /** Accept a main presenter
-* @param mainPresenter :: [input] A main presenter
-*/
+ * @param mainPresenter :: [input] A main presenter
+ */
 void ReflRunsTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
@@ -233,8 +233,8 @@ bool ReflRunsTabPresenter::search() {
 }
 
 /** Populates the search results table
-* @param searchAlg : [input] The search algorithm
-*/
+ * @param searchAlg : [input] The search algorithm
+ */
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (!searchAlg->isExecuted())
     return;
@@ -256,8 +256,8 @@ void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 }
 
 /** Searches ICAT for runs with given instrument and investigation id, transfers
-* runs to table and processes them. Clears any existing table data first.
-*/
+ * runs to table and processes them. Clears any existing table data first.
+ */
 void ReflRunsTabPresenter::startNewAutoreduction() {
 
   auto const group = selectedGroup();
@@ -281,9 +281,9 @@ void ReflRunsTabPresenter::startNewAutoreduction() {
 }
 
 /** Determines whether to start a new autoreduction. Starts a new one if the
-* either the search number, transfer method or instrument has changed
-* @return : Boolean on whether to start a new autoreduction
-*/
+ * either the search number, transfer method or instrument has changed
+ * @return : Boolean on whether to start a new autoreduction
+ */
 bool ReflRunsTabPresenter::requireNewAutoreduction() const {
   bool searchNumChanged =
       m_autoreduction.searchStringChanged(m_view->getSearchString());
@@ -482,12 +482,11 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer, int,
 }
 
 /** Used to tell the presenter something has changed in the ADS
-*
-* @param workspaceList :: the list of table workspaces in the ADS that could
-*be
-* loaded into the interface
-* @param group :: the group that the notification came from
-*/
+ *
+ * @param workspaceList :: the list of table workspaces in the ADS that could be
+ * loaded into the interface
+ * @param group :: the group that the notification came from
+ */
 void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
                                             int group) {
 
@@ -502,13 +501,13 @@ void ReflRunsTabPresenter::notifyADSChanged(const QSet<QString> &workspaceList,
 }
 
 /** Requests global pre-processing options. Options are supplied by
-  * the main presenter and there can be multiple sets of options for different
-  * columns that need to be preprocessed.
-  * @return :: A map of the column name to the global pre-processing options
-  * for that column
-  * the main presenter.
-  * @return :: Global pre-processing options
-  */
+ * the main presenter and there can be multiple sets of options for different
+ * columns that need to be preprocessed.
+ * @return :: A map of the column name to the global pre-processing options
+ * for that column
+ * the main presenter.
+ * @return :: Global pre-processing options
+ */
 ColumnOptionsQMap
 ReflRunsTabPresenter::getPreprocessingOptions(int group) const {
   ColumnOptionsQMap result;
@@ -525,9 +524,9 @@ ReflRunsTabPresenter::getPreprocessingOptions(int group) const {
 }
 
 /** Requests global processing options. Options are supplied by the main
-* presenter
-* @return :: Global processing options
-*/
+ * presenter
+ * @return :: Global processing options
+ */
 OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
   assert(m_mainPresenter != nullptr &&
          "The main presenter must be set with acceptMainPresenter.");
@@ -544,23 +543,23 @@ ReflRunsTabPresenter::getPostprocessingOptionsAsString(int group) const {
 }
 
 /** Requests time-slicing values. Values are supplied by the main presenter
-* @return :: Time-slicing values
-*/
+ * @return :: Time-slicing values
+ */
 QString ReflRunsTabPresenter::getTimeSlicingValues(int group) const {
   return QString::fromStdString(m_mainPresenter->getTimeSlicingValues(group));
 }
 
 /** Requests time-slicing type. Type is supplied by the main presenter
-* @return :: Time-slicing values
-*/
+ * @return :: Time-slicing values
+ */
 QString ReflRunsTabPresenter::getTimeSlicingType(int group) const {
   return QString::fromStdString(m_mainPresenter->getTimeSlicingType(group));
 }
 
 /** Requests transmission runs for a particular run angle. Values are supplied
-* by the main presenter
-* @return :: Transmission run(s) as a comma-separated list
-*/
+ * by the main presenter
+ * @return :: Transmission run(s) as a comma-separated list
+ */
 OptionsQMap ReflRunsTabPresenter::getOptionsForAngle(const double angle,
                                                      int group) const {
   return m_mainPresenter->getOptionsForAngle(group, angle);
@@ -597,7 +596,7 @@ void ReflRunsTabPresenter::updateWidgetEnabledState() const {
 
 /** Tells view to update the enabled/disabled state of all relevant widgets
  * based on the fact that processing is not in progress
-*/
+ */
 void ReflRunsTabPresenter::pause(int group) {
   if (m_autoreduction.pause(group)) {
     m_view->stopTimer();
@@ -614,16 +613,16 @@ void ReflRunsTabPresenter::pause(int group) {
 void ReflRunsTabPresenter::resume(int group) const { UNUSED_ARG(group); }
 
 /** Notifies main presenter that data reduction is confirmed to be finished
-* i.e. after all rows have been reduced
-*/
+ * i.e. after all rows have been reduced
+ */
 void ReflRunsTabPresenter::confirmReductionCompleted(int group) {
   UNUSED_ARG(group);
   m_view->startTimer(10000);
 }
 
 /** Notifies main presenter that data reduction is confirmed to be paused
-* via a user command to pause reduction
-*/
+ * via a user command to pause reduction
+ */
 void ReflRunsTabPresenter::confirmReductionPaused(int group) {
   updateWidgetEnabledState();
   m_mainPresenter->notifyReductionPaused(group);
@@ -637,7 +636,7 @@ void ReflRunsTabPresenter::confirmReductionPaused(int group) {
 }
 
 /** Notifies main presenter that data reduction is confirmed to be resumed
-*/
+ */
 void ReflRunsTabPresenter::confirmReductionResumed(int group) {
   updateWidgetEnabledState();
   m_mainPresenter->notifyReductionResumed(group);

@@ -13,8 +13,8 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/Material.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/V3D.h"
 

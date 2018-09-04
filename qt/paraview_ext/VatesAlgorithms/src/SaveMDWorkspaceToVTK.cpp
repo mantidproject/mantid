@@ -1,10 +1,10 @@
+#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidVatesAlgorithms/SaveMDWorkspaceToVTK.h"
 
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAlgorithms/SaveMDWorkspaceToVTKImpl.h"
@@ -111,5 +111,5 @@ std::map<std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {
   // Check for file location
   return errorMessage;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

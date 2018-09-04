@@ -1,12 +1,12 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -21,10 +21,10 @@
 #include <string>
 #include <vector>
 
+#include "boost/shared_ptr.hpp"
+#include <QHash>
 #include <QString>
 #include <QVariant>
-#include <QHash>
-#include "boost/shared_ptr.hpp"
 
 using namespace MantidQt::MantidWidgets;
 
@@ -218,6 +218,6 @@ void RebinAlgorithmDialogProvider::setAxisDimensions(
     dialog->resestAlignedDimProperty(index, propertyValue);
   }
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

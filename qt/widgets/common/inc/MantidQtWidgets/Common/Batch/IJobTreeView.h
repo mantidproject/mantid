@@ -86,7 +86,7 @@ public:
   virtual Cell deadCell() const = 0;
   virtual ~IJobTreeView() = default;
 };
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_IJOBTREEVIEW_H_

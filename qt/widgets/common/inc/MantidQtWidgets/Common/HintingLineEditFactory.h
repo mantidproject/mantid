@@ -1,11 +1,10 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 
-#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
 #include <memory>
 
@@ -38,8 +37,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
   HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate,
-                         std::unique_ptr<HintStrategy> hintStrategy)
-      : m_strategy(std::move(hintStrategy)),
+                         std::unique_ptr<HintStrategy> hintStrategy,
+                         QObject *parent = nullptr)
+      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)),
         m_cellPainterDelegate(cellPainterDelegate){};
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
@@ -48,7 +48,8 @@ public:
     Q_UNUSED(index);
 
     auto editor = new HintingLineEdit(parent, m_strategy->createHints());
-    editor->setFrame(true);
+    editor->setFrame(false);
+
     return editor;
   }
 
@@ -61,7 +62,7 @@ protected:
   std::unique_ptr<HintStrategy> m_strategy;
   QAbstractItemDelegate *m_cellPainterDelegate;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H */

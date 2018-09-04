@@ -127,7 +127,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         # SaveNXcanSAS clashes with SaveNexusProcessed
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NXcanSAS, file_types,
-                                                            [SaveType.Nexus])
+                                                            [])
 
         # SaveNISTDAT clashes with SaveRKH, both can save to .dat
         self.add_file_format_with_appended_name_requirement(file_formats, SaveType.NistQxy, file_types, [SaveType.RKH])

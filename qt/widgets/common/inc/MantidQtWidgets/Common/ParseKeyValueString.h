@@ -28,19 +28,21 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "DllOption.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "DllOption.h"
 #include <QString>
 #include <map>
+#include <sstream>
 #include <string>
 #include <sstream>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-std::map<std::string, std::string> DLLExport
-parseKeyValueString(const std::string &str);
+std::map<std::string, std::string>
+    DLLExport parseKeyValueString(const std::string &str);
 MantidQt::MantidWidgets::DataProcessor::OptionsMap DLLExport
 parseKeyValueQString(const QString &str);
 // Trim leading/trailing whitespace and quotes from a string
@@ -52,7 +54,7 @@ QString EXPORT_OPT_MANTIDQT_COMMON
 convertMapToString(const std::map<QString, QString> &optionsMap);
 std::string EXPORT_OPT_MANTIDQT_COMMON
 optionsToString(std::map<std::string, std::string> const &options);
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_PARSEKEYVALUESTRING_H

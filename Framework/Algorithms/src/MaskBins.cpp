@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/MaskBins.h"
+#include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Algorithm.tcc"
 
 #include <limits>
 #include <sstream>
@@ -19,8 +19,8 @@ DECLARE_ALGORITHM(MaskBins)
 using namespace Kernel;
 using namespace API;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 
 void MaskBins::init() {
   declareWorkspaceInputProperties<MatrixWorkspace>(

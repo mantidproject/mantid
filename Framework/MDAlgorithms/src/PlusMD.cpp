@@ -166,5 +166,5 @@ void PlusMD::execEvent() {
   setProperty("OutputWorkspace", m_out_event);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

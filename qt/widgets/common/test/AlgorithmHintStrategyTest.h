@@ -1,14 +1,14 @@
 #ifndef MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGYTEST_H
 #define MANTID_MANTIDWIDGETS_ALGORITHMHINTSTRATEGYTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidQtWidgets/Common/HintStrategy.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -48,8 +48,9 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       declareProperty(
           Mantid::Kernel::make_unique<Mantid::Kernel::ArrayProperty<double>>(
               "DoubleArray"));
-      declareProperty(Mantid::Kernel::make_unique<
-          Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
+      declareProperty(
+          Mantid::Kernel::make_unique<
+              Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
     };
     void exec() override { return; };
   };
@@ -88,8 +89,9 @@ public:
 
     auto hints = strategy.createHints();
 
-    auto compare = [](Hint const &lhs, Hint const &rhs)
-                       -> bool { return lhs.word() < rhs.word(); };
+    auto compare = [](Hint const &lhs, Hint const &rhs) -> bool {
+      return lhs.word() < rhs.word();
+    };
     std::sort(expected.begin(), expected.end(), compare);
     std::sort(hints.begin(), hints.end(), compare);
 

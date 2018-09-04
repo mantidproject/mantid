@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_
 #define MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidDataObjects/SkippingPolicy.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
+#include <boost/tuple/tuple.hpp>
 #include <map>
 #include <vector>
-#include <boost/tuple/tuple.hpp>
 
 namespace Mantid {
 namespace DataObjects {

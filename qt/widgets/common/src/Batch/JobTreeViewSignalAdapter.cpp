@@ -41,6 +41,6 @@ void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
 }
 
 void JobTreeViewSignalAdapter::notifyFilterReset() { emit filterReset(); }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -2,8 +2,8 @@
 #define MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTITEMSOURCE_H_
 
 #include "DllConfig.h"
-#include "ReflMeasurementItemSource.h"
 #include "MeasurementItem.h"
+#include "ReflMeasurementItemSource.h"
 
 #include <string>
 
@@ -47,6 +47,6 @@ public:
 };
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOMINTERFACES_REFLNEXUSMEASUREMENTSOURCE_H_ */

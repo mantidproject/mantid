@@ -29,7 +29,7 @@ const int ScaleCol = 7;
 const int OptionsCol = 8;
 const int HiddenOptionsCol = 9;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockDataProcessorView : public DataProcessorView {
 public:
@@ -67,6 +67,7 @@ public:
   MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
+  MOCK_METHOD0(setItemDelegate, void());
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<QString, QVariant> &));
@@ -91,7 +92,8 @@ public:
 
   // Calls we don't care about
   void showTable(boost::shared_ptr<
-      MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>) override{};
+                 MantidQt::MantidWidgets::DataProcessor::AbstractTreeModel>)
+      override{};
   void saveSettings(const std::map<QString, QVariant> &) override{};
 
   void emitProcessClicked() override{};
@@ -242,6 +244,6 @@ public:
   };
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /*MANTID_MANTIDWIDGETS_DATAPROCESSORVIEWMOCKOBJECTS_H*/

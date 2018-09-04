@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAHANDLING_SAVEPDFGUITEST_H_
 #define MANTID_DATAHANDLING_SAVEPDFGUITEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataHandling/SavePDFGui.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/SavePDFGui.h"
 
-using Mantid::DataHandling::SavePDFGui;
 using Mantid::DataHandling::LoadNexusProcessed;
+using Mantid::DataHandling::SavePDFGui;
 using namespace Mantid::API;
 
 class SavePDFGuiTest : public CxxTest::TestSuite {

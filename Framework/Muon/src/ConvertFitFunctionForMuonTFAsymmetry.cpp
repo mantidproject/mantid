@@ -54,7 +54,7 @@ int findName(const std::vector<std::string> &colNames, const char *name) {
   }
   return -1;
 }
-}
+} // namespace
 namespace Mantid {
 
 namespace Muon {
@@ -76,13 +76,13 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
   // if construct -> read relevant norms into sorted list
   declareProperty(
       make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "NormalisationTable", "", Direction::Input),
-      "Name of the table containing the normalisations for the asymmetries.");
+          "NormalizationTable", "", Direction::Input),
+      "Name of the table containing the normalizations for the asymmetries.");
   // list of workspaces
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<std::string>>(
                       "WorkspaceList", boost::make_shared<API::ADSValidator>()),
                   "An ordered list of workspaces (to get the initial values "
-                  "for the normalisations).");
+                  "for the normalizations).");
 
   std::vector<std::string> allowedModes{"Construct", "Extract"};
   auto modeVal = boost::make_shared<Kernel::CompositeValidator>();
@@ -101,25 +101,25 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
 }
 
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string>
 ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
   // create the map
   std::map<std::string, std::string> result;
   // check norm table is correct
-  API::ITableWorkspace_const_sptr tabWS = getProperty("NormalisationTable");
+  API::ITableWorkspace_const_sptr tabWS = getProperty("NormalizationTable");
 
   if (tabWS->columnCount() == 0) {
-    result["NormalisationTable"] =
-        "Please provide a non-empty NormalisationTable.";
+    result["NormalizationTable"] =
+        "Please provide a non-empty NormalizationTable.";
   }
 
-  // NormalisationTable should have three columns: (norm, name, method)
+  // NormalizationTable should have three columns: (norm, name, method)
   if (tabWS->columnCount() != 3) {
-    result["NormalisationTable"] = "NormalisationTable must have three columns";
+    result["NormalizationTable"] = "NormalizationTable must have three columns";
   }
   auto names = tabWS->getColumnNames();
   int normCount = 0;
@@ -135,18 +135,19 @@ ConvertFitFunctionForMuonTFAsymmetry::validateInputs() {
     }
   }
   if (normCount == 0) {
-    result["NormalisationTable"] = "NormalisationTable needs norm column";
+    result["NormalizationTable"] = "NormalizationTable needs norm column";
   }
   if (wsNamesCount == 0) {
-    result["NormalisationTable"] = "NormalisationTable needs a name column";
+    result["NormalizationTable"] = "NormalizationTable needs a name column";
   }
   if (normCount > 1) {
-    result["NormalisationTable"] =
-        "NormalisationTable has " + std::to_string(normCount) + " norm columns";
+    result["NormalizationTable"] =
+        "NormalizationTable has " + std::to_string(normCount) + " norm columns";
   }
   if (wsNamesCount > 1) {
-    result["PhaseTable"] =
-        "PhaseTable has " + std::to_string(wsNamesCount) + " name columns";
+    result["NormalizationTable"] = "NormalizationTable has " +
+                                   std::to_string(wsNamesCount) +
+                                   " name columns";
   }
   // Check units, should be microseconds
   return result;
@@ -184,12 +185,12 @@ void ConvertFitFunctionForMuonTFAsymmetry::setOutput(
   }
   setProperty("OutputFunction", outputFitFunction);
 }
-/** Extracts the user's original function f from the normalisation function
-* N(1+f)+expDecay
-* and adds in the ties
-* @param original :: [input] normalisation function
-* @return :: user function
-*/
+/** Extracts the user's original function f from the normalization function
+ * N(1+f)+expDecay
+ * and adds in the ties
+ * @param original :: [input] normalization function
+ * @return :: user function
+ */
 Mantid::API::IFunction_sptr
 ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
     const Mantid::API::IFunction_sptr &original) {
@@ -237,35 +238,43 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
 
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
-/** Extracts the user's original function f from the normalisation function
+/** Extracts the user's original function f from the normalization function
  * N(1+f)+expDecay
-        * @param original :: [input] normalisation function
-        * @return :: user function
-        */
+ * @param original :: [input] normalization function
+ * @return :: user function
+ */
 
 IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
     const IFunction_sptr &TFFuncIn) {
   // N(1+g) + exp
   auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
-
+  if (TFFunc == nullptr) {
+    throw std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(0) -> N(1+g)
+
   TFFunc =
       boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(0));
-
+  if (TFFunc == nullptr) {
+    throw std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(1) -> 1+g
+
   TFFunc =
       boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(1));
-
+  if (TFFunc == nullptr) {
+    throw std::runtime_error("Input function is not of the correct form");
+  }
   // getFunction(1) -> g
   return TFFunc->getFunction(1);
 }
 
 /** Get the nomralisation constants from the table
-* the order is the same as the workspace list
-* @return :: vector of normals
-*/
+ * the order is the same as the workspace list
+ * @return :: vector of normals
+ */
 std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
-  API::ITableWorkspace_sptr table = getProperty("NormalisationTable");
+  API::ITableWorkspace_sptr table = getProperty("NormalizationTable");
   const std::vector<std::string> wsNames = getProperty("WorkspaceList");
 
   std::vector<double> norms(wsNames.size(), 0);
@@ -286,10 +295,10 @@ std::vector<double> ConvertFitFunctionForMuonTFAsymmetry::getNorms() {
   return norms;
 }
 /** Gets the fitting function for TFAsymmetry fit
-* @param original :: The user function f
-* @param norms :: vector of normalization constants
-* @returns :: The normalisation function N(1+f) +ExpDecay
-*/
+ * @param original :: The user function f
+ * @param norms :: vector of normalization constants
+ * @returns :: The normalization function N(1+f) +ExpDecay
+ */
 Mantid::API::IFunction_sptr
 ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     const Mantid::API::IFunction_sptr &original,
@@ -300,7 +309,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
   for (size_t j = 0; j < numDomains; j++) {
     IFunction_sptr userFunc;
     auto constant = FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground, A0 = 1.0; ties=(f0.A0=1)");
+        "name = FlatBackground, A0 = 1.0, ties=(A0=1)");
     if (numDomains == 1) {
       userFunc = original;
     } else {
@@ -311,7 +320,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     inBrace->addFunction(constant);
     inBrace->addFunction(userFunc);
     auto norm = FunctionFactory::Instance().createInitialized(
-        "composite=CompositeFunction,NumDeriv=true;name = FlatBackground, A0 "
+        "name = FlatBackground, A0 "
         "=" +
         std::to_string(norms[j]));
     auto product = boost::dynamic_pointer_cast<CompositeFunction>(
@@ -323,7 +332,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     constant = FunctionFactory::Instance().createInitialized(
         "name = ExpDecayMuon, A = 0.0, Lambda = -" +
         std::to_string(MUON_LIFETIME_MICROSECONDS) +
-        ";ties = (f0.A = 0.0, f0.Lambda = -" +
+        ",ties = (A = 0.0, Lambda = -" +
         std::to_string(MUON_LIFETIME_MICROSECONDS) + ")");
     composite->addFunction(product);
     composite->addFunction(constant);
@@ -351,5 +360,5 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
 
   return boost::dynamic_pointer_cast<IFunction>(multi);
 }
-} // namespace Algorithm
+} // namespace Muon
 } // namespace Mantid

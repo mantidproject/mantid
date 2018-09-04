@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/WienerSmooth.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -12,8 +12,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(WienerSmooth)
@@ -26,7 +26,7 @@ struct PowerSpectrum {
 
 // To be used when actual noise level cannot be estimated
 const double guessSignalToNoiseRatio = 1e15;
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 

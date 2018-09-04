@@ -53,7 +53,8 @@ void ManageUserDirectories::loadProperties() {
   // get data search directories and populate the list widget (lwDataSearchDirs)
   QString directories = QString::fromStdString(
                             Mantid::Kernel::ConfigService::Instance().getString(
-                                "datasearch.directories")).trimmed();
+                                "datasearch.directories"))
+                            .trimmed();
   QStringList list = directories.split(";", QString::SkipEmptyParts);
   m_uiForm.lwDataSearchDirs->clear();
   m_uiForm.lwDataSearchDirs->addItems(list);
@@ -61,7 +62,8 @@ void ManageUserDirectories::loadProperties() {
   // Do the same thing for the "pythonscripts.directories" property.
   directories = QString::fromStdString(
                     Mantid::Kernel::ConfigService::Instance().getString(
-                        "pythonscripts.directories")).trimmed();
+                        "pythonscripts.directories"))
+                    .trimmed();
   list = directories.split(";", QString::SkipEmptyParts);
   m_uiForm.lwUserSearchDirs->clear();
   m_uiForm.lwUserSearchDirs->addItems(list);
@@ -96,7 +98,8 @@ void ManageUserDirectories::loadProperties() {
   // default save directory
   QString saveDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "defaultsave.directory")).trimmed();
+                            "defaultsave.directory"))
+                        .trimmed();
   m_uiForm.leDefaultSave->setText(saveDir);
 }
 void ManageUserDirectories::saveProperties() {
@@ -158,7 +161,7 @@ void ManageUserDirectories::saveProperties() {
  * back) there already, and strip whitespace from the path.
  *
  * @param path :: A reference to the path
-*/
+ */
 void ManageUserDirectories::appendSlashIfNone(QString &path) const {
   path = path.trimmed();
   if (!(path.endsWith("/") || path.endsWith("\\") || path.isEmpty())) {
@@ -269,8 +272,8 @@ void ManageUserDirectories::selectSaveDir() {
   }
 }
 /** Opens a manage directories dialog and gives it focus
-*  @param parent :: the parent window, probably the window that called it
-*/
+ *  @param parent :: the parent window, probably the window that called it
+ */
 void ManageUserDirectories::openUserDirsDialog(QWidget *parent) {
   ManageUserDirectories *ad = new ManageUserDirectories(parent);
   ad->show();

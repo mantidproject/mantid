@@ -30,8 +30,8 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GetEi2)
 
 /**
-* Default contructor
-*/
+ * Default contructor
+ */
 GetEi2::GetEi2()
     : Algorithm(), m_input_ws(), m_peak1_pos(0, 0.0), m_fixedei(false),
       m_tof_window(0.1), m_peak_signif(2.0), m_peak_deriv(1.0),
@@ -109,14 +109,14 @@ void GetEi2::init()
 }
 
 /** Executes the algorithm
-*  @throw out_of_range if the peak runs off the edge of the histogram
-*  @throw NotFoundError if one of the requested spectrum numbers was not found
-* in the workspace
-*  @throw IndexError if there is a problem converting spectra indexes to spectra
-* numbers, which would imply there is a problem with the workspace
-*  @throw invalid_argument if a good peak fit wasn't made or the input workspace
-* does not have common binning
-*/
+ *  @throw out_of_range if the peak runs off the edge of the histogram
+ *  @throw NotFoundError if one of the requested spectrum numbers was not found
+ * in the workspace
+ *  @throw IndexError if there is a problem converting spectra indexes to
+ * spectra numbers, which would imply there is a problem with the workspace
+ *  @throw invalid_argument if a good peak fit wasn't made or the input
+ * workspace does not have common binning
+ */
 void GetEi2::exec() {
   m_input_ws = getProperty("InputWorkspace");
   m_fixedei = getProperty("FixEi");
@@ -387,7 +387,7 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
  * @param peak_e :: An output vector containing just the E values of the peak
  * data
  * @returns The width of the peak at half height
-*/
+ */
 double GetEi2::calculatePeakWidthAtHalfHeight(
     API::MatrixWorkspace_sptr data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
@@ -565,9 +565,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
                       << "half-height point will not be as accurate.\n";
       ip1--;
     }
-    xp_hh = peak_x[ip2] +
-            (peak_x[ip1] - peak_x[ip2]) *
-                ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
+    xp_hh =
+        peak_x[ip2] + (peak_x[ip1] - peak_x[ip2]) *
+                          ((hby2 - peak_y[ip2]) / (peak_y[ip1] - peak_y[ip2]));
   } else {
     xp_hh = peak_x[nyvals - 1];
   }
@@ -600,9 +600,9 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
                       << "half-height point will not be as accurate.\n";
       im1++;
     }
-    xm_hh = peak_x[im2] +
-            (peak_x[im1] - peak_x[im2]) *
-                ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
+    xm_hh =
+        peak_x[im2] + (peak_x[im1] - peak_x[im2]) *
+                          ((hby2 - peak_y[im2]) / (peak_y[im1] - peak_y[im2]));
   } else {
     xm_hh = peak_x.front();
   }
@@ -688,9 +688,9 @@ void GetEi2::integrate(double &integral_val, double &integral_err,
     unsigned int ihi = std::min<unsigned int>(static_cast<unsigned int>(mu) + 1,
                                               static_cast<unsigned int>(nx));
     double fraction = (xmax - xmin) / (x[ihi] - x[ilo]);
-    integral_val =
-        0.5 * fraction * (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +
-                          s[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin)));
+    integral_val = 0.5 * fraction *
+                   (s[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo])) +
+                    s[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin)));
     double err_hi = e[ihi] * ((xmax - x[ilo]) + (xmin - x[ilo]));
     double err_lo = e[ilo] * ((x[ihi] - xmax) + (x[ihi] - xmin));
     integral_err =
@@ -766,5 +766,5 @@ void GetEi2::storeEi(const double ei) const {
       new PropertyWithValue<double>("Ei", ei, Direction::Input);
   m_input_ws->mutableRun().addProperty(incident_energy, true);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

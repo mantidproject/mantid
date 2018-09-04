@@ -1,13 +1,13 @@
+#include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraAxisValidator.h"
 
 namespace Mantid {
 namespace API {
 
 /** Class constructor with parameter.
-  * @param axisNumber :: set the axis number to validate
-  */
+ * @param axisNumber :: set the axis number to validate
+ */
 SpectraAxisValidator::SpectraAxisValidator(const int &axisNumber)
     : m_axisNumber(axisNumber) {}
 
@@ -17,9 +17,9 @@ Kernel::IValidator_sptr SpectraAxisValidator::clone() const {
 }
 
 /** Checks that the axis stated
-*  @param value :: The workspace to test
-*  @return A message for users with negative results, otherwise ""
-*/
+ *  @param value :: The workspace to test
+ *  @return A message for users with negative results, otherwise ""
+ */
 std::string
 SpectraAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   Mantid::API::Axis *axis;

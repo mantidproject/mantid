@@ -1,10 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 #define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
+#include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "Presenters/BatchPresenter.h"
@@ -22,7 +22,7 @@ namespace DataProcessor {
 class Command;
 }
 class SlitCalculator;
-}
+} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
@@ -152,7 +152,7 @@ private slots:
   void showSearchContextMenu(const QPoint &pos);
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_ */

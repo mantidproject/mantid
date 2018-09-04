@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/FilterByTime2.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -147,5 +147,5 @@ void FilterByTime2::exec() {
   this->setProperty("OutputWorkspace", optws);
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

@@ -16,15 +16,13 @@ MDBox. A brief introduction to the multi-dimensional data normalization can be f
 
 .. Note::
 
-    This is an experimental algorithm in Release 3.3. Please check the nightly Mantid build, and the Mantid webpage
-    for better offline help and usage examples.
-
-.. Note::
-
     If the MDEvent input workspace is generated from an event workspace, the algorithm gives the correct normalization
     only if the event workspace is cropped and binned to the same energy transfer range. If the workspace is not cropped, 
     one might have events in places where the normalization is calculated to be 0.
 
+.. Note::
+
+    As of :ref:`Release 3.14.0 <v3.14.0>`, the algorithm can handle merged MD workspaces. Make sure all original MDEvent workspaces have the same dimensions
 
 Usage
 -----

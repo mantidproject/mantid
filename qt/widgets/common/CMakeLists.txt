@@ -11,8 +11,8 @@ set ( SRC_FILES
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
+  src/FlowLayout.cpp
   src/Hint.cpp
-	src/FlowLayout.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp
@@ -533,11 +533,13 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::PrintSupport
     ${_webwidgets_tgt}
     Qt5::Qscintilla
+  INSTALL_DIR
+    ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries
   LINUX_INSTALL_RPATH
-    "\$ORIGIN/../../${LIB_DIR}"
+    "\$ORIGIN/../${LIB_DIR}"
 )
 
 ###########################################################################

@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTSTRATEGY_H
 #define MANTID_MANTIDWIDGETS_HINTSTRATEGY_H
 
-#include <vector>
+#include <map>
 #include <string>
 #include "MantidQtWidgets/Common/Hint.h"
 #include "DllOption.h"
@@ -43,7 +43,7 @@ public:
    */
   virtual std::vector<Hint> createHints() = 0;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_HINTSTRATEGY_H */

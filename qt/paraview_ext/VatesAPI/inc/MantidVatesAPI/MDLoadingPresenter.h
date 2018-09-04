@@ -1,15 +1,15 @@
 #ifndef MANTID_VATES_MD_LOADING_PRESENTER
 #define MANTID_VATES_MD_LOADING_PRESENTER
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
-#include <vtkDataSet.h>
-#include <vtkPVChangeOfBasisHelper.h>
 #include <string>
 #include <vector>
+#include <vtkDataSet.h>
+#include <vtkPVChangeOfBasisHelper.h>
 
 class vtkUnstructuredGrid;
 namespace Mantid {
@@ -70,7 +70,7 @@ public:
    */
   virtual const std::string &getInstrument() = 0;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

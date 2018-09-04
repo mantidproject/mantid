@@ -1506,8 +1506,6 @@ public:
   const std::string& word() const;
   const std::string& description() const;
 };
-
-
 class HintStrategy
 {
 %TypeHeaderCode
@@ -1518,7 +1516,6 @@ public:
   virtual std::vector<MantidQt::MantidWidgets::Hint> createHints() = 0;
   virtual ~HintStrategy();
 };
-
 class AlgorithmHintStrategy : public MantidQt::MantidWidgets::HintStrategy
 {
 %TypeHeaderCode
@@ -1603,14 +1600,15 @@ class JobTreeView : public QTreeView
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 %End
 public:
-    JobTreeView(const QStringList &columnHeadings, const MantidQt::MantidWidgets::Batch::Cell& defaultCellStyle, QWidget *parent = nullptr);
+    JobTreeView(const QStringList &columnHeadings, const MantidQt::MantidWidgets::Batch::Cell& defaultCellStyle,
+     QWidget *parent = nullptr);
 
     void subscribe(MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber& subscriber);
     MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
-    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow);
-    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent);
-    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parentLocation,
+    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parentLocation,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);

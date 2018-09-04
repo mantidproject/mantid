@@ -1,12 +1,12 @@
 #ifndef QXYTEST_H_
 #define QXYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/Qxy.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/Qxy.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

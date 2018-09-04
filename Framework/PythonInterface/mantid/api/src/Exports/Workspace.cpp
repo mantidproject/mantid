@@ -6,8 +6,8 @@
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/overloads.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -19,27 +19,20 @@ GET_POINTER_SPECIALIZATION(Workspace)
 
 namespace {
 ///@cond
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
                                        Workspace::isDirty, 0, 1)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-///@endcond
-}
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
-//--------------------------------------------------------------------------------------
-// Deprecated function
-//--------------------------------------------------------------------------------------
+///@endcond
+} // namespace
+
 /**
+ * DEPRECATED. Use DataItem.name()
  * @param self Reference to the calling object
  * @return name of the workspace.
  */
@@ -69,8 +62,9 @@ void export_Workspace() {
                                       "(Default=1)"))
       .def("getMemorySize", &Workspace::getMemorySize, arg("self"),
            "Returns the memory footprint of the workspace in KB")
-      .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
-                             Workspace::getHistory,
+      .def("getHistory",
+           (const WorkspaceHistory &(Workspace::*)() const) &
+               Workspace::getHistory,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Return read-only access to the "
            ":class:`~mantid.api.WorkspaceHistory`");

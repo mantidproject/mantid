@@ -80,7 +80,7 @@ private:
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_

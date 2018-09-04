@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 namespace Algorithms {

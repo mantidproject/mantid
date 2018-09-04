@@ -1,20 +1,20 @@
 #include "MantidAlgorithms/HyspecScharpfCorrection.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HyspecScharpfCorrection)
@@ -192,8 +192,8 @@ void HyspecScharpfCorrection::execEvent() {
     case Mantid::API::TOF:
       // Switch to weights if needed.
       evlist.switchTo(Mantid::API::WEIGHTED);
-    /* no break */
-    // Fall through
+      /* no break */
+      // Fall through
 
     case Mantid::API::WEIGHTED:
       ScharpfEventHelper(evlist.getWeightedEvents(), thPlane);

@@ -25,11 +25,11 @@ using namespace API;
 LoadTBL::LoadTBL() {}
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filePath = descriptor.filename();
   const size_t filenameLength = filePath.size();
@@ -66,10 +66,10 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 /**
-* counte the commas in the line
-* @param line the line to count from
-* @returns a size_t of how many commas were in line
-*/
+ * counte the commas in the line
+ * @param line the line to count from
+ * @returns a size_t of how many commas were in line
+ */
 size_t LoadTBL::countCommas(std::string line) const {
   size_t found = 0;
   size_t pos = line.find(',', 0);
@@ -86,12 +86,12 @@ size_t LoadTBL::countCommas(std::string line) const {
 }
 
 /**
-* find pairs of qutoes and store them in a vector
-* @param line the line to count from
-* @param quoteBounds a vector<vector<size_t>> which will contain the locations
-* of pairs of quotes
-* @returns a size_t of how many pairs of quotes were in line
-*/
+ * find pairs of qutoes and store them in a vector
+ * @param line the line to count from
+ * @param quoteBounds a vector<vector<size_t>> which will contain the locations
+ * of pairs of quotes
+ * @returns a size_t of how many pairs of quotes were in line
+ */
 size_t
 LoadTBL::findQuotePairs(std::string line,
                         std::vector<std::vector<size_t>> &quoteBounds) const {
@@ -117,15 +117,15 @@ LoadTBL::findQuotePairs(std::string line,
 }
 
 /**
-* parse the CSV format if it's not a simple case of splitting 16 commas
-* @param line the line to parse
-* @param cols The vector to parse into
-* @param quoteBounds a vector<vector<size_t>> containing the locations of pairs
-* of quotes
-* @param expectedCommas The number of expected commas in the line
-* @throws std::length_error if anything other than 17 columns (or 16
-* cell-delimiting commas) is found
-*/
+ * parse the CSV format if it's not a simple case of splitting 16 commas
+ * @param line the line to parse
+ * @param cols The vector to parse into
+ * @param quoteBounds a vector<vector<size_t>> containing the locations of pairs
+ * of quotes
+ * @param expectedCommas The number of expected commas in the line
+ * @throws std::length_error if anything other than 17 columns (or 16
+ * cell-delimiting commas) is found
+ */
 void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
                        std::vector<std::vector<size_t>> &quoteBounds,
                        size_t expectedCommas) const {
@@ -181,17 +181,17 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
 }
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param line the line to parse
-* @param cols The vector to parse into
-* @param expectedCommas The number of expected commas in the line
-* @param isOldTBL boolean to deal with new and old TBL formats.
-* @returns An integer specifying how many columns were parsed into.
-* @throws std::length_error if anything other than 17 columns (or 16
-* cell-delimiting commas) is found when loading an old Refl TBL. A
-* length_error will be thrown for new TBL formats if there are less column
-* headings than expected commas.
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param line the line to parse
+ * @param cols The vector to parse into
+ * @param expectedCommas The number of expected commas in the line
+ * @param isOldTBL boolean to deal with new and old TBL formats.
+ * @returns An integer specifying how many columns were parsed into.
+ * @throws std::length_error if anything other than 17 columns (or 16
+ * cell-delimiting commas) is found when loading an old Refl TBL. A
+ * length_error will be thrown for new TBL formats if there are less column
+ * headings than expected commas.
+ */
 size_t LoadTBL::getCells(std::string line, std::vector<std::string> &cols,
                          size_t expectedCommas, bool isOldTBL) const {
   // first check the number of commas in the line.
@@ -272,8 +272,8 @@ void LoadTBL::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void LoadTBL::exec() {
   std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());
@@ -317,16 +317,16 @@ void LoadTBL::exec() {
   if (isOld) {
     /**THIS IS ESSENTIALLY THE OLD LoadReflTBL CODE**/
     // create the column headings
-    auto colStitch = ws->addColumn("str", "StitchGroup");
-    auto colRuns = ws->addColumn("str", "Run(s)");
-    auto colTheta = ws->addColumn("str", "ThetaIn");
-    auto colTrans = ws->addColumn("str", "TransRun(s)");
-    auto colQmin = ws->addColumn("str", "Qmin");
-    auto colQmax = ws->addColumn("str", "Qmax");
-    auto colDqq = ws->addColumn("str", "dq/q");
-    auto colScale = ws->addColumn("str", "Scale");
-    auto colOptions = ws->addColumn("str", "Options");
-    auto colHiddenOptions = ws->addColumn("str", "HiddenOptions");
+    ws->addColumn("str", "StitchGroup");
+    ws->addColumn("str", "Run(s)");
+    ws->addColumn("str", "ThetaIn");
+    ws->addColumn("str", "TransRun(s)");
+    ws->addColumn("str", "Qmin");
+    ws->addColumn("str", "Qmax");
+    ws->addColumn("str", "dq/q");
+    ws->addColumn("str", "Scale");
+    ws->addColumn("str", "Options");
+    ws->addColumn("str", "HiddenOptions");
 
     for (size_t i = 0; i < ws->columnCount(); i++) {
       auto col = ws->getColumn(i);

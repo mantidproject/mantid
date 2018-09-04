@@ -40,7 +40,7 @@ private:
   std::mutex coutMutex;
 };
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_PROGRESSTEXT_H_ */

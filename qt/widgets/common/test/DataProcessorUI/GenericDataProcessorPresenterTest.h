@@ -151,16 +151,16 @@ private:
 
   const std::map<QString, PreprocessingAlgorithm>
   createReflectometryPreprocessingStep() {
-    return {
-        {"Run(s)", PreprocessingAlgorithm(
-                       "Plus", "TOF_", "+",
-                       std::set<QString>{"LHSWorkspace", "RHSWorkspace",
-                                         "OutputWorkspace"})},
-        {"Transmission Run(s)",
-         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
-                                "_", std::set<QString>{"FirstTransmissionRun",
-                                                       "SecondTransmissionRun",
-                                                       "OutputWorkspace"})}};
+    return {{"Run(s)", PreprocessingAlgorithm(
+                           "Plus", "TOF_", "+",
+                           std::set<QString>{"LHSWorkspace", "RHSWorkspace",
+                                             "OutputWorkspace"})},
+            {"Transmission Run(s)",
+             PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                    "_",
+                                    std::set<QString>{"FirstTransmissionRun",
+                                                      "SecondTransmissionRun",
+                                                      "OutputWorkspace"})}};
   }
 
   ProcessingAlgorithm createReflectometryProcessor() {
@@ -549,7 +549,8 @@ private:
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
       EXPECT_CALL(mockDataProcessorView,
-                  askUserString(_, _, QString("Workspace"))).Times(numTimes);
+                  askUserString(_, _, QString("Workspace")))
+          .Times(numTimes);
     } else {
       EXPECT_CALL(mockDataProcessorView,
                   askUserString(_, _, QString("Workspace")))
@@ -591,15 +592,17 @@ private:
 
   // A list of commonly used input/output workspace names
   std::vector<std::string> m_defaultWorkspaces = {
-      "TestWorkspace", "TOF_12345", "TOF_12346", "IvsQ_binned_TOF_12345",
-      "IvsQ_TOF_12345", "IvsLam_TOF_12345", "IvsQ_binned_TOF_12346",
-      "IvsQ_TOF_12346", "IvsLam_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
+      "TestWorkspace",  "TOF_12345",
+      "TOF_12346",      "IvsQ_binned_TOF_12345",
+      "IvsQ_TOF_12345", "IvsQ_binned_TOF_12346",
+      "IvsQ_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
 
   // Same as above but input workspaces don't have TOF_ prefix
   std::vector<std::string> m_defaultWorkspacesNoPrefix = {
-      "TestWorkspace", "12345", "12346", "IvsQ_binned_TOF_12345",
-      "IvsQ_TOF_12345", "IvsLam_TOF_12345", "IvsQ_binned_TOF_12346",
-      "IvsQ_TOF_12346", "IvsLam_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
+      "TestWorkspace",  "12345",
+      "12346",          "IvsQ_binned_TOF_12345",
+      "IvsQ_TOF_12345", "IvsQ_binned_TOF_12346",
+      "IvsQ_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
 
   void checkWorkspacesExistInADS(std::vector<std::string> workspaceNames) {
     for (auto &ws : workspaceNames)
@@ -1335,10 +1338,11 @@ public:
 
     // Check output and tidy up
     auto firstGroupWorkspaces = m_defaultWorkspaces;
-    auto secondGroupWorkspaces = std::vector<std::string>{
-        "TestWorkspace", "TOF_24681", "TOF_24682", "IvsQ_binned_TOF_24681",
-        "IvsQ_TOF_24681", "IvsLam_TOF_24681", "IvsQ_binned_TOF_24682",
-        "IvsQ_TOF_24682", "IvsLam_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
+    auto secondGroupWorkspaces =
+        std::vector<std::string>{"TestWorkspace",  "TOF_24681",
+                                 "TOF_24682",      "IvsQ_binned_TOF_24681",
+                                 "IvsQ_TOF_24681", "IvsQ_binned_TOF_24682",
+                                 "IvsQ_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
 
     checkWorkspacesExistInADS(firstGroupWorkspaces);
     checkWorkspacesExistInADS(secondGroupWorkspaces);
@@ -1675,8 +1679,8 @@ public:
         AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataB"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
     TS_ASSERT(
         AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA_TOF_dataB"));
 
@@ -3348,7 +3352,8 @@ public:
     EXPECT_CALL(mockDataProcessorView,
                 setInstrumentList(
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
-                    QString::fromStdString("INTER"))).Times(1);
+                    QString::fromStdString("INTER")))
+        .Times(1);
     presenter.setInstrumentList(
         QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"}, "INTER");
 

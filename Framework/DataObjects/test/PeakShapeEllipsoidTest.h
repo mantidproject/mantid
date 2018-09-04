@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
-#include <vector>
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/cow_ptr.h"
 #include <json/json.h>
+#include <vector>
 
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;

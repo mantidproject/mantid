@@ -18,7 +18,7 @@ using namespace testing;
 
 namespace {
 ACTION(ICATRuntimeException) { throw std::runtime_error(""); }
-}
+} // namespace
 
 //=====================================================================================
 // Functional tests
@@ -223,7 +223,8 @@ public:
     auto presenter = createMocksAndPresenter(1);
 
     EXPECT_CALL(*mockTablePresenter(0),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
+                notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(0));
 
     presenter.notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
     verifyAndClearExpectations();
@@ -243,10 +244,12 @@ public:
     EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup()).Times(Exactly(0));
     // Notify the cached autoreduction group
     EXPECT_CALL(*mockTablePresenter(GROUP_NUMBER),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(1));
+                notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(1));
     // Check the other table is not affected
     EXPECT_CALL(*mockTablePresenter(0),
-                notify(DataProcessorPresenter::PauseFlag)).Times(Exactly(0));
+                notify(DataProcessorPresenter::PauseFlag))
+        .Times(Exactly(0));
 
     presenter.notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
     verifyAndClearExpectations();
@@ -266,7 +269,8 @@ public:
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
-                notifyReductionPaused(AUTOREDUCTION_GROUP)).Times(Exactly(0));
+                notifyReductionPaused(AUTOREDUCTION_GROUP))
+        .Times(Exactly(0));
     expectSetWidgetEnabledState(false, true);
 
     presenter.pause(GROUP_TO_PAUSE);
@@ -292,7 +296,8 @@ public:
     EXPECT_CALL(*m_mockMainPresenter, notifyReductionPaused(GROUP_TO_PAUSE))
         .Times(Exactly(1));
     EXPECT_CALL(*m_mockMainPresenter,
-                notifyReductionPaused(AUTOREDUCTION_GROUP)).Times(Exactly(0));
+                notifyReductionPaused(AUTOREDUCTION_GROUP))
+        .Times(Exactly(0));
 
     presenter.pause(GROUP_TO_PAUSE);
     verifyAndClearExpectations();

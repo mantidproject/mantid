@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_OPTIONALBOOLTEST_H_
 #define MANTID_KERNEL_OPTIONALBOOLTEST_H_
 
+#include "MantidKernel/OptionalBool.h"
 #include <cxxtest/TestSuite.h>
 #include <sstream>
-#include "MantidKernel/OptionalBool.h"
 
 using namespace Mantid::Kernel;
 

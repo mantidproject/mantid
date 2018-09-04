@@ -132,5 +132,5 @@ void Projection::setUnit(size_t nd, ProjectionUnit unit) {
     m_units[nd] = unit;
 }
 
-} // API
-} // Mantid
+} // namespace API
+} // namespace Mantid

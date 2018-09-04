@@ -307,18 +307,19 @@ private:
     const Kernel::V3D sourcePos{0., 0., -L1};
     const Kernel::V3D &monitorPos = sourcePos;
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     const auto detZ = DET_DIST * std::cos(2 * braggAngle);
     const auto detY = DET_DIST * std::sin(2 * braggAngle);
     const Kernel::V3D detectorPos{0., detY, detZ};
     const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
     constexpr int nBins{100};
     auto ws = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};
@@ -537,7 +538,9 @@ private:
     const Kernel::V3D sourcePos{0., 0., -L1};
     const Kernel::V3D &monitorPos = sourcePos;
     const Kernel::V3D samplePos{
-        0., 0., 0.,
+        0.,
+        0.,
+        0.,
     };
     const double braggAngle{0.7};
     const auto detZ = DET_DIST * std::cos(2 * braggAngle);
@@ -545,11 +548,10 @@ private:
     const Kernel::V3D detectorPos{0., detY, detZ};
     const Kernel::V3D slit1Pos{0., 0., -SLIT1_DIST};
     const Kernel::V3D slit2Pos{0., 0., -SLIT2_DIST};
-    constexpr int nHisto{2};
     constexpr int nBins{10000};
     auto ws = create2DWorkspaceWithReflectometryInstrument(
         startX, slit1Pos, slit2Pos, SLIT1_SIZE, SLIT2_SIZE, sourcePos,
-        monitorPos, samplePos, detectorPos, nHisto, nBins, TOF_BIN_WIDTH);
+        monitorPos, samplePos, detectorPos, nBins, TOF_BIN_WIDTH);
     // Add slit sizes to sample logs, too.
     auto &run = ws->mutableRun();
     constexpr bool overwrite{true};
