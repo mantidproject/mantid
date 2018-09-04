@@ -74,7 +74,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
         self._wavelength_band = None
-        self._wavelength_nbins = 20  # for normalization by monitor
+        self._wavelength_dl = 0.02  # in Angstroms
         self._qbins = None
         self._short_inst = "BSS"
         self._run_list = None
@@ -178,7 +178,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                                 value,
                                 OutputWorkspace='_t_mask')
         #
-        # Desirece wavelength band of incoming neutrons
+        # Desired wavelength band of incoming neutrons
         #
         self._wavelength_band = np.array(self.getProperty('LambdaRange').value)
         #
@@ -304,8 +304,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_corr = ConvertUnits(_t_corr, Target='Wavelength', Emode='Elastic')
         l_s, l_e = self._wavelength_band[0], self._wavelength_band[1]
         _t_corr = CropWorkspace(_t_corr, XMin=l_s, XMax=l_e)
-        l_d = (l_e - l_s) / self._wavelength_nbins
-        _t_corr = Rebin(_t_corr, Params=[l_s, l_d, l_e])
+        _t_corr = Rebin(_t_corr, Params=[l_s, self._wavelength_dl, l_e],
+                        PreserveEvents=False)
         if self.getProperty('MonitorNormalization').value is True:
             _t_corr = self._monitor_normalization(_t_corr, target)
         return _t_corr
@@ -332,7 +332,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         # Load monitors files together
         #
-        rl = self._run_lists(self.getProperty('RunNumbers').value)
+        rl = self._run_lists(self.getProperty(target_to_runs[target]).value)
         _t_all_w = None
         for run in rl:
             file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
@@ -367,7 +367,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_mon = OneMinusExponentialCor(_t_mon, C='0.20749999999999999',
                                       C1='0.001276')
         _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply')
-        _t_mon = RebinToWorkspace(_t_mon, w)
+        _t_mon = RebinToWorkspace(_t_mon, w, PreserveEvents=False)
         _t_w = Divide(w, _t_mon, OutputWorkspace=w.name())
         return _t_w
 
