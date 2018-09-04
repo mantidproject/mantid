@@ -23,6 +23,7 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
 # global QApplication (get errors if > 1 instance in the code)
@@ -45,13 +46,14 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        self.obj = QtGui.QWidget()
         self.data = MuonLoadData()
-        self.load_file_view = BrowseFileWidgetView()
-        self.load_run_view = LoadRunWidgetView()
+        self.load_file_view = BrowseFileWidgetView(self.obj)
+        self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.data)
         self.load_run_model = LoadRunWidgetModel(self.data)
 
-        self.view = LoadWidgetView(load_file_view=self.load_file_view, load_run_view=self.load_run_view)
+        self.view = LoadWidgetView(parent=self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view)
         self.presenter = LoadWidgetPresenter(self.view, LoadWidgetModel(self.data))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
@@ -62,6 +64,9 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         self.runs = [1234 + i for i in range(10)]
         self.workspaces = [[run] for run in self.runs]
         self.filenames = ["C:\dir1\dir2\EMU000" + str(run) + ".nxs" for run in self.runs]
+
+    def tearDown(self):
+        self.obj = None
 
     def mock_loading_from_browse(self, workspaces, filenames, runs):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(

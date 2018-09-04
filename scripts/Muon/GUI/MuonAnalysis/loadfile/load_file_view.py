@@ -57,7 +57,7 @@ class BrowseFileWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.file_path_edit)
         self.horizontal_layout.addWidget(self.browse_button)
 
-        self.setLayout(self.horizontal_layout)
+        #self.setLayout(self.horizontal_layout)
 
     def on_browse_clicked(self, slot):
         self.browse_button.clicked.connect(slot)

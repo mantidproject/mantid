@@ -57,7 +57,7 @@ class LoadRunWidgetView(QtGui.QWidget):
             + " and " + runUtils.range_separator + " as delimiter and range-separator respectively")
         self.runEdit.setObjectName("runEdit")
 
-        spacerItem = QtGui.QSpacerItem(25, 25, QtGui.QSizePolicy.Minimum,
+        self.spacerItem = QtGui.QSpacerItem(25, 25, QtGui.QSizePolicy.Minimum,
                                        QtGui.QSizePolicy.Minimum)
 
         self.horizontalLayout.addWidget(self.loadCurrentRunButton)
@@ -65,7 +65,9 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.horizontalLayout.addWidget(self.instrumentLabel)
         self.horizontalLayout.addWidget(self.runEdit)
         self.horizontalLayout.addWidget(self.incrementRunButton)
-        self.horizontalLayout.addItem(spacerItem)
+        self.horizontalLayout.addItem(self.spacerItem)
+
+        #self.setLayout(self.horizontalLayout)
 
     def set_run_edit_regex(self):
         regex = QtCore.QRegExp(runUtils.run_string_regex)  # "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"

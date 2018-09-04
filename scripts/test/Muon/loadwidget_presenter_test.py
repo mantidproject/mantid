@@ -26,10 +26,12 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
 # global QApplication (get errors if > 1 instance in the code)
 QT_APP = QApplication([])
+
 
 
 class LoadRunWidgetPresenterTest(unittest.TestCase):
@@ -48,20 +50,24 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        self.obj = QtGui.QWidget()
         self.data = MuonLoadData()
-        self.load_file_view = BrowseFileWidgetView()
-        self.load_run_view = LoadRunWidgetView()
+        self.load_file_view = BrowseFileWidgetView(self.obj)
+        self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.data)
         self.load_run_model = LoadRunWidgetModel(self.data)
 
         self.presenter = LoadWidgetPresenter(
-            LoadWidgetView(load_file_view=self.load_file_view, load_run_view=self.load_run_view),
+            LoadWidgetView(parent = self.obj, load_file_view=self.load_file_view, load_run_view=self.load_run_view),
             LoadWidgetModel(self.data))
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 
         self.mock_loading_from_browse([1], "C:\dir1\dir2\dir3\EMU0001234.nxs", 1234)
         fileUtils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
+
+    def tearDown(self):
+        self.obj = None
 
     def mock_loading_from_browse(self, workspace, filename, run):
         self.load_file_view.show_file_browser_and_return_selection = mock.Mock(
@@ -220,27 +226,26 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
     class Runner:
 
         def __init__(self, thread):
-            self.QT_APP = QT_APP
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                if self._thread.isRunning():
-                    self.QT_APP.exec_()
+            if thread and thread.isRunning():
+                thread.finished.connect(self.finished)
+                QT_APP.exec_()
 
         def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
+            QT_APP.processEvents()
+            QT_APP.exit(0)
 
     def setUp(self):
+        self.obj = QtGui.QWidget()
         self.data = MuonLoadData()
-        self.load_file_view = BrowseFileWidgetView()
-        self.load_run_view = LoadRunWidgetView()
+        self.load_file_view = BrowseFileWidgetView(self.obj)
+        self.load_run_view = LoadRunWidgetView(self.obj)
         self.load_file_model = BrowseFileWidgetModel(self.data)
         self.load_run_model = LoadRunWidgetModel(self.data)
 
-        self.presenter = LoadWidgetPresenter(
-            LoadWidgetView(load_file_view=self.load_file_view, load_run_view=self.load_run_view),
-            LoadWidgetModel(self.data))
+        self.model = LoadWidgetModel(self.data)
+        self.view = LoadWidgetView(parent=self.obj, load_run_view=self.load_run_view, load_file_view=self.load_file_view)
+
+        self.presenter = LoadWidgetPresenter(view=self.view, model=self.model)
         self.presenter.set_load_file_widget(BrowseFileWidgetPresenter(self.load_file_view, self.load_file_model))
         self.presenter.set_load_run_widget(LoadRunWidgetPresenter(self.load_run_view, self.load_run_model))
 
@@ -257,6 +262,9 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
 
         self.load_file_view.warning_popup = mock.Mock()
         self.load_run_view.warning_popup = mock.Mock()
+
+    def tearDown(self):
+        self.obj = None
 
     def load_failure(self):
         raise ValueError("Error text")
@@ -313,19 +321,23 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         self.assert_model_unchanged()
         self.assert_interface_unchanged()
 
-    @mock.patch("Muon.GUI.Common.message_box.warning")
-    def test_that_if_load_fails_from_browse_that_warning_is_displayed(self, mock_warning):
-        self.presenter.load_file_widget.on_browse_button_clicked()
-        self.Runner(self.presenter.load_file_widget._load_thread)
+    def test_that_if_load_fails_from_browse_that_warning_is_displayed(self):
+        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
+            mock_warning.side_effect = None
+            mock_warning.return_value = None
+            self.presenter.load_file_widget.on_browse_button_clicked()
+            self.Runner(self.presenter.load_file_widget._load_thread)
 
-        self.assertEqual(mock_warning.call_count, 1)
+            self.assertEqual(mock_warning.call_count, 1)
 
-    @mock.patch("Muon.GUI.Common.message_box.warning")
-    def test_that_if_load_fails_from_user_file_entry_that_warning_is_displayed(self, mock_warning):
-        self.presenter.load_file_widget.handle_file_changed_by_user()
-        self.Runner(self.presenter.load_file_widget._load_thread)
+    def test_that_if_load_fails_from_user_file_entry_that_warning_is_displayed(self):
+        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning2:
+            mock_warning2.side_effect = None
+            mock_warning2.return_value = None
+            self.presenter.load_file_widget.handle_file_changed_by_user()
+            self.Runner(self.presenter.load_file_widget._load_thread)
 
-        self.assertEqual(mock_warning.call_count, 1)
+            self.assertEqual(mock_warning2.call_count, 1)
 
     @mock.patch("Muon.GUI.Common.message_box.warning")
     def test_that_if_load_fails_from_current_run_that_warning_is_displayed(self, mock_warning):
@@ -336,6 +348,8 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
 
     @mock.patch("Muon.GUI.Common.message_box.warning")
     def test_that_if_load_fails_from_user_run_entry_that_warning_is_displayed(self, mock_warning):
+        mock_warning.side_effect = None
+        mock_warning.return_value = None
         self.presenter.load_run_widget.handle_run_changed_by_user()
         self.Runner(self.presenter.load_run_widget._load_thread)
 
