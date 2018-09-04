@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
 #define MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
 
-#include "MantidDataObjects/CoordTransformDistanceParser.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/CoordTransformDistanceParser.h"
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
 using namespace Mantid::DataObjects;

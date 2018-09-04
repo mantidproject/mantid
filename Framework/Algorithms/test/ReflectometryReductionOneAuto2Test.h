@@ -55,6 +55,17 @@ private:
     return MatrixWorkspace_sptr();
   };
 
+  void momentumTransferHelper(ReflectometryReductionOneAuto2 &alg,
+                              MatrixWorkspace_sptr &inter,
+                              const double &theta) {
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("ThetaIn", theta);
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("ProcessingInstructions", "3");
+    alg.setProperty("Debug", false);
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -886,6 +897,52 @@ public:
     ADS.clear();
   }
 
+  void test_polarization_correction_default_Wildes() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    applyPolarizationEfficiencies(name);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "ParameterFile");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_EQUALS(outQGroup.size(), 4);
+    TS_ASSERT_EQUALS(outLamGroup.size(), 4);
+
+    TS_ASSERT_EQUALS(outLamGroup[0]->blocksize(), 9);
+    // X range in outLam
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).front(), 2.0729661466, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0).back(), 14.2963182408, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9368, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[1]->y(0)[0], 0.7813, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[2]->y(0)[0], 0.6797, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[3]->y(0)[0], 0.5242, 0.0001);
+
+    TS_ASSERT_EQUALS(outQGroup[0]->blocksize(), 9);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.9368, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.7813, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.6797, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.5242, 0.0001);
+
+    ADS.clear();
+  }
+
   void test_monitor_index_in_group() {
     std::string const name = "input";
     prepareInputGroup(name);
@@ -928,6 +985,184 @@ public:
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e,
                             std::string(e.what()),
                             "A monitor is expected at spectrum index 1");
+  }
+
+  void test_QStep_QMin_and_QMax() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.setProperty("MomentumTransferMax", 1.0);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[24], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outY[23], 0, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 25);
+    TS_ASSERT_EQUALS(outY.size(), 24);
+  }
+
+  void test_QMin_alone() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQbinned = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQbinned->x(0);
+    auto outY = outQbinned->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[1], 0.1018, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 2);
+    TS_ASSERT_EQUALS(outY.size(), 1);
+  }
+
+  void test_QMax_alone() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferMax", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0006, 0.0001);
+
+    TS_ASSERT_DELTA(outX[72], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[71], 3.8e-06, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 73);
+    TS_ASSERT_EQUALS(outY.size(), 72);
+  }
+
+  void test_QMax_and_QMin() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.setProperty("MomentumTransferMax", 1.0);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[69], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outY[68], 0.0, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 70);
+    TS_ASSERT_EQUALS(outY.size(), 69);
+  }
+
+  void test_QStep_alone() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
+
+    TS_ASSERT_DELTA(outX[26], 0.1018, 0.0001);
+    TS_ASSERT_DELTA(outY[25], 4.4e-06, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 27);
+    TS_ASSERT_EQUALS(outY.size(), 26);
+  }
+
+  void test_QStep_QMin_alone() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.setProperty("MomentumTransferMin", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX[1], 0.1018, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 2);
+    TS_ASSERT_EQUALS(outY.size(), 1);
+  }
+
+  void test_QStep_QMax_alone() {
+    auto inter = loadRun("INTER00013460.nxs");
+    const double theta = 0.7;
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    momentumTransferHelper(alg, inter, theta);
+    alg.setProperty("MomentumTransferStep", 0.1);
+    alg.setProperty("MomentumTransferMax", 0.1);
+    alg.execute();
+
+    MatrixWorkspace_sptr outQBin = alg.getProperty("OutputWorkspaceBinned");
+
+    auto outX = outQBin->x(0);
+    auto outY = outQBin->y(0);
+
+    TS_ASSERT_DELTA(outX[0], 0.009, 0.0001);
+    TS_ASSERT_DELTA(outY[0], 0.0021, 0.0001);
+
+    TS_ASSERT_DELTA(outX[25], 0.1, 0.0001);
+    TS_ASSERT_DELTA(outY[24], 2.3e-05, 0.0001);
+
+    TS_ASSERT_EQUALS(outX.size(), 26);
+    TS_ASSERT_EQUALS(outY.size(), 25);
   }
 };
 

@@ -25,6 +25,7 @@ class HYSPECReductionTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         Load(Filename='HYS_13656-13658',OutputWorkspace='sum')
+        SetGoniometer('sum',Axis0="s1,0,1,0,1")
         FilterByLogValue(InputWorkspace='sum',OutputWorkspace='sum1',LogName='s1',MinimumValue='0',MaximumValue='24.5',LogBoundary='Left')
         DeleteWorkspace('sum')
         GenerateEventsFilter(   InputWorkspace='sum1',OutputWorkspace='splboth',InformationWorkspace='info',
@@ -44,7 +45,6 @@ class HYSPECReductionTest(stresstesting.MantidStressTest):
                         OutputWorkspace='reduced',GroupingFile=self.groupingFile,
                         TimeIndepBackgroundSub ='1',TibTofRangeStart =10400,TibTofRangeEnd =12400,IncidentEnergyGuess=50)
         DeleteWorkspace('splitc')
-        SetGoniometer('reduced',Axis0="s1,0,1,0,1")
         SetUB('reduced',5.823,6.475,3.186,90,90,90,'0,1,0','0,0,1')
         ConvertToMD(InputWorkspace='reduced',OutputWorkspace='md',QDimensions='Q3D',
                     QConversionScales='HKL',MinValues='-0.5,-3,-5,-10',MaxValues='0.5,6,2,45')

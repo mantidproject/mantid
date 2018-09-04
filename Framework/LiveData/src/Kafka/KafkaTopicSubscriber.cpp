@@ -51,7 +51,7 @@ std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
   globalConf->set("default_topic_conf", conf.get(), errorMsg);
   return conf;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -157,6 +157,11 @@ KafkaTopicSubscriber::getCurrentOffsets() {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
                              "current partition assignment.");
   }
+  error = m_consumer->position(partitions);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
+                             "current partition positions.");
+  }
   for (auto topicPartition : partitions) {
     std::vector<int64_t> offsetList = {topicPartition->offset()};
     auto result = currentOffsets.emplace(
@@ -217,7 +222,8 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
                        << ", looked up offset as: " << partition->offset()
                        << ", current high watermark is: "
                        << getCurrentOffset(partition->topic(),
-                                           partition->partition()) << std::endl;
+                                           partition->partition())
+                       << std::endl;
     }
   }
 
@@ -503,5 +509,5 @@ KafkaTopicSubscriber::getOffsetsForTimestamp(int64_t timestamp) {
 
   return partitionOffsetMap;
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

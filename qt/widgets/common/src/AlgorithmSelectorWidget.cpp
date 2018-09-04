@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/System.h"
 
 #include "boost/algorithm/string.hpp"
 
@@ -195,7 +195,7 @@ bool AlgorithmDescriptorNameLess(const AlgorithmDescriptor &d1,
                                  const AlgorithmDescriptor &d2) {
   return d1.name < d2.name;
 }
-}
+} // namespace
 
 //============================================================================
 //======================= AlgorithmTreeWidget ================================
@@ -407,5 +407,5 @@ SelectedAlgorithm FindAlgComboBox::getSelectedAlgorithm() {
   return SelectedAlgorithm(typedText, -1);
 }
 
-} // namespace Mantid
 } // namespace MantidWidgets
+} // namespace MantidQt

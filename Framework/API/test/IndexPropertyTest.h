@@ -5,9 +5,9 @@
 #include "MantidAPI/IndexTypeProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -15,8 +15,8 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Kernel::Direction;
 using Mantid::API::IndexType;
+using Mantid::Kernel::Direction;
 
 class IndexPropertyTest : public CxxTest::TestSuite {
 public:
@@ -125,8 +125,9 @@ public:
 
     auto error = indexProp.setValue("30:35");
 
-    TS_ASSERT_EQUALS(error,
-                     "Indices provided to IndexProperty are out of range.");
+    TS_ASSERT(
+        error.find("Indices provided to IndexProperty are out of range.") !=
+        std::string::npos);
   }
 
   void testIndexAccessWithOperator() {

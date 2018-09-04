@@ -17,17 +17,19 @@ if (POLICY CMP0072)
 endif ()
 
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
-set ( SYSTEM_PACKAGE_TARGET "")
+set ( SYSTEM_PACKAGE_TARGET "" )
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
-set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the Qt4-based gui & components")
-# TODO: Switch this on by default when the builders all have Qt5 installed
-set ( ENABLE_WORKBENCH OFF CACHE BOOL "Switch for compiling the Qt5-based gui & components")
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Enable Qt4-based gui & components" )
+set ( ENABLE_WORKBENCH OFF CACHE BOOL "Enable Qt5-based gui & components" )
+set ( PACKAGE_WORKBENCH OFF CACHE BOOL "If packaging is enabled then include the Qt-5 workbench in the package" )
+if ( PACKAGE_WORKBENCH AND NOT ENABLE_WORKBENCH )
+  message ( FATAL_ERROR "Packaging workbench requested but workbench build is disabled!" )
+endif ()
 
-set ( CPACK_INSTALL_CMAKE_PROJECTS
-      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
+set ( CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################
 # Quick exit if we only want data targets
@@ -49,14 +51,15 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
-# Include Eigen as an external project
-###########################################################################
-include ( Eigen )
-
-###########################################################################
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
+
+###########################################################################
+# Configure Eigen early
+###########################################################################
+include ( Eigen )
+
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
@@ -161,6 +164,7 @@ include_directories ( Framework/Beamline/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 include_directories ( Framework/Types/inc )
+include_directories ( Framework/NexusGeometry/inc )
 
 set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types )
 
@@ -292,8 +296,6 @@ if ( ENABLE_CPACK )
       include ( WindowsNSIS )
     elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
       include ( CPackLinuxSetup )
-      # let people know what is coming out the other end
-      message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
@@ -305,8 +307,11 @@ if ( ENABLE_CPACK )
       # scipy
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
+      if (ENABLE_WORKBENCH)
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-qt5" )
+      endif()
 
-      if( "${UNIX_CODENAME}" MATCHES "Santiago" )
+      if( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6, boost157,python-matplotlib" )
         # On RHEL6 we are using SCL packages for Qt
@@ -317,7 +322,7 @@ if ( ENABLE_CPACK )
       endif()
 
       # Add software collections for RHEL
-      if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
+      if ( "${UNIX_CODENAME}" MATCHES "Santiago" ) # RHEL6
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} scl-utils" )
       endif()
 
@@ -372,6 +377,13 @@ if ( ENABLE_CPACK )
           list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3),")
           string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
           string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
+          if (ENABLE_WORKBENCH)
+            set ( APPEND DEPENDS_LIST ",python3-qt5" )
+          endif()
+        else()
+          if (ENABLE_WORKBENCH)
+            set ( APPEND DEPENDS_LIST ",pyqt5" )
+          endif()
         endif ()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
@@ -385,4 +397,6 @@ if ( ENABLE_CPACK )
     ENDIF ()
     # run cpack configuration
     include ( CPack )
+    # let people know what is coming out the other end - must be after cpack generates value for rpm
+    message ( STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 endif ()

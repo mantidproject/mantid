@@ -22,19 +22,19 @@ UCorrectionDialog::UCorrectionDialog(QWidget *parent, QPointF oldValue,
 UCorrectionDialog::~UCorrectionDialog() { delete ui; }
 
 /**
-* If true the manual correction returned by getValue() method should
-* be applied to the surface or use automatic correction if false.
-*/
+ * If true the manual correction returned by getValue() method should
+ * be applied to the surface or use automatic correction if false.
+ */
 bool UCorrectionDialog::applyCorrection() const {
   return ui->cbApply->isChecked();
 }
 
 /**
-* Get the value of the manual u-correction.
-*/
+ * Get the value of the manual u-correction.
+ */
 QPointF UCorrectionDialog::getValue() const {
   return QPointF(ui->dsbUMin->value(), ui->dsbUMax->value());
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

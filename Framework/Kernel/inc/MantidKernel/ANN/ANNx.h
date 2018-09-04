@@ -36,15 +36,18 @@
 #ifndef ANNx_H
 #define ANNx_H
 
-#include <iomanip>                // I/O manipulators
 #include "MantidKernel/ANN/ANN.h" // ANN includes
+#include <iomanip>                // I/O manipulators
 
 //----------------------------------------------------------------------
 //	Global constants and types
 //----------------------------------------------------------------------
-enum { ANN_LO = 0, ANN_HI = 1 };  // splitting indices
-enum { ANN_IN = 0, ANN_OUT = 1 }; // shrinking indices
-                                  // what to do in case of error
+enum { ANN_LO = 0, ANN_HI = 1 }; // splitting indices
+enum {
+  ANN_IN = 0,
+  ANN_OUT = 1
+}; // shrinking indices
+   // what to do in case of error
 enum ANNerr { ANNwarn = 0, ANNabort = 1 };
 
 //----------------------------------------------------------------------

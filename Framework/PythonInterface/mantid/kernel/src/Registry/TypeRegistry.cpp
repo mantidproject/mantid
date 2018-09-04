@@ -2,16 +2,16 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
-#include <map>
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include <boost/python/type_id.hpp>
+#include <map>
 
 namespace Mantid {
 namespace PythonInterface {
 namespace Registry {
 namespace // <anonymous>
-    {
+{
 /// Typedef the map of type_info -> handler objects. We store
 /// boost::python::type_info objects so that they work across DLL boundaries
 /// unlike std::type_info objects
@@ -26,7 +26,7 @@ TypeIDMap &typeRegistry() {
   static TypeIDMap typeHandlers;
   return typeHandlers;
 }
-} // end <anonymous>
+} // namespace
 
 //-------------------------------------------------------------------------------------------
 // Public methods
@@ -101,6 +101,6 @@ TypeRegistry::retrieve(const std::type_info &typeObject) {
         boost::python::type_info(typeObject).name() + "'");
   }
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

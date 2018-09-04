@@ -1,9 +1,9 @@
 #include "MantidCrystal/IndexPeaks.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -208,5 +208,5 @@ void IndexPeaks::exec() {
   g_log.notice() << o_lattice << "\n";
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

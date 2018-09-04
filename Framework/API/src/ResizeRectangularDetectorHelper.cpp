@@ -1,7 +1,7 @@
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
-#include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 

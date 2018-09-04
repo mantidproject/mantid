@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_THREADSCHEDULERMUTEXESTEST_H_
 #define MANTID_KERNEL_THREADSCHEDULERMUTEXESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
 #include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 #include <MantidKernel/ThreadSchedulerMutexes.h>
 

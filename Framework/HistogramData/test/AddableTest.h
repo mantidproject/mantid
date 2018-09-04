@@ -9,11 +9,11 @@
 #include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/VectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::Addable;
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class AddableTester : public VectorOf<AddableTester, HistogramX>,
                       public Iterable<AddableTester>,

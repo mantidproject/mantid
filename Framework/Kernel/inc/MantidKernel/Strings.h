@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
 
@@ -56,14 +57,17 @@ namespace Strings {
  * For example, join a vector of strings with commas with:
  *  out = join(v.begin(), v.end(), ", ");
  *
+ * This is a simple default version that works in all cases but is potentially
+ * slow.
+ *
  * @param begin :: iterator at the start
  * @param end :: iterator at the end
  * @param separator :: string to append.
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string &separator) {
+DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end,
+                                 const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -77,21 +81,139 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
 
 //------------------------------------------------------------------------------------------------
 /** Join a set or vector of (something that turns into a string) together
-* into one string, separated by a separator,
-* adjacent items that are precisely 1 away from each other
-* will be compressed into a list syntax e.g. 1-5.
-* Returns an empty string if the range is null.
-* Does not add the separator after the LAST item.
-*
-* For example, join a vector of strings with commas with:
-*  out = join(v.begin(), v.end(), ", ");
-*
-* @param begin :: iterator at the start
-* @param end :: iterator at the end
-* @param separator :: string to append between items.
-* @param listSeparator :: string to append between list items.
-* @return A string with contiguous values compressed using the list syntax
+ * into one string, separated by a string.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * This version is used for random access iterators (e.g. map, set), and
+ * it calls simpleJoin().
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append.
+ * @return
+ */
+template <typename ITERATOR_TYPE>
+DLLExport std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<
+         !(std::is_same<
+             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+  return simpleJoin(begin, end, separator);
+}
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+ * into one string, separated by a string.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * This is a faster threaded version of the join() function above.
+ * It is used only if the iterators are not random access (e.g. vector), as it
+ * needs to be able to determine the distance between begin and end.
+ * It reverts to calling simpleJoin() if the input array is small.
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append.
+ * @return
+ */
+template <typename ITERATOR_TYPE>
+DLLExport std::string
+join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
+     typename std::enable_if<
+         (std::is_same<
+             typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
+             std::random_access_iterator_tag>::value)>::type * = nullptr) {
+
+  // Get max number of threads
+  int nmaxThreads = static_cast<int>(PARALLEL_GET_MAX_THREADS);
+
+  // Define minimum size for using threading
+  int min_size = 500 * nmaxThreads;
+
+  // Get the distance between begining and end
+  int dist = static_cast<int>(std::distance(begin, end));
+
+  if (dist < min_size) {
+
+    // If the input array is small, use the simpler function to avoid
+    // unnecessary overhead from generating the parallel section
+    return simpleJoin(begin, end, separator);
+
+  } else {
+
+    // Allocate vector space
+    std::vector<std::string> output(nmaxThreads);
+    size_t stream_size = 0;
+
+    // Actual number of threads in the current region
+    int nThreads = 1;
+#pragma omp parallel reduction(+ : stream_size)
+    {
+      nThreads = static_cast<int>(PARALLEL_NUMBER_OF_THREADS);
+      int idThread = static_cast<int>(PARALLEL_THREAD_NUMBER);
+      ITERATOR_TYPE it;
+
+      // Initialise ostringstream
+      std::ostringstream thread_stream;
+
+/* To make sure the loop is done in the right order, we use schedule(static).
+
+   From the OpenMP documentation:
+   "When schedule(static, chunk_size) is specified, iterations are divided into
+   chunks of size chunk_size, and the chunks are assigned to the threads in the
+   team in a round-robin fashion **in the order of the thread number**."
+
+   "When no chunk_size is specified, the iteration space is divided into chunks
+   that are approximately equal in size, and at most one chunk is distributed
+   to each thread."
 */
+#pragma omp for schedule(static)
+      for (int i = 0; i < dist; i++) {
+        thread_stream << separator << *(begin + i);
+      }
+      output[idThread] = thread_stream.str();
+      stream_size += output[idThread].length();
+    }
+
+    // Reserve space in memory for output string
+    std::string master_string = output[0].erase(0, separator.length());
+    master_string.reserve(stream_size - separator.length());
+
+    // Concatenate the contributions from the remaning threads
+    for (int i = 1; i < nThreads; i++) {
+      master_string += output[i];
+    }
+
+    return master_string;
+  }
+}
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+ * into one string, separated by a separator,
+ * adjacent items that are precisely 1 away from each other
+ * will be compressed into a list syntax e.g. 1-5.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append between items.
+ * @param listSeparator :: string to append between list items.
+ * @return A string with contiguous values compressed using the list syntax
+ */
 template <typename ITERATOR_TYPE>
 DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
                                    const std::string &separator = ",",
@@ -242,8 +364,8 @@ MANTID_KERNEL_DLL void readToEndOfLine(std::istream &in, bool ConsumeEOL);
 MANTID_KERNEL_DLL std::string getWord(std::istream &in, bool consumeEOL);
 ///  function parses a path, found in input string "path" and returns vector of
 ///  the folders contributed into the path */
-MANTID_KERNEL_DLL size_t
-split_path(const std::string &path, std::vector<std::string> &path_components);
+MANTID_KERNEL_DLL size_t split_path(const std::string &path,
+                                    std::vector<std::string> &path_components);
 
 /// Loads the entire contents of a text file into a string
 MANTID_KERNEL_DLL std::string loadFile(const std::string &filename);
@@ -266,9 +388,10 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
 
   // Local helper functions.
   auto translateAdd = [&groups](const std::string &str) {
-    const auto tokens = Kernel::StringTokenizer(
-        str, "+", Kernel::StringTokenizer::TOK_TRIM |
-                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens =
+        Kernel::StringTokenizer(str, "+",
+                                Kernel::StringTokenizer::TOK_TRIM |
+                                    Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     std::vector<Integer> group;
     group.reserve(tokens.count());
     for (const auto &t : tokens) {
@@ -280,9 +403,10 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
 
   auto translateSumRange = [&groups](const std::string &str) {
     // add a group with the numbers in the range
-    const auto tokens = Kernel::StringTokenizer(
-        str, "-", Kernel::StringTokenizer::TOK_TRIM |
-                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens =
+        Kernel::StringTokenizer(str, "-",
+                                Kernel::StringTokenizer::TOK_TRIM |
+                                    Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if (tokens.count() != 2)
       throw std::runtime_error("Malformed range (-) operation.");
     Integer first = boost::lexical_cast<Integer>(tokens[0]);
@@ -300,9 +424,10 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
 
   auto translateRange = [&groups](const std::string &str) {
     // add a group per number
-    const auto tokens = Kernel::StringTokenizer(
-        str, ":", Kernel::StringTokenizer::TOK_TRIM |
-                      Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens =
+        Kernel::StringTokenizer(str, ":",
+                                Kernel::StringTokenizer::TOK_TRIM |
+                                    Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     if (tokens.count() != 2)
       throw std::runtime_error("Malformed range (:) operation.");
     Integer first = boost::lexical_cast<Integer>(tokens[0]);
@@ -318,9 +443,9 @@ std::vector<std::vector<Integer>> parseGroups(const std::string &str) {
   try {
     // split into comma separated groups, each group potentially containing
     // an operation (+-:) that produces even more groups.
-    const auto tokens =
-        StringTokenizer(str, ",", StringTokenizer::TOK_TRIM |
-                                      StringTokenizer::TOK_IGNORE_EMPTY);
+    const auto tokens = StringTokenizer(str, ",",
+                                        StringTokenizer::TOK_TRIM |
+                                            StringTokenizer::TOK_IGNORE_EMPTY);
     for (const auto &token : tokens) {
       // Look for the various operators in the string. If one is found then
       // do the necessary translation into groupings.

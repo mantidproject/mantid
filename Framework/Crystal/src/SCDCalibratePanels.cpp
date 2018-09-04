@@ -1,29 +1,29 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/CalibrationHelpers.h"
-#include "MantidCrystal/SelectCellWithForm.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidCrystal/SCDPanelErrors.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/Run.h"
+#include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidDataObjects/Peak.h"
-#include <fstream>
+#include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
-#include "MantidGeometry/Crystal/EdgePixel.h"
-#include <boost/math/special_functions/round.hpp>
-#include <boost/container/flat_set.hpp>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include <Poco/File.h>
+#include <boost/container/flat_set.hpp>
+#include <boost/math/special_functions/round.hpp>
+#include <fstream>
 #include <sstream>
 
 using namespace Mantid::DataObjects;
@@ -57,10 +57,11 @@ void SCDCalibratePanels::exec() {
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(peaks.begin(), peaks.end(), [edge, inst](
-                                                             const Peak &pk) {
-      return edgePixel(inst, pk.getBankName(), pk.getCol(), pk.getRow(), edge);
-    });
+    auto it = std::remove_if(peaks.begin(), peaks.end(),
+                             [edge, inst](const Peak &pk) {
+                               return edgePixel(inst, pk.getBankName(),
+                                                pk.getCol(), pk.getRow(), edge);
+                             });
     peaks.erase(it, peaks.end());
   }
   findU(peaksWs);
@@ -311,7 +312,8 @@ void SCDCalibratePanels::findL1(int nPeaks,
           << ",Bank=moderator";
   std::ostringstream tie_str;
   tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
-             "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift =" << mT0;
+             "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift ="
+          << mT0;
   fitL1_alg->setPropertyValue("Function", fun_str.str());
   fitL1_alg->setProperty("Ties", tie_str.str());
   fitL1_alg->setProperty("InputWorkspace", L1WS);
@@ -504,9 +506,10 @@ void SCDCalibratePanels::init() {
                   "lattice constants in peaks workspace)");
   declareProperty("ChangeL1", true, "Change the L1(source to sample) distance");
   declareProperty("ChangeT0", false, "Change the T0 (initial TOF)");
-  declareProperty("ChangePanelSize", true, "Change the height and width of the "
-                                           "detectors.  Implemented only for "
-                                           "RectangularDetectors.");
+  declareProperty("ChangePanelSize", true,
+                  "Change the height and width of the "
+                  "detectors.  Implemented only for "
+                  "RectangularDetectors.");
 
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");

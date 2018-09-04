@@ -8,18 +8,22 @@ namespace {
 // element in a tuple. Templated to support const and non-const.
 template <class T, class Key>
 auto lower_bound(T &map, const Key key) -> decltype(map.begin()) {
-  return std::lower_bound(
-      map.begin(), map.end(), std::make_pair(key, size_t{0}),
-      [](const typename T::value_type &a, const typename T::value_type &b)
-          -> bool { return std::get<0>(a) < std::get<0>(b); });
+  return std::lower_bound(map.begin(), map.end(),
+                          std::make_pair(key, size_t{0}),
+                          [](const typename T::value_type &a,
+                             const typename T::value_type &b) -> bool {
+                            return std::get<0>(a) < std::get<0>(b);
+                          });
 }
 
 template <class T, class Key>
 auto upper_bound(T &map, const Key key) -> decltype(map.begin()) {
-  return std::upper_bound(
-      map.begin(), map.end(), std::make_pair(key, size_t{0}),
-      [](const typename T::value_type &a, const typename T::value_type &b)
-          -> bool { return std::get<0>(a) < std::get<0>(b); });
+  return std::upper_bound(map.begin(), map.end(),
+                          std::make_pair(key, size_t{0}),
+                          [](const typename T::value_type &a,
+                             const typename T::value_type &b) -> bool {
+                            return std::get<0>(a) < std::get<0>(b);
+                          });
 }
 
 template <class T, class Key>
@@ -29,7 +33,7 @@ auto find(T &map, const Key key) -> decltype(map.begin()) {
     return it;
   return map.end();
 }
-}
+} // namespace
 
 SpectrumNumberTranslator::SpectrumNumberTranslator(
     const std::vector<SpectrumNumber> &spectrumNumbers,
@@ -178,8 +182,9 @@ void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
 void SpectrumNumberTranslator::setupSpectrumNumberToIndexMap() const {
   std::sort(m_spectrumNumberToIndex.begin(), m_spectrumNumberToIndex.end(),
             [](const std::pair<SpectrumNumber, size_t> &a,
-               const std::pair<SpectrumNumber, size_t> &b)
-                -> bool { return std::get<0>(a) < std::get<0>(b); });
+               const std::pair<SpectrumNumber, size_t> &b) -> bool {
+              return std::get<0>(a) < std::get<0>(b);
+            });
 }
 
 std::vector<SpectrumNumber> SpectrumNumberTranslator::spectrumNumbers(

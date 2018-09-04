@@ -34,25 +34,35 @@ namespace {
  * @param source : Source workspace containing instrument
  * @param target : Target workspace to write instrument to
  */
-void copyInstrument(const API::Workspace *source, API::Workspace &target) {
+void copyInstrument(const API::Workspace *source, API::Workspace *target) {
+
+  if (!source || !target)
+    return;
 
   // Special handling for Worspace Groups.
-  if (auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source)) {
-    auto &targetGroup = dynamic_cast<API::WorkspaceGroup &>(target);
-    for (size_t index = 0;
-         index < std::min(sourceGroup->size(), targetGroup.size()); ++index) {
+  if (source->isGroup() && target->isGroup()) {
+    auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
+    auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+    auto minSize = std::min(sourceGroup->size(), targetGroup->size());
+    for (size_t index = 0; index < minSize; ++index) {
       copyInstrument(sourceGroup->getItem(index).get(),
-                     *targetGroup.getItem(index));
+                     targetGroup->getItem(index).get());
     }
+  } else if (source->isGroup()) {
+    auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
+    copyInstrument(sourceGroup->getItem(0).get(), target);
+  } else if (target->isGroup()) {
+    auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+    copyInstrument(source, targetGroup->getItem(0).get());
   } else {
     if (auto *sourceExpInfo =
             dynamic_cast<const API::ExperimentInfo *>(source)) {
-      dynamic_cast<API::ExperimentInfo &>(target)
-          .setInstrument(sourceExpInfo->getInstrument());
+      dynamic_cast<API::ExperimentInfo &>(*target).setInstrument(
+          sourceExpInfo->getInstrument());
     }
   }
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadLiveData)
@@ -135,8 +145,8 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       for (auto prop : proplist) {
         if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
-            g_log.information() << "Using " << prop->name()
-                                << " as the input property.\n";
+            g_log.information()
+                << "Using " << prop->name() << " as the input property.\n";
             alg->setPropertyValue(prop->name(), inputName);
             inputPropertyWorkspaceFound = true;
           }
@@ -222,17 +232,9 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
   WriteLock _lock1(*m_accumWS);
   ReadLock _lock2(*chunkWS);
 
-  // Choose the appropriate algorithm to add chunks
-  std::string algoName = "PlusMD";
-  MatrixWorkspace_sptr mws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
   // ISIS multi-period data come in workspace groups
-  WorkspaceGroup_sptr gws =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
-  if (mws || gws)
-    algoName = "Plus";
-
-  if (gws) {
+  if (WorkspaceGroup_sptr gws =
+          boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS)) {
     WorkspaceGroup_sptr accum_gws =
         boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
     if (!accum_gws) {
@@ -246,11 +248,15 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
     // one by one
     for (size_t i = 0; i < static_cast<size_t>(gws->getNumberOfEntries());
          ++i) {
-      addMatrixWSChunk(algoName, accum_gws->getItem(i), gws->getItem(i));
+      addMatrixWSChunk(accum_gws->getItem(i), gws->getItem(i));
     }
+  } else if (MatrixWorkspace_sptr mws =
+                 boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
+    // If workspace is a Matrix workspace just add the chunk
+    addMatrixWSChunk(m_accumWS, chunkWS);
   } else {
-    // just add the chunk
-    addMatrixWSChunk(algoName, m_accumWS, chunkWS);
+    // Assume MD Workspace
+    addMDWSChunk(m_accumWS, chunkWS);
   }
 }
 
@@ -262,8 +268,7 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
  * @param accumWS :: accumulation matrix workspace
  * @param chunkWS :: processed live data chunk matrix workspace
  */
-void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
-                                    Workspace_sptr accumWS,
+void LoadLiveData::addMatrixWSChunk(Workspace_sptr accumWS,
                                     Workspace_sptr chunkWS) {
   // Handle the addition of the internal monitor workspace, if present
   auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
@@ -277,27 +282,48 @@ void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
   }
 
   // Now do the main workspace
-  IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
+  IAlgorithm_sptr alg = this->createChildAlgorithm("Plus");
   alg->setProperty("LHSWorkspace", accumWS);
   alg->setProperty("RHSWorkspace", chunkWS);
   alg->setProperty("OutputWorkspace", accumWS);
   alg->execute();
-  if (!alg->isExecuted()) {
-    throw std::runtime_error("Error when calling " + alg->name() +
-                             " to add the chunk of live data. See log.");
-  } else {
-    // Get the output as the generic Workspace type
-    // This step is necessary for when we are operating on MD workspaces
-    // (PlusMD)
-    Property *prop = alg->getProperty("OutputWorkspace");
-    IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
-    if (!wsProp)
-      throw std::runtime_error(
-          "The " + alg->name() +
-          " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
-    Workspace_sptr temp = wsProp->getWorkspace();
-    accumWS = temp;
-  }
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * Add an MD Workspace to the accumulation workspace.
+ *
+ * @param accumWS :: accumulation MD workspace
+ * @param chunkWS :: processed live data chunk MD workspace
+ */
+void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
+                                const Workspace_sptr &chunkWS) {
+  // Need to add chunk to ADS for MergeMD
+  std::string chunkName = "__anonymous_livedata_addmdws_" +
+                          this->getPropertyValue("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(chunkName, chunkWS);
+
+  std::string ws_names_to_merge = accumWS->getName();
+  ws_names_to_merge.append(", ");
+  ws_names_to_merge.append(chunkName);
+
+  IAlgorithm_sptr alg = this->createChildAlgorithm("MergeMD");
+  alg->setPropertyValue("InputWorkspaces", ws_names_to_merge);
+  alg->execute();
+
+  // Chunk no longer needed in ADS
+  AnalysisDataService::Instance().remove(chunkName);
+
+  // Get the output as the generic Workspace type
+  // This step is necessary for when we are operating on MD workspaces
+  Property *prop = alg->getProperty("OutputWorkspace");
+  IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+  if (!wsProp)
+    throw std::runtime_error(
+        "The " + alg->name() +
+        " Algorithm's OutputWorkspace property is not a WorkspaceProperty!");
+  Workspace_sptr temp = wsProp->getWorkspace();
+  accumWS = temp;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -314,7 +340,7 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
   m_accumWS = chunkWS;
   // Put the original instrument back. Otherwise geometry changes will not be
   // persistent
-  copyInstrument(instrumentWS.get(), *m_accumWS);
+  copyInstrument(instrumentWS.get(), m_accumWS.get());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -392,6 +418,30 @@ Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
 }
 
 //----------------------------------------------------------------------------------------------
+/** Resets all HistogramX in given EventWorkspace(s) to a single bin.
+ *
+ * Ensures bin boundaries encompass all events currently in the workspace.
+ * This will overwrite any rebinning that was previously done.
+ *
+ * Input should be an EventWorkspace or WorkspaceGroup containing
+ * EventWorkspaces. Any other workspace types are ignored.
+ *
+ * @param workspace :: Workspace(Group) that will have its bins reset
+ */
+void LoadLiveData::resetAllXToSingleBin(API::Workspace *workspace) {
+  if (auto *ws_event = dynamic_cast<EventWorkspace *>(workspace)) {
+    ws_event->resetAllXToSingleBin();
+  } else if (auto *ws_group = dynamic_cast<WorkspaceGroup *>(workspace)) {
+    auto num_entries = static_cast<size_t>(ws_group->getNumberOfEntries());
+    for (size_t i = 0; i < num_entries; ++i) {
+      auto ws = ws_group->getItem(i);
+      if (auto *ws_event = dynamic_cast<EventWorkspace *>(ws.get()))
+        ws_event->resetAllXToSingleBin();
+    }
+  }
+}
+
+//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadLiveData::exec() {
@@ -441,10 +491,16 @@ void LoadLiveData::exec() {
   DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
   this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
+  // For EventWorkspaces, we adjust the X values such that all events fit
+  // within the bin boundaries. This is done both before and after the
+  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  bool PreserveEvents = this->getProperty("PreserveEvents");
+  if (PreserveEvents)
+    this->resetAllXToSingleBin(chunkWS.get());
+
   // Now we process the chunk
   Workspace_sptr processed = this->processChunk(chunkWS);
 
-  bool PreserveEvents = this->getProperty("PreserveEvents");
   EventWorkspace_sptr processedEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(processed);
   if (!PreserveEvents && processedEvent) {
@@ -499,6 +555,11 @@ void LoadLiveData::exec() {
   else
     // Default to Add.
     this->addChunk(processed);
+
+  // For EventWorkspaces, we adjust the X values such that all events fit
+  // within the bin boundaries. This is done both before and after the
+  // "Process" step. Any custom rebinning should be done in Post-Processing.
+  this->resetAllXToSingleBin(m_accumWS.get());
 
   // At this point, m_accumWS is set.
 

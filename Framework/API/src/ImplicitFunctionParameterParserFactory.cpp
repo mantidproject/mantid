@@ -41,5 +41,5 @@ ImplicitFunctionParameterParser *ImplicitFunctionParameterParserFactoryImpl::
   }
   return paramParser;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

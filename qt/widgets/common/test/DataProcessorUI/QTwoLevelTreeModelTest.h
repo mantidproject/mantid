@@ -12,8 +12,13 @@ using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 
 class QTwoLevelTreeModelTest : public CxxTest::TestSuite {
-
 public:
+  // This means the constructor isn't called when running other tests
+  static QTwoLevelTreeModelTest *createSuite() {
+    return new QTwoLevelTreeModelTest();
+  }
+  static void destroySuite(QTwoLevelTreeModelTest *suite) { delete suite; }
+
   // Constructor (initializes whitelist)
   QTwoLevelTreeModelTest() {
     m_whitelist.addElement("Column1", "Property1", "Description1");

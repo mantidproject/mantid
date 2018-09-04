@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAHANDLING_EventWorkspaceCollection_H_
 #define MANTID_DATAHANDLING_EventWorkspaceCollection_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/DllConfig.h"
-#include <vector>
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
 #include <memory>
+#include <vector>
 
 namespace Mantid {
 namespace Indexing {

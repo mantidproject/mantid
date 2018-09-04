@@ -12,7 +12,7 @@ void export_IPeakFunction() {
          boost::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
       "IPeakFunction", "Base class for peak Fit functions")
       .def("functionLocal",
-           (object (IPeakFunctionAdapter::*)(const object &) const) &
+           (object(IPeakFunctionAdapter::*)(const object &) const) &
                IPeakFunction::functionLocal,
            (arg("self"), arg("vec_x")),
            "Calculate the values of the function for the given x values. The "

@@ -1,14 +1,14 @@
 #ifndef MANTID_MDALGORITHMS_LOADDNSSCD_H_
 #define MANTID_MDALGORITHMS_LOADDNSSCD_H_
 
-#include <vector>
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include <vector>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -59,6 +59,10 @@ public:
     return "MDAlgorithms\\DataHandling";
   }
 
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadDNSLegacy", "LoadWANDSCD", "ConvertWANDSCDtoQ"};
+  }
+
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
@@ -67,6 +71,9 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+
+  /// The column separator
+  std::string m_columnSep;
 
   /// number of workspace dimensions
   size_t m_nDims;
@@ -78,11 +85,13 @@ private:
 
   /// structure for experimental data
   struct ExpData {
-    double deterota;
-    double huber;
+    double deterota; // detector rotation angle
+    double huber;    // sample rotation angle
     double wavelength;
-    double norm;
-    std::vector<double> signal;
+    double norm;      // normalizarion
+    size_t nchannels; // TOF channels number
+    double chwidth;   // channel width, microseconds
+    std::vector<std::vector<double>> signal;
     std::vector<int> detID;
   };
 
@@ -91,6 +100,7 @@ private:
   /// Output IMDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
+  int splitIntoColumns(std::list<std::string> &columns, std::string &str);
   void read_data(const std::string fname,
                  std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);

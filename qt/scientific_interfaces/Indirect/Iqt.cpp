@@ -59,7 +59,7 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
       propsTable->getColumn("SampleOutputBins")->cell<int>(0),
       propsTable->getColumn("ResolutionBins")->cell<int>(0));
 }
-}
+} // namespace
 
 using namespace Mantid::API;
 
@@ -142,6 +142,7 @@ void Iqt::run() {
 
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
+  QString nIterations = m_uiForm.spIterations->cleanText();
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
@@ -153,6 +154,7 @@ void Iqt::run() {
 
   IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
   IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
+  IqtAlg->setProperty("NumberOfIterations", nIterations.toStdString());
 
   IqtAlg->setProperty("EnergyMin", energyMin);
   IqtAlg->setProperty("EnergyMax", energyMax);

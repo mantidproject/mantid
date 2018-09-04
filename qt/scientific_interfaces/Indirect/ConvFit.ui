@@ -6,400 +6,157 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>803</width>
-    <height>800</height>
+    <width>719</width>
+    <height>809</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_42">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QGroupBox" name="gbInput">
-     <property name="title">
-      <string>Input</string>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-     <layout class="QGridLayout" name="layoutFiles">
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbSample">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Sample</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lbResolution">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Resolution</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="autoLoad" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_red</string>
-          <string>_sqw</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_red.nxs</string>
-          <string>_sqw.nxs</string>
-          <string>.sqw</string>
-          <string>.red</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="ShowGroups" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResInput" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="autoLoad" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_res</string>
-          <string>_red</string>
-          <string>_sqw</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_res.nxs</string>
-          <string>_red.nxs</string>
-          <string>_sqw.nxs</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="ShowGroups" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetNoConstraint</enum>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
      </property>
-     <item>
-      <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
-       <widget class="QWidget" name="dockWidgetContents_2"/>
-      </widget>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="loMiniPlot" stretch="0,0">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetDefaultConstraint</enum>
-       </property>
+     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataView" name="fitDataView" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QVBoxLayout" name="loPlots" stretch="5,3">
-         <property name="sizeConstraint">
-          <enum>QLayout::SetDefaultConstraint</enum>
-         </property>
-         <item>
-          <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>125</height>
-            </size>
-           </property>
-           <property name="showLegend" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="canvasColour" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>75</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="showLegend" stdset="0">
-            <bool>true</bool>
-           </property>
-           <property name="canvasColour" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="loPlotOptions">
+        <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
          <property name="sizeConstraint">
           <enum>QLayout::SetNoConstraint</enum>
          </property>
          <item>
-          <widget class="QLabel" name="lbPlotSpectrum">
-           <property name="text">
-            <string>Plot Spectrum:</string>
-           </property>
+          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+           <widget class="QWidget" name="dockWidgetContents_2"/>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="spPlotSpectrum">
-           <property name="minimum">
-            <number>0</number>
-           </property>
-           <property name="maximum">
-            <number>0</number>
-           </property>
-          </widget>
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotView" name="pvFitPlotView" native="true"/>
          </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="loSpectrumView" stretch="0">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
          <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="minimumSize">
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>0</width>
+             <height>0</height>
             </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbSingleFit">
-           <property name="text">
-            <string>Fit Single Spectrum</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbPlotPreview">
-           <property name="text">
-            <string>Plot Current Preview</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="ckPlotGuess">
-           <property name="text">
-            <string>Plot Guess</string>
            </property>
           </widget>
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="QGroupBox" name="gbOutput">
+         <property name="title">
+          <string>Output</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="lbPlotType">
+            <property name="text">
+             <string>Plot Output:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbPlotType">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>All</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Amplitude</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FWHM</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbPlot">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Plot</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_1">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbSave">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Save Result</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0">
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="gbOutput">
-     <property name="title">
-      <string>Output</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_10">
-      <item>
-       <widget class="QLabel" name="lbPlotType">
-        <property name="text">
-         <string>Plot Output:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cbPlotType">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>120</width>
-          <height>0</height>
-         </size>
-        </property>
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Amplitude</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FWHM</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbPlot">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Plot</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_1">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbSave">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     </widget>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::DataSelector</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/DataSelector.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::PreviewPlot</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/LegacyQwt/PreviewPlot.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
    <extends>QWidget</extends>
@@ -410,6 +167,18 @@
    <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowser</class>
    <extends>QDockWidget</extends>
    <header>MantidQtWidgets/Common/IndirectFitPropertyBrowser.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotView</class>
+   <extends>QWidget</extends>
+   <header>IndirectFitPlotView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataView</class>
+   <extends>QWidget</extends>
+   <header>IndirectFitDataView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

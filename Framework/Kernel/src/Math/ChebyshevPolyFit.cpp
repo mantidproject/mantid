@@ -3,8 +3,8 @@
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
 #include "MantidKernel/Math/Distributions/ChebyshevPolynomial.h"
-#include <gsl/gsl_multifit.h>
 #include <cassert>
+#include <gsl/gsl_multifit.h>
 
 namespace Mantid {
 namespace Kernel {

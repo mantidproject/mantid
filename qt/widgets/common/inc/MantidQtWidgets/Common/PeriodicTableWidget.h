@@ -2,9 +2,9 @@
 #define MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
 
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "ui_PeriodicTableWidget.h"
 #include <QVector>
 #include <QWidget>
-#include "ui_PeriodicTableWidget.h"
 
 /**
   PeriodicTableWidget: A Widget representing a colour coded Periodic Table of

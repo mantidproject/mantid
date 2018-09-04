@@ -163,5 +163,5 @@ int BinFinder::bin(double x) {
     return index;
   }
 }
-}
-} // Namespace
+} // namespace Kernel
+} // namespace Mantid

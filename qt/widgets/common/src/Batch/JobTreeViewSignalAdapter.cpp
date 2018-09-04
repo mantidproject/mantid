@@ -32,11 +32,15 @@ void JobTreeViewSignalAdapter::notifyCopyRowsRequested() {
   emit copyRowsRequested();
 }
 
+void JobTreeViewSignalAdapter::notifyCutRowsRequested() {
+  emit cutRowsRequested();
+}
+
 void JobTreeViewSignalAdapter::notifyPasteRowsRequested() {
   emit pasteRowsRequested();
 }
 
 void JobTreeViewSignalAdapter::notifyFilterReset() { emit filterReset(); }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

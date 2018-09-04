@@ -5,15 +5,15 @@
 #include <QPoint>
 #include <QRect>
 #include <QTableWidget>
-#include <qwt_plot.h>
 #include <boost/weak_ptr.hpp>
+#include <qwt_plot.h>
 
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumPlotItem.h"
-#include "MantidQtWidgets/SpectrumViewer/ISliderHandler.h"
-#include "MantidQtWidgets/SpectrumViewer/IRangeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/IRangeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/ISliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumPlotItem.h"
 
 /**
     @class SpectrumDisplay

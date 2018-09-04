@@ -8,6 +8,7 @@
 #include "InstrumentParameters.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include <map>
 #include <vector>
 
@@ -55,7 +56,7 @@ public:
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
   virtual void
-  createStitchHints(const std::map<std::string, std::string> &hints) = 0;
+  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) = 0;
 
   /// Experiment settings
   virtual std::string getAnalysisMode() const = 0;
@@ -106,6 +107,6 @@ public:
   virtual void disableAll() = 0;
   virtual void enableAll() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSVIEW_H */

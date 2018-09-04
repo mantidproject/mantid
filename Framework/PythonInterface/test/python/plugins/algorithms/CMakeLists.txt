@@ -23,6 +23,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
+  CropWorkspaceForMDNormTest.py
   CropWorkspaceRaggedTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
@@ -45,13 +46,16 @@ set ( TEST_PY_FILES
   FindEPPTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
+  FractionalIndexingTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectTransmissionTest.py
+  IndexSatellitePeaksTest.py
   LoadAndMergeTest.py
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
+  LoadGudrunOutputTest.py
   LoadLiveDataTest.py
   LoadLampTest.py
   LoadLogPropertyTableTest.py
@@ -82,7 +86,6 @@ set ( TEST_PY_FILES
   SetDetScaleTest.py
   SortByQVectorsTest.py
   SortDetectorsTest.py
-  SortXAxisTest.py
   StatisticsOfTableWorkspaceTest.py
   StringToPngTest.py
   SuggestTibCNCSTest.py

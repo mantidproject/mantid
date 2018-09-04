@@ -9,7 +9,8 @@ from mantid.kernel import IValidator
 from mantid.api import (WorkspaceUnitValidator, HistogramValidator,
                         RawCountValidator, CommonBinsValidator,
                         SpectraAxisValidator, NumericAxisValidator,
-                        InstrumentValidator, MDFrameValidator)
+                        InstrumentValidator, MDFrameValidator,
+                        OrientedLatticeValidator)
 
 class WorkspaceValidatorsTest(unittest.TestCase):
 
@@ -68,9 +69,19 @@ class WorkspaceValidatorsTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, InstrumentValidator)
 
     def test_MDFrameValidator_construction(self):
+        """
+            Test that the MDFrameValidator can be constructed
+            with a single string
+        """
         testhelpers.assertRaisesNothing(self, MDFrameValidator, "HKL")
         self.assertRaises(Exception, MDFrameValidator)
 
+    def test_OrientedLatticeValidator_construction(self):
+        """
+            Test that the OrientedLatticeValidator can be constructed
+            with no args
+        """
+        testhelpers.assertRaisesNothing(self, OrientedLatticeValidator)
 
 if __name__ == '__main__':
     unittest.main()

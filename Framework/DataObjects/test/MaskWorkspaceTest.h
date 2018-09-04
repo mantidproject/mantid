@@ -115,9 +115,9 @@ public:
   }
 
   /**
-  * Test declaring an input MaskWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input MaskWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     MaskWorkspace_sptr wsInput(new Mantid::DataObjects::MaskWorkspace());

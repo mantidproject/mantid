@@ -1,16 +1,16 @@
 #ifndef SV_CONNECTIONS_H
 #define SV_CONNECTIONS_H
 
-#include <QWidget>
 #include <QActionGroup>
+#include <QWidget>
 
-#include "ui_SpectrumView.h"
+#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include "MantidQtWidgets/SpectrumViewer/TrackingPicker.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/GraphDisplay.h"
-#include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
-#include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
+#include "ui_SpectrumView.h"
 
 /**
     @class SVConnections

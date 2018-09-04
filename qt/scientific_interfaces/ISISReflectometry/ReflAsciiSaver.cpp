@@ -2,8 +2,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -11,8 +11,8 @@ Mantid::API::IAlgorithm_sptr
 ReflAsciiSaver::algorithmForFormat(NamedFormat format) {
   auto create =
       [](std::string const &algorithmName) -> Mantid::API::IAlgorithm_sptr {
-        return Mantid::API::AlgorithmManager::Instance().create(algorithmName);
-      };
+    return Mantid::API::AlgorithmManager::Instance().create(algorithmName);
+  };
   switch (format) {
   case NamedFormat::Custom:
     return create("SaveReflCustomAscii");
@@ -62,7 +62,7 @@ void setPropertyIfSupported(Mantid::API::IAlgorithm_sptr alg,
   if (alg->existsProperty(propertyName))
     alg->setProperty(propertyName, value);
 }
-}
+} // namespace
 
 std::string ReflAsciiSaver::assembleSavePath(
     std::string const &saveDirectory, std::string const &prefix,
@@ -122,5 +122,5 @@ void ReflAsciiSaver::save(std::string const &saveDirectory,
     throw InvalidSavePath(saveDirectory);
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

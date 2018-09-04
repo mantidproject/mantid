@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 
-#include <QWidget>
 #include <QMap>
+#include <QWidget>
 
 /* Forward declarations */
 class QtProperty;
@@ -24,7 +24,7 @@ class Property;
 namespace API {
 class IAlgorithm;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -179,8 +179,8 @@ private:
   QList<QtProperty *> m_simultaneousProperties;
 };
 
-} // MantidWidgets
+} // namespace MantidWidgets
 
-} // MantidQt
+} // namespace MantidQt
 
 #endif /*MANTIDWIDGETS_FITOPTIONSBROWSER_H_*/

@@ -1,19 +1,19 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/NotebookBuilder.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/HistoryItem.h"
-#include "MantidAPI/NotebookBuilder.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
 
 #include <boost/utility.hpp>
 
 namespace Mantid {
 namespace API {
 
-using Mantid::Kernel::PropertyHistory_sptr;
 using Mantid::Kernel::PropertyHistory_const_sptr;
+using Mantid::Kernel::PropertyHistory_sptr;
 
 namespace {
 Mantid::Kernel::Logger g_log("NotebookBuilder");
@@ -122,21 +122,16 @@ NotebookBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     properties << "Version=" << algHistory->version() << ", ";
   } else if (m_versionSpecificity == "old") {
     //...or only specify algorithm versions when they're not the newest version
-    bool oldVersion = false;
+    const auto &algName = algHistory->name();
+    auto &algFactory = API::AlgorithmFactory::Instance();
+    int latestVersion = 0;
 
-    std::vector<AlgorithmDescriptor> descriptors =
-        AlgorithmFactory::Instance().getDescriptors();
-    for (auto &descriptor : descriptors) {
-      // If a newer version of this algorithm exists, then this must be an old
-      // version.
-      if (descriptor.name == algHistory->name() &&
-          descriptor.version > algHistory->version()) {
-        oldVersion = true;
-        break;
-      }
+    if (algFactory.exists(algName)) { // Check the alg still exists in Mantid
+      latestVersion = AlgorithmFactory::Instance().highestVersion(algName);
     }
-
-    if (oldVersion) {
+    // If a newer version of this algorithm exists, then this must be an old
+    // version.
+    if (latestVersion > algHistory->version()) {
       properties << "Version=" << algHistory->version() << ", ";
     }
   }

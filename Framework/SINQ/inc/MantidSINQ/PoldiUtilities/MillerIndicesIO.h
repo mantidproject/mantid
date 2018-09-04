@@ -3,8 +3,8 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
-#include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid {
@@ -42,7 +42,8 @@ class MANTID_SINQ_DLL MillerIndicesIO {
 public:
   static std::string toString(const MillerIndices &millerIndices) {
     return (boost::format("%i %i %i") % millerIndices.h() % millerIndices.k() %
-            millerIndices.l()).str();
+            millerIndices.l())
+        .str();
   }
 
   static MillerIndices fromString(const std::string &millerIncidesString) {
@@ -60,7 +61,7 @@ public:
 private:
   MillerIndicesIO() = default;
 };
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_MILLERINDICESIO_H
