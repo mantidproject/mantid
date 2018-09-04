@@ -14,9 +14,12 @@ using namespace MantidQt::MantidWidgets;
 /**
  * Construct a new model with a list of window handles
  * @param windows :: vector of handles to windows open in Mantid
+ * @param activePythonInterfaces The list of active Python interfaces
  */
 ProjectSaveModel::ProjectSaveModel(
-    std::vector<IProjectSerialisable *> windows) {
+    std::vector<IProjectSerialisable *> windows,
+    std::vector<std::string> activePythonInterfaces)
+    : m_activePythonInterfaces(std::move(activePythonInterfaces)) {
   auto workspaces = getWorkspaces();
   for (auto &ws : workspaces) {
     std::pair<std::string, std::vector<IProjectSerialisable *>> item(
@@ -110,6 +113,14 @@ std::vector<std::string> ProjectSaveModel::getWorkspaceNames() const {
 
   std::sort(names.begin(), names.end());
   return names;
+}
+
+/**
+ * Get all workspace names in the model
+ * @return vector of all python interfaces names in the model
+ */
+std::vector<std::string> ProjectSaveModel::getAllPythonInterfaces() const {
+  return m_activePythonInterfaces;
 }
 
 /**

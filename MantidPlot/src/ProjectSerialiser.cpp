@@ -115,20 +115,30 @@ constexpr auto PY_INTERFACE_SECTION = "pythoninterface";
 
 // A list of python interfaces to be saved. This should be the name
 // of the launcher script containing the def main() function.
-// WARNING: The module here should be importable without any side effects, i.e.
-// it should finish with
+// WARNING: The module here should be importable without any side effects,
+// i.e. it should finish with
 //
 // if __name__ == '__main__':
-//     main()
+//     ...
+//     w = MainWindow()
+//     w.show()
 //
-// and any work to start the interface be done in main().
-QStringList SAVED_PY_INTERFACES;
+QStringList SERIALISABLE_PY_INTERFACES;
 
 } // namespace
 
 // This C function is defined in the third party C lib minigzip.c
 extern "C" {
 void file_compress(const char *file, const char *mode);
+}
+
+/**
+ * @brief ProjectSerialiser::serialisablePythonInterfaces
+ * @return A list of python interfaces that are known to be serisable. This
+ * returns the names of the startup file
+ */
+QStringList ProjectSerialiser::serialisablePythonInterfaces() {
+  return SERIALISABLE_PY_INTERFACES;
 }
 
 // We assume any caller which do not explicitly mention the recovery flag
@@ -151,9 +161,11 @@ ProjectSerialiser::ProjectSerialiser(ApplicationWindow *window, Folder *folder,
 bool ProjectSerialiser::save(const QString &projectName,
                              const std::vector<std::string> &wsNames,
                              const std::vector<std::string> &windowNames,
+                             const std::vector<std::string> &interfaces,
                              bool compress) {
   m_windowNames = windowNames;
   m_workspaceNames = wsNames;
+  m_interfacesNames = interfaces;
   window->projectname = projectName;
   QFileInfo fileInfo(projectName);
   window->workingDir = fileInfo.absoluteDir().absolutePath();
@@ -711,11 +723,12 @@ QString ProjectSerialiser::saveAdditionalWindows() {
  */
 QString ProjectSerialiser::savePythonInterfaces() {
   QString pythonInterfacesState;
-  for (const auto &interfaceLauncher : SAVED_PY_INTERFACES) {
+  for (const auto &interfaceLauncher : m_interfacesNames) {
     try {
-      pythonInterfacesState += savePythonInterface(interfaceLauncher);
+      pythonInterfacesState +=
+          savePythonInterface(QString::fromStdString(interfaceLauncher));
     } catch (std::runtime_error &exc) {
-      g_log.warning() << "Error saving " << interfaceLauncher.toLatin1().data()
+      g_log.warning() << "Error saving " << interfaceLauncher
                       << " to project: " << exc.what() << "\n";
     }
   }
@@ -1061,7 +1074,7 @@ void ProjectSerialiser::loadPythonInterfaces(const std::string &lines) {
 void ProjectSerialiser::loadPythonInterface(
     const std::string &launcherModuleName, const std::string &pySection) {
   // sanity check that this an interface we know how to save
-  if (!SAVED_PY_INTERFACES.contains(
+  if (!SERIALISABLE_PY_INTERFACES.contains(
           QString::fromStdString(launcherModuleName))) {
     throw std::runtime_error("Interface not whitelisted as saveable.");
   }
