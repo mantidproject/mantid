@@ -27,8 +27,6 @@ Improvements
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
-:ref:`Release 3.14.0 <v3.14.0>`
-
 
 Single Crystal Diffraction
 --------------------------
@@ -48,10 +46,13 @@ Bugfixes
 
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` now finds peaks correctly with the crystallography convention setting and reduction with crystallography convention is tested with a system test.
 
-Total Scattering
-----------------
+Powder Diffraction
+------------------
 
-Improvements
-############
+New
+###
 
+- :ref:`HB2AReduce <algm-HB2AReduce>` algorithm reduces HFIR POWDER (HB-2A) data
 - :ref:`LoadGudrunOutput <algm-LoadGudrunOutput>` is a new algorithm that allows users to load the standard Gudrun output files into Mantid.
+
+:ref:`Release 3.14.0 <v3.14.0>`
