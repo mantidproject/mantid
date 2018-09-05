@@ -52,7 +52,7 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
- * With modulation vectors, construct an object to store events that correspond 
+ * With modulation vectors, construct an object to store events that correspond
  * to a peak and are within the specified radius of the specified peak centers,
  * and to integrate the peaks.
  *
