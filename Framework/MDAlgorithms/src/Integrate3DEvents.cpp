@@ -26,8 +26,7 @@ using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
 /**
- * \overload
- * Construct an object to store events that correspond to a peak an are
+ * Construct an object to store events that correspond to a peak and are
  * within the specified radius of the specified peak centers, and to
  * integrate the peaks.
  *
@@ -53,10 +52,9 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
- * \overload
- * Construct an object to store events that correspond to a peak an are
- * within the specified radius of the specified peak centers, and to
- * integrate the peaks.
+ * With modulation vectors, construct an object to store events that correspond 
+ * to a peak and are within the specified radius of the specified peak centers,
+ * and to integrate the peaks.
  *
  * @param   peak_q_list  List of Q-vectors for peak centers.
  * @param   hkl_list     The list of h,k,l
