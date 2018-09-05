@@ -93,9 +93,7 @@ DECLARE_ALGORITHM(GetEiMonDet2)
 /** Construct a GetEiMonDet2 object.
  *
  */
-GetEiMonDet2::GetEiMonDet2() {
-  useAlgorithm("GetEiMonDet", 3);
-}
+GetEiMonDet2::GetEiMonDet2() { useAlgorithm("GetEiMonDet", 3); }
 
 /** Initialized the algorithm.
  *

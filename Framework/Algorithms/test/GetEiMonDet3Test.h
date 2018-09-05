@@ -120,7 +120,8 @@ public:
         algorithm.setProperty("DetectorWorkspace", detectorWs));
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "0"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspaceIndexSet", "0"))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("MonitorWorkspace", monitorWs))
     TS_ASSERT_THROWS_NOTHING(
@@ -240,7 +241,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("MonitorIndex", "1"))
     TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
@@ -263,7 +265,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", -1))
     const std::string exceptionMessage("Invalid MonitorIndex");
     TS_ASSERT_THROWS_EQUALS(algorithm.execute(), const std::runtime_error &e,
@@ -288,7 +291,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", 42))
     TS_ASSERT_THROWS(algorithm.execute(), std::runtime_error)
     TS_ASSERT(!algorithm.isExecuted())
@@ -326,7 +330,8 @@ private:
     return ws;
   }
 
-  static std::vector<double> peakCentres(const double timeAtMonitor, const double energy,
+  static std::vector<double> peakCentres(const double timeAtMonitor,
+                                         const double energy,
                                          const double pulseInterval) {
     std::vector<double> centres;
     centres.emplace_back(timeAtMonitor);
@@ -347,7 +352,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", 0))
   }
 
@@ -376,7 +382,8 @@ private:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws));
     TS_ASSERT_THROWS_NOTHING(
         algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspaceIndexSet", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorIndex", 0))
     if (pulseIntervalInput == PulseIntervalInputs::AS_PROPERTY) {
       TS_ASSERT_THROWS_NOTHING(
