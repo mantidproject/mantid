@@ -108,6 +108,58 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         self.assertEquals(type(info.samplePosition()), V3D)
 
+    """
+    ---------------
+    Iteration
+    ---------------
+    """
+
+    def test_iteration_for_isMonitor(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.isMonitor), bool)
+
+    def test_iteration_for_isMasked(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.isMasked), bool)
+
+    def test_iteration_for_twoTheta(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.twoTheta), float)
+
+    def test_iteration_for_signedTwoTheta(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.signedTwoTheta), float)
+
+    def test_iteration_for_l2(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.l2), float)
+
+    def test_iteration_for_hasUniqueDetector(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            self.assertEquals(type(specInfo.hasUniqueDetector), bool)
+
+    def test_iteration_for_spectrumDefinition(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.spectrumDefinition), SpectrumDefinition)
+
+    def test_iteration_for_position(self):
+        info = self._ws.spectrumInfo()
+        for specInfo in info:
+            if specInfo.hasUniqueDetector:
+                self.assertEquals(type(specInfo.position), V3D)
 
     """
     ----------------------------------------------------------------------------

@@ -208,5 +208,6 @@ Component Overviews
    MultiThreadingInAlgorithms
    PythonVSCppAlgorithms
    RemoteJobSubmissionAPI
+   Workbench
    WritingAnAlgorithm
    WritingCustomConvertToMDTransformation

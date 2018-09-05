@@ -5,7 +5,7 @@ from sans.common.enums import (SANSFacility, SANSInstrument, FileType, SampleSha
 
 class SANSFileInformationMock(SANSFileInformation):
     def __init__(self, instrument=SANSInstrument.LOQ, facility=SANSFacility.ISIS, run_number=00000, file_name='file_name',
-                 height=8.0, width=8.0, thickness=1.0, shape=SampleShape.Cuboid, date='2012-10-22T22:41:27', periods=1,
+                 height=8.0, width=8.0, thickness=1.0, shape=SampleShape.FlatPlate, date='2012-10-22T22:41:27', periods=1,
                  event_mode=True, added_data=False):
         super(SANSFileInformationMock, self).__init__(file_name)
         self._instrument = instrument

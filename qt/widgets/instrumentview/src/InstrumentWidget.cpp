@@ -886,15 +886,7 @@ void InstrumentWidget::dragEnterEvent(QDragEnterEvent *e) {
 void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
-    QString text = e->mimeData()->text();
-    int endIndex = 0;
-    QStringList wsNames;
-    while (text.indexOf("[\"", endIndex) > -1) {
-      int startIndex = text.indexOf("[\"", endIndex) + 2;
-      endIndex = text.indexOf("\"]", startIndex);
-      wsNames.append(text.mid(startIndex, endIndex - startIndex));
-    }
-
+    QStringList wsNames = e->mimeData()->text().split("\n");
     foreach (const auto &wsName, wsNames) {
       if (this->overlay(wsName))
         e->accept();

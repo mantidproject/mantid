@@ -225,7 +225,8 @@ void profile(std::vector<double> &Xs, std::vector<double> &Ys,
     for (size_t j = limits.widthStart; j < limits.widthEnd; ++j) {
       const size_t iHor = dir == LineDirection::horizontal ? i : j;
       const size_t iVert = dir == LineDirection::horizontal ? j : i;
-      auto iter = ws.histogram(iVert).begin();
+      auto histogram = ws.histogram(iVert);
+      auto iter = histogram.begin();
       std::advance(iter, iHor);
       const double y = iter->counts();
       if ((ignoreNans && std::isnan(y)) || (ignoreInfs && std::isinf(y))) {

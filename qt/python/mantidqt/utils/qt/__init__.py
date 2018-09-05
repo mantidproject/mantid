@@ -24,10 +24,12 @@ from importlib import import_module
 import os.path as osp
 
 # 3rd-party modules
-import qtawesome as qta
 from qtpy import QT_VERSION
 from qtpy.uic import loadUi, loadUiType
 from qtpy.QtWidgets import QAction, QMenu
+
+# local modules
+from ...icons import get_icon
 
 LIB_SUFFIX = 'qt' + QT_VERSION[0]
 
@@ -135,7 +137,7 @@ def create_action(parent, text, on_triggered=None, shortcut=None,
         if shortcut_context is not None:
             action.setShortcutContext(shortcut_context)
     if icon_name is not None:
-        action.setIcon(qta.icon(icon_name))
+        action.setIcon(get_icon(icon_name))
 
     return action
 
