@@ -151,23 +151,23 @@ void Q1DWeighted::exec() {
   // Create wedge workspaces
   std::vector<MatrixWorkspace_sptr> wedgeWorkspaces;
   for (int iWedge = 0; iWedge < nWedges; iWedge++) {
-    double center_angle = wedgeFullAngle / nWedges * iWedge;
-    center_angle += wedgeOffset;
+    double centerAngle = wedgeFullAngle / nWedges * iWedge;
+    centerAngle += wedgeOffset;
 
-    MatrixWorkspace_sptr wedge_ws =
+    MatrixWorkspace_sptr wedgeWs =
         WorkspaceFactory::Instance().create(inputWS, 1, sizeOut, sizeOut - 1);
-    wedge_ws->getAxis(0)->unit() =
+    wedgeWs->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
-    wedge_ws->setYUnitLabel("1/cm");
-    wedge_ws->setDistribution(true);
-    wedge_ws->setBinEdges(0, XOut);
-    wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
-                                       true);
-    wedgeWorkspaces.push_back(wedge_ws);
+    wedgeWs->setYUnitLabel("1/cm");
+    wedgeWs->setDistribution(true);
+    wedgeWs->setBinEdges(0, XOut);
+    wedgeWs->mutableRun().addProperty("wedge_angle", centerAngle, "degrees",
+                                      true);
+    wedgeWorkspaces.push_back(wedgeWs);
   }
 
   // Count histogram for wedge normalization
-  std::vector<std::vector<double>> wedge_XNormLambda(
+  std::vector<std::vector<double>> wedgeXNormLambda(
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
@@ -179,16 +179,16 @@ void Q1DWeighted::exec() {
   for (int j = 0; j < xLength - 1; j++) {
     PARALLEL_START_INTERUPT_REGION
 
-    std::vector<double> lambda_iq(sizeOut - 1, 0.0);
-    std::vector<double> lambda_iq_err(sizeOut - 1, 0.0);
+    std::vector<double> lambdaIq(sizeOut - 1, 0.0);
+    std::vector<double> lambdaIqErr(sizeOut - 1, 0.0);
     std::vector<double> XNorm(sizeOut - 1, 0.0);
 
     // Wedges
-    std::vector<std::vector<double>> wedge_lambda_iq(
+    std::vector<std::vector<double>> wedgeLambdaIq(
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
-    std::vector<std::vector<double>> wedge_lambda_iq_err(
+    std::vector<std::vector<double>> wedgeLambdaIqErr(
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
-    std::vector<std::vector<double>> wedge_XNorm(
+    std::vector<std::vector<double>> wedgeXNorm(
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
     for (int i = 0; i < numSpec; i++) {
@@ -210,19 +210,19 @@ void Q1DWeighted::exec() {
       // parameter (NPixelDivision)
       for (int isub = 0; isub < nSubPixels * nSubPixels; isub++) {
         // Find the position offset for this sub-pixel in real space
-        double sub_y = pixelSizeY *
-                       ((isub % nSubPixels) - (nSubPixels - 1.0) / 2.0) /
-                       nSubPixels;
-        double sub_x = pixelSizeX *
-                       (floor(static_cast<double>(isub) / nSubPixels) -
-                        (nSubPixels - 1.0) * 0.5) /
-                       nSubPixels;
+        double subY = pixelSizeY *
+                      ((isub % nSubPixels) - (nSubPixels - 1.0) / 2.0) /
+                      nSubPixels;
+        double subX = pixelSizeX *
+                      (floor(static_cast<double>(isub) / nSubPixels) -
+                       (nSubPixels - 1.0) * 0.5) /
+                      nSubPixels;
 
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
         //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
-        V3D pos = spectrumInfo.position(i) - V3D(sub_x, sub_y, 0.0) - samplePos;
+        V3D pos = spectrumInfo.position(i) - V3D(subX, subY, 0.0) - samplePos;
         double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);
@@ -238,10 +238,10 @@ void Q1DWeighted::exec() {
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0; i_qbin < static_cast<int>(XOut.size()) - 1;
-               i_qbin++) {
-            if (q >= XOut[i_qbin] && q < XOut[(i_qbin + 1)]) {
-              iq = i_qbin;
+          for (int iQbin = 0; iQbin < static_cast<int>(XOut.size()) - 1;
+               iQbin++) {
+            if (q >= XOut[iQbin] && q < XOut[(iQbin + 1)]) {
+              iq = iQbin;
               break;
             }
           }
@@ -267,26 +267,26 @@ void Q1DWeighted::exec() {
 
           PARALLEL_CRITICAL(iqnorm) /* Write to shared memory - must protect */
           {
-            lambda_iq[iq] += YIn[j] * w;
-            lambda_iq_err[iq] += w * w * EIn[j] * EIn[j];
+            lambdaIq[iq] += YIn[j] * w;
+            lambdaIqErr[iq] += w * w * EIn[j] * EIn[j];
             XNorm[iq] += w;
 
             // Fill in the wedge data
             for (int iWedge = 0; iWedge < nWedges; iWedge++) {
-              double center_angle = M_PI / nWedges * iWedge;
+              double centerAngle = M_PI / nWedges * iWedge;
               if (asymmWedges) {
-                center_angle *= 2;
+                centerAngle *= 2;
               }
-              center_angle += deg2rad * wedgeOffset;
-              V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
-              double angle = fabs(sub_pix.angle(
-                  V3D(cos(center_angle), sin(center_angle), 0.0)));
+              centerAngle += deg2rad * wedgeOffset;
+              V3D subPix = V3D(pos.X(), pos.Y(), 0.0);
+              double angle = fabs(
+                  subPix.angle(V3D(cos(centerAngle), sin(centerAngle), 0.0)));
               if (angle < deg2rad * wedgeAngle * 0.5 ||
                   (!asymmWedges &&
                    fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
-                wedge_lambda_iq[iWedge][iq] += YIn[j] * w;
-                wedge_lambda_iq_err[iWedge][iq] += w * w * EIn[j] * EIn[j];
-                wedge_XNorm[iWedge][iq] += w;
+                wedgeLambdaIq[iWedge][iq] += YIn[j] * w;
+                wedgeLambdaIqErr[iWedge][iq] += w * w * EIn[j] * EIn[j];
+                wedgeXNorm[iWedge][iq] += w;
               }
             }
           }
@@ -299,20 +299,20 @@ void Q1DWeighted::exec() {
     {
       for (int k = 0; k < sizeOut - 1; k++) {
         if (XNorm[k] > 0) {
-          YOut[k] += lambda_iq[k] / XNorm[k];
-          EOut[k] += lambda_iq_err[k] / XNorm[k] / XNorm[k];
+          YOut[k] += lambdaIq[k] / XNorm[k];
+          EOut[k] += lambdaIqErr[k] / XNorm[k] / XNorm[k];
           XNormLambda[k] += 1.0;
         }
 
         // Normalize wedges
         for (int iWedge = 0; iWedge < nWedges; iWedge++) {
-          if (wedge_XNorm[iWedge][k] > 0) {
+          if (wedgeXNorm[iWedge][k] > 0) {
             auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
             auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
-            wedgeYOut[k] += wedge_lambda_iq[iWedge][k] / wedge_XNorm[iWedge][k];
-            wedgeEOut[k] += wedge_lambda_iq_err[iWedge][k] /
-                            wedge_XNorm[iWedge][k] / wedge_XNorm[iWedge][k];
-            wedge_XNormLambda[iWedge][k] += 1.0;
+            wedgeYOut[k] += wedgeLambdaIq[iWedge][k] / wedgeXNorm[iWedge][k];
+            wedgeEOut[k] += wedgeLambdaIqErr[iWedge][k] /
+                            wedgeXNorm[iWedge][k] / wedgeXNorm[iWedge][k];
+            wedgeXNormLambda[iWedge][k] += 1.0;
           }
         }
       }
@@ -330,8 +330,8 @@ void Q1DWeighted::exec() {
     for (int i = 0; i < sizeOut - 1; i++) {
       auto &wedgeYOut = wedgeWorkspaces[iWedge]->mutableY(0);
       auto &wedgeEOut = wedgeWorkspaces[iWedge]->mutableE(0);
-      wedgeYOut[i] /= wedge_XNormLambda[iWedge][i];
-      wedgeEOut[i] = sqrt(wedgeEOut[i]) / wedge_XNormLambda[iWedge][i];
+      wedgeYOut[i] /= wedgeXNormLambda[iWedge][i];
+      wedgeEOut[i] = sqrt(wedgeEOut[i]) / wedgeXNormLambda[iWedge][i];
     }
   }
 
