@@ -39,7 +39,7 @@ using Mantid::Kernel::V3D;
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    std::vector<std::pair<double, V3D>> const &peak_q_list,
+    const std::vector<std::pair<double, V3D>> &peak_q_list,
     DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
@@ -73,7 +73,7 @@ Integrate3DEvents::Integrate3DEvents(
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    std::vector<std::pair<double, V3D>> const &peak_q_list,
+    const std::vector<std::pair<double, V3D>> &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     DblMatrix const &UBinv, DblMatrix const &ModHKL, double radius_m,
     double radius_s, int MaxO, const bool CrossT,
