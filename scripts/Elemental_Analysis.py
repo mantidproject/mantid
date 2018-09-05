@@ -101,6 +101,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         for detector in self.detectors.detectors:
             if detector.isChecked():
                 self.load_run(detector.name, last_run)
+        for item in self.ptable.selection:
+            self._add_element_lines(
+                item.symbol, self.element_data[item.symbol])
 
     def _generate_element_data(self):
         for element in self.ptable.peak_data:
@@ -150,8 +153,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                 item.symbol, self.element_data[item.symbol])
         else:
             self._remove_element_lines(item.symbol)
-        print("Element Left Clicked: {}".format(
-            self.element_data[item.symbol]))
 
     def table_right_clicked(self, item):
         self.element_widgets[item.symbol].view.show()
