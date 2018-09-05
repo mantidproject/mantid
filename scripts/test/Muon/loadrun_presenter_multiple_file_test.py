@@ -14,6 +14,7 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
 # global QApplication (get errors if > 1 instance in the code)
@@ -36,14 +37,20 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        # Store an empty widget to parent all the views, and ensure they are deleted correctly
+        self.obj = QtGui.QWidget()
+
         self.data = MuonLoadData()
-        self.view = LoadRunWidgetView()
+        self.view = LoadRunWidgetView(self.obj)
         self.model = LoadRunWidgetModel(self.data)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
         self.view.warning_popup = mock.Mock()
 
         self.presenter.enable_multiple_files(True)
+
+    def tearDown(self):
+        self.obj = None
 
     def load_runs(self, runs, filenames, workspaces):
         self.model.load_workspace_from_filename = mock.Mock(

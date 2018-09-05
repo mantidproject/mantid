@@ -17,6 +17,7 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
 # global QApplication (get errors if > 1 instance in the code)
@@ -39,11 +40,17 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        # Store an empty widget to parent all the views, and ensure they are deleted correctly
+        self.obj = QtGui.QWidget()
+
         self.data = MuonLoadData()
-        self.view = LoadRunWidgetView()
+        self.view = LoadRunWidgetView(parent=self.obj)
         self.model = LoadRunWidgetModel(self.data)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
         self.presenter.enable_multiple_files(False)
+
+    def tearDown(self):
+        self.obj = None
 
     def mock_loading_via_user_input_run(self, workspace, filename, run):
         self.model.load_workspace_from_filename = mock.Mock(
@@ -100,7 +107,6 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.workspaces, [[1]])
 
 
-
 class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     class Runner:
 
@@ -117,8 +123,11 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        # Store an empty widget to parent all the views, and ensure they are deleted correctly
+        self.obj = QtGui.QWidget()
+
         self.data = MuonLoadData()
-        self.view = LoadRunWidgetView()
+        self.view = LoadRunWidgetView(parent=self.obj)
         self.model = LoadRunWidgetModel(self.data)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
@@ -126,6 +135,9 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.enable_multiple_files(False)
 
         self.load_single_run()
+
+    def tearDown(self):
+        self.obj = None
 
     def load_single_run(self):
         self._loaded_run = 1234

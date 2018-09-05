@@ -13,6 +13,7 @@ if sys.version_info.major == 3:
 else:
     import mock
 
+from PyQt4 import QtGui
 from PyQt4.QtGui import QApplication
 
 # global QApplication (get errors if > 1 instance in the code)
@@ -37,8 +38,11 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         raise ValueError("Error text")
 
     def setUp(self):
+        # Store an empty widget to parent all the views, and ensure they are deleted correctly
+        self.obj = QtGui.QWidget()
+
         self.data = MuonLoadData()
-        self.view = LoadRunWidgetView()
+        self.view = LoadRunWidgetView(parent=self.obj)
         self.model = LoadRunWidgetModel(self.data)
         self.presenter = LoadRunWidgetPresenter(self.view, self.model)
 
@@ -48,6 +52,9 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.view.enable_load_buttons = mock.Mock()
 
         fileUtils.get_current_run_filename = mock.Mock(return_value="EMU0001234.nxs")
+
+    def tearDown(self):
+        self.obj = None
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
