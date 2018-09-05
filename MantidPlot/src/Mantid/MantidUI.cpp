@@ -102,6 +102,7 @@ using namespace std;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Core::time_duration;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;

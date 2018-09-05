@@ -39,6 +39,7 @@
 
 #include <stdexcept>
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 namespace {
 // Avoids a compiler warning about implicit 'const char *'->'char*' conversion
 // under clang

@@ -37,6 +37,7 @@
 #include <vector>
 
 using namespace Mantid::API;
+namespace Python = Mantid::PythonInterface;
 using namespace MantidQt::API;
 using Mantid::Kernel::Logger;
 
@@ -750,7 +751,7 @@ QString ProjectSerialiser::savePythonInterfaces() {
 QString
 ProjectSerialiser::savePythonInterface(const QString &launcherModuleName) {
   assert(!launcherModuleName.isEmpty());
-  ScopedGIL<PythonGIL> gil;
+  Python::GlobalInterpreterLock gil;
   auto state = callPythonModuleAttr(launcherModuleName.toLatin1().data(),
                                     "saveToProject", nullptr);
   if (!STR_CHECK(state)) {
@@ -1079,7 +1080,7 @@ void ProjectSerialiser::loadPythonInterface(
     throw std::runtime_error("Interface not whitelisted as saveable.");
   }
 
-  ScopedGIL<PythonGIL> gil;
+  Python::GlobalInterpreterLock gil;
   PyObject *fnArg = Py_BuildValue("(s)", pySection.c_str());
   PyObject *result(nullptr);
   try {

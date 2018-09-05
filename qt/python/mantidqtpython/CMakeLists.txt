@@ -89,7 +89,9 @@ mtd_add_sip_module (
   TARGET_NAME mantidqtpython
   SIP_SRCS mantidqtpython_def.sip
   HEADER_DEPS ${HEADER_DEPENDS}
-  INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_LIST_DIR}
+    ../../../Framework/PythonInterface/core/inc
   PYQT_VERSION 4
   LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
     MantidQtWidgetsCommonQt4

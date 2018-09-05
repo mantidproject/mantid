@@ -58,6 +58,7 @@ PyMODINIT_FUNC PyInit__qti();
 PyMODINIT_FUNC init_qti();
 #endif
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 namespace {
 Mantid::Kernel::Logger g_log("PythonScripting");
 
