@@ -63,12 +63,12 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
             self.nonIDShareButton.setEnabled(False)
 
     def display_message_box(self, title, message, details):
-        msg = QtGui.QMessageBox()
+        msg = QtGui.QMessageBox(self)
         msg.setIcon(QtGui.QMessageBox.Warning)
 
         message_length = len(message)
 
-        # This is to ensure that the QMessage box if wide enough to display nicely.
+        # This is to ensure that the QMessage box is wide enough to display nicely.
         msg.setText(10 * ' ' + message + ' ' * (30 - message_length))
         msg.setWindowTitle(title)
         msg.setDetailedText(details)
