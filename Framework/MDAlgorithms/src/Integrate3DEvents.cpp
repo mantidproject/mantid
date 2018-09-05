@@ -39,7 +39,7 @@ using Mantid::Kernel::V3D;
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
  */
-void Integrate3DEvents::Integrate3DEvents(
+Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<double, V3D>> &peak_q_list,
     DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
@@ -74,7 +74,7 @@ void Integrate3DEvents::Integrate3DEvents(
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
  */
-void Integrate3DEvents::Integrate3DEvents(
+Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<double, V3D>> &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     DblMatrix const &UBinv, DblMatrix const &ModHKL, double radius_m,
