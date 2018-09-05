@@ -2,17 +2,17 @@
 #define MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
 class BinEdges;
 class CountStandardDeviations;
 class Counts;
-}
-}
+} // namespace HistogramData
+} // namespace Mantid
 
 namespace Mantid {
 namespace Algorithms {
@@ -183,7 +183,7 @@ private:
   bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_NORMALISETOMONITOR_H_ */

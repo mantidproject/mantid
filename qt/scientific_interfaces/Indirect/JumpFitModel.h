@@ -21,6 +21,11 @@ public:
   void removeWorkspace(std::size_t index) override;
   void setFitType(const std::string &fitType);
 
+  bool zeroWidths(std::size_t dataIndex) const;
+  bool zeroEISF(std::size_t dataIndex) const;
+
+  bool isMultiFit() const override;
+
   std::string getFitParameterName(std::size_t dataIndex,
                                   std::size_t spectrum) const;
   std::vector<std::string> getWidths(std::size_t dataIndex) const;
@@ -38,11 +43,14 @@ public:
                                   std::size_t spectrum) const override;
 
 private:
+  std::string constructOutputName() const;
+  bool allWorkspacesEqual(Mantid::API::MatrixWorkspace_sptr workspace) const;
   JumpFitParameters &
   addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
                        const std::string &hwhmName);
   std::unordered_map<std::string, JumpFitParameters>::const_iterator
   findJumpFitParameters(std::size_t dataIndex) const;
+  std::string getResultXAxisUnit() const override;
 
   std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;

@@ -21,7 +21,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Set and get parameter
-    */
+   */
   void test_accessParameter() {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
@@ -39,7 +39,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
-    */
+   */
   void test_calculatePeakPositions() {
     // (1,1,1)
     NeutronBk2BkExpConvPVoigt func;
@@ -99,7 +99,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
-    */
+   */
   void test_calculatePeakShape() {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
@@ -136,7 +136,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
-    */
+   */
   void calculateVulcanPeakPositions() {
     // TODO - This will be left to the ticket for VULCAN
     // (2, 2, 0)

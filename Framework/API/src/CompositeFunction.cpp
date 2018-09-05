@@ -2,17 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 #include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace API {
@@ -20,7 +20,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("CompositeFunction");
-}
+} // namespace
 
 using std::size_t;
 
@@ -208,7 +208,7 @@ double CompositeFunction::getParameter(size_t i) const {
  * Check if function has a parameter with a particular name.
  * @param name :: A name of a parameter.
  * @return True if the parameter exists.
-*/
+ */
 bool CompositeFunction::hasParameter(const std::string &name) const {
   try {
     std::string pname;
@@ -547,11 +547,11 @@ size_t CompositeFunction::functionIndex(std::size_t i) const {
 }
 
 /**
-* @param varName :: The variable name which may contain function index (
-* [f<index.>]name )
-* @param index :: Receives function index or throws std::invalid_argument
-* @param name :: Receives the parameter name
-*/
+ * @param varName :: The variable name which may contain function index (
+ * [f<index.>]name )
+ * @param index :: Receives function index or throws std::invalid_argument
+ * @param name :: Receives the parameter name
+ */
 void CompositeFunction::parseName(const std::string &varName, size_t &index,
                                   std::string &name) {
   size_t i = varName.find('.');

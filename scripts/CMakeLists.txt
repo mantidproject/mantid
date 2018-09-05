@@ -5,7 +5,6 @@ add_subdirectory(HFIRPowderReduction)
 add_subdirectory(Interface/ui)
 add_subdirectory(TofConverter)
 add_subdirectory(HFIR_4Circle_Reduction)
-add_subdirectory(Muon)
 add_subdirectory(ErrorReporter)
 
 # Chain all required interface custom targets into CompilePyUI
@@ -15,7 +14,6 @@ add_custom_target(CompilePyUI DEPENDS
   CompileUITofConverter
   CompileUIUI
   CompileUIHFIR_4Circle_Reduction
-  CompileUIFrequency_Domain_Analysis
   CompileUIErrorReporter
 )
 
@@ -26,15 +24,19 @@ set_property ( TARGET CompileUIHFIRPowderReduction PROPERTY FOLDER "CompilePyUI"
 set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
-set_property ( TARGET CompileUIFrequency_Domain_Analysis PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIErrorReporter PROPERTY FOLDER "CompilePyUI" )
 
 # External GUIs
 add_subdirectory ( ExternalInterfaces )
 
-# -------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Testing
-# -------------------------------------------------------------------
+# --------------------------------------------------------------------
+# All of the following tests (and those in subdirectories) require the
+# test format to import mantid to setup paths to the scripts
+# directory
+set ( PYUNITTEST_TESTRUNNER_IMPORT_MANTID 1 )
+
 set ( TEST_PY_FILES
       test/AbinsAtomsDataTest.py
       test/AbinsCalculateDWSingleCrystalTest.py

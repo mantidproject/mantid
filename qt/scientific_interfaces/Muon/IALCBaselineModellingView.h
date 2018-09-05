@@ -3,11 +3,11 @@
 
 #include "MantidKernel/System.h"
 
-#include "MantidAPI/IFunction.h"
 #include "DllConfig.h"
+#include "MantidAPI/IFunction.h"
 
-#include <QObject>
 #include "qwt_data.h"
+#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {

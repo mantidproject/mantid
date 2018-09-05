@@ -7,8 +7,8 @@
 #include "MantidAPI/ParamFunction.h"
 //#include "MantidAPI/IPeakFunction.h"
 
-#include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IFunctionMW.h"
 
 namespace Mantid {
 namespace CurveFitting {

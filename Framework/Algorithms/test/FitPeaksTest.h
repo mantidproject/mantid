@@ -24,9 +24,9 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class FitPeaksTest : public CxxTest::TestSuite {
 private:
@@ -266,7 +266,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on single peak on partial spectra
-    */
+   */
   void Ntest_singlePeakMultiSpectra() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
@@ -323,7 +323,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
-    */
+   */
   void Ntest_SingleSpectrum3Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
@@ -556,7 +556,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on VULCAN's data including 2 different starting value of peak
    * profiles
-    */
+   */
   void test_multiple_peak_profiles() {
     // Generate input workspace
     std::string input_ws_name = loadVulcanHighAngleData();
@@ -662,7 +662,7 @@ public:
    * PeakRange='1.06,1.09',
    * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
    * PeakPositionTolerance=0.02)
-    */
+   */
   void gen_PeakParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
     parvalues.clear();
@@ -770,7 +770,7 @@ public:
   /** Generate a workspace contains peaks with profile as back to back
    * exponenential convoluted
    * by Gaussian
-    */
+   */
   std::string loadVulcanHighAngleData() {
     DataHandling::LoadNexusProcessed loader;
     loader.initialize();

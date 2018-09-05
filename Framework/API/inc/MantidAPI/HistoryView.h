@@ -58,13 +58,14 @@ public:
                         Mantid::Types::Core::DateAndTime end =
                             Mantid::Types::Core::DateAndTime::getCurrentTime());
   /**
-  * Get the list of History Items for this view.
-  *
-  * @returns vector of history items for this view.
-  */
+   * Get the list of History Items for this view.
+   *
+   * @returns vector of history items for this view.
+   */
   const std::vector<HistoryItem> &getAlgorithmsList() const {
     return m_historyItems;
   };
+
   size_t size() const { return m_historyItems.size(); }
 
 private:

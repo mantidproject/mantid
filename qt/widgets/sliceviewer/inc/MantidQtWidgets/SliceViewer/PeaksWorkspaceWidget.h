@@ -90,6 +90,6 @@ private slots:
   void onAddPeaksToggled(bool);
 };
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif // PEAKSWORKSPACEWIDGET_H

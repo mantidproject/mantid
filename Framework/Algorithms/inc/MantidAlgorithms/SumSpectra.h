@@ -110,9 +110,10 @@ private:
   // if calculating additional workspace with specially weighted averages is
   // necessary
   bool m_calculateWeightedSum{false};
+  bool m_multiplyByNumSpec{true};
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SUMSPECTRA_H_*/

@@ -165,6 +165,9 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
                     const std::vector<std::size_t> &widthSpectra) {
   if (widthSpectra.empty())
     return workspace;
+  if (AnalysisDataService::Instance().doesExist(hwhmName))
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        hwhmName);
 
   const auto subworkspaces = subdivideWidthWorkspace(workspace, widthSpectra);
   const auto hwhmWorkspace = appendAll(subworkspaces);
@@ -239,8 +242,7 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end()) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
-    const auto spectra = createSpectra(widthSpectra[widthIndex]);
-    setSpectra(spectra, dataIndex);
+    setSpectra(createSpectra(widthSpectra[widthIndex]), dataIndex);
   } else
     throw std::runtime_error("Invalid width index specified.");
 }
@@ -249,14 +251,33 @@ void JumpFitModel::setActiveEISF(std::size_t eisfIndex, std::size_t dataIndex) {
   const auto parametersIt = findJumpFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end()) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
-    const auto spectra = createSpectra(eisfSpectra[eisfIndex]);
-    setSpectra(spectra, dataIndex);
+    setSpectra(createSpectra(eisfSpectra[eisfIndex]), dataIndex);
   } else
     throw std::runtime_error("Invalid EISF index specified.");
 }
 
 void JumpFitModel::setFitType(const std::string &fitType) {
   m_fitType = fitType;
+}
+
+bool JumpFitModel::zeroWidths(std::size_t dataIndex) const {
+  const auto parameters = findJumpFitParameters(dataIndex);
+  if (parameters != m_jumpParameters.end())
+    return parameters->second.widths.empty();
+  return true;
+}
+
+bool JumpFitModel::zeroEISF(std::size_t dataIndex) const {
+  const auto parameters = findJumpFitParameters(dataIndex);
+  if (parameters != m_jumpParameters.end())
+    return parameters->second.eisf.empty();
+  return true;
+}
+
+bool JumpFitModel::isMultiFit() const {
+  if (numberOfWorkspaces() == 0)
+    return false;
+  return !allWorkspacesEqual(getWorkspace(0));
 }
 
 std::vector<std::string> JumpFitModel::getWidths(std::size_t dataIndex) const {
@@ -292,11 +313,9 @@ JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
 }
 
 std::string JumpFitModel::sequentialFitOutputName() const {
-  auto name = createOutputName("%1%_JumpFit", "", 0);
-  auto position = name.find("_Result");
-  if (position != std::string::npos)
-    return name.substr(0, position) + name.substr(position + 7, name.size());
-  return name;
+  if (isMultiFit())
+    return "MultiFofQFit_" + m_fitType + "_Result";
+  return constructOutputName();
 }
 
 std::string JumpFitModel::simultaneousFitOutputName() const {
@@ -305,6 +324,25 @@ std::string JumpFitModel::simultaneousFitOutputName() const {
 
 std::string JumpFitModel::singleFitOutputName(std::size_t, std::size_t) const {
   return sequentialFitOutputName();
+}
+
+std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
+
+std::string JumpFitModel::constructOutputName() const {
+  auto name = createOutputName("%1%_FofQFit_" + m_fitType, "", 0);
+  auto position = name.find("_Result");
+  if (position != std::string::npos)
+    return name.substr(0, position) + name.substr(position + 7, name.size());
+  return name;
+}
+
+bool JumpFitModel::allWorkspacesEqual(
+    Mantid::API::MatrixWorkspace_sptr workspace) const {
+  for (auto i = 1u; i < numberOfWorkspaces(); ++i) {
+    if (getWorkspace(i) != workspace)
+      return false;
+  }
+  return true;
 }
 
 } // namespace IDA

@@ -20,6 +20,6 @@ QString const &Column::prefix() const { return m_prefix; }
 QString const &Column::description() const { return m_description; }
 
 QString const &Column::name() const { return m_name; }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

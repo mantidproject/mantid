@@ -4,11 +4,11 @@
 //---------------------------------------------
 // Includes
 //---------------------------------------------
-#include "qwt_color_map.h"
-#include <boost/shared_ptr.hpp>
+#include "DllOption.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
-#include "DllOption.h"
+#include "qwt_color_map.h"
+#include <boost/shared_ptr.hpp>
 
 /**
    The class inherits from QwtColorMap and implements reading a color color map
@@ -74,9 +74,9 @@ public:
   GraphOptions::ScaleType getScaleType() const { return m_scale_type; }
 
   /**
-  * Retrieve the map name
-  * @returns the map name
-  */
+   * Retrieve the map name
+   * @returns the map name
+   */
   QString getName() const { return m_name; }
 
   /**

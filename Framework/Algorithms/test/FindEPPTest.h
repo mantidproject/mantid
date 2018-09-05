@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FindEPP.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/FindEPP.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -102,7 +102,7 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
   createAlg.execute();
   return createAlg.getProperty("OutputWorkspace");
 }
-}
+} // namespace
 
 class FindEPPTest : public CxxTest::TestSuite {
 public:

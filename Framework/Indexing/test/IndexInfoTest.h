@@ -5,8 +5,8 @@
 
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidParallel/Communicator.h"
 #include "MantidKernel/make_cow.h"
+#include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ParallelRunner.h"
@@ -137,7 +137,7 @@ void run_globalSpectrumIndicesFromDetectorIndices_missing(
       const std::runtime_error &e, std::string(e.what()),
       "Some of the requested detectors do not have a corresponding spectrum");
 }
-}
+} // namespace
 
 class IndexInfoTest : public CxxTest::TestSuite {
 public:
@@ -333,17 +333,40 @@ public:
         "Some of the requested detectors do not have a corresponding spectrum");
   }
 
-  void test_globalSpectrumIndicesFromDetectorIndices_scanning() {
+  void
+  test_globalSpectrumIndicesFromDetectorIndices_scanning_different_time_indices() {
     IndexInfo info(3);
     std::vector<size_t> detectorIndices{6, 8};
     std::vector<SpectrumDefinition> specDefs(3);
-    // Two indices map to same detector; typical for time-indexed workspaces.
-    specDefs[0].add(6);
-    specDefs[1].add(6);
-    specDefs[2].add(8);
+    // Two indices map to the same detector at different time indices; typical
+    // for time-indexed workspaces.
+    specDefs[0].add(6, 1);
+    specDefs[1].add(6, 2);
+    specDefs[2].add(8, 1);
     info.setSpectrumDefinitions(specDefs);
     TS_ASSERT_THROWS_NOTHING(
         info.globalSpectrumIndicesFromDetectorIndices(detectorIndices));
+    const auto &indices =
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices);
+    TS_ASSERT_EQUALS(indices.size(), 3);
+    TS_ASSERT_EQUALS(indices[0], 0);
+    TS_ASSERT_EQUALS(indices[1], 1);
+    TS_ASSERT_EQUALS(indices[2], 2);
+  }
+
+  void
+  test_globalSpectrumIndicesFromDetectorIndices_scanning_same_time_indices() {
+    IndexInfo info(2);
+    std::vector<size_t> detectorIndices{6};
+    std::vector<SpectrumDefinition> specDefs(2);
+    // Two indices map to the same detector at the same time index; throw
+    specDefs[0].add(6, 1);
+    specDefs[1].add(6, 1);
+    info.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(
+        info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),
+        const std::runtime_error &e, std::string(e.what()),
+        "Some of the spectra map to the same detector at the same time index");
   }
 
   void test_globalSpectrumIndicesFromDetectorIndices_fails_conflict_miss() {
@@ -351,8 +374,8 @@ public:
     std::vector<size_t> detectorIndices{6, 8};
     std::vector<SpectrumDefinition> specDefs(3);
     // Two indices map to same detector, but additionally one is missing.
-    specDefs[0].add(6);
-    specDefs[1].add(6);
+    specDefs[0].add(6, 1);
+    specDefs[1].add(6, 2);
     info.setSpectrumDefinitions(specDefs);
     TS_ASSERT_THROWS_EQUALS(
         info.globalSpectrumIndicesFromDetectorIndices(detectorIndices),

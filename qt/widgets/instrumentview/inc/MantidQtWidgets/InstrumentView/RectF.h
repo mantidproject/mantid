@@ -1,15 +1,15 @@
 #ifndef RECTF_H
 #define RECTF_H
 
-#include <QSize>
 #include <QPoint>
 #include <QRectF>
+#include <QSize>
 #include <QTransform>
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <cmath>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -60,10 +60,10 @@ public:
   RectF translated(const QPointF &p) const;
 
   /**
-  * Adjust the rect by moving the defining points.
-  * @param dp0 :: Vector to be added to the first point.
-  * @param dp1 :: Vector to be added to the second point.
-  */
+   * Adjust the rect by moving the defining points.
+   * @param dp0 :: Vector to be added to the first point.
+   * @param dp1 :: Vector to be added to the second point.
+   */
   void adjust(const QPointF &dp0, const QPointF &dp1);
 
   /// Expand the rectangle if needed to include a point.
@@ -200,7 +200,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const QPointF &p) {
   ostr << '(' << p.x() << ',' << p.y() << ')';
   return ostr;
 }
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // RECTF_H

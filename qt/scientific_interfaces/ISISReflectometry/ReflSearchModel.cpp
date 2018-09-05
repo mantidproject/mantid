@@ -1,7 +1,7 @@
 #include "ReflSearchModel.h"
-#include "ReflTransferStrategy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "ReflTransferStrategy.h"
 #include <QColor>
 
 namespace MantidQt {
@@ -23,7 +23,7 @@ ReflSearchModel::ReflSearchModel(const ReflTransferStrategy &transferMethod,
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
-*/
+ */
 ReflSearchModel::~ReflSearchModel() {}
 
 void ReflSearchModel::addDataFromTable(
@@ -62,6 +62,10 @@ void ReflSearchModel::addDataFromTable(
     const std::string description = tableWorkspace->String(i, 6);
     const std::string location = tableWorkspace->String(i, 1);
     newRunDetails[run] = SearchResult{description, location};
+  }
+
+  if (newRunDetails.empty()) {
+    return;
   }
 
   // To append, insert the new runs after the last element in the model
@@ -272,4 +276,4 @@ std::string ReflSearchModel::runLocation(const std::string &run) const {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

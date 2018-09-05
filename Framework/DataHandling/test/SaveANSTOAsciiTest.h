@@ -1,14 +1,14 @@
 #ifndef SAVEANSTOASCIITEST_H_
 #define SAVEANSTOASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataHandling/SaveANSTOAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
-#include <boost/algorithm/string.hpp>
 #include <Poco/File.h>
+#include <boost/algorithm/string.hpp>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -61,7 +61,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -92,7 +92,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT((columns.at(3) == "nan") || (columns.at(3) == "inf"));
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -123,7 +123,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 0, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -154,7 +154,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 0, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();
@@ -186,7 +186,7 @@ public:
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(0)), 1.5, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(1)), 1, 0.01);
     TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(2)), 1, 0.01);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(columns.at(3)), 0.6, 0.01);
+    TS_ASSERT_EQUALS(columns.at(3), "0.000000000000000e+00");
     in.close();
 
     cleanupafterwards();

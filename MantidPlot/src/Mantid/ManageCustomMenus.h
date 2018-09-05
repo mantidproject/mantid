@@ -1,8 +1,8 @@
 #ifndef MANTID_MANAGE_CUSTOM_MENUS_H
 #define MANTID_MANAGE_CUSTOM_MENUS_H
 
-#include <QDialog>
 #include "ui_ManageCustomMenus.h"
+#include <QDialog>
 
 class ApplicationWindow;
 

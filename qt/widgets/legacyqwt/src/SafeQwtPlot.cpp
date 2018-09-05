@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/LegacyQwt/SafeQwtPlot.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 
@@ -48,5 +48,5 @@ void SafeQwtPlot::drawCanvas(QPainter *painter) {
   // lock is released when it goes out of scope.
 }
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

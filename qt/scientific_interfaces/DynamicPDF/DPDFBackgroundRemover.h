@@ -20,9 +20,9 @@ class SliceSelector;
 class DisplayControl;
 class FitControl;
 class FourierTrasform;
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -83,8 +83,8 @@ private:
   FitControl *m_fitControl;
   FourierTransform *m_fourierTransform;
 };
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_BACKGROUNDREMOVER_H_

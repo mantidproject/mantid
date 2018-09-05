@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/ClearCache.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidKernel/UsageService.h"
-#include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/Glob.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace Algorithms {

@@ -1,14 +1,14 @@
 #include "MantidGeometry/Crystal/Group.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
-#include <boost/python/scope.hpp>
 #include <boost/python/list.hpp>
-#include <boost/python/stl_iterator.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/scope.hpp>
+#include <boost/python/stl_iterator.hpp>
 
 using namespace Mantid::Geometry;
 using Mantid::Geometry::SymmetryOperation;
@@ -59,7 +59,7 @@ bool isInvariantTolerance(Group &self, const boost::python::object &tensor,
                           double tolerance) {
   return self.isInvariant(PyObjectToMatrix(tensor)(), tolerance);
 }
-}
+} // namespace
 
 void export_Group() {
 
@@ -84,9 +84,10 @@ void export_Group() {
            make_constructor(&constructGroupFromVector, default_call_policies(),
                             (arg("symmetryOperationVector"))),
            "Construct a group from the provided symmetry operation list.")
-      .def("__init__", make_constructor(&constructGroupFromPythonList,
-                                        default_call_policies(),
-                                        (arg("symmetryOperationList"))),
+      .def("__init__",
+           make_constructor(&constructGroupFromPythonList,
+                            default_call_policies(),
+                            (arg("symmetryOperationList"))),
            "Construct a group from a python generated symmetry operation list.")
       .def("getOrder", &Group::order, arg("self"),
            "Returns the order of the group.")

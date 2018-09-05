@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
 #define MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/System.h"
 #include <complex>
 
 namespace Mantid {

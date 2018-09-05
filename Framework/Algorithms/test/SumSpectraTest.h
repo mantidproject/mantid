@@ -1,17 +1,17 @@
 #ifndef SUMSPECTRATEST_H_
 #define SUMSPECTRATEST_H_
 
-#include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/SumSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/lexical_cast.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <limits>
-#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -413,6 +413,79 @@ public:
     TS_ASSERT_DELTA(y[7], double(nSignals) * y0[7], 1.e-6);
     TS_ASSERT_DELTA(y[38], double(nSignals - 1) * y0[38], 1.e-6);
     TS_ASSERT_DELTA(y[72], double(nSignals) * y0[72], 1.e-6);
+    TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
+    TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
+    TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);
+    TS_ASSERT_DELTA(e[99], std::sqrt(double(nSignals)) * e0[99], 0.00001);
+
+    // Check the detectors mapped to the single spectra
+    const auto &spec = output2D->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 1);
+    // Spectra at workspace index 1 is masked, 8 & 9 are monitors
+    TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 7);
+    TS_ASSERT(spec.hasDetectorID(1));
+    TS_ASSERT(spec.hasDetectorID(3));
+    TS_ASSERT(spec.hasDetectorID(4));
+    TS_ASSERT(spec.hasDetectorID(5));
+    TS_ASSERT(spec.hasDetectorID(6));
+    TS_ASSERT(spec.hasDetectorID(7));
+  }
+
+  void testExecNoLimitsWeightedNoMult() {
+    // this one turns off multiplying by the number of spectra
+    Mantid::Algorithms::SumSpectra alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT(alg2.isInitialized());
+
+    const auto &y0 = inputSpace->y(0);
+    const auto &e0 = inputSpace->e(0);
+    // Set the properties
+    alg2.setProperty("InputWorkspace", inputSpace);
+    const std::string outputSpace2 = "SumSpectraOut2";
+    alg2.setPropertyValue("OutputWorkspace", outputSpace2);
+    alg2.setProperty("IncludeMonitors", false);
+    alg2.setProperty("WeightedSum", true);
+    alg2.setProperty("MultiplyBySpectra", false);
+
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+    TS_ASSERT(alg2.isExecuted());
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve(outputSpace2));
+    Workspace2D_const_sptr output2D =
+        boost::dynamic_pointer_cast<const Workspace2D>(output);
+
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
+
+    const auto &x = output2D->x(0);
+    const auto &y = output2D->y(0);
+    const auto &e = output2D->e(0);
+    TS_ASSERT_EQUALS(x.size(), 103);
+    TS_ASSERT_EQUALS(y.size(), 102);
+    TS_ASSERT_EQUALS(e.size(), 102);
+
+    TS_ASSERT(output2D->run().hasProperty("NumAllSpectra"))
+    TS_ASSERT(output2D->run().hasProperty("NumMaskSpectra"))
+    TS_ASSERT(output2D->run().hasProperty("NumZeroSpectra"))
+
+    // Spectra at workspace index 1 is masked, 8 & 9 are monitors
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nTestHist - 3),
+                     output2D->run().getLogData("NumAllSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
+                     output2D->run().getLogData("NumMaskSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(1),
+                     output2D->run().getLogData("NumZeroSpectra")->value())
+
+    size_t nSignals = nTestHist - 3;
+    // Check a few bins
+    TS_ASSERT_EQUALS(x[0], inputSpace->x(0)[0]);
+    TS_ASSERT_EQUALS(x[50], inputSpace->x(0)[50]);
+    TS_ASSERT_EQUALS(x[100], inputSpace->x(0)[100]);
+    TS_ASSERT_DELTA(y[7], y0[7], 1.e-6);
+    TS_ASSERT_DELTA(y[38], y0[38], 1.e-6);
+    TS_ASSERT_DELTA(y[72], y0[72], 1.e-6);
     TS_ASSERT_DELTA(e[28], std::sqrt(double(nSignals)) * e0[28], 0.00001);
     TS_ASSERT_DELTA(e[38], std::sqrt(double(nSignals - 1)) * e0[38], 0.00001);
     TS_ASSERT_DELTA(e[47], std::sqrt(double(nSignals)) * e0[47], 0.00001);

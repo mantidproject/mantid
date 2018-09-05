@@ -1,13 +1,13 @@
 #ifndef MANTID_DATAHANDLING_LOADNXSPETEST_H_
 #define MANTID_DATAHANDLING_LOADNXSPETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadNXSPE.h"
 

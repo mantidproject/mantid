@@ -1,10 +1,10 @@
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
-#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -67,7 +67,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(
 
   return startAndEndTime;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {

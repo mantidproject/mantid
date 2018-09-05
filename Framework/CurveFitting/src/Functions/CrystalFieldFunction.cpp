@@ -1,5 +1,5 @@
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
@@ -405,15 +405,15 @@ void CrystalFieldFunction::buildAttributeNames() const {
     }
   };
   // Prepend a prefix to attribute names, ignore NumDeriv attribute.
-  auto prependPrefix =
-      [&](const std::string &prefix, const std::vector<std::string> &names) {
-        for (auto name : names) {
-          if (name == "NumDeriv")
-            continue;
-          name.insert(name.begin(), prefix.begin(), prefix.end());
-          m_attributeNames.push_back(name);
-        }
-      };
+  auto prependPrefix = [&](const std::string &prefix,
+                           const std::vector<std::string> &names) {
+    for (auto name : names) {
+      if (name == "NumDeriv")
+        continue;
+      name.insert(name.begin(), prefix.begin(), prefix.end());
+      m_attributeNames.push_back(name);
+    }
+  };
   // These names must appear first and in this order in the output vector
   moveAttributeName("Ions");
   moveAttributeName("Symmetries");

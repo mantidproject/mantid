@@ -74,6 +74,11 @@ const std::string ReflectometryMomentumTransfer::category() const {
   return "ILL\\Reflectometry;Reflectometry";
 }
 
+/// Return a vector of related algorithms.
+const std::vector<std::string> ReflectometryMomentumTransfer::seeAlso() const {
+  return {"ConvertToReflectometryQ", "ConvertUnits"};
+}
+
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ReflectometryMomentumTransfer::summary() const {
   return "Convert wavelength to momentum transfer and calculate the Qz "
@@ -99,11 +104,12 @@ void ReflectometryMomentumTransfer::init() {
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Direction::Input, inWavelength),
-      "A reflectivity workspace in wavelenght.");
+      "A reflectivity workspace with X units in wavelength.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Direction::Output, inWavelength),
-      "The input workspace with DX values set to the Qz resolution.");
+      "The input workspace with X units converted to Q and DX values set to "
+      "the Q resolution.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::REFLECTED_BEAM_WS, "", Direction::Input, inWavelength),
@@ -531,15 +537,16 @@ double ReflectometryMomentumTransfer::wavelengthResolutionSquared(
   const auto l1 = spectrumInfo.l1();
   const auto l2 = spectrumInfo.l2(wsIndex);
   const auto flightDistance = l1 + l2;
-  const auto chopperResolution = setup.chopperPairDistance +
-                                 h * setup.chopperOpening *
-                                     setup.chopperPeriod /
-                                     (2. * M_PI * NeutronMass * wavelength);
+  const auto chopperResolution =
+      setup.chopperPairDistance + h * setup.chopperOpening *
+                                      setup.chopperPeriod /
+                                      (2. * M_PI * NeutronMass * wavelength);
   const auto detectorResolution =
       h * setup.tofChannelWidth / (NeutronMass * wavelength);
   const auto partialResolution =
-      0.49 * (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) +
-              3. * chopperResolution * detectorResolution) /
+      0.49 *
+      (3. * pow<2>(chopperResolution) + pow<2>(detectorResolution) +
+       3. * chopperResolution * detectorResolution) /
       (2. * chopperResolution + detectorResolution) / flightDistance;
   const auto flightDistRatio =
       (l1 - setup.slit2SampleDistance) / setup.slit1Slit2Distance;

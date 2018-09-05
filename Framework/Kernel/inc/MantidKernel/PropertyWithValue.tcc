@@ -278,7 +278,7 @@ PropertyWithValue<TYPE> &PropertyWithValue<TYPE>::operator=(const TYPE &value) {
     return *this;
   } else {
     m_value = oldValue;
-    throw std::invalid_argument(problem);
+    throw std::invalid_argument("When setting value of property \"" + this->name() + "\": " + problem);
   }
 }
 

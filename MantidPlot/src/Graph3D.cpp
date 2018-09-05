@@ -3088,8 +3088,8 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   fnt = sp->coordinates()->axes[Z1].labelFont();
   tsv << fnt.family() << fnt.pointSize() << fnt.weight() << fnt.italic();
 
-  tsv.writeLine("rotation") << sp->xRotation() << sp->yRotation()
-                            << sp->zRotation();
+  tsv.writeLine("rotation")
+      << sp->xRotation() << sp->yRotation() << sp->zRotation();
   tsv.writeLine("zoom") << sp->zoom();
   tsv.writeLine("scaling") << sp->xScale() << sp->yScale() << sp->zScale();
   tsv.writeLine("shift") << sp->xShift() << sp->yShift() << sp->zShift();

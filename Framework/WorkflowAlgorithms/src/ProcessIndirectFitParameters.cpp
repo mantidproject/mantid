@@ -1,13 +1,194 @@
 #include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/algorithm/string/predicate.hpp>
+
+namespace {
+using namespace Mantid::API;
+
+template <typename T, typename... Ts>
+std::vector<T, Ts...> repeat(std::vector<T, Ts...> const &vec, std::size_t n) {
+  std::vector<T, Ts...> result;
+  result.reserve(vec.size() * n);
+  for (; n > 0; --n)
+    result.insert(result.end(), vec.begin(), vec.end());
+  return result;
+}
+
+template <typename T>
+std::vector<T> getIncrementingSequence(const T &from, std::size_t length) {
+  std::vector<T> sequence(length);
+  std::iota(sequence.begin(), sequence.end(), from);
+  return sequence;
+}
+
+std::vector<std::string> appendSuffix(std::vector<std::string> const &vec,
+                                      std::string const &suffix) {
+  std::vector<std::string> appended;
+  appended.reserve(vec.size());
+  for (auto &&str : vec)
+    appended.emplace_back(str + suffix);
+  return appended;
+}
+
+MatrixWorkspace_sptr
+createWorkspace(std::vector<double> const &x, std::vector<double> const &y,
+                std::vector<double> const &e, int numberOfSpectra,
+                std::vector<std::string> const &verticalAxisNames,
+                std::string const &unitX) {
+  auto createWorkspaceAlgorithm =
+      AlgorithmManager::Instance().createUnmanaged("CreateWorkspace");
+  createWorkspaceAlgorithm->initialize();
+  createWorkspaceAlgorithm->setChild(true);
+  createWorkspaceAlgorithm->setLogging(false);
+  createWorkspaceAlgorithm->setProperty("DataX", x);
+  createWorkspaceAlgorithm->setProperty("DataY", y);
+  createWorkspaceAlgorithm->setProperty("DataE", e);
+  createWorkspaceAlgorithm->setProperty("NSpec", numberOfSpectra);
+  createWorkspaceAlgorithm->setProperty("VerticalAxisUnit", "Text");
+  createWorkspaceAlgorithm->setProperty("VerticalAxisValues",
+                                        verticalAxisNames);
+  createWorkspaceAlgorithm->setProperty("UnitX", unitX);
+  createWorkspaceAlgorithm->setProperty("OutputWorkspace", "__created");
+  createWorkspaceAlgorithm->execute();
+  return createWorkspaceAlgorithm->getProperty("OutputWorkspace");
+}
+
+template <typename T, typename OutputIterator>
+void extractColumnValues(Column const &column, std::size_t startRow,
+                         std::size_t endRow, OutputIterator outputIt) {
+  for (auto i = startRow; i <= endRow; ++i)
+    *outputIt++ = column.cell<T>(i);
+}
+
+template <typename T, typename OutputIterator>
+void extractValuesFromColumns(std::size_t startRow, std::size_t endRow,
+                              std::vector<Column_const_sptr> columns,
+                              OutputIterator outputIt) {
+  for (auto &&column : columns)
+    extractColumnValues<T>(*column, startRow, endRow, outputIt);
+}
+
+template <typename T>
+std::vector<T> getColumnValues(Column const &column, std::size_t startRow,
+                               std::size_t endRow) {
+  std::vector<T> values;
+  values.reserve(1 + (endRow - startRow));
+  extractColumnValues<T>(column, startRow, endRow, std::back_inserter(values));
+  return values;
+}
+
+std::vector<double> getNumericColumnValuesOrIndices(Column const &column,
+                                                    std::size_t startRow,
+                                                    std::size_t endRow) {
+  auto const length = startRow > endRow ? 0 : 1 + endRow - startRow;
+  if (column.isNumber())
+    return getColumnValues<double>(column, startRow, endRow);
+  return getIncrementingSequence(0.0, length);
+}
+
+std::string getColumnName(Column_const_sptr column) { return column->name(); }
+
+std::vector<std::string>
+extractColumnNames(std::vector<Column_const_sptr> const &columns) {
+  std::vector<std::string> names;
+  names.reserve(columns.size());
+  std::transform(columns.begin(), columns.end(), std::back_inserter(names),
+                 getColumnName);
+  return names;
+}
+
+template <typename ColumnFilter>
+std::vector<Column_const_sptr> extractColumns(ITableWorkspace const *table,
+                                              ColumnFilter const &filter) {
+  std::vector<Column_const_sptr> columns;
+  for (auto i = 0u; i < table->columnCount(); ++i) {
+    auto const column = table->getColumn(i);
+    if (filter(*column))
+      columns.emplace_back(column);
+  }
+  return columns;
+}
+
+struct TableToMatrixWorkspaceConverter {
+  template <typename YFilter, typename EFilter>
+  TableToMatrixWorkspaceConverter(ITableWorkspace const *table,
+                                  std::vector<double> const &x,
+                                  YFilter const &yFilter,
+                                  EFilter const &eFilter)
+      : m_x(x), m_yColumns(extractColumns(table, yFilter)),
+        m_eColumns(extractColumns(table, eFilter)),
+        m_yAxis(extractColumnNames(m_yColumns)) {}
+
+  MatrixWorkspace_sptr operator()(std::size_t startRow, std::size_t endRow,
+                                  std::string const &unitX) const {
+    auto const x = repeat(m_x, m_yColumns.size());
+
+    std::vector<double> y;
+    std::vector<double> e;
+    y.reserve(x.size());
+    e.reserve(x.size());
+    extractValuesFromColumns<double>(startRow, endRow, m_yColumns,
+                                     std::back_inserter(y));
+    extractValuesFromColumns<double>(startRow, endRow, m_eColumns,
+                                     std::back_inserter(e));
+
+    return createWorkspace(x, y, e, static_cast<int>(m_yColumns.size()),
+                           m_yAxis, unitX);
+  }
+
+private:
+  std::vector<double> const m_x;
+  std::vector<Column_const_sptr> const m_yColumns;
+  std::vector<Column_const_sptr> const m_eColumns;
+  std::vector<std::string> const m_yAxis;
+};
+
+struct EndsWithOneOf {
+  explicit EndsWithOneOf(std::vector<std::string> &&strings)
+      : m_strings(std::move(strings)) {}
+
+  bool operator()(std::string const &value) const {
+    for (auto &&str : m_strings) {
+      if (boost::algorithm::ends_with(value, str))
+        return true;
+    }
+    return false;
+  }
+
+private:
+  std::vector<std::string> const m_strings;
+};
+
+template <typename StringFilter> struct ColumnNameFilter {
+public:
+  explicit ColumnNameFilter(StringFilter &&filter)
+      : m_filter(std::forward<StringFilter>(filter)) {}
+
+  bool operator()(Column const &column) const {
+    return m_filter(column.name());
+  }
+
+private:
+  StringFilter const m_filter;
+};
+
+template <typename StringFilter>
+ColumnNameFilter<StringFilter> makeColumnNameFilter(StringFilter &&filter) {
+  return ColumnNameFilter<StringFilter>(std::forward<StringFilter>(filter));
+}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -65,6 +246,15 @@ void ProcessIndirectFitParameters::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
 
+  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  positiveInt->setLower(0);
+  declareProperty(
+      "StartRowIndex", EMPTY_INT(), positiveInt,
+      "The start row index to include in the output matrix workspace.");
+  declareProperty(
+      "EndRowIndex", EMPTY_INT(), positiveInt,
+      "The end row index to include in the output matrix workspace.");
+
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name to give the output workspace");
@@ -74,164 +264,34 @@ void ProcessIndirectFitParameters::init() {
 /** Execute the algorithm.
  */
 void ProcessIndirectFitParameters::exec() {
-  // Get Properties
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
   std::string xColumn = getProperty("ColumnX");
-  std::vector<std::string> parameterNames = getProperty("ParameterNames");
   std::string xUnit = getProperty("XAxisUnit");
-  MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+  std::vector<std::string> parameterNames = getProperty("ParameterNames");
+  std::vector<std::string> errorNames = appendSuffix(parameterNames, "_Err");
+  auto const startRow = getStartRow();
+  auto const endRow = getEndRow(inputWs->rowCount() - 1);
 
-  // Search for any parameters in the table with the given parameter names,
-  // ignoring their function index and output them to a workspace
-  auto workspaces = std::vector<std::vector<MatrixWorkspace_sptr>>();
-  const size_t totalNames = parameterNames.size();
-  Progress tblSearchProg = Progress(this, 0.0, 0.5, totalNames * 2);
-  for (size_t i = 0; i < totalNames; i++) {
-    tblSearchProg.report("Splitting table into relevant columns");
-    auto const allColumnNames = inputWs->getColumnNames();
-    auto columns = searchForFitParams(parameterNames.at(i), allColumnNames);
-    auto errColumns =
-        searchForFitParams((parameterNames.at(i) + "_Err"), allColumnNames);
+  auto const x = getNumericColumnValuesOrIndices(*inputWs->getColumn(xColumn),
+                                                 startRow, endRow);
+  auto const yFilter =
+      makeColumnNameFilter(EndsWithOneOf(std::move(parameterNames)));
+  auto const eFilter =
+      makeColumnNameFilter(EndsWithOneOf(std::move(errorNames)));
 
-    auto paramWorkspaces = std::vector<MatrixWorkspace_sptr>();
-    size_t min = columns.size();
-    if (errColumns.size() < min) {
-      min = errColumns.size();
-    }
-    auto convertToMatrix =
-        createChildAlgorithm("ConvertTableToMatrixWorkspace", -1, -1, true);
-    tblSearchProg.report("Converting Column to Matrix");
-    for (size_t j = 0; j < min; j++) {
-      convertToMatrix->setProperty("InputWorkspace", inputWs);
-      convertToMatrix->setProperty("ColumnX", xColumn);
-      convertToMatrix->setProperty("ColumnY", columns.at(j));
-      convertToMatrix->setProperty("ColumnE", errColumns.at(j));
-      convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
-      convertToMatrix->executeAsChildAlg();
-      paramWorkspaces.push_back(
-          convertToMatrix->getProperty("OutputWorkspace"));
-    }
-    workspaces.push_back(std::move(paramWorkspaces));
-  }
-
-  Progress workflowProg = Progress(this, 0.5, 1.0, 10);
-  // Transpose list of workspaces, ignoring unequal length of lists
-  // this handles the case where a parameter occurs only once in the whole
-  // workspace
-  workflowProg.report("Reordering workspace vector");
-  workspaces = reorder2DVector(workspaces);
-
-  // Get output workspace columns
-  auto outputSpectraNames = std::vector<std::string>();
-  for (const auto &paramWorkspaces : workspaces) {
-    for (const auto &workspace : paramWorkspaces) {
-      outputSpectraNames.push_back(workspace->YUnitLabel());
-    }
-  }
-
-  // Join all the parameters for each peak into a single workspace per peak
-  auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
-  auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
-  conjoin->setProperty("CheckOverlapping", false);
-  const size_t wsMax = workspaces.size();
-  for (size_t j = 0; j < wsMax; j++) {
-    auto tempPeakWs = workspaces.at(j).at(0);
-    const size_t paramMax = workspaces.at(j).size();
-    workflowProg.report("Conjoining matrix workspaces");
-    for (size_t k = 1; k < paramMax; k++) {
-      auto paramWs = workspaces.at(j).at(k);
-      conjoin->setProperty("InputWorkspace1", tempPeakWs);
-      conjoin->setProperty("InputWorkspace2", paramWs);
-      conjoin->executeAsChildAlg();
-      tempPeakWs = conjoin->getProperty("InputWorkspace1");
-    }
-    tempWorkspaces.push_back(tempPeakWs);
-  }
-
-  // Join all peaks into a single workspace
-  outputWs = tempWorkspaces.at(0);
-  for (auto it = tempWorkspaces.begin() + 1; it != tempWorkspaces.end(); ++it) {
-    workflowProg.report("Joining peak workspaces");
-    conjoin->setProperty("InputWorkspace1", outputWs);
-    conjoin->setProperty("InputWorkspace2", *it);
-    conjoin->executeAsChildAlg();
-    outputWs = conjoin->getProperty("InputWorkspace1");
-  }
-
-  // Replace axis on workspaces with text axis
-  workflowProg.report("Converting text axis");
-  const auto numberOfHist = outputWs->getNumberHistograms();
-  auto axis = new TextAxis(numberOfHist);
-
-  for (size_t k = 0; k < numberOfHist; k++) {
-    axis->setLabel(k, outputSpectraNames[k]);
-  }
-  outputWs->replaceAxis(1, axis);
-
-  workflowProg.report("Setting unit");
-  // Set units for the xAxis
-  if (!xUnit.empty()) {
-    outputWs->getAxis(0)->setUnit(xUnit);
-  }
-
-  setProperty("OutputWorkspace", outputWs);
+  TableToMatrixWorkspaceConverter converter(inputWs.get(), x, yFilter, eFilter);
+  auto const output = converter(startRow, endRow, xUnit);
+  setProperty("OutputWorkspace", output);
 }
 
-/**
- * Searchs for a particular word within all of the fit params in the columns of
- * a table workspace (note: This method only matches strings that are at the end
- * of a column name this is to ensure that "Amplitude" will match
- * "f0.f0.f1.Amplitude" but not f0.f0.f1.Amplitude_Err")
- * @param suffix - The string to search for
- * @param columns - A string vector of all the column names in a table workspace
- * @return - The full column names in which the string is present
- */
-std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
-    const std::string &suffix, const std::vector<std::string> &columns) {
-  auto fitParams = std::vector<std::string>();
-  const size_t totalColumns = columns.size();
-  for (size_t i = 0; i < totalColumns; i++) {
-    auto pos = columns.at(i).rfind(suffix);
-    if (pos != std::string::npos) {
-      auto endCheck = pos + suffix.size();
-      if (endCheck == columns.at(i).size()) {
-        fitParams.push_back(columns.at(i));
-      }
-    }
-  }
-  return fitParams;
+std::size_t ProcessIndirectFitParameters::getStartRow() const {
+  int startRow = getProperty("StartRowIndex");
+  return startRow == EMPTY_INT() ? 0 : static_cast<std::size_t>(startRow);
 }
 
-/**
- * Changes the ordering of a 2D vector of strings such that
- * [[1a,2a,3a], [1b,2b,3b], [1c,2c,3c]]
- * becomes
- * [[1a,1b,1c], [2a,2b,2c], [3a,3b,3c]]
- * @param original - The original vector to be transformed
- * @return - The vector after it has been transformed
- */
-std::vector<std::vector<MatrixWorkspace_sptr>>
-ProcessIndirectFitParameters::reorder2DVector(
-    std::vector<std::vector<MatrixWorkspace_sptr>> &original) {
-  size_t maximumLength = original.at(0).size();
-  for (size_t i = 1; i < original.size(); i++) {
-    if (original.at(i).size() > maximumLength) {
-      maximumLength = original.at(i).size();
-    }
-  }
-
-  auto reorderedVector = std::vector<std::vector<MatrixWorkspace_sptr>>();
-  for (size_t i = 0; i < maximumLength; i++) {
-    std::vector<MatrixWorkspace_sptr> temp;
-    for (const auto &j : original) {
-      if (j.size() > i) {
-        temp.push_back(j.at(i));
-      }
-    }
-    reorderedVector.push_back(temp);
-  }
-
-  return reorderedVector;
+std::size_t ProcessIndirectFitParameters::getEndRow(std::size_t maximum) const {
+  int endRow = getProperty("EndRowIndex");
+  return endRow == EMPTY_INT() ? maximum : static_cast<std::size_t>(endRow);
 }
 
 } // namespace Algorithms

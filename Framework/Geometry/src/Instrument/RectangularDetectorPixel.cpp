@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::Kernel;
@@ -63,5 +63,5 @@ Kernel::V3D RectangularDetectorPixel::getRelativePos() const {
   return V3D(x, y, 0);
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

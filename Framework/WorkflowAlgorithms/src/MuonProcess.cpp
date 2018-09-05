@@ -1,12 +1,12 @@
 #include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
@@ -19,7 +19,7 @@ namespace {
  * @returns True if i == 1, else false.
  */
 bool isOne(int i) { return (i == 1); }
-}
+} // namespace
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -117,7 +117,9 @@ void MuonProcess::init() {
                   "An output workspace.");
 
   declareProperty("CropWorkspace", true,
-                  "Determines if the input workspace should be cropped");
+                  "Determines if the input workspace "
+                  "should be cropped at Xmax, Xmin is "
+                  "still aplied.");
 
   declareProperty("WorkspaceName", "", "The name of the input workspace");
 }
@@ -300,25 +302,23 @@ MatrixWorkspace_sptr MuonProcess::correctWorkspace(MatrixWorkspace_sptr ws,
 
     ws = changeOffset->getProperty("OutputWorkspace");
   }
-  bool toCrop = getProperty("CropWorkspace");
-  if (toCrop) {
-    // Crop workspace, if need to
-    double Xmin = getProperty("Xmin");
-    double Xmax = getProperty("Xmax");
-    if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
-      IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-      crop->setProperty("InputWorkspace", ws);
+  // Crop workspace, if need to
+  double Xmin = getProperty("Xmin");
+  double Xmax = getProperty("Xmax");
+  if (Xmin != EMPTY_DBL() || Xmax != EMPTY_DBL()) {
+    IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+    crop->setProperty("InputWorkspace", ws);
 
-      if (Xmin != EMPTY_DBL())
-        crop->setProperty("Xmin", Xmin);
-
+    if (Xmin != EMPTY_DBL())
+      crop->setProperty("Xmin", Xmin);
+    bool toCrop = getProperty("CropWorkspace");
+    if (toCrop) {
       if (Xmax != EMPTY_DBL())
         crop->setProperty("Xmax", Xmax);
-
-      crop->execute();
-
-      ws = crop->getProperty("OutputWorkspace");
     }
+    crop->execute();
+
+    ws = crop->getProperty("OutputWorkspace");
   }
 
   // Rebin workspace if need to
@@ -433,10 +433,10 @@ std::map<std::string, std::string> MuonProcess::validateInputs() {
 }
 
 /**
-* Builds an error message from the supplied parameters.
-* @param invalidPeriods :: [input] Vector containing invalid periods
-* @returns An error message
-*/
+ * Builds an error message from the supplied parameters.
+ * @param invalidPeriods :: [input] Vector containing invalid periods
+ * @returns An error message
+ */
 std::string
 MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods) const {
   std::stringstream message;

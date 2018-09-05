@@ -231,34 +231,34 @@ private:
 //-----------------------------------------------------------------------------
 
 /**
-* Load the time of flight data. file must have open the group containing
-* "time_of_flight" data set. This will add a offset to all of the
-* time-of-flight values or a random number to each time-of-flight. It
-* should only ever be called on event files that have a "detector_1_events"
-* group inside the "NXentry". It is an old ISIS requirement that is rarely
-* used now.
-*
-* Due to hardware issues with retro-fitting event mode to old electronics,
-* ISIS event mode is really a very fine histogram with between 1 and 2
-* microseconds bins.
-*
-* If we just took "middle of bin" as the true event time here then WISH
-* observed strange ripples when they added spectra. The solution was to
-* randomise the probability of an event within the bin.
-*
-* This randomisation is now performed in the control program which also writes
-* the "event_time_offset_shift" dataset (with a single value of "random") when
-* it has been performed. If this dataset is present in an event file then no
-* randomisation is performed in LoadEventNexus.
-*
-* This code should remain for loading older ISIS event datasets.
-*
-* @param file :: The nexus file to read from.
-* @param localWorkspace :: The event workspace collection to write to.
-* @param binsName :: bins name
-* @param start_wi :: First workspace index to process
-* @param end_wi :: Last workspace index to process
-*/
+ * Load the time of flight data. file must have open the group containing
+ * "time_of_flight" data set. This will add a offset to all of the
+ * time-of-flight values or a random number to each time-of-flight. It
+ * should only ever be called on event files that have a "detector_1_events"
+ * group inside the "NXentry". It is an old ISIS requirement that is rarely
+ * used now.
+ *
+ * Due to hardware issues with retro-fitting event mode to old electronics,
+ * ISIS event mode is really a very fine histogram with between 1 and 2
+ * microseconds bins.
+ *
+ * If we just took "middle of bin" as the true event time here then WISH
+ * observed strange ripples when they added spectra. The solution was to
+ * randomise the probability of an event within the bin.
+ *
+ * This randomisation is now performed in the control program which also writes
+ * the "event_time_offset_shift" dataset (with a single value of "random") when
+ * it has been performed. If this dataset is present in an event file then no
+ * randomisation is performed in LoadEventNexus.
+ *
+ * This code should remain for loading older ISIS event datasets.
+ *
+ * @param file :: The nexus file to read from.
+ * @param localWorkspace :: The event workspace collection to write to.
+ * @param binsName :: bins name
+ * @param start_wi :: First workspace index to process
+ * @param end_wi :: Last workspace index to process
+ */
 template <typename T>
 void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
                                const std::string &binsName, size_t start_wi = 0,
@@ -339,17 +339,17 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
 }
 
 /**
-* ISIS specific method for dealing with wide events. Check if time_of_flight
-* can be found in the file and load it.
-*
-* THIS ONLY APPLIES TO ISIS FILES WITH "detector_1_events" IN THE "NXentry."
-*
-* @param file :: The nexus file to read from.
-* @param localWorkspace :: The event workspace collection which events will be
-*modified.
-* @param entry_name :: An NXentry tag in the file
-* @param classType :: The type of the events: either detector or monitor
-*/
+ * ISIS specific method for dealing with wide events. Check if time_of_flight
+ * can be found in the file and load it.
+ *
+ * THIS ONLY APPLIES TO ISIS FILES WITH "detector_1_events" IN THE "NXentry."
+ *
+ * @param file :: The nexus file to read from.
+ * @param localWorkspace :: The event workspace collection which events will be
+ *modified.
+ * @param entry_name :: An NXentry tag in the file
+ * @param classType :: The type of the events: either detector or monitor
+ */
 template <typename T>
 void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
                                   const std::string &entry_name,
@@ -453,14 +453,14 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file.
-*
-*  @param nexusfilename :: Used to pick the instrument.
-*  @param localWorkspace :: Templated workspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the NXS file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
+ *
+ *  @param nexusfilename :: Used to pick the instrument.
+ *  @param localWorkspace :: Templated workspace in which to put the instrument
+ *geometry
+ *  @param top_entry_name :: entry name at the top of the NXS file
+ *  @param alg :: Handle of the algorithm
+ *  @return true if successful
+ */
 template <typename T>
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        T localWorkspace,
@@ -477,8 +477,8 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   try {
     nxfile.openData("name");
     instrument = nxfile.getStrData();
-    alg->getLogger().debug() << "Instrument name read from NeXus file is "
-                             << instrument << '\n';
+    alg->getLogger().debug()
+        << "Instrument name read from NeXus file is " << instrument << '\n';
   } catch (::NeXus::Exception &) {
     // Try to fall back to isis compatibility options
     nxfile.closeGroup();
@@ -708,15 +708,15 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file or if not found from the IDF file
-*  specified by the info in the Nexus file
-*
-*  @param nexusfilename :: The Nexus file name
-*  @param localWorkspace :: templated workspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the Nexus file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
+ *  specified by the info in the Nexus file
+ *
+ *  @param nexusfilename :: The Nexus file name
+ *  @param localWorkspace :: templated workspace in which to put the instrument
+ *geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm
+ *  @return true if successful
+ */
 template <typename T>
 bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
                                     T localWorkspace,
@@ -732,14 +732,14 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
-*
-*  @param nexusfilename :: The name of the nexus file being loaded
-*  @param localWorkspace :: templated workspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the Nexus file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
+ *
+ *  @param nexusfilename :: The name of the nexus file being loaded
+ *  @param localWorkspace :: templated workspace in which to put the instrument
+ *geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm
+ *  @return true if successful
+ */
 template <typename T>
 bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
                                          T localWorkspace,
