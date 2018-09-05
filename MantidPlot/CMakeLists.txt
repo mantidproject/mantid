@@ -73,6 +73,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/MatrixValuesDialog.cpp
                    src/MdiSubWindow.cpp
                    src/MdPlottingCmapsProvider.cpp
+                   src/MenuWithToolTips.cpp
                    src/MultiLayer.cpp
                    src/MultiPeakFit.cpp
                    src/MultiPeakFitTool.cpp
@@ -529,6 +530,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/MatrixSizeDialog.h
                         src/MatrixValuesDialog.h
                         src/MdiSubWindow.h
+                        src/MenuWithToolTips.h
                         src/MultiLayer.h
                         src/MultiPeakFit.h
                         src/MultiPeakFitTool.h

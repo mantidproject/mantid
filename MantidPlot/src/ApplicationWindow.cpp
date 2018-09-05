@@ -1122,7 +1122,7 @@ void ApplicationWindow::initMainMenu() {
 
   newMenu = new QMenu(this);
   recentProjectsMenu = new QMenu(this);
-  recentFilesMenu = new QMenu(this);
+  recentFilesMenu = new MenuWithToolTips(this);
   newMenu->setObjectName("newMenu");
   exportPlotMenu = new QMenu(this);
   exportPlotMenu->setObjectName("exportPlotMenu");
@@ -13691,6 +13691,7 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     }
     QString actionText = itemTemplate.arg(QString::number(i + 1), itemText);
     QAction *ma = new QAction(actionText, recentFilesMenu);
+    ma->setToolTip("<p>" + filePath + "</p>");
     ma->setData(recentFiles[i]);
     recentFilesMenu->addAction(ma);
   }
