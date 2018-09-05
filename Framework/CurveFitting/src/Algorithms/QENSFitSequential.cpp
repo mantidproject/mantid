@@ -10,6 +10,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/cast.hpp>
 #include <boost/regex.hpp>
@@ -278,6 +279,23 @@ createGroup(const std::vector<MatrixWorkspace_sptr> &workspaces) {
     group->addWorkspace(workspace);
   return group;
 }
+
+WorkspaceGroup_sptr
+runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
+                                   const std::vector<std::size_t> &grouping) {
+  std::vector<MatrixWorkspace_sptr> results;
+  results.reserve(grouping.size() - 1);
+  for (auto i = 0u; i < grouping.size() - 1; ++i) {
+    processingAlgorithm.setProperty("StartRowIndex",
+                                    static_cast<int>(grouping[i]));
+    processingAlgorithm.setProperty("EndRowIndex",
+                                    static_cast<int>(grouping[i + 1]) - 1);
+    processingAlgorithm.setProperty("OutputWorkspace", "__Result");
+    processingAlgorithm.execute();
+    results.push_back(processingAlgorithm.getProperty("OutputWorkspace"));
+  }
+  return createGroup(results);
+}
 } // namespace
 
 namespace Mantid {
@@ -344,6 +362,13 @@ void QENSFitSequential::init() {
       "by a list of spectra/workspace-indices \n"
       "or values using the notation described in the description section of "
       "the help page.");
+
+  std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
+  unitOptions.emplace_back("");
+  declareProperty("ResultXAxisUnit", "MomentumTransfer",
+                  boost::make_shared<StringListValidator>(unitOptions),
+                  "The unit to assign to the X Axis of the result workspace, "
+                  "defaults to MomentumTransfer");
 
   declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -610,23 +635,15 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
+  std::string const xAxisUnit = getProperty("ResultXAxisUnit");
   auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, true);
+      createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
+  pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
   pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("XAxisUnit", "MomentumTransfer");
+  pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
-
-  std::vector<MatrixWorkspace_sptr> results;
-  results.reserve(grouping.size() - 1);
-  for (auto i = 0u; i < grouping.size() - 1; ++i) {
-    pifp->setProperty("StartRowIndex", static_cast<int>(grouping[i]));
-    pifp->setProperty("EndRowIndex", static_cast<int>(grouping[i + 1]) - 1);
-    pifp->setProperty("OutputWorkspace", "__Result");
-    pifp->executeAsChildAlg();
-    results.push_back(pifp->getProperty("OutputWorkspace"));
-  }
-  return createGroup(results);
+  return runParameterProcessingWithGrouping(*pifp, grouping);
 }
 
 ITableWorkspace_sptr

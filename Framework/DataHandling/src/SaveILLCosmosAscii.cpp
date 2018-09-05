@@ -5,8 +5,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <fstream>
-
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
@@ -36,9 +34,8 @@ void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
   std::string startDT;
   std::string endDT;
   auto tempInst = m_ws->getInstrument();
-  if (tempInst) {
+  if (tempInst)
     instrument = tempInst->getName();
-  }
 
   try {
     subtitle = samp.getLogData("run_title")->value();
@@ -75,7 +72,7 @@ void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
   }
 
   file << "Number of file format: 2\n";
-  file << "Number of data points:" << m_sep << m_xlength << '\n';
+  file << "Number of data points: " << m_length << '\n';
   file << '\n';
 
   file << m_sep << "q" << m_sep << "refl" << m_sep << "refl_err" << m_sep
