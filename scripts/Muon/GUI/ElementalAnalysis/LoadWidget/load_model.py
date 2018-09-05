@@ -12,6 +12,8 @@ class LoadModel(lutils.LModel):
     def execute(self):
         if self.run not in self.loaded_runs:
             self.load_run()
+        else:
+            self.last_loaded_runs.append(self.run)
 
 
 class CoLoadModel(lutils.LModel):
@@ -30,6 +32,8 @@ class CoLoadModel(lutils.LModel):
             if current_ws is None:
                 return
             self.loaded_runs[self.run] = current_ws
+        else:
+            self.last_loaded_runs.append(self.run)
         if self.run not in self.co_runs:
             self.co_runs.append(self.run)
             if self.workspace:
@@ -45,6 +49,7 @@ class CoLoadModel(lutils.LModel):
 
     def co_load_run(self, workspace):
         run = lutils.hyphenise(self.co_runs)
+        self.last_loaded_runs.append(run)
         to_add = [self.add_runs(l, r, run) for l, r in zip(*lutils.flatten_run_data(
             self.workspace, workspace))]
         self.workspace = lutils.group_by_detector(run, to_add)

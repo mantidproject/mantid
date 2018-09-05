@@ -1,8 +1,6 @@
 import glob
 import os
 
-from collections import OrderedDict
-
 from six import iteritems
 
 from mantid import config
@@ -14,7 +12,8 @@ type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.loaded_runs = OrderedDict({})
+        self.loaded_runs = {}
+        self.last_loaded_runs = []
 
     def _load(self, inputs):
         """ inputs is a dict mapping filepaths to output names """
@@ -30,6 +29,7 @@ class LModel(object):
         self._load(workspaces)
         self.loaded_runs[self.run] = group_by_detector(
             self.run, workspaces.values())
+        self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
     def output(self):

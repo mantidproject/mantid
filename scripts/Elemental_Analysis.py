@@ -4,6 +4,8 @@ from PyQt4 import QtGui
 
 import sys
 
+from six import iteritems
+
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
@@ -70,6 +72,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
         self.element_widgets = {}
         self.element_data = {}
+        self.element_lines = {}
         self._generate_element_widgets()
         self._generate_element_data()
 
@@ -105,8 +108,18 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             except KeyError:
                 continue
 
+    def _add_element_lines(self, element, data):
+        for label, x_value in iteritems(data):
+            for plot_name in self.plotting.get_subplots():
+                line = self.plotting.add_vline(plot_name, x_value, 0, 1)
+                try:
+                    self.element_lines[element][x_value] = line
+                except KeyError:
+                    self.element_lines[element] = {x_value: line}
+
     def _update_peak_data(self, element, data):
         self.element_data[element] = data
+        # self.elem
 
     def _generate_element_widgets(self):
         self.element_widgets = {}
