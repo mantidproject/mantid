@@ -72,14 +72,14 @@ class MantidStressTest(unittest.TestCase):
         from mantid.kernel import MemoryStats
         self.memory = MemoryStats().residentMem()/1024
 
-    def setSearchSaveDirectories(self, core_id, searchDir, saveDir):
+    def setSearchSaveDirectories(self, core_id, saveDir):
+        '''
+        Modify the defaultsave.directory to a path specific to each thread
+        '''
         from mantid.kernel import config
         config['datasearch.directories'] += "/core-%i" % (core_id)
         config['defaultsave.directory'] = "%s/core-%i" % (saveDir,core_id)
         sys.path.insert(0, config['defaultsave.directory'])
-        # print("in here")
-        # print(config['datasearch.directories'])
-        # print(config['defaultsave.directory'])
         return
 
     def runTest(self):
@@ -632,8 +632,7 @@ class TestRunner(object):
             exec_call += ' '  + self._exec_args
         # write script to temporary file and execute this file
         tmp_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        tmp_file.write(script.asString(clean=self._clean, core_id=self._core_id,
-                                       searchDir=self._searchDir, saveDir=self._saveDir))
+        tmp_file.write(script.asString(clean=self._clean, core_id=self._core_id, saveDir=self._saveDir))
         tmp_file.close()
         cmd = exec_call + ' ' + tmp_file.name
         results = self.spawnSubProcess(cmd)
@@ -657,7 +656,7 @@ class TestScript(object):
                ("sys.path.append('%s')\n" % self._test_dir) + \
                ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
                ("systest = %s()\n" % self._test_cls_name) + \
-               ("systest.setSearchSaveDirectories(%i,'%s','%s')\n" % (core_id, searchDir, saveDir)) + \
+               ("systest.setSearchSaveDirectories(%i,'%s')\n" % (core_id, saveDir)) + \
                ("if %r:\n" % self._exclude_in_pr_builds) + \
                ("    systest.excludeInPullRequests = lambda: False\n")
         if (not clean):
@@ -1013,18 +1012,15 @@ class MantidFrameworkConfig:
 
     def __moveFile(self, src, dst):
         if os.path.exists(src):
-            # import shutil
             shutil.move(src, dst)
 
     def __copyFile(self, src, dst):
         if os.path.exists(src):
-            # import shutil
             shutil.copyfile(src, dst)
 
     saveDir = property(lambda self: self.__saveDir)
     testDir = property(lambda self: self.__testDir)
     dataDir = property(lambda self: self.__dataDirs)
-
 
     def config(self):
 

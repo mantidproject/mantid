@@ -99,7 +99,6 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
-    print("NVAYTET 5",run_details.splined_vanadium_file_path)
     vanadium_splines = None
     if perform_vanadium_norm:
         vanadium_splines = mantid.LoadNexus(Filename=run_details.splined_vanadium_file_path)
