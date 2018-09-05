@@ -312,7 +312,9 @@ void PanelsSurface::addFlatBankOfDetectors(
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
 
-  for (auto detector : detectors) {
+  PRAGMA_OMP(parallel for)
+  for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
+    auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);
     // update the outline polygon
     UnwrappedDetector &udet = m_unwrappedDetectors[detector];
@@ -352,10 +354,12 @@ void PanelsSurface::processStructured(size_t rootIndex) {
 
   info->polygon = QPolygonF(verts);
 
-  for (auto column : columns) {
-    const auto &row = componentInfo.children(column);
-    for (auto det : row) {
-      addDetector(det, ref, index, info->rotation);
+  PRAGMA_OMP(parallel for)
+  for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
+    const auto &row = componentInfo.children(columns[i]);
+    PRAGMA_OMP(parallel for)
+    for (int j = 0; j < static_cast<int>(row.size()); ++j) {
+      addDetector(row[j], ref, index, info->rotation);
     }
   }
 }
@@ -406,10 +410,11 @@ void PanelsSurface::processTubes(size_t rootIndex) {
   vert << p0 << p1;
   info->polygon = QPolygonF(vert);
 
-  for (auto tube : tubes) {
-    const auto &children = componentInfo.children(tube);
-    for (auto child : children) {
-      addDetector(child, pos0, index, info->rotation);
+  for (int i = 0; i < static_cast<int>(tubes.size()); ++i) {
+    const auto &children = componentInfo.children(tubes[i]);
+    PRAGMA_OMP(parallel for)
+    for (int j = 0; j < static_cast<int>(children.size()); ++j) {
+      addDetector(children[j], pos0, index, info->rotation);
     }
 
     auto &udet0 = m_unwrappedDetectors[children.front()];
