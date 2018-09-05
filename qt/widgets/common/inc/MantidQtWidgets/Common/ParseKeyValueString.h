@@ -31,12 +31,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "DllOption.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
-#include "DllOption.h"
 #include <QString>
 #include <map>
 #include <sstream>
 #include <string>
-#include <sstream>
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -9,9 +9,9 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
+using testing::Return;
 
 class RunsTablePresenterGroupInsertionTest : public CxxTest::TestSuite,
                                              RunsTablePresenterTest {
@@ -68,7 +68,7 @@ public:
     auto &groups = unslicedJobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("", groups[1].name());
+    TS_ASSERT_EQUALS("Group2", groups[1].name());
 
     verifyAndClearExpectations();
   }
@@ -115,7 +115,7 @@ public:
 
     auto &groups = unslicedJobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(3, groups.size());
-    TS_ASSERT_EQUALS("", groups[2].name());
+    TS_ASSERT_EQUALS("Group3", groups[2].name());
 
     verifyAndClearExpectations();
   }

@@ -4,6 +4,7 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"

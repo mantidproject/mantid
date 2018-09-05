@@ -1,9 +1,8 @@
-#ifndef MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
-#include "../../../ISISReflectometry/GUI/RunsTable/IRunsTableView.h"
+#ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
+#define MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
+#include "DllConfig.h"
+#include "Views/IBatchView.h"
 #include <gmock/gmock.h>
-#include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 

@@ -11,15 +11,16 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
+using testing::Return;
 using testing::_;
 
 class RunsTablePresenterTest {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
+  // The boilerplate methods are not included because this base class does not
+  // include any tests itself
+
   void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView,
                   MockRunsTableView &view) {
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
@@ -75,8 +76,8 @@ public:
 
   void selectedRowLocationsAre(
       MantidQt::MantidWidgets::Batch::MockJobTreeView &mockJobs,
-      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-          locations) {
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+          &locations) {
     ON_CALL(mockJobs, selectedRowLocations()).WillByDefault(Return(locations));
   }
 

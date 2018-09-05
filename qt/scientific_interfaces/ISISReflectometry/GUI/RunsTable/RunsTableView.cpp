@@ -1,7 +1,7 @@
 #include "RunsTableView.h"
 #include "../../IndexOf.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 
@@ -184,5 +184,5 @@ int RunsTableViewFactory::defaultInstrumentFromConfig() const {
   return indexOfElseFirst(Mantid::Kernel::ConfigService::Instance().getString(
       "default.instrument"));
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

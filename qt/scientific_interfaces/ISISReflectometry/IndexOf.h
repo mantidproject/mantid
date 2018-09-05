@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_INDEXOF_H
 #define MANTID_ISISREFLECTOMETRY_INDEXOF_H
 #include <algorithm>
-#include <iterator>
 #include <boost/optional.hpp>
+#include <iterator>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,7 +15,6 @@ boost::optional<int> indexOf(Container const &container, Predicate pred) {
   else
     return boost::none;
 }
-
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INDEXOF_H

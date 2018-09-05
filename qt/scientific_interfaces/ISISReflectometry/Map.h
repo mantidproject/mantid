@@ -1,10 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_MAP_H
 #define MANTID_ISISREFLECTOMETRY_MAP_H
-#include <vector>
 #include <algorithm>
+#include <boost/optional.hpp>
 #include <iterator>
 #include <type_traits>
-#include <boost/optional.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -30,10 +30,12 @@ boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
 
 template <typename T>
 std::string optionalToString(boost::optional<T> maybeValue) {
-  return map(maybeValue, [](T const &value) -> std::string {
-    return std::to_string(value);
-  }).get_value_or(std::string());
+  return map(maybeValue,
+             [](T const &value) -> std::string {
+               return std::to_string(value);
+             })
+      .get_value_or(std::string());
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_MAP_H

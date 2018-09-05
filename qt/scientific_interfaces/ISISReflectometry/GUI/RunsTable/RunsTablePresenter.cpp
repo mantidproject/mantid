@@ -1,15 +1,15 @@
 #include "RunsTablePresenter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "Map.h"
 #include "Reduction/Group.h"
 #include "Reduction/Slicing.h"
 #include "Reduction/ValidateRow.h"
-#include "Map.h"
 #include "RegexRowFilter.h"
 #include "RowLocation.h"
-#include <boost/regex.hpp>
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
+#include <boost/regex.hpp>
 
 #include <iostream>
 
@@ -177,8 +177,9 @@ void RunsTablePresenter::notifyCollapseAllRequested() {
 std::vector<std::string> RunsTablePresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
   return map(m_view->jobs().cellsAt(location),
-             [](MantidWidgets::Batch::Cell const &cell)
-                 -> std::string { return cell.contentText(); });
+             [](MantidWidgets::Batch::Cell const &cell) -> std::string {
+               return cell.contentText();
+             });
 }
 
 void RunsTablePresenter::clearInvalidCellStyling(
@@ -272,7 +273,7 @@ void RunsTablePresenter::notifyRowInserted(
   }
 }
 
-void RunsTablePresenter::removeRowsAndGroupsFromModel(std::vector<
+void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
     MantidQt::MantidWidgets::Batch::RowLocation> locationsOfRowsToRemove) {
   std::sort(locationsOfRowsToRemove.begin(), locationsOfRowsToRemove.end());
   for (auto location = locationsOfRowsToRemove.crbegin();
@@ -287,13 +288,13 @@ void RunsTablePresenter::removeRowsAndGroupsFromModel(std::vector<
   }
 }
 
-void RunsTablePresenter::removeRowsAndGroupsFromView(
+void BatchPresenter::removeRowsAndGroupsFromView(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
         locationsOfRowsToRemove) {
   m_view->jobs().removeRows(locationsOfRowsToRemove);
 }
 
-void RunsTablePresenter::notifyRemoveRowsRequested(
+void BatchPresenter::notifyRemoveRowsRequested(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
         locationsOfRowsToRemove) {
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
@@ -331,5 +332,5 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     m_view->invalidSelectionForPaste();
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

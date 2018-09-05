@@ -77,6 +77,12 @@ public:
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
 
+  ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
+  ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
+
+  ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
+  ReflRunsTabPresenter &operator=(ReflRunsTabPresenter &&) = default;
+
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void settingsChanged() override;
@@ -106,8 +112,6 @@ private:
   IReflBatchPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  /// The current search string used for autoreduction
-  std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
   double m_thetaTolerance;

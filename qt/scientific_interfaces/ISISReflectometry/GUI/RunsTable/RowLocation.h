@@ -29,8 +29,9 @@ namespace CustomInterfaces {
 
 std::vector<int> groupIndexesFromSelection(
     std::vector<MantidWidgets::Batch::RowLocation> const &selected);
-std::vector<int> mapToContainingGroups(std::vector<
-    MantidQt::MantidWidgets::Batch::RowLocation> const &mustNotContainRoot);
+std::vector<int> mapToContainingGroups(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+        &mustNotContainRoot);
 bool containsGroups(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations);
 bool isGroupLocation(
@@ -38,6 +39,6 @@ bool isGroupLocation(
 int groupOf(MantidQt::MantidWidgets::Batch::RowLocation const &groupLocation);
 bool isRowLocation(MantidWidgets::Batch::RowLocation const &location);
 int rowOf(MantidQt::MantidWidgets::Batch::RowLocation const &rowLocation);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_ROWLOCATION_H

@@ -23,8 +23,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_
 #include "../DllConfig.h"
-#include <boost/optional.hpp>
 #include "../multivisitors.hpp"
+#include <boost/optional.hpp>
 // equivalent to
 //         #include <boost/variant/multivisitors.hpp>
 // available in boost 1.54+ - required for RHEL7.
@@ -145,7 +145,7 @@ unsliced(SlicedReductionJobs const &slicedJobs,
 
 SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONJOBS_H_

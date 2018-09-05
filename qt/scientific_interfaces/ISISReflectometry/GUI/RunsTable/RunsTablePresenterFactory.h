@@ -22,8 +22,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
+#include "BatchPresenter.h"
 #include "DllConfig.h"
 #include <memory>
+#include <string>
 #include <vector>
 #include <string>
 #include "RunsTablePresenter.h"

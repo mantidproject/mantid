@@ -39,7 +39,7 @@ public:
     return postprocessedWorkspaceNameForSliced(runNumbers, slicing);
   }
 };
-}
+} // namespace internal
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL WorkspaceNamesFactory {
 public:
@@ -63,6 +63,6 @@ public:
 private:
   Slicing m_slicing;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_WORKSPACENAMESFACTORY_H_

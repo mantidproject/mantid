@@ -23,8 +23,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_SLICING_H_
 #define MANTID_CUSTOMINTERFACES_SLICING_H_
 #include <boost/variant.hpp>
-#include <vector>
 #include <string>
+#include <vector>
 #include <ostream>
 #include "../DllConfig.h"
 

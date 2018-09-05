@@ -25,10 +25,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "DllConfig.h"
 #include <memory>
 #include "IRunsTableView.h"
+#include "JobViewUpdater.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "Map.h"
 #include "Reduction/Group.h"
 #include "Reduction/ReductionJobs.h"
-#include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "Map.h"
 
@@ -50,11 +52,11 @@ public:
   void notifyCellTextChanged(
       MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
       std::string const &oldValue, std::string const &newValue) override;
-  void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const &
-                             newRowLocation) override;
+  void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const
+                             &newRowLocation) override;
   void notifyRemoveRowsRequested(
-      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-          locationsOfRowsToRemove) override;
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+          &locationsOfRowsToRemove) override;
   void notifyCopyRowsRequested() override;
   void notifyPasteRowsRequested() override;
   void notifyCutRowsRequested() override;
@@ -86,8 +88,9 @@ private:
   void
   showAllCellsOnRowAsValid(MantidWidgets::Batch::RowLocation const &itemIndex);
 
-  void removeRowsAndGroupsFromView(std::vector<
-      MantidQt::MantidWidgets::Batch::RowLocation> const &locations);
+  void removeRowsAndGroupsFromView(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+          &locations);
   void removeRowsAndGroupsFromModel(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> locations);
 

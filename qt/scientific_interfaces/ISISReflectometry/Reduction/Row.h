@@ -22,17 +22,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_RUN_H_
 #define MANTID_CUSTOMINTERFACES_RUN_H_
+#include "../DllConfig.h"
 #include <string>
 #include <vector>
 #include <boost/variant.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/optional.hpp>
 #include "RangeInQ.h"
-#include "WorkspaceNamesFactory.h"
 #include "ReductionWorkspaces.h"
 #include "SlicedReductionWorkspaces.h"
 #include "ReductionOptionsMap.h"
 #include "Slicing.h"
+#include "WorkspaceNamesFactory.h"
 #include "../DllConfig.h"
 
 namespace MantidQt {
@@ -114,6 +115,6 @@ unslice(boost::optional<SlicedRow> const &row,
 boost::optional<SlicedRow>
 slice(boost::optional<UnslicedRow> const &row,
       WorkspaceNamesFactory const &workspaceNamesFactory);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_RUN_H_

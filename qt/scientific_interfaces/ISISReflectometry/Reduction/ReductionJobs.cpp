@@ -1,7 +1,7 @@
-#include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "ReductionJobs.h"
-#include "../Map.h"
 #include "../IndexOf.h"
+#include "../Map.h"
+#include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <iostream>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -23,8 +23,9 @@ Group &ReductionJobs<Group>::appendGroup(Group group) {
 template <typename Group>
 boost::optional<int>
 ReductionJobs<Group>::indexOfGroupWithName(std::string const &groupName) {
-  return indexOf(m_groups, [&groupName](Group const &group)
-                               -> bool { return group.name() == groupName; });
+  return indexOf(m_groups, [&groupName](Group const &group) -> bool {
+    return group.name() == groupName;
+  });
 }
 
 template <typename Group>
@@ -38,8 +39,9 @@ template <typename Group>
 bool ReductionJobs<Group>::hasGroupWithName(
     std::string const &groupName) const {
   return std::any_of(m_groups.crbegin(), m_groups.crend(),
-                     [&groupName](Group const &group)
-                         -> bool { return group.name() == groupName; });
+                     [&groupName](Group const &group) -> bool {
+                       return group.name() == groupName;
+                     });
 }
 
 template <typename Group> void ReductionJobs<Group>::removeGroup(int index) {
@@ -102,8 +104,14 @@ class InsertEmptyGroupVisitor : public boost::static_visitor<> {
 public:
   InsertEmptyGroupVisitor(int beforeGroup) : m_beforeGroup(beforeGroup) {}
 
+  std::string emptyGroupName() const {
+    static int nameSuffix = 1;
+    std::string name = "Group" + std::to_string(nameSuffix++);
+    return name;
+  }
+
   template <typename Group> void operator()(ReductionJobs<Group> &jobs) const {
-    jobs.insertGroup(Group(""), m_beforeGroup);
+    jobs.insertGroup(Group(emptyGroupName()), m_beforeGroup);
   }
 
 private:
@@ -335,5 +343,5 @@ Group const &ReductionJobs<Group>::operator[](int index) const {
 
 template class ReductionJobs<SlicedGroup>;
 template class ReductionJobs<UnslicedGroup>;
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -22,12 +22,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_GROUP_H_
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
+#include "../DllConfig.h"
+#include "Row.h"
+#include "WorkspaceNamesFactory.h"
+#include <boost/optional.hpp>
 #include <string>
 #include <vector>
-#include <boost/optional.hpp>
-#include "Row.h"
-#include "../DllConfig.h"
-#include "WorkspaceNamesFactory.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -89,8 +89,7 @@ void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
 }
 
 template <typename Row>
-MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
-operator<<(std::ostream &os, Group<Row> const &group) {
+std::ostream &operator<<(std::ostream &os, Group<Row> const &group) {
   os << "  Group (name: " << group.name() << ")\n";
   for (auto &&row : group.rows()) {
     if (row.is_initialized())
@@ -108,6 +107,6 @@ UnslicedGroup unslice(SlicedGroup const &slicedGroup,
                       WorkspaceNamesFactory const &workspaceNamesFactory);
 SlicedGroup slice(UnslicedGroup const &unslicedGroup,
                   WorkspaceNamesFactory const &WorkspaceNamesFactory);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

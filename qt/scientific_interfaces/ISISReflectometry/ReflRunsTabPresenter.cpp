@@ -28,8 +28,8 @@
 #include <sstream>
 #include <vector>
 
-#include "Reduction/WorkspaceNamesFactory.h"
 #include "Reduction/ValidateRow.h"
+#include "Reduction/WorkspaceNamesFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

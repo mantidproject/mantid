@@ -3,6 +3,7 @@
 #include "MantidAPI/TableRow.h"
 #include <boost/regex.hpp>
 #include <QColor>
+#include <boost/regex.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {

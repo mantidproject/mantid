@@ -15,6 +15,6 @@ struct SearchResult {
   std::string location;
   std::string issues;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_SEARCHRESULT_H

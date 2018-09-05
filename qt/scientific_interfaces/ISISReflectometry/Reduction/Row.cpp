@@ -1,7 +1,7 @@
 #include "Row.h"
-#include <boost/variant.hpp>
-#include <boost/algorithm/string.hpp>
 #include "../Map.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/variant.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -85,5 +85,5 @@ slice(boost::optional<UnslicedRow> const &row,
 
 template class Row<SlicedReductionWorkspaces>;
 template class Row<ReductionWorkspaces>;
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -16,5 +16,5 @@ operator()(IRunsTableView *view) const {
       view, m_instruments, m_thetaTolerance, m_workspaceNamesFactory,
       UnslicedReductionJobs());
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
