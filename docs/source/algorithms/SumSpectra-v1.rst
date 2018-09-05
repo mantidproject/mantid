@@ -14,33 +14,29 @@ maintaining the existing bin structure and units. Any masked spectra are
 ignored. The result is stored as a new workspace containing a single
 spectra.
 
-If we define a the :math:`i^{th}` spectrum with bins :math:`i`. The unweighted sum is just
+If we define a the :math:`i^{th}` spectrum with bins :math:`j`. The unweighted sum is just (``WeightedSum=False``)
 
 .. math:: Signal[j] = \displaystyle\Sigma_{i \in spectra} Signal_i[j]
 
-The weighted sum (property ignored for event workspaces), the sum is defined, for :math:`Error_i[j] \neq 0`
+The weighted sum (``WeightedSum=True`` and ``MultiplyBySpectra=True``, ignored for event workspaces), the sum is defined (skipping :math:`Signal_i[j]` when :math:`Error_i[j] == 0`),
 
 .. math:: Signal[j] = NSpectra \times \displaystyle\Sigma_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right) / \Sigma_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
 
-If the weights contributing to the sum are equal, these result in the same value.
+:math:`NSpectra` is the number of spectra contributing to that bin. If the weights contributing to the sum are equal, these result in the same value. This should be used for unnormalized (e.g. not divided by vanadium spectrum) data. If the data has been normalized (e.g. divided by vanadium spectrum for total scattering) then multiplying by the number of spectra contributing to the bin is incorrect, use ``WeightedSum=True`` and ``MultiplyBySpectra=False`` to sum as
 
-The algorithm adds to the **OutputWorkspace** three additional
+.. math:: Signal[j] = \displaystyle\Sigma_{i \in spectra} \left(\frac{Signal_i[j]}{Error_i^2[j]}\right) / \Sigma_{i \in spectra}\left(\frac{1}{Error_i^2[j]}\right)
+
+The algorithm adds to the ``OutputWorkspace`` three additional
 properties (Log values). The properties (Log) names are:
-**NumAllSpectra**, **NumMaskSpectra** and **NumZeroSpectra**,
-where:
 
-* NumAllSpectra is the number of spectra contributed to the sum
+* ``NumAllSpectra`` is the number of spectra contributed to the sum
 
-* NumMaskSpectra is the spectra dropped from the summations because they are masked.
+* ``NumMaskSpectra`` is the spectra dropped from the summations because they are masked. Monitors are not included in this total if ``IncludeMonitors=False``.
 
-  * If monitors are not included in the summation, they are not counted here.
+* ``NumZeroSpectra`` is the number of zero bins in histogram workspace or empty spectra for event workspace. These spectra are dropped from the summation of histogram workspace when ``WeightedSum=True``.
 
-* NumZeroSpectra is the number of zero bins in histogram workspace or empty spectra for event workspace.
-
-  * These spectra are dropped from the summation of histogram workspace when WeightedSum property is set to True.
-
-Assuming **pWS** is the output workspace handle, from Python these
-properties can be accessed by the code:
+Assuming ``pWS`` is the output workspace handle, from Python these
+properties can be accessed using:
 
 .. code-block:: python
 
