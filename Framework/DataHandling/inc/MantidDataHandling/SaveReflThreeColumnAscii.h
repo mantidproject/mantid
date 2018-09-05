@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/AsciiPointBase.h"
 
@@ -40,7 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SaveReflThreeColumnAscii : public DataHandling::AsciiPointBase {
+class DLLExport SaveReflThreeColumnAscii : public DataHandling::AsciiPointBase,
+                                           public API::DeprecatedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveReflThreeColumnAscii"; }
@@ -54,8 +56,11 @@ public:
     return {"SaveReflCustomAscii", "SaveAscii"};
   }
   /// Algorithm's version for data output overriding a virtual method
-  void data(std::ofstream &file, const std::vector<double> &XData,
-            bool exportDeltaQ = false) override;
+  void data(std::ofstream &file, bool exportDeltaQ = false) override;
+  SaveReflThreeColumnAscii() {
+    this->useAlgorithm("SaveReflectometryAscii");
+    this->deprecatedDate("2018-06-29");
+  }
 
 private:
   /// Return the file extension this algorthm should output.

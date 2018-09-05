@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
-from mantidqt.utils.qt.test import requires_qapp,  select_item_in_combo_box, select_item_in_tree
+from mantidqt.utils.qt.test import select_item_in_combo_box, select_item_in_tree, GuiTest
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
@@ -80,9 +80,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(True))
 
 
-@requires_qapp
 @patch('mantid.AlgorithmFactory.getDescriptors', mock_get_algorithm_descriptors)
-class WidgetTest(unittest.TestCase):
+class WidgetTest(GuiTest):
 
     def _select_in_tree(self, widget, item_label):
         select_item_in_tree(widget.tree, item_label)

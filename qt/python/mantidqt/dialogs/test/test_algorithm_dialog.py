@@ -20,10 +20,10 @@ from qtpy.QtWidgets import QWidget, QLineEdit
 
 from mantid.api import AlgorithmManager, AlgorithmFactory, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty
-from mantidqt.utils.qt.test import requires_qapp
 from mantidqt.dialogs.algorithmdialog import AlgorithmDialog
 from mantidqt.dialogs.genericdialog import GenericDialog
 from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.utils.qt.test import GuiTest
 
 
 class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
@@ -41,8 +41,7 @@ class AlgorithmDialogMockAlgorithm(PythonAlgorithm):
         pass
 
 
-@requires_qapp
-class TestAlgorithmDialog(unittest.TestCase):
+class TestAlgorithmDialog(GuiTest):
 
     def setUp(self):
         AlgorithmFactory.subscribe(AlgorithmDialogMockAlgorithm)

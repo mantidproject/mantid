@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
@@ -50,8 +50,7 @@ class ReceiverWithProgress(Receiver):
         self.lines_received.append(lineno)
 
 
-@requires_qapp
-class PythonCodeExecutionTest(unittest.TestCase):
+class PythonCodeExecutionTest(GuiTest):
 
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()

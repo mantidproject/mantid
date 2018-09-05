@@ -4,7 +4,7 @@
 Mantid 3.10.0 Release Notes
 ===========================
 
-.. figure::  ../../images/ArtSurfacePlotT1.PNG
+.. figure::  ../../images/ArtSurfacePlotT1.png
    :class: screenshot
    :width: 550px
    :align: right

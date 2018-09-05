@@ -20,15 +20,14 @@ from __future__ import (absolute_import)
 import unittest
 
 # third-party library imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from qtpy.QtWidgets import QMainWindow
 
 # local package imports
 from workbench.plugins.jupyterconsole import InProcessJupyterConsole, JupyterConsole
 
 
-@requires_qapp
-class JupyterConsoleTest(unittest.TestCase):
+class JupyterConsoleTest(GuiTest):
 
     def test_construction_creates_inprocess_console_widget(self):
         main_window = QMainWindow()
