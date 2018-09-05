@@ -10,14 +10,21 @@ class ErrorReporterPresenter(object):
         self._view.action.connect(self.error_handler)
 
     def error_handler(self, continue_working, share, name, email):
+        status = -1
         if share == 0:
             errorReporter = ErrorReporter(
                 "mantidplot", UsageService.getUpTime(), self._exit_code, True, str(name), str(email))
-            errorReporter.sendErrorReport()
+            status = errorReporter.sendErrorReport()
         elif share == 1:
             errorReporter = ErrorReporter(
                 "mantidplot", UsageService.getUpTime(), self._exit_code, False, str(name), str(email))
-            errorReporter.sendErrorReport()
+            status = errorReporter.sendErrorReport()
+
+        if status != 201:
+            self._view.display_message_box('Error contacting server','There was an error when sending the report.'
+                                           'Please contact mantid-help@mantidproject.org directly',
+                                           'http request returned with status {}'.format(status))
+            self.error_log.error("Failed to send error report http request returned status {}".format(status))
 
         if not continue_working:
             self.error_log.error("Terminated by user.")

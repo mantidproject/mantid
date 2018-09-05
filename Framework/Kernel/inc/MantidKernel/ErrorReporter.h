@@ -44,7 +44,7 @@ public:
                 std::string exitCode, bool share, std::string name,
                 std::string email);
   /// Sends an error report
-  void sendErrorReport();
+  int sendErrorReport();
 
 protected:
   /// Generates an error string in json format
