@@ -9,6 +9,14 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+	Powder Diffraction
+	------------------
+	
+Improvements
+############
+- Removed save_angles flag for Gem , as it was set by the texture mode
+- Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files
+
 Improvements
 ############
 
