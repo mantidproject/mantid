@@ -19,7 +19,17 @@ from PyQt4.QtGui import QApplication
 # global QApplication (get errors if > 1 instance in the code)
 QT_APP = QApplication([])
 
+
 class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
+    def run_test_with_and_without_threading(test_function):
+        def run_twice(self):
+            test_function(self)
+            self.setUp()
+            self.presenter._use_threading = False
+            test_function(self)
+
+        return run_twice
+
     class Runner:
 
         def __init__(self, thread):
@@ -60,6 +70,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
 
+    @run_test_with_and_without_threading
     def test_load_current_run_loads_run_into_model(self):
         self.presenter.handle_load_current_run()
         self.Runner(self.presenter._load_thread)
@@ -70,6 +81,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         self.assertEqual(self.model.current_run, 1234)
 
+    @run_test_with_and_without_threading
     def test_load_current_run_correctly_displays_run_if_load_successful(self):
         self.presenter.handle_load_current_run()
         self.Runner(self.presenter._load_thread)
@@ -84,6 +96,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         self.assertEqual(mock_warning.call_count, 1)
 
+    @run_test_with_and_without_threading
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
         # set up previous data
         self.model.load_workspace_from_filename = mock.Mock(return_value=([1], "1234.nxs", 1234))
@@ -99,6 +112,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [1234])
         self.assertEqual(self.presenter.workspaces, [[1]])
 
+    @run_test_with_and_without_threading
     def test_load_current_run_clears_previous_data_if_load_succeeds(self):
         # set up previous data
         self.model.load_workspace_from_filename = mock.Mock(return_value=([1], "1234.nxs", 1234))
@@ -115,6 +129,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.runs, [9999])
         self.assertEqual(self.presenter.workspaces, [[2]])
 
+    @run_test_with_and_without_threading
     def test_load_current_run_displays_error_if_incrementing_past_current_run(self):
         # set up current run
         self.model.load_workspace_from_filename = mock.Mock(return_value=([1], "1234.nxs", 1234))

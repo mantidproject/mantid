@@ -4,7 +4,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSignal as Signal
 
 import Muon.GUI.Common.run_string_utils as runUtils
-
+from Muon.GUI.Common.message_box import warning
 
 class LoadRunWidgetView(QtGui.QWidget):
     # signals for parent widgets
@@ -133,8 +133,9 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.runEdit.returnPressed.connect(slot)
 
     def warning_popup(self, message):
-        self._warning_window = None
-        self._warning_window = QtGui.QMessageBox.warning(self, "Error", str(message))
+        #self._warning_window = None
+        #self._warning_window = QtGui.QMessageBox.warning(self, "Error", str(message))
+        warning(message, parent=self)
 
     def clear(self):
         self.set_run_edit_text("")
