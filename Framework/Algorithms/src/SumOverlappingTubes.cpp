@@ -14,6 +14,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -75,18 +76,21 @@ void SumOverlappingTubes::init() {
       make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
       "If true normalise to the number of entries added for a particular "
       "scattering angle. ");
-  auto toleranceValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
-  toleranceValidator->clearUpper();
-  declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
-                  "The relative tolerance for the scattering angles before the "
-                  "counts are split.");
   declareProperty(make_unique<PropertyWithValue<bool>>("MirrorScatteringAngles",
                                                        false, Direction::Input),
                   "A flag to mirror the signed 2thetas. ");
   declareProperty(make_unique<PropertyWithValue<bool>>("SplitCounts", false,
                                                        Direction::Input),
                   "A flag to split the counts between adjacent bins");
+  auto toleranceValidator =
+      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
+  toleranceValidator->clearUpper();
+  declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
+                  "The relative tolerance for the scattering angles before the "
+                  "counts are split.");
+  setPropertySettings("ScatteringAngleTolerance",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "SplitCounts", IS_NOT_DEFAULT));
 }
 
 void SumOverlappingTubes::exec() {
