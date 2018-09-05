@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 #define MANTID_ISISREFLECTOMETRY_REFLSEARCHMODEL_H_
 
-#include "SearchResult.h"
 #include "DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "SearchResult.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>

@@ -1,15 +1,15 @@
 #include "BatchPresenter.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "Map.h"
 #include "Reduction/Group.h"
 #include "Reduction/Slicing.h"
 #include "Reduction/ValidateRow.h"
-#include "Map.h"
 #include "RegexRowFilter.h"
 #include "RowLocation.h"
-#include <boost/regex.hpp>
 #include <boost/range/algorithm/fill.hpp>
 #include <boost/range/iterator_range_core.hpp>
+#include <boost/regex.hpp>
 
 #include <iostream>
 
@@ -177,8 +177,9 @@ void BatchPresenter::notifyCollapseAllRequested() {
 std::vector<std::string> BatchPresenter::cellTextFromViewAt(
     MantidWidgets::Batch::RowLocation const &location) const {
   return map(m_view->jobs().cellsAt(location),
-             [](MantidWidgets::Batch::Cell const &cell)
-                 -> std::string { return cell.contentText(); });
+             [](MantidWidgets::Batch::Cell const &cell) -> std::string {
+               return cell.contentText();
+             });
 }
 
 void BatchPresenter::clearInvalidCellStyling(
@@ -272,8 +273,9 @@ void BatchPresenter::notifyRowInserted(
   }
 }
 
-void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
-    MantidQt::MantidWidgets::Batch::RowLocation> locationsOfRowsToRemove) {
+void BatchPresenter::removeRowsAndGroupsFromModel(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation>
+        locationsOfRowsToRemove) {
   std::sort(locationsOfRowsToRemove.begin(), locationsOfRowsToRemove.end());
   for (auto location = locationsOfRowsToRemove.crbegin();
        location != locationsOfRowsToRemove.crend(); ++location) {
@@ -288,14 +290,14 @@ void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
 }
 
 void BatchPresenter::removeRowsAndGroupsFromView(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-        locationsOfRowsToRemove) {
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+        &locationsOfRowsToRemove) {
   m_view->jobs().removeRows(locationsOfRowsToRemove);
 }
 
 void BatchPresenter::notifyRemoveRowsRequested(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-        locationsOfRowsToRemove) {
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+        &locationsOfRowsToRemove) {
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
 }
@@ -331,5 +333,5 @@ void BatchPresenter::notifyPasteRowsRequested() {
     m_view->invalidSelectionForPaste();
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -5,9 +5,6 @@
 #include "Hint.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "DllOption.h"
-#include "Hint.h"
 
 #include <QLineEdit>
 

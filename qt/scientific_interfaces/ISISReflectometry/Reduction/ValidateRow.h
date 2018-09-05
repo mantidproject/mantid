@@ -22,9 +22,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
-#include "Reduction/Row.h"
-#include "Reduction/ReductionJobs.h"
 #include "DllConfig.h"
+#include "Reduction/ReductionJobs.h"
+#include "Reduction/Row.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -124,6 +124,6 @@ boost::optional<RowVariant>
 validateRowFromRunAndTheta(Jobs const &jobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

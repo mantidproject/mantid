@@ -1,6 +1,6 @@
 #include "Group.h"
-#include "../Map.h"
 #include "../IndexOf.h"
+#include "../Map.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <cmath>
 
@@ -12,8 +12,7 @@ Group<Row>::Group(std::string name, std::vector<boost::optional<Row>> rows)
     : m_name(std::move(name)), m_rows(std::move(rows)) {}
 
 template <typename Row>
-Group<Row>::Group(std::string name)
-    : m_name(std::move(name)), m_rows() {}
+Group<Row>::Group(std::string name) : m_name(std::move(name)), m_rows() {}
 
 template <typename Row> std::string const &Group<Row>::name() const {
   return m_name;
@@ -35,8 +34,9 @@ template <typename Row> void Group<Row>::setName(std::string const &name) {
 
 template <typename Row> bool Group<Row>::allRowsAreValid() const {
   return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row)
-                         -> bool { return row.is_initialized(); });
+                     [](boost::optional<Row> const &row) -> bool {
+                       return row.is_initialized();
+                     });
 }
 
 template <typename Row>
@@ -44,10 +44,11 @@ std::string Group<Row>::postprocessedWorkspaceName(
     WorkspaceNamesFactory const &workspaceNamesFactory) const {
   assertOrThrow(allRowsAreValid(), "Attempted to get postprocessed workspace "
                                    "name from group with invalid rows.");
-  auto runNumbers = map(m_rows, [](boost::optional<Row> const &row)
-                                    -> std::vector<std::string> const *{
-                                      return &row.get().runNumbers();
-                                    });
+  auto runNumbers = map(
+      m_rows,
+      [](boost::optional<Row> const &row) -> std::vector<std::string> const * {
+        return &row.get().runNumbers();
+      });
   return workspaceNamesFactory
       .makePostprocessedName<typename Row::WorkspaceNames>(runNumbers);
 }
@@ -89,9 +90,9 @@ boost::optional<Row> const &Group<Row>::operator[](int rowIndex) const {
 UnslicedGroup unslice(SlicedGroup const &slicedGroup,
                       WorkspaceNamesFactory const &workspaceNamesFactory) {
   auto const &slicedRows = slicedGroup.rows();
-  auto unslicedRows =
-      map(slicedRows, [&](boost::optional<SlicedRow> const &sliced)
-                          -> boost::optional<UnslicedRow> {
+  auto unslicedRows = map(slicedRows,
+                          [&](boost::optional<SlicedRow> const &sliced)
+                              -> boost::optional<UnslicedRow> {
                             return unslice(sliced, workspaceNamesFactory);
                           });
   return UnslicedGroup(slicedGroup.name(), std::move(unslicedRows));
@@ -100,15 +101,15 @@ UnslicedGroup unslice(SlicedGroup const &slicedGroup,
 SlicedGroup slice(UnslicedGroup const &unslicedGroup,
                   WorkspaceNamesFactory const &workspaceNamesFactory) {
   auto const &unslicedRows = unslicedGroup.rows();
-  auto slicedRows =
-      map(unslicedRows, [&](boost::optional<UnslicedRow> const &unsliced)
+  auto slicedRows = map(unslicedRows,
+                        [&](boost::optional<UnslicedRow> const &unsliced)
                             -> boost::optional<SlicedRow> {
-                              return slice(unsliced, workspaceNamesFactory);
-                            });
+                          return slice(unsliced, workspaceNamesFactory);
+                        });
   return SlicedGroup(unslicedGroup.name(), std::move(slicedRows));
 }
 
 template class Group<SlicedRow>;
 template class Group<UnslicedRow>;
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_
 #define MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_
-#include <gmock/gmock.h>
-#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
+#include <gmock/gmock.h>
 
 using testing::Return;
 

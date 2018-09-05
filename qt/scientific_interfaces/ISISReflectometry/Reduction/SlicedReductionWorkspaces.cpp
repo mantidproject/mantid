@@ -41,5 +41,5 @@ bool operator!=(SlicedReductionWorkspaces const &lhs,
                 SlicedReductionWorkspaces const &rhs) {
   return !(lhs == rhs);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

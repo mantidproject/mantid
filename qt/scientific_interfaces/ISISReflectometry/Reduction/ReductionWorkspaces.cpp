@@ -84,8 +84,9 @@ ReductionWorkspaces workspaceNamesForUnsliced(
     std::pair<std::string, std::string> const &transmissionRuns) {
 
   auto tofWorkspaces =
-      map(summedRunNumbers, [](std::string const &runNumber)
-                                -> std::string { return "TOF_" + runNumber; });
+      map(summedRunNumbers, [](std::string const &runNumber) -> std::string {
+        return "TOF_" + runNumber;
+      });
 
   auto joinedRuns = boost::algorithm::join(summedRunNumbers, "+");
   auto iVsLambda = "IvsLam_" + joinedRuns;
@@ -110,5 +111,5 @@ std::string postprocessedWorkspaceNameForUnsliced(
           });
   return boost::algorithm::join(summedRunList, "_");
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

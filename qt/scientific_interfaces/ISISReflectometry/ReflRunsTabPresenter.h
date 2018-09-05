@@ -3,14 +3,14 @@
 
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
-#include "Presenters/BatchPresenter.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "Presenters/BatchPresenter.h"
 #include "Presenters/BatchPresenterFactory.h"
 #include "ReflAutoreduction.h"
-#include <boost/shared_ptr.hpp>
 #include "SearchResult.h"
+#include <boost/shared_ptr.hpp>
 
 class ProgressPresenter;
 

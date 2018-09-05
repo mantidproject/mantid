@@ -231,9 +231,9 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::vector<std::string> toStdStringVector(std::set<QString> in) {
   auto out = std::vector<std::string>();
-  std::transform(in.cbegin(), in.cend(), std::back_inserter(out),
-                 [](QString const &inStr)
-                     -> std::string { return inStr.toStdString(); });
+  std::transform(
+      in.cbegin(), in.cend(), std::back_inserter(out),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
 } // namespace

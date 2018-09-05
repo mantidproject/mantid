@@ -1,9 +1,9 @@
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "Views/IBatchView.h"
 #include <gmock/gmock.h>
-#include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
-#include "MantidKernel/WarningSuppressions.h"
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -26,7 +26,7 @@ public:
   MOCK_METHOD0(mustNotSelectGroup, void());
   MOCK_METHOD0(mustSelectGroupOrRow, void());
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 #endif // MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_

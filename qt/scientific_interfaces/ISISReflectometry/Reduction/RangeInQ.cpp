@@ -22,5 +22,5 @@ bool operator==(RangeInQ const &lhs, RangeInQ const &rhs) {
 bool operator!=(RangeInQ const &lhs, RangeInQ const &rhs) {
   return !(lhs == rhs);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

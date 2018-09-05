@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
 #define MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
-#include <cxxtest/TestSuite.h>
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 

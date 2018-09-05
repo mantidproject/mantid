@@ -19,19 +19,22 @@ std::vector<int> groupIndexesFromSelection(
   return groups;
 }
 
-std::vector<int> mapToContainingGroups(std::vector<
-    MantidQt::MantidWidgets::Batch::RowLocation> const &mustNotContainRoot) {
+std::vector<int> mapToContainingGroups(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+        &mustNotContainRoot) {
   return map(mustNotContainRoot,
-             [](MantidWidgets::Batch::RowLocation const &location)
-                 -> int { return groupOf(location); });
+             [](MantidWidgets::Batch::RowLocation const &location) -> int {
+               return groupOf(location);
+             });
 }
 
 bool containsGroups(
     std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &locations) {
   return std::any_of(
       locations.cbegin(), locations.cend(),
-      [](MantidQt::MantidWidgets::Batch::RowLocation const &location)
-          -> bool { return isGroupLocation(location); });
+      [](MantidQt::MantidWidgets::Batch::RowLocation const &location) -> bool {
+        return isGroupLocation(location);
+      });
 }
 
 bool isGroupLocation(
@@ -50,5 +53,5 @@ bool isRowLocation(MantidWidgets::Batch::RowLocation const &location) {
 int rowOf(MantidQt::MantidWidgets::Batch::RowLocation const &rowLocation) {
   return rowLocation.path()[1];
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

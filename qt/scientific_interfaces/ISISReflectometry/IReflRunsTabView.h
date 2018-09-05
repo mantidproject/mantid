@@ -1,11 +1,11 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 
+#include "Views/IBatchView.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
 #include <vector>
-#include "Views/IBatchView.h"
 
 namespace MantidQt {
 

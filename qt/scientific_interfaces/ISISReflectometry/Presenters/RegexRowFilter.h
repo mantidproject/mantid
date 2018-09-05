@@ -23,13 +23,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_ROWFILTER_H_
 #define MANTID_CUSTOMINTERFACES_ROWFILTER_H_
 
-#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
+#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/ReductionJobs.h"
 #include "RowLocation.h"
-#include "MantidKernel/make_unique.h"
-#include <memory>
 #include <boost/regex.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -53,7 +53,7 @@ std::unique_ptr<RegexFilter>
 filterFromRegexString(std::string const &regex,
                       MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
                       Jobs const &jobs);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTID_CUSTOMINTERFACES_ROWFILTER_H_

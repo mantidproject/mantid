@@ -1,14 +1,14 @@
 #include "QtReflMainWindowView.h"
 #include "MantidKernel/make_unique.h"
+#include "Presenters/BatchPresenter.h"
 #include "QtReflEventTabView.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
 #include "QtReflSettingsTabView.h"
 #include "ReflAsciiSaver.h"
 #include "ReflMainWindowPresenter.h"
-#include "ReflSaveTabPresenter.h"
-#include "Presenters/BatchPresenter.h"
 #include "ReflRunsTabPresenter.h"
+#include "ReflSaveTabPresenter.h"
 
 #include <QMessageBox>
 
@@ -68,8 +68,8 @@ int defaultInstrumentFromConfig(std::vector<std::string> const &instruments) {
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter
-* @return :: A pointer to the presenter managing the 'Runs' tab
-*/
+ * @return :: A pointer to the presenter managing the 'Runs' tab
+ */
 std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});

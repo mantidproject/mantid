@@ -60,6 +60,6 @@ public:
   virtual void resetFilterBox() = 0;
   virtual MantidQt::MantidWidgets::Batch::IJobTreeView &jobs() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_

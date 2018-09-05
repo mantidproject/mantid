@@ -28,8 +28,8 @@
 #include <sstream>
 #include <vector>
 
-#include "Reduction/WorkspaceNamesFactory.h"
 #include "Reduction/ValidateRow.h"
+#include "Reduction/WorkspaceNamesFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -45,19 +45,19 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 }
 
 /** Constructor
-* @param mainView :: [input] The view we're managing
-* @param progressableView :: [input] The view reporting progress
-* @param makeBatchPresenter :: A generator for the child presenters.
-* @param workspaceNamesFactory :: A generator for the workspace names used in
-* the reduction.
-* @param thetaTolerance The tolerance used to determine if two runs should be
-* summed in a reduction.
-* @param instruments The names of the instruments to show as options for the
-* search.
-* @param defaultInstrumentIndex The index of the instrument to have selected by
-* default.
-* @param searcher :: [input] The search implementation
-*/
+ * @param mainView :: [input] The view we're managing
+ * @param progressableView :: [input] The view reporting progress
+ * @param makeBatchPresenter :: A generator for the child presenters.
+ * @param workspaceNamesFactory :: A generator for the workspace names used in
+ * the reduction.
+ * @param thetaTolerance The tolerance used to determine if two runs should be
+ * summed in a reduction.
+ * @param instruments The names of the instruments to show as options for the
+ * search.
+ * @param defaultInstrumentIndex The index of the instrument to have selected by
+ * default.
+ * @param searcher :: [input] The search implementation
+ */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
     BatchPresenterFactory makeBatchPresenter,
@@ -455,7 +455,7 @@ RunDescriptionMetadata metadataFromDescription(std::string const &description) {
  * @param matchType : an enum specifying how strictly to match runs against
  * the transfer criteria
  * @return : The runs to transfer as a vector of maps
-*/
+ */
 void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer, int,
                                     const TransferMatch) {
   if (validateRowsToTransfer(rowsToTransfer)) {
@@ -534,9 +534,9 @@ OptionsQMap ReflRunsTabPresenter::getProcessingOptions(int group) const {
 }
 
 /** Requests global post-processing options as a string. Options are supplied
-* by the main presenter
-* @return :: Global post-processing options as a string
-*/
+ * by the main presenter
+ * @return :: Global post-processing options as a string
+ */
 QString
 ReflRunsTabPresenter::getPostprocessingOptionsAsString(int group) const {
   return QString::fromStdString(m_mainPresenter->getStitchOptions(group));
@@ -643,10 +643,10 @@ void ReflRunsTabPresenter::confirmReductionResumed(int group) {
 }
 
 /** Changes the current instrument in the data processor widget. Also clears
-* the
-* and the table selection model and updates the config service, printing an
-* information message
-*/
+ * the
+ * and the table selection model and updates the config service, printing an
+ * information message
+ */
 void ReflRunsTabPresenter::changeInstrument() {
   auto const instrument = m_view->getSearchInstrument();
   m_mainPresenter->setInstrumentName(instrument);
@@ -661,5 +661,5 @@ void ReflRunsTabPresenter::changeGroup() {
   // Update the current menu commands based on the current group
   pushCommands(selectedGroup());
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

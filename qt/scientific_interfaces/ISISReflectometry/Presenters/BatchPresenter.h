@@ -23,14 +23,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_
 #include "DllConfig.h"
-#include <memory>
-#include "Views/IBatchView.h"
-#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
-#include "Reduction/Group.h"
-#include "Reduction/ReductionJobs.h"
 #include "JobViewUpdater.h"
+#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "Map.h"
+#include "Reduction/Group.h"
+#include "Reduction/ReductionJobs.h"
+#include "Views/IBatchView.h"
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -50,11 +50,11 @@ public:
   void notifyCellTextChanged(
       MantidQt::MantidWidgets::Batch::RowLocation const &itemIndex, int column,
       std::string const &oldValue, std::string const &newValue) override;
-  void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const &
-                             newRowLocation) override;
+  void notifyRowInserted(MantidQt::MantidWidgets::Batch::RowLocation const
+                             &newRowLocation) override;
   void notifyRemoveRowsRequested(
-      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-          locationsOfRowsToRemove) override;
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+          &locationsOfRowsToRemove) override;
   void notifyCopyRowsRequested() override;
   void notifyPasteRowsRequested() override;
   void notifyCutRowsRequested() override;
@@ -86,8 +86,9 @@ private:
   void
   showAllCellsOnRowAsValid(MantidWidgets::Batch::RowLocation const &itemIndex);
 
-  void removeRowsAndGroupsFromView(std::vector<
-      MantidQt::MantidWidgets::Batch::RowLocation> const &locations);
+  void removeRowsAndGroupsFromView(
+      std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+          &locations);
   void removeRowsAndGroupsFromModel(
       std::vector<MantidQt::MantidWidgets::Batch::RowLocation> locations);
 
@@ -157,6 +158,6 @@ cellsFromRow(Row<WorkspaceNames> const &row) {
        MantidQt::MantidWidgets::Batch::Cell(
            MantidWidgets::optionsToString(row.reductionOptions()))});
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_BATCHVIEWPRESENTER_H_

@@ -1,6 +1,6 @@
 #include "ValidateRow.h"
-#include "Reduction/WorkspaceNamesFactory.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "Reduction/WorkspaceNamesFactory.h"
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -373,10 +373,9 @@ public:
         [this](std::vector<std::string> const &runNumbers,
                std::pair<std::string, std::string> const &transmissionRuns)
             -> boost::optional<SlicedReductionWorkspaces> {
-              return m_workspaceNamesFactory
-                  .makeNames<SlicedReductionWorkspaces>(runNumbers,
-                                                        transmissionRuns);
-            });
+          return m_workspaceNamesFactory.makeNames<SlicedReductionWorkspaces>(
+              runNumbers, transmissionRuns);
+        });
   }
 
   RowValidationResult<RowVariant>
@@ -387,9 +386,9 @@ public:
         [this](std::vector<std::string> const &runNumbers,
                std::pair<std::string, std::string> const &transmissionRuns)
             -> boost::optional<ReductionWorkspaces> {
-              return m_workspaceNamesFactory.makeNames<ReductionWorkspaces>(
-                  runNumbers, transmissionRuns);
-            });
+          return m_workspaceNamesFactory.makeNames<ReductionWorkspaces>(
+              runNumbers, transmissionRuns);
+        });
   }
 
 private:
@@ -412,7 +411,8 @@ validateRowFromRunAndTheta(Jobs const &jobs,
   return boost::apply_visitor(
              ValidateRowVisitor({run, theta, "", "", "", "", "", "", ""},
                                 workspaceNamesFactory),
-             jobs).validRowElseNone();
+             jobs)
+      .validRowElseNone();
 }
 
 template class RowValidationResult<UnslicedRow>;
@@ -421,5 +421,5 @@ template class RowValidationResult<RowVariant>;
 
 template class RowValidator<UnslicedRow>;
 template class RowValidator<SlicedRow>;
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

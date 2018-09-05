@@ -22,11 +22,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
 #define MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_
+#include "BatchPresenter.h"
 #include "DllConfig.h"
 #include <memory>
-#include <vector>
 #include <string>
-#include "BatchPresenter.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,6 +43,6 @@ private:
   double m_thetaTolerance;
   WorkspaceNamesFactory m_workspaceNamesFactory;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_BATCHPRESENTERFACTORY_H_

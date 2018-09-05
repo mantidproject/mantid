@@ -1,8 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_GROUPTEST_H_
 #define MANTID_CUSTOMINTERFACES_GROUPTEST_H_
-#include <cxxtest/TestSuite.h>
 #include "../../../ISISReflectometry/Reduction/Group.h"
 #include "../../../ISISReflectometry/Reduction/ReductionWorkspaces.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 

@@ -4,9 +4,9 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "Presenters/BatchPresenter.h"
 #include "Views/BatchView.h"
 
@@ -20,7 +20,7 @@ namespace MantidWidgets {
 namespace DataProcessor {
 // Forward decs
 class Command;
-}
+} // namespace DataProcessor
 class SlitCalculator;
 } // namespace MantidWidgets
 namespace API {

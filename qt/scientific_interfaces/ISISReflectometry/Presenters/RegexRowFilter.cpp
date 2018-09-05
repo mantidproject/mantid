@@ -31,5 +31,5 @@ std::unique_ptr<RegexFilter> filterFromRegexString(std::string const &regex,
   return Mantid::Kernel::make_unique<RegexFilter>(boost::regex(regex), view,
                                                   jobs);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

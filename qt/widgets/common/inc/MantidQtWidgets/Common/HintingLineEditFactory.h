@@ -5,8 +5,8 @@
 #include <QStyledItemDelegate>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include <memory>
 
 namespace MantidQt {

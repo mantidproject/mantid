@@ -23,8 +23,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_SLICING_H_
 #define MANTID_CUSTOMINTERFACES_SLICING_H_
 #include <boost/variant.hpp>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -65,7 +65,7 @@ private:
 using Slicing = boost::variant<boost::blank, UniformSlicingByTime,
                                UniformSlicingByNumberOfSlices,
                                CustomSlicingByList, SlicingByEventLog>;
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTID_CUSTOMINTERFACES_SLICING_H_

@@ -23,11 +23,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
 
-#include <vector>
-#include <boost/optional.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <string>
 #include "../DllConfig.h"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/optional.hpp>
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -74,6 +74,6 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces workspaceNamesForUnsliced(
 MANTIDQT_ISISREFLECTOMETRY_DLL std::string
 postprocessedWorkspaceNameForUnsliced(
     std::vector<std::vector<std::string> const *> const &summedRunNumbers);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_

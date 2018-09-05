@@ -22,12 +22,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_GROUP_H_
 #define MANTID_CUSTOMINTERFACES_GROUP_H_
+#include "../DllConfig.h"
+#include "Row.h"
+#include "WorkspaceNamesFactory.h"
+#include <boost/optional.hpp>
 #include <string>
 #include <vector>
-#include <boost/optional.hpp>
-#include "Row.h"
-#include "../DllConfig.h"
-#include "WorkspaceNamesFactory.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -107,6 +107,6 @@ UnslicedGroup unslice(SlicedGroup const &slicedGroup,
                       WorkspaceNamesFactory const &workspaceNamesFactory);
 SlicedGroup slice(UnslicedGroup const &unslicedGroup,
                   WorkspaceNamesFactory const &WorkspaceNamesFactory);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

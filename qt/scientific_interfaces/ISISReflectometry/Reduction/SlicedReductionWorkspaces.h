@@ -22,10 +22,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTID_CUSTOMINTERFACES_SLICEDREDUCTIONWORKSPACES_H_
 #define MANTID_CUSTOMINTERFACES_SLICEDREDUCTIONWORKSPACES_H_
-#include <string>
-#include <vector>
 #include "ReductionWorkspaces.h"
 #include "Slicing.h"
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -60,6 +60,6 @@ operator==(SlicedReductionWorkspaces const &lhs,
 MANTIDQT_ISISREFLECTOMETRY_DLL bool
 operator!=(SlicedReductionWorkspaces const &lhs,
            SlicedReductionWorkspaces const &rhs);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_SLICEDREDUCTIONWORKSPACES_H_

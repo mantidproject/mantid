@@ -9,9 +9,9 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::Return;
 using testing::Mock;
 using testing::NiceMock;
+using testing::Return;
 
 class BatchPresenterGroupInsertionTest : public CxxTest::TestSuite,
                                          BatchPresenterTest {

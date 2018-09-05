@@ -60,6 +60,6 @@ public:
 private:
   MantidQt::MantidWidgets::Batch::IJobTreeView &m_view;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H

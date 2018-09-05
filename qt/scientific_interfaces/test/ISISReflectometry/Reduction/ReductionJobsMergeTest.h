@@ -1,14 +1,14 @@
 #ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
 #define MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 #include "../../../ISISReflectometry/Reduction/ReductionJobs.h"
 #include "../../../ISISReflectometry/Reduction/WorkspaceNamesFactory.h"
 #include "../../../ISISReflectometry/ZipRange.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
-using testing::_;
-using testing::NiceMock;
 using testing::Mock;
+using testing::NiceMock;
+using testing::_;
 
 using namespace MantidQt::CustomInterfaces;
 
