@@ -78,6 +78,13 @@ void JumpFit::updatePlotOptions() {
   IndirectFitAnalysisTab::updatePlotOptions(m_uiForm->cbPlotType);
 }
 
+bool JumpFit::shouldEnablePlotResult() {
+  for (auto i = 0u; i < m_jumpFittingModel->numberOfWorkspaces(); ++i)
+    if (m_jumpFittingModel->getNumberOfSpectra(i) != 1)
+      return true;
+  return false;
+}
+
 void JumpFit::setPlotResultEnabled(bool enabled) {
   m_uiForm->pbPlot->setEnabled(enabled);
   m_uiForm->cbPlotType->setEnabled(enabled);

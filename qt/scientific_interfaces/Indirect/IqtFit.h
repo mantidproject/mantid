@@ -31,6 +31,8 @@ private:
   void setupFitTab() override;
 
 protected:
+  bool shouldEnablePlotResult() override { return true; };
+
   void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;

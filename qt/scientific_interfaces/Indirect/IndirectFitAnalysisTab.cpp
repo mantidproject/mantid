@@ -665,8 +665,8 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
  */
 void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   setSaveResultEnabled(!error);
-  setPlotResultEnabled(!error);
   setRunEnabled(true);
+  enablePlotResult(error);
   updateParameterValues();
   m_spectrumPresenter->enableView();
   m_plotPresenter->updatePlots();
@@ -878,6 +878,10 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
  */
 void IndirectFitAnalysisTab::updatePlotOptions(QComboBox *cbPlotType) {
   setPlotOptions(cbPlotType, m_fittingModel->getFitParameterNames());
+}
+
+void IndirectFitAnalysisTab::enablePlotResult(bool error) {
+  setPlotResultEnabled(!shouldEnablePlotResult() ? false : !error);
 }
 
 /**

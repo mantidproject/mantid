@@ -19,6 +19,8 @@ public:
   ConvFit(QWidget *parent = nullptr);
 
 protected:
+  bool shouldEnablePlotResult() override { return true; };
+
   void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
