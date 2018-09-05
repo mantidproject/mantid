@@ -1,25 +1,25 @@
-from PyQt4 import QtGui, QtCore
+from qtpy import QtGui, QtCore, QtWidgets
 
 
-class AxisChangerView(QtGui.QWidget):
-    sig_lower_bound_changed = QtCore.pyqtSignal(object)
-    sig_upper_bound_changed = QtCore.pyqtSignal(object)
+class AxisChangerView(QtWidgets.QWidget):
+    sig_lower_bound_changed = QtCore.Signal(object)
+    sig_upper_bound_changed = QtCore.Signal(object)
 
     def __init__(self, label):
         super(AxisChangerView, self).__init__()
-        layout = QtGui.QHBoxLayout()
-        layout.addWidget(QtGui.QLabel(label))
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(QtWidgets.QLabel(label))
 
-        self.lower_bound = QtGui.QLineEdit()
+        self.lower_bound = QtWidgets.QLineEdit()
         self.lower_bound.setValidator(QtGui.QDoubleValidator())
         self.lower_bound.returnPressed.connect(self._lower_bound_changed)
 
-        self.upper_bound = QtGui.QLineEdit()
+        self.upper_bound = QtWidgets.QLineEdit()
         self.upper_bound.setValidator(QtGui.QDoubleValidator())
         self.upper_bound.returnPressed.connect(self._upper_bound_changed)
 
         layout.addWidget(self.lower_bound)
-        layout.addWidget(QtGui.QLabel("to"))
+        layout.addWidget(QtWidgets.QLabel("to"))
         layout.addWidget(self.upper_bound)
         self.setLayout(layout)
 

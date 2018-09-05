@@ -3,7 +3,7 @@ from six import iteritems
 from mantid import plots
 from collections import OrderedDict
 
-from PyQt4 import QtGui
+from qtpy import QtWidgets
 
 from matplotlib.figure import Figure
 from matplotlib import gridspec
@@ -16,7 +16,7 @@ from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter impo
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
 
-class PlotView(QtGui.QWidget):
+class PlotView(QtWidgets.QWidget):
     def __init__(self):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
@@ -34,11 +34,11 @@ class PlotView(QtGui.QWidget):
         self.figure.set_facecolor("none")
         self.canvas = FigureCanvas(self.figure)
 
-        self.plot_selector = QtGui.QComboBox()
+        self.plot_selector = QtWidgets.QComboBox()
         self._update_plot_selector()
         self.plot_selector.currentIndexChanged[str].connect(self._set_bounds)
 
-        button_layout = QtGui.QHBoxLayout()
+        button_layout = QtWidgets.QHBoxLayout()
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
         self.x_axis_changer.on_upper_bound_changed(self._update_x_axis_upper)
         self.x_axis_changer.on_lower_bound_changed(self._update_x_axis_lower)
@@ -47,7 +47,7 @@ class PlotView(QtGui.QWidget):
         self.y_axis_changer.on_upper_bound_changed(self._update_y_axis_upper)
         self.y_axis_changer.on_lower_bound_changed(self._update_y_axis_lower)
 
-        self.errors = QtGui.QCheckBox("Errors")
+        self.errors = QtWidgets.QCheckBox("Errors")
         self.errors.stateChanged.connect(self._errors_changed)
 
         button_layout.addWidget(self.plot_selector)
@@ -55,7 +55,7 @@ class PlotView(QtGui.QWidget):
         button_layout.addWidget(self.y_axis_changer.view)
         button_layout.addWidget(self.errors)
 
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         grid.addWidget(self.canvas, 0, 0)
         grid.addLayout(button_layout, 1, 0)
         self.setLayout(grid)
