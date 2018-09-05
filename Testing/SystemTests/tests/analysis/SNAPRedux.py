@@ -52,13 +52,14 @@ class SNAP_short(stresstesting.MantidStressTest):
 
     def runTest(self):
         # run the actual code
-        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.9,-0.004,6',
+        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
                    Normalization='Extracted from Data', PeakClippingWindowSize=7,
                    SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
                    SaveData=True, OutputDirectory=getSaveDir())
 
     def validate(self):
         self.tolerance = 1.0e-2
+        self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
 
@@ -78,7 +79,7 @@ class SNAP_short_detcal(stresstesting.MantidStressTest):
 
     def runTest(self):
         # run the actual code
-        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.9,-0.004,6',
+        SNAPReduce(RunNumbers='34172', Masking='Horizontal', Binning='0.7,-0.004,5.5',
                    Calibration='DetCal File', DetCalFilename='SNAP_34172.DetCal',
                    Normalization='Extracted from Data', PeakClippingWindowSize=7,
                    SmoothingRange=5, GroupDetectorsBy='2_4 Grouping',
@@ -86,5 +87,6 @@ class SNAP_short_detcal(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1.0e-2
+        self.disableChecking.append('Instrument')  # doesn't validate correctly
         # default validation of workspace to processed nexus is right
         return ('SNAP_34172_2_4_Grouping_nor','SNAP_34172_2_4_Grouping_nor.nxs')
