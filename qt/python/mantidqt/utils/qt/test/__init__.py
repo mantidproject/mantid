@@ -19,8 +19,7 @@
 """
 from __future__ import absolute_import
 
-from inspect import isfunction, ismethod
-import gc
+from unittest import TestCase
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QApplication
@@ -28,55 +27,23 @@ from qtpy.QtWidgets import QApplication
 from mantidqt.utils.qt.plugins import setup_library_paths
 from .modal_tester import ModalTester
 
+# Hold on to QAPP reference to avoid garbage collection
+_QAPP = None
 
-def requires_qapp(cls):
+
+class GuiTest(TestCase):
+    """Base class for tests that require a QApplication instance
+    GuiTest ensures that a QApplication exists before tests are run
     """
-    Converts a unittest.TestCase class to a GUI test case by wrapping all
-    test methods in a decorator that makes sure that a QApplication is created.
-    Qt widgets don't work without QApplication.
-
-    Note: It seems possible to segfault the Python process if the QApplication object
-    is destroyed too late. This seems nearly guaranteed if the QApplication object is stored
-    as a global variable at module scope. For this reason this decorator stores
-    its instance as an object attribute.
-
-    Usage:
-
-        @requires_qapp
-        class MyWidgetTest(unittest.TestCase):
-
-            def test_something(self):
-                ...
-
-            def test_something_else(self):
-                ...
-
-    :param cls: Class instance
-    """
-    def do_nothing(self):
-      pass
-
-    orig_setUp = getattr(cls, 'setUp', do_nothing)
-    orig_tearDown = getattr(cls, 'tearDown', do_nothing)
-
-    def setUp(self):
-        qapp = QApplication.instance()
-        if qapp is None:
+    @classmethod
+    def setUpClass(cls):
+        """Prepare for test execution.
+        Ensure that a (single copy of) QApplication has been created
+        """
+        global _QAPP
+        if _QAPP is None:
             setup_library_paths()
-            cls._qapp = QApplication([cls.__name__])
-        else:
-            self._qapp = qapp
-        orig_setUp(self)
-
-    def tearDown(self):
-      orig_tearDown(self)
-      if self._qapp is not None:
-          self._qapp.closeAllWindows()
-          gc.collect()
-
-    cls.setUp = setUp
-    cls.tearDown = tearDown
-    return cls
+            _QAPP = QApplication([cls.__name__])
 
 
 def select_item_in_tree(tree, item_label):

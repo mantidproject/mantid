@@ -89,8 +89,9 @@ public:
 
     auto hints = strategy.createHints();
 
-    auto compare = [](Hint const &lhs, Hint const &rhs)
-                       -> bool { return lhs.word() < rhs.word(); };
+    auto compare = [](Hint const &lhs, Hint const &rhs) -> bool {
+      return lhs.word() < rhs.word();
+    };
     std::sort(expected.begin(), expected.end(), compare);
     std::sort(hints.begin(), hints.end(), compare);
 

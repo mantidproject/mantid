@@ -24,21 +24,28 @@ except ImportError:
 
 # 3rdparty imports
 from mantid.api import WorkspaceFactory
+from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QDialogButtonBox
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.dialogs.spectraselectordialog import (get_spectra_selection, parse_selection_str,
                                                     SpectraSelectionDialog)
 
 
-@requires_qapp
-class SpectraSelectionDialogTest(unittest.TestCase):
+class SpectraSelectionDialogTest(GuiTest):
 
+    _mock_get_icon = None
     _single_spec_ws = None
     _multi_spec_ws = None
 
     def setUp(self):
+        # patch away getting a real icon as it can hit a race condition when running tests
+        # in parallel
+        patcher = mock.patch('mantidqt.dialogs.spectraselectordialog.get_icon')
+        self._mock_get_icon = patcher.start()
+        self._mock_get_icon.return_value = QIcon()
+        self.addCleanup(patcher.stop)
         if self._single_spec_ws is None:
             self.__class__._single_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1,
                                                                                 XLength=1, YLength=1)
@@ -104,6 +111,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         dlg._ui.wkspIndices.setText("50-60")
         dlg._ui.buttonBox.button(QDialogButtonBox.Ok).click()
 
+        self._mock_get_icon.assert_called_once_with('fa.asterisk', color='red', scale_factor=0.6)
         self.assertTrue(dlg.selection is not None)
         self.assertTrue(dlg.selection.spectra is None)
         self.assertEqual(list(range(50, 61)), dlg.selection.wksp_indices)

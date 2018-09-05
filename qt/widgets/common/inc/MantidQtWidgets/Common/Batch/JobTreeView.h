@@ -28,6 +28,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
 #include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
+#include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"

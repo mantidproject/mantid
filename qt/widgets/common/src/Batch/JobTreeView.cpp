@@ -6,7 +6,6 @@
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
-#include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include <QKeyEvent>
 #include <QStandardItemModel>
@@ -488,6 +487,7 @@ void JobTreeView::keyPressEvent(QKeyEvent *event) {
     if (event->modifiers() & Qt::ControlModifier) {
       cutSelectedRequested();
     }
+  } else {
     QTreeView::keyPressEvent(event);
   }
 }

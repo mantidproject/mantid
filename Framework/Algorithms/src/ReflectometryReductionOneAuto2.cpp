@@ -398,15 +398,9 @@ void ReflectometryReductionOneAuto2::exec() {
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
   if (!params.empty()) {
-    if (params.size() == 3) {
-      setProperty("MomentumTransferMin", params[0]);
-      setProperty("MomentumTransferStep", -params[1]);
-      setProperty("MomentumTransferMax", params[2]);
-    } else {
-      setProperty("MomentumTransferMin", IvsQ->x(0).front());
-      setProperty("MomentumTransferMax", IvsQ->x(0).back());
-      setProperty("MomentumTransferStep", -params[0]);
-    }
+    setProperty("MomentumTransferMin", params[0]);
+    setProperty("MomentumTransferStep", -params[1]);
+    setProperty("MomentumTransferMax", params[2]);
   }
   if (getPointerToProperty("ScaleFactor")->isDefault())
     setProperty("ScaleFactor", 1.0);
@@ -635,17 +629,13 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
     qstep = -qstep;
   }
 
-  Property *qMin = getProperty("MomentumTransferMin");
-  Property *qMax = getProperty("MomentumTransferMax");
-  if (!qMin->isDefault() && !qMax->isDefault()) {
-    double qmin = getProperty("MomentumTransferMin");
-    double qmax = getProperty("MomentumTransferMax");
-    params.push_back(qmin);
-    params.push_back(qstep);
-    params.push_back(qmax);
-  } else {
-    params.push_back(qstep);
-  }
+  auto qmin =
+      getPropertyOrDefault("MomentumTransferMin", inputWS->x(0).front());
+  auto qmax = getPropertyOrDefault("MomentumTransferMax", inputWS->x(0).back());
+
+  params.push_back(qmin);
+  params.push_back(qstep);
+  params.push_back(qmax);
 
   // Rebin
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
@@ -670,6 +660,21 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
   }
 
   return IvsQ;
+}
+
+/**
+ * @brief Get the Property Or return a default given value
+ *
+ * @param propertyName
+ * @param defaultValue
+ */
+double ReflectometryReductionOneAuto2::getPropertyOrDefault(
+    const std::string &propertyName, const double defaultValue) {
+  Property *property = getProperty(propertyName);
+  if (property->isDefault())
+    return defaultValue;
+  else
+    return getProperty(propertyName);
 }
 
 /** Check if input workspace is a group
@@ -715,16 +720,16 @@ void ReflectometryReductionOneAuto2::setOutputWorkspaces(
 }
 
 /** Process groups. Groups are processed differently depending on transmission
- * runs and polarization analysis. If transmission run is a matrix workspace, it
- * will be applied to each of the members in the input workspace group. If
+ * runs and polarization analysis. If transmission run is a matrix workspace,
+ * it will be applied to each of the members in the input workspace group. If
  * transmission run is a workspace group, the behaviour is different depending
  * on polarization analysis. If polarization analysis is off (i.e.
- * 'PolarizationAnalysis' is set to 'None') each item in the transmission group
- * is associated with the corresponding item in the input workspace group. If
- * polarization analysis is on (i.e. 'PolarizationAnalysis' is 'PA' or 'PNR')
- * items in the transmission group will be summed to produce a matrix workspace
- * that will be applied to each of the items in the input workspace group. See
- * documentation of this algorithm for more details.
+ * 'PolarizationAnalysis' is set to 'None') each item in the transmission
+ * group is associated with the corresponding item in the input workspace
+ * group. If polarization analysis is on (i.e. 'PolarizationAnalysis' is 'PA'
+ * or 'PNR') items in the transmission group will be summed to produce a
+ * matrix workspace that will be applied to each of the items in the input
+ * workspace group. See documentation of this algorithm for more details.
  */
 bool ReflectometryReductionOneAuto2::processGroups() {
   // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
@@ -829,6 +834,22 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     }
   }
 
+  // Group the IvsQ and IvsLam workspaces
+  Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
+  groupAlg->setChild(false);
+  groupAlg->setRethrows(true);
+  if (!IvsLamGroup.empty()) {
+    groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
+    groupAlg->setProperty("OutputWorkspace", outputIvsLam);
+    groupAlg->execute();
+  }
+  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
+  groupAlg->setProperty("OutputWorkspace", outputIvsQ);
+  groupAlg->execute();
+  groupAlg->setProperty("InputWorkspaces", IvsQUnbinnedGroup);
+  groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
+  groupAlg->execute();
+
   // Set other properties so they can be updated in the Reflectometry interface
   setPropertyValue("ThetaIn", alg->getPropertyValue("ThetaIn"));
   setPropertyValue("MomentumTransferMin",
@@ -931,7 +952,8 @@ ReflectometryReductionOneAuto2::getPolarizationEfficiencies() {
 
 /**
  * Apply a polarization correction to workspaces in lambda.
- * @param outputIvsLam :: Name of a workspace group to apply the correction to.
+ * @param outputIvsLam :: Name of a workspace group to apply the correction
+ * to.
  */
 void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
     std::string const &outputIvsLam) {
@@ -972,7 +994,8 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
 /**
  * Sum transmission workspaces that belong to a workspace group
  * @param transGroup : The transmission group containing the transmission runs
- * @return :: A workspace pointer containing the sum of transmission workspaces
+ * @return :: A workspace pointer containing the sum of transmission
+ * workspaces
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
     WorkspaceGroup_sptr &transGroup) {
@@ -980,8 +1003,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
   const std::string transSum = "trans_sum";
   Workspace_sptr sumWS = transGroup->getItem(0)->clone();
 
-  /// For this step to appear in the history of the output workspaces I need to
-  /// set child to false and work with the ADS
+  /// For this step to appear in the history of the output workspaces I need
+  /// to set child to false and work with the ADS
   auto plusAlg = createChildAlgorithm("Plus");
   plusAlg->setChild(false);
   plusAlg->initialize();

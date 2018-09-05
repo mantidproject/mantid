@@ -11,8 +11,8 @@ set ( SRC_FILES
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
+  src/FlowLayout.cpp
   src/Hint.cpp
-	src/FlowLayout.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp

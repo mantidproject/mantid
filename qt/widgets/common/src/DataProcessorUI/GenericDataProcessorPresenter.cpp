@@ -281,6 +281,8 @@ void GenericDataProcessorPresenter::acceptViews(
   observeADSClear();
   observeAfterReplace();
 
+  m_view->setItemDelegate();
+
   // Provide autocompletion hints for the options column. We use the algorithm's
   // properties minus those we blacklist. We blacklist any useless properties or
   // ones we're handling that the user should'nt touch.

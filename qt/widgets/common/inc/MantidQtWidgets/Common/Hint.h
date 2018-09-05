@@ -19,6 +19,6 @@ private:
 
 EXPORT_OPT_MANTIDQT_COMMON bool operator==(Hint const &lhs, Hint const &rhs);
 EXPORT_OPT_MANTIDQT_COMMON bool operator!=(Hint const &lhs, Hint const &rhs);
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTID_MANTIDWIDGETS_HINT_H_

@@ -2,6 +2,7 @@
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDIT_H_
 
 #include "DllOption.h"
+#include "Hint.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmFactory.h"

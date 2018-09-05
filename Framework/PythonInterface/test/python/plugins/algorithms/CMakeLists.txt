@@ -23,6 +23,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
+  CropWorkspaceForMDNormTest.py
   CropWorkspaceRaggedTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py

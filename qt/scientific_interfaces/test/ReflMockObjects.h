@@ -23,6 +23,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;

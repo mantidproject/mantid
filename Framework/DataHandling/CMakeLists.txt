@@ -1,4 +1,4 @@
-set ( SRC_FILES
+﻿set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
 	src/BankPulseTimes.cpp
@@ -61,7 +61,7 @@ set ( SRC_FILES
 	src/LoadILLIndirect2.cpp
 	src/LoadILLPolarizationFactors.cpp
 	src/LoadILLReflectometry.cpp
-	src/LoadILLSANS.cpp
+        src/LoadILLSANS.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadISISPolarizationEfficiencies.cpp
@@ -134,7 +134,7 @@ set ( SRC_FILES
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
 	src/SNSDataArchive.cpp
-	src/SaveANSTOAscii.cpp
+        src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveBankScatteringAngles.cpp
@@ -156,7 +156,7 @@ set ( SRC_FILES
 	src/SaveILLCosmosAscii.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
-	src/SaveMask.cpp
+        src/SaveMask.cpp
 	src/SaveNISTDAT.cpp
 	src/SaveNXSPE.cpp
 	src/SaveNXTomo.cpp
@@ -169,6 +169,7 @@ set ( SRC_FILES
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
+        src/SaveReflectometryAscii.cpp
 	src/SaveReflCustomAscii.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSESANS.cpp
@@ -353,6 +354,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
+        inc/MantidDataHandling/SaveReflectometryAscii.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSESANS.h
@@ -527,6 +529,7 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
+        SaveReflectometryAsciiTest.h
 	SaveReflCustomAsciiTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSESANSTest.h

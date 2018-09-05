@@ -22,12 +22,11 @@ import unittest
 # third-party library imports
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
 
 
-@requires_qapp
-class MultiPythonFileInterpreterTest(unittest.TestCase):
+class MultiPythonFileInterpreterTest(GuiTest):
 
     def test_default_contains_single_editor(self):
         widget = MultiPythonFileInterpreter()

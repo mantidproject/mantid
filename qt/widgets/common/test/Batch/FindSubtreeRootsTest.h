@@ -232,7 +232,6 @@ public:
         RowLocation({1, 2})
     });
     // clang-format on
-
     auto roots = findSubtreeRoots(region);
     TS_ASSERT(!roots.is_initialized())
   }

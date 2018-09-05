@@ -25,7 +25,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
 #define MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidKernel/make_unique.h"
 #include <memory>
 
