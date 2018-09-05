@@ -99,6 +99,7 @@ private: // methods
   void setupColorMapWidget();
   void setupUnwrappedControls(QHBoxLayout *parentLayout);
   void setupGridBankMenu(QVBoxLayout *parentLayout);
+  void forceLayers(bool on);
 
 private: // members
   QPushButton *m_surfaceTypeButton;
@@ -134,6 +135,8 @@ private: // members
   QCheckBox *m_layerCheck;
   QSlider *m_layerSlide;
   QSpinBox *m_layerSpin;
+
+  bool m_usingLayerStore;
 
   friend class InstrumentWidget;
 };

@@ -198,6 +198,7 @@ public:
   bool hasGridBank() const;
   size_t getNumberOfGridLayers() const;
   void setGridLayer(bool isUsingLayer, int layer) const;
+  const InstrumentRenderer &getInstrumentRenderer() const;
 
 signals:
   void colorMapChanged() const;

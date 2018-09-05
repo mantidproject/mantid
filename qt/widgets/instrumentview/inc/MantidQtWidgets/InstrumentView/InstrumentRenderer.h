@@ -28,9 +28,12 @@ private:
 
 public:
   InstrumentRenderer(const InstrumentActor &actor);
+
   ~InstrumentRenderer();
+
   void renderInstrument(const std::vector<bool> &visibleComps, bool showGuides,
                         bool picking = false);
+
   void reset();
 
   void changeScaleType(int type);
@@ -48,6 +51,10 @@ public:
   static GLColor makePickColor(size_t pickID);
 
   static size_t decodePickColor(const QRgb &c);
+
+  bool isUsingLayers() const { return m_isUsingLayers; }
+
+  size_t selectedLayer() const { return m_layer; }
 
 private:
   void resetColors();

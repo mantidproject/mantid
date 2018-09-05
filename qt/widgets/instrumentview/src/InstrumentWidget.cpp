@@ -413,17 +413,21 @@ void InstrumentWidget::setSurfaceType(int type) {
 
       // create the surface
       if (surfaceType == FULL3D) {
+        m_renderTab->forceLayers(false);
         surface = new Projection3D(m_instrumentActor.get(),
                                    getInstrumentDisplayWidth(),
                                    getInstrumentDisplayHeight());
       } else if (surfaceType <= CYLINDRICAL_Z) {
+        m_renderTab->forceLayers(false);
         surface =
             new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
       } else if (surfaceType <= SPHERICAL_Z) {
+        m_renderTab->forceLayers(false);
         surface =
             new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
       } else // SIDE_BY_SIDE
       {
+        m_renderTab->forceLayers(true);
         surface = new PanelsSurface(m_instrumentActor.get(), sample_pos, axis);
       }
     } catch (InstrumentHasNoSampleError &) {

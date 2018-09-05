@@ -1208,6 +1208,10 @@ void InstrumentActor::setGridLayer(bool isUsingLayer, int layer) const {
   emit colorMapChanged();
 }
 
+const InstrumentRenderer &InstrumentActor::getInstrumentRenderer() const {
+  return *m_renderer;
+}
+
 /** If instrument.geometry.view is set to Default or Physical, then the physical
  * instrument componentInfo is returned. Othewise this returns the neutronic
  * version.

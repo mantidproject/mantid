@@ -53,16 +53,16 @@ public:
 
 protected:
   boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
-  findFlatPanels(size_t rootIndex, const std::vector<size_t> &children,
-                 std::vector<bool> &visited);
+  findFlatPanels(size_t rootIndex, std::vector<bool> &visited);
 
-  void processStructured(const std::vector<size_t> &children, size_t rootIndex);
+  void processStructured(size_t rootIndex);
 
-  void processTubes(size_t rootIndex, std::vector<bool> &visited);
+  void processTubes(size_t rootIndex);
+
+  void processGrid(size_t rootIndex);
 
   std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
-  processUnstructured(const std::vector<size_t> &children, size_t rootIndex,
-                      std::vector<bool> &visited);
+  processUnstructured(size_t rootIndex, std::vector<bool> &visited);
 
   void rotate(const UnwrappedDetector &udet,
               Mantid::Kernel::Quat &R) const override;

@@ -1,9 +1,10 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
-#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/InstrumentView/UCorrectionDialog.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -286,6 +287,7 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
   voxelControlsLayout->addWidget(m_layerSpin);
 
   parentLayout->addLayout(voxelControlsLayout);
+  m_usingLayerStore = false;
 }
 
 /** Sets up the controls and surrounding layout that allows uses to view the
@@ -339,6 +341,23 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
   } else {
     m_full3D->setToolTip(
         "Disabled: check \"Use OpenGL\" option in Display Settings to enable");
+  }
+}
+
+void InstrumentWidgetRenderTab::forceLayers(bool on) {
+  auto &actor = m_instrWidget->getInstrumentActor();
+
+  if (!actor.hasGridBank())
+    return;
+
+  const auto &renderer = actor.getInstrumentRenderer();
+  if (on) {
+    m_usingLayerStore = renderer.isUsingLayers();
+    m_layerCheck->setDisabled(on);
+    toggleLayerDisplay(on);
+  } else {
+    toggleLayerDisplay(m_usingLayerStore);
+    m_layerCheck->setDisabled(on);
   }
 }
 
