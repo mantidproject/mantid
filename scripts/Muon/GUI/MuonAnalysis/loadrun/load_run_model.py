@@ -22,6 +22,10 @@ def get_run_from_multi_period_data(workspace_list):
         return unique_runs[0]
 
 
+def exception_message_for_failed_files(failed_file_list):
+    return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
+
+
 class LoadRunWidgetModel(object):
     """Stores info on all currently loaded workspaces"""
 
@@ -51,12 +55,8 @@ class LoadRunWidgetModel(object):
                 continue
             self._loaded_data_store.add_data(run=run, workspace=ws, filename=filename)
         if failed_files:
-            message = self.exception_message_for_failed_files(failed_files)
+            message = exception_message_for_failed_files(failed_files)
             raise ValueError(message)
-
-    def exception_message_for_failed_files(self, failed_file_list):
-        print("Exception in execute : Could not load the following files : \n - " + "\n - ".join(failed_file_list))
-        return "Could not load the following files : \n - " + "\n - ".join(failed_file_list)
 
     # Used with load thread
     def output(self):
