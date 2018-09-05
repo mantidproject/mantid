@@ -338,7 +338,10 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   for (auto i = 0; i < m_header.numberOfHistograms; ++i) {
     outputWorkspace->getSpectrum(i).setDetectorID(i);
   }
-
+  
+  // Set Run Property goodfrm
+  outputWorkspace->mutableRun().addProperty("goodfrm", 1);
+  
   // Set axis variables
   outputWorkspace->setYUnit("Counts");
   boost::shared_ptr<Kernel::Units::Label> lblUnit =
