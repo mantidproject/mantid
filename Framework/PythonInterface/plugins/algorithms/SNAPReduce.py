@@ -273,6 +273,25 @@ class SNAPReduce(DataProcessorAlgorithm):
             maskWSname = ''
         return maskWSname
 
+    def _generateGrouping(self, runnumber, metaWS, progress):
+        group_to_real = {'Banks': 'Group', 'Modules': 'bank', '2_4 Grouping': '2_4Grouping'}
+        group = self.getProperty('GroupDetectorsBy').value
+        real_name = group_to_real.get(group, group)
+
+        if not mtd.doesExist(group):
+            if group == '2_4 Grouping':
+                group = '2_4_Grouping'
+
+            if metaWS is None:
+                metaWS = self._loadMetaWS(runnumber)
+            CreateGroupingWorkspace(InputWorkspace=metaWS, GroupDetectorsBy=real_name,
+                                    OutputWorkspace=group)
+            progress.report('create grouping')
+        else:
+            progress.report()
+
+        return group
+
     def _generateNormalization(self, WS, normType, normWS):
         if normType == 'None':
             return None
@@ -335,7 +354,8 @@ class SNAPReduce(DataProcessorAlgorithm):
         alignAndFocusArgs={'TMax':50000,
                            'RemovePromptPulseWidth':1600,
                            'PreserveEvents':False,
-                           'Dspacing':True}  # bin in d-spacing
+                           'Dspacing':True,  # binning parameters in d-space
+                           'Params':self.getProperty("Binning").value}
 
         # workspace for loading metadata only to be used in LoadDiffCal and
         # CreateGroupingWorkspace
@@ -343,24 +363,18 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         # either type of file-based calibration is stored in the same variable
         calib = self.getProperty("Calibration").value
+        detcalFile = None
         if calib == "Calibration File":
-            cal_File = self.getProperty("CalibrationFilename").value
-            # TODO take instrument from the data being loaded
             metaWS = self._loadMetaWS(in_Runs[0])
-            LoadDiffCal(Filename=cal_File, WorkspaceName='SNAP',
+            LoadDiffCal(Filename=self.getPropertyValue("CalibrationFilename"),
+                        WorkspaceName='SNAP',
                         InputWorkspace=metaWS,
                         MakeGroupingWorkspace=False, MakeMaskWorkspace=False)
             alignAndFocusArgs['CalibrationWorkspace'] = 'SNAP_cal'
-            progress.report('loaded calibration')
         elif calib == 'DetCal File':
-            cal_File = self.getProperty('DetCalFilename').value
-            cal_File = ','.join(cal_File)
-            progress.report('loaded detcal')
-        else:
-            cal_File = None
-            progress.report('')
+            detcalFile = ','.join(self.getProperty('DetCalFilename').value)
+        progress.report('loaded calibration')
 
-        params = self.getProperty("Binning").value
         norm = self.getProperty("Normalization").value
 
         if norm == "From Processed Nexus":
@@ -375,19 +389,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             normalizationWS = None
             progress.report('')
 
-        group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4Grouping'}
-        group = self.getProperty('GroupDetectorsBy').value
-        real_name = group_to_real.get(group, group)
-
-        if not mtd.doesExist(group):
-            if group == '2_4 Grouping':
-                group = '2_4_Grouping'
-
-            if metaWS is None:
-                metaWS = self._loadMetaWS(in_Runs[0])
-            CreateGroupingWorkspace(InputWorkspace=metaWS, GroupDetectorsBy=real_name,
-                                    OutputWorkspace=group)
-            progress.report('create grouping')
+        group = self._generateGrouping(in_Runs[0], metaWS, progress)
 
         if metaWS is not None:
             DeleteWorkspace(Workspace=metaWS)
@@ -399,6 +401,8 @@ class SNAPReduce(DataProcessorAlgorithm):
         # --------------------------- REDUCE DATA -----------------------------
 
         Tag = 'SNAP'
+        if self.getProperty("LiveData").value:
+            Tag = 'Live'
 
         progStart = .25
         progDelta = (1.-progStart)/len(in_Runs)
@@ -413,8 +417,6 @@ class SNAPReduce(DataProcessorAlgorithm):
             basename = '%s_%s_%s' % (new_Tag, runnumber, group)
 
             if self.getProperty("LiveData").value:
-                Tag = 'Live'
-                # Need to update the new_Tag and basename variables
                 raise RuntimeError('Live data is not currently supported')
             else:
                 Load(Filename='SNAP' + str(runnumber), OutputWorkspace=basename + '_red', startProgress=progStart,
@@ -424,7 +426,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             # overwrite geometry with detcal files
             if calib == 'DetCal File':
-                LoadIsawDetCal(InputWorkspace=redWS, Filename=cal_File)
+                LoadIsawDetCal(InputWorkspace=redWS, Filename=detcalFile)
 
             # create unfocussed data if in set-up mode
             if Process_Mode == "Set-Up":
@@ -433,7 +435,6 @@ class SNAPReduce(DataProcessorAlgorithm):
                 unfocussedWksp = ''
 
             AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
-                                Params=params,  # binning parameters in d-space
                                 MaskWorkspace=maskWSname,  # can be empty string
                                 GroupingWorkspace=group,
                                 UnfocussedWorkspace=unfocussedWksp,  # can be empty string
@@ -460,7 +461,8 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             # AlignAndFocus doesn't necessarily rebin the data correctly
             if Process_Mode == "Set-Up":
-                Rebin(InputWorkspace=unfocussedWksp, Params=params, Outputworkspace=unfocussedWksp)
+                Rebin(InputWorkspace=unfocussedWksp, Params=alignAndFocusArgs['Params'],
+                      Outputworkspace=unfocussedWksp)
 
             NormaliseByCurrent(InputWorkspace=redWS, OutputWorkspace=redWS)
 
@@ -485,9 +487,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             else:
                 outputWksp = normalizedWS
 
-                if norm == "Extracted from Data":
-
-                    if Process_Mode == "Production":
+                if norm == "Extracted from Data" and Process_Mode == "Production":
                         DeleteWorkspace(Workspace=redWS)
                         DeleteWorkspace(Workspace=normalizationWS)
 
