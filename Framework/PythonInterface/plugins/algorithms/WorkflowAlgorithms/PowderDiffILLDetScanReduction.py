@@ -36,6 +36,9 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
             issues['Output2D'] = 'No output chosen'
             issues['Output1D'] = 'No output chosen'
 
+        if self.getPropertyValue("ComponentsToReduce") and self.getProperty("CropNegativeScatteringAngles").value:
+            issues['CropNegativeScatteringAngles'] = 'For component-wise reduction, this has to be unchecked.'
+
         return issues
 
     def PyInit(self):
@@ -226,8 +229,6 @@ class PowderDiffILLDetScanReduction(DataProcessorAlgorithm):
 
         components = self.getPropertyValue('ComponentsToReduce')
         if components:
-            self._mirror = False
-            self.log().information('Mirroring is disabled for tube per tube output.')
             for ws in input_group:
                 CropToComponent(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(),
                                 ComponentNames=components)

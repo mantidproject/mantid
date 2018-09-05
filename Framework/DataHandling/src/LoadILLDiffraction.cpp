@@ -155,17 +155,17 @@ void LoadILLDiffraction::loadDataScan() {
   // open the root entry
   NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
-
   m_instName = firstEntry.getString("instrument/name");
-
   m_startTime = DateAndTime(
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
-
-  // read the detector data
-
+  const std::string dataType = getPropertyValue("DataType");
+  const bool hasCalibratedData = containsCalibratedData(m_filename);
+  if (dataType != "Raw" && hasCalibratedData) {
+    m_useCalibratedData = true;
+  }
+  // Load the data
   std::string dataName;
-  if (getPropertyValue("DataType") == "Raw" &&
-      containsCalibratedData(m_filename))
+  if (dataType == "Raw" && hasCalibratedData)
     dataName = "data_scan/detector_data/raw_data";
   else
     dataName = "data_scan/detector_data/data";
@@ -483,7 +483,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-      if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+      if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
         pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
       }
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
@@ -525,7 +525,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     auto &errors = m_outWorkspace->mutableE(i);
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
     auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-    if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+    if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
       pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
     }
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
