@@ -157,6 +157,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             needsForcedProfileIDX = np.where(needsForcedProfile)[0]
             canFitProfileIDX = np.where(~needsForcedProfile)[0]
             numPeaksCanFit = len(canFitProfileIDX)
+
             # We can populate the strongPeakParams_ws now
             for row in strongPeakParams:
                 strongPeakParams_ws.addRow(row)
@@ -198,7 +199,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         peaks_ws_out = peaks_ws.clone()
         np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
         progress = Progress(self, 0.0, 1.0, len(peaksToFit))
-        
+
         for fitNumber, peakNumber in enumerate(peaksToFit):#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
             progress.report(' ')
