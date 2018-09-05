@@ -75,12 +75,12 @@ using PeakQMap = std::unordered_map<int64_t, Mantid::Kernel::V3D>;
 class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
-  Integrate3DEvents(
+  void Integrate3DEvents(
       const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
       Kernel::DblMatrix const &UBinv, double radius,
       const bool useOnePercentBackgroundCorrection = true);
 
-  Integrate3DEvents(
+  void Integrate3DEvents(
       const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
       std::vector<Mantid::Kernel::V3D> const &hkl_list,
       std::vector<Mantid::Kernel::V3D> const &mnp_list,

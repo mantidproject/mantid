@@ -26,6 +26,7 @@ using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
 /**
+ * \overload
  * Construct an object to store events that correspond to a peak an are
  * within the specified radius of the specified peak centers, and to
  * integrate the peaks.
@@ -38,7 +39,7 @@ using Mantid::Kernel::V3D;
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
  */
-Integrate3DEvents::Integrate3DEvents(
+void Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<double, V3D>> &peak_q_list,
     DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
@@ -52,6 +53,7 @@ Integrate3DEvents::Integrate3DEvents(
 }
 
 /**
+ * \overload
  * Construct an object to store events that correspond to a peak an are
  * within the specified radius of the specified peak centers, and to
  * integrate the peaks.
@@ -72,7 +74,7 @@ Integrate3DEvents::Integrate3DEvents(
  * @param   useOnePercentBackgroundCorrection flag if one percent background
  *                       correction should be used.
  */
-Integrate3DEvents::Integrate3DEvents(
+void Integrate3DEvents::Integrate3DEvents(
     const std::vector<std::pair<double, V3D>> &peak_q_list,
     std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     DblMatrix const &UBinv, DblMatrix const &ModHKL, double radius_m,
