@@ -68,10 +68,11 @@ class PlotView(QtGui.QWidget):
         """
 
         def wraps(self, *args, **kwargs):
-            func(self, *args, **kwargs)
+            output = func(self, *args, **kwargs)
             if len(self.plots):
                 self.figure.tight_layout()
             self.canvas.draw()
+            return output
         return wraps
 
     def _save_addition(func):
@@ -86,7 +87,7 @@ class PlotView(QtGui.QWidget):
                 self.plot_additions[name].append((func, name, args, kwargs))
             except KeyError:
                 self.plot_additions[name] = [(func, name, args, kwargs)]
-            func(self, name, *args, **kwargs)
+            return func(self, name, *args, **kwargs)
         return wraps
 
     def _silent_checkbox_check(self, state):

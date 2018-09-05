@@ -2,6 +2,10 @@ class PlotPresenter(object):
     def __init__(self, view):
         self.view = view
 
+    def update_canvas(self):
+        """ Redraws the canvas. """
+        self.view.canvas.draw()
+
     def get_subplot(self, name):
         """
         Returns the subplot with the given name.

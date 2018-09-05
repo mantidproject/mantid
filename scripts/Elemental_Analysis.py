@@ -4,6 +4,8 @@ from PyQt4 import QtGui
 
 import sys
 
+from itertools import cycle
+
 from six import iteritems
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
@@ -76,6 +78,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self._generate_element_widgets()
         self._generate_element_data()
 
+        self.line_colours = cycle(["r", "g", "b", "c", "m", "y"])
+
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
         subplot = self.plotting.add_subplot(detector)
@@ -109,17 +113,26 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                 continue
 
     def _add_element_lines(self, element, data):
+        self.element_lines[element] = {}
+        colour = self.line_colours.next()
         for label, x_value in iteritems(data):
             for plot_name in self.plotting.get_subplots():
-                line = self.plotting.add_vline(plot_name, x_value, 0, 1)
+                line = self.plotting.add_vline(
+                    plot_name, x_value, 0, 1, color=colour)
                 try:
-                    self.element_lines[element][x_value] = line
+                    self.element_lines[element][x_value].append(line)
                 except KeyError:
-                    self.element_lines[element] = {x_value: line}
+                    self.element_lines[element][x_value] = [line]
+
+    def _remove_element_lines(self, element):
+        for x_value, lines in iteritems(self.element_lines[element]):
+            for line in lines:
+                line.remove()
+        self.plotting.update_canvas()
+        self.element_lines[element] = {}
 
     def _update_peak_data(self, element, data):
         self.element_data[element] = data
-        # self.elem
 
     def _generate_element_widgets(self):
         self.element_widgets = {}
@@ -132,6 +145,11 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.element_widgets[element] = widget
 
     def table_left_clicked(self, item):
+        if self.ptable.is_selected(item.symbol):
+            self._add_element_lines(
+                item.symbol, self.element_data[item.symbol])
+        else:
+            self._remove_element_lines(item.symbol)
         print("Element Left Clicked: {}".format(
             self.element_data[item.symbol]))
 
