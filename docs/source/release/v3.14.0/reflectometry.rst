@@ -65,6 +65,8 @@ Improved
 ########
 
 - :ref:`algm-ReflectometryReductionOneAuto` now supports the Wildes method for polarization corrections as well as Fredrikze when configured in the parameters file.
+- :ref:`algm-ReflectometryReductionOneAuto` now uses spectrum numbers for it's processing instructions instead of workspace indecies
+- :ref:`algm-ReflectometryReductionOne` now uses spectrum numbers for it's processing instructions instead of workspace indecies
 
 Bug fixes
 #########
