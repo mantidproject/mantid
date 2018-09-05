@@ -6,7 +6,7 @@ from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fil
     MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignAndFocusPowder, CloneWorkspace, \
     ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, \
-    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
+    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
     MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
     RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
     SaveGSS, SaveNexusProcessed, mtd
@@ -316,6 +316,14 @@ class SNAPReduce(DataProcessorAlgorithm):
                        SplitFiles=True, Append=False)
         DeleteWorkspace(Workspace='WS_tof')
 
+    def _loadMetaWS(self, runnumber):
+        # currently only event nexus files are supported
+        wsname = '__meta_SNAP_{}'.format(runnumber)
+        LoadEventNexus(Filename='SNAP' + str(runnumber), OutputWorkspace=wsname,
+                       MetaDataOnly=True, LoadLogs=False)
+        return wsname
+
+
     def PyExec(self):
         # Retrieve all relevant notice
 
@@ -325,10 +333,27 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         progress = Progress(self, 0., .25, 3)
 
+        # default arguments for AlignAndFocusPowder
+        alignAndFocusArgs={'TMax':50000,
+                           'RemovePromptPulseWidth':1600,
+                           'PreserveEvents':False,
+                           'Dspacing':True,  # bin in d-spacing
+        }
+
+        # workspace for loading metadata only to be used in LoadDiffCal and
+        # CreateGroupingWorkspace
+        metaWS = None
+
         # either type of file-based calibration is stored in the same variable
         calib = self.getProperty("Calibration").value
         if calib == "Calibration File":
             cal_File = self.getProperty("CalibrationFilename").value
+            # TODO take instrument from the data being loaded
+            metaWS = self._loadMetaWS(in_Runs[0])
+            LoadDiffCal(Filename=calFile, WorkspaceName='SNAP',
+                        InputWorkspace=metaWS,
+                        MakeGroupingWorkspace=False, MakeMaskWorkspace=False)
+            alignAndFocusArgs['CalibrationWorkspace'] = 'SNAP_cal'
             progress.report('loaded calibration')
         elif calib == 'DetCal File':
             cal_File = self.getProperty('DetCalFilename').value
@@ -360,10 +385,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         if not mtd.doesExist(group):
             if group == '2_4 Grouping':
                 group = '2_4_Grouping'
-            # TODO take instrument from the data being loaded
-            CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
+
+            if metaWS is None:
+                metaWS = self._loadMetaWS(in_Runs[0])
+            CreateGroupingWorkspace(InputWorkspace=metaWS, GroupDetectorsBy=real_name,
                                     OutputWorkspace=group)
             progress.report('create grouping')
+
+        if metaWS is not None:
+            DeleteWorkspace(Workspace=metaWS)
 
         Process_Mode = self.getProperty("ProcessingMode").value
 
@@ -405,19 +435,14 @@ class SNAPReduce(DataProcessorAlgorithm):
             else:
                 unfocussedWksp = ''
 
-            # TODO the right thing with the calibration information
             AlignAndFocusPowder(InputWorkspace=redWS, OutputWorkspace=redWS,
-                                TMax=50000,
                                 Params=params,  # binning parameters in d-space
-                                RemovePromptPulseWidth=1600,
                                 MaskWorkspace=maskWSname,  # can be empty string
                                 GroupingWorkspace=group,
                                 UnfocussedWorkspace=unfocussedWksp,  # can be empty string
-                                PreserveEvents=False,
-                                Dspacing=True,  # bin in d-spacing
                                 startProgress = progStart,
-                                endProgress = progStart + .5 * progDelta
-            )
+                                endProgress = progStart + .5 * progDelta,
+                                **alignAndFocusArgs)
             progStart += .5 * progDelta
 
             # the rest takes up .25 percent of the run processing
@@ -425,6 +450,16 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             # AlignAndFocusPowder leaves the data in time-of-flight
             ConvertUnits(InputWorkspace=redWS, OutputWorkspace=redWS, Target='dSpacing', EMode='Elastic')
+
+            # Edit instrument geometry to make final workspace smaller on disk
+            det_table = PreprocessDetectorsToMD(Inputworkspace=redWS,
+                                                OutputWorkspace='__SNAP_det_table')
+            polar = np.degrees(det_table.column('TwoTheta'))
+            azi = np.degrees(det_table.column('Azimuthal'))
+            EditInstrumentGeometry(Workspace=redWS, L2=det_table.column('L2'),
+                                   Polar=polar, Azimuthal=azi)
+            mtd.remove('__SNAP_det_table')
+            progress.report('simplify geometry')
 
             # AlignAndFocus doesn't necessarily rebin the data correctly
             if Process_Mode == "Set-Up":
@@ -446,19 +481,6 @@ class SNAPReduce(DataProcessorAlgorithm):
                 progress.report('normalized')
             else:
                 progress.report()
-
-            # Edit instrument geomety to make final workspace smaller on disk
-            det_table = PreprocessDetectorsToMD(Inputworkspace=redWS,
-                                                OutputWorkspace='__SNAP_det_table')
-            polar = np.degrees(det_table.column('TwoTheta'))
-            azi = np.degrees(det_table.column('Azimuthal'))
-            EditInstrumentGeometry(Workspace=redWS, L2=det_table.column('L2'),
-                                   Polar=polar, Azimuthal=azi)
-            if normalizedWS is not None:
-                EditInstrumentGeometry(Workspace=normalizedWS, L2=det_table.column('L2'),
-                                       Polar=polar, Azimuthal=azi)
-            mtd.remove('__SNAP_det_table')
-            progress.report('simplify geometry')
 
             # rename everything as appropriate and determine output workspace name
             if normalizedWS is None:
