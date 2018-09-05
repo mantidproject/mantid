@@ -5,11 +5,10 @@ from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidato
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
     MultipleFileProperty, Progress, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignAndFocusPowder, CloneWorkspace, \
-    ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, \
-    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
-    MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
-    RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
-    SaveGSS, SaveNexusProcessed, mtd
+    ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Divide, EditInstrumentGeometry, \
+    GetIPTS, Load, LoadDiffCal, LoadEventNexus, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
+    NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, ReplaceSpecialValues, SaveAscii, \
+    SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
 
@@ -323,7 +322,6 @@ class SNAPReduce(DataProcessorAlgorithm):
                        MetaDataOnly=True, LoadLogs=False)
         return wsname
 
-
     def PyExec(self):
         # Retrieve all relevant notice
 
@@ -337,8 +335,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         alignAndFocusArgs={'TMax':50000,
                            'RemovePromptPulseWidth':1600,
                            'PreserveEvents':False,
-                           'Dspacing':True,  # bin in d-spacing
-        }
+                           'Dspacing':True}  # bin in d-spacing
 
         # workspace for loading metadata only to be used in LoadDiffCal and
         # CreateGroupingWorkspace
@@ -350,7 +347,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             cal_File = self.getProperty("CalibrationFilename").value
             # TODO take instrument from the data being loaded
             metaWS = self._loadMetaWS(in_Runs[0])
-            LoadDiffCal(Filename=calFile, WorkspaceName='SNAP',
+            LoadDiffCal(Filename=cal_File, WorkspaceName='SNAP',
                         InputWorkspace=metaWS,
                         MakeGroupingWorkspace=False, MakeMaskWorkspace=False)
             alignAndFocusArgs['CalibrationWorkspace'] = 'SNAP_cal'
