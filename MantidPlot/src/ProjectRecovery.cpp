@@ -7,6 +7,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
@@ -490,7 +492,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  const auto wsHandles =
+  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
       ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
@@ -519,6 +521,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
+    alg->setProperty("IgnoreGroups", true);
 
     alg->execute();
   }

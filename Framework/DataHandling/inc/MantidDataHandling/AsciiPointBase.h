@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_ASCIIPOINTBASE_H_
 #define MANTID_DATAHANDLING_ASCIIPOINTBASE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
 #include <fstream>
+#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,7 +51,7 @@ public:
 private:
   /// Return the file extension this algorthm should output.
   virtual std::string ext() = 0;
-  /// return if the line should start with a separator
+  /// Return if the line should start with a separator
   virtual bool leadingSep() { return true; }
   /// Add extra properties
   virtual void extraProps() = 0;
@@ -64,24 +64,19 @@ private:
   void exec() override;
   /// print the appropriate value to file
   void outputval(double val, std::ofstream &file, bool leadingSep = true);
-  /// write the top of the file
-  virtual std::vector<double> header(std::ofstream &file);
 
 protected:
   /// write the main content of the data
-  virtual void data(std::ofstream &file, const std::vector<double> &XData,
-                    bool exportDeltaQ = true);
+  virtual void data(std::ofstream &file, bool exportDeltaQ = true);
   /// Retrieves the separator property
   virtual void appendSeparatorProperty();
   /// The separator character
-  char m_sep;
-  double m_qres = 0.0;
-  size_t m_xlength = 0;
-
+  char m_sep{'\t'};
+  size_t m_length{0};
   API::MatrixWorkspace_const_sptr m_ws;
 };
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*  MANTID_DATAHANDLING_SAVEANSTO_H_  */
+#endif /*  MANTID_DATAHANDLING_ASCIIPOINTBASE_H_  */
