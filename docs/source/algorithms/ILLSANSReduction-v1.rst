@@ -124,7 +124,7 @@ This example performs the complete reduction for D11. :ref:`Q1DWeighted <algm-Q1
                      TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
 
     # Convert to I(Q)
-    Q1DWeighted(InputWorkspace='sample_flux', OutputBinning='0.0027,0.0004,0.033', OutputWorkspace='iq')
+    Q1DWeighted(InputWorkspace='sample_flux', NumberOfWedges=0, OutputBinning='0.003,0.001,0.027', OutputWorkspace='iq')
 
 Output:
 
@@ -139,14 +139,17 @@ Output:
 
     mtd.clear()
 
-Print the I(Q):
+Plot the I(Q):
 
 .. code-block:: python
 
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
-    ax.plot(mtd['iq'],'-')
+    plt.xscale('log')
+    plt.yscale('log')
+    ax.errorbar(mtd['iq'],'-rs')
     ax.set_ylabel('I [cm-1]')
+    ax.legend()
     fig.show()
 
 .. plot::
@@ -212,13 +215,16 @@ Print the I(Q):
                      TransmissionInputWorkspace='s_tr', OutputWorkspace='sample_flux')
 
     # Convert to I(Q)
-    Q1DWeighted(InputWorkspace='sample_flux', OutputBinning='0.0027,0.0004,0.033', OutputWorkspace='iq')
+    Q1DWeighted(InputWorkspace='sample_flux', NumberOfWedges=0, OutputBinning='0.003,0.001,0.027', OutputWorkspace='iq')
 
-    # Print the output
+    # Plot the output
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
-    ax.plot(mtd['iq'],'-')
+    plt.xscale('log')
+    plt.yscale('log')
+    ax.errorbar(mtd['iq'],'-rs')
     ax.set_ylabel('I [cm-1]')
+    ax.legend()
     fig.show()
 
 .. note::
