@@ -23,9 +23,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEVIEW_H_
 #include "DllConfig.h"
-#include "IBatchView.h"
-#include "MantidQtWidgets/Common/Batch/JobTreeView.h"
-#include "ui_BatchView.h"
 #include <memory>
 #include <vector>
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"

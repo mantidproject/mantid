@@ -273,8 +273,9 @@ void RunsTablePresenter::notifyRowInserted(
   }
 }
 
-void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
-    MantidQt::MantidWidgets::Batch::RowLocation> locationsOfRowsToRemove) {
+void RunsTablePresenter::removeRowsAndGroupsFromModel(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation>
+        locationsOfRowsToRemove) {
   std::sort(locationsOfRowsToRemove.begin(), locationsOfRowsToRemove.end());
   for (auto location = locationsOfRowsToRemove.crbegin();
        location != locationsOfRowsToRemove.crend(); ++location) {
@@ -288,15 +289,15 @@ void BatchPresenter::removeRowsAndGroupsFromModel(std::vector<
   }
 }
 
-void BatchPresenter::removeRowsAndGroupsFromView(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-        locationsOfRowsToRemove) {
+void RunsTablePresenter::removeRowsAndGroupsFromView(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+        &locationsOfRowsToRemove) {
   m_view->jobs().removeRows(locationsOfRowsToRemove);
 }
 
-void BatchPresenter::notifyRemoveRowsRequested(
-    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &
-        locationsOfRowsToRemove) {
+void RunsTablePresenter::notifyRemoveRowsRequested(
+    std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const
+        &locationsOfRowsToRemove) {
   removeRowsAndGroupsFromModel(locationsOfRowsToRemove);
   removeRowsAndGroupsFromView(locationsOfRowsToRemove);
 }

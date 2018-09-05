@@ -1,7 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
 #define MANTID_CUSTOMINTERFACES_MOCKBATCHVIEW_H_
 #include "DllConfig.h"
-#include "Views/IBatchView.h"
+#include "GUI/RunsTable/IRunsTableView.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <gmock/gmock.h>
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE

@@ -23,16 +23,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
 #include "DllConfig.h"
-#include <memory>
 #include "IRunsTableView.h"
-#include "JobViewUpdater.h"
+#include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "Map.h"
 #include "Reduction/Group.h"
 #include "Reduction/ReductionJobs.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "Map.h"
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
