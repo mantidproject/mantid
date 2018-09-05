@@ -1,16 +1,17 @@
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
 #include <QCursor>
 #include <QMessageBox>
 #include <QApplication>
 
 using namespace Mantid::Geometry;
-
+using Mantid::Beamline::ComponentType;
 namespace {
 // The logger object
 Mantid::Kernel::Logger g_log("RotationSurface");
@@ -25,23 +26,7 @@ RotationSurface::RotationSurface(const InstrumentActor *rootActor,
     : UnwrappedSurface(rootActor), m_pos(origin), m_zaxis(axis),
       m_manual_u_correction(false) {}
 
-/**
-* Initialize the surface.
-*/
-void RotationSurface::init() {
-  // the actor calls this->callback for each detector
-  m_unwrappedDetectors.clear();
-
-  // if u-correction is applied manually then m_u_min and m_u_max
-  // have valid values and have to be saved
-  double manual_u_min = m_u_min;
-  double manual_u_max = m_u_max;
-
-  size_t ndet = m_instrActor->ndetectors();
-  m_unwrappedDetectors.resize(ndet);
-  if (ndet == 0)
-    return;
-
+void RotationSurface::findAxes() {
   // First detector defines the surface's x axis
   if (m_xaxis.nullVector()) {
     Mantid::Kernel::V3D pos = m_instrActor->getDetPos(0) - m_pos;
@@ -67,82 +52,141 @@ void RotationSurface::init() {
     }
     m_yaxis = m_zaxis.cross_prod(m_xaxis);
   }
+}
+
+std::vector<size_t> RotationSurface::retrieveSurfaceDetectors() const {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  const auto &renderer = m_instrActor->getInstrumentRenderer();
+  const auto &components = m_instrActor->components();
+  std::vector<size_t> detectors;
+
+  auto root = componentInfo.root();
+  if (renderer.isUsingLayers()) { // handle voxel detectors
+    for (const auto &component : components) {
+      auto parent = componentInfo.parent(component);
+      auto grandparent = componentInfo.parent(parent);
+      auto parentType = componentInfo.componentType(parent);
+      auto grandparentType = componentInfo.componentType(grandparent);
+      auto componentType = componentInfo.componentType(component);
+      if (componentType == ComponentType::Grid) {
+        // Select detectors in layer and add to list for display
+        const auto &layers = componentInfo.children(component);
+        auto layer = layers[renderer.selectedLayer()];
+        auto dets = componentInfo.detectorsInSubtree(layer);
+        detectors.insert(detectors.end(), dets.begin(), dets.end());
+      } else if (component != root && parentType != ComponentType::Grid &&
+                 grandparentType != ComponentType::Grid) {
+        // Add detectors not in any way related to a grid
+        auto dets = componentInfo.detectorsInSubtree(component);
+        detectors.insert(detectors.end(), dets.begin(), dets.end());
+      }
+    }
+  } else // use all instrument detectors otherwise
+    detectors = componentInfo.detectorsInSubtree(root);
+
+  return detectors;
+}
+
+void RotationSurface::correctUCoords(double manual_u_min, double manual_u_max) {
+  // apply a shift in u-coord either found automatically
+  // or set manually
+  if (!m_manual_u_correction) {
+    // automatic gap correction
+    findAndCorrectUGap();
+  } else {
+    // apply manually set shift
+    m_u_min = manual_u_min;
+    m_u_max = manual_u_max;
+    for (auto &udet : m_unwrappedDetectors) {
+      udet.u = applyUCorrection(udet.u);
+    }
+  }
+  updateViewRectForUCorrection();
+}
+
+void RotationSurface::createUnwrappedDetectors() {
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+  const auto &detIds = detectorInfo.detectorIDs();
+  auto detectors = retrieveSurfaceDetectors();
+  bool exceptionThrown = false;
+  // For each detector in the order of actors
+  // cppcheck-suppress syntaxError
+  PRAGMA_OMP(parallel for)
+  for (int ii = 0; ii < int(detectors.size()); ++ii) {
+    if (!exceptionThrown) {
+      auto i = detectors[size_t(ii)];
+      try {
+        if (detectorInfo.isMonitor(i) || detIds[i] < 0) {
+          m_unwrappedDetectors[i] = UnwrappedDetector();
+        } else {
+          // A real detector.
+          // Position, relative to origin
+          auto rpos = detectorInfo.position(i) - m_pos;
+          // Create the unwrapped shape
+          UnwrappedDetector udet(m_instrActor->getColor(i), i);
+          // Calculate its position/size in UV
+          // coordinates
+          this->calcUV(udet, rpos);
+
+          m_unwrappedDetectors[i] = udet;
+        } // is a real detector
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
+        // do nothing
+      } catch (...) {
+        // stop executing the body of the loop
+        exceptionThrown = true;
+        g_log.error("Unknown exception thrown.");
+      }
+    }
+  } // for each detector in pick order
+
+  if (exceptionThrown)
+    throw std::exception();
+}
+
+/**
+* Initialize the surface.
+*/
+void RotationSurface::init() {
+  // the actor calls this->callback for each detector
+  m_unwrappedDetectors.clear();
+
+  // if u-correction is applied manually then m_u_min and m_u_max
+  // have valid values and have to be saved
+  double manual_u_min = m_u_min;
+  double manual_u_max = m_u_max;
+
+  size_t ndet = m_instrActor->ndetectors();
+  m_unwrappedDetectors.resize(ndet);
+  if (ndet == 0)
+    return;
+
+  findAxes();
 
   // give some valid values to u bounds in case some code checks
   // on u to be within them
   m_u_min = -DBL_MAX;
   m_u_max = DBL_MAX;
 
-  const auto &detectorInfo = m_instrActor->detectorInfo();
-  const auto &detIds = detectorInfo.detectorIDs();
   // Set if one of the threads in the following loop
   // throws an exception
   bool exceptionThrown = false;
 
-  // For each detector in the order of actors
-  // cppcheck-suppress syntaxError
-                        PRAGMA_OMP(parallel for)
-                        for (int ii = 0; ii < int(ndet); ++ii) {
-                          if (!exceptionThrown)
-                            try {
-                              size_t i = size_t(ii);
-                              try {
-                                if (detectorInfo.isMonitor(i) ||
-                                    detIds[i] < 0) {
-                                  m_unwrappedDetectors[i] = UnwrappedDetector();
-                                } else {
-                                  // A real detector.
-                                  // Position, relative to origin
-                                  auto rpos = detectorInfo.position(i) - m_pos;
-                                  // Create the unwrapped shape
-                                  UnwrappedDetector udet(
-                                      m_instrActor->getColor(i), i);
-                                  // Calculate its position/size in UV
-                                  // coordinates
-                                  this->calcUV(udet, rpos);
+  try {
+    createUnwrappedDetectors();
+  } catch (std::exception &) {
+    exceptionThrown = true;
+  }
 
-                                  m_unwrappedDetectors[i] = udet;
-                                } // is a real detector
-                              } catch (
-                                  Mantid::Kernel::Exception::NotFoundError &) {
-                                // do nothing
-                              }
-                            } catch (std::exception &e) {
-                              // stop executing the body of the loop
-                              exceptionThrown = true;
-                              g_log.error() << e.what() << '\n';
-                            } catch (...) {
-                              // stop executing the body of the loop
-                              exceptionThrown = true;
-                              g_log.error("Unknown exception thrown.");
-                            }
-                        } // for each detector in pick order
+  // if the loop above has thrown stop execution
+  if (exceptionThrown) {
+    throw std::runtime_error("An exception was thrown. See log for detail.");
+  }
 
-                        // if the loop above has thrown stop execution
-                        if (exceptionThrown) {
-                          throw std::runtime_error(
-                              "An exception was thrown. See log for detail.");
-                        }
+  // find the overall edges in u and v coords
+  findUVBounds();
 
-                        // find the overall edges in u and v coords
-                        findUVBounds();
-
-                        // apply a shift in u-coord either found automatically
-                        // or set manually
-                        if (!m_manual_u_correction) {
-                          // automatic gap correction
-                          findAndCorrectUGap();
-                        } else {
-                          // apply manually set shift
-                          m_u_min = manual_u_min;
-                          m_u_max = manual_u_max;
-                          for (size_t i = 0; i < m_unwrappedDetectors.size();
-                               ++i) {
-                            auto &udet = m_unwrappedDetectors[i];
-                            udet.u = applyUCorrection(udet.u);
-                          }
-                        }
-                        updateViewRectForUCorrection();
+  correctUCoords(manual_u_min, manual_u_max);
 }
 
 /** Update the view rect to account for the U correction

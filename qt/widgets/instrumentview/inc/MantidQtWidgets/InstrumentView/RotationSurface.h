@@ -48,6 +48,14 @@ protected:
 
   /// Update the view rect to offset for the U correction
   void updateViewRectForUCorrection();
+
+private:
+  void findAxes();
+  std::vector<size_t> retrieveSurfaceDetectors() const;
+  void correctUCoords(double manual_u_min, double manual_u_max);
+  void createUnwrappedDetectors();
+
+protected:
   /// Calculate UV offsets from the view rect
   std::pair<double, double> calculateViewRectOffsets();
 

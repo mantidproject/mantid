@@ -418,11 +418,11 @@ void InstrumentWidget::setSurfaceType(int type) {
                                    getInstrumentDisplayWidth(),
                                    getInstrumentDisplayHeight());
       } else if (surfaceType <= CYLINDRICAL_Z) {
-        m_renderTab->forceLayers(false);
+        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedCylinder(m_instrumentActor.get(), sample_pos, axis);
       } else if (surfaceType <= SPHERICAL_Z) {
-        m_renderTab->forceLayers(false);
+        m_renderTab->forceLayers(true);
         surface =
             new UnwrappedSphere(m_instrumentActor.get(), sample_pos, axis);
       } else // SIDE_BY_SIDE
