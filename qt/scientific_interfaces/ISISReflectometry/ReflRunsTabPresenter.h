@@ -140,8 +140,6 @@ private:
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  /// The current search string used for autoreduction
-  std::string m_autoSearchString;
   /// Legacy transfer method
   static const std::string LegacyTransferMethod;
   /// Measure transfer method

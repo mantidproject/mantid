@@ -18,8 +18,9 @@ using testing::_;
 
 class BatchPresenterTest {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
+  // The boilerplate methods are not included because this base class does not
+  // include any tests itself
+
   void jobsViewIs(MantidQt::MantidWidgets::Batch::IJobTreeView &jobsView,
                   MockBatchView &view) {
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
