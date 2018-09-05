@@ -145,7 +145,7 @@ void LoadIsawUB::exec() {
     if (!convert(s, valBool))
       throw std::runtime_error("The string '" + s +
                                "' in the file was not understood as a number.");
-    crossterm = val;
+    crossterm = valBool;
   }
 
   // Adjust the UB by transposing
