@@ -337,7 +337,7 @@ class SANS2DSearchCentreGUI_V2(stresstesting.MantidStressTest):
         ii2.TransmissionSample('22041', '22024')
         ii2.TransmissionCan('22024', '22024')
         centre = ii2.FindBeamCentre(rlow=41.0, rupp=280.0, xstart=float(150)/1000., ystart=float(-160)/1000.,
-                                tolerance=0.0001251, MaxIter=3, reduction_method=True)
+                                    tolerance=0.0001251, MaxIter=3, reduction_method=True)
         self.assertDelta(centre['pos2'], -0.145, 0.0001)
         self.assertDelta(centre['pos1'], 0.15, 0.0001)
 

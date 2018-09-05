@@ -35,6 +35,7 @@ calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
 
+
 class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
     existing_config = config['datasearch.directories']

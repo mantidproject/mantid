@@ -26,13 +26,13 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         ii.SetCentre('155.45','-169.6','rear')
         ii.SetCentre('155.45','-169.6','front')
         ii.AssignSample(r'SANS2D00022048-add.nxs',
-                       reload = True, period = 1)
+                        reload = True, period = 1)
         ii.AssignCan(r'SANS2D00022023-add.nxs',
-                    reload = True, period = 1)
+                     reload = True, period = 1)
         ii.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs',
-                             period_t=1, period_d=1)
+                              period_t=1, period_d=1)
         ii.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs',
-                          period_t=1, period_d=1)
+                           period_t=1, period_d=1)
 
         self.checkAfterLoad()
 

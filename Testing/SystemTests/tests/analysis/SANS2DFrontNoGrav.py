@@ -2,9 +2,9 @@
 
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.simpleapi import *
 import ISISCommandInterface as ii
 import sans.command_interface.ISISCommandInterface as ii2
+
 
 class SANS2DFrontNoGrav(stresstesting.MantidStressTest):
 
