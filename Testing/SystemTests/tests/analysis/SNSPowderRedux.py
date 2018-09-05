@@ -236,16 +236,16 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         # prepare for validation
         LoadGSS(Filename="PG3_9829.gsa", OutputWorkspace="PG3_9829")
         LoadGSS(Filename=self.ref_files[0], OutputWorkspace="PG3_9829_golden")
-        #LoadGSS(Filename="PG3_9830.gsa", OutputWorkspace="PG3_9830") # can only validate one workspace
-        #LoadGSS(Filename=self.ref_file[1], OutputWorkspace="PG3_9830_golden")
+        LoadGSS(Filename="PG3_9830.gsa", OutputWorkspace="PG3_9830")
+        LoadGSS(Filename=self.ref_files[1], OutputWorkspace="PG3_9830_golden")
 
     def validateMethod(self):
         self.tolerance = 1.0e-2
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        return ('PG3_9829','PG3_9829_golden')
-        #return ('PG3_9830','PG3_9830_golden') # can only validate one workspace
+        # these are an ordered pair
+        return ('PG3_9829','PG3_9829_golden', 'PG3_9830','PG3_9830_golden')
 
 
 class SumFilesTest(stresstesting.MantidStressTest):
