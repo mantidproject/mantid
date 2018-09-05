@@ -24,7 +24,7 @@ import six
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 
 if six.PY2:
     import mock
@@ -32,8 +32,7 @@ else:
     from unittest import mock
 
 
-@requires_qapp
-class PythonFileInterpreterTest(unittest.TestCase):
+class PythonFileInterpreterTest(GuiTest):
 
     def test_construction(self):
         w = PythonFileInterpreter()
