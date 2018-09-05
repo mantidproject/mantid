@@ -21,6 +21,7 @@ Changes
 Bugfixes
 ########
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
+- Project recovery will now run normally when you select no or the recovery fails when recvoering from a ungraceful exit.
 
 MantidPlot
 ----------
