@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common import thread_model
-import Muon.GUI.Common.run_string_utils as runUtils
-import Muon.GUI.Common.muon_file_utils as fileUtils
-
 import copy
+
+from Muon.GUI.Common import thread_model
+import Muon.GUI.Common.run_string_utils as run_utils
+import Muon.GUI.Common.muon_file_utils as file_utils
 
 
 class LoadRunWidgetPresenter(object):
@@ -17,7 +17,6 @@ class LoadRunWidgetPresenter(object):
         self._load_multiple_runs = False
         self._use_threading = True
 
-        # TODO : Replace lines below with code to get the instrument
         self._instrument = "EMU"
         self._view.set_current_instrument(self._instrument)
 
@@ -32,6 +31,11 @@ class LoadRunWidgetPresenter(object):
     def show(self):
         self._view.show()
 
+    # used with threading
+    def create_load_thread(self):
+        return thread_model.ThreadModel(self._model)
+
+    # used with threading
     def cancel(self):
         if self._load_thread is not None:
             self._load_thread.cancel()
@@ -39,16 +43,11 @@ class LoadRunWidgetPresenter(object):
     def get_current_instrument(self):
         return self._instrument
 
-    def clear_loaded_data(self):
-        self._view.clear()
-        self._model.clear_loaded_data()
-
-    def create_load_thread(self):
-        return thread_model.ThreadModel(self._model)
-
-    def set_new_instrument(self):
-        # TODO : implement
-        pass
+    def set_current_instrument(self, instrument):
+        if instrument in file_utils.allowed_instruments:
+            self.clear_loaded_data()
+            self._instrument = instrument
+            self._view.set_current_instrument(instrument)
 
     def enable_multiple_files(self, enabled):
         self._load_multiple_runs = enabled
@@ -65,10 +64,6 @@ class LoadRunWidgetPresenter(object):
     def runs(self):
         return self._model.loaded_runs
 
-    # used by parent widget
-    def update_view_from_model(self, run_list):
-        self.set_run_edit_from_list(run_list)
-
     def disable_loading(self):
         self._view.disable_load_buttons()
 
@@ -76,11 +71,16 @@ class LoadRunWidgetPresenter(object):
         self._view.enable_load_buttons()
 
     def set_run_edit_from_list(self, run_list):
-        run_string = runUtils.run_list_to_string(run_list)
+        run_string = run_utils.run_list_to_string(run_list)
         self._view.set_run_edit_text(run_string)
 
-    def get_loaded_runs(self):
-        return self._model.loaded_runs
+    # used by parent widget
+    def update_view_from_model(self, run_list):
+        self.set_run_edit_from_list(run_list)
+
+    def clear_loaded_data(self):
+        self._view.clear()
+        self._model.clear_loaded_data()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from user input
@@ -88,8 +88,8 @@ class LoadRunWidgetPresenter(object):
 
     def handle_run_changed_by_user(self):
         run_string = self._view.get_run_edit_text()
-        run_list = runUtils.run_string_to_list(run_string)
-        file_names = [fileUtils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+        run_list = run_utils.run_string_to_list(run_string)
+        file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
                       for new_run in run_list]
 
         if len(file_names) > 1 and not self._load_multiple_runs:
@@ -135,10 +135,10 @@ class LoadRunWidgetPresenter(object):
 
     def on_loading_finished(self):
         # If in single file mode, remove the previous run
-        if not self._load_multiple_runs and len(self._model.get_run_list()) > 1:
+        if not self._load_multiple_runs and len(self._model.loaded_runs) > 1:
             self._model.remove_previous_data()
 
-        run_list = self._model.get_run_list()
+        run_list = self._model.loaded_runs
         self.set_run_edit_from_list(run_list)
 
         self._view.notify_loading_finished()
@@ -151,7 +151,7 @@ class LoadRunWidgetPresenter(object):
     def handle_load_current_run(self):
 
         try:
-            current_run_file = fileUtils.get_current_run_filename(self.get_current_instrument())
+            current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
         except ValueError as e:
             self._view.warning_popup(e.args[0])
             return
@@ -195,12 +195,12 @@ class LoadRunWidgetPresenter(object):
 
     def on_loading_current_run_finished(self):
         # If in single file mode, remove the previous run
-        if not self._load_multiple_runs and len(self._model.get_run_list()) > 1:
+        if not self._load_multiple_runs and len(self._model.loaded_runs) > 1:
             self._model.remove_previous_data()
 
         # if loaded successfully
         if self._model.loaded_runs:
-            current_run = self._model.get_run_list()[0]
+            current_run = self._model.loaded_runs[0]
             self.set_run_edit_from_list([current_run])
             self._model.current_run = current_run
 
@@ -221,7 +221,7 @@ class LoadRunWidgetPresenter(object):
             self._view.warning_popup("Requested run exceeds the current run for this instrument")
             return
 
-        file_name = fileUtils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+        file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
         self.handle_loading([file_name], self._use_threading)
 
     def handle_decrement_run(self):
@@ -230,25 +230,31 @@ class LoadRunWidgetPresenter(object):
             return
         new_run = min(run_list)
 
-        file_name = fileUtils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+        file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
         self.handle_loading([file_name], self._use_threading)
 
     def get_incremented_run_list(self):
+        """
+        Updates list of runs by adding a run equal to 1 after to the highest run.
+        """
         run_list = copy.copy(self.runs)
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
-            run_list = [run_list[0], runUtils.increment_run(run_list[0])]
+            run_list = [run_list[0], run_utils.increment_run(run_list[0])]
         else:
-            run_list = runUtils.increment_run_list(run_list)
+            run_list = run_utils.increment_run_list(run_list)
         return run_list
 
     def get_decremented_run_list(self):
+        """
+        Updates list of runs by adding a run equal to 1 before to the lowest run.
+        """
         run_list = copy.copy(self.runs)
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
-            run_list = [runUtils.decrement_run(run_list[0]), run_list[0]]
+            run_list = [run_utils.decrement_run(run_list[0]), run_list[0]]
         else:
-            run_list = runUtils.decrement_run_list(run_list)
+            run_list = run_utils.decrement_run_list(run_list)
         return run_list

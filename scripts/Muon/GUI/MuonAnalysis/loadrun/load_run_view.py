@@ -15,10 +15,6 @@ class LoadRunWidgetView(QtGui.QWidget):
 
     def __init__(self, parent=None):
         super(LoadRunWidgetView, self).__init__(parent)
-        self.setup_interface_layout()
-        self.set_run_edit_regex()
-
-        self._cached_text = ""
 
         self.load_current_run_button = None
         self.increment_run_button = None
@@ -27,6 +23,11 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.instrument_label = None
         self.run_edit = None
         self.spacer_item = None
+
+        self.setup_interface_layout()
+        self.set_run_edit_regex()
+
+        self._cached_text = ""
 
     def setup_interface_layout(self):
         self.setObjectName("LoadRunWidget")

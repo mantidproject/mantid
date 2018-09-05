@@ -78,7 +78,7 @@ class LoadRunWidgetModel(object):
             alg.execute()
             workspace = alg.getProperty("OutputWorkspace").value
         except Exception:
-            # let Load search for the file
+            # let Load search for the file itself
             alg.setProperty("Filename", filename.split(os.sep)[-1])
             alg.execute()
             workspace = alg.getProperty("OutputWorkspace").value
@@ -93,9 +93,6 @@ class LoadRunWidgetModel(object):
             run = int(workspace.getRunNumber())
 
         return workspaces, filename, run
-
-    def get_run_list(self):
-        return self.loaded_runs
 
     def clear_loaded_data(self):
         self._loaded_data_store.clear()
