@@ -13675,42 +13675,24 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     recentFiles.removeAll(fname);
     recentFiles.push_front(fname);
   }
-  while ((int)recentFiles.size() > MaxRecentFiles)
+  while ((int)recentFiles.size() > MaxRecentFiles) {
     recentFiles.pop_back();
+  }
 
   recentFilesMenu->clear();
-  int menuCount = 1;
+  const QString itemTemplate("&%1 %2");
+  const int maxItemLength(50);
   for (int i = 0; i < (int)recentFiles.size(); i++) {
-    std::ostringstream ostr;
-    try {
-      Mantid::API::MultipleFileProperty mfp("tester");
-      mfp.setValue(recentFiles[i].toStdString());
-      const std::vector<std::string> files =
-          Mantid::Kernel::VectorHelper::flattenVector(mfp());
-      if (files.size() == 1) {
-        ostr << "&" << menuCount << " " << files[0];
-      } else if (files.size() > 1) {
-        ostr << "&" << menuCount << " " << files[0] << " && "
-             << files.size() - 1 << " more";
-      } else {
-        // mfp.setValue strips out any filenames that cannot be resolved.
-        // So if your recent file history contains a file that you have
-        // since deleted or renamed, files will be empty so do not
-        // register this entry and go on to the next one
-        continue;
-      }
-    } catch (Poco::PathSyntaxException &) {
-      // mfp could not find the file
-      continue;
-    } catch (std::exception &) {
-      // The file property could not parse the string, use as is
-      ostr << "&" << menuCount << " " << recentFiles[i].toStdString();
+    QString filePath = recentFiles[i];
+    // elide the text if it is over the allowed limit
+    QString itemText = filePath;
+    if (filePath.size() > maxItemLength) {
+      itemText = "..." + filePath.right(maxItemLength);
     }
-    QString actionText = QString::fromStdString(ostr.str());
-    QAction *ma = new QAction(actionText, nullptr);
+    QString actionText = itemTemplate.arg(QString::number(i + 1), itemText);
+    QAction *ma = new QAction(actionText, recentFilesMenu);
     ma->setData(recentFiles[i]);
     recentFilesMenu->addAction(ma);
-    menuCount++;
   }
 }
 
