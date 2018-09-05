@@ -14,9 +14,10 @@ set ( HEADER_DEPENDS
   SIPVector.h
   string.sip
   vector.sip
+  ../../../Framework/PythonInterface/core/inc/MantidPythonInterface/core/VersionCompat.h
+
   ${FACTORY_INC}/MantidQtWidgets/Factory/WidgetFactory.h
 
-  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/PythonSystemHeader.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WorkspaceObserver.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/GraphOptions.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/AlgorithmDialog.h

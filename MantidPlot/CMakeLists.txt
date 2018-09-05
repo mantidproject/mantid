@@ -462,7 +462,7 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
 
 add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
-                     DEPENDS ${SIP_SRC_AUTO}
+                     DEPENDS ${SIP_SRC_IN}
                      COMMENT ""
 )
 
@@ -792,12 +792,14 @@ target_include_directories ( MantidPlot PRIVATE
   ../qt/widgets/sliceviewer/inc
   ../qt/widgets/spectrumviewer/inc
   ../qt/widgets/factory/inc
+  ../Framework/PythonInterface/inc
 )
 
 # Library dependencies
 target_link_libraries ( MantidPlot LINK_PRIVATE
   ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
+  PythonInterfaceCore
   MantidQtWidgetsCommonQt4
   MantidQtWidgetsLegacyQwtQt4
   MantidQtWidgetsFactoryQt4
