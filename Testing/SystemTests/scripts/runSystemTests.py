@@ -112,7 +112,7 @@ test_counts, test_list, test_stats = tmgr.generateMasterTestList()
 number_of_test_modules = len(test_list.keys())
 
 #########################################################################
-# Run the tests
+# Run the tests with a task scheduler
 #########################################################################
 
 if options.clean:

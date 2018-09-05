@@ -838,19 +838,10 @@ class TestManager(object):
         # the processes into groups instead of test by test, to avoid issues
         # with data being cleaned up before another process has finished.
         #
-        # Because different modules (= different python files in the
-        # 'Testing/SystemTests/tests/analysis' directory) use the same input
-        # and output files, it is not enough to distribute each module to a
-        # separate core. The module have to ge gathered into groups, where a
-        # given test group will contain all tests that begin with the same name,
-        # i.e. the same first 8 (= min_length_for_group_name below) characters.
-        #
-        # This is not optimal, ideally we would like to distribute the runtimes
-        # evenly so that all cores finish in the same amount of time but this will
-        # do as a first step.
-        #
-        # First we need to count how many tests are in each module
-        # We also create on the fly a list of tests for each module
+        # We create a list of test modules (= different python files in the
+        # 'Testing/SystemTests/tests/analysis' directory) and count how many
+        # tests are in each module. We also create on the fly a list of tests
+        # for each module.
         modcounts = dict()
         modtests = dict()
         for t in reduced_test_list:
@@ -861,23 +852,6 @@ class TestManager(object):
             else:
                 modcounts[key] = 1
                 modtests[key] = [t]
-
-        # modcounts = dict()
-        # modtests = dict()
-        # # This is the length of characters to match at the start of test name
-        # min_length_for_group_name = 8
-        # for t in reduced_test_list:
-        #     not_found = True
-        #     for key in modcounts.keys():
-        #         if (t._modname).startswith(key):
-        #             modcounts[key] += 1
-        #             modtests[key].append(t)
-        #             not_found = False
-        #             break
-        #     if not_found:
-        #         key = (t._modname)[:min_length_for_group_name]
-        #         modcounts[key] = 1
-        #         modtests[key] = [t]
 
         return modcounts, modtests, test_stats
 
@@ -1124,7 +1098,17 @@ def envAsString():
     return env
 
 #########################################################################
-# Function to keep a pool of threads active in a loop to run the tests
+# Function to keep a pool of threads active in a loop to run the tests.
+# Each threads starts a loop and gathers a first test module from the
+# master test list which is stored in the tests_dict shared dictionary,
+# starting with the number in the module list equal to the process id.
+# Once it has completed the work in the current module, it checks if the
+# number of modules that remains to be executed is greater than 0. If
+# there is some work left to do, the thread finds the next module that
+# still has not been executed (searches through the tests_lock array
+# and finds the next element that has a 0 value). This aims to have all
+# threads end calculation approximately at the same time, even though in
+# practise some test modules take a long time to complete.
 #########################################################################
 def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                     tests_lock, tests_left, res_array, stat_dict,
@@ -1145,10 +1129,11 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
     res_array[process_number + 2*options.ncores] = 1
 
     # Begin loop
+    imodule = process_number
     while (tests_left.value > 0):
 
         lock.acquire()
-        for i in range(process_number,len(tests_lock)):
+        for i in range(imodule,len(tests_lock)):
             if tests_lock[i] == 0:
                 local_test_list = tests_dict[str(i)]
                 tests_lock[i] = 1
