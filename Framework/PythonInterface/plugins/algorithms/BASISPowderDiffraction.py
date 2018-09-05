@@ -74,7 +74,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
         self._wavelength_band = None
-        self._wavelength_dl = 0.02  # in Angstroms
+        self._wavelength_dl = 0.01  # in Angstroms
         self._qbins = None
         self._short_inst = "BSS"
         self._run_list = None
@@ -129,15 +129,10 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                                           extensions=['.xml']),
                              doc='See documentation for latest mask files.')
 
-        self.declareProperty(FloatArrayProperty('LambdaRange',
-                                                [5.86, 6.75],  # inverse Angs
-                                                direction=Direction.Input),
-                             doc='Incoming neutron wavelength range')
-
         self.declareProperty('MonitorNormalization', True,
                              'Normalization with wavelength-dependent '
                              'monitor counts')
-        for a_property in ('MaskFile', 'LambdaRange', 'MonitorNormalization'):
+        for a_property in ('MaskFile', 'MonitorNormalization'):
             self.setPropertyGroup(a_property, required_title)
         #
         # Background for the sample runs
@@ -171,25 +166,28 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         #
         self._qbins = np.array(self.getProperty('MomentumTransferBins').value)
         #
-        # Load the mask to a temporary workspace
-        #
-        self._t_mask = LoadMask(Instrument='BASIS',
-                                InputFile=self.getProperty('MaskFile').
-                                value,
-                                OutputWorkspace='_t_mask')
-        #
-        # Desired wavelength band of incoming neutrons
-        #
-        self._wavelength_band = np.array(self.getProperty('LambdaRange').value)
-        #
-        # Load and process vanadium runs, if applicable
-        #
-        if self.getProperty('VanadiumRuns').value != '':
-            self._load_vanadium_runs()
-        #
         # implement with ContextDecorator after python2 is deprecated)
         #
         with pyexec_setup(config_new_options) as self._temps:
+            #
+            # Load the mask to a temporary workspace
+            #
+            self._t_mask = LoadMask(Instrument='BASIS',
+                                    InputFile=self.getProperty('MaskFile').
+                                    value,
+                                    OutputWorkspace='_t_mask')
+            #
+            # Calculate the valid range of wavelengths for incoming neutrons
+            #
+            self._calculate_wavelength_band()
+            #
+            # Load and process vanadium runs, if applicable
+            #
+            if self.getProperty('VanadiumRuns').value != '':
+                self._load_vanadium_runs()
+            #
+            # Process the sample
+            #
             runs = self.getProperty('RunNumbers').value
             _t_sample = self._load_runs(runs, '_t_sample')
             _t_sample = self._apply_corrections_vanadium(_t_sample)
@@ -381,9 +379,8 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_van = self._apply_corrections(_t_van, target='vanadium')
         RenameWorkspace(_t_van, OutputWorkspace='_t_van')
         wave_band = self._wavelength_band[1] - self._wavelength_band[0]
-        _t_van = Rebin(_t_van, PreserveEvents=False,
-                       Params=[self._wavelength_band[0], wave_band,
-                               self._wavelength_band[1]])
+        _t_van = Rebin(_t_van, Params=[self._wavelength_band[0], wave_band,
+                                       self._wavelength_band[1]])
         output = MedianDetectorTest(_t_van, OutputWorkspace='_t_v_mask')
         self._v_mask = output.OutputWorkspace
         MaskDetectors(_t_van, MaskedWorkspace=self._v_mask)
@@ -455,6 +452,35 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         w_name = self.getProperty(prop).valueAsStr
         RenameWorkspace(w, OutputWorkspace=w_name)
         self.setProperty(prop, w)
+
+    def _calculate_wavelength_band(self):
+        """
+        Calculate the wavelength band using the monitors from the sample runs
+
+        Consider wavelenghts with an associated intensity above a certain
+        fraction of the maximum observed intensity.
+        """
+        _t_w = self._load_monitors('sample')
+        _t_w = ConvertUnits(_t_w, Target='Wavelength', Emode='Elastic')
+        l_min, l_max = 0.0, 20.0
+        _t_w = CropWorkspace(_t_w, XMin=l_min, XMax=l_max)
+        _t_w = OneMinusExponentialCor(_t_w, C='0.20749999999999999',
+                                      C1='0.001276')
+        _t_w = Scale(_t_w, Factor='1e-06', Operation='Multiply')
+        _t_w = Rebin(_t_w, Params=[l_min, self._wavelength_dl, l_max],
+                     PreserveEvents=False)
+        y = _t_w.readY(0)
+        k = np.argmax(y)  # y[k] is the maximum observed intensity
+        factor = 0.01  # 1% of the maximum intensity
+        i_s = k - 1
+        while y[i_s] > factor * y[k]:
+            i_s -= 1
+        i_e = k + 1
+        while y[i_e] > factor * y[k]:
+            i_e += 1
+        x = _t_w.readX(0)
+        self._wavelength_band = [x[i_s], x[i_e]]
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISPowderDiffraction)
