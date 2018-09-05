@@ -741,30 +741,42 @@ void IndirectFitAnalysisTab::plotResult(const QString &plotType) {
 
 void IndirectFitAnalysisTab::plotAll(
     Mantid::API::WorkspaceGroup_sptr workspaces) {
-  for (auto &&workspace : *workspaces)
-    plotAll(boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+  for (auto index = 0u; index < workspaces->size(); ++index)
+    plotAll(boost::dynamic_pointer_cast<MatrixWorkspace>(
+                workspaces->getItem(index)),
+            index);
 }
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::WorkspaceGroup_sptr workspaces, const std::string &parameter) {
-  for (auto &&workspace : *workspaces)
-    plotParameter(boost::dynamic_pointer_cast<MatrixWorkspace>(workspace),
-                  parameter);
+  for (auto index = 0u; index < workspaces->size(); ++index)
+    plotParameter(boost::dynamic_pointer_cast<MatrixWorkspace>(
+                      workspaces->getItem(index)),
+                  parameter, index);
 }
 
 void IndirectFitAnalysisTab::plotAll(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
-  const auto name = QString::fromStdString(workspace->getName());
-  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
-    IndirectTab::plotSpectrum(name, static_cast<int>(i));
+    Mantid::API::MatrixWorkspace_sptr workspace, const std::size_t &index) {
+  const std::size_t numberOfSpectra =
+      m_fittingModel->getWorkspace(index)->getNumberHistograms();
+  if (numberOfSpectra != 1 || allowPlotResultWithOneSpectra())
+    plotSpectrum(workspace);
 }
 
 void IndirectFitAnalysisTab::plotParameter(
     Mantid::API::MatrixWorkspace_sptr workspace,
+    const std::string &parameterToPlot, const std::size_t &index) {
+  const std::size_t numberOfSpectra =
+      m_fittingModel->getWorkspace(index)->getNumberHistograms();
+  if (numberOfSpectra != 1 || allowPlotResultWithOneSpectra())
+    plotSpectrum(workspace, parameterToPlot);
+}
+
+void IndirectFitAnalysisTab::plotSpectrum(
+    Mantid::API::MatrixWorkspace_sptr workspace,
     const std::string &parameterToPlot) {
   const auto name = QString::fromStdString(workspace->getName());
   const auto labels = IndirectTab::extractAxisLabels(workspace, 1);
-
   for (const auto &parameter : m_fittingModel->getFitParameterNames()) {
     if (boost::contains(parameter, parameterToPlot)) {
       auto it = labels.find(parameter);
@@ -772,6 +784,13 @@ void IndirectFitAnalysisTab::plotParameter(
         IndirectTab::plotSpectrum(name, static_cast<int>(it->second));
     }
   }
+}
+
+void IndirectFitAnalysisTab::plotSpectrum(
+    Mantid::API::MatrixWorkspace_sptr workspace) {
+  const auto name = QString::fromStdString(workspace->getName());
+  for (auto i = 0u; i < workspace->getNumberHistograms(); ++i)
+    IndirectTab::plotSpectrum(name, static_cast<int>(i));
 }
 
 /**

@@ -32,8 +32,13 @@ private:
 
 protected:
   bool shouldEnablePlotResult() override { return true; };
+<<<<<<< HEAD
 
   void setRunEnabled(bool enabled) override;
+=======
+  bool allowPlotResultWithOneSpectra() override { return true; }
+
+>>>>>>> Plot Result only for workspaces with multiple spectra Refs #23164
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

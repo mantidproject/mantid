@@ -118,9 +118,13 @@ protected:
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
                      const std::string &parameter);
-  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace,
+               const std::size_t &index);
   void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
-                     const std::string &parameter);
+                     const std::string &parameter, const std::size_t &index);
+  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotSpectrum(Mantid::API::MatrixWorkspace_sptr workspace,
+                    const std::string &parameterToPlot);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -137,6 +141,7 @@ protected:
                       const QSet<QString> &options) const;
 
   virtual bool shouldEnablePlotResult() = 0;
+  virtual bool allowPlotResultWithOneSpectra() = 0;
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 
