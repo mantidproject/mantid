@@ -101,8 +101,14 @@ class InsertEmptyGroupVisitor : public boost::static_visitor<> {
 public:
   InsertEmptyGroupVisitor(int beforeGroup) : m_beforeGroup(beforeGroup) {}
 
+  std::string emptyGroupName() const {
+    static int nameSuffix = 1;
+    std::string name = "Group" + std::to_string(nameSuffix++);
+    return name;
+  }
+
   template <typename Group> void operator()(ReductionJobs<Group> &jobs) const {
-    jobs.insertGroup(Group(""), m_beforeGroup);
+    jobs.insertGroup(Group(emptyGroupName()), m_beforeGroup);
   }
 
 private:
