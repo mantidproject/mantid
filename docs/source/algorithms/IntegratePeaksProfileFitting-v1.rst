@@ -83,7 +83,7 @@ This histogram is in (q\ :sub:`x`\ ,  q\ :sub:`y`\, q\ :sub:`z`\) and composed o
 length **DQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable 
 **qMask** is used to only consider a region around the peak in (h,k,l) space.  It will filter voxels
 outside of (h ± **FracHKL**, k ± **FracHKL**, l ± **FracHKL**) from calculations used for profile
-fitting. In practice, values of 0.35 < **fracHKL** < 0.5 seem to work best. 
+fitting. In practice, values of 0.25 < **fracHKL** < 0.5 seem to work best. 
 
 Fitting the Time-of-Flight Coordinate
 #####################################

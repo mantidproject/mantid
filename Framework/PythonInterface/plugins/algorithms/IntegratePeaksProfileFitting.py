@@ -95,6 +95,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
 
         #UB Matrix
+        
         if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
             logger.information("Using UB file already available in PeaksWorkspace")
         else:
