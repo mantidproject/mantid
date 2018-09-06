@@ -205,7 +205,7 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
     }
   }
 
-  m_numPoints = size_t(std::floor(
+  m_numPoints = static_cast<size_t>(std::floor(
       (m_endScatteringAngle - m_startScatteringAngle) / m_stepScatteringAngle));
   g_log.information() << "Number of bins:" << m_numPoints << std::endl;
   g_log.information() << "Scattering angle binning:" << m_startScatteringAngle
@@ -316,7 +316,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.signedTwoTheta(i);
       angle *= m_mirrorDetectors * 180.0 / M_PI;
 
-      const int angleIndex = int(
+      const int angleIndex = static_cast<int>(
           std::floor((angle - m_startScatteringAngle) / m_stepScatteringAngle));
 
       // point is out of range, a warning should have been generated already for

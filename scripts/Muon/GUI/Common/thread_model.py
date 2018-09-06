@@ -6,7 +6,6 @@ from Muon.GUI.Common import message_box
 
 
 class ThreadModel(QThread):
-
     """
     A wrapper to allow threading with
     the MaxEnt models.
@@ -17,10 +16,31 @@ class ThreadModel(QThread):
         QThread.__init__(self)
         self.model = model
 
+        self.start_slot = None
+        self.end_slot = None
+
+        self.check_model_has_correct_attributes()
+
+    def check_model_has_correct_attributes(self):
+        if hasattr(self.model, "execute") and hasattr(self.model, "output"):
+            return
+        raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
+                             " execute() and output() methods")
+
+    def connect_exception_slot(self):
+        self.exceptionSignal.connect(message_box.warning)
+
+    def disconnect_exception_slot(self):
+        self.exceptionSignal.disconnect(message_box.warning)
+
     def __del__(self):
-        self.wait()
+        try:
+            self.wait()
+        except RuntimeError:
+            pass
 
     def run(self):
+        self.connect_exception_slot()
         self.user_cancel = False
         try:
             self.model.execute()
@@ -33,6 +53,8 @@ class ThreadModel(QThread):
             else:
                 self.sendSignal(error)
             pass
+        finally:
+            self.disconnect_exception_slot()
 
     def sendSignal(self, error):
         self.exceptionSignal.emit(error)
@@ -51,14 +73,22 @@ class ThreadModel(QThread):
 
     # if there are multiple inputs (alg>1)
     def loadData(self, inputs):
+        if not hasattr(self.model, "loadData"):
+            raise AttributeError("The model passed to ThreadModel has not implemented"
+                                 " loadData() method, which it is attempting to call.")
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self, startSlot, endSlot):
-        self.started.connect(startSlot)
-        self.finished.connect(endSlot)
-        self.exceptionSignal.connect(message_box.warning)
+        assert hasattr(startSlot, '__call__')
+        assert hasattr(endSlot, '__call__')
+        self.start_slot, self.end_slot = startSlot, endSlot
+        self.started.connect(self.start_slot)
+        self.finished.connect(self.end_slot)
+        self.finished.connect(self.threadWrapperTearDown)
 
-    def threadWrapperTearDown(self, startSlot, endSlot):
-        self.started.disconnect(startSlot)
-        self.finished.disconnect(endSlot)
-        self.exceptionSignal.disconnect(message_box.warning)
+    def threadWrapperTearDown(self):
+        self.started.disconnect(self.start_slot)
+        self.finished.disconnect(self.end_slot)
+        self.finished.disconnect(self.threadWrapperTearDown)
+        self.start_slot = None
+        self.end_slot = None
