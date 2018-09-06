@@ -109,7 +109,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
 
         self.declareProperty(FloatArrayProperty('MomentumTransferBins',
-                                                [0.1, 0.05, 2.1],  # inverse A
+                                                [0.1, 0.0025, 2.5],  # invers A
                                                 direction=Direction.Input),
                              'Momentum transfer binning scheme')
 
@@ -193,6 +193,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
             if self.getProperty('BackgroundRuns').value != '':
                 _t_sample, _t_bkg = self._subtract_background(_t_sample)
                 if self.getPropertyValue('OutputBackground') != '':
+                    _t_bkg_angle = self._convert_to_angle(_t_bkg)
+                    self._output_workspace(_t_bkg_angle, 'OutputBackground',
+                                           suffix='_angle')
                     _t_bkg = self._convert_to_q(_t_bkg)
                     self._output_workspace(_t_bkg, 'OutputBackground')
             _t_sample_angle = self._convert_to_angle(_t_sample)
