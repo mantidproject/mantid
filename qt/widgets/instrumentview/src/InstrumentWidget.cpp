@@ -528,7 +528,7 @@ void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
     selection = ColorMap::exists(cmapNameOrPath);
   }
 
-  if (selection == m_instrumentActor->getCurrentColorMap()) {
+  if (selection == currentCMap) {
     // selection matches current
     return;
   }
