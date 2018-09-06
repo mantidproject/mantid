@@ -556,7 +556,7 @@
 	<technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
     <livedata>
-      <connection name="event" address="bl2-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+      <connection name="event" address="bl12-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
     </livedata>
    </instrument>
 
