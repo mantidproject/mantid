@@ -69,6 +69,7 @@ Bug fixes
 #########
 
 - A bug has been fixed on the Settings tab where the IncludePartialBins check box had been hidden by a misplaced text entry box.
+- :ref:`algm-ReflectometryReductionOneAuto` No longer sums all of a transmission run's workspaces and instead will use the first run only
 
 Algorithms
 ----------
