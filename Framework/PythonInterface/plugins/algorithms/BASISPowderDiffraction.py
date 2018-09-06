@@ -15,7 +15,8 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               CropWorkspace, RenameWorkspace,
                               LoadNexusMonitors, OneMinusExponentialCor,
                               Scale, RebinToWorkspace, Divide, Rebin,
-                              MedianDetectorTest, SumSpectra)
+                              MedianDetectorTest, SumSpectra, Integration,
+                              CreateWorkspace)
 from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty,
                            Direction, IntArrayProperty)
 debug_flag = False
@@ -74,7 +75,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
     def __init__(self):
         DataProcessorAlgorithm.__init__(self)
         self._wavelength_band = None
-        self._wavelength_dl = 0.01  # in Angstroms
+        self._wavelength_dl = 0.0025  # in Angstroms
         self._qbins = None
         self._short_inst = "BSS"
         self._run_list = None
@@ -196,6 +197,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                 if self.getPropertyValue('OutputBackground') != '':
                     _t_bkg = self._convert_to_q(_t_bkg)
                     self._output_workspace(_t_bkg, 'OutputBackground')
+            _t_sample_angle = self._convert_to_angle(_t_sample)
+            self._output_workspace(_t_sample_angle, 'OutputWorkspace',
+                                   suffix='_angle')
             _t_sample = self._convert_to_q(_t_sample)
             self._output_workspace(_t_sample, 'OutputWorkspace')
 
@@ -274,9 +278,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         -------
         Mantid.EventsWorkspace
         """
-        _t_corr = self._apply_corrections(w, target=target)
+        _t_corr_van = self._apply_corrections(w, target=target)
         if self.getProperty('VanadiumRuns').value != '':
-            _t_corr_van = self._sensitivity_correction(_t_corr)
+            _t_corr_van = self._sensitivity_correction(_t_corr_van)
         RenameWorkspace(_t_corr_van, OutputWorkspace=w.name())
         return _t_corr_van
 
@@ -343,7 +347,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
 
     def _monitor_normalization(self, w, target):
         """
-        Divide data by wavelength-dependent flux
+        Divide data by integrated monitor intensity
 
         Parameters
         ----------
@@ -365,7 +369,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_mon = OneMinusExponentialCor(_t_mon, C='0.20749999999999999',
                                       C1='0.001276')
         _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply')
-        _t_mon = RebinToWorkspace(_t_mon, w, PreserveEvents=False)
+        _t_mon = Integration(_t_mon)  # total monitor count
         _t_w = Divide(w, _t_mon, OutputWorkspace=w.name())
         return _t_w
 
@@ -428,18 +432,57 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
 
         Parameters
         ----------
-        w: Mantid.EventWorkspace
+        w: Mantid.MatrixWorkspace2D
 
         Returns
         -------
-        Mantid.MatrixWorkspace
+        Mantid.MatrixWorkspace2D
         """
         _t_w = ConvertUnits(w, Target='MomentumTransfer', Emode='Elastic')
         _t_w = Rebin(_t_w, Params=self._qbins, PreserveEvents=False)
         _t_w = SumSpectra(_t_w, OutputWorkspace=w.name())
         return _t_w
 
-    def _output_workspace(self, w, prop):
+    def _convert_to_angle(self, w):
+        """
+        Output the integrated intensity for each elastic detector versus
+        detector angle with the neutron beam.
+
+        Masked elastic detectors are assigned a zero intensity
+
+        Parameters
+        ----------
+        w: Mantid.MatrixWorkspace2D
+
+        Returns
+        -------
+        Mantid.MatrixWorkspace2D
+        """
+        id_s, id_e = 16386, 17534  # start and end for elastic detector ID's
+        _t_w = Integration(w)
+        sp = _t_w.spectrumInfo()
+        x, y, e = [list(), list(), list()]
+        for i in range(_t_w.getNumberHistograms()):
+            id_i = _t_w.getDetector(i).getID()
+            if id_s <= id_i <= id_e:
+                x.append(np.degrees(sp.twoTheta(i)))
+                if sp.isMasked(i) is True:
+                    y.append(0.0)
+                    e.append(1.0)
+                else:
+                    y.append(_t_w.readY(i)[0])
+                    e.append(_t_w.readE(i)[0])
+        x = np.asarray(x)
+        y = np.asarray(y)
+        e = np.asarray(e)
+        od = np.argsort(x)  # order in ascending angles
+        title = 'Angle between detector and incoming neutron beam'
+        _t_w = CreateWorkspace(DataX=x[od], DataY=y[od], DataE=e[od],
+                               NSpec=1, UnitX='Degrees',
+                               WorkspaceTitle=title)
+        return _t_w
+
+    def _output_workspace(self, w, prop, suffix=''):
         """
         Rename workspace and set the related output property
 
@@ -449,7 +492,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         prop: str
             Output property name
         """
-        w_name = self.getProperty(prop).valueAsStr
+        w_name = self.getProperty(prop).valueAsStr + suffix
         RenameWorkspace(w, OutputWorkspace=w_name)
         self.setProperty(prop, w)
 
@@ -471,7 +514,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
                      PreserveEvents=False)
         y = _t_w.readY(0)
         k = np.argmax(y)  # y[k] is the maximum observed intensity
-        factor = 0.01  # 1% of the maximum intensity
+        factor = 0.8  # 80% of the maximum intensity
         i_s = k - 1
         while y[i_s] > factor * y[k]:
             i_s -= 1
