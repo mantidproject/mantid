@@ -19,7 +19,7 @@ Example:
 inelastic detectors as well as the tips of the diffraction tubes. The file
 is in directory /SNS/BSS/shared/autoreduce/new_masks_08_12_2015.
 
-**OutputWorkspace**: a one-histogram :ref:`MatrixWorkspace2D <MatrixWorkspace2D>`
+**OutputWorkspace**: a one-histogram :ref:`MatrixWorkspace <MatrixWorkspace>`
 is produced containing the intensities versus momentum transfer `Q`. In addition, a
 workspace of same name plus suffix `_angle` is produced. The latter workspace
 contains intensities versus scattering angle. If background runs are
@@ -38,7 +38,7 @@ Background runs are reduced together.
 when subtracting background from sample.
 
 **OutputBackground**: if populated, a one-histogram
-:ref:`MatrixWorkspace2D <MatrixWorkspace2D>` is produced containing the
+:ref:`MatrixWorkspace <MatrixWorkspace>` is produced containing the
 background intensities versus momentum transfer `Q`. In addition, a
 workspace of same name plus suffix `_angle` is produced. The latter workspace
 contains intensities versus scattering angle. Rescaling of the
