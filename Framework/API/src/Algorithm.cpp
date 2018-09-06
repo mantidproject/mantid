@@ -1123,7 +1123,6 @@ void Algorithm::findWorkspaceProperties(
       if (direction == Direction::Output || direction == Direction::InOut) {
         outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
       }
-      currentWS = "";
     }
   }
 }
