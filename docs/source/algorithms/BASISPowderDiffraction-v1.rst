@@ -56,17 +56,15 @@ Usage
 .. code-block:: python
 
     from mantid.simpleapi import BASISPowderDiffraction
-    BASISPowderDiffraction(RunNumbers='77754',
-                           OutputWorkspace='sample',
-                           BackgroundRuns='79745',
-                           BackgroundScale=0.80,
+    BASISPowderDiffraction(RunNumbers='74799',
+                           OutputWorkspace='powder',
+                           BackgroundRuns='75527',
                            OutputBackground='background'
-                           VanadiumRuns='78378')
-
+                           VanadiumRuns='64642')
 .. figure:: /images/BASISPowderDiffraction.png
 
-The color image shows the nine diffraction detectors with intensities in a
-log-scale. The second detector from the left features a sharp dip in intensity.
+The color image shows the nine diffraction detectors with a Bragg peak spilling
+intensity on the edges of two tubes at a scattering angle of 60 degrees.
 
 .. categories::
 
