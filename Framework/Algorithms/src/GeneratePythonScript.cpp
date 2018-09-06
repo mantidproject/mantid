@@ -66,7 +66,7 @@ void GeneratePythonScript::init() {
       "When to specify which algorithm version was used by Mantid.");
 
   declareProperty("ProjectRecovery", false,
-                  "Whether or not groups need to be filtered for",
+                  "Whether or not unneeded algorithms should be filtered for",
                   Direction::Input);
 }
 
