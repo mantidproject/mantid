@@ -65,8 +65,8 @@ class ReflectometryApplyFloodWorkspace(stresstesting.MantidStressTest):
     out_ws_name = 'out'
 
     def runTest(self):
-        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
-                                     Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
+        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=250, EndSpectrum=600,
+                                     ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
         data = Load('OFFSPEC00044998.nxs')
         ApplyFloodWorkspace(InputWorkspace=data, FloodWorkspace=flood, OutputWorkspace=self.out_ws_name)
 
@@ -80,8 +80,8 @@ class ReflectometryApplyFloodWorkspaceRebinned(stresstesting.MantidStressTest):
     out_ws_name = 'out'
 
     def runTest(self):
-        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
-                                     Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
+        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=250, EndSpectrum=600,
+                                     ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
         data = Load('OFFSPEC00044998.nxs')
         data = Rebin(data, [0,1000,100000], PreserveEvents=False)
         ApplyFloodWorkspace(InputWorkspace=data, FloodWorkspace=flood, OutputWorkspace=self.out_ws_name)
@@ -96,8 +96,8 @@ class ReflectometryApplyFloodWorkspaceUnits(stresstesting.MantidStressTest):
     out_ws_name = 'out'
 
     def runTest(self):
-        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrumIndex=250, EndSpectrumIndex=600,
-                                     Exclude=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
+        flood = CreateFloodWorkspace('OFFSPEC00035946.nxs', StartSpectrum=250, EndSpectrum=600,
+                                     ExcludeSpectra=[260, 261, 262, 516, 517, 518], OutputWorkspace='flood')
         data = Load('OFFSPEC00044998.nxs')
         data = Rebin(data, [0,1000,100000], PreserveEvents=False)
         data = ConvertUnits(data, 'Wavelength')
