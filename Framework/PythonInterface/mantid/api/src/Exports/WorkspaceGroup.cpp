@@ -38,8 +38,8 @@ std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) {
 }
 
 /** Constructor function for WorkspaceGroup */
-WorkspaceGroup_sptr makeWorkspaceGroup() {
-	WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+Workspace_sptr makeWorkspaceGroup() {
+	Workspace_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
 	return wsGroup;
 }
 
@@ -60,6 +60,8 @@ void export_WorkspaceGroup() {
            "Sort members by name")
       .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")),
            "Add a name to the group")
+	  .def("addWorkspace", &WorkspaceGroup::addWorkspace, (arg("self"), arg("workspace")), 
+		  "Add a workspace to the group.")
       .def("size", &WorkspaceGroup::size, arg("self"),
            "Returns the number of workspaces contained in the group")
       .def("remove", &WorkspaceGroup::remove,
