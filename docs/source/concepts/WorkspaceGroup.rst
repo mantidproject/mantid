@@ -8,18 +8,16 @@ Workspace Group
 .. contents::
   :local:
 
-A WorkspaceGroup is a group of workspaces.
+A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a like of Workspace objects. They appear as an expandable list of workspaces in the MantidPlot interface (the list of workspace is also called the ADS or *AnalysisDataService*). Thus, their primary function is to add structure to the ADS and make it more readable.
 
-Most algorithms will execute on a WorkspaceGroup by simply executing the
-algorithm on each workspace contained within.
+Most algorithms can be passed a WorkspaceGroup in place of a normal workspace input, and will simply execute the algorithm on each workspace contained within the group.
 
 Creating a Workspace Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Workspace groups can be created through the MantidPlot interface;
 
-- Select a few workspaces from the ADS in MantidPlot and click the "Group" button
-   above the list of workspaces. The group will be named "NewGroup".
+- Select a few workspaces from the ADS in MantidPlot and click the "Group" button above the list of workspaces. The group will be named "NewGroup".
 
 Workspace groups can be created in a more flexible way in the Python script window using the Python API;
 
@@ -33,7 +31,7 @@ Workspace groups can be created in a more flexible way in the Python script wind
 
     ws_group = api.WorkspaceGroup()
 
-This **will not** be automatically added to the list of workspaces, to do so, using the following line
+This **will not** be automatically added to the ADS, to do so, using the following line
 
 .. code::
 
@@ -76,9 +74,9 @@ Creating groups via the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm
     # Using wsGroup now will cause a runtime error
     # RuntimeError: Variable invalidated, data has been deleted.
 
+Output:
 
 .. testoutput:: CreatingWorkspaceGroups
-    :hide:
     :options: +NORMALIZE_WHITESPACE
 
     ['ws1','ws2','ws3']
@@ -102,9 +100,9 @@ Creating groups via direct instantiation;
 
     print(ws_group.getNames())
 
+Output:
 
 .. testoutput:: CreatingWorkspaceGroupsInstantiated
-    :hide:
     :options: +NORMALIZE_WHITESPACE
 
     ['ws1','ws2','ws3']
@@ -128,11 +126,11 @@ Workspace groups can be created without using the ADS, and fed workspaces which 
 
     mtd.add("group1", ws_group)
 
-    print(ws_group.getNmes())
+    print(ws_group.getNames())
 
+Output:
 
 .. testoutput:: CreatingWorkspaceGroupsNoADS
-    :hide:
     :options: +NORMALIZE_WHITESPACE
 
     ['','','']
@@ -219,7 +217,8 @@ Using Nested Workspace Groups
 
 It is possible to have groups within groups, the inner group can simply be added to the outer group in the usual way. For example
 
-.. testcode:: WorkspaceGroupNesting
+.. code::
+
     # create the following structure
     # group1/
     #       ws1
