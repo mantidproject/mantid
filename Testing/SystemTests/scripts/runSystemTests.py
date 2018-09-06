@@ -116,16 +116,21 @@ if __name__ == "__main__":
     # Run the tests with a task scheduler
     #########################################################################
 
+    # Print message if this is a cleanup run instead of a normal test run
     if options.clean:
         print("Performing cleanup run")
+
+    # Cleanup any pre-existing XML reporter files
+    entries = os.listdir(mtdconf.saveDir)
+    for file in entries:
+        if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
+            os.remove(os.path.join(mtdconf.saveDir,file))
 
     # Multi-core processes --------------
     # An array to hold the processes
     processes = []
     # A shared array to hold skipped and failed tests + status
     results_array = Array('i', [0] * (3*options.ncores))
-    # A shared array for number of executed tests, total number and max name length
-    test_counter  = Array('i', [0] * len(test_stats))
     # A manager to create a shared dict to store names of skipped and failed tests
     manager = Manager()
     # A shared dict to store names of skipped and failed tests
@@ -136,11 +141,13 @@ if __name__ == "__main__":
     tests_lock = Array('i', [0] * number_of_test_modules)
     # A shared value to count the number of remaining test modules
     tests_left = Value('i', number_of_test_modules)
+    # A shared value to count the number of completed tests
+    tests_done = Value('i', 0)
+    
+    total_number_of_tests = test_stats[0]
+    maximum_name_length = test_stats[1]
 
-    # Store the global list of tests into the shared dictionaries and arrays
-    for i in range(len(test_counter)):
-        test_counter[i] = test_stats[i]
-    # Store in reverse number of number of tests in each module
+    # Store in reverse number of number of tests in each module into the shared dictionary
     reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
     counter = 0
     for key, value in reverse_sorted_dict:
@@ -159,7 +166,7 @@ if __name__ == "__main__":
     for ip in range(options.ncores):
         processes.append(Process(target=stresstesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
                          mtdconf.dataDir, options, tests_dict, tests_lock, tests_left, results_array,
-                         status_dict, test_counter, ip, lock)))
+                         status_dict, total_number_of_tests, maximum_name_length, tests_done, ip, lock)))
     # Start and join processes
     for p in processes:
         p.start()
@@ -167,9 +174,9 @@ if __name__ == "__main__":
         p.join()
 
     # Gather results
-    skippedTests = sum(results_array[:options.ncores]) + (test_stats[3] - test_stats[1])
+    skippedTests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
     failedTests = sum(results_array[options.ncores:2*options.ncores])
-    totalTests = test_stats[3]
+    totalTests = test_stats[2]
     # Find minimum of status: if min == 0, then success is False
     success = bool(min(results_array[2*options.ncores:3*options.ncores]))
 

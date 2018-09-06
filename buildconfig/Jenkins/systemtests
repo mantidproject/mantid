@@ -72,4 +72,7 @@ find ${default_save_directory} -name "*-mismatch*" -delete
 
 # Run
 PKGDIR=${WORKSPACE}/build
-python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${BUILD_THREADS:?} $EXTRA_ARGS
+# Assuming the build server is using hyper-threading,
+# we make a guess on the number of cores
+NCORES=$((${BUILD_THREADS:?} / 2))
+python $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${NCORES} $EXTRA_ARGS

@@ -516,14 +516,16 @@ class ResultReporter(object):
     method.
     '''
 
-    def __init__(self):
+    def __init__(self, total_number_of_tests=0, maximum_name_length=0):
         '''Initialize a class instance, e.g. connect to a database'''
+        self._total_number_of_tests = total_number_of_tests
+        self._maximum_name_length = maximum_name_length
         pass
 
-    def dispatchResults(self, result, test_count):
+    def dispatchResults(self, result, number_of_completed_tests):
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
 
-    def printResultsToConsole(self, result, test_count):
+    def printResultsToConsole(self, result, number_of_completed_tests):
         '''
         Print the results to standard out
         '''
@@ -532,13 +534,14 @@ class ResultReporter(object):
         else:
             console_output = ''
             if self._quiet:
-                percentage = int(float(test_count[0])*100.0/float(test_count[1]))
+                percentage = int(float(number_of_completed_tests)*100.0/float(self._total_number_of_tests))
                 if len(result._results) < 6:
                     time_taken = " -- "
                 else:
                     time_taken = result._results[6][1]
-                console_output += ("[%3i%%] %3i/%3i : " % (percentage,test_count[0],test_count[1])) \
-                       + (result.name+" ").ljust(test_count[2]+2,'.') + " (" + result.status \
+                console_output += ("[%3i%%] %3i/%3i : " \
+                       % (percentage,number_of_completed_tests,self._total_number_of_tests)) \
+                       + (result.name+" ").ljust(self._maximum_name_length+2,'.') + " (" + result.status \
                        + ": " + time_taken + "s)"
             if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
                 nstars = 80
@@ -569,11 +572,11 @@ class TextResultReporter(ResultReporter):
     Report the results of a test using standard out
     '''
 
-    def dispatchResults(self, result, test_count):
+    def dispatchResults(self, result, number_of_completed_tests):
         '''
         The default text reporter prints to standard out
         '''
-        self.printResultsToConsole(result, test_count)
+        self.printResultsToConsole(result, number_of_completed_tests)
         return
 
 #########################################################################
@@ -762,9 +765,9 @@ class TestSuite(object):
         if msg is not None:
             self._result.output = msg
 
-    def reportResults(self, reporters, test_count):
+    def reportResults(self, reporters, number_of_completed_tests):
         for r in reporters:
-            r.dispatchResults(self._result, test_count)
+            r.dispatchResults(self._result, number_of_completed_tests)
 
 #########################################################################
 # The main API class
@@ -775,10 +778,9 @@ class TestManager(object):
     '''
 
     def __init__(self, test_loc=None, runner=None, output = [TextResultReporter()],
-                 quiet=False, testsInclude=None, testsExclude=None,
-                 exclude_in_pr_builds=None, showSkipped=False,
-                 output_on_failure=False, clean=False,
-                 test_count=None, process_number=0, ncores=1,list_of_tests=None):
+                 quiet=False, testsInclude=None, testsExclude=None, showSkipped=False,
+                 exclude_in_pr_builds=None, output_on_failure=False, clean=False,
+                 process_number=0, ncores=1, list_of_tests=None):
         '''Initialize a class instance'''
 
         # Runners and reporters
@@ -787,7 +789,6 @@ class TestManager(object):
         for r in self._reporters:
             r._quiet = quiet
             r._output_on_failure = output_on_failure
-        self._test_count = test_count
         self._clean = clean
         self._showSkipped = showSkipped
 
@@ -822,16 +823,16 @@ class TestManager(object):
             full_test_list = self.loadTestsFromModule(os.path.basename(self._testDir))
 
         # Gather statistics on full test list
-        test_stats = [0, 0, 0, 0]
-        test_stats[3] = len(full_test_list)
+        test_stats = [0, 0, 0]
+        test_stats[2] = len(full_test_list)
         reduced_test_list = []
         for t in full_test_list:
             if self.__shouldTest(t) or self._showSkipped:
                 reduced_test_list.append(t)
 
-        test_stats[1] = len(reduced_test_list)
+        test_stats[0] = len(reduced_test_list)
         for t in reduced_test_list:
-            test_stats[2] = max(test_stats[2],len(t._fqtestname))
+            test_stats[1] = max(test_stats[1],len(t._fqtestname))
 
         # When using multiprocessing, we have to split the list of tests among
         # the processes into groups instead of test by test, to avoid issues
@@ -865,7 +866,7 @@ class TestManager(object):
                 return False
         return True
 
-    def executeTests(self):
+    def executeTests(self, tests_done=None):
         # Get the defined tests
         for suite in self._tests:
             if self.__shouldTest(suite):
@@ -876,15 +877,17 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            self._test_count[0] += 1
+            with tests_done.get_lock():
+                tests_done.value += 1
             if not self._clean:
-                suite.reportResults(self._reporters, self._test_count)
+                suite.reportResults(self._reporters, tests_done.value)
             self._lastTestRun += 1
 
-    def markSkipped(self, reason=None):
+    def markSkipped(self, reason=None, tests_done_value=0):
         for suite in self._tests[self._lastTestRun:]:
             suite.setOutputMsg(reason)
-            suite.reportResults(self._reporters, self._test_count) # just let people know you were skipped
+            # Just let people know you were skipped
+            suite.reportResults(self._reporters, tests_done_value)
 
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
@@ -1108,9 +1111,12 @@ def envAsString():
 #########################################################################
 def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                     tests_lock, tests_left, res_array, stat_dict,
-                    test_count, process_number, lock):
+                    total_number_of_tests, maximum_name_length,
+                    tests_done, process_number, lock):
     
-    reporter = XmlResultReporter(showSkipped=options.showskipped)
+    reporter = XmlResultReporter(showSkipped=options.showskipped,
+                                 total_number_of_tests=total_number_of_tests,
+                                 maximum_name_length=maximum_name_length)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
                         escape_quotes=True, clean=options.clean, core_id=process_number,
@@ -1152,16 +1158,15 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                           exclude_in_pr_builds=options.exclude_in_pr_builds,
                           showSkipped=options.showskipped,
                           output_on_failure=options.output_on_failure,
-                          test_count=test_count,
                           process_number=process_number,
                           ncores=options.ncores,
                           clean=options.clean,
                           list_of_tests=local_test_list)
 
         try:
-            mgr.executeTests()
+            mgr.executeTests(tests_done)
         except KeyboardInterrupt:
-            mgr.markSkipped("KeyboardInterrupt")
+            mgr.markSkipped("KeyboardInterrupt", tests_done.value)
 
         # Update the test results in the array shared accross cores
         res_array[process_number] += mgr._skippedTests

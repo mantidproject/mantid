@@ -10,9 +10,12 @@ class XmlResultReporter(stresstesting.ResultReporter):
 	_failures = []
 	_skipped = []
 	
-	def __init__(self, showSkipped=True):
+	def __init__(self, showSkipped=True, total_number_of_tests=0, maximum_name_length=0):
 		self._doc = getDOMImplementation().createDocument(None,'testsuite',None)
 		self._show_skipped = showSkipped
+		self._total_number_of_tests = total_number_of_tests
+		self._maximum_name_length = maximum_name_length
+		return
 
 	def reportStatus(self):
 		return len(self._failures) == 0
@@ -39,7 +42,7 @@ class XmlResultReporter(stresstesting.ResultReporter):
 		docEl.setAttribute('time',str(self._time_taken))
 		return self._doc.toxml()
 
-	def dispatchResults(self, result, test_count):
+	def dispatchResults(self, result, number_of_completed_tests):
 		''' This relies on the order and names of the items to give the correct output '''
 		test_name = result.name.split('.')
 		if len(test_name) > 1:
@@ -85,4 +88,4 @@ class XmlResultReporter(stresstesting.ResultReporter):
 			elem.setAttribute('totalTime',str(time_taken))
 		self._doc.documentElement.appendChild(elem)
 		# Also output to terminal
-		self.printResultsToConsole(result, test_count)
+		self.printResultsToConsole(result, number_of_completed_tests)

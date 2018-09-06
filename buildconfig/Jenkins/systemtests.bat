@@ -81,4 +81,7 @@ set PKGDIR=%WORKSPACE%\build
 :: A completely clean build will not have Mantid installed but will need Python to
 :: run the testing setup scripts. Assume it is in the PATH
 set PYTHON_EXE=python.exe
-%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% -j %BUILD_THREADS% %EXTRA_ARGS%
+:: Assuming the build server is using hyper-threading,
+:: we make a guess on the number of cores
+set /a NCORES=%BUILD_THREADS%/2
+%PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% -j %NCORES% %EXTRA_ARGS%
