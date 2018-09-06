@@ -2,8 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import stresstesting
 from mantid import config
-from mantid.simpleapi import (BASISDiffraction, Load, GroupWorkspaces,
-                              ElasticWindowMultiple, MSDFit)
+from mantid.simpleapi import (BASISCrystalDiffraction, Load, GroupWorkspaces,
+                              ElasticWindowMultiple, MSDFit,
+                              BASISPowderDiffraction)
 
 
 class PreppingMixin(object):
@@ -113,7 +114,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
     def __init__(self):
         super(CrystalDiffractionTest, self).__init__()
         self.config = None
-        self.prepset('BASISDiffraction')
+        self.prepset('BASISCrystalDiffraction')
 
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
@@ -128,8 +129,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         Override parent method, does the work of running the test
         """
         try:
-            BASISDiffraction(SingleCrystalDiffraction=True,
-                             RunNumbers='74799-74800',
+            BASISCrystalDiffraction(RunNumbers='74799-74800',
                              MaskFile='BASIS_Mask_default_diff.xml',
                              VanadiumRuns='64642',
                              BackgroundRuns='75527',
@@ -155,3 +155,38 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         """
         self.tolerance = 0.1
         return 'peaky', 'BASISOrientedSample.nxs'
+
+
+class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
+    r"""Run a elastic reduction for powder sample"""
+
+    def __init__(self):
+        super(PowderSampleTest, self).__init__()
+        self.config = None
+        self.prepset('BASISPowderDiffraction')
+
+    def requiredFiles(self):
+        return ['BASIS_Mask_default_diff.xml',
+                'BSS_74799_event.nxs',
+                'BASISPowderSample.nxs']
+
+    def runTest(self):
+        r"""
+        Override parent method, does the work of running the test
+        """
+        try:
+            BASISPowderDiffraction(RunNumbers='74799',
+                                   OutputWorkspace='powder',
+                                   BackgroundRuns='75527',
+                                   VanadiumRuns='64642')
+        finally:
+            self.tearDown()
+
+    def validate(self):
+        r"""
+        Inform of workspace output after runTest(), and associated file to
+        compare to.
+        :return: strings for workspace and file name
+        """
+        self.tolerance = 0.1
+        return 'powder', 'BASISPowderSample.nxs'
