@@ -107,6 +107,7 @@ class ReflectometryApplyFloodWorkspaceUnits(stresstesting.MantidStressTest):
         self.disableChecking.append('Instrument')
         return self.out_ws_name,'ReflectometryApplyFloodWorkspaceUnits.nxs'
 
+
 class ReflectometryCreateFloodWorkspaceCentralPixel(stresstesting.MantidStressTest):
 
     flood_ws_name = 'flood'
