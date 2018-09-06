@@ -44,6 +44,28 @@ Instrument Parameters
 
 If the instrument parameter ``mirror_detector_angles`` is set to true, then output scattering angles are effectively multiplied by :math:`-1`. This is used for D2B where the instrument is mirrored compared with other Powder Diffraction instruments at the ILL.
 
+SplitCounts
++++++++++++
+
+The counts are split between bins, if the difference between two angles is larger than the scattering angle step multiplied by the ``ScatteringAngleTolerance``.
+By default there is no splitting.
+
+CropNegativeScatteringAngles
+++++++++++++++++++++++++++++
+
+When cropping is requested the bins that are fully on the negative side, will be dropped. However if there is a bin with one edge negative, the other positive, this bin will be preserved.
+
+ScatteringAngleBinning
+++++++++++++++++++++++
+
+This can be a comma separated list of start, step, end. Alternatively, if single number is given, it will be taken as the step.
+The start and end will be computed from the input workspaces, such that the first bin center is the minimum, and the last bin center is the maximum scattering angle in the equatorial plane in the list of input workspaces.
+
+OutputWorkspace
++++++++++++++++
+
+Output is a histogram workspace containing the summed/averaged counts.
+
 Usage
 -----
 **Example - an example of running SumOverlappingTubes in the 2DTubes case.**
