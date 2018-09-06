@@ -67,7 +67,7 @@ public:
   template <typename T, typename U> void add(const U &arg) {
     this->add(boost::make_shared<T>(arg));
   }
-  std::list<IValidator_sptr> getChildren() const {return m_children;};
+  std::list<IValidator_sptr> getChildren() const { return m_children; };
 
 private:
   /// Verify the value with the child validators
