@@ -9,6 +9,8 @@ else:
 from Muon.GUI.Common.thread_model import ThreadModel
 from Muon.GUI.Common import mock_widget
 from PyQt4.QtGui import QApplication
+from PyQt4 import QtGui
+from Muon.GUI.Common.message_box import warning
 
 
 class testModelWithoutExecute:
@@ -76,8 +78,13 @@ class LoadFileWidgetViewTest(unittest.TestCase):
             self.QT_APP.exit(0)
 
     def setUp(self):
+        self.obj = QtGui.QWidget()
         self.model = testModel()
-        self.thread = ThreadModel(self.model)
+        self.exception_callback = mock.Mock()
+        self.thread = ThreadModel(self.model, self.exception_callback)
+
+    def tearDown(self):
+        self.obj = None
 
     def mock_model(self):
         model = mock.Mock()
@@ -127,7 +134,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
     def test_that_AttributeError_raised_if_trying_to_load_data_into_model_without_loadData_method(self):
         model = testModelWithoutLoadData()
 
-        thread = ThreadModel(model)
+        thread = ThreadModel(model, self.exception_callback)
         with self.assertRaises(AttributeError):
             thread.loadData(None)
 
@@ -135,13 +142,13 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         model = testModelWithoutExecute()
 
         with self.assertRaises(AttributeError):
-            ThreadModel(model)
+            ThreadModel(model, self.exception_callback)
 
     def test_that_attribute_error_raised_if_model_does_not_contain_output_method(self):
         model = testModelWithoutOutput
 
         with self.assertRaises(AttributeError):
-            ThreadModel(model)
+            ThreadModel(model, self.exception_callback)
 
     def test_that_tearDown_function_called_automatically(self):
         start_slot = mock.Mock()
@@ -155,10 +162,9 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.assertEqual(start_slot.call_count, 1)
         self.assertEqual(end_slot.call_count, 1)
 
-    @mock.patch("Muon.GUI.Common.message_box.warning")
-    def test_that_message_box_called_when_execute_throws_even_without_setup_and_teardown_methods(self, mock_box):
+    def test_that_exception_callback_called_when_execute_throws_even_without_setup_and_teardown_methods(self):
         # Need to instantiate a new thread for patch to work
-        self.thread = ThreadModel(self.model)
+        self.thread = ThreadModel(self.model, self.exception_callback)
 
         def raise_error():
             raise ValueError()
@@ -167,7 +173,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
 
         self.Runner(self.thread)
 
-        self.assertEqual(mock_box.call_count, 1)
+        self.assertEqual(self.exception_callback.call_count, 1)
 
     def test_that_passing_non_callables_to_setUp_throws_AssertionError(self):
 

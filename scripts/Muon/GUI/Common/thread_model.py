@@ -27,11 +27,11 @@ class ThreadModel(QThread):
         raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
                              " execute() and output() methods")
 
-    def connect_exception_slot(self):
-        self.exceptionSignal.connect(self.exception_slot)
-
-    def disconnect_exception_slot(self):
-        self.exceptionSignal.disconnect(self.exception_slot)
+    # def connect_exception_slot(self):
+    #     self.exceptionSignal.connect(self.exception_slot)
+    #
+    # def disconnect_exception_slot(self):
+    #     self.exceptionSignal.disconnect(self.exception_slot)
 
     def __del__(self):
         try:
@@ -40,7 +40,7 @@ class ThreadModel(QThread):
             pass
 
     def run(self):
-        self.connect_exception_slot()
+        # self.connect_exception_slot()
         self.user_cancel = False
         try:
             self.model.execute()
@@ -53,11 +53,12 @@ class ThreadModel(QThread):
             else:
                 self.sendSignal(error)
             pass
-        finally:
-            self.disconnect_exception_slot()
+        # finally:
+        #     self.disconnect_exception_slot()
 
     def sendSignal(self, error):
-        self.exceptionSignal.emit(error)
+        # self.exceptionSignal.emit(error)
+        self.exception_slot(error)
 
     def join(self):
         if self.exception is not None:
