@@ -43,18 +43,9 @@ class PlotPresenter(object):
         """ Removes the subplot corresponding to 'name' from the plotting window """
         self.view.remove_subplot(name)
 
-    def call_plot_method(self, name, func, *args, **kwargs):
-        """
-        Calls the function with the specified arguments and returns the result:
-        the call will be 'saved' and 'replayed' when the plots are redrawn (errors checkbox is changed).
-        """
-        return self.view.call_plot_method(name, func, *args, **kwargs)
-
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         """
         Adds a vertical line to a plot.
-
-        This line will be re-added when the plots are redrawn (errors checkbox is changed).
 
         :param plot_name: the plot on which to add the line
         :param x_value: the x value for the axvline
@@ -66,14 +57,9 @@ class PlotPresenter(object):
         """
         return self.view.add_vline(plot_name, x_value, y_min, y_max, **kwargs)
 
-    def del_line(self, plot_name, line):
-        self.view.del_line(plot_name, line)
-
     def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         """
         Adds a horizontal line to a plot.
-
-        This line will be re-added when the plots are redrawn (errors checkbox is changed).
 
         :param plot_name: the plot on which to add the line
         :param y_value: the y value for the axvline

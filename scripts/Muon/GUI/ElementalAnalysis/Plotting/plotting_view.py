@@ -22,8 +22,7 @@ class PlotView(QtWidgets.QWidget):
         self.plots = OrderedDict({})
         self.errors_list = set()
         self.workspaces = {}
-        self.workspace_plots = {} # stores the plotted 'graphs' for deletion
-        self.plot_additions = {}
+        self.workspace_plots = {}  # stores the plotted 'graphs' for deletion
         self.current_grid = None
         self.gridspecs = {
             1: gridspec.GridSpec(1, 1),
@@ -74,22 +73,6 @@ class PlotView(QtWidgets.QWidget):
                 self.figure.tight_layout()
             self.canvas.draw()
             return output
-        return wraps
-
-    def _save_addition(func):
-        """
-        Simple decorator (@_save_addition) to 'Save' the function call to be
-        replayed later when the plots are cleared.
-        (https://www.python.org/dev/peps/pep-0318/)
-        """
-
-        def wraps(self, name, *args, **kwargs):
-            # try:
-            #     self.plot_additions[name].append((func, name, args, kwargs))
-            # except KeyError:
-            #     self.plot_additions[name] = [(func, name, args, kwargs)]
-            # return func(self, name, *args, **kwargs)
-            func(self, name, *args, **kwargs)
         return wraps
 
     def _silent_checkbox_check(self, state):
@@ -161,19 +144,15 @@ class PlotView(QtWidgets.QWidget):
         workspaces = self.workspaces[name]
         self.workspaces[name] = []
         x, y = plot.get_xlim(), plot.get_ylim()
-        for plot_name, plot_list in iteritems(self.workspace_plots):
-            print(plot_list)
-            for old_plot in plot_list:
-                print("deleting", old_plot)
-                old_plot.remove()
-                #del old_plot
-            self.workspace_plots[plot_name] = []
+        for old_plot in self.workspace_plots[name]:
+            old_plot.remove()
+            del old_plot
+        self.workspace_plots[name] = []
         for workspace in workspaces:
             self.plot(name, workspace)
         plot.set_xlim(x)
         plot.set_ylim(y)
         self._set_bounds(name)
-        #self._replay_additions(name)
 
     @_redo_layout
     def _errors_changed(self, state):
@@ -184,10 +163,6 @@ class PlotView(QtWidgets.QWidget):
         else:
             self._change_plot_errors(
                 current_name, self.get_subplot(current_name), state)
-
-    def _replay_additions(self, name):
-        for func, name, args, kwargs in self.plot_additions[name]:
-            func(self, name, *args, **kwargs)
 
     def _set_positions(self, positions):
         for plot, pos in zip(self.plots.values(), positions):
@@ -238,7 +213,8 @@ class PlotView(QtWidgets.QWidget):
 
     def plot_workspace_errors(self, name, workspace):
         subplot = self.get_subplot(name)
-        line, cap_lines, bar_lines = plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
+        line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
+            subplot, workspace, specNum=1)
         all_lines = [line]
         all_lines.extend(cap_lines)
         all_lines.extend(bar_lines)
@@ -265,40 +241,22 @@ class PlotView(QtWidgets.QWidget):
         self.figure.delaxes(self.get_subplot(name))
         del self.plots[name]
         del self.workspaces[name]
-        del self.plot_additions[name]
         self._update_gridspec(len(self.plots))
 
     @_redo_layout
-    @_save_addition
-    def call_plot_method(self, name, func, *args, **kwargs):
-        """
-        Allows an arbitrary function call to be replayed
-        """
-        return func(*args, **kwargs)
-
-    @_redo_layout
-    @_save_addition
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         return self.get_subplot(plot_name).axvline(
             x_value, y_min, y_max, **kwargs)
 
     @_redo_layout
-    @_save_addition
-    def del_line(self, plot_name, line):
-        line.remove()
-
-    @_redo_layout
-    @_save_addition
     def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         return self.get_subplot(plot_name).axhline(
             y_value, x_min, x_max, **kwargs)
 
     @_redo_layout
-    @_save_addition
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
         pass
 
     @_redo_layout
-    @_save_addition
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
