@@ -394,7 +394,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = make_unique<Progress>(this, 0., 1., 22);
+  m_progress = make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");
@@ -725,18 +725,6 @@ void AlignAndFocusPowder::exec() {
     m_outputEW = compressAlg->getProperty("OutputWorkspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
   }
-  m_progress->report();
-
-  if ((!m_params.empty()) && (m_params.size() != 1)) {
-    m_params.erase(m_params.begin());
-    m_params.pop_back();
-  }
-  if (!m_dmins.empty())
-    m_dmins.clear();
-  if (!m_dmaxs.empty())
-    m_dmaxs.clear();
-
-  m_outputW = rebin(m_outputW);
   m_progress->report();
 
   // return the output workspace
