@@ -36,7 +36,7 @@
 class EXPORT_OPT_MANTIDQT_LEGACYQWT MantidColorMap : public QwtColorMap {
 
 public:
-  static QString chooseColorMap(QString previousFile, QWidget *parent);
+  static QString chooseColorMap(const QString &previousFile, QWidget *parent);
   static QString exists(const QString &filename);
 
 public:

@@ -34,7 +34,8 @@ const double LOG_ZERO_CUTOFF = 1e-15;
  * @param parent :: widget owner of the dialog
  * @return QString of the filename
  */
-QString MantidColorMap::chooseColorMap(QString previousFile, QWidget *parent) {
+QString MantidColorMap::chooseColorMap(const QString &previousFile,
+                                       QWidget *parent) {
   QString fileselection;
   // Get the installed color maps directory.
   QString colormapdir = QString::fromStdString(
