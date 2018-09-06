@@ -14,12 +14,11 @@ from mantid.simpleapi import (DeleteWorkspace, LoadMask, LoadEventNexus,
                               ModeratorTzeroLinear, ConvertUnits,
                               CropWorkspace, RenameWorkspace,
                               LoadNexusMonitors, OneMinusExponentialCor,
-                              Scale, RebinToWorkspace, Divide, Rebin,
-                              MedianDetectorTest, SumSpectra, Integration,
-                              CreateWorkspace)
-from mantid.kernel import (FloatArrayLengthValidator, FloatArrayProperty,
-                           Direction, IntArrayProperty)
-debug_flag = False
+                              Scale, Divide, Rebin, MedianDetectorTest,
+                              SumSpectra, Integration, CreateWorkspace)
+from mantid.kernel import (FloatArrayProperty, Direction)
+debug_flag = False  # set to True to prevent erasing temporary workspaces
+
 
 @contextmanager
 def pyexec_setup(new_options):
@@ -104,10 +103,9 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         return ['BASISReduction', 'BASISCrystalDiffraction']
 
     def PyInit(self):
-        # Input validators
-        array_length_three = FloatArrayLengthValidator(3)
-
+        #
         # Properties
+        #
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
 
         self.declareProperty(FloatArrayProperty('MomentumTransferBins',
@@ -142,7 +140,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.declareProperty('BackgroundRuns', '', 'Background run numbers')
         self.setPropertyGroup('BackgroundRuns', background_title)
         self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this '+
+                             doc='The background will be scaled by this ' +
                                  'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         self.declareProperty(WorkspaceProperty('OutputBackground', '',
@@ -252,7 +250,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         _t_all_w = None
         for run in rl:
             file_name = "{0}_{1}_event.nxs".format(self._short_inst, str(run))
-            _t_w = LoadEventNexus(Filename=file_name,NXentryName='entry-diff',
+            _t_w = LoadEventNexus(Filename=file_name, NXentryName='entry-diff',
                                   SingleBankPixelsOnly=False)
             if _t_all_w is None:
                 _t_all_w = CloneWorkspace(_t_w)
@@ -363,11 +361,10 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         """
         _t_mon = self._load_monitors(target)
         _t_mon = ConvertUnits(_t_mon, Target='Wavelength', Emode='Elastic')
-        _t_mon = CropWorkspace(_t_mon,
-                             XMin=self._wavelength_band[0],
-                             XMax=self._wavelength_band[1])
+        _t_mon = CropWorkspace(_t_mon, XMin=self._wavelength_band[0],
+                               XMax=self._wavelength_band[1])
         _t_mon = OneMinusExponentialCor(_t_mon, C='0.20749999999999999',
-                                      C1='0.001276')
+                                        C1='0.001276')
         _t_mon = Scale(_t_mon, Factor='1e-06', Operation='Multiply')
         _t_mon = Integration(_t_mon)  # total monitor count
         _t_w = Divide(w, _t_mon, OutputWorkspace=w.name())

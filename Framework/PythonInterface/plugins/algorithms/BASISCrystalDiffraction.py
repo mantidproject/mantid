@@ -1,4 +1,4 @@
-#pylint: disable=too-many-branches
+# pylint: disable=too-many-branches
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -21,8 +21,7 @@ from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer,
                               ConvertUnits, CropWorkspace, DivideMD, MinusMD,
                               RenameWorkspace, ConvertToMDMinMaxGlobal,
                               ClearMaskFlag)
-from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion,
-                           IntArrayProperty, FloatArrayProperty,
+from mantid.kernel import (Direction, IntArrayProperty, FloatArrayProperty,
                            FloatArrayLengthValidator)
 
 
@@ -128,8 +127,8 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
-                             doc='Output Workspace. If background is '+
-                                 'subtracted, _data and _background '+
+                             doc='Output Workspace. If background is ' +
+                                 'subtracted, _data and _background ' +
                                  'workspaces will also be generated')
 
         #
@@ -139,7 +138,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty('BackgroundRuns', '', 'Background run numbers')
         self.setPropertyGroup('BackgroundRuns', background_title)
         self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this '+
+                             doc='The background will be scaled by this ' +
                                  'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         #
@@ -160,7 +159,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty('PsiOffset', 0.0,
                              direction=Direction.Input,
                              doc='Add this quantity to PsiAngleLog')
-        self.declareProperty(FloatArrayProperty('LatticeSizes', [0,0,0],
+        self.declareProperty(FloatArrayProperty('LatticeSizes', [0, 0, 0],
                                                 array_length_three,
                                                 direction=Direction.Input),
                              doc='three item comma-separated list "a, b, c"')
@@ -528,6 +527,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         ClearMaskFlag(ws)
         MaskDetectors(ws, MaskedWorkspace=self._t_mask)
         return ws
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(BASISCrystalDiffraction)
