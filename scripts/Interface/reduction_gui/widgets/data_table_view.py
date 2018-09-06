@@ -29,7 +29,7 @@ class DataTableModel(QtCore.QAbstractTableModel):
         def checkAndConvertRow(row):
             assert(len(row) == self.columnCount())
             return list(row)
-        self._tableData = map(checkAndConvertRow, data)
+        self._tableData = list(map(checkAndConvertRow, data))
 
     def _numRows(self):
         """
