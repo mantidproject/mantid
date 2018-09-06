@@ -40,26 +40,6 @@ public:
 protected:
   virtual bool rowMeetsCriteria(RowLocation const &row) const = 0;
 };
-
-template <typename LambdaPredicate>
-class LambdaRowPredicate : public RowPredicate {
-public:
-  LambdaRowPredicate(LambdaPredicate predicate)
-      : m_predicate(std::move(predicate)) {}
-
-protected:
-  bool rowMeetsCriteria(RowLocation const &row) const override {
-    return m_predicate(row);
-  }
-
-private:
-  LambdaPredicate m_predicate;
-};
-
-template <typename Predicate>
-std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
-  return Mantid::Kernel::make_unique<LambdaRowPredicate<Predicate>>(predicate);
-}
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt

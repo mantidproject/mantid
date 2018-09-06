@@ -6,8 +6,10 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "Presenters/BatchPresenter.h"
+#include "Presenters/BatchPresenterFactory.h"
 #include "ReflAutoreduction.h"
-#include "ReflTransferStrategy.h"
+#include "SearchResult.h"
 #include <boost/shared_ptr.hpp>
 
 class ProgressPresenter;
@@ -33,6 +35,12 @@ class ReflTransferStrategy;
 
 using MantidWidgets::DataProcessor::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
+
+enum class TransferMatch {
+  Any,        // any that match the regex
+  ValidTheta, // any that match and have a valid theta value
+  Strict      // only those that exactly match all parts of the regex
+};
 
 /** @class ReflRunsTabPresenter
 
@@ -66,10 +74,20 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
-                       std::vector<DataProcessorPresenter *> tablePresenter,
+                       BatchPresenterFactory makeBatchPresenter,
+                       WorkspaceNamesFactory workspaceNamesFactory,
+                       double thetaTolerance,
+                       std::vector<std::string> const &instruments,
+                       int defaultInstrumentIndex,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-  ~ReflRunsTabPresenter() override;
+
+  ReflRunsTabPresenter(ReflRunsTabPresenter const &) = delete;
+  ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
+
+  ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
+  ReflRunsTabPresenter &operator=(ReflRunsTabPresenter &&) = default;
+
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList, int group) override;
@@ -114,8 +132,10 @@ private:
   IReflRunsTabView *m_view;
   /// The progress view
   ProgressableView *m_progressView;
+  BatchPresenterFactory m_makeBatchPresenter;
+  WorkspaceNamesFactory const &m_workspaceNamesFactory;
   /// The data processor presenters stored in a vector
-  std::vector<DataProcessorPresenter *> m_tablePresenters;
+  std::vector<std::unique_ptr<BatchPresenter>> m_tablePresenters;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
@@ -126,6 +146,7 @@ private:
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  double m_thetaTolerance;
 
   /// searching
   bool search();
@@ -151,20 +172,15 @@ private:
   void transfer(const std::set<int> &rowsToTransfer, int group,
                 const TransferMatch matchType = TransferMatch::Any);
   void pushCommands(int group);
-  std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   void changeInstrument();
   void changeGroup();
   void updateWidgetEnabledState() const;
-  DataProcessorPresenter *getTablePresenter(int group) const;
+  BatchPresenter *getTablePresenter(int group) const;
   /// Check that a given set of row indices are valid to transfer
   bool validateRowsToTransfer(const std::set<int> &rowsToTransfer);
   /// Get runs to transfer from row indices
-  SearchResultMap
+  std::vector<SearchResult>
   getSearchResultRunDetails(const std::set<int> &rowsToTransfer);
-  /// Deal with rows that are invalid for transfer
-  void updateErrorStateInSearchModel(
-      const std::set<int> &rowsToTransfer,
-      const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
 };

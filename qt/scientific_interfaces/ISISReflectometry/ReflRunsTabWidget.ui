@@ -185,16 +185,6 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QComboBox" name="comboTransferMethod">
-           <property name="toolTip">
-            <string>The method used to transfer runs into the processing table</string>
-           </property>
-           <property name="whatsThis">
-            <string>The strategy for searching and transfering files. See help.</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0">
           <widget class="QPushButton" name="buttonAutoreduce">
            <property name="sizePolicy">

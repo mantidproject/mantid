@@ -1,7 +1,6 @@
 #include "QtReflRunsTabView.h"
 #include "IReflRunsTabPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
@@ -13,6 +12,7 @@
 #include "ReflGenericDataProcessorPresenterFactory.h"
 #include "ReflRunsTabPresenter.h"
 #include "ReflSearchModel.h"
+#include "Views/BatchView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -22,18 +22,24 @@ using namespace MantidQt::MantidWidgets;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  * @param parent :: The parent of this view
+ * @param makeBatchView :: The factory for the BatchViews.
  */
-QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
-    : m_presenter(), m_calculator(new SlitCalculator(this)) {
+QtReflRunsTabView::QtReflRunsTabView(QWidget *parent,
+                                     BatchViewFactory makeBatchView)
+    : m_presenter(nullptr), m_calculator(new SlitCalculator(this)),
+      m_tableViews(), m_makeBatchView(std::move(makeBatchView)) {
 
   UNUSED_ARG(parent);
   initLayout();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QtReflRunsTabView::~QtReflRunsTabView() {}
+void QtReflRunsTabView::subscribe(IReflRunsTabPresenter *presenter) {
+  m_presenter = presenter;
+}
+
+std::vector<IBatchView *> const &QtReflRunsTabView::tableViews() const {
+  return m_tableViews;
+}
 
 /**
 Initialise the Interface
@@ -47,38 +53,14 @@ void QtReflRunsTabView::initLayout() {
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
 
-  // Create the DataProcessor presenter
-  ReflGenericDataProcessorPresenterFactory presenterFactory;
+  auto *batchView1 = m_makeBatchView();
+  ui.toolbox->addItem(batchView1, "Group 1");
+  m_tableViews.emplace_back(batchView1);
 
-  QDataProcessorWidget *qDataProcessorWidget_1 = new QDataProcessorWidget(
-      std::unique_ptr<DataProcessor::DataProcessorPresenter>(
-          presenterFactory.create(0)),
-      this);
-  ui.toolbox->addItem(qDataProcessorWidget_1, "Group 1");
-  connect(qDataProcessorWidget_1,
-          SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
+  auto *batchView2 = m_makeBatchView();
+  ui.toolbox->addItem(batchView2, "Group 2");
+  m_tableViews.emplace_back(batchView2);
 
-  QDataProcessorWidget *qDataProcessorWidget_2 = new QDataProcessorWidget(
-      std::unique_ptr<DataProcessor::DataProcessorPresenter>(
-          presenterFactory.create(1)),
-      this);
-  ui.toolbox->addItem(qDataProcessorWidget_2, "Group 2");
-  connect(qDataProcessorWidget_2,
-          SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
-
-  std::vector<DataProcessor::DataProcessorPresenter *> processingWidgets;
-  processingWidgets.push_back(qDataProcessorWidget_1->getPresenter());
-  processingWidgets.push_back(qDataProcessorWidget_2->getPresenter());
-
-  // Create the presenter
-  m_presenter = std::make_shared<ReflRunsTabPresenter>(
-      this /* main view */,
-      this /* Currently this concrete view is also responsible for prog
-              reporting */
-      ,
-      processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
@@ -93,25 +75,25 @@ void QtReflRunsTabView::initLayout() {
 
   // Synchronize the instrument selection widgets
   // Processing table in group 1
-  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          qDataProcessorWidget_1,
-          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(qDataProcessorWidget_1,
-          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
-          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
-  connect(qDataProcessorWidget_1,
-          SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
-          SLOT(instrumentChanged(int)));
+  // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+  //        qDataProcessorWidget_1,
+  //        SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
+  // connect(qDataProcessorWidget_1,
+  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
+  //        ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+  // connect(qDataProcessorWidget_1,
+  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
+  //        SLOT(instrumentChanged(int)));
   // Processing table in group 2
-  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          qDataProcessorWidget_2,
-          SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(qDataProcessorWidget_2,
-          SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
-          ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
-  connect(qDataProcessorWidget_2,
-          SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
-          SLOT(instrumentChanged(int)));
+  // connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
+  //        qDataProcessorWidget_2,
+  //        SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
+  // connect(qDataProcessorWidget_2,
+  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
+  //        ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
+  // connect(qDataProcessorWidget_2,
+  //        SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
+  //        SLOT(instrumentChanged(int)));
 }
 
 /**
@@ -215,15 +197,6 @@ void QtReflRunsTabView::setInstrumentComboEnabled(bool enabled) {
 }
 
 /**
- * Sets the transfer method combo box enabled or disabled
- * @param enabled : Whether to enable or disable the button
- */
-void QtReflRunsTabView::setTransferMethodComboEnabled(bool enabled) {
-
-  ui.comboTransferMethod->setEnabled(enabled);
-}
-
-/**
  * Sets the search text box enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
@@ -242,35 +215,18 @@ void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 }
 
 /**
- * Set all possible tranfer methods
- * @param methods : All possible transfer methods.
- */
-void QtReflRunsTabView::setTransferMethods(
-    const std::set<std::string> &methods) {
-  for (auto method = methods.begin(); method != methods.end(); ++method) {
-    ui.comboTransferMethod->addItem((*method).c_str());
-  }
-}
-
-/**
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available
-@param defaultInstrument : The instrument to have selected by default
+@param defaultInstrumentIndex : The index of the instrument to have selected by
+default
 */
 void QtReflRunsTabView::setInstrumentList(
-    const std::vector<std::string> &instruments,
-    const std::string &defaultInstrument) {
+    const std::vector<std::string> &instruments, int defaultInstrumentIndex) {
   ui.comboSearchInstrument->clear();
-
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
-    ui.comboSearchInstrument->addItem(instrument);
-  }
-
-  int index = ui.comboSearchInstrument->findData(
-      QString::fromStdString(defaultInstrument), Qt::DisplayRole);
-  ui.comboSearchInstrument->setCurrentIndex(index);
+  for (auto &&instrument : instruments)
+    ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
+  ui.comboSearchInstrument->setCurrentIndex(defaultInstrumentIndex);
 }
 
 /**
@@ -405,7 +361,7 @@ void QtReflRunsTabView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
-  m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+  // m_presenter->notify(IReflRunsTabPresenter::InstrumentChangedFlag);
 }
 
 /**
@@ -450,7 +406,7 @@ Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
 IReflRunsTabPresenter *QtReflRunsTabView::getPresenter() const {
-  return m_presenter.get();
+  return m_presenter;
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -464,13 +420,6 @@ Get the string the user wants to search for.
 */
 std::string QtReflRunsTabView::getSearchString() const {
   return ui.textSearch->text().toStdString();
-}
-
-/**
- * @return the transfer method selected.
- */
-std::string QtReflRunsTabView::getTransferMethod() const {
-  return ui.comboTransferMethod->currentText().toStdString();
 }
 
 /**

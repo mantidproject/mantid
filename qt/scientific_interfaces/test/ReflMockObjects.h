@@ -16,7 +16,6 @@
 #include "../ISISReflectometry/IReflSettingsTabPresenter.h"
 #include "../ISISReflectometry/IReflSettingsView.h"
 #include "../ISISReflectometry/InstrumentOptionDefaults.h"
-#include "../ISISReflectometry/ReflLegacyTransferStrategy.h"
 #include "../ISISReflectometry/ReflSearchModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -40,8 +39,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockReflSearchModel : public ReflSearchModel {
 public:
   MockReflSearchModel()
-      : ReflSearchModel(ReflLegacyTransferStrategy(), ITableWorkspace_sptr(),
-                        std::string()) {}
+      : ReflSearchModel(ITableWorkspace_sptr(), std::string()) {}
   ~MockReflSearchModel() override {}
   MOCK_CONST_METHOD2(data, QVariant(const QModelIndex &, int role));
 };
@@ -50,6 +48,11 @@ public:
 
 class MockRunsTabView : public IReflRunsTabView {
 public:
+  MockRunsTabView() {
+    ON_CALL(*this, tableViews())
+        .WillByDefault(testing::ReturnRef(m_tableViews));
+  }
+
   // Gmock requires parameters and return values of mocked methods to be
   // copyable
   // We can't mock setTableCommands(std::vector<Command_uptr>)
@@ -82,14 +85,14 @@ public:
   MOCK_METHOD0(setTableCommandsProxy, void());
   MOCK_METHOD0(setRowCommandsProxy, void());
   MOCK_METHOD0(clearCommands, void());
-  MOCK_METHOD2(setInstrumentList,
-               void(const std::vector<std::string> &, const std::string &));
+  MOCK_METHOD2(setInstrumentList, void(const std::vector<std::string> &, int));
   MOCK_METHOD1(updateMenuEnabledState, void(bool));
   MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
   MOCK_METHOD1(setAutoreducePauseButtonEnabled, void(bool));
   MOCK_METHOD1(setTransferButtonEnabled, void(bool));
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
-  MOCK_METHOD1(setTransferMethodComboEnabled, void(bool));
+  MOCK_METHOD1(subscribe, void(IReflRunsTabPresenter *));
+  MOCK_CONST_METHOD0(tableViews, std::vector<IBatchView *> const &());
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
   MOCK_METHOD1(startTimer, void(const int));
@@ -99,6 +102,9 @@ public:
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
   IReflRunsTabPresenter *getPresenter() const override { return nullptr; };
+
+private:
+  std::vector<IBatchView *> m_tableViews;
 };
 
 class MockSettingsView : public IReflSettingsView {

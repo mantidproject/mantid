@@ -49,9 +49,7 @@ set ( TEST_FILES
   test/ReflDataProcessorPresenterTest.h
   test/ReflEventPresenterTest.h
   test/ReflEventTabPresenterTest.h
-  test/ReflLegacyTransferStrategyTest.h
   test/ReflMainWindowPresenterTest.h
-  test/ReflMeasureTransferStrategyTest.h
   test/ReflNexusMeasurementItemSourceTest.h
   test/ReflRunsTabPresenterTest.h
   test/ReflSaveTabPresenterTest.h
@@ -59,6 +57,14 @@ set ( TEST_FILES
   test/ReflSettingsTabPresenterTest.h
   test/RunMapTest.h
   test/UserInputValidatorTest.h
+
+  test/ISISReflectometry/Reduction/GroupTest.h
+  test/ISISReflectometry/Reduction/ValidateRowTest.h
+  test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterGroupDeletionTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterGroupInsertionTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterRowInsertionTest.h
+  test/ISISReflectometry/Presenters/BatchPresenterRowDeletionTest.h
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest

@@ -1604,15 +1604,11 @@ public:
      QWidget *parent = nullptr);
 
     void subscribe(MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber& subscriber);
-    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
-     &parent, int beforeRow,
+    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
-    MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation 
-    &parent, int beforeRow);
-    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation 
-    &parent);
-    MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation 
-    &parentLocation,
+    void insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent, int beforeRow);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parent);
+    void appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation &parentLocation,
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
@@ -1720,7 +1716,6 @@ signals:
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
-
 };
 
 };

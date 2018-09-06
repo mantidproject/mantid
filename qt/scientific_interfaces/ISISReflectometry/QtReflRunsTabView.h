@@ -4,8 +4,11 @@
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
+#include "Presenters/BatchPresenter.h"
+#include "Views/BatchView.h"
 
 #include "ui_ReflRunsTabWidget.h"
 
@@ -17,7 +20,6 @@ namespace MantidWidgets {
 namespace DataProcessor {
 // Forward decs
 class Command;
-class QtCommandAdapter;
 } // namespace DataProcessor
 class SlitCalculator;
 } // namespace MantidWidgets
@@ -64,17 +66,17 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
       public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
-  /// Constructor
-  QtReflRunsTabView(QWidget *parent = nullptr);
-  /// Destructor
-  ~QtReflRunsTabView() override;
+  QtReflRunsTabView(QWidget *parent, BatchViewFactory makeView);
+
+  void subscribe(IReflRunsTabPresenter *presenter) override;
+  std::vector<IBatchView *> const &tableViews() const override;
+
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
-                         const std::string &defaultInstrument) override;
-  void setTransferMethods(const std::set<std::string> &methods) override;
+                         int defaultInstrumentIndex) override;
   void setTableCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
                             tableCommands) override;
   void setRowCommands(std::vector<std::unique_ptr<DataProcessor::Command>>
@@ -85,7 +87,6 @@ public:
   void setAutoreducePauseButtonEnabled(bool enabled) override;
   void setTransferButtonEnabled(bool enabled) override;
   void setInstrumentComboEnabled(bool enabled) override;
-  void setTransferMethodComboEnabled(bool enabled) override;
   void setSearchTextEntryEnabled(bool enabled) override;
   void setSearchButtonEnabled(bool enabled) override;
 
@@ -99,7 +100,6 @@ public:
   std::set<int> getAllSearchRows() const override;
   std::string getSearchInstrument() const override;
   std::string getSearchString() const override;
-  std::string getTransferMethod() const override;
   int getSelectedGroup() const override;
 
   IReflRunsTabPresenter *getPresenter() const override;
@@ -122,9 +122,9 @@ private:
   void timerEvent(QTimerEvent *event) override;
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-
   // the presenter
-  std::shared_ptr<IReflRunsTabPresenter> m_presenter;
+  IReflRunsTabPresenter *m_presenter;
+
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   // Command adapters
@@ -135,6 +135,10 @@ private:
   SlitCalculator *m_calculator;
   // Timer for triggering periodic autoreduction
   QBasicTimer m_timer;
+
+  std::vector<IBatchView *> m_tableViews;
+
+  BatchViewFactory m_makeBatchView;
 
 private slots:
   void on_actionSearch_triggered();

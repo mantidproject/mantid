@@ -1,11 +1,13 @@
 #include "QtReflMainWindowView.h"
 #include "MantidKernel/make_unique.h"
+#include "Presenters/BatchPresenter.h"
 #include "QtReflEventTabView.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
 #include "QtReflSettingsTabView.h"
 #include "ReflAsciiSaver.h"
 #include "ReflMainWindowPresenter.h"
+#include "ReflRunsTabPresenter.h"
 #include "ReflSaveTabPresenter.h"
 
 #include <QMessageBox>
@@ -42,7 +44,7 @@ void QtReflMainWindowView::initLayout() {
 
   // Create the presenter
   m_presenter = Mantid::Kernel::make_unique<ReflMainWindowPresenter>(
-      this, runsPresenter, eventPresenter, settingsPresenter,
+      this, std::move(runsPresenter), eventPresenter, settingsPresenter,
       std::move(savePresenter));
 }
 
@@ -50,17 +52,41 @@ void QtReflMainWindowView::helpPressed() {
   m_presenter->notify(IReflMainWindowPresenter::Flag::HelpPressed);
 }
 
+int indexOfElseFirst(std::string const &instrument,
+                     std::vector<std::string> const &instruments) {
+  auto it = std::find(instruments.cbegin(), instruments.cend(), instrument);
+  if (it != instruments.cend())
+    return static_cast<int>(std::distance(instruments.cbegin(), it));
+  else
+    return 0;
+}
+
+int defaultInstrumentFromConfig(std::vector<std::string> const &instruments) {
+  return indexOfElseFirst(
+      Mantid::Kernel::ConfigService::Instance().getString("default.instrument"),
+      instruments);
+}
+
 /** Creates the 'Runs' tab and returns a pointer to its presenter
  * @return :: A pointer to the presenter managing the 'Runs' tab
  */
-IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
+std::unique_ptr<IReflRunsTabPresenter> QtReflMainWindowView::createRunsTab() {
+  auto instruments = std::vector<std::string>(
+      {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
+  auto defaultInstrumentIndex = defaultInstrumentFromConfig(instruments);
 
-  QtReflRunsTabView *runsTab = new QtReflRunsTabView(this);
+  auto *runsTab = new QtReflRunsTabView(this, BatchViewFactory(instruments));
   m_ui.mainTab->addTab(runsTab, QString("Runs"));
   connect(runsTab, SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
-  return runsTab->getPresenter();
+  auto workspaceNamesFactory = WorkspaceNamesFactory(Slicing());
+  auto runsTabPresenter = Mantid::Kernel::make_unique<ReflRunsTabPresenter>(
+      runsTab, runsTab,
+      BatchPresenterFactory(instruments, 0.01, workspaceNamesFactory),
+      workspaceNamesFactory, 0.01, instruments, defaultInstrumentIndex);
+
+  return std::move(runsTabPresenter);
 }
 
 /** Creates the 'Event Handling' tab and returns a pointer to its presenter

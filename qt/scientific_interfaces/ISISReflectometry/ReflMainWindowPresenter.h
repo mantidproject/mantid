@@ -45,7 +45,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflMainWindowPresenter
 public:
   /// Constructor
   ReflMainWindowPresenter(IReflMainWindowView *view,
-                          IReflRunsTabPresenter *runsPresenter,
+                          std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
                           IReflEventTabPresenter *eventPresenter,
                           IReflSettingsTabPresenter *settingsPresenter,
                           std::unique_ptr<IReflSaveTabPresenter> savePresenter);
@@ -109,7 +109,7 @@ private:
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
-  IReflRunsTabPresenter *m_runsPresenter;
+  std::unique_ptr<IReflRunsTabPresenter> m_runsPresenter;
   /// The presenter of tab 'Event Handling'
   IReflEventTabPresenter *m_eventPresenter;
   /// The presenter of tab 'Settings'

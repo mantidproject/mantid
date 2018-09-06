@@ -74,7 +74,7 @@ private:
   /// Initializes the interface
   void initLayout() override;
   /// Creates the 'Runs' tab
-  IReflRunsTabPresenter *createRunsTab();
+  std::unique_ptr<IReflRunsTabPresenter> createRunsTab();
   /// Creates the 'Event Handling' tab
   IReflEventTabPresenter *createEventTab();
   /// Creates the 'Settings' tab

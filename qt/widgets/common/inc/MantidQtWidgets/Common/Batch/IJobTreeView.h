@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
 #include <boost/optional.hpp>
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {

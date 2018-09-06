@@ -1,6 +1,7 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 
+#include "Views/IBatchView.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
@@ -55,13 +56,15 @@ public:
   IReflRunsTabView(){};
   virtual ~IReflRunsTabView(){};
 
+  virtual void subscribe(IReflRunsTabPresenter *presenter) = 0;
+  virtual std::vector<IBatchView *> const &tableViews() const = 0;
+
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 const std::string &defaultInstrument) = 0;
-  virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
+                                 int defaultInstrumentIndex) = 0;
   virtual void setTableCommands(
       std::vector<std::unique_ptr<DataProcessor::Command>> tableCommands) = 0;
   virtual void setRowCommands(
@@ -72,7 +75,6 @@ public:
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
   virtual void setTransferButtonEnabled(bool enabled) = 0;
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
-  virtual void setTransferMethodComboEnabled(bool enabled) = 0;
   virtual void setSearchTextEntryEnabled(bool enabled) = 0;
   virtual void setSearchButtonEnabled(bool enabled) = 0;
 
@@ -81,7 +83,6 @@ public:
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
   virtual std::string getSearchString() const = 0;
-  virtual std::string getTransferMethod() const = 0;
   virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
