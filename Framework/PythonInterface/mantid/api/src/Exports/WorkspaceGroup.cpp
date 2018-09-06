@@ -2,6 +2,8 @@
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/ToWeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
+#include "MantidPythonInterface/kernel/DataServiceExporter.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
@@ -43,6 +45,10 @@ Workspace_sptr makeWorkspaceGroup() {
 	return wsGroup;
 }
 
+void addWorkspace(WorkspaceGroup &self, const boost::python::object& pyobj) {
+	self.addWorkspace(DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr >::extractCppValue(pyobj));
+}
+
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
                                                                no_init)
@@ -60,7 +66,7 @@ void export_WorkspaceGroup() {
            "Sort members by name")
       .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")),
            "Add a name to the group")
-	  .def("addWorkspace", &WorkspaceGroup::addWorkspace, (arg("self"), arg("workspace")), 
+	  .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")), 
 		  "Add a workspace to the group.")
       .def("size", &WorkspaceGroup::size, arg("self"),
            "Returns the number of workspaces contained in the group")
