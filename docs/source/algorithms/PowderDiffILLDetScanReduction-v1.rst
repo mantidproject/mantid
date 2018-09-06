@@ -24,6 +24,7 @@ Calibration
 -----------
 
 The NeXus files for D2B contain raw data and pre-calibrated data. Either of these can be used when loading.
+Note that, when reading the calibrated data, the even-numbered tubes will not be flipped, since they are flipped in the nexus files already.
 
 Normalisation Options
 ---------------------
