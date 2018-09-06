@@ -142,8 +142,8 @@ class TOFTOFScriptElementTest(unittest.TestCase):
     # due to an issue with 'exec()' in functtions with nested functions in python 2.7 (2.7.8 and earlier), 
     # this function has to stay outside of 'test_that_script_is_executable_in_mantid()'.
     # see https://bugs.python.org/issue21591
-    @staticmethod
-    def execScript(script):
+    # cannot be a @staticmethod for the same reasons
+    def execScript(self, script):
         exec(script, dict(), dict())
 
     def test_that_script_is_executable_in_mantid(self):
