@@ -12,10 +12,11 @@ class ThreadModel(QThread):
     """
     exceptionSignal = QtCore.pyqtSignal(object)
 
-    def __init__(self, model):
+    def __init__(self, model, exception_slot):
         QThread.__init__(self)
         self.model = model
 
+        self.exception_slot = exception_slot
         self.start_slot = None
         self.end_slot = None
 
@@ -28,10 +29,10 @@ class ThreadModel(QThread):
                              " execute() and output() methods")
 
     def connect_exception_slot(self):
-        self.exceptionSignal.connect(message_box.warning)
+        self.exceptionSignal.connect(self.exception_slot)
 
     def disconnect_exception_slot(self):
-        self.exceptionSignal.disconnect(message_box.warning)
+        self.exceptionSignal.disconnect(self.exception_slot)
 
     def __del__(self):
         try:

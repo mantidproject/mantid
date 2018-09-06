@@ -29,7 +29,7 @@ class BrowseFileWidgetPresenter(object):
             self._load_thread.cancel()
 
     def create_load_thread(self):
-        return thread_model.ThreadModel(self._model)
+        return thread_model.ThreadModel(self._model, self._view.warning_popup)
 
     def get_filenames_from_user(self):
         file_filter = file_utils.filter_for_extensions(["nxs"])
@@ -90,7 +90,6 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
         self.on_loading_finished()
