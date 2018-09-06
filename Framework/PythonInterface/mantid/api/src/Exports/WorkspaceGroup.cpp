@@ -1,9 +1,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidPythonInterface/kernel/DataServiceExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/ToWeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
-#include "MantidPythonInterface/kernel/DataServiceExporter.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
@@ -41,18 +41,20 @@ std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) {
 
 /** Constructor function for WorkspaceGroup */
 Workspace_sptr makeWorkspaceGroup() {
-	Workspace_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
-	return wsGroup;
+  Workspace_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  return wsGroup;
 }
 
-void addWorkspace(WorkspaceGroup &self, const boost::python::object& pyobj) {
-	self.addWorkspace(DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr >::extractCppValue(pyobj));
+void addWorkspace(WorkspaceGroup &self, const boost::python::object &pyobj) {
+  self.addWorkspace(
+      DataServiceExporter<AnalysisDataServiceImpl,
+                          Workspace_sptr>::extractCppValue(pyobj));
 }
 
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
                                                                no_init)
-	  .def("__init__", make_constructor(&makeWorkspaceGroup))
+      .def("__init__", make_constructor(&makeWorkspaceGroup))
       .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries,
            arg("self"), "Returns the number of entries in the group")
       .def("getNames", &WorkspaceGroup::getNames, arg("self"),
@@ -66,8 +68,8 @@ void export_WorkspaceGroup() {
            "Sort members by name")
       .def("add", &WorkspaceGroup::add, (arg("self"), arg("workspace_name")),
            "Add a name to the group")
-	  .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")), 
-		  "Add a workspace to the group.")
+      .def("addWorkspace", addWorkspace, (arg("self"), arg("workspace")),
+           "Add a workspace to the group.")
       .def("size", &WorkspaceGroup::size, arg("self"),
            "Returns the number of workspaces contained in the group")
       .def("remove", &WorkspaceGroup::remove,
