@@ -214,6 +214,42 @@ You can pass workspace groups into any algorithm and Mantid will run that algori
     # You can still of course refer to members of a group directly
     ws1 = Rebin(ws1, Params=100)
 
+Using Nested Workspace Groups
+#############################
+
+It is possible to have groups within groups, the inner group can simply be added to the outer group in the usual way. For example
+
+.. testcode:: WorkspaceGroupNesting
+    # create the following structure
+    # group1/
+    #       ws1
+    #       ws2
+    #       group2/
+    #               ws3
+    #               ws4
+
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    ws3 = CreateSampleWorkspace()
+    ws4 = CreateSampleWorkspace()
+
+    group1 = WorkspaceGroup()
+    group2 = WorkspaceGroup()
+
+    group1.add("ws1")
+    group1.add("ws2")
+    group2.add("ws3")
+    group2.add("ws4")
+
+    mtd.add("group1", group1)
+    mtd.add("group2", group2)
+
+    group1.add("group2")
+
+Be careful when creating nested groups; every single group and workspace must have a unique name, if not workspaces with the same name will be overwritten. Do not be tempted to make duplicate named workspaces and put them into different folders; this will result in data being deleted without warning.
+
+One final note; it is best to add all workspaces to the ADS before configuring the grouping structure (as in the above code); otherwise you will only be able to name the top level group when you add the structure to the ADS. All the sub-groups and workspaces not already in the ADS will be given default names which you will then have to change manually, it is much easier to name them as you go (and putting them in the ADS is the only way to name them).
+
 .. include:: WorkspaceNavigation.txt
 
 
