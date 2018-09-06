@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
-import mantid
+import mantid # noqa
 import stresstesting
 import ISISCommandInterface as ii
 import sans.command_interface.ISISCommandInterface as ii2
