@@ -6,6 +6,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/iterator.hpp>
+#include <boost/python/make_constructor.hpp>
 #include <boost/python/return_value_policy.hpp>
 
 using namespace Mantid::API;
@@ -36,9 +37,16 @@ std::vector<Workspace_sptr>::iterator group_end(WorkspaceGroup &self) {
   return self.end();
 }
 
+/** Constructor function for WorkspaceGroup */
+WorkspaceGroup_sptr makeWorkspaceGroup() {
+	WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+	return wsGroup;
+}
+
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
                                                                no_init)
+	  .def("__init__", make_constructor(&makeWorkspaceGroup))
       .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries,
            arg("self"), "Returns the number of entries in the group")
       .def("getNames", &WorkspaceGroup::getNames, arg("self"),
