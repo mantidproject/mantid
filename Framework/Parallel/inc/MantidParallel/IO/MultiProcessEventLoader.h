@@ -39,8 +39,6 @@ namespace IO {
 */
 class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
-private:
-public:
   MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
                           unsigned int numThreads, const std::string &binary);
   void
@@ -70,6 +68,8 @@ private:
 
   void assembleFromShared(
       std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
+
+  size_t estimateShmemAmount(size_t eventCount) const;
 
 private:
   unsigned m_numPixels;
