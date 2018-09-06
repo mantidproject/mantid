@@ -6041,9 +6041,31 @@ int ApplicationWindow::execSaveProjectDialog() {
       windows.push_back(win);
   }
 
+  const QString pyInterfaceMarkerProperty("launcher");
+  std::vector<std::string> activePythonInterfaces;
+  auto serialisablePythonInterfaces =
+      ProjectSerialiser::serialisablePythonInterfaces();
+  auto activeWidgets = QApplication::allWidgets();
+  for (auto widget : activeWidgets) {
+    QVariant launcherScript =
+        widget->property(pyInterfaceMarkerProperty.toLatin1().data());
+    if (launcherScript.isValid()) {
+      auto launcherScriptName = launcherScript.toString();
+      if (serialisablePythonInterfaces.contains(launcherScriptName)) {
+        activePythonInterfaces.emplace_back(launcherScriptName.toStdString());
+      } else {
+        g_log.warning()
+            << "Widget contains property "
+            << pyInterfaceMarkerProperty.toStdString() << " with value "
+            << launcherScriptName.toStdString()
+            << " but this is not an interface we know how to save.\n";
+      }
+    }
+  }
+
   auto serialiser = new ProjectSerialiser(this, currentFolder());
   m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(
-      projectname, *serialiser, windows, this);
+      projectname, *serialiser, windows, activePythonInterfaces, this);
   connect(m_projectSaveView, SIGNAL(projectSaved()), this,
           SLOT(postSaveProject()));
   return m_projectSaveView->exec();
@@ -6703,9 +6725,9 @@ void ApplicationWindow::autoCorrelate() {
 
   QStringList s = t->selectedColumns();
   if ((int)s.count() != 1) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Error"),
-        tr("Please select exactly one columns for this operation!")); // Mantid
+    QMessageBox::warning(this, tr("MantidPlot - Error"),
+                         tr("Please select exactly one columns for this "
+                            "operation!")); // Mantid
     return;
   }
 
@@ -6781,7 +6803,8 @@ void ApplicationWindow::showRowStatistics() {
         targets << i;
     newTableStatistics(t, TableStatistics::row, targets)->showNormal();
   } else
-    QMessageBox::warning(this, tr("MantidPlot - Row selection error"), // Mantid
+    QMessageBox::warning(this,
+                         tr("MantidPlot - Row selection error"), // Mantid
                          tr("Please select a row first!"));
 }
 
@@ -7683,7 +7706,8 @@ void ApplicationWindow::exportPDF() {
       QMessageBox::critical(
           this, tr("MantidPlot - Export error"), // Mantid
           tr("Could not write to file: <h4>%1</h4><p>Please verify that you "
-             "have the right to write to this location or that the file is not "
+             "have the right to write to this location or that the file is "
+             "not "
              "being used by another application!")
               .arg(fname));
       return;
@@ -8095,7 +8119,8 @@ void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser) {
   selectMultiPeak(plot, showFitPropertyBrowser);
 }
 
-/**  Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
+/**  Switch on the multi-peak selecting tool for fitting with the Fit
+ * algorithm.
  * @param plot :: The MultiLayer the tool will apply to.
  * @param showFitPropertyBrowser :: Set if FitPropertyBrowser must be shown as
  * well.
@@ -8132,9 +8157,9 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
       PeakPickerTool *ppicker = new PeakPickerTool(
           g, mantidUI->fitFunctionBrowser(), mantidUI, showFitPropertyBrowser);
       if (!ppicker->isInitialized()) {
-        QMessageBox::warning(
-            this, tr("MantidPlot - Warning"),
-            tr("This functionality is not available for the underlying data."));
+        QMessageBox::warning(this, tr("MantidPlot - Warning"),
+                             tr("This functionality is not available for the "
+                                "underlying data."));
         delete ppicker;
         btnPointer->setChecked(true);
         return;
@@ -8588,7 +8613,8 @@ void ApplicationWindow::pasteSelection() {
 }
 
 /**
- * Clone an MDI window. TODO: if this method is to be used it needs refactoring.
+ * Clone an MDI window. TODO: if this method is to be used it needs
+ * refactoring.
  *
  * @param w :: A window to clone.
  * @return :: Pointer to the cloned window if successful or NULL if failed.
@@ -8902,8 +8928,8 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow *w) {
     // is active> or the
     // latter one is NULL (when floating window is active).
     if (d_active_window->getFloatingWindow()) {
-      // If floating window is activated, we set MdiArea to not have any active
-      // sub-window.
+      // If floating window is activated, we set MdiArea to not have any
+      // active sub-window.
       d_workspace->setActiveSubWindow(nullptr);
     } else if (QMdiSubWindow *w = d_active_window->getDockedWindow()) {
       // If docked window activated, activate it in MdiArea as well.
@@ -8956,8 +8982,8 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w,
     return;
   }
 
-  // return any non-active QMdiSubWindows to normal so that the active could be
-  // seen
+  // return any non-active QMdiSubWindows to normal so that the active could
+  // be seen
   QMdiSubWindow *qw = dynamic_cast<QMdiSubWindow *>(w->parent());
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
   foreach (MdiSubWindow *ow, windows) {
@@ -9516,9 +9542,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
   interfaceMenu->clear();
   m_interfaceActions.clear();
 
-  // Create a submenu for each category.  Make sure submenus are in alphabetical
-  // order,
-  // and ignore any hidden categories.
+  // Create a submenu for each category.  Make sure submenus are in
+  // alphabetical order, and ignore any hidden categories.
   const QString hiddenProp = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
           "interfaces.categories.hidden"));
@@ -9714,7 +9739,8 @@ void ApplicationWindow::modifiedProject() {
     return;
   // enable actionSaveProject, but not actionSaveFile (which is Save Nexus and
   // doesn't
-  // seem to make sense for qti objects (graphs, tables, matrices, notes, etc.)
+  // seem to make sense for qti objects (graphs, tables, matrices, notes,
+  // etc.)
   if (actionSaveProject)
     actionSaveProject->setEnabled(true);
   if (actionSaveProjectAs)
@@ -9794,8 +9820,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
   // cleaned up meaning we cannot rely on the deleteLater functionality to
-  // work correctly as this will happen in the next iteration of the event loop,
-  // i.e after the python shutdown code has been run below.
+  // work correctly as this will happen in the next iteration of the event
+  // loop, i.e after the python shutdown code has been run below.
   m_shuttingDown = true;
 
   MDIWindowList windows = getAllWindows();
@@ -10508,7 +10534,8 @@ void ApplicationWindow::showHelp() {
            "found in the help file directory!")
                 .arg("qtiplot.adp") +
             "<br>" +
-            tr("This file is provided with the MantidPlot manual which can be "
+            tr("This file is provided with the MantidPlot manual which can "
+               "be "
                "downloaded from the following internet address:") +
             "<p><a href = "
             "http://www.mantidproject.org/MantidPlot:_Help>http://"
@@ -11564,12 +11591,13 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   colour for ToolTipText on the other hand affects all three of
   these.
 
-  The default pallete shows light text on a pale background which, although not
-  affecting tooltips, makes LineEdit hints and 'What's This' boxes difficuilt
-  if not impossible to read.
+  The default pallete shows light text on a pale background which, although
+  not affecting tooltips, makes LineEdit hints and 'What's This' boxes
+  difficuilt if not impossible to read.
 
-  Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
-  hints and 'What's This' boxes but creates one for ordinary tooltips.
+  Changing the tooltip text to a darker colour fixes the problem for
+  'LineEdit' hints and 'What's This' boxes but creates one for ordinary
+  tooltips.
 
   Setting the tooltip background colour to a darker colour works fine on
   Fedora 26-7+ and Ubuntu 14.04 but not for RHEL7 where the tooltip text
@@ -13872,9 +13900,9 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     if ((str == "-v" || str == "--version") ||
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
-      g_log.warning()
-          << qPrintable(str)
-          << ": This command line option must be used without other arguments!";
+      g_log.warning() << qPrintable(str)
+                      << ": This command line option must be used without "
+                         "other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
     } else if (str.endsWith("--execute") || str.endsWith("-x")) {
@@ -14859,9 +14887,9 @@ void ApplicationWindow::goToColumn() {
  */
 void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting) {
   if (!scriptingWindow) {
-    // MG 09/02/2010 : Removed parent from scripting window. If it has one then
-    // it doesn't respect the always on top
-    // flag, it is treated as a sub window of its parent
+    // MG 09/02/2010 : Removed parent from scripting window. If it has one
+    // then it doesn't respect the always on top flag, it is treated as a sub
+    // window of its parent
     const bool capturePrint = !quitting;
     scriptingWindow =
         new ScriptingWindow(scriptingEnv(), capturePrint, nullptr);
@@ -14996,8 +15024,8 @@ void ApplicationWindow::cascade() {
 /**
  *  Load a script file into a new or existing project
  *
- * @param fn :: is read as a Python script file and loaded in the command script
- * window.
+ * @param fn :: is read as a Python script file and loaded in the command
+ * script window.
  * @param existingProject :: True if loading into an already existing project
  */
 ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
@@ -15011,7 +15039,8 @@ ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
   QApplication::restoreOverrideCursor();
   return this;
 #else
-  QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"), // Mantid
+  QMessageBox::critical(this,
+                        tr("MantidPlot") + " - " + tr("Error"), // Mantid
                         tr("MantidPlot was not built with Python scripting "
                            "support included!")); // Mantid
   return 0;
@@ -15090,8 +15119,8 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
 /**
  * Run Python code
  * @param code :: An arbitrary string of python code
- * @param async :: If true the code will be run asynchronously but only if it is
- * called from the GUI thread
+ * @param async :: If true the code will be run asynchronously but only if it
+ * is called from the GUI thread
  * @param quiet :: If true then no output is produced concerning script
  * start/finished
  * @param redirect :: If true redirect stdout/stderr to results log
@@ -15929,11 +15958,10 @@ void ApplicationWindow::tileMdiWindows() {
   d_workspace->tileSubWindows();
   // hack to redraw the graphs
   shakeViewport();
-  // QMdiArea::tileSubWindows() aranges the windows and enables automatic tiling
-  // after subsequent resizing of the mdi area until a window is moved or
-  // resized
-  // separatly. Unfortunately Graph behaves badly during this.
-  // The following code disables automatic tiling.
+  // QMdiArea::tileSubWindows() aranges the windows and enables automatic
+  // tiling after subsequent resizing of the mdi area until a window is moved
+  // or resized separatly. Unfortunately Graph behaves badly during this. The
+  // following code disables automatic tiling.
   auto winList = d_workspace->subWindowList();
   if (!winList.isEmpty()) {
     auto p = winList[0]->pos();
@@ -16170,9 +16198,9 @@ MultiLayer *ApplicationWindow::waterfallPlot(Table *t,
  * Add a sub-window either as a docked or a floating window. The desision is
  * made by isDefalutFloating() method.
  * @param w :: Pointer to a MdiSubWindow which to add.
- * @param showNormal :: If true (default) show as a normal window, if false show
- * as a minimized docked window
- *   regardless of what isDefalutFloating() returns.
+ * @param showNormal :: If true (default) show as a normal window, if false
+ * show as a minimized docked window regardless of what isDefalutFloating()
+ * returns.
  */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal) {
   addMdiSubWindow(w, isDefaultFloating(w), showNormal);
@@ -16295,9 +16323,8 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const {
         // Get a screen space which we can use
         const QRect screen = QApplication::desktop()->availableGeometry(this);
 
-        // How mush we need to move in X so that cascading direction is diagonal
-        // according to
-        // screen size
+        // How mush we need to move in X so that cascading direction is
+        // diagonal according to screen size
         const int yDelta = 40;
         const int xDelta =
             static_cast<int>(yDelta * (1.0 * screen.width() / screen.height()));
@@ -16472,8 +16499,8 @@ bool ApplicationWindow::event(QEvent *e) {
       if (qCurrent) {
         QWidget *wgt = qCurrent->widget();
         MdiSubWindow *sw = dynamic_cast<MdiSubWindow *>(wgt);
-        if (!sw) { // this should never happen - all MDI subwindow widgets must
-                   // inherit from MdiSubwindow
+        if (!sw) { // this should never happen - all MDI subwindow widgets
+                   // must inherit from MdiSubwindow
           throw std::logic_error("Non-MdiSubwindow widget found in MDI area");
         }
         activateWindow(sw);
@@ -16643,8 +16670,8 @@ void ApplicationWindow::onAboutToStart() {
   std::string local_rep = Mantid::Kernel::ConfigService::Instance().getString(
       "ScriptLocalRepository");
   if (!local_rep.empty()) {
-    // there is no reason to trigger UpdataScriptRepository if it has never been
-    // installed
+    // there is no reason to trigger UpdataScriptRepository if it has never
+    // been installed
     Mantid::API::IAlgorithm_sptr update_script_repo =
         mantidUI->createAlgorithm("UpdateScriptRepository");
     update_script_repo->initialize();
