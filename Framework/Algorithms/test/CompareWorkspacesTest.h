@@ -264,6 +264,38 @@ public:
                  "event lists include 10 of total 10 spectra. \n0, ");
   }
 
+  void testEvent_differentEventWeightsNoTime() {
+    Mantid::Algorithms::CompareWorkspaces alg;
+    alg.initialize();
+    EventWorkspace_sptr ews1 =
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    ews1 *= 1.1;
+    EventWorkspace_sptr ews2 =
+        WorkspaceCreationHelper::createEventWorkspace(10, 20, 30);
+    ews2 *= 1.2;
+    for (size_t i = 0; i < ews1->getNumberHistograms(); ++i) {
+      ews1->getSpectrum(i).switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+      ews2->getSpectrum(i).switchTo(Mantid::API::EventType::WEIGHTED_NOTIME);
+    }
+    alg.setProperty("Workspace1",
+                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews1));
+    alg.setProperty("Workspace2",
+                    boost::dynamic_pointer_cast<MatrixWorkspace>(ews2));
+    alg.setProperty("CheckAllData", true);
+    TS_ASSERT(alg.execute());
+    TS_ASSERT_DIFFERS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT((!Mantid::API::equals(ews1, ews2)));
+    auto result = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
+        "compare_msgs");
+    auto message = result->String(0, 0);
+    TS_ASSERT_EQUALS(
+        message, "Total 300 (in 300) events are differrent. 0 have different "
+                 "TOF; 0 have different pulse time; 0 have different in both "
+                 "TOF and pulse time; 300 have different weights.\nMismatched "
+                 "event lists include 10 of total 10 spectra. \n0, ");
+  }
+
   void testEvent_differentBinBoundaries() {
     if (!checker.isInitialized())
       checker.initialize();

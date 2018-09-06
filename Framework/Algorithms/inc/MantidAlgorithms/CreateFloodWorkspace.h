@@ -47,7 +47,13 @@ private:
   std::string getBackgroundFunction();
   API::MatrixWorkspace_sptr integrate(API::MatrixWorkspace_sptr ws);
   API::MatrixWorkspace_sptr transpose(API::MatrixWorkspace_sptr ws);
+  bool shouldRemoveBackground();
+  void collectExcludedSpectra();
+  bool isExcludedSpectrum(double spec) const;
   API::MatrixWorkspace_sptr removeBackground(API::MatrixWorkspace_sptr ws);
+  API::MatrixWorkspace_sptr scaleToCentralPixel(API::MatrixWorkspace_sptr ws);
+
+  std::vector<double> m_excludedSpectra;
 };
 
 } // namespace Algorithms

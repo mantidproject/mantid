@@ -159,3 +159,22 @@ bug <https://code.google.com/p/include-what-you-use/issues/detail?id=164>`__.
 **Note:** ``iwyu`` outputs to ``stderr`` and always returns a failure
 status code since it generates no output. The output stream also affects
 ``iwyu_tool.py``
+
+Network Related Tools
+---------------------
+
+Wireshark
+~~~~~~~~~
+
+Linux distros should have this in their repositories. For other platforms download it from https://www.wireshark.org.
+
+Cross-platform tool for inspecting network packets. This is useful to troubleshoot many different types of
+network-related problems.
+
+Wonder Shaper
+~~~~~~~~~~~~~
+
+Linux only. Install it from your distro's repository.
+
+Wonder Shaper allows the user to limit the bandwidth of one or more network adapters. This is useful for debugging
+issues when a network interface is still active but very slow. More details can be found at http://xmodulo.com/limit-network-bandwidth-linux.html.

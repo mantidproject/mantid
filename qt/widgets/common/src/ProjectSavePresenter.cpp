@@ -2,10 +2,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 
+#include <QApplication>
 #include <QDir>
 #include <QFileInfo>
 
 #include <algorithm>
+#include <iostream>
 #include <iterator>
 #include <vector>
 
@@ -17,12 +19,14 @@ using namespace Mantid::API;
  * @param view :: a handle to a view for this presenter
  */
 ProjectSavePresenter::ProjectSavePresenter(IProjectSaveView *view)
-    : m_view(view), m_model(m_view->getWindows()) {
+    : m_view(view),
+      m_model(m_view->getWindows(), m_view->getAllPythonInterfaces()) {
   auto workspaceNames = m_model.getWorkspaceNames();
   auto info = m_model.getWorkspaceInformation();
   auto winInfo = m_model.getWindowInformation(workspaceNames, true);
   m_view->updateIncludedWindowsList(winInfo);
   m_view->updateWorkspacesList(info);
+  m_view->updateInterfacesList(m_model.getAllPythonInterfaces());
 }
 
 /**
