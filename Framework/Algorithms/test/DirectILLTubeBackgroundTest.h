@@ -34,26 +34,35 @@ public:
   void test_Nondistribution() {
     constexpr int numBanks{2};
     constexpr int numPixels{2};
-    constexpr int numBins{9};
+    constexpr int numSpectraPerBank{numPixels * numPixels};
+    constexpr int numBins{11};
     API::MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
+    constexpr double startX{9.};
+    constexpr double deltaX{0.57};
     for (size_t i = 0; i < numBanks; ++i) {
-      for (size_t j = 0; j < numPixels * numPixels; ++j) {
-        auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
-        Ys = bankBkgs[i];
-        Ys[numBins / 2] = 1090.; // Peak.
+      for (size_t j = 0; j < numSpectraPerBank; ++j) {
+        auto const spectraIndex = i * numSpectraPerBank + j;
+        auto &Xs = inWS->mutableX(spectraIndex);
+        auto &Ys = inWS->mutableY(spectraIndex);
+        Xs.front() = startX;
+        for (size_t k = 1; k < Xs.size(); ++k) {
+          Xs[k] = startX + k * deltaX;
+          Ys[k - 1] = bankBkgs[i];
+        }
       }
     }
     std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
-        numBanks * numPixels * numPixels);
+        numBanks * numSpectraPerBank);
     for (auto &row : eppRows) {
       // Peak covers the middle bin of all histograms.
-      row.peakCentre = static_cast<double>(numBins) / 2.;
-      row.sigma = 1.1 / 6.;
+      row.peakCentre =
+          startX + static_cast<double>(numSpectraPerBank / 2) * deltaX;
+      row.sigma = deltaX / 2.;
     }
     auto eppWS = createEPPTableWorkspace(eppRows);
     std::vector<std::string> const components{"bank1", "bank2"};
@@ -69,6 +78,7 @@ public:
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outWS)
+    TS_ASSERT(!outWS->isDistribution())
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
     TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
     for (size_t i = 0; i < numBanks; ++i) {
@@ -76,8 +86,68 @@ public:
         auto const &Ys = outWS->y(i * numPixels * numPixels + j);
         auto const &Es = outWS->e(i * numPixels * numPixels + j);
         for (size_t k = 0; k < Ys.size(); ++k) {
-          TS_ASSERT_EQUALS(Ys[k], bankBkgs[i])
+          TS_ASSERT_DELTA(Ys[k], bankBkgs[i], 1e-6)
           TS_ASSERT_EQUALS(Es[k], 0.)
+        }
+      }
+    }
+  }
+
+  void test_NondistributionNonequidistandBinning() {
+    constexpr int numBanks{2};
+    constexpr int numPixels{2};
+    constexpr int numBins{12};
+    API::MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
+            numBanks, numPixels, numBins);
+    TS_ASSERT(inWS->isHistogramData())
+    TS_ASSERT(!inWS->isDistribution())
+    constexpr double startX{9.};
+    constexpr double deltaX{0.57};
+    std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
+    for (size_t i = 0; i < numBanks; ++i) {
+      for (size_t j = 0; j < numPixels * numPixels; ++j) {
+        auto &Ys = inWS->mutableY(i * numPixels * numPixels + j);
+        auto &Xs = inWS->mutableX(i * numPixels * numPixels + j);
+        Xs[0] = startX;
+        for (size_t k = 1; k < Xs.size(); ++k) {
+          auto const width = (static_cast<double>(k) * 0.1 + 1.) * deltaX;
+          Xs[k] = Xs[k - 1] + width;
+          Ys[k - 1] = bankBkgs[i] * width;
+        }
+        Ys[numBins / 2] = 1030.; // Peak.
+      }
+    }
+    std::vector<WorkspaceCreationHelper::EPPTableRow> eppRows(
+        numBanks * numPixels * numPixels);
+    for (auto &row : eppRows) {
+      // Peak covers the middle bin of all histograms.
+      row.peakCentre = (inWS->x(0)[numBins / 2] + inWS->x(0)[numBins / 2 + 1]) / 2.;
+      row.sigma = (inWS->x(0)[numBins / 2 + 1] - inWS->x(0)[numBins / 2]) / 6.;
+    }
+    auto eppWS = createEPPTableWorkspace(eppRows);
+    std::vector<std::string> const components{"bank1", "bank2"};
+    Algorithms::DirectILLTubeBackground alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Components", components))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EPPWorkspace", eppWS))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT(!outWS->isDistribution())
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
+    TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
+    auto subtractedWS = inWS - outWS;
+    for (size_t i = 0; i < subtractedWS->getNumberHistograms(); ++i) {
+      auto const &Ys = subtractedWS->y(i);
+      for (size_t j = 0; j < Ys.size(); ++j) {
+        if (j != numBins / 2) {
+          TS_ASSERT_DELTA(Ys[j], 0., 1e-12);
         }
       }
     }
@@ -86,13 +156,16 @@ public:
   void test_Distribution() {
     constexpr int numBanks{2};
     constexpr int numPixels{2};
-    constexpr int numBins{9};
+    constexpr int numSpectraPerBank{numPixels * numPixels};
+    constexpr int numBins{12};
     API::MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             numBanks, numPixels, numBins);
     TS_ASSERT(inWS->isHistogramData())
     TS_ASSERT(!inWS->isDistribution())
     std::array<double, numBanks> bankBkgs{{2.33, 4.22}};
+    constexpr double startX{9.};
+    constexpr double deltaX{0.57};
     for (size_t i = 0; i < numBanks; ++i) {
       for (size_t j = 0; j < numPixels * numPixels; ++j) {
         auto histogram = inWS->histogram(i * numPixels * numPixels + j);
@@ -101,7 +174,7 @@ public:
         Ys[numBins / 2] = 1090.; // Peak.
         // Non-equidistant binning.
         auto &Xs = inWS->mutableX(i * numPixels * numPixels + j);
-        Xs[0] = 9.;
+        Xs[0] = startX;
         for (size_t k = 1; k < Xs.size(); ++k) {
           Xs[k] = Xs[k - 1] + static_cast<double>(k + 1) * 0.57;
         }
@@ -114,8 +187,9 @@ public:
         numBanks * numPixels * numPixels);
     for (auto &row : eppRows) {
       // Peak covers the middle bin of all histograms.
-      row.peakCentre = static_cast<double>(numBins) / 2.;
-      row.sigma = 1.1 / 6.;
+      row.peakCentre =
+          startX + static_cast<double>(numSpectraPerBank / 2) * deltaX;
+      row.sigma = deltaX / 2.;
     }
     auto eppWS = createEPPTableWorkspace(eppRows);
     std::vector<std::string> const components{"bank1", "bank2"};
@@ -131,6 +205,7 @@ public:
     TS_ASSERT(alg.isExecuted())
     API::MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outWS)
+    TS_ASSERT(outWS->isDistribution())
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), inWS->getNumberHistograms())
     TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize())
     auto subtractedWS = inWS - outWS;

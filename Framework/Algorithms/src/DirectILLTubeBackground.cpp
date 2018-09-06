@@ -284,6 +284,9 @@ void DirectILLTubeBackground::exec() {
   auto ws = applyDiagnostics(inWS->clone());
   API::MatrixWorkspace_sptr bkgWS =
       DataObjects::create<DataObjects::Workspace2D>(*ws);
+  for (size_t i = 0; i < bkgWS->getNumberHistograms(); ++i) {
+    bkgWS->convertToFrequencies(i);
+  }
   API::ITableWorkspace_sptr eppWS = getProperty(Prop::EPP_WS);
   double const sigmaMultiplier = getProperty(Prop::SIGMA_MULTIPLIER);
   auto peakCentreColumn = eppWS->getColumn("PeakCentre");
@@ -317,6 +320,11 @@ void DirectILLTubeBackground::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  if (!ws->isDistribution()) {
+    for (size_t i = 0; i < bkgWS->getNumberHistograms(); ++i) {
+      bkgWS->convertToCounts(i);
+    }
+  }
   setProperty(Prop::OUTPUT_WS, bkgWS);
 }
 
@@ -402,13 +410,15 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::fitComponentBackground(
  * @param ws a workspace to average
  * @param peakStarts start X values of an exclusion range
  * @param peakEnds end X values of an exclusion range
- * @return a single column workspace containing the averages
+ * @return a single histogram workspace containing the averages
  */
 API::MatrixWorkspace_sptr DirectILLTubeBackground::peakExcludingAverage(
     API::MatrixWorkspace const &ws, std::vector<double> const &peakStarts,
     std::vector<double> const &peakEnds) {
   HistogramData::Points wsIndices{ws.getNumberHistograms(),
                                   HistogramData::LinearGenerator(0., 1.)};
+  // zeroCounts actually holds the mean frequencies but since its
+  // point data the type has to be Counts.
   HistogramData::Counts zeroCounts(ws.getNumberHistograms(), 0.);
   HistogramData::Histogram modelHistogram{wsIndices, zeroCounts};
   API::MatrixWorkspace_sptr averageWS =
@@ -417,13 +427,12 @@ API::MatrixWorkspace_sptr DirectILLTubeBackground::peakExcludingAverage(
     auto const peakStart = peakStarts[i];
     auto const peakEnd = peakEnds[i];
     auto histogram = ws.histogram(i);
-    auto points = histogram.points();
     size_t itemCount{0};
     double &sum = averageWS->mutableY(0)[i];
     double &error = averageWS->mutableE(0)[i];
     for (auto &histogramItem : ws.histogram(i)) {
       auto const center = histogramItem.center();
-      if (center >= peakStart && center <= peakEnd) {
+      if (peakStart <= center && center <= peakEnd) {
         continue;
       }
       sum += histogramItem.frequency();
