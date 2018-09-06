@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4.QtCore import QThread
 from PyQt4 import QtCore
-from Muon.GUI.Common import message_box
 
 
 class ThreadModel(QThread):
