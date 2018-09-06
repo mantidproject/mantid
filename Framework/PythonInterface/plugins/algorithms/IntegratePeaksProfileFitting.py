@@ -68,8 +68,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
     def PyExec(self):
         import ICCFitTools as ICCFT
         import BVGFitTools as BVGFT
-        reload(BVGFT)
-        reload(ICCFT)
         from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve
@@ -94,8 +92,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         iccFitDict = ICCFT.parseConstraints(peaks_ws) #Contains constraints and guesses for ICC Fitting
         padeCoefficients = ICCFT.getModeratorCoefficients(padeFile)
 
-        #UB Matrix
-        
+        # Load the UB Matrix if one is not already loaded
         if UBFile == '' and peaks_ws.sample().hasOrientedLattice():
             logger.information("Using UB file already available in PeaksWorkspace")
         else:
@@ -195,8 +192,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             params_ws.addColumn(datatype, key)
 
         # And we're off!
-        numgood = 0
-        numerrors = 0
         peaks_ws_out = peaks_ws.clone()
         np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
         progress = Progress(self, 0.0, 1.0, len(peaksToFit))
@@ -237,7 +232,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 # Now we consider the variation of the fit.  These are done as three independent fits.  So we need to consider
                 # the variance within our fit sig^2 = sum(N*(yFit-yData)) / sum(N) and scale by the number of parameters that go into
                 # the fit.  In total: 10 (removing scale variables)
-                # TODO: It's not clear to me if we should be normalizing by #params - so we'll leave it for now.
                 w_events = n_events.copy()
                 w_events[w_events==0] = 1
                 varFit = np.average((n_events[peakIDX]-Y3D[peakIDX])*(n_events[peakIDX]-Y3D[peakIDX]), weights=(w_events[peakIDX]))
@@ -258,7 +252,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 params_ws.addRow(params)
                 peak.setIntensity(intensity)
                 peak.setSigmaIntensity(sigma)
-                numgood += 1
 
                 if generateStrongPeakParams and ~needsForcedProfile[peakNumber]:
                         qPeak = peak.getQLabFrame()
@@ -279,7 +272,6 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
 
             except:
                 #raise
-                numerrors += 1
                 peak.setIntensity(0.0)
                 peak.setSigmaIntensity(1.0)
 
