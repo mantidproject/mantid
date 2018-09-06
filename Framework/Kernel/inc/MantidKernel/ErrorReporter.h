@@ -43,6 +43,10 @@ public:
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
                 std::string email);
+  /// Constructor
+  ErrorReporter(std::string application, Types::Core::time_duration startTime,
+                std::string exitCode, bool share, std::string name,
+                std::string email, std::string recoveryFile);
   /// Sends an error report
   int sendErrorReport();
 
@@ -67,6 +71,8 @@ private:
   const std::string m_email;
   /// Target url
   std::string m_url;
+  /// recovery file path
+  const std::string m_recoveryFile;
 };
 
 } // namespace Kernel

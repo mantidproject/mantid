@@ -10,7 +10,7 @@
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
-
+#include <boost/functional/hash.hpp>
 #include <json/json.h>
 
 namespace Mantid {
@@ -36,8 +36,14 @@ ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
                              std::string email)
+    : ErrorReporter(application, upTime, exitCode, share, name, email, "") {}
+
+ErrorReporter::ErrorReporter(std::string application,
+                             Types::Core::time_duration upTime,
+                             std::string exitCode, bool share, std::string name,
+                             std::string email, std::string recoveryFile)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email) {
+      m_share(share), m_name(name), m_email(email), m_recoveryFile(recoveryFile) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
       "errorreports.rooturl");
   if (!url.is_initialized()) {
@@ -106,9 +112,11 @@ std::string ErrorReporter::generateErrorMessage() {
   if (m_share) {
     message["email"] = m_email;
     message["name"] = m_name;
+    message["fileHash"] = m_recoveryFile;
   } else {
     message["email"] = "";
     message["name"] = "";
+    message["fileHash"] = "";
   }
 
   ::Json::FastWriter writer;
