@@ -16,9 +16,30 @@ algorithm on each workspace contained within.
 Creating a Workspace Group
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  Select a few workspaces in MantidPlot and click the "Group" button
-   above the list of workspaces.
--  Use the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm.
+Workspace groups can be created through the MantidPlot interface;
+
+- Select a few workspaces from the ADS in MantidPlot and click the "Group" button
+   above the list of workspaces. The group will be named "NewGroup".
+
+Workspace groups can be created in a more flexible way in the Python script window using the Python API;
+
+- Use the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm. This will place a workspace group directly into the ADS, and requires at least one workspace to be added to the group.
+
+- To avoid interaction with the ADS, a `WorkspaceGroup` object can be instantiated using
+
+.. code::
+
+    import mantid.api as api
+
+    ws_group = api.WorkspaceGroup()
+
+This **will not** be automatically added to the list of workspaces, to do so, using the following line
+
+.. code::
+
+    AnalysisDataService.add("name", ws_group)
+
+the group should then appear with the given name.
 
 Un-grouping Workspaces
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -31,6 +52,8 @@ Working with Event Workspaces in Python
 
 Creating and splitting groups
 #############################
+
+Creating groups via the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm
 
 .. testcode:: CreatingWorkspaceGroups
 
@@ -59,6 +82,63 @@ Creating and splitting groups
     :options: +NORMALIZE_WHITESPACE
 
     ['ws1','ws2','ws3']
+
+Creating groups via direct instantiation;
+
+.. testcode:: CreatingWorkspaceGroupsInstantiated
+
+    ws1 = CreateSampleWorkspace()
+    ws2 = CreateSampleWorkspace()
+    ws3 = CreateSampleWorkspace()
+
+
+    # Create a group workspace and add to the ADS
+    ws_group = api.WorkspaceGroup()
+    mtd.add("group1", ws_group)
+
+    ws_group.add(ws1)
+    ws_group.add(ws2)
+    ws_group.add(ws3)
+
+    print(ws_group.getNames())
+
+
+.. testoutput:: CreatingWorkspaceGroupsInstantiated
+    :hide:
+    :options: +NORMALIZE_WHITESPACE
+
+    ['ws1','ws2','ws3']
+
+Workspace groups can be created without using the ADS, and fed workspaces which are also not in the ADS (in this case the `addWorkspace` method is used rather than `add` because `add` requires a name, and since the workspaces are not in the ADS they may not have a name)
+
+.. testcode:: CreatingWorkspaceGroupsNoADS
+
+    ws1 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
+    ws2 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
+    ws3 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
+
+    # Create a group workspace
+    ws_group = api.WorkspaceGroup()
+
+    ws_group.addWorkspace(ws1)
+    ws_group.addWorkspace(ws2)
+    ws_group.addWorkspace(ws3)
+
+    print(ws_group.getNames())
+
+    mtd.add("group1", ws_group)
+
+    print(ws_group.getNmes())
+
+
+.. testoutput:: CreatingWorkspaceGroupsNoADS
+    :hide:
+    :options: +NORMALIZE_WHITESPACE
+
+    ['','','']
+    ['1','2','3']
+
+when adding the group to the ADS, the workspaces will also be added, and given default names. It is not recommended to add workspace to groups in this way, as much of the functionality of groups depends on workspaces having names; for example the "in" keyword.
 
 Accessing Workspace Groups
 ##########################
