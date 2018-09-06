@@ -122,7 +122,7 @@ public:
         auto &Xs = inWS->mutableX(i * numSpectraPerBank + j);
         Xs[0] = startX;
         for (size_t k = 1; k < Xs.size(); ++k) {
-          Xs[k] = Xs[k - 1] + static_cast<double>(k + 1) * 0.57;
+          Xs[k] = Xs[k - 1] + static_cast<double>(k + 1) * deltaX;
         }
         histogram.convertToFrequencies();
       }
