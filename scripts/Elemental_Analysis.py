@@ -103,7 +103,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
         subplot = self.plotting.add_subplot(detector)
-        self.plotting.call_plot_method(detector, subplot.set_title, detector)
+        subplot.set_title(detector)
         for plot in mantid.mtd[name]:
             self.plotting.plot(detector, plot)
         if self.plotting.view.isHidden():
@@ -137,12 +137,13 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     def _add_element_line(self, x_value, element, colour="b"):
         for plot_name in self.plotting.get_subplots():
-            line = self.plotting.add_vline(
-                plot_name, x_value, 0, 1, color=colour)
+            line = self.plotting.get_subplot(
+                plot_name).axvline(x_value, 0, 1, color=colour)
             try:
                 self.element_lines[element][x_value].append(line)
             except KeyError:
                 self.element_lines[element][x_value] = [line]
+        self.plotting.update_canvas()
 
     def _add_element_lines(self, element, data):
         self.element_lines[element] = {}
@@ -158,24 +159,26 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.element_lines[element] = {}
 
     def _update_element_lines(self, element, current_dict, new_dict):
-        if len(current_dict) > len(new_dict): # i.e. item removed
-            dict_difference = {k: current_dict[k] for k in set(current_dict) - set(new_dict)}
+        if len(current_dict) > len(new_dict):  # i.e. item removed
+            dict_difference = {k: current_dict[k]
+                               for k in set(current_dict) - set(new_dict)}
             for label, x_value in iteritems(dict_difference):
                 for line in self.element_lines[element][x_value]:
                     self.plotting.del_line(None, line)
                 self.element_lines[element][x_value] = []
                 del current_dict[label]
-            #self.plotting.update_canvas()
         elif current_dict != new_dict:
             colour = self.line_colours.next()
-            dict_difference = {k: new_dict[k] for k in set(new_dict) - set(current_dict)}
+            dict_difference = {k: new_dict[k]
+                               for k in set(new_dict) - set(current_dict)}
             for label, x_value in iteritems(dict_difference):
                 self._add_element_line(x_value, element, colour)
             current_dict.update(dict_difference)
 
     def _update_peak_data(self, element, data):
         if self.ptable.is_selected(element):
-            self._update_element_lines(element, self.element_data[element], data)
+            self._update_element_lines(
+                element, self.element_data[element], data)
         else:
             self.element_data[element] = data.copy()
 

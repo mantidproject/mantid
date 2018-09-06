@@ -244,16 +244,6 @@ class PlotView(QtWidgets.QWidget):
         self._update_gridspec(len(self.plots))
 
     @_redo_layout
-    def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
-        return self.get_subplot(plot_name).axvline(
-            x_value, y_min, y_max, **kwargs)
-
-    @_redo_layout
-    def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
-        return self.get_subplot(plot_name).axhline(
-            y_value, x_min, x_max, **kwargs)
-
-    @_redo_layout
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
         pass
 
