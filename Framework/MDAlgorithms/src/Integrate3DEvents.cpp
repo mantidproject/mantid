@@ -56,6 +56,7 @@ Integrate3DEvents::Integrate3DEvents(
  * to a peak and are within the specified radius of the specified peak centers,
  * and to integrate the peaks.
  *
+ * @overload
  * @param   peak_q_list  List of Q-vectors for peak centers.
  * @param   hkl_list     The list of h,k,l
  * @param   mnp_list     The list of satellite m,n,p
