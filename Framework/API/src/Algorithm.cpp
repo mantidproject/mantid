@@ -1,4 +1,5 @@
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
@@ -8,10 +9,12 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UsageService.h"
@@ -509,9 +512,8 @@ bool Algorithm::execute() {
   // ----- Perform validation of the whole set of properties -------------
   if ((!callProcessGroups) &&
       (executionMode != Parallel::ExecutionMode::MasterOnly ||
-       communicator().rank() ==
-           0)) // for groups this is called on each workspace
-               // separately
+       communicator().rank() == 0)) // for groups this is called on each
+                                    // workspace separately
   {
     std::map<std::string, std::string> errors = this->validateInputs();
     if (!errors.empty()) {
@@ -1093,7 +1095,58 @@ void Algorithm::findWorkspaceProperties(
         outputWorkspaces.push_back(workspace);
       }
     }
+    // If it is a list of strings of workspace names make sure to add history
+    const Mantid::Kernel::PropertyWithValue<std::vector<std::string>>
+        *propProp = dynamic_cast<
+            Mantid::Kernel::PropertyWithValue<std::vector<std::string>> *>(*it);
+    if (propProp && hasAnADSValidator(propProp->getValidator())) {
+      const auto &ADS = AnalysisDataService::Instance();
+      const auto direction = propProp->direction();
+      const auto propPropValue = propProp->value();
+      std::string currentWS = "";
+      for (auto i = 0u; i < propPropValue.size(); ++i) {
+        if (propPropValue[i] == ',') {
+          if (direction == Direction::Input || direction == Direction::InOut) {
+            inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+          }
+          if (direction == Direction::Output || direction == Direction::InOut) {
+            outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+          }
+          currentWS = "";
+        } else {
+          currentWS.push_back(propPropValue[i]);
+        }
+      }
+      if (direction == Direction::Input || direction == Direction::InOut) {
+        inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+      }
+      if (direction == Direction::Output || direction == Direction::InOut) {
+        outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+      }
+      currentWS = "";
+    }
   }
+}
+
+bool Algorithm::hasAnADSValidator(const IValidator_sptr propProp) const {
+  const Mantid::API::ADSValidator *ADSPropPropValidator =
+      dynamic_cast<Mantid::API::ADSValidator *>(propProp.get());
+  if (ADSPropPropValidator) {
+    return true;
+  }
+
+  const Mantid::Kernel::CompositeValidator *propPropCompValidator =
+      dynamic_cast<Mantid::Kernel::CompositeValidator *>(propProp.get());
+  if (propPropCompValidator) {
+    const std::list<IValidator_sptr> validatorList =
+        propPropCompValidator->getChildren();
+    for (IValidator_sptr i : validatorList) {
+      if (hasAnADSValidator(i) == true) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 /** Sends out algorithm parameter information to the logger */
@@ -1105,8 +1158,8 @@ void Algorithm::logAlgorithmInfo() const {
     if (this->isChild())
       logger.notice() << " (child)";
     logger.notice() << '\n';
-    // Make use of the AlgorithmHistory class, which holds all the info we want
-    // here
+    // Make use of the AlgorithmHistory class, which holds all the info we
+    // want here
     AlgorithmHistory algHistory(this);
     size_t maxPropertyLength = 40;
     if (logger.is(Logger::Priority::PRIO_DEBUG)) {
@@ -1159,9 +1212,9 @@ bool Algorithm::checkGroups() {
     WorkspaceGroup_sptr wsGroup =
         boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
 
-    // Workspace groups are NOT returned by IWP->getWorkspace() most of the time
-    // because WorkspaceProperty is templated by <MatrixWorkspace>
-    // and WorkspaceGroup does not subclass <MatrixWorkspace>
+    // Workspace groups are NOT returned by IWP->getWorkspace() most of the
+    // time because WorkspaceProperty is templated by <MatrixWorkspace> and
+    // WorkspaceGroup does not subclass <MatrixWorkspace>
     if (!wsGroup && prop && !prop->value().empty()) {
       // So try to use the name in the AnalysisDataService
       try {
@@ -1425,8 +1478,8 @@ bool Algorithm::processGroups() {
 
         outputWSNames[owp] = outName;
       } else {
-        throw std::logic_error(
-            "Found a Workspace property which doesn't inherit from Property.");
+        throw std::logic_error("Found a Workspace property which doesn't "
+                               "inherit from Property.");
       }
     } // for each OutputWorkspace property
 
@@ -1645,8 +1698,8 @@ void Algorithm::interruption_point() {
   // contravene the OpenMP standard
   // that defines that all loops must complete, and no exception can leave an
   // OpenMP section
-  // openmp cancel handling is performed using the ??, ?? and ?? macros in each
-  // algrothim
+  // openmp cancel handling is performed using the ??, ?? and ?? macros in
+  // each algrothim
   IF_NOT_PARALLEL
   if (m_cancel)
     throw CancelException();
@@ -1746,11 +1799,11 @@ void Algorithm::execDistributed() { exec(); }
 /** Runs the algorithm in `master-only` execution mode.
  *
  * The default implementation runs the normal exec() method on rank 0 and
- * nothing on all other ranks. As a consequence all output properties will have
- * their default values, such as a nullptr for output workspaces. Classes
+ * nothing on all other ranks. As a consequence all output properties will
+ * have their default values, such as a nullptr for output workspaces. Classes
  * inheriting from Algorithm can re-implement this if they support execution
- * with multiple MPI ranks and require a special implementation for master-only
- * execution. */
+ * with multiple MPI ranks and require a special implementation for
+ * master-only execution. */
 void Algorithm::execMasterOnly() {
   if (communicator().rank() == 0)
     exec();
@@ -1813,10 +1866,10 @@ Algorithm::getInputWorkspaceStorageModes() const {
 
 /** Get correct execution mode based on input storage modes for an MPI run.
  *
- * The default implementation returns ExecutionMode::Invalid. Classes inheriting
- * from Algorithm can re-implement this if they support execution with multiple
- * MPI ranks. May not return ExecutionMode::Serial, because that is not a
- * "parallel" execution mode. */
+ * The default implementation returns ExecutionMode::Invalid. Classes
+ * inheriting from Algorithm can re-implement this if they support execution
+ * with multiple MPI ranks. May not return ExecutionMode::Serial, because that
+ * is not a "parallel" execution mode. */
 Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   UNUSED_ARG(storageModes)
@@ -1827,9 +1880,10 @@ Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
 /// Sets up skipping workspace validation on non-master ranks for
 /// StorageMode::MasterOnly.
 void Algorithm::setupSkipValidationMasterOnly() {
-  // If workspaces have StorageMode::MasterOnly, validation on non-master ranks
-  // would usually fail. Therefore, WorkspaceProperty needs to skip validation.
-  // Thus, we must notify it whether or not it is on the master rank or not.
+  // If workspaces have StorageMode::MasterOnly, validation on non-master
+  // ranks would usually fail. Therefore, WorkspaceProperty needs to skip
+  // validation. Thus, we must notify it whether or not it is on the master
+  // rank or not.
   if (communicator().rank() != 0)
     for (auto *prop : getProperties())
       if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop))
