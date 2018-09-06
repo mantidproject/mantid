@@ -57,7 +57,7 @@ getCustomGroupingNumbers(std::string const &customString) {
   // Get the numbers from customString and store them in customGroupingStrings
   boost::split(customGroupingStrings, customString, boost::is_any_of(" ,-+:"));
   for (const auto &string : customGroupingStrings)
-    if (string != "")
+    if (!string.empty())
       customGroupingNumbers.emplace_back(std::stoull(string));
   return customGroupingNumbers;
 }
@@ -268,7 +268,7 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
   } else if (m_uiForm.cbGroupingOptions->currentText() == "Custom") {
     const std::string customString =
         m_uiForm.leCustomGroups->text().toStdString();
-    if (customString == "")
+    if (customString.empty())
       return "Please supply a custom grouping for detectors.";
     else
       return checkCustomGroupingNumbersInRange(
