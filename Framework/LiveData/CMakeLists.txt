@@ -14,7 +14,6 @@ set ( SRC_FILES
 	src/MonitorLiveData.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/StartLiveData.cpp
-	src/TOPAZLiveEventDataListener.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/ISIS/DAE/idc.cpp
@@ -37,7 +36,6 @@ set ( INC_FILES
 	inc/MantidLiveData/MonitorLiveData.h
 	inc/MantidLiveData/SNSLiveEventDataListener.h
 	inc/MantidLiveData/StartLiveData.h
-	inc/MantidLiveData/TOPAZLiveEventDataListener.h
 	src/ISIS/DAE/idc.h
 	src/ISIS/DAE/isisds_command.h
 )

@@ -556,9 +556,8 @@
 	<technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
     <livedata>
-      <connection name="event" address="128.219.164.132:9000" listener="TOPAZLiveEventDataListener" />
+      <connection name="event" address="bl12-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
     </livedata>
-    <!-- Act like we're ISawEV talking to event_catcher -->
    </instrument>
 
   <instrument name="HYSPEC" shortname="HYS" beamline="14B">
