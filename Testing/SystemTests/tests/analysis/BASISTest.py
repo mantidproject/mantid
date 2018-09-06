@@ -154,6 +154,7 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         :return: strings for workspace and file name
         """
         self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'peaky', 'BASISOrientedSample.nxs'
 
 
@@ -180,7 +181,7 @@ class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
                                    BackgroundRuns='75527',
                                    VanadiumRuns='64642')
         finally:
-            self.tearDown()
+            self.preptear()
 
     def validate(self):
         r"""
@@ -189,4 +190,5 @@ class PowderSampleTest(stresstesting.MantidStressTest, PreppingMixin):
         :return: strings for workspace and file name
         """
         self.tolerance = 0.1
+        self.disableChecking.extend(['SpectraMap', 'Instrument'])
         return 'powder', 'BASISPowderSample.nxs'

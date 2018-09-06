@@ -95,8 +95,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
 
     @staticmethod
     def summary():
-        return 'Multiple-file BASIS powder reduction for diffraction ' \
-               'detectors.'
+        return 'Diffraction pattern for powder samples'
 
     @staticmethod
     def seeAlso():
