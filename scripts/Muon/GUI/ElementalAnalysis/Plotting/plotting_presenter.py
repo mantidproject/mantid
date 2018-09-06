@@ -66,6 +66,9 @@ class PlotPresenter(object):
         """
         return self.view.add_vline(plot_name, x_value, y_min, y_max, **kwargs)
 
+    def del_line(self, plot_name, line):
+        self.view.del_line(plot_name, line)
+
     def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         """
         Adds a horizontal line to a plot.

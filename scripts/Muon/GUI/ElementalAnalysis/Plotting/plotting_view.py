@@ -22,6 +22,7 @@ class PlotView(QtWidgets.QWidget):
         self.plots = OrderedDict({})
         self.errors_list = set()
         self.workspaces = {}
+        self.workspace_plots = {} # stores the plotted 'graphs' for deletion
         self.plot_additions = {}
         self.current_grid = None
         self.gridspecs = {
@@ -83,11 +84,12 @@ class PlotView(QtWidgets.QWidget):
         """
 
         def wraps(self, name, *args, **kwargs):
-            try:
-                self.plot_additions[name].append((func, name, args, kwargs))
-            except KeyError:
-                self.plot_additions[name] = [(func, name, args, kwargs)]
-            return func(self, name, *args, **kwargs)
+            # try:
+            #     self.plot_additions[name].append((func, name, args, kwargs))
+            # except KeyError:
+            #     self.plot_additions[name] = [(func, name, args, kwargs)]
+            # return func(self, name, *args, **kwargs)
+            func(self, name, *args, **kwargs)
         return wraps
 
     def _silent_checkbox_check(self, state):
@@ -159,13 +161,19 @@ class PlotView(QtWidgets.QWidget):
         workspaces = self.workspaces[name]
         self.workspaces[name] = []
         x, y = plot.get_xlim(), plot.get_ylim()
-        plot.clear()
+        for plot_name, plot_list in iteritems(self.workspace_plots):
+            print(plot_list)
+            for old_plot in plot_list:
+                print("deleting", old_plot)
+                old_plot.remove()
+                #del old_plot
+            self.workspace_plots[plot_name] = []
         for workspace in workspaces:
             self.plot(name, workspace)
         plot.set_xlim(x)
         plot.set_ylim(y)
         self._set_bounds(name)
-        self._replay_additions(name)
+        #self._replay_additions(name)
 
     @_redo_layout
     def _errors_changed(self, state):
@@ -222,13 +230,24 @@ class PlotView(QtWidgets.QWidget):
             self.plot_workspace(name, workspace)
         self._set_bounds(name)
 
+    def _add_plotted_line(self, name, lines):
+        try:
+            self.workspace_plots[name].extend(lines)
+        except KeyError:
+            self.workspace_plots[name] = lines
+
     def plot_workspace_errors(self, name, workspace):
         subplot = self.get_subplot(name)
-        plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
+        line, cap_lines, bar_lines = plots.plotfunctions.errorbar(subplot, workspace, specNum=1)
+        all_lines = [line]
+        all_lines.extend(cap_lines)
+        all_lines.extend(bar_lines)
+        self._add_plotted_line(name, all_lines)
 
     def plot_workspace(self, name, workspace):
         subplot = self.get_subplot(name)
-        plots.plotfunctions.plot(subplot, workspace, specNum=1)
+        line, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
+        self._add_plotted_line(name, [line])
 
     def get_subplot(self, name):
         return self.plots[name]
@@ -262,6 +281,11 @@ class PlotView(QtWidgets.QWidget):
     def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
         return self.get_subplot(plot_name).axvline(
             x_value, y_min, y_max, **kwargs)
+
+    @_redo_layout
+    @_save_addition
+    def del_line(self, plot_name, line):
+        line.remove()
 
     @_redo_layout
     @_save_addition

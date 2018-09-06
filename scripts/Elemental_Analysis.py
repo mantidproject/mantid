@@ -56,6 +56,10 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             detector.on_checkbox_checked(self.add_plot)
             detector.on_checkbox_unchecked(self.del_plot)
         self.peaks = PeaksPresenter(PeaksView())
+        self.peaks.major.on_checkbox_checked(self.major_peaks_checked)
+        self.peaks.major.on_checkbox_unchecked(self.major_peaks_unchecked)
+        self.peaks.minor.on_checkbox_checked(self.minor_peaks_checked)
+        self.peaks.minor.on_checkbox_unchecked(self.minor_peaks_unchecked)
 
         self.widget_list.addWidget(self.peaks.view)
         self.widget_list.addWidget(self.detectors.view)
@@ -79,6 +83,22 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self._generate_element_data()
 
         self.line_colours = cycle(["r", "g", "b", "c", "m", "y"])
+
+    ### Peak Checkbox Functions ###
+
+    def major_peaks_checked(self):
+        pass
+
+    def major_peaks_unchecked(self):
+        pass
+
+    def minor_peaks_checked(self):
+        pass
+
+    def minor_peaks_unchecked(self):
+        pass
+
+    ### ----------------------- ###
 
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
@@ -115,17 +135,20 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             except KeyError:
                 continue
 
+    def _add_element_line(self, x_value, element, colour="b"):
+        for plot_name in self.plotting.get_subplots():
+            line = self.plotting.add_vline(
+                plot_name, x_value, 0, 1, color=colour)
+            try:
+                self.element_lines[element][x_value].append(line)
+            except KeyError:
+                self.element_lines[element][x_value] = [line]
+
     def _add_element_lines(self, element, data):
         self.element_lines[element] = {}
         colour = self.line_colours.next()
         for label, x_value in iteritems(data):
-            for plot_name in self.plotting.get_subplots():
-                line = self.plotting.add_vline(
-                    plot_name, x_value, 0, 1, color=colour)
-                try:
-                    self.element_lines[element][x_value].append(line)
-                except KeyError:
-                    self.element_lines[element][x_value] = [line]
+            self._add_element_line(x_value, element, colour=colour)
 
     def _remove_element_lines(self, element):
         for x_value, lines in iteritems(self.element_lines[element]):
@@ -134,8 +157,27 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.plotting.update_canvas()
         self.element_lines[element] = {}
 
+    def _update_element_lines(self, element, current_dict, new_dict):
+        if len(current_dict) > len(new_dict): # i.e. item removed
+            dict_difference = {k: current_dict[k] for k in set(current_dict) - set(new_dict)}
+            for label, x_value in iteritems(dict_difference):
+                for line in self.element_lines[element][x_value]:
+                    self.plotting.del_line(None, line)
+                self.element_lines[element][x_value] = []
+                del current_dict[label]
+            #self.plotting.update_canvas()
+        elif current_dict != new_dict:
+            colour = self.line_colours.next()
+            dict_difference = {k: new_dict[k] for k in set(new_dict) - set(current_dict)}
+            for label, x_value in iteritems(dict_difference):
+                self._add_element_line(x_value, element, colour)
+            current_dict.update(dict_difference)
+
     def _update_peak_data(self, element, data):
-        self.element_data[element] = data
+        if self.ptable.is_selected(element):
+            self._update_element_lines(element, self.element_data[element], data)
+        else:
+            self.element_data[element] = data.copy()
 
     def _generate_element_widgets(self):
         self.element_widgets = {}
