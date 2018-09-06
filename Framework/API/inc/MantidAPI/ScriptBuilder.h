@@ -75,7 +75,6 @@ private:
   bool m_timestampCommands;
   bool m_projectRecovery;
   std::vector<std::string> m_algsToIgnore = {
-      "GroupWorkspaces",
       "EnggSaveGSASIIFitResultsToHDF5",
       "EnggSaveSinglePeakFitResultsToHDF5",
       "ExampleSaveAscii",
