@@ -47,7 +47,7 @@ public:
         auto &Ys = inWS->mutableY(spectraIndex);
         Xs.front() = startX;
         for (size_t k = 1; k < Xs.size(); ++k) {
-          Xs[k] = startX + k * deltaX;
+          Xs[k] = startX + static_cast<double>(k) * deltaX;
           Ys[k - 1] = bankBkgs[i];
         }
       }
