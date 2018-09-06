@@ -97,6 +97,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
   virtual void setClipboard(const QString &text) = 0;
+  virtual void setItemDelegate() = 0;
   virtual void setModel(QString const &name) = 0;
 
   // Accessor methods

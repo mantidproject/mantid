@@ -30,6 +30,95 @@ using Types::Event::TofEvent;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)
 
+namespace {
+
+template <class ET> const std::vector<ET> &getEventVector(const EventList &el);
+
+template <>
+const std::vector<Types::Event::TofEvent> &getEventVector(const EventList &el) {
+  return el.getEvents();
+}
+
+template <>
+const std::vector<DataObjects::WeightedEvent> &
+getEventVector(const EventList &el) {
+  return el.getWeightedEvents();
+}
+
+template <>
+const std::vector<DataObjects::WeightedEventNoTime> &
+getEventVector(const EventList &el) {
+  return el.getWeightedEventsNoTime();
+}
+
+template <class ET>
+int compareEventLists(Kernel::Logger &logger, const EventList &el1,
+                      const EventList &el2, double tolTof, double tolWeight,
+                      int64_t tolPulse, bool printdetails, size_t &numdiffpulse,
+                      size_t &numdifftof, size_t &numdiffboth,
+                      size_t &numdiffweight) {
+
+  // Initialize
+  numdiffpulse = 0;
+  numdifftof = 0;
+  numdiffboth = 0;
+  numdiffweight = 0;
+
+  // Compare event by event including all events
+  const auto &events1 = getEventVector<ET>(el1);
+  const auto &events2 = getEventVector<ET>(el2);
+
+  int returnint = 0;
+  size_t numevents = events1.size();
+  for (size_t i = 0; i < numevents; ++i) {
+    // Compare 2 individual events
+    const auto &e1 = events1[i];
+    const auto &e2 = events2[i];
+
+    bool diffpulse = false;
+    bool difftof = false;
+    bool diffweight = false;
+    if (std::abs(e1.pulseTime().totalNanoseconds() -
+                 e2.pulseTime().totalNanoseconds()) > tolPulse) {
+      diffpulse = true;
+      ++numdiffpulse;
+    }
+    if (fabs(e1.tof() - e2.tof()) > tolTof) {
+      difftof = true;
+      ++numdifftof;
+    }
+    if (diffpulse && difftof)
+      ++numdiffboth;
+    if (fabs(e1.weight() - e2.weight()) > tolWeight) {
+      diffweight = true;
+      ++numdiffweight;
+    }
+
+    bool same = (!diffpulse) && (!difftof) && (!diffweight);
+    if (!same) {
+      returnint += 1;
+      if (printdetails) {
+        std::stringstream outss;
+        outss << "Spectrum ? Event " << i << ": ";
+        if (diffpulse)
+          outss << "Diff-Pulse: " << e1.pulseTime() << " vs. " << e2.pulseTime()
+                << "; ";
+        if (difftof)
+          outss << "Diff-TOF: " << e1.tof() << " vs. " << e2.tof() << ";";
+        if (diffweight)
+          outss << "Diff-Weight: " << e1.weight() << " vs. " << e2.weight()
+                << ";";
+
+        logger.information(outss.str());
+      }
+    }
+  } // End of loop on all events
+
+  // Anything that gets this far is equal within tolerances
+  return returnint;
+}
+} // namespace
+
 /** Initialize the algorithm's properties.
  */
 void CompareWorkspaces::init() {
@@ -411,6 +500,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
   size_t numUnequalTOFEvents = 0;
   size_t numUnequalPulseEvents = 0;
   size_t numUnequalBothEvents = 0;
+  size_t numUnequalWeights = 0;
 
   std::vector<int> vec_mismatchedwsindex;
   PARALLEL_FOR_IF(m_parallelComparison && ews1.threadSafe() &&
@@ -434,6 +524,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
         size_t tempNumTof = 0;
         size_t tempNumPulses = 0;
         size_t tempNumBoth = 0;
+        size_t tempNumWeight = 0;
 
         int tempNumUnequal = 0;
 
@@ -443,7 +534,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
         } else {
           tempNumUnequal = compareEventsListInDetails(
               el1, el2, toleranceTOF, toleranceWeight, tolerancePulse,
-              printdetail, tempNumPulses, tempNumTof, tempNumBoth);
+              printdetail, tempNumPulses, tempNumTof, tempNumBoth,
+              tempNumWeight);
         }
 
         mismatchedEvent = true;
@@ -458,6 +550,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
             numUnequalTOFEvents += tempNumTof;
             numUnequalPulseEvents += tempNumPulses;
             numUnequalBothEvents += tempNumBoth;
+            numUnequalWeights += tempNumWeight;
           }
 
           vec_mismatchedwsindex.push_back(i);
@@ -482,7 +575,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
            << ") events are differrent. " << numUnequalTOFEvents
            << " have different TOF; " << numUnequalPulseEvents
            << " have different pulse time; " << numUnequalBothEvents
-           << " have different in both TOF and pulse time. "
+           << " have different in both TOF and pulse time; "
+           << numUnequalWeights << " have different weights."
            << "\n";
 
       mess << "Mismatched event lists include " << vec_mismatchedwsindex.size()
@@ -890,76 +984,29 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1,
 int CompareWorkspaces::compareEventsListInDetails(
     const EventList &el1, const EventList &el2, double tolTof, double tolWeight,
     int64_t tolPulse, bool printdetails, size_t &numdiffpulse,
-    size_t &numdifftof, size_t &numdiffboth) const {
+    size_t &numdifftof, size_t &numdiffboth, size_t &numdiffweight) const {
   // Check
   if (el1.getNumberEvents() != el2.getNumberEvents())
     throw std::runtime_error(
         "compareEventsListInDetails only work on 2 event lists with same "
         "number of events.");
 
-  // Initialize
-  numdiffpulse = 0;
-  numdifftof = 0;
-  numdiffboth = 0;
-  int returnint = 0;
-
-  // Compare event by event including all events
-  const std::vector<TofEvent> &events1 = el1.getEvents();
-  const std::vector<TofEvent> &events2 = el2.getEvents();
-
-  size_t numdiffweight = 0;
-
-  EventType etype = el1.getEventType();
-
-  size_t numevents = events1.size();
-  for (size_t i = 0; i < numevents; ++i) {
-    // Compare 2 individual events
-    const TofEvent &e1 = events1[i];
-    const TofEvent &e2 = events2[i];
-
-    bool diffpulse = false;
-    bool difftof = false;
-    if (std::abs(e1.pulseTime().totalNanoseconds() -
-                 e2.pulseTime().totalNanoseconds()) > tolPulse) {
-      diffpulse = true;
-      ++numdiffpulse;
-    }
-    if (fabs(e1.tof() - e2.tof()) > tolTof) {
-      difftof = true;
-      ++numdifftof;
-    }
-    if (diffpulse && difftof)
-      ++numdiffboth;
-
-    if (etype == WEIGHTED) {
-      if (fabs(e1.weight() - e2.weight()) > tolWeight)
-        ++numdiffweight;
-    }
-
-    bool same = (!diffpulse) && (!difftof);
-    if (!same) {
-      returnint += 1;
-      if (printdetails) {
-        std::stringstream outss;
-        outss << "Spectrum ? Event " << i << ": ";
-        if (diffpulse)
-          outss << "Diff-Pulse: " << e1.pulseTime() << " vs. " << e2.pulseTime()
-                << "; ";
-        if (difftof)
-          outss << "Diff-TOF: " << e1.tof() << " vs. " << e2.tof() << ";";
-
-        g_log.information(outss.str());
-      }
-    }
-  } // End of loop on all events
-
-  if (numdiffweight > 0) {
-    throw std::runtime_error(
-        "Detected mismatched events in weight.  Implement this branch ASAP.");
+  switch (el1.getEventType()) {
+  case EventType::TOF:
+    return compareEventLists<Types::Event::TofEvent>(
+        g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
+        numdiffpulse, numdifftof, numdiffboth, numdiffweight);
+  case EventType::WEIGHTED:
+    return compareEventLists<DataObjects::WeightedEvent>(
+        g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
+        numdiffpulse, numdifftof, numdiffboth, numdiffweight);
+  case EventType::WEIGHTED_NOTIME:
+    return compareEventLists<DataObjects::WeightedEventNoTime>(
+        g_log, el1, el2, tolTof, tolWeight, tolPulse, printdetails,
+        numdiffpulse, numdifftof, numdiffboth, numdiffweight);
+  default:
+    throw std::runtime_error("Cannot compare event lists: unknown event type.");
   }
-
-  // Anything that gets this far is equal within tolerances
-  return returnint;
 }
 
 //------------------------------------------------------------------------------------------------

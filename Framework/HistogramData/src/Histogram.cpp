@@ -285,11 +285,11 @@ void Histogram::resize(size_t n) {
   }
 }
 
-HistogramIterator Histogram::begin() const {
+HistogramIterator Histogram::begin() const & {
   return HistogramIterator(*this, 0);
 }
 
-HistogramIterator Histogram::end() const {
+HistogramIterator Histogram::end() const & {
   return HistogramIterator(*this, size());
 }
 

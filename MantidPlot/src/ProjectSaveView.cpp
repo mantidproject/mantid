@@ -17,13 +17,15 @@ namespace MantidWidgets {
  * @param projectName :: the existing project path
  * @param serialiser :: a ProjectSerialiser instance
  * @param windows :: vector of window handles for the open application
+ * @param
  * @param parent :: parent widget for this object
  */
 ProjectSaveView::ProjectSaveView(
     const QString &projectName, ProjectSerialiser &serialiser,
-    const std::vector<IProjectSerialisable *> &windows, QWidget *parent)
+    const std::vector<IProjectSerialisable *> &windows,
+    const std::vector<std::string> &activePythonInterfaces, QWidget *parent)
     : QDialog(parent), m_serialisableWindows(windows.cbegin(), windows.cend()),
-      m_serialiser(serialiser) {
+      m_allPythonInterfaces(activePythonInterfaces), m_serialiser(serialiser) {
 
   m_ui.setupUi(this);
   m_presenter.reset(new ProjectSavePresenter(this));
@@ -48,11 +50,19 @@ std::vector<API::IProjectSerialisable *> ProjectSaveView::getWindows() {
 }
 
 /**
+ * @brief Get all python interfaces that can be saved
+ * @return a vector of names of launcher scripts for the interfaces
+ */
+std::vector<std::string> ProjectSaveView::getAllPythonInterfaces() {
+  return m_allPythonInterfaces;
+}
+
+/**
  * Get all of the checked workspace names
  * @return a vector of workspace names
  */
 std::vector<std::string> ProjectSaveView::getCheckedWorkspaceNames() {
-  return getItemsWithCheckState(Qt::CheckState::Checked);
+  return getItemsWithCheckState(*m_ui.workspaceList, Qt::CheckState::Checked);
 }
 
 /**
@@ -60,7 +70,23 @@ std::vector<std::string> ProjectSaveView::getCheckedWorkspaceNames() {
  * @return a vector of workspace names
  */
 std::vector<std::string> ProjectSaveView::getUncheckedWorkspaceNames() {
-  return getItemsWithCheckState(Qt::CheckState::Unchecked);
+  return getItemsWithCheckState(*m_ui.workspaceList, Qt::CheckState::Unchecked);
+}
+
+/**
+ * Get all of the checked workspace names
+ * @return a vector of workspace names
+ */
+std::vector<std::string> ProjectSaveView::getCheckedPythonInterfaces() {
+  return getItemsWithCheckState(*m_ui.interfaceList, Qt::CheckState::Checked);
+}
+
+/**
+ * Get all of the unchecked workspace names
+ * @return a vector of workspace names
+ */
+std::vector<std::string> ProjectSaveView::getUncheckedPythonInterfaces() {
+  return getItemsWithCheckState(*m_ui.interfaceList, Qt::CheckState::Unchecked);
 }
 
 /**
@@ -96,6 +122,27 @@ void ProjectSaveView::updateWorkspacesList(
   }
   // pad the header for longish workspace names
   m_ui.workspaceList->header()->resizeSection(0, 300);
+}
+
+/**
+ * Update the list of interfaces. The names will have `_` characters
+ * substituted by a single space character
+ * @param workspaces :: vector of interface launcher script names
+ */
+void ProjectSaveView::updateInterfacesList(
+    const std::vector<std::string> &interfaces) {
+  m_ui.interfaceList->clear();
+  for (const auto &launcherScript : interfaces) {
+    const auto originalName = QString::fromStdString(launcherScript);
+    auto sanitized = originalName;
+    sanitized.replace("_", " ");
+    QStringList columns{sanitized};
+    auto item = new QTreeWidgetItem(columns);
+    item->setCheckState(0, Qt::CheckState::Checked);
+    item->setData(0, Qt::UserRole, originalName);
+    m_ui.interfaceList->addTopLevelItem(item);
+  }
+  m_ui.interfaceList->header()->resizeSection(0, 300);
 }
 
 /**
@@ -197,11 +244,12 @@ void ProjectSaveView::save(bool checked) {
 
   m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto wsNames = getCheckedWorkspaceNames();
+  auto interfaces = getCheckedPythonInterfaces();
   auto windowNames = getIncludedWindowNames();
   auto filePath = m_ui.projectPath->text();
   auto compress = filePath.endsWith(".gz");
 
-  m_serialiser.save(filePath, wsNames, windowNames, compress);
+  m_serialiser.save(filePath, wsNames, windowNames, interfaces, compress);
   emit projectSaved();
 
   close();
@@ -232,16 +280,18 @@ void ProjectSaveView::findFilePath() {
 
 /**
  * Get all items with a given check state from the workspace list
+ * @param tree :: A reference to the tree containing the items
  * @param state :: any of the values in Qt::CheckState
  * @return a vector of names of workspaces that had the state
  */
 std::vector<std::string>
-ProjectSaveView::getItemsWithCheckState(const Qt::CheckState state) const {
+ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
+                                        const Qt::CheckState state) const {
   std::vector<std::string> names;
-  for (int i = 0; i < m_ui.workspaceList->topLevelItemCount(); ++i) {
-    auto item = m_ui.workspaceList->topLevelItem(i);
+  for (int i = 0; i < tree.topLevelItemCount(); ++i) {
+    auto item = tree.topLevelItem(i);
     if (item->checkState(0) == state) {
-      auto name = item->text(0).toStdString();
+      auto name = item->data(0, Qt::UserRole).toString().toStdString();
       names.push_back(name);
     }
 
@@ -338,6 +388,7 @@ ProjectSaveView::makeWorkspaceItem(const WorkspaceInfo &info) const {
   if (!info.icon_id.empty())
     item->setIcon(0, getQPixmap(info.icon_id));
   item->setCheckState(0, Qt::CheckState::Checked);
+  item->setData(0, Qt::UserRole, lst[0]);
 
   return item;
 }

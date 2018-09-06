@@ -34,20 +34,30 @@ namespace {
  * @param source : Source workspace containing instrument
  * @param target : Target workspace to write instrument to
  */
-void copyInstrument(const API::Workspace *source, API::Workspace &target) {
+void copyInstrument(const API::Workspace *source, API::Workspace *target) {
+
+  if (!source || !target)
+    return;
 
   // Special handling for Worspace Groups.
-  if (auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source)) {
-    auto &targetGroup = dynamic_cast<API::WorkspaceGroup &>(target);
-    for (size_t index = 0;
-         index < std::min(sourceGroup->size(), targetGroup.size()); ++index) {
+  if (source->isGroup() && target->isGroup()) {
+    auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
+    auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+    auto minSize = std::min(sourceGroup->size(), targetGroup->size());
+    for (size_t index = 0; index < minSize; ++index) {
       copyInstrument(sourceGroup->getItem(index).get(),
-                     *targetGroup.getItem(index));
+                     targetGroup->getItem(index).get());
     }
+  } else if (source->isGroup()) {
+    auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source);
+    copyInstrument(sourceGroup->getItem(0).get(), target);
+  } else if (target->isGroup()) {
+    auto *targetGroup = dynamic_cast<API::WorkspaceGroup *>(target);
+    copyInstrument(source, targetGroup->getItem(0).get());
   } else {
     if (auto *sourceExpInfo =
             dynamic_cast<const API::ExperimentInfo *>(source)) {
-      dynamic_cast<API::ExperimentInfo &>(target).setInstrument(
+      dynamic_cast<API::ExperimentInfo &>(*target).setInstrument(
           sourceExpInfo->getInstrument());
     }
   }
@@ -330,7 +340,7 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
   m_accumWS = chunkWS;
   // Put the original instrument back. Otherwise geometry changes will not be
   // persistent
-  copyInstrument(instrumentWS.get(), *m_accumWS);
+  copyInstrument(instrumentWS.get(), m_accumWS.get());
 }
 
 //----------------------------------------------------------------------------------------------
