@@ -44,7 +44,7 @@ workspace of same name plus suffix `_angle` is produced. The latter workspace
 contains intensities versus scattering angle. Rescaling of the
 background intensities is not applied when producing these workspaces.
 
-**Vanadium runs**: a set of runs to be reduced jointly provide an incoherent
+**VanadiumRuns**: a set of runs to be reduced jointly provide an incoherent
 and isotropic scattering to determine instrument efficiency per detector. If
 no vanadium is provided, all detectors are assumed to have the same efficiency.
 The vanadium intensity is integrated in each detector and used to normalize

@@ -130,20 +130,20 @@ class CrystalDiffractionTest(stresstesting.MantidStressTest, PreppingMixin):
         """
         try:
             BASISCrystalDiffraction(RunNumbers='74799-74800',
-                             MaskFile='BASIS_Mask_default_diff.xml',
-                             VanadiumRuns='64642',
-                             BackgroundRuns='75527',
-                             PsiAngleLog='SE50Rot',
-                             PsiOffset=-27.0,
-                             LatticeSizes=[10.71, 10.71, 10.71],
-                             LatticeAngles=[90.0, 90.0, 90.0],
-                             VectorU=[1, 1, 0],
-                             VectorV=[0, 0, 1],
-                             Uproj=[1, 1, 0],
-                             Vproj=[0, 0, 1],
-                             Wproj=[1, -1, 0],
-                             Nbins=300,
-                             OutputWorkspace='peaky')
+                                    MaskFile='BASIS_Mask_default_diff.xml',
+                                    VanadiumRuns='64642',
+                                    BackgroundRuns='75527',
+                                    PsiAngleLog='SE50Rot',
+                                    PsiOffset=-27.0,
+                                    LatticeSizes=[10.71, 10.71, 10.71],
+                                    LatticeAngles=[90.0, 90.0, 90.0],
+                                    VectorU=[1, 1, 0],
+                                    VectorV=[0, 0, 1],
+                                    Uproj=[1, 1, 0],
+                                    Vproj=[0, 0, 1],
+                                    Wproj=[1, -1, 0],
+                                    Nbins=300,
+                                    OutputWorkspace='peaky')
         finally:
             self.preptear()
 
