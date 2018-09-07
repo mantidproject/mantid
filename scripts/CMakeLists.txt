@@ -95,6 +95,7 @@ set ( TEST_PY_FILES
 add_subdirectory(test/directtools)
 add_subdirectory(test/Muon)
 add_subdirectory(test/SANS)
+add_subdirectory(test/TOFTOF)
 
 # python unit tests
 if (PYUNITTEST_FOUND)
