@@ -85,10 +85,11 @@ Creating groups via direct instantiation;
 
 .. testcode:: CreatingWorkspaceGroupsInstantiated
 
+    from mantid.api import WorkspaceGroup
+
     ws1 = CreateSampleWorkspace()
     ws2 = CreateSampleWorkspace()
     ws3 = CreateSampleWorkspace()
-
 
     # Create a group workspace and add to the ADS
     ws_group = WorkspaceGroup()
@@ -110,6 +111,8 @@ Output:
 Workspace groups can be created without using the ADS, and fed workspaces which are also not in the ADS (in this case the `addWorkspace` method is used rather than `add` because `add` requires a name, and since the workspaces are not in the ADS they may not have a name)
 
 .. testcode:: CreatingWorkspaceGroupsNoADS
+
+    from mantid.api import WorkspaceGroup
 
     ws1 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
     ws2 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
