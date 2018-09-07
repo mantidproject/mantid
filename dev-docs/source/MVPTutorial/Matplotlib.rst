@@ -1,3 +1,5 @@
+.. _Matplotlib:
+
 ==================
 Matplotlib and MVP
 ==================

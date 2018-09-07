@@ -10,7 +10,7 @@ Algorithm Documentation
 Summary
 =======
 
-This page deals with the specifics of how to document an algorithm. For a more general guide to the Mantid documentation system see `Documentation Guide For Devs <DocumentationGuideForDevs.html>`__.
+This page deals with the specifics of how to document an algorithm. For a more general guide to the Mantid documentation system see :ref:`Documentation Guide For Devs <DocumentationGuideForDevs>`.
 
 How to Document an Algorithm
 ============================
@@ -18,7 +18,7 @@ How to Document an Algorithm
 Algorithm documentation is stored in two places.
 
 * The code (.cpp / .h / .py) files: For strings that are needed in the GUI for tooltips etc.
-* The .rst file: For all other documentation, including the algorithm description and `usage examples <AlgorithmUsageExamples.html>`__.
+* The .rst file: For all other documentation, including the algorithm description and :ref:`usage examples <AlgorithmUsageExamples>`.
 
 The Code Files
 --------------
@@ -69,7 +69,7 @@ For example:
 Workflow algorithms
 ===================
 
-There should be a flow chart for workflow algorithms. See `here <FlowchartCreation.html>`__ on how to make one.
+There should be a flow chart for workflow algorithms. See :ref:`here <FlowchartCreation>` on how to make one.
 
 Algorithm Directives
 ====================
@@ -84,7 +84,7 @@ As the **Description** and **Usage** of an algorithm *cannot* be obtained automa
 
    .. summary::
 
-   .. alias::
+   .. relatedalgorithms::
 
    .. properties::
 
@@ -120,13 +120,16 @@ As the **Description** and **Usage** of an algorithm *cannot* be obtained automa
       return "Rebins data with new X bin boundaries. For EventWorkspaces, you can very quickly rebin in-place by keeping the same output name and PreserveEvents=true.";
    }
 
-``.. alias::``
-   This directive obtains aliases from the required ``alias`` method in the algorithm, for example, the following method is used in Rebin: 
+``.. relatedalgorithms::``
+   This directive obtains a list of related algorithm from the ``seeAlso`` method in the algorithm, for example, the following method is used in Rebin: 
 
 .. code-block:: c++
 
-   /// Algorithm's aliases
-   const std::string alias() const override { return "rebin"; }
+   /// Algorithm's seeAlso
+   const std::vector<std::string> seeAlso() const override {
+    return {"RebinToWorkspace", "Rebin2D",           "Rebunch",
+            "Regroup",          "RebinByPulseTimes", "RebinByTimeAtSample"};
+   }
 
 ``.. properties::``
    As mentioned above, it is *critical* that you include a description for the properties of your algorithm. This directive obtains all of the algorithm's properties (set inside the algorithm's ``init`` method) and outputs in a table format. 
@@ -147,7 +150,7 @@ It is possible to add additional categories by passing the directive arguments, 
 
    .. categories:: Algorithms, Transforms, Rebin, Example
 
-``..sourcelink ::``
+``.. sourcelink::``
    This directive adds links to the algorithms source code.
 
 Description
@@ -175,7 +178,7 @@ where the first part outside the angle brackets defines the link text and the pa
 Usage
 =====
 
-This section *must* be manually entered. The usage is a 'code' example of the algorithm in use. The `testcode` directive must be used to verify the usage code you entered works correctly. See `here <AlgorithmUsageExamples>`__ for more information on how to write usage examples.
+This section *must* be manually entered. The usage is a 'code' example of the algorithm in use. The ``.. testcode::`` directive must be used to verify the usage code you entered works correctly. See :ref:`here <AlgorithmUsageExamples>` for more information on how to write usage examples.
 
 Building the Documentation
 ==========================

@@ -1,3 +1,5 @@
+.. _MockingExerciseSolution:
+
 =========================
 Mocking Exercise Solution
 =========================

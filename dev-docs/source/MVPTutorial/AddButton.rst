@@ -1,3 +1,5 @@
+.. _AddButton:
+
 ===============
 Adding a Button
 ===============
@@ -10,7 +12,7 @@ The View
 The below code creates a QWidget containing a single button. When the
 button is pressed it will print a message to the terminal screen. It
 should be noted that in practice this should be avoided and will be
-discussed in `this section <ReceivingSignalFromView.html>`_.
+discussed in :ref:`this section <ReceivingSignalFromView>`.
 
 First we need to import the relevant packages, this includes PyQt.
 
@@ -42,10 +44,10 @@ Next we create a layout and add a button to it
 
         # connect button to signal
         self.button.clicked.connect(self.btn_click)
-	# add button to layout
-	grid.addWidget(self.button)
-	# set the layout for the view widget
-	self.setLayout(grid)
+    # add button to layout
+    grid.addWidget(self.button)
+    # set the layout for the view widget
+    self.setLayout(grid)
 
 The above connect statement means that when the button is pressed, the
 function ``btn_click`` is called:
@@ -88,9 +90,9 @@ all been saved in ``view.py``, the ``main.py`` will contain:
     def qapp():
         if QtGui.QApplication.instance():
             _app = QtGui.QApplication.instance()
-	else:
+    else:
             _app = QtGui.QApplication(sys.argv)
-	return _app
+    return _app
 
     app = qapp()
     window = demo()

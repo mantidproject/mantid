@@ -1,3 +1,5 @@
+.. _PresenterExerciseSolution:
+
 ===========================
 Presenter Exercise Solution
 ===========================
@@ -16,7 +18,7 @@ View
 
         plotSignal = QtCore.pyqtSignal()
 
-	def __init__(self, parent=None):
+        def __init__(self, parent=None):
             super(view, self).__init__(parent)
 
             grid = QtGui.QVBoxLayout(self)
@@ -52,22 +54,22 @@ View
 
             self.plot.clicked.connect(self.buttonPressed)
 
-	def getColour(self):
+        def getColour(self):
             return self.colours.currentText()
   
-	def getGridLines(self):
+        def getGridLines(self):
             return self.grid_lines.checkState() == QtCore.Qt.Checked
 
-	def getFreq(self):
+        def getFreq(self):
             return float(self.freq.text())
 
-	def getPhase(self):
+        def getPhase(self):
             return float(self.phi.text())
 
-	def buttonPressed(self):
+        def buttonPressed(self):
             self.plotSignal.emit()
 
-	def setTableRow(self, name, row):
+        def setTableRow(self, name, row):
             text = QtGui.QTableWidgetItem(name)
             text.setFlags(QtCore.Qt.ItemIsEnabled)
             col = 0
@@ -93,18 +95,18 @@ Presenter
     class Presenter(object):
 
         # pass the view and model into the presenter
-	def __init__(self, view):
+        def __init__(self, view):
             self.view = view
 
-	    self.view.plotSignal.connect(self.updatePlot)             
+        self.view.plotSignal.connect(self.updatePlot)             
        
-	# handle signals 
-	def updatePlot(self):
+        # handle signals 
+        def updatePlot(self):
             print("The table settings are:")
-	    print("   colour     : " + str(self.view.getColour()))
-	    print("   Grid lines : " + str(self.view.getGridLines()))
-	    print("   Frequency  : " + str(self.view.getFreq()))
-	    print("   Phase      : " + str(self.view.getPhase()))
+        print("   colour     : " + str(self.view.getColour()))
+        print("   Grid lines : " + str(self.view.getGridLines()))
+        print("   Frequency  : " + str(self.view.getFreq()))
+        print("   Phase      : " + str(self.view.getPhase()))
 
 Main module
 ###########
@@ -136,12 +138,12 @@ Main module
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-	def qapp():
+    def qapp():
             if QtGui.QApplication.instance():
                 _app = QtGui.QApplication.instance()
-	    else:
-		_app = QtGui.QApplication(sys.argv)
-	    return _app
+        else:
+        _app = QtGui.QApplication(sys.argv)
+        return _app
 
     app = qapp()
     window = demo()

@@ -146,7 +146,7 @@ Plot Presenter
 PlotView
 ########
 
-Unchanged from `Matplotlib and MVP <Matplotlib.html>`_.
+Unchanged from :ref:`Matplotlib and MVP <Matplotlib>`.
 
 Presenter
 #########
@@ -171,9 +171,9 @@ Presenter
 View
 ####
 
-Unchanged from `Model Exercise Solution <ModelExerciseSolution.html>`_.
+Unchanged from :ref:`Model Exercise Solution <ModelExerciseSolution>`.
 
 Model
 #####
 
-Unchanged from `Model Exercise Solution <ModelExerciseSolution.html>`_.
+Unchanged from :ref:`Model Exercise Solution <ModelExerciseSolution>`.
