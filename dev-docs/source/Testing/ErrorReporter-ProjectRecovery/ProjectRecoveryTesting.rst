@@ -40,7 +40,6 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
    Load(Filename='INTER00013464.nxs', OutputWorkspace='INTER1')
    Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER2')  
    Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER3')  
@@ -81,7 +80,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory=<path-to-test>   # <path-to-test> is the location of a directory for saving workspaces for comparison later
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
    for i in range(100):
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
