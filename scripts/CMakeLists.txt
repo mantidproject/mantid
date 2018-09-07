@@ -59,7 +59,7 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/DirectPropertyManagerTest.py
       test/DirectReductionHelpersTest.py
-      test/ErrorReporterPresenterTest.py
+      test/ErrorReportPresenterTest.py
       test/IndirectCommonTests.py
       test/ISISDirecInelasticConfigTest.py
       test/ISISPowderAbsorptionTest.py

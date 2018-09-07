@@ -10,7 +10,6 @@
 #include "MantidKernel/ParaViewVersion.h"
 
 #include <Poco/ActiveResult.h>
-#include <boost/functional/hash.hpp>
 #include <json/json.h>
 
 namespace Mantid {

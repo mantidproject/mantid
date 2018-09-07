@@ -77,6 +77,9 @@ class CrashReportPage(QtGui.QWidget, ui_errorreport.Ui_Errorreport):
         msg.setEscapeButton(QtGui.QMessageBox.Ok)
         msg.exec_()
 
+    def set_report_callback(self, callback):
+        self.action.connect(callback)
+
     @property
     def input_name(self):
         return self.get_simple_line_edit_field(line_edit="input_name_line_edit", expected_type=str)
