@@ -175,6 +175,7 @@ void ProjectRecovery::attemptRecovery() {
 
   if (userChoice == 1) {
     // User selected no
+    this->startProjectSaving();
     return;
   }
 
@@ -355,12 +356,14 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
           m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
           Q_RETURN_ARG(bool, loadCompleted),
           Q_ARG(const std::string, projectFile.toString()))) {
+    this->startProjectSaving();
     throw std::runtime_error(
         "Project Recovery: Failed to load project windows - Qt binding failed");
   }
 
   if (!loadCompleted) {
     g_log.warning("Loading failed to recovery everything completely");
+    this->startProjectSaving();
     return;
   }
   g_log.notice("Project Recovery finished");
@@ -391,6 +394,7 @@ void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
+  startProjectSaving();
   scriptWindow->open(QString::fromStdString(historyDest.toString()));
 }
 
