@@ -10,6 +10,7 @@ from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector
                                                          WavRangeReduction, DefaultTrans, UseCompatibilityMode,
                                                          AddRuns, LARMOR)
 
+
 class SANS2DMultiPeriodAddFiles_V2(stresstesting.MantidStressTest):
 
     def requiredMemoryMB(self):
@@ -28,12 +29,9 @@ class SANS2DMultiPeriodAddFiles_V2(stresstesting.MantidStressTest):
         # one period of a multi-period Nexus file
         AssignSample('5512-add.nxs', period=7)
 
-        print("NEIL V2 : 1",config['defaultsave.directory'])
         WavRangeReduction(2, 4, DefaultTrans)
-        print("NEIL V2 : 2",config['defaultsave.directory'])
         paths = [os.path.join(config['defaultsave.directory'], 'SANS2D00005512-add.nxs'),
                  os.path.join(config['defaultsave.directory'], 'SANS2D00005512.log')]
-        # exit()
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)
@@ -86,6 +84,3 @@ class LARMORMultiPeriodAddEventFilesTest_V2(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
 
         return "13065p1rear_1D_2.0_4.0", "LARMORMultiPeriodAddEventFiles.nxs"
-
-def approximateModuleRuntime():
-    return 81.065734
