@@ -113,6 +113,7 @@ protected:
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
 
+  void run();
   void plotResult(const QString &plotType);
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
@@ -186,7 +187,6 @@ private:
   void loadSettings(const QSettings &settings) override;
   virtual void setupFitTab() = 0;
   bool validate() override;
-  void run() override;
 
   void connectDataAndPlotPresenters();
   void connectSpectrumAndPlotPresenters();

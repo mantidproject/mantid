@@ -63,6 +63,7 @@ void JumpFit::setupFitTab() {
   m_uiForm->cbParameter->setEnabled(false);
 
   // Handle plotting and saving
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this,
@@ -89,6 +90,13 @@ void JumpFit::setSaveResultEnabled(bool enabled) {
 void JumpFit::plotClicked() {
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
 }
+
+void JumpFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void JumpFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

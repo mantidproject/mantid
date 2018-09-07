@@ -123,6 +123,7 @@ void Iqt::setup() {
           SLOT(updateDisplayedBinParameters()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(plotTiled()));
@@ -132,6 +133,8 @@ void Iqt::setup() {
 
 void Iqt::run() {
   using namespace Mantid::API;
+
+  setRunEnabled(false);
 
   updateDisplayedBinParameters();
 
@@ -175,6 +178,7 @@ void Iqt::run() {
 void Iqt::algorithmComplete(bool error) {
   if (error)
     return;
+  setRunEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.pbTile->setEnabled(true);
@@ -293,7 +297,7 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
 
     m_dblManager->setValue(m_properties["ELow"], -val);
   } else if (prop == m_properties["ELow"]) {
-    // If the user enters a positive value for ELow, assume they ment to add a
+    // If the user enters a positive value for ELow, assume they meant to add a
     if (val > 0) {
       val = -val;
       m_dblManager->setValue(m_properties["ELow"], val);
@@ -437,6 +441,13 @@ void Iqt::updateRS(QtProperty *prop, double val) {
   else if (prop == m_properties["EHigh"])
     xRangeSelector->setMaximum(val);
 }
+
+void Iqt::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+  m_uiForm.pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void Iqt::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

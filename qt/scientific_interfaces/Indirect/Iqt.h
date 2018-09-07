@@ -13,9 +13,12 @@ class DLLExport Iqt : public IndirectDataAnalysisTab {
 public:
   Iqt(QWidget *parent = nullptr);
 
+protected:
+  void setRunEnabled(bool enabled) override;
+
 private:
-  void setup() override;
   void run() override;
+  void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
@@ -26,11 +29,11 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
   void updateDisplayedBinParameters();
+  void runClicked();
   void saveClicked();
   void plotClicked();
   void plotTiled();
 
-private:
 private:
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;

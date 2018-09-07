@@ -47,6 +47,7 @@ void MSDFit::setupFitTab() {
   setSampleWSSuffices({"_eq"});
   setSampleFBSuffices({"_eq.nxs"});
 
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(this, SIGNAL(functionChanged()), this,
@@ -68,6 +69,13 @@ void MSDFit::setPlotResultEnabled(bool enabled) {
 void MSDFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
+
+void MSDFit::setRunEnabled(bool enabled) {
+  m_uiForm->pbRun->setEnabled(enabled);
+  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void MSDFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

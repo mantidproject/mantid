@@ -68,7 +68,7 @@ private slots:
   /// Called when the user clicks the Py button
   void exportTabPython();
   /// Called when the Run button is pressed.  Runs current tab.
-  void run();
+  //void run();
   /// Opens a directory dialog.
   void openDirectoryDialog();
   /// Opens the Mantid Wiki web page of the current tab.

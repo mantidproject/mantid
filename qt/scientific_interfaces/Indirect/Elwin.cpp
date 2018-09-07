@@ -102,6 +102,7 @@ void Elwin::setup() {
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
   // Handle plot and save
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
@@ -116,6 +117,8 @@ void Elwin::setup() {
 }
 
 void Elwin::run() {
+  setRunEnabled(false);
+
   QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
   inputFilenames.sort();
 
@@ -247,7 +250,8 @@ void Elwin::unGroupInput(bool error) {
     ungroupAlg->execute();
   }
 
-  // Enable plot and save
+  // Enable run, plot and save
+  setRunEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
@@ -507,6 +511,13 @@ void Elwin::saveClicked() {
 
   m_batchAlgoRunner->executeBatchAsync();
 }
+
+void Elwin::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+  m_uiForm.pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void Elwin::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces
