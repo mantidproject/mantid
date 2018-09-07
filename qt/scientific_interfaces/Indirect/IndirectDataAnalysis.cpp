@@ -83,7 +83,6 @@ void IndirectDataAnalysis::initLayout() {
   connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this,
           SLOT(exportTabPython()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  //connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
           SLOT(openDirectoryDialog()));
 }
@@ -117,14 +116,6 @@ void IndirectDataAnalysis::loadSettings() {
 
   settings.endGroup();
 }
-
-/**
- * Private slot, called when the Run button is pressed.  Runs current tab.
- */
-//void IndirectDataAnalysis::run() {
-//  const unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
-//  m_tabs[currentTab]->runTab();
-//}
 
 /**
  * Opens a directory dialog.

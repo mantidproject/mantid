@@ -113,7 +113,7 @@ protected:
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
 
-  void run();
+  void run() override;
   void plotResult(const QString &plotType);
   void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
   void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
