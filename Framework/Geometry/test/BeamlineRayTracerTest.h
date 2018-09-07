@@ -242,7 +242,7 @@ private:
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
 
     // Create an instrument visitor
-    InstrumentVisitor visitor = (m_testInstrument);
+    InstrumentVisitor visitor{m_testInstrument};
 
     // Visit everything
     visitor.walkInstrument();
@@ -260,7 +260,7 @@ private:
         ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
 
     // Create an instrument visitor
-    InstrumentVisitor visitor = (m_testInstrumentRectangular);
+    InstrumentVisitor visitor{m_testInstrumentRectangular};
 
     // Visit everything
     visitor.walkInstrument();
@@ -290,7 +290,6 @@ private:
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoRectangular;
 };
 
-/*
 class BeamlineRayTracerTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -307,7 +306,7 @@ public:
     m_inst = ComponentCreationHelper::createTestInstrumentRectangular(2, 100);
 
     // Create an instrument visitor
-    InstrumentVisitor visitor = (m_inst);
+    InstrumentVisitor visitor{m_inst};
 
     // Visit everything
     visitor.walkInstrument();
@@ -319,54 +318,40 @@ public:
     m_compInfo = std::move(infos.first);
     m_detInfo = std::move(infos.second);
 
-    //std::cout << "IN SETUP" << std::endl;
     // Parse test file
     std::string filename = ConfigService::Instance().getInstrumentDirectory() +
                            "TOPAZ_Definition_2010.xml";
     std::string xmlText = Mantid::Kernel::Strings::loadFile(filename);
     InstrumentDefinitionParser IDP(filename, "UnitTesting", xmlText);
 
-    //std::cout << "DONE IDP" << std::endl;
-
     // Get the instrument
     m_instTopaz = IDP.parseXML(nullptr);
-    //std::cout << "GOT INSTRUMENT" << std::endl;
 
     // Create an instrument visitor
-    InstrumentVisitor visitor2 = (m_instTopaz);
-    //std::cout << "DONE VISITOR" << std::endl;
+    InstrumentVisitor visitor2{m_instTopaz};
 
     // Visit everything
     visitor2.walkInstrument();
-    //std::cout << "DONE WALKTHROUGH" << std::endl;
 
     // Get ComponentInfo and DetectorInfo objects and set them
     auto infos2 = InstrumentVisitor::makeWrappers(*m_instTopaz, nullptr);
-    //std::cout << "GOT INFOS" << std::endl;
 
     // Unpack the pair
     m_compInfoTopaz = std::move(infos2.first);
     m_detInfoTopaz = std::move(infos2.second);
-    //std::cout << "UNPACKED INFOS" << std::endl;
-    //std::cout << "DONE SETUP" << std::endl;
   }
 
   void test_RectangularDetector() {
-    //std::cout << "IN Rec Det" << std::endl;
 
     // Directly in Z+ = towards the detector center
     V3D testDir(0.0, 0.0, 1.0);
     for (size_t i = 0; i < 100; i++) {
-      //std::cout << "TEST " << i << std::endl;
       Links results = RayTracer::traceFromSample(testDir, *m_compInfo);
       TS_ASSERT_EQUALS(results.size(), 3);
     }
   }
 
   void test_TOPAZ() {
-    // Debugging flag
-    bool verbose = false;
-
     // Directly in Z+ = towards the detector center
     for (int azimuth = 0; azimuth < 360; azimuth += 3) {
       for (int elev = -89; elev < 89; elev += 3) {
@@ -374,18 +359,8 @@ public:
         V3D testDir;
         testDir.spherical(1, double(elev), double(azimuth));
 
-        // For debugging
-        if (verbose) {
-          std::cout << testDir << " : ";
-        }
-
         // Track it
         Links results = RayTracer::traceFromSample(testDir, *m_compInfoTopaz);
-
-        // For debugging
-        if (verbose) {
-          showResults(results);
-        }
       }
     }
   }
@@ -400,23 +375,6 @@ private:
   Instrument_sptr m_instTopaz;
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoTopaz;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoTopaz;
-
-  // Helper method for debugging
-  void showResults(Links &results) {
-    Links::const_iterator resultItr = results.begin();
-    for (; resultItr != results.end(); resultItr++) {
-      std::cout << resultItr->componentID->getFullName() << ", ";
-    }
-    std::cout << "\n";
-
-    // Links::const_iterator resultItr = results.begin();
-    // for (; resultItr != results.end(); resultItr++) {
-    //  IComponent_const_sptr component =
-    //    inst->getComponentByID(resultItr->componentID);
-    //  std::cout << component->getName() << ", ";
-    //}
-    // std::cout << "\n";
-  }
 };
-*/
+
 #endif /* BEAMLINERAYTRACERTEST_H_ */
