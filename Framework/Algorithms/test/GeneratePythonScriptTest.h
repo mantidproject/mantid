@@ -127,7 +127,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
-  void test_workspace_group() {
+  void test_project_recovery_option() {
     Mantid::Algorithms::CreateWorkspace creator;
     creator.initialize();
     creator.setPropertyValue("OutputWorkspace", "ws1");
@@ -163,7 +163,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "GeneratePythonScriptTest.py"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ScriptText", ""));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreGroups", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ProjectRecovery", true));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
