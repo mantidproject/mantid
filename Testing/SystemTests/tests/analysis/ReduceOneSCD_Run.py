@@ -21,6 +21,9 @@ import stresstesting
 import os
 from mantid.api import *
 from mantid.simpleapi import *
+from mantid import config
+# Make this test use crystallography convention
+config['Q.convention'] = 'Crystallography'
 
 
 class ReduceOneSCD_Run( stresstesting.MantidStressTest):
