@@ -31,13 +31,13 @@ Workspace groups can be created in a more flexible way in the Python script wind
 
     ws_group = api.WorkspaceGroup()
 
-This **will not** be automatically added to the ADS, to do so, using the following line
+This **will not** be automatically added to the ADS, to do so, use the following line
 
 .. code::
 
     AnalysisDataService.add("name", ws_group)
 
-the group should then appear with the given name.
+the group should then appear in the ADS with the given name.
 
 Un-grouping Workspaces
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -95,9 +95,9 @@ Creating groups via direct instantiation;
     ws_group = WorkspaceGroup()
     mtd.add("group1", ws_group)
 
-    ws_group.add(ws1)
-    ws_group.add(ws2)
-    ws_group.add(ws3)
+    ws_group.add("ws1")
+    ws_group.add("ws2")
+    ws_group.add("ws3")
 
     print(ws_group.getNames())
 
@@ -137,7 +137,7 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
     ['','','']
-    ['1','2','3']
+    ['group1_1','group1_2','group1_3']
 
 when adding the group to the ADS, the workspaces will also be added, and given default names. It is not recommended to add workspace to groups in this way, as much of the functionality of groups depends on workspaces having names; for example the "in" keyword.
 
