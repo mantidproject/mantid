@@ -14,6 +14,11 @@ Indirect Inelastic Changes
 Data Analysis Interface
 -----------------------
 
+Improvements
+############
+
+- The Run button in the Data Analysis tabs is now above the output options, and is disabled during fitting.
+
 Bugfixes
 ########
 
@@ -42,4 +47,3 @@ Improvements
 - Added 'Default' detector grouping option in ISISEnergyTransfer for TOSCA, to allow a default grouping 
   using the grouping specified in the Instrument Parameter File.
 - ISISEnergyTransfer now allows overlapping detector grouping.
-
