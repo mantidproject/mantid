@@ -1100,29 +1100,20 @@ void Algorithm::findWorkspaceProperties(
         *propProp = dynamic_cast<
             Mantid::Kernel::PropertyWithValue<std::vector<std::string>> *>(*it);
     if (propProp && hasAnADSValidator(propProp->getValidator())) {
-      const auto &ADS = AnalysisDataService::Instance();
-      const auto direction = propProp->direction();
       const auto propPropValue = propProp->value();
+      const auto direction = propProp->direction();
       std::string currentWS = "";
       for (auto i = 0u; i < propPropValue.size(); ++i) {
         if (propPropValue[i] == ',') {
-          if (direction == Direction::Input || direction == Direction::InOut) {
-            inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
-          }
-          if (direction == Direction::Output || direction == Direction::InOut) {
-            outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
-          }
+          constructWorkspaceVectorForHistoryHelper(
+              inputWorkspaces, outputWorkspaces, direction, currentWS);
           currentWS = "";
         } else {
           currentWS.push_back(propPropValue[i]);
         }
       }
-      if (direction == Direction::Input || direction == Direction::InOut) {
-        inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
-      }
-      if (direction == Direction::Output || direction == Direction::InOut) {
-        outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
-      }
+      constructWorkspaceVectorForHistoryHelper(
+          inputWorkspaces, outputWorkspaces, direction, currentWS);
     }
   }
 }
@@ -1148,6 +1139,28 @@ bool Algorithm::hasAnADSValidator(const IValidator_sptr propProp) const {
   return false;
 }
 
+void Algorithm::constructWorkspaceVectorForHistoryHelper(
+    std::vector<Workspace_sptr> &inputWorkspaces,
+    std::vector<Workspace_sptr> &outputWorkspaces, const unsigned int direction,
+    std::string &currentWS) const {
+  const auto &ADS = AnalysisDataService::Instance();
+  try {
+    if (direction == Direction::Input || direction == Direction::InOut) {
+      inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+    }
+  } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
+    g_log.information("The ADS was unable to find the output workspaces "
+                      "when attaching history");
+  }
+  try {
+    if (direction == Direction::Output || direction == Direction::InOut) {
+      outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+    }
+  } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
+    g_log.information("The ADS was unable to find the output workspaces "
+                      "when attaching history");
+  }
+}
 /** Sends out algorithm parameter information to the logger */
 void Algorithm::logAlgorithmInfo() const {
   auto &logger = getLogger();

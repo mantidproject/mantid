@@ -79,7 +79,8 @@ void GeneratePythonScript::exec() {
   const std::string endTime = getProperty("EndTimestamp");
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
   const bool appendTimestamp = getProperty("AppendTimestamp");
-  const std::vector<std::string> ignoreTheseAlgs = getProperty("IgnoreTheseAlgs");
+  const std::vector<std::string> ignoreTheseAlgs =
+      getProperty("IgnoreTheseAlgs");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();

@@ -87,7 +87,8 @@ void ScriptBuilder::writeHistoryToStream(
       os << "\n";
     }
   } else {
-    // create the string for this algorithm if not found to be in the ignore list
+    // create the string for this algorithm if not found to be in the ignore
+    // list
     if (!(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
                     algHistory->name()) != m_algsToIgnore.end())) {
       createStringForAlg(os, algHistory);

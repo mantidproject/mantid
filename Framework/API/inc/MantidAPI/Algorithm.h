@@ -449,6 +449,11 @@ private:
 
   bool hasAnADSValidator(const Mantid::Kernel::IValidator_sptr propProp) const;
 
+  void constructWorkspaceVectorForHistoryHelper(
+      std::vector<Workspace_sptr> &inputWorkspaces,
+      std::vector<Workspace_sptr> &outputWorkspaces,
+      const unsigned int direction, std::string &currentWS) const;
+
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, Poco::Void, Algorithm,
