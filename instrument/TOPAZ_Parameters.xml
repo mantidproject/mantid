@@ -144,6 +144,21 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
  <value val="15" />
 </parameter>
 
+<!-- Initial guess parameters for coshPeakWidthModel -->
+<parameter name="sigSC0Params" type="string">
+ <value val="0.00413132 1.54103839 1.0 -0.00266634" />
+</parameter>
+
+<!-- Initial guess for sigma along the azimuthal direction (rad) -->
+<parameter name="sigAZ0">
+ <value val="0.0025" />
+</parameter>
+
+<!-- Initial guess parameters for fsigP (BVG covariance) -->
+<parameter name="sigP0Params" type="string">
+ <value val="0.1460775 1.85816592 0.26850086 -0.00725352" />
+</parameter>
+
 <!-- Constraints for ICC fitting.  Valid names are iccA, iccB, iccR, iccT0, iccScale0
      iccHatWidth and iccKConv.  Inputs are strings with values separated by
      spaces which are prased by the IntegratePeaksProfileFitting algorithm.  
@@ -157,6 +172,8 @@ detScale={13:1.046504,14:1.259293,16:1.02449,17:1.18898,18:0.88014,19:0.98665,\
  <value val="10.0 800.0 100.0" />
 </parameter>
 </component-link>
+
+
 
 </parameter-file>
  

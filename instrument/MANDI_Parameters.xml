@@ -68,6 +68,21 @@
  <value val="5" />
 </parameter>
 
+<!-- Initial guess parameters for coshPeakWidthModel -->
+<parameter name="sigSC0Params" type="string">
+ <value val="0.00413132 1.54103839 1.0 -0.00266634" />
+</parameter>
+
+<!-- Initial guess for sigma along the azimuthal direction (rad) -->
+<parameter name="sigAZ0">
+ <value val="0.0025" />
+</parameter>
+
+<!-- Initial guess parameters for fsigP (BVG covariance) -->
+<parameter name="sigP0Params" type="string">
+ <value val="0.1460775 1.85816592 0.26850086 -0.00725352" />
+</parameter>
+
 </component-link>
 
 </parameter-file>
