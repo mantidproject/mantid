@@ -1150,7 +1150,8 @@ void Algorithm::constructWorkspaceVectorForHistoryHelper(
     }
   } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
     g_log.information("The ADS was unable to find the input workspaces "
-                      "when attaching history: " + error.what());
+                      "when attaching history: " +
+                      error.what());
   }
   try {
     if (direction == Direction::Output || direction == Direction::InOut) {
@@ -1158,7 +1159,8 @@ void Algorithm::constructWorkspaceVectorForHistoryHelper(
     }
   } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
     g_log.information("The ADS was unable to find the output workspaces "
-                      "when attaching history: " + error.what());
+                      "when attaching history: " +
+                      error.what());
   }
 }
 /** Sends out algorithm parameter information to the logger */
