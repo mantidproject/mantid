@@ -28,6 +28,8 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/HintStrategy.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Hint.h
 
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/Row.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/RowLocation.h

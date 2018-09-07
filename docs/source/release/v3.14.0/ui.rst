@@ -13,11 +13,14 @@ UI & Usability Changes
 
 Project Recovery
 ----------------
+
+Changes
+#######
+- Project Recovery will no longer save groups, this fixes an issue where it would cause crashes if you deleted a workspace from a group.
+
 Bugfixes
 ########
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
-
-:ref:`Release 3.14.0 <v3.14.0>`
 
 MantidPlot
 ----------
@@ -26,3 +29,5 @@ BugFixes
 ########
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
+
+:ref:`Release 3.14.0 <v3.14.0>`

@@ -29,9 +29,14 @@ set_property ( TARGET CompileUIErrorReporter PROPERTY FOLDER "CompilePyUI" )
 # External GUIs
 add_subdirectory ( ExternalInterfaces )
 
-# -------------------------------------------------------------------
+# --------------------------------------------------------------------
 # Testing
-# -------------------------------------------------------------------
+# --------------------------------------------------------------------
+# All of the following tests (and those in subdirectories) require the
+# test format to import mantid to setup paths to the scripts
+# directory
+set ( PYUNITTEST_TESTRUNNER_IMPORT_MANTID 1 )
+
 set ( TEST_PY_FILES
       test/AbinsAtomsDataTest.py
       test/AbinsCalculateDWSingleCrystalTest.py
@@ -90,6 +95,7 @@ set ( TEST_PY_FILES
 add_subdirectory(test/directtools)
 add_subdirectory(test/Muon)
 add_subdirectory(test/SANS)
+add_subdirectory(test/TOFTOF)
 
 # python unit tests
 if (PYUNITTEST_FOUND)

@@ -192,8 +192,12 @@ public:
   void convertToCounts();
   void convertToFrequencies();
 
-  HistogramIterator begin() const;
-  HistogramIterator end() const;
+  HistogramIterator begin() const &;
+  HistogramIterator end() const &;
+  // Calling begin/end on a temporary is not allowed as the iterator
+  // reference will be immediately invalidated.
+  HistogramIterator begin() const && = delete;
+  HistogramIterator end() const && = delete;
 
 private:
   template <class TX> void initX(const TX &x);

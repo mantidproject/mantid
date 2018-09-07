@@ -84,6 +84,10 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=StringListValidator(['Linear', 'CSpline']),
                              doc='Type of interpolation')
 
+        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
+                             validator=IntBoundedValidator(0),
+                             doc='Maximum number of tries made to generate a scattering point')
+
         # -------------------------------------------------------------------------------------------
 
         # Beam size
@@ -230,6 +234,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         monte_carlo_alg.setProperty("EventsPerPoint", self._events)
         monte_carlo_alg.setProperty("NumberOfWavelengthPoints", self._number_wavelengths)
         monte_carlo_alg.setProperty("Interpolation", self._interpolation)
+        monte_carlo_alg.setProperty("MaxScatterPtAttempts", self._max_scatter_attempts)
         monte_carlo_alg.execute()
 
         output_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
@@ -265,6 +270,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._number_wavelengths = self.getProperty('NumberOfWavelengthPoints').value
         self._events = self.getProperty('EventsPerPoint').value
         self._interpolation = self.getProperty('Interpolation').value
+        self._max_scatter_attempts = self.getProperty('MaxScatterPtAttempts').value
 
         # beam options
         self._beam_height = self.getProperty('BeamHeight').value

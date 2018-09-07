@@ -87,6 +87,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      Direction.Output),
                              doc='Combined output workspace')
+        self.copyProperties('AlignAndFocusPowder', ['UnfocussedWorkspace'])
 
         self.declareProperty(ITableWorkspaceProperty('Characterizations', '',
                                                      Direction.Input, PropertyMode.Optional),
@@ -94,6 +95,18 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         self.copyProperties("AlignAndFocusPowder", PROPS_FOR_ALIGN)
         self.copyProperties('PDDetermineCharacterizations', PROPS_FOR_PD_CHARACTER)
+
+    def validateInputs(self):
+        errors = dict()
+
+        unfocusname = self.getPropertyValue('UnfocussedWorkspace')
+        if len(unfocusname) > 0:
+            finalname = self.getPropertyValue('OutputWorkspace')
+            if unfocusname == finalname:
+                errors["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace"
+                errors["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace"
+
+        return errors
 
     def _getLinearizedFilenames(self, propertyName):
         runnumbers = self.getProperty(propertyName).value
@@ -188,15 +201,19 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                                    OtherProperties=alignandfocusargs,
                                    CacheDir=cachedir).OutputFilename
 
-    def __processFile(self, filename, wkspname, file_prog_start, determineCharacterizations):
+    def __processFile(self, filename, wkspname, unfocusname, file_prog_start, determineCharacterizations):
         chunks = determineChunking(filename, self.chunkSize)
-        self.log().information('Processing \'%s\' in %d chunks' % (filename, len(chunks)))
-        prog_per_chunk_step = self.prog_per_file * 1./(6.*float(len(chunks))) # for better progress reporting - 6 steps per chunk
+        numSteps = 6 # for better progress reporting - 6 steps per chunk
+        if unfocusname != '':
+            numSteps = 7 # one more for accumulating the unfocused workspace
+        self.log().information('Processing \'{}\' in {:d} chunks'.format(filename, len(chunks)))
+        prog_per_chunk_step = self.prog_per_file * 1./(numSteps*float(len(chunks)))
 
         # inner loop is over chunks
         for (j, chunk) in enumerate(chunks):
-            prog_start = file_prog_start + float(j) * 5. * prog_per_chunk_step
-            chunkname = "%s_c%d" % (wkspname, j)
+            prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
+            chunkname = '{}_c{:d}'.format(wkspname, j)
+            unfocusname_chunk = '{}_c{:d}'.format(unfocusname, j)
             Load(Filename=filename, OutputWorkspace=chunkname,
                  startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step,
                  **chunk)
@@ -221,7 +238,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                              Target='TOF', EMode='Elastic')
             prog_start += prog_per_chunk_step
 
-            AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname,
+            AlignAndFocusPowder(InputWorkspace=chunkname, OutputWorkspace=chunkname, UnfocussedWorkspace=unfocusname_chunk,
                                 startProgress=prog_start, endProgress=prog_start+2.*prog_per_chunk_step,
                                 **self.kwargs)
             prog_start += 2.*prog_per_chunk_step # AlignAndFocusPowder counts for two steps
@@ -229,11 +246,20 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if j == 0:
                 self.__updateAlignAndFocusArgs(chunkname)
                 RenameWorkspace(InputWorkspace=chunkname, OutputWorkspace=wkspname)
+                if unfocusname != '':
+                    RenameWorkspace(InputWorkspace=unfocusname_chunk, OutputWorkspace=unfocusname)
             else:
                 Plus(LHSWorkspace=wkspname, RHSWorkspace=chunkname, OutputWorkspace=wkspname,
                      ClearRHSWorkspace=self.kwargs['PreserveEvents'],
                      startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
                 DeleteWorkspace(Workspace=chunkname)
+
+                if unfocusname != '':
+                    Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_chunk, OutputWorkspace=unfocusname,
+                         ClearRHSWorkspace=self.kwargs['PreserveEvents'],
+                         startProgress=prog_start, endProgress=prog_start + prog_per_chunk_step)
+                    DeleteWorkspace(Workspace=unfocusname_chunk)
+
                 if self.kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname)
         # end of inner loop
@@ -244,10 +270,21 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         self.chunkSize = self.getProperty('MaxChunkSize').value
         self.absorption = self.getProperty('AbsorptionWorkspace').value
         self.charac = self.getProperty('Characterizations').value
-        finalname = self.getProperty('OutputWorkspace').valueAsStr
+        finalname = self.getPropertyValue('OutputWorkspace')
         useCaching = len(self.getProperty('CacheDir').value) > 0
 
-        if not useCaching:
+        # accumulate the unfocused workspace if it was requested
+        # empty string means it is not used
+        unfocusname = self.getPropertyValue('UnfocussedWorkspace')
+        unfocusname_file = ''
+        if len(unfocusname) > 0:
+            unfocusname_file = '__{}_partial'.format(unfocusname)
+
+        if useCaching:
+            # unfocus check only matters if caching is requested
+            if unfocusname != '':
+                self.log().warning('CacheDir is specified with "UnfocussedWorkspace" - reading cache files disabled')
+        else:
             self.log().warning('CacheDir is not specified - functionality disabled')
 
         self.prog_per_file = 1./float(len(filenames)) # for better progress reporting
@@ -269,7 +306,9 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
             wkspname += '_f%d' % i # add file number to be unique
 
-            if useCaching and os.path.exists(cachefile):
+            # if the unfocussed data is requested, don't read it from disk
+            # because of the extra complication of the unfocussed workspace
+            if useCaching and os.path.exists(cachefile) and unfocusname == '':
                 LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
                 # TODO LoadNexusProcessed has a bug. When it finds the
                 # instrument name without xml it reads in from an IDF
@@ -282,8 +321,10 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 if editinstrargs:
                     EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
             else:
-                self.__processFile(filename, wkspname, self.prog_per_file*float(i), not useCaching)
+                self.__processFile(filename, wkspname, unfocusname_file, self.prog_per_file*float(i), not useCaching)
 
+                # write out the cachefile for the main reduced data independent of whether
+                # the unfocussed workspace was requested
                 if useCaching:
                     SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
 
@@ -291,12 +332,22 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             if i == 0:
                 if wkspname != finalname:
                     RenameWorkspace(InputWorkspace=wkspname, OutputWorkspace=finalname)
+                if unfocusname != '':
+                    RenameWorkspace(InputWorkspace=unfocusname_file, OutputWorkspace=unfocusname)
             else:
                 Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
                      ClearRHSWorkspace=self.kwargs['PreserveEvents'])
                 DeleteWorkspace(Workspace=wkspname)
+
+                if unfocusname != '':
+                    Plus(LHSWorkspace=unfocusname, RHSWorkspace=unfocusname_file, OutputWorkspace=unfocusname,
+                         ClearRHSWorkspace=self.kwargs['PreserveEvents'])
+                    DeleteWorkspace(Workspace=unfocusname_file)
+
                 if self.kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
+                    # not compressing unfocussed workspace because it is in d-spacing
+                    # and is likely to be from a different part of the instrument
 
         # with more than one chunk or file the integrated proton charge is
         # generically wrong
@@ -304,6 +355,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
 
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])
+        if unfocusname != '':
+            self.setProperty('UnfocussedWorkspace', mtd[unfocusname])
 
 
 # Register algorithm with Mantid.

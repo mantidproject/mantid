@@ -81,6 +81,8 @@ public:
            "according to a grouping scheme defined in a CalFile.";
   }
 
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   // Overridden Algorithm methods
   void init() override;
