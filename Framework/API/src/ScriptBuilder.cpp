@@ -31,11 +31,11 @@ const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity,
-                             bool appendTimestamp, bool ignoreGroupWorkspaces)
+                             bool appendTimestamp, bool projectRecovery)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp),
-      m_ignoreGroups(ignoreGroupWorkspaces) {}
+      m_timestampCommands(appendTimestamp), m_projectRecovery(projectRecovery) {
+}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -88,10 +88,12 @@ void ScriptBuilder::writeHistoryToStream(
     }
   } else {
     // create the string for this algorithm
-    if (!m_ignoreGroups) {
+    if (!m_projectRecovery) {
       createStringForAlg(os, algHistory);
     }
-    if (m_ignoreGroups && algHistory->name() != "GroupWorkspaces") {
+    if (m_projectRecovery &&
+        !(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
+                    algHistory->name()) != m_algsToIgnore.end())) {
       createStringForAlg(os, algHistory);
     }
   }
