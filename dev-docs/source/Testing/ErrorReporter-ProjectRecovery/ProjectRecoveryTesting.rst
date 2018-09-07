@@ -86,7 +86,7 @@ Project Recovery test
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
    for i in range(300):
        CloneWorkspace(InputWorkspace='100Rebinned', OutputWorkspace='%sClone'%str(i))
-   SaveCSV(InputWorkspace='2999Clone', Filename=testing_directory + 'Clone.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory + 'Clone.csv')
 
 - Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
