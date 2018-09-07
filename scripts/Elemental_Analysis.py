@@ -62,6 +62,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.peaks.minor.on_checkbox_unchecked(self.minor_peaks_unchecked)
         self.peaks.gamma.on_checkbox_checked(self.gammas_checked)
         self.peaks.gamma.on_checkbox_unchecked(self.gammas_unchecked)
+        self.peaks.electron.on_checkbox_checked(self.electrons_checked)
+        self.peaks.electron.on_checkbox_unchecked(self.electrons_unchecked)
 
         self.widget_list.addWidget(self.peaks.view)
         self.widget_list.addWidget(self.detectors.view)
@@ -83,6 +85,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.element_lines = {}
         self.gamma_lines = []
         self.gamma_peaks = self._get_gamma_peaks()
+        self.electron_peaks = self._get_electron_peaks()
         self.electron_lines = []
         self._generate_element_widgets()
         self._generate_element_data()
@@ -132,6 +135,30 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.gamma_lines = []
         self.plotting.update_canvas()
 
+    def _get_electron_peaks(self):
+        return self.ptable.peak_data["Electrons"].copy()
+
+    def _plot_electrons(self, subplot, colour=None):
+        if colour is None:
+            colour = self.line_colours.next()
+        for peak, intensity in iteritems(self.electron_peaks):
+            self.electron_lines.append(
+                subplot.axvline(
+                    float(peak), 0, 1, color=colour))
+        self.plotting.update_canvas()
+
+    def electrons_checked(self):
+        colour = self.line_colours.next()
+        for subplot_name, subplot in iteritems(self.plotting.get_subplots()):
+            self._plot_electrons(subplot, colour=colour)
+
+    def electrons_unchecked(self):
+        for line in self.electron_lines:
+            line.remove()
+            del line
+        self.electron_lines = []
+        self.plotting.update_canvas()
+
     ### ----------------------- ###
 
     def load_run(self, detector, run):
@@ -144,6 +171,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.plotting.view.show()
         if self.peaks.gamma.isChecked():
             self._plot_gammas(subplot)
+        if self.peaks.electron.isChecked():
+            self._plot_electrons(subplot)
         self.plotting.update_canvas()
 
     def load_last_run(self, detector):
