@@ -1,19 +1,24 @@
 #pylint: disable=no-init,too-few-public-methods
 
-# test batch mode with sans2d and selecting a period in batch mode
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.api import AnalysisDataService
-from ISISCommandInterface import *
-from SANSBatchMode import *
+import mantid  # noqa
+
+from mantid.api import (AnalysisDataService, FileFinder)
+from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector, MaskFile, Gravity,
+                                                         UseCompatibilityMode, AssignSample, WavRangeReduction,
+                                                         LARMOR, BatchReduce)
+
+# test batch mode with sans2d and selecting a period in batch mode
 
 
-class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
+class SANS2DMultiPeriodSingleTest_V2(stresstesting.MantidStressTest):
 
-    reduced=''
+    reduced = ''
 
     def runTest(self):
-
+        pass
+        UseCompatibilityMode()
         SANS2D()
         Set1D()
         Detector("rear-detector")
@@ -24,20 +29,19 @@ class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
         self.reduced = WavRangeReduction()
 
     def validate(self):
-    # Need to disable checking of the Spectra-Detector map because it isn't
-    # fully saved out to the nexus file (it's limited to the spectra that
-    # are actually present in the saved workspace).
+        # Need to disable checking of the Spectra-Detector map because it isn't
+        # fully saved out to the nexus file (it's limited to the spectra that
+        # are actually present in the saved workspace).
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
+        return AnalysisDataService[self.reduced][6].name(),'SANS2DBatch.nxs'
 
-        return mtd[self.reduced][6].name(),'SANS2DBatch.nxs'
 
-
-class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
+class SANS2DMultiPeriodBatchTest_V2(SANS2DMultiPeriodSingleTest_V2):
 
     def runTest(self):
-
+        UseCompatibilityMode()
         SANS2D()
         Set1D()
         Detector("rear-detector")
@@ -50,13 +54,13 @@ class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
         self.reduced = '5512_SANS2DBatch'
 
 
-class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
+class LARMORMultiPeriodEventModeLoadingTest_V2(stresstesting.MantidStressTest):
     """
     This test checks if the positioning of all workspaces of a
     multi-period event-type file are the same.
     """
     def __init__(self):
-        super(LARMORMultiPeriodEventModeLoading, self).__init__()
+        super(LARMORMultiPeriodEventModeLoadingTest_V2, self).__init__()
         self.success = True
 
     def _get_position_and_rotation(self, workspace):
@@ -83,8 +87,8 @@ class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
             ws_name = base_name + str(index)
             workspace = AnalysisDataService.retrieve(ws_name)
             position, rotation = self._get_position_and_rotation(workspace)
-            self.assertEqual(position, reference_position)
-            self.assertEqual(rotation, reference_rotation)
+            if position != reference_position or rotation != reference_rotation:
+                self.success = False
 
     def runTest(self):
         LARMOR()
@@ -92,6 +96,9 @@ class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
         Detector("DetectorBench")
         MaskFile('USER_Larmor_163F_HePATest_r13038.txt')
         AssignSample('13038')
+        # Different in V2. We need to call the reduction in order to load the data. Hence we add the
+        # WaveRangeReduction here.
+        WavRangeReduction()
         base_name = "13038_sans_nxs_"
         number_of_workspaces = 4
         self._check_if_all_multi_period_workspaces_have_the_same_position(base_name, number_of_workspaces)

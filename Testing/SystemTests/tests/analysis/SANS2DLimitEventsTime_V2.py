@@ -2,13 +2,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+import mantid  # noqa
+from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, AssignSample, WavRangeReduction,
+                                                         UseCompatibilityMode)
 
 
-class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
-
+class SANS2DLimitEventsTimeTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
+        UseCompatibilityMode()
         SANS2D()
         MaskFile('MaskSANS2DReductionGUI_LimitEventsTime.txt')
         AssignSample('22048')
@@ -18,4 +19,4 @@ class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '22048rear_1D_1.5_12.5','SANSReductionGUI_LimitEventsTime.nxs'
+        return '22048rear_1D_1.5_12.5', 'SANSReductionGUI_LimitEventsTime.nxs'

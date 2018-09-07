@@ -72,16 +72,6 @@ class MantidStressTest(unittest.TestCase):
         from mantid.kernel import MemoryStats
         self.memory = MemoryStats().residentMem()/1024
 
-    def setSearchSaveDirectories(self, core_id, saveDir):
-        '''
-        Modify the defaultsave.directory to a path specific to each thread
-        '''
-        from mantid.kernel import config
-        config['datasearch.directories'] += "/core-%i" % (core_id)
-        config['defaultsave.directory'] = "%s/core-%i" % (saveDir,core_id)
-        sys.path.insert(0, config['defaultsave.directory'])
-        return
-
     def runTest(self):
         raise NotImplementedError('"runTest(self)" should be overridden in a derived class')
 
@@ -600,16 +590,12 @@ class TestRunner(object):
     SKIP_TEST = 97
 
 
-    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False, core_id=0,
-                 searchDir=None, saveDir=None):
+    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False):
         self._executable = executable
         self._exec_args = exec_args
         self._test_dir = ''
         self._escape_quotes = escape_quotes
         self._clean = clean
-        self._core_id = core_id
-        self._searchDir = searchDir
-        self._saveDir = saveDir
 
     def getTestDir(self):
         return self._test_dir
@@ -635,7 +621,7 @@ class TestRunner(object):
             exec_call += ' '  + self._exec_args
         # write script to temporary file and execute this file
         tmp_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        tmp_file.write(script.asString(clean=self._clean, core_id=self._core_id, saveDir=self._saveDir))
+        tmp_file.write(script.asString(clean=self._clean))
         tmp_file.close()
         cmd = exec_call + ' ' + tmp_file.name
         results = self.spawnSubProcess(cmd)
@@ -653,13 +639,12 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
-    def asString(self, clean=False, core_id=0, searchDir=None, saveDir=None):
+    def asString(self, clean=False):
         code = "import sys\n" + \
                ("sys.path.append('%s')\n" % TESTING_FRAMEWORK_DIR) + \
                ("sys.path.append('%s')\n" % self._test_dir) + \
                ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
                ("systest = %s()\n" % self._test_cls_name) + \
-               ("systest.setSearchSaveDirectories(%i,'%s')\n" % (core_id, saveDir)) + \
                ("if %r:\n" % self._exclude_in_pr_builds) + \
                ("    systest.excludeInPullRequests = lambda: False\n")
         if (not clean):
@@ -853,7 +838,89 @@ class TestManager(object):
                 modcounts[key] = 1
                 modtests[key] = [t]
 
-        return modcounts, modtests, test_stats
+        # Now we scan each test module (= python file) and list all the data files
+        # that are used by that module. The possible ways files are being specified
+        # are:
+        # 1. if the extension '.nxs' is present in the line
+        # 2. if there is a sequence of at least 4 digits inside a string
+        # In case number 2, we have to search for strings starting with 4 digits,
+        # i.e. "0123, or strings ending with 4 digits 0123".
+        # This might over-count, meaning some sequences of 4 digits might not be
+        # used for a file name specification, but it does not matter if it gets
+        # identified as a filename as the probability of the same sequence being
+        # present in another python file is small, and it would therefore not lock
+        # any other tests.
+
+        # Some dictionaries to store the info
+        files_required_by_test_module = dict()
+        data_file_lock_status = dict()
+        # The extension mostly used is '.nxs'
+        pattern = ".nxs"
+        # A regex check is used to iterate back from the position of '.nxs' and
+        # check that the current character is still part of a variable name. This
+        # is needed to find the start of the string, hence the total filename.
+        check = re.compile("[A-Za-z0-9_-]")
+        # In the case of looking for digits inside strings, the strings can start
+        # with either " or '
+        string_quotation_mark = ["'",'"']
+
+        # Now look through all the test modules and build the list of data files
+        for modkey in modtests.keys():
+
+            fname = modkey+".py"
+            f = open(os.path.join(os.path.dirname(self._testDir),"analysis",fname),"r")
+            files_required_by_test_module[modkey] = []
+            for line in f.readlines():
+
+                # Search for all instances of '.nxs'
+                for indx in [m.start() for m in re.finditer(pattern, line)]:
+                    # When '.nxs' is found, iterate backwards to find the start
+                    # of the filename.
+                    for i in range(indx-1,1,-1):
+                        # If the present character is not either a letter, digit,
+                        # underscore, or hyphen then the beginning of the filename
+                        # has been found
+                        if not check.search(line[i]):
+                            key = line[i+1:indx]+pattern
+                            if (key not in files_required_by_test_module[modkey]) and (key != '.nxs'):
+                                files_required_by_test_module[modkey].append(key)
+                                data_file_lock_status[key] = False
+                            break
+
+                # Search for '0123 or "0123
+                for so in string_quotation_mark:
+                    p = re.compile(so+r"\d\d\d\d")
+                    for m in p.finditer(line):
+                        # Iterate forwards to find the closing quotation mark
+                        for i in range(m.end(),len(line)):
+                            if line[i] == so:
+                                key = line[m.start()+1:i]
+                                if key not in files_required_by_test_module[modkey]:
+                                    files_required_by_test_module[modkey].append(key)
+                                    data_file_lock_status[key] = False
+                                break
+
+                # Search for 0123' or 0123"
+                for so in string_quotation_mark:
+                    p = re.compile(r"\d\d\d\d"+so)
+                    for m in p.finditer(line):
+                        # Iterate backwards to find the opening quotation mark
+                        for i in range(m.start(),1,-1):
+                            if line[i] == so:
+                                key = line[i+1:m.end()-1]
+                                if key not in files_required_by_test_module[modkey]:
+                                    files_required_by_test_module[modkey].append(key)
+                                    data_file_lock_status[key] = False
+                                break
+
+        if (not self._quiet):
+            for key in files_required_by_test_module.keys():
+                print('=============================================')
+                print(key)
+                for s in files_required_by_test_module[key]:
+                    print(s)
+
+        return modcounts, modtests, test_stats, files_required_by_test_module, data_file_lock_status
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
@@ -1064,7 +1131,7 @@ class MantidFrameworkConfig:
         config['filefinder.casesensitive'] = 'Off'
 
         # Maximum number of threads
-        config['MultiThreaded.MaxCores'] = '4'
+        config['MultiThreaded.MaxCores'] = '2'
 
         # datasearch
         if self.__datasearch:
@@ -1101,83 +1168,114 @@ def envAsString():
 # Each threads starts a loop and gathers a first test module from the
 # master test list which is stored in the tests_dict shared dictionary,
 # starting with the number in the module list equal to the process id.
+#
+# Each process then checks if all the data files requird by the current
+# test module are available (i.e. have not been locked by another
+# thread). If all files are unlocked, the thread proceeds with that test
+# module. If not, it goes further down the list until it finds a module
+# whose files are all available.
+#
 # Once it has completed the work in the current module, it checks if the
 # number of modules that remains to be executed is greater than 0. If
 # there is some work left to do, the thread finds the next module that
 # still has not been executed (searches through the tests_lock array
 # and finds the next element that has a 0 value). This aims to have all
-# threads end calculation approximately at the same time, even though in
-# practise some test modules take a long time to complete.
+# threads end calculation approximately at the same time.
 #########################################################################
 def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                     tests_lock, tests_left, res_array, stat_dict,
                     total_number_of_tests, maximum_name_length,
-                    tests_done, process_number, lock):
+                    tests_done, process_number, lock, required_files_dict,
+                    locked_files_dict):
     
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
 
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
-                        escape_quotes=True, clean=options.clean, core_id=process_number,
-                        searchDir=dataDir, saveDir=saveDir)
-
-    # Create temporary local work directory
-    save_dir_for_this_core = saveDir + "/core-%i" % process_number
-    shutil.rmtree(save_dir_for_this_core, ignore_errors=True)
-    os.mkdir(save_dir_for_this_core)
+                        escape_quotes=True, clean=options.clean)
 
     # Make sure the status is 1 to begin with as it will be replaced 
     res_array[process_number + 2*options.ncores] = 1
 
-    # Begin loop
-    imodule = process_number
+    # Begin loop: as long as there are still some test modules that
+    # have not been run, keep looping
     while (tests_left.value > 0):
-
+        # Empty test list
+        local_test_list = None
+        # Get the lock to inspect the global list of tests
         lock.acquire()
-        for i in range(imodule,len(tests_lock)):
+        # Run through the list of test modules, starting from the ith
+        # element where i is the process number.
+        for i in range(process_number,len(tests_lock)):
+            # If the lock for this particular module is 0, it means
+            # this module has not yet been run and it will be chosen
+            # for this particular loop
             if tests_lock[i] == 0:
-                local_test_list = tests_dict[str(i)]
-                tests_lock[i] = 1
-                imodule = i
-                tests_left.value -= 1
-                break
+                # Check for the lock status of the required files for this test module
+                modname = tests_dict[str(i)][0]._modname
+                no_files_are_locked = True
+                for f in required_files_dict[tests_dict[str(i)][0]._modname]:
+                    if locked_files_dict[f]:
+                        no_files_are_locked = False
+                        break
+                # If all failes are available, we can proceed with this module
+                if no_files_are_locked:
+                    # Lock the data files for this test module
+                    for f in required_files_dict[modname]:
+                        locked_files_dict[f] = True
+                    # Set the current test list to the chosen module
+                    local_test_list = tests_dict[str(i)]
+                    tests_lock[i] = 1
+                    imodule = i
+                    tests_left.value -= 1
+                    break
+        # Release the lock
         lock.release()
 
-        if (not options.quiet):
-            print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
-                   % (process_number, imodule, local_test_list[0]._modname, len(local_test_list)))
-            sys.stdout.flush()
+        # Check if local_test_list exists: if all data was locked,
+        # then there is no test list
+        if local_test_list:
 
-        mgr = TestManager(test_loc=testDir,
-                          runner=runner,
-                          output=[reporter],
-                          quiet=options.quiet,
-                          testsInclude=options.testsInclude,
-                          testsExclude=options.testsExclude,
-                          exclude_in_pr_builds=options.exclude_in_pr_builds,
-                          showSkipped=options.showskipped,
-                          output_on_failure=options.output_on_failure,
-                          process_number=process_number,
-                          ncores=options.ncores,
-                          clean=options.clean,
-                          list_of_tests=local_test_list)
+            if (not options.quiet):
+                print("##### Thread %2i will execute module: [%3i] %s (%i tests)" \
+                       % (process_number, imodule, modname, len(local_test_list)))
+                sys.stdout.flush()
 
-        try:
-            mgr.executeTests(tests_done)
-        except KeyboardInterrupt:
-            mgr.markSkipped("KeyboardInterrupt", tests_done.value)
+            # Create a TestManager, giving it a pre-compiled list_of_tests
+            mgr = TestManager(test_loc=testDir,
+                              runner=runner,
+                              output=[reporter],
+                              quiet=options.quiet,
+                              testsInclude=options.testsInclude,
+                              testsExclude=options.testsExclude,
+                              exclude_in_pr_builds=options.exclude_in_pr_builds,
+                              showSkipped=options.showskipped,
+                              output_on_failure=options.output_on_failure,
+                              process_number=process_number,
+                              ncores=options.ncores,
+                              clean=options.clean,
+                              list_of_tests=local_test_list)
 
-        # Update the test results in the array shared accross cores
-        res_array[process_number] += mgr._skippedTests
-        res_array[process_number + options.ncores] += mgr._failedTests
-        res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
-            res_array[process_number + 2*options.ncores])
-        
-        # Delete the TestManager
-        del mgr
+            try:
+                mgr.executeTests(tests_done)
+            except KeyboardInterrupt:
+                mgr.markSkipped("KeyboardInterrupt", tests_done.value)
 
-    shutil.rmtree(save_dir_for_this_core, ignore_errors=True)    
+            # Update the test results in the array shared accross cores
+            res_array[process_number] += mgr._skippedTests
+            res_array[process_number + options.ncores] += mgr._failedTests
+            res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\
+                res_array[process_number + 2*options.ncores])
+
+            # Delete the TestManager
+            del mgr
+
+            # Unlock the data files
+            lock.acquire()
+            for f in required_files_dict[modname]:
+                locked_files_dict[f] = False
+            lock.release()
 
     # Report the errors
     local_dict = dict()

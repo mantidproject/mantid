@@ -1,15 +1,14 @@
 #pylint: disable=no-init
-
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+import mantid  # noqa
+from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, SetDetectorOffsets, Gravity, Set1D,
+                                                         UseCompatibilityMode, AssignSample, WavRangeReduction)
 
 
-class SANS2DFrontNoGrav(stresstesting.MantidStressTest):
-
+class SANS2DFrontNoGravTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
-
+        UseCompatibilityMode()
         SANS2D()
         MaskFile('MASKSANS2D_094i_RKH.txt')
         SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -25,11 +24,12 @@ class SANS2DFrontNoGrav(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
+        return '2500front_1D_4.6_12.85', 'SANS2DFrontNoGrav.nxs'
 
 
-class SANS2DWithExtraLengthGravity(stresstesting.MantidStressTest):
+class SANS2DWithExtraLengthGravityTest_V2(stresstesting.MantidStressTest):
     def runTest(self):
+        UseCompatibilityMode()
         SANS2D()
         MaskFile('MASKSANS2D_094i_RKH.txt')
         SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)

@@ -91,7 +91,8 @@ if __name__ == "__main__":
 
     # Configure properties file
     mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
-                                                  data_dirs=data_paths, save_dir=save_dir,
+                                                  data_dirs=data_paths,
+                                                  save_dir=save_dir,
                                                   archivesearch=options.archivesearch)
     if options.makeprop:
         mtdconf.config()
@@ -100,17 +101,23 @@ if __name__ == "__main__":
     # Generate list of tests
     #########################################################################
 
-    runner = stresstesting.TestRunner(executable=options.executable, exec_args=options.execargs,
-                            escape_quotes=True,
-                            searchDir=mtdconf.dataDir, saveDir=mtdconf.saveDir)
+    runner = stresstesting.TestRunner(executable=options.executable,
+                                      exec_args=options.execargs,
+                                      escape_quotes=True)
 
-    tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir, runner=runner, quiet=options.quiet,
-                       testsInclude=options.testsInclude, testsExclude=options.testsExclude,
-                       exclude_in_pr_builds=options.exclude_in_pr_builds)
+    tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir,
+                                     runner=runner,
+                                     quiet=options.quiet,
+                                     testsInclude=options.testsInclude,
+                                     testsExclude=options.testsExclude,
+                                     exclude_in_pr_builds=options.exclude_in_pr_builds)
 
-    test_counts, test_list, test_stats = tmgr.generateMasterTestList()
+    test_counts, test_list, test_stats, files_required_by_test_module, data_file_lock_status = \
+        tmgr.generateMasterTestList()
 
     number_of_test_modules = len(test_list.keys())
+    total_number_of_tests = test_stats[0]
+    maximum_name_length = test_stats[1]
 
     #########################################################################
     # Run the tests with a task scheduler
@@ -143,9 +150,14 @@ if __name__ == "__main__":
     tests_left = Value('i', number_of_test_modules)
     # A shared value to count the number of completed tests
     tests_done = Value('i', 0)
-    
-    total_number_of_tests = test_stats[0]
-    maximum_name_length = test_stats[1]
+    # A shared dict to store which data files are required by each test module
+    required_files_dict = manager.dict()
+    for key in files_required_by_test_module.keys():
+        required_files_dict[key] = files_required_by_test_module[key]
+    # A shared dict to store the locked status of each data file
+    locked_files_dict = manager.dict()
+    for key in data_file_lock_status.keys():
+        locked_files_dict[key] = data_file_lock_status[key]
 
     # Store in reverse number of number of tests in each module into the shared dictionary
     reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
@@ -166,7 +178,8 @@ if __name__ == "__main__":
     for ip in range(options.ncores):
         processes.append(Process(target=stresstesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
                          mtdconf.dataDir, options, tests_dict, tests_lock, tests_left, results_array,
-                         status_dict, total_number_of_tests, maximum_name_length, tests_done, ip, lock)))
+                         status_dict, total_number_of_tests, maximum_name_length, tests_done, ip, lock,
+                         required_files_dict, locked_files_dict)))
     # Start and join processes
     for p in processes:
         p.start()

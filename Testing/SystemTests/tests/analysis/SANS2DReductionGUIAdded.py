@@ -2,12 +2,9 @@
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
+import ISISCommandInterface as i
 import copy
-import SANSadd2
 import SANS2DReductionGUI as sansgui
-import stresstesting
-import ISISCommandInterface as ii
-import sans.command_interface.ISISCommandInterface as ii2
 
 
 class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
@@ -17,31 +14,32 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         self.checkFirstPart()
 
         # add files (SAMPLE and CAN)
+        import SANSadd2
         SANSadd2.add_runs(('22048','22048'),'SANS2D', '.nxs',
                           rawTypes=('.add','.raw','.s*'), lowMem=False)
         SANSadd2.add_runs(('22023','22023'),'SANS2D', '.nxs',
                           rawTypes=('.add','.raw','.s*'), lowMem=False)
 
         # load values:
-        ii.SetCentre('155.45','-169.6','rear')
-        ii.SetCentre('155.45','-169.6','front')
-        ii.AssignSample(r'SANS2D00022048-add.nxs',
-                        reload = True, period = 1)
-        ii.AssignCan(r'SANS2D00022023-add.nxs',
-                     reload = True, period = 1)
-        ii.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs',
-                              period_t=1, period_d=1)
-        ii.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs',
-                           period_t=1, period_d=1)
+        i.SetCentre('155.45','-169.6','rear')
+        i.SetCentre('155.45','-169.6','front')
+        i.AssignSample(r'SANS2D00022048-add.nxs',
+                       reload = True, period = 1)
+        i.AssignCan(r'SANS2D00022023-add.nxs',
+                    reload = True, period = 1)
+        i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs',
+                             period_t=1, period_d=1)
+        i.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs',
+                          period_t=1, period_d=1)
 
         self.checkAfterLoad()
 
         self.applyGUISettings()
 
         self.applySampleSettings()
-        _user_settings_copy = copy.deepcopy(ii.ReductionSingleton().user_settings)
+        _user_settings_copy = copy.deepcopy(i.ReductionSingleton().user_settings)
 
-        reduced = ii.WavRangeReduction(full_trans_wav=False, resetSetup=False)
+        reduced = i.WavRangeReduction(full_trans_wav=False, resetSetup=False)
         RenameWorkspace(reduced, OutputWorkspace='trans_test_rear')
 
         self.checkFittingSettings()
@@ -59,14 +57,15 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
-        ii.SANS2DTUBES()
-        ii.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii.Gravity(False)
-        ii.Set1D()
+        i.SANS2DTUBES()
+        i.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
+        i.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        i.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        i.Gravity(False)
+        i.Set1D()
 
         # add files (SAMPLE and CAN)
+        import SANSadd2
         SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = True)
@@ -74,12 +73,12 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = True)
 
-        ii.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        ii.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
-        ii.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
+        i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
-        ii.WavRangeReduction()
+        i.WavRangeReduction()
 
     def validate(self):
         self.tolerance = 0.01
@@ -100,15 +99,16 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
 class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
-        ii.SANS2DTUBES()
-        ii.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii.Gravity(False)
-        ii.Set1D()
+        i.SANS2DTUBES()
+        i.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
+        i.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        i.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        i.Gravity(False)
+        i.Set1D()
 
         # add files (SAMPLE and CAN)
         time_shifts=[1]
+        import SANSadd2
         SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
@@ -116,12 +116,12 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
 
-        ii.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        ii.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
-        ii.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
+        i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
-        ii.WavRangeReduction()
+        i.WavRangeReduction()
 
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be
@@ -144,14 +144,15 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
 class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
-        ii.SANS2DTUBES()
-        ii.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii.Gravity(False)
-        ii.Set1D()
+        i.SANS2DTUBES()
+        i.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
+        i.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        i.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        i.Gravity(False)
+        i.Set1D()
 
         # add files (SAMPLE and CAN)
+        import SANSadd2
         SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = False)
@@ -159,12 +160,12 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
                           rawTypes=('.add','.raw','.s*'), lowMem=False,
                           saveAsEvent=True, isOverlay = False)
 
-        ii.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        ii.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
-        ii.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
+        i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
-        ii.WavRangeReduction()
+        i.WavRangeReduction()
 
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be
@@ -187,25 +188,25 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
-        ii.SANS2DTUBES()
-        ii.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii.Gravity(False)
-        ii.Set1D()
+        i.SANS2DTUBES()
+        i.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
+        i.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        i.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        i.Gravity(False)
+        i.Set1D()
 
         # add files (SAMPLE and CAN) using the ISISCommandInterface
         runs_sample = ('28827','28797')
-        ii.AddRuns(runs_sample, instrument = 'SANS2DTUBES', saveAsEvent=True)
+        i.AddRuns(runs_sample, instrument = 'SANS2DTUBES', saveAsEvent=True)
         runs_can = ('28823','28793')
-        ii.AddRuns(runs_can, instrument = 'SANS2DTUBES', saveAsEvent=True)
+        i.AddRuns(runs_can, instrument = 'SANS2DTUBES', saveAsEvent=True)
 
-        ii.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
-        ii.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
-        ii.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
+        i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
+        i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
+        i.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
+        i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
-        ii.WavRangeReduction()
+        i.WavRangeReduction()
 
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be
@@ -223,132 +224,6 @@ class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2D
         # Delete the stored files
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
-
-
-class SANS2DAddedEventFilesWithOverlayTest_V2(stresstesting.MantidStressTest):
-    def runTest(self):
-        ii2.UseCompatibilityMode()
-        ii2.SANS2DTUBES()
-        ii2.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii2.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii2.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii2.Gravity(False)
-        ii2.Set1D()
-
-        # add files (SAMPLE and CAN)
-        ii2.AddRuns(runs=('28827', '28797'), instrument='SANS2DTUBES', defType='.nxs', rawTypes=('.add', '.raw', '.s*'),
-                    lowMem=False, saveAsEvent=True, isOverlay=True)
-        ii2.AddRuns(('28823', '28793'), 'SANS2DTUBES', defType='.nxs', rawTypes=('.add', '.raw', '.s*'),
-                    lowMem=False, saveAsEvent=True, isOverlay=True)
-
-        ii2.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
-        ii2.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
-        ii2.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii2.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
-
-        ii2.WavRangeReduction()
-
-    def validate(self):
-        self.tolerance = 0.01
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        return '28827rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithOverlay.nxs'
-
-    def cleanup(self):
-        # Delete all workspaces
-        for ws in AnalysisDataService.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
-        # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
-
-
-class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(stresstesting.MantidStressTest):
-    def runTest(self):
-        ii2.UseCompatibilityMode()
-        ii2.SANS2DTUBES()
-        ii2.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii2.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii2.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii2.Gravity(False)
-        ii2.Set1D()
-
-        # add files (SAMPLE and CAN)
-        time_shifts = [1]
-        SANSadd2.add_runs(('28827', '28797'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=True, time_shifts=time_shifts)
-        SANSadd2.add_runs(('28823', '28793'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=True, time_shifts=time_shifts)
-
-        ii2.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
-        ii2.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
-        ii2.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii2.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
-
-        ii2.WavRangeReduction()
-
-    def validate(self):
-        # we have double the sample and the can, this means that the reduced data will be
-        # almost the same
-        self.tolerance = 0.01
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        return '28827rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithOverlayAndTimeShifts.nxs'
-
-    def cleanup(self):
-        # Delete all workspaces
-        for ws in AnalysisDataService.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
-        # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
-
-
-class SANS2DAddedEventFilesWithoutOverlayTest_V2(stresstesting.MantidStressTest):
-    def runTest(self):
-        ii2.UseCompatibilityMode()
-        ii2.SANS2DTUBES()
-        ii2.MaskFile('USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
-        ii2.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        ii2.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        ii2.Gravity(False)
-        ii2.Set1D()
-
-        # add files (SAMPLE and CAN)
-        SANSadd2.add_runs(('28827', '28797'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=False)
-        SANSadd2.add_runs(('28823', '28793'), 'SANS2DTUBES', '.nxs',
-                          rawTypes=('.add', '.raw', '.s*'), lowMem=False,
-                          saveAsEvent=True, isOverlay=False)
-
-        ii2.AssignSample(r'SANS2D00028797-add.nxs', reload=True)
-        ii2.AssignCan(r'SANS2D00028793-add.nxs', reload=True)
-        ii2.TransmissionSample(r'SANS2D00028808.nxs', r'SANS2D00028784.nxs')
-        ii2.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
-
-        ii2.WavRangeReduction()
-
-    def validate(self):
-        # we have double the sample and the can, this means that the reduced data will be
-        # almost the same
-        self.tolerance = 0.01
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        return '28827rear_1D_1.75_16.5', 'SANS2DTUBES_AddedEventFilesWithoutOverlay.nxs'
-
-    def cleanup(self):
-        # Delete all workspaces
-        for ws in AnalysisDataService.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
-        # Delete the stored files
-        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028793-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
 if __name__ == "__main__":

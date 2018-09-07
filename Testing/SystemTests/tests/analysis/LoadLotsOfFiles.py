@@ -1,7 +1,8 @@
 # pylint: disable=invalid-name,no-init
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import config, Load
+from mantid.simpleapi import *
 from mantid.api import FrameworkManager
+import copy
 import os
 import re
 import stresstesting
@@ -113,15 +114,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'Fe-alpha.cif',
                 'Sm2O3.cif',
                 'template_ENGINX_241391_236516_North_bank.prm',
-                'test_data_Iqxy.dat',
-                'BioSANS_test_data_Iqxy.dat',
-                'BioSANS_exp61_scan0004_0001_Iqxy.dat',
-                'test_data_Iq.xml',
-                'BioSANS_exp61_scan0004_0001_Iq.xml',
-                'BioSANS_test_data_Iq.xml',
-                'BioSANS_exp61_scan0004_0001_Iq.txt',
-                'test_data_Iq.txt',
-                'BioSANS_test_data_Iq.txt'
                 ]
 
 EXPECTED_EXT = '.expected'
@@ -141,6 +133,16 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*\.phonon']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]
+
+# This list stores files that will be loaded first.
+# Implemented as simple solution to avoid failures on
+# WinXP where small files have trouble allocating larger
+# amounts of contiguous memory.
+# Usage of XP is getting lower so we don't want to compromise the
+# performance of the code elsewhere just to pass here
+PRIORITY_FILES = ['HYS_13658_event.nxs',
+                  'ILLIN5_Sample_096003.nxs',
+                  'ILLIN5_Vana_095893.nxs']
 
 
 def useDir(direc):
@@ -184,18 +186,33 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
         dirs = [item for item in dirs if useDir(item)]
         print("Looking for data files in:", ', '.join(dirs))
 
-        # Files
-        datafiles = []
+        # Files and their corresponding sizes. the low-memory win machines
+        # fair better loading the big files first
+        files = {}
+        priority_abspaths = copy.deepcopy(PRIORITY_FILES)
         for direc in dirs:
             myFiles = os.listdir(direc)
             for filename in myFiles:
                 (good, fullpath) = useFile(direc, filename)
+                # print "***", good, filename
                 if good:
-                    # there is a further check just before loading
-                    # that then file still exists
-                    datafiles.append(fullpath)
+                    files[fullpath] = os.path.getsize(fullpath)
+                    try:
+                        cur_index = PRIORITY_FILES.index(filename)
+                        priority_abspaths[cur_index] = fullpath
+                    except ValueError:
+                        pass
 
-        datafiles = sorted(datafiles, reverse=True)
+        datafiles = sorted(files, key=lambda key: files[key], reverse=True)
+
+        # Put the priority ones first
+        for insertion_index, fname in enumerate(priority_abspaths):
+            try:
+                cur_index = datafiles.index(fname)
+            except ValueError:
+                continue
+            datafiles.pop(cur_index)
+            datafiles.insert(insertion_index, fname)
 
         return datafiles
 
