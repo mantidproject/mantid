@@ -184,16 +184,16 @@ def getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params):
     # If we're not given initial guesses for the BVG, then we try to find instrument defaults.  If those are not
     # available we use default values.
     if sigX0Params is None:
-        if peaks_ws.getInstrument().hasParameter("sigX0Params"):
-            sigX0Params = np.array(peaks_ws.getInstrument().getStringParameter("sigX0Params")[0].split(),dtype=float)
+        if peaks_ws.getInstrument().hasParameter("sigSC0Params"):
+            sigX0Params = np.array(peaks_ws.getInstrument().getStringParameter("sigSC0Params")[0].split(),dtype=float)
         else:
             sigX0Params=[0.00413132, 1.54103839, 1.0, -0.00266634]
     
     if sigY0 is None:
-        if peaks_ws.getInstrument().hasParameter("sigY0"):
-            sigY0 = peaks_ws.getInstrument().getNumberParameter("sigY0")[0]
+        if peaks_ws.getInstrument().hasParameter("sigAZ0"):
+            sigY0 = peaks_ws.getInstrument().getNumberParameter("sigAZ0")[0]
         else:
-            sigY0=0.025
+            sigY0=0.0025
     if sigP0Params is None:
         if peaks_ws.getInstrument().hasParameter("sigP0Params"):
             sigP0Params = np.array(peaks_ws.getInstrument().getStringParameter("sigP0Params")[0].split(),dtype=float)
