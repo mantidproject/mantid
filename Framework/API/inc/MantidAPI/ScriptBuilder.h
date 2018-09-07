@@ -49,7 +49,7 @@ public:
   ScriptBuilder(boost::shared_ptr<HistoryView> view,
                 std::string versionSpecificity = "old",
                 bool appendTimestamp = false,
-                bool ignoreGroupWorkspaces = false);
+                std::vector<std::string> ignoreTheseAlgs = {""});
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -74,67 +74,7 @@ private:
   std::string m_versionSpecificity;
   bool m_timestampCommands;
   bool m_projectRecovery;
-  std::vector<std::string> m_algsToIgnore = {
-      "EnggSaveGSASIIFitResultsToHDF5",
-      "EnggSaveSinglePeakFitResultsToHDF5",
-      "ExampleSaveAscii",
-      "SANSSave",
-      "SaveANSTOAscii",
-      "SaveAscii",
-      "SaveBankScatteringAngles",
-      "SaveCSV",
-      "SaveCalFile",
-      "SaveCanSAS1D",
-      "SaveDaveGrp",
-      "SaveDetectorsGrouping",
-      "SaveDiffCal",
-      "SaveDiffFittingAscii",
-      "SaveDspacemap",
-      "SaveFITS",
-      "SaveFocusedXYE",
-      "SaveFullprofResolution",
-      "SaveGDA",
-      "SaveGEMMAUDParamFile",
-      "SaveGSASInstrumentFile",
-      "SaveGSS",
-      "SaveHKL",
-      "SaveILLCosmosAscii",
-      "SaveISISNexus",
-      "SaveIsawDetCal",
-      "SaveIsawPeaks",
-      "SaveIsawQvector",
-      "SaveIsawUB",
-      "SaveLauenorm",
-      "SaveMD",
-      "SaveMDWorkspaceToVTK",
-      "SaveMask",
-      "SaveNISTDAT",
-      "SaveNXSPE",
-      "SaveNXTomo",
-      "SaveNXcanSAS",
-      "SaveNexus",
-      "SaveNexusPD",
-      "SaveNexusProcessed",
-      "SaveOpenGenieAscii",
-      "SavePAR",
-      "SavePDFGui",
-      "SavePHX",
-      "SaveParameterFile",
-      "SavePlot1D",
-      "SavePlot1DAsJson",
-      "SaveRKH",
-      "SaveReflCustomAscii",
-      "SaveReflThreeColumnAscii",
-      "SaveReflections",
-      "SaveReflectometryAscii",
-      "SaveSESANS",
-      "SaveSPE",
-      "SaveTBL",
-      "SaveToSNSHistogramNexus",
-      "SaveVTK",
-      "SaveVulcanGSS",
-      "SaveYDA",
-      "SaveZODS"};
+  std::vector<std::string> m_algsToIgnore;
 };
 
 } // namespace API

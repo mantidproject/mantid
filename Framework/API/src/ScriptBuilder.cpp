@@ -31,11 +31,11 @@ const std::string COMMENT_ALG = "Comment";
 
 ScriptBuilder::ScriptBuilder(boost::shared_ptr<HistoryView> view,
                              std::string versionSpecificity,
-                             bool appendTimestamp, bool projectRecovery)
+                             bool appendTimestamp,
+                             std::vector<std::string> ignoreTheseAlgs)
     : m_historyItems(view->getAlgorithmsList()), m_output(),
       m_versionSpecificity(versionSpecificity),
-      m_timestampCommands(appendTimestamp), m_projectRecovery(projectRecovery) {
-}
+      m_timestampCommands(appendTimestamp), m_algsToIgnore(ignoreTheseAlgs) {}
 
 /**
  * Build a python script for each algorithm included in the history view.
@@ -87,12 +87,8 @@ void ScriptBuilder::writeHistoryToStream(
       os << "\n";
     }
   } else {
-    // create the string for this algorithm
-    if (!m_projectRecovery) {
-      createStringForAlg(os, algHistory);
-    }
-    if (m_projectRecovery &&
-        !(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
+    // create the string for this algorithm if not found to be in the ignore list
+    if (!(std::find(m_algsToIgnore.begin(), m_algsToIgnore.end(),
                     algHistory->name()) != m_algsToIgnore.end())) {
       createStringForAlg(os, algHistory);
     }
