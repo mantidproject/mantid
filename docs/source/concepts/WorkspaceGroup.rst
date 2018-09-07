@@ -8,42 +8,9 @@ Workspace Group
 .. contents::
   :local:
 
-A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a list of Workspace objects. They appear as an expandable list of workspaces in the MantidPlot interface (the list of workspaces is also called the ADS or *AnalysisDataService*). Thus, their primary function is to add structure to the ADS and make it more readable.
+A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a list of Workspace objects. They appear as an expandable list of workspaces in the MantidPlot interface (the list of workspaces is also called the ADS or *AnalysisDataService*). Thus, workspace groups add structure to the ADS and make it more readable and also allow algorithms to be executed over a list of workspaces contained within the group but passing the group to the algorithm.
 
 Most algorithms can be passed a WorkspaceGroup in place of a normal workspace input, and will simply execute the algorithm on each workspace contained within the group.
-
-Creating a Workspace Group
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Workspace groups can be created through the MantidPlot interface;
-
-- Select a few workspaces from the ADS in MantidPlot and click the "Group" button above the list of workspaces. The group will be named "NewGroup".
-
-Workspace groups can be created in a more flexible way in the Python script window using the Python API;
-
-- Use the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm. This will place a workspace group directly into the ADS, and requires at least one workspace to be added to the group.
-
-- To avoid interaction with the ADS, a `WorkspaceGroup` object can be instantiated using
-
-.. code::
-
-    import mantid.api as api
-
-    ws_group = api.WorkspaceGroup()
-
-This **will not** be automatically added to the ADS, to do so, use the following line
-
-.. code::
-
-    AnalysisDataService.add("name", ws_group)
-
-the group should then appear in the ADS with the given name.
-
-Un-grouping Workspaces
-~~~~~~~~~~~~~~~~~~~~~~
-
--  Select the WorkspaceGroup and click "Ungroup".
--  Use the :ref:`UnGroupWorkspace <algm-UnGroupWorkspace>` algorithm.
 
 Working with Event Workspaces in Python
 ----------------------------------------
@@ -51,7 +18,11 @@ Working with Event Workspaces in Python
 Creating and splitting groups
 #############################
 
-Creating groups via the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm
+Workspace groups can be created through the MantidPlot interface;
+
+- Select a few workspaces from the ADS in MantidPlot and click the "Group" button above the list of workspaces. The group will be named "NewGroup".
+
+Workspace groups can be created in a more flexible way in the Python script window using the Python API. Groups may be created via the :ref:`GroupWorkspaces <algm-GroupWorkspaces>` algorithm,  This will place a workspace group directly into the ADS, and requires at least one workspace to be added to the group.
 
 .. testcode:: CreatingWorkspaceGroups
 
@@ -81,7 +52,21 @@ Output:
 
     ['ws1','ws2','ws3']
 
-Creating groups via direct instantiation;
+To avoid interaction with the ADS, a `WorkspaceGroup` object can be instantiated using
+
+.. code::
+
+    import mantid.api as api
+
+    ws_group = api.WorkspaceGroup()
+
+This **will not** be automatically added to the ADS, to do so, use the following line
+
+.. code::
+
+    AnalysisDataService.add("name", ws_group)
+
+the group should then appear in the ADS with the given name. Using direct instantiation; groups can be added to the ADS and then workspaces added to the group via their name and the `add` method;
 
 .. testcode:: CreatingWorkspaceGroupsInstantiated
 
@@ -108,7 +93,7 @@ Output:
 
     ['ws1','ws2','ws3']
 
-Workspace groups can be created without using the ADS, and fed workspaces which are also not in the ADS (in this case the `addWorkspace` method is used rather than `add` because `add` requires a name, and since the workspaces are not in the ADS they may not have a name)
+Alternatively, workspace group objects can be fed workspaces which are not in the ADS (in this case the `addWorkspace` method is used rather than `add` because `add` requires a name, and since the workspaces are not in the ADS they may not have a name)
 
 .. testcode:: CreatingWorkspaceGroupsNoADS
 
