@@ -5,10 +5,13 @@ from multiprocessing import Process, Array, Manager, Value, Lock
 import optparse
 import os
 import sys
+import time
 
 #########################################################################
 # Set up the command line options
 #########################################################################
+
+start_time = time.time()
 
 VERSION = "1.1"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -201,6 +204,9 @@ if __name__ == "__main__":
     if options.makeprop:
         mtdconf.restoreconfig()
 
+    end_time = time.time()
+    total_runtime = time.strftime("%H:%M:%S", time.gmtime(end_time-start_time))
+
     #########################################################################
     # Output summary to terminal (skip if this was a cleanup run)
     #########################################################################
@@ -208,10 +214,8 @@ if __name__ == "__main__":
     if (not options.clean):
         nwidth = 80
         banner = "#" * nwidth
-        print()
-        print(banner)
-        print("#"+(" "*(int(nwidth/2)-4))+"SUMMARY")
-        print(banner)
+        print('\n' + banner)
+        print("Total runtime: "+total_runtime)
 
         if (skippedTests > 0) and options.showskipped:
             print("\nSKIPPED:")
@@ -235,5 +239,6 @@ if __name__ == "__main__":
             print("%d%s tests passed, %d tests failed out of %d (%d skipped)" %
                   (percent, '%', failedTests, (totalTests-skippedTests), skippedTests))
         print('All tests passed? ' + str(success))
+        print(banner)
         if not success:
             sys.exit(1)

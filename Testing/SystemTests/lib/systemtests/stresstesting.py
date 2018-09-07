@@ -854,8 +854,8 @@ class TestManager(object):
         # Some dictionaries to store the info
         files_required_by_test_module = dict()
         data_file_lock_status = dict()
-        # The extension mostly used is '.nxs'
-        pattern = ".nxs"
+        # The extension most commonly used
+        extensions = [".nxs", ".raw", ".RAW"]
         # A regex check is used to iterate back from the position of '.nxs' and
         # check that the current character is still part of a variable name. This
         # is needed to find the start of the string, hence the total filename.
@@ -872,20 +872,21 @@ class TestManager(object):
             files_required_by_test_module[modkey] = []
             for line in f.readlines():
 
-                # Search for all instances of '.nxs'
-                for indx in [m.start() for m in re.finditer(pattern, line)]:
-                    # When '.nxs' is found, iterate backwards to find the start
-                    # of the filename.
-                    for i in range(indx-1,1,-1):
-                        # If the present character is not either a letter, digit,
-                        # underscore, or hyphen then the beginning of the filename
-                        # has been found
-                        if not check.search(line[i]):
-                            key = line[i+1:indx]+pattern
-                            if (key not in files_required_by_test_module[modkey]) and (key != '.nxs'):
-                                files_required_by_test_module[modkey].append(key)
-                                data_file_lock_status[key] = False
-                            break
+                # Search for all instances of '.nxs' or '.raw'
+                for ext in extensions:
+                    for indx in [m.start() for m in re.finditer(ext, line)]:
+                        # When '.nxs' is found, iterate backwards to find the start
+                        # of the filename.
+                        for i in range(indx-1,1,-1):
+                            # If the present character is not either a letter, digit,
+                            # underscore, or hyphen then the beginning of the filename
+                            # has been found
+                            if not check.search(line[i]):
+                                key = line[i+1:indx]+ext
+                                if (key not in files_required_by_test_module[modkey]) and (key != ext):
+                                    files_required_by_test_module[modkey].append(key)
+                                    data_file_lock_status[key] = False
+                                break
 
                 # Search for '0123 or "0123
                 for so in string_quotation_mark:
