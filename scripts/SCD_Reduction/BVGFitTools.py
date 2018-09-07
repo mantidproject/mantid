@@ -180,6 +180,16 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
     return Y2, goodIDX, pp_lambda, retParams
 
 
+def coshPeakWidthModel(x,A,x0,b,BG):
+    """
+    coshPeakWidthModel: returns A*cosh((x-x0)/b) + BG
+    This phenomenologically describes the peak width along the scattering
+    direction.
+    """
+    y = (x-x0)/b
+    return A*(np.exp(y)+np.exp(-y)) + BG
+
+
 def boxToTOFThetaPhi(box, peak):
     QX, QY, QZ = ICCFT.getQXQYQZ(box)
     R, THETA, PHI = ICCFT.cart2sph(QX, QY, QZ)
@@ -474,10 +484,9 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
     if forceParams is None:
         meanTH = TH.mean()
         meanPH = PH.mean()
-        # sigX0 = 0.0018
-        # sigX0 = 0.002#ICCFT.oldScatFun(meanPH, 1.71151521e-02,   6.37218400e+00,   3.39439675e-03)
-        sigX0 = ICCFT.oldScatFun(
-            meanPH, 1.71151521e-02, 6.37218400e+00, 3.39439675e-03)
+        sigX0 = coshPeakWidthModel(meanPH,  0.00413132, 1.54103839, 1.0, -0.00266634) #TOPAZ
+        #sigX0 = coshPeakWidthModel(meanPH, 0.09191742, 0.41444781, 1.0, -0.17877383) #MaNDi
+        print(sigX0)
         sigY0 = 0.0025
         sigP0 = fSigP(meanTH, 0.1460775, 1.85816592,
                       0.26850086, -0.00725352)
