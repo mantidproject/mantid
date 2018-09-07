@@ -36,6 +36,10 @@ EventsListsShmemStorage::~EventsListsShmemStorage() {
     ip::shared_memory_object::remove(m_segmentName.c_str());
 }
 
+void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size) {
+  m_chunks[chunkN][pixelN].reserve(size);
+}
+
 std::ostream &operator<<(std::ostream &os,
                          const EventsListsShmemStorage &storage) {
   os << static_cast<const EventsListsShmemManager &>(storage);

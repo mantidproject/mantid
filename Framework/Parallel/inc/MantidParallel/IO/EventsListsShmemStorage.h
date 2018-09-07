@@ -47,6 +47,8 @@ public:
                           bool destroy = true);
   virtual ~EventsListsShmemStorage();
 
+  void reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size);
+
   MANTID_PARALLEL_DLL friend std::ostream &
   operator<<(std::ostream &os, const EventsListsShmemStorage &storage);
 
