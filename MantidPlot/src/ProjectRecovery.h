@@ -118,7 +118,6 @@ private:
   ApplicationWindow *m_windowPtr;
 
   std::vector<std::string> m_algsToIgnore = {
-      "GroupWorkspaces",
       "EnggSaveGSASIIFitResultsToHDF5",
       "EnggSaveSinglePeakFitResultsToHDF5",
       "ExampleSaveAscii",
