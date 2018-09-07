@@ -353,11 +353,8 @@ void PanelsSurface::processStructured(size_t rootIndex) {
   }
 
   info->polygon = QPolygonF(verts);
-
-  PRAGMA_OMP(parallel for)
   for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
     const auto &row = componentInfo.children(columns[i]);
-    PRAGMA_OMP(parallel for)
     for (int j = 0; j < static_cast<int>(row.size()); ++j) {
       addDetector(row[j], ref, index, info->rotation);
     }

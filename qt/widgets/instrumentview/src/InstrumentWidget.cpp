@@ -292,6 +292,12 @@ void InstrumentWidget::resetInstrument(bool resetGeometry) {
   updateInstrumentDetectors();
 }
 
+void InstrumentWidget::resetSurface() {
+  auto surface = getSurface();
+  surface->updateDetectors();
+  update();
+}
+
 /**
 * Select the tab to be displayed
 */

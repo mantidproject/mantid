@@ -120,6 +120,7 @@ public:
   }
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
+  void resetSurface();
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;

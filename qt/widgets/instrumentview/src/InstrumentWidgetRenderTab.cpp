@@ -277,9 +277,9 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
 
   connect(m_layerCheck, SIGNAL(toggled(bool)), this,
           SLOT(toggleLayerDisplay(bool)));
-  connect(m_layerSlide, SIGNAL(sliderMoved(int)), this,
+  connect(m_layerSlide, SIGNAL(valueChanged(int)), this,
           SLOT(setVisibleLayer(int)));
-  connect(m_layerSlide, SIGNAL(sliderMoved(int)), m_layerSpin,
+  connect(m_layerSlide, SIGNAL(valueChanged(int)), m_layerSpin,
           SLOT(setValue(int)));
   QHBoxLayout *voxelControlsLayout = new QHBoxLayout();
   voxelControlsLayout->addWidget(m_layerCheck);
@@ -344,6 +344,8 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
   }
 }
 
+/// Force the rendering of layers for banks containing vocel/grid detectors,
+/// only does this if not already in a forced state.
 void InstrumentWidgetRenderTab::forceLayers(bool on) {
   auto &actor = m_instrWidget->getInstrumentActor();
 
@@ -352,15 +354,23 @@ void InstrumentWidgetRenderTab::forceLayers(bool on) {
 
   const auto &renderer = actor.getInstrumentRenderer();
   if (on) {
-    m_usingLayerStore = renderer.isUsingLayers();
-    m_layerCheck->setDisabled(on);
-    toggleLayerDisplay(on);
+    // only force this state if not already enforced.
+    if (!m_layerCheck->isChecked() || m_layerCheck->isEnabled()) {
+      m_usingLayerStore = renderer.isUsingLayers();
+      m_layerCheck->setChecked(on);
+      toggleLayerDisplay(on);
+    }
   } else {
     toggleLayerDisplay(m_usingLayerStore);
-    m_layerCheck->setDisabled(on);
+    m_layerCheck->setChecked(m_usingLayerStore);
   }
+
+  // Checkbox disabled when forced so that all detectors are never drawn
+  m_layerCheck->setDisabled(on);
 }
 
+/// Toggles the display of Grid bank layers or all detectors in the instrument
+/// view.
 void InstrumentWidgetRenderTab::toggleLayerDisplay(bool on) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   m_layerSlide->setEnabled(on);
@@ -369,9 +379,17 @@ void InstrumentWidgetRenderTab::toggleLayerDisplay(bool on) {
   emit rescaleColorMap();
 }
 
+/// Select the Grid bank layer which will be displayed in the instrument view.
 void InstrumentWidgetRenderTab::setVisibleLayer(int layer) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   actor.setGridLayer(true, layer);
+  const auto &renderer = actor.getInstrumentRenderer();
+  auto surfaceType = m_instrWidget->getSurfaceType();
+
+  // If in an unwrapped view the surface needs to be redrawn
+  if (renderer.isUsingLayers() && surfaceType != SurfaceType::FULL3D)
+    m_instrWidget->resetSurface();
+
   emit rescaleColorMap();
 }
 
