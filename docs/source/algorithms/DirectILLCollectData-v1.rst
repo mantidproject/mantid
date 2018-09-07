@@ -116,14 +116,16 @@ The following settings are used when the :literal:`AUTO` keyword is encountered:
 Usage
 -----
 
+For usage of this algorithm as part of the direct geometry data reduction, check the examples :ref:`here <DirectILL>`.
+
 .. include:: ../usagedata-note.txt
 
-**Example - Basic usage as an advanced loader**
+**Example - Usage as an advanced loader**
 
 .. testsetup:: IN4Example
 
-   config['default.facility'] = 'ILL'
-   config['default.instrument'] = 'IN4'
+    config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'IN4'
 
 .. testcode:: IN4Example
 

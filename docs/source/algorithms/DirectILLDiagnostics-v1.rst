@@ -101,14 +101,16 @@ The following settings are used when not explicitly overwritten by the algorithm
 Usage
 -----
 
+For usage of this algorithm as part of the direct geometry data reduction, check the examples :ref:`here <DirectILL>`.
+
 .. include:: ../usagedata-note.txt
 
 **Example - Diagnostics on IN4 workspace**
 
 .. testsetup:: IN4Example
 
-   config['default.facility'] = 'ILL'
-   config['default.instrument'] = 'IN4'
+    config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'IN4'
 
 .. testcode:: IN4Example
 
@@ -141,12 +143,12 @@ Output:
     Additional spectra marked as bad by flat background diagnostics:
     13, 100-101, 132, 213, 300-309, 313-319, 321, 325-331, 337-343, 345, 348-357, 361-367, 373-378, 381, 385-391
 
-**Example - Diagnostics on IN5 workspace**
+**Example - Default and beam stop masks on IN5 workspace**
 
 .. testsetup:: IN5Example
 
-   config['default.facility'] = 'ILL'
-   config['default.instrument'] = 'IN4'
+    config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'IN4'
 
 .. testcode:: IN5Example
 

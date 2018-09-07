@@ -57,59 +57,7 @@ After conversion to momentum transfer, the vertical axis of the data is in units
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
-
-**Example - Reduction without absorption corrections/empty container subtraction**
-
-.. plot::
-   :include-source:
-
-    import mantid
-    from mantid.simpleapi import *
-    import matplotlib.pyplot as plt
-    import numpy as np
-    mantid.config['default.facility'] = 'ILL'
-    mantid.config['default.instrument'] = 'IN4'
-    # Vanadium
-    DirectILLCollectData(
-        Run='ILL/IN4/085801+085802.nxs',
-        OutputWorkspace='vanadium',
-        OutputRawWorkspace='raw',  # For diagnostics
-        OutputEPPWorkspace='epps' # For diagnostics and integration.
-    )
-    DirectILLDiagnostics(
-        InputWorkspace='raw',
-        OutputWorkspace='mask',
-        EPPWorkspace='epps',
-        MaskedComponents='rosace', #Exclude small-angle detectors of IN4.
-    )
-    DirectILLIntegrateVanadium(
-        InputWorkspace='vanadium',
-        OutputWorkspace='vanadium_factors',
-        EPPWorkspace='epps',
-        DebyeWallerCorrection='Correction OFF'
-    )
-    # Sample.
-    DirectILLCollectData(
-        Run='ILL/IN4/087294-087295.nxs',
-        OutputWorkspace='sample',
-    )
-    DirectILLReduction(
-        InputWorkspace='sample',
-        OutputWorkspace='S_QW',
-        IntegratedVanadiumWorkspace='vanadium_factors',
-        DiagnosticsWorkspace='mask'
-    )
-    # Plot the resulting S(Q,W)
-    s_qw = mtd['S_QW']
-    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
-    contours = ax.pcolor(s_qw, vmax=1)
-    fig.colorbar(contours)
-    ax.set_xlim(xmax=4)
-    ax.set_ylim(ymin=-2, ymax=8)
-    # Uncomment the line below to actually show the plot.
-    #fig.show()
-    mtd.clear()
+For usage of this algorithm, check the examples :ref:`here <DirectILL>`.
 
 .. categories::
 

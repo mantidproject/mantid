@@ -27,37 +27,7 @@ A correction for the Debye-Waller factor is applied to the integrated vanadium, 
 Usage
 -----
 
-.. include:: ../usagedata-note.txt
-
-**Example - Integrating vanadium**
-
-.. testsetup:: IN4Example
-
-   config['default.facility'] = 'ILL'
-   config['default.instrument'] = 'IN4'
-
-.. testcode:: IN4Example
-
-    DirectILLCollectData(
-        Run='ILL/IN4/085801+085802',
-        OutputWorkspace='preprocessed',
-        OutputEPPWorkspace='epps'
-    )
-    DirectILLIntegrateVanadium(
-        InputWorkspace='preprocessed',
-        OutputWorkspace='vanadium',
-        EPPWorkspace='epps',
-        DebyeWallerCorrection='Correction OFF',
-    )
-    vanadium = mtd['vanadium']
-    print('Integrated vanadium contains {} bin in each of {} histograms.'
-        .format(vanadium.blocksize(), vanadium.getNumberHistograms()))
-
-Output:
-
-.. testoutput:: IN4Example
-
-    Integrated vanadium contains 1 bin in each of 396 histograms.
+For usage of this algorithm, check the examples :ref:`here <DirectILL>`.
 
 .. categories::
 
