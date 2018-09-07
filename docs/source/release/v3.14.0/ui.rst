@@ -17,6 +17,7 @@ Project Recovery
 Changes
 #######
 - Project Recovery will no longer save groups, this fixes an issue where it would cause crashes if you deleted a workspace from a group.
+- Workspaces now save locally as a number of how many workspaces have already been saved instead of workspace names
 
 Bugfixes
 ########
