@@ -197,10 +197,12 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                                 RHSWorkspace=directForegroundWS,
                                 OutputWorkspace=reflectivityWSName,
                                 EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
         self._cleanup.cleanup(directForegroundWS)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
+        # The X error data is lost in Divide.
+        reflectivityWS.setDx(0, ws.readDx(0))
+        self._cleanup.cleanup(ws)
         return reflectivityWS
 
     def _foreground(self, sampleLogs):
