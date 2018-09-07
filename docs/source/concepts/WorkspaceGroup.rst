@@ -8,7 +8,7 @@ Workspace Group
 .. contents::
   :local:
 
-A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a like of Workspace objects. They appear as an expandable list of workspaces in the MantidPlot interface (the list of workspace is also called the ADS or *AnalysisDataService*). Thus, their primary function is to add structure to the ADS and make it more readable.
+A WorkspaceGroup is a group of workspaces. The WorkspaceGroup object does not hold any data itself, but instead holds a list of Workspace objects. They appear as an expandable list of workspaces in the MantidPlot interface (the list of workspaces is also called the ADS or *AnalysisDataService*). Thus, their primary function is to add structure to the ADS and make it more readable.
 
 Most algorithms can be passed a WorkspaceGroup in place of a normal workspace input, and will simply execute the algorithm on each workspace contained within the group.
 
@@ -91,7 +91,7 @@ Creating groups via direct instantiation;
 
 
     # Create a group workspace and add to the ADS
-    ws_group = api.WorkspaceGroup()
+    ws_group = WorkspaceGroup()
     mtd.add("group1", ws_group)
 
     ws_group.add(ws1)
@@ -116,7 +116,7 @@ Workspace groups can be created without using the ADS, and fed workspaces which 
     ws3 = WorkspaceFactory.create("Workspace2D", 2, 2, 2)
 
     # Create a group workspace
-    ws_group = api.WorkspaceGroup()
+    ws_group = WorkspaceGroup()
 
     ws_group.addWorkspace(ws1)
     ws_group.addWorkspace(ws2)
