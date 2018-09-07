@@ -37,6 +37,12 @@ using namespace Mantid;
 
 class FrameworkManagerTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static FrameworkManagerTest *createSuite() {
+    return new FrameworkManagerTest();
+  }
+  static void destroySuite(FrameworkManagerTest *suite) { delete suite; }
+
 #ifdef MPI_EXPERIMENTAL
   // Make sure FrameworkManager is always instantiated. This is needed to
   // initialize the MPI environment.

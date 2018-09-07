@@ -1651,11 +1651,8 @@ bool otherWorkspacePresent() {
 void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e,
                                                       const QString &text,
                                                       QStringList &wsNames) {
-  int endIndex = 0;
-  while (text.indexOf("[\"", endIndex) > -1) {
-    int startIndex = text.indexOf("[\"", endIndex) + 2;
-    endIndex = text.indexOf("\"]", startIndex);
-    QString candidate = text.mid(startIndex, endIndex - startIndex);
+  const QStringList selectedWorkspaces = text.split("\n");
+  for (const auto &candidate : selectedWorkspaces) {
     // Only append the candidate if SplattorPlotView is selected and an
     // MDWorkspace is loaded.
     if (currentView->getViewType() == ModeControlWidget::Views::SPLATTERPLOT &&

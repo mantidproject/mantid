@@ -101,6 +101,18 @@ public:
     TS_ASSERT_EQUALS(names[1], "ws2");
   }
 
+  void testGetInterfaceNames() {
+    std::vector<MantidQt::API::IProjectSerialisable *> windows;
+    std::vector<std::string> interfaces{"Test_Interface",
+                                        "Test_Python_Interface_2"};
+
+    ProjectSaveModel model(windows, interfaces);
+    auto names = model.getAllPythonInterfaces();
+    TS_ASSERT_EQUALS(2, names.size());
+    TS_ASSERT_EQUALS("Test_Interface", names[0]);
+    TS_ASSERT_EQUALS("Test_Python_Interface_2", names[1]);
+  }
+
   void testGetWindowNames() {
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
 

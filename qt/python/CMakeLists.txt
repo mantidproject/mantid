@@ -1,6 +1,7 @@
 # This file manages building/installation of the mantidqt and mantidqtpython
 # Python wrappers.
 #
+include ( PythonPackageTargetFunctions )
 
 # Legacy wrappers for MantidPlot
 add_subdirectory ( mantidqtpython )
@@ -20,7 +21,6 @@ if ( ENABLE_WORKBENCH )
       ${CMAKE_CURRENT_SOURCE_DIR}/mantidqt/utils/qt/plugins.py
   )
 
-  # Create egg link to binary output directory for mantidqt
   add_python_package ( mantidqt )
 
   # Configure resources data in place for ease of development. The output
@@ -87,6 +87,7 @@ endif ()
   )
 
   # Tests
+  set ( PYUNITTEST_RUN_SERIAL ON )
   set ( PYUNITTEST_QT_API pyqt5 )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
     mantidqt_qt5 ${PYTHON_TEST_FILES}
@@ -96,11 +97,12 @@ endif ()
   # Leave it out as it's a very basic test and the Qt5
   # tests should catch any problems anyway
   list ( REMOVE_ITEM PYTHON_TEST_FILES mantidqt/widgets/test/test_jupyterconsole.py )
+  # The workspacewidget test randomly sefaults on exit with Qt4. It will not be used
+  # in a Qt 4 context so remove the test
+  list ( REMOVE_ITEM PYTHON_TEST_FILES mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py )
   set ( PYUNITTEST_QT_API pyqt )
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}
     mantidqt_qt4 ${PYTHON_TEST_FILES}
   )
   unset ( PYUNITTEST_QT_API )
-  # No package installation yet...
-  # Configure utils.qt.plugins file for install
 endif ()

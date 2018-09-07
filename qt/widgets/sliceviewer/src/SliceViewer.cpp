@@ -910,7 +910,7 @@ Mantid::API::IMDWorkspace_sptr SliceViewer::getWorkspace() { return m_ws; }
 void SliceViewer::loadColorMap(QString filename) {
   QString fileselection;
   if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(m_currentColorMapFile, this);
+    fileselection = MantidColorMap::chooseColorMap(m_currentColorMapFile, this);
     if (fileselection.isEmpty())
       return;
   } else

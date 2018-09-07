@@ -229,8 +229,9 @@ if [[ ${DO_BUILD_PKG} == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
   if [[ "${ON_MACOS}" == true ]]; then
-    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+    PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=OFF -DCPACK_PACKAGE_SUFFIX="
   else
+    PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=ON"
     # Use different suffix for linux builds if parameter is not defined
     if [[ -n "${PACKAGE_SUFFIX}" ]]; then
        echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
@@ -293,7 +294,7 @@ rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -341,7 +342,9 @@ fi
 userconfig_dir=$HOME/.mantid
 rm -fr $userconfig_dir
 mkdir -p $userconfig_dir
-touch $userconfig_dir/Mantid.user.properties
+# use a fixed number of openmp threads to avoid overloading the system
+userprops_file=$userconfig_dir/Mantid.user.properties
+echo MultiThreaded.MaxCores=2 > $userprops_file
 
 if [[ ${DO_UNITTESTS} == true ]]; then
   $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
@@ -351,6 +354,8 @@ fi
 # User Documentation
 ###############################################################################
 if [[ ${DO_DOCTESTS_USER} == true ]]; then
+  # use default configuration
+  rm -f $userprops_file
   # Remove doctrees directory so it forces a full reparse. It seems that
   # without this newly added doctests are not executed
   if [ -d $BUILD_DIR/docs/doctrees ]; then

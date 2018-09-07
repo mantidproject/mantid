@@ -6,6 +6,7 @@
 //----------------------------------
 #include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidQtWidgets/Common/Configurable.h"
 #include <QHash>
 #include <QString>
 
@@ -33,7 +34,8 @@ namespace API {
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory {
+class EXPORT_OPT_MANTIDQT_COMMON AbstractAlgorithmInputHistory
+    : public MantidWidgets::Configurable {
 public:
   AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
   AbstractAlgorithmInputHistory &
@@ -62,6 +64,12 @@ public:
 
   /// Save the values stored here to persistent storage
   void save() const;
+
+  /// @copydoc MantidWidgets::Configurable::readSettings
+  void readSettings(const QSettings &storage) override;
+
+  /// @copydoc MantidWidgets::Configurable::writeSettings
+  void writeSettings(QSettings &storage) const override;
 
 protected:
   /// Constructor

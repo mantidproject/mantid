@@ -36,6 +36,7 @@ void GeneratePythonScript::init() {
                       "Filename", "", API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                   "be generated.");
+
   declareProperty("ScriptText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
@@ -47,6 +48,7 @@ void GeneratePythonScript::init() {
   declareProperty("StartTimestamp", std::string(""),
                   "The filter start time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
+
   declareProperty("EndTimestamp", std::string(""),
                   "The filter end time in the format YYYY-MM-DD HH:mm:ss",
                   Direction::Input);
@@ -62,6 +64,10 @@ void GeneratePythonScript::init() {
       "SpecifyAlgorithmVersions", "Specify Old",
       boost::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
+
+  declareProperty("IgnoreGroups", false,
+                  "Whether or not groups need to be filtered for",
+                  Direction::Input);
 }
 
 /** Execute the algorithm.
@@ -73,6 +79,7 @@ void GeneratePythonScript::exec() {
   const std::string endTime = getProperty("EndTimestamp");
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
   const bool appendTimestamp = getProperty("AppendTimestamp");
+  const bool removeGroupAlgorithms = getProperty("IgnoreGroups");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -103,7 +110,8 @@ void GeneratePythonScript::exec() {
   else
     versionSpecificity = "all";
 
-  ScriptBuilder builder(view, versionSpecificity, appendTimestamp);
+  ScriptBuilder builder(view, versionSpecificity, appendTimestamp,
+                        removeGroupAlgorithms);
   std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";

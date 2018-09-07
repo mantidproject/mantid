@@ -50,7 +50,6 @@ public:
   HistogramDx(HistogramDx &&) = default;
   HistogramDx &operator=(const HistogramDx &) & = default;
   HistogramDx &operator=(HistogramDx &&) & = default;
-
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<PointVariances, HistogramDx>;

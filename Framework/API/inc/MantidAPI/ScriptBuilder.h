@@ -48,7 +48,8 @@ class MANTID_API_DLL ScriptBuilder {
 public:
   ScriptBuilder(boost::shared_ptr<HistoryView> view,
                 std::string versionSpecificity = "old",
-                bool appendTimestamp = false);
+                bool appendTimestamp = false,
+                bool ignoreGroupWorkspaces = false);
   virtual ~ScriptBuilder() = default;
   /// build a python script from the history view
   const std::string build();
@@ -64,11 +65,15 @@ private:
   const std::string buildAlgorithmString(const AlgorithmHistory &algHistory);
   const std::string
   buildPropertyString(const Mantid::Kernel::PropertyHistory &propHistory);
+  void createStringForAlg(
+      std::ostringstream &os,
+      boost::shared_ptr<const Mantid::API::AlgorithmHistory> &algHistory);
 
   const std::vector<HistoryItem> m_historyItems;
   std::string m_output;
   std::string m_versionSpecificity;
   bool m_timestampCommands;
+  bool m_ignoreGroups;
 };
 
 } // namespace API

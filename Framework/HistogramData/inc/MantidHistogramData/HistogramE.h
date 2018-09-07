@@ -66,7 +66,6 @@ public:
   HistogramE(HistogramE &&) = default;
   HistogramE &operator=(const HistogramE &) & = default;
   HistogramE &operator=(HistogramE &&) & = default;
-
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<CountStandardDeviations, HistogramE>;

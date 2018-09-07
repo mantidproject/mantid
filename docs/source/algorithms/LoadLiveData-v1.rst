@@ -44,6 +44,11 @@ Processing with an Algorithm
       ``ProcessingProperties``.
    -  The algorithm is then run, and its ``OutputWorkspace`` is saved.
 
+.. note:
+
+   When PreserveEvents is enabled, any rebinning done in this step will be
+   lost. Use the Post-Process step instead for EventWorkspaces.
+
 Processing with a Python Script
 ###############################
 
@@ -66,6 +71,11 @@ its documentation for details of how the script is run.
 -  Specify a python script in the ``ProcessingScriptFilename`` property.
 
    - Contents of the file have the exact same rules as specifying the ``ProcessingScript``
+
+.. note:
+
+   When PreserveEvents is enabled, any rebinning done in this step will be
+   lost. Use the Post-Process step instead for EventWorkspaces.
 
 Data Accumulation
 #################
@@ -90,6 +100,13 @@ require re-sorting the events, which is an operation that gets much
 slower as the list gets bigger (Order of :math:`N * log(N)`). This
 could cause Mantid to run very slowly or to crash due to lack of
 memory.
+
+Additionally, the resulting EventWorkspaces produced when
+``PreserveEvents=True`` will have their X values reset to a single bin with
+boundaries that encompass all events currently in the workspace. This means
+that any rebinning that was done during the Process step will be lost. If
+custom binning is required, this should be done using the Post-Process step
+described below.
 
 Post-Processing Step
 ####################

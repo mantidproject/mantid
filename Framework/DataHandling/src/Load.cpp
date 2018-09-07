@@ -284,6 +284,7 @@ void Load::init() {
   exts.emplace_back(".hd5");
   exts.emplace_back(".sqw");
   exts.emplace_back(".fits");
+  exts.emplace_back(".bin");
 
   declareProperty(
       Kernel::make_unique<MultipleFileProperty>("Filename", exts),
