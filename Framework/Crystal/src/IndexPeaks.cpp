@@ -368,7 +368,7 @@ void IndexPeaks::exec() {
               }
               if (ModDim == 2) {
                 for (int m = -maxOrder; m <= maxOrder; m++)
-                  for (int n = -maxOrder; m <= maxOrder; n++) {
+                  for (int n = -maxOrder; n <= maxOrder; n++) {
                     if (m == 0 && n == 0)
                       continue; // exclude 0,0
                     V3D hkl1(hkl);
@@ -389,8 +389,8 @@ void IndexPeaks::exec() {
               }
               if (ModDim == 3) {
                 for (int m = -maxOrder; m <= maxOrder; m++)
-                  for (int n = -maxOrder; m <= maxOrder; n++)
-                    for (int p = -maxOrder; m <= maxOrder; p++) {
+                  for (int n = -maxOrder; n <= maxOrder; n++)
+                    for (int p = -maxOrder; p <= maxOrder; p++) {
                       if (m == 0 && n == 0 && p == 0)
                         continue; // exclude 0,0,0
                       V3D hkl1(hkl);
