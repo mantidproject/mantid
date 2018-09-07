@@ -126,7 +126,7 @@ public:
     // Clean the ADS
     Mantid::API::AnalysisDataService::Instance().clear();
   }
-  
+
   void create_test_workspace(const std::string &wsName) {
     Mantid::Algorithms::CreateWorkspace creator;
     Mantid::Algorithms::CropWorkspace cropper;
