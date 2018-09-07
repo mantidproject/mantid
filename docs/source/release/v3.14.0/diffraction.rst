@@ -36,7 +36,7 @@ Single Crystal Diffraction
 Improvements
 ############
 
-- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
