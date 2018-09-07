@@ -60,6 +60,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.peaks.major.on_checkbox_unchecked(self.major_peaks_unchecked)
         self.peaks.minor.on_checkbox_checked(self.minor_peaks_checked)
         self.peaks.minor.on_checkbox_unchecked(self.minor_peaks_unchecked)
+        self.peaks.gamma.on_checkbox_checked(self.gammas_checked)
+        self.peaks.gamma.on_checkbox_unchecked(self.gammas_unchecked)
 
         self.widget_list.addWidget(self.peaks.view)
         self.widget_list.addWidget(self.detectors.view)
@@ -79,6 +81,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.element_widgets = {}
         self.element_data = {}
         self.element_lines = {}
+        self.gamma_lines = []
+        self.gamma_peaks = self._get_gamma_peaks()
+        self.electron_lines = []
         self._generate_element_widgets()
         self._generate_element_data()
 
@@ -98,6 +103,35 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     def minor_peaks_unchecked(self):
         pass
 
+    def _get_gamma_peaks(self):
+        gamma_peaks = self.ptable.peak_data["Gammas"]["Primary"]
+        gamma_peaks.update(self.ptable.peak_data["Gammas"]["Secondary"])
+        return gamma_peaks.copy()
+
+    def _plot_gammas(self, subplot, colour=None):
+        if colour is None:
+            colour = self.line_colours.next()
+        for label, lines in iteritems(self.gamma_peaks):
+            if lines is None:
+                continue
+            for line in lines:
+                self.gamma_lines.append(
+                    subplot.axvline(
+                        line, 0, 1, color=colour))
+        self.plotting.update_canvas()
+
+    def gammas_checked(self):
+        colour = self.line_colours.next()
+        for subplot_name, subplot in iteritems(self.plotting.get_subplots()):
+            self._plot_gammas(subplot, colour=colour)
+
+    def gammas_unchecked(self):
+        for line in self.gamma_lines:
+            line.remove()
+            del line
+        self.gamma_lines = []
+        self.plotting.update_canvas()
+
     ### ----------------------- ###
 
     def load_run(self, detector, run):
@@ -108,6 +142,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.plotting.plot(detector, plot)
         if self.plotting.view.isHidden():
             self.plotting.view.show()
+        if self.peaks.gamma.isChecked():
+            self._plot_gammas(subplot)
+        self.plotting.update_canvas()
 
     def load_last_run(self, detector):
         self.load_run(detector, self.load_widget.last_loaded_run())
@@ -155,6 +192,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         for x_value, lines in iteritems(self.element_lines[element]):
             for line in lines:
                 line.remove()
+                del line
         self.plotting.update_canvas()
         self.element_lines[element] = {}
 
@@ -164,7 +202,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                                for k in set(current_dict) - set(new_dict)}
             for label, x_value in iteritems(dict_difference):
                 for line in self.element_lines[element][x_value]:
-                    self.plotting.del_line(None, line)
+                    line.remove()
+                    del line
                 self.element_lines[element][x_value] = []
                 del current_dict[label]
         elif current_dict != new_dict:
@@ -215,6 +254,17 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         # not using load_last_run prevents two calls to last_loaded_run()
         if last_run is not None:
             self.load_run(detector, last_run)
+        colour = self.line_colours.next()
+        for element in self.ptable.selection:
+            print(element.symbol)
+            for label, x_value in iteritems(self.element_data[element.symbol]):
+                l = self.plotting.get_subplot(detector).axvline(
+                    x_value, 1, 0, color=colour)
+                try:
+                    self.element_lines[element.symbol][x_value].append(l)
+                except KeyError:
+                    self.element_lines[element.symbol][x_value] = [l]
+        self.plotting.update_canvas()
 
     def del_plot(self, checkbox):
         if self.load_widget.last_loaded_run() is not None:
