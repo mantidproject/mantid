@@ -6,6 +6,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IndexTypeProperty.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
@@ -445,6 +446,8 @@ private:
   void setupSkipValidationMasterOnly();
 
   bool isCompoundProperty(const std::string &name) const;
+
+  bool hasAnADSValidator(const Mantid::Kernel::IValidator_sptr propProp) const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
