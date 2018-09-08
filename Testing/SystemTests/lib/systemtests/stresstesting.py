@@ -913,6 +913,7 @@ class TestManager(object):
                                     files_required_by_test_module[modkey].append(key)
                                     data_file_lock_status[key] = False
                                 break
+            f.close()
 
         if (not self._quiet):
             for key in files_required_by_test_module.keys():
