@@ -2,15 +2,16 @@
 set ( LIB_SRCS
   src/Artist.cpp
   src/Axes.cpp
-  src/Figure.cpp
+  src/FigureCanvasQt.cpp
 )
 
-set ( MOC_HEADERS "" )
+set ( MOC_HEADERS
+  inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h
+)
 
 set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Artist.h
   inc/MantidQtWidgets/MplCpp/Axes.h
-  inc/MantidQtWidgets/MplCpp/Figure.h
 )
 
 find_package ( BoostPython REQUIRED )

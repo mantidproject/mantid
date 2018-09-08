@@ -25,7 +25,7 @@ Artist::Artist(Python::Object obj) : InstanceHolder(std::move(obj), isArtist) {}
 /**
  * Call .remove on the underlying artist
  */
-void Artist::remove() { instance().attr("remove")(); }
+void Artist::remove() { pyobj().attr("remove")(); }
 
 } // namespace MplCpp
 } // namespace Widgets

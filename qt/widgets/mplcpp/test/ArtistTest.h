@@ -15,16 +15,15 @@ public:
 public:
   // ----------------- success tests ---------------------
   void testConstructWithArtistIsSuccessful() {
-    Python::Object artistModule(
-        Python::Handle<>(PyImport_ImportModule("matplotlib.artist")));
+    auto artistModule(
+        Python::NewRef(PyImport_ImportModule("matplotlib.artist")));
     Python::Object pyartist = artistModule.attr("Artist")();
     TS_ASSERT_THROWS_NOTHING(Artist drawer(pyartist));
   }
 
   void testArtistCallsRemoveOnPyObject() {
-    Python::Object artistModule(
-        Python::Handle<>(PyImport_ImportModule("matplotlib.text")));
-    Artist label(artistModule.attr("Text")());
+    auto textModule(Python::NewRef(PyImport_ImportModule("matplotlib.text")));
+    Artist label(textModule.attr("Text")());
     TS_ASSERT_THROWS(label.remove(), Python::ErrorAlreadySet);
   }
   // ----------------- failure tests ---------------------

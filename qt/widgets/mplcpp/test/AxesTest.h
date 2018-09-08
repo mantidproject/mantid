@@ -16,13 +16,12 @@ public:
   void testConstructWithAxesIsSuccessful() {
     // An Axes requires a figure and rectangle definition
     // to be constructible
-    const Python::Object figureModule(
-        Python::Handle<>(PyImport_ImportModule("matplotlib.figure")));
-    const Python::Object figure = figureModule.attr("Figure")();
-    const Python::Object rect(
-        Python::Handle<>(Py_BuildValue("(iiii)", 0, 0, 1, 1)));
-    const Python::Object axesModule(
-        Python::Handle<>(PyImport_ImportModule("matplotlib.axes")));
+    const auto figureModule{
+        Python::NewRef(PyImport_ImportModule("matplotlib.figure"))};
+    const auto figure{figureModule.attr("Figure")()};
+    const auto rect{Python::NewRef(Py_BuildValue("(iiii)", 0, 0, 1, 1))};
+    const auto axesModule{
+        Python::NewRef(PyImport_ImportModule("matplotlib.axes"))};
 
     Python::Object pyaxes = axesModule.attr("Axes")(figure, rect);
     TS_ASSERT_THROWS_NOTHING(Axes axes(pyaxes));

@@ -1,5 +1,5 @@
-#ifndef MPLCPP_FIGURE_H
-#define MPLCPP_FIGURE_H
+#ifndef MPLCPP_FIGURECANVASQT_H
+#define MPLCPP_FIGURECANVASQT_H
 /*
  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -16,24 +16,35 @@
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 */
+#include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
+
+#include <QWidget>
 
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
 
 /**
- * @brief A C++ wrapper holding a matplotlib.Figure instance
+ * @brief FigureCanvasQt defines a QWidget that can be embedded within
+ * another widget to display a matplotlib figure. It roughly follows
+ * the matplotlib example on embedding a matplotlib canvas:
+ * https://matplotlib.org/examples/user_interfaces/embedding_in_qt5.html
  */
-class MANTID_MPLCPP_DLL Figure : Python::InstanceHolder {
+class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
+                                         public Python::InstanceHolder {
+  Q_OBJECT
 public:
-  /// Creates a new matplotlib figure
-  Figure();
-};
+  FigureCanvasQt(QWidget *parent = nullptr);
+
+  /// Non-const access to the axes instance
+  inline Axes &axes() { return m_axes; }
+
+private:
+  Axes m_axes;
+}; // namespace MplCpp
 
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif // MPLCPP_FIGURE_H
+#endif // MPLCPP_FIGURECANVASQT_H

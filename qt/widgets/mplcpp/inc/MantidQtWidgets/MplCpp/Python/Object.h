@@ -28,10 +28,15 @@ namespace Python {
 using Object = boost::python::object;
 
 // Alias for handle wrapping a raw PyObject*
-template <class T = PyObject> using Handle = boost::python::handle<T>;
+template <typename T = PyObject> using Handle = boost::python::handle<T>;
 
 // Alias to borrowed function that increments the reference count
-template <class T> using BorrowedRef = boost::python::detail::borrowed<T>;
+template <typename T> using BorrowedRef = boost::python::detail::borrowed<T>;
+
+// Helper to create an Object from a new reference to a raw PyObject*
+inline Python::Object NewRef(PyObject *obj) {
+  return Python::Object(Python::Handle<>(obj));
+}
 
 // Alias for exception indicating Python error handler is set
 using ErrorAlreadySet = boost::python::error_already_set;
@@ -60,7 +65,7 @@ public:
   }
 
   /// Return the held instance object
-  inline const Object &instance() const { return m_instance; }
+  inline const Object &pyobj() const { return m_instance; }
 
 private:
   Object m_instance;
