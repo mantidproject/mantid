@@ -4,6 +4,7 @@
 set ( TEST_HEADERS
   ArtistTest.h
   AxesTest.h
+  SipTest.h
 )
 
 # CXXTEST_EXTRA_HEADER_INCLUDE passes this file to the --include argument
