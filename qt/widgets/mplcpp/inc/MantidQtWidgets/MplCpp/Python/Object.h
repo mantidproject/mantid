@@ -41,9 +41,26 @@ using ErrorAlreadySet = boost::python::error_already_set;
  */
 class InstanceHolder {
 public:
-  InstanceHolder(Object obj) : m_instance(std::move(obj)) {}
+  /**
+   * Construct an InstanceHolder with an existing Python object.
+   * @param obj An existing Python instance
+   */
+  explicit InstanceHolder(Object obj) : m_instance(std::move(obj)) {}
+  /**
+   * Construct an InstanceHolder with an existing Python object, providing
+   * an object to verify the instance has the correct type.
+   * @param obj An existing Python instance
+   * @param objectChecker A type defining an operator()(const Object &)
+   * that when called throws an exception if the instance is invalid
+   */
+  template <typename InstanceCheck>
+  InstanceHolder(Object obj, const InstanceCheck &objectChecker)
+      : m_instance(std::move(obj)) {
+    objectChecker(m_instance);
+  }
 
-  inline const Object &pyobj() const { return m_instance; }
+  /// Return the held instance object
+  inline const Object &instance() const { return m_instance; }
 
 private:
   Object m_instance;

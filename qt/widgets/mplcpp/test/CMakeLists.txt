@@ -3,6 +3,7 @@
 #
 set ( TEST_HEADERS
   ArtistTest.h
+  AxesTest.h
   FigureTest.h
 )
 

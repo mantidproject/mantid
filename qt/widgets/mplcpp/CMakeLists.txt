@@ -1,6 +1,7 @@
 # Rules for matplotlib cpp library
 set ( LIB_SRCS
   src/Artist.cpp
+  src/Axes.cpp
   src/Figure.cpp
 )
 
@@ -8,6 +9,7 @@ set ( MOC_HEADERS "" )
 
 set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Artist.h
+  inc/MantidQtWidgets/MplCpp/Axes.h
   inc/MantidQtWidgets/MplCpp/Figure.h
 )
 

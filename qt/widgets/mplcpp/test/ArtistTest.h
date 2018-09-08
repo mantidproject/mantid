@@ -1,5 +1,5 @@
-#ifndef ARTISTTEST_H
-#define ARTISTTEST_H
+#ifndef MPLCPP_ARTISTTEST_H
+#define MPLCPP_ARTISTTEST_H
 
 #include "MantidQtWidgets/MplCpp/Artist.h"
 
