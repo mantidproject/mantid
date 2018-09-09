@@ -37,8 +37,8 @@ class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
 public:
   FigureCanvasQt(QWidget *parent = nullptr);
 
-  /// Non-const access to the axes instance
-  inline Axes &axes() { return m_axes; }
+  /// Non-const access to the current active axes instance
+  inline Axes &gca() { return m_axes; }
 
 private:
   Axes m_axes;

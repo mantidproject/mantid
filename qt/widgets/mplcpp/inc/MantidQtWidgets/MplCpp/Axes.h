@@ -19,13 +19,24 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Python/Object.h"
 
-namespace MantidQt { namespace Widgets { namespace MplCpp {
+namespace MantidQt {
+namespace Widgets {
+namespace MplCpp {
 
 class MANTID_MPLCPP_DLL Axes : public Python::InstanceHolder {
 public:
   Axes(Python::Object obj);
+
+  /// @name Formatting
+  /// @{
+  void setXLabel(const char *label);
+  void setYLabel(const char *label);
+  void setTitle(const char *label);
+  /// @}
 };
 
-}}}
+} // namespace MplCpp
+} // namespace Widgets
+} // namespace MantidQt
 
 #endif // MPLCPP_AXES_H

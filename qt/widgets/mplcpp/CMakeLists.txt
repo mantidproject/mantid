@@ -27,13 +27,14 @@ mtd_add_qt_library (TARGET_NAME MplCpp
     IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS
       inc
-      ../../Framework/PythonInterface/inc
+      ../../../Framework/PythonInterface/inc
       ${PYTHON_INCLUDE_PATH}
       ${PYTHON_NUMPY_INCLUDE_DIR}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
+    PythonInterfaceCore
   INSTALL_DIR
     ${LIB_DIR}
   OSX_INSTALL_RPATH
