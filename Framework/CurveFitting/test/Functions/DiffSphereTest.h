@@ -43,7 +43,8 @@ public:
     std::string funtion_string =
         "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
         "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=0.0,"
-        "Sigma=0.002);name=ElasticDiffSphere,Q=0.5,Height=47.014,Radius=3.567)";
+        "Sigma=0.002);name=ElasticDiffSphere,Q=0.20092,Height=47.014,Radius="
+        "3.567)";
 
     // Initialize the fit function in the Fit algorithm
     Algorithms::Fit fitalg;
@@ -66,10 +67,11 @@ public:
      * and thus no unique fit exists. Thus, we fix parameter height and fit the
      * radius.
      */
-    funtion_string = "(composite=Convolution,NumDeriv=true;name=Gaussian,"
-                     "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,"
-                     "PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.5,"
-                     "Height=47.014,Radius=6.0,ties=(Height=47.014,Centre=0))";
+    funtion_string =
+        "(composite=Convolution,NumDeriv=true;name=Gaussian,"
+        "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,"
+        "PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.20092,"
+        "Height=47.014,Radius=6.0,ties=(Height=47.014,Centre=0))";
     fitalg.setProperty("Function", funtion_string);
     fitalg.setProperty("InputWorkspace", data_workspace);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
