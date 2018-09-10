@@ -122,7 +122,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertTrue(view.q_resolution_delta_r == 11.)
         self.assertTrue(view.q_resolution_collimation_length == 12.)
         self.assertTrue(view.q_resolution_moderator_file == "moderator_rkh_file.txt")
-        self.assertFalse(view.phi_limit_use_mirror)
+        self.assertTrue(view.phi_limit_use_mirror)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_min == 12.)
         self.assertTrue(view.radius_limit_max == 15.)

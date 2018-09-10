@@ -92,6 +92,8 @@ private slots:
   void emitPlotGuessChanged(int);
 
 private:
+  std::string getSpectrumText() const;
+
   void addFitRangeSelector();
   void addBackgroundRangeSelector();
   void addHWHMRangeSelector();

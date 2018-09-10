@@ -7,7 +7,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMuon/RRFMuon.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;

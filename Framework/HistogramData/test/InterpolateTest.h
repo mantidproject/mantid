@@ -6,7 +6,6 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::HistogramData;
 

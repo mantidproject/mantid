@@ -689,7 +689,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
                 ws_name = '__raw_'+str(index)
                 ApplyDetectorScanEffCorr(InputWorkspace=ws_name, DetectorEfficiencyWorkspace=calib_current, OutputWorkspace=ws_name)
             SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=response_ws, MirrorScatteringAngles=False,
-                                CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes", ScatteringAngleTolerance=1000)
+                                CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
 
         DeleteWorkspace(ref_ws)
         DeleteWorkspaces(numors)
@@ -733,7 +733,7 @@ class PowderDiffILLDetEffCorr(PythonAlgorithm):
 
         self._progress.report('Constructing the global reference')
         SumOverlappingTubes(InputWorkspaces=numors, OutputWorkspace=ref_ws, MirrorScatteringAngles=False,
-                            CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes", ScatteringAngleTolerance=1000)
+                            CropNegativeScatteringAngles=False, Normalise=True, OutputType="2DTubes")
 
         to_group = []
         self._progress.report('Preparing the tube responses')

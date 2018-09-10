@@ -364,7 +364,7 @@ void FitDialog::parseInput() {
  * @param readHistory :: If true then the history will be re read.
  */
 void FitDialog::tieStaticWidgets(const bool readHistory) {
-  QString funValue = getStoredPropertyValue("Function");
+  QString funValue = getPreviousValue("Function");
   if (!funValue.isEmpty()) {
     m_form.function->setFunction(funValue);
   }
@@ -386,7 +386,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
   // tie(m_form.cbDomainType, "DomainType", m_form.staticLayout, readHistory);
   connect(m_form.cbDomainType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(domainTypeChanged()));
-  QString domainTypeValue = getStoredPropertyValue("DomainType");
+  QString domainTypeValue = getPreviousValue("DomainType");
   if (!domainTypeValue.isEmpty()) {
     m_form.cbDomainType->setItemText(-1, domainTypeValue);
   }
@@ -398,7 +398,7 @@ void FitDialog::tieStaticWidgets(const bool readHistory) {
   // read value from history
   tie(m_form.cbMinimizer, "Minimizer", m_form.staticLayout, readHistory);
 
-  auto value = getStoredPropertyValue("InputWorkspace");
+  auto value = getPreviousValue("InputWorkspace");
   setWorkspaceName(0, value);
 }
 
@@ -484,29 +484,6 @@ void FitDialog::functionChanged() {
   // this->setPropertyValues();
   // removeOldInputWidgets();
   // createDynamicLayout();
-}
-
-/**
- * Return property value stored in history
- * @param propName :: A property name
- */
-QString FitDialog::getStoredPropertyValue(const QString &propName) const {
-  // Get the value from either the previous input store or from Python argument
-  QString value("");
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-
-  if (!isForScript()) {
-    value = m_propertyValueMap.value(propName);
-    if (value.isEmpty()) {
-      value =
-          AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
-    }
-  } else {
-    if (!property)
-      return "";
-    value = m_propertyValueMap.value(propName);
-  }
-  return value;
 }
 
 /**

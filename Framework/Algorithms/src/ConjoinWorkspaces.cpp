@@ -46,12 +46,14 @@ void ConjoinWorkspaces::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  event_ws1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  event_ws2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  DataObjects::EventWorkspace_const_sptr eventWs1 =
+      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  DataObjects::EventWorkspace_const_sptr eventWs2 =
+      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
-  if (((event_ws1) && (!event_ws2)) || ((!event_ws1) && (event_ws2))) {
+  if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
     const std::string message("Only one of the input workspaces are of type "
                               "EventWorkspace; please use matching workspace "
                               "types (both EventWorkspace's or both "
@@ -60,9 +62,9 @@ void ConjoinWorkspaces::exec() {
     throw std::invalid_argument(message);
   }
 
-  if (event_ws1 && event_ws2) {
-    this->validateInputs(*event_ws1, *event_ws2, false);
-    auto output = conjoinEvents(*event_ws1, *event_ws2);
+  if (eventWs1 && eventWs2) {
+    this->validateInputs(*eventWs1, *eventWs2, false);
+    auto output = conjoinEvents(*eventWs1, *eventWs2);
     setYUnitAndLabel(*output);
     // Set the result workspace to the first input
     setProperty("InputWorkspace1", output);
@@ -150,7 +152,7 @@ ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
   }
 
   // Both are event workspaces. Use the special method
-  auto output = this->execEvent();
+  auto output = this->execEvent(ws1, ws2);
 
   // Copy the history from the original workspace
   output->history().addHistory(ws1.getHistory());

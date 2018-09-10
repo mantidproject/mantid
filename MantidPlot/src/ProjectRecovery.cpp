@@ -7,6 +7,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
@@ -124,13 +126,6 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   return folderPaths;
 }
 
-std::string removeInvalidFilenameChars(std::string s) {
-  // NTFS is most restrictive, so blacklist on this
-  std::string blacklistChars{":*?<>|/\"\\"};
-  boost::remove_erase_if(s, boost::is_any_of(blacklistChars));
-  return s;
-}
-
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
 
 // Config keys
@@ -180,6 +175,7 @@ void ProjectRecovery::attemptRecovery() {
 
   if (userChoice == 1) {
     // User selected no
+    this->startProjectSaving();
     return;
   }
 
@@ -360,12 +356,14 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
           m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
           Q_RETURN_ARG(bool, loadCompleted),
           Q_ARG(const std::string, projectFile.toString()))) {
+    this->startProjectSaving();
     throw std::runtime_error(
         "Project Recovery: Failed to load project windows - Qt binding failed");
   }
 
   if (!loadCompleted) {
     g_log.warning("Loading failed to recovery everything completely");
+    this->startProjectSaving();
     return;
   }
   g_log.notice("Project Recovery finished");
@@ -373,7 +371,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   // Restart project recovery when the async part finishes
   clearAllCheckpoints();
   startProjectSaving();
-}
+} // namespace MantidQt
 
 /**
  * Compiles the project recovery script from a given checkpoint
@@ -396,6 +394,7 @@ void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
+  startProjectSaving();
   scriptWindow->open(QString::fromStdString(historyDest.toString()));
 }
 
@@ -470,8 +469,8 @@ void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
                                  Qt::BlockingQueuedConnection,
                                  Q_RETURN_ARG(bool, saveCompleted),
                                  Q_ARG(const std::string, projectDestFile))) {
-    throw std::runtime_error(
-        "Project Recovery: Failed to save project windows - Qt binding failed");
+    throw std::runtime_error("Project Recovery: Failed to save project "
+                             "windows - Qt binding failed");
   }
 
   if (!saveCompleted) {
@@ -490,7 +489,7 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  const auto wsHandles =
+  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
       ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
@@ -506,9 +505,8 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   alg->setChild(true);
   alg->setLogging(false);
 
-  for (const auto &ws : wsHandles) {
-    std::string filename = removeInvalidFilenameChars(ws->getName());
-    filename.append(".py");
+  for (auto i = 0u; i < wsHandles.size(); ++i) {
+    std::string filename = std::to_string(i) + ".py";
 
     Poco::Path destFilename = historyDestFolder;
     destFilename.append(filename);
@@ -516,9 +514,10 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->initialize();
     alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
-    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace", wsHandles[i]);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
+    alg->setProperty("IgnoreGroups", true);
 
     alg->execute();
   }

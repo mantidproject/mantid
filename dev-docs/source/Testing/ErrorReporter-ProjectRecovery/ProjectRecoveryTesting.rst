@@ -40,7 +40,6 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
    Load(Filename='INTER00013464.nxs', OutputWorkspace='INTER1')
    Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER2')  
    Load(Filename='INTER00013469.nxs', OutputWorkspace='INTER3')  
@@ -65,25 +64,12 @@ Project Recovery test
    GroupWorkspaces(InputWorkspaces='Rename3_fit_Workspace_1_Workspace,Rename1_fit_Workspace_1_Workspace', OutputWorkspace='Rename3_fit_Workspaces') 
    RenameWorkspace(InputWorkspace='Rename3_fit_Workspace_1_Workspace', OutputWorkspace='Sequential5')
    RenameWorkspace(InputWorkspace='Rename1_fit_Workspace_1_Workspace', OutputWorkspace='Sequential6')
-   SaveCSV(InputWorkspace='Sequential4', Filename=testing_directory + '/Sequence4.csv')
-   SaveCSV(InputWorkspace='Sequential5', Filename=testing_directory + '/Sequence5.csv')
-   SaveCSV(InputWorkspace='Sequential6', Filename=testing_directory + '/Sequence6.csv') 
 
 - Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
 - You should be presented with the Project Recovery dialog
 - Choose `Yes`
 - This should re-populate your workspace dialog and pop up a recovery script in the script window
-- Run the following script:
-
-.. code-block:: python
-
-    testing_directory=<path-to-test>
-    SaveCSV(InputWorkspace='Sequential4', Filename=testing_directory + '/Sequence4r.csv')
-    SaveCSV(InputWorkspace='Sequential5', Filename=testing_directory + '/Sequence5r.csv')
-    SaveCSV(InputWorkspace='Sequential6', Filename=testing_directory + '/Sequence6r.csv')
-
-- Compare the contents of the `SequenceX.csv` and `SequenceXr.csv` files, they should be the same
 
 -------- 
 
@@ -98,9 +84,9 @@ Project Recovery test
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
    for i in range(100):
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
-   for i in range(3000):
+   for i in range(300):
        CloneWorkspace(InputWorkspace='100Rebinned', OutputWorkspace='%sClone'%str(i))
-   SaveCSV(InputWorkspace='2999Clone', Filename=testing_directory + 'Clone.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory + 'Clone.csv')
 
 - Wait a few seconds, then provoke a crash by running `Segfault` from the algorithm window
 - Re-start MantidPlot
@@ -112,7 +98,7 @@ Project Recovery test
 .. code-block:: python
 
    testing_directory=<path-to-test>
-   SaveCSV(InputWorkspace='2999Clone', Filename=testing_directory +'Cloner.csv')
+   SaveCSV(InputWorkspace='299Clone', Filename=testing_directory +'Cloner.csv')
 
 - Compare the contents of `Clone.csv` and `Cloner.csv`, they should be the same
 

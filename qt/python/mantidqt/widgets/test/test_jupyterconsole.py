@@ -26,15 +26,14 @@ from qtpy import QT_VERSION
 
 # local package imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 
 
 PRE_IPY5_PY3_QT5 = (sys.version_info.major == 3 and IPython.version_info[0] < 5 and int(QT_VERSION[0]) == 5)
 SKIP_REASON = "Segfault within readline for IPython < 5 and Python 3"
 
 
-@requires_qapp
-class InProcessJupyterConsoleTest(unittest.TestCase):
+class InProcessJupyterConsoleTest(GuiTest):
 
     @unittest.skipIf(PRE_IPY5_PY3_QT5, SKIP_REASON)
     def test_construction_raises_no_errors(self):

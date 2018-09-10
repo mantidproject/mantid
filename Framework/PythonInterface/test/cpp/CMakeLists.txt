@@ -8,6 +8,7 @@ set ( TEST_FILES
   PythonAlgorithmInstantiatorTest.h
   PySequenceToVectorTest.h
   RunPythonScriptTest.h
+  ToPyListTest.h
 )
 
 if ( CXXTEST_FOUND )

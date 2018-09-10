@@ -43,8 +43,7 @@ void AppendSpectra::init() {
 
   declareProperty("Number", 1,
                   boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
-                  "Append the spectra from InputWorkspace2 multiple times (for "
-                  "MatrixWorkspaces only)");
+                  "Append the spectra from InputWorkspace2 multiple times.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -60,12 +59,14 @@ void AppendSpectra::exec() {
   // Retrieve the input workspaces
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
-  event_ws1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  event_ws2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  DataObjects::EventWorkspace_const_sptr eventWs1 =
+      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  DataObjects::EventWorkspace_const_sptr eventWs2 =
+      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces
-  if (((event_ws1) && (!event_ws2)) || ((!event_ws1) && (event_ws2))) {
+  if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
     const std::string message("Only one of the input workspaces are of type "
                               "EventWorkspace; please use matching workspace "
                               "types (both EventWorkspace's or both "
@@ -82,28 +83,28 @@ void AppendSpectra::exec() {
 
   const bool mergeLogs = getProperty("MergeLogs");
   const int number = getProperty("Number");
+  MatrixWorkspace_sptr output;
 
-  if (event_ws1 && event_ws2) {
+  if (eventWs1 && eventWs2) {
     // Both are event workspaces. Use the special method
-    MatrixWorkspace_sptr output = this->execEvent();
-    if (number > 1)
-      g_log.warning("Number property is ignored for event workspaces");
-    if (mergeLogs)
-      combineLogs(ws1->run(), ws2->run(), output->mutableRun());
-    // Set the output workspace
-    setProperty("OutputWorkspace", output);
-    return;
+    DataObjects::EventWorkspace_sptr eOutput =
+        this->execEvent(*eventWs1, *eventWs2);
+    for (int i = 1; i < number; i++) {
+      eOutput = this->execEvent(*eOutput, *eventWs2);
+    }
+    output = boost::static_pointer_cast<MatrixWorkspace>(eOutput);
+  } else { // So it is a workspace 2D.
+    // The only restriction, even with ValidateInputs=false
+    if (ws1->blocksize() != ws2->blocksize())
+      throw std::runtime_error(
+          "Workspace2D's must have the same number of bins.");
+
+    output = execWS2D(*ws1, *ws2);
+    for (int i = 1; i < number; i++) {
+      output = execWS2D(*output, *ws2);
+    }
   }
-  // So it is a workspace 2D.
 
-  // The only restriction, even with ValidateInputs=false
-  if (ws1->blocksize() != ws2->blocksize())
-    throw std::runtime_error(
-        "Workspace2D's must have the same number of bins.");
-
-  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
-  for (int i = 1; i < number; i++)
-    output = execWS2D(*output, *ws2);
   if (mergeLogs)
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 

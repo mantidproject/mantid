@@ -26,6 +26,7 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/Hint.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces;
@@ -145,8 +146,8 @@ public:
                     std::vector<MissingInstrumentParameterValue> const &));
   MOCK_CONST_METHOD0(detectorCorrectionEnabled, bool());
   // Calls we don't care about
-  void
-  createStitchHints(const std::map<std::string, std::string> &hints) override {
+  void createStitchHints(
+      const std::vector<MantidQt::MantidWidgets::Hint> &hints) override {
     UNUSED_ARG(hints);
   };
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }

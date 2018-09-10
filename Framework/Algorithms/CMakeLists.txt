@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
 	src/ApplyDetailedBalance.cpp
+	src/ApplyFloodWorkspace.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AverageLogData.cpp
 	src/Bin2DPowderDiffraction.cpp
@@ -74,6 +75,7 @@ set ( SRC_FILES
 	src/CreateDummyCalFile.cpp
 	src/CreateEPP.cpp
 	src/CreateFlatEventWorkspace.cpp
+	src/CreateFloodWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
 	src/CreateLogTimeCorrection.cpp
@@ -102,6 +104,7 @@ set ( SRC_FILES
 	src/DiffractionEventCalibrateDetectors.cpp
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
+	src/DirectILLTubeBackground.cpp
 	src/Divide.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
@@ -137,6 +140,7 @@ set ( SRC_FILES
 	src/FindEPP.cpp
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
+	src/FindReflectometryLines2.cpp
 	src/FitPeak.cpp
 	src/FitPeaks.cpp
 	src/FixGSASInstrumentFile.cpp
@@ -280,6 +284,7 @@ set ( SRC_FILES
 	src/SofQWPolygon.cpp
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
+	src/SortXAxis.cpp
 	src/SpatialGrouping.cpp
 	src/SpectrumAlgorithm.cpp
 	src/SpecularReflectionAlgorithm.cpp
@@ -335,6 +340,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AppendSpectra.h
 	inc/MantidAlgorithms/ApplyCalibration.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
+	inc/MantidAlgorithms/ApplyFloodWorkspace.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/Bin2DPowderDiffraction.h
@@ -398,6 +404,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateDummyCalFile.h
 	inc/MantidAlgorithms/CreateEPP.h
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
+	inc/MantidAlgorithms/CreateFloodWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
 	inc/MantidAlgorithms/CreateLogTimeCorrection.h
@@ -426,6 +433,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
+	inc/MantidAlgorithms/DirectILLTubeBackground.h
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
@@ -461,6 +469,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindEPP.h
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
+	inc/MantidAlgorithms/FindReflectometryLines2.h
 	inc/MantidAlgorithms/FitPeak.h
 	inc/MantidAlgorithms/FitPeaks.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
@@ -609,6 +618,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SofQWPolygon.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
+	inc/MantidAlgorithms/SortXAxis.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SpectrumAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
@@ -766,6 +776,7 @@ set ( TEST_FILES
 	DiffractionEventCalibrateDetectorsTest.h
 	DiffractionFocussing2Test.h
 	DiffractionFocussingTest.h
+	DirectILLTubeBackgroundTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
@@ -797,6 +808,7 @@ set ( TEST_FILES
 	FindEPPTest.h
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
+	FindReflectometryLines2Test.h
 	FitPeakTest.h
 	FitPeaksTest.h
 	FixGSASInstrumentFileTest.h
@@ -928,6 +940,7 @@ set ( TEST_FILES
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
+	SortXAxisTest.h
 	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateTheta2Test.h

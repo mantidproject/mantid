@@ -6,6 +6,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/LiveListenerInfo.h"
+#include "MantidKernel/make_unique.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -25,7 +26,7 @@ public:
                             "<connection />"
                             "</livedata>";
 
-    FacilityInfo *fac = nullptr;
+    std::unique_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createMinimalFacility(xml));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -41,7 +42,7 @@ public:
                             "<connection name='n' address='a' listener='l' />"
                             "</livedata>";
 
-    FacilityInfo *fac = nullptr;
+    std::unique_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createMinimalFacility(xml));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -58,7 +59,7 @@ public:
                             "<connection name='n2' address='A' listener='L' />"
                             "</livedata>";
 
-    FacilityInfo *fac = nullptr;
+    std::unique_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createMinimalFacility(xml));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -88,7 +89,7 @@ public:
                             "<connection name='n2' address='A' listener='L' />"
                             "</livedata>";
 
-    FacilityInfo *fac = nullptr;
+    std::unique_ptr<FacilityInfo> fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createMinimalFacility(xml));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -150,7 +151,8 @@ public:
   }
 
 private:
-  FacilityInfo *createMinimalFacility(const std::string &livedataXml) {
+  std::unique_ptr<FacilityInfo>
+  createMinimalFacility(const std::string &livedataXml) {
     const std::string xmlStr =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         "<facilities>"
@@ -165,13 +167,13 @@ private:
     return createFacility(xmlStr);
   }
 
-  FacilityInfo *createFacility(const std::string &xml) {
+  std::unique_ptr<FacilityInfo> createFacility(const std::string &xml) {
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(xml);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     Poco::XML::Element *elem = pRootElem->getChildElement("facility");
 
-    return new FacilityInfo(elem);
+    return Mantid::Kernel::make_unique<FacilityInfo>(elem);
   }
 };
 
