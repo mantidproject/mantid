@@ -1149,18 +1149,20 @@ void Algorithm::constructWorkspaceVectorForHistoryHelper(
       inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
     }
   } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
+    std::string errorMsg(error.what());
     g_log.information("The ADS was unable to find the input workspaces "
                       "when attaching history: " +
-                      error.what());
+                      errorMsg);
   }
   try {
     if (direction == Direction::Output || direction == Direction::InOut) {
       outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
     }
   } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
+    std::string errorMsg(error.what());
     g_log.information("The ADS was unable to find the output workspaces "
                       "when attaching history: " +
-                      error.what());
+                      errorMsg);
   }
 }
 /** Sends out algorithm parameter information to the logger */
