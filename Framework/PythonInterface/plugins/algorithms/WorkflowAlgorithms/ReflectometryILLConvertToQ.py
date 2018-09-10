@@ -107,7 +107,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional,
                                                      validator=WorkspaceUnitValidator('Wavelength')),
-                             doc='Summed direct beam workspace if output in reflectivity is required.')
+                             doc='Summed direct beam workspace for finalizing the reflectivity calculation in SumInLambda case.')
         self.declareProperty(Prop.POLARIZED,
                              defaultValue=False,
                              doc='True if input workspace has been corrected for polarization efficiencies.')
@@ -120,6 +120,11 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         """Validate the input properties."""
         issues = dict()
         inputWS = self.getProperty(Prop.INPUT_WS).value
+        run = inputWS.run()
+        if run.hasProperty(common.SampleLogs.SUM_TYPE):
+            sumType = run.getProperty(common.SampleLogs.SUM_TYPE).value
+            if sumType == 'SumInLambda' and self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
+                issues[Prop.DIRECT_FOREGROUND_WS] = 'DirectForegroundWorkspace needed for SumInLambda mode.'
         if inputWS.getNumberHistograms() != 1:
             issues[Prop.INPUT_WS] = 'The workspace should have only a single histogram. Was foreground summation forgotten?'
         if not self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:

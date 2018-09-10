@@ -19,7 +19,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         illhelpers.add_chopper_configuration_D17(dirWS)
         illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
         dirWS = illhelpers.refl_preprocess('dirWS', dirWS, 'dirBeamPosWS')
-        dirFgdWS = illhelpers.refl_sum_in_lambda('difFgdWS', dirWS)
+        dirFgdWS = illhelpers.refl_sum_foreground('difFgdWS', 'SumInLambda', dirWS)
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(reflWS)
         illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
@@ -27,7 +27,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         mtd.add('reflWS', reflWS)
         illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.5, 128)
         reflWS = illhelpers.refl_preprocess('reflWS', reflWS, 'reflBeamPosWS')
-        fgdWS = illhelpers.refl_sum_in_lambda('fgdWS', reflWS)
+        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInLambda', reflWS, dirFgdWS)
         args = {
             'InputWorkspace': fgdWS,
             'OutputWorkspace': 'inQ',
@@ -51,6 +51,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         illhelpers.add_chopper_configuration_D17(dirWS)
         illhelpers.refl_create_beam_position_ws('dirBeamPosWS', dirWS, 0., 128)
         dirWS = illhelpers.refl_preprocess('dirWS', dirWS, 'dirBeamPosWS')
+        dirFgdWS = illhelpers.refl_sum_foreground('dirFgdWS', 'SumInLambda', dirWS)
         reflWS = illhelpers.create_poor_mans_d17_workspace()
         illhelpers.add_chopper_configuration_D17(reflWS)
         illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
@@ -58,7 +59,7 @@ class ReflectometryILLConvertToQTest(unittest.TestCase):
         mtd.add('reflWS', reflWS)
         illhelpers.refl_create_beam_position_ws('reflBeamPosWS', reflWS, 1.5, 128)
         reflWS = illhelpers.refl_preprocess('reflWS', reflWS, 'reflBeamPosWS')
-        fgdWS = illhelpers.refl_sum_in_lambda('fgdWS', reflWS)
+        fgdWS = illhelpers.refl_sum_foreground('fgdWS', 'SumInQ', reflWS, dirFgdWS)
         args = {
             'InputWorkspace': fgdWS,
             'OutputWorkspace': 'inQ',
