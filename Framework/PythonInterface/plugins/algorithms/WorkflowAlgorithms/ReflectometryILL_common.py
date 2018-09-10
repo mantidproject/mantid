@@ -25,7 +25,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
         chopper2Phase = sampleLogs.getProperty(phase2Entry).value
         if chopper1Phase > 360.:
             # CH1.phase on FIGARO is set to an arbitrary value (999.9)
-            chopper1Phase = 0.        
+            chopper1Phase = 0.
         openoffset = sampleLogs.getProperty('CollAngle.openOffset').value
         return 45. - (chopper2Phase - chopper1Phase) - openoffset
 
