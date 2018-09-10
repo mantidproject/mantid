@@ -92,8 +92,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
         self.line_colours = cycle(["r", "g", "b", "c", "m", "y"])
 
-    ### Peak Checkbox Functions ###
-
     def iterate_over_selectors(self, check_state, primary_checkboxes=True):
         """
         Iterates over element popups.
@@ -172,8 +170,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             del line
         self.electron_lines = []
         self.plotting.update_canvas()
-
-    ### ----------------------- ###
 
     def load_run(self, detector, run):
         name = "{}; Detector {}".format(run, detector[-1])
