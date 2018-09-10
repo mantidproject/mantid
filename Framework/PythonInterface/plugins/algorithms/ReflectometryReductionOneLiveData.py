@@ -38,93 +38,118 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         issues = {}
         return issues
 
+    def PyExec(self):
+        self.setupWorkspaceForReduction()
+        alg = self.setupReductionAlgorithm()
+        self.runReductionAlgorithm(alg)
+
+    def setupWorkspaceForReduction(self):
+        """Set up the workspace ready for the reduction"""
+        self.createWorkspaceForReduction()
+        self.setupInstrument()
+        liveValues = self.getLiveValuesFromInstrument()
+        self.setupSampleLogs(liveValues)
+        self.setupSlits(liveValues)
+
+    def setupReductionAlgorithm(self):
+        """Set up the reduction algorithm"""
+        alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+        alg.initialize()
+        alg.setChild(False)
+        self.copyPropertyValuesTo(alg)
+        alg.setProperty("InputWorkspace", self.ws_name)
+        alg.setProperty("ThetaLogName", "Theta")
+        alg.setProperty("OutputWorkspaceBinned", self.ws_name)
+        return alg
+
+    def runReductionAlgorithm(self, alg):
+        """Run the reduction"""
+        alg.execute()
+        out_ws = alg.getProperty("OutputWorkspaceBinned").value
+        self.setProperty("OutputWorkspace", out_ws)
+
+    def createWorkspaceForReduction(self):
+        """Create a workspace for the input/output to the reduction algorithm"""
+        in_ws_name = self.getProperty("InputWorkspace").value.getName()
+        self.ws_name = self.getPropertyValue("OutputWorkspace")
+        CloneWorkspace(InputWorkspace=in_ws_name,OutputWorkspace=self.ws_name)
+
+    def setupInstrument(self):
+        """Sets the instrument name and loads the instrument on the workspace"""
+        self.instrument = config.getInstrument().shortName()
+        LoadInstrument(Workspace=self.ws_name,RewriteSpectraMap=True,InstrumentName=self.instrument)
+
+    def setupSampleLogs(self, liveValues):
+        """Set up the sample logs based on live values from the instrument"""
+        logNames = [key for key in liveValues]
+        logValues = [liveValues[key].value for key in liveValues]
+        logUnits = [liveValues[key].unit for key in liveValues]
+        AddSampleLogMultiple(Workspace=self.ws_name,LogNames=logNames,LogValues=logValues,
+                             LogUnits=logUnits)
+
+    def setupSlits(self, liveValues):
+        """Set up instrument parameters for the slits"""
+        s1 = liveValues[self.s1vgName()].value
+        s2 = liveValues[self.s2vgName()].value
+        SetInstrumentParameter(Workspace=self.ws_name,
+                               ParameterName='vertical gap',
+                               ParameterType='Number',
+                               ComponentName='slit1',
+                               Value=str(s1))
+        SetInstrumentParameter(Workspace=self.ws_name,
+                               ParameterName='vertical gap',
+                               ParameterType='Number',
+                               ComponentName='slit2',
+                               Value=str(s2))
+
     def copyPropertyValuesTo(self, alg):
         props = self.getProperties()
         for prop in props:
             value = self.getPropertyValue(prop.name)
             alg.setPropertyValue(prop.name, value)
 
-    def setupSlits(self, ws, liveValues):
-        s1 = liveValues['s1vg'].value
-        s2 = liveValues['s2vg'].value
-        SetInstrumentParameter(Workspace=ws,
-                               ParameterName='vertical gap',
-                               ParameterType='Number',
-                               ComponentName='slit1',
-                               Value=str(s1))
-        SetInstrumentParameter(Workspace=ws,
-                               ParameterName='vertical gap',
-                               ParameterType='Number',
-                               ComponentName='slit2',
-                               Value=str(s2))
+    def getLiveValuesFromInstrument(self):
+        # get values from instrument
+        liveValues = self.liveValueList()
+        for key in liveValues:
+            if liveValues[key].value is None:
+                liveValues[key].value = self.getLiveValueFromInstrument(key)
+        # check we have all we need
+        self.validateLiveValues(liveValues)
+        return liveValues
+
+    def s1vgName(self):
+        if self.instrument == 'INTER' or self.instrument == 'SURF':
+            return 'S1VG'
+        elif self.instrument == 'OFFSPEC':
+            return 's1vgap'
+        else:
+            return 's1vg'
+
+    def s2vgName(self):
+        if self.instrument == 'INTER' or self.instrument == 'SURF':
+            return 'S2VG'
+        elif self.instrument == 'OFFSPEC':
+            return 's2vgap'
+        else:
+            return 's2vg'
+
+    def liveValueList(self):
+        """Get the list of required live value names and their unit type"""
+        liveValues =  {'Theta' : LiveValue(None, 'deg'),
+                       self.s1vgName() : LiveValue(None, 'm'),
+                       self.s2vgName() : LiveValue(None, 'm')}
+        return liveValues
+
+    def getLiveValueFromInstrument(self, logName):
+        from epics import caget
+        return caget('IN:' + self.instrument + ':CS:SB:' + logName, as_string=True)
 
     def validateLiveValues(self, liveValues):
         for key in liveValues:
             if liveValues[key].value is None:
                 raise RuntimeError('Required value ' + key + ' was not found for instrument')
-
         if float(liveValues['Theta'].value) <= 1e-06:
             raise RuntimeError('Theta must be greater than zero')
-
-    def getLiveValueFromInstrument(self, logName, instrument):
-        from epics import caget
-        return caget('IN:' + instrument + ':CS:SB:' + logName, as_string=True)
-
-    def getLiveValuesFromInstrument(self, instrument):
-        # set up required values
-        liveValues = {'Theta' : LiveValue(None, 'deg'),
-                      's1vg' : LiveValue(None, 'm'),
-                      's2vg' : LiveValue(None, 'm')}
-        # get values from instrument
-        for key in liveValues:
-            if liveValues[key].value is None:
-                liveValues[key].value = self.getLiveValueFromInstrument(key, instrument)
-        # check we have all we need
-        self.validateLiveValues(liveValues)
-        return liveValues
-
-    def setupInstrument(self):
-        instrument = config.getInstrument().shortName()
-        LoadInstrument(Workspace=self.out_ws_name,RewriteSpectraMap=True,InstrumentName=instrument)
-        return instrument
-
-    def setupSampleLogs(self, liveValues):
-        logNames = [key for key in liveValues]
-        logValues = [liveValues[key].value for key in liveValues]
-        logUnits = [liveValues[key].unit for key in liveValues]
-        AddSampleLogMultiple(Workspace=self.out_ws_name,LogNames=logNames,LogValues=logValues,
-                             LogUnits=logUnits)
-
-    def setupWorkspaceForReduction(self):
-        in_ws_name = self.getProperty("InputWorkspace").value.getName()
-        self.out_ws_name = self.getPropertyValue("OutputWorkspace")
-        CloneWorkspace(InputWorkspace=in_ws_name,OutputWorkspace=self.out_ws_name)
-        # The workspace must have an instrument.
-        instrument = self.setupInstrument()
-        # Set up the sample logs based on live values from the instrument.
-        liveValues = self.getLiveValuesFromInstrument(instrument)
-        self.setupSampleLogs(liveValues)
-        # Set up instrument parameters for the slits
-        self.setupSlits(self.out_ws_name, liveValues)
-
-    def setupReductionAlgorithm(self):
-        alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
-        alg.initialize()
-        alg.setChild(False)
-        self.copyPropertyValuesTo(alg)
-        alg.setProperty("InputWorkspace", self.out_ws_name)
-        alg.setProperty("ThetaLogName", "Theta")
-        alg.setProperty("OutputWorkspaceBinned", self.out_ws_name)
-        return alg
-
-    def runReductionAlgorithm(self, alg):
-        alg.execute()
-        out_ws = alg.getProperty("OutputWorkspaceBinned").value
-        self.setProperty("OutputWorkspace", out_ws)
-
-    def PyExec(self):
-        self.setupWorkspaceForReduction()
-        alg = self.setupReductionAlgorithm()
-        self.runReductionAlgorithm(alg)
 
 AlgorithmFactory.subscribe(ReflectometryReductionOneLiveData)
