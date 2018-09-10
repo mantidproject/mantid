@@ -45,9 +45,12 @@ Improvements
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 
+
 Bugfixes
 ########
 
+- The workspace(s) loaded into F(Q) Fit are checked for EISF or Width values, and an error message is displayed
+  if neither are present. This prevents an unexpected crash.
 - The parameter values for a selected spectrum are now updated properly when a Fit is run using the Fit String
   option in ConvFit.
 - An unexpected crash is prevented when Plot Current Preview is clicked when no data is loaded. A meaningful error
