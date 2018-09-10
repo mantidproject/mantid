@@ -75,16 +75,16 @@ View
             col = 0
             self.table.setItem(row, col, text)
 
-     def addWidgetToTable(self, name, widget, row):
+        def addWidgetToTable(self, name, widget, row):
             self.setTableRow(name, row)
             col = 1
             self.table.setCellWidget(row, col, widget)
-
-     def addItemToTable(self, name, widget, row):
+        
+        def addItemToTable(self, name, widget, row):
             self.setTableRow(name, row)
             col = 1
             self.table.setItem(row, col, widget)
-
+    
 Presenter
 #########
 
@@ -139,10 +139,10 @@ Main module
             self.setWindowTitle("view tutorial")
 
     def qapp():
-            if QtGui.QApplication.instance():
-                _app = QtGui.QApplication.instance()
+        if QtGui.QApplication.instance():
+            _app = QtGui.QApplication.instance()
         else:
-        _app = QtGui.QApplication(sys.argv)
+            _app = QtGui.QApplication(sys.argv)
         return _app
 
     app = qapp()

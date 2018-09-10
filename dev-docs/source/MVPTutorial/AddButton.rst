@@ -90,9 +90,9 @@ all been saved in ``view.py``, the ``main.py`` will contain:
     def qapp():
         if QtGui.QApplication.instance():
             _app = QtGui.QApplication.instance()
-    else:
+        else:
             _app = QtGui.QApplication(sys.argv)
-    return _app
+        return _app
 
     app = qapp()
     window = demo()
