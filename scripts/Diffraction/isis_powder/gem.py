@@ -7,7 +7,6 @@ from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_ma
 from isis_powder.routines import absorb_corrections, common, instrument_settings, common_output
 
 
-
 class Gem(AbstractInst):
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
@@ -104,7 +103,7 @@ class Gem(AbstractInst):
 
         if self._is_vanadium:
             return d_spacing_group, tof_group
-          
+
         output_paths = self._generate_out_file_paths(run_details=run_details)
         if "maud_filename" in output_paths:
             gem_output.save_maud(d_spacing_group, output_paths["maud_filename"])
