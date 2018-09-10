@@ -3,6 +3,7 @@ class PeakSelectorPresenter(object):
         self.view = view
         self.primary_checkboxes = self.view.primary_checkboxes
         self.secondary_checkboxes = self.view.secondary_checkboxes
+        self.gamma_checkboxes = self.view.gamma_checkboxes
 
     def finish_selection(self):
         self.view.finish_selection()

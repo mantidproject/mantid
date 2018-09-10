@@ -84,7 +84,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.element_data = {}
         self.element_lines = {}
         self.gamma_lines = []
-        self.gamma_peaks = self._get_gamma_peaks()
+        self.gamma_peaks = self.ptable.peak_data["Gammas"]
         self.electron_peaks = self._get_electron_peaks()
         self.electron_lines = []
         self._generate_element_widgets()
@@ -118,29 +118,29 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.iterate_over_selectors(False, primary_checkboxes=False)
         self.plotting.update_canvas()
 
-    def _get_gamma_peaks(self):
-        gamma_peaks = self.ptable.peak_data["Gammas"]["Primary"]
-        gamma_peaks.update(self.ptable.peak_data["Gammas"]["Secondary"])
-        return gamma_peaks.copy()
-
     def _plot_gammas(self, subplot, colour=None):
         if colour is None:
             colour = self.line_colours.next()
-        for label, lines in iteritems(self.gamma_peaks):
-            if lines is None:
-                continue
-            for line in lines:
+        for element, peaks in iteritems(self.gamma_peaks):
+            for peak_type, peak in iteritems(peaks):
+                if peak is None:
+                    continue
                 self.gamma_lines.append(
                     subplot.axvline(
-                        line, 0, 1, color=colour))
+                        peak, 0, 1, color=colour))
         self.plotting.update_canvas()
 
+    def _iterate_over_gamma_selectors(self, check_state):
+        for element, selector in iteritems(self.element_widgets):
+            for checkbox in selector.gamma_checkboxes:
+                checkbox.setChecked(check_state)
+            selector.finish_selection()
+
     def gammas_checked(self):
-        colour = self.line_colours.next()
-        for subplot_name, subplot in iteritems(self.plotting.get_subplots()):
-            self._plot_gammas(subplot, colour=colour)
+        self._iterate_over_gamma_selectors(True)
 
     def gammas_unchecked(self):
+        self._iterate_over_gamma_selectors(False)
         for line in self.gamma_lines:
             line.remove()
             del line
@@ -245,6 +245,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                     del line
                 self.element_lines[element][x_value] = []
                 del current_dict[label]
+            self.plotting.update_canvas()
         elif current_dict != new_dict:
             colour = self.line_colours.next()
             dict_difference = {k: new_dict[k]
@@ -266,6 +267,10 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             if element in ["Gammas", "Electrons"]:
                 continue
             data = self.ptable.element_data(element)
+            try:
+                data["Gammas"] = self.ptable.peak_data["Gammas"][element]
+            except KeyError:
+                pass
             widget = PeakSelectorPresenter(PeakSelectorView(data, element))
             widget.on_finished(self._update_peak_data)
             self.element_widgets[element] = widget

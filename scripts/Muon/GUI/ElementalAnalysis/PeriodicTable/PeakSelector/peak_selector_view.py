@@ -24,6 +24,12 @@ class PeakSelectorView(QtGui.QListWidget):
         secondary = peak_data["Secondary"]
         self.secondary_checkboxes = self._create_checkbox_list(
             "Secondary", secondary, checked=False)
+        try:
+            gammas = peak_data["Gammas"]
+            self.gamma_checkboxes = self._create_checkbox_list(
+                "Gammas", gammas, checked=False)
+        except KeyError:
+            self.gamma_checkboxes = []
 
         widget.setLayout(self.list)
         scroll = QtGui.QScrollArea()
@@ -50,17 +56,22 @@ class PeakSelectorView(QtGui.QListWidget):
         new_data = data["Primary"].copy()
         self.new_data = new_data
 
+    def _setup_checkbox(self, name, checked):
+        checkbox = Checkbox(name)
+        checkbox.setChecked(checked)
+        checkbox.on_checkbox_unchecked(self._remove_value_from_new_data)
+        checkbox.on_checkbox_checked(self._add_value_to_new_data)
+        self.list.addWidget(checkbox)
+        return checkbox
+
     def _create_checkbox_list(self, heading, checkbox_data, checked=True):
         _heading = QtGui.QLabel(heading)
         self.list.addWidget(_heading)
         checkboxes = []
         for peak_type, value in iteritems(checkbox_data):
-            checkbox = Checkbox("{}: {}".format(peak_type, value))
-            checkbox.setChecked(checked)
-            checkbox.on_checkbox_unchecked(self._remove_value_from_new_data)
-            checkbox.on_checkbox_checked(self._add_value_to_new_data)
-            self.list.addWidget(checkbox)
-            checkboxes.append(checkbox)
+            checkboxes.append(
+                self._setup_checkbox(
+                    "{}: {}".format(peak_type, value), checked))
         return checkboxes
 
     def _parse_checkbox_name(self, name):
