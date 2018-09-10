@@ -24,7 +24,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def PyInit(self):
         self.copyProperties('ReflectometryReductionOneAuto',[
             'InputWorkspace', 'SummationType', 'ReductionType','IncludePartialBins', 'AnalysisMode',
-            'ProcessingInstructions','ThetaIn', 'ThetaLogName','CorrectDetectors',
+            'ProcessingInstructions','CorrectDetectors',
             'DetectorCorrectionType','WavelengthMin','WavelengthMax','I0MonitorIndex',
             'MonitorBackgroundWavelengthMin','MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin','MonitorIntegrationWavelengthMax',
@@ -55,7 +55,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         """Set up the reduction algorithm"""
         alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
         alg.initialize()
-        alg.setChild(False)
+        alg.setChild(True)
         self.copyPropertyValuesTo(alg)
         alg.setProperty("InputWorkspace", self.ws_name)
         alg.setProperty("ThetaLogName", "Theta")
