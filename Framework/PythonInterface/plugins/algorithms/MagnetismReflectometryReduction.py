@@ -370,7 +370,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                                   ParentWorkspace=workspace, OutputWorkspace=name_output_ws)
 
         # At this point we still have a histogram, and we need to convert to point data
-        q_rebin = ConvertToPointData(InputWorkspace=q_rebin)
+        q_rebin = ConvertToPointData(InputWorkspace=q_rebin, OutputWorkspace=name_output_ws)
         return q_rebin
 
     def convert_to_q(self, workspace):
