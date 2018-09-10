@@ -792,7 +792,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     if (!firstTransG) {
       alg->setProperty("FirstTransmissionRun", firstTrans);
     } else {
-      g_log.information("A group has been passed as the first transmission run so the first run only is being used");
+      g_log.information("A group has been passed as the first transmission run "
+                        "so the first run only is being used");
       alg->setProperty("FirstTransmissionRun", firstTransG->getItem(0));
     }
   }
@@ -806,7 +807,8 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     if (!secondTransG) {
       alg->setProperty("SecondTransmissionRun", secondTrans);
     } else {
-      g_log.information("A group has been passed as the second transmission run so the first run only is being used");
+      g_log.information("A group has been passed as the second transmission "
+                        "run so the first run only is being used");
       alg->setProperty("secondTransmissionRun", secondTransG->getItem(0));
     }
   }
