@@ -44,7 +44,6 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
-class OneCurvePlot;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -178,8 +177,8 @@ public slots:
 
   void setupColorMap();
 
-  void changeColormap(const QString &filename = ""); // Deprecated
-  void changeScaleType(int);                         // Deprecated
+  void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
+  void changeScaleType(int);                               // Deprecated
   void changeNthPower(double);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated

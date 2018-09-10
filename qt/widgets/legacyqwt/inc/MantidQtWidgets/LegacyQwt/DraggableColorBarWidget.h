@@ -1,6 +1,7 @@
-#ifndef COLORMAPWIDGET_H_
-#define COLORMAPWIDGET_H_
+#ifndef DRAGGABLECOLORBARWIDGET_H_
+#define DRAGGABLECOLORBARWIDGET_H_
 
+#include "DllOption.h"
 #include <QFrame>
 
 class MantidColorMap;
@@ -16,13 +17,13 @@ namespace MantidWidgets {
 /**
  * Displays a color map with numeric axis and editable bounds
  */
-class ColorMapWidget : public QFrame {
+class EXPORT_OPT_MANTIDQT_LEGACYQWT DraggableColorBarWidget : public QFrame {
   Q_OBJECT
   enum DragType { Bottom, Top };
 
 public:
-  ColorMapWidget(int type, QWidget *parent,
-                 const double &minPositiveValue = 0.0001);
+  DraggableColorBarWidget(int type, QWidget *parent,
+                          const double &minPositiveValue = 0.0001);
   void setupColorBarScaling(const MantidColorMap &);
   void setMinValue(double);
   void setMaxValue(double);
@@ -72,4 +73,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif /*COLORMAPWIDGET_H_*/
+#endif // DRAGGABLECOLORBARWIDGET_H_

@@ -17,11 +17,13 @@ Project Recovery
 Changes
 #######
 - Project Recovery will no longer run certain Save Algorithms again, so you won't get duplication of files when recovering.
+- Workspaces now save locally as a number of how many workspaces have already been saved instead of workspace names
 
 Bugfixes
 ########
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
-- Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm
+- Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces aswell)
+- Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 
 MantidPlot
 ----------

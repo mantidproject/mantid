@@ -8,6 +8,16 @@ Diffraction Changes
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
+	
+Powder Diffraction
+------------------
+ Improvements
+ 
+############
+- Focusing in texture mode for Gem now properly saves
+  .gda files.
+  
+  
 
 Improvements
 ############
@@ -26,7 +36,7 @@ Single Crystal Diffraction
 Improvements
 ############
 
-- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.
+- :ref:`IntegratePeaksProfileFitting <algm-IntegratePeaksProfileFitting>` now supports MaNDi, TOPAZ, and CORELLI. Other instruments can easily be added as well.  In addition, the algorithm can now automatically generate a strong peaks library is one is not provided.
 - :ref:`MDNormSCD <algm-MDNormSCD>` now can handle merged MD workspaces.
 - :ref:`StartLiveData <algm-StartLiveData>` will load "live"
   data streaming from TOPAZ new Adara data server.
