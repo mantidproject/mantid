@@ -158,7 +158,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
         chopperPairDist = common.chopperPairDistance(logs, instrumentName)
         slit1SizeLog = common.slitSizeLogEntry(instrumentName, 1)
         slit2SizeLog = common.slitSizeLogEntry(instrumentName, 2)
-        tofBinWidth = self._TOFChannelWidth(logs, instrumentName)
+        tofBinWidth = self._TOFChannelWidth(logs)
         qWSName = self._names.withSuffix('in_momentum_transfer')
         qWS = ReflectometryMomentumTransfer(
             InputWorkspace=ws,
@@ -289,7 +289,7 @@ class ReflectometryILLConvertToQ(DataProcessorAlgorithm):
             EnableLogging=self._subalgLogging)
         return qWS
 
-    def _TOFChannelWidth(self, sampleLogs, instrumentName):
+    def _TOFChannelWidth(self, sampleLogs):
         """Return the time of flight bin width."""
         return sampleLogs.getProperty('PSD.time_of_flight_0').value
 
