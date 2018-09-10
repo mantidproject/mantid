@@ -967,18 +967,18 @@ class TestManager(object):
         '''
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
-        pyfile = open(filename, 'r')
         tests = []
         try:
-            mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
-            mod_attrs = dir(mod)
-            for key in mod_attrs:
-                value = getattr(mod, key)
-                if key is "MantidStressTest" or not inspect.isclass(value):
-                    continue
-                if self.isValidTestClass(value):
-                    test_name = key
-                    tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            with open(filename, 'r') as pyfile:
+                mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
+                mod_attrs = dir(mod)
+                for key in mod_attrs:
+                    value = getattr(mod, key)
+                    if key is "MantidStressTest" or not inspect.isclass(value):
+                        continue
+                    if self.isValidTestClass(value):
+                        test_name = key
+                        tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
         except Exception as exc:
             print("Error importing module '%s': %s" % (modname, str(exc)))
             # Error loading the source, add fake unnamed test so that an error
