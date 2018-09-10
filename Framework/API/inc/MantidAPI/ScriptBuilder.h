@@ -73,7 +73,6 @@ private:
   std::string m_output;
   std::string m_versionSpecificity;
   bool m_timestampCommands;
-  bool m_projectRecovery;
   std::vector<std::string> m_algsToIgnore;
 };
 
