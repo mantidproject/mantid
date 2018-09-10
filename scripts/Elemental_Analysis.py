@@ -94,17 +94,31 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
 
     ### Peak Checkbox Functions ###
 
+    def iterate_over_selectors(self, check_state, primary_checkboxes=True):
+        """
+        Iterates over element popups.
+
+        :param check_state: True or False - i.e. check boxes or not
+        :param primary_checkboxes: True if Primary, False if Secondary
+        """
+        for element, selector in iteritems(self.element_widgets):
+            for checkbox in selector.primary_checkboxes if primary_checkboxes else selector.secondary_checkboxes:
+                checkbox.setChecked(check_state)
+            selector.finish_selection()
+
     def major_peaks_checked(self):
-        pass
+        self.iterate_over_selectors(True, primary_checkboxes=True)
 
     def major_peaks_unchecked(self):
-        pass
+        self.iterate_over_selectors(False, primary_checkboxes=True)
+        self.plotting.update_canvas()
 
     def minor_peaks_checked(self):
-        pass
+        self.iterate_over_selectors(True, primary_checkboxes=False)
 
     def minor_peaks_unchecked(self):
-        pass
+        self.iterate_over_selectors(False, primary_checkboxes=False)
+        self.plotting.update_canvas()
 
     def _get_gamma_peaks(self):
         gamma_peaks = self.ptable.peak_data["Gammas"]["Primary"]
@@ -285,7 +299,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             self.load_run(detector, last_run)
         colour = self.line_colours.next()
         for element in self.ptable.selection:
-            print(element.symbol)
             for label, x_value in iteritems(self.element_data[element.symbol]):
                 l = self.plotting.get_subplot(detector).axvline(
                     x_value, 1, 0, color=colour)

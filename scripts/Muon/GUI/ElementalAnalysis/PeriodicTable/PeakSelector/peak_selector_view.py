@@ -19,9 +19,11 @@ class PeakSelectorView(QtGui.QListWidget):
         self.list = QtGui.QVBoxLayout(self)
 
         primary = peak_data["Primary"]
-        self._create_checkbox_list("Primary", primary)
+        self.primary_checkboxes = self._create_checkbox_list(
+            "Primary", primary)
         secondary = peak_data["Secondary"]
-        self._create_checkbox_list("Secondary", secondary, checked=False)
+        self.secondary_checkboxes = self._create_checkbox_list(
+            "Secondary", secondary, checked=False)
 
         widget.setLayout(self.list)
         scroll = QtGui.QScrollArea()
@@ -34,8 +36,11 @@ class PeakSelectorView(QtGui.QListWidget):
 
         self.setLayout(scroll_layout)
 
-    def closeEvent(self, event):
+    def finish_selection(self):
         self.sig_finished_selection.emit(self.element, self.new_data)
+
+    def closeEvent(self, event):
+        self.finish_selection()
         event.accept()
 
     def update_new_data(self, data):
@@ -48,12 +53,15 @@ class PeakSelectorView(QtGui.QListWidget):
     def _create_checkbox_list(self, heading, checkbox_data, checked=True):
         _heading = QtGui.QLabel(heading)
         self.list.addWidget(_heading)
+        checkboxes = []
         for peak_type, value in iteritems(checkbox_data):
             checkbox = Checkbox("{}: {}".format(peak_type, value))
             checkbox.setChecked(checked)
             checkbox.on_checkbox_unchecked(self._remove_value_from_new_data)
             checkbox.on_checkbox_checked(self._add_value_to_new_data)
             self.list.addWidget(checkbox)
+            checkboxes.append(checkbox)
+        return checkboxes
 
     def _parse_checkbox_name(self, name):
         peak_type, value = name.replace(" ", "").split(":")
