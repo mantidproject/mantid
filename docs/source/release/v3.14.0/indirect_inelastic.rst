@@ -45,7 +45,6 @@ Improvements
 - The WorkspaceIndex and Q value in the FitPropertyBrowser are now updated when the Plot Spectrum number is changed.
   This improvement can be seen in ConvFit when functions which depend on Q value are selected.
 
-
 Bugfixes
 ########
 
