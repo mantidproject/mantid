@@ -18,6 +18,11 @@ def _applyIfTimeSeries(logValue, function):
     return logValue
 
 
+def _binCentres(edges):
+    """Return bin centers."""
+    return (edges[:-1] + edges[1:]) / 2
+
+
 def _chooseMarker(markers, index):
     """Pick a marker from markers and return next cyclic index."""
     if index >= len(markers):
@@ -86,15 +91,37 @@ def _globalnanminmax(workspaces):
             globalMax = cMax
     return globalMin, globalMax
 
+def _incidentEnergy(logs):
+    """Return the incident energy value from the logs or None."""
+    if logs.hasProperty('Ei'):
+        return logs.getProperty('Ei').value
+    else:
+        return None
+
+
+def _instrumentName(logs):
+    """Return the instrument name from the logs or None."""
+    if logs.hasProperty('instrument.name'):
+        return logs.getProperty('instrument.name').value
+    else:
+        return None
 
 def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     """Return a line label for a line profile."""
     ws = _normws(ws)
     wsLabel = ''
     if not singleWS:
-        logs = SampleLogs(ws)
-        T = _applyIfTimeSeries(logs.sample.temperature, numpy.mean)
-        wsLabel = '\\#{:06d} $T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(logs.run_number, T, logs.Ei)
+        logs = ws.run()
+        run = _runNumber(logs)
+        if run is not None:
+            wsLabel = wsLabel + '\\#{:06d} '.format(run)
+        T = _sampleTemperature(logs)
+        if T is not None:
+            T = _applyIfTimeSeries(T, numpy.mean)
+            wsLabel = wsLabel + '$T$ = {:0.1f} K '.format(T)
+        ei = _incidentEnergy(logs)
+        if ei is not None:
+            wsLabel =  wsLabel + '$E_i$ = {:0.2f} meV'.format(ei)
     cutLabel = ''
     if not singleCut or not singleWidth:
         cutLabel = quantity + ' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
@@ -122,11 +149,6 @@ def _plottingtime():
     return time.strftime('%d.%m.%Y %H:%M:%S')
 
 
-def _binCentres(edges):
-    """Return bin centers."""
-    return (edges[:-1] + edges[1:]) / 2
-
-
 def _mantidsubplotsetup():
     """Return the Mantid projection setup."""
     return {'projection': 'mantid'}
@@ -142,8 +164,11 @@ def _profiletitle(workspaces, scan, units, cuts, widths, figure):
     if len(workspaces) == 1:
         title = _singledatatitle(workspaces[0])
     else:
-        logs = SampleLogs(workspaces[0])
-        title = logs.instrument.name + ' ' + _plottingtime()
+        title = _plottingtime()
+        logs = workspaces[0].run()
+        instrument = _instrumentName(logs)
+        if instrument is not None:
+            title = instrument + ' ' + title
     if len(cuts) == 1 and len(widths) == 1:
         title = title + '\n' + scan + ' = {:0.2f} $\pm$ {:0.2f}'.format(cuts[0], widths[0]) + ' ' + units
     figure.suptitle(title)
@@ -171,6 +196,22 @@ def _removesingularity(ws, epsilon):
             es[binIndex] = 0.
 
 
+def _runNumber(logs):
+    """Return run number from the logs or None."""
+    if logs.hasProperty('run_number'):
+        return logs.getProperty('run_number').value
+    else:
+        return None
+
+def _sampleTemperature(logs):
+    """Return the instrument specific sample temperature from the logs or None."""
+    instrument = _instrumentName(logs)
+    if instrument in ['IN4', 'IN5', 'IN6']:
+        return logs.getProperty('sample.temperature').value
+    else:
+        return None
+
+
 def _sanitizeforlatex(s):
     """Return a string with LaTeX special characters escaped."""
     s = s.replace('_', '\\_')
@@ -184,12 +225,23 @@ def _sanitizeforlatex(s):
 def _singledatatitle(workspace):
     """Return title for a single data dataset."""
     workspace = _normws(workspace)
-    logs = SampleLogs(workspace)
-    T = _applyIfTimeSeries(logs.sample.temperature, numpy.mean)
     wsName = _sanitizeforlatex(str(workspace))
-    title = (wsName + ' ' + logs.instrument.name + ' \\#{:06d}'.format(logs.run_number) + '\n'
-             + _plottingtime() + '\n'
-             + '$T$ = {:0.1f} K $E_i$ = {:0.2f} meV'.format(T, logs.Ei))
+    title = wsName
+    logs = workspace.run()
+    instrument= _instrumentName(logs)
+    if instrument is not None:
+        title = title + ' ' + instrument
+    run = _runNumber(logs)
+    if run is not None:
+        title = title + ' \\#{:06d}'.format(run)
+    title = title + '\n' + _plottingtime() + '\n'
+    T = _sampleTemperature(logs)    
+    if T is not None:
+        T = _applyIfTimeSeries(T, numpy.mean)
+        title = title + '$T$ = {:0.1f} K'.format(T)
+    ei = _incidentEnergy(logs)
+    if ei is not None:
+        title = title + ' $E_i$ = {:0.2f} meV'.format(ei)
     return title
 
 
@@ -198,6 +250,14 @@ def _SofQWtitle(workspace, figure):
     workspace = _normws(workspace)
     title = _singledatatitle(workspace)
     figure.suptitle(title)
+
+
+def _wavelength(logs):
+    """Return the wavelength from the logs or None."""
+    if logs.hasProperty('wavelength'):
+        return logs.getProperty('wavelength').value
+    else:
+        return None
 
 
 def box2D(xs, vertAxis, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf, vertMax=numpy.inf):
@@ -270,7 +330,7 @@ def dynamicsusceptibility(workspace, temperature, outputName=None, zeroEnergyEps
     if doTranspose:
         outWS = Transpose(outWS, OutputWorkspace=outputName, EnableLogging=False)
         DeleteWorkspace('__transposed_SofQW_', EnableLogging=False)
-    outWS.setYUnit("Dynamic susceptibility")
+    outWS.setYUnit('Dynamic susceptibility')
     return outWS
 
 
@@ -618,20 +678,36 @@ def wsreport(workspace):
     :returns: None
     """
     workspace = _normws(workspace)
+    logs = workspace.run()
     print(str(workspace))
-    logs = SampleLogs(workspace)
-    print('Instrument: ' + logs.instrument.name)
-    print('Run Number: {:06d}'.format(logs.run_number))
-    print('Start Time: {}'.format(logs.start_time))
-    print('Ei = {:0.2f} meV    lambda = {:0.2f} \xc5'.format(logs.Ei, logs.wavelength))
-    meanT = _applyIfTimeSeries(logs.sample.temperature, numpy.mean)
-    stdT = _applyIfTimeSeries(logs.sample.temperature, numpy.std)
-    print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
-    minT = _applyIfTimeSeries(logs.sample.temperature, numpy.amin)
-    maxT = _applyIfTimeSeries(logs.sample.temperature, numpy.amax)
-    print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
-    fermiHertz = logs.FC.rotation_speed / 60.
-    print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(logs.FC.rotation_speed, fermiHertz))
+    instrument = _instrumentName(logs)
+    if instrument is not None:
+        print('Instrument: ' + instrument)
+    if logs.hasProperty('run_number'):
+        print('Run Number: {:06d}'.format(logs.getProperty('run_number').value))
+    if logs.hasProperty('start_time'):
+        print('Start Time: {}'.format(logs.getProperty('start_time').value.replace('T', ' ')))
+    ei = _incidentEnergy(logs)
+    wavelength = _wavelength(logs)
+    if ei is not None and wavelength is not None:
+        print('Ei = {:0.2f} meV    lambda = {:0.2f} \xc5'.format(ei, wavelength))
+    T = _sampleTemperature(logs)
+    if T is not None:
+        meanT = _applyIfTimeSeries(T, numpy.mean)
+        stdT = _applyIfTimeSeries(T, numpy.std)
+        print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
+        minT = _applyIfTimeSeries(T, numpy.amin)
+        maxT = _applyIfTimeSeries(T, numpy.amax)
+        print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
+    # Instrument specific additional information
+    if instrument == 'IN4':
+        rpm = logs.getProperty('FC.rotation_speed').value
+        hertz = rpm / 60.
+        print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(rpm, hertz))
+    elif instrument == 'IN6':
+        rpm = logs.getProperty('Fermi.rotation_speed').value
+        hertz = rpm / 60.
+        print('Fermi = {:0.0f} rpm = {:0.1f} Hz'.format(rpm, hertz))
 
 
 class SampleLogs:
