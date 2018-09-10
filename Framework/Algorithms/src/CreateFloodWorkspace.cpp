@@ -4,6 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -18,13 +19,17 @@ namespace {
 namespace Prop {
 std::string const FILENAME("Filename");
 std::string const OUTPUT_WORKSPACE("OutputWorkspace");
-std::string const START_X("StartSpectrumIndex");
-std::string const END_X("EndSpectrumIndex");
-std::string const EXCLUDE("Exclude");
+std::string const START_X("StartSpectrum");
+std::string const END_X("EndSpectrum");
+std::string const EXCLUDE("ExcludeSpectra");
 std::string const BACKGROUND("Background");
+std::string const CENTRAL_PIXEL("CentralPixelSpectrum");
+std::string const RANGE_LOWER("RangeLower");
+std::string const RANGE_UPPER("RangeUpper");
 } // namespace Prop
 
-double const VERY_BIG_VALUE = std::numeric_limits<double>::max();
+// Too large number makes mantid crash when trying to open a plot
+double const VERY_BIG_VALUE = 1.0e200;
 std::map<std::string, std::string> const funMap{
     {"Linear", "name=LinearBackground"}, {"Quadratic", "name=Quadratic"}};
 
@@ -73,6 +78,15 @@ void CreateFloodWorkspace::init() {
   declareProperty(Kernel::make_unique<ArrayProperty<double>>(Prop::EXCLUDE),
                   "Spectra to exclude");
 
+  declareProperty(Prop::RANGE_LOWER, EMPTY_DBL(),
+                  "The lower integration limit (an X value).");
+
+  declareProperty(Prop::RANGE_UPPER, EMPTY_DBL(),
+                  "The upper integration limit (an X value).");
+
+  declareProperty(Prop::CENTRAL_PIXEL, EMPTY_INT(),
+                  "A spectrum number of the central pixel.");
+
   std::vector<std::string> allowedValues;
   for (auto i : funMap)
     allowedValues.push_back(i.first);
@@ -112,6 +126,14 @@ MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
   auto alg = createChildAlgorithm("Integration");
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("OutputWorkspace", "dummy");
+  if (!isDefault(Prop::RANGE_LOWER)) {
+    alg->setProperty("RangeLower",
+                     static_cast<double>(getProperty(Prop::RANGE_LOWER)));
+  }
+  if (!isDefault(Prop::RANGE_UPPER)) {
+    alg->setProperty("RangeUpper",
+                     static_cast<double>(getProperty(Prop::RANGE_UPPER)));
+  }
   alg->execute();
   return alg->getProperty("OutputWorkspace");
 }
@@ -124,8 +146,23 @@ MatrixWorkspace_sptr CreateFloodWorkspace::transpose(MatrixWorkspace_sptr ws) {
   return alg->getProperty("OutputWorkspace");
 }
 
+bool CreateFloodWorkspace::shouldRemoveBackground() {
+  return isDefault(Prop::CENTRAL_PIXEL);
+}
+
+void CreateFloodWorkspace::collectExcludedSpectra() {
+  m_excludedSpectra = getProperty(Prop::EXCLUDE);
+}
+
+bool CreateFloodWorkspace::isExcludedSpectrum(double spec) const {
+  return std::find(m_excludedSpectra.begin(), m_excludedSpectra.end(), spec) !=
+         m_excludedSpectra.end();
+}
+
 API::MatrixWorkspace_sptr
 CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
+  g_log.information() << "Remove background "
+                      << getPropertyValue(Prop::BACKGROUND) << '\n';
   auto fitWS = transpose(ws);
   auto const &x = fitWS->x(0);
 
@@ -147,14 +184,10 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   }
 
   // Exclude any bad detectors.
-  std::vector<double> const exclude = getProperty(Prop::EXCLUDE);
-  for (auto i : exclude) {
+  for (auto i : m_excludedSpectra) {
     excludeFromFit.push_back(i);
     excludeFromFit.push_back(i);
   }
-  auto isExcluded = [&exclude](double xVal) {
-    return std::find(exclude.begin(), exclude.end(), xVal) != exclude.end();
-  };
 
   std::string const function = getBackgroundFunction();
 
@@ -169,6 +202,13 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   alg->setProperty("Output", "fit");
   alg->execute();
 
+  IFunction_sptr func = alg->getProperty("Function");
+  g_log.information() << "Background function parameters:\n";
+  for (size_t i = 0; i < func->nParams(); ++i) {
+    g_log.information() << "    " << func->parameterName(i) << ": "
+                        << func->getParameter(i) << '\n';
+  }
+
   // Divide the workspace by the fitted curve to remove the background
   // and scale to values around 1
   MatrixWorkspace_sptr bkgWS = alg->getProperty("OutputWorkspace");
@@ -178,7 +218,7 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   for (int i = 0; i < nHisto; ++i) {
     PARALLEL_START_INTERUPT_REGION
     auto const xVal = x[i];
-    if (isExcluded(xVal)) {
+    if (isExcludedSpectrum(xVal)) {
       ws->mutableY(i)[0] = VERY_BIG_VALUE;
       ws->mutableE(i)[0] = 0.0;
     } else if (xVal >= startX && xVal <= endX) {
@@ -205,6 +245,51 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   return ws;
 }
 
+MatrixWorkspace_sptr
+CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_sptr ws) {
+  int const centralSpectrum = getProperty(Prop::CENTRAL_PIXEL);
+  auto const nHisto = static_cast<int>(ws->getNumberHistograms());
+  if (centralSpectrum >= nHisto) {
+    throw std::invalid_argument(
+        "Spectrum index " + std::to_string(centralSpectrum) +
+        " passed to property " + Prop::CENTRAL_PIXEL +
+        " is outside the range 0-" + std::to_string(nHisto - 1));
+  }
+  auto const spectraMap = ws->getSpectrumToWorkspaceIndexMap();
+  auto const centralIndex = spectraMap.at(centralSpectrum);
+  auto const scaleFactor = ws->y(centralIndex).front();
+  g_log.information() << "Scale to central pixel, factor = " << scaleFactor
+                      << '\n';
+  if (scaleFactor <= 0.0) {
+    throw std::runtime_error("Scale factor muhst be > 0, found " +
+                             std::to_string(scaleFactor));
+  }
+  auto const axis = ws->getAxis(1);
+  auto const sa = dynamic_cast<const SpectraAxis *>(axis);
+  double const startX =
+      isDefault(Prop::START_X) ? sa->getMin() : getProperty(Prop::START_X);
+  double const endX =
+      isDefault(Prop::END_X) ? sa->getMax() : getProperty(Prop::END_X);
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  for (int i = 0; i < nHisto; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    auto const spec = ws->getSpectrum(i).getSpectrumNo();
+    if (isExcludedSpectrum(spec)) {
+      ws->mutableY(i)[0] = VERY_BIG_VALUE;
+      ws->mutableE(i)[0] = 0.0;
+    } else if (spec >= startX && spec <= endX) {
+      ws->mutableY(i)[0] /= scaleFactor;
+      ws->mutableE(i)[0] /= scaleFactor;
+    } else {
+      ws->mutableY(i)[0] = 1.0;
+      ws->mutableE(i)[0] = 0.0;
+    }
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+  return ws;
+}
+
 /** Execute the algorithm.
  */
 void CreateFloodWorkspace::exec() {
@@ -212,7 +297,12 @@ void CreateFloodWorkspace::exec() {
   auto ws = getInputWorkspace();
   ws = integrate(ws);
   progress(0.9);
-  ws = removeBackground(ws);
+  collectExcludedSpectra();
+  if (shouldRemoveBackground()) {
+    ws = removeBackground(ws);
+  } else {
+    ws = scaleToCentralPixel(ws);
+  }
   progress(1.0);
   setProperty(Prop::OUTPUT_WORKSPACE, ws);
 }

@@ -15,10 +15,14 @@ class DirectILLCollectDataTest(unittest.TestCase):
         unittest.TestCase.__init__(self, methodName)
 
     def setUp(self):
-        if not DirectILLCollectDataTest._TEST_WS:
-            DirectILLCollectDataTest._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
-                                                                                          illhelpers.default_test_detectors)
-        mtd.addOrReplace(self._TEST_WS_NAME, DirectILLCollectDataTest._TEST_WS)
+        if self._TEST_WS is None:
+            self._TEST_WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL,
+                                                                      illhelpers.default_test_detectors)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS,
+            'OutputWorkspace': self._TEST_WS_NAME,
+        }
+        run_algorithm('CloneWorkspace', **algProperties)        
 
     def tearDown(self):
         mtd.clear()
