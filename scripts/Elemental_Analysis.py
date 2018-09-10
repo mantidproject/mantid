@@ -74,7 +74,6 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
         self.box.addLayout(self.widget_list)
-        self.box.addWidget(self.load_widget.view)
 
         self.setCentralWidget(QtGui.QWidget(self))
         self.centralWidget().setLayout(self.box)
