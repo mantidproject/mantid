@@ -10,18 +10,18 @@ class TestView(QtGui.QWidget):
 
     buttonSignal = QtCore.pyqtSignal()
 
-    def __init__(self,parent=None):
+    def __init__(self,context, parent=None):
         super(TestView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
 
         self.table = QtGui.QTableWidget(self)
         self.table.resize(800, 800)
-        self.table.setRowCount(4)
+        self.table.setRowCount(2)
         self.table.setColumnCount(4)
         self.table.setColumnWidth(0, 300)
-        self.table.setColumnWidth(1, 300)
-        self.table.setColumnWidth(2, 300)
-        self.table.setColumnWidth(3, 300)
+        self.table.setColumnWidth(1, 100)
+        self.table.setColumnWidth(2, 100)
+        self.table.setColumnWidth(3, 100)
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(
@@ -29,12 +29,20 @@ class TestView(QtGui.QWidget):
         # populate table
         options = ['Fwd',"Bwd"]
 
-        table_utils.setRowName(self.table, 0, "Workspaces")
-        self.ws0 = table_utils.addDoubleToTable(self.table,"",0,1)
-        self.ws1 = table_utils.addDoubleToTable(self.table,"",0,2)
-        self.ws2 = table_utils.addDoubleToTable(self.table,"",0,3)
+        table_utils.setRowName(self.table, 0, "Groups")
+ 
+        group_name = context
+        print(group_name)
 
-        #self.ws = table_utils.addComboToTable(self.FFTTable, 0, options)
+        self.ws0 = table_utils.addDoubleToTable(self.table,group_name[0],0,1)
+        self.ws1 = table_utils.addDoubleToTable(self.table,group_name[1],0,2)
+        self.ws2 = table_utils.addDoubleToTable(self.table,group_name[2],0,3)
+
+        table_utils.setRowName(self.table,1, "Pair")
+        options = ["a","b","c"]
+        self.g1 = table_utils.addComboToTable(self.table, 1, options,1)
+        self.g2 = table_utils.addComboToTable(self.table, 1, options,2)
+        self.alpha = table_utils.addDoubleToTable(self.table,"1.",1,3)
  
 
 

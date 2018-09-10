@@ -8,6 +8,7 @@ from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.Common.dock.dock_view import DockView
 
 
+
 class DockWidget(QtGui.QWidget):
 
     """
@@ -19,13 +20,14 @@ class DockWidget(QtGui.QWidget):
     populates it
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, context, parent=None):
         super(DockWidget, self).__init__(parent)
+
         self.dockWidget = QtGui.QWidget()
 
         self.dock_view = DockView(self)
 
-        self.test = TestWidget(self)
+        self.test = TestWidget(context,parent=self)
         self.dock_view.addDock(self.test.widget, "test")
 
 

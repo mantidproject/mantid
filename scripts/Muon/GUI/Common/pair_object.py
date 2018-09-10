@@ -1,9 +1,9 @@
 class pair(object):
-    def __init__(self):
-        self._name = ""
-        self._F_group = ""
-        self._B_group = ""
-        self._alpha = 1.0
+    def __init__(self,name="",F_group="",B_group="",alpha=1.0):
+        self._name = name
+        self._F_group = F_group
+        self._B_group = B_group
+        self._alpha = alpha
 
     def setName(self,name):
          self._name = name

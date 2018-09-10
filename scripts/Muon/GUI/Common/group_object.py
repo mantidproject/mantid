@@ -1,7 +1,11 @@
 class group(object):
-    def __init__(self):
-        self._name = ""
-        self._dets = []
+    def __init__(self,name="",dets=[]):
+        self._name = name
+        self._dets = dets
+
+    @property
+    def name(self):
+        return self._name
 
     def setName(self,name):
          self._name = name
