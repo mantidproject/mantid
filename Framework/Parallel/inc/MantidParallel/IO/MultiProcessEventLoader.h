@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-//#include "H5Cpp.h"
+#include <unordered_map>
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"
@@ -40,7 +40,8 @@ namespace IO {
 class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
   MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
-                          unsigned int numThreads, const std::string &binary);
+                          unsigned int numThreads, const std::string &binary,
+                          bool precalc = true);
   void
   load(const std::string &filename, const std::string &groupname,
        const std::vector<std::string> &bankNames,
@@ -52,7 +53,7 @@ public:
                            const std::string &groupname,
                            const std::vector<std::string> &bankNames,
                            const std::vector<int32_t> &bankOffsets,
-                           unsigned from, unsigned to);
+                           unsigned from, unsigned to, bool precalc);
 
 private:
   static std::vector<std::string> GenerateSegmentsName(unsigned procNum);
@@ -64,7 +65,7 @@ private:
                             const H5::Group &group,
                             const std::vector<std::string> &bankNames,
                             const std::vector<int32_t> &bankOffsets,
-                            unsigned from, unsigned to);
+                            unsigned from, unsigned to, bool precalc);
 
   void assembleFromShared(
       std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const;
@@ -72,6 +73,7 @@ private:
   size_t estimateShmemAmount(size_t eventCount) const;
 
 private:
+  bool m_precalculateEvents;
   unsigned m_numPixels;
   unsigned m_numProcesses;
   unsigned m_numThreads;
@@ -84,7 +86,8 @@ template<typename T>
 void MultiProcessEventLoader::loadFromGroup(
     EventsListsShmemStorage &storage, const H5::Group &instrument,
     const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, unsigned from, unsigned to) {
+    const std::vector<int32_t> &bankOffsets, unsigned from,
+    unsigned to, bool precalc) {
   std::vector<int32_t> eventId;
   std::vector<T> eventTimeOffset;
 
@@ -113,6 +116,19 @@ void MultiProcessEventLoader::loadFromGroup(
 
       detail::eventIdToGlobalSpectrumIndex(eventId.data(), cnt,
                                            bankOffsets[bankIdx]);
+
+      if (precalc) {
+        std::unordered_map<int32_t, std::size_t> eventsPerPixel;
+        for (auto &pixId: eventId) {
+          auto iter = eventsPerPixel.find(pixId);
+          if (iter == eventsPerPixel.end())
+            iter = eventsPerPixel.insert(std::make_pair(pixId, 0)).first;
+          ++iter->second;
+        }
+
+        for (const auto &pair: eventsPerPixel)
+          storage.reserve(0, pair.first, pair.second);
+      }
 
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {

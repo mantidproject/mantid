@@ -18,11 +18,13 @@ namespace IO {
 MultiProcessEventLoader::MultiProcessEventLoader(unsigned int numPixels,
                                                  unsigned int numProcesses,
                                                  unsigned int numThreads,
-                                                 const std::string &binary)
+                                                 const std::string &binary,
+                                                 bool precalc)
     : m_numPixels(numPixels), m_numProcesses(numProcesses),
       m_numThreads(numThreads), m_binaryToLaunch(binary),
       m_segmentNames(GenerateSegmentsName(numProcesses)),
-      m_storageName(GenerateStoragename()) {}
+      m_storageName(GenerateStoragename()),
+      m_precalculateEvents(precalc) {}
 
 std::vector<std::string>
 MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
@@ -97,7 +99,7 @@ void MultiProcessEventLoader::load(
     EventsListsShmemStorage storage(m_segmentNames[0], m_storageName,
                                     storageSize, 1, m_numPixels, false);
     fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0,
-                 numEvents / m_numProcesses);
+                 numEvents / m_numProcesses, m_precalculateEvents);
 
     for (auto &c : vChilds)
       c.wait();
@@ -149,7 +151,7 @@ void MultiProcessEventLoader::assembleFromShared(
 void MultiProcessEventLoader::fillFromFile(
     EventsListsShmemStorage &storage, const std::string &filename,
     const std::string &groupname, const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, unsigned from, unsigned to) {
+    const std::vector<int32_t> &bankOffsets, unsigned from, unsigned to, bool precalc) {
   H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
   auto instrument = file.openGroup(groupname);
 
@@ -158,22 +160,22 @@ void MultiProcessEventLoader::fillFromFile(
 
   if (type == H5::PredType::NATIVE_INT32)
     return loadFromGroup<int32_t>(storage, instrument, bankNames, bankOffsets,
-                                  from, to);
+                                  from, to, precalc);
   if (type == H5::PredType::NATIVE_INT64)
     return loadFromGroup<int64_t>(storage, instrument, bankNames, bankOffsets,
-                                  from, to);
+                                  from, to, precalc);
   if (type == H5::PredType::NATIVE_UINT32)
     return loadFromGroup<uint32_t>(storage, instrument, bankNames, bankOffsets,
-                                   from, to);
+                                   from, to, precalc);
   if (type == H5::PredType::NATIVE_UINT64)
     return loadFromGroup<uint64_t>(storage, instrument, bankNames, bankOffsets,
-                                   from, to);
+                                   from, to, precalc);
   if (type == H5::PredType::NATIVE_FLOAT)
     return loadFromGroup<float>(storage, instrument, bankNames, bankOffsets,
-                                from, to);
+                                from, to, precalc);
   if (type == H5::PredType::NATIVE_DOUBLE)
     return loadFromGroup<double>(storage, instrument, bankNames, bankOffsets,
-                                 from, to);
+                                 from, to, precalc);
   throw std::runtime_error(
       "Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
