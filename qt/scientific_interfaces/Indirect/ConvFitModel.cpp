@@ -365,6 +365,12 @@ IFunction_sptr createConvolutionFitModel(IFunction_sptr model,
         AnalysisDataService::Instance().doesExist("__ConvFitResolution0")))
     return model ? model : comp;
 
+  if (auto compModel = boost::dynamic_pointer_cast<CompositeFunction>(model)) {
+    if (compModel->nFunctions() == 1) {
+      model = compModel->getFunction(0);
+    }
+  }
+
   auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("Convolution"));
   conv->addFunction(createResolutionFunction("__ConvFitResolution0"));
