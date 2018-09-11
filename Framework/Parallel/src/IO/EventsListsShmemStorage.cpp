@@ -21,14 +21,8 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
         chunksCnt, EventLists(pixelsCount, EventList(alloc()), alloc()),
         alloc());
   } catch (std::exception const &ex) {
-    std::cout << "Can't create the EventsListsShmemStorage: " << ex.what()
-              << std::endl;
     std::rethrow_if_nested(ex);
   }
-
-  for (auto &chunk : *m_chunks)
-    for (auto &list : chunk)
-      list.reserve(10000);
 }
 
 EventsListsShmemStorage::~EventsListsShmemStorage() {
@@ -37,7 +31,7 @@ EventsListsShmemStorage::~EventsListsShmemStorage() {
 }
 
 void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size) {
-  m_chunks[chunkN][pixelN].reserve(size);
+  m_chunks->at(chunkN)[pixelN].reserve(size);
 }
 
 std::ostream &operator<<(std::ostream &os,
