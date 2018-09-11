@@ -1133,9 +1133,9 @@ public slots:
   void checkForProjectRecovery();
 
   /// Make a Recovery checkpoint so you don't have to wait for it to happen
-  /// normally  
+  /// normally
   void saveRecoveryCheckpoint();
-  
+
 signals:
   void modified();
   void shutting_down();

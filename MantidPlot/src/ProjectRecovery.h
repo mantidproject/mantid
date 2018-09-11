@@ -98,7 +98,8 @@ private:
   void projectSavingThread();
 
   /// Saves a project recovery file in Mantid
-  void saveOpenWindows(const std::string &projectDestFolder, bool autoSave = true);
+  void saveOpenWindows(const std::string &projectDestFolder,
+                       bool autoSave = true);
 
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
