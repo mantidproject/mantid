@@ -243,25 +243,26 @@ std::unordered_map<std::string, std::string> parameterNameChanges(
   std::unordered_map<std::string, std::string> changes;
   auto const nFunctions = model.nFunctions();
   if (nFunctions > 2) {
-    getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0, backgroundIndex,
-                            changes);
+    getParameterNameChanges(model, prefixPrefix, prefixSuffix, 0,
+                            backgroundIndex, changes);
 
     const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
-    getParameterNameChanges(*model.getFunction(backgroundIndex), backgroundPrefix,
-                            "f0.", changes);
+    getParameterNameChanges(*model.getFunction(backgroundIndex),
+                            backgroundPrefix, "f0.", changes);
 
     getParameterNameChanges(model, prefixPrefix, prefixSuffix,
                             backgroundIndex + 1, model.nFunctions(), changes);
   } else if (nFunctions == 2) {
     const auto backgroundPrefix = "f" + std::to_string(backgroundIndex) + ".";
-    getParameterNameChanges(*model.getFunction(backgroundIndex), backgroundPrefix,
-                            "f0.", changes);
+    getParameterNameChanges(*model.getFunction(backgroundIndex),
+                            backgroundPrefix, "f0.", changes);
     size_t otherIndex = backgroundIndex == 0 ? 1 : 0;
     const auto otherPrefix = "f" + std::to_string(otherIndex) + ".";
-    getParameterNameChanges(*model.getFunction(otherIndex), otherPrefix, prefixPrefix,
-                            changes);
+    getParameterNameChanges(*model.getFunction(otherIndex), otherPrefix,
+                            prefixPrefix, changes);
   } else {
-    throw std::runtime_error("Composite function is expected to have more than 1 member.");
+    throw std::runtime_error(
+        "Composite function is expected to have more than 1 member.");
   }
   return changes;
 }
