@@ -16,7 +16,7 @@ New Algorithms
 ##############
 - :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
 - :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
-
+- Deprecated algorithm BASISReduction311 has been removed.
 
 :ref:`Release 3.14.0 <v3.14.0>`
 
