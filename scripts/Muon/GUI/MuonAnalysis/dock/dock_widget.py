@@ -7,7 +7,7 @@ from Muon.GUI.Common.dummy.dummy_widget import DummyWidget
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.Common.dock.dock_view import DockView
 
-
+from Muon.GUI.Common.muon_context.muon_context import *
 
 class DockWidget(QtGui.QWidget):
 
@@ -35,7 +35,7 @@ class DockWidget(QtGui.QWidget):
         self.dock_view.addDock(self.btn.widget, "first")
         self.btn.setButtonConnection(self.handleButton)
 
-        self.label = DummyLabelWidget("boo", self)
+        self.label = DummyLabelWidget(context, Tab2Text,self)
         self.dock_view.addDock(self.label.widget, "second")
 
         self.btn2 = DummyWidget("waaa", self)
@@ -53,6 +53,10 @@ class DockWidget(QtGui.QWidget):
     # set signals and slots
     def setUpdateContext(self,slot):
         self.test.setUpdateContext(slot)
+        # the buttons change the label value
+        # so we want to update context
+        self.btn.setButtonConnection(slot)
+        self.btn2.setButtonConnection(slot)
 
     def loadFromProject(self, project):
         self.label.updateLabel(project)
@@ -60,11 +64,13 @@ class DockWidget(QtGui.QWidget):
     def handleButton(self, message):
         self.label.updateLabel(message)
 
-    # functions
+    # interaction with context
     def updateContext(self):
+        self.label.updateContext()
         self.test.updateContext()
 
     def loadFromContext(self,context):
+        self.label.loadFromContext(context)
         self.test.loadFromContext(context)
 
     # needed for docking

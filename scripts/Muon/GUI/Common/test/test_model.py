@@ -18,9 +18,9 @@ class TestModel(object):
             group_names.append(group.name)
         subContext["Group Names"] = group_names
         pair = self._context.get(Pairs)[0] # there is only one
-        subContext["Pair_F"] = pair.getFGroup()
-        subContext["Pair_B"] = pair.getBGroup()
-        subContext["Pair_alpha"] = pair.getAlpha()
+        subContext["Pair_F"] = pair.FGroup
+        subContext["Pair_B"] = pair.BGroup
+        subContext["Pair_alpha"] = pair.alpha
         
         return subContext
 

@@ -17,13 +17,18 @@ class TestPresenter(object):
         return self._model
 
     def groupChanged(self,row):
+        # the groups are all row 0
         if row == 0:
+            # make sure the context is up to date
             self.updateContext()
-            self._view.buttonClick()
+            # update the whole GUI (not just this MVP)
+            self._view.sendUpdateSignal()
 
     def updateContext(self):
+      """
+      A simple method for updating the context.
+      Gets the current values from the view and the model
+      will update the context accordingly (inc. packing the data)
+      """
       subcontext = self._view.getSubContext()
       self._model.updateContext(subcontext)
-
-    def loadFromContext(self):
-        return self._model.getSubContext()

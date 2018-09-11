@@ -17,16 +17,20 @@ class pair(object):
     def setAlpha(self,alpha):
          self._alpha = alpha
 
-    def getName(self):
+    @property
+    def name(self):
          return self._name
 
-    def getFGroup(self):
+    @property
+    def FGroup(self):
          return self._F_group
 
-    def getBGroup(self):
+    @property
+    def BGroup(self):
         return self._B_group
 
-    def getAlpha(self):
+    @property
+    def alpha(self):
         return self._alpha
 
     def isValid(self):

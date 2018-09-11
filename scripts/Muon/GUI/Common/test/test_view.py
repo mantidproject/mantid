@@ -8,7 +8,7 @@ from Muon.GUI.Common import table_utils
 
 class TestView(QtGui.QWidget):
 
-    buttonSignal = QtCore.pyqtSignal()
+    updateSignal = QtCore.pyqtSignal()
     groupChangedSignal = QtCore.pyqtSignal(object)
 
     def __init__(self,context, parent=None):
@@ -28,69 +28,87 @@ class TestView(QtGui.QWidget):
         self.table.setHorizontalHeaderLabels(
             ("Property;Value 1; Value 2; Value3").split(";"))
         # populate table
-        table_utils.setRowName(self.table, 0, "Groups")
- 
-        group_name =["a","b","c"]
-        print(group_name)
 
+        # row of groups
+        table_utils.setRowName(self.table, 0, "Groups")
+        group_name =["a","b","c"]
         self.ws0 = table_utils.addDoubleToTable(self.table,group_name[0],0,1)
         self.ws1 = table_utils.addDoubleToTable(self.table,group_name[1],0,2)
         self.ws2 = table_utils.addDoubleToTable(self.table,group_name[2],0,3)
 
-        table_utils.setRowName(self.table,1, "Pair")
-        options = group_name
-       
-        self.g1 = table_utils.addComboToTable(self.table, 1, options,1)
-        self.g2 = table_utils.addComboToTable(self.table, 1, options,2)
-
+        # row to describe a pair
+        table_utils.setRowName(self.table,1, "Pair")       
+        self.g1 = table_utils.addComboToTable(self.table, 1, group_name,1)
+        self.g2 = table_utils.addComboToTable(self.table, 1, group_name,2)
         self.alpha = table_utils.addDoubleToTable(self.table,"2.",1,3)
 
-        self.loadFromContext(context)
-
+        # explicit update button
         btn = QtGui.QPushButton("print context", self)
 
+        # create grid
         self.grid.addWidget(self.table)
         self.grid.addWidget(btn)
-        btn.clicked.connect(self.buttonClick)
-        self.table.itemChanged.connect(self.groupChanged)
 
+        # add connections
+        btn.clicked.connect(self.sendUpdateSignal)
+        # needed for updating the possible pairs when groups change
+        self.table.itemChanged.connect(self.groupChanged)
+		# load values into GUI from context
+        self.loadFromContext(context)
+
+    # signals
+    def sendUpdateSignal(self):
+        self.updateSignal.emit()
+
+    def groupChanged(self,cell):
+        self.groupChangedSignal.emit(cell.row())
+
+    # get layout
+    def getLayout(self):
+        return self.grid
+
+    # context interaction
     def loadFromContext(self,context):
+        """
+        Create a simple dict of the values
+        from the GUI. This does not alter 
+        how the information is stored
+        """
+        # make sure we dont fire signals during update
         self.table.blockSignals(True)
+
+        # get the group names and update the GUI
         group_name = context["Group Names"]
  
         self.ws0.setText(group_name[0]) 
         self.ws1.setText(group_name[1])
         self.ws2.setText(group_name[2])
 
+        # update combo boxes (clear and repopulate)
         self.g1.clear()
         self.g2.clear()
-
         self.g1.addItems(group_name)
         self.g2.addItems(group_name)
-
+        # set correct selection for pair
         index = self.g1.findText(context["Pair_F"])
         self.g1.setCurrentIndex(index)
-
         index = self.g2.findText(context["Pair_B"])
         self.g2.setCurrentIndex(index)
-
+        # set alpha for pair
         self.alpha.setText(str(context["Pair_alpha"]))
+
+        # turn signals back on
         self.table.blockSignals(False)
 
     def getSubContext(self):
+        """
+        This packs up the information
+        from the GUI into a simple dict that can be translated
+        into the context
+        """
         context = {}
         context["Group Names"] = [self.ws0.text(), self.ws1.text(),self.ws2.text()]
         context["Pair_F"] = str(self.g1.currentText())
         context["Pair_B"] = str(self.g2.currentText())
         context["Pair_alpha"] = float(self.alpha.text())
         return context
-
-    def buttonClick(self):
-        self.buttonSignal.emit()
-
-    def groupChanged(self,cell):
-        
-        self.groupChangedSignal.emit(cell.row())
-
-    def getLayout(self):
-        return self.grid

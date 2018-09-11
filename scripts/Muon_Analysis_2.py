@@ -8,7 +8,7 @@ import PyQt4.QtCore as QtCore
 
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.MuonAnalysis.dock.dock_widget import DockWidget
-from Muon.GUI.Common.muon_context.muon_context import MuonContext
+from Muon.GUI.Common.muon_context.muon_context import *#MuonContext
 
 muonGUI = None
 
@@ -20,15 +20,15 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
 
         self._context = MuonContext()
 
-        loadWidget = DummyLabelWidget("Load dummy", self)
+        self.loadWidget = DummyLabelWidget(self._context ,LoadText, self)
         self.dockWidget = DockWidget(self._context,self)
 
-        helpWidget = DummyLabelWidget("Help dummy", self)
+        self.helpWidget = DummyLabelWidget(self._context,HelpText, self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        splitter.addWidget(loadWidget.widget)
+        splitter.addWidget(self.loadWidget.widget)
         splitter.addWidget(self.dockWidget.widget)
-        splitter.addWidget(helpWidget.widget)
+        splitter.addWidget(self.helpWidget.widget)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
@@ -36,7 +36,11 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.dockWidget.setUpdateContext(self.update)
 
     def update(self):
+        # update load
+        self.loadWidget.updateContext()
         self.dockWidget.updateContext()
+        self.helpWidget.updateContext()
+
         self._context.printContext()
         self.dockWidget.loadFromContext(self._context)
 
