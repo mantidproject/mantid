@@ -33,6 +33,13 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
+        self.dockWidget.setUpdateContext(self.update)
+
+    def update(self):
+        self.dockWidget.updateContext()
+        self._context.printContext()
+        self.dockWidget.loadFromContext(self._context)
+
     # cancel algs if window is closed
     def closeEvent(self, event):
         self.dockWidget.closeEvent(event)

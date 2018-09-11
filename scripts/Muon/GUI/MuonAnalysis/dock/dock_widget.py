@@ -50,12 +50,24 @@ class DockWidget(QtGui.QWidget):
 
         self.dockWidget.setLayout(QHbox)
 
+    # set signals and slots
+    def setUpdateContext(self,slot):
+        self.test.setUpdateContext(slot)
+
     def loadFromProject(self, project):
         self.label.updateLabel(project)
 
     def handleButton(self, message):
         self.label.updateLabel(message)
 
+    # functions
+    def updateContext(self):
+        self.test.updateContext()
+
+    def loadFromContext(self,context):
+        self.test.loadFromContext(context)
+
+    # needed for docking
     @property
     def widget(self):
         return self.dockWidget

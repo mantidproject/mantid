@@ -13,6 +13,7 @@ class TestWidget(object):
         model=TestModel(context)
         sub_context = model.getSubContext()
         view=TestView(sub_context,parent)
+        context.printContext()
         self._presenter = TestPresenter(view,model)
 
     @property
@@ -23,6 +24,17 @@ class TestWidget(object):
     def widget(self):
         return self._presenter.widget
 
-    def setButtonConnection(self,slot):
+    def setUpdateContext(self,slot):
         view=self._presenter.widget
         view.buttonSignal.connect(slot)
+
+    def updateContext(self):
+       self._presenter.updateContext()
+
+    def loadFromContext(self,context):
+        model = self._presenter.model
+        sub_context = model.getSubContext()
+        view = self._presenter.widget
+        view.loadFromContext(sub_context)    
+
+

@@ -17,6 +17,18 @@ class pair(object):
     def setAlpha(self,alpha):
          self._alpha = alpha
 
+    def getName(self):
+         return self._name
+
+    def getFGroup(self):
+         return self._F_group
+
+    def getBGroup(self):
+        return self._B_group
+
+    def getAlpha(self):
+        return self._alpha
+
     def isValid(self):
          if self._name != "" and self._F_group != "" and self._B_group != "":
               return True
