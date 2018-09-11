@@ -5,8 +5,6 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
                         ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger, IntBoundedValidator
 
-import time
-
 DEFAULT_ITERATIONS = 50
 DEFAULT_SEED = 89631139
 
