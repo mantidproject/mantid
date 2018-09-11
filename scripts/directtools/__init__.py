@@ -180,23 +180,20 @@ def _mantidsubplotsetup():
     return {'projection': 'mantid'}
 
 
-def _profiletitle(workspaces, scan, units, cuts, widths, figure):
+def _profiletitle(workspaces, cuts, scan, units, figure):
     """Add title to line profile figure."""
     workspaces = _normwslist(workspaces)
-    if not isinstance(cuts, collections.Iterable):
-        cuts = [cuts]
-    if not isinstance(widths, collections.Iterable):
-        widths = [widths] * len(cuts)
-    if len(workspaces) == 1:
+    cuts = _normwslist(cuts)
+    if len(cuts) == 1:
         title = _singledatatitle(workspaces[0])
+        centre, width = _cutCentreAndWidth(cuts[0])
+        title = title + '\n' + scan + ' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
     else:
         title = _plottingtime()
         logs = workspaces[0].run()
         instrument = _instrumentName(logs)
         if instrument is not None:
             title = instrument + ' ' + title
-    if len(cuts) == 1 and len(widths) == 1:
-        title = title + '\n' + scan + ' = {:0.2f} $\pm$ {:0.2f}'.format(cuts[0], widths[0]) + ' ' + units
     figure.suptitle(title)
 
 
@@ -419,7 +416,7 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
     """
     figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
+    _profiletitle(workspaces, cutWSList, '$E$', 'meV', figure)
     axes.legend()
     _finalizeprofileE(axes)
     return figure, axes, cutWSList
@@ -452,7 +449,7 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     """
     figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
+    _profiletitle(workspaces, cutWSList, '$Q$', '\\AA$^{-1}$', figure)
     axes.legend()
     _finalizeprofileQ(workspaces, axes)
     return figure, axes, cutWSList
