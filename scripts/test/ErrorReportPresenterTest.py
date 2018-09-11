@@ -1,12 +1,11 @@
 import unittest
 import sys
+from ErrorReporter.error_report_presenter import ErrorReporterPresenter
 if sys.version_info.major > 2:
     from unittest import mock
 else:
     import mock
-from ErrorReporter.error_report_presenter import ErrorReporterPresenter
 
-import math
 
 class ErrorReportPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -49,14 +48,15 @@ class ErrorReportPresenterTest(unittest.TestCase):
         name = 'John Smith'
         email = 'john.smith@email.com'
         file_hash = '91df56ab7a2de7264052a7a7125dcfa18b4f59de'
+        text_box = 'details of error'
         uptime = 'time_string'
         self.errorreport_mock_instance.sendErrorReport.return_value = 201
         self.error_report_presenter._send_report_to_server(False, name=name, email=email,
                                                            file_hash=file_hash,
-                                                           uptime=uptime)
+                                                           uptime=uptime, text_box=text_box)
 
         self.errorreport_mock.assert_called_once_with('mantidplot', uptime, self.exit_code, False, name,
-                                                      email, file_hash)
+                                                      email, text_box, file_hash)
         self.errorreport_mock_instance.sendErrorReport.assert_called_once_with()
 
     def test_send_error_report_to_server_calls_ErrorReport_correctly_and_triggers_view_upon_failure(self):
@@ -64,13 +64,15 @@ class ErrorReportPresenterTest(unittest.TestCase):
         email = 'john.smith@email.com'
         file_hash = '91df56ab7a2de7264052a7a7125dcfa18b4f59de'
         uptime = 'time_string'
+        text_box = 'details of error'
+
         self.errorreport_mock_instance.sendErrorReport.return_value = 500
         self.error_report_presenter._send_report_to_server(True, name=name, email=email,
                                                            file_hash=file_hash,
-                                                           uptime=uptime)
+                                                           uptime=uptime, text_box=text_box)
 
         self.errorreport_mock.assert_called_once_with('mantidplot', uptime, self.exit_code, True, name,
-                                                      email, file_hash)
+                                                      email, text_box, file_hash)
         self.errorreport_mock_instance.sendErrorReport.assert_called_once_with()
         self.view.display_message_box.assert_called_once_with('Error contacting server',
                                                               'There was an error when sending the report.'
@@ -80,15 +82,52 @@ class ErrorReportPresenterTest(unittest.TestCase):
     def test_error_handler_share_all_sunny_day_case(self):
         name = 'John Smith'
         email = 'john.smith@email.com'
+        text_box = 'Details about error'
         continue_working = False
         share = 0
+        self.error_report_presenter._send_report_to_server = mock.MagicMock()
+        self.error_report_presenter._upload_recovery_file = mock.MagicMock()
+        self.error_report_presenter._handle_exit = mock.MagicMock()
 
-        self.error_report_presenter.error_handler(continue_working, share, name, email)
+        self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
 
+        self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=True, name=name, email=email,
+                                                                            file_hash=mock.ANY, uptime=mock.ANY,
+                                                                            text_box=text_box)
+        self.assertEqual(self.error_report_presenter._upload_recovery_file.call_count, 1)
+        self.error_report_presenter._handle_exit.assert_called_once_with(False)
 
+    def test_error_handler_share_non_id_sunny_day_case(self):
+        name = 'John Smith'
+        email = 'john.smith@email.com'
+        text_box = 'Details about error'
+        continue_working = True
+        share = 1
+        self.error_report_presenter._send_report_to_server = mock.MagicMock()
+        self.error_report_presenter._upload_recovery_file = mock.MagicMock()
+        self.error_report_presenter._handle_exit = mock.MagicMock()
 
+        self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
 
+        self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=False, uptime=mock.ANY)
+        self.assertEqual(self.error_report_presenter._upload_recovery_file.call_count, 0)
+        self.error_report_presenter._handle_exit.assert_called_once_with(True)
 
+    def test_error_handler_share_nothing_sunny_day_case(self):
+        name = 'John Smith'
+        email = 'john.smith@email.com'
+        text_box = 'Details about error'
+        continue_working = True
+        share = 2
+        self.error_report_presenter._send_report_to_server = mock.MagicMock()
+        self.error_report_presenter._upload_recovery_file = mock.MagicMock()
+        self.error_report_presenter._handle_exit = mock.MagicMock()
+
+        self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
+
+        self.assertEqual(self.error_report_presenter._send_report_to_server.call_count, 0)
+        self.assertEqual(self.error_report_presenter._upload_recovery_file.call_count, 0)
+        self.error_report_presenter._handle_exit.assert_called_once_with(True)
 
 
 if __name__ == '__main__':

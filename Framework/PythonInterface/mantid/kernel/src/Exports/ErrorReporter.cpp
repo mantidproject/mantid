@@ -12,10 +12,10 @@ void export_ErrorReporter() {
                         init<std::string, Mantid::Types::Core::time_duration,
                              std::string, bool>())
       .def(init<std::string, Mantid::Types::Core::time_duration, std::string,
-                bool, std::string, std::string>())
+                bool, std::string, std::string, std::string>())
 
       .def(init<std::string, Mantid::Types::Core::time_duration, std::string,
-                bool, std::string, std::string, std::string>())
+                bool, std::string, std::string, std::string, std::string>())
 
       .def("sendErrorReport", &ErrorReporter::sendErrorReport, arg("self"),
            "Sends an error report");

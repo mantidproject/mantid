@@ -21,17 +21,18 @@ class ErrorReporterPresenter(object):
         self.error_log.notice("Sent non-identifiable information")
         self._handle_exit(continue_working)
 
-    def share_all_information(self, continue_working, name, email):
+    def share_all_information(self, continue_working, name, email, text_box):
         uptime = UsageService.getUpTime()
         zip_recovery_file, file_hash = RetrieveRecoveryFiles.zip_recovery_directory()
-        self._send_report_to_server(share_identifiable=False, uptime=uptime, name=name, email=email, file_hash=file_hash)
+        self._send_report_to_server(share_identifiable=True, uptime=uptime, name=name, email=email, file_hash=file_hash
+                                    , text_box=text_box)
         self.error_log.notice("Sent complete information")
         self._upload_recovery_file(zip_recovery_file=zip_recovery_file)
         self._handle_exit(continue_working)
 
-    def error_handler(self, continue_working, share, name, email):
+    def error_handler(self, continue_working, share, name, email, text_box):
         if share == 0:
-            self.share_all_information(continue_working, name, email)
+            self.share_all_information(continue_working, name, email, text_box)
         elif share == 1:
             self.share_non_identifiable_information(continue_working)
         elif share == 2:
@@ -57,9 +58,9 @@ class ErrorReporterPresenter(object):
         else:
             self.error_log.error("Failed to send recovery data HTTP response {}".format(response.status_code))
 
-    def _send_report_to_server(self, share_identifiable=False, name='', email='', file_hash='', uptime=''):
+    def _send_report_to_server(self, share_identifiable=False, name='', email='', file_hash='', uptime='', text_box=''):
         errorReporter = ErrorReporter(
-            "mantidplot", uptime, self._exit_code, share_identifiable, str(name), str(email),
+            "mantidplot", uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box),
             str(file_hash))
         status = errorReporter.sendErrorReport()
 
