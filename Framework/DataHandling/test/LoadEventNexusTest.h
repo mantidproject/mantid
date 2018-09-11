@@ -849,9 +849,16 @@ public:
   }
 
   void test_multiprocess_load() {
+    Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("Load type", "multiprocess");
+    std::string outws_name = "multiprocess";
+    ld.setPropertyValue("Filename", "/home/igudich/work/nexus-sandbox/realtest_500M.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    ld.setPropertyValue("Precount", "0");
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
+    ld.execute();
   }
 
 private:
