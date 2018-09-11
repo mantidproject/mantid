@@ -125,21 +125,17 @@ def _divide_one_spectrum_by_spline(spectrum, spline,instrument):
     return divided
 
 
-def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
+def _divide_by_vanadium_splines(spectra_list, vanadium_splines,instrument):
     if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
         vanadium_splines = vanadium_splines.OutputWorkspace
-
         num_splines = len(vanadium_splines)
         num_spectra = len(spectra_list)
-
         if num_splines != num_spectra:
             raise RuntimeError("Mismatch between number of banks in vanadium and number of banks in workspace to focus"
                                "\nThere are {} banks for vanadium but {} for the run".format(num_splines, num_spectra))
-
         output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws, instrument)
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
-
     output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines)]
     common.remove_intermediate_workspace(vanadium_splines)
     return output_list
