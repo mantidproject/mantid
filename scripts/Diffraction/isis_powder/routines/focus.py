@@ -115,8 +115,6 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
 
 def _divide_one_spectrum_by_spline(spectrum, spline,instrument):
     rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum, StoreInADS=False)
-
-    print(instrument.get_instrument_prefix())
     if instrument.get_instrument_prefix() == "GEM":
         divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
                                 StoreInADS=False)
@@ -172,7 +170,6 @@ def _test_splined_vanadium_exists(instrument, run_details):
 
 
 def _crop_spline_to_percent_of_max(spline, input_ws):
-    print("Cropping")
     y_val = 0
     spline_spectrum = spline.readY(0)
 
@@ -180,7 +177,6 @@ def _crop_spline_to_percent_of_max(spline, input_ws):
         temp = spline_spectrum[i]
         if float(y_val) < float(temp):
             y_val = temp
-    print("y_max = "+str(y_val))
     y_val = y_val/100
     x_min = 0
     before_min = True
@@ -192,13 +188,9 @@ def _crop_spline_to_percent_of_max(spline, input_ws):
             if float(y_val) > float(spline_spectrum[i]):
                 x_min = x_list[i]
             else:
-                print("y_val: " + str(y_val) + "< x_val: "+str(spline_spectrum[i]))
                 before_min = False
         else:
             if float(y_val) < float(spline_spectrum[i]):
                 x_max = x_list[i]
-    print("block_size = "+str(input_ws.blocksize()))
-    print("x_min = "+str(x_min))
-    print("x_max = "+str(x_max))
     output = mantid.CropWorkspace(inputWorkspace=input_ws, XMin=x_min, XMax=x_max, StoreInADS=False)
     return output
