@@ -12,7 +12,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y, DataE=e)
         test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws)
         y_compare = [30, 2000, 80, 50, 40, 30, 25, 30]
-        result = test_ws.ready(0)
+        result = test_ws.readY(0)
         i = 0
         for y_val in result:
             self.assertEqual(y_compare[i], y_val)
@@ -25,7 +25,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y, DataE=e)
         test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws)
         y_compare = [50, 100, 300, 500, 2000, 80, 50]
-        result = test_ws.ready(0)
+        result = test_ws.readY(0)
         i = 0
         for y_val in result:
             self.assertEqual(y_compare[i], y_val)
@@ -38,7 +38,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y, DataE=e)
         test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws)
         y_compare = [30, 2000, 80, 50]
-        result = test_ws.ready(0)
+        result = test_ws.readY(0)
         i = 0
         for y_val in result:
             self.assertEqual(y_compare[i], y_val)
@@ -51,7 +51,7 @@ class ISISPowderFocusCropTest(unittest.TestCase):
         test_ws = mantid.CreateWorkspace(DataX=x, DataY=y, DataE=e)
         test_ws = focus._crop_spline_to_percent_of_max(test_ws, test_ws)
         y_compare = [1, 5, 10, 30, 20, 80, 50, 40, 20, 10, 1]
-        result = test_ws.ready(0)
+        result = test_ws.readY(0)
         i = 0
         for y_val in result:
             self.assertEqual(y_compare[i], y_val)
