@@ -35,7 +35,7 @@ def chopperPairDistance(sampleLogs, instrumentName):
     if instrumentName == 'D17':
         return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
     else:
-        return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-2
+        return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 
 
 def chopperSpeed(sampleLogs, instrumentName):
