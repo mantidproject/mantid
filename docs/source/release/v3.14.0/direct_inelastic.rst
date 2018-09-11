@@ -29,5 +29,14 @@ Improvements
 - :ref:`LoadDNSSCD <algm-LoadDNSSCD>` has been improved to be able to load TOF data.
 - :ref:`MDNormDirectSC <algm-MDNormDirectSC>` now can handle merged MD workspaces.
 
+Python
+------
+
+
+Improved
+########
+
+- The ``directtools`` plotting and utility module has been updated with improved automatic E ranges, cut labels and other visuals. All functions now should also be applicable to non-ILL data as well.
+
 :ref:`Release 3.14.0 <v3.14.0>`
 
