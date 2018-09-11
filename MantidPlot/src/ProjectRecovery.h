@@ -68,7 +68,7 @@ public:
   void stopProjectSaving();
 
   /// Saves a project recovery checkpoint
-  void saveAll();
+  void saveAll(bool autoSave = true);
 
 private:
   /// Captures the current object in the background thread
@@ -98,7 +98,7 @@ private:
   void projectSavingThread();
 
   /// Saves a project recovery file in Mantid
-  void saveOpenWindows(const std::string &projectDestFolder);
+  void saveOpenWindows(const std::string &projectDestFolder, bool autoSave = true);
 
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);

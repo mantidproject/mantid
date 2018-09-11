@@ -174,7 +174,6 @@ void ProjectRecovery::attemptRecovery() {
       QObject::tr("Only open script in editor"), 0, 1);
 
   if (userChoice == 1) {
-    this->saveAll();
     // User selected no
     this->startProjectSaving();
     return;
@@ -444,14 +443,20 @@ void ProjectRecovery::projectSavingThread() {
  * @param projectDestFile :: The full path to write to
  * @throws If saving fails in the main GUI thread
  */
-void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
+void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile,
+                                      bool autoSave) {
   bool saveCompleted = false;
-  if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
-                                 Qt::QueuedConnection,
-                                 Q_RETURN_ARG(bool, saveCompleted),
-                                 Q_ARG(const std::string, projectDestFile))) {
-    throw std::runtime_error("Project Recovery: Failed to save project "
-                             "windows - Qt binding failed");
+  if (autoSave) {
+    if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
+                                   Qt::BlockingQueuedConnection,
+                                   Q_RETURN_ARG(bool, saveCompleted),
+                                   Q_ARG(const std::string, projectDestFile))) {
+      throw std::runtime_error("Project Recovery: Failed to save project "
+                               "windows - Qt binding failed");
+    }
+  } else {
+    // Only use this if it is called from the python interface/error reporter
+    saveCompleted = m_windowPtr->saveProjectRecovery(projectDestFile);
   }
 
   if (!saveCompleted) {
@@ -509,13 +514,13 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
  * This won't run if it is locked by the background thread but then it saving
  * Anyway so thats no issue.
  */
-void ProjectRecovery::saveAll() {
+void ProjectRecovery::saveAll(bool autoSave) {
   // "Timeout" - Save out again
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
-  //if (ads.size() == 0) {
-  //  g_log.debug("Nothing to save");
-  //  return;
-  //}
+  if (ads.size() == 0) {
+    g_log.debug("Nothing to save");
+    return;
+  }
 
   g_log.debug("Project Recovery: Saving started");
 
@@ -524,7 +529,7 @@ void ProjectRecovery::saveAll() {
 
   saveWsHistories(basePath);
   auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
-  saveOpenWindows(projectFile.toString());
+  saveOpenWindows(projectFile.toString(), autoSave);
 
   // Purge any excessive folders
   deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
