@@ -1109,7 +1109,7 @@ void Algorithm::findWorkspaceProperties(
               inputWorkspaces, outputWorkspaces, direction, currentWS);
           currentWS = "";
         } else {
-          currentWS.emplace_back(propPropValue[i]);
+          currentWS.push_back(propPropValue[i]);
         }
       }
       constructWorkspaceVectorForHistoryHelper(
