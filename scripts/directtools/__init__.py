@@ -54,6 +54,16 @@ def _denormalizeLine(line):
     Es *= height
 
 
+def _cutCentreAndWidth(line):
+    """Return cut centre and width as tuple."""
+    axis = line.getAxis(1)
+    aMin = axis.getMin()
+    aMax = axis.getMax()
+    centre = (aMin + aMax) / 2.
+    width = aMax - aMin
+    return centre, width
+
+
 def _energyLimits(workspaces):
     """Find suitable xmin and xmax for energy transfer plots."""
     workspaces = _normwslist(workspaces)
@@ -69,6 +79,7 @@ def _energyLimits(workspaces):
         else:
             eMin = -0.2 * ei
     return eMin, eMax
+
 
 def _finalizeprofileE(axes):
     """Set axes for const E axes."""
@@ -119,6 +130,7 @@ def _instrumentName(logs):
         return logs.getProperty('instrument.name').value
     else:
         return None
+
 
 def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
     """Return a line label for a line profile."""
@@ -217,6 +229,7 @@ def _runNumber(logs):
     else:
         return None
 
+
 def _sampleTemperature(logs):
     """Return the instrument specific sample temperature from the logs or None."""
     instrument = _instrumentName(logs)
@@ -249,7 +262,7 @@ def _singledatatitle(workspace):
     if run is not None:
         title = title + ' \\#{:06d}'.format(run)
     title = title + '\n' + _plottingtime() + '\n'
-    T = _sampleTemperature(logs)    
+    T = _sampleTemperature(logs)
     if T is not None:
         T = _applyIfTimeSeries(T, numpy.mean)
         title = title + '$T$ = {:0.1f} K'.format(T)
@@ -506,7 +519,8 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                     _denormalizeLine(line)
                 if 'm' in style:
                     markerStyle, markerIndex = _chooseMarker(markers, markerIndex)
-                label = _label(ws, cut, width, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
+                realCutCentre, realCutWidth = _cutCentreAndWidth(line)
+                label = _label(ws, realCutCentre, realCutWidth, len(workspaces) == 1, len(cuts) == 1, len(widths) == 1, quantity, unit)
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
