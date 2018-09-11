@@ -121,7 +121,7 @@ As the **Description** and **Usage** of an algorithm *cannot* be obtained automa
    }
 
 ``.. relatedalgorithms::``
-   This directive obtains a list of related algorithms from the ``seeAlso`` method in the algorithm, for example, the following method is used in Rebin: 
+   This directive obtains a list of related algorithms from the ``seeAlso`` and ``alias`` methods in the algorithm, for example, the following ``seeAlso`` is used in Rebin: 
 
 .. code-block:: c++
 
