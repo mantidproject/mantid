@@ -67,15 +67,17 @@ def _cutCentreAndWidth(line):
 def _energyLimits(workspaces):
     """Find suitable xmin and xmax for energy transfer plots."""
     workspaces = _normwslist(workspaces)
-    Xs = workspaces[0].readX(0)
-    eMax = Xs[-1]
+    eMax = 0.
+    for ws in workspaces:
+        Xs = workspaces[0].getAxis(1).extractValues()
+        eMax = max(eMax, Xs[-1])
     eMin = -eMax
     logs = workspaces[0].run()
     ei = _incidentEnergy(logs)
     T = _applyIfTimeSeries(_sampleTemperature(logs), numpy.mean)
     if ei is not None:
         if T is not None:
-            eMin = min(-T / 6.0, -0.2 * ei)
+            eMin = min(-T / 6., -0.2 * ei)
         else:
             eMin = -0.2 * ei
     return eMin, eMax
@@ -83,19 +85,25 @@ def _energyLimits(workspaces):
 
 def _finalizeprofileE(axes):
     """Set axes for const E axes."""
-    axes.set_xlim(xmin=0.)
+    if axes.get_xscale() == 'linear':
+        axes.set_xlim(xmin=0.)
     axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
-    axes.set_ylim(0.)
+    if axes.get_yscale() == 'linear':
+        axes.set_ylim(0.)
 
 
 def _finalizeprofileQ(workspaces, axes):
     """Set axes for const Q axes."""
     workspaces = _normwslist(workspaces)
     eMin, eMax = _energyLimits(workspaces)
-    axes.set_xlim(eMin, eMax)
+    axes.set_xlim(xmax=eMax)
+    if axes.get_xscale() == 'linear':
+        axes.set_xlim(xmin=eMin)
     axes.set_xlabel('Energy (meV)')
     unusedMin, cMax = _globalnanminmax(workspaces)
-    axes.set_ylim(ymin=0., ymax=cMax / 100.)
+    if axes.get_yscale() == 'linear':
+        axes.set_ylim(ymin=0.)
+    axes.set_ylim(ymax=cMax / 100.)
 
 
 def _globalnanminmax(workspaces):
@@ -521,7 +529,8 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
-    _horizontalLineAtZero(axes)
+    if axes.get_yscale() == 'linear':
+        _horizontalLineAtZero(axes)
     _profileytitle(workspaces[0], axes)
     return figure, axes, cutWSList
 
@@ -610,7 +619,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
             EMin, unusedEMax = _energyLimits(workspace)
     if EMax is None:
         EAxis = workspace.getAxis(1).extractValues()
-        EMax = numpy.amax(EAxis)
+        EMax = EAxis[-1]
     if VMax is None:
         vertMax = EMax if EMax is not None else numpy.inf
         dummy, VMax = nanminmax(workspace, horMin=QMin, horMax=QMax, vertMin=EMin, vertMax=vertMax)
