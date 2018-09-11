@@ -1070,7 +1070,6 @@ public:
     ADS.clear();
   }
 
-
   void test_one_transmissionrun() {
     const double startX = 1000;
     const int nBins = 3;
@@ -1269,7 +1268,7 @@ public:
 
     ADS.clear();
   }
-  
+
   void test_polarization_correction_default_Wildes() {
 
     std::string const name = "input";
