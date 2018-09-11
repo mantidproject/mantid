@@ -211,6 +211,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                 continue
 
     def _add_element_line(self, x_value, element, colour="b"):
+        if x_value is None:
+            return
         for plot_name in self.plotting.get_subplots():
             line = self.plotting.get_subplot(
                 plot_name).axvline(x_value, 0, 1, color=colour)
