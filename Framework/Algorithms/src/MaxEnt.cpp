@@ -946,7 +946,7 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
         "Cannot write data results to output workspaces");
   if (concatenated && !complex)
     throw std::invalid_argument("Concatenated data results must be complex");
-  if (concatenated && result.size() % nspec * 2)
+  if (concatenated && result.size() % (nspec * 2))
     throw std::invalid_argument(
         "Cannot write complex concatenated data results to output workspaces");
   if (concatenated && spec != 0)
