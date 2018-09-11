@@ -65,7 +65,7 @@ void GeneratePythonScript::init() {
       boost::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
 
-  declareProperty("IgnoreTheseAlgs", std::vector<std::string>({""}),
+  declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),
                   "A list of algorithms to filter out of the built script",
                   Direction::Input);
 }

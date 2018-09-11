@@ -1089,10 +1089,10 @@ void Algorithm::findWorkspaceProperties(
         continue;
       unsigned int direction = wsPropProp->direction();
       if (direction == Direction::Input || direction == Direction::InOut) {
-        inputWorkspaces.push_back(workspace);
+        inputWorkspaces.emplace_back(workspace);
       }
       if (direction == Direction::Output || direction == Direction::InOut) {
-        outputWorkspaces.push_back(workspace);
+        outputWorkspaces.emplace_back(workspace);
       }
     }
     // If it is a list of strings of workspace names make sure to add history
@@ -1109,7 +1109,7 @@ void Algorithm::findWorkspaceProperties(
               inputWorkspaces, outputWorkspaces, direction, currentWS);
           currentWS = "";
         } else {
-          currentWS.push_back(propPropValue[i]);
+          currentWS.emplace_back(propPropValue[i]);
         }
       }
       constructWorkspaceVectorForHistoryHelper(
@@ -1146,20 +1146,20 @@ void Algorithm::constructWorkspaceVectorForHistoryHelper(
   const auto &ADS = AnalysisDataService::Instance();
   try {
     if (direction == Direction::Input || direction == Direction::InOut) {
-      inputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+      inputWorkspaces.emplace_back(ADS.retrieveWS<Workspace>(currentWS));
     }
   } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
-    std::string errorMsg(error.what());
+    const std::string errorMsg(error.what());
     g_log.information("The ADS was unable to find the input workspaces "
                       "when attaching history: " +
                       errorMsg);
   }
   try {
     if (direction == Direction::Output || direction == Direction::InOut) {
-      outputWorkspaces.push_back(ADS.retrieveWS<Workspace>(currentWS));
+      outputWorkspaces.emplace_back(ADS.retrieveWS<Workspace>(currentWS));
     }
   } catch (const Mantid::Kernel::Exception::NotFoundError &error) {
-    std::string errorMsg(error.what());
+    const std::string errorMsg(error.what());
     g_log.information("The ADS was unable to find the output workspaces "
                       "when attaching history: " +
                       errorMsg);
