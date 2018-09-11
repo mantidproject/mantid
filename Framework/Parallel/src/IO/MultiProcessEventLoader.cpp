@@ -181,10 +181,11 @@ void MultiProcessEventLoader::fillFromFile(
 }
 
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
+  float factor = m_precalculateEvents ? 1.3 : 100;
   std::size_t eventBased{eventCount / m_numProcesses * sizeof(TofEvent) +
       m_numPixels *
           sizeof(std::vector<std::vector<TofEvent>>)};
-  return eventBased * 100; // TODO we have a big shared memory overhead because
+  return eventBased * factor;
   // of reallocation memory for eventlists
 }
 
