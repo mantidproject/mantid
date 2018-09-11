@@ -168,7 +168,6 @@ def _test_splined_vanadium_exists(instrument, run_details):
 def _crop_spline_to_percent_of_max(spline, input_ws):
     y_val = 0
     spline_spectrum = spline.readY(0)
-
     for i in range(spline.blocksize()):
         temp = spline_spectrum[i]
         if float(y_val) < float(temp):
@@ -180,11 +179,11 @@ def _crop_spline_to_percent_of_max(spline, input_ws):
     x_max = x_list[-1]
     for i in range(spline.blocksize()):
         if before_min:
-
             if float(y_val) > float(spline_spectrum[i]):
-                x_min = x_list[i]
+                x_min = x_list[i+1]
             else:
                 before_min = False
+                x_max = x_list[i]
         else:
             if float(y_val) < float(spline_spectrum[i]):
                 x_max = x_list[i]

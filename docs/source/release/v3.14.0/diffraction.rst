@@ -16,8 +16,7 @@ Powder Diffraction
 ############
 - Focusing in texture mode for Gem now properly saves
   .gda files.
-  
-  
+- Focusing on Gem now crops values that would be divided by very small or zero vanadium values
 
 Improvements
 ############
