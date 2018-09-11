@@ -19,6 +19,7 @@ class TransformToIqt(PythonAlgorithm):
     _parameter_table = None
     _output_workspace = None
     _dry_run = None
+    _calculate_errors = None
     _number_of_iterations = None
     _seed = None
 
@@ -47,6 +48,8 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
+        self.declareProperty('CalculateErrors', defaultValue=True,
+                             doc="Calculate monte-carlo errors.")
         self.declareProperty('NumberOfIterations', DEFAULT_ITERATIONS, IntBoundedValidator(lower=1),
                              doc="Number of randomised simulations for monte-carlo error calculation.")
 
@@ -103,6 +106,7 @@ class TransformToIqt(PythonAlgorithm):
         if self._parameter_table == '':
             self._parameter_table = getWSprefix(self._sample) + 'TransformToIqtParameters'
 
+        self._calculate_errors = self.getProperty("CalculateErrors").value
         self._number_of_iterations = self.getProperty("NumberOfIterations").value
         self._seed = self.getProperty("SeedValue").value
 
@@ -213,6 +217,7 @@ class TransformToIqt(PythonAlgorithm):
         Run TransformToIqt.
         """
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
+
         try:
             CheckAnalysers(self._sample, self._resolution)
         except ValueError:
@@ -228,9 +233,9 @@ class TransformToIqt(PythonAlgorithm):
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         iqt = CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
-                           EnergyMax=self._e_max, EnergyWidth=self._e_width,
+                           EnergyMax=self._e_max, EnergyWidth=self._e_width, CalculateErrors=self._calculate_errors,
                            NumberOfIterations=self._number_of_iterations, SeedValue=self._seed,
-                           StoreInADS=False, OutputWorkspace="__ciqt")
+                           StoreInADS=False, OutputWorkspace="__ciqt")#, startProgress=0.0, endProgress=1.0)
 
         # Set Y axis unit and label
         iqt.setYUnit('')

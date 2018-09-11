@@ -40,9 +40,11 @@ private:
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
   std::string rebinParamsAsString();
-  API::MatrixWorkspace_sptr monteCarloErrorCalculation(
-      API::MatrixWorkspace_sptr sample, API::MatrixWorkspace_sptr resolution,
-      const std::string &rebinParams, const int seed, const int nIterations);
+  API::MatrixWorkspace_sptr
+  monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
+                             API::MatrixWorkspace_sptr resolution,
+                             const std::string &rebinParams, const int seed,
+                             bool calculateErrors, const int nIterations);
 };
 
 } // namespace Algorithms

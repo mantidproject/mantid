@@ -10,6 +10,8 @@
 #include <cmath>
 #include <functional>
 
+#include "MantidAPI/Progress.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
@@ -199,13 +201,24 @@ allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
   return yValues;
 }
 
+std::size_t getWorkspaceNumberOfHistograms(MatrixWorkspace_sptr workspace) {
+  return boost::numeric_cast<std::size_t>(workspace->getNumberHistograms());
+}
+
+MatrixWorkspace_sptr
+setErrorsToZero(const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
+  auto outputWorkspace = simulatedWorkspaces.front();
+  PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
+  for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i)
+    outputWorkspace->mutableE(i) = 0;
+  return outputWorkspace;
+}
+
 MatrixWorkspace_sptr setErrorsToStandardDeviation(
     const std::vector<MatrixWorkspace_sptr> &simulatedWorkspaces) {
   auto outputWorkspace = simulatedWorkspaces.front();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*outputWorkspace))
-  for (int i = 0;
-       i < boost::numeric_cast<int>(outputWorkspace->getNumberHistograms());
-       ++i)
+  for (auto i = 0; i < getWorkspaceNumberOfHistograms(outputWorkspace); ++i)
     outputWorkspace->mutableE(i) =
         standardDeviationArray(allYValuesAtIndex(simulatedWorkspaces, i));
   return outputWorkspace;
@@ -251,6 +264,7 @@ void CalculateIqt::init() {
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
 
+  declareProperty("CalculateErrors", true, "Calculate monte-carlo errors.");
   declareProperty("NumberOfIterations", DEFAULT_ITERATIONS, positiveInt,
                   "Number of randomised simulations within error to run.");
   declareProperty(
@@ -266,12 +280,14 @@ void CalculateIqt::exec() {
   const auto rebinParams = rebinParamsAsString();
   const MatrixWorkspace_sptr sampleWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr resolution = getProperty("ResolutionWorkspace");
+  bool calculateErrors = getProperty("CalculateErrors");
   const int nIterations = getProperty("NumberOfIterations");
   const int seed = getProperty("SeedValue");
   resolution = normalizedFourierTransform(resolution, rebinParams);
 
-  auto outputWorkspace = monteCarloErrorCalculation(
-      sampleWorkspace, resolution, rebinParams, seed, nIterations);
+  auto outputWorkspace =
+      monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed,
+                                 calculateErrors, nIterations);
 
   outputWorkspace = removeInvalidData(outputWorkspace);
   setProperty("OutputWorkspace", outputWorkspace);
@@ -286,23 +302,27 @@ std::string CalculateIqt::rebinParamsAsString() {
 
 MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
     MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
-    const std::string &rebinParams, const int seed, const int nIterations) {
+    const std::string &rebinParams, const int seed, bool calculateErrors,
+    const int nIterations) {
   auto outputWorkspace = calculateIqt(sample, resolution, rebinParams);
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
   simulatedWorkspaces.reserve(nIterations);
   simulatedWorkspaces.emplace_back(outputWorkspace);
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
-  for (auto i = 0; i < nIterations - 1; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    auto simulated =
-        doSimulation(sample->clone(), resolution, rebinParams, seed);
-    PARALLEL_CRITICAL(emplace_back)
-    simulatedWorkspaces.emplace_back(simulated);
-    PARALLEL_END_INTERUPT_REGION
+  if (calculateErrors) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*sample, *resolution))
+    for (auto i = 0; i < nIterations - 1; ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      auto simulated =
+          doSimulation(sample->clone(), resolution, rebinParams, seed);
+      PARALLEL_CRITICAL(emplace_back)
+      simulatedWorkspaces.emplace_back(simulated);
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+    return setErrorsToStandardDeviation(simulatedWorkspaces);
   }
-  PARALLEL_CHECK_INTERUPT_REGION
-  return setErrorsToStandardDeviation(simulatedWorkspaces);
+  return setErrorsToZero(simulatedWorkspaces);
 }
 
 std::map<std::string, std::string> CalculateIqt::validateInputs() {
