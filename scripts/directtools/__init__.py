@@ -719,12 +719,15 @@ def wsreport(workspace):
         print('Ei = {:0.2f} meV    lambda = {:0.2f} \xc5'.format(ei, wavelength))
     T = _sampleTemperature(logs)
     if T is not None:
-        meanT = _applyIfTimeSeries(T, numpy.mean)
-        stdT = _applyIfTimeSeries(T, numpy.std)
-        print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
-        minT = _applyIfTimeSeries(T, numpy.amin)
-        maxT = _applyIfTimeSeries(T, numpy.amax)
-        print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
+        if isinstance(T, collections.Iterable):
+            meanT = _applyIfTimeSeries(T, numpy.mean)
+            stdT = _applyIfTimeSeries(T, numpy.std)
+            print('T = {:0.2f} +- {:4.2f} K'.format(meanT, stdT))
+            minT = _applyIfTimeSeries(T, numpy.amin)
+            maxT = _applyIfTimeSeries(T, numpy.amax)
+            print('T in [{:0.2f},{:0.2f}]'.format(minT, maxT))
+        else:
+            print('T = {:0.2f} K'.format(T))
     # Instrument specific additional information
     if instrument == 'IN4':
         rpm = logs.getProperty('FC.rotation_speed').value
