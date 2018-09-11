@@ -2,13 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,7 +16,7 @@ namespace Constraints {
 namespace {
 /// static logger
 Kernel::Logger g_log("BoundaryConstraint");
-}
+} // namespace
 
 DECLARE_CONSTRAINT(BoundaryConstraint)
 

@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_SYMMETRYELEMENTFACTORY_H_
 #define MANTID_GEOMETRY_SYMMETRYELEMENTFACTORY_H_
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <boost/make_shared.hpp>
 #include <map>
@@ -41,8 +41,8 @@ public:
   virtual bool canProcess(const SymmetryOperation &operation) const = 0;
 };
 
-typedef boost::shared_ptr<AbstractSymmetryElementGenerator>
-    AbstractSymmetryElementGenerator_sptr;
+using AbstractSymmetryElementGenerator_sptr =
+    boost::shared_ptr<AbstractSymmetryElementGenerator>;
 
 /** @class SymmetryElementIdentityGenerator
 
@@ -258,8 +258,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SymmetryElementFactoryImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>
-    SymmetryElementFactory;
+using SymmetryElementFactory =
+    Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -269,7 +269,7 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::SymmetryElementFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #define DECLARE_SYMMETRY_ELEMENT_GENERATOR(classname)                          \
   namespace {                                                                  \

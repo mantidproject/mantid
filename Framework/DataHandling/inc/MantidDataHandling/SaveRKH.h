@@ -54,6 +54,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadRKH"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Text"; }
 
@@ -81,7 +84,7 @@ private:
   /// The output filehandle
   std::ofstream m_outRKH;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_SAVERKH_H_

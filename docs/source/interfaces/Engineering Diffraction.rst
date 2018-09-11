@@ -372,7 +372,6 @@ Peaks:
   peaks. These peaks can be manually written or imported by selecting a
   (*CSV*) file.
 
-
 Output
 ^^^^^^
 
@@ -397,9 +396,14 @@ workspaces window:
 3. The *engggui_fitting_single_peaks* workspace with each workspace
    index representing individual expected peak.
 
-During the Fit process, :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>`
-algorithm will be utilised to save *engggui_fitting_fitpeaks_param*
-TableWorkspace as a `csv` file.
+During the Fit process, :ref:`EnggSaveSinglePeakFitResultsToHDF5
+<algm-EnggSaveSinglePeakFitResultsToHDF5>` algorithm will be utilised
+to save *engggui_fitting_fitpeaks_param* TableWorkspace as a `hdf5`
+file. There will one file per run, indexed by bank ID, and the file
+will be found in the **Runs** directory of the user's output
+directory. If **Fit All** was run on multiple runs, then an additional
+file for all runs will be output, which is indexed first by run number
+and then by bank ID.
 
 In the plots, the x or abscissa axis is in d-spacing units, which are
 more convenient for peak fitting than time-of-flight. However the run
@@ -450,6 +454,88 @@ by clicking Save button.
 User may plot single peak fitting workspace in separate window by using
 Plot To Separate Window button, if the *engggui_fitting_single_peaks*
 is available.
+
+.. _gsas-Engineering_Diffraction-ref:
+
+GSAS Fitting
+------------
+
+.. warning:: This is a new capability that is currently in a very
+             early stage of definition and implementation. Not all
+	     options may be supported and/or consistent at the moment.
+
+The GSAS tab provides a graphical interface to the Mantid algorithm
+:ref:`GSASIIRefineFitPeaks <algm-GSASIIRefineFitPeaks>`. This allows
+users to perform GSAS-style fitting on their data from Mantid.
+
+The user must input the following files:
+
+- **Focused run file(s)** - these must have been generated either by
+  the **Fitting** tab or :ref:`EnggFocus <algm-EnggFocus>`.
+- **Instrument Parameter File** - contains DIFA and DIFC GSAS
+  constants, will probably be of ``.prm`` format
+- **Phase file(s)** - contain crystallographic information about the
+  sample in question. Currently only ``.cif`` files are supported
+
+The following parameters are also required:
+
+- **New GSAS-II Project** - GSASIIRefineFitPeaks creates a new
+  ``.gpx`` project here, which can be opened and inspected from the
+  GSAS-II GUI
+
+  - Note, if running **Refine All** on more than one run, the run
+    number and bank ID will be appended to the filename
+- **GSAS-II Installation Directory**
+
+  - This is the directory containing the GSAS-II executables and
+    Python libraries. In particular, it must contain
+    ``GSASIIscriptable.py``. This directory will normally be called
+    `GSASII`, if GSAS-II was installed normally
+  - You must have a version of GSAS-II from at least **February 2018**
+    to use the GUI. See :ref:`Installing_GSASII` for how to install a
+    compatible version
+- **Refinement method** - can either be **Pawley** or
+  **Rietveld**. Pawley refinement is currently under development, so
+  Rietveld is recommended.
+
+Optionally, you may also supply:
+
+- **XMin** and **XMax** - the limits (in TOF) to perform fitting
+  within
+- **DMin** - the minimum dSpacing to use for refinement when
+  performing Pawley refinement
+- **Negative weight** - The weight for a penalty function applied
+  during a Pawley refinement on resulting negative intensities.
+
+To do a refinement, take the following steps:
+
+1. Load a run by selecting the focused NeXuS file using the
+   corresponding **Browse** button, then clicking **Load**. The run
+   number and bank ID (for example ``123456_1``) should appear in the
+   **Run Number** list in the **Preview** section. Click the label,
+   and the run willl be plotted
+2. Select your input files, and input any additional parameters in the
+   **GSASIIRefineFitPeaks Controls** section
+3. Click **Run Refinement**. Once complete, fitted peaks for the run
+   should be overplotted in the fitting area. In addition, Rwp
+   (goodness of fit index), Sigma and Gamma (peak broadening
+   coefficients) and lattice parameters should be displayed in the
+   **Fit Results** section.
+
+   - You can also click **Refine All** to run refinement on all runs
+     loaded into GSAS tab
+
+During the Fit process, :ref:`EnggSaveGSASIIFitResultsToHDF5
+<algm-EnggSaveGSASIIFitResultsToHDF5>` algorithm will be utilised to
+save the fit results, and also the parameters used, as a `hdf5`
+file. There will be one file per run, indexed by bank ID, and the file
+will be found in the **Runs** directory of the user's output
+directory.
+
+You can toggle the fitted peaks on and off with the **Plot Fitted
+Peaks** checkbox, remove runs from the list with the **Remove Run**
+button, and plot the run and fitted peaks to a larger, separate plot
+using **Plot to separate window**.
 
 .. _setting-Engineering_Diffraction-ref:
 

@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_TOBYFITYMATRIX_H_
 #define MANTID_MDALGORITHMS_TOBYFITYMATRIX_H_
 
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FermiChopperModel.h"
@@ -45,8 +45,8 @@ public:
                             "DetectorArea",  "DetectionTime"};
 
     TobyFitYVector yVector;
-    for (unsigned int i = 0; i < 8; ++i) {
-      yVector.setAttribute(attrs[i], IFunction::Attribute(false));
+    for (auto &attr : attrs) {
+      yVector.setAttribute(attr, IFunction::Attribute(false));
     }
 
     std::vector<double> randNums(yVector.requiredRandomNums(), 0.5);

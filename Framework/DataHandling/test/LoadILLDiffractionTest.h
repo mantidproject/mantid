@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/Load.h"
+#include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -229,6 +229,54 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
+  }
+
+  void test_D2B_alignment() {
+    // Tests the D2B loading for a file from Cycle 1 in 04.2018
+    // This should have increased pixel size than previously and
+    // the corresponding IPF file should contain vertical and horizontal tube
+    // alignments.
+
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "535401.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    const auto &run = outputWS->run();
+    TS_ASSERT(run.hasProperty("PixelHeight"))
+    TS_ASSERT(run.hasProperty("MaxHeight"))
+    TS_ASSERT_DELTA(run.getLogAsSingleValue("PixelHeight"), 0.00276, 1E-5)
+    TS_ASSERT_DELTA(run.getLogAsSingleValue("MaxHeight"), 0.19386, 1E-5)
+    const auto &detInfo = outputWS->detectorInfo();
+    const auto tube1CentreTime1 = detInfo.position({70, 0});
+    TS_ASSERT_DELTA(tube1CentreTime1.Y(), 0., 0.001)
+    double r, theta, phi;
+    tube1CentreTime1.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 11.25, 0.001)
+    const auto tube1CentreTime2 = detInfo.position({70, 1});
+    TS_ASSERT_DELTA(tube1CentreTime2.Y(), 0., 0.001)
+    tube1CentreTime2.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 11.2, 0.001)
+    const auto tube23CentreTime1 = detInfo.position({128 * 22 + 69, 0});
+    TS_ASSERT_DELTA(tube23CentreTime1.Y(), 0., 0.001)
+    tube23CentreTime1.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 16.238, 0.001)
+    const auto tube23CentreTime2 = detInfo.position({128 * 22 + 69, 1});
+    TS_ASSERT_DELTA(tube23CentreTime2.Y(), 0., 0.001)
+    tube23CentreTime2.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 16.288, 0.001)
+    const auto tube128CentreTime1 = detInfo.position({128 * 127 + 68, 0});
+    TS_ASSERT_DELTA(tube128CentreTime1.Y(), 0., 0.001)
+    tube128CentreTime1.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 147.5, 0.001)
+    const auto tube128CentreTime2 = detInfo.position({128 * 127 + 68, 1});
+    TS_ASSERT_DELTA(tube128CentreTime2.Y(), 0., 0.001)
+    tube128CentreTime2.getSpherical(r, theta, phi);
+    TS_ASSERT_DELTA(theta, 147.55, 0.001)
   }
 
   void do_test_D2B_single_file(std::string dataType) {

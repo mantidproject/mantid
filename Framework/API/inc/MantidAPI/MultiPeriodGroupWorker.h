@@ -1,12 +1,12 @@
 #ifndef MANTID_API_MULTIPERIODGROUPWORKER_H_
 #define MANTID_API_MULTIPERIODGROUPWORKER_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidKernel/System.h"
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -46,7 +46,7 @@ namespace API {
 class DLLExport MultiPeriodGroupWorker {
 public:
   /// Convenience typdef for workspace names.
-  typedef std::vector<WorkspaceGroup_sptr> VecWSGroupType;
+  using VecWSGroupType = std::vector<WorkspaceGroup_sptr>;
   /// Constructor
   MultiPeriodGroupWorker() = default;
   /// Constructor

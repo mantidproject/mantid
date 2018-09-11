@@ -1,15 +1,15 @@
 #ifndef MANTID_CRYSTAL_PEAKSINTERSECTION_H_
 #define MANTID_CRYSTAL_PEAKSINTERSECTION_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace Crystal {
 
-typedef std::vector<Mantid::Kernel::V3D> VecV3D;
-typedef std::vector<VecV3D> VecVecV3D;
+using VecV3D = std::vector<Mantid::Kernel::V3D>;
+using VecVecV3D = std::vector<VecV3D>;
 
 /** PeaksIntersection : Abstract base algorithm class for algorithms that
   identify peaks interacting with one or more surfaces

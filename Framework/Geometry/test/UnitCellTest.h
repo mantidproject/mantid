@@ -1,17 +1,17 @@
 #ifndef MANTID_GEOMETRY_UNITCELLTEST_H_
 #define MANTID_GEOMETRY_UNITCELLTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
 #include <MantidKernel/Matrix.h>
+#include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <cxxtest/TestSuite.h>
 
 #include <MantidGeometry/Crystal/UnitCell.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class UnitCellTest : public CxxTest::TestSuite {
 public:
@@ -140,6 +140,12 @@ public:
                      "   2.000000    3.000000    4.000000    "
                      "5.000000    6.000000   26.088800");
     }
+  }
+
+  void testReciprocalAngle0() {
+    UnitCell cell(5.45, 5.45, 5.45);
+    TS_ASSERT_EQUALS(cell.recAngle(0., 4., 0., 0., 4., 0.), 0.);
+    TS_ASSERT_EQUALS(cell.recAngle(0., -4., 0., 0., 4., 0.), 180.);
   }
 
   void testStrToUnitCell() {

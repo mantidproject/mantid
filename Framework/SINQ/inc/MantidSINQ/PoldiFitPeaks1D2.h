@@ -1,16 +1,16 @@
 #ifndef MANTID_SINQ_POLDIFITPEAKS1D2_H_
 #define MANTID_SINQ_POLDIFITPEAKS1D2_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
-#include "MantidSINQ/DllConfig.h"
-#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/DllConfig.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -46,10 +46,10 @@ private:
   double m_width;
 };
 
-typedef boost::shared_ptr<RefinedRange> RefinedRange_sptr;
+using RefinedRange_sptr = boost::shared_ptr<RefinedRange>;
 
-bool MANTID_SINQ_DLL
-operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs);
+bool MANTID_SINQ_DLL operator<(const RefinedRange_sptr &lhs,
+                               const RefinedRange_sptr &rhs);
 
 /** PoldiFitPeaks1D2 :
 
@@ -88,6 +88,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"PoldiFitPeaks2D"};
+  }
   const std::string category() const override;
 
 protected:

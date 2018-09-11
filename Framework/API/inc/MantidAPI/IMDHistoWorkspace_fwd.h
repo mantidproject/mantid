@@ -34,13 +34,13 @@ namespace API {
 /// forward declare of Mantid::API::IMDHistoWorkspace
 class IMDHistoWorkspace;
 /// shared pointer to Mantid::API::IMDHistoWorkspace
-typedef boost::shared_ptr<IMDHistoWorkspace> IMDHistoWorkspace_sptr;
+using IMDHistoWorkspace_sptr = boost::shared_ptr<IMDHistoWorkspace>;
 /// shared pointer to Mantid::API::IMDHistoWorkspace (const version)
-typedef boost::shared_ptr<const IMDHistoWorkspace> IMDHistoWorkspace_const_sptr;
+using IMDHistoWorkspace_const_sptr = boost::shared_ptr<const IMDHistoWorkspace>;
 /// unique pointer to Mantid::API::IMDHistoWorkspace
-typedef std::unique_ptr<IMDHistoWorkspace> IMDHistoWorkspace_uptr;
+using IMDHistoWorkspace_uptr = std::unique_ptr<IMDHistoWorkspace>;
 /// unique pointer to Mantid::API::IMDHistoWorkspace (const version)
-typedef std::unique_ptr<const IMDHistoWorkspace> IMDHistoWorkspace_const_uptr;
+using IMDHistoWorkspace_const_uptr = std::unique_ptr<const IMDHistoWorkspace>;
 
 } // namespace API
 } // namespace Mantid

@@ -1,8 +1,8 @@
 #ifndef MANTID_API_MULTIPLEEXPERIMENTINFOS_H_
 #define MANTID_API_MULTIPLEEXPERIMENTINFOS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -63,9 +63,9 @@ private:
   std::vector<ExperimentInfo_sptr> m_expInfos;
 };
 
-typedef boost::shared_ptr<MultipleExperimentInfos> MultipleExperimentInfos_sptr;
-typedef boost::shared_ptr<const MultipleExperimentInfos>
-    MultipleExperimentInfos_const_sptr;
+using MultipleExperimentInfos_sptr = boost::shared_ptr<MultipleExperimentInfos>;
+using MultipleExperimentInfos_const_sptr =
+    boost::shared_ptr<const MultipleExperimentInfos>;
 
 } // namespace API
 } // namespace Mantid

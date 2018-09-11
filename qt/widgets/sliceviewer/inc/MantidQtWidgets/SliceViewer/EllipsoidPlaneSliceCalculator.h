@@ -66,7 +66,7 @@ private:
   bool checkIfIsCircle(const Kernel::Matrix<double> &m) const;
   const double m_zoomOutFactor = 2.;
 };
-}
-}
+} // namespace SliceViewer
+} // namespace Mantid
 
 #endif

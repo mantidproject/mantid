@@ -31,10 +31,10 @@
 
 #include "ExtensibleFileDialog.h"
 
-#include <QComboBox>
 #include <QCheckBox>
-#include <QSpinBox>
+#include <QComboBox>
 #include <QLineEdit>
+#include <QSpinBox>
 #include <QTableView>
 
 class QGroupBox;

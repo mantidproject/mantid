@@ -6,9 +6,9 @@
 
 #include <unordered_map>
 
-typedef std::vector<double> Column;
-typedef std::unordered_map<std::string, Column> ColumnMap;
-typedef std::unordered_map<std::string, std::string> AttributeMap;
+using Column = std::vector<double>;
+using ColumnMap = std::unordered_map<std::string, Column>;
+using AttributeMap = std::unordered_map<std::string, std::string>;
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,6 +51,9 @@ public:
   const std::string name() const override;
   const std::string summary() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveSESANS"};
+  }
   const std::string category() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
@@ -63,10 +66,11 @@ private:
   const std::string m_beginData = "BEGIN_DATA";
 
   const std::vector<std::string> m_mandatoryAttributes{
-      "FileFormatVersion", "DataFileTitle", "Sample", "Thickness",
-      "Thickness_unit", "Theta_zmax", "Theta_zmax_unit", "Theta_ymax",
-      "Theta_ymax_unit", "Orientation", "SpinEchoLength_unit",
-      "Depolarisation_unit", "Wavelength_unit"};
+      "FileFormatVersion", "DataFileTitle",       "Sample",
+      "Thickness",         "Thickness_unit",      "Theta_zmax",
+      "Theta_zmax_unit",   "Theta_ymax",          "Theta_ymax_unit",
+      "Orientation",       "SpinEchoLength_unit", "Depolarisation_unit",
+      "Wavelength_unit"};
   const std::vector<std::string> m_mandatoryColumnHeaders{
       m_spinEchoLength, m_wavelength, m_depolarisation, m_depolarisationError};
   const std::vector<std::string> m_fileExtensions{".ses", ".SES", ".sesans",

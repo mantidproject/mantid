@@ -33,10 +33,10 @@
 
 #include "Script.h"
 
-#include <QVariant>
-#include <QStringList>
-#include <QObject>
 #include <QEvent>
+#include <QObject>
+#include <QStringList>
+#include <QVariant>
 
 #include "customevents.h"
 
@@ -169,7 +169,7 @@ public:
   static int numLanguages();
 
 private:
-  typedef ScriptingEnv *(*ScriptingEnvConstructor)(ApplicationWindow *);
+  using ScriptingEnvConstructor = ScriptingEnv *(*)(ApplicationWindow *);
   typedef struct {
     const char *name;
     ScriptingEnvConstructor constructor;

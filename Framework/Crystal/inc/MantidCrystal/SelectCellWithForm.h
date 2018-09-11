@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_SELECT_CELL_WITH_FORM_H_
 #define MANTID_CRYSTAL_SELECT_CELL_WITH_FORM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -44,6 +44,10 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"FindUBUsingFFT", "FindUBUsingIndexedPeaks",
+            "FindUBUsingLatticeParameters"};
+  }
 
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Cell"; }

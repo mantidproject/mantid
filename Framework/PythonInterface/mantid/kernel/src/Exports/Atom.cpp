@@ -1,10 +1,10 @@
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
-#include <boost/python/make_function.hpp>
 #include <boost/python/make_constructor.hpp>
+#include <boost/python/make_function.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::PhysicalConstants::Atom;
@@ -58,7 +58,7 @@ static boost::shared_ptr<Atom> setAtom(const std::string &symbol,
     return boost::shared_ptr<Atom>(new Atom(atom));
   }
 }
-}
+} // namespace
 
 void export_Atom() {
   register_ptr_to_python<Atom *>();

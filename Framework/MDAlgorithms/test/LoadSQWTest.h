@@ -1,11 +1,11 @@
 #ifndef MANTID_MDEVENTS_LOAD_SQW_TEST_H_
 #define MANTID_MDEVENTS_LOAD_SQW_TEST_H_
 
-#include "MantidMDAlgorithms/LoadSQW.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/LoadSQW.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -39,47 +39,47 @@ public:
   void checkPosCorrect(const LoadSQWHelper::dataPositions &pos) {
     if (cdp.if_sqw_start != pos.if_sqw_start) {
       throw(std::invalid_argument(" pixels location differs from expected" +
-                                  conv2str(pos.if_sqw_start) + " expected: " +
-                                  conv2str(cdp.if_sqw_start)));
+                                  conv2str(pos.if_sqw_start) +
+                                  " expected: " + conv2str(cdp.if_sqw_start)));
     }
     if (cdp.n_dims_start != pos.n_dims_start) {
       throw(std::invalid_argument(" n_dims location differs from expected" +
-                                  conv2str(pos.n_dims_start) + " expected: " +
-                                  conv2str(cdp.n_dims_start)));
+                                  conv2str(pos.n_dims_start) +
+                                  " expected: " + conv2str(cdp.n_dims_start)));
     }
     if (cdp.sqw_header_start != pos.sqw_header_start) {
-      throw(std::invalid_argument(" sqw_header location differs from expected" +
-                                  conv2str(pos.sqw_header_start) +
-                                  " expected: " +
-                                  conv2str(cdp.sqw_header_start)));
+      throw(std::invalid_argument(
+          " sqw_header location differs from expected" +
+          conv2str(pos.sqw_header_start) +
+          " expected: " + conv2str(cdp.sqw_header_start)));
     }
     if (cdp.detectors_start != pos.detectors_start) {
-      throw(std::invalid_argument(" detectors location differs from expected" +
-                                  conv2str(pos.detectors_start) +
-                                  " expected: " +
-                                  conv2str(cdp.detectors_start)));
+      throw(
+          std::invalid_argument(" detectors location differs from expected" +
+                                conv2str(pos.detectors_start) +
+                                " expected: " + conv2str(cdp.detectors_start)));
     }
     if (cdp.data_start != pos.data_start) {
       throw(std::invalid_argument(" data location differs from expected" +
-                                  conv2str(pos.data_start) + " expected: " +
-                                  conv2str(cdp.data_start)));
+                                  conv2str(pos.data_start) +
+                                  " expected: " + conv2str(cdp.data_start)));
     }
     if (cdp.n_cell_pix_start != pos.n_cell_pix_start) {
-      throw(
-          std::invalid_argument(" cells pixels location differs from expected" +
-                                conv2str(pos.n_cell_pix_start) + " expected: " +
-                                conv2str(cdp.n_cell_pix_start)));
+      throw(std::invalid_argument(
+          " cells pixels location differs from expected" +
+          conv2str(pos.n_cell_pix_start) +
+          " expected: " + conv2str(cdp.n_cell_pix_start)));
     }
     if (cdp.pix_start != pos.pix_start) {
       throw(std::invalid_argument(" pixels location differs from expected" +
-                                  conv2str(pos.pix_start) + " expected: " +
-                                  conv2str(cdp.pix_start)));
+                                  conv2str(pos.pix_start) +
+                                  " expected: " + conv2str(cdp.pix_start)));
     }
   }
 };
 
 /* Helper type provides public access to methods for testing.
-*/
+ */
 class ExposedLoadSQW : public LoadSQW {
 public:
   ExposedLoadSQW() : LoadSQW() {}

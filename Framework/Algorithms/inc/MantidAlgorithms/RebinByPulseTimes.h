@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
 #define MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAlgorithms/RebinByTimeBase.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,7 +41,12 @@ public:
   }
 
   int version() const override;
+
   const std::string category() const override;
+  /// Algorithm's seeAlso
+  const std::vector<std::string> seeAlso() const override {
+    return {"Rebin", "RebinByTimeAtSample"};
+  }
 
 private:
   /// Do the algorithm specific histogramming.

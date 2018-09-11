@@ -1,10 +1,10 @@
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -65,9 +65,10 @@ void MayersSampleCorrection::init() {
       "If True then also correct for the effects of multiple scattering."
       "Please note that the MS correction assumes the scattering is elastic.",
       Direction::Input);
-  declareProperty("MSEvents", 10000, "Controls the number of second-scatter "
-                                     "events generated. Only applicable where "
-                                     "MultipleScattering=True.",
+  declareProperty("MSEvents", 10000,
+                  "Controls the number of second-scatter "
+                  "events generated. Only applicable where "
+                  "MultipleScattering=True.",
                   Direction::Input);
   declareProperty("MSRuns", 10,
                   "Controls the number of simulations, each containing "

@@ -22,10 +22,10 @@ import unittest
 
 from qtpy.QtWidgets import QInputDialog
 
-from mantidqt.utils.qt.testing import ModalTester
+from mantidqt.utils.qt.test import GuiTest, ModalTester
 
 
-class TestModalTester(unittest.TestCase):
+class TestModalTester(GuiTest):
 
     def test_pass_widget_closed(self):
         def testing_function(widget):

@@ -34,6 +34,6 @@ void VsiApplyBehaviour::applied(pqPropertiesPanel *) {
   Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(m_colorScaleLock);
   this->pqApplyBehavior::applied(nullptr);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

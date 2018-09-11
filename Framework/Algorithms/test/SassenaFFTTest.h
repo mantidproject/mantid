@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 #define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/SassenaFFT.h"
+#include "MantidDataHandling/SaveAscii.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 
@@ -60,8 +60,8 @@ public:
   }
 
   /* FFT of a real symmetric Gaussian with detailed balance condition
-  *
-  */
+   *
+   */
   void test_DetailedBalanceCondition() {
     const double T(100);
     // params defines (height,stdev) values for fqt.Re, fqt.Im, and fqt0,
@@ -144,10 +144,10 @@ private:
       double sum = 0.0;
       double average = 0.0;
       MantidVec::iterator itx = xv.begin();
-      for (MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) {
+      for (double &y : yv) {
         factor = exp(exponentFactor * (*itx));
-        sum += (*it) * factor;
-        average += (*it) * (*itx) * factor;
+        sum += y * factor;
+        average += y * (*itx) * factor;
         ++itx;
       }
       average /= sum;
@@ -186,9 +186,9 @@ private:
       xv = ws->readX(i);
       MantidVec::iterator itx = xv.begin();
       double sum = 0.0;
-      for (MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) {
+      for (double &y : yv) {
         factor = exp(exponentFactor * (*itx));
-        sum += (*it) * factor;
+        sum += y * factor;
         ++itx;
       }
       sum *= dx / static_cast<double>(nbins);

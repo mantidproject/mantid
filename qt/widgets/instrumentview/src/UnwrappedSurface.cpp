@@ -1,82 +1,47 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
 
-#include <QRgb>
-#include <QSet>
+#include <QApplication>
 #include <QMenu>
 #include <QMouseEvent>
-#include <QApplication>
-#include <QMessageBox>
 #include <QTransform>
 
 #include <cfloat>
-#include <limits>
 #include <cmath>
-#include "MantidKernel/Exception.h"
+#include <limits>
 
 using namespace Mantid::Geometry;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace {
 
-UnwrappedDetector::UnwrappedDetector()
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(0) {
-  color[0] = 0;
-  color[1] = 0;
-  color[2] = 0;
+QRectF getArea(const UnwrappedDetector &udet, double maxWidth,
+               double maxHeight) {
+  auto w = udet.width;
+  if (w > maxWidth)
+    w = maxWidth;
+  auto h = udet.height;
+  if (h > maxHeight)
+    h = maxHeight;
+  return QRectF(udet.u - w, udet.v - h, w * 2, h * 2);
 }
-
-UnwrappedDetector::UnwrappedDetector(const unsigned char *c,
-                                     const IDetector &det)
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(det.getID()),
-      position(det.getPos()), rotation(det.getRotation()), shape(det.shape()),
-      scaleFactor(det.getScaleFactor()) {
-  color[0] = *c;
-  color[1] = *(c + 1);
-  color[2] = *(c + 2);
-}
-
-/** Copy constructor */
-UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) {
-  this->operator=(other);
-}
-
-/** Assignment operator */
-UnwrappedDetector &UnwrappedDetector::
-operator=(const UnwrappedDetector &other) {
-  color[0] = other.color[0];
-  color[1] = other.color[1];
-  color[2] = other.color[2];
-  u = other.u;
-  v = other.v;
-  width = other.width;
-  height = other.height;
-  uscale = other.uscale;
-  vscale = other.vscale;
-  detID = other.detID;
-  position = other.position;
-  rotation = other.rotation;
-  shape = other.shape;
-  scaleFactor = other.scaleFactor;
-  return *this;
-}
-
-/** Check if the object is valid*/
-bool UnwrappedDetector::isValid() const { return static_cast<bool>(shape); }
-
+} // namespace
 /**
-* Constructor.
-* @param rootActor :: The instrument actor.
-*/
+ * Constructor.
+ * @param rootActor :: The instrument actor.
+ */
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
     : ProjectionSurface(rootActor), m_u_min(DBL_MAX), m_u_max(-DBL_MAX),
       m_v_min(DBL_MAX), m_v_max(-DBL_MAX), m_height_max(0), m_width_max(0),
@@ -93,8 +58,8 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
 }
 
 /**
-* Get information about the dimensions of the surface.
-*/
+ * Get information about the dimensions of the surface.
+ */
 QString UnwrappedSurface::getDimInfo() const {
   return QString("U: [%1, %2] V: [%3, %4]")
       .arg(m_viewRect.x0())
@@ -104,57 +69,11 @@ QString UnwrappedSurface::getDimInfo() const {
 }
 
 //------------------------------------------------------------------------------
-/** Calculate the rectangular region in uv coordinates occupied by an assembly.
-*
-* @param comp :: A member of the assembly. The total area of the assembly is a
-*sum of areas of its members
-* @param compRect :: A rect. area occupied by comp in uv space
-*/
-void UnwrappedSurface::calcAssemblies(const Mantid::Geometry::IComponent *comp,
-                                      const QRectF &compRect) {
-  // We don't need the parametrized version = use the bare parent for speed
-  const Mantid::Geometry::IComponent *parent = comp->getBareParent();
-  if (parent) {
-    QRectF &r = m_assemblies[parent->getComponentID()];
-    r |= compRect;
-    calcAssemblies(parent, r);
-  }
-}
-
-//------------------------------------------------------------------------------
-/** If needed, recalculate the cached bounding rectangles of all assemblies. */
-void UnwrappedSurface::cacheAllAssemblies() {
-  if (!m_assemblies.empty())
-    return;
-
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.isValid())
-      continue;
-    // Get the BARE parent (not parametrized) to speed things up.
-    auto &detector = m_instrActor->getDetectorByDetID(udet.detID);
-    const Mantid::Geometry::IComponent *bareDet = detector.getComponentID();
-    const Mantid::Geometry::IComponent *parent = bareDet->getBareParent();
-    if (parent) {
-      QRectF detRect;
-      detRect.setLeft(udet.u - udet.width);
-      detRect.setRight(udet.u + udet.width);
-      detRect.setBottom(udet.v - udet.height);
-      detRect.setTop(udet.v + udet.height);
-      Mantid::Geometry::ComponentID id = parent->getComponentID();
-      QRectF &r = m_assemblies[id];
-      r |= detRect;
-      calcAssemblies(parent, r);
-    }
-  }
-}
-
-//------------------------------------------------------------------------------
 /**
-* Draw the unwrapped instrument onto the screen
-* @param widget :: The widget to draw it on.
-* @param picking :: True if detector is being drawn in the picking mode.
-*/
+ * Draw the unwrapped instrument onto the screen
+ * @param widget :: The widget to draw it on.
+ * @param picking :: True if detector is being drawn in the picking mode.
+ */
 void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
   // dimensions of the screen to draw on
   int widget_width = widget->width();
@@ -220,10 +139,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
     glShadeModel(GL_FLAT);
   }
 
-  for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
-    const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-
-    if (!udet.isValid())
+  const auto &componentInfo = m_instrActor->componentInfo();
+  for (const auto &udet : m_unwrappedDetectors) {
+    if (udet.empty() || !componentInfo.hasValidShape(udet.detIndex))
       continue;
 
     int iw = int(udet.width / dw);
@@ -237,7 +155,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
       continue;
 
     // apply the detector's colour
-    setColor(int(i), picking);
+    setColor(udet.detIndex, picking);
 
     // if the detector is too small to see its shape draw a rectangle
     if (iw < 6 || ih < 6) {
@@ -261,10 +179,11 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
       rot.getAngleAxis(deg, ax0, ax1, ax2);
       glRotated(deg, ax0, ax1, ax2);
 
-      Mantid::Kernel::V3D scaleFactor = udet.scaleFactor;
+      Mantid::Kernel::V3D scaleFactor =
+          componentInfo.scaleFactor(udet.detIndex);
       glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
 
-      udet.shape->draw();
+      m_instrActor->componentInfo().shape(udet.detIndex).draw();
 
       glPopMatrix();
     }
@@ -280,19 +199,21 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
 }
 
 /**
-* Set detector color in OpenGL context.
-* @param index :: Detector's index in m_unwrappedDetectors
-* @param picking :: True if detector is being drawn in the picking mode.
-*   In this case index is transformed into color
-*/
-void UnwrappedSurface::setColor(int index, bool picking) const {
+ * Set detector color in OpenGL context.
+ * @param index :: Detector's index in m_unwrappedDetectors
+ * @param picking :: True if detector is being drawn in the picking mode.
+ *   In this case index is transformed into color
+ */
+void UnwrappedSurface::setColor(size_t index, bool picking) const {
   if (picking) {
-    GLColor c = GLActor::makePickColor(index);
+    auto c = InstrumentRenderer::makePickColor(index);
     unsigned char r, g, b;
     c.get(r, g, b);
     glColor3ub(r, g, b);
   } else {
-    glColor3ubv(&m_unwrappedDetectors[index].color[0]);
+    unsigned char col[3];
+    m_unwrappedDetectors[index].color.getUB3(&col[0]);
+    glColor3ub(col[0], col[1], col[2]);
   }
 }
 
@@ -309,56 +230,33 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 
 //------------------------------------------------------------------------------
 /** This method is called when a component is selected in the
-*InstrumentTreeWidget
-* and zooms into that spot on the view.
-*
-* @param id :: ComponentID to zoom to.
-*/
-void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
-  boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
-      m_instrActor->getInstrument();
-  if (id == nullptr) {
-    id = instr->getComponentID();
-  }
-  boost::shared_ptr<const Mantid::Geometry::IComponent> comp =
-      instr->getComponentByID(id);
-  boost::shared_ptr<const Mantid::Geometry::ICompAssembly> ass =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(comp);
-  boost::shared_ptr<const Mantid::Geometry::IDetector> det =
-      boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(comp);
-  if (det) {
-    int detID = det->getID();
-
-    std::vector<UnwrappedDetector>::const_iterator it;
-    for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end();
-         ++it) {
-      const UnwrappedDetector &udet = *it;
-      if (udet.detID == detID) {
-        double w = udet.width;
-        if (w > m_width_max)
-          w = m_width_max;
-        double h = udet.height;
-        if (h > m_height_max)
-          h = m_height_max;
-        QRectF area(udet.u - w, udet.v - h, w * 2, h * 2);
-        zoom(area);
-        break;
-      }
+ *InstrumentTreeWidget
+ * and zooms into that spot on the view.
+ *
+ * @param id :: ComponentID to zoom to.
+ */
+void UnwrappedSurface::componentSelected(size_t componentIndex) {
+  const auto &componentInfo = m_instrActor->componentInfo();
+  if (componentInfo.isDetector(componentIndex)) {
+    const auto &udet = m_unwrappedDetectors[componentIndex];
+    zoom(getArea(udet, m_width_max, m_height_max));
+  } else {
+    auto detectors = componentInfo.detectorsInSubtree(componentIndex);
+    QRectF area;
+    for (auto det : detectors) {
+      QRectF detRect;
+      const auto &udet = m_unwrappedDetectors[det];
+      detRect.setLeft(udet.u - udet.width);
+      detRect.setRight(udet.u + udet.width);
+      detRect.setBottom(udet.v - udet.height);
+      detRect.setTop(udet.v + udet.height);
+      area |= detRect;
     }
-  }
-  if (ass) {
-    this->cacheAllAssemblies();
-    QMap<Mantid::Geometry::ComponentID, QRectF>::iterator assRect =
-        m_assemblies.find(ass->getComponentID());
-    if (assRect != m_assemblies.end())
-      zoom(*assRect);
-    else {
-      // std::cout << "Assembly not found \n";
-    }
+    zoom(area);
   }
 }
 
-void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
+void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
   if (m_selectRect.isNull()) {
     return;
   }
@@ -417,19 +315,20 @@ void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
-      dets.push_back(udet.detID);
+      detIndices.push_back(udet.detIndex);
     }
   }
 }
 
-void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
-  dets.clear();
+void UnwrappedSurface::getMaskedDetectors(
+    std::vector<size_t> &detIndices) const {
+  detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
     if (m_maskShapes.isMasked(udet.u, udet.v)) {
-      dets.append(udet.detID);
+      detIndices.push_back(udet.detIndex);
     }
   }
 }
@@ -437,11 +336,7 @@ void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
 void UnwrappedSurface::changeColorMap() {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    unsigned char color[3];
-    m_instrActor->getColor(udet.detID).getUB3(&color[0]);
-    udet.color[0] = color[0];
-    udet.color[1] = color[1];
-    udet.color[2] = color[2];
+    udet.color = m_instrActor->getColor(udet.detIndex);
   }
 }
 
@@ -457,9 +352,9 @@ QString UnwrappedSurface::getInfoText() const {
 RectF UnwrappedSurface::getSurfaceBounds() const { return m_viewRect; }
 
 /**
-* Set a peaks workspace to be drawn ontop of the workspace.
-* @param pws :: A shared pointer to the workspace.
-*/
+ * Set a peaks workspace to be drawn ontop of the workspace.
+ * @param pws :: A shared pointer to the workspace.
+ */
 void UnwrappedSurface::setPeaksWorkspace(
     boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws) {
   if (!pws) {
@@ -479,10 +374,10 @@ void UnwrappedSurface::setPeaksWorkspace(
 
 //-----------------------------------------------------------------------------
 /** Create the peak labels from the peaks set by setPeaksWorkspace.
-* The method is called from the draw(...) method
-*
-* @param window :: The screen window rectangle in pixels.
-*/
+ * The method is called from the draw(...) method
+ *
+ * @param window :: The screen window rectangle in pixels.
+ */
 void UnwrappedSurface::createPeakShapes(const QRect &window) const {
   if (!m_peakShapes.isEmpty()) {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -498,8 +393,8 @@ void UnwrappedSurface::createPeakShapes(const QRect &window) const {
 }
 
 /**
-* Toggle between flipped and straight view.
-*/
+ * Toggle between flipped and straight view.
+ */
 void UnwrappedSurface::setFlippedView(bool on) {
   if (m_flippedView != on) {
     m_flippedView = on;
@@ -511,10 +406,10 @@ void UnwrappedSurface::setFlippedView(bool on) {
 }
 
 /**
-* Draw the surface onto an image without OpenGL
-* @param image :: Image to draw on.
-* @param picking :: If true draw a picking image.
-*/
+ * Draw the surface onto an image without OpenGL
+ * @param image :: Image to draw on.
+ * @param picking :: If true draw a picking image.
+ */
 void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
   if (!image)
     return;
@@ -565,13 +460,13 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
     QColor color;
     int index = int(i);
     if (picking) {
-      GLColor c = GLActor::makePickColor(index);
+      GLColor c = InstrumentRenderer::makePickColor(index);
       unsigned char r, g, b;
       c.get(r, g, b);
       color = QColor(r, g, b);
     } else {
-      auto c = &m_unwrappedDetectors[index].color[0];
-      color = QColor(c[0], c[1], c[2]);
+      auto c = m_unwrappedDetectors[index].color;
+      color = QColor(c.red(), c.green(), c.blue());
     }
 
     paint.fillRect(u - iw / 2, v - ih / 2, iw, ih, color);
@@ -588,8 +483,8 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
 }
 
 /**
-* Zooms to the specified area. The previous zoom stack is cleared.
-*/
+ * Zooms to the specified area. The previous zoom stack is cleared.
+ */
 void UnwrappedSurface::zoom(const QRectF &area) {
   if (!m_zoomStack.isEmpty()) {
     m_viewRect = m_zoomStack.first();
@@ -672,12 +567,12 @@ void UnwrappedSurface::zoom() {
 
 //------------------------------------------------------------------------------
 /** Calculate the UV and size of the given detector
-* Calls the pure virtual project() and calcSize() methods that
-* depend on the type of projection
-*
-* @param udet :: detector to unwrap.
-* @param pos :: detector position relative to the sample origin
-*/
+ * Calls the pure virtual project() and calcSize() methods that
+ * depend on the type of projection
+ *
+ * @param udet :: detector to unwrap.
+ * @param pos :: detector position relative to the sample origin
+ */
 void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
                               Mantid::Kernel::V3D &pos) {
   this->project(pos, udet.u, udet.v, udet.uscale, udet.vscale);
@@ -686,11 +581,11 @@ void UnwrappedSurface::calcUV(UnwrappedDetector &udet,
 
 //------------------------------------------------------------------------------
 /** Calculate the size of the detector in U/V
-*
-* @param udet :: UwrappedDetector struct to calculate the size for. udet's size
-*fields
-* are updated by this method.
-*/
+ *
+ * @param udet :: UwrappedDetector struct to calculate the size for. udet's size
+ *fields
+ * are updated by this method.
+ */
 void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   // U is the horizontal axis on the screen
   const Mantid::Kernel::V3D U(-1, 0, 0);
@@ -701,8 +596,9 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   Mantid::Kernel::Quat R;
   this->rotate(udet, R);
 
-  Mantid::Geometry::BoundingBox bbox = udet.shape->getBoundingBox();
-  Mantid::Kernel::V3D scale = udet.scaleFactor;
+  const auto &componentInfo = m_instrActor->componentInfo();
+  const auto &bbox = componentInfo.shape(udet.detIndex).getBoundingBox();
+  auto scale = componentInfo.scaleFactor(udet.detIndex);
 
   // sizes of the detector along each 3D axis
   Mantid::Kernel::V3D size = bbox.maxPoint() - bbox.minPoint();
@@ -819,5 +715,5 @@ std::string UnwrappedSurface::saveToProject() const {
   return tsv.outputLines();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

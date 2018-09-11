@@ -8,7 +8,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 /// @endcond
 
 namespace Mantid {
@@ -21,7 +21,7 @@ class Component;
 class CSGObject;
 class ObjComponent;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /** @class LoadParameterFile LoadParameterFile.h
@@ -76,6 +76,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveParameterFile"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\Instrument";

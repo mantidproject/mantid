@@ -46,7 +46,7 @@ public:
   virtual void enggFitPeaks(const RunLabel &runLabel,
                             const std::string &expectedPeaks) = 0;
 
-  virtual void saveDiffFittingAscii(const RunLabel &runLabel,
+  virtual void saveFitResultsToHDF5(const std::vector<RunLabel> &runLabel,
                                     const std::string &filename) const = 0;
 
   virtual void createFittedPeaksWS(const RunLabel &runLabel) = 0;
@@ -60,7 +60,7 @@ public:
   virtual bool hasFittedPeaksForRun(const RunLabel &runLabel) const = 0;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGMODEL_H_

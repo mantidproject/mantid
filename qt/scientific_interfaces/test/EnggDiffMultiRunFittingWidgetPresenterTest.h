@@ -31,7 +31,7 @@ void addBankID(API::MatrixWorkspace_sptr ws, const size_t bankID) {
   addLogAlg->setPropertyValue("LogType", "Number");
   addLogAlg->execute();
 }
-}
+} // namespace
 
 class EnggDiffMultiRunFittingWidgetPresenterTest : public CxxTest::TestSuite {
 public:
@@ -349,6 +349,13 @@ public:
 
     presenter->notify(IEnggDiffMultiRunFittingWidgetPresenter::Notification::
                           PlotToSeparateWindow);
+    assertMocksUsedCorrectly();
+  }
+
+  void test_getAllRunLabelsDelegatesToView() {
+    auto presenter = setUpPresenter();
+    EXPECT_CALL(*m_mockView, getAllRunLabels());
+    presenter->getAllRunLabels();
     assertMocksUsedCorrectly();
   }
 

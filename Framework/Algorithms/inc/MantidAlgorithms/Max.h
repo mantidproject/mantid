@@ -58,6 +58,9 @@ public:
   const std::string name() const override { return "Max"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Min", "MaxMin"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
   /// Summary of algorithms purpose
@@ -72,7 +75,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_MAX_H_*/

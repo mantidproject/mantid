@@ -1,14 +1,14 @@
 #ifndef NEXUSFILEIO_H
 #define NEXUSFILEIO_H
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/VectorColumn.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/local_time_adjustor.hpp>
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/date_time/local_time_adjustor.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/scoped_array.hpp>
 
 #include <boost/optional.hpp>
@@ -55,7 +55,7 @@ class DLLExport NexusFileIO {
 
 public:
   // Helper typedef
-  typedef boost::optional<size_t> optional_size_t;
+  using optional_size_t = boost::optional<size_t>;
 
   /// Default constructor
   NexusFileIO();
@@ -426,7 +426,7 @@ void NexusFileIO::writeNumericTimeLog(
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.
-typedef boost::shared_ptr<NexusFileIO> NexusFileIO_sptr;
+using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid

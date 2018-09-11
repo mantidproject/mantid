@@ -36,10 +36,10 @@ using Mantid::HistogramData::HistogramX;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 
 //==========================================================================================
 class LoadEventPreNexus2Test : public CxxTest::TestSuite {
@@ -135,8 +135,8 @@ public:
     Types::Core::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
-    for (size_t i = 0; i < events1.size(); i++) {
-      std::cout << (events1[i].pulseTime() - start) << " sec \n";
+    for (auto &event : events1) {
+      std::cout << (event.pulseTime() - start) << " sec \n";
     }
   }
 

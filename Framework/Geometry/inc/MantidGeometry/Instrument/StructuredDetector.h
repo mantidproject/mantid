@@ -64,8 +64,8 @@ public:
   StructuredDetector(const StructuredDetector *base, const ParameterMap *map);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(size_t xPixels, size_t yPixels, const std::vector<double> &x,
-                  const std::vector<double> &y, bool isZBeam, detid_t idStart,
+  void initialize(size_t xPixels, size_t yPixels, std::vector<double> &&x,
+                  std::vector<double> &&y, bool isZBeam, detid_t idStart,
                   bool idFillByFirstY, int idStepByRow, int idStep = 1);
 
   //! Make a clone of the present component
@@ -192,9 +192,9 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const StructuredDetector &);
 
-typedef boost::shared_ptr<StructuredDetector> StructuredDetector_sptr;
-typedef boost::shared_ptr<const StructuredDetector>
-    StructuredDetector_const_sptr;
+using StructuredDetector_sptr = boost::shared_ptr<StructuredDetector>;
+using StructuredDetector_const_sptr =
+    boost::shared_ptr<const StructuredDetector>;
 } // namespace Geometry
 } // namespace Mantid
 #endif // STRUCTUREDDETECTOR_H

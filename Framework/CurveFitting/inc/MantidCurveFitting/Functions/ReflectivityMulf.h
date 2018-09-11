@@ -1,12 +1,12 @@
 #ifndef MANTID_CURVEFITTING_REFLECTIVITYMULF_H_
 #define MANTID_CURVEFITTING_REFLECTIVITYMULF_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
-#include <complex>
+#include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include <cmath>
+#include <complex>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -58,7 +58,7 @@ private:
   int m_nlayer, m_nlayer_old;
 };
 
-typedef boost::shared_ptr<ReflectivityMulf> ReflectivityMulf_sptr;
+using ReflectivityMulf_sptr = boost::shared_ptr<ReflectivityMulf>;
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -2,8 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACES_ILLENERGYTRANSFER_H_
 
 #include "IndirectDataReductionTab.h"
-#include "ui_ILLEnergyTransfer.h"
 #include "MantidKernel/System.h"
+#include "ui_ILLEnergyTransfer.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -61,6 +61,6 @@ private:
   void plot();
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ILLENERGYTRANSFER_H_

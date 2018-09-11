@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUP_H_
 #define MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUP_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/Communicator.h"
 
@@ -52,8 +52,8 @@ public:
   Indexing::IndexInfo makeIndexInfo();
   Indexing::IndexInfo makeIndexInfo(const std::vector<std::string> &bankNames);
   Indexing::IndexInfo
-  makeIndexInfo(const std::pair<std::vector<int32_t>, std::vector<int32_t>> &
-                    spectrumDetectorMapping,
+  makeIndexInfo(const std::pair<std::vector<int32_t>, std::vector<int32_t>>
+                    &spectrumDetectorMapping,
                 const bool monitorsOnly);
 
 private:

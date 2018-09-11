@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PROCESSINDIRECTFITPARAMETERS_H_
 #define MANTID_ALGORITHMS_PROCESSINDIRECTFITPARAMETERS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -46,10 +46,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::vector<std::string> searchForFitParams(const std::string &,
-                                              const std::vector<std::string> &);
-  std::vector<std::vector<API::MatrixWorkspace_sptr>>
-  reorder2DVector(std::vector<std::vector<API::MatrixWorkspace_sptr>> &);
+  std::size_t getStartRow() const;
+  std::size_t getEndRow(std::size_t maximum) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

@@ -1,19 +1,18 @@
 #ifndef MANTID_TESTParObjObjCompAssembly__
 #define MANTID_TESTParObjObjCompAssembly__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class ParObjCompAssemblyTest : public CxxTest::TestSuite {
 public:
@@ -107,13 +106,12 @@ public:
 
     TS_ASSERT_EQUALS(pcomp.type(), "ObjCompAssembly");
   }
-
   void testCreateOutlineCylinder() {
     std::stringstream obj_str;
     obj_str << "<cylinder id=\"stick\">";
     obj_str << "<centre-of-bottom-base ";
-    obj_str << "x=\"0\" y=\"0\" z=\"0\" />";
-    obj_str << "<axis x=\"0\" y=\"1\" z=\"0\" /> ";
+    obj_str << R"(x="0" y="0" z="0" />)";
+    obj_str << R"(<axis x="0" y="1" z="0" /> )";
     obj_str << "<radius val=\"0.1\" />";
     obj_str << "<height val=\"0.2\" />";
     obj_str << "</cylinder>";
@@ -135,12 +133,12 @@ public:
     boost::shared_ptr<IObject> shape = bank.createOutline();
     TS_ASSERT(shape);
 
-    int otype;
+    detail::ShapeInfo::GeometryShape otype;
     std::vector<V3D> vectors;
     double radius, height;
     shape->GetObjectGeom(otype, vectors, radius, height);
 
-    TS_ASSERT_EQUALS(otype, 6);
+    TS_ASSERT_EQUALS(otype, detail::ShapeInfo::GeometryShape::CYLINDER);
     TS_ASSERT_EQUALS(radius, 0.1);
     TS_ASSERT_EQUALS(height, 0.6);
 

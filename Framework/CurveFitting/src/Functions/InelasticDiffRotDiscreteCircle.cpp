@@ -1,15 +1,15 @@
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>

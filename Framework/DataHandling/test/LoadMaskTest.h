@@ -1,18 +1,18 @@
 #ifndef MANTID_DATAHANDLING_LOADMASKTEST_H_
 #define MANTID_DATAHANDLING_LOADMASKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
-#include "MantidDataHandling/LoadMask.h"
-#include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadMask.h"
+#include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -532,8 +532,8 @@ public:
       ss << "</detids>\n";
     }
 
-    for (size_t i = 0; i < banks.size(); i++) {
-      ss << "<component>bank" << banks[i] << "</component>\n";
+    for (int bank : banks) {
+      ss << "<component>bank" << bank << "</component>\n";
     }
 
     // 4. End of file
@@ -552,8 +552,8 @@ public:
     std::stringstream ss;
 
     // 1. Single spectra
-    for (size_t i = 0; i < singlespectra.size(); i++) {
-      ss << singlespectra[i] << " ";
+    for (int i : singlespectra) {
+      ss << i << " ";
     }
     ss << '\n';
 

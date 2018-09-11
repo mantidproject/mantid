@@ -53,7 +53,7 @@ private:
   std::string m_propName;
 };
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_ALGORITHMHASPROPERTY_H_ */

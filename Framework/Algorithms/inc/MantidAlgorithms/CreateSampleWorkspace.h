@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_
 #define MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,6 +43,9 @@ public:
 
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateWorkspace"};
+  }
   const std::string category() const override;
   /// Algorithm's summary
   const std::string summary() const override {

@@ -61,6 +61,9 @@ public:
   }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"UnwrapMonitorsInTOF", "UnwrapSNS"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
@@ -93,7 +96,7 @@ private:
   std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_UNWRAPMONITOR_H_ */

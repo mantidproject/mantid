@@ -2,9 +2,9 @@
 #include "MantidKernel/Statistics.h"
 
 #include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 
 #include <algorithm>
@@ -102,7 +102,43 @@ std::vector<double> getZscore(const vector<TYPE> &data) {
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     double tmp = static_cast<double>(*it);
-    Zscore.push_back(fabs((tmp - stats.mean) / stats.standard_deviation));
+    Zscore.push_back(fabs((stats.mean - tmp) / stats.standard_deviation));
+  }
+  return Zscore;
+}
+/**
+ * There are enough special cases in determining the Z score where it useful to
+ * put it in a single function.
+ */
+template <typename TYPE>
+std::vector<double> getWeightedZscore(const vector<TYPE> &data,
+                                      const vector<TYPE> &weights) {
+  if (data.size() < 3) {
+    std::vector<double> Zscore(data.size(), 0.);
+    return Zscore;
+  }
+  std::vector<double> Zscore;
+  Statistics stats = getStatistics(data);
+  if (stats.standard_deviation == 0.) {
+    std::vector<double> Zscore(data.size(), 0.);
+    return Zscore;
+  }
+  double sumWeights = 0.0;
+  double sumWeightedData = 0.0;
+  double weightedVariance = 0.0;
+  for (size_t it = 0; it != data.size(); ++it) {
+    sumWeights += static_cast<double>(weights[it]);
+    sumWeightedData += static_cast<double>(weights[it] * data[it]);
+  }
+  double weightedMean = sumWeightedData / sumWeights;
+  for (size_t it = 0; it != data.size(); ++it) {
+    weightedVariance +=
+        std::pow(static_cast<double>(data[it]) - weightedMean, 2) *
+        std::pow(static_cast<double>(weights[it]) / sumWeights, 2);
+  }
+  for (auto it = data.cbegin(); it != data.cend(); ++it) {
+    Zscore.push_back(fabs((static_cast<double>(*it) - weightedMean) /
+                          std::sqrt(weightedVariance)));
   }
   return Zscore;
 }
@@ -193,8 +229,8 @@ Statistics getStatistics(const vector<TYPE> &data, const unsigned int flags) {
 
 /// Getting statistics of a string array should just give a bunch of NaNs
 template <>
-DLLExport Statistics
-getStatistics<string>(const vector<string> &data, const unsigned int flags) {
+DLLExport Statistics getStatistics<string>(const vector<string> &data,
+                                           const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
@@ -202,20 +238,20 @@ getStatistics<string>(const vector<string> &data, const unsigned int flags) {
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
 template <>
-DLLExport Statistics
-getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
+DLLExport Statistics getStatistics<bool>(const vector<bool> &data,
+                                         const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return getNanStatistics();
 }
 
 /** Return the Rwp of a diffraction pattern data
-  * @param obsI :: array of observed intensity values
-  * @param calI :: array of calculated intensity values;
-  * @param obsE :: array of error of the observed data;
-  * @return :: RFactor including Rp and Rwp
-  *
-  */
+ * @param obsI :: array of observed intensity values
+ * @param calI :: array of calculated intensity values;
+ * @param obsE :: array of error of the observed data;
+ * @return :: RFactor including Rp and Rwp
+ *
+ */
 Rfactor getRFactor(const std::vector<double> &obsI,
                    const std::vector<double> &calI,
                    const std::vector<double> &obsE) {
@@ -402,10 +438,12 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
 #define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL Statistics                                        \
-  getStatistics<TYPE>(const vector<TYPE> &, const unsigned int);               \
+  template MANTID_KERNEL_DLL Statistics getStatistics<TYPE>(                   \
+      const vector<TYPE> &, const unsigned int);                               \
   template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE>(              \
       const vector<TYPE> &);                                                   \
+  template MANTID_KERNEL_DLL std::vector<double> getWeightedZscore<TYPE>(      \
+      const vector<TYPE> &, const vector<TYPE> &);                             \
   template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE>(      \
       const vector<TYPE> &, const bool);                                       \
   template MANTID_KERNEL_DLL std::vector<double> getMomentsAboutOrigin<TYPE>(  \

@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_CONFIGPROPERTYOBSERVER_H_
 #define MANTID_KERNEL_CONFIGPROPERTYOBSERVER_H_
-#include "ConfigService.h"
 #include "ConfigObserver.h"
+#include "ConfigService.h"
 #include "MantidKernel/DllConfig.h"
 
 namespace Mantid {
@@ -45,6 +45,6 @@ protected:
 private:
   std::string m_propertyName;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 #endif /*MANTID_KERNEL_CONFIGPROPERTYOBSERVER_H_*/

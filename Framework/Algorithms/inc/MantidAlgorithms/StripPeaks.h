@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_STRIPPEAKS_H_
 #define MANTID_ALGORITHMS_STRIPPEAKS_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,6 +63,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FindPeaks", "StripVanadiumPeaks"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\PeakCorrections;Optimization\\PeakFinding";

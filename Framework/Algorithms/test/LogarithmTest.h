@@ -72,7 +72,7 @@ public:
         alg.setPropertyValue("OutputWorkspace", "test_outLn2");
         alg.setPropertyValue("Natural", "1");
 
-        );
+    );
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

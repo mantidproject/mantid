@@ -32,7 +32,7 @@ class IqtFitMultiple(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', direction=Direction.Input),
                              doc='The _iqt.nxs InputWorkspace used by the algorithm')
 
-        self.declareProperty(FunctionProperty(name='Function'),
+        self.declareProperty(FunctionProperty(name='Function',direction=Direction.InOut),
                              doc='The function to use in fitting')
 
         self.declareProperty(name='FitType', defaultValue='',

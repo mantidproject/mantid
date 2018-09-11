@@ -160,6 +160,36 @@ public:
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
+  void test_CreateAxisFromRebinParams_ThrowsIfSingleParamNoHintsProvided() {
+    const std::vector<double> rbParams = {1.0};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(rbParams, axis),
+                     const std::runtime_error)
+  }
+
+  void test_createAxisFromRebinParams_throwsOnInfiniteVal() {
+    const std::vector<double> params = {1.0, INFINITY};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
+                     const std::runtime_error);
+  }
+
+  void test_createAxisFromRebinParams_throwsOnNaNVal() {
+    const std::vector<double> params = {1.0, NAN};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS(VectorHelper::createAxisFromRebinParams(params, axis),
+                     const std::runtime_error);
+  }
+
+  void test_CreateAxisFromRebinParams_xMinXMaxHints() {
+    const std::vector<double> rbParams = {1.0};
+    std::vector<double> axis;
+    TS_ASSERT_THROWS_NOTHING(VectorHelper::createAxisFromRebinParams(
+        rbParams, axis, true, true, -5., 3.))
+    const std::vector<double> expectedAxis = {-5, -4, -3, -2, -1, 0, 1, 2, 3};
+    TS_ASSERT_EQUALS(axis, expectedAxis);
+  }
+
   void test_ConvertToBinBoundary_EmptyInputVector() {
     std::vector<double> bin_centers;
     std::vector<double> bin_edges;

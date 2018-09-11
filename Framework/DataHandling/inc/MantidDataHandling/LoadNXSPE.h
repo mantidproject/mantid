@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADNXSPE_H_
 #define MANTID_DATAHANDLING_LOADNXSPE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -52,9 +52,12 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveNXSPE", "LoadSPE"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic\\DataHandling";
+    return R"(DataHandling\Nexus;DataHandling\SPE;Inelastic\DataHandling)";
   }
 
   /// Returns a confidence value that this algorithm can load a file

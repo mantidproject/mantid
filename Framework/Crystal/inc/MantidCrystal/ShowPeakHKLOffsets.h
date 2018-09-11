@@ -37,8 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef SHOWPEAKHKLOFFSETS_H_
 #define SHOWPEAKHKLOFFSETS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -53,6 +53,9 @@ public:
   }
 
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"StatisticsOfPeaksWorkspace"};
+  }
 
   const std::string category() const override { return "Crystal\\Peaks"; };
 
@@ -61,7 +64,7 @@ private:
 
   void exec() override;
 };
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* ShowPeakHKLOffsets_H_ */

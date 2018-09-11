@@ -1,8 +1,9 @@
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -10,7 +11,6 @@
 
 namespace Mantid {
 namespace Geometry {
-
 /** Construct DetectorInfo based on an Instrument.
  *
  * The Instrument reference `instrument` must be the parameterized instrument
@@ -344,8 +344,9 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
  * i.e., time intervals must be set with this method before merging individual
  * scans. */
 void DetectorInfo::setScanInterval(
-    const size_t index, const std::pair<Types::Core::DateAndTime,
-                                        Types::Core::DateAndTime> &interval) {
+    const size_t index,
+    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+        &interval) {
   m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
                                           interval.second.totalNanoseconds()});
 }
@@ -354,8 +355,9 @@ void DetectorInfo::setScanInterval(
  *
  * Prefer this over setting intervals for individual detectors since it enables
  * internal performance optimization. See also overload for other details. */
-void DetectorInfo::setScanInterval(const std::pair<
-    Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
+void DetectorInfo::setScanInterval(
+    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
+        &interval) {
   m_detectorInfo->setScanInterval(
       {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }
@@ -385,6 +387,16 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   static_cast<void>(getDetector(index));
   return m_lastDetector[thread];
+}
+
+// Begin method for iterator
+DetectorInfoIterator DetectorInfo::begin() const {
+  return DetectorInfoIterator(*this, 0);
+}
+
+// End method for iterator
+DetectorInfoIterator DetectorInfo::end() const {
+  return DetectorInfoIterator(*this, size());
 }
 
 } // namespace Geometry

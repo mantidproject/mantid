@@ -21,7 +21,7 @@ namespace Mantid {
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 // Qt forward declarations
 class QPushButton;
@@ -44,7 +44,6 @@ namespace MantidWidgets {
 class InstrumentActor;
 class InstrumentWidgetTab;
 class InstrumentWidgetRenderTab;
-class OneCurvePlot;
 class CollapsiblePanel;
 class XIntegrationControl;
 class SimpleWidget;
@@ -172,14 +171,14 @@ protected:
 
 public slots:
   void tabChanged(int);
-  void componentSelected(Mantid::Geometry::ComponentID id);
+  void componentSelected(size_t componentIndex);
   void executeAlgorithm(const QString &, const QString &);
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
   void setupColorMap();
 
-  void changeColormap(const QString &filename = ""); // Deprecated
-  void changeScaleType(int);                         // Deprecated
+  void changeColormap(const QString &cmapNameOrPath = ""); // Deprecated
+  void changeScaleType(int);                               // Deprecated
   void changeNthPower(double);
   void changeColorMapMinValue(double minValue);               // Deprecated
   void changeColorMapMaxValue(double maxValue);               // Deprecated
@@ -314,7 +313,7 @@ private:
   std::string saveTabs() const;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGET_H_*/

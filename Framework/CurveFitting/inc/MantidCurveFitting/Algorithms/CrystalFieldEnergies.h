@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDENERGIES_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDENERGIES_H_
 
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 namespace Mantid {
 namespace CurveFitting {
 

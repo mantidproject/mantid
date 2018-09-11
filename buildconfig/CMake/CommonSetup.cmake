@@ -242,6 +242,12 @@ if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
 endif ()
 
 ###########################################################################
+# Set the c++ standard to 14 - cmake should do the right thing with msvc
+###########################################################################
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+###########################################################################
 # Add compiler options if using gcc
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )

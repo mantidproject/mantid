@@ -2,90 +2,125 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
 Description
 -----------
 
-This algorithm calculates the asymmetry from the specified muon
-spectra. By default, all of the spectra
+This algorithm calculates the asymmetry from the first muon
+spectra in a workspace.
 in a workspace will be corrected.
 
 The formula for calculating the asymmetry (from counts) is given by:
 
 .. math:: \textrm{NewData} = (\textrm{OldData}\times e^\frac{t}{\tau})/(F N_0) - 1.0,
 
-where :math:`\tau` is the muon lifetime (2.1969811e-6 seconds), :math:'F' is the number of good frames and :math:`N_0` is a
+where :math:`\tau` is the muon lifetime (2.1969811e-6 seconds), :math:`F` is the number of good frames and :math:`N_0` is a
 fitted normalisation constant. The normalisation is calculated by fitting to the normalised counts which is given by
 
 .. math:: \textrm{normalisedCounts}=(\textrm{OldData}\times e^\frac{t}{\tau})/F
 
 and the fitting function is given by
 
-.. math:: N_0[1+f(t)] 
+.. math:: N_0[1+f(t)]
 
-where :math:`f(t)` is a user defined function. 
+and the renormalized data is transformed via the equation:
 
-It is also possible to calculate the asymmetry from an estimated asymmetry. 
+.. math:: \textrm{NewData} = (\textrm{NormalisedCounts}/(N_0) - 1.0. 
 
 Usage
 -----
 
-**Example - Calculating Asymmetry From Counts:**
-This example is for calculating the Asymmetry from counts.
+**Example - Calculating Asymmetry:**
+This example is for calculating the Asymmetry for a single data set.
 
 .. testcode:: ExCounts
 
    import math
    import numpy as np
-   xData=np.linspace(start=0,stop=10,num=22)   
-   yData=[]
-   tau =  2.1969811
-   for x in xData:
-        yData.append(50.*(1+10.*math.cos(3.*x))*math.exp(-x/tau))
-   input = CreateWorkspace(xData,yData)
-   run = input.getRun()
-   run.addProperty("goodfrm","10","None",True)
-   output,norm=CalculateMuonAsymmetry   (InputWorkspace=input,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="counts",Minimizer="Levenberg-MarquardtMD",MaxIterations=500 )
-   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
-   print("Normalization constant: {0:.2f}".format(norm[0]))
+
+   def makeData(name,norm):
+       xData=np.linspace(start=0,stop=10,num=200)
+       yData=np.sin(5.2*xData)
+       result = (1-yData )*norm
+       ws= CreateWorkspace(DataX=xData, DataY=result,OutputWorkspace=name)
+       return ws
+
+   #create a normalisation table
+   tab = CreateEmptyTableWorkspace()
+   tab.addColumn('double', 'norm')
+   tab.addColumn('str', 'name')
+   tab.addColumn('str', 'method')
+
+   tab.addRow([11.,"a","Estimate"])
+   tab.addRow([22.,"b","Estimate"])
+   
+   ws= makeData("a",2.30)
+   ws2= makeData("b",1.10)
+   
+   myFunc='name=GausOsc,$domains=i,Frequency=5.;'  
+   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(myFunc,tab,["a"],"Construct")
+   CalculateMuonAsymmetry(tab,["a"],["b"],str(TFFunc),OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
+   print("Normalization constant for b: {0:.2f}".format(tab.column(0)[1]))
 
 Output:
 
 .. testoutput:: ExCounts
 
-   Asymmetry:  ['10.00', '1.42', '-9.60', '-4.14', '8.42', '6.53', '-6.57', '-8.39', '4.20', '9.58', '-1.48', '-10.00', '-1.35', '9.62', '4.08', '-8.46', '-6.48', '6.62', '8.36', '-4.25', '-9.56', '1.54']
-   Normalization constant: 5.00
+   Normalization constant for b: 2.30
 
-**Example - Calculating Asymmetry From Estimated Asymmetry:**
-This example is for calculating the Asymmetry from an estimate of the asymmetry.
+**Example - Calculating Asymmetry For multiple data sets:**
+This example is for calculating the Asymmetry for multuiple data sets.
 
 .. testcode:: ExAsymm
 
    import math
    import numpy as np
-   xData=np.linspace(start=0,stop=10,num=22)
-   yData=[]
-   tau =  2.1969811
-   for x in xData:
-       yData.append(50.*(1+10.*math.cos(3.*x))*math.exp(-x/tau))
-   input = CreateWorkspace(xData,yData)
-   run = input.getRun()
-   run.addProperty("goodfrm","10","None",True)
-   estAsymm,estNorm=CalculateMuonAsymmetry(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
-   output,norm=CalculateMuonAsymmetry(InputWorkspace=estAsymm,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="asymmetry",Minimizer="Levenberg-MarquardtMD",MaxIterations=500,PreviousNormalizationConstant=estNorm )
-   print("Asymmetry:  {}".format(['{0:.2f}'.format(value) for value in output.readY(0)]))
-   print("Normalization constant: {0:.2f}".format(norm[0]))
+
+   def makeData(name,norm):
+      xData=np.linspace(start=0,stop=10,num=200)
+      yData=np.sin(5.2*xData)
+      result = (1-yData )*norm
+      ws= CreateWorkspace(DataX=xData, DataY=result,OutputWorkspace=name)
+      return ws
+
+   #create a normalisation table
+   tab = CreateEmptyTableWorkspace()
+   tab.addColumn('double', 'norm')
+   tab.addColumn('str', 'name')
+   tab.addColumn('str', 'method')
+
+   tab.addRow([11.,"a","Estimate"])
+   tab.addRow([22.,"b","Estimate"])
+   tab.addRow([22.,"c","Estimate"])
+   tab.addRow([22.,"d","Estimate"])
+
+   #create original function and workspace
+   myFunc='name=GausOsc,$domains=i,Frequency=5.;'
+   myFunc2='name=GausOsc,$domains=i,Frequency=5.;'
+   multiFunc='composite=MultiDomainFunction,NumDeriv=1;'+myFunc+myFunc2+'ties=(f0.Frequency=f1.Frequency)'
+
+   ws= makeData("a",2.30)
+   ws2= makeData("b",1.10)
+   ws3= makeData("c",4.1)
+   ws4= makeData("d",2.0)
+
+   TFFunc = ConvertFitFunctionForMuonTFAsymmetry(multiFunc,tab,["a","c"],"Construct")
+
+   CalculateMuonAsymmetry(tab,["a","c"],["b","d"],str(TFFunc),OutputFitWorkspace="fit_result",StartX=0.1,EndX=9.9)
+
+   print("Normalization constant for b: {0:.2f}".format(tab.column(0)[1]))
+   print("Normalization constant for d: {0:.2f}".format(tab.column(0)[3]))
 
 Output:
 
 .. testoutput:: ExAsymm
 
-   Asymmetry:  ['10.00', '1.42', '-9.60', '-4.14', '8.42', '6.53', '-6.57', '-8.39', '4.20', '9.58', '-1.48', '-10.00', '-1.35', '9.62', '4.08', '-8.46', '-6.48', '6.62', '8.36', '-4.25', '-9.56', '1.54']
-   Normalization constant: 5.00
-
+   Normalization constant for b: 2.30
+   Normalization constant for d: 4.10
+   
 .. categories::
 
 .. sourcelink::

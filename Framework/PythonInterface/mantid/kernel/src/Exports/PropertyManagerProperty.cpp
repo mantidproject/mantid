@@ -1,16 +1,16 @@
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 
-#include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 
-#include <boost/python/make_constructor.hpp>
 #include <boost/python/default_call_policies.hpp>
+#include <boost/python/make_constructor.hpp>
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyManagerProperty;
@@ -29,12 +29,12 @@ createPropertyManagerPropertyWithDict(const std::string &name,
 
 void export_PropertyManagerProperty() {
   // export base class
-  typedef PropertyManager_sptr BaseValueType;
+  using BaseValueType = PropertyManager_sptr;
   PropertyWithValueExporter<BaseValueType>::define(
       "PropertyManagerPropertyWithValue");
 
   // leaf class type
-  typedef PropertyManagerProperty::BaseClass BaseClassType;
+  using BaseClassType = PropertyManagerProperty::BaseClass;
   class_<PropertyManagerProperty, bases<BaseClassType>, boost::noncopyable>(
       "PropertyManagerProperty", no_init)
       .def(init<const std::string &, const unsigned int>(

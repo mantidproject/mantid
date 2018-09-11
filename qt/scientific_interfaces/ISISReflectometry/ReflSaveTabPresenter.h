@@ -2,9 +2,13 @@
 #define MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H
 
 #include "DllConfig.h"
+#include "IReflAsciiSaver.h"
 #include "IReflSaveTabPresenter.h"
-#include <vector>
+#include <MantidKernel/ConfigPropertyObserver.h>
+#include <boost/optional.hpp>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,16 +47,29 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflSaveTabPresenter
     : public IReflSaveTabPresenter {
 public:
   /// Constructor
-  ReflSaveTabPresenter(IReflSaveTabView *view);
+  ReflSaveTabPresenter(std::unique_ptr<IReflAsciiSaver> saver,
+                       std::unique_ptr<IReflSaveTabView> view);
   /// Destructor
   ~ReflSaveTabPresenter() override;
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflSaveTabPresenter::Flag flag) override;
+  void completedGroupReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
+  void completedRowReductionSuccessfully(
+      MantidWidgets::DataProcessor::GroupData const &group,
+      std::string const &workspaceName) override;
   void onAnyReductionPaused() override;
   void onAnyReductionResumed() override;
 
 private:
+  bool isValidSaveDirectory(std::string const &directory);
+  void onSavePathChanged();
+  void warnInvalidSaveDirectory();
+  void errorInvalidSaveDirectory();
+  void warn(std::string const &message, std::string const &title);
+  void error(std::string const &message, std::string const &title);
   /// Adds all workspace names to the list of workspaces
   void populateWorkspaceList();
   /// Adds all workspace params to the list of logged parameters
@@ -62,19 +79,26 @@ private:
   /// Suggest a save directory
   void suggestSaveDir();
   /// Save selected workspaces to a directory
-  void saveWorkspaces();
+  void saveSelectedWorkspaces();
+  /// Save specified workspaces to a directory
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames);
+  void saveWorkspaces(std::vector<std::string> const &workspaceNames,
+                      std::vector<std::string> const &logParameters);
   /// Obtains all available workspace names
   std::vector<std::string> getAvailableWorkspaceNames();
+  NamedFormat formatFromIndex(int formatIndex) const;
+  FileFormatOptions getSaveParametersFromView() const;
+  void enableAutosave();
+  void disableAutosave();
+  bool shouldAutosave() const;
 
   /// The view
-  IReflSaveTabView *m_view;
+  std::unique_ptr<IReflSaveTabView> m_view;
+  std::unique_ptr<IReflAsciiSaver> m_saver;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
-  /// Names of possible save algorithms
-  std::vector<std::string> m_saveAlgs;
-  /// Extensions used for each save algorithm
-  std::vector<std::string> m_saveExts;
+  bool m_shouldAutosave;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_CUSTOMINTERFACES_REFLSAVETABPRESENTER_H */

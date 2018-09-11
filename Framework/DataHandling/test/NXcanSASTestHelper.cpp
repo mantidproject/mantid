@@ -1,11 +1,11 @@
 #include "NXcanSASTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
@@ -212,4 +212,4 @@ void removeFile(std::string filename) {
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
 }
-}
+} // namespace NXcanSASTestHelper

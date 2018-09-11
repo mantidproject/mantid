@@ -12,13 +12,13 @@ Overview
 
 Table workspaces are general purpose workspaces for storing data of
 mixed types. A table workspace is organized in columns. Each column has
-a name and a type - the type of the data in that column.
+a name and a type - the type of the data in that column. Data can be accessed by column, by row, or by cell
 
 
 Working with Table Workspaces in Python
 ---------------------------------------
 
-For more details on interacting with Table Workspaces in Python, please see :py:obj:`this page <mantid.api.ITableWorkspace>`.
+For full details of the Table Workspaces python type itself please see :py:obj:`this page <mantid.api.ITableWorkspace>`.
 
 Accessing Workspaces
 ####################
@@ -197,6 +197,10 @@ the second argument is the name of the column. The predefined types are:
 | V3D             | Mantid::Geometry::V3D   |
 +-----------------+-------------------------+
 | long64          | int64\_t                |
++-----------------+-------------------------+
+| vector_int      | std::vector<int>        |
++-----------------+-------------------------+
+| vector_double   | std::vector<double>     |
 +-----------------+-------------------------+
 
 The data in the table can be accessed in a number of ways. The most

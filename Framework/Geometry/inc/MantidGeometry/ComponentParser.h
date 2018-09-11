@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_COMPONENTPARSER_H_
 #define MANTID_GEOMETRY_COMPONENTPARSER_H_
 
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/System.h"
-#include <Poco/SAX/ContentHandler.h>
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/SAX/Attributes.h>
-#include "MantidGeometry/Instrument/Component.h"
+#include <Poco/SAX/ContentHandler.h>
 
 namespace Mantid {
 namespace Geometry {
@@ -58,7 +58,7 @@ public:
   // These functions must be present as they are abstract in the base class.
   // They are not used them here.
   /// Signals start of XML document
-  void startDocument() override {}                                ///<Not used
+  void startDocument() override {}                                ///< Not used
   void setDocumentLocator(const Poco::XML::Locator *) override {} ///< Not used
   void endDocument() override {}                                  ///< Not used
   void ignorableWhitespace(const Poco::XML::XMLChar[], int, int) override {

@@ -1,15 +1,15 @@
 #ifndef MANTID_GEOMETRY_GROUP_H_
 #define MANTID_GEOMETRY_GROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Tolerance.h"
 
-#include <vector>
 #include <set>
+#include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -195,8 +195,8 @@ protected:
   CoordinateSystem m_axisSystem;
 };
 
-typedef boost::shared_ptr<Group> Group_sptr;
-typedef boost::shared_ptr<const Group> Group_const_sptr;
+using Group_sptr = boost::shared_ptr<Group>;
+using Group_const_sptr = boost::shared_ptr<const Group>;
 
 namespace GroupFactory {
 /// Creates a Group sub-class of type T if T has a constructor that takes a
@@ -213,10 +213,10 @@ Group_const_sptr
 create(const std::vector<SymmetryOperation> &symmetryOperations) {
   return boost::make_shared<const T>(symmetryOperations);
 }
-}
+} // namespace GroupFactory
 
-MANTID_GEOMETRY_DLL Group_const_sptr
-operator*(const Group_const_sptr &lhs, const Group_const_sptr &rhs);
+MANTID_GEOMETRY_DLL Group_const_sptr operator*(const Group_const_sptr &lhs,
+                                               const Group_const_sptr &rhs);
 MANTID_GEOMETRY_DLL std::vector<Kernel::V3D>
 operator*(const Group_const_sptr &lhs, const Kernel::V3D &rhs);
 MANTID_GEOMETRY_DLL bool operator==(const Group_const_sptr &lhs,

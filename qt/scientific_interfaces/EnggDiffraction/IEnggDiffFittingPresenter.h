@@ -37,8 +37,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IEnggDiffFittingPresenter {
 
 public:
-  virtual ~IEnggDiffFittingPresenter() = default;
-
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
   enum Notification {

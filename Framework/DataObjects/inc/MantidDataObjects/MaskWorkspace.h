@@ -55,7 +55,7 @@ private:
   MaskWorkspace *doClone() const override { return new MaskWorkspace(*this); }
   MaskWorkspace *doCloneEmpty() const override { return new MaskWorkspace(); }
 
-  IMaskWorkspace *doInterfaceClone() const override { return doClone(); };
+  IMaskWorkspace *doInterfaceClone() const override { return doClone(); }
   /// Clear original incorrect mask
   void clearMask();
 
@@ -64,10 +64,10 @@ private:
 };
 
 /// shared pointer to the MaskWorkspace class
-typedef boost::shared_ptr<MaskWorkspace> MaskWorkspace_sptr;
+using MaskWorkspace_sptr = boost::shared_ptr<MaskWorkspace>;
 
 /// shared pointer to a const MaskWorkspace
-typedef boost::shared_ptr<const MaskWorkspace> MaskWorkspace_const_sptr;
+using MaskWorkspace_const_sptr = boost::shared_ptr<const MaskWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

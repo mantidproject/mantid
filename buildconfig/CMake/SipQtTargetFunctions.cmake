@@ -3,7 +3,7 @@
 # of .sip definitions
 include ( QtTargetFunctions )
 
-#
+
 # brief: Add a module target to generate Python bindings
 # for a set of sip sources. The sources list should be a list of filenames
 # without a path. The .sip module is generated in the CMAKE_CURRENT_BINARY_DIR
@@ -17,6 +17,9 @@ include ( QtTargetFunctions )
 # keyword: LINK_LIBS A list of additional target_link_libraries
 # keyword: PYQT_VERSION A single value indicating the version of PyQt
 #                       to compile against
+# keyword: INSTALL_DIR The target location for installing this library
+# keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
+# keyword: LINUX_INSTALL_RPATH Install path for CMAKE_SYSTEM_NAME == Linux
 function ( mtd_add_sip_module )
   find_file ( _sipmodule_template_path NAME sipqtmodule_template.sip.in
     PATHS ${CMAKE_MODULE_PATH} )
@@ -27,7 +30,7 @@ function ( mtd_add_sip_module )
   set ( options )
   set ( oneValueArgs MODULE_NAME TARGET_NAME MODULE_OUTPUT_DIR
                      PYQT_VERSION FOLDER )
-  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS )
+  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS INSTALL_DIR OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
   cmake_parse_arguments ( PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN} )
 
@@ -96,6 +99,20 @@ function ( mtd_add_sip_module )
       LIBRARY_OUTPUT_DIRECTORY ${PARSED_MODULE_OUTPUT_DIR} )
   endif ()
 
+  if (OSX_VERSION VERSION_GREATER 10.8)
+    if (PARSED_OSX_INSTALL_RPATH)
+      set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
+    endif()
+  elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+    if (PARSED_LINUX_INSTALL_RPATH)
+      set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH  "${PARSED_LINUX_INSTALL_RPATH}" )
+    endif ()
+  endif ()
+
+  if ( PARSED_INSTALL_DIR AND PACKAGE_WORKBENCH)
+    mtd_install_qt_library ( ${PARSED_PYQT_VERSION} ${PARSED_TARGET_NAME} "" ${PARSED_INSTALL_DIR} )
+  endif ()
+
   if ( WIN32 )
     set_target_properties( ${PARSED_TARGET_NAME} PROPERTIES PREFIX "" SUFFIX ".pyd" )
     if ( PYTHON_DEBUG_LIBRARY )
@@ -107,9 +124,6 @@ function ( mtd_add_sip_module )
     endif ()
   elseif ( APPLE )
     set_target_properties( ${PARSED_TARGET_NAME} PROPERTIES PREFIX "" SUFFIX ".so" )
-    if (OSX_VERSION VERSION_GREATER 10.8)
-      set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-    endif ()
   else ()
     set_target_properties( ${PARSED_TARGET_NAME} PROPERTIES PREFIX "" )
   endif ()

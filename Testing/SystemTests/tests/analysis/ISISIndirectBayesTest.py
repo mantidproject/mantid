@@ -369,7 +369,7 @@ class JumpCETest(JumpFitFunctionTestBase):
     def __init__(self):
         JumpFitFunctionTestBase.__init__(self)
 
-        self._function = 'name=ChudleyElliot,Tau=3.31,L=1.42'
+        self._function = 'name=ChudleyElliot,Tau=1.42,L=2.42'
         self.tolerance = 5e-3
 
     def get_reference_files(self):
@@ -411,7 +411,7 @@ class JumpTeixeiraTest(JumpFitFunctionTestBase):
     def __init__(self):
         JumpFitFunctionTestBase.__init__(self)
 
-        self._function = 'name=TeixeiraWater,Tau=1.6,L=0.4'
+        self._function = 'name=TeixeiraWater,Tau=1.6,L=0.9'
         self.tolerance = 1e-3
 
     def get_reference_files(self):

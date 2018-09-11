@@ -2,13 +2,13 @@
 #define SCDCALIBRATEPANELS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Quat.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Quat.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -54,6 +54,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CalculateUMatrix"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;

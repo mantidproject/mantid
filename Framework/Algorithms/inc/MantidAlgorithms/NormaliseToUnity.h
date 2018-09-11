@@ -67,6 +67,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
@@ -78,7 +79,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_NORMALISETOUNITY_H_*/

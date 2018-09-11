@@ -4,8 +4,8 @@
 #include <cstddef>
 
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -13,11 +13,11 @@ namespace Mantid {
 namespace Geometry {
 class IComponent;
 class Instrument;
-}
+} // namespace Geometry
 namespace API {
 class SpectrumInfo;
 }
-}
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SpectrumView {
@@ -103,9 +103,9 @@ private:
   const Mantid::API::SpectrumInfo &m_spectrumInfo;
 };
 
-typedef boost::shared_ptr<MatrixWSDataSource> MatrixWSDataSource_sptr;
-typedef boost::shared_ptr<const MatrixWSDataSource>
-    MatrixWSDataSource_const_sptr;
+using MatrixWSDataSource_sptr = boost::shared_ptr<MatrixWSDataSource>;
+using MatrixWSDataSource_const_sptr =
+    boost::shared_ptr<const MatrixWSDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

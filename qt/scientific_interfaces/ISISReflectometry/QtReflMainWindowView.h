@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IReflMainWindowView.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_ReflMainWindowWidget.h"
 
 #include <QCloseEvent>
@@ -80,13 +80,13 @@ private:
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab
-  IReflSaveTabPresenter *createSaveTab();
+  std::unique_ptr<IReflSaveTabPresenter> createSaveTab();
 
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;
   /// The presenter handling this view
   std::unique_ptr<IReflMainWindowPresenter> m_presenter;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H */

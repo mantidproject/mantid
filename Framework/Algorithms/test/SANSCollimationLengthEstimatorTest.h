@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
 #define MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
@@ -51,7 +51,7 @@ createTestInstrument(const Mantid::detid_t id,
   Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
     det0 = new Detector("det0", id, nullptr);
   }
@@ -160,7 +160,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   }
   return ws2d;
 }
-}
+} // namespace
 
 class SANSCollimationLengthEstimatorTest : public CxxTest::TestSuite {
 public:

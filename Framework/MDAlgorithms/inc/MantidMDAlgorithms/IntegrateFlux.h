@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_INTEGRATEFLUX_H_
 #define MANTID_MDALGORITHMS_INTEGRATEFLUX_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -46,6 +46,9 @@ class DLLExport IntegrateFlux : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"Integration"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

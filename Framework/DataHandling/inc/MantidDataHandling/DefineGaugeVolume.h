@@ -50,6 +50,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AbsorptionCorrection"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Sample"; }
 
@@ -59,7 +62,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_DEFINEGAUGEVOLUME_H_*/

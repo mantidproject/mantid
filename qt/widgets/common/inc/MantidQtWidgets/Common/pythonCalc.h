@@ -1,16 +1,16 @@
 #ifndef MANTIDQTMANTIDWIDGETS_PYTHONCALC_H_
 #define MANTIDQTMANTIDWIDGETS_PYTHONCALC_H_
 
-#include <Poco/Path.h>
+#include "DllOption.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "DllOption.h"
-#include <QLineEdit>
+#include <Poco/Path.h>
 #include <QLabel>
+#include <QLineEdit>
 #include <QString>
-#include <string>
-#include <map>
 #include <climits>
+#include <map>
+#include <string>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -20,9 +20,9 @@ class EXPORT_OPT_MANTIDQT_COMMON pythonCalc : public API::MantidWidget {
 public:
   const QString &python() const;
   /** Allows access to m_fails, the list of any validation errors
-  *  return the map is empty if there were no errors, otherwise, the keys are
-  * the internal names of the controls, the values the errors
-  */
+   *  return the map is empty if there were no errors, otherwise, the keys are
+   * the internal names of the controls, the values the errors
+   */
   QString
   checkNoErrors(const QHash<const QWidget *const, QLabel *> &validLbls) const;
 
@@ -47,7 +47,7 @@ protected:
   void appendChk(const QLineEdit *const userVal,
                  Mantid::Kernel::Property *const check);
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_PYTHONCALC_H_

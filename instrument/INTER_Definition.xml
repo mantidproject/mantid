@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+     see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="INTER" valid-from   ="1900-01-31 23:59:59"
-                          valid-to     ="2100-01-31 23:59:59"
-			last-modified="2010-11-04 00:00:00">
+            name="INTER"
+            valid-from="1900-01-31 23:59:59"
+            valid-to=  "2017-02-13 23:59:59"
+            last-modified="2018-02-16 00:00:00">
+
   <defaults>
     <length unit="meter" />
     <angle unit="degree" />
@@ -16,57 +20,34 @@
     <default-view axis-view="z+"/>
   </defaults>
 
- <!-- Definition of instrument specific parameters for data reduction (e.g. wavelength cutoffs etc.) , could go into paramter file
-	MonitorBackground= [7.6,8.5]
-	MonitorsToCorrect=[1]
-	PointDetectorStart=[0]   # Note: Since we are removing the monitors in the load raw command they are not counted here.
-	PointDetectorStop=[0]
-	MultiDetectorStart=[1]
-	I0MonitorIndex=1
- -->
+<!-- source and sample-position components START============================= -->
 
-<!-- here we need to add the other monitors -->
-   <!-- parameters for efficiency correction -->
-  <parameter name="correction" type="string">
-    <value val="polynomial"/>
-  </parameter>
+  <component type="source">
+    <location z="-17.037" />
+  </component>
+  <type name="source" is="Source">
+    <properties>
+      40mm(H) x 60mm(W)
+    </properties>
+  </type>
 
-  <parameter name="polystring" type="string">
-    <value val="35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-6"/>
-    <!--<value val="28.0051,-19.396,7.5629,-1.624,0.1986,-0.013783,0.00050478,-7.56647e-6"/>-->
-  </parameter>
+  <component type="some-surface-holder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type name="some-surface-holder" is="SamplePos"/>
 
-  <!-- BRIEF DESCRIPTION OF Inter INSTRUMENT:
+<!-- source and sample-position components END=============================== -->
 
-      Here Z=0 is defined by the neutron beam which slopes down at 2.3 deg.
-      from the horizon. This description is based on data provided by Tim
-      Charlton and Rob Dalgliesh.
 
-      Note from Tim spreedsheet
-      theta is a rotation about the y axis
-      phi is a rotation about the x axis
-      chi is a rotation about the z axis
+<!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+<!-- detector components (including monitors) -->
 
-      Noticed the face of the monitors/detector shapes that faces the
-      beam/sample path is in this IDF defined to be the y-z plane.
-
-      Note the status of the instrument during a run is stored in the
-      logfile RunNo_status.txt
-  -->
-
-  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
-
-  <!-- detector components (including monitors) -->
-
+<!-- ================MONITOR 1 START========================================= -->
   <component type="monitor1" idlist="monitor1">
-    <location z="6.96" />
+    <location z="-10.077" />
   </component>
 
   <type name="monitor1" is="monitor">
-    <!-- Shape specified at least big enough to cover the beam which
-         is 10mm high and 40mm wide. Note it is described as tube, hence
-	 the choice of a cylinder shape.
-    -->
     <percent-transparency val="95" />
     <cylinder id="shape">
       <centre-of-bottom-base z="0.0" x="-0.02" y="0.0" />
@@ -76,17 +57,14 @@
     </cylinder>
     <algebra val="shape" />
   </type>
+<!-- ================MONITOR 1 END=========================================== -->
 
+<!-- ================MONITOR 2 START========================================= -->
   <component type="monitor2" idlist="monitor2">
-    <location z="13.791" /> <!-- x = 23.0-5.05 -->
+    <location z="-3.246" />
   </component>
 
   <type name="monitor2" is="monitor">
-    <!-- Shape specified as a minimum needs to cover the beam which
-         is 10mm high and 40mm wide. The 'top' shape is included to
-	 more easily recognise this monitor when visualised in MantidPlot.
-	 This monitor is suppose to look a bit like a German hand grenade.
-    -->
     <percent-transparency val="95" />
     <cuboid id="base">
       <left-front-bottom-point z="0.04" x="-0.02" y="-0.01"  />
@@ -101,23 +79,16 @@
       <radius val="0.02" />
       <height val="0.04" />
     </cylinder>
-
     <algebra val="base : top" />
   </type>
+<!-- ================MONITOR 2 END=========================================== -->
 
+<!-- ================MONITOR 3 START========================================= -->
   <component type="monitor3" idlist="monitor3">
-    <location z="16.785" />  <!-- 23.0-0.425 -->
+    <location z="-0.252" />
   </component>
 
   <type name="monitor3" is="monitor">
-    <!-- Shape specified as a minimum needs to cover the beam which
-         is 10mm high and 40mm wide. The 'top' shape is included to
-	 more easily recognise this monitor when visualised in MantidPlot.
-	 This monitor is suppose to look a bit like a German hand grenade.
-
-
-
-    -->
     <percent-transparency val="95" />
     <cuboid id="base">
       <left-front-bottom-point z="0.04" x="-0.02" y="-0.01"  />
@@ -135,26 +106,15 @@
 
     <algebra val="base : top" />
   </type>
+<!-- ================MONITOR 2 END=========================================== -->
 
+<!-- ================POINT DETECTOR START==================================== -->
   <component type="point-detector" idlist="point-detector">
 
-    <location z="19.700" />  <!-- x= 23.0+2.6 -->
-
-    <!-- Link to log file that stores the z position. This angle can be used to
-    calculate the z position since the distance along the x-axis between
-    the sample and this detector is known (2.6m). Also theta in the logfile is
-    assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
-    to radians factor in the eq attribute.
-
-
-    This calculation becomes more complex due to the detector table and height stage above it.
-    It should be revisited when the log files become more stable.
-
-    We may actually want to draw in the table for clarity.
-    -->
+    <location z="2.663" />  <!-- x= 23.0+2.6 -->
     <parameter name="y">
-      <logfile id="PD1H" eq="(value+201.0)/1000." extract-single-value-as="last_value"/>
-      <!--<logfile id="theta" eq="2.6*sin(value*0.0174533)" extract-single-value-as="last_value"/>-->
+      <!-- <logfile id="PD1H" eq="(value+201.0)/1000." extract-single-value-as="last_value"/> -->
+      <logfile id="theta" eq="2.663*sin(2*value*0.0174533)" extract-single-value-as="last_value"/>
     </parameter>
 
   </component>
@@ -173,53 +133,13 @@
     </cuboid>
     <algebra val="shape" />
   </type>
+<!-- ================POINT DETECTOR END====================================== -->
 
-
- <component type="point-detector2" idlist="point-detector2">
-
-    <location z="19.700" />  <!-- x= 23.0+2.6 -->
-
-    <!-- Link to log file that stores the z position. This angle can be used to
-    calculate the z position since the distance along the x-axis between
-    the sample and this detector is known (2.6m). Also theta in the logfile is
-    assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
-    to radians factor in the eq attribute.
-
-
-    This calculation becomes more complex due to the detector table and height stage above it.
-    It should be revisited when the log files become more stable.
-
-    We may actually want to draw in the table for clarity.
-    -->
-    <parameter name="y">
-      <logfile id="PD1H" eq="(value+301.0)/1000" extract-single-value-as="last_value"/>
-      <!--<logfile id="Theta" eq="2.7*sin((value+1)*0.0174533)" extract-single-value-as="last_value"/> -->
-    </parameter>
-
-  </component>
-
-  <type name="point-detector2" is="detector">
-    <!-- Not exactly sure about the dimensions of this one. But pretty sure
-    it at least covers the beam. Also, just in front of it is a slit which
-    at the end of day will determine which neutrons get through to this
-    detector I believe.
-    -->
-    <cuboid id="shape">
-      <left-front-bottom-point z="0.01" x="-0.02" y="-0.005"  />
-      <left-front-top-point  z="0.01" x="-0.02" y="0.005"  />
-      <left-back-bottom-point  z="-0.01" x="-0.02" y="-0.005"  />
-      <right-front-bottom-point  z="0.01" x="0.02" y="-0.005"  />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
-
-
-
-  <!--  ################################### -->
+<!-- ================LINEAR DETECTOR START=================================== -->
   <component type="panel" idstart="2001" idfillbyfirst="y" idstep="1" idstepbyrow="1">
-    <location z="20.200" name="linear-detector"/>
+    <location z="3.163" name="linear-detector"/>
     <parameter name="y">
-      <logfile id="Theta" eq="3.2*tan(value*0.0174533)-46*0.0012" extract-single-value-as="last_value"/>
+      <logfile id="Theta" eq="3.163*tan(2*value*0.0174533)-46*0.0012" extract-single-value-as="last_value"/>
     </parameter>
 
   </component>
@@ -239,57 +159,12 @@
     </cuboid>
     <algebra val="shape" />
   </type>
+<!-- ================LINEAR DETECTOR END-==================================== -->
 
-
-  <!-- source and sample-position components -->
-
-  <component type="source">
-    <location />
-  </component>
-
-  <type name="source" is="Source">
-    <properties>
-      40mm(H) x 60mm(W)
-    </properties>
-  </type>
-
-
-  <component type="some-surface-holder">
-    <!-- worry about linking relevant logfiles for y,z,theta,phi up later -->
-    <location z="17.037"/>
-  </component>
-
-  <type name="some-surface-holder" is="SamplePos">
-  </type>
-
-
-  <!-- other components -->
-
-  <!--  Must change the distances below to match polref -->
-
-  <component type="test" name="test1">
-    <location z="13.200"/>
-    <parameter name="y">
-      <value val="-0.1"/>
-    </parameter>
-    <location z="13.00" />
-    <parameter name="y">
-      <value val="0.1"/>
-    </parameter>
-  </component>
-
-  <type name="test">
-      <percent-transparency val="50" />
-    <cuboid id="bottom">
-      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
-      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
-      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
-      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
-    </cuboid>
-  </type>
+<!-- other components -->
 
   <component type="slit" name="slit1">
-    <location z="14.801"/>
+    <location z="-2.236"/>
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
       <logfile id="S1_VG" extract-single-value-as="last_value" />
@@ -297,15 +172,10 @@
     <parameter name="y">
       <logfile id="S1_VG" eq="-value*0.001/2.0" extract-single-value-as="last_value" />
     </parameter>
-
-    <parameter name="y2">
-      <logfile id="S1_VG" eq="0.3+value*0.001/2.0" extract-single-value-as="last_value" />
-    </parameter>
-    <location z="15.250" y="0.3"/>
-    </component>
+  </component>
 
   <component type="slit" name="slit2">
-    <location z="16.724"/>
+    <location z="-0.313"/>
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
@@ -315,7 +185,7 @@
   </component>
 
   <component type="slit" name="slit3">
-    <location z="18.200"/> <!-- x=23.0+0.960   -->
+    <location z="1.163"/> <!-- x=23.0+0.960   -->
     <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
       <logfile id="S3_VG" extract-single-value-as="last_value" />
@@ -323,7 +193,7 @@
   </component>
 
   <component type="slit" name="slit4">
-    <location z="19.700"/>     <!-- x=23.0+2.445   -->
+    <location z="2.663"/>     <!-- x=23.0+2.445   -->
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
     <parameter name="vertical gap">
@@ -340,33 +210,15 @@
       <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
     </cuboid>
   </type>
- <!--    <cuboid id="top">
-      <left-front-bottom-point z="0.0005" x="-0.025" y="0.01"  />
-      <left-front-top-point  z="0.0005" x="-0.025" y="0.04"  />
-      <left-back-bottom-point  z="-0.0005" x="-0.025" y="0.01"  />
-      <right-front-bottom-point  z="0.0005" x="0.025" y="0.01"  />
-    </cuboid>
-    <algebra val="top : bottom" />
- <type name="slit2"></type>
-  <type name="slit3"></type>
-  <type name="slit4"></type>
- -->
-
 
   <component type="supermirror">
-    <!-- Worry about linking relevant logfiles for z,theta up later -->
     <location z="28.52"/>  <!-- x=32.0-3.480   -->
   </component>
-
   <type name="supermirror" />
 
 
 
-
-  <!-- DETECTOR and MONITOR ID LISTS -->
-
-
-
+<!-- DETECTOR and MONITOR ID LISTS -->
   <idlist idname="monitor1">
     <id val="1" />
   </idlist>
@@ -383,9 +235,6 @@
     <id val="4" />
   </idlist>
 
-  <idlist idname="point-detector2">
-    <id val="5" />
-  </idlist>
  <!--
   <idlist idname="linear-detector">
     <id start="2001" end="2240" />

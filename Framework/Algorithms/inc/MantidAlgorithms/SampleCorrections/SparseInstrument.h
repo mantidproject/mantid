@@ -55,8 +55,9 @@ geographicalAngles(const Kernel::V3D &p,
                    const Geometry::ReferenceFrame &refFrame);
 DLLExport std::tuple<double, double>
 extremeWavelengths(const API::MatrixWorkspace &ws);
-HistogramData::Histogram modelHistogram(const API::MatrixWorkspace &modelWS,
-                                        const size_t wavelengthPoints);
+DLLExport HistogramData::Histogram
+modelHistogram(const API::MatrixWorkspace &modelWS,
+               const size_t wavelengthPoints);
 DLLExport API::MatrixWorkspace_uptr
 createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,
@@ -72,8 +73,8 @@ interpolateFromDetectorGrid(const double lat, const double lon,
 DLLExport std::unique_ptr<const Algorithms::DetectorGridDefinition>
 createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
                              const size_t rows, const size_t columns);
-}
-}
-}
+} // namespace SparseInstrument
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif // MANTID_ALGORITHMS_SPARSEWORKSPACECREATION_H_

@@ -5,15 +5,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/PropertyHistory.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <ctime>
-#include <vector>
 #include <set>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -31,13 +31,13 @@ template <class T> struct CompareHistory {
     return (*lhs) < (*rhs);
   }
 };
-}
+} // namespace Detail
 
 // typedefs for algorithm history pointers
-typedef boost::shared_ptr<AlgorithmHistory> AlgorithmHistory_sptr;
-typedef boost::shared_ptr<const AlgorithmHistory> AlgorithmHistory_const_sptr;
-typedef std::set<AlgorithmHistory_sptr,
-                 Detail::CompareHistory<AlgorithmHistory>> AlgorithmHistories;
+using AlgorithmHistory_sptr = boost::shared_ptr<AlgorithmHistory>;
+using AlgorithmHistory_const_sptr = boost::shared_ptr<const AlgorithmHistory>;
+using AlgorithmHistories =
+    std::set<AlgorithmHistory_sptr, Detail::CompareHistory<AlgorithmHistory>>;
 
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 

@@ -30,8 +30,8 @@
 #define SCALES_H
 
 #include <QDateTime>
-#include <QStringList>
 #include <QLocale>
+#include <QStringList>
 
 #include "Plot.h"
 #include <qwt_scale_draw.h>

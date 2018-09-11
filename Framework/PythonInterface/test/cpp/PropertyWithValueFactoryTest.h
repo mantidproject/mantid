@@ -7,8 +7,8 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4005)
 #endif
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #ifdef _MSC_VER
 #pragma warning(push)
 #endif
@@ -18,13 +18,20 @@
 
 //-------------------------------------------------------------------------
 
-using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
-using Mantid::PythonInterface::Converters::PySequenceToVector;
-using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::PropertyWithValue;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
 
 class PropertyWithValueFactoryTest : public CxxTest::TestSuite {
 public:
+  static PropertyWithValueFactoryTest *createSuite() {
+    return new PropertyWithValueFactoryTest();
+  }
+  static void destroySuite(PropertyWithValueFactoryTest *suite) {
+    delete suite;
+  }
+
 #if PY_MAJOR_VERSION >= 3
 #define FROM_INT PyLong_FromLong
 #define FROM_CSTRING PyUnicode_FromString
@@ -92,7 +99,7 @@ private:
   template <typename CType> void testCreateArrayProperty(PyObject *pyValue) {
     using namespace boost::python;
     using namespace Mantid::Kernel;
-    typedef std::vector<CType> TypeVec;
+    using TypeVec = std::vector<CType>;
     object pyvalue = object(handle<>(pyValue));
     auto valueProp = createAndCheckPropertyTraits<TypeVec>(
         "TestProperty", pyvalue, Direction::Input);

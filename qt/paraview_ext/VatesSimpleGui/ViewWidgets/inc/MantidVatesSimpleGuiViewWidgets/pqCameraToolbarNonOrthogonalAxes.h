@@ -65,14 +65,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QToolBar>
 
 /**
-* pqCameraToolbarNonOrthogonalAxes is the toolbar that has icons for resetting
-* camera
-* orientations as well as zoom-to-data and zoom-to-box.
-*/
+ * pqCameraToolbarNonOrthogonalAxes is the toolbar that has icons for resetting
+ * camera
+ * orientations as well as zoom-to-data and zoom-to-box.
+ */
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
     pqCameraToolbarNonOrthogonalAxes : public QToolBar {
   Q_OBJECT
-  typedef QToolBar Superclass;
+  using Superclass = QToolBar;
 
 public:
   pqCameraToolbarNonOrthogonalAxes(const QString &title,

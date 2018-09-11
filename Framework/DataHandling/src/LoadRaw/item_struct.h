@@ -1,8 +1,8 @@
 #ifndef ITEM_STRUCT_H
 #define ITEM_STRUCT_H
 
-#include <string>
 #include <map>
+#include <string>
 
 /// structure to hold a dae item
 template <typename T>
@@ -11,7 +11,7 @@ class item_struct {
 public:
   /// structure to hold a dae item
   struct item_t {
-    const T *value;   ///<array of type T
+    const T *value;   ///< array of type T
     bool det_average; ///< can be averaged over detectors via m_spec_array
     const int *dim0;  ///< dimension zero array
     const int *dim1;  ///< dimension one array
@@ -23,12 +23,13 @@ public:
   item_struct() : m_items(), m_spec_array(nullptr), m_ndet(0){};
 
 private:
-  typedef std::map<std::string, item_t>
-      items_map_t;             ///<Type def of internal map of named items
-  items_map_t m_items;         ///<internal map of named items
+  using items_map_t =
+      std::map<std::string,
+               item_t>;        ///< Type def of internal map of named items
+  items_map_t m_items;         ///< internal map of named items
   unsigned long *m_spec_array; ///< length m_ndet; used for averaging values
   /// with det_average
-  long m_ndet; ///<number of detectors
+  long m_ndet; ///< number of detectors
 public:
   /** Adds an item
   @param name :: the item name

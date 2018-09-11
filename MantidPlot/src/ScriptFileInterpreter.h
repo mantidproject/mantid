@@ -87,7 +87,7 @@ public slots:
   virtual void spacesToTabs();
 
   /// Execute the whole script.
-  virtual void
+  virtual bool
   executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Execute the current selection
   virtual void
@@ -152,7 +152,7 @@ private:
   void setupScriptRunner(const ScriptingEnv &env, const QString &identifier);
 
   bool readFileIntoEditor(const QString &filename);
-  void executeCode(const ScriptCode &code, const Script::ExecutionMode mode);
+  bool executeCode(const ScriptCode &code, const Script::ExecutionMode mode);
 
   void toggleComment(bool addComment);
 
@@ -200,7 +200,7 @@ private slots:
   void showFindReplaceDialog() override {}
 
   /// Does nothing
-  void executeAll(const Script::ExecutionMode) override {}
+  bool executeAll(const Script::ExecutionMode) override { return true; }
   /// Does nothing
   void executeSelection(const Script::ExecutionMode) override {}
   /// Does nothing

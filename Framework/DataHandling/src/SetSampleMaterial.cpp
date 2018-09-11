@@ -1,14 +1,14 @@
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialBuilder.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -36,8 +36,8 @@ using namespace Mantid::API;
 using namespace Kernel;
 
 /**
-* Initialize the algorithm
-*/
+ * Initialize the algorithm
+ */
 void SetSampleMaterial::init() {
   using namespace Mantid::Kernel;
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
@@ -152,15 +152,15 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
 }
 
 /**
-* Add the cross sections to the neutron atom if they are not-empty
-* numbers. All values are in barns.
-*
-* @param neutron The neutron to update
-* @param coh_xs Coherent cross section
-* @param inc_xs Incoherent cross section
-* @param abs_xs Absorption cross section
-* @param tot_xs Total scattering cross section
-*/
+ * Add the cross sections to the neutron atom if they are not-empty
+ * numbers. All values are in barns.
+ *
+ * @param neutron The neutron to update
+ * @param coh_xs Coherent cross section
+ * @param inc_xs Incoherent cross section
+ * @param abs_xs Absorption cross section
+ * @param tot_xs Total scattering cross section
+ */
 void SetSampleMaterial::fixNeutron(NeutronAtom &neutron, double coh_xs,
                                    double inc_xs, double abs_xs,
                                    double tot_xs) {
@@ -175,8 +175,8 @@ void SetSampleMaterial::fixNeutron(NeutronAtom &neutron, double coh_xs,
 }
 
 /**
-* Execute the algorithm
-*/
+ * Execute the algorithm
+ */
 void SetSampleMaterial::exec() {
   // Get the input workspace
   Workspace_sptr workspace = getProperty("InputWorkspace");
@@ -273,5 +273,5 @@ void SetSampleMaterial::exec() {
   // Done!
   progress(1);
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

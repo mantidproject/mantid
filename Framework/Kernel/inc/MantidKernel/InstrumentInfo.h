@@ -7,9 +7,9 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LiveListenerInfo.h"
 
+#include <map>
 #include <set>
 #include <string>
-#include <map>
 #include <vector>
 
 //----------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -90,7 +90,7 @@ private:
 
   /// Typedef for the zeropadding holder, first is starting run-number,
   /// second is file prefix - zero padding pair
-  typedef std::map<unsigned int, std::pair<std::string, int>> ZeroPaddingMap;
+  using ZeroPaddingMap = std::map<unsigned int, std::pair<std::string, int>>;
   /// get the zeropadding part
   int getZeroPadding(ZeroPaddingMap::const_iterator it) const {
     return it->second.second;

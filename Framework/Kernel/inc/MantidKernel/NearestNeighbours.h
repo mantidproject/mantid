@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_NEARESTNEIGHBOURS_H_
 #define MANTID_KERNEL_NEARESTNEIGHBOURS_H_
 
-#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ANN/ANN.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/make_unique.h"
 
 #include <Eigen/Core>
@@ -103,9 +103,9 @@ template <int N = 3> class DLLExport NearestNeighbours {
 
 public:
   // typedefs for code brevity
-  typedef Eigen::Matrix<double, N, 1> VectorType;
-  typedef std::vector<std::tuple<VectorType, size_t, double>>
-      NearestNeighbourResults;
+  using VectorType = Eigen::Matrix<double, N, 1>;
+  using NearestNeighbourResults =
+      std::vector<std::tuple<VectorType, size_t, double>>;
 
   /** Create a nearest neighbour search object
    *
@@ -190,7 +190,7 @@ private:
   /// handle to the ANN KD-tree used for searching
   std::unique_ptr<ANNkd_tree> m_kdTree;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

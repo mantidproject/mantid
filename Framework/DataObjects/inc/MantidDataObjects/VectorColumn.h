@@ -5,8 +5,8 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace DataObjects {
@@ -101,6 +101,8 @@ public:
 
   /// Specialized type check
   bool isBool() const override { return false; }
+
+  bool isNumber() const override { return false; }
 
   /// Overall memory size taken by the column (bytes)
   long int sizeOfData() const override {

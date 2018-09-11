@@ -198,7 +198,7 @@ public slots:
   //! Size of the widget as a string
   virtual QString sizeToString();
 
-  //!Notifies that a window was hidden by a direct user action
+  //! Notifies that a window was hidden by a direct user action
   virtual void setHidden();
 
   // event handlers
@@ -353,7 +353,7 @@ private:
   friend class FloatingWindow;
 };
 
-typedef QList<MdiSubWindow *> MDIWindowList;
+using MDIWindowList = QList<MdiSubWindow *>;
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator

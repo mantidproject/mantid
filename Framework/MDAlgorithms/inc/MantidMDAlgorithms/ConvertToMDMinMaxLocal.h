@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTTOMDMINMAX_LOCAL_H_
 #define MANTID_MDALGORITHMS_CONVERTTOMDMINMAX_LOCAL_H_
 
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -41,6 +41,9 @@ public:
   }
 
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToMD"};
+  }
 
 protected: // for testing
   void findMinMaxValues(MDWSDescription &WSDescription,

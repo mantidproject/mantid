@@ -1,14 +1,14 @@
 #ifndef MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
 #define MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -183,8 +183,8 @@ public:
     speclist.push_back(6);
     speclist.push_back(7);
     speclist.push_back(8);
-    for (size_t iws = 0; iws < speclist.size(); ++iws) {
-      auto &yvec = WS->y(speclist[iws]);
+    for (int spectrum : speclist) {
+      auto &yvec = WS->y(spectrum);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
         if (bin >= 4 && bin < 7) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
@@ -262,7 +262,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to mask detectors by detectors IDs
-    */
+   */
   void test_maskBinWithDetectorIDsList() {
     // Create a workspace to mask: 5 spectra, 10 bins
     const std::string workspaceName("raggedMask5");

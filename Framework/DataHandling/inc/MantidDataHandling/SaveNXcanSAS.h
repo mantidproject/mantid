@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_SAVENXCANSAS_H_
 #define MANTID_DATAHANDLING_SAVENXCANSAS_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -45,6 +45,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveCanSAS1D", "LoadNXcanSAS"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

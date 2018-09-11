@@ -7,9 +7,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

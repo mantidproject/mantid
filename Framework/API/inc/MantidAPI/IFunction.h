@@ -31,7 +31,7 @@ namespace Kernel {
 // Forward declaration
 //----------------------------------------------------------------------
 class ProgressBase;
-}
+} // namespace Kernel
 namespace API {
 class Workspace;
 class MatrixWorkspace;
@@ -625,9 +625,9 @@ private:
 };
 
 /// shared pointer to the function base class
-typedef boost::shared_ptr<IFunction> IFunction_sptr;
+using IFunction_sptr = boost::shared_ptr<IFunction>;
 /// shared pointer to the function base class (const version)
-typedef boost::shared_ptr<const IFunction> IFunction_const_sptr;
+using IFunction_const_sptr = boost::shared_ptr<const IFunction>;
 
 /**
  * Classes inherited from FunctionHandler will handle the function.

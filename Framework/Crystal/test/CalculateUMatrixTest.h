@@ -1,12 +1,12 @@
 #ifndef MANTID_CRYSTAL_CALCULATEUMATRIXTEST_H_
 #define MANTID_CRYSTAL_CALCULATEUMATRIXTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/CalculateUMatrix.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

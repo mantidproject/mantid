@@ -10,6 +10,9 @@ SANS Changes
 ILL SANS
 --------
 
+Improvements
+############
+
 - Minor changes of the D33 instrument definition file, e.g. detector indexing.
 - New instrument definition file for the D22 instrument
 - New instrument definition file for the D11 instrument
@@ -17,10 +20,10 @@ ILL SANS
 ISIS SANS
 ---------
 
-.. image::  ../../images/ISIS_SANS_312.png
+.. figure::  ../../images/ISIS_SANS_312.png
    :align: right
    :class: screenshot
-   :width: 800px
+   :figwidth: 50%
 
 New features
 ############
@@ -49,6 +52,10 @@ Bug fixes
 - Fixed a bug in the old GUI where merged reductions of time sliced data was not working.
 - Fixed a bug in the old GUI where 2D reductions were being run in 1D if a new user file was specified in a batch file.
 - Fixed a bug in Isis Gui v2 whereby the sum runs script was not working for ZOOM.
+
+Deprecation
+###########
+- As an advance warning we plan to remove the 1D Analysis tab from the old Gui for the next release.
 
 
 :ref:`Release 3.12.0 <v3.12.0>`

@@ -31,6 +31,9 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         """
         return "Inelastic\\Utility"
 
+    def seeAlso(self):
+        return [ "MaskDetectors" ]
+
     def name(self):
         """
         Name of the algorithm.

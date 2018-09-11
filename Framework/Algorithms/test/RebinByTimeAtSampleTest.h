@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_
 #define MANTID_ALGORITHMS_REBINBYTIMEATSAMPLETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "RebinByTimeBaseTest.h"
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include <numeric>
+#include "MantidGeometry/Instrument/Detector.h"
+#include "RebinByTimeBaseTest.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using Mantid::Algorithms::RebinByTimeAtSample;
 using Mantid::Types::Event::TofEvent;
@@ -31,8 +31,7 @@ createSinglePulseEventWorkspace(const V3D &sourcePosition,
 
   // Make fake events
   for (size_t pix = 0; pix < numberspectra; pix++) {
-    for (size_t i = 0; i < allSpectraTOF.size(); i++) {
-      const double tof = allSpectraTOF[i];
+    for (double tof : allSpectraTOF) {
       uint64_t pulseTime(0); // Pulse time is always zero. Same pulse.
       retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
@@ -50,12 +49,12 @@ createSinglePulseEventWorkspace(const V3D &sourcePosition,
 
   return retVal;
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-typedef RebinByTimeBaseTest<RebinByTimeAtSample> Super;
+using Super = RebinByTimeBaseTest<RebinByTimeAtSample>;
 class RebinByTimeAtSampleTest : public CxxTest::TestSuite, public Super {
 
 public:
@@ -277,8 +276,8 @@ public:
 // clang-format off
 class RebinByTimeAtSampleTestPerformance: public CxxTest::TestSuite,
     public RebinByTimeBaseTestPerformance<RebinByTimeAtSample>
-      // clang-format on
-      {
+// clang-format on
+{
 
 public:
   static RebinByTimeAtSampleTestPerformance *createSuite() {

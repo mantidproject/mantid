@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_RADIUSSUM_H_
 #define MANTID_ALGORITHMS_RADIUSSUM_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -46,6 +46,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RingProfile", "RadiusSum"};
+  }
   const std::string category() const override;
 
   static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr);

@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_HKLGENERATOR_H_
 #define MANTID_GEOMETRY_HKLGENERATOR_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/iterator/iterator_facade.hpp>
@@ -143,7 +143,7 @@ public:
     int m_h, m_k, m_l;
     Kernel::V3D m_hkl;
 
-    int m_hMin, m_hMax;
+    int m_hMax;
     int m_kMin, m_kMax;
     int m_lMin, m_lMax;
   };

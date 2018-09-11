@@ -12,7 +12,9 @@
 		<parameter name="l2" type="string">
 			<value val="2.0" />
 		</parameter>
-
+		<parameter name="components-for-backgrounds" type="string">
+			<value val="top_bank/box_1, top_bank/box_2, top_bank/box_3, top_bank/box_4, top_bank/box_5, top_bank/box_6, top_bank/box_7, top_bank/box_8, top_bank/box_9, top_bank/box_10, top_bank/box_11, middle_bank/box_1, middle_bank/box_2, middle_bank/box_3, middle_bank/box_4, middle_bank/box_5, middle_bank/box_6, middle_bank/box_7, middle_bank/box_8, middle_bank/box_9, bottom_bank/box_1, bottom_bank/box_2, bottom_bank/box_3, bottom_bank/box_4, bottom_bank/box_5, bottom_bank/box_6, bottom_bank/box_7, bottom_bank/box_8, bottom_bank/box_9, bottom_bank/box_10, bottom_bank/box_11, rosace/sector_0, rosace/sector_1, rosace/sector_2, rosace/sector_3, rosace/sector_4, rosace/sector_5, rosace/sector_6, rosace/sector_7" />
+		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
 			<value val="397" />
@@ -20,6 +22,24 @@
 		<!-- Preferred scaling after normalisation to monitor counts. -->
 		<parameter name="scaling_after_monitor_normalisation">
 			<value val="1000" />
+		</parameter>
+		<parameter name="enable_flat_background_subtraction" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_background_diagnostics" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_incident_energy_calibration" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_peak_fitting" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="enable_elastic_channel_fitting" type="bool">
+			<value val="true" />
 		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
@@ -35,10 +55,10 @@
 			<value val="1.0" />
 		</parameter>
 		<parameter name="sample_logs_fail" type="string">
-			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
+			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2, wavelength, FC.rotation_speed, BC1.rotation_speed" />
 		</parameter>
 		<parameter name="sample_logs_fail_tolerances" type="string">
-			<value val="0, 0, 0" />
+			<value val="0, 0, 0, 0.02, 5, 5" />
 		</parameter>
 
 	</component-link>

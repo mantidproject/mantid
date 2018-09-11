@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SOFQWPOLYGONTEST_H_
 #define MANTID_ALGORITHMS_SOFQWPOLYGONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/SofQWPolygon.h"
+#include <cxxtest/TestSuite.h>
 
 #include "SofQWTest.h"
 
@@ -59,7 +59,7 @@ public:
 
     // Spectra-detector mapping
     const size_t nspectra(6);
-    typedef std::set<int> IDSet;
+    using IDSet = std::set<int>;
     std::vector<IDSet> expectedIDs(nspectra);
     IDSet s1 = {3};
     expectedIDs[0] = s1;

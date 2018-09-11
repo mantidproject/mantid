@@ -3,10 +3,10 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
@@ -19,7 +19,7 @@ namespace DataHandling {
 namespace {
 /// static logger
 Kernel::Logger g_log("LoadHelper");
-}
+} // namespace
 
 using namespace Kernel;
 using namespace API;
@@ -68,7 +68,8 @@ std::vector<double> LoadHelper::getTimeBinningFromNexusPath(
 
   float *timeBinning_p = &timeBinningNexus[0];
   std::vector<double> timeBinning(numberOfBins);
-  timeBinning.assign(timeBinning_p, timeBinning_p + numberOfBins);
+  std::copy(timeBinning_p, timeBinning_p + timeBinningNexus.dim0(),
+            std::begin(timeBinning));
   // calculate the extra bin at the end
   timeBinning[numberOfBins - 1] =
       timeBinning[numberOfBins - 2] + timeBinning[1] - timeBinning[0];
@@ -248,9 +249,10 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
               NX_OK) {
 
             g_log.debug() << indent_str << "Rank of " << property_name << " is "
-                          << rank << "\n" << indent_str << "Dimensions are "
-                          << dims[0] << ", " << dims[1] << ", " << dims[2]
-                          << ", " << dims[3] << "\n";
+                          << rank << "\n"
+                          << indent_str << "Dimensions are " << dims[0] << ", "
+                          << dims[1] << ", " << dims[2] << ", " << dims[3]
+                          << "\n";
 
             // Note, we choose to only build properties on small float arrays
             // filter logic is below
@@ -270,9 +272,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
             } else if (type != NX_CHAR) {
               if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) ||
                   (dims[2] > 1) || (dims[3] > 1)) {
-                g_log.debug() << indent_str
-                              << "ignored non-scalar numeric data on "
-                              << property_name << '\n';
+                g_log.debug()
+                    << indent_str << "ignored non-scalar numeric data on "
+                    << property_name << '\n';
                 read_property = false;
               }
             } else {

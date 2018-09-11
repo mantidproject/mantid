@@ -2,29 +2,30 @@
 #define MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
 
 #include "DllOption.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include "MantidQtWidgets/SliceViewer/PeakEditMode.h"
 #include "MantidQtWidgets/SliceViewer/PeakPalette.h"
-#include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
+#include <boost/shared_ptr.hpp>
 
-#include <set>
 #include <QObject>
+#include <array>
+#include <set>
 
 namespace Mantid {
 namespace Kernel {
 // Forward dec
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 // Forward dec.
 class PeakTransform;
-}
+} // namespace Geometry
 namespace API {
 // Forward dec.
 class IPeaksWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -35,8 +36,8 @@ class PeakOverlayView;
 class UpdateableOnDemand;
 
 // Alias
-typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>
-    SetPeaksWorkspaces;
+using SetPeaksWorkspaces =
+    std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace>>;
 
 /*---------------------------------------------------------
 Abstract PeaksPresenter.
@@ -51,7 +52,8 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksPresenter : public QObject {
 public:
   virtual void update() = 0;
   virtual void updateWithSlicePoint(const PeakBoundingBox &) = 0;
-  virtual bool changeShownDim() = 0;
+  virtual bool changeShownDim(size_t dimX, size_t dimY) = 0;
+  virtual void setNonOrthogonal(bool nonOrthogonalEnabled) = 0;
   virtual bool isLabelOfFreeAxis(const std::string &label) const = 0;
   virtual SetPeaksWorkspaces presentedWorkspaces() const = 0;
   virtual void setForegroundColor(const PeakViewColor) = 0;
@@ -79,9 +81,9 @@ public:
   ~PeaksPresenter() override{};
 };
 
-typedef boost::shared_ptr<PeaksPresenter> PeaksPresenter_sptr;
-typedef boost::shared_ptr<const PeaksPresenter> PeaksPresenter_const_sptr;
-}
-}
+using PeaksPresenter_sptr = boost::shared_ptr<PeaksPresenter>;
+using PeaksPresenter_const_sptr = boost::shared_ptr<const PeaksPresenter>;
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_PEAKSPRESENTER_H_ */

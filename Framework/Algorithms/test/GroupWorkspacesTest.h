@@ -1,10 +1,10 @@
 #ifndef GROUPWORKSPACESTEST_H_
 #define GROUPWORKSPACESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 class GroupWorkspacesTest : public CxxTest::TestSuite {
 public:
@@ -29,9 +29,9 @@ public:
   }
 
   void testInit() {
-    using Mantid::Algorithms::GroupWorkspaces;
-    using Mantid::API::WorkspaceProperty;
     using Mantid::API::WorkspaceGroup;
+    using Mantid::API::WorkspaceProperty;
+    using Mantid::Algorithms::GroupWorkspaces;
 
     GroupWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -196,8 +196,8 @@ public:
 
 private:
   void addTestMatrixWorkspacesToADS(const std::vector<std::string> &inputs) {
-    for (auto it = inputs.begin(); it != inputs.end(); ++it) {
-      addTestMatrixWorkspaceToADS(*it);
+    for (const auto &input : inputs) {
+      addTestMatrixWorkspaceToADS(input);
     }
   }
 
@@ -258,9 +258,9 @@ private:
                      const std::vector<std::string> &members) {
     auto &ads = Mantid::API::AnalysisDataService::Instance();
 
-    for (auto it = members.begin(); it != members.end(); ++it) {
-      if (ads.doesExist(*it))
-        ads.remove(*it);
+    for (const auto &member : members) {
+      if (ads.doesExist(member))
+        ads.remove(member);
     }
     if (ads.doesExist(groupName))
       ads.remove(groupName);

@@ -108,7 +108,7 @@ private:
   /// Value of offset for area calculation
   mutable double m_offset;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_IKEDACARPENTERMODERATOR_H_ */

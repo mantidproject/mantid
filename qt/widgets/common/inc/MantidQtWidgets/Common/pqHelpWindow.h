@@ -32,8 +32,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __pqHelpWindow_h
 #define __pqHelpWindow_h
 
-#include <QMainWindow>
 #include "DllOption.h"
+#include <QMainWindow>
 
 class QHelpEngine;
 class QToolButton;
@@ -72,11 +72,11 @@ signals:
 /// a QHelpEngine.
 class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
   Q_OBJECT
-  typedef QMainWindow Superclass;
+  using Superclass = QMainWindow;
 
 public:
-  pqHelpWindow(QHelpEngine *engine, QWidget *parent = 0,
-               Qt::WindowFlags flags = 0);
+  pqHelpWindow(QHelpEngine *engine, QWidget *parent = nullptr,
+               Qt::WindowFlags flags = nullptr);
 
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"

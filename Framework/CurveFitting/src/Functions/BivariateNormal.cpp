@@ -7,9 +7,9 @@
 
 #include "MantidHistogramData/HistogramY.h"
 
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/make_unique.h"
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -32,7 +32,7 @@ using namespace HistogramData;
 namespace {
 /// static logger
 Kernel::Logger g_log("BivariateNormal");
-}
+} // namespace
 
 DECLARE_FUNCTION(BivariateNormal)
 
@@ -136,10 +136,10 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     else {
       double dx = X[i] - Xmean;
       double dy = Y[i] - Ymean;
-      out[x] = Background +
-               coefNorm * Intensity *
-                   exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy +
-                       expCoeffy2 * dy * dy);
+      out[x] =
+          Background + coefNorm * Intensity *
+                           exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy +
+                               expCoeffy2 * dy * dy);
       out[x] = out[x] + DDD;
 
       if (out[x] != out[x]) {
@@ -214,8 +214,8 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
     double coefx2 = -LastParams[IVYY] / 2 / uu;
 
     if (penaltyDeriv <= 0)
-      out->set(x, IXMEAN, penaltyDeriv +
-                              coefExp * expVals[x] *
+      out->set(x, IXMEAN,
+               penaltyDeriv + coefExp * expVals[x] *
                                   (-2 * coefx2 * (c - LastParams[IXMEAN]) -
                                    coefxy * (r - LastParams[IYMEAN])));
     else // if(LastParams[IXMEAN] < 0)
@@ -228,8 +228,8 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
     double coefy2 = -LastParams[IVXX] / 2 / uu;
 
     if (penaltyDeriv <= 0)
-      out->set(x, IYMEAN, penaltyDeriv +
-                              coefExp * expVals[x] *
+      out->set(x, IYMEAN,
+               penaltyDeriv + coefExp * expVals[x] *
                                   (-coefxy * (c - LastParams[IXMEAN]) -
                                    2 * coefy2 * (r - LastParams[IYMEAN])));
     else // if(LastParams[IYMEAN] < 0)
@@ -690,5 +690,5 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X,
 }
 
 } // namespace Functions
-} // namespace curveFitting
-} // namespaceMantid
+} // namespace CurveFitting
+} // namespace Mantid

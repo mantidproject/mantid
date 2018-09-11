@@ -8,8 +8,8 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <mutex>
 
@@ -56,6 +56,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }

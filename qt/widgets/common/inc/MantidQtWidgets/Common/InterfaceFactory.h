@@ -8,8 +8,8 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <QHash>
-#include <QStringList>
 #include <QSetIterator>
+#include <QStringList>
 #include <set>
 
 namespace MantidQt {
@@ -70,8 +70,8 @@ private:
 };
 
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>
-    AlgorithmDialogFactory;
+using AlgorithmDialogFactory =
+    Mantid::Kernel::SingletonHolder<AlgorithmDialogFactoryImpl>;
 
 /**
     The UserSubWindowFactory is responsible for creating concrete instances of
@@ -180,10 +180,10 @@ void UserSubWindowFactoryImpl::saveAliasNames(const std::string &realName) {
 }
 
 /// The specific instantiation of the templated type
-typedef Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>
-    UserSubWindowFactory;
-}
-}
+using UserSubWindowFactory =
+    Mantid::Kernel::SingletonHolder<UserSubWindowFactoryImpl>;
+} // namespace API
+} // namespace MantidQt
 
 namespace Mantid {
 namespace Kernel {
@@ -191,7 +191,7 @@ EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmDialogFactoryImpl>;
 EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::UserSubWindowFactoryImpl>;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif // MANTIDQT_API_INTERFACEFACTORY_H_

@@ -2,8 +2,8 @@
 #define MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -53,6 +53,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AlignComponents", "GetDetOffsetsMultiPeaks"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diffraction\\Calibration;"

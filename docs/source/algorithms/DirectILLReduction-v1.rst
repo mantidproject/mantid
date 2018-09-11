@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -47,7 +47,7 @@ After conversion from time-of-flight to energy transfer, the binning may differ 
 - Find the spectrum with smallest bin border. Copy binning from this spectrum for negative energy transfers.
 - For positive energy transfers, use the median bin width at zero energy transfer.
 
-*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to ten times the median :math:`2\theta` steps between the spectra.
+*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to a value that depends on the :math:`2\theta` separation of the detectors and the wavelength.
 
 Transposing output
 ##################
@@ -176,7 +176,7 @@ Output:
 
 .. testoutput:: FakeIN4Example
 
-    Size of the final S(q,w) workspace: 177 histograms, 234 bins
+    Size of the final S(q,w) workspace: 177 histograms, 260 bins
 
 .. categories::
 

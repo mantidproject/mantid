@@ -8,7 +8,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -16,6 +16,8 @@ class MockEnggDiffMultiRunFittingWidgetView
     : public IEnggDiffMultiRunFittingWidgetView {
 
 public:
+  MOCK_CONST_METHOD0(getAllRunLabels, std::vector<RunLabel>());
+
   MOCK_CONST_METHOD0(getSelectedRunLabel, boost::optional<RunLabel>());
 
   MOCK_METHOD1(plotFittedPeaks,
@@ -36,6 +38,8 @@ public:
 
   MOCK_METHOD0(resetCanvas, void());
 
+  MOCK_METHOD1(setEnabled, void(const bool));
+
   MOCK_METHOD1(
       setMessageProvider,
       void(boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider));
@@ -49,6 +53,6 @@ public:
   MOCK_METHOD1(updateRunList, void(const std::vector<RunLabel> &runLabels));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETVIEWMOCK_H_

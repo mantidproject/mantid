@@ -1,17 +1,17 @@
 #ifndef MANTID_CURVEFITTING_LEBAILFIT_H_
 #define MANTID_CURVEFITTING_LEBAILFIT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
+#include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidKernel/System.h"
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -19,7 +19,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace CurveFitting {
 namespace Algorithms {
@@ -91,6 +91,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateLeBailFitInput", "FitPowderDiffPeaks"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Diffraction\\Fitting"; }

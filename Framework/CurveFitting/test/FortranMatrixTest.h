@@ -7,13 +7,13 @@
 #include "MantidCurveFitting/FortranMatrix.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-using Mantid::CurveFitting::FortranMatrix;
-using Mantid::CurveFitting::GSLMatrix;
 using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
+using Mantid::CurveFitting::FortranMatrix;
+using Mantid::CurveFitting::GSLMatrix;
 
-typedef FortranMatrix<GSLMatrix> DoubleFortranMatrix;
-typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
+using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
+using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;
 
 class FortranMatrixTest : public CxxTest::TestSuite {
 public:

@@ -58,9 +58,9 @@ class SANSCalculateTransmissionTest(unittest.TestCase):
         if wavelength_step_type:
             wavelength_and_pixel_builder.set_wavelength_step_type(wavelength_step_type)
         if wavelength_low:
-            wavelength_and_pixel_builder.set_wavelength_low(wavelength_low)
+            wavelength_and_pixel_builder.set_wavelength_low([wavelength_low])
         if wavelength_high:
-            wavelength_and_pixel_builder.set_wavelength_high(wavelength_high)
+            wavelength_and_pixel_builder.set_wavelength_high([wavelength_high])
         if wavelength_step:
             wavelength_and_pixel_builder.set_wavelength_step(wavelength_step)
         wavelength_and_pixel_state = wavelength_and_pixel_builder.build()

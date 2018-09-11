@@ -62,6 +62,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ChangeBinOffset", "Scale"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Arithmetic;CorrectionFunctions";
@@ -98,7 +101,7 @@ private:
   int m_wi_max;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_SCALEX_H_*/

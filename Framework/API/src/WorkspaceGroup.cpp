@@ -1,9 +1,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {
@@ -13,7 +13,7 @@ namespace {
 size_t MAXIMUM_DEPTH = 100;
 /// static logger object
 Kernel::Logger g_log("WorkspaceGroup");
-}
+} // namespace
 
 WorkspaceGroup::WorkspaceGroup(const Parallel::StorageMode storageMode)
     : Workspace(storageMode),
@@ -193,6 +193,13 @@ Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
   }
   throw std::out_of_range("Workspace " + wsName +
                           " not contained in the group");
+}
+
+/** Return all workspaces in the group as one call for thread safety
+ */
+std::vector<Workspace_sptr> WorkspaceGroup::getAllItems() const {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+  return m_workspaces;
 }
 
 /// Empty all the entries out of the workspace group. Does not remove the
@@ -454,6 +461,21 @@ bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck,
     }
   }
   return false;
+}
+
+size_t WorkspaceGroup::getMemorySize() const {
+  auto total = std::size_t(0);
+  // Go through each workspace
+  for (auto workspace : m_workspaces) {
+    // If the workspace is a group
+    if (workspace->getMemorySize() == 0) {
+      total = total + boost::dynamic_pointer_cast<WorkspaceGroup>(workspace)
+                          ->getMemorySize();
+      continue;
+    }
+    total = total + workspace->getMemorySize();
+  }
+  return total;
 }
 
 } // namespace API

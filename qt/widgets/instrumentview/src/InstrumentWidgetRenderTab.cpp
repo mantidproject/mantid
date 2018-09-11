@@ -1,31 +1,29 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
-#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
+#include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 #include "MantidQtWidgets/InstrumentView/UCorrectionDialog.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
-#include <QMenu>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QLabel>
-#include <QComboBox>
-#include <QCheckBox>
-#include <QFileInfo>
-#include <QSettings>
 #include <QAction>
 #include <QActionGroup>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QFileInfo>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMenu>
+#include <QPushButton>
+#include <QSettings>
 #include <QSignalMapper>
 #include <QToolTip>
-
-#include <qwt_scale_widget.h>
-#include <qwt_scale_engine.h>
+#include <QVBoxLayout>
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtWidgets/InstrumentView/BinDialog.h"
-#include "MantidQtWidgets/InstrumentView/ColorMapWidget.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+
+#include "MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h"
 
 #include <limits>
 
@@ -160,10 +158,10 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   m_GLView->setToolTip("Toggle use of OpenGL for unwrapped view. Default value "
                        "can be set in Preferences.");
   m_GLView->setCheckable(true);
-  QString setting =
-      QString::fromStdString(
-          Mantid::Kernel::ConfigService::Instance().getString(
-              "MantidOptions.InstrumentView.UseOpenGL")).toUpper();
+  QString setting = QString::fromStdString(
+                        Mantid::Kernel::ConfigService::Instance().getString(
+                            "MantidOptions.InstrumentView.UseOpenGL"))
+                        .toUpper();
   bool useOpenGL = setting == "ON";
   connect(m_GLView, SIGNAL(toggled(bool)), this, SLOT(enableGL(bool)));
   enableGL(useOpenGL);
@@ -185,7 +183,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   QFrame *axisViewFrame = setupAxisFrame();
 
   // Colormap widget
-  m_colorMapWidget = new ColorMapWidget(0, this);
+  m_colorMapWidget = new DraggableColorBarWidget(0, this);
   connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWidget,
           SLOT(changeScaleType(int)));
   connect(m_colorMapWidget, SIGNAL(nthPowerChanged(double)), m_instrWidget,
@@ -229,10 +227,10 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
 InstrumentWidgetRenderTab::~InstrumentWidgetRenderTab() {}
 
 /** Sets up the controls and surrounding layout that allows uses to view the
-* instrument
-*  from an axis that they select
-*  @return the QFrame that will be inserted on the main instrument view form
-*/
+ * instrument
+ *  from an axis that they select
+ *  @return the QFrame that will be inserted on the main instrument view form
+ */
 QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
   m_resetViewFrame = new QFrame();
   QHBoxLayout *axisViewLayout = new QHBoxLayout();
@@ -256,8 +254,8 @@ QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
 }
 
 /**
-* Set checked n-th menu item in m_setPrecison menu.
-*/
+ * Set checked n-th menu item in m_setPrecison menu.
+ */
 void InstrumentWidgetRenderTab::setPrecisionMenuItemChecked(int n) {
   for (int i = 0; i < m_precisionActions.size(); ++i) {
     QAction *prec = m_precisionActions[i];
@@ -269,9 +267,9 @@ void InstrumentWidgetRenderTab::setPrecisionMenuItemChecked(int n) {
 }
 
 /**
-* Enable/disable the Full 3D menu option
-* @param on :: True to enable.
-*/
+ * Enable/disable the Full 3D menu option
+ * @param on :: True to enable.
+ */
 void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
   m_full3D->setEnabled(on);
   if (on) {
@@ -283,11 +281,11 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
 }
 
 /**
-* Surface-specific adjustments.
-*/
+ * Surface-specific adjustments.
+ */
 void InstrumentWidgetRenderTab::initSurface() {
   setAxis(QString::fromStdString(
-      m_instrWidget->getInstrumentActor().getInstrument()->getDefaultAxis()));
+      m_instrWidget->getInstrumentActor().getDefaultAxis()));
   auto surface = getSurface();
 
   // 3D axes switch needs to be shown for the 3D surface
@@ -324,18 +322,9 @@ void InstrumentWidgetRenderTab::initSurface() {
 }
 
 /**
-*
-*/
-void InstrumentWidgetRenderTab::setupColorBarScaling(const MantidColorMap &cmap,
-                                                     double minPositive) {
-  m_colorMapWidget->setMinPositiveValue(minPositive);
-  m_colorMapWidget->setupColorBarScaling(cmap);
-}
-
-/**
-* Change color map button slot. This provides the file dialog box to select
-* colormap or sets it directly a string is provided
-*/
+ * Change color map button slot. This provides the file dialog box to select
+ * colormap or sets it directly a string is provided
+ */
 void InstrumentWidgetRenderTab::changeColorMap(const QString &filename) {
   m_instrWidget->changeColormap(filename);
 }
@@ -356,10 +345,10 @@ void InstrumentWidgetRenderTab::saveSettings(QSettings &settings) const {
 }
 
 /**
-* Set minimum value on the colormap scale.
-* @param value :: New value to set.
-* @param apply ::
-*/
+ * Set minimum value on the colormap scale.
+ * @param value :: New value to set.
+ * @param apply ::
+ */
 void InstrumentWidgetRenderTab::setMinValue(double value, bool apply) {
   if (!apply)
     m_colorMapWidget->blockSignals(true);
@@ -369,10 +358,10 @@ void InstrumentWidgetRenderTab::setMinValue(double value, bool apply) {
 }
 
 /**
-* Set maximum value on the colormap scale.
-* @param value :: New value to set.
-* @param apply ::
-*/
+ * Set maximum value on the colormap scale.
+ * @param value :: New value to set.
+ * @param apply ::
+ */
 void InstrumentWidgetRenderTab::setMaxValue(double value, bool apply) {
   if (!apply)
     m_colorMapWidget->blockSignals(true);
@@ -382,11 +371,11 @@ void InstrumentWidgetRenderTab::setMaxValue(double value, bool apply) {
 }
 
 /**
-* Set minimum and maximum values on the colormap scale.
-* @param minValue :: New min value to set.
-* @param maxValue :: New max value to set.
-* @param apply ::
-*/
+ * Set minimum and maximum values on the colormap scale.
+ * @param minValue :: New min value to set.
+ * @param maxValue :: New max value to set.
+ * @param apply ::
+ */
 void InstrumentWidgetRenderTab::setRange(double minValue, double maxValue,
                                          bool apply) {
   if (!apply)
@@ -418,9 +407,9 @@ bool InstrumentWidgetRenderTab::areAxesOn() const {
 }
 
 /**
-* Show ResetView combo box only with 3D view
-* @param iv Index of a render mode in RenderMode combo box. iv == 0 is 3D view
-*/
+ * Show ResetView combo box only with 3D view
+ * @param iv Index of a render mode in RenderMode combo box. iv == 0 is 3D view
+ */
 void InstrumentWidgetRenderTab::showResetView(int iv) {
   m_resetViewFrame->setVisible(iv == 0);
 }
@@ -432,10 +421,10 @@ void InstrumentWidgetRenderTab::showFlipControl(int iv) {
 }
 
 /**
-* Toggle display of 3D axes.
-*
-* @param on :: True of false for on and off.
-*/
+ * Toggle display of 3D axes.
+ *
+ * @param on :: True of false for on and off.
+ */
 void InstrumentWidgetRenderTab::showAxes(bool on) {
   m_instrWidget->set3DAxesState(on);
   m_displayAxes->blockSignals(true);
@@ -444,10 +433,10 @@ void InstrumentWidgetRenderTab::showAxes(bool on) {
 }
 
 /**
-* Toggle display of guide and other non-detector components.
-*
-* @param yes :: True of false for on and off.
-*/
+ * Toggle display of guide and other non-detector components.
+ *
+ * @param yes :: True of false for on and off.
+ */
 void InstrumentWidgetRenderTab::displayDetectorsOnly(bool yes) {
   m_instrWidget->getInstrumentActor().showGuides(!yes);
   m_instrWidget->updateInstrumentView();
@@ -457,10 +446,10 @@ void InstrumentWidgetRenderTab::displayDetectorsOnly(bool yes) {
 }
 
 /**
-* Toggle use of OpenGL
-*
-* @param on :: True of false for on and off.
-*/
+ * Toggle use of OpenGL
+ *
+ * @param on :: True of false for on and off.
+ */
 void InstrumentWidgetRenderTab::enableGL(bool on) {
   m_instrWidget->enableGL(on);
   m_GLView->blockSignals(true);
@@ -474,9 +463,7 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent *) {
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
-  auto &actor = m_instrWidget->getInstrumentActor();
-  auto visitor = SetAllVisibleVisitor(actor.areGuidesShown());
-  actor.accept(visitor);
+
   getSurface()->updateView();
   getSurface()->requestRedraw();
 }
@@ -495,24 +482,24 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
 }
 
 /**
-* Saves the current image buffer to the given file. An empty string raises a
-* dialog
-* for finding the file
-* @param filename Optional full path of the saved image
-*/
+ * Saves the current image buffer to the given file. An empty string raises a
+ * dialog
+ * for finding the file
+ * @param filename Optional full path of the saved image
+ */
 void InstrumentWidgetRenderTab::saveImage(QString filename) {
   m_instrWidget->saveImage(filename);
 }
 
 /**
-* Reset the colorbar parameters.
-* @param cmap :: A new Mantid color map.
-* @param minValue :: A new minimum value.
-* @param maxValue :: A new maximum value.
-* @param minPositive :: A new minimum positive value for the log scale.
-* @param autoscaling :: Flag to set autoscaling of the color
-*/
-void InstrumentWidgetRenderTab::setupColorBar(const MantidColorMap &cmap,
+ * Reset the colorbar parameters.
+ * @param cmap :: A new Mantid color map.
+ * @param minValue :: A new minimum value.
+ * @param maxValue :: A new maximum value.
+ * @param minPositive :: A new minimum positive value for the log scale.
+ * @param autoscaling :: Flag to set autoscaling of the color
+ */
+void InstrumentWidgetRenderTab::setupColorBar(const ColorMap &cmap,
                                               double minValue, double maxValue,
                                               double minPositive,
                                               bool autoscaling) {
@@ -526,15 +513,15 @@ void InstrumentWidgetRenderTab::setupColorBar(const MantidColorMap &cmap,
 }
 
 /**
-* Set on / off autoscaling of the color bar.
-*/
+ * Set on / off autoscaling of the color bar.
+ */
 void InstrumentWidgetRenderTab::setColorMapAutoscaling(bool on) {
   emit setAutoscaling(on);
 }
 
 /**
-* Creates a menu for interaction with peak overlays
-*/
+ * Creates a menu for interaction with peak overlays
+ */
 QMenu *InstrumentWidgetRenderTab::createPeaksMenu() {
   QSettings settings;
   settings.beginGroup(m_instrWidget->getSettingsGroupName());
@@ -591,8 +578,8 @@ QMenu *InstrumentWidgetRenderTab::createPeaksMenu() {
 }
 
 /**
-* Called before the display setting menu opens. Filters out menu options.
-*/
+ * Called before the display setting menu opens. Filters out menu options.
+ */
 void InstrumentWidgetRenderTab::displaySettingsAboutToshow() {
   if (m_instrWidget->getSurfaceType() == InstrumentWidget::FULL3D) {
     // in 3D mode use GL widget only and allow lighting
@@ -611,9 +598,9 @@ void InstrumentWidgetRenderTab::displaySettingsAboutToshow() {
 }
 
 /**
-* Change the type of the surface.
-* @param index :: Index selected in the surface type combo box.
-*/
+ * Change the type of the surface.
+ * @param index :: Index selected in the surface type combo box.
+ */
 void InstrumentWidgetRenderTab::setSurfaceType(int index) {
   if ((int)m_instrWidget->getSurfaceType() != index) {
     m_instrWidget->setSurfaceType(index);
@@ -621,9 +608,9 @@ void InstrumentWidgetRenderTab::setSurfaceType(int index) {
 }
 
 /**
-* Respond to surface change from script.
-* @param index :: Index selected in the surface type combo box.
-*/
+ * Respond to surface change from script.
+ * @param index :: Index selected in the surface type combo box.
+ */
 void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
   // display action's text on the render mode button
   QAction *action = m_surfaceTypeActionGroup->actions()[index];
@@ -639,8 +626,8 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
 }
 
 /**
-* Respond to external change of the colormap.
-*/
+ * Respond to external change of the colormap.
+ */
 void InstrumentWidgetRenderTab::colorMapChanged() {
   const auto &instrumentActor = m_instrWidget->getInstrumentActor();
   setupColorBar(instrumentActor.getColorMap(), instrumentActor.minValue(),
@@ -657,10 +644,10 @@ void InstrumentWidgetRenderTab::nthPowerChanged(double nth_power) {
 }
 
 /**
-* Update the GUI element after the "Use OpenGL" option has been changed
-* programmatically.
-* @param on :: True for enabling OpenGL, false for disabling.
-*/
+ * Update the GUI element after the "Use OpenGL" option has been changed
+ * programmatically.
+ * @param on :: True for enabling OpenGL, false for disabling.
+ */
 void InstrumentWidgetRenderTab::glOptionChanged(bool on) {
   m_GLView->blockSignals(true);
   m_GLView->setChecked(on);
@@ -668,15 +655,15 @@ void InstrumentWidgetRenderTab::glOptionChanged(bool on) {
 }
 
 /**
-* Show the tooltip of an action which is attached to a menu.
-*/
+ * Show the tooltip of an action which is attached to a menu.
+ */
 void InstrumentWidgetRenderTab::showMenuToolTip(QAction *action) {
   QToolTip::showText(QCursor::pos(), action->toolTip(), this);
 }
 
 /**
-* Set the offset in u-coordinate of a 2d (unwrapped) surface
-*/
+ * Set the offset in u-coordinate of a 2d (unwrapped) surface
+ */
 void InstrumentWidgetRenderTab::setUCorrection() {
   auto surface = getSurface();
   auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
@@ -712,9 +699,9 @@ void InstrumentWidgetRenderTab::setUCorrection() {
 }
 
 /**
-* Get current value for the u-correction for a RotationSurface.
-* Return 0 if it's not a RotationSurface.
-*/
+ * Get current value for the u-correction for a RotationSurface.
+ * Return 0 if it's not a RotationSurface.
+ */
 QPointF InstrumentWidgetRenderTab::getUCorrection() const {
   auto surface = getSurface();
   auto rotSurface = boost::dynamic_pointer_cast<RotationSurface>(surface);
@@ -831,5 +818,5 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   }
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

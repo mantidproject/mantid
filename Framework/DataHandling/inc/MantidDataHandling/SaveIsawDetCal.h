@@ -1,10 +1,13 @@
 #ifndef MANTID_DATAHANDLING_SAVEISAWDETCAL_H_
 #define MANTID_DATAHANDLING_SAVEISAWDETCAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
+namespace Kernel {
+class V3D;
+}
 namespace DataHandling {
 
 /** Saves an instrument with RectangularDetectors to an ISAW .DetCal file.
@@ -36,7 +39,7 @@ namespace DataHandling {
 class DLLExport SaveIsawDetCal : public API::Algorithm {
 public:
   /// Algorithm's name for identification
-  const std::string name() const override { return "SaveIsawDetCal"; };
+  const std::string name() const override { return "SaveIsawDetCal"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Saves an instrument with RectangularDetectors to an ISAW .DetCal "
@@ -44,7 +47,10 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadIsawDetCal"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Isaw";

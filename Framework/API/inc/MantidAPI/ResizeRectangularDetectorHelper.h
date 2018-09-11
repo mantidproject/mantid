@@ -7,7 +7,7 @@ namespace Mantid {
 namespace Geometry {
 class ComponentInfo;
 class IComponent;
-}
+} // namespace Geometry
 namespace API {
 /** Helpers for resizing RectangularDetectors
 

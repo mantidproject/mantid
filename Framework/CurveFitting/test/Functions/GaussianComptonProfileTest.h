@@ -1,14 +1,14 @@
 #ifndef MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 #define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/GaussianComptonProfile.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FunctionDomain1D.h"
 #include "ComptonProfileTestHelpers.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
-using Mantid::CurveFitting::Functions::GaussianComptonProfile;
 using Mantid::CurveFitting::Functions::ComptonProfile;
+using Mantid::CurveFitting::Functions::GaussianComptonProfile;
 
 class GaussianComptonProfileTest : public CxxTest::TestSuite {
 public:
@@ -53,7 +53,8 @@ public:
     auto func = createFunctionWithParamsSet();
     double x0(370.0), x1(371.0),
         dx(0.5); // chosen to give put us near the peak for this mass & spectrum
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(1, x0, x1, dx);
+    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, ComptonProfileTestHelpers::NoiseType::None);
     auto &dataX = testWS->dataX(0);
     std::transform(
         dataX.begin(), dataX.end(), dataX.begin(),

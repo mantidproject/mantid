@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_
 #define MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -40,6 +40,10 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"IntegratePeaksHybrid", "IntegratePeaksMDHKL", "IntegratePeaksMD",
+            "IntegratePeaksCWSD"};
+  }
   const std::string category() const override;
 
 private:

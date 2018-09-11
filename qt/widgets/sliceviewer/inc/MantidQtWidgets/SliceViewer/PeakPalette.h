@@ -3,11 +3,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
+#include <QColor>
 #include <algorithm>
+#include <map>
 #include <sstream>
 #include <stdexcept>
-#include <map>
-#include <QColor>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -26,7 +26,7 @@ public:
   ~PeakPalette();
 
 private:
-  typedef std::map<int, C> ColourMapType;
+  using ColourMapType = std::map<int, C>;
   ColourMapType m_backgroundMap;
   ColourMapType m_foregroundMap;
   typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
@@ -133,6 +133,6 @@ bool PeakPalette<C>::operator==(const PeakPalette &other) const {
 template <> DLLExport PeakPalette<QColor>::PeakPalette();
 template <> DLLExport PeakPalette<PeakViewColor>::PeakPalette();
 
-} // namespace
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif // MANTID_SLICEVIEWER_PEAKSPALETTE_H

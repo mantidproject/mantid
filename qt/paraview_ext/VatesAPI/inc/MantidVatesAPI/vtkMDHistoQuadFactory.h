@@ -6,8 +6,8 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "vtkUnstructuredGrid.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "vtkUnstructuredGrid.h"
 
 namespace Mantid {
 namespace VATES {
@@ -62,9 +62,9 @@ public:
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
-  typedef std::vector<std::vector<UnstructuredPoint>> Plane;
+  using Plane = std::vector<std::vector<UnstructuredPoint>>;
 
-  typedef std::vector<UnstructuredPoint> Column;
+  using Column = std::vector<UnstructuredPoint>;
 
   std::string getFactoryTypeName() const override {
     return "vtkMDHistoQuadFactory";
@@ -78,6 +78,6 @@ private:
 
   VisualNormalization m_normalizationOption;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

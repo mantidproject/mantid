@@ -173,9 +173,9 @@ protected:
 };
 
 /// typedef for a shared pointer to a FunctionDomain1D
-typedef boost::shared_ptr<FunctionDomain1D> FunctionDomain1D_sptr;
+using FunctionDomain1D_sptr = boost::shared_ptr<FunctionDomain1D>;
 /// typedef for a shared pointer to a const FunctionDomain1D
-typedef boost::shared_ptr<const FunctionDomain1D> FunctionDomain1D_const_sptr;
+using FunctionDomain1D_const_sptr = boost::shared_ptr<const FunctionDomain1D>;
 
 } // namespace API
 } // namespace Mantid

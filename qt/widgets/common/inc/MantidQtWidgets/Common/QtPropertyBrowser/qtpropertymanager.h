@@ -942,8 +942,8 @@ template <class Value, class PrivateData>
 static Value getData(const QMap<const QtProperty *, PrivateData> &propertyMap,
                      Value PrivateData::*data, const QtProperty *property,
                      const Value &defaultValue = Value()) {
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef typename PropertyToData::const_iterator PropertyToDataConstIterator;
+  using PropertyToData = QMap<const QtProperty *, PrivateData>;
+  using PropertyToDataConstIterator = typename PropertyToData::const_iterator;
   const PropertyToDataConstIterator it = propertyMap.constFind(property);
   if (it == propertyMap.constEnd())
     return defaultValue;
@@ -980,8 +980,8 @@ static void setSimpleValue(
     void (PropertyManager::*valueChangedSignal)(QtProperty *,
                                                 ValueChangeParameter),
     QtProperty *property, const Value &val) {
-  typedef QMap<const QtProperty *, Value> PropertyToData;
-  typedef typename PropertyToData::iterator PropertyToDataIterator;
+  using PropertyToData = QMap<const QtProperty *, Value>;
+  using PropertyToDataIterator = typename PropertyToData::iterator;
   const PropertyToDataIterator it = propertyMap.find(property);
   if (it == propertyMap.end())
     return;
@@ -1005,9 +1005,9 @@ static void setValueInRange(
     QtProperty *property, const Value &val,
     void (PropertyManagerPrivate::*setSubPropertyValue)(QtProperty *,
                                                         ValueChangeParameter)) {
-  typedef typename PropertyManagerPrivate::Data PrivateData;
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef typename PropertyToData::iterator PropertyToDataIterator;
+  using PrivateData = typename PropertyManagerPrivate::Data;
+  using PropertyToData = QMap<const QtProperty *, PrivateData>;
+  using PropertyToDataIterator = typename PropertyToData::iterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
   if (it == managerPrivate->m_values.end())
     return;
@@ -1046,9 +1046,9 @@ static void setBorderValues(
                                                         ValueChangeParameter,
                                                         ValueChangeParameter,
                                                         ValueChangeParameter)) {
-  typedef typename PropertyManagerPrivate::Data PrivateData;
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef typename PropertyToData::iterator PropertyToDataIterator;
+  using PrivateData = typename PropertyManagerPrivate::Data;
+  using PropertyToData = QMap<const QtProperty *, PrivateData>;
+  using PropertyToDataIterator = typename PropertyToData::iterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
   if (it == managerPrivate->m_values.end())
     return;
@@ -1097,8 +1097,8 @@ static void setBorderValue(
                                                         ValueChangeParameter,
                                                         ValueChangeParameter,
                                                         ValueChangeParameter)) {
-  typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef typename PropertyToData::iterator PropertyToDataIterator;
+  using PropertyToData = QMap<const QtProperty *, PrivateData>;
+  using PropertyToDataIterator = typename PropertyToData::iterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
   if (it == managerPrivate->m_values.end())
     return;
@@ -1138,7 +1138,7 @@ static void setMinimumValue(
     QtProperty *property, const Value &minVal) {
   void (PropertyManagerPrivate::*setSubPropertyRange)(
       QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = 0;
+      ValueChangeParameter) = nullptr;
   setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
                  Value, PrivateData>(
       manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
@@ -1160,7 +1160,7 @@ static void setMaximumValue(
     QtProperty *property, const Value &maxVal) {
   void (PropertyManagerPrivate::*setSubPropertyRange)(
       QtProperty *, ValueChangeParameter, ValueChangeParameter,
-      ValueChangeParameter) = 0;
+      ValueChangeParameter) = nullptr;
   setBorderValue<ValueChangeParameter, PropertyManagerPrivate, PropertyManager,
                  Value, PrivateData>(
       manager, managerPrivate, propertyChangedSignal, valueChangedSignal,
@@ -1184,7 +1184,7 @@ public:
 
   QStringList m_familyNames;
 
-  typedef QMap<const QtProperty *, QFont> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QFont>;
   PropertyValueMap m_values;
 
   QtIntPropertyManager *m_intPropertyManager;
@@ -1224,7 +1224,7 @@ public:
     QStringList flagNames;
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 
   QtBoolPropertyManager *m_boolPropertyManager;
@@ -1241,7 +1241,7 @@ public:
   void slotIntChanged(QtProperty *property, int value);
   void slotPropertyDestroyed(QtProperty *property);
 
-  typedef QMap<const QtProperty *, QColor> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QColor>;
   PropertyValueMap m_values;
 
   QtIntPropertyManager *m_intPropertyManager;
@@ -1266,7 +1266,7 @@ public:
   void slotEnumChanged(QtProperty *property, int value);
   void slotPropertyDestroyed(QtProperty *property);
 
-  typedef QMap<const QtProperty *, QLocale> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QLocale>;
   PropertyValueMap m_values;
 
   QtEnumPropertyManager *m_enumPropertyManager;
@@ -1285,7 +1285,7 @@ public:
   void slotIntChanged(QtProperty *property, int value);
   void slotPropertyDestroyed(QtProperty *property);
 
-  typedef QMap<const QtProperty *, QPoint> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QPoint>;
   PropertyValueMap m_values;
 
   QtIntPropertyManager *m_intPropertyManager;
@@ -1310,7 +1310,7 @@ public:
   void slotDoubleChanged(QtProperty *property, double value);
   void slotPropertyDestroyed(QtProperty *property);
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 
   QtDoublePropertyManager *m_doublePropertyManager;
@@ -1338,7 +1338,7 @@ public:
     int decimals;
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 
   QtDoublePropertyManager *m_doublePropertyManager;
@@ -1369,7 +1369,7 @@ public:
     QRect constraint;
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 
   QtIntPropertyManager *m_intPropertyManager;
@@ -1413,7 +1413,7 @@ public:
     }
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 
   QtDoublePropertyManager *m_doublePropertyManager;
@@ -1435,7 +1435,7 @@ public:
   void slotEnumChanged(QtProperty *property, int value);
   void slotPropertyDestroyed(QtProperty *property);
 
-  typedef QMap<const QtProperty *, QSizePolicy> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, QSizePolicy>;
   PropertyValueMap m_values;
 
   QtIntPropertyManager *m_intPropertyManager;
@@ -1479,7 +1479,7 @@ public:
     }
   };
 
-  typedef QMap<const QtProperty *, Data> PropertyValueMap;
+  using PropertyValueMap = QMap<const QtProperty *, Data>;
   PropertyValueMap m_values;
 
   QtIntPropertyManager *m_intPropertyManager;

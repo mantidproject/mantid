@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Geometry {
 // Forward declaration
 class MDImplicitFunction;
-}
+} // namespace Geometry
 namespace MDAlgorithms {
 
 /** Take a MDEventWorkspace and bin it to a dense histogram
@@ -44,6 +44,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SliceMDHisto", "ProjectMD", "CutMD", "SliceMD"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "MDAlgorithms\\Slicing";
@@ -83,7 +86,7 @@ private:
   bool m_accumulate{false};
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_BINMD_H_ */

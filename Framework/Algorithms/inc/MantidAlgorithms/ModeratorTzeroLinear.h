@@ -88,6 +88,9 @@ public:
   const std::string summary() const override;
   /// Algorithm's version
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ModeratorTzero"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override;
 

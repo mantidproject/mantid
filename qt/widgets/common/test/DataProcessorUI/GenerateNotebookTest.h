@@ -26,17 +26,18 @@ class GenerateNotebookTest : public CxxTest::TestSuite {
 private:
   // Creates a map with pre-processing instruction for reflectometry
   std::map<QString, PreprocessingAlgorithm>
-  reflPreprocessMap(const QString &plusPrefix = "") {
+  reflPreprocessMap(const QString &plusPrefix = "",
+                    const QString &transPrefix = "TRANS_") {
 
     // Reflectometry pre-process map
     return std::map<QString, PreprocessingAlgorithm>{
         {"Run(s)",
-         PreprocessingAlgorithm("Plus", plusPrefix, std::set<QString>())},
+         PreprocessingAlgorithm("Plus", plusPrefix, "+", std::set<QString>())},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
-                                std::set<QString>{"FirstTransmissionRun",
-                                                  "SecondTransmissionRun",
-                                                  "OutputWorkspace"})}};
+         PreprocessingAlgorithm(
+             "CreateTransmissionWorkspaceAuto", transPrefix, "_",
+             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
+                               "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -44,7 +45,7 @@ private:
 
     return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
                           "FirstTransmissionRun", "SecondTransmissionRun"});
@@ -151,10 +152,17 @@ public:
 
     auto notebookLines = splitIntoLines(generatedNotebook);
     const QString result[] = {
-        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
-        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
-        "            {", "               \"cell_type\" : \"markdown\",",
+        "{",
+        "   \"metadata\" : {",
+        R"(      "name" : "Mantid Notebook")",
+        "   },",
+        "   \"nbformat\" : 3,",
+        "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [",
+        "      {",
+        "         \"cells\" : [",
+        "            {",
+        R"(               "cell_type" : "markdown",)",
     };
 
     // Check that the first 10 lines are output as expected
@@ -217,7 +225,8 @@ public:
         "0 | 12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
         "0 | 12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
         "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
-        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
+        ""};
 
     assertContainsMatchingLines(result, output);
   }
@@ -265,7 +274,7 @@ public:
   }
 
   void testLoadWorkspaceStringThreeRunsWithOptions() {
-    PreprocessingAlgorithm preprocessor("WeightedMean");
+    PreprocessingAlgorithm preprocessor("WeightedMean", "", "+");
     auto output = loadWorkspaceString("RUN1+RUN2,RUN3", "INST_", preprocessor,
                                       "Property1 = 1, Property2 = 2");
     auto outputLines = splitIntoLines(boost::get<0>(output));
@@ -345,7 +354,8 @@ public:
 
     // Create a pre-process map
     std::map<QString, PreprocessingAlgorithm> preprocessMap = {
-        {"Run", PreprocessingAlgorithm("Plus", "RUN_", std::set<QString>())}};
+        {"Run",
+         PreprocessingAlgorithm("Plus", "RUN_", "+", std::set<QString>())}};
     // Specify some pre-processing options
     auto runOptions = OptionsMap{{"Property", "prop"}};
     auto userPreProcessingOptions = ColumnOptionsMap{{"Run", runOptions}};
@@ -425,16 +435,18 @@ public:
     // Create some data
     const auto data = makeRowData(
         {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
-    TS_ASSERT_THROWS_ANYTHING(getReducedWorkspaceName(data, whitelist));
+    auto reflectometryPreprocessMap = reflPreprocessMap();
+    TS_ASSERT_THROWS_ANYTHING(
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap));
   }
 
   void testReducedWorkspaceNameOnlyRun() {
 
     // Create a whitelist
     WhiteList whitelist;
-    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Run(s)", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
-    whitelist.addElement("Trans", "", "", false, "");
+    whitelist.addElement("Transmission Run(s)", "", "", false, "");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -446,7 +458,9 @@ public:
     const auto data = makeRowData(
         {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
 
-    auto name = getReducedWorkspaceName(data, whitelist);
+    auto reflectometryPreprocessMap = reflPreprocessMap("run_", "");
+    auto name =
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap);
     TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001")
   }
 
@@ -454,9 +468,9 @@ public:
 
     // Create a whitelist
     WhiteList whitelist;
-    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Run(s)", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
-    whitelist.addElement("Trans", "", "", true, "trans_");
+    whitelist.addElement("Transmission Run(s)", "", "", true, "trans_");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -468,17 +482,19 @@ public:
     const auto data = makeRowData(
         {"1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", "", ""});
 
-    auto name = getReducedWorkspaceName(data, whitelist);
-    TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001_trans_2000+2001")
+    auto reflectometryPreprocessMap = reflPreprocessMap("run_", "trans_");
+    auto name =
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap);
+    TS_ASSERT_EQUALS(name.toStdString(), "run_1000+1001_trans_2000_2001")
   }
 
   void testReducedWorkspaceNameTransNoPrefix() {
 
     // Create a whitelist
     WhiteList whitelist;
-    whitelist.addElement("Run", "", "", false, "");
+    whitelist.addElement("Run(s)", "", "", false, "");
     whitelist.addElement("Angle", "", "", false, "");
-    whitelist.addElement("Trans", "", "", true, "");
+    whitelist.addElement("Transmission Run(s)", "", "", true, "");
     whitelist.addElement("Q min", "MomentumTransferMinimum", "");
     whitelist.addElement("Q max", "MomentumTransferMaximum", "");
     whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
@@ -489,8 +505,10 @@ public:
     const auto data = makeRowData(
         {"1000,1001", "0.5", "2000+2001", "1.4", "2.9", "0.04", "1", "", ""});
 
-    auto name = getReducedWorkspaceName(data, whitelist);
-    TS_ASSERT_EQUALS(name.toStdString(), "2000+2001")
+    auto reflectometryPreprocessMap = reflPreprocessMap("", "");
+    auto name =
+        getReducedWorkspaceName(data, whitelist, reflectometryPreprocessMap);
+    TS_ASSERT_EQUALS(name.toStdString(), "2000_2001")
   }
 
   void testPostprocessGroupString() {
@@ -831,7 +849,7 @@ public:
         "'IvsLam_TOF_12345', ScaleFactor = '1', ThetaIn = '0.5')\\n\",");
     TS_ASSERT_EQUALS(notebookLines[48].toStdString(), loadAndReduceString);
 
-    auto postProcessString = QString("               \"input\" : \"\",");
+    auto postProcessString = QString(R"(               "input" : "",)");
     TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
 
     auto groupWorkspacesString = std::string(
@@ -866,7 +884,7 @@ public:
         "'IvsLam_TOF_12346', ScaleFactor = '1', ThetaIn = '1.5')\\n\",";
     TS_ASSERT_EQUALS(notebookLines[77].toStdString(), loadAndReduceString);
 
-    postProcessString = "               \"input\" : \"\",";
+    postProcessString = R"(               "input" : "",)";
     TS_ASSERT_EQUALS(notebookLines[85], postProcessString);
 
     groupWorkspacesString =

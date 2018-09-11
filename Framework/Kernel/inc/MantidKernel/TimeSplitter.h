@@ -53,15 +53,15 @@ private:
  * It is a vector of SplittingInterval classes.
  *
  */
-typedef std::vector<SplittingInterval> TimeSplitterType;
+using TimeSplitterType = std::vector<SplittingInterval>;
 
 // -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType
-operator+(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType
-operator&(const TimeSplitterType &a, const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType
-operator|(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a,
+                                             const TimeSplitterType &b);
 MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
 
 } // Namespace Kernel

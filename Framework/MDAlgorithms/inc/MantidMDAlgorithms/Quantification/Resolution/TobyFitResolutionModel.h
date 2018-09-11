@@ -22,11 +22,11 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 
-#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
+#include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 
@@ -161,7 +161,7 @@ private:
   /// Cache of experiment info caches
   std::map<std::pair<int, detid_t>, CachedExperimentInfo *> m_exptCache;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_TOBYFITRESOLUTIONMODEL_H_*/

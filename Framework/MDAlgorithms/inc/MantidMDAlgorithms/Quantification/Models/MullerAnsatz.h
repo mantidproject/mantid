@@ -58,6 +58,6 @@ private:
   // direction of the magnetic form factor wrt the lattice vectors.
   MagneticFFDirection m_FFDirection;
 };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 #endif /* MANTID_MDALGORITHMS_STRONTIUM122_H_ */

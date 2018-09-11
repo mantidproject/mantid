@@ -44,8 +44,13 @@ public:
     return "Transforms\\Splitting";
   } ///< @return the algorithms category
   int version() const override {
+
     return (1);
   } ///< @return version number of algorithm
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"ExtractSpectra"};
+  }
   /// Algorithm's summary
   const std::string summary() const override {
     return "Splits an input workspace into a grouped workspace, where each "
@@ -59,6 +64,6 @@ private:
   void init() override; ///< Initialise the algorithm. Declare properties, etc.
   void exec() override; ///< Executes the algorithm.
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 #endif

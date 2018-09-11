@@ -59,6 +59,6 @@ public slots:
 };
 
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_TRACKEDACTION_H_ */

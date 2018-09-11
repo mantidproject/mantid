@@ -1,12 +1,12 @@
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 
 #include <boost/bind.hpp>
 #include <numeric>
@@ -743,7 +743,7 @@ void PoldiIndexKnownCompounds::assignCrystalStructureParameters(
 }
 
 /** Initialize the algorithm's properties.
-   */
+ */
 void PoldiIndexKnownCompounds::init() {
   declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -773,7 +773,7 @@ void PoldiIndexKnownCompounds::init() {
 }
 
 /** Execute the algorithm.
-   */
+ */
 void PoldiIndexKnownCompounds::exec() {
   g_log.information() << "Starting POLDI peak indexing.\n";
 

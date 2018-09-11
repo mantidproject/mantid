@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <vector>
 
 namespace Mantid {
 
@@ -72,8 +72,8 @@ private:
   ~ConstraintFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>
-    ConstraintFactory;
+using ConstraintFactory =
+    Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
@@ -83,7 +83,7 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::ConstraintFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /**
  * Macro for declaring a new type of function to be used with the

@@ -938,7 +938,40 @@ class LOQ(ISISInstrument):
         elif self._m4_det_id in list(self.monitor_names.keys()):
             del self.monitor_names[self._m4_det_id]
 
-    def move_components(self, ws, xbeam, ybeam):
+    def on_load_sample(self, ws_name, beamcentre, isSample, other_centre=None):
+        """It will be called just after loading the workspace for sample and can
+
+        It configures the instrument for the specific run of the workspace for handle historical changes in the instrument.
+
+        It centralizes the detector bank to teh beamcentre (tuple of two values)
+        """
+        ws_ref = mtd[str(ws_name)]
+        try:
+            run_num = LARMOR.get_run_number_from_workspace_reference(ws_ref)
+        except:
+            run_num = int(re.findall(r'\d+', str(ws_name))[0])
+
+        if isSample:
+            self.set_up_for_run(run_num)
+
+        if self._newCalibrationWS:
+            # We are about to transfer the Instrument Parameter File from the
+            # calibration to the original workspace. We want to add new parameters
+            # which the calibration file has not yet picked up.
+            # IMPORTANT NOTE: This takes the parameter settings from the original workspace
+            # if they are old too, then we don't pick up newly added parameters
+            self._add_parmeters_absent_in_calibration(ws_name, self._newCalibrationWS)
+            self.changeCalibration(ws_name)
+
+        # centralize the bank to the centre
+        if other_centre:
+            dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1],
+                                                              xbeam_other=other_centre[0], ybeam_other=other_centre[1])
+        else:
+            dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1])
+        return centre_shift
+
+    def move_components(self, ws, xbeam, ybeam, xbeam_other=None, ybeam_other=None):
         """
             Move the locations of the sample and detector bank based on the passed beam center
             and information from the sample workspace logs
@@ -954,13 +987,22 @@ class LOQ(ISISInstrument):
         MoveInstrumentComponent(Workspace=ws,
                                 ComponentName=self.cur_detector().name(),
                                 X=xshift, Y=yshift, RelativePosition="1")
-
+        if ybeam_other and xbeam_other:
+            xshift_other = (317.5 / 1000.) - xbeam_other
+            yshift_other = (317.5 / 1000.) - ybeam_other
+            MoveInstrumentComponent(Workspace=ws,
+                                    ComponentName=self.other_detector().name(),
+                                    X=xshift_other, Y=yshift_other, RelativePosition="1")
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
         det = self.cur_detector()
+        det_other = self.other_detector()
         if det.x_corr != 0.0 or det.y_corr != 0.0 or det.z_corr != 0.0:
             MoveInstrumentComponent(Workspace=ws, ComponentName=det.name(), X=det.x_corr / 1000.0,
                                     Y=det.y_corr / 1000.0, Z=det.z_corr / 1000.0, RelativePosition="1")
+            if ybeam_other and xbeam_other:
+                MoveInstrumentComponent(Workspace=ws, ComponentName=det_other.name(), X=det_other.x_corr / 1000.0,
+                                        Y=det_other.y_corr / 1000.0, Z=det_other.z_corr / 1000.0, RelativePosition="1")
             xshift = xshift + det.x_corr / 1000.0
             yshift = yshift + det.y_corr / 1000.0
 

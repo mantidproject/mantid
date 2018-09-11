@@ -36,6 +36,12 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReadGroupsFromFile",   "CreateDummyCalFile",
+            "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile",
+            "SaveCalFile",          "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Text;Diffraction\\DataHandling";
@@ -97,7 +103,7 @@ private:
   std::map<int, std::pair<double, double>> m_effLTheta;
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADVULCANCALFILE_H_ */

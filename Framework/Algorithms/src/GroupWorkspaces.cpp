@@ -82,5 +82,5 @@ Parallel::ExecutionMode GroupWorkspaces::getParallelExecutionMode(
   const auto ws = AnalysisDataService::Instance().retrieve(names.front());
   return Parallel::getCorrespondingExecutionMode(ws->storageMode());
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

@@ -1,21 +1,21 @@
 #include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/PeakShapeBase.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/SliceViewer/PeakEditMode.h"
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include "MantidQtWidgets/SliceViewer/ZoomableOnDemand.h"
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/MultipleExperimentInfos.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidDataObjects/PeakShapeBase.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Sample.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/Logger.h"
-#include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -27,7 +27,7 @@ namespace SliceViewer {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeaksPresenter");
-}
+} // namespace
 
 /**
  * Convert from a SpecialCoordinateSystem enum to a correpsonding enum name.
@@ -90,9 +90,11 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
             "work-space is determined to be in: ";
       ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
       ss << "However, the MDWorkspace has properties indicating that it's "
-            "coordinates are in: " << coordinateToString(coordSystMD);
+            "coordinates are in: "
+         << coordinateToString(coordSystMD);
       ss << " To resolve the conflict, the MDWorkspace will be treated as "
-            "though it has coordinates in: " << m_transform->getFriendlyName();
+            "though it has coordinates in: "
+         << m_transform->getFriendlyName();
       g_log.notice(ss.str());
     }
     // If the peaks work-space has been integrated. check cross-work-space
@@ -135,7 +137,22 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
       m_owningPresenter(nullptr), m_isHidden(false),
-      m_editMode(SliceViewer::None) {
+      m_editMode(SliceViewer::None), m_nonOrthogonalMode(false) {
+
+  m_axisData.dimX = 0;
+  m_axisData.dimY = 1;
+  m_axisData.dimMissing = 2;
+
+  m_axisData.fromHklToXyz[0] = 1.0;
+  m_axisData.fromHklToXyz[1] = 0.0;
+  m_axisData.fromHklToXyz[2] = 0.0;
+  m_axisData.fromHklToXyz[3] = 0.0;
+  m_axisData.fromHklToXyz[4] = 1.0;
+  m_axisData.fromHklToXyz[5] = 0.0;
+  m_axisData.fromHklToXyz[6] = 0.0;
+  m_axisData.fromHklToXyz[7] = 0.0;
+  m_axisData.fromHklToXyz[8] = 1.0;
+
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
   this->initialize();
@@ -165,8 +182,9 @@ void ConcretePeaksPresenter::initialize() {
 
   // Make and register each peak widget.
   produceViews();
-  changeShownDim(); // in case dimensions shown are not those expected by
-                    // default transformation
+  // in case dimensions shown are not those expected by
+  // default transformation
+  changeShownDim(m_axisData.dimX, m_axisData.dimY);
 }
 
 /**
@@ -228,15 +246,31 @@ ConcretePeaksPresenter::~ConcretePeaksPresenter() { hideAll(); }
  Respond to changes in the shown dimension.
  @ return True only if this succeeds.
  */
-bool ConcretePeaksPresenter::changeShownDim() {
+bool ConcretePeaksPresenter::changeShownDim(size_t dimX, size_t dimY) {
+  m_axisData.dimX = dimX;
+  m_axisData.dimY = dimY;
+
   // Reconfigure the mapping tranform.
   const bool transformSucceeded = this->configureMappingTransform();
   // Apply the mapping tranform to move each peak overlay object.
 
   if (transformSucceeded) {
-    m_viewPeaks->movePosition(m_transform);
+    if (m_nonOrthogonalMode) {
+      m_viewFactory->getNonOrthogonalInfo(m_axisData);
+      m_viewPeaks->movePositionNonOrthogonal(m_transform, m_axisData);
+    } else {
+      m_viewPeaks->movePosition(m_transform);
+    }
   }
   return transformSucceeded;
+}
+
+void ConcretePeaksPresenter::setNonOrthogonal(bool nonOrthogonalEnabled) {
+  m_nonOrthogonalMode = nonOrthogonalEnabled;
+  if (m_nonOrthogonalMode) {
+    m_viewFactory->getNonOrthogonalInfo(m_axisData);
+    changeShownDim(m_axisData.dimX, m_axisData.dimY);
+  }
 }
 
 /**
@@ -286,7 +320,7 @@ bool ConcretePeaksPresenter::isDimensionNameOfFreeAxis(
  Request that each owned view makes its self visible.
  */
 void ConcretePeaksPresenter::showAll() {
-  if (m_viewPeaks != NULL)
+  if (m_viewPeaks != nullptr)
     m_viewPeaks->showView();
 }
 
@@ -295,7 +329,7 @@ void ConcretePeaksPresenter::showAll() {
  */
 void ConcretePeaksPresenter::hideAll() {
   // Hide all views.
-  if (m_viewPeaks != NULL)
+  if (m_viewPeaks != nullptr)
     m_viewPeaks->hideView();
 }
 
@@ -319,7 +353,7 @@ PeakViewColor ConcretePeaksPresenter::getForegroundPeakViewColor() const {
 
 void ConcretePeaksPresenter::setForegroundColor(const PeakViewColor color) {
   // Change foreground colors
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     m_viewPeaks->changeForegroundColour(color);
     m_viewPeaks->updateView();
   }
@@ -329,7 +363,7 @@ void ConcretePeaksPresenter::setForegroundColor(const PeakViewColor color) {
 
 void ConcretePeaksPresenter::setBackgroundColor(const PeakViewColor color) {
   // Change background colours
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     m_viewPeaks->changeBackgroundColour(color);
     m_viewPeaks->updateView();
   }
@@ -343,7 +377,7 @@ std::string ConcretePeaksPresenter::getTransformName() const {
 
 void ConcretePeaksPresenter::showBackgroundRadius(const bool show) {
   // Change background colours
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     m_viewPeaks->showBackgroundRadius(show);
     doFindPeaksInRegion();
   }
@@ -353,7 +387,7 @@ void ConcretePeaksPresenter::showBackgroundRadius(const bool show) {
 
 void ConcretePeaksPresenter::setShown(const bool shown) {
   m_isHidden = !shown;
-  if (m_viewPeaks != NULL) {
+  if (m_viewPeaks != nullptr) {
     if (shown) {
       m_viewPeaks->showView();
     } else {
@@ -417,7 +451,7 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
+  if (m_viewPeaks != nullptr && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -425,7 +459,7 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
+  if (m_viewPeaks != nullptr && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;
@@ -522,7 +556,11 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
       boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
 
   const auto frame = m_transform->getCoordinateSystem();
-  peaksWS->addPeak(position, frame);
+  try {
+    peaksWS->addPeak(position, frame);
+  } catch (const std::invalid_argument &e) {
+    g_log.warning(e.what());
+  }
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
@@ -579,5 +617,5 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
   }
   return indexes;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

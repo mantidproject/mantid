@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_OFFSETSWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -24,9 +24,9 @@ public:
   }
 
   /**
-  * Test declaring an input OffsetsWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input OffsetsWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     OffsetsWorkspace_sptr wsInput(new OffsetsWorkspace());
@@ -38,10 +38,10 @@ public:
     OffsetsWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<OffsetsWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<OffsetsWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -49,9 +49,9 @@ public:
     OffsetsWorkspace_const_sptr wsCastConst;
     OffsetsWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (OffsetsWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (OffsetsWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

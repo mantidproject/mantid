@@ -1085,7 +1085,7 @@ class RunDescriptor(PropDescriptor):
             # call appropritate load command
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
         except ValueError: # if loader thrown, its probably event file rejected "separate" options
-            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
+            Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = True, MonitorsLoadOnly='Histogram')
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 
         loaded_ws = mtd[ws_name]

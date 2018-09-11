@@ -5,9 +5,8 @@
 
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/MersenneTwister.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
@@ -76,8 +75,8 @@ public:
     const size_t nevents(10), maxTries(1);
     MCAbsorptionStrategy mcabs(testBeamProfile, testThinAnnulus, nevents,
                                maxTries);
-    MersenneTwister rng;
-    rng.setSeed(1);
+    MockRNG rng;
+    EXPECT_CALL(rng, nextValue()).WillRepeatedly(Return(0.5));
     const double lambdaBefore(2.5), lambdaAfter(3.5);
     const V3D endPos(0.7, 0.7, 1.4);
     TS_ASSERT_THROWS(mcabs.calculate(rng, endPos, lambdaBefore, lambdaAfter),
@@ -88,7 +87,7 @@ private:
   class MockBeamProfile final : public Mantid::Algorithms::IBeamProfile {
   public:
     using Mantid::Algorithms::IBeamProfile::Ray;
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &));
     MOCK_CONST_METHOD2(generatePoint,
@@ -96,7 +95,7 @@ private:
                            const Mantid::Geometry::BoundingBox &));
     MOCK_CONST_METHOD1(defineActiveRegion, Mantid::Geometry::BoundingBox(
                                                const Mantid::API::Sample &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

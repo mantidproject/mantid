@@ -576,6 +576,8 @@ def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
     retWSname_merged = retWSname_rear
     if retWSname_merged.count('rear') == 1:
         retWSname_merged = retWSname_merged.replace('rear', 'merged')
+    elif retWSname_merged.count('main') == 1:
+        retWSname_merged = retWSname_merged.replace('main', 'merged')
     else:
         retWSname_merged = retWSname_merged + "_merged"
 

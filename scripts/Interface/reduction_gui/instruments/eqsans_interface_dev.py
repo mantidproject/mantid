@@ -16,7 +16,6 @@ from reduction_gui.widgets.sans.sans_catalog import SANSCatalogWidget
 from reduction_gui.reduction.sans.eqsans_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
-from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -31,7 +30,7 @@ class EQSANSInterface(InstrumentInterface):
     """
         Defines the widgets for EQSANS reduction
     """
-    data_type = "Data files *.nxs *.dat (*.nxs *.dat)"
+    data_type = "Data files *.nxs *.dat *.h5 (*.nxs *.dat *.h5)"
 
     def __init__(self, name, settings):
         super(EQSANSInterface, self).__init__(name, settings)
@@ -64,20 +63,10 @@ class EQSANSInterface(InstrumentInterface):
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))
 
-        # Tabs that only make sense within MantidPlot
-        if IS_IN_MANTIDPLOT:
-            # Remote jobs status
-            if self.remote_resources_available():
-                self.attach(RemoteJobsWidget(settings = self._settings))
+        return
 
     def has_advanced_version(self):
         """
             Returns true if the instrument has simple and advanced views
         """
         return False
-
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
-        """
-        return True

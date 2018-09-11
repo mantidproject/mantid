@@ -36,9 +36,11 @@ public:
   signal_t getNormalizedError() const override;
   signal_t getSignal() const override { return 0; }
   signal_t getError() const override { return 0; }
-  coord_t *getVertexesArray(size_t &) const override { return nullptr; }
-  coord_t *getVertexesArray(size_t &, const size_t,
-                            const bool *) const override {
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &) const override {
+    return nullptr;
+  }
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t &, const size_t,
+                                              const bool *) const override {
     return nullptr;
   }
   Mantid::Kernel::VMD getCenter() const override;
@@ -69,10 +71,15 @@ public:
 
 class IMDWorkspaceTester : public WorkspaceTester {
 public:
-  std::vector<IMDIterator *>
+  std::vector<std::unique_ptr<IMDIterator>>
   createIterators(size_t,
                   Mantid::Geometry::MDImplicitFunction *) const override {
-    return std::vector<IMDIterator *>(1, new IMDWorkspaceTesterIterator(this));
+
+    std::vector<std::unique_ptr<IMDIterator>> ret;
+    auto ptr = std::unique_ptr<IMDIterator>{
+        Kernel::make_unique<IMDWorkspaceTesterIterator>(this)};
+    ret.push_back(std::move(ptr));
+    return ret;
   }
 };
 

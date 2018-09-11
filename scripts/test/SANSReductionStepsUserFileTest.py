@@ -41,6 +41,70 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         self.assertEqual(None, start_TOF_ROI, 'The start time should not have been set')
         self.assertEqual(None, end_TOF_ROI, 'The end time should not have been set')
 
+    def test_can_parse_DET_OVERLAP_line(self):
+        # Arrange
+        line = 'DET/OVERLAP 0.13 0.15'
+        command_iface.Clean()
+        command_iface.LOQ()
+        user_file = reduction_steps.UserFile()
+
+        # Act
+        user_file.read_line(line = line, reducer = ReductionSingleton())
+        merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
+
+        # Assert
+        self.assertEqual(merge_Range.q_min, 0.13, 'The q_min should have been read in')
+        self.assertEqual(merge_Range.q_max, 0.15, 'The q_max should have been read in')
+        self.assertEqual(merge_Range.q_merge_range, True, 'q_merge_range should be true')
+
+    def test_that_will_not_parse_DET_OVERLAP_with_no_subsequent_commands(self):
+        # Arrange
+        line = 'DET/OVERLAP'
+        command_iface.Clean()
+        command_iface.LOQ()
+        user_file = reduction_steps.UserFile()
+
+        # Act
+        user_file.read_line(line = line, reducer = ReductionSingleton())
+        merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
+
+        # Assert
+        self.assertEqual(merge_Range.q_min, None, 'The q_min should have been read in')
+        self.assertEqual(merge_Range.q_max, None, 'The q_max should have been read in')
+        self.assertEqual(merge_Range.q_merge_range, False, 'q_merge_range should be true')
+
+    def test_that_will_not_parse_DET_OVERLAP_with_one_subsequent_commands(self):
+        # Arrange
+        line = 'DET/OVERLAP 0.13'
+        command_iface.Clean()
+        command_iface.LOQ()
+        user_file = reduction_steps.UserFile()
+
+        # Act
+        user_file.read_line(line = line, reducer = ReductionSingleton())
+        merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
+
+        # Assert
+        self.assertEqual(merge_Range.q_min, None, 'The q_min should have been read in')
+        self.assertEqual(merge_Range.q_max, None, 'The q_max should have been read in')
+        self.assertEqual(merge_Range.q_merge_range, False, 'q_merge_range should be true')
+
+    def test_that_will_not_parse_DET_OVERLAP_with_three_subsequent_commands(self):
+        # Arrange
+        line = 'DET/OVERLAP 0.13 0.15 0.17'
+        command_iface.Clean()
+        command_iface.LOQ()
+        user_file = reduction_steps.UserFile()
+
+        # Act
+        user_file.read_line(line=line, reducer=ReductionSingleton())
+        merge_Range = ReductionSingleton().instrument.getDetector('FRONT').mergeRange
+
+        # Assert
+        self.assertEqual(merge_Range.q_min, None, 'The q_min should have been read in')
+        self.assertEqual(merge_Range.q_max, None, 'The q_max should have been read in')
+        self.assertEqual(merge_Range.q_merge_range, False, 'q_merge_range should be true')
+
 class MockConvertTOQISISQResolution(object):
     def __init__(self):
         super(MockConvertTOQISISQResolution, self).__init__()

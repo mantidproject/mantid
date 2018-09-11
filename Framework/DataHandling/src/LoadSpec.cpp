@@ -46,8 +46,8 @@ void LoadSpec::init() {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void LoadSpec::exec() {
   std::string filename = getProperty("Filename");
   std::ifstream file(filename.c_str());
@@ -134,7 +134,7 @@ size_t LoadSpec::readNumberOfSpectra(std::ifstream &file) const {
 void LoadSpec::readLine(const std::string &line,
                         std::vector<double> &buffer) const {
   if (!line.empty() && line[0] != '#') {
-    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    using tokenizer = Mantid::Kernel::StringTokenizer;
     const std::string sep = " ";
     tokenizer tok(line, sep, Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     for (const auto &beg : tok) {

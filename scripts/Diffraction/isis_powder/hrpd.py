@@ -4,6 +4,8 @@ from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
+import mantid.simpleapi as mantid
+
 
 class HRPD(AbstractInst):
 
@@ -48,6 +50,10 @@ class HRPD(AbstractInst):
                           " set the following argument: {}".format(kwarg_name))
         self._sample_details = sample_details_obj
 
+    def mask_prompt_pulses_if_necessary(self, ws_list):
+        for ws in ws_list:
+            self._mask_prompt_pulses(ws)
+
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return hrpd_algs.calculate_van_absorb_corrections(
@@ -84,6 +90,15 @@ class HRPD(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium=self._is_vanadium)
 
         return self._cached_run_details[run_number_string_key]
+
+    def _mask_prompt_pulses(self, ws):
+        left_crop = 30
+        right_crop = 140
+        for i in range(6):
+            middle = 100000 + 20000 * i
+            min_crop = middle - left_crop
+            max_crop = middle + right_crop
+            mantid.MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=min_crop, XMax=max_crop)
 
     def _spline_vanadium_ws(self, focused_vanadium_banks, instrument_version=''):
         spline_coeff = self._inst_settings.spline_coeff

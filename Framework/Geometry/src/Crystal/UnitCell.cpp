@@ -1,18 +1,18 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/System.h"
-#include <stdexcept>
+#include "MantidKernel/V3D.h"
+#include <cfloat>
 #include <iomanip>
 #include <ios>
-#include <cfloat>
+#include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Geometry {
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::V3D;
 
 /** Default constructor.
 \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
@@ -452,7 +452,13 @@ double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2,
   double E, ang;
   Q1 = Gstar * Q1;
   E = Q1.scalar_prod(Q2);
-  ang = acos(E / dstar(h1, k1, l1) / dstar(h2, k2, l2));
+  double temp = E / dstar(h1, k1, l1) / dstar(h2, k2, l2);
+  if (temp > 1)
+    ang = 0.;
+  else if (temp < -1)
+    ang = M_PI;
+  else
+    ang = acos(temp);
   if (angleunit == angDegrees)
     return rad2deg * ang;
   else
@@ -564,7 +570,8 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
   if (NewGstar.numRows() != 3 || NewGstar.numCols() != 3) {
     std::ostringstream msg;
     msg << "UnitCell::recalculateFromGstar - Expected a 3x3 matrix but was "
-           "given a " << NewGstar.numRows() << "x" << NewGstar.numCols();
+           "given a "
+        << NewGstar.numRows() << "x" << NewGstar.numCols();
     throw std::invalid_argument(msg.str());
   }
 
@@ -646,5 +653,5 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
   }
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

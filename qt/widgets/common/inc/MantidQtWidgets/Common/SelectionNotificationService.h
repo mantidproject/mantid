@@ -1,9 +1,9 @@
 #ifndef MANTIDQTAPI_SELECTION_NOTIFICATION_SERVICE_H_
 #define MANTIDQTAPI_SELECTION_NOTIFICATION_SERVICE_H_
 
-#include <QObject>
 #include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <QObject>
 
 namespace MantidQt {
 namespace API {
@@ -63,15 +63,15 @@ private:
       SelectionNotificationServiceImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>
-    SelectionNotificationService;
-}
-}
+using SelectionNotificationService =
+    Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
+} // namespace API
+} // namespace MantidQt
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON Mantid::
     Kernel::SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
 }
-}
+} // namespace Mantid
 
 #endif // MANTIDQTAPI_SELECTION_NOTIFICATION_SERVICE_H_

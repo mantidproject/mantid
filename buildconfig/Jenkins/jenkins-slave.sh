@@ -71,17 +71,18 @@ if [ -f ${HOME}/jenkins-linode/${JAR_FILE} ]; then
 elif [ -f ${HOME}/Jenkins/${JAR_FILE} ]; then
   JAR_FILE=${HOME}/Jenkins/${JAR_FILE}
 else
-  JAR_FILE=/tmp/${JAR_FILE}
-  if [ ! -f ${JAR_FILE} ]; then
-    echo "Downloading slave jar file to ${JAR_FILE}"
+  JAR_FILE_TMP=/tmp/${JAR_FILE}
+  if [ ! -f ${JAR_FILE_TMP} ]; then
+    echo "Downloading slave jar file to ${JAR_FILE_TMP}"
     if [ $(command -v curl) ]; then
-      echo "curl -o ${JAR_FILE} ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
-      curl -o ${JAR_FILE} ${JENKINS_URL}/jnlpJars/${JAR_FILE}
+      echo "curl -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
+      curl -o ${JAR_FILE_TMP} ${JENKINS_URL}/jnlpJars/${JAR_FILE}
     else
       echo "Need curl to download ${JENKINS_URL}/jnlpJars/${JAR_FILE}"
       exit -1
     fi
   fi
+  JAR_FILE=${JAR_FILE_TMP}
 fi
 
 echo "starting ..."

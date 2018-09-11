@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidMDAlgorithms/ReplicateMD.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/ReplicateMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
@@ -77,8 +77,8 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
     // Generate the axis order 0, 1, 2 ... in reverse
     std::vector<int> axes(outWs->getNumDims());
     Decreasing op(outWs->getNumDims());
-    for (auto it = axes.begin(); it != axes.end(); ++it) {
-      *it = static_cast<int>(op());
+    for (int &axis : axes) {
+      axis = static_cast<int>(op());
     }
 
     IAlgorithm *transpose =
@@ -94,7 +94,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
 
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests

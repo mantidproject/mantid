@@ -95,7 +95,7 @@ private:
   readGroupingFile(std::string groupingFileName);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_DIFFRACTIONFOCUSSING_H_*/

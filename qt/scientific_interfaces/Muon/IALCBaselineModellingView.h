@@ -3,11 +3,11 @@
 
 #include "MantidKernel/System.h"
 
-#include "MantidAPI/IFunction.h"
 #include "DllConfig.h"
+#include "MantidAPI/IFunction.h"
 
-#include <QObject>
 #include "qwt_data.h"
+#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -39,8 +39,8 @@ class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingView : public QObject {
   Q_OBJECT
 
 public:
-  typedef std::pair<QString, QString> SectionRow;
-  typedef std::pair<double, double> SectionSelector;
+  using SectionRow = std::pair<QString, QString>;
+  using SectionSelector = std::pair<double, double>;
 
   /// Function chosen to fit the data to
   /// @return Function string, or empty string if nothing chosen

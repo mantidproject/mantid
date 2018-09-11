@@ -23,25 +23,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 '''
 from __future__ import (absolute_import, division, print_function)
+from six import PY3
 import datetime
+import difflib
 import imp
 import inspect
-import os
+from mantid.api import FileFinder
+from mantid.api import FrameworkManager
+from mantid.kernel import config, MemoryStats
+from mantid.simpleapi import AlgorithmManager, Load, SaveNexus
 import numpy
+import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 import unittest
-from six import PY3
+
 
 # Path to this file
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 # Some windows paths can contain sequences such as \r, e.g. \release_systemtests
 # and need escaping to be able to add to the python path
 TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
+
 
 #########################################################################
 # The base test class.
@@ -66,9 +74,7 @@ class MantidStressTest(unittest.TestCase):
         # Tolerance
         self.tolerance = 0.00000001
         # Store the resident memory of the system (in MB) before starting the test
-        import mantid.api
-        mantid.api.FrameworkManager.clear()
-        from mantid.kernel import MemoryStats
+        FrameworkManager.clear()
         self.memory = MemoryStats().residentMem()/1024
 
     def runTest(self):
@@ -84,8 +90,8 @@ class MantidStressTest(unittest.TestCase):
 
     def excludeInPullRequests(self):
         '''
-        Override this to return True if the test is too slow or deemed unnecessary to be run with every pull request.
-        These tests will be run nightly instead.
+        Override this to return True if the test is too slow or deemed unnecessary to
+        be run with every pull request. These tests will be run nightly instead.
         '''
         return False
 
@@ -137,8 +143,6 @@ class MantidStressTest(unittest.TestCase):
 
     def __verifyRequiredFile(self, filename):
         '''Return True if the specified file name is findable by Mantid.'''
-        from mantid.api import FileFinder
-
         # simple way is just getFullPath which never uses archive search
         if os.path.exists(FileFinder.getFullPath(filename)):
             return True
@@ -149,9 +153,8 @@ class MantidStressTest(unittest.TestCase):
             for item in candidates:
                 if os.path.exists(item):
                     return True
-        except RuntimeError as e:
+        except RuntimeError:
             return False
-
 
         # file was not found
         return False
@@ -165,8 +168,6 @@ class MantidStressTest(unittest.TestCase):
         # by default everything is ok
         foundAll = True
 
-        # initialize mantid so it can get the data directories to look in
-        import mantid
         # check that all of the files exist
         for filename in reqFiles:
             if not self.__verifyRequiredFile(filename):
@@ -176,25 +177,20 @@ class MantidStressTest(unittest.TestCase):
         if not foundAll:
             sys.exit(TestRunner.SKIP_TEST)
 
-
     def __verifyMemory(self):
-        """ Do we need to skip due to lack of memory? """
+        """Do we need to skip due to lack of memory?"""
         required = self.requiredMemoryMB()
         if required <= 0:
             return
 
         # Check if memory is available
-        from mantid.kernel import MemoryStats
         MB_avail = MemoryStats().availMem()/(1024.)
         if (MB_avail < required):
-            print("Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail,required))
+            print("Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail, required))
             sys.exit(TestRunner.SKIP_TEST)
 
-
     def execute(self):
-        '''
-        Run the defined number of iterations of this test
-        '''
+        '''Run the defined number of iterations of this test'''
         # Do we need to skip due to missing files?
         self.__verifyRequiredFiles()
 
@@ -218,24 +214,20 @@ class MantidStressTest(unittest.TestCase):
             self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
         delta_t = float(time.time() - start)
         # Finish
-        #self.reportResult('time_taken', '%.2f' % delta_t)
+        self.reportResult('time_taken', '%.2f' % delta_t)
 
     def __prepASCIIFile(self, filename):
-        """
-        Prepare an ascii file for comparison using difflib.
-        """
-        handle = open(filename, mode='r')
-        stuff = handle.readlines()
+        """Prepare an ascii file for comparison using difflib."""
+        with open(filename, mode='r') as handle:
+            stuff = handle.readlines()
+
         if self.stripWhitespace:
             stuff = [line.strip() for line in stuff]
-        handle.close()
+
         return stuff
 
     def validateASCII(self):
-        """
-        Validate ASCII files using difflib.
-        """
-        from mantid.api import FileFinder
+        """Validate ASCII files using difflib."""
         (measured, expected) = self.validate()
         if not os.path.isabs(measured):
             measured = FileFinder.Instance().getFullPath(measured)
@@ -246,7 +238,6 @@ class MantidStressTest(unittest.TestCase):
         expected = self.__prepASCIIFile(expected)
 
         # calculate the difference
-        import difflib
         diff = difflib.Differ().compare(measured, expected)
         result = []
         for line in diff:
@@ -272,28 +263,26 @@ class MantidStressTest(unittest.TestCase):
         to compare to the supplied workspace.
         '''
         valNames = list(self.validate())
-        from mantid.simpleapi import Load
-        numRezToCheck=len(valNames)
-        mismatchName=None;
+        numRezToCheck = len(valNames)
+        mismatchName = None
 
-        validationResult =True;
-        for ik in range(0,numRezToCheck,2): # check All results
-            workspace2 = valNames[ik+1]
-            if workspace2.endswith('.nxs'):
-                Load(Filename=workspace2,OutputWorkspace="RefFile")
-                workspace2 = "RefFile"
+        validationResult = True
+        # results are in pairs
+        for valname, refname in zip(valNames[::2], valNames[1::2]):
+            if refname.endswith('.nxs'):
+                Load(Filename=refname, OutputWorkspace="RefFile")
+                refname = "RefFile"
             else:
-                raise RuntimeError("Should supply a NeXus file: %s" % workspace2)
-            valPair=(valNames[ik],"RefFile");
-            if numRezToCheck>2:
-                mismatchName = valNames[ik];
+                raise RuntimeError("Should supply a NeXus file: %s" % refname)
+            valPair = (valname, "RefFile")
+            if numRezToCheck > 2:
+                mismatchName = valname
 
-            if not(self.validateWorkspaces(valPair,mismatchName)):
-                validationResult = False;
-                print('Workspace {0} not equal to its reference file'.format(valNames[ik]));
-        #end check All results
+            if not(self.validateWorkspaces(valPair, mismatchName)):
+                validationResult = False
+                print('Workspace {0} not equal to its reference file'.format(valname))
 
-        return validationResult;
+        return validationResult
 
     def validateWorkspaceToWorkspace(self):
         '''
@@ -303,9 +292,9 @@ class MantidStressTest(unittest.TestCase):
         valNames = list(self.validate())
         return self.validateWorkspaces(valNames)
 
-    def validateWorkspaces(self, valNames=None,mismatchName=None):
+    def validateWorkspaces(self, valNames=None, mismatchName=None):
         '''
-        Performs a check that two workspaces are equal using the CompareWorkspaces
+        Performs a check that two workspaces are equal using the CheckWorkspacesMatch
         algorithm. Loads one workspace from a nexus file if appropriate.
         Returns true if: the workspaces match
                       OR the validate method has not been overridden.
@@ -314,23 +303,24 @@ class MantidStressTest(unittest.TestCase):
         if valNames is None:
             valNames = self.validate()
 
-        from mantid.simpleapi import SaveNexus, AlgorithmManager
-        checker = AlgorithmManager.create("CompareWorkspaces")
+        checker = AlgorithmManager.create("CheckWorkspacesMatch")
         checker.setLogging(True)
-        checker.setPropertyValue("Workspace1",valNames[0])
-        checker.setPropertyValue("Workspace2",valNames[1])
-        checker.setPropertyValue("Tolerance", str(self.tolerance))
-        if hasattr(self,'tolerance_is_reller') and self.tolerance_is_reller:
-           checker.setPropertyValue("ToleranceRelerr", "1")
+        checker.setPropertyValue("Workspace1", valNames[0])
+        checker.setPropertyValue("Workspace2", valNames[1])
+        checker.setProperty("Tolerance", float(self.tolerance))
+        if hasattr(self, 'tolerance_is_reller') and self.tolerance_is_reller:
+            checker.setProperty("ToleranceRelerr", True)
         for d in self.disableChecking:
-            checker.setPropertyValue("Check"+d,"0")
+            checker.setProperty("Check"+d, False)
         checker.execute()
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
             if mismatchName:
-                SaveNexus(InputWorkspace=valNames[0],Filename=self.__class__.__name__+mismatchName+'-mismatch.nxs')
+                SaveNexus(InputWorkspace=valNames[0],
+                          Filename=self.__class__.__name__+mismatchName+'-mismatch.nxs')
             else:
-                SaveNexus(InputWorkspace=valNames[0],Filename=self.__class__.__name__+'-mismatch.nxs')
+                SaveNexus(InputWorkspace=valNames[0],
+                          Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 
         return True
@@ -356,7 +346,8 @@ class MantidStressTest(unittest.TestCase):
         # switch based on validation methods
         method = self.validateMethod()
         if method is None:
-            return True # don't validate
+            return True  # don't validate
+
         method = method.lower()
         if "validateworkspacetonexus".endswith(method):
             return self.validateWorkspaceToNeXus()
@@ -367,7 +358,7 @@ class MantidStressTest(unittest.TestCase):
         else:
             raise RuntimeError("invalid validation method '%s'" % self.validateMethod())
 
-    def returnValidationCode(self,code):
+    def returnValidationCode(self, code):
         """
         Calls doValidation() and returns 0 in success and code if failed. This will be
         used as return code from the calling python subprocess
@@ -381,19 +372,15 @@ class MantidStressTest(unittest.TestCase):
         else:
             self._success = False
         # Now the validation is complete we can clear out all the stored data and check memory usage
-        import mantid.api
-        mantid.api.FrameworkManager.clear()
+        FrameworkManager.clear()
         # Get the resident memory again and work out how much it's gone up by (in MB)
-        from mantid.kernel import MemoryStats
         memorySwallowed = MemoryStats().residentMem()/1024 - self.memory
         # Store the result
-        self.reportResult('memory footprint increase', memorySwallowed )
+        self.reportResult('memory footprint increase', memorySwallowed)
         return retcode
 
     def succeeded(self):
-        """
-        Returns true if the test has been run and it succeeded, false otherwise
-        """
+        """Returns true if the test has been run and it succeeded, false otherwise"""
         if hasattr(self, '_success'):
             return self._success
         else:
@@ -406,16 +393,14 @@ class MantidStressTest(unittest.TestCase):
         '''
         pass
 
-
     def assertDelta(self, value, expected, delta, msg=""):
-        """
-        Check that a value is within +- delta of the expected value
-        """
+        """Check that a value is within +- delta of the expected value"""
         # Build the error message
-        if msg != "": msg += " "
+        if len(msg) > 0:
+            msg += " "
         msg += "Expected %g == %g within +- %g." % (value, expected, delta)
 
-        if (value > expected+delta) or  (value < expected-delta):
+        if (value > expected+delta) or (value < expected-delta):
             raise Exception(msg)
 
     def assertLessThan(self, value, expected, msg=""):
@@ -423,7 +408,8 @@ class MantidStressTest(unittest.TestCase):
         Check that a value is < expected.
         """
         # Build the error message
-        if msg != "": msg += " "
+        if len(msg) > 0:
+            msg += " "
         msg += "Expected %g < %g " % (value, expected)
 
         if (value >= expected):
@@ -434,11 +420,29 @@ class MantidStressTest(unittest.TestCase):
         Check that a value is > expected.
         """
         # Build the error message
-        if msg != "": msg += " "
+        if len(msg) > 0:
+            msg += " "
         msg += "Expected %g > %g " % (value, expected)
 
         if (value <= expected):
             raise Exception(msg)
+
+    def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
+        """
+        Check that a callable raises an exception when called.
+        """
+        was_raised = True
+        try:
+            callableObj(*args, **kwargs)
+            was_raised = False
+        except excClass:
+            pass
+        except Exception as e:
+            msg = 'Expected {0} but raised {1} instead.'
+            raise Exception(msg.format(excClass.__name__, e.__class__.__name__))
+
+        if not was_raised:
+            raise Exception('{} not raised'.format(excClass.__name__))
 
 
 #########################################################################
@@ -478,6 +482,7 @@ class TestResult(object):
         '''
         return self._results
 
+
 #########################################################################
 # A base class to support report results in an appropriate manner
 #########################################################################
@@ -492,8 +497,47 @@ class ResultReporter(object):
         '''Initialize a class instance, e.g. connect to a database'''
         pass
 
-    def dispatchResults(self, result):
+    def dispatchResults(self, result, test_count):
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
+
+    def printResultsToConsole(self, result, test_count):
+        '''
+        Print the results to standard out
+        '''
+        if ((result.status == 'skipped') and (not self._show_skipped)):
+            pass
+        else:
+            console_output = ''
+            if self._quiet:
+                percentage = int(float(test_count[0])*100.0/float(test_count[1]))
+                if len(result._results) < 6:
+                    time_taken = " -- "
+                else:
+                    time_taken = result._results[6][1]
+                # this is a super confusing way to make a string
+                console_output += '[{:>3d}%] {:>3d}/{:>3d} : '.format(percentage, test_count[0], test_count[1])
+                console_output += '{:.<{}} ({}: {}s)'.format(result.name+" ", test_count[2], result.status, time_taken)
+            if ((self._output_on_failure and (result.status.count('fail') > 0)) or (not self._quiet)):
+                nstars = 80
+                console_output += '\n' + ('*' * nstars) + '\n'
+                print_list = ['test_name', 'filename', 'test_date', 'host_name', 'environment',
+                              'status', 'time_taken', 'memory footprint increase', 'output', 'err']
+                for key in print_list:
+                    key_not_found = True
+                    for i in range(len(result._results)):
+                        if key == result._results[i][0]:
+                            console_output += '{}: {}\n'.format(key, result._results[i][1])
+                            key_not_found = False
+                    if key_not_found:
+                        try:
+                            console_output += '{}: {}\n'.format(key, getattr(result, key))
+                        except AttributeError:
+                            pass
+                console_output += ('*' * nstars) + '\n'
+            print(console_output)
+            sys.stdout.flush()
+        return
+
 
 #########################################################################
 # A class to report results as formatted text output
@@ -503,20 +547,17 @@ class TextResultReporter(ResultReporter):
     Report the results of a test using standard out
     '''
 
-    def dispatchResults(self, result):
+    def dispatchResults(self, result, test_count):
         '''
-        Print the results to standard out
+        The default text reporter prints to standard out
         '''
-        nstars = 30
-        print('*' * nstars)
-        for t in result.resultLogs():
-            print('\t' + str(t[0]).ljust(15) + '->  ', str(t[1]))
-        print('*' * nstars)
+        self.printResultsToConsole(result, test_count)
+        return
 
-#########################################################################
 # A class to report results as junit xml
-#########################################################################
-from xmlreporter import XmlResultReporter
+# DO NOT MOVE
+from xmlreporter import XmlResultReporter  # noqa
+
 
 #########################################################################
 # A base class for a TestRunner
@@ -533,44 +574,40 @@ class TestRunner(object):
     NOT_A_TEST = 98
     SKIP_TEST = 97
 
-
-    def __init__(self, executable, exec_args=None, escape_quotes=False):
+    def __init__(self, executable, exec_args=None, escape_quotes=False, clean=False):
         self._executable = executable
         self._exec_args = exec_args
         self._test_dir = ''
         self._escape_quotes = escape_quotes
+        self._clean = clean
 
     def getTestDir(self):
         return self._test_dir
 
     def setTestDir(self, test_dir):
-        self._test_dir = os.path.abspath(test_dir).replace('\\','/')
+        self._test_dir = os.path.abspath(test_dir).replace('\\', '/')
 
     def spawnSubProcess(self, cmd):
-        '''
-        Spawn a new process and run the given command within it
-        '''
-        proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT, bufsize=-1)
+        '''Spawn a new process and run the given command within it'''
+        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, bufsize=-1)
         std_out, _ = proc.communicate()
         return proc.returncode, std_out
 
     def start(self, script):
-        '''
-        Run the given test code in a new subprocess
-        '''
+        '''Run the given test code in a new subprocess'''
         exec_call = self._executable
         if self._exec_args:
-            exec_call += ' '  + self._exec_args
+            exec_call += ' ' + self._exec_args
         # write script to temporary file and execute this file
         tmp_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
-        tmp_file.write(script.asString())
+        tmp_file.write(script.asString(clean=self._clean))
         tmp_file.close()
         cmd = exec_call + ' ' + tmp_file.name
-        print("Executing test script '%s'" % (cmd))
         results = self.spawnSubProcess(cmd)
         os.remove(tmp_file.name)
         return results
+
 
 #########################################################################
 # Encapsulate the script for runnning a single test
@@ -583,20 +620,22 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
-    def asString(self):
-        code = '''import sys
-sys.path.append('{0}')
-sys.path.append('{1}')
-from {2} import {3}
-systest = {3}()
-if {5}:
-    systest.excludeInPullRequests = lambda: False
-systest.execute()
-exitcode = systest.returnValidationCode({4})
-systest.cleanup()
-sys.exit(exitcode)'''
-        return code.format(TESTING_FRAMEWORK_DIR, self._test_dir, self._modname,
-                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE, self._exclude_in_pr_builds)
+    def asString(self, clean=False):
+        code = "import sys\n" + \
+               ("sys.path.append('%s')\n" % TESTING_FRAMEWORK_DIR) + \
+               ("sys.path.append('%s')\n" % self._test_dir) + \
+               ("from %s import %s\n" % (self._modname, self._test_cls_name)) + \
+               ("systest = %s()\n" % self._test_cls_name) + \
+               ("if %r:\n" % self._exclude_in_pr_builds) + \
+               ("    systest.excludeInPullRequests = lambda: False\n")
+        if (not clean):
+            code += "systest.execute()\n" + \
+                    ("exitcode = systest.returnValidationCode(%i)\n" % TestRunner.VALIDATION_FAIL_CODE)
+        else:
+            code += "exitcode = 0\n"
+        code += "systest.cleanup()\nsys.exit(exitcode)\n"
+        return code
+
 
 #########################################################################
 # A class to tie together a test and its results
@@ -605,7 +644,7 @@ class TestSuite(object):
     '''
     Tie together a test and its results.
     '''
-    def __init__(self, test_dir, modname, testname, filename = None):
+    def __init__(self, test_dir, modname, testname, filename=None):
         self._test_dir = test_dir
         self._modname = modname
         self._test_cls_name = testname
@@ -628,7 +667,7 @@ class TestSuite(object):
         sysinfo = platform.uname()
         self._result.addItem(['host_name', sysinfo[1]])
         self._result.addItem(['environment', self.envAsString()])
-        self._result.status = 'skipped' # the test has been skipped until it has been executed
+        self._result.status = 'skipped'  # the test has been skipped until it has been executed
 
     name = property(lambda self: self._fqtestname)
     status = property(lambda self: self._result.status)
@@ -649,15 +688,15 @@ class TestSuite(object):
         self._result.status = 'skipped'
 
     def execute(self, runner, exclude_in_pr_builds):
-        print(time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname)
         if self._test_cls_name is not None:
-          script = TestScript(self._test_dir, self._modname, self._test_cls_name,exclude_in_pr_builds)
-          # Start the new process and wait until it finishes
-          retcode, output  = runner.start(script)
+            script = TestScript(self._test_dir, self._modname, self._test_cls_name, exclude_in_pr_builds)
+            # Start the new process and wait until it finishes
+            retcode, output = runner.start(script)
         else:
-          retcode, output = TestRunner.SKIP_TEST, ""
+            retcode, output = TestRunner.SKIP_TEST, ""
+
         self._result.date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self._result.addItem(['test_date',self._result.date])
+        self._result.addItem(['test_date', self._result.date])
 
         if retcode == TestRunner.SUCCESS_CODE:
             status = 'success'
@@ -682,8 +721,7 @@ class TestSuite(object):
         if PY3:
             if isinstance(output, bytes):
                 output = output.decode()
-        print(output)
-        self._result.output = output
+        self._result.output = '\n' + output
         all_lines = output.split('\n')
         # Find the test results
         for line in all_lines:
@@ -695,9 +733,10 @@ class TestSuite(object):
         if msg is not None:
             self._result.output = msg
 
-    def reportResults(self, reporters):
+    def reportResults(self, reporters, test_count):
         for r in reporters:
-            r.dispatchResults(self._result)
+            r.dispatchResults(self._result, test_count)
+
 
 #########################################################################
 # The main API class
@@ -707,42 +746,125 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
 
-    def __init__(self, test_loc, runner, output = [TextResultReporter()],
-                 testsInclude=None, testsExclude=None, exclude_in_pr_builds=None):
+    def __init__(self, test_loc, runner, output=[TextResultReporter()],
+                 quiet=False, testsInclude=None, testsExclude=None,
+                 exclude_in_pr_builds=None, showSkipped=False,
+                 output_on_failure=False, clean=False,
+                 test_count=None, process_number=0, ncores=1):
         '''Initialize a class instance'''
 
         # Runners and reporters
         self._runner = runner
         self._reporters = output
+        for r in self._reporters:
+            r._quiet = quiet
+            r._output_on_failure = output_on_failure
+        self._test_count = test_count
+        self._clean = clean
 
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
-            test_dir = os.path.abspath(test_loc).replace('\\','/')
+            test_dir = os.path.abspath(test_loc).replace('\\', '/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            self._tests = self.loadTestsFromDir(test_dir)
+            full_test_list = self.loadTestsFromDir(test_dir)
         else:
             if os.path.exists(test_loc) == False:
                 print('Cannot find file ' + test_loc + '.py. Please check the path.')
                 exit(2)
-            test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\','/')
+            test_dir = os.path.abspath(os.path.dirname(test_loc)).replace('\\', '/')
             sys.path.append(test_dir)
             runner.setTestDir(test_dir)
-            self._tests = self.loadTestsFromModule(os.path.basename(test_loc))
-
-        if len(self._tests) == 0:
-            print('No tests defined in ' + test_dir + '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
-            exit(2)
-
-        self._passedTests = 0
-        self._skippedTests = 0
-        self._failedTests = 0
-        self._lastTestRun = 0
+            full_test_list = self.loadTestsFromModule(os.path.basename(test_loc))
 
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
         # flag to exclude slow tests from pull requests
         self._exclude_in_pr_builds = exclude_in_pr_builds
+
+        # Gather statistics on full test list
+        reduced_test_list = []
+        tid = 0
+        for t in full_test_list:
+            if self.__shouldTest(t) or showSkipped:
+                reduced_test_list.append(t)
+                tid += 1
+                t._id = tid
+
+        self._test_count[1] = len(reduced_test_list)
+        for t in reduced_test_list:
+            self._test_count[2] = max(self._test_count[2], len(t._fqtestname))
+
+        # When using multiprocessing, we have to split the list of tests among
+        # the processes into groups instead of test by test, to avoid issues
+        # with data being cleaned up before another process has finished.
+        #
+        # Because different modules (= different python files in the
+        # 'Testing/SystemTests/tests/analysis' directory) use the same input
+        # and output files, it is not enough to distribute each module to a
+        # separate core. The module have to ge gathered into groups, where a
+        # given test group will contain all tests that begin with the same name,
+        # i.e. the same first 8 (= min_length_for_group_name below) characters.
+        #
+        # This is not optimal, ideally we would like to distribute the runtimes
+        # evenly so that all cores finish in the same amount of time but this will
+        # do as a first step.
+        #
+        # First we need to count how many tests are in each module
+        # We also create on the fly a list of tests for each module
+        modcounts = dict()
+        modtests = dict()
+        # This is the length of characters to match at the start of test name
+        min_length_for_group_name = 4
+        for t in reduced_test_list:
+            not_found = True
+            for key in modcounts.keys():
+                if (t._modname).startswith(key):
+                    modcounts[key] += 1
+                    modtests[key].append(t)
+                    not_found = False
+                    break
+            if not_found:
+                key = (t._modname)[:min_length_for_group_name]
+                modcounts[key] = 1
+                modtests[key] = [t]
+
+        # Now we distribute the tests to each core
+        # This is done by sorting the modules by descending order of number of tests
+        # We then iterate through that list and give all the tests inside a given module
+        # to the core which currently has the lowest number of tests.
+        # The number of tests for that core is then incremented by the number of tests
+        # inside the module it has just received.
+        ntests_per_core = [0] * ncores
+        self._tests = []
+        reverse_sorted_dict = [(k, modcounts[k]) for k in sorted(modcounts, key=modcounts.get, reverse=True)]
+        for key, value in reverse_sorted_dict:
+            for i in range(ncores):
+                if(ntests_per_core[i] == min(ntests_per_core)):
+                    ntests_per_core[i] += value
+                    if (i == process_number):
+                        self._tests.extend(modtests[key])
+                    break
+
+        if len(reduced_test_list) == 0:
+            print('No tests defined in ' + test_dir +
+                  '. Please ensure all test classes sub class stresstesting.MantidStressTest.')
+            exit(2)
+
+        if (not quiet) and (not clean):
+            hline = "========================================"
+            out_string = hline + "\n"
+            out_string += "Core %i will execute %i tests:\n" % (process_number, len(self._tests))
+            for t in self._tests:
+                out_string += ("%3i. " % t._id) + t._fqtestname + "\n"
+            out_string += hline
+            print(out_string)
+        sys.stdout.flush()
+
+        self._passedTests = 0
+        self._skippedTests = 0
+        self._failedTests = 0
+        self._lastTestRun = 0
 
     totalTests = property(lambda self: len(self._tests))
     skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
@@ -751,7 +873,7 @@ class TestManager(object):
 
     def __shouldTest(self, suite):
         if self._testsInclude is not None:
-            if not self._testsInclude in suite.name:
+            if self._testsInclude not in suite.name:
                 suite.markAsSkipped("NotIncludedTest")
                 return False
         if self._testsExclude is not None:
@@ -771,14 +893,16 @@ class TestManager(object):
                 self._skippedTests += 1
             else:
                 self._failedTests += 1
-            suite.reportResults(self._reporters)
+            self._test_count[0] += 1
+            if not self._clean:
+                suite.reportResults(self._reporters, self._test_count)
             self._lastTestRun += 1
 
     def markSkipped(self, reason=None):
         for suite in self._tests[self._lastTestRun:]:
             suite.setOutputMsg(reason)
-            suite.reportResults(self._reporters) # just let people know you were skipped
-         
+            suite.reportResults(self._reporters, self._test_count)  # just let people know you were skipped
+
     def loadTestsFromDir(self, test_dir):
         ''' Load all of the tests defined in the given directory'''
         entries = os.listdir(test_dir)
@@ -786,7 +910,7 @@ class TestManager(object):
         regex = re.compile('^.*\.py$', re.IGNORECASE)
         for file in entries:
             if regex.match(file) != None:
-                tests.extend(self.loadTestsFromModule(os.path.join(test_dir,file)))
+                tests.extend(self.loadTestsFromModule(os.path.join(test_dir, file)))
         return tests
 
     def loadTestsFromModule(self, filename):
@@ -796,7 +920,6 @@ class TestManager(object):
         '''
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
-        path = os.path.dirname(filename)
         pyfile = open(filename, 'r')
         tests = []
         try:
@@ -833,13 +956,14 @@ class TestManager(object):
         else:
             return True
 
+
 #########################################################################
 # Class to handle the environment
 #########################################################################
 class MantidFrameworkConfig:
 
     def __init__(self, sourceDir=None,
-                 data_dirs="", save_dir = "",
+                 data_dirs="", save_dir="",
                  loglevel='information', archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
@@ -847,7 +971,7 @@ class MantidFrameworkConfig:
         self.__testDir = self.__locateTestsDir()
 
         # add location of the analysis tests
-        sys.path.insert(0,self.__locateTestsDir())
+        sys.path.insert(0, self.__locateTestsDir())
 
         # setup the rest of the magic directories
         self.__saveDir = save_dir
@@ -869,21 +993,21 @@ class MantidFrameworkConfig:
             for direc in data_dirs:
                 if not os.path.exists(direc):
                     raise RuntimeError('Directory ' + direc + ' was not found.')
-                search_dir = direc.replace('\\','/')
+                search_dir = direc.replace('\\', '/')
                 if not search_dir.endswith('/'):
                     search_dir += '/'
                     data_path += search_dir + ';'
-            #endfor
+
             self.__dataDirs = data_path
 
         # set the log level
         self.__loglevel = loglevel
-        self.__datasearch =  archivesearch
+        self.__datasearch = archivesearch
 
     def __locateSourceDir(self, suggestion):
         if suggestion is None:
             loc = os.path.abspath(__file__)
-            suggestion = os.path.split(loc)[0] # get the directory
+            suggestion = os.path.split(loc)[0]  # get the directory
         loc = os.path.abspath(suggestion)
         loc = os.path.normpath(loc)
 
@@ -905,26 +1029,19 @@ class MantidFrameworkConfig:
 
     def __moveFile(self, src, dst):
         if os.path.exists(src):
-            import shutil
             shutil.move(src, dst)
 
     def __copyFile(self, src, dst):
         if os.path.exists(src):
-            import shutil
             shutil.copyfile(src, dst)
 
     saveDir = property(lambda self: self.__saveDir)
     testDir = property(lambda self: self.__testDir)
 
     def config(self):
-
-        # Start mantid
-        import mantid
-        from mantid.kernel import config
-
         # backup the existing user properties so we can step all over it
         self.__userPropsFile = config.getUserFilename()
-        self.__userPropsFileBackup  = self.__userPropsFile + ".bak"
+        self.__userPropsFileBackup = self.__userPropsFile + ".bak"
         self.__userPropsFileSystest = self.__userPropsFile + ".systest"
         self.__moveFile(self.__userPropsFile, self.__userPropsFileBackup)
 
@@ -933,7 +1050,6 @@ class MantidFrameworkConfig:
 
         # Up the log level so that failures can give useful information
         config['logging.loggers.root.level'] = self.__loglevel
-        config['logging.channels.consoleFilterChannel.level'] = self.__loglevel
         # Set the correct search path
         config['datasearch.directories'] = self.__dataDirs
 
@@ -945,7 +1061,7 @@ class MantidFrameworkConfig:
 
         # Do not update instrument definitions
         config['UpdateInstrumentDefinitions.OnStartup'] = "0"
-        
+
         # Do not perform a version check
         config['CheckMantidVersion.OnStartup'] = "0"
 
@@ -954,10 +1070,14 @@ class MantidFrameworkConfig:
 
         # Case insensitive
         config['filefinder.casesensitive'] = 'Off'
-        
+
+        # Maximum number of threads
+        config['MultiThreaded.MaxCores'] = '4'
+
         # datasearch
         if self.__datasearch:
-            config["datasearch.searcharchive"] = 'On'
+            # turn on for 'all' facilties, 'on' is only for default facility
+            config["datasearch.searcharchive"] = 'all'
             config['network.default.timeout'] = '5'
 
         # Save this configuration
@@ -968,7 +1088,10 @@ class MantidFrameworkConfig:
         self.__moveFile(self.__userPropsFileBackup, self.__userPropsFile)
 
 
-#==============================================================================
+#########################################################################
+# Function to return a string describing the environment
+# (platform) of this test.
+#########################################################################
 def envAsString():
     """Returns a string describing the environment
     (platform) of this test."""
@@ -981,3 +1104,49 @@ def envAsString():
     else:
         env = platform.dist()[0] + "-" + platform.dist()[1]
     return env
+
+
+#########################################################################
+# Function to spawn one test manager per core
+#########################################################################
+def testProcess(testDir, saveDir, options, res_array,
+                stat_dict, test_count, process_number):
+
+    reporter = XmlResultReporter(showSkipped=options.showskipped)
+
+    runner = TestRunner(executable=options.executable, exec_args=options.execargs,
+                        escape_quotes=True, clean=options.clean)
+
+    mgr = TestManager(testDir, runner,
+                      output=[reporter],
+                      quiet=options.quiet,
+                      testsInclude=options.testsInclude,
+                      testsExclude=options.testsExclude,
+                      exclude_in_pr_builds=options.exclude_in_pr_builds,
+                      showSkipped=options.showskipped,
+                      output_on_failure=options.output_on_failure,
+                      test_count=test_count,
+                      process_number=process_number,
+                      ncores=options.ncores,
+                      clean=options.clean)
+    try:
+        mgr.executeTests()
+    except KeyboardInterrupt:
+        mgr.markSkipped("KeyboardInterrupt")
+
+    # Update the test results in the array shared accross cores
+    res_array[process_number] = mgr.skippedTests
+    res_array[process_number + options.ncores] = mgr.failedTests
+    res_array[process_number + 2*options.ncores] = mgr.totalTests
+    res_array[process_number + 3*options.ncores] = int(reporter.reportStatus())
+
+    # Report the errors
+    local_dict = dict()
+    with open(os.path.join(saveDir, "TEST-systemtests-%i.xml" % process_number),
+              'w') as xml_report:
+        xml_report.write(reporter.getResults(local_dict))
+
+    for key in local_dict.keys():
+        stat_dict[key] = local_dict[key]
+
+    return

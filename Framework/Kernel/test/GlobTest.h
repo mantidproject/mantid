@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Glob.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Glob.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 using namespace Mantid::Kernel;
 
@@ -34,9 +34,8 @@ public:
     TS_ASSERT(files.size() > 0);
 
     size_t matches = 0;
-    for (std::set<std::string>::const_iterator f = files.begin();
-         f != files.end(); ++f) {
-      Poco::Path path = *f;
+    for (const auto &file : files) {
+      Poco::Path path = file;
       std::string project = path[path.depth() - 1];
       if (project == "API")
         ++matches;
@@ -96,9 +95,8 @@ public:
     TS_ASSERT(files.size() > 0);
 
     size_t matches = 0;
-    for (std::set<std::string>::const_iterator f = files.begin();
-         f != files.end(); ++f) {
-      Poco::Path path = *f;
+    for (const auto &file : files) {
+      Poco::Path path = file;
       std::string project = path[path.depth() - 1];
       if (project == "API")
         ++matches;

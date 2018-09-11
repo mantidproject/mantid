@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::Algorithms::CorelliCrossCorrelate;
@@ -62,7 +62,7 @@ public:
 
     ws->getAxis(0)->setUnit("TOF");
 
-    ws->sortAll(PULSETIME_SORT, NULL);
+    ws->sortAll(PULSETIME_SORT, nullptr);
 
     // Add some chopper TDCs to the workspace.
     double period = 1 / 293.383;

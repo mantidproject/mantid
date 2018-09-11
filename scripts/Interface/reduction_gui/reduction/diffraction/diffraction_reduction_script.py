@@ -148,7 +148,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         script += "config['default.facility']=\"%s\"\n" % self.facility_name
         script += "\n"
 
-        if dofilter is True:
+        if dofilter:
             # a) Construct python script with generating filters
             for runtuple in datafilenames:
 
@@ -164,51 +164,48 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
                 script += "# Load data's log only\n"
                 script += "Load(\n"
-                script += "%sFilename = '%s',\n" % (DiffractionReductionScripter.WIDTH, datafilename)
-                script += "%sOutputWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, metadatawsname)
-                script += "%sMetaDataOnly = '1')\n" % (DiffractionReductionScripter.WIDTH)
+                script += "{}Filename = '{}',\n".format(DiffractionReductionScripter.WIDTH, datafilename)
+                script += "{}OutputWorkspace = '{}',\n".format(DiffractionReductionScripter.WIDTH, metadatawsname)
+                script += "{}MetaDataOnly = True)\n".format(DiffractionReductionScripter.WIDTH)
 
                 script += "\n"
 
                 # ii. Generate event filters
                 script += "# Construct the event filters\n"
                 script += "GenerateEventsFilter(\n"
-                script += "%sInputWorkspace  = '%s',\n" % (DiffractionReductionScripter.WIDTH, metadatawsname)
-                script += "%sOutputWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, splitwsname)
-                script += "%sInformationWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, splitinfowsname)
+                script += "{}InputWorkspace  = '{}',\n".format(DiffractionReductionScripter.WIDTH, metadatawsname)
+                script += "{}OutputWorkspace = '{}',\n".format(DiffractionReductionScripter.WIDTH, splitwsname)
+                script += "{}InformationWorkspace = '{}',\n".format(DiffractionReductionScripter.WIDTH, splitinfowsname)
                 if filterdict["FilterByTimeMin"] != "":
-                    script += "%sStartTime = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMin"])
+                    script += "{}StartTime = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMin"])
                 if filterdict["FilterByTimeMax"] != "":
-                    script += "%sStopTime  = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMax"])
+                    script += "{}StopTime  = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["FilterByTimeMax"])
 
                 if filterdict["FilterType"] == "ByTime":
                     # Filter by time
-                    script += "%sTimeInterval   = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LengthOfTimeInterval"])
-                    script += "%sUnitOfTime = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["UnitOfTime"])
-                    script += "%sLogName    = '%s',\n" % (DiffractionReductionScripter.WIDTH, "")
+                    script += "{}TimeInterval   = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["LengthOfTimeInterval"])
+                    script += "{}UnitOfTime = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["UnitOfTime"])
+                    script += "{}LogName    = '',\n".format(DiffractionReductionScripter.WIDTH) # intentionally empty
 
                 elif filterdict["FilterType"] == "ByLogValue":
                     # Filter by log value
-                    script += "%sLogName = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["LogName"])
+                    script += "{}LogName = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["LogName"])
                     if filterdict["MinimumLogValue"] != "":
-                        script += "%sMinimumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
+                        script += "{}MinimumLogValue    = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["MinimumLogValue"])
                     if filterdict["MaximumLogValue"] != "":
-                        script += "%sMaximumLogValue    = '%s',\n" % (DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
-                    script += "%sFilterLogValueByChangingDirection = '%s',\n" % (DiffractionReductionScripter.WIDTH,
-                                                                                 filterdict["FilterLogValueByChangingDirection"])
+                        script += "{}MaximumLogValue    = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["MaximumLogValue"])
+                    script += "{}FilterLogValueByChangingDirection = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                                     filterdict["FilterLogValueByChangingDirection"])
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
-                        script += "%sLogValueInterval       = '%s',\n" % (
-                            DiffractionReductionScripter.WIDTH,
-                            filterdict["LogValueInterval"])
-                    script += "%sLogBoundary    = '%s',\n" % (
-                        DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
+                        script += "{}LogValueInterval       = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                              filterdict["LogValueInterval"])
+                    script += "{}LogBoundary    = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
-                        script += "%sTimeTolerance  = '%s',\n" % (
-                            DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
+                        script += "{}TimeTolerance  = '{}',\n".format(DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
                     if filterdict["LogValueTolerance"] != "":
-                        script += "%sLogValueTolerance  = '%s',\n" % (
-                            DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
+                        script += "{}LogValueTolerance  = '{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                          filterdict["LogValueTolerance"])
                 # ENDIF
                 script += ")\n"
 
@@ -254,7 +251,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         runnumbers_str = str(runsetupdict["RunNumber"])
         if runnumbers_str.count(':') > 0:
             runnumbers_str = runnumbers_str.replace(':', '-')
-        runnumbers_str = FileFinder.findRuns(self.instrument_name + runnumbers_str)
+        runnumbers_str = FileFinder.findRuns('{}{}'.format(self.instrument_name, runnumbers_str))
         runnumbers_str = [os.path.split(filename)[-1] for filename in runnumbers_str]
 
         # create an integer version
@@ -296,64 +293,52 @@ class DiffractionReductionScripter(BaseReductionScripter):
             # turn off the binning
             runsetupdict["Binning"] = ''
 
-        # NOMAD special
-        if self.instrument_name.lower().startswith('nom') is False:
+        # only NOMAD uses 'ExpIniFile'
+        if not self.instrument_name.lower().startswith('nom'):
             runsetupdict.pop('ExpIniFile', None)
 
         # c) all properties
-        for propname in runsetupdict.keys():
-            if propname.count("Disable") == 1 and propname.count("Correction") == 1:
-                # Skip disable XXXX
+        for propname, propvalue in runsetupdict.iteritems():
+            # skip these pseudo-properties
+            if propname in ['DisableBackgroundCorrection', 'DisableVanadiumCorrection',
+                            'DisableVanadiumBackgroundCorrection', 'DoReSampleX']:
                 continue
-            if propname == "DoReSampleX":
-                # Skip this
-                continue
-
-            propvalue = runsetupdict[propname]
 
             if propvalue == '' or propvalue is None:
                 # Skip not-defined value
                 continue
 
-            if propvalue.__class__.__name__ == "bool":
-                # Special treatment on boolean
-                propvalue = int(propvalue)
-
             if propname == "RunNumber":
-                # Option to take user input run number
-                if runnumber is not None:
-                    propvalue = '%s%s' % (self.instrument_name, str(runnumber))
+                propname = 'Filename' # change to what SNSPowderReduction uses
 
-                script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, 'Filename', str(propvalue))
-                continue
+                # option to take user input run number
+                if runnumber is not None:
+                    propvalue = runnumber
+
+                # add the instrument name to the file hint
+                propvalue = '{}_{}'.format(self.instrument_name, str(propvalue))
 
             # Add value
-            script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, propname, str(propvalue))
+            script += "{}{} = '{}',\n".format(DiffractionReductionScripter.WIDTH, propname, propvalue)
         # ENDFOR
 
         # 2. Advanced setup
-        for propname in advsetupdict.keys():
-            propvalue = advsetupdict[propname]
-
-            if propvalue == "" or propvalue is None:
+        for propname, propvalue in advsetupdict.iteritems():
+            if propvalue == '' or propvalue is None:
                 # Skip not-defined value
                 continue
 
-            if propvalue.__class__.__name__ == "bool":
-                # Special treatment on boolean
-                propvalue = int(propvalue)
-
             # Add to script
-            script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, propname, str(propvalue))
+            script += "{}{} = '{}',\n".format(DiffractionReductionScripter.WIDTH, propname, propvalue)
         # ENDFOR
 
         # 3. Optional spliter workspace
         if splitwsname is not None and splitwsname != "":
-            script += "%sSplittersWorkspace = '%s',\n" % (DiffractionReductionScripter.WIDTH, str(splitwsname))
+            script += "{}SplittersWorkspace = '{}',\n".format(DiffractionReductionScripter.WIDTH, str(splitwsname))
         if splitinfowsname is not None and splitinfowsname != "":
-            script += "%sSplitInformationWorkspace='%s',\n" % (DiffractionReductionScripter.WIDTH,
-                                                               str(splitinfowsname))
-        script += "%s)\n" % (DiffractionReductionScripter.WIDTH)
+            script += "{}SplitInformationWorkspace='{}',\n".format(DiffractionReductionScripter.WIDTH,
+                                                                   str(splitinfowsname))
+        script += "{})\n".format(DiffractionReductionScripter.WIDTH)
 
         return script
 

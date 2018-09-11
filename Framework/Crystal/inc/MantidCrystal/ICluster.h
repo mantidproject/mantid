@@ -1,11 +1,11 @@
 #ifndef MANTID_CRYSTAL_ICLUSTER_H_
 #define MANTID_CRYSTAL_ICLUSTER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCrystal/DisjointElement.h"
-#include <vector>
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -39,7 +39,7 @@ namespace Crystal {
  */
 class DLLExport ICluster {
 public:
-  typedef boost::tuple<double, double> ClusterIntegratedValues;
+  using ClusterIntegratedValues = boost::tuple<double, double>;
 
   /// integrate the cluster
   virtual ClusterIntegratedValues integrate(

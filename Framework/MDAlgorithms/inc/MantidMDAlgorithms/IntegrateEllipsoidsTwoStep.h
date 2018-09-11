@@ -4,10 +4,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 
 namespace Mantid {
@@ -45,6 +45,9 @@ public:
   const std::string name() const override;
   /// Get the version of this algorithm
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"IntegrateEllipsoids"};
+  }
   /// Get the category of this algorithm
   const std::string category() const override;
   /// Summary of algorithms purpose

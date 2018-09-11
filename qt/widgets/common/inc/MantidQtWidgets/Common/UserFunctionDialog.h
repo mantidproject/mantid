@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 #define MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_
 
-#include "ui_UserFunctionDialog.h"
 #include "DllOption.h"
+#include "ui_UserFunctionDialog.h"
 
 #include <QMap>
 #include <QSet>
@@ -73,7 +73,7 @@ private:
   QLineEdit *m_name;
   QTextEdit *m_comment;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_USERFUNCTIONDIALOG_H_

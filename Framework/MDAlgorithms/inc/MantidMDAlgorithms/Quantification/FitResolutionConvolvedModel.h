@@ -35,6 +35,9 @@ public:
     return "Fits a cuts/slices from an MDEventWorkspace using a resolution "
            "function convolved with a foreground model";
   }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SimulateResolutionConvolvedModel"};
+  }
 
   int version() const override;
   const std::string category() const override;

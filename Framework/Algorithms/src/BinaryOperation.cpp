@@ -401,7 +401,7 @@ std::string BinaryOperation::checkSizeCompatibility(
       // can't be more specific as if this is reached both failed and only one
       // or both are needed
       return "Left and right sides should contain the same amount of spectra "
-             "or the right side should contian only one spectra.";
+             "or the right side should contain only one spectra.";
     }
   } else {
     // blocksize check failed, but still check the number of spectra to see if

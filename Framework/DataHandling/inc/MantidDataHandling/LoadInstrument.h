@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADINSTRUMENT_H_
 #define MANTID_DATAHANDLING_LOADINSTRUMENT_H_
 
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 #include <mutex>
 
@@ -11,7 +11,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 /// @endcond
 
 namespace Mantid {
@@ -27,7 +27,7 @@ class Component;
 class CSGObject;
 class ObjComponent;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
@@ -84,6 +84,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadInstrumentFromNexus", "LoadInstrumentFromRaw",
+            "ExportGeometry", "Load"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\Instrument";

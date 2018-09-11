@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_
 #define MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,6 +42,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"FilterByXValue", "FilterEvents", "FilterLogByTime",
+            "FilterBadPulses", "FilterByTime"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Events\\EventFiltering";

@@ -1,6 +1,6 @@
-#include <sstream>
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/Column.h"
+#include <sstream>
 
 namespace Mantid {
 namespace API {

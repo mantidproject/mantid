@@ -16,7 +16,7 @@ class Histogram;
 class HistogramE;
 class HistogramY;
 class Points;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -62,6 +62,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"DetectorEfficiencyCor"};
+  }
   const std::string category() const override;
 
 private:

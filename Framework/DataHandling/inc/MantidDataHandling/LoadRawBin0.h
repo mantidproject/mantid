@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRawHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -78,6 +78,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadRawSpectrum0", "LoadRaw"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diagnostics\\Raw;DataHandling\\Raw";
@@ -120,6 +123,6 @@ private:
   /// time channel vector
   std::vector<boost::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif

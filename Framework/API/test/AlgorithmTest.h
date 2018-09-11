@@ -241,6 +241,13 @@ public:
     TS_ASSERT_EQUALS(algv3.categories(), result);
   }
 
+  void testSeeAlso() {
+    std::vector<std::string> result{"rabbit"};
+    result.emplace_back("goldfish");
+    result.emplace_back("Spotted Hyena");
+    TS_ASSERT_EQUALS(alg.seeAlso(), result);
+  }
+
   void testAlias() { TS_ASSERT_EQUALS(alg.alias(), "Dog"); }
 
   void testIsChild() {
@@ -361,7 +368,7 @@ public:
   }
 
   void test_Construction_Via_Valid_String_With_No_Properties() {
-    IAlgorithm_sptr testAlg = runFromString("{\"name\":\"ToyAlgorithm\"}");
+    IAlgorithm_sptr testAlg = runFromString(R"({"name":"ToyAlgorithm"})");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
   }
@@ -808,10 +815,10 @@ public:
     IAlgorithm_sptr algNonConst;
     TS_ASSERT_THROWS_NOTHING(
         algConst = manager.getValue<IAlgorithm_const_sptr>(algName));
-    TS_ASSERT(algConst != NULL);
+    TS_ASSERT(algConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(algNonConst =
                                  manager.getValue<IAlgorithm_sptr>(algName));
-    TS_ASSERT(algNonConst != NULL);
+    TS_ASSERT(algNonConst != nullptr);
     TS_ASSERT_EQUALS(algConst, algNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -819,9 +826,9 @@ public:
     IAlgorithm_const_sptr algCastConst;
     IAlgorithm_sptr algCastNonConst;
     TS_ASSERT_THROWS_NOTHING(algCastConst = (IAlgorithm_const_sptr)val);
-    TS_ASSERT(algCastConst != NULL);
+    TS_ASSERT(algCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(algCastNonConst = (IAlgorithm_sptr)val);
-    TS_ASSERT(algCastNonConst != NULL);
+    TS_ASSERT(algCastNonConst != nullptr);
     TS_ASSERT_EQUALS(algCastConst, algCastNonConst);
   }
 

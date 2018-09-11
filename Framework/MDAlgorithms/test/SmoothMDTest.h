@@ -1,20 +1,20 @@
 #ifndef MANTID_MDALGORITHMS_SMOOTHMDTEST_H_
 #define MANTID_MDALGORITHMS_SMOOTHMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/SmoothMD.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include <vector>
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/SmoothMD.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 using Mantid::MDAlgorithms::SmoothMD;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Typedef for width vector
-typedef std::vector<double> WidthVector;
+using WidthVector = std::vector<double>;
 
 class SmoothMDTest : public CxxTest::TestSuite {
 public:

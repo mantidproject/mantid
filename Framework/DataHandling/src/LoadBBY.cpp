@@ -810,5 +810,5 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   }
 }
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid

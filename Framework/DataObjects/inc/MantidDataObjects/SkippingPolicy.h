@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_SKIPPINGPOLICY_H_
 #define MANTID_DATAOBJECTS_SKIPPINGPOLICY_H_
 
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/SkippingPolicy.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidDataObjects/SkippingPolicy.h"
+#include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
@@ -66,7 +66,7 @@ public:
   bool keepGoing() const override { return false; }
 };
 
-typedef boost::scoped_ptr<SkippingPolicy> SkippingPolicy_scptr;
+using SkippingPolicy_scptr = boost::scoped_ptr<SkippingPolicy>;
 
 } // namespace DataObjects
 } // namespace Mantid

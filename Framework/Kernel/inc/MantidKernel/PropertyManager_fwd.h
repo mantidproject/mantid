@@ -34,13 +34,13 @@ namespace Kernel {
 /// forward declare of Mantid::Kernel::PropertyManager
 class PropertyManager;
 /// shared pointer to Mantid::Kernel::PropertyManager
-typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
+using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
 /// shared pointer to Mantid::Kernel::PropertyManager(const version)
-typedef boost::shared_ptr<const PropertyManager> PropertyManager_const_sptr;
+using PropertyManager_const_sptr = boost::shared_ptr<const PropertyManager>;
 /// unique pointer to Mantid::Kernel::PropertyManager
-typedef std::unique_ptr<PropertyManager> PropertyManager_uptr;
+using PropertyManager_uptr = std::unique_ptr<PropertyManager>;
 /// unique pointer to Mantid::Kernel::PropertyManager (const version)
-typedef std::unique_ptr<const PropertyManager> PropertyManager_const_uptr;
+using PropertyManager_const_uptr = std::unique_ptr<const PropertyManager>;
 
 } // namespace Kernel
 } // namespace Mantid

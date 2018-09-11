@@ -49,8 +49,8 @@ private:
 };
 
 /**
-* Implements a control for setting the x integration range
-*/
+ * Implements a control for setting the x integration range
+ */
 class XIntegrationControl : public QFrame {
   Q_OBJECT
 public:
@@ -84,7 +84,7 @@ private:
   double m_minimum;
   double m_maximum;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*XINTEGRATIONCONTROL_H_*/

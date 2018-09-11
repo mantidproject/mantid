@@ -1,11 +1,11 @@
 #ifndef MANTID_API_MATRIXWORKSPACEMDITERATOR_H_
 #define MANTID_API_MATRIXWORKSPACEMDITERATOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -60,10 +60,12 @@ public:
 
   signal_t getError() const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 

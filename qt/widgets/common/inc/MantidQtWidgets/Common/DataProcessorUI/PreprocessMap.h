@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSMAP_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSMAP_H
 
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <map>
 
 #include <QString>
@@ -45,7 +45,8 @@ public:
   virtual ~PreprocessMap();
   // Add a column to pre-process
   void addElement(const QString &column, const QString &algorithm,
-                  const QString &prefix = "", const QString &blacklist = "");
+                  const QString &prefix = "", const QString &separator = "",
+                  const QString &blacklist = "");
   // Returns a map where keys are columns and values pre-processing algorithms
   std::map<QString, PreprocessingAlgorithm> asMap() const;
 
@@ -53,7 +54,7 @@ private:
   // A map where keys are columns and values pre-processing algorithms
   std::map<QString, PreprocessingAlgorithm> m_map;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSMAP_H*/

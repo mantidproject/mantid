@@ -23,17 +23,17 @@ private:
     enum { value = I };
 
   public:
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
     MOCK_CONST_METHOD2(createTransform,
                        PeakTransform_sptr(const std::string &,
                                           const std::string &));
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
-  typedef MockPeakTransformFactoryType<0> MockPeakTransformFactory;
-  typedef MockPeakTransformFactoryType<0> MockPeakTransformFactoryA;
-  typedef MockPeakTransformFactoryType<1> MockPeakTransformFactoryB;
+  using MockPeakTransformFactory = MockPeakTransformFactoryType<0>;
+  using MockPeakTransformFactoryA = MockPeakTransformFactoryType<0>;
+  using MockPeakTransformFactoryB = MockPeakTransformFactoryType<1>;
 
 public:
   void test_Constructor() {

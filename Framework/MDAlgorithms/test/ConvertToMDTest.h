@@ -3,8 +3,8 @@
 
 #include "MantidAPI/BoxController.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -47,7 +47,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
 
   return ws;
 }
-}
+} // namespace
 
 class Convert2AnyTestHelper : public ConvertToMD {
 public:
@@ -76,7 +76,7 @@ public:
   static ConvertToMDTest *createSuite() { return new ConvertToMDTest(); }
   static void destroySuite(ConvertToMDTest *suite) { delete suite; }
 
-  typedef std::vector<std::string> PropertyAllowedValues;
+  using PropertyAllowedValues = std::vector<std::string>;
 
   void testInit() {
 

@@ -28,9 +28,9 @@
 #ifndef PROJECTMD_H_
 #define PROJECTMD_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidSINQ/DllConfig.h"
 
 class MANTID_SINQ_DLL ProjectMD : public Mantid::API::Algorithm {
 public:
@@ -43,6 +43,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CutMD", "BinMD"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "MDAlgorithms\\Slicing";

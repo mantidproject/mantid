@@ -40,11 +40,13 @@
 #ifndef FLEXINEXUSLOADER_H_
 #define FLEXINEXUSLOADER_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidSINQ/DllConfig.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/shared_array.hpp>
@@ -61,6 +63,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

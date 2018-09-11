@@ -2,8 +2,8 @@
 
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidKernel/V2D.h"
 
 #include <cmath>
@@ -143,7 +143,7 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
   return v2.X() * v1.Y() - v2.Y() * v1.X() +
          polyArea(v2, std::forward<Ts>(vertices)...);
 }
-} // Private namespace
+} // namespace
 
 /**
  * Computes the output grid bins which intersect the input quad and their
@@ -152,9 +152,9 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
  * @param yAxis The output data vertical axis
  * @param inputQ The input quadrilateral
  * @param y_start The starting y-axis index
- * @param y_end The starting y-axis index
+ * @param y_end The ending y-axis index
  * @param x_start The starting x-axis index
- * @param x_end The starting x-axis index
+ * @param x_end The ending x-axis index
  * @param areaInfo Output vector of indices and areas of overlapping bins
  */
 void calcTrapezoidYIntersections(
@@ -202,8 +202,8 @@ void calcTrapezoidYIntersections(
   // Step 1 - construct the left/right bin lims on the lines of the y-grid.
   const double NaN = std::numeric_limits<double>::quiet_NaN();
   const double DBL_EPS = std::numeric_limits<double>::epsilon();
-  std::vector<double> leftLim(nx * (ny + 1), NaN);
-  std::vector<double> rightLim(nx * (ny + 1), NaN);
+  std::vector<double> leftLim((nx + 1) * (ny + 1), NaN);
+  std::vector<double> rightLim((nx + 1) * (ny + 1), NaN);
   auto x0_it = xAxis.begin() + x_start;
   auto x1_it = xAxis.begin() + x_end + 1;
   auto y0_it = yAxis.begin() + y_start;
@@ -239,7 +239,7 @@ void calcTrapezoidYIntersections(
       auto right_it = std::upper_bound(x0_it, x1_it, right_val);
       if (right_it != x1_it) {
         rightLim[right_it - x0_it - 1 + yjx] = right_val;
-      } else if (yAxis[yj + y_start] < ur_y) {
+      } else if (yAxis[yj + y_start] < ur_y && nx > 0) {
         right_it = x1_it - 1;
         rightLim[nx - 1 + yjx] = lr_x;
       }
@@ -277,12 +277,15 @@ void calcTrapezoidYIntersections(
         left_it--;
       if (right_it == x1_it)
         right_it--;
-      size_t li = left_it - x0_it - 1;
+      size_t li = (left_it > x0_it) ? (left_it - x0_it - 1) : 0;
+      size_t ri = (right_it > x0_it) ? (right_it - x0_it - 1) : 0;
       leftLim[li + yjx] = (mTop >= 0) ? val : ll_x;
-      rightLim[right_it - x0_it - 1 + yjx] = (mTop >= 0) ? lr_x : val;
-      for (auto x_it = left_it; x_it != right_it; x_it++) {
-        leftLim[li + 1 + yjx] = *x_it;
-        rightLim[li++ + yjx] = *x_it;
+      rightLim[ri + yjx] = (mTop >= 0) ? lr_x : val;
+      if (left_it < right_it && right_it != x1_it) {
+        for (auto x_it = left_it; x_it != right_it; x_it++) {
+          leftLim[li + 1 + yjx] = *x_it;
+          rightLim[li++ + yjx] = *x_it;
+        }
       }
     }
   }
@@ -321,8 +324,8 @@ void calcTrapezoidYIntersections(
       // Checks if this bin is completely inside new quadrilateral
       if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) &&
           yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
-        areaInfo.emplace_back(xi, yi, (nlr.X() - nll.X()) *
-                                          (yAxis[yi + 1] - yAxis[yi]));
+        areaInfo.emplace_back(
+            xi, yi, (nlr.X() - nll.X()) * (yAxis[yi + 1] - yAxis[yi]));
         // Checks if this bin is not completely outside new quadrilateral
       } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) &&
                  yAxis[yi] <= std::max(nul.Y(), nur.Y())) {
@@ -478,6 +481,8 @@ void calcGeneralIntersections(
 void normaliseOutput(MatrixWorkspace_sptr outputWS,
                      MatrixWorkspace_const_sptr inputWS,
                      boost::shared_ptr<Progress> progress) {
+  const bool removeBinWidth(inputWS->isDistribution() &&
+                            outputWS->id() != "RebinnedOutput");
   for (int64_t i = 0; i < static_cast<int64_t>(outputWS->getNumberHistograms());
        ++i) {
     const auto &outputX = outputWS->x(i);
@@ -487,7 +492,7 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
       if (progress)
         progress->report("Calculating errors");
       double eValue = std::sqrt(outputE[j]);
-      if (inputWS->isDistribution()) {
+      if (removeBinWidth) {
         const double binWidth = outputX[j + 1] - outputX[j];
         outputY[j] /= binWidth;
         eValue /= binWidth;
@@ -599,11 +604,15 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
   // If the input workspace was normalized by the bin width, we need to
   // recover the original Y value, we do it by 'removing' the bin width
+  // Don't do the overlap removal if already RebinnedOutput.
+  // This wreaks havoc on the data.
   double error = inE[j];
-  if (inputWS->isDistribution()) {
+  double inputWeight = 1.;
+  if (inputWS->isDistribution() && !inputRB) {
     const double overlapWidth = inX[j + 1] - inX[j];
     signal *= overlapWidth;
     error *= overlapWidth;
+    inputWeight = overlapWidth;
   }
 
   // The intersection overlap algorithm is relatively costly. The outputQ is
@@ -626,7 +635,6 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
   // If the input is a RebinnedOutput workspace with frac. area we need
   // to account for the weight of the input bin in the output bin weights
-  double inputWeight = 1.;
   if (inputRB) {
     const auto &inF = inputRB->dataF(i);
     inputWeight = inF[j];

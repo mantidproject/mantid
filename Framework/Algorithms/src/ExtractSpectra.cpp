@@ -1,23 +1,23 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
 
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Slice.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidHistogramData/Slice.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
 
 namespace {
 /// The percentage 'fuzziness' to use when comparing to bin boundaries
 const double xBoundaryTolerance = 1.0e-15;
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -58,13 +58,15 @@ void ExtractSpectra::init() {
                                                    Direction::Output),
                   "Name of the output workspace");
 
-  declareProperty("XMin", EMPTY_DBL(), "An X value that is within the first "
-                                       "(lowest X value) bin that will be "
-                                       "retained\n"
-                                       "(default: workspace min)");
-  declareProperty("XMax", EMPTY_DBL(), "An X value that is in the highest X "
-                                       "value bin to be retained (default: max "
-                                       "X)");
+  declareProperty("XMin", EMPTY_DBL(),
+                  "An X value that is within the first "
+                  "(lowest X value) bin that will be "
+                  "retained\n"
+                  "(default: workspace min)");
+  declareProperty("XMax", EMPTY_DBL(),
+                  "An X value that is in the highest X "
+                  "value bin to be retained (default: max "
+                  "X)");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
@@ -166,7 +168,7 @@ void filterEventsHelper(std::vector<T> &events, const double xmin,
       std::remove_if(events.begin(), events.end(), eventFilter<T>(xmin, xmax)),
       events.end());
 }
-}
+} // namespace
 
 /** Executes the algorithm
  *  @throw std::out_of_range If a property is set to an invalid value for the

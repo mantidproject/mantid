@@ -8,16 +8,15 @@
 #ifndef SCDCALIBRATEPANELSTEST_H_
 #define SCDCALIBRATEPANELSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace std;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
 
 class SCDCalibratePanelsTest : public CxxTest::TestSuite {

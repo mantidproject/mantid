@@ -56,8 +56,9 @@ private slots:
         m_presenter->m_manager->setProcessed(true, m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
-      emit reductionErrorSignal(QString(ex.what()));
-      emit finished(1);
+      handleError(ex.what());
+    } catch (...) {
+      handleError("Unexpected exception");
     }
   }
 
@@ -69,6 +70,16 @@ private:
   GenericDataProcessorPresenter *m_presenter;
   const GroupData m_groupData;
   int m_groupIndex;
+
+  void handleError(const std::string &errorMessage) {
+    m_presenter->m_manager->setError(
+        std::string("Group processing failed: ") + errorMessage, m_groupIndex);
+    if (m_presenter->m_manager->rowCount(m_groupIndex) ==
+        static_cast<int>(m_groupData.size()))
+      m_presenter->m_manager->setProcessed(true, m_groupIndex);
+    emit reductionErrorSignal(QString::fromStdString(errorMessage));
+    emit finished(1);
+  }
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets

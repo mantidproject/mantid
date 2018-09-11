@@ -1,24 +1,24 @@
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
 
+using Mantid::API::AlgorithmManager;
+using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
-using Mantid::API::IAlgorithm_sptr;
-using Mantid::API::AlgorithmManager;
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-* @param inputWS :: [input] Input workspace group
-* @param summedPeriods :: [input] Vector of period indexes to be summed
-* @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
-* from summed periods
-* @param firstPairIndex :: [input] Workspace index of the first (forward) group
-* of the pair
-* @param secondPairIndex :: [input] Workspace index of the second (backward)
-* group of the pair
-* @param alpha :: [input] Alpha (balance) value of the pair
+ * @param inputWS :: [input] Input workspace group
+ * @param summedPeriods :: [input] Vector of period indexes to be summed
+ * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
+ * from summed periods
+ * @param firstPairIndex :: [input] Workspace index of the first (forward) group
+ * of the pair
+ * @param secondPairIndex :: [input] Workspace index of the second (backward)
+ * group of the pair
+ * @param alpha :: [input] Alpha (balance) value of the pair
  */
 MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
     const API::WorkspaceGroup_sptr inputWS,
@@ -30,10 +30,10 @@ MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
       m_secondPairIndex(secondPairIndex) {}
 
 /**
-* Calculates asymmetry for the given pair of groups, using the alpha value
-* provided.
-* @returns Workspace containing result of calculation
-*/
+ * Calculates asymmetry for the given pair of groups, using the alpha value
+ * provided.
+ * @returns Workspace containing result of calculation
+ */
 MatrixWorkspace_sptr MuonPairAsymmetryCalculator::calculate() const {
   MatrixWorkspace_sptr outWS;
 
@@ -63,10 +63,10 @@ MatrixWorkspace_sptr MuonPairAsymmetryCalculator::calculate() const {
 }
 
 /**
-* Performs asymmetry calculation on the given workspace.
-* @param inputWS :: [input] Workspace to calculate asymmetry from
-* @returns Result of the calculation
-*/
+ * Performs asymmetry calculation on the given workspace.
+ * @param inputWS :: [input] Workspace to calculate asymmetry from
+ * @returns Result of the calculation
+ */
 MatrixWorkspace_sptr MuonPairAsymmetryCalculator::asymmetryCalc(
     const Workspace_sptr &inputWS) const {
   MatrixWorkspace_sptr outWS;

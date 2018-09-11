@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 
 #include "BoundingBox.h"
 #include <map>
@@ -19,10 +20,9 @@ namespace Kernel {
 class PseudoRandomNumberGenerator;
 class Material;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
-class CacheGeometryHandler;
 class CompGrp;
 class GeometryHandler;
 class Rule;
@@ -83,6 +83,11 @@ public:
     return obj;
   }
 
+  bool isFiniteGeometry() const override { return m_isFiniteGeometry; }
+  void setFiniteGeometryFlag(bool isFinite) override {
+    m_isFiniteGeometry = isFinite;
+  }
+
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
   void setID(const std::string &id) { m_id = id; }
@@ -119,8 +124,7 @@ public:
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
@@ -191,8 +195,9 @@ public:
   void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
   void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override;
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override;
   /// Getter for the shape xml
   std::string getShapeXML() const;
 
@@ -252,7 +257,8 @@ private:
   int ObjNum;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> m_handler;
-  friend class CacheGeometryHandler;
+  friend class GeometryHandler;
+  friend class GeometryRenderer;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
   /// a pointer to a class for reading from the geometry cache
@@ -260,17 +266,19 @@ private:
   /// a pointer to a class for writing to the geometry cache
   boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
   void updateGeometryHandler();
+  size_t numberOfTriangles() const;
+  size_t numberOfVertices() const;
   /// for solid angle from triangulation
-  int NumberOfTriangles() const;
-  int NumberOfPoints() const;
-  int *getTriangleFaces() const;
-  double *getTriangleVertices() const;
+  const std::vector<uint32_t> &getTriangleFaces() const;
+  const std::vector<double> &getTriangleVertices() const;
   /// original shape xml used to generate this object.
   std::string m_shapeXML;
   /// Optional string identifier
   std::string m_id;
   /// material composition
   std::unique_ptr<Kernel::Material> m_material;
+  /// Whether or not the object geometry is finite
+  bool m_isFiniteGeometry = true;
 
 protected:
   std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map

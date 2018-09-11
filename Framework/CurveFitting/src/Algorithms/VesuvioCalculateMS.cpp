@@ -1,16 +1,15 @@
 #include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
 // Use helpers for storing detector/resolution parameters
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
-#include "MantidCurveFitting/MSVesuvioHelpers.h"
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -21,7 +20,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -56,12 +54,6 @@ VesuvioCalculateMS::VesuvioCalculateMS()
       m_detThick(-1.0), m_tmin(-1.0), m_tmax(-1.0), m_delt(-1.0),
       m_foilRes(-1.0), m_nscatters(0), m_nruns(0), m_nevents(0),
       m_progress(nullptr), m_inputWS() {}
-
-/// Destructor
-VesuvioCalculateMS::~VesuvioCalculateMS() {
-  delete m_randgen;
-  delete m_sampleProps;
-}
 
 /**
  * Initialize the algorithm's properties.
@@ -139,7 +131,8 @@ void VesuvioCalculateMS::exec() {
   MatrixWorkspace_sptr multsc = WorkspaceFactory::Instance().create(m_inputWS);
 
   // Initialize random number generator
-  m_randgen = new CurveFitting::MSVesuvioHelper::RandomNumberGenerator(
+  m_randgen = Kernel::make_unique<
+      CurveFitting::MSVesuvioHelper::RandomVariateGenerator>(
       getProperty("Seed"));
 
   // Setup progress
@@ -225,12 +218,12 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
   const int natoms = nInputAtomProps / 3;
-  m_sampleProps = new SampleComptonProperties(natoms);
+  m_sampleProps = Kernel::make_unique<SampleComptonProperties>(natoms);
   m_sampleProps->density = getProperty("SampleDensity");
 
   double totalMass(0.0); // total mass in grams
@@ -511,11 +504,11 @@ double VesuvioCalculateMS::calculateCounts(
 }
 
 /**
-  * Sample from the moderator assuming it can be seen
-  * as a cylindrical ring with inner and outer radius
-  * @param l1 Src-sample distance (m)
-  * @returns Position on the moderator of the generated point
-  */
+ * Sample from the moderator assuming it can be seen
+ * as a cylindrical ring with inner and outer radius
+ * @param l1 Src-sample distance (m)
+ * @returns Position on the moderator of the generated point
+ */
 V3D VesuvioCalculateMS::generateSrcPos(const double l1) const {
   double radius(-1.0), widthPos(0.0), heightPos(0.0);
   do {

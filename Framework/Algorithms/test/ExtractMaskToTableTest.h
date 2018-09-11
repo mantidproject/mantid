@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractMaskToTable.h"
-#include "MantidAlgorithms/ExtractMask.h"
-#include "MantidAlgorithms/SumNeighbours.h"
-#include "MantidAlgorithms/MaskDetectorsIf.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidAlgorithms/ExtractMask.h"
+#include "MantidAlgorithms/ExtractMaskToTable.h"
+#include "MantidAlgorithms/MaskDetectorsIf.h"
+#include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractMaskToTable;
 
@@ -35,7 +35,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test method 'subtractVector'
-    */
+   */
   void test_method() {
     ExtractMaskToTable alg;
 
@@ -91,7 +91,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test initialization of the algorithm
-    */
+   */
   void test_Init() {
     ExtractMaskToTable alg;
     alg.initialize();
@@ -100,7 +100,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test for writing a new line to a new table workspace
-    */
+   */
   void test_writeToNewTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
@@ -163,7 +163,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test for appending a new line to an existing table workspace
-    */
+   */
   void test_appendToExistingTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
@@ -263,8 +263,8 @@ public:
   }
 
   /** Test for appending a new line to an existing table workspace
-    * Some masked detectors are in the input table workspace
-    */
+   * Some masked detectors are in the input table workspace
+   */
   void test_appendToPreviousTable() {
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
@@ -355,7 +355,7 @@ public:
   }
 
   /** Test for extracting masks from a MaskWorkspace
-    */
+   */
   void test_extractFromMaskWorkspace() {
     // Create a workspace with Mask
     const int nvectors(50), nbins(10);

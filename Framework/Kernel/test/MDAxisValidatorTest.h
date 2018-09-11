@@ -4,14 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MDAxisValidator.h"
+#include "boost/make_shared.hpp"
+#include "boost/shared_ptr.hpp"
 #include <map>
 #include <string>
 #include <vector>
-#include "boost/shared_ptr.hpp"
-#include "boost/make_shared.hpp"
 
 using Mantid::Kernel::MDAxisValidator;
-typedef boost::shared_ptr<MDAxisValidator> MDAxisValidator_sptr;
+using MDAxisValidator_sptr = boost::shared_ptr<MDAxisValidator>;
 
 class MDAxisValidatorTest : public CxxTest::TestSuite {
 public:
@@ -41,8 +41,8 @@ public:
   }
 
   /**
-    * Tests no error given for an empty axes vector (if check turned off)
-    */
+   * Tests no error given for an empty axes vector (if check turned off)
+   */
   void testMDAxisValidator_EmptyNoCheck() {
     MDAxisValidator_sptr checker = createValidator(0, 3, false);
     auto errors = checker->validate();

@@ -1,21 +1,21 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/CoordTransform.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <vtkUnstructuredGrid.h>
-#include <vtkFloatArray.h>
-#include <vtkQuad.h>
+#include <boost/shared_ptr.hpp>
 #include <vtkCellData.h>
+#include <vtkFloatArray.h>
 #include <vtkNew.h>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+#include <vtkQuad.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::API;
 
@@ -71,8 +71,8 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
 
     // Make iterator, which will use the desired normalization. Ensure
     // destruction in any eventuality.
-    boost::scoped_ptr<IMDIterator> it(
-        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    auto it =
+        createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 4 points per box.
     vtkNew<vtkPoints> points;
@@ -112,9 +112,8 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 
-        auto coords = std::unique_ptr<coord_t[]>(
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
-
+        auto coords =
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {
           coord_t *coord = coords.get() + v * 2;
@@ -183,5 +182,5 @@ void vtkMDQuadFactory::validate() const {
         "vtkMDQuadFactory has no workspace to run against");
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

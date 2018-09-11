@@ -1,6 +1,6 @@
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid {
 namespace DataObjects {

@@ -1,14 +1,14 @@
 #ifndef MANTID_GEOMETRY_CRYSTALSTRUCTURE_H_
 #define MANTID_GEOMETRY_CRYSTALSTRUCTURE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroup.h"
-#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/HKLFilter.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidKernel/System.h"
 
 #include <boost/make_shared.hpp>
 
@@ -116,7 +116,7 @@ protected:
   CompositeBraggScatterer_sptr m_scatterers;
 };
 
-typedef boost::shared_ptr<CrystalStructure> CrystalStructure_sptr;
+using CrystalStructure_sptr = boost::shared_ptr<CrystalStructure>;
 
 } // namespace Geometry
 } // namespace Mantid

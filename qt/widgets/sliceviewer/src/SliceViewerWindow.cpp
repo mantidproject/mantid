@@ -1,16 +1,16 @@
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/VMD.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
-#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include <QBoxLayout>
-#include <QMainWindow>
 #include <QLayout>
+#include <QMainWindow>
 #include <QTimer>
 
 using namespace Mantid;
@@ -32,7 +32,7 @@ namespace SliceViewer {
  */
 SliceViewerWindow::SliceViewerWindow(const QString &wsName,
                                      const QString &label, Qt::WindowFlags f)
-    : QMainWindow(NULL, f), WorkspaceObserver(), m_lastLinerWidth(0),
+    : QMainWindow(nullptr, f), WorkspaceObserver(), m_lastLinerWidth(0),
       m_lastPeaksViewerWidth(0) {
 
 #ifdef Q_OS_MAC

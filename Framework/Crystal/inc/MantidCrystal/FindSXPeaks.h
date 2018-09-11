@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace Crystal {
 
-typedef std::vector<FindSXPeaksHelper::SXPeak> peakvector;
+using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
 
 /** Search detector space for single crystal peaks.
 
@@ -64,6 +64,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"IndexSXPeaks"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Crystal\\Peaks;Optimization\\PeakFinding";
@@ -89,8 +92,9 @@ private:
   getPeakFindingStrategy(
       const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
       const API::SpectrumInfo &spectrumInfo, const double minValue,
-      const double maxValue, const FindSXPeaksHelper::XAxisUnit tofUnits =
-                                 FindSXPeaksHelper::XAxisUnit::TOF) const;
+      const double maxValue,
+      const FindSXPeaksHelper::XAxisUnit tofUnits =
+          FindSXPeaksHelper::XAxisUnit::TOF) const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy>
@@ -120,7 +124,7 @@ private:
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaks;
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_FindSXPeaks_H_*/

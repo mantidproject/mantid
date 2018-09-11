@@ -4,10 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "BoundingBox.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
-#include "BoundingBox.h"
 #include <map>
 #include <memory>
 
@@ -18,10 +19,9 @@ namespace Mantid {
 namespace Kernel {
 class PseudoRandomNumberGenerator;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
-class CacheGeometryHandler;
 class CompGrp;
 class GeometryHandler;
 class Track;
@@ -37,7 +37,8 @@ class vtkGeometryCacheWriter;
 
 Mesh Object of Triangles assumed to form one or more
 non-intersecting closed surfaces enclosing separate volumes.
-The number of vertices is limited to 65535.
+The number of vertices is limited to 2^16 based on index type. For 2D Meshes see
+Mesh2DObject
 
 Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -97,8 +98,7 @@ public:
   bool
   isValid(const Kernel::V3D &) const override; ///< Check if a point is inside
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;
@@ -139,14 +139,15 @@ public:
   /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 
-  void GetObjectGeom(int &type, std::vector<Kernel::V3D> &vectors,
-                     double &myradius, double &myheight) const override;
+  void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
+                     std::vector<Kernel::V3D> &vectors, double &myradius,
+                     double &myheight) const override;
 
   /// Read access to mesh object for rendering
-  int numberOfVertices() const;
-  double *getVertices() const;
-  int numberOfTriangles() const;
-  int *getTriangles() const;
+  size_t numberOfVertices() const;
+  std::vector<double> getVertices() const;
+  size_t numberOfTriangles() const;
+  std::vector<uint32_t> getTriangles() const;
 
   void updateGeometryHandler();
 

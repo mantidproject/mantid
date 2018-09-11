@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_ESTIMATEDIVERGENCE_H_
 #define MANTID_ALGORITHMS_ESTIMATEDIVERGENCE_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -35,6 +35,9 @@ class MANTID_ALGORITHMS_DLL EstimateDivergence : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"EstimateResolutionDiffraction"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

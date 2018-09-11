@@ -44,12 +44,14 @@ def create_option_column_properties():
                                   prefix='',
                                   property_type=float),
              algorithm_list_entry(column_name="",
-                                  algorithm_property="Thickness",
-                                  description='The sample thickness.',
+                                  algorithm_property="EventSlices",
+                                  description='The event slices to reduce. The format is the same as for the event slices'
+                                              ' box in settings, however if a comma separated list is given '
+                                              'it must be enclosed in quotes',
                                   show_value=True,
                                   default='',
                                   prefix='',
-                                  property_type=float),
+                                  property_type=str)
              ]
     return props
 
@@ -169,6 +171,13 @@ def create_properties(show_periods=True):
                                            default="",
                                            prefix='',
                                            property_type=str),
+                      algorithm_list_entry(column_name="Sample Thickness",
+                                           algorithm_property="SampleThickness",
+                                           description=('The sample thickness from the user file'),
+                                           show_value=False,
+                                           default='',
+                                           prefix='',
+                                           property_type=str),
                       algorithm_list_entry(column_name="",
                                            algorithm_property="RowIndex",
                                            description='The row index (which is automatically populated by the GUI)',
@@ -261,6 +270,13 @@ def create_properties(show_periods=True):
                                                         ' If left unspecified default will be used'),
                                            show_value=False,
                                            default="",
+                                           prefix='',
+                                           property_type=str),
+                      algorithm_list_entry(column_name="Sample Thickness",
+                                           algorithm_property="SampleThickness",
+                                           description=('The sample thickness from the user file'),
+                                           show_value=False,
+                                           default='',
                                            prefix='',
                                            property_type=str),
                       algorithm_list_entry(column_name="",

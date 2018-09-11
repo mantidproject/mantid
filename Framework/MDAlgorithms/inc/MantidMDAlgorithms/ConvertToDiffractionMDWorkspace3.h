@@ -21,6 +21,9 @@ class DLLExport ConvertToDiffractionMDWorkspace3
 public:
   /// Algorithm's version for identification
   int version() const override { return 3; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToMD", "SetSpecialCoordinates"};
+  }
 
 private:
   void init() override;
@@ -36,7 +39,7 @@ private:
                                 std::vector<double> &maxVal);
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE3_H_ */

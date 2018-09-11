@@ -42,8 +42,8 @@ class SANSConvertToWavelength(DistributedDataProcessorAlgorithm):
 
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
-                              "WavelengthLow": wavelength_state.wavelength_low,
-                              "WavelengthHigh": wavelength_state.wavelength_high,
+                              "WavelengthLow": wavelength_state.wavelength_low[0],
+                              "WavelengthHigh": wavelength_state.wavelength_high[0],
                               "WavelengthStep": wavelength_state.wavelength_step,
                               "WavelengthStepType": RangeStepType.to_string(
                                   wavelength_state.wavelength_step_type),

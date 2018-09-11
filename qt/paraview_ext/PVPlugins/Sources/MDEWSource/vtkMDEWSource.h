@@ -1,17 +1,17 @@
 #ifndef _vtkMDEWSource_h
 #define _vtkMDEWSource_h
 
-#include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
 
 namespace Mantid {
 namespace VATES {
 class MDLoadingPresenter;
 }
-}
+} // namespace Mantid
 
 /*  Source for fetching Multidimensional Workspace out of the Mantid Analysis
    Data Service

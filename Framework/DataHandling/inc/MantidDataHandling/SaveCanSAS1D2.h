@@ -13,8 +13,8 @@ namespace XML {
 class Document;
 class Element;
 class Text;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -79,6 +79,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport SaveCanSAS1D2 : public SaveCanSAS1D {
 public:
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadCanSAS1D"};
+  }
 
 protected:
   /// Extends the SaveCanSAS1D init method
@@ -92,13 +95,16 @@ protected:
   /// this method creates SAStransmission_spectrum element
   void createSASTransElement(std::string &sasTrans, const std::string &name);
 
+  /// this method creates SASProcess element
+  void createSASProcessElement(std::string &sasProcess);
+
   /// Overwrites writeHeader method
   void writeHeader(const std::string &fileName) override;
 
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_trans_ws, m_transcan_ws;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif

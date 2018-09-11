@@ -3,18 +3,18 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreateDummyCalFile.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/ConfigService.h"
 
-#include <queue>
-#include <fstream>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <fstream>
+#include <queue>
 
 namespace Mantid {
 namespace Algorithms {
@@ -85,9 +85,9 @@ void CreateDummyCalFile::exec() {
   vgroups.clear();
 
   // Find Detectors that belong to groups
-  typedef boost::shared_ptr<const Geometry::ICompAssembly> sptr_ICompAss;
-  typedef boost::shared_ptr<const Geometry::IComponent> sptr_IComp;
-  typedef boost::shared_ptr<const Geometry::IDetector> sptr_IDet;
+  using sptr_ICompAss = boost::shared_ptr<const Geometry::ICompAssembly>;
+  using sptr_IComp = boost::shared_ptr<const Geometry::IComponent>;
+  using sptr_IDet = boost::shared_ptr<const Geometry::IDetector>;
   std::queue<std::pair<sptr_ICompAss, int>> assemblies;
   sptr_ICompAss current =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst);
@@ -257,5 +257,5 @@ void CreateDummyCalFile::writeHeaders(std::ostream &os,
      << "\n";
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

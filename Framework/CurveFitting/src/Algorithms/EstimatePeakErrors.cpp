@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/Algorithms/EstimatePeakErrors.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -105,12 +105,12 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
   row = results.appendRow();
   row << prefix + "Intensity" << intensity << sqrt(JCJ.get(3, 3));
 }
-}
+} // namespace
 
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(make_unique<FunctionProperty>("Function"),
+  declareProperty(make_unique<FunctionProperty>("Function", Direction::InOut),
                   "Fitting function containing peaks. Must have a covariance "
                   "matrix attached.");
 

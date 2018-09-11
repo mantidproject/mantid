@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_SHIFTLOGTIME_H_
 #define MANTID_ALGORITHMS_SHIFTLOGTIME_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -36,6 +36,9 @@ class DLLExport ShiftLogTime : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateLogTimeCorrection", "ChangePulsetime", "ChangeLogTime"};
+  }
   const std::string category() const override;
 
   /// Summary of algorithms purpose

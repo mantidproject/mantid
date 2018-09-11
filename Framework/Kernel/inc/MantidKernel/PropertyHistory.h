@@ -96,9 +96,9 @@ private:
 };
 
 // typedefs for property history pointers
-typedef boost::shared_ptr<PropertyHistory> PropertyHistory_sptr;
-typedef boost::shared_ptr<const PropertyHistory> PropertyHistory_const_sptr;
-typedef std::vector<PropertyHistory_sptr> PropertyHistories;
+using PropertyHistory_sptr = boost::shared_ptr<PropertyHistory>;
+using PropertyHistory_const_sptr = boost::shared_ptr<const PropertyHistory>;
+using PropertyHistories = std::vector<PropertyHistory_sptr>;
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,
                                            const PropertyHistory &);

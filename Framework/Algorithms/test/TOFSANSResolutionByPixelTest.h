@@ -1,19 +1,19 @@
 #ifndef TOFSANSRESOLUTIONBYPIXELTEST_H_
 #define TOFSANSRESOLUTIONBYPIXELTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include "boost/shared_ptr.hpp"
 #include <stdexcept>
@@ -62,7 +62,7 @@ createTestInstrument(const Mantid::detid_t id,
   Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
-    det0 = new Detector("det0", id, shape, NULL);
+    det0 = new Detector("det0", id, shape, nullptr);
   } else {
     det0 = new Detector("det0", id, nullptr);
   }
@@ -181,7 +181,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   }
   return ws2d;
 }
-}
+} // namespace
 
 class TOFSANSResolutionByPixelTest : public CxxTest::TestSuite {
 public:

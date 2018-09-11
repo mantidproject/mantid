@@ -17,7 +17,7 @@ const char *CHOPPER_RADIUS = "ChopperRadius";
 const char *SLIT_THICK = "SlitThickness";
 const char *SLIT_RADIUS = "SlitRadius";
 const char *INCIDENT_ENERGY = "Ei";
-}
+} // namespace
 
 /// Default constructor required by the factory
 FermiChopperModel::FermiChopperModel()
@@ -93,7 +93,8 @@ double FermiChopperModel::sampleTimeDistribution(const double randomNo) const {
   } else {
     std::ostringstream os;
     os << "FermiChopperModel::sampleTimeDistribution - Random number must be "
-          "flat between [0,1]. Current value=" << randomNo;
+          "flat between [0,1]. Current value="
+       << randomNo;
     throw std::invalid_argument(os.str());
   }
 }
@@ -205,7 +206,8 @@ double FermiChopperModel::regimeFactor(const double gamma) const {
   } else {
     std::ostringstream os;
     os << "FermiChopperModel::regimeFactor - gamma is greater than 4! "
-          "Behaviour is undefined. Value=" << gamma;
+          "Behaviour is undefined. Value="
+       << gamma;
     throw std::invalid_argument(os.str());
   }
 }
@@ -226,5 +228,5 @@ double FermiChopperModel::sampleFromTriangularDistribution(
   }
   return xmin + offset;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

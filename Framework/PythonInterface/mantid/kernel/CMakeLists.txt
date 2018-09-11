@@ -17,6 +17,7 @@ set ( EXPORT_FILES
   src/Exports/IValidator.cpp
   src/Exports/IPropertySettings.cpp
   src/Exports/EnabledWhenProperty.cpp
+  src/Exports/ErrorReporter.cpp
   src/Exports/VisibleWhenProperty.cpp
   src/Exports/PropertyWithValue.cpp
   src/Exports/ArrayProperty.cpp
@@ -59,6 +60,7 @@ set ( EXPORT_FILES
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
   src/Exports/StringContainsValidator.cpp
+  src/Exports/PropertyFactory.cpp	
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -87,6 +89,7 @@ set ( SRC_FILES
   src/Registry/TypeRegistry.cpp
   src/Environment/ErrorHandling.cpp
   src/Environment/GlobalInterpreterLock.cpp
+  src/Environment/ReleaseGlobalInterpreterLock.cpp
   src/Environment/WrapperHelpers.cpp
 )
 
@@ -94,6 +97,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
+  ${HEADER_DIR}/kernel/Converters/ContainerDtype.h
   ${HEADER_DIR}/kernel/Converters/DateAndTime.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
@@ -179,7 +183,7 @@ copy_files_to_dir ( ${MPISETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
                     PYTHON_INSTALL_FILES )
 
 # Package version
-if ( WIN32 OR APPLE )
+if ( WIN32 OR (APPLE AND ENABLE_MANTIDPLOT) )
   # NeXus library is in the same place relative to the Python library
   get_filename_component ( NEXUSLIB_FILE ${NEXUSLIB} NAME )
   set ( NEXUSLIB ../../${NEXUSLIB_FILE} )

@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <vector>
 
 namespace Mantid {
 
@@ -67,8 +67,8 @@ private:
   ~ScriptRepositoryFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>
-    ScriptRepositoryFactory;
+using ScriptRepositoryFactory =
+    Mantid::Kernel::SingletonHolder<ScriptRepositoryFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
@@ -78,7 +78,7 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::ScriptRepositoryFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /**
  * Macro for declaring a new type of function to be used with the

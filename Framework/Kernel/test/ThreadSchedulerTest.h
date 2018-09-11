@@ -1,12 +1,12 @@
 #ifndef MANTID_KERNEL_THREADSCHEDULERTEST_H_
 #define MANTID_KERNEL_THREADSCHEDULERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
 #include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <cxxtest/TestSuite.h>
 
-#include <MantidKernel/ThreadScheduler.h>
 #include <MantidKernel/Task.h>
+#include <MantidKernel/ThreadScheduler.h>
 
 using namespace Mantid::Kernel;
 
@@ -87,8 +87,8 @@ public:
 
     // And ThreadScheduler does not delete popped tasks in this way
     TS_ASSERT_EQUALS(ThreadSchedulerTest_numDestructed, 0);
-    for (size_t i = 0; i < 4; i++) {
-      delete tasks[i];
+    for (auto &task : tasks) {
+      delete task;
     }
   }
 

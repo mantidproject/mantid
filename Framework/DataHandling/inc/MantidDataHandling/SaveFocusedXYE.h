@@ -69,6 +69,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveFullprofResolution", "SaveAscii"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";
@@ -115,6 +118,6 @@ private:
   /// Comment character
   std::string m_comment;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEFOCUSEDXYE_H_

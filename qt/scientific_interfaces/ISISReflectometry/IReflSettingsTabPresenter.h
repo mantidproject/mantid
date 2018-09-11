@@ -40,10 +40,10 @@ class IReflSettingsTabPresenter {
 public:
   virtual ~IReflSettingsTabPresenter(){};
   /// Transmission runs for a particular run angle
-  virtual std::string getTransmissionRunsForAngle(int group,
-                                                  const double angle) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const = 0;
   /// Whether per-angle transmission runs are specified
-  virtual bool hasPerAngleTransmissionRuns(int group) const = 0;
+  virtual bool hasPerAngleOptions(int group) const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions(int group) const = 0;
@@ -59,6 +59,6 @@ public:
   virtual void onReductionPaused(int group) = 0;
   virtual void onReductionResumed(int group) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSTABPRESENTER_H */

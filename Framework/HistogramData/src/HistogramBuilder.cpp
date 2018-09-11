@@ -34,6 +34,8 @@ Histogram HistogramBuilder::build() const {
   }
   if (m_e)
     histogram->setSharedE(m_e);
+  if (d_x)
+    histogram->setSharedDx(d_x);
   return *histogram;
 }
 

@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 
 #include <boost/make_shared.hpp>
 
@@ -51,8 +51,9 @@ public:
         sampleShape = can->createSampleShape(Container::ShapeArgs()));
     TS_ASSERT(sampleShape->hasValidShape());
     TS_ASSERT_DELTA(
-        1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
-                 *sampleShape)),
+        1.0,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
         1e-10);
   }
 
@@ -67,8 +68,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
     TS_ASSERT_DELTA(
-        0.5, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
-                 *sampleShape)),
+        0.5,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
         1e-10);
   }
 
@@ -83,8 +85,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(sampleShape = can->createSampleShape(args));
     TS_ASSERT(sampleShape->hasValidShape());
     TS_ASSERT_DELTA(
-        1.0, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
-                 *sampleShape)),
+        1.0,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(*sampleShape)),
         1e-10);
   }
 
@@ -110,8 +113,8 @@ private:
         "</cylinder></type>");
   }
   double getSphereRadius(const Mantid::Geometry::CSGObject &shape) {
-    using Mantid::Geometry::SurfPoint;
     using Mantid::Geometry::Sphere;
+    using Mantid::Geometry::SurfPoint;
     auto topRule = shape.topRule();
     if (auto surfpoint = dynamic_cast<const SurfPoint *>(topRule)) {
       if (auto sphere = dynamic_cast<Sphere *>(surfpoint->getKey())) {

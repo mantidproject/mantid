@@ -63,6 +63,10 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"OneMinusExponentialCor", "MagFormFactorCorrection",
+            "ExponentialCorrection", "PowerLawCorrection"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "CorrectionFunctions"; }
 

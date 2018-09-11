@@ -45,11 +45,11 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/format.hpp>
 #include <cmath>
@@ -73,7 +73,7 @@ std::string extractFormattedPropertyFromDimension(
   std::string id = dimension->getDimensionId();
   return boost::str(boost::format("%s, %f, %f, %d") % id % min % max % nBins);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -103,7 +103,7 @@ void IntegratePeaksHybrid::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -129,7 +129,7 @@ void IntegratePeaksHybrid::init() {
           "BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input),
       "Background outer radius estimate. Choose liberal value.");
 
-  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
 
@@ -149,8 +149,8 @@ const std::string IntegratePeaksHybrid::summary() const {
  */
 void IntegratePeaksHybrid::exec() {
   IMDEventWorkspace_sptr mdWS = getProperty("InputWorkspace");
-  IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
-  IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
+  PeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
+  PeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   const int numBins = getProperty("NumberOfBins");
   const double peakOuterRadius = getProperty("BackgroundOuterRadius");
   const double halfPeakOuterRadius = peakOuterRadius / 2;

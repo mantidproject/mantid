@@ -1,8 +1,8 @@
 #include "MantidCrystal/ClusterRegister.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/CompositeCluster.h"
-#include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/make_shared.hpp>
 #include <list>
 #include <unordered_set>
 
@@ -12,7 +12,7 @@ template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
   T max = std::max(a, b);
   return std::pair<T, T>(min, max);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {
@@ -26,13 +26,13 @@ public:
   ClusterRegister::MapCluster m_unique;
 
   /// Type for identifying label groups
-  typedef std::list<std::unordered_set<size_t>> GroupType;
+  using GroupType = std::list<std::unordered_set<size_t>>;
 
   /// Groups of labels to maintain
   GroupType m_groups;
 
   /// Type for identifying labels already seen
-  typedef std::unordered_set<size_t> LabelHash;
+  using LabelHash = std::unordered_set<size_t>;
 
   /// Hash of labels merged
   LabelHash m_labelHash;
@@ -113,11 +113,11 @@ public:
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 ClusterRegister::ClusterRegister() : m_Impl(new ImplClusterRegister) {}
 
 /** Destructor
-*/
+ */
 ClusterRegister::~ClusterRegister() = default;
 
 /**

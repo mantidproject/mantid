@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_LATTICEFUNCTION_H_
 #define MANTID_CURVEFITTING_LATTICEFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidKernel/System.h"
 
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
@@ -63,7 +63,7 @@ private:
   Functions::PawleyParameterFunction_sptr m_cellParameters;
 };
 
-typedef boost::shared_ptr<LatticeFunction> LatticeFunction_sptr;
+using LatticeFunction_sptr = boost::shared_ptr<LatticeFunction>;
 
 } // namespace CurveFitting
 } // namespace Mantid

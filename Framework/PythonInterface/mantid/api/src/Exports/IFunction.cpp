@@ -1,9 +1,9 @@
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -40,22 +40,26 @@ PyObject *getCategories(IFunction &self) {
   return registered;
 }
 
+/**
+ * Return fitting error for a parameter given its name.
+ */
+double getError(IFunction &self, std::string const &name) {
+  return self.getError(self.parameterIndex(name));
+}
+
 // -- Set property overloads --
 // setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType1)(size_t, const double &value, bool);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
-typedef void (IFunction::*setParameterType2)(const std::string &,
-                                             const double &value, bool);
+using setParameterType2 = void (IFunction::*)(const std::string &,
+                                              const double &, bool);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
@@ -65,14 +69,12 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1,
                                        2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
-typedef void (IFunction::*removeTieByName)(const std::string &);
+using removeTieByName = void (IFunction::*)(const std::string &);
 
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
-}
+} // namespace
 
 void export_IFunction() {
 
@@ -127,8 +129,9 @@ void export_IFunction() {
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
-      .def("__getitem__", (double (IFunction::*)(const std::string &) const) &
-                              IFunction::getParameter,
+      .def("__getitem__",
+           (double (IFunction::*)(const std::string &) const) &
+               IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
@@ -250,6 +253,10 @@ void export_IFunction() {
       .def("getParamValue",
            (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getError", &IFunction::getError, (arg("self"), arg("i")),
+           "Return fitting error of the ith parameter")
+      .def("getError", &getError, (arg("self"), arg("name")),
+           "Return fitting error of the named parameter")
 
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),

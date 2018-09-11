@@ -290,11 +290,13 @@ The intention is that this mode could be useful for users who are accustomed to 
 TF asymmetry enabled
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The TF asymmetry mode can be enabled by checking the "TF Asymmetry" checkbox in the Settings table of the data analysis tab. Loading transverse field asymmetry data into muon analysis will automatically
-enable TF asymmetry mode. 
-When this is activated, the data analysis tab has two main differences to the pre 3.8 version. Firstly there 
-is an additional row in the Data table (normalization). The second difference is the addition of the "TF
-Asymmetry Fit" button in the fitting tab. Selecting this fitting option will recalculate the normalization based on the user fitting function. 
+The TF asymmetry mode can be enabled by checking the "TF Asymmetry" checkbox in the Settings table of the data analysis tab. Leaving the tab will deactivate 
+TF asymmetry.
+When TF Asymmetry is activated the user's function is updated by using :ref:`ConvertFitFunctionForMuonTFAsymmetry <algm-ConvertFitFunctionForMuonTFAsymmetry>`
+and populates the function browser. The ties and constraints are not preserved. The plot will also update. Running a fit will then use :ref:`CalculaterMuonAsymmetry <algm-CalculateMuonAsymmetry>`. This willupdate the normalized data.
+It is adviced that when using this feature to have no binning. 
+
+When the user deactivates the  "TF Asymmetry" checkbox the user function is returned with updated values.
 
 .. image::  ../images/MuonAnalysisTFAsymm.png
    :align: right

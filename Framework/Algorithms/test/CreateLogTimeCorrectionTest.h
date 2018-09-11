@@ -11,9 +11,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
 
+#include <Poco/File.h>
 #include <fstream>
 #include <sstream>
-#include <Poco/File.h>
 
 using Mantid::Algorithms::CreateLogTimeCorrection;
 
@@ -43,7 +43,7 @@ public:
   }
 
   /** Test against a Vulcan run
-    */
+   */
   void test_VulcanNoFileOutput() {
     CreateLogTimeCorrection alg;
     alg.initialize();
@@ -83,7 +83,7 @@ public:
   }
 
   /** Test against a Vulcan run
-    */
+   */
   void WindowsFailed_test_VulcanFileOutput() {
     CreateLogTimeCorrection alg;
     alg.initialize();
@@ -140,7 +140,7 @@ public:
   }
 
   /** Test if there is no instrument in given workspace
-    */
+   */
   void test_NoInstrument() {
     MatrixWorkspace_sptr inpws = createEmptyWorkspace("");
 
@@ -163,7 +163,7 @@ public:
 
 private:
   /** Generate an empty Vulcan workspace
-    */
+   */
   API::MatrixWorkspace_sptr createEmptyWorkspace(const string &instrument) {
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));

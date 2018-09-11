@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_SORTPEAKSWORKSPACE_H_
 #define MANTID_CRYSTAL_SORTPEAKSWORKSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -41,13 +41,14 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreatePeaksWorkspace"};
+  }
   const std::string category() const override;
 
 private:
   void init() override;
   void exec() override;
-  Mantid::DataObjects::PeaksWorkspace_sptr tryFetchOutputWorkspace() const;
-  Mantid::DataObjects::PeaksWorkspace_sptr tryFetchInputWorkspace() const;
 };
 
 } // namespace Crystal

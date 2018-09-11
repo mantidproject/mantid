@@ -107,6 +107,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """ Defines the category the algorithm will be put in the algorithm browser
         """
         return 'DataHandling\\Raw'
+
+#----------------------------------------------------------------------------------------
+
+    def seeAlso(self):
+        return [ "LoadEmptyVesuvio" ,"LoadRaw" ]
+
 #----------------------------------------------------------------------------------------
 
     def PyInit(self):
@@ -413,8 +419,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
     def _get_filename(self, run_or_filename):
         """Given a string containing either a filename/partial filename or run number find the correct
         file prefix"""
-        isis = config.getFacility("ISIS")
-        vesuvio = isis.instrument("VESUVIO")
+        vesuvio = config.getInstrument("VESUVIO")
         if isinstance(run_or_filename, six.integer_types):
             run_no = run_or_filename
             return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)

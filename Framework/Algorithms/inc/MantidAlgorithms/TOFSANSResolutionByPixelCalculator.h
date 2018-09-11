@@ -38,7 +38,7 @@ public:
                         double wavelength, double deltaWavelength, double l1,
                         double l2) const;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif

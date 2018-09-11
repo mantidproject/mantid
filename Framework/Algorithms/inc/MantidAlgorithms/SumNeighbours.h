@@ -55,6 +55,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SumSpectra", "SumRowColumn"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Grouping"; }
 
@@ -64,7 +67,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SumNeighbours_H_*/

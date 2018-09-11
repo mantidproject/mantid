@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_CALCULATEUMATRIX_H_
 #define MANTID_CRYSTAL_CALCULATEUMATRIX_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -46,6 +46,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override { return {"SetUB"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\UBMatrix"; }
 

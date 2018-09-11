@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_LOADISAWPEAKS_H_
 #define MANTID_CRYSTAL_LOADISAWPEAKS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -29,6 +29,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveIsawPeaks"};
+  }
 
   /// Algorithm's category for identification
   const std::string category() const override {
@@ -80,7 +83,7 @@ private:
       const boost::shared_ptr<const Geometry::Instrument> &inst);
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LOADISAWPEAKS_H_ */

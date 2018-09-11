@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
 #define MANTID_GEOMETRY_COMPOSITEBRAGGSCATTERER_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/BraggScatterer.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -59,7 +59,7 @@ namespace Geometry {
   */
 class CompositeBraggScatterer;
 
-typedef boost::shared_ptr<CompositeBraggScatterer> CompositeBraggScatterer_sptr;
+using CompositeBraggScatterer_sptr = boost::shared_ptr<CompositeBraggScatterer>;
 
 class MANTID_GEOMETRY_DLL CompositeBraggScatterer : public BraggScatterer {
 public:
@@ -97,7 +97,7 @@ protected:
 
   std::vector<BraggScatterer_sptr> m_scatterers;
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

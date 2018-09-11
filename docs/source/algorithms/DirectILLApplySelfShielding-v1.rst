@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -126,7 +126,7 @@ Output:
 .. testoutput:: FakeIN4Example
 
     Elastic peak maximum before corrections: 26.7
-    After empty container subtraction and absorption corrections: 48.0
+    After empty container subtraction and absorption corrections: 51.5
 
 .. categories::
 

@@ -22,7 +22,7 @@ using boost::python::extract;
 ExtractWorkspace::ExtractWorkspace(const boost::python::api::object &pyvalue)
     : m_value() {
   // Test for a weak pointer first
-  typedef boost::weak_ptr<Workspace> Workspace_wptr;
+  using Workspace_wptr = boost::weak_ptr<Workspace>;
   extract<Workspace_wptr &> extractWeak(pyvalue);
   if (extractWeak.check()) {
     m_value = extractWeak().lock();
@@ -50,5 +50,5 @@ const API::Workspace_sptr ExtractWorkspace::operator()() const {
         "Unable to extract boost::shared_ptr<Workspace> from Python object");
   }
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

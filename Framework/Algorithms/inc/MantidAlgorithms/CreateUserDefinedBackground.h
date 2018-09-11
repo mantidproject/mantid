@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUND_H_
 #define MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUND_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 namespace Mantid {
 namespace Kernel {
@@ -44,6 +44,9 @@ public:
   const std::string name() const override;
   /// Version number
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"RemoveBackground", "CalculatePolynomialBackground"};
+  }
   /// Category algorithm belongs to
   const std::string category() const override;
   /// Description of algorithm

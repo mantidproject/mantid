@@ -35,8 +35,8 @@ int MAX_SUBOPT_ITER = 100;
 /// Holder for data to pass to gsl functions
 struct FunctionData {
   size_t n; // number of parameters
-  const AugmentedLagrangianOptimizer::ObjFunction *
-      userfunc;                      // user supplied function
+  const AugmentedLagrangianOptimizer::ObjFunction
+      *userfunc;                     // user supplied function
   const DblMatrix *eqmatrix;         // equality constraints
   const std::vector<double> *lambda; // lagrange multiplier for equality
   const DblMatrix *ineqmatrix;       // inequality constraints
@@ -116,7 +116,7 @@ int relstopX(const std::vector<double> &xvOld, const gsl_vector *xvNew,
   }
   return 1;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------------------
 // AugmentedLagrangianOptimizer
@@ -283,7 +283,7 @@ void costfdf(const gsl_vector *x, void *params, double *f, gsl_vector *df) {
   *f = costf(x, params);
   costdf(x, params, df);
 }
-}
+} // namespace
 
 /**
  * @param lambda
@@ -382,9 +382,10 @@ void AugmentedLagrangianOptimizer::checkConstraints(
     if (ncols > 0 && ncols != numParameters()) {
       std::ostringstream os;
       os << "AugmentedLagrangianOptimizer::initializeConstraints - Invalid "
-         << matrix << " constraint matrix. Number of columns must match number "
-                      "of parameters. ncols=" << ncols
-         << ", nparams=" << numParameters();
+         << matrix
+         << " constraint matrix. Number of columns must match number "
+            "of parameters. ncols="
+         << ncols << ", nparams=" << numParameters();
       throw std::invalid_argument(os.str());
     }
   }

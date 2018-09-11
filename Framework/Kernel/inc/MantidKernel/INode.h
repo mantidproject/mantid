@@ -36,7 +36,7 @@ class DLLExport INode {
 public:
   virtual ~INode(){};
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

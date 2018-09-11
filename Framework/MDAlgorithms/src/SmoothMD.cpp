@@ -30,22 +30,22 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 // Typedef for width vector
-typedef std::vector<double> WidthVector;
+using WidthVector = std::vector<double>;
 
 // Typedef for kernel vector
-typedef std::vector<double> KernelVector;
+using KernelVector = std::vector<double>;
 
 // Typedef for an optional md histo workspace
-typedef boost::optional<IMDHistoWorkspace_const_sptr>
-    OptionalIMDHistoWorkspace_const_sptr;
+using OptionalIMDHistoWorkspace_const_sptr =
+    boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-typedef boost::function<IMDHistoWorkspace_sptr(
+using SmoothFunction = boost::function<IMDHistoWorkspace_sptr(
     IMDHistoWorkspace_const_sptr, const WidthVector &,
-    OptionalIMDHistoWorkspace_const_sptr)> SmoothFunction;
+    OptionalIMDHistoWorkspace_const_sptr)>;
 
 // Typedef for a smoothing function map keyed by name.
-typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
+using SmoothFunctionMap = std::map<std::string, SmoothFunction>;
 
 namespace {
 
@@ -60,7 +60,7 @@ SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
       {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
                                instance, _1, _2, _3)}};
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -192,8 +192,8 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+    auto iterator =
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     if (!iterator) {
       throw std::logic_error(
@@ -318,9 +318,8 @@ SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
     for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
       PARALLEL_START_INTERUPT_REGION
-      boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
-
+      auto iterator =
+          dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
       if (!iterator) {
         throw std::logic_error(
             "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
@@ -505,15 +504,19 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
       double intpart;
       if (modf(widthEntry, &intpart) != 0.0) {
         std::stringstream message;
-        message << widthVectorPropertyName << " entries must be (odd) integers "
-                                              "when Hat function is chosen. "
-                                              "Bad entry is " << widthEntry;
+        message << widthVectorPropertyName
+                << " entries must be (odd) integers "
+                   "when Hat function is chosen. "
+                   "Bad entry is "
+                << widthEntry;
         product.emplace(widthVectorPropertyName, message.str());
       } else if (static_cast<unsigned long>(widthEntry) % 2 == 0) {
         std::stringstream message;
-        message << widthVectorPropertyName << " entries must be odd integers "
-                                              "when Hat function is chosen. "
-                                              "Bad entry is " << widthEntry;
+        message << widthVectorPropertyName
+                << " entries must be odd integers "
+                   "when Hat function is chosen. "
+                   "Bad entry is "
+                << widthEntry;
       }
     }
   }
@@ -545,8 +548,9 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
           message << normalisationWorkspacePropertyName
                   << ". Number of bins from dimension with index " << i
                   << " do not match. " << nBinsSmooth << " expected. Got "
-                  << nBinsNorm << ". Shapes of inputs must be the same. Cannot "
-                                  "continue smoothing.";
+                  << nBinsNorm
+                  << ". Shapes of inputs must be the same. Cannot "
+                     "continue smoothing.";
           product.emplace(normalisationWorkspacePropertyName, message.str());
           break;
         }

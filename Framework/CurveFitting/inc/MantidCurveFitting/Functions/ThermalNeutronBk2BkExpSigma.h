@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPSIGMA_H_
 #define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPSIGMA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -65,8 +65,8 @@ private:
                              double sig2sq) const;
 };
 
-typedef boost::shared_ptr<ThermalNeutronBk2BkExpSigma>
-    ThermalNeutronBk2BkExpSigma_sptr;
+using ThermalNeutronBk2BkExpSigma_sptr =
+    boost::shared_ptr<ThermalNeutronBk2BkExpSigma>;
 
 } // namespace Functions
 } // namespace CurveFitting

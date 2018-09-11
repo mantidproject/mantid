@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
 
@@ -16,7 +16,7 @@ using std::string;
 namespace {
 // static logger reference
 Logger g_log("PropertyManager");
-}
+} // namespace
 
 //-----------------------------------------------------------------------------------------------
 /// Default constructor
@@ -347,7 +347,7 @@ void PropertyManager::setPropertiesWithSimpleString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
 
   boost::char_separator<char> sep(";");
   tokenizer propPairs(propertiesString, ";",

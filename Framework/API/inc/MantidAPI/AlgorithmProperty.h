@@ -2,8 +2,8 @@
 #define MANTID_API_ALGORITHMPROPERTY_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid {
 namespace API {
@@ -53,7 +53,7 @@ class DLLExport AlgorithmProperty
     : public Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm>> {
 public:
   /// Typedef the held type
-  typedef boost::shared_ptr<IAlgorithm> HeldType;
+  using HeldType = boost::shared_ptr<IAlgorithm>;
 
   /// Constructor
   AlgorithmProperty(const std::string &propName,

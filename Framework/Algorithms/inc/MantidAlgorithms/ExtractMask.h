@@ -56,6 +56,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ExtractMaskToTable"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
 
@@ -65,7 +68,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif // MANTID_ALGORITHMS_EXTRACTMASK_H_

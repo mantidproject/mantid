@@ -2,17 +2,17 @@
 #define MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
 class BinEdges;
 class CountStandardDeviations;
 class Counts;
-}
-}
+} // namespace HistogramData
+} // namespace Mantid
 
 namespace Mantid {
 namespace Algorithms {
@@ -88,6 +88,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
@@ -182,7 +183,7 @@ private:
   bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_NORMALISETOMONITOR_H_ */

@@ -34,13 +34,13 @@ namespace Geometry {
 class Instrument;
 
 /// Shared pointer to an instrument object
-typedef boost::shared_ptr<Instrument> Instrument_sptr;
+using Instrument_sptr = boost::shared_ptr<Instrument>;
 /// Shared pointer to an const instrument object
-typedef boost::shared_ptr<const Instrument> Instrument_const_sptr;
+using Instrument_const_sptr = boost::shared_ptr<const Instrument>;
 /// unique pointer to an instrument
-typedef std::unique_ptr<Instrument> Instrument_uptr;
+using Instrument_uptr = std::unique_ptr<Instrument>;
 /// unique pointer to an instrument (const version)
-typedef std::unique_ptr<const Instrument> Instrument_const_uptr;
+using Instrument_const_uptr = std::unique_ptr<const Instrument>;
 
 } // namespace Geometry
 } // namespace Mantid

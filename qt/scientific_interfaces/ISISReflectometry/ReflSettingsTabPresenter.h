@@ -55,10 +55,10 @@ public:
   passSelfToChildren(std::vector<IReflSettingsPresenter *> const &children);
 
   /// Returns values passed for 'Transmission run(s)'
-  std::string getTransmissionRunsForAngle(int group,
-                                          const double angle) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(int group, const double angle) const override;
   /// Whether per-angle tranmsission runs are set
-  bool hasPerAngleTransmissionRuns(int group) const override;
+  bool hasPerAngleOptions(int group) const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions(int group) const override;
@@ -73,6 +73,6 @@ private:
   std::vector<IReflSettingsPresenter *> m_settingsPresenters;
   IReflMainWindowPresenter *m_mainPresenter;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSTABPRESENTER_H */

@@ -1,9 +1,9 @@
 #ifndef MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_
 #define MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -27,7 +27,7 @@ template <typename T>
 class DLLExport FirstExperimentInfoQueryAdapter
     : public FirstExperimentInfoQuery {
 public:
-  typedef boost::shared_ptr<const T> Adaptee_sptr;
+  using Adaptee_sptr = boost::shared_ptr<const T>;
 
 private:
   Adaptee_sptr m_ws;
@@ -67,7 +67,7 @@ public:
     return hasRotatedGoniometer;
   }
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif /* MANTID_SLICEVIEWER_FIRSTEXPERIMENTINFOQUERY_H_ */

@@ -1,29 +1,31 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -129,7 +131,7 @@ public:
   void test_Setting_A_New_Chopper_With_NULL_Ptr_Throws() {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
-    TS_ASSERT_THROWS(ws->setChopperModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws->setChopperModel(nullptr), std::invalid_argument);
   }
 
   void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds() {
@@ -154,14 +156,12 @@ public:
 
   void test_GetSetSample() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.sample());
     ws.mutableSample().setName("test");
     TS_ASSERT_EQUALS(ws.sample().getName(), "test");
   }
 
   void test_GetSetRun() {
     ExperimentInfo ws;
-    TS_ASSERT(&ws.run());
     ws.mutableRun().setProtonCharge(1.234);
     TS_ASSERT_DELTA(ws.run().getProtonCharge(), 1.234, 0.001);
   }
@@ -524,11 +524,11 @@ public:
     // iterator to browse through the multimap: paramInfoFromIDF
     std::unordered_multimap<std::string, fromToEntry>::const_iterator it1, it2;
     std::pair<std::unordered_multimap<std::string, fromToEntry>::iterator,
-              std::unordered_multimap<std::string, fromToEntry>::iterator> ret;
+              std::unordered_multimap<std::string, fromToEntry>::iterator>
+        ret;
 
-    for (auto setIt = idfIdentifiers.begin(); setIt != idfIdentifiers.end();
-         setIt++) {
-      ret = idfFiles.equal_range(*setIt);
+    for (const auto &idfIdentifier : idfIdentifiers) {
+      ret = idfFiles.equal_range(idfIdentifier);
       for (it1 = ret.first; it1 != ret.second; ++it1) {
         for (it2 = ret.first; it2 != ret.second; ++it2) {
           if (it1 != it2) {
@@ -715,9 +715,9 @@ public:
   }
 
   /**
-  * Test declaring an ExperimentInfo property and retrieving as const or
-  * non-const
-  */
+   * Test declaring an ExperimentInfo property and retrieving as const or
+   * non-const
+   */
   void testGetProperty_const_sptr() {
     const std::string eiName = "InputEi";
     ExperimentInfo_sptr eiInput(new ExperimentInfo());
@@ -729,10 +729,10 @@ public:
     ExperimentInfo_sptr eiNonConst;
     TS_ASSERT_THROWS_NOTHING(
         eiConst = manager.getValue<ExperimentInfo_const_sptr>(eiName));
-    TS_ASSERT(eiConst != NULL);
+    TS_ASSERT(eiConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiNonConst =
                                  manager.getValue<ExperimentInfo_sptr>(eiName));
-    TS_ASSERT(eiNonConst != NULL);
+    TS_ASSERT(eiNonConst != nullptr);
     TS_ASSERT_EQUALS(eiConst, eiNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -740,9 +740,9 @@ public:
     ExperimentInfo_const_sptr eiCastConst;
     ExperimentInfo_sptr eiCastNonConst;
     TS_ASSERT_THROWS_NOTHING(eiCastConst = (ExperimentInfo_const_sptr)val);
-    TS_ASSERT(eiCastConst != NULL);
+    TS_ASSERT(eiCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
-    TS_ASSERT(eiCastNonConst != NULL);
+    TS_ASSERT(eiCastNonConst != nullptr);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
   }
 
@@ -938,6 +938,19 @@ public:
 
     TS_ASSERT_EQUALS(compInfo.indexOf(inst->getComponentID()),
                      compInfo.parent(compInfo.indexOf(bankId)));
+  }
+
+  void test_readParameterMap_semicolons_in_value() {
+    auto inst = ComponentCreationHelper::createMinimalInstrument(
+        V3D{-2, 0, 0} /*source*/, V3D{10, 0, 0} /*sample*/,
+        V3D{12, 0, 0} /*detector*/);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    expInfo.readParameterMap("detID:1;string;par;11;22;33;44");
+    auto &pmap = expInfo.instrumentParameters();
+    auto det = expInfo.getInstrument()->getDetector(1);
+    auto value = pmap.getString(det.get(), "par");
+    TS_ASSERT_EQUALS(value, "11;22;33;44");
   }
 
 private:

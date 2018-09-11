@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAOBJECTS_MDLEANEVENT_H_
 #define MANTID_DATAOBJECTS_MDLEANEVENT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/System.h"
 #include <algorithm>
 #include <cmath>
 #include <numeric>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
 namespace DataObjects {
@@ -228,7 +228,7 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** @return the detectorId of this event.
-  *           Always 0: this information is not present in a MDLeanEvent. */
+   *           Always 0: this information is not present in a MDLeanEvent. */
   int32_t getDetectorID() const { return 0; }
 
   /* static method used to convert vector of lean events into vector of their

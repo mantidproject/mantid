@@ -142,5 +142,5 @@ void Quadrilateral::shiftVertexesClockwise() {
   m_lowerRight = temp;
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

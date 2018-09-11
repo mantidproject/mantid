@@ -1,7 +1,8 @@
 #include "MantidLiveData/Kafka/KafkaEventListener.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
+#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 namespace {
@@ -13,21 +14,32 @@ namespace LiveData {
 
 DECLARE_LISTENER(KafkaEventListener)
 
-KafkaEventListener::KafkaEventListener() {
-  declareProperty("InstrumentName", "");
+void KafkaEventListener::setAlgorithm(
+    const Mantid::API::IAlgorithm &callingAlgorithm) {
+  this->updatePropertyValues(callingAlgorithm);
+  // Get the instrument name from StartLiveData so we can sub to correct topics
+  if (callingAlgorithm.existsProperty("Instrument")) {
+    m_instrumentName = callingAlgorithm.getPropertyValue("Instrument");
+  } else {
+    g_log.error("KafkaEventListener requires Instrument property to be set in "
+                "calling algorithm");
+  }
 }
 
 /// @copydoc ILiveListener::connect
 bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
+  if (m_instrumentName.empty()) {
+    g_log.error(
+        "KafkaEventListener::connect requires a non-empty instrument name");
+  }
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
-    std::string instrumentName = getProperty("InstrumentName");
-    const std::string eventTopic(instrumentName +
+    const std::string eventTopic(m_instrumentName +
                                  KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
-        runInfoTopic(instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
-        spDetInfoTopic(instrumentName +
+        runInfoTopic(m_instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
+        spDetInfoTopic(m_instrumentName +
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX),
-        sampleEnvTopic(instrumentName +
+        sampleEnvTopic(m_instrumentName +
                        KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<KafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic);
@@ -50,7 +62,8 @@ void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
     startNow = false;
   } else if (startTime != 0) {
     g_log.warning() << "KafkaLiveListener does not currently support starting "
-                       "from arbitrary time." << std::endl;
+                       "from arbitrary time."
+                    << std::endl;
   }
   m_decoder->startCapture(startNow);
 }
@@ -85,5 +98,10 @@ API::ILiveListener::RunStatus KafkaEventListener::runStatus() {
 int KafkaEventListener::runNumber() const {
   return (m_decoder ? m_decoder->runNumber() : -1);
 }
+
+/// @copydoc ILiveListener::dataReset
+bool KafkaEventListener::dataReset() {
+  return (m_decoder ? m_decoder->dataReset() : false);
 }
-}
+} // namespace LiveData
+} // namespace Mantid

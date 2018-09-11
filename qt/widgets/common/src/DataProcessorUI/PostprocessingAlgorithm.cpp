@@ -5,10 +5,10 @@ namespace MantidWidgets {
 namespace DataProcessor {
 
 /** Constructor
-* @param name : The name of the post-processing algorithm
-* @param prefix : The prefix that will be added to the output workspace name
-* @param blacklist : The list of properties we don't want to show
-*/
+ * @param name : The name of the post-processing algorithm
+ * @param prefix : The prefix that will be added to the output workspace name
+ * @param blacklist : The list of properties we don't want to show
+ */
 PostprocessingAlgorithm::PostprocessingAlgorithm(
     const QString &name, const QString &prefix,
     const std::set<QString> &blacklist)
@@ -32,10 +32,10 @@ PostprocessingAlgorithm::PostprocessingAlgorithm(
 }
 
 /** Delegating constructor
-* @param name : The name of the post-processing algorithm
-* @param prefix : The prefix that will be added to the output workspace name
-* @param blacklist : The list of properties we don't want to show, as a string
-*/
+ * @param name : The name of the post-processing algorithm
+ * @param prefix : The prefix that will be added to the output workspace name
+ * @param blacklist : The list of properties we don't want to show, as a string
+ */
 PostprocessingAlgorithm::PostprocessingAlgorithm(const QString &name,
                                                  const QString &prefix,
                                                  const QString &blacklist)
@@ -59,6 +59,6 @@ size_t PostprocessingAlgorithm::numberOfOutputProperties() const { return 1; }
 
 // Returns the prefix that will be added to the output ws
 QString PostprocessingAlgorithm::prefix() const { return m_prefix; }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

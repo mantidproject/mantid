@@ -1,21 +1,21 @@
 #ifndef MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
 #define MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
 #include <Poco/File.h>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/GenerateEventsFilter.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -28,11 +28,11 @@ using namespace std;
 namespace {
 //----------------------------------------------------------------------------------------------
 /** Create an EventWorkspace containing an integer log
-* 1. Run start  = 10  (s)
-* 2. Run end    = 22  (s)
-* 3. Pulse      = 0.5 (s)
-* 4. Log change = 1   (s)
-*/
+ * 1. Run start  = 10  (s)
+ * 2. Run end    = 22  (s)
+ * 3. Pulse      = 0.5 (s)
+ * 4. Log change = 1   (s)
+ */
 EventWorkspace_sptr createEventWorkspaceIntLog() {
   using namespace WorkspaceCreationHelper;
 
@@ -84,7 +84,7 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
 
   return eventws;
 }
-}
+} // namespace
 class GenerateEventsFilterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -361,7 +361,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to generate a set of filters against an integer log
-    */
+   */
   void test_genFilterByIntegerLog() {
     // 1. Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
@@ -432,7 +432,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to generate a set of filters against an integer log by using the
    * single value mode
-    */
+   */
   void test_genFilterByIntegerLog2() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
@@ -1105,7 +1105,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test that time intervals consisting solely of zero-values throws
-  */
+   */
   void test_timeIntervalsOnlyZeroValuesThrows() {
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -1138,7 +1138,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Convert the splitters stored in a matrix workspace to a vector of
    * SplittingInterval objects
-    */
+   */
   size_t convertMatrixSplitterToSplitters(
       API::MatrixWorkspace_const_sptr matrixws,
       std::vector<Kernel::SplittingInterval> &splitters) {

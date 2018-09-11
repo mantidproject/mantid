@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
   beam_centre_model_test.py
   diagnostics_page_presenter_test.py
   diagnostics_page_model_test.py
+  create_state_test.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

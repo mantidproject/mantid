@@ -12,7 +12,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace DataHandling {
 /**
      Saves a workspace into an ASCII SPE file.
@@ -57,6 +57,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSPE", "SavePAR", "SavePHX"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\SPE;Inelastic\\DataHandling";

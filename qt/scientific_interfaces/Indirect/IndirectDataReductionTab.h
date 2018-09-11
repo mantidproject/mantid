@@ -1,21 +1,21 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_
 
+#include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/IndirectInstrumentConfig.h"
+#include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include "IndirectTab.h"
 
-#include <QDoubleValidator>
-#include <QMap>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager>
 #include <MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser>
+#include <QDoubleValidator>
+#include <QMap>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -95,12 +95,12 @@ protected:
                            std::string analyser = "",
                            std::string reflection = "");
   /// Function to get details about the instrumet from a given workspace
-  QMap<QString, QString> getInstrumentDetails();
+  QMap<QString, QString> getInstrumentDetails() const;
   std::map<std::string, double>
   getRangesFromInstrument(QString instName = "", QString analyser = "",
                           QString reflection = "");
   /// Get the instrument config widget
-  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration();
+  MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration() const;
 
 private slots:
   void tabExecutionComplete(bool error);
@@ -110,6 +110,6 @@ private:
   bool m_tabRunning;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_INDIRECTDATAREDUCTIONTAB_H_ */

@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <Poco/NotificationCenter.h>
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/Algorithm.h"
+#include <Poco/NotificationCenter.h>
 
 #include <deque>
 #include <mutex>
@@ -102,7 +102,7 @@ private:
   mutable std::mutex m_managedMutex;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
+using AlgorithmManager = Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
 
 } // namespace API
 } // Namespace Mantid
@@ -112,6 +112,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmManagerImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_ALGORITHMMANAGER_H_ */

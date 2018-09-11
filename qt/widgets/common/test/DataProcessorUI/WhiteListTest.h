@@ -97,9 +97,19 @@ public:
     whitelist.addElement("Column3", "Property3", "Description3", true);
 
     TS_ASSERT_EQUALS(whitelist.size(), 2);
-    // Descriptions
     TS_ASSERT_EQUALS(whitelist.isShown(0), false);
     TS_ASSERT_EQUALS(whitelist.isShown(1), true);
+  }
+
+  void test_column_isKey() {
+    WhiteList whitelist;
+    whitelist.addElement("Column1", "Property1", "Description1");
+    whitelist.addElement("Column3", "Property3", "Description3", false,
+                         "prefix", true);
+
+    TS_ASSERT_EQUALS(whitelist.size(), 2);
+    TS_ASSERT_EQUALS(whitelist.isKey(0), false);
+    TS_ASSERT_EQUALS(whitelist.isKey(1), true);
   }
 
   void test_column_prefix() {
@@ -108,7 +118,6 @@ public:
     whitelist.addElement("Column3", "Property3", "Description3", true, "blah");
 
     TS_ASSERT_EQUALS(whitelist.size(), 2);
-    // Descriptions
     TS_ASSERT_EQUALS(whitelist.prefix(0), "");
     TS_ASSERT_EQUALS(whitelist.prefix(1), "blah");
   }

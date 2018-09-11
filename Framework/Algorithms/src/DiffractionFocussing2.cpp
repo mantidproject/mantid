@@ -22,8 +22,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using std::vector;
 using Mantid::HistogramData::BinEdges;
+using std::vector;
 
 namespace Mantid {
 
@@ -532,7 +532,7 @@ void DiffractionFocussing2::determineRebinParameters() {
   std::ostringstream mess;
 
   // typedef for the storage of the group ranges
-  typedef std::map<int, std::pair<double, double>> group2minmaxmap;
+  using group2minmaxmap = std::map<int, std::pair<double, double>>;
   // Map from group number to its associated range parameters <Xmin,Xmax,step>
   group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;
@@ -663,5 +663,5 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   return totalHistProcess;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

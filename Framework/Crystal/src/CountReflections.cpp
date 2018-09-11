@@ -6,12 +6,12 @@
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -90,7 +90,7 @@ void CountReflections::init() {
                   "Fraction of reflections with more than one observation.");
 
   declareProperty(
-      Kernel::make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+      Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "MissingReflectionsWorkspace", "", Direction::Output,
           PropertyMode::Optional),
       "Reflections in specified d-range that are missing in input workspace.");
@@ -134,7 +134,8 @@ void CountReflections::exec() {
     g_log.information() << "There are " << (peaks.size() - totalReflections)
                         << " peaks in the input workspace that fall outside "
                            "the resolution limit and are not considered for "
-                           "the calculations." << std::endl;
+                           "the calculations."
+                        << std::endl;
   }
 
   double multiplyObservedReflections =
@@ -148,7 +149,7 @@ void CountReflections::exec() {
   setProperty("MultiplyObserved",
               multiplyObservedReflections / observedUniqueReflectionsD);
 
-  IPeaksWorkspace_sptr outputWorkspace =
+  PeaksWorkspace_sptr outputWorkspace =
       getPeaksWorkspace(inputPeaksWorkspace, reflections, pointGroup);
 
   if (outputWorkspace) {
@@ -171,7 +172,7 @@ void CountReflections::exec() {
  * @param pointGroup :: Point group to expand unique reflections.
  * @return :: PeaksWorkspace with missing reflections.
  */
-IPeaksWorkspace_sptr CountReflections::getPeaksWorkspace(
+PeaksWorkspace_sptr CountReflections::getPeaksWorkspace(
     const PeaksWorkspace_sptr &templateWorkspace,
     const PeakStatisticsTools::UniqueReflectionCollection &reflections,
     const PointGroup_sptr &pointGroup) const {
@@ -179,10 +180,10 @@ IPeaksWorkspace_sptr CountReflections::getPeaksWorkspace(
       getPropertyValue("MissingReflectionsWorkspace");
 
   if (outputWorkspaceName.empty()) {
-    return IPeaksWorkspace_sptr();
+    return PeaksWorkspace_sptr();
   }
 
-  IPeaksWorkspace_sptr rawOutputPeaksWorkspace =
+  PeaksWorkspace_sptr rawOutputPeaksWorkspace =
       getProperty("MissingReflectionsWorkspace");
 
   PeaksWorkspace_sptr outputPeaksWorkspace =
@@ -210,7 +211,7 @@ IPeaksWorkspace_sptr CountReflections::getPeaksWorkspace(
 
   outputPeaksWorkspace->getPeaks().swap(peaks);
 
-  return boost::static_pointer_cast<IPeaksWorkspace>(outputPeaksWorkspace);
+  return outputPeaksWorkspace;
 }
 
 } // namespace Crystal

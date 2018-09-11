@@ -5,9 +5,9 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <Poco/File.h>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

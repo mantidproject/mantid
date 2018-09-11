@@ -11,8 +11,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Mantid::HistogramData;
 using Mantid::Types::Event::TofEvent;
 
@@ -27,7 +27,7 @@ public:
   /// deleting operator. Does nothing
   void operator()(const API::MatrixWorkspace *) {}
 };
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 

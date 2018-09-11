@@ -107,7 +107,7 @@ private:
 
   /// Typedef for a map of string commands to an enum of strongly typed
   /// commands.
-  typedef std::map<std::string, commands> CommandMap;
+  using CommandMap = std::map<std::string, commands>;
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
   boost::shared_ptr<Kernel::Property> m_periods;

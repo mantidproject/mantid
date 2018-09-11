@@ -1,12 +1,12 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 #define MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 
-#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/SerialAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <nexus/NeXusFile.hpp>
 #include <boost/optional.hpp>
 #include <climits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace NeXus {
@@ -62,6 +62,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveISISNexus", "SaveNexus", "LoadNexusProcessed"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

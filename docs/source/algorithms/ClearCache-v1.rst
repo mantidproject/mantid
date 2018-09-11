@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -20,7 +20,7 @@ Usage
 
 **Example - ClearCache**
 
-.. testcode:: ClearCacheExample
+.. code-block:: python
 
    filesRemoved = ClearCache(DownloadedInstrumentFileCache=True)
 
@@ -32,8 +32,7 @@ Usage
 
 Output:
 
-.. testoutput:: ClearCacheExample
-   :options: +ELLIPSIS
+.. code-block:: python
 
    ... files were removed
 

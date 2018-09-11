@@ -48,7 +48,7 @@ private:
   /// Checks the value is valid
   std::string checkValidity(const std::string &value) const override;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif

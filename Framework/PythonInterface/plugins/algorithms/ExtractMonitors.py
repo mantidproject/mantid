@@ -11,6 +11,9 @@ class ExtractMonitors(DataProcessorAlgorithm):
     def summary(self):
         return 'Separates the monitors and/or detectors into separate workspaces.'
 
+    def seeAlso(self):
+        return [ "ExtractMonitorWorkspace" ]
+
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input),

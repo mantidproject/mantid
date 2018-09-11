@@ -3,25 +3,25 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ConfigService.h"
 
-#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
-#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
-#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidCurveFitting/Functions/ExpDecay.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
+#include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/GSLJacobian.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -33,8 +33,8 @@ using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::CurveFitting::FuncMinimisers;
 using namespace Mantid::CurveFitting::CostFunctions;
 
-typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
-typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+using WS_type = Mantid::DataObjects::Workspace2D_sptr;
+using TWS_type = Mantid::DataObjects::TableWorkspace_sptr;
 
 class CurveFittingGauss : public IPeakFunction {
 public:

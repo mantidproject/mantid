@@ -139,6 +139,42 @@ class BatchCsvParserTest(unittest.TestCase):
 
         BatchCsvParserTest._remove_csv(batch_file_path)
 
+    def test_that_does_not_return_excluded_keywords(self):
+        content = "# MANTID_BATCH_FILE add more text here\n" \
+                   "sample_sans,1,sample_trans,2,sample_direct_beam,3,output_as,test_file,user_file,user_test_file\n" \
+                   "sample_sans,1,can_sans,2,output_as,test_file2,"","", background_sans, background\n"
+        batch_file_path = BatchCsvParserTest._save_to_csv(content)
+        parser = BatchCsvParser(batch_file_path)
+
+        # Act
+        output = parser.parse_batch_file()
+
+        # Assert
+        self.assertTrue(len(output) == 2)
+
+        first_line = output[0]
+        # Should have 5 user specified entries and 3 period entries
+        self.assertTrue(len(first_line) == 8)
+        self.assertTrue(first_line[BatchReductionEntry.SampleScatter] == "1")
+        self.assertTrue(first_line[BatchReductionEntry.SampleScatterPeriod] == ALL_PERIODS)
+        self.assertTrue(first_line[BatchReductionEntry.SampleTransmission] == "2")
+        self.assertTrue(first_line[BatchReductionEntry.SampleTransmissionPeriod] == ALL_PERIODS)
+        self.assertTrue(first_line[BatchReductionEntry.SampleDirect] == "3")
+        self.assertTrue(first_line[BatchReductionEntry.SampleDirectPeriod] == ALL_PERIODS)
+        self.assertTrue(first_line[BatchReductionEntry.Output] == "test_file")
+        self.assertTrue(first_line[BatchReductionEntry.UserFile] == "user_test_file")
+        second_line = output[1]
+
+        # Should have 3 user specified entries and 2 period entries
+        self.assertTrue(len(second_line) == 5)
+        self.assertTrue(second_line[BatchReductionEntry.SampleScatter] == "1")
+        self.assertTrue(second_line[BatchReductionEntry.SampleScatterPeriod] == ALL_PERIODS)
+        self.assertTrue(second_line[BatchReductionEntry.CanScatter] == "2")
+        self.assertTrue(second_line[BatchReductionEntry.CanScatterPeriod] == ALL_PERIODS)
+        self.assertTrue(second_line[BatchReductionEntry.Output] == "test_file2")
+
+        BatchCsvParserTest._remove_csv(batch_file_path)
+
 
 if __name__ == '__main__':
     unittest.main()

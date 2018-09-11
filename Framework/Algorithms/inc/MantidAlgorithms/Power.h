@@ -59,6 +59,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Exponential", "Logarithm"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Arithmetic"; }
 
@@ -74,7 +77,7 @@ private:
   /// Exponent to raise the base workspace to
   double m_exponent;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif

@@ -2,9 +2,9 @@
 #define MANTID_ALGORITHM_GROUP_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,6 +49,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"UnGroupWorkspace"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Transforms\\Grouping;Utility\\Workspaces";
@@ -74,7 +77,7 @@ private:
   API::WorkspaceGroup_sptr m_group;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REGROUP_H_*/

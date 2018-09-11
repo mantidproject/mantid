@@ -7,11 +7,12 @@ digraph DirectILLCollectData {
     bkgScaling [label="FlatBkgScaling"]
     inputFile [label="Run"]
     inputWS [label="InputWorkspace"]
-    inputEPP [label="EPPWorkspace"]
     inputBkg [label="FlatBkgWorkspace"]
     inputEi [label="IncidentEnergyWorkspace"]
+    inputElasticChannel [label="ElasticChannelWorkspace"]
     outputBkg [label="OutputFlatBkgWorkspace"]
     outputEi [label="OutputIncidentEnergyWorkspace"]
+    outputElasticChannel [label="OutputElasticChannelWorkspace"]
     outputEPP [label="OutputEPPWorkspace"]
     outputRaw [label="OutputRawWorkspace"]
     outputWS [label="OutputWorkspace"]
@@ -24,13 +25,15 @@ digraph DirectILLCollectData {
     CorrectTOFAxis [label="CorrectTOFAxis"]
     CorrectTOFAxisRaw [label="CorrectTOFAxis"]
     ExtractMonitors [label="ExtractMonitors"]
-    FindEPP [label="FindEPP \n or \n CreateEPP"]
-    FindEPPAgain [label="FindEPP \n or \n CreateEPP"]
+    FindEPP [label="FindEPP\nor\nCreateEPP"]
+    FindEPPAgain [label="FindEPP\nor\nCreateEPP"]
+    FitElasticChannel [label="Find elastic channel\nby fitting"]
     IntegrateMonitor [label="Integrate monitor"]
     LoadAndMerge [label="LoadAndMerge"]
     Normalize [label="Normalise to monitor/time"]
     ScaleAfterNormalization [label="Multiply"]
     ScaleBkg [label="Multiply"]
+    SetIncidentEnergy [label="Set incident energy"]
     SubtractBkgDetector [label="Subtract flat background"]
     SubtractBkgMonitor [label="Subtract flat background"]
   }
@@ -44,9 +47,9 @@ digraph DirectILLCollectData {
 
   subgraph decisions {
     $decision_style
+    inputElasticChannelGiven [label="ElasticChannelWorkspace\ngiven?"]
     inputBkgGiven [label="FlatBkgWorkspace given?"]
     inputEiGiven [label="IncidentEnergyWorkspace given?"]
-    inputEPPGiven [label="EPPWorkspace given?"]
     inputFileGiven [label="Run given?"]
   }
 
@@ -73,18 +76,21 @@ digraph DirectILLCollectData {
   bkgScaling -> ScaleBkg
   ScaleBkg -> SubtractBkgDetector
   ScaleAfterNormalization -> SubtractBkgDetector
-  inputEPPGiven -> FindEPP [label="no"]
-  SubtractBkgDetector -> FindEPP
+  SubtractBkgDetector -> inputEiGiven
   FindEPP -> CalibrateEi
-  inputEPPGiven -> inputEPP [label="yes"]
-  inputEPP -> CalibrateEi
-  SubtractBkgDetector -> CalibrateEi
-  inputEiGiven -> inputEPPGiven [label="no"]
+  inputEiGiven -> FindEPP [label="no"]
   CalibrateEi -> outputEi
-  inputEiGiven -> inputEi [label="yes"]
-  inputEi -> CalibrateEi
+  inputEiGiven -> SetIncidentEnergy [label="yes"]
+  inputEi -> SetIncidentEnergy
+  SetIncidentEnergy -> CorrectTOFAxis
+  SetIncidentEnergy -> outputEi
   CalibrateEi -> CorrectTOFAxis
-  CalibrateEi -> CorrectTOFAxisRaw [label="as reference workspace"]
+  inputElasticChannelGiven -> inputElasticChannel [label="yes"]
+  inputElasticChannel -> CorrectTOFAxis
+  inputElasticChannelGiven -> FitElasticChannel [label="no"]
+  FitElasticChannel -> CorrectTOFAxis
+  CorrectTOFAxis -> outputElasticChannel
+  CorrectTOFAxis -> CorrectTOFAxisRaw [label="as reference workspace"]
   CorrectTOFAxisRaw -> outputRaw
   CorrectTOFAxis -> FindEPPAgain
   CorrectTOFAxis ->outputWS

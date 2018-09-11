@@ -8,7 +8,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include "../Muon/ALCBaselineModellingModel.h"
 
@@ -16,9 +15,9 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class ALCBaselineModellingModelTest : public CxxTest::TestSuite {
   ALCBaselineModellingModel *m_model;

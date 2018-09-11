@@ -1,8 +1,8 @@
 #ifndef ROTATIONPOINTDIALOG_H
 #define ROTATIONPOINTDIALOG_H
 
-#include "ui_RotationPointDialog.h"
 #include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
+#include "ui_RotationPointDialog.h"
 
 #include <QDialog>
 
@@ -62,8 +62,8 @@ protected slots:
 private:
   Ui::RotationPointDialog ui; ///< The dialog's UI form
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // ROTATIONPOINTDIALOG_H

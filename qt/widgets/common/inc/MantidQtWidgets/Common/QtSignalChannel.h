@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 
-#include <QObject>
 #include <Poco/Channel.h>
+#include <QObject>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -70,7 +70,7 @@ private:
   /// Optional source (use std::string to avoid conversion in comparison)
   QString m_source;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTAPI_MANTIDWIDGET_H_

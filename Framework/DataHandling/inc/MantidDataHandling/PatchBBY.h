@@ -5,11 +5,11 @@
 // Includes
 //---------------------------------------------------
 
-#include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexus/NexusClasses.h"
 #include "LoadANSTOHelper.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -47,6 +47,9 @@ class DLLExport PatchBBY : public API::Algorithm {
 public:
   // description
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadBBY"};
+  }
   const std::string name() const override { return "PatchBBY"; }
   const std::string category() const override { return "DataHandling\\ANSTO"; }
   const std::string summary() const override {
@@ -60,7 +63,7 @@ protected:
   void exec() override;
 };
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // DATAHANDING_PATCHBBY_H_

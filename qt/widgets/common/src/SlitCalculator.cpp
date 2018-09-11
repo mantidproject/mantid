@@ -2,8 +2,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidKernel/Strings.h"
 
 #include <cmath>
 
@@ -62,8 +62,8 @@ void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
   auto slit2Component = instrument->getComponentByName("slit2");
   auto sampleComponent = instrument->getComponentByName("some-surface-holder");
   // check that they have been fetched from the IDF
-  if (slit1Component.get() != NULL && slit2Component.get() != NULL &&
-      sampleComponent.get() != NULL) {
+  if (slit1Component.get() != nullptr && slit2Component.get() != nullptr &&
+      sampleComponent.get() != nullptr) {
     // convert from meters to millimeters
     const double s1s2 = 1e3 * (slit1Component->getDistance(*slit2Component));
     // set value in field of slitCalculator
@@ -120,5 +120,5 @@ void SlitCalculator::on_recalculate_triggered() {
   ui.slit1Text->setText(QString::number(s1, 'f', 3));
   ui.slit2Text->setText(QString::number(s2, 'f', 3));
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

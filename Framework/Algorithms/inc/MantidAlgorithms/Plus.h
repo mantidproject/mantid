@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -58,6 +58,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Divide", "Minus", "Multiply"};
+  }
 
 private:
   // Overridden BinaryOperation methods
@@ -93,7 +96,7 @@ private:
                               const API::MatrixWorkspace_const_sptr rhs) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_PLUS_H_*/

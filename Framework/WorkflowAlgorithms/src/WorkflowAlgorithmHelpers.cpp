@@ -145,4 +145,4 @@ bool getBoolPropOrParam(const std::string &pmProp,
   }
   return param;
 }
-}
+} // namespace WorkflowAlgorithmHelpers

@@ -3,38 +3,40 @@
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Math/Algebra.h"
-#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/make_unique.h"
+#include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cmath>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <ostream>
 #include <vector>
-#include <algorithm>
-#include <ctime>
 
-#include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
+#include "boost/shared_ptr.hpp"
 
-#include <gmock/gmock.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <gmock/gmock.h>
 
 using namespace Mantid;
 using namespace Geometry;
 using Mantid::Kernel::V3D;
+using detail::ShapeInfo;
 
 namespace {
 // -----------------------------------------------------------------------------
@@ -42,7 +44,7 @@ namespace {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -53,9 +55,9 @@ public:
   MOCK_METHOD2(setRange, void(const double, const double));
   MOCK_CONST_METHOD0(min, double());
   MOCK_CONST_METHOD0(max, double());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-}
+} // namespace
 
 class CSGObjectTest : public CxxTest::TestSuite {
 
@@ -83,23 +85,22 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
+    ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
+    auto handler = original.getGeometryHandler();
+    TS_ASSERT(handler->hasShapeInfo());
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject copy(original);
-    // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
+    // The copy should be a primitive object with a GeometryHandler
     copy.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", copy.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        copy.getGeometryHandler()));
+    auto handlerCopy = copy.getGeometryHandler();
+    TS_ASSERT(handlerCopy->hasShapeInfo());
+    TS_ASSERT_EQUALS(handler->shapeInfo(), handlerCopy->shapeInfo());
     TS_ASSERT_EQUALS(copy.getName(), original.getName());
     // Check the string representation is the same
     TS_ASSERT_EQUALS(copy.str(), original.str());
@@ -110,24 +111,24 @@ public:
     auto original_ptr = ComponentCreationHelper::createSphere(1.0);
     auto &original = dynamic_cast<CSGObject &>(*original_ptr);
     original.setID("sp-1");
-    int objType(-1);
+    ShapeInfo::GeometryShape objType;
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
+    auto handler = original.getGeometryHandler();
+    TS_ASSERT(handler->hasShapeInfo());
     original.GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        original.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
 
     CSGObject lhs;  // initialize
     lhs = original; // assign
     // The copy should be a primitive object with a GluGeometryHandler
-    objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
     TS_ASSERT_EQUALS("sp-1", lhs.id());
-    TS_ASSERT_EQUALS(3, objType);
-    TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
-        lhs.getGeometryHandler()));
+    TS_ASSERT_EQUALS(ShapeInfo::GeometryShape::SPHERE, objType);
+    auto handlerCopy = lhs.getGeometryHandler();
+    TS_ASSERT(handlerCopy->hasShapeInfo());
+    TS_ASSERT_EQUALS(handlerCopy->shapeInfo(), handler->shapeInfo());
   }
 
   void testCreateUnitCube() {
@@ -144,8 +145,9 @@ public:
     auto testMaterial =
         Material("arm", PhysicalConstants::getNeutronAtom(13), 45.0);
     auto geom_obj = createUnitCube();
-    TS_ASSERT_THROWS_NOTHING(geom_obj->cloneWithMaterial(testMaterial));
-    auto cloned_obj = geom_obj->cloneWithMaterial(testMaterial);
+    std::unique_ptr<IObject> cloned_obj;
+    TS_ASSERT_THROWS_NOTHING(
+        cloned_obj.reset(geom_obj->cloneWithMaterial(testMaterial)));
     TSM_ASSERT_DELTA("Expected a number density of 45", 45.0,
                      cloned_obj->material().numberDensity(), 1e-12);
   }
@@ -664,7 +666,8 @@ public:
     // for defining non-AA objects. However, BoundingBox is poor for non-AA and
     // needs improvement if these are
     // common
-    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
+    planes = {"p 1 0 0 -0.5",
+              "p 1 0 0 0.5",
               "p 0 .70710678118 .70710678118 -1.1",
               "p 0 .70710678118 .70710678118 -0.1",
               "p 0 -.70710678118 .70710678118 -0.5",
@@ -679,7 +682,8 @@ public:
     // case. Framework has now been updated to support this automatically.
     // Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and
     // rotated 45deg to these two axes
-    planes = {"p 1 0 0 -0.5", "p 1 0 0 0.5",
+    planes = {"p 1 0 0 -0.5",
+              "p 1 0 0 0.5",
               "p 0  .70710678118 .70710678118 -2",
               "p 0  .70710678118 .70710678118 -1",
               "p 0 -.70710678118 .70710678118 -0.5",
@@ -793,10 +797,11 @@ public:
   {
     boost::shared_ptr<CSGObject> geom_obj = createSmallCappedCylinder();
     // Want to test triangulation so setup a geometry handler
-    boost::shared_ptr<GluGeometryHandler> h =
-        boost::shared_ptr<GluGeometryHandler>(
-            new GluGeometryHandler(geom_obj.get()));
-    h->setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
+    auto h = boost::make_shared<GeometryHandler>(geom_obj);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setCylinder(V3D(-0.0015, 0.0, 0.0), V3D(1., 0.0, 0.0), 0.005,
+                          0.003);
+    h->setShapeInfo(std::move(shapeInfo));
     geom_obj->setGeometryHandler(h);
 
     double satol(1e-8); // tolerance for solid angle
@@ -1147,7 +1152,7 @@ public:
 
 private:
   /// Surface type
-  typedef std::map<int, boost::shared_ptr<Surface>> STYPE;
+  using STYPE = std::map<int, boost::shared_ptr<Surface>>;
 
   /// set timeTest true to get time comparisons of soild angle methods
   const static bool timeTest = false;
@@ -1240,7 +1245,7 @@ private:
 
     // PLANE SURFACES:
 
-    typedef std::pair<int, std::string> SCompT;
+    using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
     if (desired.find("60001") != std::string::npos)
       SurfLine.push_back(SCompT(60001, "px -1"));
@@ -1268,12 +1273,12 @@ private:
       SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"
-    for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
-      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
+    for (const auto &vc : SurfLine) {
+      auto A = Geometry::SurfaceFactory::Instance()->processLine(vc.second);
       TSM_ASSERT("Expected a non-null surface from the factory", A);
-      A->setName(vc->first);
-      SMap.insert(STYPE::value_type(vc->first,
-                                    boost::shared_ptr<Surface>(A.release())));
+      A->setName(vc.first);
+      SMap.insert(
+          STYPE::value_type(vc.first, boost::shared_ptr<Surface>(A.release())));
     }
 
     return;
@@ -1441,9 +1446,11 @@ private:
 
     // Explicitly setting the GluGeometryHanler hexahedron allows
     // for the correct bounding box calculation.
-    auto handler = boost::make_shared<GluGeometryHandler>(retVal);
-    handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
-                           hex.rft, hex.rbt);
+    auto handler = boost::make_shared<GeometryHandler>(retVal);
+    detail::ShapeInfo shapeInfo;
+    shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt,
+                            hex.lft, hex.rft, hex.rbt);
+    handler->setShapeInfo(std::move(shapeInfo));
     retVal->setGeometryHandler(handler);
 
     retVal->setObject(68, ObjHex);

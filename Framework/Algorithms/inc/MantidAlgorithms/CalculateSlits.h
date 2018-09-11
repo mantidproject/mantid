@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CALCULATESLITS_H_
 #define MANTID_ALGORITHMS_CALCULATESLITS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -40,6 +40,9 @@ public:
 
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"NRCalculateSlitResolution"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

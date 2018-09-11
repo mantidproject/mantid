@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_SAVEFITS_H_
 #define MANTID_DATAHANDLING_SAVEFITS_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -37,6 +37,9 @@ public:
   const std::string name() const override final;
 
   int version() const override final;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadFITS", "SaveNXTomo"};
+  }
 
   const std::string category() const override final;
 

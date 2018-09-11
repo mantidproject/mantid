@@ -3,13 +3,14 @@
 
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
-#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/Histogram.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -277,6 +278,21 @@ public:
     TS_ASSERT_LESS_THAN(grid->longitudeAt(0), lon)
     TS_ASSERT_LESS_THAN(lat, grid->latitudeAt(1))
     TS_ASSERT_LESS_THAN(lon, grid->longitudeAt(1))
+  }
+
+  void test_modelHistogram_coversModelWS() {
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    const BinEdges edges(256, LinearGenerator(-1.33, 0.77));
+    const Counts counts(edges.size() - 1, 0.);
+    auto ws = create<Workspace2D>(2, Histogram(edges, counts));
+    const auto points = ws->points(0);
+    for (size_t nCounts = 2; nCounts < counts.size(); ++nCounts) {
+      const auto histo = modelHistogram(*ws, nCounts);
+      // These have to be equal, don't use DELTA here!
+      TS_ASSERT_EQUALS(histo.x().front(), points.front())
+      TS_ASSERT_EQUALS(histo.x().back(), points.back())
+    }
   }
 
 private:

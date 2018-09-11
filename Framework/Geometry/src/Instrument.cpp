@@ -1,27 +1,27 @@
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
 
-#include <nexus/NeXusFile.hpp>
 #include <boost/make_shared.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <queue>
 
 using namespace Mantid::Kernel;
-using Mantid::Kernel::Exception::NotFoundError;
 using Mantid::Kernel::Exception::InstrumentDefinitionError;
+using Mantid::Kernel::Exception::NotFoundError;
 
 namespace Mantid {
 namespace Geometry {
@@ -35,7 +35,7 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
           << " already exists.";
   throw Exception::InstrumentDefinitionError(sstream.str());
 }
-}
+} // namespace
 
 /// Default constructor
 Instrument::Instrument()
@@ -204,8 +204,8 @@ void Instrument::setPhysicalInstrument(std::unique_ptr<Instrument> physInst) {
 
 //------------------------------------------------------------------------------------------
 /**	Fills a copy of the detector cache
-* @returns a map of the detectors hold by the instrument
-*/
+ * @returns a map of the detectors hold by the instrument
+ */
 void Instrument::getDetectors(detid2det_map &out_map) const {
   if (m_map) {
     // Get the base instrument detectors
@@ -415,9 +415,9 @@ IComponent_const_sptr Instrument::getSample() const {
 }
 
 /** Gets the beam direction (i.e. source->sample direction).
-*  Not virtual because it relies the getSample() & getPos() virtual functions
-*  @returns A unit vector denoting the direction of the beam
-*/
+ *  Not virtual because it relies the getSample() & getPos() virtual functions
+ *  @returns A unit vector denoting the direction of the beam
+ */
 Kernel::V3D Instrument::getBeamDirection() const {
   V3D retval = getSample()->getPos() - getSource()->getPos();
   retval.normalize();
@@ -426,9 +426,9 @@ Kernel::V3D Instrument::getBeamDirection() const {
 
 //------------------------------------------------------------------------------------------
 /**  Get a shared pointer to a component by its ID, const version
-*   @param id :: ID
-*   @return A pointer to the component.
-*/
+ *   @param id :: ID
+ *   @return A pointer to the component.
+ */
 boost::shared_ptr<const IComponent>
 Instrument::getComponentByID(const IComponent *id) const {
   const IComponent *base = static_cast<const IComponent *>(id);
@@ -504,18 +504,18 @@ auto find(T &map, const detid_t key) -> decltype(map.begin()) {
     return it;
   return map.end();
 }
-}
+} // namespace
 
 /**	Gets a pointer to the detector from its ID
-*  Note that for getting the detector associated with a spectrum, the
-* MatrixWorkspace::getDetector
-*  method should be used rather than this one because it takes account of the
-* possibility of more
-*  than one detector contributing to a single spectrum
-*  @param   detector_id The requested detector ID
-*  @returns A pointer to the detector object
-*  @throw   NotFoundError If no detector is found for the detector ID given
-*/
+ *  Note that for getting the detector associated with a spectrum, the
+ * MatrixWorkspace::getDetector
+ *  method should be used rather than this one because it takes account of the
+ * possibility of more
+ *  than one detector contributing to a single spectrum
+ *  @param   detector_id The requested detector ID
+ *  @returns A pointer to the detector object
+ *  @throw   NotFoundError If no detector is found for the detector ID given
+ */
 IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detector_id);
@@ -535,10 +535,10 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
 }
 
 /**	Gets a pointer to the base (non-parametrized) detector from its ID
-  * returns null if the detector has not been found
-  *  @param   detector_id The requested detector ID
-  *  @returns A const pointer to the detector object
-  */
+ * returns null if the detector has not been found
+ *  @param   detector_id The requested detector ID
+ *  @returns A const pointer to the detector object
+ */
 const IDetector *Instrument::getBaseDetector(const detid_t &detector_id) const {
   auto it = find(m_instr->m_detectorCache, detector_id);
   if (it == m_instr->m_detectorCache.end()) {
@@ -701,13 +701,13 @@ void Instrument::markAsSource(const IComponent *comp) {
 }
 
 /** Mark a Component which has already been added to the Instrument (as a child
-*component)
-* to be a Detector by adding it to a detector cache.
-*
-* @param det :: Component to be marked (stored for later retrieval) as a
-*detector Component
-*
-*/
+ *component)
+ * to be a Detector by adding it to a detector cache.
+ *
+ * @param det :: Component to be marked (stored for later retrieval) as a
+ *detector Component
+ *
+ */
 void Instrument::markAsDetector(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsDetector() called on a "
@@ -742,29 +742,32 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
 void Instrument::markAsDetectorFinalize() {
   // Detectors (even when different objects) are NOT allowed to have duplicate
   // ids. This method establishes the presence of duplicates.
-  std::sort(m_detectorCache.begin(), m_detectorCache.end(),
-            [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-               const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
-                -> bool { return std::get<0>(a) < std::get<0>(b); });
+  std::sort(
+      m_detectorCache.begin(), m_detectorCache.end(),
+      [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+         const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool {
+        return std::get<0>(a) < std::get<0>(b);
+      });
 
   auto resultIt = std::adjacent_find(
       m_detectorCache.begin(), m_detectorCache.end(),
       [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-         const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
-          -> bool { return std::get<0>(a) == std::get<0>(b); });
+         const std::tuple<detid_t, IDetector_const_sptr, bool> &b) -> bool {
+        return std::get<0>(a) == std::get<0>(b);
+      });
   if (resultIt != m_detectorCache.end()) {
     raiseDuplicateDetectorError(std::get<0>(*resultIt));
   }
 }
 
 /** Mark a Component which has already been added to the Instrument class
-* as a monitor and add it to the detector cache.
-*
-* @param det :: Component to be marked (stored for later retrieval) as a
-*detector Component
-*
-* @throw Exception::ExistsError if cannot add detector to cache
-*/
+ * as a monitor and add it to the detector cache.
+ *
+ * @param det :: Component to be marked (stored for later retrieval) as a
+ *detector Component
+ *
+ * @throw Exception::ExistsError if cannot add detector to cache
+ */
 void Instrument::markAsMonitor(const IDetector *det) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsMonitor() called on a "
@@ -1047,12 +1050,12 @@ void Instrument::saveNexus(::NeXus::File *file,
 }
 
 /* A private helper function so save information about a set of detectors to
-* Nexus
-*  @param file :: open Nexus file ready to recieve the info about the set of
-* detectors
-*                 a group must be open that has only one call of this function.
-*  @param detIDs :: the dectector IDs of the detectors belonging to the set
-*/
+ * Nexus
+ *  @param file :: open Nexus file ready to recieve the info about the set of
+ * detectors
+ *                 a group must be open that has only one call of this function.
+ *  @param detIDs :: the dectector IDs of the detectors belonging to the set
+ */
 void Instrument::saveDetectorSetInfoToNexus(
     ::NeXus::File *file, const std::vector<detid_t> &detIDs) const {
 
@@ -1097,9 +1100,9 @@ void Instrument::saveDetectorSetInfoToNexus(
 
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
-* @param file :: open NeXus file
-* @param group :: name of the group to open
-*/
+ * @param file :: open NeXus file
+ * @param group :: name of the group to open
+ */
 void Instrument::loadNexus(::NeXus::File *file, const std::string &group) {
   file->openGroup(group, "NXinstrument");
   file->closeGroup();
@@ -1464,6 +1467,6 @@ double tofToDSpacingFactor(const double l1, const double l2,
   }
   return factor / static_cast<double>(detectors.size());
 }
-}
+} // namespace Conversion
 } // namespace Geometry
 } // Namespace Mantid

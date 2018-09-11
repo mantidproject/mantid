@@ -2,6 +2,22 @@
 
 #include "MantidKernel/make_unique.h"
 
+namespace {
+
+MantidQt::CustomInterfaces::RunLabel
+parseListWidgetItem(const QString &listWidgetItem) {
+  const auto pieces = listWidgetItem.split("_");
+  if (pieces.size() != 2) {
+    throw std::runtime_error(
+        "Unexpected run label: \"" + listWidgetItem.toStdString() +
+        "\". Please contact the development team with this message");
+  }
+  return MantidQt::CustomInterfaces::RunLabel(pieces[0].toInt(),
+                                              pieces[1].toUInt());
+}
+
+} // anonymous namespace
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -33,17 +49,22 @@ void EnggDiffMultiRunFittingQtWidget::cleanUpPlot() {
   m_fittedPeaksCurves.clear();
 }
 
+std::vector<RunLabel> EnggDiffMultiRunFittingQtWidget::getAllRunLabels() const {
+  std::vector<RunLabel> runLabels;
+  runLabels.reserve(m_ui.listWidget_runLabels->count());
+
+  for (int i = 0; i < m_ui.listWidget_runLabels->count(); i++) {
+    const auto currentLabel = m_ui.listWidget_runLabels->item(i)->text();
+    runLabels.emplace_back(parseListWidgetItem(currentLabel));
+  }
+  return runLabels;
+}
+
 boost::optional<RunLabel>
 EnggDiffMultiRunFittingQtWidget::getSelectedRunLabel() const {
   if (hasSelectedRunLabel()) {
     const auto currentLabel = m_ui.listWidget_runLabels->currentItem()->text();
-    const auto pieces = currentLabel.split("_");
-    if (pieces.size() != 2) {
-      throw std::runtime_error(
-          "Unexpected run label: \"" + currentLabel.toStdString() +
-          "\". Please contact the development team with this message");
-    }
-    return RunLabel(pieces[0].toInt(), pieces[1].toUInt());
+    return parseListWidgetItem(currentLabel);
   } else {
     return boost::none;
   }
@@ -174,6 +195,14 @@ void EnggDiffMultiRunFittingQtWidget::resetPlotZoomLevel() {
   m_zoomTool->setZoomBase(true);
 }
 
+void EnggDiffMultiRunFittingQtWidget::setEnabled(const bool enabled) {
+  m_ui.listWidget_runLabels->setEnabled(enabled);
+  m_ui.pushButton_removeRun->setEnabled(enabled);
+  m_ui.pushButton_plotToSeparateWindow->setEnabled(enabled);
+  m_ui.checkBox_plotFittedPeaks->setEnabled(enabled);
+  m_zoomTool->setEnabled(enabled);
+}
+
 void EnggDiffMultiRunFittingQtWidget::setMessageProvider(
     boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) {
   m_userMessageProvider = messageProvider;
@@ -216,5 +245,5 @@ void EnggDiffMultiRunFittingQtWidget::userError(
   m_userMessageProvider->userError(errorTitle, errorDescription);
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

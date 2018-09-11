@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICAL_H_
 #define MANTID_DATAOBJECTS_PEAKSHAPESPHERICAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 #include <string>
 

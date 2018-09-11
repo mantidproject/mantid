@@ -1,13 +1,13 @@
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidCurveFitting/HalfComplex.h"
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_real.h>
-#include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_eigen.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_halfcomplex.h>
+#include <gsl/gsl_fft_real.h>
 
 #include <algorithm>
 #include <cassert>
@@ -31,7 +31,7 @@ const size_t ChebfunBase::g_maxNumberPoints = 1026;
 namespace {
 // Abs value function to be used with std::transform
 double AbsValue(double x) { return fabs(x); }
-}
+} // namespace
 
 /**
  * Constructor.
@@ -489,10 +489,10 @@ std::vector<double> ChebfunBase::linspace(size_t n) const {
 }
 
 /**
-* Calculate the chebyshev expansion coefficients given function values
-* at the x-points.
-* @param p :: Function values at chebyshev points.
-*/
+ * Calculate the chebyshev expansion coefficients given function values
+ * at the x-points.
+ * @param p :: Function values at chebyshev points.
+ */
 std::vector<double> ChebfunBase::calcA(const std::vector<double> &p) const {
   const size_t nn = m_n + 1;
 
@@ -671,11 +671,11 @@ std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
 }
 
 /**
-  * Find all roots of this chebfun.
-  * @param a :: A vector with the Chebyshev expansion coefficients.
-  * @return A vector with root values, unordered. If empty function
-  * has no roots.
-  */
+ * Find all roots of this chebfun.
+ * @param a :: A vector with the Chebyshev expansion coefficients.
+ * @return A vector with root values, unordered. If empty function
+ * has no roots.
+ */
 std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
   std::vector<double> r;
   // build the companion matrix
@@ -770,9 +770,9 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
       continue;
     auto j = std::distance(xbegin, ix0);
     if (j > 0) {
-      y[i] = yvalues[j - 1] +
-             (x - xvalues[j - 1]) / (xvalues[j] - xvalues[j - 1]) *
-                 (yvalues[j] - yvalues[j - 1]);
+      y[i] = yvalues[j - 1] + (x - xvalues[j - 1]) /
+                                  (xvalues[j] - xvalues[j - 1]) *
+                                  (yvalues[j] - yvalues[j - 1]);
       ix = ix0;
     } else {
       y[i] = yvalues[0];
@@ -919,6 +919,6 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
   return y;
 }
 
-} // Functions
-} // CurveFitting
-} // Mantid
+} // namespace Functions
+} // namespace CurveFitting
+} // namespace Mantid

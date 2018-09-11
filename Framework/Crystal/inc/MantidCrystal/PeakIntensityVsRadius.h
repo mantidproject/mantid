@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_PEAKINTENSITYVSRADIUS_H_
 #define MANTID_CRYSTAL_PEAKINTENSITYVSRADIUS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -41,6 +41,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"PeakIntegration"};
+  }
   const std::string category() const override;
 
 private:

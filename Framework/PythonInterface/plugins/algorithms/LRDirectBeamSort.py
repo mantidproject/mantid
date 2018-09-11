@@ -5,6 +5,9 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 
 
+THI_TOLERANCE = 0.002
+
+
 class CompareTwoNXSDataForSFcalculator(object):
     """
         will return -1, 0 or 1 according to the position of the nexusToPosition in relation to the
@@ -28,7 +31,7 @@ class CompareTwoNXSDataForSFcalculator(object):
             self.resultComparison = compare
             return
 
-        compare = self.compareParameter('thi', 'descending')
+        compare = self.compareParameter('thi', 'descending', tolerance=THI_TOLERANCE)
         if compare != 0:
             self.resultComparison = compare
             return
@@ -43,15 +46,21 @@ class CompareTwoNXSDataForSFcalculator(object):
 
         self.resultComparison = -1 if pcharge1 < pcharge2 else 1
 
-    def compareParameter(self, param, order):
+    def compareParameter(self, param, order, tolerance=0.0):
         """
             Compare parameters for the two runs
+            :param string param: name of the parameter to compare
+            :param string order: ascending or descending
+            :param float tolerance: tolerance to apply to the comparison [optional]
         """
         _nexusToCompareWithRun = self.nexusToCompareWithRun
         _nexusToPositionRun = self.nexusToPositionRun
 
         _paramNexusToCompareWith = float(_nexusToCompareWithRun.getProperty(param).value[0])
         _paramNexusToPosition = float(_nexusToPositionRun.getProperty(param).value[0])
+
+        if abs(_paramNexusToPosition - _paramNexusToCompareWith) <= tolerance:
+            return 0
 
         if order == 'ascending':
             resultLessThan = -1
@@ -156,15 +165,16 @@ class LRDirectBeamSort(PythonAlgorithm):
         """
         group_list = []
         current_group = []
-        group_wl = None
+        _current_wl = None
+        _current_thi = None
         for r in lr_data_sorted:
             wl_ = r.getRun().getProperty('LambdaRequest').value[0]
             thi = r.getRun().getProperty('thi').value[0]
-            wl = "%g%-5.2g" % (wl_, thi)
 
-            if not group_wl == wl:
+            if _current_thi is None or abs(thi-_current_thi)>THI_TOLERANCE or not _current_wl == wl_:
                 # New group
-                group_wl = wl
+                _current_wl = wl_
+                _current_thi = thi
                 if len(current_group)>0:
                     group_list.append(current_group)
                 current_group = []

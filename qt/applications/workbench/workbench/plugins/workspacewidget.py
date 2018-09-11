@@ -20,49 +20,13 @@ from __future__ import (absolute_import, unicode_literals)
 import functools
 
 # third-party library imports
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger
-from mantidqt.widgets.workspacewidget.mantidtreemodel import MantidTreeModel
-from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
+from mantid.api import AnalysisDataService
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
-from qtpy.QtWidgets import QVBoxLayout
+from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.functions import pcolormesh, plot
-
-
-LOGGER = Logger(b"workspacewidget")
-
-
-def _workspaces_from_names(names):
-    """
-    Convert a list of workspace names to a list of MatrixWorkspace handles. Any WorkspaceGroup
-    encountered is flattened and its members inserted into the list at this point
-
-    Flattens any workspace groups with the list, preserving the order of the remaining elements
-    :param names: A list of workspace names
-    :return: A list where each element is a single MatrixWorkspace
-    """
-    ads = AnalysisDataService.Instance()
-    flat = []
-    for name in names:
-        try:
-            ws = ads[name.encode('utf-8')]
-        except KeyError:
-            LOGGER.warning("Skipping {} as it does not exist".format(name))
-            continue
-
-        if isinstance(ws, MatrixWorkspace):
-            flat.append(ws)
-        elif isinstance(ws, WorkspaceGroup):
-            group_len = len(ws)
-            for i in range(group_len):
-                flat.append(ws[i])
-        else:
-            LOGGER.warning("{} it is not a MatrixWorkspace or WorkspaceGroup.".format(name))
-
-    return flat
+from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names
 
 
 class WorkspaceWidget(PluginWidget):
@@ -71,19 +35,24 @@ class WorkspaceWidget(PluginWidget):
     def __init__(self, parent):
         super(WorkspaceWidget, self).__init__(parent)
 
+        self._ads = AnalysisDataService.Instance()
+
         # layout
-        workspacewidget = WorkspaceTreeWidget(MantidTreeModel())
-        self.workspacewidget = workspacewidget
+        self.workspacewidget = WorkspaceTreeWidget()
         layout = QVBoxLayout()
         layout.addWidget(self.workspacewidget)
         self.setLayout(layout)
 
         # behaviour
-        workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                      errors=False))
-        workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
-                                                                                errors=True))
-        workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
+        self.workspacewidget.plotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                           errors=False, overplot=False))
+        self.workspacewidget.overplotSpectrumClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                               errors=False, overplot=True))
+        self.workspacewidget.plotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                     errors=True, overplot=False))
+        self.workspacewidget.overplotSpectrumWithErrorsClicked.connect(functools.partial(self._do_plot_spectrum,
+                                                                                         errors=True, overplot=True))
+        self.workspacewidget.plotColorfillClicked.connect(self._do_plot_colorfill)
 
     # ----------------- Plugin API --------------------
 
@@ -98,22 +67,22 @@ class WorkspaceWidget(PluginWidget):
 
     # ----------------- Behaviour --------------------
 
-    def _do_plot_spectrum(self, names, errors):
+    def _do_plot_spectrum(self, names, errors, overplot):
         """
         Plot spectra from the selected workspaces
 
         :param names: A list of workspace names
         :param errors: If true then error bars will be plotted on the points
+        :param overplot: If true then the add to the current figure if one
+                         exists and it is a compatible figure
         """
-        try:
-            selection = get_plot_selection(_workspaces_from_names(names), self)
-            if selection is not None:
-                plot(selection.workspaces, spectrum_nums=selection.spectra,
-                     wksp_indices=selection.wksp_indices,
-                     errors=errors)
-        except BaseException:
-            import traceback
-            traceback.print_exc()
+        if overplot:
+            compatible, error_msg = can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+
+        plot_from_names(names, errors, overplot)
 
     def _do_plot_colorfill(self, names):
         """
@@ -122,7 +91,7 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         try:
-            pcolormesh(_workspaces_from_names(names))
+            pcolormesh(self._ads.retrieveWorkspaces(names, unrollGroups=True))
         except BaseException:
             import traceback
             traceback.print_exc()

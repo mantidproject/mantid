@@ -3,20 +3,20 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/Common.h"
-#include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidVatesAPI/Normalization.h"
 
 #include <vtkCellData.h>
 #include <vtkCellType.h>
@@ -231,10 +231,11 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
     std::cout << "START SORTING\n";
   }
 
-  std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(), [](IMDNode *box_1,
-                                                           IMDNode *box_2) {
-    return box_1->getSignalNormalized() > box_2->getSignalNormalized();
-  });
+  std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(),
+            [](IMDNode *box_1, IMDNode *box_2) {
+              return box_1->getSignalNormalized() >
+                     box_2->getSignalNormalized();
+            });
 
   if (VERBOSE) {
     std::cout << "DONE SORTING\n";
@@ -522,10 +523,10 @@ void vtkSplatterPlotFactory::addMetadata() const {
 }
 
 /**
-* Write the xml metadata from the underlying source into the vktArray of the
-* @param fieldData The field data from the underlying source
-* @param dataSet The splatterplot data set.
-*/
+ * Write the xml metadata from the underlying source into the vktArray of the
+ * @param fieldData The field data from the underlying source
+ * @param dataSet The splatterplot data set.
+ */
 void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
                                          vtkDataSet *dataSet) {
   // Extract the xml-metadata part of the fieldData and the json-metadata from
@@ -579,11 +580,11 @@ void vtkSplatterPlotFactory::setTime(double time) {
 }
 
 /**
-* Getter for the instrument.
-* @returns The name of the instrument which is associated with the workspace.
-*/
+ * Getter for the instrument.
+ * @returns The name of the instrument which is associated with the workspace.
+ */
 const std::string &vtkSplatterPlotFactory::getInstrument() {
   return m_instrument;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

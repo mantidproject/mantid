@@ -331,9 +331,9 @@ public:
     std::vector<double> x[2] = {{0.0, 50.0}, {0.0, 50.0}};
     std::vector<double> y[2] = {{1.0, 2.0}, {3.0, 4.0}};
     auto checkW = [&x, &y](size_t i, double c) {
-      return y[i].front() +
-             (y[i].back() - y[i].front()) / (x[i].back() - x[i].front()) *
-                 (c - x[i].front());
+      return y[i].front() + (y[i].back() - y[i].front()) /
+                                (x[i].back() - x[i].front()) *
+                                (c - x[i].front());
     };
     fun.setAttributeValue("FWHMX0", x[0]);
     fun.setAttributeValue("FWHMY0", y[0]);
@@ -404,6 +404,16 @@ public:
       auto w = fun.getParameter(prefix + "FWHM");
       TS_ASSERT_EQUALS(w, 0.0);
     }
+  }
+
+  void test_multispectrum_malformed_resmod() {
+    std::string fun =
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,FWHMX0=(1,2),FWHMY0=(2,3),"
+        "FWHMX1=(0,1),FWHMY2=(5,6),Temperatures=(44,50),B20=0.37737";
+    auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+    alg->initialize();
+    TS_ASSERT_THROWS(alg->setPropertyValue("Function", fun),
+                     std::invalid_argument);
   }
 
   void test_underdefinded() {

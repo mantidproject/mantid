@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/ReflectionGenerator.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

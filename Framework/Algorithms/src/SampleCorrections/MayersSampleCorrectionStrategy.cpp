@@ -11,9 +11,9 @@
 
 using Mantid::Kernel::ChebyshevPolyFit;
 using Mantid::Kernel::ChebyshevSeries;
-using Mantid::Kernel::getStatistics;
 using Mantid::Kernel::MersenneTwister;
 using Mantid::Kernel::StatOptions;
+using Mantid::Kernel::getStatistics;
 using std::pow;
 
 namespace {
@@ -60,7 +60,7 @@ double integrate(const std::vector<double> &y, const double dx) {
   }
   return dx * (y.front() + 4.0 * sumOdd + 2.0 * sumEven + y.back()) / 3.0;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -76,10 +76,11 @@ namespace Algorithms {
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
-    const Mantid::HistogramData::Histogram &inputHist)
-    : m_pars(params), m_histogram(inputHist), m_tofVals(inputHist.points()),
-      m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
-      m_rng(new MersenneTwister(1)) {
+    HistogramData::Histogram inputHist)
+    : m_pars(params), m_histogram(std::move(inputHist)),
+      m_tofVals(m_histogram.points()), m_histoYSize(m_histogram.size()),
+      m_muRrange(calculateMuRange()),
+      m_rng(std::make_unique<MersenneTwister>(1)) {
 
   const auto &xVals = m_histogram.x();
   if (!(xVals.front() < xVals.back())) {

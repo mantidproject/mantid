@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_LOADHKL_H_
 #define MANTID_CRYSTAL_LOADHKL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_poly.h>
 
@@ -27,6 +27,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveHKL"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Text";
@@ -39,7 +42,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LOADHKL_H_ */

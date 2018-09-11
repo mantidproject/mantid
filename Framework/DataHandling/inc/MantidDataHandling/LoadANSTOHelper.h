@@ -6,8 +6,8 @@
 //---------------------------------------------------
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidNexus/NexusClasses.h"
 
 #define TarTypeFlag_NormalFile '0'
@@ -24,7 +24,7 @@ namespace DataHandling {
 namespace ANSTO {
 
 /// pointer to the vector of events
-typedef std::vector<Types::Event::TofEvent> *EventVector_pt;
+using EventVector_pt = std::vector<Types::Event::TofEvent> *;
 
 /// helper class to keep track of progress
 class ProgressTracker {
@@ -256,9 +256,9 @@ public:
                      const void *buffer, size_t size);
 };
 
-} // Tar
-} // ANSTO
-} // DataHandling
-} // Mantid
+} // namespace Tar
+} // namespace ANSTO
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // DATAHANDING_ANSTO_H_

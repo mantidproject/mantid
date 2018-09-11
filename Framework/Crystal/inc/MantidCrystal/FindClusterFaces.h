@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_FINDCLUSTERFACES_H_
 #define MANTID_CRYSTAL_FINDCLUSTERFACES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -40,6 +40,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"IntegratePeaksUsingClusters"};
+  }
   const std::string category() const override;
 
 private:

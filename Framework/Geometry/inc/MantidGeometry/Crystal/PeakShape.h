@@ -55,8 +55,8 @@ public:
   virtual ~PeakShape() = default;
 };
 
-typedef boost::shared_ptr<PeakShape> PeakShape_sptr;
-typedef boost::shared_ptr<const PeakShape> PeakShape_const_sptr;
+using PeakShape_sptr = boost::shared_ptr<PeakShape>;
+using PeakShape_const_sptr = boost::shared_ptr<const PeakShape>;
 
 } // namespace Geometry
 } // namespace Mantid

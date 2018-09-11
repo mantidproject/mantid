@@ -49,6 +49,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AbsorptionCorrection", "SetSampleMaterial", "CopySample"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Sample;"; }
   /// Algorithm's aliases
@@ -60,7 +63,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_CREATESAMPLESHAPE_H_*/

@@ -64,8 +64,7 @@ public:
     }
     std::vector<API::IMDNode *> boxes;
     ws2->getBox()->getBoxes(boxes, 1000, true);
-    for (size_t i = 0; i < boxes.size(); i++) {
-      API::IMDNode *box = boxes[i];
+    for (auto box : boxes) {
       TSM_ASSERT_LESS_THAN("Box extents was offset", 20.0,
                            box->getExtents(0).getMin());
       // More detailed tests are in MDBox, MDBoxBase and MDGridBox.

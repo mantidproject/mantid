@@ -2,9 +2,9 @@
 #define MANTID_CRYSTAL_CENTROIDPEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -27,6 +27,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"CentroidPeaksMD", "PeakIntegration"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -48,7 +51,7 @@ private:
   Mantid::detid2index_map wi_to_detid_map;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_CENTROIDPEAKS_H_ */

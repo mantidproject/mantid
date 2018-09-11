@@ -1,10 +1,10 @@
 #ifndef MANTID_MANTIDWIDGETS_DISPLAYCURVEFIT_H_
 #define MANTID_MANTIDWIDGETS_DISPLAYCURVEFIT_H_
 // includes for interface development
-#include "ui_DisplayCurveFit.h"
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
+#include "ui_DisplayCurveFit.h"
 // includes for workspace handling
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -100,7 +100,7 @@ private:
   // maps a curve type onto one of the two PreviewPlot panels
   std::map<curveType, PreviewPlot *> m_plotPanel;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTID_MANTIDWIDGETS_DISPLAYCURVEFIT_H_

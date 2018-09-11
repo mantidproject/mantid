@@ -1,9 +1,9 @@
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {

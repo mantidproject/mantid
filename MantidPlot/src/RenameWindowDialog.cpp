@@ -31,11 +31,11 @@
 #include "ApplicationWindow.h"
 #include "Table.h"
 
+#include <QButtonGroup>
 #include <QGroupBox>
 #include <QLineEdit>
-#include <QRadioButton>
 #include <QMessageBox>
-#include <QButtonGroup>
+#include <QRadioButton>
 
 RenameWindowDialog::RenameWindowDialog(QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {

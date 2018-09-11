@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_CLUSTERREGISTER_H_
 #define MANTID_CRYSTAL_CLUSTERREGISTER_H_
 
-#include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidKernel/System.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
 
@@ -40,7 +40,7 @@ class ImplClusterRegister;
 class DLLExport ClusterRegister {
 public:
   /// Cluster map
-  typedef std::map<size_t, boost::shared_ptr<ICluster>> MapCluster;
+  using MapCluster = std::map<size_t, boost::shared_ptr<ICluster>>;
 
   /// Constructor
   ClusterRegister();

@@ -1,31 +1,30 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include "MantidQtWidgets/InstrumentView/Projection3D.h"
-#include "MantidQtWidgets/InstrumentView/GLActor.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
-#include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidQtWidgets/Common/InputController.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include <QtOpenGL>
-#include <QSpinBox>
 #include <QApplication>
+#include <QSpinBox>
 #include <QTime>
+#include <QtOpenGL>
 
+#include <algorithm>
+#include <cfloat>
 #include <map>
 #include <string>
-#include <cfloat>
-#include <algorithm>
 
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE 0x809D
@@ -42,9 +41,6 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, int winWidth,
                            int winHeight)
     : ProjectionSurface(rootActor), m_drawAxes(true), m_wireframe(false),
       m_viewport(0, 0) {
-
-  Instrument_const_sptr instr = rootActor->getInstrument();
-
   m_viewport.resize(winWidth, winHeight);
   V3D minBounds, maxBounds;
   m_instrActor->getBoundingBox(minBounds, maxBounds);
@@ -52,7 +48,6 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, int winWidth,
   m_viewport.setProjection(minBounds, maxBounds);
 
   changeColorMap();
-  rootActor->invalidateDisplayLists();
 
   // create and connect the move input controller
   InputController3DMove *moveController = new InputController3DMove(this);
@@ -76,18 +71,18 @@ Projection3D::Projection3D(const InstrumentActor *rootActor, int winWidth,
 Projection3D::~Projection3D() {}
 
 /**
-* Resize the surface on the screen.
-* @param w :: New width of the surface in pixels.
-* @param h :: New height of the surface in pixels.
-*/
+ * Resize the surface on the screen.
+ * @param w :: New width of the surface in pixels.
+ * @param h :: New height of the surface in pixels.
+ */
 void Projection3D::resize(int w, int h) {
   m_viewport.resize(w, h);
   updateView();
 }
 
 /**
-* Draw the instrument on MantidGLWidget.
-*/
+ * Draw the instrument on MantidGLWidget.
+ */
 void Projection3D::drawSurface(MantidGLWidget *, bool picking) const {
   OpenGLError::check("GL3DWidget::draw3D()[begin]");
 
@@ -133,8 +128,8 @@ void Projection3D::drawSurface(MantidGLWidget *, bool picking) const {
 }
 
 /** Draw 3D axes centered at the origin (if the option is selected)
-*
-*/
+ *
+ */
 void Projection3D::drawAxes(double axis_length) const {
   glPointSize(3.0);
   glLineWidth(3.0);
@@ -167,8 +162,8 @@ void Projection3D::drawAxes(double axis_length) const {
 void Projection3D::changeColorMap() {}
 
 /**
-* Select 1 of the 6 axis-aligned orientations.
-*/
+ * Select 1 of the 6 axis-aligned orientations.
+ */
 void Projection3D::setViewDirection(const QString &input) {
   if (input.toUpper().compare("X+") == 0) {
     m_viewport.setViewToXPositive();
@@ -187,23 +182,23 @@ void Projection3D::setViewDirection(const QString &input) {
 }
 
 /**
-* Toggle the 3D axes.
-*/
+ * Toggle the 3D axes.
+ */
 void Projection3D::set3DAxesState(bool on) { m_drawAxes = on; }
 
 /**
-* Toggle wireframe view.
-*/
+ * Toggle wireframe view.
+ */
 void Projection3D::setWireframe(bool on) { m_wireframe = on; }
 
 //-----------------------------------------------------------------------------
 /** This seems to be called when the user has selected a rectangle
-* using the mouse.
-*
-* @param dets :: returns a list of detector IDs selected.
-*/
-void Projection3D::getSelectedDetectors(QList<int> &dets) {
-  dets.clear();
+ * using the mouse.
+ *
+ * @param detIndices :: returns a list of detector Indices selected.
+ */
+void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
+  detIndices.clear();
   if (!hasSelection())
     return;
   double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -218,30 +213,23 @@ void Projection3D::getSelectedDetectors(QList<int> &dets) {
   double yTop = ymin + (ymax - ymin) * (h - rect.top()) / h;
   size_t ndet = m_instrActor->ndetectors();
 
-  // Cache all the detector positions if needed. This is slow, but just once.
-  m_instrActor->cacheDetPos();
-
   for (size_t i = 0; i < ndet; ++i) {
-    detid_t detId = m_instrActor->getDetID(i);
     V3D pos = m_instrActor->getDetPos(i);
     m_viewport.transform(pos);
     if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom &&
         pos.Y() <= yTop) {
-      dets.push_back(detId);
+      detIndices.push_back(i);
     }
   }
 }
 
 //-----------------------------------------------------------------------------
 /** Select detectors to mask, using the mouse.
-* From the Instrument Window's mask tab.
-*
-* @param dets :: returns a list of detector IDs to mask.
-*/
-void Projection3D::getMaskedDetectors(QList<int> &dets) const {
-  // Cache all the detector positions if needed. This is slow, but just once.
-  m_instrActor->cacheDetPos();
-
+ * From the Instrument Window's mask tab.
+ *
+ * @param dets :: returns a list of detector Indices to mask.
+ */
+void Projection3D::getMaskedDetectors(std::vector<size_t> &detIndices) const {
   // find the layer of visible detectors
   QList<QPoint> pixels = m_maskShapes.getMaskedPixels();
   double zmin = 1.0;
@@ -266,7 +254,7 @@ void Projection3D::getMaskedDetectors(QList<int> &dets) const {
   }
 
   // find masked detector in that layer
-  dets.clear();
+  detIndices.clear();
   if (m_maskShapes.isEmpty())
     return;
   size_t ndet = m_instrActor->ndetectors();
@@ -274,34 +262,32 @@ void Projection3D::getMaskedDetectors(QList<int> &dets) const {
     // Find the cached ID and position. This is much faster than getting the
     // detector.
     V3D pos = m_instrActor->getDetPos(i);
-    detid_t id = m_instrActor->getDetID(i);
     // project pos onto the screen plane
     m_viewport.transform(pos);
     if (pos.Z() < zmin || pos.Z() > zmax)
       continue;
     if (m_maskShapes.isMasked(pos.X(), pos.Y())) {
-      dets.push_back(int(id));
+      detIndices.push_back(i);
     }
   }
 }
 
 /**
-* Orient the viewport to look at a selected component.
-* @param id :: The ID of a selected component.
-*/
-void Projection3D::componentSelected(Mantid::Geometry::ComponentID id) {
+ * Orient the viewport to look at a selected component.
+ * @param id :: The ID of a selected component.
+ */
+void Projection3D::componentSelected(size_t componentIndex) {
 
-  Instrument_const_sptr instr = m_instrActor->getInstrument();
+  const auto &componentInfo = m_instrActor->componentInfo();
 
-  if (id == NULL || id == instr->getComponentID()) {
+  if (componentIndex == componentInfo.root()) {
     m_viewport.reset();
     return;
   }
 
-  IComponent_const_sptr comp = instr->getComponentByID(id);
-  V3D pos = comp->getPos();
+  auto pos = componentInfo.position(componentIndex);
 
-  V3D compDir = comp->getPos() - instr->getSample()->getPos();
+  auto compDir = pos - componentInfo.samplePosition();
   compDir.normalize();
   V3D up(0, 0, 1);
   V3D x = up.cross_prod(compDir);
@@ -316,8 +302,8 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id) {
 }
 
 /**
-* Return information text to be displayed in the InstrumentWindow's info area.
-*/
+ * Return information text to be displayed in the InstrumentWindow's info area.
+ */
 QString Projection3D::getInfoText() const {
   if (m_interactionMode == MoveMode) {
     QString text =
@@ -331,19 +317,19 @@ QString Projection3D::getInfoText() const {
 }
 
 /**
-* Initialize translation movement at point on the screen.
-* @param x :: The x screen coord clicked with the mouse to start translation.
-* @param y :: The y screen coord clicked with the mouse to start translation.
-*/
+ * Initialize translation movement at point on the screen.
+ * @param x :: The x screen coord clicked with the mouse to start translation.
+ * @param y :: The y screen coord clicked with the mouse to start translation.
+ */
 void Projection3D::initTranslation(int x, int y) {
   m_viewport.initTranslateFrom(x, y);
 }
 
 /**
-* Translate the view in the surface.
-* @param x :: The x screen coord of the mouse pointer.
-* @param y :: The y screen coord of the mouse pointer.
-*/
+ * Translate the view in the surface.
+ * @param x :: The x screen coord of the mouse pointer.
+ * @param y :: The y screen coord of the mouse pointer.
+ */
 void Projection3D::translate(int x, int y) {
   m_viewport.generateTranslationTo(x, y);
   m_viewport.initTranslateFrom(x, y);
@@ -351,17 +337,17 @@ void Projection3D::translate(int x, int y) {
 }
 
 /**
-* Initialize zooming at point on the screen.
-* @param x :: The x screen coord of the mouse pointer.
-* @param y :: The y screen coord of the mouse pointer.
-*/
+ * Initialize zooming at point on the screen.
+ * @param x :: The x screen coord of the mouse pointer.
+ * @param y :: The y screen coord of the mouse pointer.
+ */
 void Projection3D::initZoom(int x, int y) { m_viewport.initZoomFrom(x, y); }
 
 /**
-* Zoom the view in the surface.
-* @param x :: The x screen coord of the mouse pointer.
-* @param y :: The y screen coord of the mouse pointer.
-*/
+ * Zoom the view in the surface.
+ * @param x :: The x screen coord of the mouse pointer.
+ * @param y :: The y screen coord of the mouse pointer.
+ */
 void Projection3D::zoom(int x, int y) {
   m_viewport.generateZoomTo(x, y);
   m_viewport.initZoomFrom(x, y);
@@ -370,11 +356,11 @@ void Projection3D::zoom(int x, int y) {
 }
 
 /**
-* Zoom the view in the surface using the mouse wheel.
-* @param x :: The x screen coord of the mouse pointer.
-* @param y :: The y screen coord of the mouse pointer.
-* @param d :: zoom factor to shift y screen coord.
-*/
+ * Zoom the view in the surface using the mouse wheel.
+ * @param x :: The x screen coord of the mouse pointer.
+ * @param y :: The y screen coord of the mouse pointer.
+ * @param d :: zoom factor to shift y screen coord.
+ */
 void Projection3D::wheelZoom(int x, int y, int d) {
   m_viewport.wheelZoom(x, y, d);
   updateView(false);
@@ -382,19 +368,19 @@ void Projection3D::wheelZoom(int x, int y, int d) {
 }
 
 /**
-* Initialize rotation movement at point on the screen.
-* @param x :: The x screen coord of the mouse pointer.
-* @param y :: The y screen coord of the mouse pointer.
-*/
+ * Initialize rotation movement at point on the screen.
+ * @param x :: The x screen coord of the mouse pointer.
+ * @param y :: The y screen coord of the mouse pointer.
+ */
 void Projection3D::initRotation(int x, int y) {
   m_viewport.initRotationFrom(x, y);
 }
 
 /**
-* Rotate the view in the surface.
-* @param x :: The x screen coord of the mouse pointer.
-* @param y :: The y screen coord of the mouse pointer.
-*/
+ * Rotate the view in the surface.
+ * @param x :: The x screen coord of the mouse pointer.
+ * @param y :: The y screen coord of the mouse pointer.
+ */
 void Projection3D::rotate(int x, int y) {
   m_viewport.generateRotationTo(x, y);
   m_viewport.initRotationFrom(x, y);
@@ -402,16 +388,16 @@ void Projection3D::rotate(int x, int y) {
 }
 
 /**
-* Call upon finishing all moves to update the pick image.
-*/
+ * Call upon finishing all moves to update the pick image.
+ */
 void Projection3D::finishMove() {
   updateView(true);
   emit finishedMove();
 }
 
 /**
-* Get bounds of this projection surface. Used with 2D overlays.
-*/
+ * Get bounds of this projection surface. Used with 2D overlays.
+ */
 RectF Projection3D::getSurfaceBounds() const {
   double xmin, xmax, ymin, ymax, zmin, zmax;
   m_viewport.getInstantProjection(xmin, xmax, ymin, ymax, zmin, zmax);
@@ -419,8 +405,8 @@ RectF Projection3D::getSurfaceBounds() const {
 }
 
 /**
-* Define lighting of the scene
-*/
+ * Define lighting of the scene
+ */
 void Projection3D::setLightingModel(bool picking) const {
   // Basic lighting
   if (m_isLightingOn && !picking) {
@@ -486,5 +472,5 @@ std::string Projection3D::saveToProject() const {
   return tsv.outputLines();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

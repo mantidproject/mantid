@@ -12,7 +12,7 @@ namespace Geometry {
 class CompAssembly;
 class Component;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /** @class LoadInstrumentFromRaw LoadInstrumentFromRaw.h
@@ -84,6 +84,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadInstrument"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {

@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_ADDPEAKHKL_H_
 #define MANTID_CRYSTAL_ADDPEAKHKL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -34,6 +34,9 @@ class DLLExport AddPeakHKL : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"AddPeak"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

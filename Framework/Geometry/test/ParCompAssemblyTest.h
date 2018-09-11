@@ -1,17 +1,16 @@
 #ifndef MANTID_TESTPARCOMPASSEMBLY_H_
 #define MANTID_TESTPARCOMPASSEMBLY_H_
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <string>
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class ParCompAssemblyTest : public CxxTest::TestSuite {
 public:

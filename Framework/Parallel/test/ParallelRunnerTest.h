@@ -24,7 +24,7 @@ void get_ranks(const Communicator &comm, std::mutex &mutex,
   std::lock_guard<std::mutex> lock(mutex);
   ranks.insert(comm.rank());
 }
-}
+} // namespace
 
 class ParallelRunnerTest : public CxxTest::TestSuite {
 public:

@@ -1,14 +1,14 @@
 #ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
 #define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
 
@@ -33,7 +33,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test initialize profile number 9 (NeutronBk2BkExpConvPVoigt)
-    */
+   */
   void test_initProfNo9() {
     LeBailFunction function("ThermalNeutronBk2BkExpConvPVoigt");
     TS_ASSERT(function.isParameterValid());
@@ -328,23 +328,17 @@ public:
     // Add peak parameters
     map<string, double> parammap
 
-        {{"Dtt1", 16370.650},
-         {"Dtt2", 0.10},
+        {{"Dtt1", 16370.650},    {"Dtt2", 0.10},
          {"Zero", 0.0},
 
-         {"Alph0", 1.0},
-         {"Alph1", 0.0},
-         {"Beta0", 0.109036},
-         {"Beta1", 0.009834},
+         {"Alph0", 1.0},         {"Alph1", 0.0},
+         {"Beta0", 0.109036},    {"Beta1", 0.009834},
 
-         {"Sig2", sqrt(91.127)},
-         {"Sig1", sqrt(1119.230)},
+         {"Sig2", sqrt(91.127)}, {"Sig1", sqrt(1119.230)},
          {"Sig0", sqrt(0.0)},
 
-         {"Gam0", 0.0},
-         {"Gam1", 7.688},
-         {"Gam2", 0.0},
-         {"LatticeConstant", 5.431363}};
+         {"Gam0", 0.0},          {"Gam1", 7.688},
+         {"Gam2", 0.0},          {"LatticeConstant", 5.431363}};
 
     lebailfunction.setProfileParameterValues(parammap);
 
@@ -389,7 +383,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create a test data workspace
-    */
+   */
   MatrixWorkspace_sptr createDataWorkspace(int option) {
     // Create vectors
     std::vector<double> vecX;
@@ -515,10 +509,10 @@ public:
         1.950190,    1.613562,    1.335208,    1.104734,    0.914043,
         0.756362,    0.000000};
 
-    for (size_t i = 0; i < vecY.size(); ++i) {
+    for (double y : vecY) {
       double e = 1.0;
-      if (vecY[i] > 1.0)
-        e = sqrt(vecY[i]);
+      if (y > 1.0)
+        e = sqrt(y);
       vecE.push_back(e);
     }
 
@@ -687,8 +681,8 @@ public:
     vecy.push_back(0.03096179);
     vece.push_back(0.00105191);
 
-    for (size_t i = 0; i < vecy.size(); ++i)
-      vecy[i] -= 0.02295189;
+    for (double &i : vecy)
+      i -= 0.02295189;
 
     return;
   }

@@ -1,6 +1,8 @@
 #ifndef Torus_h
 #define Torus_h
 
+#include "MantidKernel/V3D.h"
+
 namespace Mantid {
 
 namespace Geometry {
@@ -98,7 +100,7 @@ public:
 #endif
 };
 
-} // NAMESPACE
+} // namespace Geometry
 
 } // NAMESPACE Mantid
 

@@ -6,8 +6,8 @@
 #include <QStringList>
 
 /** The ase class from which mantid custom widgets are derived it contains
-*  some useful functions
-*/
+ *  some useful functions
+ */
 namespace MantidQt {
 namespace API {
 /**
@@ -53,7 +53,7 @@ public:
 signals:
   void runAsPythonScript(const QString &code, bool);
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQTAPI_PYTHONRUNNER_H_

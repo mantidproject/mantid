@@ -88,8 +88,8 @@
 #ifndef QTEDITORFACTORY_H
 #define QTEDITORFACTORY_H
 
-#include "qtpropertymanager.h"
 #include "qtpropertybrowserutils_p.h"
+#include "qtpropertymanager.h"
 
 #include <QComboBox>
 #include <QDateTimeEdit>
@@ -515,9 +515,9 @@ private:
 
 template <class Editor> class EditorFactoryPrivate {
 public:
-  typedef QList<Editor *> EditorList;
-  typedef QMap<QtProperty *, EditorList> PropertyToEditorListMap;
-  typedef QMap<Editor *, QtProperty *> EditorToPropertyMap;
+  using EditorList = QList<Editor *>;
+  using PropertyToEditorListMap = QMap<QtProperty *, EditorList>;
+  using EditorToPropertyMap = QMap<Editor *, QtProperty *>;
 
   Editor *createEditor(QtProperty *property, QWidget *parent);
   void initializeEditor(QtProperty *property, Editor *e);

@@ -6,15 +6,15 @@
 #include "MantidCurveFitting/Functions/ProductLinearExp.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -73,7 +73,7 @@ to check that the results are equal.
     benchmark.addFunction(expFunction);
 
     const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
     std::generate(xValues.begin(), xValues.end(),
                   LinearIncrementingAssignment(0, 0.0001));
@@ -171,7 +171,7 @@ public:
     benchmark.setParameter("Lifetime", Lifetime);
 
     const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
     std::generate(xValues.begin(), xValues.end(),
                   LinearIncrementingAssignment(0, 0.1));
@@ -196,7 +196,7 @@ public:
 
   void test_calculate_derivative_throws_nothing() {
     const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble xValues(nResults);
     std::generate(xValues.begin(), xValues.end(),
                   LinearIncrementingAssignment(0, 0.1));

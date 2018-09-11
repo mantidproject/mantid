@@ -16,8 +16,9 @@ void export_ProgressBase() {
            "Increment the progress by 1 and report along with "
            "the given message")
 
-      .def("report", (void (ProgressBase::*)(int64_t, const std::string &)) &
-                         ProgressBase::report,
+      .def("report",
+           (void (ProgressBase::*)(int64_t, const std::string &)) &
+               ProgressBase::report,
            (arg("self"), arg("i"), arg("msg")),
            "Set the progress to given amount and "
            "report along with the given message")

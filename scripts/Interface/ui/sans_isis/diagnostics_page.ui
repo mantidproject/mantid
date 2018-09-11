@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>695</width>
-    <height>252</height>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,9 @@
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="browse_button">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
         <property name="text">
          <string>Browse</string>
         </property>
@@ -133,6 +136,9 @@
       </item>
       <item row="2" column="0">
        <widget class="QPushButton" name="time_button">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
         <property name="text">
          <string>Time Integral</string>
         </property>
@@ -146,6 +152,9 @@
       </item>
       <item row="0" column="0">
        <widget class="QPushButton" name="horizontal_button">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
         <property name="text">
          <string>Horizontal Integral</string>
         </property>
@@ -160,6 +169,9 @@
       </item>
       <item row="1" column="0">
        <widget class="QPushButton" name="vertical_button">
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
         <property name="text">
          <string>Vertical Integral</string>
         </property>
@@ -239,6 +251,21 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>run_input_line_edit</tabstop>
+  <tabstop>browse_button</tabstop>
+  <tabstop>detector_combo_box</tabstop>
+  <tabstop>period_line_edit</tabstop>
+  <tabstop>horizontal_button</tabstop>
+  <tabstop>horizontal_range_line_edit</tabstop>
+  <tabstop>horizontal_mask_check_box</tabstop>
+  <tabstop>vertical_button</tabstop>
+  <tabstop>vertical_range_line_edit</tabstop>
+  <tabstop>vertical_mask_check_box</tabstop>
+  <tabstop>time_button</tabstop>
+  <tabstop>time_range_line_edit</tabstop>
+  <tabstop>time_mask_checkbox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

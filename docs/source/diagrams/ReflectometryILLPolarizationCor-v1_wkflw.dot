@@ -1,0 +1,45 @@
+digraph ReflectometryILLPolarizationCor {
+  label = "ReflectometryILLPolarizationCor workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    input        [label="InputWorkspaces"]
+    output       [label="OutputWorkspace"]
+    reference    [label="Reference\nworkspace"]
+    workspaces   [label="Rest of the\nworkspaces"]
+    efficiencies [label="EfficiencyFile"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    correction         [label="PolarizationEfficiencyCor"]
+    pick_reference     [label="Pick reference workspace"]
+    match_binning      [label="RebinToWorkspace"]
+    determine_flippers [label="Determine flipper\nsettings"]
+    load_efficiencies  [label="LoadILLPolarizationFactors"]
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  input              -> pick_reference
+
+  pick_reference     -> reference
+  pick_reference     -> workspaces
+
+  reference          -> match_binning [label="WorkspaceToMatch"]
+  reference          -> correction    [label="No analyzer?"]
+
+  workspaces         -> match_binning [label="WorkspaceToRebin"]
+
+  match_binning      -> determine_flippers
+
+  determine_flippers -> correction
+
+  efficiencies       -> load_efficiencies
+  load_efficiencies  -> correction
+
+  correction         -> output
+}

@@ -1,0 +1,150 @@
+name: LET
+# Input file for PyChop2 for the LET spectrometer at ISIS.
+# At a minium, the "chopper_system" and "moderator" entries must be present
+
+chopper_system:
+  name: LET chopper system
+  chop_sam: 1.5                 # Distance (x1) from final chopper to sample (m)
+  sam_det: 3.5                  # Distance (x2) from sample to detector (m)
+  choppers:
+    -                           # Each entry must have a dash on an otherwise empty line!
+      name: LET Disk 1 Resolution
+      distance: 7.83            # Distance from moderator to this chopper in metres
+      slot_width: 40            # Slot width in mm
+      guide_width: 40           # Width of guide after chopper in mm
+      nslot: 6                  # Number of slots. (Assume all slots equally spaced)
+      radius: 290               # Disk radius
+      isDouble: True            # Is this a double disk system?
+      isPhaseIndependent: False # Is this disk to be phased independently?
+    -
+      name: LET Disk 2 Frame Overlap
+      distance: 8.4             # Distance from moderator to this chopper in metres
+      slot_width: 890           # Slot width in mm
+      guide_width: 40           # Width of guide after chopper in mm
+      nslot: 1                  # Number of slots. (Assume all slots equally spaced)
+      radius: 545               # Disk radius
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: True  # Is this disk to be phased independently?
+      defaultPhase: 5           # What is the default phase for this disk (either a time in microseconds
+                                #   or a slot index for the desired rep to go through).
+      phaseName: 'Chopper 2 phase delay time'
+    -
+      name: LET Disk 3 Pulse Remover
+      distance: 11.75           # Distance from moderator to this chopper in metres
+      slot_width: 56            # Slot width in mm
+      guide_width: 40           # Width of guide after chopper in mm
+      nslot: 2                  # Number of slots. (Assume all slots equally spaced)
+      radius: 290               # Disk radius
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: False # Is this disk to be phased independently?
+    -
+      name: LET Disk 4 Contamination Remover
+      distance: 15.66           # Distance from moderator to this chopper in metres
+      slot_width: 56            # Slot width in mm
+      guide_width: 40           # Width of guide after chopper in mm
+      nslot: 6                  # Number of slots. (Assume all slots equally spaced)
+      radius: 290               # Disk radius
+      isDouble: False           # Is this a double disk system?
+      isPhaseIndependent: False # Is this disk to be phased independently?
+    -
+      name: LET Disk 5 Resolution
+      distance: 23.5            # Distance from moderator to this chopper in metres
+      slot_width: 31            # Slot width in mm
+      guide_width: 20           # Width of guide after chopper in mm
+      nslot: 2                  # Number of slots. (Assume all slots equally spaced)
+      radius: 290               # Disk radius
+      isDouble: True            # Is this a double disk system?
+      isPhaseIndependent: False # Is this disk to be phased independently?
+  # Now define how the frequencies of the choppers should be related
+  # This is an NxM matrix A where N is the number of choppers and M is the number of indepdent frequencies
+  # Such that A.F will give the N required frequencies for each chopper from the M input frequencies
+  frequency_matrix:             # LET is run with two main frequencies:
+    [[0, 0.5],                  #   f1: The frequency of the resolution chopper (Disk 5)
+     [0, 0],                    #   f2: The frequency of the pulse removal chopper (Disk 3)
+     [0, 1],                    # Disk 4 is usually run at half f1, and disk 1 at half of f2
+     [0.5, 0],
+     [1, 0]]
+  constant_frequencies:         # This specifies if a chopper should be run at a fixed constant frequency
+    [0, 10., 0., 0., 0.]        # On LET, Disk 2, the frame-overlap chopper, should always run at 10 Hz
+  frequency_names:
+    - 'Resolution frequency'
+    - 'Pulse remover frequency'
+  max_frequencies:
+    [300, 300]                  # Maximum frequencies (Hz)
+  default_frequencies:
+    [240, 120]
+  overlap_ei_frac: 0.9          # Fraction of energy loss Ei to plot ToF lines in time-distance plots
+  ei_limits: [0, 30]            # Limits on ei for multirep calculations (reps outside range ignored)
+  flux_ref_slot: 20             # Reference slot width (mm) for flux transmission calculation (disk choppers only)
+  flux_ref_freq: 150            # Reference final chopper freq (Hz) for flux transmission calc (disk choppers only)
+  # Can define variants which overide one of the above parameters
+  variants:                     # On LET the final chopper has 3 sets of slots with different widths
+    High Flux:                  # This is the default mode (uses the widest 31mm slot).
+      default: True             # If this key is omitted, the variant without any option is used as default
+    Intermediate:
+      choppers:                 # Note that we need to leave the required number of dashes to indicate
+        -                       #   choppers whos parameters have not changed.
+        -
+        -
+        -
+        -
+          slot_width: 20
+    High Resolution:
+      frequency_matrix:
+        [[0.5, 0],
+         [0, 0],
+         [0, 1],
+         [0, 1],
+         [1, 0]]
+      choppers:                 # Note that we need to leave the required number of dashes to indicate
+        -                       #   choppers whos parameters have not changed.
+        -
+        -
+        -
+        -
+          slot_width: 15
+
+detector:
+  name: LET detector banks
+  tthlims: [2.65, 140.0]        # Min and max 2-theta angles of detectors (for Q-E plot)
+
+moderator:
+  name: TS2 Hydrogen            # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
+                                # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
+  imod: 3                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2
+  mod_pars: [-3.143, 49.28, .535] # imod==3 is polynomial. Pars are coeff from highest order to lowest
+  theta: 32.0                   # Angle beamline makes with moderator face (degrees)
+  source_rep: 10                # Frequency of source (Hz)
+  emission_time: 3500           # Time width of source pulse in microseconds (only used to determine spurious reps in multi-rep mode)
+  measured_width:               # Table of measured moderator time widths in microseconds. If present will overide imod and mod_pars
+    isSigma: False              # Indicates measurements are FWHM
+    wavelength: [3.8063, 2.1961, 6.2121, 5.3820, 1.4371, 1.7010, 2.6920, 1.9013]
+    width: [90.4, 40.8, 154.4, 131.2, 22.4, 25.6, 52.4, 32.4]
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+    scale_factor: 63276.8362    # A factor to scale the flux values below by
+    wavelength: [0.5,   0.6,   0.7,   0.8,   0.9,   1. ,   1.1,   1.2,   1.3,
+                 1.4,   1.5,   1.6,   1.7,   1.8,   1.9,   2. ,   2.1,   2.2,
+                 2.3,   2.4,   2.5,   2.6,   2.7,   2.8,   2.9,   3. ,   3.1,
+                 3.2,   3.3,   3.4,   3.5,   3.6,   3.7,   3.8,   3.9,   4. ,
+                 4.1,   4.2,   4.3,   4.4,   4.5,   4.6,   4.7,   4.8,   4.9,
+                 5.0,   5.1,   5.2,   5.3,   5.4,   5.5,   5.6,   5.7,   5.8,
+                 5.9,   6.0,   6.1,   6.2,   6.3,   6.4,   6.5,   6.6,   6.7,
+                 6.8,   6.9,   7.0,   7.1,   7.2,   7.3,   7.4,   7.5,   7.6,
+                 7.7,   7.8,   7.9,   8.0,   8.1,   8.2,   8.3,   8.4,   8.5,
+                 8.6,   8.7,   8.8,   8.9,   9.0,   9.1,   9.2,   9.3,   9.4,
+                 9.5,   9.6,   9.7,   9.8,   9.9,  10.0,  10.1,  10.2,  10.3,
+                10.4,  10.5,  10.6,  10.7,  10.8,  10.9,  11.0,  11.1,  11.2,
+                11.3,  11.4,  11.5,  11.6,  11.7,  11.8,  11.9]
+    flux: [0.0889, 0.1003, 0.1125, 0.1213, 0.1274, 0.1358, 0.1455, 0.1562, 0.1702,
+           0.1902, 0.2149, 0.2496, 0.2938, 0.3537, 0.4315, 0.5244, 0.6415, 0.7856,
+           0.9341, 1.0551, 1.1437, 1.1955, 1.2004, 1.1903, 1.1662, 1.1428, 1.1176,
+           1.0875, 1.0641, 1.0562, 1.0242, 0.9876, 0.9586, 0.9415, 0.924, 0.8856,
+           0.8865, 0.8727, 0.842, 0.8125, 0.7849, 0.7596, 0.7417, 0.7143, 0.6869,
+           0.6608, 0.6341, 0.6073, 0.581, 0.5548, 0.5304, 0.507, 0.4849, 0.4639,
+           0.4445, 0.425, 0.407, 0.3902, 0.3737, 0.3579, 0.3427, 0.3274, 0.3129,
+           0.2989, 0.2854, 0.2724, 0.2601, 0.2483, 0.2371, 0.2267, 0.2167, 0.2072,
+           0.1984, 0.19, 0.1821, 0.1743, 0.1669, 0.1599, 0.1532, 0.1467, 0.1404,
+           0.1346, 0.1291, 0.1238, 0.1189, 0.1141, 0.1097, 0.1053, 0.1014, 0.0975,
+           0.0938, 0.0902, 0.0866, 0.0834, 0.0801, 0.077, 0.0741, 0.0712, 0.0686,
+           0.066, 0.0637, 0.0614, 0.0593, 0.0571, 0.0551, 0.0532, 0.0512, 0.0494,
+           0.0477, 0.0461, 0.0445, 0.043, 0.0415, 0.0401, 0.0387]

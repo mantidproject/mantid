@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
 #define MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -45,6 +45,10 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetUB", "FindUBUsingFFT", "FindUBUsingIndexedPeaks",
+            "FindUBUsingLatticeParameters"};
+  }
 
   /// Algorithm's category for identification
   const std::string category() const override;

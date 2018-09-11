@@ -1,8 +1,8 @@
 #ifndef MDGEOMETRY_XMLDEFINITIONS_H_
 #define MDGEOMETRY_XMLDEFINITIONS_H_
 
-#include <string>
 #include "MantidGeometry/DllConfig.h"
+#include <string>
 namespace Mantid {
 namespace Geometry {
 
@@ -98,6 +98,6 @@ public:
   }
   static const std::string RebinnedWSName() { return "RebinnedWS"; }
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 #endif

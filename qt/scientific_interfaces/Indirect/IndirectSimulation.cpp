@@ -1,17 +1,17 @@
+#include "IndirectSimulation.h"
+#include "DensityOfStates.h"
+#include "IndirectMolDyn.h"
+#include "IndirectSassena.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "DensityOfStates.h"
-#include "IndirectSimulation.h"
-#include "IndirectMolDyn.h"
-#include "IndirectSassena.h"
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectSimulation)
 }
-}
+} // namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 

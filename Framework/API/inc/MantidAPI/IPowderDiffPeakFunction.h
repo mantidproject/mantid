@@ -1,8 +1,8 @@
 #ifndef MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
 #define MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
 
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include <complex>
 
@@ -159,7 +159,7 @@ protected:
   size_t HEIGHTINDEX;
 };
 
-typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
+using IPowderDiffPeakFunction_sptr = boost::shared_ptr<IPowderDiffPeakFunction>;
 
 /// Integral for Gamma
 std::complex<double> MANTID_API_DLL E1(std::complex<double> z);

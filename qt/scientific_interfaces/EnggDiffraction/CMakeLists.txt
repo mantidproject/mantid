@@ -5,12 +5,14 @@ set ( SRC_FILES
 	EnggDiffGSASFittingModel.cpp
 	EnggDiffGSASFittingPresenter.cpp
 	EnggDiffGSASFittingViewQtWidget.cpp
+	EnggDiffGSASFittingWorker.cpp
 	EnggDiffMultiRunFittingQtWidget.cpp
 	EnggDiffMultiRunFittingWidgetAdder.cpp
 	EnggDiffMultiRunFittingWidgetModel.cpp
 	EnggDiffMultiRunFittingWidgetPresenter.cpp
 	EnggDiffractionPresenter.cpp
 	EnggDiffractionViewQtGUI.cpp
+	EnggVanadiumCorrectionsModel.cpp
 	GSASIIRefineFitPeaksOutputProperties.cpp
 	GSASIIRefineFitPeaksParameters.cpp
 	RunLabel.cpp
@@ -27,6 +29,7 @@ set ( INC_FILES
 	EnggDiffGSASFittingModel.h
 	EnggDiffGSASFittingPresenter.h
 	EnggDiffGSASFittingViewQtWidget.h
+	EnggDiffGSASFittingWorker.h
 	EnggDiffGSASRefinementMethod.h
 	EnggDiffMultiRunFittingQtWidget.h
 	EnggDiffMultiRunFittingWidgetAdder.h
@@ -35,6 +38,7 @@ set ( INC_FILES
 	EnggDiffractionPresWorker.h
 	EnggDiffractionPresenter.h
 	EnggDiffractionViewQtGUI.h
+	EnggVanadiumCorrectionsModel.h
 	GSASIIRefineFitPeaksOutputProperties.cpp
 	GSASIIRefineFitPeaksParameters.h
 	IEnggDiffFittingModel.h
@@ -49,6 +53,7 @@ set ( INC_FILES
 	IEnggDiffMultiRunFittingWidgetView.h
 	IEnggDiffractionPresenter.h
 	IEnggDiffractionView.h
+	IEnggVanadiumCorrectionsModel.h
 	RunLabel.h
 	RunMap.h
 )
@@ -57,7 +62,9 @@ set ( MOC_FILES
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
+    EnggDiffGSASFittingModel.h
     EnggDiffGSASFittingViewQtWidget.h
+    EnggDiffGSASFittingWorker.h
     EnggDiffractionPresenter.h
     EnggDiffractionPresWorker.h
     EnggDiffractionViewQtGUI.h

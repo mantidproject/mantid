@@ -61,7 +61,7 @@ public:
 
 private:
   /// Typdef for the white-space separated file data type.
-  typedef std::deque<std::string> DataCollectionType;
+  using DataCollectionType = std::deque<std::string>;
 
   /// Initialisation code
   void init() override;
@@ -146,7 +146,7 @@ private:
   size_t m_nDimensions = 3;
 };
 
-} // namespace DataHandling
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_ */

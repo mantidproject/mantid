@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_
 #define MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -54,6 +54,9 @@ public:
   }
 
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ChangePulsetime", "ShiftLogTime"};
+  }
   const std::string category() const override {
     return "Events\\EventFiltering";
   }

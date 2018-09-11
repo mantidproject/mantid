@@ -1,7 +1,9 @@
 #include "MantidKernel/NexusDescriptor.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -75,7 +77,7 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   std::rewind(fileHandle);
   return result;
 }
-}
+} // namespace
 
 //---------------------------------------------------------------------------------------------------------------------------
 // static NexusDescriptor methods

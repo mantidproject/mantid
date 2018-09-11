@@ -1,8 +1,8 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/VMD.h"
 
 #include <sstream>
@@ -26,15 +26,16 @@ IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
  * @param function :: Implicit function limiting space to look at
  * @return a single IMDIterator pointer
  */
-IMDIterator *IMDWorkspace::createIterator(
+std::unique_ptr<IMDIterator> IMDWorkspace::createIterator(
     Mantid::Geometry::MDImplicitFunction *function) const {
-  std::vector<IMDIterator *> iterators = this->createIterators(1, function);
+  std::vector<std::unique_ptr<IMDIterator>> iterators =
+      this->createIterators(1, function);
   if (iterators.empty())
     throw std::runtime_error("IMDWorkspace::createIterator(): iterator "
                              "creation was not successful. No iterators "
                              "returned by " +
                              this->id());
-  return iterators[0];
+  return std::move(iterators[0]);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -189,8 +190,8 @@ none for the generic case, but overriden elsewhere.
 MDNormalization IMDWorkspace::displayNormalizationHisto() const {
   return NoNormalization;
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

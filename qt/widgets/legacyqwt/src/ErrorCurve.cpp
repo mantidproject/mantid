@@ -108,5 +108,5 @@ QRectF ErrorCurve::boundingRect() const {
   return rect;
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

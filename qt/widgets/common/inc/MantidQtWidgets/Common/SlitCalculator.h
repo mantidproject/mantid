@@ -57,7 +57,7 @@ private:
 private slots:
   void on_recalculate_triggered();
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_SLITCALCULATOR_H */

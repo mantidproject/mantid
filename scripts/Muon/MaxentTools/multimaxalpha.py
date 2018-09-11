@@ -17,7 +17,7 @@ def MULTIMAX(
       POINTS_nhists, POINTS_ngroups, POINTS_npts, CHANNELS_itzero, CHANNELS_i1stgood, CHANNELS_itotal, RUNDATA_res, RUNDATA_frames,
       GROUPING_group, DATALL_rdata, FAC_factor, SENSE_taud, MAXPAGE_n, filePHASE,
       PULSES_def, PULSES_npulse, FLAGS_fitdead, FLAGS_fixphase, SAVETIME_i2,
-      OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine):
+      OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine,deadDetectors):
     #
     base = np.zeros([MAXPAGE_n])
     (datum, sigma, corr, datt, MISSCHANNELS_mm, RUNDATA_fnorm, RUNDATA_hists, FAC_facfake, FAC_ratio) = INPUT(
@@ -56,9 +56,18 @@ def MULTIMAX(
                                                               MISSCHANNELS_mm, MAXPAGE_f, PULSESHAPE_convol, DETECT_e, SAVETIME_i2, mylog)
         # outout per-iteration debug info
         if(phaseconvWS):
-            for k in range(POINTS_ngroups):
-                phaseconvWS.dataX(k)[j + 1] = (j + 1) * 1.0
-                phaseconvWS.dataY(k)[j + 1] = SENSE_phi[k]
+            offset = 0
+            for k in range(POINTS_ngroups+len(deadDetectors)):
+                phaseConvX_k = phaseconvWS.dataX(k)
+                phaseConvY_k = phaseconvWS.dataY(k)
+                if k+1 in deadDetectors:
+                    offset+=1
+                    phaseConvX_k[j + 1] = (j + 1) * 1.0
+                    phaseConvY_k[j + 1] = 0.0
+                else:
+                    phaseConvX_k[j + 1] = (j + 1) * 1.0
+                    phaseConvY_k[j + 1] = SENSE_phi[k-offset]
+
         prog.report((j + 1) * InnerIter, "")
                     # finished outer loop, jump progress bar
 

@@ -43,6 +43,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveIsawPeaks", "SaveIsawUB"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Text";
@@ -61,7 +64,7 @@ private:
   Geometry::Instrument_const_sptr getInstrument3Ways(Algorithm *alg);
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LoadIsawSpectrum_H_ */

@@ -58,12 +58,12 @@ private:
 };
 
 /// shared pointer to the GroupingWorkspace class
-typedef boost::shared_ptr<GroupingWorkspace> GroupingWorkspace_sptr;
+using GroupingWorkspace_sptr = boost::shared_ptr<GroupingWorkspace>;
 
 /// shared pointer to a const GroupingWorkspace
-typedef boost::shared_ptr<const GroupingWorkspace> GroupingWorkspace_const_sptr;
+using GroupingWorkspace_const_sptr = boost::shared_ptr<const GroupingWorkspace>;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_ */

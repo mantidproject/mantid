@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_GONIOMETER_H_
 #define MANTID_GEOMETRY_GONIOMETER_H_
 
+#include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Crystal/AngleUnits.h"
-#include <string>
 #include <nexus/NeXusFile.hpp>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {
@@ -91,6 +91,10 @@ public:
   // Set rotation angle for an axis in the units the angle is set (default --
   // degrees)
   void setRotationAngle(size_t axisnumber, double value);
+  // Calculate goniometer for rotation around y-axis for constant wavelength
+  // from Q Sample
+  void calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q,
+                                    double wavelength);
   // Get axis object
   const GoniometerAxis &getAxis(size_t axisnumber) const;
   // Get axis object

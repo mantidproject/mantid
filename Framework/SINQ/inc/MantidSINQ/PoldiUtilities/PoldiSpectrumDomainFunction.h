@@ -97,7 +97,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
   int minTOFN;
 };
 
-typedef boost::shared_ptr<Poldi2DHelper> Poldi2DHelper_sptr;
+using Poldi2DHelper_sptr = boost::shared_ptr<Poldi2DHelper>;
 
 class WrapAroundJacobian : public API::Jacobian {
 public:
@@ -111,8 +111,9 @@ public:
 
   void set(size_t iY, size_t iP, double value) override {
     size_t realY = (m_offset + iY) % m_domainSize;
-    m_jacobian.set(realY, iP, m_jacobian.get(realY, iP) +
-                                  value * m_factors[m_factorOffset + iY]);
+    m_jacobian.set(realY, iP,
+                   m_jacobian.get(realY, iP) +
+                       value * m_factors[m_factorOffset + iY]);
   }
 
   void zero() override { m_jacobian.zero(); }

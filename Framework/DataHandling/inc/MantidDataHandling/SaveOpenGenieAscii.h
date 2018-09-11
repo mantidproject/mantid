@@ -26,6 +26,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveAscii"};
+  }
 
   /// Algorithm's category for identification
   const std::string category() const override {
@@ -92,6 +95,6 @@ private:
   /// Output type - Integer
   const std::string m_intType = "Integer";
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // DATAHANDING_SAVEOPENGENIEASCII_H_

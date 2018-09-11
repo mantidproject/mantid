@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -26,7 +26,7 @@ void BoxControllerSettingsAlgorithm::initBoxControllerProps(
   mustBeMoreThen1->setLower(1);
 
   // Split up comma-separated properties
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   tokenizer values(SplitInto, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
   std::vector<int> valueVec;
@@ -149,5 +149,5 @@ void BoxControllerSettingsAlgorithm::setBoxController(BoxController_sptr bc) {
   bc->resetNumBoxes();
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

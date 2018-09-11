@@ -1,8 +1,8 @@
 #ifndef MANTID_CRYSTAL_CLEARUB_H_
 #define MANTID_CRYSTAL_CLEARUB_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -45,6 +45,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetUB", "HasUB"};
+  }
   const std::string category() const override;
 
 protected:

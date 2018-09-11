@@ -73,8 +73,8 @@ private:
   using Kernel::DynamicFactory<IDomainCreator>::createUnwrapped;
 };
 
-typedef Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
-    DomainCreatorFactory;
+using DomainCreatorFactory =
+    Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
@@ -84,6 +84,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::DomainCreatorFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_DOMAINCREATORFACTORY_H_ */

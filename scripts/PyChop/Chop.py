@@ -19,6 +19,8 @@ technical reports:
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+import warnings
+warnings.simplefilter('always', UserWarning)
 
 # ------------------------------------------------------------------------------------------------- #
 # Chopper functions
@@ -46,7 +48,8 @@ def tchop(freq, Ei, pslit, radius, rho):
         #area[idx] = pre * 0.60 * gamm[idx] * ((groot-2.00)**2) * (groot+8.00) / (groot+4.00)
     else:
         if gamm >= 4.00:
-            raise ValueError('PyChop: tchop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq))
+            warnings.warn('PyChop: tchop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq))
+            return np.nan
         if gamm <= 1.00:
             gsqr = (1.00-(gamm**2)**2 /10.00) / (1.00-(gamm**2)/6.00)
         else:
@@ -86,7 +89,8 @@ def achop(Ei, freq, dslat, pslit, radius, rho):
         area[idx] = pre * groot * ((groot-2.0)**2) * (groot+4.0)/6.0
     else:
         if gamm >= 4.00:
-            raise ValueError('PyChop: achop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq))
+            warnings.warn('PyChop: achop(): No transmission at %5.3f meV at %3d Hz' % (Ei, freq), UserWarning)
+            return np.nan
         else:
             if gamm <= 1.00:
                 f1 = 1.00-(gamm**2)/6.00
@@ -105,18 +109,16 @@ def tikeda(S1, S2, B1, B2, Emod, Ei):
     """
     ! Calculates the moderator time width based on the Ikeda-Carpenter distribution
     """
+    Ei = np.array(Ei if hasattr(Ei, '__len__') else [Ei])
     sig = np.sqrt((S1*S1) + ((S2*S2*81.8048)/Ei))
     A = 4.37392e-4 * sig * np.sqrt(Ei)
     tausqr = []
-    for j in range(len(Ei)):
-        if Ei[j] > 130.0:
-            B = B2
-        else:
-            B = B1
-        R = np.exp(-Ei/Emod)
-        tausqr[j] = (3.0/(A*A)) + (R*(2.0-R)) / (B*B)
+    B = np.array([B1] * len(Ei))
+    B[np.where(Ei > 130.0)] = B2
+    R = np.exp(-Ei/Emod)
+    tausqr = (3.0/(A**2)) + (R*(2.0-R)) / (B**2)
     # variance currently in mms**2. Convert to sec**2
-    return tausqr*1.0e-12
+    return (tausqr if len(tausqr) > 1 else tausqr[0]) * 1.0e-12
 
 
 def tchi(delta, Ei):

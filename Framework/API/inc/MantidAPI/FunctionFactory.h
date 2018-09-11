@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <vector>
 
 #include <mutex>
 
@@ -142,14 +142,14 @@ const std::vector<std::string> &FunctionFactoryImpl::getFunctionNames() const {
   return typeNames;
 }
 
-typedef Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
+using FunctionFactory = Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
 
 /// Convenient typedef for an UpdateNotification
-typedef FunctionFactoryImpl::UpdateNotification
-    FunctionFactoryUpdateNotification;
+using FunctionFactoryUpdateNotification =
+    FunctionFactoryImpl::UpdateNotification;
 /// Convenient typedef for an UpdateNotification AutoPtr
-typedef const Poco::AutoPtr<FunctionFactoryUpdateNotification> &
-    FunctionFactoryUpdateNotification_ptr;
+using FunctionFactoryUpdateNotification_ptr =
+    const Poco::AutoPtr<FunctionFactoryUpdateNotification> &;
 } // namespace API
 } // namespace Mantid
 
@@ -158,7 +158,7 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FunctionFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /**
  * Macro for declaring a new type of function to be used with the

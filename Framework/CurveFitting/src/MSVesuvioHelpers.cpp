@@ -6,8 +6,6 @@
 #include <algorithm>
 #include <numeric>
 
-#include <boost/random/variate_generator.hpp>
-
 namespace Mantid {
 namespace CurveFitting {
 namespace MSVesuvioHelper {
@@ -279,12 +277,12 @@ double finalEnergyAuYap(const double randv) {
 }
 
 /**
-   * Generate the final energy of a neutron for uranium foil analyser at 293K
-   * with number density of 1.456E20 atoms/cm^2 in double-difference mode.
-   * @param randv A random number between 0.0 & 1.0, sample from a flat
+ * Generate the final energy of a neutron for uranium foil analyser at 293K
+ * with number density of 1.456E20 atoms/cm^2 in double-difference mode.
+ * @param randv A random number between 0.0 & 1.0, sample from a flat
  * distribution
-   * @return A value to use for the final energy
-   */
+ * @return A value to use for the final energy
+ */
 double finalEnergyUranium(const double randv) {
   static const double ENERGIES[201] = {
       5959.0, 5967.7, 5976.4, 5985.1, 5993.8, 6002.5, 6011.2, 6019.9, 6028.6,
@@ -353,20 +351,16 @@ double finalEnergyUranium(const double randv) {
 /**
  * Produces random numbers with various probability distributions
  */
-RandomNumberGenerator::RandomNumberGenerator(const int seed) : m_generator() {
-  m_generator.seed(static_cast<boost::mt19937::result_type>(seed));
+RandomVariateGenerator::RandomVariateGenerator(const int seed) : m_engine() {
+  m_engine.seed(static_cast<std::mt19937::result_type>(seed));
 }
 /// Returns a flat random number between 0.0 & 1.0
-double RandomNumberGenerator::flat() {
-  typedef boost::variate_generator<boost::mt19937 &, uniform_double>
-      uniform_generator;
-  return uniform_generator(m_generator, uniform_double(0.0, 1.0))();
+double RandomVariateGenerator::flat() {
+  return std::uniform_real_distribution<>(0.0, 1.0)(m_engine);
 }
-/// Returns a random number distributed  by a normal distribution
-double RandomNumberGenerator::gaussian(const double mean, const double sigma) {
-  typedef boost::variate_generator<boost::mt19937 &, gaussian_double>
-      gauss_generator;
-  return gauss_generator(m_generator, gaussian_double(mean, sigma))();
+/// Returns a random number distributed following a normal distribution
+double RandomVariateGenerator::gaussian(const double mean, const double sigma) {
+  return Kernel::normal_distribution<>(mean, sigma)(m_engine);
 }
 
 //-------------------------------------------------------------------------
@@ -395,7 +389,7 @@ SimulationAggregator::SimulationAggregator(const size_t nruns) {
  * @param order The number of requested scatterings
  * @param ntimes The number of times on input workspace
  * @return A reference to a new Simulation object
-*/
+ */
 Simulation &SimulationAggregator::newSimulation(const size_t order,
                                                 const size_t ntimes) {
   results.push_back(Simulation(order, ntimes));
@@ -472,5 +466,5 @@ void SimulationWithErrors::normalise() {
 }
 
 } // namespace MSVesuvioHelper
-}
-}
+} // namespace CurveFitting
+} // namespace Mantid

@@ -86,7 +86,7 @@ private:
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
     Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
 
-typedef SingletonHolder<UnitFactoryImpl> UnitFactory;
+using UnitFactory = SingletonHolder<UnitFactoryImpl>;
 
 } // namespace Kernel
 } // namespace Mantid

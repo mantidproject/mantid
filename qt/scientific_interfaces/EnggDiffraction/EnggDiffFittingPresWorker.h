@@ -50,9 +50,7 @@ private slots:
 
   void fitting() {
     try {
-      for (const auto &runLabel : m_runLabels) {
-        m_pres->doFitting(runLabel, m_expectedPeaks);
-      }
+      m_pres->doFitting(m_runLabels, m_expectedPeaks);
     } catch (std::exception &ex) {
       Mantid::Kernel::Logger log("EngineeringDiffractionFitting");
       log.error(ex.what());

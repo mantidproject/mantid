@@ -27,15 +27,15 @@
  *                                                                         *
  ***************************************************************************/
 #include "MatrixSizeDialog.h"
-#include "MatrixCommand.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MatrixCommand.h"
 
-#include <QPushButton>
-#include <QLabel>
 #include <QGroupBox>
-#include <QSpinBox>
-#include <QMessageBox>
+#include <QLabel>
 #include <QLayout>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
 
 MatrixSizeDialog::MatrixSizeDialog(Matrix *m, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), d_matrix(m) {

@@ -24,12 +24,12 @@
  */
 #include "MantidKernel/System.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
+#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 
-#include <type_traits>
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>
+#include <type_traits>
 #include <vector>
 
 namespace Mantid {
@@ -37,7 +37,7 @@ namespace PythonInterface {
 namespace Policies {
 
 namespace // anonymous
-    {
+{
 //-----------------------------------------------------------------------
 // MPL helper structs
 //-----------------------------------------------------------------------
@@ -69,7 +69,7 @@ struct VectorRefToNumpyImpl {
 
 template <typename T>
 struct VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type {};
-}
+} // namespace
 
 /**
  * Implements a return value policy that
@@ -85,15 +85,14 @@ template <typename ConversionPolicy> struct VectorRefToNumpy {
   // The boost::python framework calls return_value_policy::apply<T>::type
   template <class T> struct apply {
     // Typedef that removes and const or reference qualifiers from the type
-    typedef typename std::remove_const<
-        typename std::remove_reference<T>::type>::type non_const_type;
+    using non_const_type = typename std::remove_const<
+        typename std::remove_reference<T>::type>::type;
     // MPL compile-time check that T is a reference to a std::vector
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         boost::mpl::and_<std::is_reference<T>,
                          is_std_vector<non_const_type>>::value,
         VectorRefToNumpyImpl<non_const_type, ConversionPolicy>,
-        VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type<T>>::type
-        type;
+        VectorRefToNumpy_Requires_Reference_To_StdVector_Return_Type<T>>::type;
   };
 };
 
@@ -118,7 +117,7 @@ template <typename VectorType> struct VectorToNumpyImpl {
 
 template <typename T>
 struct VectorToNumpy_Requires_StdVector_Return_By_Value {};
-}
+} // namespace
 
 /**
  * Implements a return value policy that
@@ -130,16 +129,16 @@ struct VectorToNumpy {
   // The boost::python framework calls return_value_policy::apply<T>::type
   template <class T> struct apply {
     // Typedef that removes any const from the type
-    typedef typename std::remove_const<T>::type non_const_type;
+    using non_const_type = typename std::remove_const<T>::type;
     // MPL compile-time check that T is a std::vector
-    typedef typename boost::mpl::if_c<
+    using type = typename boost::mpl::if_c<
         is_std_vector<non_const_type>::value,
         VectorRefToNumpyImpl<non_const_type, Converters::Clone>,
-        VectorToNumpy_Requires_StdVector_Return_By_Value<T>>::type type;
+        VectorToNumpy_Requires_StdVector_Return_By_Value<T>>::type;
   };
 };
-}
-}
-}
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_

@@ -37,7 +37,7 @@ namespace Converters {
  * Converter that takes a std::vector and converts it into a flat numpy array.
  *
  * The type of conversion is specified by another struct/class that
- * contains a static member create.
+ * contains a static member create1D.
  */
 template <typename ElementType, typename ConversionPolicy>
 struct VectorToNDArray {
@@ -48,12 +48,12 @@ struct VectorToNDArray {
    */
   inline PyObject *operator()(const std::vector<ElementType> &cdata) const {
     // Hand off the work to the conversion policy
-    typedef typename ConversionPolicy::template apply<ElementType> policy;
+    using policy = typename ConversionPolicy::template apply<ElementType>;
     return policy::create1D(cdata);
   }
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_ */

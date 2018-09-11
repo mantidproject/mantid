@@ -35,7 +35,7 @@ private:
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, CPUTimer &);
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_CPUTIMER_H_ */

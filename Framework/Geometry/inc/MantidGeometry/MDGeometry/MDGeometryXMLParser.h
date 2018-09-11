@@ -1,8 +1,8 @@
 #ifndef MDGEOMETRY_XML_PARSER_H
 #define MDGEOMETRY_XML_PARSER_H
 
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <string>
 
 namespace Mantid {
@@ -108,7 +108,7 @@ public:
 
   MDGeometryXMLParser(const MDGeometryXMLParser &);
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

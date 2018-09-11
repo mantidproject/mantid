@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_MASKSPECTRA_H_
 #define MANTID_DATAHANDLING_MASKSPECTRA_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,6 +39,9 @@ class MANTID_DATAHANDLING_DLL MaskSpectra : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"MaskDetectors"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

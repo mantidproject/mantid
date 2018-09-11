@@ -1,11 +1,10 @@
+#include "MantidCurveFitting/GeneralDomainCreator.h"
 #include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/IFunctionGeneral.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidCurveFitting/GeneralDomainCreator.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/lexical_cast.hpp>

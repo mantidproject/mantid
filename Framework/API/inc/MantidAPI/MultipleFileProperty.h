@@ -1,10 +1,10 @@
 #ifndef MANTID_API_MULTIPLEFILEPROPERTY_H_
 #define MANTID_API_MULTIPLEFILEPROPERTY_H_
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include <vector>
+#include "MantidKernel/PropertyWithValue.h"
 #include <set>
+#include <vector>
 
 namespace Mantid {
 namespace API {

@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
 #define MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/SerialAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -54,6 +54,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"RecordPythonScript", "GenerateIPythonNotebook"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Python"; }
 

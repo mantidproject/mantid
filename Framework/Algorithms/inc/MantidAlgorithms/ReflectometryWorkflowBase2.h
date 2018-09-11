@@ -93,6 +93,8 @@ protected:
   /// Find theta from a named log value
   double getThetaFromLogs(Mantid::API::MatrixWorkspace_sptr inputWs,
                           const std::string &logName);
+  // Retrieve the run number from the logs of the input workspace.
+  std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
 };
 } // namespace Algorithms
 } // namespace Mantid

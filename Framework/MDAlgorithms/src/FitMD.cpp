@@ -2,15 +2,15 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -97,7 +97,6 @@ void FitMD::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   setParameters();
   auto iterator = m_IMDWorkspace->createIterator();
   const size_t n = iterator->getDataSize();
-  delete iterator;
 
   if (m_count == 0) {
     m_count = n;
@@ -233,7 +232,6 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
     }
     ++resultValueIndex;
   } while (inputIter->next());
-  delete inputIter;
 
   // This splits up all the boxes according to split thresholds and sizes.
   auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
@@ -342,7 +340,6 @@ size_t FitMD::getDomainSize() const {
     throw std::runtime_error("FitMD: workspace wasn't defined");
   auto iterator = m_IMDWorkspace->createIterator();
   size_t n = iterator->getDataSize();
-  delete iterator;
   if (m_count != 0) {
     if (m_startIndex + m_count > n)
       throw std::range_error("FitMD: index is out of range");
@@ -351,5 +348,5 @@ size_t FitMD::getDomainSize() const {
   return n;
 }
 
-} // namespace Algorithm
+} // namespace MDAlgorithms
 } // namespace Mantid

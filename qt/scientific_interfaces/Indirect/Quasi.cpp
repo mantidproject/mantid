@@ -1,6 +1,6 @@
-#include "MantidAPI/TextAxis.h"
 #include "Quasi.h"
 #include "../General/UserInputValidator.h"
+#include "MantidAPI/TextAxis.h"
 
 using namespace Mantid::API;
 
@@ -76,7 +76,7 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
  * Set the data selectors to use the default save directory
  * when browsing for input files.
  *
-* @param settings :: The current settings
+ * @param settings :: The current settings
  */
 void Quasi::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
@@ -137,7 +137,7 @@ bool Quasi::validate() {
 }
 
 /**
-* Run the BayesQuasi algorithm
+ * Run the BayesQuasi algorithm
  */
 void Quasi::run() {
 
@@ -338,8 +338,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 }
 
 /**
-* Plots the current preview on the miniplot
-*/
+ * Plots the current preview on the miniplot
+ */
 void Quasi::plotCurrentPreview() {
 
   if (m_uiForm.ppPlot->hasCurve("fit.1")) {
@@ -458,8 +458,8 @@ void Quasi::saveClicked() {
 }
 
 /**
-* Handles plotting the selected plot when plot is clicked
-*/
+ * Handles plotting the selected plot when plot is clicked
+ */
 void Quasi::plotClicked() {
   // Output options
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();

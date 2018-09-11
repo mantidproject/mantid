@@ -38,10 +38,10 @@ public:
   virtual ~ReflGenericDataProcessorPresenterFactory() = default;
 
   /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
+   * Creates a Reflectometry Data Processor Presenter
+   */
   std::unique_ptr<ReflDataProcessorPresenter> create(int group);
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /*MANTID_ISISREFLECTOMETRY_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/

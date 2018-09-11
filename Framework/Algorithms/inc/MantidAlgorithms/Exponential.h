@@ -58,6 +58,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"Power", "Logarithm"};
+  }
 
 private:
   // Overridden UnaryOperation methods
@@ -80,7 +83,7 @@ private:
   // lhs,API::MatrixWorkspace_sptr out);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_EXPONENTIAL_H_*/

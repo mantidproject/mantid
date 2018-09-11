@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_POLYNOMIAL_H_
 #define MANTID_CURVEFITTING_POLYNOMIAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 
 namespace Mantid {
@@ -68,7 +68,7 @@ private:
   int m_n;
 };
 
-typedef boost::shared_ptr<Polynomial> Polynomial_sptr;
+using Polynomial_sptr = boost::shared_ptr<Polynomial>;
 
 } // namespace Functions
 } // namespace CurveFitting

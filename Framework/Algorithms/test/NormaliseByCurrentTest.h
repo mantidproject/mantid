@@ -132,7 +132,7 @@ void addPChargeLogTo(MatrixWorkspace_sptr ws, const double pChargeAccum) {
   ws->mutableRun().addLogData(pchargeLog.release());
   // ws->mutableRun().integrateProtonCharge(); // TODO
 }
-}
+} // namespace
 class NormaliseByCurrentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

@@ -50,9 +50,9 @@ public:
     TOK_IGNORE_FINAL_EMPTY_TOKEN =
         4 ///< ignore an empty token at the end of the string.
   };
-  typedef std::vector<std::string> TokenVec;
-  typedef std::vector<std::string>::iterator Iterator;
-  typedef std::vector<std::string>::const_iterator ConstIterator;
+  using TokenVec = std::vector<std::string>;
+  using Iterator = std::vector<std::string>::iterator;
+  using ConstIterator = std::vector<std::string>::const_iterator;
   /// Constructs an object from an empty string.
   StringTokenizer() = default;
   /// Constructor requiring a string to tokenize and a string of separators.
@@ -63,8 +63,8 @@ public:
   ~StringTokenizer() = default;
 
   /** Iterator referring to first element in the container.
-  * @return an iterator referring to the first element in the container.
-  */
+   * @return an iterator referring to the first element in the container.
+   */
   Iterator begin() { return m_tokens.begin(); }
 
   /** Iterator referring to the past-the-end element in the container.
@@ -83,8 +83,8 @@ public:
   ConstIterator end() const { return m_tokens.cend(); }
 
   /** Const iterator referring to first element in the container.
-  * @return a const iterator referring to the first element in the container.
-  */
+   * @return a const iterator referring to the first element in the container.
+   */
   ConstIterator cbegin() const { return m_tokens.cbegin(); }
   /** Const iterator referring to the past-the-end element in the container.
    * @return a const iterator referring to the past-the-end element in the
@@ -102,10 +102,10 @@ public:
   }
 
   /** Get a const reference to the index'th token. Indexing an out-of-range
-  * element won't throw, but is otherwise undefined behavior.
-  * @param index Index of the requested token.
-  * @return a const reference to the index'th token.
-  */
+   * element won't throw, but is otherwise undefined behavior.
+   * @param index Index of the requested token.
+   * @return a const reference to the index'th token.
+   */
   std::string &operator[](std::size_t index) { return m_tokens[index]; }
 
   /// Returns a vector of tokenized strings.
@@ -133,7 +133,7 @@ public:
 private:
   std::vector<std::string> m_tokens;
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* StringTokenizer_h */

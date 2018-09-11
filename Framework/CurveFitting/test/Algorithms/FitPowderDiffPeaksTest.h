@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h"
-#include "MantidDataHandling/LoadAscii2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidCurveFitting/Algorithms/FitPowderDiffPeaks.h"
+#include "MantidDataHandling/LoadAscii2.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
 
 using Mantid::CurveFitting::Algorithms::FitPowderDiffPeaks;
@@ -26,7 +26,7 @@ namespace {
 
 //----------------------------------------------------------------------------------------------
 /** Import data from a column data file by calling LoadAscii
-*/
+ */
 void importDataFromColumnFile(string filename, string datawsname) {
   // 1. Call LoadAscii
   DataHandling::LoadAscii2 loader;
@@ -52,9 +52,9 @@ void importDataFromColumnFile(string filename, string datawsname) {
 //----------------------------------
 //----------------------------------------------------------------------------------------------
 /** Create data workspace
-*  Option 1: Old Bank 7 data
-*         2: New Bank 1 data
-*/
+ *  Option 1: Old Bank 7 data
+ *         2: New Bank 1 data
+ */
 API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
   // 1. Import data
   string datawsname("Data");
@@ -90,7 +90,7 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
 
 //----------------------------------------------------------------------------------------------
 /** Create the Bragg peak parameters table for LaB6, PG3, Bank1
-*/
+ */
 void createLaB6PG3Bank1BraggPeaksTable(TableWorkspace_sptr tablews) {
   TableRow newrow0 = tablews->appendRow();
   newrow0 << 6 << 3 << 1 << .6129000 << 13962.47 << 0.20687 << 0.10063
@@ -220,7 +220,7 @@ void createLaB6PG3Bank1BraggPeaksTable(TableWorkspace_sptr tablews) {
 // =======================================
 //----------------------------------------------------------------------------------------------
 /** Create reflection table workspaces
-*/
+ */
 DataObjects::TableWorkspace_sptr createReflectionWorkspace(int option) {
   // 1. Create table workspace
   DataObjects::TableWorkspace *tablews = new DataObjects::TableWorkspace();
@@ -260,7 +260,7 @@ DataObjects::TableWorkspace_sptr createReflectionWorkspace(int option) {
 
 //----------------------------------------------------------------------------------------------
 /** Add rows for input table workspace for PG3 bank1
-*/
+ */
 void createPG3Bank1ParameterTable(TableWorkspace_sptr tablews) {
   TableRow newrow0 = tablews->appendRow();
   newrow0 << "Alph0" << 2.708;
@@ -316,7 +316,7 @@ void createPG3Bank1ParameterTable(TableWorkspace_sptr tablews) {
 // =============================
 //----------------------------------------------------------------------------------------------
 /** Create instrument geometry parameter/LeBail parameter workspaces
-*/
+ */
 DataObjects::TableWorkspace_sptr
 createInstrumentParameterWorkspace(int option) {
   // 1. Crate table workspace
@@ -348,7 +348,7 @@ createInstrumentParameterWorkspace(int option) {
 
   return geomws;
 }
-}
+} // namespace
 
 class FitPowderDiffPeaksTest : public CxxTest::TestSuite {
 public:
@@ -360,7 +360,7 @@ public:
   static void destroySuite(FitPowderDiffPeaksTest *suite) { delete suite; }
 
   /** Test init
-    */
+   */
   void test_Init() {
     Algorithms::FitPowderDiffPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -370,9 +370,9 @@ public:
   }
 
   /** Fit the parameters for PG3's bank 1 with
-    * 1. Quite-off starting values of instrumental geometry parameters.
-    * 2. Quite-close starting values of peak profile parameters.
-    */
+   * 1. Quite-off starting values of instrumental geometry parameters.
+   * 2. Quite-close starting values of peak profile parameters.
+   */
   void test_RobustFitPG3Bank1() {
     // 1. Generate testing workspace
     // Data
@@ -499,9 +499,9 @@ public:
 
   void test_RobustFitPG3Bank1() {
     /** Fit the parameters for PG3's bank 1 with
-    * 1. Quite-off starting values of instrumental geometry parameters.
-    * 2. Quite-close starting values of peak profile parameters.
-    */
+     * 1. Quite-off starting values of instrumental geometry parameters.
+     * 2. Quite-close starting values of peak profile parameters.
+     */
 
     // HKL = (331)
     vector<int32_t> minhkl = {3, 3, 1};

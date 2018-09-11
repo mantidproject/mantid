@@ -14,7 +14,8 @@ SCRIPT_DIR=$(dirname "$0")
 ###############################################################################
 # System discovery
 ###############################################################################
-if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]]; then
+USE_CORE_DUMPS=true
+if [[ ${NODE_LABELS} == *rhel7* ]] || [[ ${NODE_LABELS} == *centos7* ]] || [[ ${NODE_LABELS} == *scilin7* ]]; then
   ON_RHEL7=true
 fi
 if [[ ${NODE_LABELS} == *ubuntu* ]]; then
@@ -22,10 +23,22 @@ if [[ ${NODE_LABELS} == *ubuntu* ]]; then
 fi
 if [[ ${NODE_LABELS} == *osx* ]]; then
   ON_MACOS=true
+  USE_CORE_DUMPS=false
 fi
 
 ###############################################################################
-# All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.3.0-RC1
+# Script cleanup
+###############################################################################
+ULIMIT_CORE_ORIG=$(ulimit -c)
+function onexit {
+  if [[ ${USE_CORE_DUMPS} == true ]]; then
+    ulimit -c $ULIMIT_CORE_ORIG
+  fi
+}
+trap onexit INT TERM EXIT
+
+###############################################################################
+# All nodes currently have PARAVIEW_DIR and PARAVIEW_NEXT_DIR set
 ###############################################################################
 export PARAVIEW_DIR=${PARAVIEW_DIR}
 
@@ -66,20 +79,45 @@ else
   BUILD_CONFIG="Release"
 fi
 
+# Setup software collections on rhel7 to allow using gcc7
+if [[ $ON_RHEL7 ]]; then
+  SCL_ENABLE="scl enable devtoolset-7"
+else
+  SCL_ENABLE="eval"
+fi
+
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
-BUILDPKG=true
-SYSTEMTESTS=false
+DO_BUILD_CODE=true
+DO_UNITTESTS=true
+DO_DOCTESTS_USER=true
+DO_BUILD_DEVDOCS=true
+DO_BUILD_PKG=true
+DO_SYSTEMTESTS=false
 if [[ ${PRBUILD} == true ]]; then
-  if [[ -n ${BUILD_PACKAGE} ]]; then
-    BUILDPKG=${BUILD_PACKAGE}
+  if ${SCRIPT_DIR}/check_for_changes dev-docs-only || ${SCRIPT_DIR}/check_for_changes user-docs-only; then
+    DO_BUILD_CODE=false
+    DO_UNITTESTS=false
   fi
+  DO_DOCTESTS_USER=false
+  DO_BUILD_DEVDOCS=false
+  DO_BUILD_PKG=${BUILD_PACKAGE:-false}
+  DO_SYSTEMTESTS=false
+
   if [[ ${ON_RHEL7} == true ]]; then
-    if ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
-      SYSTEMTESTS=false
+    # rhel does system testing
+    if ! ${SCRIPT_DIR}/check_for_changes docs-gui-only; then
+      DO_BUILD_PKG=true
+      DO_SYSTEMTESTS=true
+    fi
+  elif [[ ${ON_UBUNTU} == true ]]; then
+    # ubuntu does the docs build
+    if ${SCRIPT_DIR}/check_for_changes dev-docs-only; then
+      DO_BUILD_CODE=false
+      DO_DOCTESTS_USER=false
     else
-      BUILDPKG=true
-      SYSTEMTESTS=true
+      DO_BUILD_CODE=true # code needs to be up to date
+      DO_DOCTESTS_USER=true
     fi
   fi
 fi
@@ -89,12 +127,14 @@ fi
 # For a clean build the entire thing is removed to guarantee it is clean. All
 # other build types are assumed to be incremental and the following items
 # are removed to ensure stale build objects don't interfere with each other:
+#   - those removed by git clean -fdx --exclude=`basename $BUILD_DIR`
 #   - build/bin/**: if libraries are removed from cmake they are not deleted
 #                   from bin and can cause random failures
 #   - build/ExternalData/**: data files will change over time and removing
 #                            the links helps keep it fresh
 ###############################################################################
-BUILD_DIR=$WORKSPACE/build
+BUILD_DIR_REL=build
+BUILD_DIR=$WORKSPACE/$BUILD_DIR_REL
 if [ -z "$BUILD_DIR" ]; then
   echo "Build directory not set. Cannot continue"
   exit 1
@@ -104,7 +144,9 @@ if [[ "$CLEANBUILD" == true ]]; then
   rm -rf $BUILD_DIR
 fi
 if [ -d $BUILD_DIR ]; then
+  git clean -fdx --exclude=${BUILD_DIR_REL} --exclude=".Xauthority-*"
   rm -rf ${BUILD_DIR:?}/bin ${BUILD_DIR:?}/ExternalData
+  find ${BUILD_DIR:?} -name 'TEST-*.xml' -delete
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
@@ -183,12 +225,13 @@ fi
 ###############################################################################
 # Packaging options
 ###############################################################################
-if [[ "$BUILDPKG" == true ]]; then
+if [[ ${DO_BUILD_PKG} == true ]]; then
   PACKAGINGVARS="-DPACKAGE_DOCS=ON"
   # Set some variables relating to the linux packages
   if [[ "${ON_MACOS}" == true ]]; then
-    PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="
+    PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=OFF -DCPACK_PACKAGE_SUFFIX="
   else
+    PACKAGINGVARS="${PACKAGINGVARS} -DPACKAGE_WORKBENCH=ON"
     # Use different suffix for linux builds if parameter is not defined
     if [[ -n "${PACKAGE_SUFFIX}" ]]; then
        echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
@@ -214,8 +257,16 @@ if [[ "$BUILDPKG" == true ]]; then
       # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
+
+    if [[ ${ON_RHEL7} == true ]]; then
+      if [[ -n "${RELEASE_NUMBER}" ]]; then
+        RELEASE_NUMBER="1"
+      fi
+      PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_RPM_PACKAGE_RELEASE=${RELEASE_NUMBER}"
+    fi
   fi
 fi
+
 
 ###############################################################################
 # Generator
@@ -238,12 +289,12 @@ cd $BUILD_DIR
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
-rm -f -- *.dmg *.rpm *.deb *.tar.gz
+rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 
 ###############################################################################
 # CMake configuration
 ###############################################################################
-${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ..
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_WORKBENCH=ON ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -266,11 +317,13 @@ fi
 ###############################################################################
 # Build step
 ###############################################################################
-${CMAKE_EXE} --build . -- -j${BUILD_THREADS:?}
-${CMAKE_EXE} --build . --target AllTests -- -j${BUILD_THREADS:?}
+if [[ ${DO_BUILD_CODE} == true ]]; then
+  ${CMAKE_EXE} --build . -- -j${BUILD_THREADS:?}
+  ${CMAKE_EXE} --build . --target AllTests -- -j${BUILD_THREADS:?}
+fi
 
 ###############################################################################
-# static analysis builds stop here
+# Static analysis builds or stop here
 ###############################################################################
 if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
   exit 0
@@ -280,19 +333,33 @@ fi
 ###############################################################################
 # Run the unit tests
 ###############################################################################
-# Remove any Mantid.user.properties file
-userprops=~/.mantid/Mantid.user.properties
-rm -f $userprops
-$CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+# Activate core dumps. They are deactivated by the registered EXIT function
+# at the top of this script
+if [[ ${USE_CORE_DUMPS} == true ]]; then
+  ulimit -c unlimited
+fi
+# Prevent race conditions when creating the user config directory
+userconfig_dir=$HOME/.mantid
+rm -fr $userconfig_dir
+mkdir -p $userconfig_dir
+# use a fixed number of openmp threads to avoid overloading the system
+userprops_file=$userconfig_dir/Mantid.user.properties
+echo MultiThreaded.MaxCores=2 > $userprops_file
+
+if [[ ${DO_UNITTESTS} == true ]]; then
+  $CTEST_EXE -j${BUILD_THREADS:?} --schedule-random --output-on-failure
+fi
 
 ###############################################################################
-# Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
+# User Documentation
 ###############################################################################
-if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
+if [[ ${DO_DOCTESTS_USER} == true ]]; then
+  # use default configuration
+  rm -f $userprops_file
   # Remove doctrees directory so it forces a full reparse. It seems that
   # without this newly added doctests are not executed
   if [ -d $BUILD_DIR/docs/doctrees ]; then
-    rm -rf $BUILD_DIR/docs/doctrees/*
+    rm -fr $BUILD_DIR/docs/doctrees/*
   fi
   # Build HTML to verify that no referencing errors have crept in.
   ${CMAKE_EXE} --build . --target docs-html
@@ -300,10 +367,21 @@ if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
 fi
 
 ###############################################################################
+# Developer Documentation
+###############################################################################
+# Uncomment this when the dev-docs are ready to build without warnings
+# if [[ ${DO_BUILD_DEVDOCS} == true ]]; then
+#   if [ -d $BUILD_DIR/dev-docs/doctree ]; then
+#     rm -fr $BUILD_DIR/dev-docs/doctree/*
+#   fi
+#   ${CMAKE_EXE} --build . --target dev-docs-html
+# fi
+
+###############################################################################
 # Create the install kit if required. This includes building the Qt help
 # documentation
 ###############################################################################
-if [[ ${BUILDPKG} == true ]]; then
+if [[ ${DO_BUILD_PKG} == true ]]; then
   # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
   if [[ ${ON_MACOS} == true ]]; then
@@ -328,7 +406,7 @@ fi
 # Run the system tests if required. Run from a package to have at least one
 # Linux checks it install okay
 ###############################################################################
-if [[ ${SYSTEMTESTS} == true ]]; then
+if [[ ${DO_SYSTEMTESTS} == true ]]; then
   if [[ ${PRBUILD} == true ]]; then
     EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
   else

@@ -74,6 +74,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SumSpectra", "SumNeighbours"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "SANS;Transforms\\Grouping";

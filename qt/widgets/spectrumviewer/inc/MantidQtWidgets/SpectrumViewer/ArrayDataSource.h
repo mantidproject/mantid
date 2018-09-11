@@ -1,9 +1,9 @@
 #ifndef ARRAY_DATA_SOURCE_H
 #define ARRAY_DATA_SOURCE_H
 
-#include <cstddef>
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include <cstddef>
 
 /**
     @class ArrayDataSource
@@ -67,8 +67,8 @@ private:
   std::vector<float> m_data;
 };
 
-typedef boost::shared_ptr<ArrayDataSource> ArrayDataSource_sptr;
-typedef boost::shared_ptr<const ArrayDataSource> ArrayDataSource_const_sptr;
+using ArrayDataSource_sptr = boost::shared_ptr<ArrayDataSource>;
+using ArrayDataSource_const_sptr = boost::shared_ptr<const ArrayDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

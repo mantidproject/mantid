@@ -7,13 +7,13 @@ namespace WorkflowAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*
-* @param inputWS :: [input] Input workspace group
-* @param summedPeriods :: [input] Vector of period indexes to be summed
-* @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
-* from summed periods
-* @param groupIndex :: [input] Workspace index of the group to analyse
-*/
+ *
+ * @param inputWS :: [input] Input workspace group
+ * @param summedPeriods :: [input] Vector of period indexes to be summed
+ * @param subtractedPeriods :: [input] Vector of period indexes to be subtracted
+ * from summed periods
+ * @param groupIndex :: [input] Workspace index of the group to analyse
+ */
 MuonGroupCountsCalculator::MuonGroupCountsCalculator(
     const Mantid::API::WorkspaceGroup_sptr inputWS,
     const std::vector<int> summedPeriods,

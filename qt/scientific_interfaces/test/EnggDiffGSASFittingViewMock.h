@@ -8,7 +8,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffGSASFittingView : public IEnggDiffGSASFittingView {
 
@@ -57,6 +57,8 @@ public:
 
   MOCK_METHOD0(resetCanvas, void());
 
+  MOCK_METHOD1(setEnabled, void(const bool));
+
   MOCK_CONST_METHOD0(showRefinementResultsSelected, bool());
 
   MOCK_CONST_METHOD1(showStatus, void(const std::string &status));
@@ -70,6 +72,6 @@ public:
                                        const std::string &warningDescription));
 };
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFGSASFITTINGVIEWMOCK_H_

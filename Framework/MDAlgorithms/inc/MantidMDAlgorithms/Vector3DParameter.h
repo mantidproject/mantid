@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_Vector3DParameter_H_
 #define MANTID_MDALGORITHMS_Vector3DParameter_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/System.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
@@ -152,7 +152,7 @@ ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
   class classname                                                              \
       : public Mantid::MDAlgorithms::Vector3DParameter<classname, double> {    \
   public:                                                                      \
-    typedef Vector3DParameter<classname, type_> SuperType;                     \
+    using SuperType = Vector3DParameter<classname, type_> SuperType;           \
     static std::string parameterName() { return #classname; }                  \
     classname(type_ a, type_ b, type_ c) : SuperType(a, b, c) {}               \
     classname() : SuperType() {}                                               \
@@ -161,7 +161,7 @@ ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
       return new classname(m_vector[0], m_vector[1], m_vector[2]);             \
     }                                                                          \
   };
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

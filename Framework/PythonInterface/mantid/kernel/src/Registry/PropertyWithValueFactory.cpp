@@ -2,22 +2,35 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
-#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/make_shared.hpp>
+#include <boost/python.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/extract.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/object.hpp>
 
 #include <cassert>
+
+using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
+using namespace boost::python;
+using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
 
 namespace Mantid {
 namespace PythonInterface {
 namespace Registry {
 namespace {
 /// Lookup map type
-typedef std::map<PyTypeObject const *, boost::shared_ptr<PropertyValueHandler>>
-    PyTypeIndex;
+using PyTypeIndex =
+    std::map<const PyTypeObject *, boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -26,21 +39,21 @@ void initTypeLookup(PyTypeIndex &index) {
   assert(index.empty());
 
   // Map the Python types to the best match in C++
-  typedef TypedPropertyValueHandler<double> FloatHandler;
+  using FloatHandler = TypedPropertyValueHandler<double>;
   index.emplace(&PyFloat_Type, boost::make_shared<FloatHandler>());
 
-  typedef TypedPropertyValueHandler<bool> BoolHandler;
+  using BoolHandler = TypedPropertyValueHandler<bool>;
   index.emplace(&PyBool_Type, boost::make_shared<BoolHandler>());
 
   // Python 2/3 have an arbitrary-sized long type. The handler
   // will raise an error if the input value overflows a C long
-  typedef TypedPropertyValueHandler<long> IntHandler;
+  using IntHandler = TypedPropertyValueHandler<long>;
   index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
   // must be explicitly requested. The C++ string handler will accept both
   // but throw and error if the unicode string contains non-ascii characters
-  typedef TypedPropertyValueHandler<std::string> AsciiStrHandler;
+  using AsciiStrHandler = TypedPropertyValueHandler<std::string>;
   // Both versions have unicode objects
   index.emplace(&PyUnicode_Type, boost::make_shared<AsciiStrHandler>());
 
@@ -67,8 +80,8 @@ const PyTypeIndex &getTypeIndex() {
 }
 
 // Lookup map for arrays
-typedef std::map<std::string, boost::shared_ptr<PropertyValueHandler>>
-    PyArrayIndex;
+using PyArrayIndex =
+    std::map<std::string, boost::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -77,18 +90,18 @@ void initArrayLookup(PyArrayIndex &index) {
   assert(index.empty());
 
   // Map the Python array types to the best match in C++
-  typedef SequenceTypeHandler<std::vector<double>> FloatArrayHandler;
+  using FloatArrayHandler = SequenceTypeHandler<std::vector<double>>;
   index.emplace("FloatArray", boost::make_shared<FloatArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<std::string>> StringArrayHandler;
+  using StringArrayHandler = SequenceTypeHandler<std::vector<std::string>>;
   index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
 
-  typedef SequenceTypeHandler<std::vector<long>> LongIntArrayHandler;
+  using LongIntArrayHandler = SequenceTypeHandler<std::vector<long>>;
   index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Backwards compatible behaviour
-  typedef SequenceTypeHandler<std::vector<int>> IntArrayHandler;
+  using IntArrayHandler = SequenceTypeHandler<std::vector<int>>;
   index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
 #endif
 }
@@ -102,7 +115,7 @@ const PyArrayIndex &getArrayIndex() {
     initArrayLookup(index);
   return index;
 }
-}
+} // namespace
 
 /**
  * Creates a PropertyWithValue<Type> instance from the given information.
@@ -136,6 +149,42 @@ PropertyWithValueFactory::create(const std::string &name,
                                  const unsigned int direction) {
   boost::python::object validator; // Default construction gives None object
   return create(name, defaultValue, validator, direction);
+}
+
+/**
+ * Creates a TimeSeriesProperty<Type> instance from the given information.
+ * The python type is mapped to a C type
+ * @param name :: The name of the property
+ * @param defaultValue :: A default value for this property.
+ * @returns A pointer to a new Property object
+ */
+std::unique_ptr<Mantid::Kernel::Property>
+PropertyWithValueFactory::createTimeSeries(const std::string &name,
+                                           const list &defaultValue) {
+
+  // Use a PyObject pointer to determine the type stored in the list
+  auto obj = object(defaultValue[0]).ptr();
+  auto val = defaultValue[0];
+
+  /**
+   * Decide which kind of TimeSeriesProperty to return
+   * Need to use a different method to check for boolean values
+   * since extract<> seems to get confused sometimes.
+   */
+  if (PyBool_Check(obj)) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>(name);
+  } else if (extract<int>(val).check()) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<int>>(name);
+  } else if (extract<double>(val).check()) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<double>>(name);
+  } else if (extract<std::string>(val).check()) {
+    return Mantid::Kernel::make_unique<TimeSeriesProperty<std::string>>(name);
+  }
+
+  // If we reach here an error has occurred as there are no type to create
+  // a TimeSeriesProperty from
+  throw std::runtime_error(
+      "Cannot create a TimeSeriesProperty with that data type!");
 }
 
 //-------------------------------------------------------------------------
@@ -186,6 +235,7 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
 
     PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
     // Boolean can be cast to int, so check first.
+    GNU_DIAG_OFF("parentheses-equality")
     if (PyBool_Check(item)) {
       throw std::runtime_error(
           "Unable to support extracting arrays of booleans.");
@@ -193,6 +243,8 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     if (PyLong_Check(item)) {
       return std::string("LongIntArray");
     }
+    GNU_DIAG_ON("parentheses-equality")
+
 #if PY_MAJOR_VERSION < 3
     // In python 2 ints & longs are separate
     if (PyInt_Check(item)) {
@@ -223,6 +275,6 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     return std::string("");
   }
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

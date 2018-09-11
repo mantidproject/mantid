@@ -40,12 +40,15 @@ public:
 
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadInstrument", "UpdateScriptRepository"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 
 protected:
   // Convenience typedef
-  typedef std::map<std::string, std::string> StringToStringMap;
+  using StringToStringMap = std::map<std::string, std::string>;
 
 private:
   void init() override;

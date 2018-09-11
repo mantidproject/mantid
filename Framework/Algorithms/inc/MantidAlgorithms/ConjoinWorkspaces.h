@@ -4,15 +4,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/WorkspaceJoiners.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/WorkspaceJoiners.h"
 
 // Forward declarations
 namespace Mantid {
 namespace DataObjects {
 class EventWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace Mantid {
 namespace Algorithms {
@@ -64,6 +64,9 @@ public:
   const std::string name() const override { return "ConjoinWorkspaces"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConjoinSpectra", "ConjoinXRuns", "MergeRuns"};
+  }
 
 private:
   // Overridden Algorithm methods
@@ -88,7 +91,7 @@ private:
   bool m_overlapChecked = false;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CONJOINWORKSPACES_H_ */

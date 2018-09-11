@@ -19,7 +19,7 @@ PyChop2.showGUI()
 
 from __future__ import (absolute_import, division, print_function)
 import warnings
-from .PyChop2 import PyChop2  # noqa: F401
+from .Instruments import Instrument as PyChop2  # noqa: F401
 # If the system doesn't have matplotlib, don't import the GUI.
 try:
     from .PyChopGui import show as showGUI

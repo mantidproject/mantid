@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/ExtractMask.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
 
 namespace Mantid {
@@ -12,8 +12,8 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractMask)
 
-using Kernel::Direction;
 using Geometry::IDetector_const_sptr;
+using Kernel::Direction;
 using namespace API;
 using namespace Kernel;
 
@@ -54,9 +54,12 @@ void ExtractMask::exec() {
   std::vector<detid_t> detectorList;
   const auto &detInfo = inputWS->detectorInfo();
   const auto &detIds = detInfo.detectorIDs();
-  for (size_t i = 0; i < detInfo.size(); ++i)
-    if (detInfo.isMasked(i))
+  for (size_t i = 0; i < detInfo.size(); ++i) {
+    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) ||
+        detInfo.isMasked(i)) {
       detectorList.push_back(detIds[i]);
+    }
+  }
 
   // Create a new workspace for the results, copy from the input to ensure
   // that we copy over the instrument and current masking
@@ -87,5 +90,5 @@ void ExtractMask::exec() {
   setProperty("OutputWorkspace", maskWS);
   setProperty("DetectorList", detectorList);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

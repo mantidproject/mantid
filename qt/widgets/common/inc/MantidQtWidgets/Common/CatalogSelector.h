@@ -1,8 +1,8 @@
 #ifndef MANTIDQTWIDGETS_CATALOGSELECTOR_H_
 #define MANTIDQTWIDGETS_CATALOGSELECTOR_H_
 
-#include "ui_CatalogSelector.h"
 #include "DllOption.h"
+#include "ui_CatalogSelector.h"
 
 namespace MantidQt {
 namespace MantidWidgets {

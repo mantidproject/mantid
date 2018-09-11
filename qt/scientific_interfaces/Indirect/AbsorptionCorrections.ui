@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>803</width>
-    <height>689</height>
+    <width>827</width>
+    <height>758</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -114,14 +114,14 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="2">
+      <item row="1" column="2">
        <widget class="QLabel" name="lbNumberEvents">
         <property name="text">
          <string>Events:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QSpinBox" name="spNumberWavelengths">
         <property name="minimum">
          <number>1</number>
@@ -137,20 +137,67 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="lbNumberWavelengths">
         <property name="text">
          <string>Number Wavelengths:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
+      <item row="1" column="4">
        <widget class="QSpinBox" name="spNumberEvents">
         <property name="maximum">
          <number>1000000</number>
         </property>
         <property name="singleStep">
          <number>10</number>
+        </property>
+        <property name="value">
+         <number>5000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Interpolation:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Maximum Scatter Point Attempts:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="cbInterpolation">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Linear</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>CSpline</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QSpinBox" name="spMaxScatterPtAttempts">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1000000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
         </property>
         <property name="value">
          <number>5000</number>
@@ -600,6 +647,9 @@
           </item>
           <item row="2" column="2">
            <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Outer Radius</string>
             </property>
@@ -641,6 +691,16 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="leSampleChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spSampleDensity">
         <property name="suffix">
@@ -671,13 +731,25 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="3">
-       <widget class="QLineEdit" name="leSampleChemicalFormula">
+      <item row="0" column="4">
+       <widget class="QLabel" name="valSampleChemicalFormula">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="midLineWidth">
+         <number>0</number>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -707,6 +779,26 @@
         </item>
        </widget>
       </item>
+      <item row="2" column="3">
+       <widget class="QLineEdit" name="leCanChemicalFormula">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="lbCanChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="spCanDensity">
         <property name="enabled">
@@ -726,23 +818,25 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QLineEdit" name="leCanChemicalFormula">
+      <item row="2" column="4">
+       <widget class="QLabel" name="valCanChemicalFormula">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -762,12 +856,44 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
+       <widget class="QLabel" name="lbPlotOutput">
+        <property name="text">
+         <string>Plot Output:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbPlotOutput">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>Wavelength</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angle</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Both</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pbPlot">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Plot Result</string>
+         <string>Plot</string>
         </property>
        </widget>
       </item>
@@ -810,20 +936,30 @@
   <tabstop>ckUseCan</tabstop>
   <tabstop>spNumberWavelengths</tabstop>
   <tabstop>spNumberEvents</tabstop>
+  <tabstop>spBeamHeight</tabstop>
   <tabstop>spBeamWidth</tabstop>
   <tabstop>cbShape</tabstop>
+  <tabstop>spFlatSampleHeight</tabstop>
   <tabstop>spFlatSampleWidth</tabstop>
+  <tabstop>spFlatSampleThickness</tabstop>
+  <tabstop>spFlatSampleAngle</tabstop>
+  <tabstop>spFlatCanFrontThickness</tabstop>
+  <tabstop>spFlatCanBackThickness</tabstop>
+  <tabstop>spCylSampleHeight</tabstop>
+  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
+  <tabstop>spAnnSampleHeight</tabstop>
   <tabstop>spAnnSampleInnerRadius</tabstop>
   <tabstop>spAnnSampleOuterRadius</tabstop>
   <tabstop>spAnnCanInnerRadius</tabstop>
   <tabstop>spAnnCanOuterRadius</tabstop>
-  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>leSampleChemicalFormula</tabstop>
+  <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbSampleDensity</tabstop>
   <tabstop>spSampleDensity</tabstop>
-  <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>cbCanDensity</tabstop>
   <tabstop>spCanDensity</tabstop>
-  <tabstop>leCanChemicalFormula</tabstop>
+  <tabstop>cbPlotOutput</tabstop>
   <tabstop>pbPlot</tabstop>
   <tabstop>pbSave</tabstop>
  </tabstops>

@@ -1,13 +1,13 @@
 #ifndef MANTID_DATAHANDLING_MODIFYDETECTORDOTDAYFILETEST_H_
 #define MANTID_DATAHANDLING_MODIFYDETECTORDOTDAYFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <sstream>
 
-#include "MantidDataHandling/ModifyDetectorDotDatFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/ModifyDetectorDotDatFile.h"
 #include <Poco/File.h>
 
 using namespace Mantid;

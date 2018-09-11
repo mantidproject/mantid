@@ -21,6 +21,18 @@ class MaskAngleTest(unittest.TestCase):
         DeleteWorkspace(w)
         self.assertTrue(array_equal(masklist,arange(10)+10))
 
+    def testMaskAnglePhi(self):
+        w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
+        AnalysisDataService.add('w',w)
+        masklist = MaskAngle(w,0,45,Angle='Phi')
+        detInfo = w.detectorInfo()
+        for i in arange(w.getNumberHistograms()):
+            if i==0:
+                self.assertTrue(detInfo.isMasked(int(i)))
+            else:
+                self.assertFalse(detInfo.isMasked(int(i)))
+        DeleteWorkspace(w)
+
     def testGroupMaskAngle(self):
         ws1=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
         AnalysisDataService.add('ws1',ws1)

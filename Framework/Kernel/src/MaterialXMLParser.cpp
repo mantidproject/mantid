@@ -5,8 +5,8 @@
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NamedNodeMap.h"
-#include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 
@@ -51,10 +51,11 @@ const char *ABSORB_ATT = "absorptionxsec";
 
 // Base type to put in a hash
 struct BuilderHandle {
+  virtual ~BuilderHandle() = default;
   virtual void operator()(MaterialBuilder &builder,
                           const std::string &value) const = 0;
 };
-typedef std::unique_ptr<BuilderHandle> BuilderHandle_uptr;
+using BuilderHandle_uptr = std::unique_ptr<BuilderHandle>;
 
 // Pointer to member function on MaterialBuilder
 template <typename ArgType>
@@ -65,8 +66,8 @@ using BuilderMethod = MaterialBuilder &(MaterialBuilder::*)(ArgType);
 template <typename ArgType>
 struct TypedBuilderHandle final : public BuilderHandle {
   // Remove const/reference qualifiers from ArgType
-  typedef typename std::remove_const<
-      typename std::remove_reference<ArgType>::type>::type ValueType;
+  using ValueType = typename std::remove_const<
+      typename std::remove_reference<ArgType>::type>::type;
 
   explicit TypedBuilderHandle(BuilderMethod<ArgType> m)
       : BuilderHandle(), m_method(m) {}
@@ -81,7 +82,7 @@ private:
   BuilderMethod<ArgType> m_method;
 };
 
-typedef std::unordered_map<std::string, BuilderHandle_uptr> Handlers;
+using Handlers = std::unordered_map<std::string, BuilderHandle_uptr>;
 
 // Insert a handle into the given map
 template <typename ArgType>
@@ -118,12 +119,12 @@ const BuilderHandle &findHandle(const std::string &name) {
 }
 
 /**
-  * Set a value on the builder base on the attribute name and the defined
-  * member function
-  * @param builder A pointer to the builder to update
-  * @param attr The attribute name
-  * @param value The value in the attribute
-  */
+ * Set a value on the builder base on the attribute name and the defined
+ * member function
+ * @param builder A pointer to the builder to update
+ * @param attr The attribute name
+ * @param value The value in the attribute
+ */
 void addToBuilder(MaterialBuilder *builder, const std::string &attr,
                   const std::string &value) {
   // Find the appropriate member function on the builder and set the value
@@ -132,7 +133,7 @@ void addToBuilder(MaterialBuilder *builder, const std::string &attr,
   const auto &setter = findHandle(attr);
   setter(*builder, value);
 }
-}
+} // namespace
 
 // -----------------------------------------------------------------------------
 // Public methods
@@ -148,7 +149,7 @@ void addToBuilder(MaterialBuilder *builder, const std::string &attr,
  */
 Material MaterialXMLParser::parse(std::istream &istr) const {
   using namespace Poco::XML;
-  typedef AutoPtr<Document> DocumentPtr;
+  using DocumentPtr = AutoPtr<Document>;
 
   InputSource src(istr);
   DOMParser parser;
@@ -195,7 +196,7 @@ Material MaterialXMLParser::parse(std::istream &istr) const {
  */
 Material MaterialXMLParser::parse(Poco::XML::Element *element) const {
   using namespace Poco::XML;
-  typedef AutoPtr<NamedNodeMap> NamedNodeMapPtr;
+  using NamedNodeMapPtr = AutoPtr<NamedNodeMap>;
   NamedNodeMapPtr attrs = element->attributes();
   const auto id = attrs->getNamedItem(ID_ATT);
   if (!id || id->nodeValue().empty()) {

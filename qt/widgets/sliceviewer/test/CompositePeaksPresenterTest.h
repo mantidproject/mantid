@@ -1,13 +1,13 @@
 #ifndef SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 #define SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/NullPeaksPresenter.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MockObjects.h"
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
@@ -41,6 +41,7 @@ public:
         "Should default construct with a &_fakeZoomableViewPeaksPresenter", 0,
         composite.size());
 
+    const size_t testDim = 0;
     /*After default construction, the composite presenter should behave
      * identically to a NULL peaks presenter.*/
     NullPeaksPresenter expected;
@@ -49,7 +50,8 @@ public:
     PeakBoundingBox region;
     TS_ASSERT_THROWS_NOTHING(expected.updateWithSlicePoint(region));
     TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(region));
-    TS_ASSERT_EQUALS(expected.changeShownDim(), composite.changeShownDim());
+    TS_ASSERT_EQUALS(expected.changeShownDim(testDim, testDim),
+                     composite.changeShownDim(testDim, testDim));
     TS_ASSERT_EQUALS(expected.isLabelOfFreeAxis(""),
                      composite.isLabelOfFreeAxis(""));
   }
@@ -85,6 +87,7 @@ public:
             1); // Should detach itself when no nested presenters are present.
 
     CompositePeaksPresenter composite(&mockZoomableView);
+    const size_t testDim = 0;
     const size_t initialSize = composite.size();
     auto a = boost::make_shared<NiceMock<MockPeaksPresenter>>();
     EXPECT_CALL(*a, contentsDifferent(_))
@@ -109,7 +112,8 @@ public:
     PeakBoundingBox region;
     TS_ASSERT_THROWS_NOTHING(expected.updateWithSlicePoint(region));
     TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(region));
-    TS_ASSERT_EQUALS(expected.changeShownDim(), composite.changeShownDim());
+    TS_ASSERT_EQUALS(expected.changeShownDim(testDim, testDim),
+                     composite.changeShownDim(testDim, testDim));
     TS_ASSERT_EQUALS(expected.isLabelOfFreeAxis(""),
                      composite.isLabelOfFreeAxis(""));
     TSM_ASSERT("Should have detached upon clear",
@@ -263,6 +267,7 @@ public:
   void test_changeShownDimension() {
     const bool PASS = true;
     const bool FAIL = false;
+    const size_t testDim = 0;
 
     CompositePeaksPresenter composite(&_fakeZoomableView);
 
@@ -276,21 +281,20 @@ public:
     PeaksPresenter_sptr subjectB(B);
 
     // if both subjects FAIL, composite should report FAIL
-    EXPECT_CALL(*A, changeShownDim()).WillOnce(Return(FAIL));
-    EXPECT_CALL(*B, changeShownDim()).WillOnce(Return(FAIL));
-
+    EXPECT_CALL(*A, changeShownDim(testDim, testDim)).WillOnce(Return(FAIL));
+    EXPECT_CALL(*B, changeShownDim(testDim, testDim)).WillOnce(Return(FAIL));
     composite.addPeaksPresenter(subjectA);
     composite.addPeaksPresenter(subjectB);
 
     TSM_ASSERT_EQUALS("Should return FAIL, because both of the subjects FAIL",
-                      FAIL, composite.changeShownDim());
+                      FAIL, composite.changeShownDim(testDim, testDim));
     TS_ASSERT(Mock::VerifyAndClearExpectations(A));
     TS_ASSERT(Mock::VerifyAndClearExpectations(B));
     composite.clear();
 
     // if one subject FAIL, composite should FAIL.
-    EXPECT_CALL(*A, changeShownDim()).WillOnce(Return(PASS));
-    EXPECT_CALL(*B, changeShownDim()).WillOnce(Return(FAIL));
+    EXPECT_CALL(*A, changeShownDim(testDim, testDim)).WillOnce(Return(PASS));
+    EXPECT_CALL(*B, changeShownDim(testDim, testDim)).WillOnce(Return(FAIL));
     EXPECT_CALL(*A, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
     EXPECT_CALL(*B, contentsDifferent(_))
@@ -301,14 +305,14 @@ public:
 
     TSM_ASSERT_EQUALS(
         "Should return FAIL, because at least one of the subjects return FAIL",
-        FAIL, composite.changeShownDim());
+        FAIL, composite.changeShownDim(testDim, testDim));
     TS_ASSERT(Mock::VerifyAndClearExpectations(A));
     TS_ASSERT(Mock::VerifyAndClearExpectations(B));
     composite.clear();
 
     // if subjects both PASS, composite should PASS.
-    EXPECT_CALL(*A, changeShownDim()).WillOnce(Return(PASS));
-    EXPECT_CALL(*B, changeShownDim()).WillOnce(Return(PASS));
+    EXPECT_CALL(*A, changeShownDim(testDim, testDim)).WillOnce(Return(PASS));
+    EXPECT_CALL(*B, changeShownDim(testDim, testDim)).WillOnce(Return(PASS));
     EXPECT_CALL(*A, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
     EXPECT_CALL(*B, contentsDifferent(_))
@@ -318,7 +322,7 @@ public:
     composite.addPeaksPresenter(subjectB);
 
     TSM_ASSERT("Should return PASS, because both of the subject PASS",
-               composite.changeShownDim());
+               composite.changeShownDim(testDim, testDim));
     TS_ASSERT(Mock::VerifyAndClearExpectations(A));
     TS_ASSERT(Mock::VerifyAndClearExpectations(B));
   }

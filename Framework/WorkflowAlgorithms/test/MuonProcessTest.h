@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/MuonProcess.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-using Mantid::WorkflowAlgorithms::MuonProcess;
 using Mantid::DataHandling::LoadMuonNexus2;
+using Mantid::WorkflowAlgorithms::MuonProcess;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -191,9 +191,9 @@ public:
     if (ws) {
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
 
-      TS_ASSERT_DELTA(ws->readX(0)[0], -0.254, 0.001);
-      TS_ASSERT_DELTA(ws->readX(0)[1000], 15.746, 0.001);
-      TS_ASSERT_DELTA(ws->readX(0)[1752], 27.778, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[0], 3.010, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1000], 19.010, 0.001);
+      TS_ASSERT_DELTA(ws->readX(0)[1752], 31.042, 0.001);
     }
   }
 
@@ -622,9 +622,9 @@ private:
   std::unique_ptr<LoadedData> loadEMU() { return loadData("emu00006473.nxs"); }
 
   /**
-  * Use LoadMuonNexus to load data from MUSR file
-  * @returns LoadedData struct
-  */
+   * Use LoadMuonNexus to load data from MUSR file
+   * @returns LoadedData struct
+   */
   std::unique_ptr<LoadedData> loadMUSR() {
     return loadData("MUSR00015189.nxs");
   }

@@ -25,7 +25,7 @@ class EXPORT_OPT_MANTIDQT_COMMON Message : public QObject {
 
 public:
   /// Priority matches Mantid Logger priority
-  typedef Mantid::Kernel::Logger::Priority Priority;
+  using Priority = Mantid::Kernel::Logger::Priority;
 
   /// Default constuctor required by Qt meta-type system
   Message();
@@ -50,8 +50,8 @@ private:
   QString m_text;
   Priority m_priority;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 /// Required to operate in signals/slots
 Q_DECLARE_METATYPE(MantidQt::MantidWidgets::Message)

@@ -54,6 +54,18 @@ else ()
   set ( PY_VER 2.7 )
 endif ()
 
+execute_process(COMMAND python${PY_VER}-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if(${PYTHON_VERSION_MAJOR} GREATER 2)
+  execute_process(COMMAND python${PY_VER}-config --abiflags OUTPUT_VARIABLE PY_ABI OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+  # --abiflags option not available in python 2
+  set(PY_ABI "")
+endif()
+
+set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython${PY_VER}${PY_ABI}.dylib" CACHE FILEPATH "PYTHON_LIBRARY" FORCE )
+set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python${PY_VER}${PY_ABI}" CACHE PATH "PYTHON_INCLUDE_DIR" FORCE )
+
 find_package ( PythonLibs REQUIRED )
 # If found, need to add debug library into libraries variable
 if ( PYTHON_DEBUG_LIBRARIES )
@@ -84,13 +96,33 @@ if ( NOT TARGET mantidpython )
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
 endif ()
 
+
+# directives similar to linux for conda framework-only build
+set ( BIN_DIR bin )
+set ( ETC_DIR etc )
+set ( LIB_DIR lib )
+set ( PLUGINS_DIR plugins )
+
 ###########################################################################
 # Mac-specific installation setup
 ###########################################################################
+# use homebrew OpenSSL package
+if (NOT OPENSSL_ROOT_DIR)
+  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
+endif(NOT OPENSSL_ROOT_DIR)
 
+if (NOT HDF5_ROOT)
+  set ( HDF5_ROOT /usr/local/opt/hdf5 )
+endif()
+
+if ( ENABLE_MANTIDPLOT )
 set ( CMAKE_INSTALL_PREFIX "" )
 set ( CPACK_PACKAGE_EXECUTABLES MantidPlot )
 set ( INBUNDLE MantidPlot.app/ )
+
+# Copy the launcher script to the correct location
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher 
+                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher COPYONLY )
 
 # We know exactly where this has to be on Darwin, but separate whether we have
 # kit build or a regular build.
@@ -134,15 +166,6 @@ string(FIND "${SITEPACKAGES_SYMLINK_sipso}" "sip.so" STOPPOS)
 string(SUBSTRING "${SITEPACKAGES_SYMLINK_sipso}" 0 ${STOPPOS} SITEPACKAGES_SYMLINK)
 set  ( SITEPACKAGES ${SITEPACKAGES_PATH}/${SITEPACKAGES_SYMLINK} )
 string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
-
-# use homebrew OpenSSL package
-if (NOT OPENSSL_ROOT_DIR)
-  set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
-endif(NOT OPENSSL_ROOT_DIR)
-
-if (NOT HDF5_ROOT)
-  set ( HDF5_ROOT /usr/local/opt/hdf5 )
-endif()
 
 # Python packages
 
@@ -192,6 +215,7 @@ install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
 
+
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt )
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
@@ -199,3 +223,4 @@ set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 string (REPLACE " " "" CPACK_SYSTEM_NAME ${OSX_CODENAME})
 
 set ( CPACK_GENERATOR DragNDrop )
+endif ()

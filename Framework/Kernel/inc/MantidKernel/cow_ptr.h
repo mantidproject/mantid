@@ -4,8 +4,8 @@
 #include "MultiThreaded.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
 #include <mutex>
@@ -56,8 +56,8 @@ namespace Kernel {
 */
 template <typename DataType> class cow_ptr {
 public:
-  typedef boost::shared_ptr<DataType> ptr_type; ///< typedef for the storage
-  typedef DataType value_type;                  ///< typedef for the data type
+  using ptr_type = boost::shared_ptr<DataType>; ///< typedef for the storage
+  using value_type = DataType;                  ///< typedef for the data type
 
 private:
   ptr_type Data; ///< Real object Ptr
@@ -100,7 +100,7 @@ public:
   } ///< Pointer dereference access
   const DataType *operator->() const {
     return Data.get();
-  } ///<indirectrion dereference access
+  } ///< indirectrion dereference access
   bool operator==(const cow_ptr<DataType> &A) const noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
@@ -115,15 +115,13 @@ public:
  resource is a sink.
  */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
-    : Data(resourcePtr) {}
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr) : Data(resourcePtr) {}
 
 /**
   Constructor : creates new data() object
 */
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr()
-    : Data(boost::make_shared<DataType>()) {}
+cow_ptr<DataType>::cow_ptr() : Data(boost::make_shared<DataType>()) {}
 
 /**
   Copy constructor : double references the data object
@@ -203,10 +201,10 @@ cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
 } // NAMESPACE Kernel
 
 /// typedef for the data storage used in Mantid matrix workspaces
-typedef std::vector<double> MantidVec;
+using MantidVec = std::vector<double>;
 
 /// typedef for the pointer to data storage used in Mantid matrix workspaces
-typedef Kernel::cow_ptr<MantidVec> MantidVecPtr;
+using MantidVecPtr = Kernel::cow_ptr<MantidVec>;
 
 } // NAMESPACE Mantid
 

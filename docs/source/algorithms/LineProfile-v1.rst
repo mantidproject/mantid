@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -23,6 +23,23 @@ By default, the profile is calculated as an average over the line width. This be
 
 'Sum'
     Sum the values, weighting them by :math:`n / n_{tot}` where :math:`n` is the number of summed data points (excluding special values if *IgnoreNans* or *IgnoreInfs* is set) and :math:`n_{tot}` is the total number of data points (including special values).
+
+Profiles over distributions
+---------------------------
+
+Horizontal profiles over distribution data (Y divided by bin width) will be distributions as well.
+
+However, vertical profiles over distribution data will be non-distributions, albeit the data is normalized by the profile width. To remove the normalization, it is possible to multiply the data by the total width of included bins. This information is contained in the vertical axis:
+
+.. code-block:: python
+
+    # line is a workspace created by LineProfile
+    axis = line.getAxis(1)
+    height = axis.getMax() - axis.getMin()
+    Ys = line.dataY(0)
+    Ys *= height
+    Es = line.dataE(0)
+    Es *= height
 
 Usage
 -----

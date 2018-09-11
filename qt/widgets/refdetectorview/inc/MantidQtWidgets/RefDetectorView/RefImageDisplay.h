@@ -1,11 +1,11 @@
 #ifndef REF_IMAGE_DISPLAY_H
 #define REF_IMAGE_DISPLAY_H
 
-#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtWidgets/RefDetectorView/RefSliderHandler.h"
-#include "MantidQtWidgets/RefDetectorView/RefRangeHandler.h"
-#include "MantidQtWidgets/RefDetectorView/RefLimitsHandler.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/RefDetectorView/RefLimitsHandler.h"
+#include "MantidQtWidgets/RefDetectorView/RefRangeHandler.h"
+#include "MantidQtWidgets/RefDetectorView/RefSliderHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"
 
 namespace MantidQt {
 namespace RefDetectorViewer {

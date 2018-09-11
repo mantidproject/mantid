@@ -34,7 +34,7 @@ public slots:
   void enableLighting(bool);
   void updateView(bool picking = true);
   void updateDetectors();
-  void componentSelected(Mantid::Geometry::ComponentID id);
+  void componentSelected(size_t componentIndex);
 
 protected:
   void initializeGL() override;
@@ -64,7 +64,7 @@ private:
   /// Surface
   boost::shared_ptr<ProjectionSurface> m_surface;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MANTIDGLWIDGET_H_*/

@@ -14,17 +14,17 @@
 #ifndef SIMPLEJSON_H
 #define SIMPLEJSON_H
 
+#include <istream>
 #include <map>
+#include <ostream>
 #include <string>
 #include <vector>
-#include <istream>
-#include <ostream>
 
 #include "MantidKernel/System.h"
 
 class JSONValue;
-typedef std::map<std::string, JSONValue> JSONObject;
-typedef std::vector<JSONValue> JSONArray;
+using JSONObject = std::map<std::string, JSONValue>;
+using JSONArray = std::vector<JSONValue>;
 // Note: according to the JSON spec, an array is a type of value.
 // That isn't strictly true in the C++ sense here (ie: JSONArray
 // doesn't inherit from JSONValue), but I think we'll be all right.
@@ -37,8 +37,8 @@ void DLLExport initFromStream(JSONObject &obj, std::istream &istr);
 // that ostr will actually be std::cout or std::cerr, but it can
 // be any output stream.  This function mostly exists for debugging
 // purposes.
-void DLLExport
-prettyPrint(const JSONObject &obj, std::ostream &ostr, unsigned indentLevel);
+void DLLExport prettyPrint(const JSONObject &obj, std::ostream &ostr,
+                           unsigned indentLevel);
 
 class JSONException;
 

@@ -5,10 +5,10 @@
 
 #include "MantidKernel/MaterialXMLParser.h"
 #include "Poco/AutoPtr.h"
-#include "Poco/SAX/InputSource.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/SAX/InputSource.h"
 #include <sstream>
 
 using Mantid::Kernel::MaterialXMLParser;
@@ -30,7 +30,7 @@ public:
   // all of the attributes are handled.
   //----------------------------------------------------------------------------
   void test_Formula_Attribute() {
-    auto mat = parseMaterial("<material id=\"vanadium\" formula=\"V\"/>");
+    auto mat = parseMaterial(R"(<material id="vanadium" formula="V"/>)");
 
     TS_ASSERT_EQUALS("vanadium", mat.name());
     TS_ASSERT_DELTA(0.07223047, mat.numberDensity(), 1e-8);
@@ -38,7 +38,7 @@ public:
 
   void test_AtomicNumber_Attribute() {
     auto mat = parseMaterial(
-        "<material id=\"n\" atomicnumber=\"28\" numberdensity=\"0.12\"/>");
+        R"(<material id="n" atomicnumber="28" numberdensity="0.12"/>)");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);

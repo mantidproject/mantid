@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADMCSTASNEXUS_H_
 #define MANTID_DATAHANDLING_LOADMCSTASNEXUS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,6 +40,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadMcStas"};
+  }
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file

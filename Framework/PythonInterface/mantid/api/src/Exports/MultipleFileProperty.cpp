@@ -1,5 +1,5 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
@@ -17,7 +17,7 @@ using namespace boost::python;
 
 namespace {
 /// The PropertyWithValue type
-typedef std::vector<std::vector<std::string>> HeldType;
+using HeldType = std::vector<std::vector<std::string>>;
 
 /**
  * Converts the value from a MultipleFileProperty to a python object rather than
@@ -68,10 +68,10 @@ createMultipleFileProperty(const std::string &name,
   return createMultipleFilePropertyWithAction(
       name, FileProperty::FileAction::Load, extensions);
 }
-}
+} // namespace
 
 void export_MultipleFileProperty() {
-  typedef PropertyWithValue<HeldType> BaseClass;
+  using BaseClass = PropertyWithValue<HeldType>;
   PropertyWithValueExporter<HeldType>::define(
       "VectorVectorStringPropertyWithValue");
 

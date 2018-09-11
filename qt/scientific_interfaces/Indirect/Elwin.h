@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
-#include "ui_Elwin.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectDataAnalysisTab.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_Elwin.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

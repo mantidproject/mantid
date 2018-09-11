@@ -5,10 +5,10 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidHistogramData/HistogramX.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

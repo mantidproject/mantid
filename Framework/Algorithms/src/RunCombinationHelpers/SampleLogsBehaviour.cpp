@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -20,11 +20,11 @@ std::string generateDifferenceMessage(const std::string &item,
   stringstream << "Item \"" << item
                << "\" has different values in workspaces! Found: " << wsValue
                << " in workspace " << wsName
-               << " but value in first workspace value was: " << firstValue
+               << " but the value in the first workspace was: " << firstValue
                << "." << std::endl;
   return stringstream.str();
 }
-}
+} // namespace
 const std::string SampleLogsBehaviour::SUM_MERGE = "sample_logs_sum";
 const std::string SampleLogsBehaviour::TIME_SERIES_MERGE =
     "sample_logs_time_series";
@@ -184,8 +184,9 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
                                        const std::string &paramsTolerances,
                                        bool skipIfInPrimaryMap) {
 
-  StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM |
-                                             StringTokenizer::TOK_IGNORE_EMPTY);
+  StringTokenizer tokenizer(params, ",",
+                            StringTokenizer::TOK_TRIM |
+                                StringTokenizer::TOK_IGNORE_EMPTY);
   StringTokenizer tokenizerTolerances(paramsTolerances, ",",
                                       StringTokenizer::TOK_TRIM |
                                           StringTokenizer::TOK_IGNORE_EMPTY);
@@ -258,8 +259,9 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     isNumeric = setNumericValue(item, ws, value);
     if (!isNumeric && (mergeType == MergeLogType::Sum ||
                        mergeType == MergeLogType::TimeSeries)) {
-      m_logger.error() << item << " could not be converted to a numeric type. "
-                                  "This sample log will be ignored.\n"
+      m_logger.error() << item
+                       << " could not be converted to a numeric type. "
+                          "This sample log will be ignored.\n"
                        << std::endl;
       continue;
     }
@@ -690,7 +692,7 @@ void SampleLogsBehaviour::readdSampleLogToWorkspace(MatrixWorkspace &addeeWS) {
  */
 void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
   for (auto const &item : m_logMap) {
-    std::string propertyToReset = item.first.first;
+    std::string const &propertyToReset = item.first.first;
 
     if (item.first.second == MergeLogType::TimeSeries) {
       auto property =

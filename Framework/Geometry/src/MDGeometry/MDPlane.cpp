@@ -1,9 +1,9 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include <stdexcept>
 #include "MantidKernel/VMD.h"
 #include <gsl/gsl_linalg.h>
-#include "MantidKernel/Matrix.h"
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 
@@ -260,5 +260,5 @@ MDPlane &MDPlane::operator=(const MDPlane &other) {
  */
 MDPlane::~MDPlane() { delete[] m_normal; }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

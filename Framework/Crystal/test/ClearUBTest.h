@@ -1,14 +1,14 @@
 #ifndef MANTID_CRYSTAL_CLEARUBTEST_H_
 #define MANTID_CRYSTAL_CLEARUBTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/ClearUB.h"
 #include "MantidAPI/Sample.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidCrystal/ClearUB.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::ClearUB;
 using namespace Mantid::API;

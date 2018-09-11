@@ -29,7 +29,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_width() == 8.0)
         self.assertTrue(file_information.get_height() == 8.0)
         self.assertTrue(file_information.get_thickness() == 1.0)
-        self.assertTrue(file_information.get_shape() is SampleShape.CylinderAxisAlong)
+        self.assertTrue(file_information.get_shape() is SampleShape.Disc)
 
     def test_that_can_extract_information_from_file_for_LOQ_single_period_and_raw_format(self):
         # Arrange
@@ -50,7 +50,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_width() == 8.0)
         self.assertTrue(file_information.get_height() == 8.0)
         self.assertTrue(file_information.get_thickness() == 1.0)
-        self.assertTrue(file_information.get_shape() is SampleShape.CylinderAxisAlong)
+        self.assertTrue(file_information.get_shape() is SampleShape.Disc)
 
     def test_that_can_extract_information_from_file_for_SANS2D_multi_period_event_and_nexus_format(self):
         # Arrange
@@ -72,7 +72,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_width() == 8.0)
         self.assertTrue(file_information.get_height() == 8.0)
         self.assertTrue(file_information.get_thickness() == 2.0)
-        self.assertTrue(file_information.get_shape() is SampleShape.Cuboid)
+        self.assertTrue(file_information.get_shape() is SampleShape.FlatPlate)
 
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange
@@ -94,7 +94,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_width() == 8.0)
         self.assertTrue(file_information.get_height() == 8.0)
         self.assertTrue(file_information.get_thickness() == 1.0)
-        self.assertTrue(file_information.get_shape() is SampleShape.CylinderAxisAlong)
+        self.assertTrue(file_information.get_shape() is SampleShape.Disc)
 
     def test_that_can_extract_information_for_LARMOR_added_event_data_and_multi_period_and_nexus_format(self):
         # Arrange
@@ -116,7 +116,7 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_width() == 6.0)
         self.assertTrue(file_information.get_height() == 8.0)
         self.assertTrue(file_information.get_thickness() == 1.0)
-        self.assertTrue(file_information.get_shape() is SampleShape.Cuboid)
+        self.assertTrue(file_information.get_shape() is SampleShape.FlatPlate)
 
 
 class SANSFileInformationGeneralFunctionsTest(unittest.TestCase):

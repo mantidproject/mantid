@@ -57,7 +57,7 @@ void run_StorageMode_Cloned(const Communicator &comm) {
     }
   }
 }
-}
+} // namespace
 
 class ScatterTest : public CxxTest::TestSuite {
 public:

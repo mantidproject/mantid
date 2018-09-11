@@ -3,13 +3,13 @@
 
 #include "MantidAPI/IkedaCarpenterModerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 class IkedaCarpenterModeratorTest : public CxxTest::TestSuite {
 public:
-  typedef boost::shared_ptr<Mantid::API::IkedaCarpenterModerator>
-      IkedaCarpenterModerator_sptr;
+  using IkedaCarpenterModerator_sptr =
+      boost::shared_ptr<Mantid::API::IkedaCarpenterModerator>;
 
   void test_Default_Object_Returns_Zero_Mean_Time() {
     Mantid::API::IkedaCarpenterModerator ikmod;

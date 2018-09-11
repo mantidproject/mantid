@@ -1,8 +1,8 @@
 #ifndef MANTID_API_ICATLOG_H_
 #define MANTID_API_ICATLOG_H_
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/CatalogSession.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <string>
 #include <vector>
@@ -71,9 +71,9 @@ public:
   virtual void keepAlive() = 0;
 };
 
-typedef boost::shared_ptr<ICatalog> ICatalog_sptr;
-typedef boost::shared_ptr<const ICatalog> ICatalog_const_sptr;
-}
-}
+using ICatalog_sptr = boost::shared_ptr<ICatalog>;
+using ICatalog_const_sptr = boost::shared_ptr<const ICatalog>;
+} // namespace API
+} // namespace Mantid
 
 #endif /*MANTID_API_ICATLOG_H_*/

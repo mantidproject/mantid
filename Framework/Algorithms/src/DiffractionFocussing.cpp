@@ -3,8 +3,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/Unit.h"
 
 #include <fstream>
 #include <limits>
@@ -23,10 +23,10 @@ DiffractionFocussing::DiffractionFocussing()
 }
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -83,12 +83,12 @@ void DiffractionFocussing::exec() {
   if (iprogress_step == 0)
     iprogress_step = 1;
   std::vector<int64_t> resultIndeces;
-  for (auto g = groupNumbers.cbegin(); g != groupNumbers.end(); ++g) {
+  for (auto groupNumber : groupNumbers) {
     if (iprogress++ % iprogress_step == 0) {
       progress(0.68 + double(iprogress) / iprogress_count / 3);
     }
-    auto from = detectorGroups.lower_bound(*g);
-    auto to = detectorGroups.upper_bound(*g);
+    auto from = detectorGroups.lower_bound(groupNumber);
+    auto to = detectorGroups.upper_bound(groupNumber);
     std::vector<detid_t> detectorList;
     for (auto d = from; d != to; ++d)
       detectorList.push_back(static_cast<detid_t>(d->second));
@@ -259,5 +259,5 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   return detectorGroups;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

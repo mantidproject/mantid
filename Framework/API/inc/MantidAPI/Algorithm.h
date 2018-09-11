@@ -131,8 +131,8 @@ public:
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
     std::string message;   ///< Message sent with notification
-    double estimatedTime;  ///<Estimated time to completion
-    int progressPrecision; ///<Digits of precision to the progress (after the
+    double estimatedTime;  ///< Estimated time to completion
+    int progressPrecision; ///< Digits of precision to the progress (after the
                            /// decimal).
   };
 
@@ -183,6 +183,9 @@ public:
   /// Function to return the separator token for the category string. A default
   /// implementation ';' is provided
   const std::string categorySeparator() const override { return ";"; }
+  /// Function to return all of the seeAlso (these are not validated) algorithms
+  /// related to this algorithm.A default implementation is provided.
+  const std::vector<std::string> seeAlso() const override { return {}; };
   /// function to return any aliases to the algorithm;  A default implementation
   /// is provided
   const std::string alias() const override { return ""; }
@@ -301,7 +304,7 @@ public:
   /// parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
 
-  typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
+  using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
 
   void findWorkspaceProperties(WorkspaceVector &inputWorkspaces,
                                WorkspaceVector &outputWorkspaces) const;
@@ -502,7 +505,7 @@ private:
 };
 
 /// Typedef for a shared pointer to an Algorithm
-typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+using Algorithm_sptr = boost::shared_ptr<Algorithm>;
 
 } // namespace API
 } // namespace Mantid

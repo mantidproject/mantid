@@ -38,11 +38,11 @@ public:
   UnitLabel() = delete;
 
   /// Type that contains a plain-text string
-  typedef std::string AsciiString;
+  using AsciiString = std::string;
   /// Type that can hold a unicode string. This may vary per-platform depending
   /// on the
   /// width of the the built-in std::wstring
-  typedef std::wstring Utf8String;
+  using Utf8String = std::wstring;
 
   /// Constructor giving labels as ascii, unicode, and latex respectively
   UnitLabel(const AsciiString &ascii, const Utf8String &unicode,

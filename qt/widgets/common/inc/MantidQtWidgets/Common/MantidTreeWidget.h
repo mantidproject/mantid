@@ -14,7 +14,7 @@ namespace MantidWidgets {
 class MantidDisplayBase;
 class WorkspaceTreeWidget;
 
-enum class MantidItemSortScheme { ByName, ByLastModified };
+enum class MantidItemSortScheme { ByName, ByLastModified, ByMemorySize };
 
 class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidget : public QTreeWidget {
   Q_OBJECT
@@ -52,6 +52,6 @@ private:
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H

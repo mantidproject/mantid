@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_SLICEMD_H_
 #define MANTID_MDALGORITHMS_SLICEMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
@@ -57,6 +57,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SliceMDHisto", "ProjectMD", "CutMD", "BinMD"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "MDAlgorithms\\Slicing";
@@ -86,7 +89,7 @@ protected: // for testing
     chunkMax);*/
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_SLICEMD_H_ */

@@ -1,12 +1,12 @@
 #ifndef MANTID_DATAHANDLING_SAVECALFILE_H_
 #define MANTID_DATAHANDLING_SAVECALFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,9 +29,15 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"ReadGroupsFromFile",   "CreateDummyCalFile",
+            "CreateCalFileByNames", "AlignDetectors",
+            "DiffractionFocussing", "LoadCalFile",
+            "MergeCalFiles"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Text;Diffraction\\DataHandling\\CalFiles";
+    return R"(DataHandling\Text;Diffraction\DataHandling\CalFiles)";
   }
 
   void saveCalFile(const std::string &calFileName,
@@ -49,7 +55,7 @@ private:
   int m_precision{7};
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_SAVECALFILE_H_ */

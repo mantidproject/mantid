@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <memory>
 #include <sstream>
 #include <vector>
-#include <memory>
 
 #include "MantidAPI/DllConfig.h"
 
@@ -16,8 +16,8 @@
 #endif
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 
@@ -101,9 +101,9 @@ chosen.
 template <typename T> struct ElementTraits {};
 
 /** ElementTraits for boolean element types.
-*/
+ */
 template <> struct ElementTraits<size_t> {
-  typedef size_t ValueType;
+  using ValueType = size_t;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%u,") % value);
   }
@@ -113,9 +113,9 @@ template <> struct ElementTraits<size_t> {
 };
 
 /** ElementTraits for boolean element types.
-*/
+ */
 template <> struct ElementTraits<bool> {
-  typedef bool ValueType;
+  using ValueType = bool;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%u,") % value);
   }
@@ -125,9 +125,9 @@ template <> struct ElementTraits<bool> {
 };
 
 /** ElementTraits for double element types.
-*/
+ */
 template <> struct ElementTraits<double> {
-  typedef double ValueType;
+  using ValueType = double;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%.4f,") % value);
   }
@@ -137,9 +137,9 @@ template <> struct ElementTraits<double> {
 };
 
 /** ElementTraits for float element types.
-*/
+ */
 template <> struct ElementTraits<float> {
-  typedef double ValueType;
+  using ValueType = double;
   static std::string formatCS(const ValueType &value) {
     return boost::str(boost::format("%.4f,") % value);
   }
@@ -151,7 +151,7 @@ template <> struct ElementTraits<float> {
 //------------------------------------------------------------------------------------
 // End ElementTraits TypeTraits region
 //------------------------------------------------------------------------------------
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

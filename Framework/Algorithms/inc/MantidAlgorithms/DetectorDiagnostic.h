@@ -59,6 +59,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"FindDetectorsOutsideLimits", "FindDeadDetectors",
+            "MedianDetectorTest", "DetectorEfficiencyVariation"};
+  }
 
 private:
   // Overridden Algorithm methods
@@ -146,7 +150,7 @@ protected:
   //@}
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_DETECTORDIAGNOSTIC_H_*/

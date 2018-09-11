@@ -1,12 +1,12 @@
 #ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_
 #define MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_
 
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -217,9 +217,9 @@ public:
   }
 
   /**
-  * Test declaring an input SpecialWorkspace2D and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input SpecialWorkspace2D and retrieving it as const_sptr
+   * or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     SpecialWorkspace2D_sptr wsInput(new SpecialWorkspace2D());
@@ -231,10 +231,10 @@ public:
     SpecialWorkspace2D_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<SpecialWorkspace2D_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<SpecialWorkspace2D_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -242,9 +242,9 @@ public:
     SpecialWorkspace2D_const_sptr wsCastConst;
     SpecialWorkspace2D_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (SpecialWorkspace2D_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (SpecialWorkspace2D_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

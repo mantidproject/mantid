@@ -6,10 +6,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 
-#include "MantidAlgorithms/RemoveBackground.h"
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/Rebin.h"
+#include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;
@@ -195,8 +195,8 @@ public:
     auto clone = cloneSourceWS();
     // set negative values to signal
     auto &Y = clone->dataY(0);
-    for (size_t i = 0; i < Y.size(); i++) {
-      Y[i] = -1000;
+    for (double &i : Y) {
+      i = -1000;
     }
     // Create zero background workspace
     // Create the workspace

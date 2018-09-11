@@ -68,7 +68,7 @@ void ImportMDHistoWorkspace::exec() {
   }
 
   // Copy each string present in the file stream into a deque.
-  typedef std::deque<std::string> box_collection;
+  using box_collection = std::deque<std::string>;
   box_collection box_elements;
   std::copy(std::istream_iterator<std::string>(file),
             std::istream_iterator<std::string>(),
@@ -105,5 +105,5 @@ void ImportMDHistoWorkspace::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

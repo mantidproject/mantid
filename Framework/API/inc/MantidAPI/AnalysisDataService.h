@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DataService.h"
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/DataService.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <Poco/AutoPtr.h>
 
@@ -23,9 +23,8 @@ class WorkspaceGroup;
 
 /** The Analysis data service stores instances of the Workspace objects and
     anything that derives from template class
-   DynamicFactory<Mantid::Kernel::IAlgorithm>.
-    This is the primary data service that
-    the users will interact with either through writing scripts or directly
+    DynamicFactory<Mantid::Kernel::IAlgorithm>. This is the primary data service
+    that the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 
     This is the manager/owner of Workspace* when registered.
@@ -35,8 +34,8 @@ class WorkspaceGroup;
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
 
     Modified to inherit from DataService
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak
+    Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -53,7 +52,8 @@ class WorkspaceGroup;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    File change history is stored at:
+   <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AnalysisDataServiceImpl final
@@ -78,8 +78,7 @@ public:
   };
 
   /// UnGroupingWorkspace notification is sent from UnGroupWorkspace algorithm
-  /// before the WorkspaceGroup is removed from the
-  /// DataService
+  /// before the WorkspaceGroup is removed from the DataService
   class UnGroupingWorkspaceNotification : public DataServiceNotification {
   public:
     /// Constructor
@@ -88,8 +87,8 @@ public:
         : DataServiceNotification(name, obj) {}
   };
 
-  /// GroupWorkspaces notification is send when a group is updated by adding or
-  /// removing members.
+  /// GroupWorkspaces notification is send when a group is updated by adding
+  /// or removing members.
   /// Disable observing the ADS by a group
   /// (WorkspaceGroup::observeADSNotifications(false))
   /// to prevent sending this notification.
@@ -110,12 +109,12 @@ public:
   void setIllegalCharacterList(const std::string &);
   /// Is the given name a valid name for an object in the ADS
   const std::string isValid(const std::string &name) const;
-  /// Overridden add member to attach the name to the workspace when a workspace
-  /// object is added to the service
+  /// Overridden add member to attach the name to the workspace when a
+  /// workspace object is added to the service
   void add(const std::string &name,
            const boost::shared_ptr<API::Workspace> &workspace) override;
-  /// Overridden addOrReplace member to attach the name to the workspace when a
-  /// workspace object is added to the service
+  /// Overridden addOrReplace member to attach the name to the workspace when
+  /// a workspace object is added to the service
   void
   addOrReplace(const std::string &name,
                const boost::shared_ptr<API::Workspace> &workspace) override;
@@ -128,25 +127,26 @@ public:
   /** Retrieve a workspace and cast it to the given WSTYPE
    *
    * @param name :: name of the workspace
-   * @tparam WSTYPE :: type of workspace to cast to. Should sub-class Workspace
+   * @tparam WSTYPE :: type of workspace to cast to. Should sub-class
+   * Workspace
    * @return a shared pointer of WSTYPE
    */
   template <typename WSTYPE>
   boost::shared_ptr<WSTYPE> retrieveWS(const std::string &name) const {
     // Get as a bare workspace
     try {
-      boost::shared_ptr<Mantid::API::Workspace> workspace =
-          Kernel::DataService<API::Workspace>::retrieve(name);
       // Cast to the desired type and return that.
-      return boost::dynamic_pointer_cast<WSTYPE>(workspace);
+      return boost::dynamic_pointer_cast<WSTYPE>(
+          Kernel::DataService<API::Workspace>::retrieve(name));
 
     } catch (Kernel::Exception::NotFoundError &) {
-      throw Kernel::Exception::NotFoundError(
-          "Unable to find workspace type with name '" + name +
-              "': data service ",
-          name);
+      throw;
     }
   }
+
+  std::vector<Workspace_sptr>
+  retrieveWorkspaces(const std::vector<std::string> &names,
+                     bool unrollGroups = false) const;
 
   /** @name Methods to work with workspace groups */
   //@{
@@ -178,65 +178,62 @@ private:
   std::string m_illegalChars;
 };
 
-typedef Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>
-    AnalysisDataService;
+using AnalysisDataService =
+    Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification
-    WorkspaceAddNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::AddNotification> &WorkspaceAddNotification_ptr;
+using WorkspaceAddNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification;
+using WorkspaceAddNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    BeforeReplaceNotification WorkspaceBeforeReplaceNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::BeforeReplaceNotification> &
-    WorkspaceBeforeReplaceNotification_ptr;
+using WorkspaceBeforeReplaceNotification = Mantid::Kernel::DataService<
+    Mantid::API::Workspace>::BeforeReplaceNotification;
+using WorkspaceBeforeReplaceNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DataService<
+        Mantid::API::Workspace>::BeforeReplaceNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    AfterReplaceNotification WorkspaceAfterReplaceNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::AfterReplaceNotification> &
-    WorkspaceAfterReplaceNotification_ptr;
+using WorkspaceAfterReplaceNotification = Mantid::Kernel::DataService<
+    Mantid::API::Workspace>::AfterReplaceNotification;
+using WorkspaceAfterReplaceNotification_ptr =
+    const Poco::AutoPtr<Mantid::Kernel::DataService<
+        Mantid::API::Workspace>::AfterReplaceNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    PreDeleteNotification WorkspacePreDeleteNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::PreDeleteNotification> &
-    WorkspacePreDeleteNotification_ptr;
+using WorkspacePreDeleteNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PreDeleteNotification;
+using WorkspacePreDeleteNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PreDeleteNotification>
+    &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::
-    PostDeleteNotification WorkspacePostDeleteNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::PostDeleteNotification> &
-    WorkspacePostDeleteNotification_ptr;
+using WorkspacePostDeleteNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PostDeleteNotification;
+using WorkspacePostDeleteNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::PostDeleteNotification>
+    &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification
-    ClearADSNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<
-    Mantid::API::Workspace>::ClearNotification> &ClearADSNotification_ptr;
+using ClearADSNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification;
+using ClearADSNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification> &;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification
-    WorkspaceRenameNotification;
-typedef const Poco::AutoPtr<
-    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification> &
-    WorkspaceRenameNotification_ptr;
+using WorkspaceRenameNotification =
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification;
+using WorkspaceRenameNotification_ptr = const Poco::AutoPtr<
+    Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification> &;
 
-typedef AnalysisDataServiceImpl::GroupWorkspacesNotification
-    WorkspacesGroupedNotification;
-typedef const Poco::AutoPtr<
-    AnalysisDataServiceImpl::GroupWorkspacesNotification> &
-    WorkspacesGroupedNotification_ptr;
+using WorkspacesGroupedNotification =
+    AnalysisDataServiceImpl::GroupWorkspacesNotification;
+using WorkspacesGroupedNotification_ptr =
+    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification> &;
 
-typedef AnalysisDataServiceImpl::UnGroupingWorkspaceNotification
-    WorkspaceUnGroupingNotification;
-typedef const Poco::AutoPtr<
-    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &
-    WorkspaceUnGroupingNotification_ptr;
+using WorkspaceUnGroupingNotification =
+    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification;
+using WorkspaceUnGroupingNotification_ptr = const Poco::AutoPtr<
+    AnalysisDataServiceImpl::UnGroupingWorkspaceNotification> &;
 
-typedef AnalysisDataServiceImpl::GroupUpdatedNotification
-    GroupUpdatedNotification;
-typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &
-    GroupUpdatedNotification_ptr;
+using GroupUpdatedNotification =
+    AnalysisDataServiceImpl::GroupUpdatedNotification;
+using GroupUpdatedNotification_ptr =
+    const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &;
 
 } // Namespace API
 } // Namespace Mantid
@@ -246,6 +243,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*MANTID_KERNEL_ANALYSISDATASERVICE_H_*/

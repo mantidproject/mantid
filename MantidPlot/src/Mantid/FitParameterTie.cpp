@@ -42,7 +42,7 @@ void FitParameterTie::set(const QString &estr) {
   // rx matches function identifiers in the parameter names and captures the
   // function index:
   // for f12.Sigma rx.cap(1).toInt() returns 12
-  QRegExp rx("\\bf(\\d+)\\.");
+  QRegExp rx(R"(\bf(\d+)\.)");
 
   if (rx.indexIn(parName) < 0) {
     throw std::invalid_argument(

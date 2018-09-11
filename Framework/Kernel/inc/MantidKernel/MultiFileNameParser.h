@@ -8,9 +8,9 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <set>
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 /**
   Copyright &copy; 2010-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -53,7 +53,7 @@ extern const std::string COMMA, PLUS, MINUS, COLON;
 extern const std::string SINGLE, RANGE, STEP_RANGE, ADD_LIST, ADD_RANGE,
     ADD_STEP_RANGE;
 extern const std::string ANY, LIST;
-}
+} // namespace Regexs
 
 /**
  * Comparator for set that holds instrument names in Parser.
@@ -175,11 +175,11 @@ public:
   };
 
   /// Add a run to the list of run ranges.
-  void addRun(unsigned int run);
+  void addRun(const unsigned int run);
   /// Add a range of runs
-  void addRunRange(unsigned int from, unsigned int to);
+  void addRunRange(const unsigned int from, const unsigned int to);
   /// Add a range of runs
-  void addRunRange(std::pair<unsigned int, unsigned int> range);
+  void addRunRange(const std::pair<unsigned int, unsigned int> &range);
 
 private:
   /// A set of pairs of unsigned ints, where each pair represents a range of

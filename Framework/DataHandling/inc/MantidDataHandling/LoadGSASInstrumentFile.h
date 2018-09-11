@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAHANDLING_LOADGSASINSTRUMENTFILE_H_
 #define MANTID_DATAHANDLING_LOADGSASINSTRUMENTFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Poco {
 namespace XML {
 class Document;
 class Element;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -49,6 +49,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveGSASInstrumentFile", "LoadGSS", "FixGSASInstrumentFile"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {

@@ -45,8 +45,8 @@ const char *AnsatzParameters::ATTR_NAMES[AnsatzParameters::NATTS] = {
     "IonName", "ChainDirection", "MagneticFFDirection"};
 // static
 /**
-* Initialize the model
-*/
+ * Initialize the model
+ */
 void MullerAnsatz::init() {
   // Default form factor. Can be overridden with the FormFactorIon attribute
   // setFormFactorIon("Cu2");
@@ -68,10 +68,10 @@ void MullerAnsatz::init() {
 }
 
 /**
-* Called when an attribute is set from the Fit string
-* @param name :: The name of the attribute
-* @param attr :: The value of the attribute
-*/
+ * Called when an attribute is set from the Fit string
+ * @param name :: The name of the attribute
+ * @param attr :: The value of the attribute
+ */
 void MullerAnsatz::setAttribute(const std::string &name,
                                 const API::IFunction::Attribute &attr) {
 
@@ -88,10 +88,9 @@ void MullerAnsatz::setAttribute(const std::string &name,
 static const double TWO_PI = 2. * M_PI;
 double inline amff_cu3d(const double &qsqr, const double &cosbsqr) {
   /**
-  * Calculates the magnetic form factor for a cu2+ ion with hole having 3dx^2-y2
-  * orbital symmetry
-  * Follows Shamoto et al. PRB 48, 13817(1993)
-  */
+   * Calculates the magnetic form factor for a cu2+ ion with hole having
+   * 3dx^2-y2 orbital symmetry Follows Shamoto et al. PRB 48, 13817(1993)
+   */
 
   if (qsqr <= 1.e-6) {
     return 1.;
@@ -120,13 +119,13 @@ double inline amff_cu3d(const double &qsqr, const double &cosbsqr) {
   }
 }
 /**
-* Calculates the scattering intensity
-* @param exptSetup :: Details of the current experiment
-* @param point :: The axis values for the current point in Q-W space: Qx, Qy,
-* Qz, DeltaE. These contain the U matrix
-* rotation already.
-* @return The weight contributing from this point
-*/
+ * Calculates the scattering intensity
+ * @param exptSetup :: Details of the current experiment
+ * @param point :: The axis values for the current point in Q-W space: Qx, Qy,
+ * Qz, DeltaE. These contain the U matrix
+ * rotation already.
+ * @return The weight contributing from this point
+ */
 double
 MullerAnsatz::scatteringIntensity(const API::ExperimentInfo &exptSetup,
                                   const std::vector<double> &point) const {
@@ -195,5 +194,5 @@ MullerAnsatz::scatteringIntensity(const API::ExperimentInfo &exptSetup,
 
   return weight;
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

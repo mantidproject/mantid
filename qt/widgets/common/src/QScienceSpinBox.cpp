@@ -233,8 +233,7 @@ bool QScienceSpinBox::isIntermediateValue(const QString &str) const {
   // left > 0, with max < 0 and no '-'
   if ((left >= 0 && max_left < 0 && !str.startsWith(QLatin1Char('-')))
       // left > 0, with min > 0
-      ||
-      (left < 0 && min_left >= 0)) {
+      || (left < 0 && min_left >= 0)) {
     QSBDEBUG("returns false");
     return false;
   }

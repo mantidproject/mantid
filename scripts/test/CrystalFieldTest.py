@@ -1523,8 +1523,9 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         # Fits multiple INS spectra and multiple physical properties
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                          Temperature=[10, 100], FWHM=[1.1, 1.2])
-        cf.PhysicalProperty = [PhysicalProperties('susc', 'powder'), PhysicalProperties('M(H)', Hdir=[0,1,0])]
+                          Temperature=[10, 100], FWHM=[1.1, 1.2], PhysicalProperty = [PhysicalProperties('susc', 'powder'),
+                          PhysicalProperties('M(H)', Hdir=[0,1,0])])
+
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws0, ws1, wschi, wsmag], MaxIterations=1)
         fit.fit()
         self.assertAlmostEqual(cf['B20'], 0.37737, 1)

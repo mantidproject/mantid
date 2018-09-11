@@ -22,8 +22,8 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/register_ptr_to_python.hpp>
@@ -40,8 +40,8 @@ namespace Registry {
  *    - Registers a new PropertyValueHandler for a boost::shared_ptr<T>
  */
 template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
-  typedef boost::shared_ptr<IType> IType_sptr;
-  typedef boost::weak_ptr<IType> IType_wptr;
+  using IType_sptr = boost::shared_ptr<IType>;
+  using IType_wptr = boost::weak_ptr<IType>;
   /// Constructor
   RegisterWorkspacePtrToPython() {
     using namespace boost::python;
@@ -53,8 +53,8 @@ template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
     TypeRegistry::subscribe<TypedPropertyValueHandler<IType_sptr>>();
   }
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_ */

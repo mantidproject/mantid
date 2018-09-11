@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHM_FFTSMOOTH2_H_
 #define MANTID_ALGORITHM_FFTSMOOTH2_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,6 +43,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"FFT", "WienerSmooth"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Arithmetic\\FFT;Transforms\\Smoothing";
@@ -61,7 +64,7 @@ private:
                    API::MatrixWorkspace_sptr &filteredWS);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_FFTSMOOTH2_H_*/

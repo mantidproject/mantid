@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_ICOMPASSEMBLY_
 #define MANTID_GEOMETRY_ICOMPASSEMBLY_
 
-#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IComponent.h"
 #include <deque>
 #include <string>
 #include <vector>
@@ -95,9 +95,9 @@ private:
 };
 
 /// Shared pointer to a ICompAssembly
-typedef boost::shared_ptr<ICompAssembly> ICompAssembly_sptr;
+using ICompAssembly_sptr = boost::shared_ptr<ICompAssembly>;
 /// Shared pointer to a const ICompAssembly
-typedef boost::shared_ptr<const ICompAssembly> ICompAssembly_const_sptr;
+using ICompAssembly_const_sptr = boost::shared_ptr<const ICompAssembly>;
 
 } // Namespace Geometry
 } // Namespace Mantid

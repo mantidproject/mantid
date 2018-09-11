@@ -2,10 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -27,11 +28,11 @@
 #include "boost/make_shared.hpp"
 
 using Poco::XML::DOMParser;
+using Poco::XML::DOMWriter;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
-using Poco::XML::DOMWriter;
 
 namespace Mantid {
 namespace Geometry {
@@ -44,7 +45,7 @@ const V3D DEFAULT_AXIS(0, 0, 1);
 
 /// static logger
 Logger g_log("ShapeFactory");
-}
+} // namespace
 
 /** Creates a geometric object directly from a XML shape string
  *
@@ -151,19 +152,16 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             numPrimitives++;
           } else if (primitiveName == "infinite-plane") {
             idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);
+            retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "infinite-cylinder") {
             idMatching[idFromUser] =
                 parseInfiniteCylinder(pE, primitives, l_id);
+            retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cylinder") {
             lastElement = pE;
             idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);
-            numPrimitives++;
-          } else if (primitiveName == "segmented-cylinder") {
-            lastElement = pE;
-            idMatching[idFromUser] =
-                parseSegmentedCylinder(pE, primitives, l_id);
             numPrimitives++;
           } else if (primitiveName == "hollow-cylinder") {
             idMatching[idFromUser] = parseHollowCylinder(pE, primitives, l_id);
@@ -174,6 +172,7 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
             numPrimitives++;
           } else if (primitiveName == "infinite-cone") {
             idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);
+            retVal->setFiniteGeometryFlag(false);
             numPrimitives++;
           } else if (primitiveName == "cone") {
             lastElement = pE;
@@ -963,13 +962,13 @@ std::string ShapeFactory::parseHexahedronFromStruct(
 }
 
 /**
-* Get all corners of a hexahedron from an XML element.
-*
-* @param pElem :: XML 'hexahedron' element from instrument definition file.
-* @return All corners of the hexahedron.
-*
-* @throw std::invalid_argument if XML string is invalid.
-*/
+ * Get all corners of a hexahedron from an XML element.
+ *
+ * @param pElem :: XML 'hexahedron' element from instrument definition file.
+ * @return All corners of the hexahedron.
+ *
+ * @throw std::invalid_argument if XML string is invalid.
+ */
 Hexahedron ShapeFactory::parseHexahedron(Poco::XML::Element *pElem) {
   Element *pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
   Element *pElem_lft = getShapeElement(pElem, "left-front-top-point");
@@ -1406,12 +1405,14 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
   shape->setObject(21, algebra);
   shape->populate(prim);
 
-  auto handler = boost::make_shared<GluGeometryHandler>(shape);
-
+  auto handler = boost::make_shared<GeometryHandler>(shape);
+  detail::ShapeInfo shapeInfo;
   shape->setGeometryHandler(handler);
 
-  handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
-                         hex.rft, hex.rbt);
+  shapeInfo.setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
+                          hex.rft, hex.rbt);
+
+  handler->setShapeInfo(std::move(shapeInfo));
 
   shape->defineBoundingBox(std::max(xrb, xrf), yrf, ZDEPTH, std::min(xlf, xlb),
                            ylb, 0);
@@ -1423,24 +1424,24 @@ ShapeFactory::createHexahedralShape(double xlb, double xlf, double xrf,
 void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
                                          boost::shared_ptr<CSGObject> Obj) {
 
-  auto geomHandler = boost::make_shared<GluGeometryHandler>(Obj);
+  auto geomHandler = boost::make_shared<GeometryHandler>(Obj);
+  detail::ShapeInfo shapeInfo;
   Obj->setGeometryHandler(geomHandler);
 
   if (pElem->tagName() == "cuboid") {
     auto corners = parseCuboid(pElem);
-    geomHandler->setCuboid(corners.lfb, corners.lft, corners.lbb, corners.rfb);
+    shapeInfo.setCuboid(corners.lfb, corners.lft, corners.lbb, corners.rfb);
   } else if (pElem->tagName() == "hexahedron") {
     auto corners = parseHexahedron(pElem);
-    geomHandler->setHexahedron(corners.lbb, corners.lfb, corners.rfb,
-                               corners.rbb, corners.lbt, corners.lft,
-                               corners.rft, corners.rbt);
+    shapeInfo.setHexahedron(corners.lbb, corners.lfb, corners.rfb, corners.rbb,
+                            corners.lbt, corners.lft, corners.rft, corners.rbt);
   } else if (pElem->tagName() == "sphere") {
     Element *pElemCentre = getOptionalShapeElement(pElem, "centre");
     Element *pElemRadius = getShapeElement(pElem, "radius");
     V3D centre;
     if (pElemCentre)
       centre = parsePosition(pElemCentre);
-    geomHandler->setSphere(centre, std::stod(pElemRadius->getAttribute("val")));
+    shapeInfo.setSphere(centre, std::stod(pElemRadius->getAttribute("val")));
   } else if (pElem->tagName() == "cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1448,20 +1449,9 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     Element *pElemHeight = getShapeElement(pElem, "height");
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    geomHandler->setCylinder(parsePosition(pElemCentre), normVec,
-                             std::stod(pElemRadius->getAttribute("val")),
-                             std::stod(pElemHeight->getAttribute("val")));
-  } else if (pElem->tagName() == "segmented-cylinder") {
-    Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
-    Element *pElemAxis = getShapeElement(pElem, "axis");
-    Element *pElemRadius = getShapeElement(pElem, "radius");
-    Element *pElemHeight = getShapeElement(pElem, "height");
-    V3D normVec = parsePosition(pElemAxis);
-    normVec.normalize();
-    geomHandler->setSegmentedCylinder(
-        parsePosition(pElemCentre), normVec,
-        std::stod(pElemRadius->getAttribute("val")),
-        std::stod(pElemHeight->getAttribute("val")));
+    shapeInfo.setCylinder(parsePosition(pElemCentre), normVec,
+                          std::stod(pElemRadius->getAttribute("val")),
+                          std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1473,8 +1463,10 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     double height = std::stod(pElemHeight->getAttribute("val"));
     double radius =
         height * tan(M_PI * std::stod(pElemAngle->getAttribute("val")) / 180.0);
-    geomHandler->setCone(parsePosition(pElemTipPoint), normVec, radius, height);
+    shapeInfo.setCone(parsePosition(pElemTipPoint), normVec, radius, height);
   }
+
+  geomHandler->setShapeInfo(std::move(shapeInfo));
 }
 
 } // namespace Geometry

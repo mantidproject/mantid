@@ -2,7 +2,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 
 namespace {
-typedef std::vector<Mantid::Crystal::DisjointElement> VecElements;
+using VecElements = std::vector<Mantid::Crystal::DisjointElement>;
 }
 
 namespace Mantid {

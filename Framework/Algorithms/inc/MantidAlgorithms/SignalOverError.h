@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SIGNALOVERERROR_H_
 #define MANTID_ALGORITHMS_SIGNALOVERERROR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/UnaryOperation.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

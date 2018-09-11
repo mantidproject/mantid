@@ -1,7 +1,7 @@
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -85,19 +85,11 @@ public:
     return (tAtSample1 < tAtSample2);
   }
 };
-}
+} // namespace
 //==========================================================================
 /// --------------------- TofEvent Comparators
 /// ----------------------------------
 //==========================================================================
-/** Compare two events' TOF, return true if e1 should be before e2.
- * @param e1 :: first event
- * @param e2 :: second event
- *  */
-template <typename T> bool compareEventTof(const T &e1, const T &e2) {
-  return (e1.tof() < e2.tof());
-}
-
 /** Compare two events' FRAME id, return true if e1 should be before e2.
  * @param e1 :: first event
  * @param e2 :: second event
@@ -441,7 +433,7 @@ operator+=(const std::vector<WeightedEvent> &more_events) {
   case TOF:
     // Need to switch to weighted
     this->switchTo(WEIGHTED);
-  // Fall through to the insertion!
+    // Fall through to the insertion!
 
   case WEIGHTED:
     // Append the two lists
@@ -479,7 +471,7 @@ operator+=(const std::vector<WeightedEventNoTime> &more_events) {
   case WEIGHTED:
     // Need to switch to weighted with no time
     this->switchTo(WEIGHTED_NOTIME);
-  // Fall through to the insertion!
+    // Fall through to the insertion!
 
   case WEIGHTED_NOTIME:
     // Simple appending of the two lists
@@ -575,7 +567,7 @@ EventList &EventList::operator-=(const EventList &more_events) {
   switch (this->getEventType()) {
   case TOF:
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     switch (more_events.getEventType()) {
@@ -986,42 +978,6 @@ void EventList::setSortOrder(const EventSortType order) const {
   this->order = order;
 }
 
-//  // MergeSort from:
-//  http://en.literateprograms.org/Merge_sort_%28C_Plus_Plus%29#chunk%20def:merge
-//  template<typename IT, typename VT> void insert(IT begin, IT end, const VT
-//  &v)
-//  {
-//    while(begin+1!=end && *(begin+1)<v) {
-//      std::swap(*begin, *(begin+1));
-//      ++begin;
-//    }
-//    *begin=v;
-//  }
-//
-//  template<typename IT> void merge(IT begin, IT begin_right, IT end)
-//  {
-//    for(;begin<begin_right; ++begin) {
-//      if(*begin>*begin_right) {
-//        typename std::iterator_traits<IT>::value_type v(*begin);
-//        *begin=*begin_right;
-//        insert(begin_right, end, v);
-//      }
-//    }
-//  }
-//
-//  template<typename IT> void mergesort(IT begin, IT end)
-//  {
-//    size_t size(end-begin);
-//    //std::cout << "mergesort called on " << size << "\n";
-//    if(size<2) return;
-//
-//    IT begin_right=begin+size/2;
-//
-//    mergesort(begin, begin_right);
-//    mergesort(begin_right, end);
-//    merge(begin, begin_right, end);
-//  }
-
 // --------------------------------------------------------------------------
 /** Sort events by TOF in one thread */
 void EventList::sortTof() const {
@@ -1036,15 +992,14 @@ void EventList::sortTof() const {
 
   switch (eventType) {
   case TOF:
-    tbb::parallel_sort(events.begin(), events.end(), compareEventTof<TofEvent>);
+    tbb::parallel_sort(events.begin(), events.end());
     break;
   case WEIGHTED:
-    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end(),
-                       compareEventTof<WeightedEvent>);
+    tbb::parallel_sort(weightedEvents.begin(), weightedEvents.end());
     break;
   case WEIGHTED_NOTIME:
-    tbb::parallel_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(),
-                       compareEventTof<WeightedEventNoTime>);
+    tbb::parallel_sort(weightedEventsNoTime.begin(),
+                       weightedEventsNoTime.end());
     break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1852,17 +1807,10 @@ void EventList::compressFatEvents(
  * @return iterator where the first event matching it is.
  */
 template <class T>
-typename std::vector<T>::const_iterator
-EventList::findFirstEvent(const std::vector<T> &events, const double seek_tof) {
-  auto itev = events.cbegin();
-  auto itev_end = events.cend(); // cache for speed
-
-  // if tof < X[0], that means that you need to skip some events
-  while ((itev != itev_end) && (itev->tof() < seek_tof))
-    itev++;
-  // Better fix would be to use a binary search instead of the linear one used
-  // here.
-  return itev;
+typename std::vector<T>::const_iterator static findFirstEvent(
+    const std::vector<T> &events, T seek_tof) {
+  return std::find_if_not(events.cbegin(), events.cend(),
+                          [seek_tof](const T &x) { return x < seek_tof; });
 }
 
 // --------------------------------------------------------------------------
@@ -1932,17 +1880,10 @@ typename std::vector<T>::const_iterator EventList::findFirstTimeAtSampleEvent(
  * @return iterator where the first event matching it is.
  */
 template <class T>
-typename std::vector<T>::iterator
-EventList::findFirstEvent(std::vector<T> &events, const double seek_tof) {
-  auto itev = events.begin();
-  auto itev_end = events.end(); // cache for speed
-
-  // if tof < X[0], that means that you need to skip some events
-  while ((itev != itev_end) && (itev->tof() < seek_tof))
-    itev++;
-  // Better fix would be to use a binary search instead of the linear one used
-  // here.
-  return itev;
+typename std::vector<T>::iterator static findFirstEvent(std::vector<T> &events,
+                                                        T seek_tof) {
+  return std::find_if_not(events.begin(), events.end(),
+                          [seek_tof](const T &x) { return x < seek_tof; });
 }
 
 // --------------------------------------------------------------------------
@@ -1989,7 +1930,7 @@ void EventList::histogramForWeightsHelper(const std::vector<T> &events,
   // Do we even have any events to do?
   if (!events.empty()) {
     // Iterate through all events (sorted by tof)
-    auto itev = findFirstEvent(events, X[0]);
+    auto itev = findFirstEvent(events, T(X[0]));
     auto itev_end = events.cend();
     // The above can still take you to end() if no events above X[0], so check
     // again.
@@ -2214,19 +2155,19 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
 }
 
 /** With respect to PulseTime fill a histogram given equal histogram
-*   bins.
-* Number of bins is equal to number of elements in vector Y.
-* Appends values to existing Y values.
-*
-* @param xMin :: Minimal Pulse time (in nanoseconds,
-*                i.e. DateTime->totalNanoseconds()) value to include
-*                in binning.
-* @param xMax :: Maximal Pulse time value to constrain binning by (include the
-*                times smaller than right boundary, excluding equal)
-* @param Y :: The generated counts histogram
-* @param TOF_min -- min TOF to include in histogram.
-* @param TOF_max -- max TOF to constrain values included in histogram.
-*/
+ *   bins.
+ * Number of bins is equal to number of elements in vector Y.
+ * Appends values to existing Y values.
+ *
+ * @param xMin :: Minimal Pulse time (in nanoseconds,
+ *                i.e. DateTime->totalNanoseconds()) value to include
+ *                in binning.
+ * @param xMax :: Maximal Pulse time value to constrain binning by (include the
+ *                times smaller than right boundary, excluding equal)
+ * @param Y :: The generated counts histogram
+ * @param TOF_min -- min TOF to include in histogram.
+ * @param TOF_max -- max TOF to constrain values included in histogram.
+ */
 void EventList::generateCountsHistogramPulseTime(const double &xMin,
                                                  const double &xMax,
                                                  MantidVec &Y,
@@ -2355,45 +2296,20 @@ void EventList::generateCountsHistogram(const MantidVec &X,
 
   // Do we even have any events to do?
   if (!this->events.empty()) {
-    // Iterate through all events (sorted by tof)
-    std::vector<TofEvent>::const_iterator itev =
-        findFirstEvent(this->events, X[0]);
-    std::vector<TofEvent>::const_iterator itev_end =
-        events.end(); // cache for speed
-    // The above can still take you to end() if no events above X[0], so check
-    // again.
-    if (itev == itev_end)
-      return;
-
-    // Find the first bin
-    size_t bin = 0;
-
-    // The tof is greater the first bin boundary, so we need to find the first
-    // bin
-    double tof = itev->tof();
-    while (bin < x_size - 1) {
-      // Within range?
-      if ((tof >= X[bin]) && (tof < X[bin + 1])) {
-        Y[bin]++;
+    // Iterate through all events (sorted by tof) placing them in the correct
+    // bin.
+    auto itev = findFirstEvent(this->events, TofEvent(X[0]));
+    // Go through all the events,
+    for (auto itx = X.cbegin(); itev != events.end(); ++itev) {
+      double tof = itev->tof();
+      itx = std::find_if(itx, X.cend(),
+                         [tof](const double x) { return tof < x; });
+      if (itx == X.cend()) {
         break;
       }
-      ++bin;
-    }
-    // Go to the next event, we've already binned this first one.
-    ++itev;
-
-    // Keep going through all the events
-    while ((itev != itev_end) && (bin < x_size - 1)) {
-      tof = itev->tof();
-      while (bin < x_size - 1) {
-        // Within range?
-        if ((tof >= X[bin]) && (tof < X[bin + 1])) {
-          Y[bin]++;
-          break;
-        }
-        ++bin;
-      }
-      ++itev;
+      auto bin =
+          std::max(std::distance(X.cbegin(), itx) - 1, std::ptrdiff_t{0});
+      ++Y[bin];
     }
   } // end if (there are any events to histogram)
 }
@@ -2416,15 +2332,15 @@ void EventList::generateErrorsHistogram(const MantidVec &Y,
                  static_cast<double (*)(double)>(sqrt));
 
 } //----------------------------------------------------------------------------------
-  /** Integrate the events between a range of X values, or all events.
-   *
-   * @param events :: reference to a vector of events to change.
-   * @param minX :: minimum X bin to use in integrating.
-   * @param maxX :: maximum X bin to use in integrating.
-   * @param entireRange :: set to true to use the entire range. minX and maxX are
-   *then ignored!
-   * @return the integrated number of events.
-   */
+/** Integrate the events between a range of X values, or all events.
+ *
+ * @param events :: reference to a vector of events to change.
+ * @param minX :: minimum X bin to use in integrating.
+ * @param maxX :: maximum X bin to use in integrating.
+ * @param entireRange :: set to true to use the entire range. minX and maxX are
+ *then ignored!
+ * @return the integrated number of events.
+ */
 template <class T>
 double EventList::integrateHelper(std::vector<T> &events, const double minX,
                                   const double maxX, const bool entireRange) {
@@ -2469,8 +2385,7 @@ void EventList::integrateHelper(std::vector<T> &events, const double minX,
       lowit = std::lower_bound(events.begin(), events.end(), minX);
     // If the last element is higher that the xmax then search for new lowit
     if ((highit - 1)->tof() > maxX) {
-      highit =
-          std::upper_bound(lowit, events.end(), T(maxX), compareEventTof<T>);
+      highit = std::upper_bound(lowit, events.end(), T(maxX));
     }
   }
 
@@ -2712,13 +2627,11 @@ std::size_t EventList::maskTofHelper(std::vector<T> &events,
     return 0;
 
   // Find the index of the first tofMin
-  auto it_first = std::lower_bound(events.begin(), events.end(), tofMin,
-                                   compareEventTof<T>);
+  auto it_first = std::lower_bound(events.begin(), events.end(), tofMin);
   if ((it_first != events.end()) && (it_first->tof() < tofMax)) {
     // Something was found
     // Look for the first one > tofMax
-    auto it_last =
-        std::upper_bound(it_first, events.end(), tofMax, compareEventTof<T>);
+    auto it_last = std::upper_bound(it_first, events.end(), T(tofMax));
 
     if (it_first >= it_last) {
       throw std::runtime_error("Event filter is all messed up"); // TODO
@@ -3417,7 +3330,7 @@ void EventList::multiply(const double value, const double error) {
   case TOF:
     // Switch to weights if needed.
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     multiplyHelper(this->weightedEvents, value, error);
@@ -3450,7 +3363,7 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events,
   size_t x_size = X.size();
 
   // Iterate through all events (sorted by tof)
-  auto itev = findFirstEvent(events, X[0]);
+  auto itev = findFirstEvent(events, T(X[0]));
   auto itev_end = events.end();
   // The above can still take you to end() if no events above X[0], so check
   // again.
@@ -3536,7 +3449,7 @@ void EventList::multiply(const MantidVec &X, const MantidVec &Y,
   case TOF:
     // Switch to weights if needed.
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     // Sorting by tof is necessary for the algorithm
@@ -3573,7 +3486,7 @@ void EventList::divideHistogramHelper(std::vector<T> &events,
   size_t x_size = X.size();
 
   // Iterate through all events (sorted by tof)
-  auto itev = findFirstEvent(events, X[0]);
+  auto itev = findFirstEvent(events, T(X[0]));
   auto itev_end = events.end();
   // The above can still take you to end() if no events above X[0], so check
   // again.
@@ -3673,7 +3586,7 @@ void EventList::divide(const MantidVec &X, const MantidVec &Y,
   case TOF:
     // Switch to weights if needed.
     this->switchTo(WEIGHTED);
-  // Fall through
+    // Fall through
 
   case WEIGHTED:
     // Sorting by tof is necessary for the algorithm
@@ -4870,5 +4783,5 @@ void EventList::checkIsYAndEWritable() const {
                            "generated automatically based on the events");
 }
 
-} /// namespace DataObjects
-} /// namespace Mantid
+} // namespace DataObjects
+} // namespace Mantid

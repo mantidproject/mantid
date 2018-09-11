@@ -1,10 +1,11 @@
 #ifndef MANTID_STRINGTOKENIZERTEST_H_
 #define MANTID_STRINGTOKENIZERTEST_H_
 
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/uniform_int_distribution.h"
+#include <array>
 #include <cxxtest/TestSuite.h>
 #include <random>
-#include <array>
-#include "MantidKernel/StringTokenizer.h"
 
 /**
    \class StringTokenizerTest
@@ -82,8 +83,9 @@ public:
 
   void test_StringTokenizer_parseRange_emptyElements() {
     auto tokenizer = Mantid::Kernel::StringTokenizer(
-        ",1,2,3", ",", Mantid::Kernel::StringTokenizer::TOK_TRIM |
-                           Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        ",1,2,3", ",",
+        Mantid::Kernel::StringTokenizer::TOK_TRIM |
+            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     std::vector<std::string> expected{"1", "2", "3"};
     TS_ASSERT_EQUALS(tokenizer.asVector(), expected);
 
@@ -165,19 +167,20 @@ class RandomCharacter {
 public:
   RandomCharacter() {
     const size_t maxIndex = (sizeof(m_characterSet) - 1);
-    m_distribution = std::uniform_int_distribution<unsigned>(0, maxIndex);
-  };
-  char operator()() { return m_characterSet[m_distribution(m_generator)]; };
+    m_distribution =
+        Mantid::Kernel::uniform_int_distribution<unsigned>(0, maxIndex);
+  }
+  char operator()() { return m_characterSet[m_distribution(m_generator)]; }
 
 private:
   std::array<char, 62> m_characterSet{
-      {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-       'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-       'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-       'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-       'u', 'v', 'w', 'x', 'y', 'z'}};
+      {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
+       'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+       'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c',
+       'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+       'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}};
   std::mt19937 m_generator;
-  std::uniform_int_distribution<unsigned> m_distribution;
+  Mantid::Kernel::uniform_int_distribution<unsigned> m_distribution;
 };
 
 std::string randomString(size_t length) {

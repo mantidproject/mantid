@@ -26,14 +26,14 @@
 #ifndef PR_QUEUE_H
 #define PR_QUEUE_H
 
-#include "MantidKernel/ANN/ANNx.h"    // all ANN includes
 #include "MantidKernel/ANN/ANNperf.h" // performance evaluation
+#include "MantidKernel/ANN/ANNx.h"    // all ANN includes
 
 //----------------------------------------------------------------------
 //	Basic types.
 //----------------------------------------------------------------------
-typedef void *PQinfo;  // info field is generic pointer
-typedef ANNdist PQkey; // key field is distance
+using PQinfo = void *; // info field is generic pointer
+using PQkey = ANNdist; // key field is distance
 
 //----------------------------------------------------------------------
 //	Priority queue

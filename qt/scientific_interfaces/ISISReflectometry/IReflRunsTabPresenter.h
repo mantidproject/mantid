@@ -43,8 +43,9 @@ public:
 
   enum Flag {
     SearchFlag,
-    NewAutoreductionFlag,
-    ResumeAutoreductionFlag,
+    StartAutoreductionFlag,
+    PauseAutoreductionFlag,
+    TimerEventFlag,
     ICATSearchCompleteFlag,
     TransferFlag,
     InstrumentChangedFlag,
@@ -53,9 +54,11 @@ public:
 
   // Tell the presenter something happened
   virtual void notify(IReflRunsTabPresenter::Flag flag) = 0;
-  // Determine whether to start a new autoreduction
-  virtual bool startNewAutoreduction() const = 0;
+  virtual bool isAutoreducing(int group) const = 0;
+  virtual bool isAutoreducing() const = 0;
+  virtual bool isProcessing(int group) const = 0;
+  virtual bool isProcessing() const = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLRUNSTABPRESENTER_H */

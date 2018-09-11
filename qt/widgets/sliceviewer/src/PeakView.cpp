@@ -1,9 +1,10 @@
 #include "MantidQtWidgets/SliceViewer/PeakView.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 
 #include <QPainter>
+#include <qwt_double_interval.h>
 #include <qwt_plot.h>
 #include <qwt_scale_div.h>
-#include <qwt_double_interval.h>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -87,6 +88,14 @@ void PeakView::movePosition(
   }
 }
 
+void PeakView::movePositionNonOrthogonal(
+    Mantid::Geometry::PeakTransform_sptr peakTransform,
+    NonOrthogonalAxis &info) {
+  for (auto &peak : m_peaks) {
+    peak->movePositionNonOrthogonal(peakTransform, info);
+  }
+}
+
 void PeakView::showBackgroundRadius(const bool show) {
   for (const auto &peak : m_peaks) {
     peak->showBackgroundRadius(show);
@@ -153,5 +162,5 @@ PeakViewColor PeakView::getBackgroundPeakViewColor() const {
 PeakViewColor PeakView::getForegroundPeakViewColor() const {
   return m_foregroundColor;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

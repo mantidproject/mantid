@@ -26,6 +26,8 @@ public:
 
   ~EnggDiffMultiRunFittingQtWidget() override;
 
+  std::vector<RunLabel> getAllRunLabels() const override;
+
   boost::optional<RunLabel> getSelectedRunLabel() const override;
 
   void plotFittedPeaks(
@@ -45,6 +47,8 @@ public:
   void reportPlotInvalidFocusedRun(const RunLabel &runLabel) override;
 
   void resetCanvas() override;
+
+  void setEnabled(const bool enabled) override;
 
   void setMessageProvider(
       boost::shared_ptr<IEnggDiffractionUserMsg> messageProvider) override;
@@ -93,7 +97,7 @@ private:
   boost::shared_ptr<IEnggDiffractionUserMsg> m_userMessageProvider;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGQTWIDGET_H_

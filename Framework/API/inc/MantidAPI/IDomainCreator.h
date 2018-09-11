@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/DomainCreatorFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
 
@@ -14,7 +14,7 @@ namespace API {
 class FunctionDomain;
 class FunctionValues;
 class Workspace;
-}
+} // namespace API
 
 namespace API {
 /**
@@ -147,7 +147,7 @@ protected:
 };
 
 /// Typedef for a shared pointer to IDomainCreator.
-typedef boost::shared_ptr<IDomainCreator> IDomainCreator_sptr;
+using IDomainCreator_sptr = boost::shared_ptr<IDomainCreator>;
 
 } // namespace API
 } // namespace Mantid

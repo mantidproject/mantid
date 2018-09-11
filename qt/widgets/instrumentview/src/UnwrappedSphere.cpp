@@ -1,5 +1,6 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedSphere.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include <cmath>
 
 namespace MantidQt {
@@ -14,13 +15,13 @@ UnwrappedSphere::UnwrappedSphere(const InstrumentActor *rootActor,
 
 //------------------------------------------------------------------------------
 /** Convert physical position to UV projection
-*
-* @param pos :: position in 3D
-* @param u :: set to U
-* @param v :: set to V
-* @param uscale :: scaling for u direction
-* @param vscale :: scaling for v direction
-*/
+ *
+ * @param pos :: position in 3D
+ * @param u :: set to U
+ * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
+ */
 void UnwrappedSphere::project(const Mantid::Kernel::V3D &pos, double &u,
                               double &v, double &uscale, double &vscale) const {
   // projection to cylinder axis
@@ -43,13 +44,14 @@ void UnwrappedSphere::rotate(const UnwrappedDetector &udet,
   Mantid::Kernel::Quat R1;
   // direction in which to look: from sample to detector
   Mantid::Kernel::V3D eye;
-  eye = m_pos - udet.position;
+  const auto &componentInfo = m_instrActor->componentInfo();
+  eye = m_pos - componentInfo.position(udet.detIndex);
   if (!eye.nullVector()) {
     InstrumentActor::rotateToLookAt(eye, m_zaxis, R1);
   }
   // add detector's own rotation
-  R = R1 * udet.rotation;
+  R = R1 * componentInfo.rotation(udet.detIndex);
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

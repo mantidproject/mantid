@@ -86,8 +86,8 @@ public:
 private:
   Kernel::Logger &m_logger;
 
-  typedef std::pair<std::string, MergeLogType> SampleLogsKey;
-  typedef std::map<SampleLogsKey, SampleLogBehaviour> SampleLogsMap;
+  using SampleLogsKey = std::pair<std::string, MergeLogType>;
+  using SampleLogsMap = std::map<SampleLogsKey, SampleLogBehaviour>;
   SampleLogsMap m_logMap;
   std::vector<std::shared_ptr<Kernel::Property>> m_addeeLogMap;
 

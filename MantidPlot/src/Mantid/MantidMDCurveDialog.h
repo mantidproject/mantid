@@ -1,9 +1,9 @@
 #ifndef MANTIDMDCURVEDIALOG_H
 #define MANTIDMDCURVEDIALOG_H
 
-#include <QtGui/QWidget>
-#include "ui_MantidMDCurveDialog.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
+#include "ui_MantidMDCurveDialog.h"
+#include <QtGui/QWidget>
 
 /** Dialog asking the user for some options on how to plot a MDWorkspace
  * before plotting

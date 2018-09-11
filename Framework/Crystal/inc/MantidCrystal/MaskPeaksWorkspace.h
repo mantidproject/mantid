@@ -45,6 +45,9 @@ public:
   const std::string name() const override { return "MaskPeaksWorkspace"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreatePeaksWorkspace"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -76,7 +79,7 @@ private:
   double m_tofMax; ///< The end of the box around the peak in tof
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MaskPeaksWorkspace_H_*/

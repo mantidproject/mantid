@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>
 
@@ -42,9 +42,11 @@ public:
   ProcessingAlgorithm();
   // Constructor
   ProcessingAlgorithm(QString name, std::vector<QString> prefix,
+                      std::size_t postprocessedOutputPrefixIndex,
                       std::set<QString> blacklist = std::set<QString>());
   // Delegating constructor
   ProcessingAlgorithm(QString name, QString const &prefix,
+                      std::size_t postprocessedOutputPrefixIndex,
                       QString const &blacklist = "");
   // Destructor
   virtual ~ProcessingAlgorithm();
@@ -62,6 +64,10 @@ public:
   QString defaultOutputPropertyName() const;
   // The default input ws property
   QString defaultInputPropertyName() const;
+  // The prefix for the postprocessed output ws property
+  QString postprocessedOutputPrefix() const;
+  // The postprocessed output ws property
+  QString postprocessedOutputPropertyName() const;
   // The input properties
   std::vector<QString> inputProperties() const;
   // The output properties
@@ -70,6 +76,9 @@ public:
   std::vector<QString> prefixes() const;
 
 private:
+  bool isValidOutputPrefixIndex(std::size_t outputPrefixIndex) const;
+  void ensureValidPostprocessedOutput() const;
+  std::size_t m_postprocessedOutputPrefixIndex;
   // The prefix of the output workspace(s)
   std::vector<QString> m_prefix;
   // The names of the input workspace properties
@@ -77,7 +86,7 @@ private:
   // The names of the output workspace properties
   std::vector<QString> m_outputProperties;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H*/

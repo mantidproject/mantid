@@ -2,9 +2,9 @@
 #define MANTID_KERNEL_MDUNITFACTORY_H_
 
 #include "MantidKernel/ChainableFactory.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/System.h"
 #include <memory>
 
 namespace Mantid {
@@ -65,9 +65,9 @@ class MANTID_KERNEL_DLL ReciprocalLatticeUnitFactory : public MDUnitFactory {
   bool canInterpret(const std::string &unitString) const override;
 };
 
-typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;
+using MDUnitFactory_uptr = std::unique_ptr<MDUnitFactory>;
 
-typedef std::unique_ptr<const MDUnitFactory> MDUnitFactory_const_uptr;
+using MDUnitFactory_const_uptr = std::unique_ptr<const MDUnitFactory>;
 
 /// Convience method. Pre-constructed builder chain.
 MDUnitFactory_uptr MANTID_KERNEL_DLL makeMDUnitFactoryChain();

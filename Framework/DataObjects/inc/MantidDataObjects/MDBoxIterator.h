@@ -2,12 +2,12 @@
 #define MANTID_DATAOBJECTS_MDBOXITERATOR_H_
 
 #include "MantidAPI/IMDIterator.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/SkippingPolicy.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -54,10 +54,12 @@ public:
 
   signal_t getError() const override;
 
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 
@@ -117,7 +119,7 @@ private:
   SkippingPolicy_scptr m_skippingPolicy;
 };
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDBOXITERATOR_H_ */

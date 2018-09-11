@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
 namespace API {
@@ -56,16 +56,16 @@ private:
   ~ArchiveSearchFactoryImpl() override = default;
 };
 
-typedef Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>
-    ArchiveSearchFactory;
-}
-}
+using ArchiveSearchFactory =
+    Mantid::Kernel::SingletonHolder<ArchiveSearchFactoryImpl>;
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::ArchiveSearchFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif // MANTID_API_ARCHIVESEARCHFACTORY_H_

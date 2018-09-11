@@ -5,10 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/Property.h"
 #include <climits>
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -70,6 +70,12 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadMcStasNexus", "LoadNexusMonitors",    "LoadNexusProcessed",
+            "LoadTOFRawNexus", "LoadILLDiffraction",   "LoadILLTOF",
+            "LoadILLIndirect", "LoadILLReflectometry", "LoadILLSANS",
+            "LoadMuonNexus",   "LoadFlexiNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

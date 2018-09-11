@@ -16,6 +16,19 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+/// Returns a vector with the wavelengths of the Peaks stored in this
+/// reflection.
+std::vector<double> UniqueReflection::getWavelengths() const {
+  std::vector<double> wavelengths;
+  wavelengths.reserve(m_peaks.size());
+
+  std::transform(
+      m_peaks.begin(), m_peaks.end(), std::back_inserter(wavelengths),
+      [](const DataObjects::Peak &peak) { return peak.getWavelength(); });
+
+  return wavelengths;
+}
+
 /// Returns a vector with the intensities of the Peaks stored in this
 /// reflection.
 std::vector<double> UniqueReflection::getIntensities() const {
@@ -44,7 +57,8 @@ std::vector<double> UniqueReflection::getSigmas() const {
 
 /// Removes peaks whose intensity deviates more than sigmaCritical from the
 /// intensities' mean.
-UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
+UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical,
+                                                  bool weightedZ) const {
   if (sigmaCritical <= 0.0) {
     throw std::invalid_argument(
         "Critical sigma value has to be greater than 0.");
@@ -54,7 +68,13 @@ UniqueReflection UniqueReflection::removeOutliers(double sigmaCritical) const {
 
   if (m_peaks.size() > 2) {
     auto intensities = getIntensities();
-    auto zScores = Kernel::getZscore(intensities);
+    std::vector<double> zScores;
+    if (!weightedZ) {
+      zScores = Kernel::getZscore(intensities);
+    } else {
+      auto sigmas = getSigmas();
+      zScores = Kernel::getWeightedZscore(intensities, sigmas);
+    }
 
     for (size_t i = 0; i < zScores.size(); ++i) {
       if (zScores[i] <= sigmaCritical) {
@@ -196,9 +216,15 @@ UniqueReflectionCollection::getReflections() const {
  * group of equivalent reflections.
  *
  * @param uniqueReflections :: Map of unique reflections and peaks.
+ * @param equivalentIntensities :: Mean or median for statistics of equivalent
+ *peaks.
+ * @param sigmaCritical :: Number of standard deviations for outliers.
+ * @param weightedZ :: True for weighted Zscore
  */
 void PeaksStatistics::calculatePeaksStatistics(
-    const std::map<V3D, UniqueReflection> &uniqueReflections) {
+    const std::map<V3D, UniqueReflection> &uniqueReflections,
+    std::string &equivalentIntensities, double &sigmaCritical,
+    bool &weightedZ) {
   double rMergeNumerator = 0.0;
   double rPimNumerator = 0.0;
   double intensitySumRValues = 0.0;
@@ -212,7 +238,8 @@ void PeaksStatistics::calculatePeaksStatistics(
       ++m_uniqueReflections;
 
       // Possibly remove outliers.
-      auto outliersRemoved = unique.second.removeOutliers();
+      auto outliersRemoved =
+          unique.second.removeOutliers(sigmaCritical, weightedZ);
 
       // I/sigma is calculated for all reflections, even if there is only one
       // observation.
@@ -225,9 +252,12 @@ void PeaksStatistics::calculatePeaksStatistics(
       if (outliersRemoved.count() > 1) {
         // Get mean, standard deviation for intensities
         auto intensityStatistics = Kernel::getStatistics(
-            intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev);
+            intensities, StatOptions::Mean | StatOptions::UncorrectedStdDev |
+                             StatOptions::Median);
 
         double meanIntensity = intensityStatistics.mean;
+        if (equivalentIntensities == "Median")
+          meanIntensity = intensityStatistics.median;
 
         /* This was in the original algorithm, not entirely sure where it is
          * used. It's basically the sum of all relative standard deviations.

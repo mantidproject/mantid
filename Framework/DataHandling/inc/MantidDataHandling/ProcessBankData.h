@@ -1,19 +1,22 @@
 #ifndef MANTID_DATAHANDLING_PROCESSBANKDATA_H
 #define MANTID_DATAHANDLING_PROCESSBANKDATA_H
 
+#include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataHandling/BankPulseTimes.h"
 
 #include <boost/shared_array.hpp>
 
 namespace Mantid {
+namespace API {
+class Progress;
+}
 namespace DataHandling {
 class DefaultEventLoader;
 
 /** This task does the disk IO from loading the NXS file,
-* and so will be on a disk IO mutex */
+ * and so will be on a disk IO mutex */
 class ProcessBankData : public Mantid::Kernel::Task {
 public:
   /** Constructor
@@ -82,7 +85,7 @@ private:
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
 }; // ENDDEF-CLASS ProcessBankData
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif

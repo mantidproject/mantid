@@ -64,6 +64,6 @@ private:
   /// The state of the checkbox in the column header.
   bool m_checked;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTWIDGETS_CHECKBOXHEADER_H_

@@ -144,6 +144,9 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
     def category(self):
         return "SINQ\\Poldi"
 
+    def seeAlso(self):
+        return [ "PoldiCreatePeaksFromCell" ]
+
     def name(self):
         return "PoldiLoadCrystalData"
 

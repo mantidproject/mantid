@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Torus.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid;
 using namespace Geometry;

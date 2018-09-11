@@ -14,7 +14,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -72,6 +72,9 @@ class DLLExport LoadCanSAS1D2 : public LoadCanSAS1D {
 public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveCanSAS1D"};
+  }
 
 protected:
   /// Overwrites Algorithm method. Extend to create the LoadTransmission flag.
@@ -93,6 +96,6 @@ private:
                            const std::string &name,
                            const std::string &output_name);
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif // MANTID_DATAHANDLING_LoadCanSAS1D2_H

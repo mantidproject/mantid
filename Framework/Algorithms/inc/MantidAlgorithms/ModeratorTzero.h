@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -86,6 +86,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ModeratorTzeroLinear"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";

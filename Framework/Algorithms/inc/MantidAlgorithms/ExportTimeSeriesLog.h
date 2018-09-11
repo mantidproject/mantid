@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_EXPORTTIMESERIESLOG_H_
 #define MANTID_ALGORITHMS_EXPORTTIMESERIESLOG_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,6 +41,9 @@ public:
   const std::string name() const override { return "ExportTimeSeriesLog"; };
 
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"GetTimeSeriesLogInformation"};
+  }
 
   const std::string category() const override {
     return "Diffraction\\DataHandling;Events\\EventFiltering";

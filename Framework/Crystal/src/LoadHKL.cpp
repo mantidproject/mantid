@@ -1,7 +1,7 @@
+#include "MantidCrystal/LoadHKL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/LoadHKL.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Material.h"
@@ -85,16 +85,19 @@ void LoadHKL::exec() {
     double wl = std::stod(line.substr(32, 8));
     double tbar, trans, scattering;
     int run, bank;
+    int seqNum;
     if (cosines) {
       tbar = std::stod(line.substr(40, 8)); // tbar
       run = std::stoi(line.substr(102, 6));
       trans = std::stod(line.substr(114, 7)); // transmission
+      seqNum = std::stoi(line.substr(109, 7));
       bank = std::stoi(line.substr(121, 4));
       scattering = std::stod(line.substr(125, 9));
     } else {
       tbar = std::stod(line.substr(40, 7)); // tbar
       run = std::stoi(line.substr(47, 7));
       trans = std::stod(line.substr(61, 7)); // transmission
+      seqNum = std::stoi(line.substr(54, 7));
       bank = std::stoi(line.substr(68, 4));
       scattering = std::stod(line.substr(72, 9));
     }
@@ -115,6 +118,7 @@ void LoadHKL::exec() {
     peak.setIntensity(Inti);
     peak.setSigmaIntensity(SigI);
     peak.setRunNumber(run);
+    peak.setPeakNumber(seqNum);
     std::ostringstream oss;
     oss << "bank" << bank;
     std::string bankName = oss.str();
@@ -155,9 +159,8 @@ void LoadHKL::exec() {
     radius1 = x1;
   else if (x2 > 0)
     radius1 = x2;
-  double frac =
-      theta -
-      static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
+  double frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) *
+                            5.; // theta%5.
   frac = frac / 5.;
   radius = radius * (1 - frac) + radius1 * frac;
   radius /= mu1;
@@ -177,5 +180,5 @@ void LoadHKL::exec() {
               boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

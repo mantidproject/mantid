@@ -3,22 +3,22 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateCalFileByNames.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CreateCalFileByNames.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include <Poco/File.h>
-#include <fstream>
 #include <cstring>
+#include <fstream>
 #include <vector>
 
 using namespace Mantid::API;

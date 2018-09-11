@@ -134,7 +134,7 @@ public:
     MDHistoWorkspace_sptr c =
         boost::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
 
-    TS_ASSERT(c != NULL);
+    TS_ASSERT(c != nullptr);
     // Since A and B are equivalent, the mean Signal in C should be the same as
     // both A and B.
     double expectedSignalResults[10] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -157,7 +157,7 @@ public:
     MDHistoWorkspace_sptr out;
     out = BinaryOperationMDTestHelper::doTest("WeightedMeanMD", "histo_A",
                                               "histo_B", "out");
-    TS_ASSERT(out != NULL);
+    TS_ASSERT(out != nullptr);
   }
 
   /**
@@ -197,7 +197,7 @@ public:
   /// MatrixWorkspaces (WeightedMean).
   void test_compare_to_matrix_weightedmean() {
     // Create some input data. Signal values as two offset sine waves.
-    typedef std::vector<double> VecDouble;
+    using VecDouble = std::vector<double>;
     VecDouble s1, s2, e1, e2, x;
     double theta_shift = 0.4;
     for (size_t i = 0; i < 40; ++i) {

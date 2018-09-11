@@ -1,9 +1,9 @@
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 using namespace testing;
@@ -182,11 +182,11 @@ public:
 
 class PeakRepresentationCrossTestPerformance : public CxxTest::TestSuite {
 private:
-  typedef std::vector<boost::shared_ptr<PeakRepresentationCross>>
-      VecPeakRepCross;
+  using VecPeakRepCross =
+      std::vector<boost::shared_ptr<PeakRepresentationCross>>;
 
-  typedef std::vector<boost::shared_ptr<
-      PeakRepresentationCrossExposeProtectedWrapper>> VecPeakRepCrossWrapped;
+  using VecPeakRepCrossWrapped = std::vector<
+      boost::shared_ptr<PeakRepresentationCrossExposeProtectedWrapper>>;
 
   /// Collection to store a large number of PeakRepresentationCross.
   VecPeakRepCross m_peaks;
@@ -210,8 +210,8 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.push_back(boost::make_shared<
-              MantidQt::SliceViewer::PeakRepresentationCross>(peakOrigin, maxZ,
-                                                              minZ));
+                            MantidQt::SliceViewer::PeakRepresentationCross>(
+              peakOrigin, maxZ, minZ));
         }
       }
     }

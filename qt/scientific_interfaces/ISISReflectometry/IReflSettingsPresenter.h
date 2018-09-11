@@ -2,8 +2,8 @@
 #define MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H
 
 #include "IReflSettingsTabPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
 
 #include <string>
 
@@ -42,9 +42,10 @@ class IReflSettingsPresenter {
 public:
   virtual ~IReflSettingsPresenter(){};
   /// Transmission runs for a particular angle
-  virtual std::string getTransmissionRunsForAngle(const double angle) const = 0;
+  virtual MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angle) const = 0;
   /// Whether per-angle transmission runs are set
-  virtual bool hasPerAngleTransmissionRuns() const = 0;
+  virtual bool hasPerAngleOptions() const = 0;
   /// Pre-processing
   virtual MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const = 0;
@@ -71,6 +72,6 @@ public:
   virtual void onReductionPaused() = 0;
   virtual void onReductionResumed() = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_IREFLSETTINGSPRESENTER_H */

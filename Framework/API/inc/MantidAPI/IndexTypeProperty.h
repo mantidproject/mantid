@@ -52,7 +52,7 @@ public:
 
   using PropertyWithValue<std::string>::operator=;
 
-  std::string &operator=(API::IndexType type);
+  IndexTypeProperty &operator=(API::IndexType type);
 
   static std::string generatePropertyName(const std::string &name = "");
 

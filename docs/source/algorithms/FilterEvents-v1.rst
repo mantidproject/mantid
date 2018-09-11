@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -99,6 +99,17 @@ name ended with '\_unfiltered'.
 
 If input property 'OutputWorkspaceIndexedFrom1' is set to True, then
 this workspace shall not be outputed.
+
+Using FilterEvents with fast-changing logs
+##########################################
+
+There are a few parameters to consider when the log filtering is expected to produce a large
+splitter table. An example of such a case would be a data file for which the events need to be split
+according to a log with two or more states changing in the kHz range. To reduce the filtering time,
+one may do the following:
+
+- Make sure the ``SplitterWorkspace`` input is a :ref:`MatrixWorkspace <MatrixWorkspace>`. Such a workspace can be produced by using the ``FastLog = True`` option when calling :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`.
+- Choose the logs to split. Filtering the logs can take a substantial amount of time. To save time, you may want to split only the logs you will need for analysis. To do so, set ``ExcludeSpecifiedLogs = False`` and list the logs you need in ``TimeSeriesPropertyLogs``. For example, if we only need to know the accumulated proton charge for each filtered workspace, we would set ``TimeSeriesPropertyLogs = proton_charge``.
 
 Difference from FilterByLogValue
 ################################

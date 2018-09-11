@@ -1,6 +1,6 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyManagerFactory.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/python/extract.hpp>
@@ -38,6 +38,6 @@ createPropertyManager(const boost::python::dict &mapping) {
   }
   return pmgr;
 }
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid

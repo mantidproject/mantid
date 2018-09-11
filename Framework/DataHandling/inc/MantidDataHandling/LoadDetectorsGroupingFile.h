@@ -1,19 +1,20 @@
 #ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
 #define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/System.h"
+
+#include <Poco/DOM/Document.h>
 
 #include <fstream>
 
 namespace Poco {
 namespace XML {
-class Document;
 class Element;
 class Node;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -62,6 +63,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveDetectorsGrouping", "GroupDetectors"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Grouping;Transforms\\Grouping";
@@ -163,9 +167,7 @@ private:
   bool m_userGiveDescription;
 
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
-  /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
   /// Data structures to store XML to Group/Detector conversion map
   std::map<int, std::vector<std::string>> m_groupComponentsMap;
   std::map<int, std::vector<detid_t>> m_groupDetectorsMap;

@@ -11,6 +11,9 @@ class CropWorkspaceRagged(PythonAlgorithm):
     def category(self):
         return 'Transforms\\Splitting;Workflow'
 
+    def seeAlso(self):
+        return [ "CropWorkspace" ]
+
     def name(self):
         return 'CropWorkspaceRagged'
 

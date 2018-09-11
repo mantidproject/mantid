@@ -49,4 +49,7 @@
 {%- endblock %}
 
 {# Custom CSS overrides #}
+<!-- Overriding style sheets changed in Sphinx >=1.6.1: https://github.com/ryan-roemer/sphinx-bootstrap-theme/blob/master/README.rst#adding-custom-css
+     Later versions of sphinx-theme-bootstrap-theme ignore this value but we keep it so that old versions still work
+ -->
 {% set bootswatch_css_custom = ['_static/custom.css'] %}

@@ -24,6 +24,9 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         """
         return "DataHandling\\Plots"
 
+    def seeAlso(self):
+        return [ "SavePlot1DAsJson","StringToPng" ]
+
     def name(self):
         """ Algorithm name
         """

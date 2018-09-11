@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -62,7 +62,7 @@ Usage
                                CellType='Hexagonal', Apply=True, Tolerance=0.2)
 
     # Run the SortHKL algorithm
-    sorted, statistics_table = StatisticsOfPeaksWorkspace(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
+    sorted, statistics_table, equivI = StatisticsOfPeaksWorkspace(peaks, PointGroup='-3m1 (Trigonal - Hexagonal)',
                                                           LatticeCentering='Rhombohedrally centred, obverse',
                                                           SortBy='Overall')
 

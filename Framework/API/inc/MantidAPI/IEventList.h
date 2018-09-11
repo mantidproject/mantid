@@ -1,9 +1,9 @@
 #ifndef MANTID_API_IEVENTLIST_H_
 #define MANTID_API_IEVENTLIST_H_
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/DateAndTime.h"
 #include <functional>
 
 namespace Mantid {
@@ -116,7 +116,7 @@ public:
                       const MantidVec &E) = 0;
 };
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_IEVENTLIST_H_ */

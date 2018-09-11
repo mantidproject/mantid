@@ -41,7 +41,7 @@ public:
 private:
   Mantid::API::Workspace_sptr m_workspace;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

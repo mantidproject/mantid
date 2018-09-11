@@ -1,9 +1,9 @@
 #ifndef REBINPARAMSVALIDATORTEST_H_
 #define REBINPARAMSVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 

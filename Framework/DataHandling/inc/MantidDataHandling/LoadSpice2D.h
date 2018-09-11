@@ -1,20 +1,20 @@
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
 
-#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/XmlHandler.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
 #include <map>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -62,6 +62,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadSpiceAscii", "LoadSpiceXML2DDet"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";

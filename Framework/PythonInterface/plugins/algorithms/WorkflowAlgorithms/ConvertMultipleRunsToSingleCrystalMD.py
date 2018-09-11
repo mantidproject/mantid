@@ -17,6 +17,9 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
     def category(self):
         return "MDAlgorithms\\Creation"
 
+    def seeAlso(self):
+        return [ "ConvertToDiffractionMDWorkspace","ConvertToMD" ]
+
     def name(self):
         return "ConvertMultipleRunsToSingleCrystalMD"
 

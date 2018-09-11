@@ -2,23 +2,26 @@
 #define GROUPDETECTORS2TEST_H_
 
 #include "MantidDataHandling/GroupDetectors2.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <Poco/Path.h>
@@ -29,14 +32,14 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
-using Mantid::detid_t;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::Types::Event::TofEvent;
+using Mantid::detid_t;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -54,13 +57,9 @@ public:
     // This is needed to load in the plugin algorithms (specifically Divide,
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
-    createTestWorkspace(inputWSName, 0);
-    createTestWorkspace(offsetWSName, 1);
   }
 
-  ~GroupDetectors2Test() override {
-    AnalysisDataService::Instance().remove(inputWSName);
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testSetup() {
     GroupDetectors2 gd;
@@ -68,13 +67,11 @@ public:
     TS_ASSERT_EQUALS(gd.version(), 2);
     TS_ASSERT_THROWS_NOTHING(gd.initialize());
     TS_ASSERT(gd.isInitialized());
-
+    createTestWorkspace(inputWSName, 0);
     gd.setPropertyValue("InputWorkspace", inputWSName);
     gd.setPropertyValue("OutputWorkspace", outputWSNameBase);
     TS_ASSERT_THROWS_NOTHING(gd.execute());
     TS_ASSERT(!gd.isExecuted());
-
-    AnalysisDataService::Instance().remove(outputWSNameBase);
   }
 
   void testAveragingWithNoInstrument() {
@@ -99,6 +96,7 @@ public:
   void testSpectraList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
+    createTestWorkspace(inputWSName, 0);
     grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "Specs");
     grouper3.setPropertyValue("OutputWorkspace", output);
@@ -124,12 +122,12 @@ public:
     TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
-    AnalysisDataService::Instance().remove(output);
   }
 
   void testIndexList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
+    createTestWorkspace(inputWSName, 0);
     grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
@@ -148,7 +146,6 @@ public:
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
-    std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
     for (int i = 0; i < NBINS; ++i) {
@@ -158,12 +155,12 @@ public:
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
-    AnalysisDataService::Instance().remove(output);
   }
 
   void testGroupingPattern() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
+    createTestWorkspace(inputWSName, 0);
     grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
@@ -199,6 +196,7 @@ public:
     // Check that the algorithm still works if spectrum numbers are not 1-based
     GroupDetectors2 grouper3;
     grouper3.initialize();
+    createTestWorkspace(offsetWSName, 1);
     grouper3.setPropertyValue("InputWorkspace", offsetWSName);
     std::string output(outputWSNameBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
@@ -217,7 +215,6 @@ public:
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
-    std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
     for (int i = 0; i < NBINS; ++i) {
@@ -227,13 +224,13 @@ public:
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
-    AnalysisDataService::Instance().remove(output);
   }
 
   void testGroupingPatternOffsetSpectra() {
     // Check that the algorithm still works if spectrum numbers are not 1-based
     GroupDetectors2 grouper3;
     grouper3.initialize();
+    createTestWorkspace(offsetWSName, 1);
     grouper3.setPropertyValue("InputWorkspace", offsetWSName);
     std::string output(outputWSNameBase + "Indices");
     grouper3.setPropertyValue("OutputWorkspace", output);
@@ -252,7 +249,6 @@ public:
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
-    std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
     for (int i = 0; i < NBINS; ++i) {
@@ -262,12 +258,12 @@ public:
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
-    AnalysisDataService::Instance().remove(output);
   }
 
   void testDetectorList() {
     GroupDetectors2 grouper3;
     grouper3.initialize();
+    createTestWorkspace(inputWSName, 0);
     grouper3.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "Detects");
     grouper3.setPropertyValue("OutputWorkspace", output);
@@ -282,7 +278,6 @@ public:
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     HistogramX tens{10, 11, 12, 13, 14};
-    std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->x(0), tens);
     TS_ASSERT_EQUALS(outputWS->y(0),
                      HistogramY(NBINS, (3 + 1) + (1 + 1) + (4 + 1) + (0 + 1) +
@@ -295,8 +290,6 @@ public:
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
-
-    AnalysisDataService::Instance().remove(output);
   }
 
   void testFileList() {
@@ -305,6 +298,7 @@ public:
 
     GroupDetectors2 grouper;
     grouper.initialize();
+    createTestWorkspace(inputWSName, 0);
     grouper.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
@@ -369,7 +363,6 @@ public:
     TS_ASSERT(spectrumInfo.hasDetectors(4));
     TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
 
-    AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
   }
 
@@ -379,6 +372,7 @@ public:
 
     GroupDetectors2 grouper;
     grouper.initialize();
+    createTestWorkspace(inputWSName, 0);
     grouper.setPropertyValue("InputWorkspace", inputWSName);
     std::string output(outputWSNameBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
@@ -420,8 +414,6 @@ public:
     }
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(2), 3);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), 3);
-
-    AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
   }
 
@@ -470,7 +462,7 @@ public:
     AnalysisDataService::Instance().remove("boevs");
   }
 
-  void testReadingFromXMLCheckDublicateIndex() {
+  void testReadingFromXMLCheckDuplicateIndex() {
     Mantid::DataHandling::LoadMuonNexus1 nxLoad;
     nxLoad.initialize();
 
@@ -587,6 +579,7 @@ public:
   }
 
   void testAverageBehaviour() {
+    createTestWorkspace(inputWSName, 0);
     Mantid::DataHandling::MaskDetectors mask;
     mask.initialize();
     mask.setPropertyValue("Workspace", inputWSName);
@@ -607,9 +600,6 @@ public:
 
     // Result should be 1 + 2  / 2 = 1.5
     TS_ASSERT_EQUALS(output->y(0)[1], 1.5);
-
-    AnalysisDataService::Instance().remove(
-        "GroupDetectors2_testAverageBehaviour_Output");
   }
 
   void testEvents() {
@@ -633,6 +623,7 @@ public:
     alg2.execute();
     TS_ASSERT(alg2.isExecuted());
 
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("GDEventsOut"))
     EventWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
         "GDEventsOut");
@@ -642,7 +633,6 @@ public:
     TS_ASSERT_EQUALS(input->x(0).size(), output->x(0).size());
     TS_ASSERT_DELTA((input->y(2)[0] + input->y(3)[0] + input->y(4)[0]) / 3,
                     output->y(0)[0], 0.00001);
-    AnalysisDataService::Instance().remove("GDEventsOut");
   }
 
   void
@@ -876,6 +866,7 @@ public:
     GroupDetectors2 groupAlg;
     groupAlg.initialize();
     groupAlg.setRethrows(true);
+    createTestWorkspace(inputWSName, 0);
     groupAlg.setPropertyValue("InputWorkspace", inputWSName);
     groupAlg.setPropertyValue("OutputWorkspace", outputWSNameBase);
     groupAlg.setPropertyValue("GroupingPattern", "-1, 0");
@@ -912,8 +903,6 @@ public:
     TS_ASSERT_EQUALS(spectrumDefinitions[1][1].second, 3);
     TS_ASSERT_EQUALS(spectrumDefinitions[1][2].second, 4);
     TS_ASSERT_EQUALS(spectrumDefinitions[1][3].second, 5);
-
-    AnalysisDataService::Instance().remove(outputWSNameBase);
   }
 
   void test_grouping_with_time_indexes_in_event_workspace_throws() {
@@ -936,11 +925,98 @@ public:
                             "EventWorkspaces with detector scans.")
   }
 
+  void test_GroupingPattern_histogram_workspace_without_SpectraAxis_works() {
+    createTestWorkspace(inputWSName, 0);
+    // Use ConvertSpectrumAxis to replace the vertical axis with a
+    // NumericAxis.
+    auto convertAxis =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+            "ConvertSpectrumAxis");
+    convertAxis->initialize();
+    convertAxis->setChild(true);
+    convertAxis->setRethrows(true);
+    convertAxis->setProperty("InputWorkspace", inputWSName);
+    convertAxis->setProperty("OutputWorkspace", "unused_for_child");
+    convertAxis->setProperty("Target", "Theta");
+    convertAxis->execute();
+    MatrixWorkspace_sptr inputWS = convertAxis->getProperty("OutputWorkspace");
+    GroupDetectors2 group;
+    group.initialize();
+    group.setRethrows(false);
+    TS_ASSERT_THROWS_NOTHING(group.setProperty("InputWorkspace", inputWS))
+    const std::string output(outputWSNameBase + "withoutSpectraAxis");
+    TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("OutputWorkspace", output))
+    TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("GroupingPattern", "2-5"))
+    TS_ASSERT_THROWS_NOTHING(group.execute())
+    TS_ASSERT(group.isExecuted())
+
+    MatrixWorkspace_sptr outputWS =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(output));
+    // The output should have SpectrumAxis.
+    const Axis *axis = outputWS->getAxis(1);
+    TS_ASSERT(dynamic_cast<const Mantid::API::SpectraAxis *>(axis) != nullptr);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    const HistogramX tens{10, 11, 12, 13, 14};
+    TS_ASSERT_EQUALS(outputWS->x(0), tens);
+    TS_ASSERT_EQUALS(outputWS->y(0), HistogramY(NBINS, (3 + 4 + 5 + 6)));
+    for (int i = 0; i < NBINS; ++i) {
+      TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
+    }
+
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
+  }
+
+  void test_GroupingPattern_event_workspace_without_SpectraAxis_works() {
+    const int numBanks{1};
+    const int bankWidthInPixels{3};
+    const bool clearEvents{false};
+    auto ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        numBanks, bankWidthInPixels, clearEvents);
+    // Number of events from WorkspaceCreationHelpers::
+    // createEventWorkspaceWithStartTime, numEvents = 100, eventPatter = 2.
+    const int numEvents{200};
+    auto newAxis = new NumericAxis(ws->getNumberHistograms());
+    for (size_t i = 0; i < newAxis->length(); ++i) {
+      newAxis->setValue(i, static_cast<double>(i + 1));
+    }
+    ws->replaceAxis(1, newAxis);
+    GroupDetectors2 group;
+    TS_ASSERT_THROWS_NOTHING(group.initialize())
+    TS_ASSERT(group.isInitialized());
+    group.setRethrows(true);
+
+    // Set the properties
+    TS_ASSERT_THROWS_NOTHING(group.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(
+        group.setPropertyValue("OutputWorkspace", "GDEventsOut"))
+    TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("GroupingPattern", "2-4"))
+    TS_ASSERT_THROWS_NOTHING(group.setPropertyValue("Behaviour", "Average"))
+    TS_ASSERT_THROWS_NOTHING(group.setProperty("PreserveEvents", true))
+
+    group.execute();
+    TS_ASSERT(group.isExecuted());
+
+    EventWorkspace_sptr output;
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+        "GDEventsOut");
+    TS_ASSERT(output);
+    const Axis *axis = output->getAxis(1);
+    TS_ASSERT(dynamic_cast<const Mantid::API::SpectraAxis *>(axis) != nullptr);
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 3 * numEvents);
+    TS_ASSERT_EQUALS(ws->x(0).size(), output->x(0).size());
+    TS_ASSERT_DELTA((ws->y(2)[0] + ws->y(3)[0] + ws->y(4)[0]) / 3,
+                    output->y(0)[0], 0.00001);
+  }
+
 private:
   const std::string inputWSName, offsetWSName, outputWSNameBase, inputFile;
   enum constants { NHIST = 6, NBINS = 4 };
 
-  void createTestWorkspace(std::string name, const int offset) {
+  void createTestWorkspace(const std::string &name, const int offset) {
     // Set up a small workspace for testing
     auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -962,6 +1038,8 @@ private:
       instr->add(d);
       instr->markAsDetector(d);
     }
+    ComponentCreationHelper::addSampleToInstrument(instr, V3D{0., 0., 0.});
+    ComponentCreationHelper::addSourceToInstrument(instr, V3D{0., 0., -2.});
     space2D->setInstrument(instr);
 
     // Register the workspace in the data service
@@ -969,6 +1047,7 @@ private:
   }
 
   MatrixWorkspace_sptr createTestScanWorkspace() {
+    createTestWorkspace(inputWSName, 0);
     MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(inputWSName));
 

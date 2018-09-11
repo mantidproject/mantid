@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LoadPreNexus_H_
 #define MANTID_DATAHANDLING_LoadPreNexus_H_
 
+#include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
-#include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IEventWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -44,6 +44,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadEventPreNexus", "LoadPreNexusMonitors", "LoadNexus"};
+  }
   const std::string category() const override;
   void parseRuninfo(const std::string &runinfo, std::string &dataDir,
                     std::vector<std::string> &eventFilenames);

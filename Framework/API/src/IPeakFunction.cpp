@@ -3,9 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/IFunction1D.tcc"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/PeakFunctionIntegrator.h"
-#include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/lexical_cast.hpp>
@@ -45,7 +46,7 @@ public:
    */
   double get(size_t iY, size_t iP) override { return m_J->get(m_iY0 + iY, iP); }
   /** Zero all matrix elements.
-  */
+   */
   void zero() override {
     throw Kernel::Exception::NotImplementedError(
         "zero() is not implemented for PartialJacobian1");
@@ -88,8 +89,8 @@ const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
 } // namespace
 
 /**
-  * Constructor.
-  */
+ * Constructor.
+ */
 IPeakFunction::IPeakFunction() : m_peakRadius(MAX_PEAK_RADIUS) {}
 
 void IPeakFunction::function(const FunctionDomain &domain,
@@ -263,6 +264,23 @@ std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
   left = findBound(-w);
   right = findBound(w);
   return std::make_pair(left, right);
+}
+
+/**
+ * Computes the function derivative numerically
+ * @param jacobian An output Jacobian to receive the calculated values
+ * @param xValues An input array of X data
+ * @param nData The number of X values provided
+ */
+void IPeakFunction::functionDerivLocal(Jacobian *jacobian,
+                                       const double *xValues,
+                                       const size_t nData) {
+  auto evalMethod = [this](double *out, const double *xValues,
+                           const size_t nData) {
+    this->functionLocal(out, xValues, nData);
+  };
+  this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues,
+                                  nData);
 }
 
 } // namespace API

@@ -19,8 +19,8 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
@@ -70,7 +70,7 @@ boost::shared_ptr<CSGObject> createCappedCylinder(double radius, double height,
 }
 
 void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
-                           std::string name = "moderator") {
+                           const std::string &name) {
   ObjComponent *source =
       new ObjComponent(name, IObject_sptr(new CSGObject), instrument.get());
   source->setPos(sourcePos);
@@ -742,7 +742,7 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
     tube->setPos(V3D(x, 0.0, z));
     for (size_t j = 0; j < nPixelsPerTube; ++j) {
       lexer.str("");
-      lexer << "pixel-" << i *nPixelsPerTube + j;
+      lexer << "pixel-" << i * nPixelsPerTube + j;
       Detector *pixel = new Detector(
           lexer.str(), int(i * nPixelsPerTube + j + 1), pixelShape, tube);
       const double xpos = 0.0;

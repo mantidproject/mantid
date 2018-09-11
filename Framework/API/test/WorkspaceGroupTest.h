@@ -58,13 +58,13 @@ private:
 
   // Helper type, representing some concrete workspace type.
   class MockWorkspace : public Mantid::API::Workspace {
-    GCC_DIAG_OFF_SUGGEST_OVERRIDE
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(name, const std::string());
     MOCK_CONST_METHOD0(threadSafe, bool());
     MOCK_CONST_METHOD0(toString, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
-    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
   private:
     MockWorkspace *doClone() const override {
       throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
@@ -241,6 +241,17 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_getAllItems() {
+    WorkspaceGroup_sptr group = makeGroup();
+    auto items = group->getAllItems();
+    TS_ASSERT_EQUALS(group->size(), 3);
+    TS_ASSERT_EQUALS(items.size(), 3);
+    TS_ASSERT_EQUALS(items[0], group->getItem(0));
+    TS_ASSERT_EQUALS(items[1], group->getItem(1));
+    TS_ASSERT_EQUALS(items[2], group->getItem(2));
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_deleting_workspaces() {
     WorkspaceGroup_sptr group = makeGroup();
     TS_ASSERT(AnalysisDataService::Instance().doesExist("group"));
@@ -310,8 +321,9 @@ public:
   }
 
   void test_not_multiperiod_if_missing_nperiods_log() {
-    Workspace_sptr a = boost::make_shared<
-        WorkspaceTester>(); // workspace has no nperiods entry.
+    Workspace_sptr a = boost::make_shared<WorkspaceTester>(); // workspace has
+                                                              // no nperiods
+                                                              // entry.
     WorkspaceGroup group;
     group.addWorkspace(a);
     TSM_ASSERT("Cannot be multiperiod without nperiods log.",
@@ -335,6 +347,11 @@ public:
     TS_ASSERT(group->isMultiperiod());
   }
 
+  void test_isGroup() {
+    WorkspaceGroup_sptr group = makeGroup();
+    TS_ASSERT_EQUALS(group->isGroup(), true);
+  }
+
   void test_isInGroup() {
     WorkspaceGroup_sptr group = makeGroup();
     auto ws1 = group->getItem(1);
@@ -355,8 +372,9 @@ public:
   }
 
   /**
-  * Test declaring an input workspace group and retrieving as const_sptr or sptr
-  */
+   * Test declaring an input workspace group and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     WorkspaceGroup_sptr wsInput(new WorkspaceGroup());
@@ -368,10 +386,10 @@ public:
     WorkspaceGroup_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<WorkspaceGroup_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<WorkspaceGroup_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -379,16 +397,16 @@ public:
     WorkspaceGroup_const_sptr wsCastConst;
     WorkspaceGroup_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (WorkspaceGroup_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (WorkspaceGroup_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
   /**
-  * Test declaring an input workspace and retrieving as const_sptr or sptr
-  * (here Workspace rather than WorkspaceGroup)
-  */
+   * Test declaring an input workspace and retrieving as const_sptr or sptr
+   * (here Workspace rather than WorkspaceGroup)
+   */
   void testGetProperty_Workspace_const_sptr() {
     const std::string wsName = "InputWorkspace";
     Workspace_sptr wsInput(new WorkspaceTester());
@@ -400,10 +418,10 @@ public:
     Workspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<Workspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<Workspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -411,9 +429,9 @@ public:
     Workspace_const_sptr wsCastConst;
     Workspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (Workspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

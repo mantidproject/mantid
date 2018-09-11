@@ -12,13 +12,9 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <boost/random/linear_congruential.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
-#include <math.h>
+#include <random>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -34,9 +30,9 @@ using Mantid::Types::Event::TofEvent;
 
 namespace {
 /** Create an EventWorkspace containing fake data of single-crystal diffraction.
-*
-* @return EventWorkspace_sptr
-*/
+ *
+ * @return EventWorkspace_sptr
+ */
 EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   FacilityHelper::ScopedFacilities loadTESTFacility(
       "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
@@ -44,27 +40,6 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   int numPixels = 10000;
   int numBins = 16;
   double binDelta = 0.10;
-  boost::mt19937 rng;
-  boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
-  boost::variate_generator<boost::mt19937 &, boost::uniform_real<double>>
-      genUnit(rng, u2);
-  int randomSeed = 1;
-  rng.seed((unsigned int)(randomSeed));
-  size_t nd = 1;
-  // Make a random generator for each dimensions
-  typedef boost::variate_generator<boost::mt19937 &,
-                                   boost::uniform_real<double>> gen_t;
-  gen_t *gens[1];
-  for (size_t d = 0; d < nd; ++d) {
-    double min = -1.;
-    double max = 1.;
-    if (max <= min)
-      throw std::invalid_argument(
-          "UniformParams: min must be < max for all dimensions.");
-    boost::uniform_real<double> u(min, max); // Range
-    gen_t *gen = new gen_t(rng, u);
-    gens[d] = gen;
-  }
 
   EventWorkspace_sptr retVal(new EventWorkspace);
   retVal->initialize(numPixels, 1, 1);
@@ -84,7 +59,8 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   retVal->populateInstrumentParameters();
 
   DateAndTime run_start("2010-01-01T00:00:00");
-
+  std::mt19937 rng(1);
+  std::uniform_real_distribution<double> flat(-1.0, 1.0);
   for (int pix = 0; pix < numPixels; pix++) {
     EventList &el = retVal->getSpectrum(pix);
     el.setSpectrumNo(pix);
@@ -101,17 +77,11 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
         numEvents / std::sqrt((pix / 100 - 50.5) * (pix / 100 - 50.5) +
                               (pix % 100 - 50.5) * (pix % 100 - 50.5)));
     for (int i = 0; i < r; i++) {
-      el += TofEvent(
-          0.75 +
-              binDelta *
-                  (((*gens[0])() + (*gens[0])() + (*gens[0])()) * 2. - 3.),
-          run_start + double(i));
+      el += TofEvent(0.75 + binDelta *
+                                ((flat(rng) + flat(rng) + flat(rng)) * 2. - 3.),
+                     run_start + double(i));
     }
   }
-
-  /// Clean up the generators
-  for (size_t d = 0; d < nd; ++d)
-    delete gens[d];
 
   // Set all the histograms at once.
   retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
@@ -126,10 +96,10 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
 }
 
 /** Creates an instance of the NormaliseVanadium algorithm and sets its
-* properties.
-*
-* @return NormaliseVanadium alg
-*/
+ * properties.
+ *
+ * @return NormaliseVanadium alg
+ */
 IAlgorithm_sptr createAlgorithm() {
   int numEventsPer = 100;
   MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
@@ -144,12 +114,7 @@ IAlgorithm_sptr createAlgorithm() {
 
   return alg;
 }
-}
-
-class NormaliseVanadiumImpl : public NormaliseVanadium {
-public:
-  void exec() override { NormaliseVanadium::exec(); };
-};
+} // namespace
 
 class NormaliseVanadiumTest : public CxxTest::TestSuite {
 public:
@@ -159,7 +124,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test_MINITOPAZ() {
+  void test_MINITOPAZ() {
 
     IAlgorithm_sptr alg = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->execute();)
@@ -172,13 +137,8 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    TS_ASSERT_DELTA(ws->y(5050)[5], 7.7142, 0.01);
+    TS_ASSERT_DELTA(ws->y(5050)[5], 17, 0.0001);
     AnalysisDataService::Instance().remove("TOPAZ");
-  }
-
-  void test_MINITOPAZ() {
-    for (int i = 0; i < 1; i++)
-      do_test_MINITOPAZ();
   }
 };
 

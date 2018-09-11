@@ -1,10 +1,10 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/SymmetryElement.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
-#include <boost/python/scope.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/scope.hpp>
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
@@ -31,7 +31,7 @@ SymmetryElementRotation::RotationSense getRotationSense(SymmetryElement &self) {
     return SymmetryElementRotation::NoRotation;
   }
 }
-}
+} // namespace
 
 void export_SymmetryElement() {
   register_ptr_to_python<boost::shared_ptr<SymmetryElement>>();

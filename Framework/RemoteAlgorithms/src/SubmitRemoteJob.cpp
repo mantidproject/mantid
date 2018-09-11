@@ -1,16 +1,16 @@
 #include "MantidRemoteAlgorithms/SubmitRemoteJob.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/RemoteJobManager.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace RemoteAlgorithms {

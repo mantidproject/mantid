@@ -27,6 +27,9 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
     def category(self):
         return "DataHandling\\Nexus"
 
+    def seeAlso(self):
+        return [ "SaveNexus" ]
+
     def name(self):
         return "SaveNexusPD"
 

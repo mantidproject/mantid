@@ -210,6 +210,10 @@ found for each individual instrument in the reference document:
 
 How objects hold state in ISIS Powder
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning:: This is NOT relevant for PEARL. PEARL scientists should
+	     refer to :ref:`state_for_pearl_isis-powder-diffraction-ref`
+
 Additionally as the objects hold state we can set a parameter
 anywhere. For example on Polaris the ``mode`` parameter indicates
 the chopper state for this/these run(s). This can either be set 

@@ -19,11 +19,11 @@ namespace DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadSNSspec)
 
 /**
-* Return the confidence with with this algorithm can load the file
-* @param descriptor A descriptor for the file
-* @returns An integer specifying the confidence level. 0 indicates it will not
-* be used
-*/
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
 int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
   if (!descriptor.isAscii())
     return 0;
@@ -33,7 +33,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
   int confidence(0);
   size_t axiscols(0), datacols(0);
   std::string str;
-  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  using tokenizer = Mantid::Kernel::StringTokenizer;
   const std::string sep = " ";
   bool snsspec(false);
 

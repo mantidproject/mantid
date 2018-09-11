@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_EVALUATEFUNCTION_H_
 #define MANTID_CURVEFITTING_EVALUATEFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -38,6 +38,7 @@ class DLLExport EvaluateFunction : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override { return {"Fit"}; }
   const std::string summary() const override;
 
 private:

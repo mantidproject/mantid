@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_EQUALTOMD_H_
 #define MANTID_MDALGORITHMS_EQUALTOMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
 
 namespace Mantid {
@@ -37,6 +37,9 @@ class DLLExport EqualToMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"GreaterThanMD", "LessThanMD", "NotMD"};
+  }
 
 private:
   void initExtraProperties() override;

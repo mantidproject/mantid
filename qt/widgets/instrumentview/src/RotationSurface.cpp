@@ -1,18 +1,20 @@
 #include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
+#include <QApplication>
 #include <QCursor>
 #include <QMessageBox>
-#include <QApplication>
 
 using namespace Mantid::Geometry;
 
 namespace {
 // The logger object
 Mantid::Kernel::Logger g_log("RotationSurface");
-}
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,12 +26,11 @@ RotationSurface::RotationSurface(const InstrumentActor *rootActor,
       m_manual_u_correction(false) {}
 
 /**
-* Initialize the surface.
-*/
+ * Initialize the surface.
+ */
 void RotationSurface::init() {
   // the actor calls this->callback for each detector
   m_unwrappedDetectors.clear();
-  m_assemblies.clear();
 
   // if u-correction is applied manually then m_u_min and m_u_max
   // have valid values and have to be saved
@@ -40,12 +41,6 @@ void RotationSurface::init() {
   m_unwrappedDetectors.resize(ndet);
   if (ndet == 0)
     return;
-
-  // Pre-calculate all the detector positions (serial because
-  // I suspect the IComponent->getPos() method to not be properly thread safe)
-  m_instrActor->cacheDetPos();
-
-  Instrument_const_sptr inst = m_instrActor->getInstrument();
 
   // First detector defines the surface's x axis
   if (m_xaxis.nullVector()) {
@@ -78,8 +73,8 @@ void RotationSurface::init() {
   m_u_min = -DBL_MAX;
   m_u_max = DBL_MAX;
 
-  const auto &detectorInfo = m_instrActor->getWorkspace()->detectorInfo();
-
+  const auto &detectorInfo = m_instrActor->detectorInfo();
+  const auto &detIds = detectorInfo.detectorIDs();
   // Set if one of the threads in the following loop
   // throws an exception
   bool exceptionThrown = false;
@@ -91,36 +86,20 @@ void RotationSurface::init() {
                           if (!exceptionThrown)
                             try {
                               size_t i = size_t(ii);
-
-                              unsigned char color[3];
-                              Mantid::detid_t id = m_instrActor->getDetID(i);
-
                               try {
-                                auto &det =
-                                    m_instrActor->getDetectorByDetID(id);
-
-                                if (detectorInfo.isMonitor(
-                                        detectorInfo.indexOf(id)) ||
-                                    (id < 0)) {
-                                  // Not a detector or a monitor
-                                  // Make some blank, empty thing that won't
-                                  // draw
+                                if (detectorInfo.isMonitor(i) ||
+                                    detIds[i] < 0) {
                                   m_unwrappedDetectors[i] = UnwrappedDetector();
                                 } else {
                                   // A real detector.
-                                  m_instrActor->getColor(id).getUB3(&color[0]);
-
                                   // Position, relative to origin
-                                  // Mantid::Kernel::V3D pos = det->getPos() -
-                                  // m_pos;
-                                  Mantid::Kernel::V3D pos =
-                                      m_instrActor->getDetPos(i) - m_pos;
-
+                                  auto rpos = detectorInfo.position(i) - m_pos;
                                   // Create the unwrapped shape
-                                  UnwrappedDetector udet(&color[0], det);
+                                  UnwrappedDetector udet(
+                                      m_instrActor->getColor(i), i);
                                   // Calculate its position/size in UV
                                   // coordinates
-                                  this->calcUV(udet, pos);
+                                  this->calcUV(udet, rpos);
 
                                   m_unwrappedDetectors[i] = udet;
                                 } // is a real detector
@@ -209,7 +188,8 @@ void RotationSurface::findUVBounds() {
   m_v_max = -DBL_MAX;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.isValid())
+    if (udet.empty() ||
+        !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;
     if (udet.u < m_u_min)
       m_u_min = udet.u;
@@ -231,7 +211,7 @@ void RotationSurface::findAndCorrectUGap() {
   double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
   if (bin_width == 0.0) {
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
-    QMessageBox::warning(NULL, tr("MantidPLot - Instrument view error"),
+    QMessageBox::warning(nullptr, tr("MantidPLot - Instrument view error"),
                          tr("Failed to build unwrapped surface"));
     QApplication::restoreOverrideCursor();
     m_u_min = 0.0;
@@ -239,12 +219,11 @@ void RotationSurface::findAndCorrectUGap() {
     return;
   }
 
-  std::vector<UnwrappedDetector>::const_iterator ud =
-      m_unwrappedDetectors.begin();
-  for (; ud != m_unwrappedDetectors.end(); ++ud) {
-    if (!ud->isValid())
+  for (const auto &udet : m_unwrappedDetectors) {
+    if (udet.empty() ||
+        !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
       continue;
-    double u = ud->u;
+    double u = udet.u;
     int i = int((u - m_u_min) / bin_width);
     ubins[i] = true;
   }
@@ -278,22 +257,22 @@ void RotationSurface::findAndCorrectUGap() {
       m_u_max += period;
     }
 
-    std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
-    for (; ud != m_unwrappedDetectors.end(); ++ud) {
-      if (!ud->isValid())
+    for (auto &udet : m_unwrappedDetectors) {
+      if (udet.empty() ||
+          !m_instrActor->componentInfo().hasValidShape(udet.detIndex))
         continue;
-      double &u = ud->u;
+      double &u = udet.u;
       u = applyUCorrection(u);
     }
   }
 }
 
 /**
-* Apply a correction to u value of a projected point due to
-* change of u-scale by findAndCorrectUGap()
-* @param u :: u-coordinate to be corrected
-* @return :: Corrected u-coordinate.
-*/
+ * Apply a correction to u value of a projected point due to
+ * change of u-scale by findAndCorrectUGap()
+ * @param u :: u-coordinate to be corrected
+ * @return :: Corrected u-coordinate.
+ */
 double RotationSurface::applyUCorrection(double u) const {
   double period = uPeriod();
   if (period == 0.0)
@@ -310,9 +289,9 @@ double RotationSurface::applyUCorrection(double u) const {
 }
 
 /**
-* Set new value for the u-correction.
-* Correct all uv corrdinates of detectors.
-*/
+ * Set new value for the u-correction.
+ * Correct all uv corrdinates of detectors.
+ */
 void RotationSurface::setUCorrection(double umin, double umax) {
   m_u_min = umin;
   m_u_max = umax;
@@ -330,13 +309,13 @@ void RotationSurface::setUCorrection(double umin, double umax) {
 }
 
 /**
-* Set automatic u-correction
-*/
+ * Set automatic u-correction
+ */
 void RotationSurface::setAutomaticUCorrection() {
   m_manual_u_correction = false;
   updateDetectors();
   updateViewRectForUCorrection();
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -1,12 +1,14 @@
 #ifndef REMOTEJOBMANAGER_H
 #define REMOTEJOBMANAGER_H
 
+#include <iosfwd>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
-#include <iosfwd>
 
 #include <Poco/Net/HTTPResponse.h>
+
+#include "MantidKernel/DllConfig.h"
 
 // Forward declarations
 namespace Poco {
@@ -18,8 +20,8 @@ class HTTPCookie;
 class NameValueCollection;
 class HTTPClientSession;
 class HTTPRequest;
-}
-}
+} // namespace Net
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -32,7 +34,7 @@ public:
   // Name/Value pairs for POST data.  Note that the second string might be
   // binary, and might be
   // fairly large.  (If it were a JPG image for example...)
-  typedef std::map<std::string, std::string> PostDataMap;
+  using PostDataMap = std::map<std::string, std::string>;
 
   // Low level HTTP functions - GET, POST, etc...
   // It's up to the various algorithms to know what to do with these functions
@@ -88,10 +90,10 @@ private:
   std::vector<Poco::Net::HTTPCookie> m_cookies;
   Poco::Net::NameValueCollection getCookies();
 
-  Poco::Net::HTTPClientSession *
-      m_session; // Pointer to session object for all our HTTP requests
-                 // (Has to be a pointer because we allocate and delete
-                 // it multiple times)
+  Poco::Net::HTTPClientSession
+      *m_session; // Pointer to session object for all our HTTP requests
+                  // (Has to be a pointer because we allocate and delete
+                  // it multiple times)
   Poco::Net::HTTPResponse
       m_response; // Response object for all of our HTTP requests
 

@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADMCSTAS_H_
 #define MANTID_DATAHANDLING_LOADMCSTAS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/System.h"
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
@@ -43,6 +43,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadMcStasNexus", "LoadNexus"};
+  }
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file

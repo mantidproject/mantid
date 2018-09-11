@@ -16,6 +16,9 @@ class SortDetectors(PythonAlgorithm):
         """
         return "Utility\\Sorting"
 
+    def seeAlso(self):
+        return [ "SortByQVectors","SortXAxis" ]
+
     def name(self):
         """ Return name
         """

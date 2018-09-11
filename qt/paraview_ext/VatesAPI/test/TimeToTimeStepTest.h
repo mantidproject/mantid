@@ -1,8 +1,8 @@
 #ifndef TIME_TO_TIMESTEP_TEST_H_
 #define TIME_TO_TIMESTEP_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/TimeToTimeStep.h"
+#include <cxxtest/TestSuite.h>
 
 class TimeToTimeStepTest : public CxxTest::TestSuite {
 public:

@@ -58,7 +58,7 @@ struct MANTID_KERNEL_DLL DeltaEMode {
   /// Returns the string list of available modes
   static const std::vector<std::string> availableTypes();
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_DELTAEMODE_H_ */

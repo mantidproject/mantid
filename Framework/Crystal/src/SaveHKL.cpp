@@ -1,17 +1,17 @@
+#include "MantidCrystal/SaveHKL.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/SaveHKL.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Utils.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Strings.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Utils.h"
 #include <fstream>
 
 #include <Poco/File.h>
@@ -185,8 +185,8 @@ void SaveHKL::exec() {
   std::string bankPart = "?";
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t>> bankMap_t;
-  typedef std::map<int, bankMap_t> runMap_t;
+  using bankMap_t = std::map<int, std::vector<size_t>>;
+  using runMap_t = std::map<int, bankMap_t>;
   std::set<int> uniqueBanks;
   std::set<int> uniqueRuns;
   runMap_t runMap;
@@ -345,6 +345,7 @@ void SaveHKL::exec() {
           continue;
         }
         int run = p.getRunNumber();
+        int seqNum = p.getPeakNumber();
         int bank = 0;
         std::string bankName = p.getBankName();
         int nCols, nRows;
@@ -546,7 +547,7 @@ void SaveHKL::exec() {
 
           out << std::setw(6) << run;
 
-          out << std::setw(6) << wi + 1;
+          out << std::setw(6) << seqNum;
 
           out << std::setw(7) << std::fixed << std::setprecision(4)
               << transmission;
@@ -716,9 +717,9 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
     for (i = 1; i < spectra[id].size(); ++i)
       if (TOF < time[id][i])
         break;
-    spect = spectra[id][i - 1] +
-            (TOF - time[id][i - 1]) / (time[id][i] - time[id][i - 1]) *
-                (spectra[id][i] - spectra[id][i - 1]);
+    spect = spectra[id][i - 1] + (TOF - time[id][i - 1]) /
+                                     (time[id][i] - time[id][i - 1]) *
+                                     (spectra[id][i] - spectra[id][i - 1]);
   }
 
   return spect;
@@ -759,5 +760,5 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

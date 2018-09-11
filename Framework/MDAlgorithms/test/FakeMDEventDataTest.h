@@ -2,12 +2,12 @@
 #define MANTID_MDEVENTS_FAKEMDEVENTDATATEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/Run.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BinMD.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -192,8 +192,8 @@ public:
 
     TS_ASSERT_EQUALS(1000, inWS->getNEvents());
 
-    Mantid::detid_t expectedIDs[10] = {106, 255, 184, 238, 0,
-                                       32,  77,  255, 37,  60};
+    Mantid::detid_t expectedIDs[10] = {37,  235, 140, 72, 255,
+                                       137, 203, 133, 79, 192};
     auto it = inWS->createIterator();
     size_t counter(0);
     while (counter < 10) {
@@ -202,8 +202,6 @@ public:
       it->next();
       ++counter;
     }
-
-    delete it;
   }
 };
 

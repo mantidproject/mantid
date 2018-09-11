@@ -40,6 +40,9 @@ class ExportExperimentLog(PythonAlgorithm):
         """
         return 'DataHandling\\Logs'
 
+    def seeAlso(self):
+        return [ "ExportSampleLogsToCSVFile" ]
+
     def PyInit(self):
         """ Declaration of properties
         """

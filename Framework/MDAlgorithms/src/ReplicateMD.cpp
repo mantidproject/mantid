@@ -1,16 +1,16 @@
 #include "MantidMDAlgorithms/ReplicateMD.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/Utils.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <utility>
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Utils.h"
+#include <memory>
 #include <sstream>
 #include <string>
-#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -124,7 +124,7 @@ size_t linearIndexToLinearIndex(const size_t &nDimsShape,
 
   return targetIndex;
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReplicateMD)
@@ -339,9 +339,6 @@ void ReplicateMD::exec() {
 
   // Create the output workspace from the shape.
   MDHistoWorkspace_sptr outputWS(shapeWS->clone());
-  auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
-      dynamic_cast<MDHistoWorkspaceIterator *>(outputWS->createIterator()));
-
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
 
@@ -352,8 +349,7 @@ void ReplicateMD::exec() {
   for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
-    auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
-        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+    auto outIt = dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it].get());
 
     // Iterate over the output workspace
     do {

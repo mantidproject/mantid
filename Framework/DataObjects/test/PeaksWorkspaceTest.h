@@ -56,7 +56,7 @@ public:
 
   /** Check that the PeaksWorkspace build by buildPW() is correct */
   void checkPW(const PeaksWorkspace &pw) {
-    TS_ASSERT_EQUALS(pw.columnCount(), 17);
+    TS_ASSERT_EQUALS(pw.columnCount(), 18);
     TS_ASSERT_EQUALS(pw.rowCount(), 1);
     TS_ASSERT_EQUALS(pw.getNumberPeaks(), 1);
     if (pw.getNumberPeaks() != 1)
@@ -467,9 +467,9 @@ public:
   }
 
   /**
-  * Test declaring an input PeaksWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input PeaksWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     PeaksWorkspace_sptr wsInput(new PeaksWorkspace());
@@ -481,10 +481,10 @@ public:
     PeaksWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<PeaksWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<PeaksWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -492,16 +492,16 @@ public:
     PeaksWorkspace_const_sptr wsCastConst;
     PeaksWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (PeaksWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (PeaksWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
   /**
-  * Test declaring an input IPeaksWorkspace and retrieving it as const_sptr or
-  * sptr
-  */
+   * Test declaring an input IPeaksWorkspace and retrieving it as const_sptr or
+   * sptr
+   */
   void testGetProperty_IPeaksWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
     IPeaksWorkspace_sptr wsInput(new PeaksWorkspace());
@@ -513,10 +513,10 @@ public:
     IPeaksWorkspace_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<IPeaksWorkspace_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<IPeaksWorkspace_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -524,9 +524,9 @@ public:
     IPeaksWorkspace_const_sptr wsCastConst;
     IPeaksWorkspace_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (IPeaksWorkspace_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (IPeaksWorkspace_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 
@@ -600,8 +600,9 @@ private:
                                     // simplified relationship between qLab and
                                     // hkl.
 
-    return PeakParameters{minimalInstrument, goniometer, orientedLattice, hkl,
-                          qLab, qSample, detectorPos};
+    return PeakParameters{
+        minimalInstrument, goniometer, orientedLattice, hkl, qLab,
+        qSample,           detectorPos};
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {

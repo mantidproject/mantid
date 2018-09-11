@@ -1,16 +1,16 @@
 #ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACE_H_
 #define MANTID_DATAOBJECTS_MDHISTOWORKSPACE_H_
 
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDGeometry.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 
 // using Mantid::DataObjects::WorkspaceSingleValue;
 // using Mantid::API::MDNormalization;
@@ -19,19 +19,19 @@ namespace Mantid {
 namespace DataObjects {
 
 /** MDHistoWorkspace:
-*
-* An implementation of IMDWorkspace that contains a (normally dense) histogram
-* representation in multiple dimensions.
-*
-* This will be the result of a slice or rebin of another workspace, e.g. a
-* MDEventWorkspace. Typically it has 3 or 4 dimensions, but there is no
-* real limit to it.
-*
-* This will be used by ParaView e.g. for visualization.
-*
-* @author Janik Zikovsky
-* @date 2011-03-24 11:21:06.280523
-*/
+ *
+ * An implementation of IMDWorkspace that contains a (normally dense) histogram
+ * representation in multiple dimensions.
+ *
+ * This will be the result of a slice or rebin of another workspace, e.g. a
+ * MDEventWorkspace. Typically it has 3 or 4 dimensions, but there is no
+ * real limit to it.
+ *
+ * This will be used by ParaView e.g. for visualization.
+ *
+ * @author Janik Zikovsky
+ * @date 2011-03-24 11:21:06.280523
+ */
 class DLLExport MDHistoWorkspace : public API::IMDHistoWorkspace {
 public:
   MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
@@ -78,7 +78,7 @@ public:
   uint64_t getNPoints() const override { return m_length; }
   /// get number of contributed events
   uint64_t getNEvents() const override;
-  std::vector<Mantid::API::IMDIterator *> createIterators(
+  std::vector<std::unique_ptr<Mantid::API::IMDIterator>> createIterators(
       size_t suggestedNumCores = 1,
       Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
@@ -174,7 +174,8 @@ public:
   void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction *function,
                              signal_t signal, signal_t errorSquared);
 
-  coord_t *getVertexesArray(size_t linearIndex, size_t &numVertices) const;
+  std::unique_ptr<coord_t[]> getVertexesArray(size_t linearIndex,
+                                              size_t &numVertices) const;
 
   Kernel::VMD getCenter(size_t linearIndex) const override;
 
@@ -381,7 +382,7 @@ public:
    * @param index :: linear index into array
    * @return the signal (not normalized) at that index.
    */
-  signal_t &operator[](const size_t &index)override {
+  signal_t &operator[](const size_t &index) override {
     if (index < m_length)
       return m_signals[index];
     else
@@ -426,7 +427,7 @@ private:
   }
 
   MDHistoWorkspace *doCloneEmpty() const override {
-    return new MDHistoWorkspace(0);
+    return new MDHistoWorkspace(nullptr);
   }
 
   void makeSingleBinWithNaN(std::vector<coord_t> &x, std::vector<signal_t> &y,
@@ -499,12 +500,12 @@ protected:
 };
 
 /// A shared pointer to a MDHistoWorkspace
-typedef boost::shared_ptr<MDHistoWorkspace> MDHistoWorkspace_sptr;
+using MDHistoWorkspace_sptr = boost::shared_ptr<MDHistoWorkspace>;
 
 /// A shared pointer to a const MDHistoWorkspace
-typedef boost::shared_ptr<const MDHistoWorkspace> MDHistoWorkspace_const_sptr;
+using MDHistoWorkspace_const_sptr = boost::shared_ptr<const MDHistoWorkspace>;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACE_H_ */

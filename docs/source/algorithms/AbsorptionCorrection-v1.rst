@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -41,7 +41,7 @@ following absorption correction algorithms:
 :ref:`algm-MonteCarloAbsorption` (correction factors for
 a generic sample using a Monte Carlo instead of a numerical integration
 method),
-:ref:`algm-MultipleScatteringCylinderAbsorption`
+:ref:`algm-CarpenterSampleCorrection`
 & :ref:`algm-AnvredCorrection` (corrections in a spherical
 sample, using a method imported from ISAW). Also, HRPD users can use the
 :ref:`algm-HRPDSlabCanAbsorption` to add rudimentary

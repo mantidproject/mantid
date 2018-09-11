@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_SAVEDSPACEMAPTEST_H_
 #define MANTID_DATAHANDLING_SAVEDSPACEMAPTEST_H_
 
-#include "MantidDataHandling/SaveDspacemap.h"
-#include "MantidDataHandling/LoadDspacemap.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidDataHandling/LoadDspacemap.h"
+#include "MantidDataHandling/SaveDspacemap.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;

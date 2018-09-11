@@ -44,7 +44,7 @@ namespace API {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL FunctionDomain //: public Kernel::PropertyManager
-    {
+{
 public:
   /// Virtual destructor
   virtual ~FunctionDomain() = default;
@@ -56,7 +56,7 @@ public:
 };
 
 /// typedef for a shared pointer
-typedef boost::shared_ptr<FunctionDomain> FunctionDomain_sptr;
+using FunctionDomain_sptr = boost::shared_ptr<FunctionDomain>;
 
 } // namespace API
 } // namespace Mantid

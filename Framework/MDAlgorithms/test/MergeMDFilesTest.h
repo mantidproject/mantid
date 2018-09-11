@@ -1,11 +1,11 @@
 #ifndef MANTID_MDEVENTS_MERGEMDEWTEST_H_
 #define MANTID_MDEVENTS_MERGEMDEWTEST_H_
 
-#include "MantidMDAlgorithms/MergeMDFiles.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidMDAlgorithms/MergeMDFiles.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -102,11 +102,11 @@ public:
     }
 
     // Cleanup generated input files
-    for (size_t i = 0; i < inWorkspaces.size(); i++) {
-      if (inWorkspaces[i]->getBoxController()->isFileBacked()) {
+    for (auto &inWorkspace : inWorkspaces) {
+      if (inWorkspace->getBoxController()->isFileBacked()) {
         std::string fileName =
-            inWorkspaces[i]->getBoxController()->getFileIO()->getFileName();
-        inWorkspaces[i]->clearFileBacked(false);
+            inWorkspace->getBoxController()->getFileIO()->getFileName();
+        inWorkspace->clearFileBacked(false);
         Poco::File(fileName).remove();
       }
     }

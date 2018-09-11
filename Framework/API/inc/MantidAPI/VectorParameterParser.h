@@ -11,9 +11,9 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #ifndef Q_MOC_RUN
@@ -80,7 +80,7 @@ VectorParameterParser<VectorValueParameterType>::parseVectorParameter(
   boost::split(strs, sValue, boost::is_any_of(","));
 
   auto product = new VectorValueParameterType(strs.size());
-  typedef typename VectorValueParameterType::ValueType ValType;
+  using ValType = typename VectorValueParameterType::ValueType;
   ValType value = 0;
 
   for (size_t i = 0; i < strs.size(); i++) {
@@ -144,7 +144,7 @@ void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

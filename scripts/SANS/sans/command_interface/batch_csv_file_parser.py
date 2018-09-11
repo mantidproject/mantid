@@ -17,7 +17,8 @@ class BatchCsvParser(object):
                            "user_file": BatchReductionEntry.UserFile}
     batch_file_keywords_which_are_dropped = {"background_sans": None,
                                              "background_trans": None,
-                                             "background_direct_beam": None}
+                                             "background_direct_beam": None,
+                                             "":None}
 
     data_keys = {BatchReductionEntry.SampleScatter: BatchReductionEntry.SampleScatterPeriod,
                  BatchReductionEntry.SampleTransmission: BatchReductionEntry.SampleTransmissionPeriod,

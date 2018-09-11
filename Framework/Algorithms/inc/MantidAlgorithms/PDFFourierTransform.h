@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PDFFourierTransform_H_
 #define MANTID_ALGORITHMS_PDFFourierTransform_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,6 +22,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override;
+  const std::vector<std::string> seeAlso() const override { return {"FFT"}; }
   /// Algorithm's category for identification
   const std::string category() const override;
   /// @copydoc Algorithm::validateInputs()
@@ -40,7 +41,7 @@ private:
   double determineRho0();
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_PDFFourierTransform_H_ */

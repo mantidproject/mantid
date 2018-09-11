@@ -13,7 +13,7 @@ namespace API {
 /// Forward declaration for MatrixWorkspace.
 class MatrixWorkspace;
 class Progress;
-}
+} // namespace API
 namespace Algorithms {
 /** NormaliseByDetector : Normalises a workspace with respect to the detector
   efficiency function stored against components in the instrument parameters.
@@ -55,6 +55,7 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   const std::string category() const override;
 
 private:

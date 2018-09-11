@@ -1,13 +1,14 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/Strings.h"
+#include <boost/algorithm/string.hpp>
+#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include "MantidKernel/Quat.h"
 #include <vector>
-#include <boost/algorithm/string.hpp>
-#include <cstdlib>
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::toString;
@@ -15,8 +16,8 @@ using Mantid::Kernel::Strings::toString;
 namespace Mantid {
 namespace Geometry {
 using Kernel::DblMatrix;
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 Mantid::Kernel::Logger g_log("Goniometer");
 
@@ -75,7 +76,10 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 /// Set the new rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer.
-void Goniometer::setR(Kernel::DblMatrix rot) { R = rot; }
+void Goniometer::setR(Kernel::DblMatrix rot) {
+  R = rot;
+  initFromR = true;
+}
 
 /// Function reports if the goniometer is defined
 bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
@@ -178,6 +182,40 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
   recalculateR();
 }
 
+/**Calculate goniometer for rotation around y-asix for constant wavelength from
+ * Q Sample
+ * @param position :: Q Sample position in reciprocal space
+ * @param wavelength :: wavelength
+ */
+void Goniometer::calcFromQSampleAndWavelength(
+    const Mantid::Kernel::V3D &position, double wavelength) {
+  V3D Q(position);
+  if (Kernel::ConfigService::Instance().getString("Q.convention") ==
+      "Crystallography")
+    Q *= -1;
+  double wv = 2.0 * M_PI / wavelength;
+  double norm_q2 = Q.norm2();
+  double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
+  double phi = asin(-Q[1] / wv * sin(theta));       // [-pi/2, pi/2]
+  V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
+            wv * (1 - cos(theta)));
+
+  // Solve to find rotation matrix, assuming only rotation around y-axis
+  // A * X = B
+  Matrix<double> A({Q[0], Q[2], Q[2], -Q[0]}, 2, 2);
+  A.Invert();
+  std::vector<double> B{Q_lab[0], Q_lab[2]};
+  std::vector<double> X = A * B;
+  double rot = atan2(X[1], X[0]);
+
+  Matrix<double> goniometer(3, 3, true);
+  goniometer[0][0] = cos(rot);
+  goniometer[0][2] = sin(rot);
+  goniometer[2][0] = -sin(rot);
+  goniometer[2][2] = cos(rot);
+  setR(goniometer);
+}
+
 /// Get GoniometerAxis obfject using motor number
 /// @param axisnumber :: axis number (from 0)
 const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
@@ -217,15 +255,20 @@ void Goniometer::makeUniversalGoniometer() {
 }
 
 /** Return Euler angles acording to a convention
-* @param convention :: the convention used to calculate Euler Angles. The
-* UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
-*/
+ * @param convention :: the convention used to calculate Euler Angles. The
+ * UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
+ */
 std::vector<double> Goniometer::getEulerAngles(std::string convention) {
   return Quat(getR()).getEulerAngles(convention);
 }
 
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR() {
+  if (initFromR) {
+    g_log.warning() << "Goniometer was initialized from a rotation matrix. No "
+                    << "recalculation from motors will be done.\n";
+    return;
+  }
   std::vector<GoniometerAxis>::iterator it;
   std::vector<double> elements;
   Quat QGlobal, QCurrent;

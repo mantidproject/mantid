@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
+#include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -14,13 +15,13 @@ UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor,
 
 //------------------------------------------------------------------------------
 /** Convert physical position to UV projection
-*
-* @param pos :: position in 3D
-* @param u :: set to U
-* @param v :: set to V
-* @param uscale :: scaling for u direction
-* @param vscale :: scaling for v direction
-*/
+ *
+ * @param pos :: position in 3D
+ * @param u :: set to U
+ * @param v :: set to V
+ * @param uscale :: scaling for u direction
+ * @param vscale :: scaling for v direction
+ */
 void UnwrappedCylinder::project(const Mantid::Kernel::V3D &pos, double &u,
                                 double &v, double &uscale,
                                 double &vscale) const {
@@ -38,10 +39,11 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
                                Mantid::Kernel::Quat &R) const {
   // direction in which to look
   Mantid::Kernel::V3D eye;
+  const auto &componentInfo = m_instrActor->componentInfo();
   // rotation from the global axes to those where
   // the z axis points to the detector
   Mantid::Kernel::Quat R1;
-  eye = m_pos - udet.position;
+  eye = m_pos - componentInfo.position(udet.detIndex);
   if (!eye.nullVector()) {
     // eye must point towards the detector and be perpendicular to the
     // cylinder's axis
@@ -54,8 +56,8 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
     }
   }
   // add detector's own rotation
-  R = R1 * udet.rotation;
+  R = R1 * componentInfo.rotation(udet.detIndex);
 }
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -311,8 +311,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
   if (outputWS.getTofMin() < 0.) {
     std::stringstream msg;
     msg << "Something wrong with the calibration. Negative minimum d-spacing "
-           "created. d_min = " << outputWS.getTofMin() << " d_max "
-        << outputWS.getTofMax();
+           "created. d_min = "
+        << outputWS.getTofMin() << " d_max " << outputWS.getTofMax();
     g_log.warning(msg.str());
   }
   outputWS.clearMRU();

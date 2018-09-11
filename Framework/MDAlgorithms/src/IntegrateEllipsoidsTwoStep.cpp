@@ -1,28 +1,28 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/NearestNeighbours.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
+#include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <string>
 #include <tuple>
-#include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -240,7 +240,8 @@ void IntegrateEllipsoidsTwoStep::exec() {
   }
 
   std::vector<std::pair<boost::shared_ptr<const Geometry::PeakShape>,
-                        std::tuple<double, double, double>>> shapeLibrary;
+                        std::tuple<double, double, double>>>
+      shapeLibrary;
 
   // Integrate strong peaks
   for (const auto &item : strongPeaks) {
@@ -557,5 +558,5 @@ void IntegrateEllipsoidsTwoStep::runMaskDetectors(
     throw std::runtime_error(
         "MaskDetectors Child Algorithm has not executed successfully");
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

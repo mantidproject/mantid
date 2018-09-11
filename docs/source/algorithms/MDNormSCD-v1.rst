@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -17,6 +17,9 @@ MDBox. A brief introduction to the multi-dimensional data normalization can be f
 The algorithm :ref:`MDNormSCDPreprocessIncoherent
 <algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
 data for the Solid Angle and Flux workspaces.
+
+.. Note::
+    As of :ref:`Release 3.14.0 <v3.14.0>`, the algorithm can handle merged MD workspaces. Make sure all original MDEvent workspaces have the same dimensions
 
 Usage
 -----

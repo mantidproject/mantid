@@ -3,13 +3,16 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"
-#include <nexus/NeXusFile.hpp>
+
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 namespace Geometry {
 class DetectorInfo;
 class Instrument;
-}
+} // namespace Geometry
 
 namespace DataHandling {
 /**
@@ -69,6 +72,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadInstrument"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {

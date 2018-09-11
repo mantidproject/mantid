@@ -193,5 +193,5 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   m_OutWSWrapper->pWorkspace()->setCoordinateSystem(m_coordinateSystem);
 }
 
-} // endNamespace DataObjects
-} // endNamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid

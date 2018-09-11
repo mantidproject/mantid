@@ -4,13 +4,13 @@
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include "MDFittingTestHelpers.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MDFittingTestHelpers.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -47,7 +47,7 @@ public:
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
-    Mantid::API::IMDIterator *box = testWS->createIterator();
+    auto box = testWS->createIterator();
     FunctionDomainMD mdDomain(testWS, 0, box->getDataSize());
     FunctionValues output;
 
@@ -55,7 +55,6 @@ public:
     crossSecResolution->setWorkspace(testWS);
     // TODO: Needs a better input workspace
     // TS_ASSERT_THROWS_NOTHING(crossSecResolution->function(mdDomain, output));
-    delete box;
     delete crossSecResolution;
   }
 
@@ -131,7 +130,7 @@ private:
 
   /**
    * Creates a workspace with 4 dims, 3 boxes and 1 event per box = 81 events
-    * @return A pointer to the object
+   * @return A pointer to the object
    */
   Mantid::API::IMDWorkspace_sptr createTestMDWorkspace() {
     using namespace Mantid::DataObjects;

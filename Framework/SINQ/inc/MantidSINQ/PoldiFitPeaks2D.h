@@ -1,19 +1,19 @@
 #ifndef MANTID_SINQ_POLDICALCULATESPECTRUM2D_H_
 #define MANTID_SINQ_POLDICALCULATESPECTRUM2D_H_
 
-#include "MantidKernel/System.h"
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include "MantidKernel/Matrix.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
-#include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -56,6 +56,9 @@ class MANTID_SINQ_DLL PoldiFitPeaks2D : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"PoldiFitPeaks1D"};
+  }
   const std::string category() const override;
 
   const std::string summary() const override;

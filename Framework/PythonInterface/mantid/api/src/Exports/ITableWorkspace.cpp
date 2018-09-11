@@ -233,8 +233,8 @@ void setPlotType(ITableWorkspace &self, const bpl::object &column, int ptype) {
   } else {
     colptr = self.getColumn(extract<int>(column)());
   }
-
   colptr->setPlotType(ptype);
+  self.modified();
 }
 
 /**
@@ -452,6 +452,7 @@ void setCell(ITableWorkspace &self, const bpl::object &col_or_row,
   int row(-1);
   getCellLoc(self, col_or_row, row_or_col, column, row);
   setValue(column, row, value);
+  self.modified();
 }
 } // namespace
 
@@ -648,8 +649,9 @@ void export_ITableWorkspace() {
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.")
 
-      .def("setCell", &setCell, (arg("self"), arg("row_or_column"),
-                                 arg("column_or_row"), arg("value")),
+      .def("setCell", &setCell,
+           (arg("self"), arg("row_or_column"), arg("column_or_row"),
+            arg("value")),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
            "is interpreted as a column name.")

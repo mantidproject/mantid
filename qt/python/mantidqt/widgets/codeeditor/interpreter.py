@@ -91,7 +91,6 @@ class EditorIO(object):
 
 
 class PythonFileInterpreter(QWidget):
-
     sig_editor_modified = Signal(bool)
     sig_filename_modified = Signal(str)
 
@@ -165,7 +164,7 @@ class PythonFileInterpreter(QWidget):
         # set a margin large enough for sensible file sizes < 1000 lines
         # and the progress marker
         font_metrics = QFontMetrics(self.font())
-        editor.setMarginWidth(1, font_metrics.averageCharWidth()*3 + 12)
+        editor.setMarginWidth(1, font_metrics.averageCharWidth() * 3 + 20)
 
         # fill with content if supplied and set source filename
         if default_content is not None:
@@ -243,9 +242,9 @@ class PythonFileInterpreterPresenter(QObject):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, \
                                          task_error.stack
         if hasattr(exc_value, 'lineno'):
-            lineno = exc_value.lineno
+            lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
-            lineno = exc_stack[-1][1]
+            lineno = exc_stack[-1][1] + self._code_start_offset
         else:
             lineno = -1
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + '\n')

@@ -3,8 +3,8 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Track.h"
 #include <boost/unordered_map.hpp>
 #include <deque>
 #include <list>
@@ -19,7 +19,7 @@ class IComponent;
 struct Link;
 class Track;
 /// Typedef for object intersections
-typedef Track::LType Links;
+using Links = Track::LType;
 
 /**
 This class is responsible for tracking rays and accumulating a list of objects
@@ -80,7 +80,7 @@ private:
   /// Mutex to lock box cache
   mutable std::mutex m_mutex;
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif // MANTID_GEOMETRY_INSTRUMENTRAYTRACER_H_

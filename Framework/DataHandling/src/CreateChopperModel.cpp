@@ -10,10 +10,10 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChopperModel)
 
-using Kernel::Direction;
-using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 using Kernel::BoundedValidator;
+using Kernel::Direction;
 using Kernel::Direction;
 using Kernel::ListValidator;
 using Kernel::MandatoryValidator;

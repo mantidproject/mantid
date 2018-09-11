@@ -23,14 +23,14 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-#include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/object.hpp>
 #include <vector>
 
 namespace Mantid {
 namespace PythonInterface {
 namespace // <anonymous>
-    {
+{
 /**
  * Extract a C type from a Python object.
  */
@@ -59,7 +59,7 @@ template <> struct ExtractCType<std::string> {
   }
 };
 
-} // end <anonymous>
+} // namespace
 
 namespace Converters {
 /**
@@ -70,7 +70,7 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
   // Alias definitions
   using TypedVector = std::vector<DestElementType>;
 
-  PySequenceToVector(const boost::python::object &value) : m_obj(value.ptr()) {}
+  PySequenceToVector(const boost::python::object &value) : m_obj(value) {}
 
   /**
    * Converts the Python object to a C++ vector
@@ -78,7 +78,7 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
    * from the Python sequence
    */
   inline const TypedVector operator()() {
-    TypedVector cvector(PySequence_Size(m_obj));
+    TypedVector cvector(srcSize());
     copyTo(cvector);
     return cvector;
   }
@@ -90,27 +90,32 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
   inline void copyTo(TypedVector &dest) {
     throwIfSizeMismatched(dest);
     ExtractCType<DestElementType> elementConverter;
-    auto length = static_cast<size_t>(PySequence_Size(m_obj));
+    auto length = srcSize();
     for (size_t i = 0; i < length; ++i) {
-      dest[i] = elementConverter(PySequence_GetItem(m_obj, i));
+      dest[i] = elementConverter(PySequence_GetItem(ptr(), i));
     }
   }
 
 private:
+  inline PyObject *ptr() const { return m_obj.ptr(); }
+
+  inline std::size_t srcSize() const {
+    return static_cast<size_t>(PySequence_Size(ptr()));
+  }
+
   inline void throwIfSizeMismatched(const TypedVector &dest) const {
-    auto length = static_cast<size_t>(PySequence_Size(m_obj));
-    if (length != dest.size()) {
+    if (srcSize() != dest.size()) {
       throw std::invalid_argument(
           "Length mismatch between python list & C array. python=" +
-          std::to_string(length) + ", C=" + std::to_string(dest.size()));
+          std::to_string(srcSize()) + ", C=" + std::to_string(dest.size()));
     }
   }
 
   /// Python object to convert
-  PyObject *m_obj;
+  boost::python::object m_obj;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PYSEQUENCETOVECTORCONVERTER_H_ */

@@ -279,7 +279,7 @@ public:
 
   void test_time_t_support() {
     DateAndTime t;
-    std::time_t current = time(NULL);
+    std::time_t current = time(nullptr);
     t.set_from_time_t(current);
     //    if (cur.day() < 28) // Annoying bug at the end of a month
     { TS_ASSERT_EQUALS(current, t.to_time_t()); }

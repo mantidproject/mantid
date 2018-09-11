@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_CYCLICGROUP_H_
 #define MANTID_GEOMETRY_CYCLICGROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include <boost/shared_ptr.hpp>
 #include <set>
@@ -89,8 +89,8 @@ protected:
   generateAllOperations(const SymmetryOperation &operation) const;
 };
 
-typedef boost::shared_ptr<CyclicGroup> CyclicGroup_sptr;
-typedef boost::shared_ptr<const CyclicGroup> CyclicGroup_const_sptr;
+using CyclicGroup_sptr = boost::shared_ptr<CyclicGroup>;
+using CyclicGroup_const_sptr = boost::shared_ptr<const CyclicGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

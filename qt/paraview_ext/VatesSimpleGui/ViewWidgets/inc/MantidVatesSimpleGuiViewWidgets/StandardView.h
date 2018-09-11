@@ -1,9 +1,9 @@
 #ifndef STANDARDVIEW_H_
 #define STANDARDVIEW_H_
 
-#include "ui_StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_StandardView.h"
 
 #include <QMap>
 #include <QPointer>
@@ -144,8 +144,8 @@ private:
   static const std::string WireFrameRepresentation;
 };
 
-} // SimpleGui
-} // Vates
-} // Mantid
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // STANDARDVIEW_H_

@@ -13,5 +13,5 @@ operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) {
   owner.addWidget(m_widget);
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

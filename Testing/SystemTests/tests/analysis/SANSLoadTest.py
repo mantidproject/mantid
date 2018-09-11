@@ -17,6 +17,7 @@ from sans.common.constants import (CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG)
 from sans.test_helper.test_director import TestDirector
 from sans.common.enums import SANSFacility
 from sans.state.data import get_data_builder
+from sans.common.file_information import SANSFileInformationFactory
 
 
 def remove_all_workspaces_from_ads():
@@ -48,9 +49,11 @@ class SANSLoadFactoryTest(unittest.TestCase):
     def test_that_valid_file_information_does_not_raise(self):
         # Arrange
         load_factory = SANSLoadDataFactory()
+        file_information_factory = SANSFileInformationFactory()
 
         ws_name_sample = "SANS2D00022024"
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information = file_information_factory.create_sans_file_information(ws_name_sample)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter(ws_name_sample)
         data = data_builder.build()
 
@@ -77,7 +80,10 @@ class SANSLoadTest(unittest.TestCase):
                           can_scatter=None, can_trans=None, can_direct=None, calibration=None,
                           sample_scatter_period=None, sample_trans_period=None, sample_direct_period=None,
                           can_scatter_period=None, can_trans_period=None, can_direct_period=None):
-        data_builder = get_data_builder(SANSFacility.ISIS)
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(sample_scatter)
+
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
         data_builder.set_sample_scatter(sample_scatter)
 
         # Set the file names

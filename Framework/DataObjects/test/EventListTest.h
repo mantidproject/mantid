@@ -1,15 +1,15 @@
 #ifndef EVENTLISTTEST_H_
 #define EVENTLISTTEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
@@ -1434,7 +1434,7 @@ public:
   void test_convertUnitsViaTof_failures() {
     DummyUnit1 fromUnit;
     DummyUnit2 toUnit;
-    TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(NULL, NULL));
+    TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(nullptr, nullptr));
     // Not initalized
     TS_ASSERT_THROWS_ANYTHING(el.convertUnitsViaTof(&fromUnit, &toUnit));
   }
@@ -1826,9 +1826,8 @@ public:
     }
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;
@@ -1874,9 +1873,8 @@ public:
     }
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;
@@ -2312,9 +2310,8 @@ public:
     TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;
@@ -2385,9 +2382,8 @@ public:
     // TS_ASSERT_EQUALS(e7->getNumberEvents(), 1);
 
     // Clean the pointers
-    for (std::map<int, EventList *>::iterator im = outputs.begin();
-         im != outputs.end(); ++im) {
-      delete im->second;
+    for (auto &output : outputs) {
+      delete output.second;
     }
 
     return;

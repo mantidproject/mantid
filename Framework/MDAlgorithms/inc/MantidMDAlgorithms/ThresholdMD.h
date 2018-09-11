@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_THRESHOLDMD_H_
 #define MANTID_MDALGORITHMS_THRESHOLDMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -39,6 +39,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SmoothMD"};
+  }
   const std::string category() const override;
 
 private:

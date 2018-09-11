@@ -1,13 +1,13 @@
 #ifndef SPECTRUM_DATA_SOURCE_H
 #define SPECTRUM_DATA_SOURCE_H
 
-#include <boost/shared_ptr.hpp>
-#include <cstddef>
-#include <vector>
-#include <string>
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
+#include <boost/shared_ptr.hpp>
+#include <cstddef>
+#include <string>
+#include <vector>
 
 /**
     @class SpectrumDataSource
@@ -106,9 +106,9 @@ protected:
   size_t m_totalCols;
 };
 
-typedef boost::shared_ptr<SpectrumDataSource> SpectrumDataSource_sptr;
-typedef boost::shared_ptr<const SpectrumDataSource>
-    SpectrumDataSource_const_sptr;
+using SpectrumDataSource_sptr = boost::shared_ptr<SpectrumDataSource>;
+using SpectrumDataSource_const_sptr =
+    boost::shared_ptr<const SpectrumDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt

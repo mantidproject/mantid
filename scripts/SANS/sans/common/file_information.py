@@ -273,11 +273,11 @@ def convert_to_shape(shape_flag):
     :return: a shape object
     """
     if shape_flag == 1:
-        shape = SampleShape.CylinderAxisUp
+        shape = SampleShape.Cylinder
     elif shape_flag == 2:
-        shape = SampleShape.Cuboid
+        shape = SampleShape.FlatPlate
     elif shape_flag == 3:
-        shape = SampleShape.CylinderAxisAlong
+        shape = SampleShape.Disc
     else:
         shape = None
     return shape
@@ -407,11 +407,11 @@ def get_geometry_information_isis_nexus(file_name):
         thickness = float(sample[THICKNESS][0])
         shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
         if shape_as_string == CYLINDER:
-            shape = SampleShape.CylinderAxisUp
+            shape = SampleShape.Cylinder
         elif shape_as_string == FLAT_PLATE:
-            shape = SampleShape.Cuboid
+            shape = SampleShape.FlatPlate
         elif shape_as_string == DISC:
-            shape = SampleShape.CylinderAxisAlong
+            shape = SampleShape.Disc
         else:
             shape = None
     return height, width, thickness, shape
@@ -843,7 +843,7 @@ class SANSFileInformationISISNexus(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
+        self._shape = shape if shape is not None else SampleShape.Disc
 
     def get_file_name(self):
         return self._full_file_name
@@ -908,7 +908,7 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
+        self._shape = shape if shape is not None else SampleShape.Disc
 
     def get_file_name(self):
         return self._full_file_name
@@ -975,7 +975,7 @@ class SANSFileInformationRaw(SANSFileInformation):
         self._height = height if height is not None else 1.
         self._width = width if width is not None else 1.
         self._thickness = thickness if thickness is not None else 1.
-        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
+        self._shape = shape if shape is not None else SampleShape.Disc
 
     def get_file_name(self):
         return self._full_file_name
@@ -1022,8 +1022,11 @@ class SANSFileInformationFactory(object):
         super(SANSFileInformationFactory, self).__init__()
 
     def create_sans_file_information(self, file_name):
+        if not file_name:
+            raise ValueError("The filename given to FileInformation is empty")
 
         full_file_name = find_sans_file(file_name)
+
         if is_isis_nexus_single_period(full_file_name) or is_isis_nexus_multi_period(full_file_name):
             file_information = SANSFileInformationISISNexus(full_file_name)
         elif is_raw_single_period(full_file_name) or is_raw_multi_period(full_file_name):

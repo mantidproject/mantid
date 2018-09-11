@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_CLEARINSTRUMENTPARAMETERS_H_
 #define MANTID_ALGORITHMS_CLEARINSTRUMENTPARAMETERS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -40,6 +40,9 @@ public:
   const std::string summary() const override;
   const std::string category() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CopyInstrumentParameters"};
+  }
 
 private:
   void init() override;

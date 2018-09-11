@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <boost/lexical_cast.hpp>
 #include <cfloat>

@@ -150,12 +150,15 @@ class MaskingTablePresenter(object):
 
     def on_row_changed(self):
         row_index = self._view.get_current_row()
-        state = self.get_state(row_index)
+        state = self.get_state(row_index, file_lookup=False)
         if state:
             self.display_masking_information(state)
 
     def on_display(self):
         # Get the state information for the selected row.
+        # Disable the button
+        self._view.set_display_mask_button_to_processing()
+
         row_index = self._view.get_current_row()
         state = self.get_state(row_index)
 
@@ -163,9 +166,6 @@ class MaskingTablePresenter(object):
             self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
                                      "valid sample scatter entry has been provided in the selected row.")
             return
-
-        # Disable the button
-        self._view.set_display_mask_button_to_processing()
 
         # Run the task
         listener = MaskingTablePresenter.DisplayMaskListener(self)
@@ -181,6 +181,8 @@ class MaskingTablePresenter(object):
 
     def on_processing_error_masking_display(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
+        # Enable button
+        self._view.set_display_mask_button_to_normal()
 
     def on_processing_error(self, error):
         pass
@@ -222,8 +224,8 @@ class MaskingTablePresenter(object):
         self._view.update_rows([])
         self.display_masking_information(state=None)
 
-    def get_state(self, index):
-        return self._parent_presenter.get_state_for_row(index)
+    def get_state(self, index, file_lookup=True):
+        return self._parent_presenter.get_state_for_row(index, file_lookup=file_lookup)
 
     @staticmethod
     def _append_single_spectrum_mask(spectrum_mask, container, detector_name, prefix):

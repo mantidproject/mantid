@@ -62,7 +62,7 @@ public:
   void generateNextPoint() override;
   // Interface to boost distribution generators
   /// Result (output) value type.
-  typedef double result_type;
+  using result_type = double;
   /// Return the minimum value of the range
   virtual double min() const = 0;
   /// Return the maximum value of the range
@@ -70,7 +70,7 @@ public:
   /// Return next random value
   double operator()() { return nextValue(); }
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_PSEUDORANDOMNUMBERGENERATOR_H_ */

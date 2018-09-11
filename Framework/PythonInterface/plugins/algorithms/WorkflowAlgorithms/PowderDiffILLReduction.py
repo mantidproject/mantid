@@ -36,6 +36,9 @@ class PowderDiffILLReduction(PythonAlgorithm):
     def summary(self):
         return 'Performs powder diffraction data reduction for ILL instrument D20.'
 
+    def seeAlso(self):
+        return [ "PowderDiffILLDetScanReduction","PowderDiffILLDetEffCorr" ]
+
     def name(self):
         return "PowderDiffILLReduction"
 

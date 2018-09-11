@@ -24,13 +24,12 @@ component of a facility. A simple facility definition would be
 
     <?xml version="1.0" encoding="UTF-8"?>
     <facilities>
-
      <facility name="BrandNew" delimiter="_" zeropadding="8" FileExtensions=".nxs,.n*">
+      <timezone>UTC</timezone>
 
       <instrument name="ABCDEF"/>
 
      </facility>
-
     </facilities>
 
 which would define a facility called *BrandNew* with an instrument
@@ -42,6 +41,9 @@ called *ABCDEF*. The facilities attributes have the following meanings:
    padded to when constructing a file name;
 -  ``FileExtensions`` should list the extensions of the data files for
    the facility. The first is taken as the preferred extension.
+- ``timezone`` specifies what timezone the facility is in for use with
+  `pytz <https://pythonhosted.org/pytz/>`_. Valid timezones can be found
+  in python by looking at the list in ``pytz.all_timezones``
 
 An instrument can have further attributes which define properties of the
 that instrument rather than the facility as a whole, e.g.

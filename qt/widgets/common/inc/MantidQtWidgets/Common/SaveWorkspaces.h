@@ -1,14 +1,14 @@
 #ifndef MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 #define MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
 
-#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "DllOption.h"
-#include <QHash>
-#include <QSignalMapper>
-#include <QGridLayout>
-#include <QListWidget>
-#include <QLineEdit>
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include <QCheckBox>
+#include <QGridLayout>
+#include <QHash>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QSignalMapper>
 #include <QString>
 
 #include "MantidAPI/FrameworkManager.h"
@@ -76,7 +76,7 @@ private:
   QString m_sampleThickness;
 
   QHash<QCheckBox *const, QString> m_savFormats;
-  typedef QHash<QCheckBox *const, QString>::const_iterator SavFormatsConstIt;
+  using SavFormatsConstIt = QHash<QCheckBox *const, QString>::const_iterator;
 
   void setupLine1(QHBoxLayout *const lineOne);
   void setupLine2(QHBoxLayout *const lineTwo,
@@ -100,7 +100,7 @@ private slots:
   void setFileName(int row);
   void saveFileBrowse();
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_

@@ -110,9 +110,9 @@ void vax_to_local_ints(fort_int *ia, const fort_int *n) {
   (void)n; // Avoid compiler warning
 }
 
-/*
- * determine a few things we need to know to write machine independent data
- */
+  /*
+   * determine a few things we need to know to write machine independent data
+   */
 
 #ifndef __VMS
 #define IEEEFP 1
@@ -158,17 +158,17 @@ struct vax_single {
 
 /** What IEEE single precision floating point looks like on local machine */
 struct ieee_single {
-  unsigned int mantissa : 23; ///<mantissa
-  unsigned int exp : 8;       ///<Exponential
-  unsigned int sign : 1;      ///<sign
+  unsigned int mantissa : 23; ///< mantissa
+  unsigned int exp : 8;       ///< Exponential
+  unsigned int sign : 1;      ///< sign
 };
 
 /** Vax single precision floating point */
 struct vax_single {
-  unsigned int mantissa1 : 7;  ///<mantissa 1
-  unsigned int exp : 8;        ///<Exponential
-  unsigned int sign : 1;       ///<sign
-  unsigned int mantissa2 : 16; ///<mantissa 2
+  unsigned int mantissa1 : 7;  ///< mantissa 1
+  unsigned int exp : 8;        ///< Exponential
+  unsigned int sign : 1;       ///< sign
+  unsigned int mantissa2 : 16; ///< mantissa 2
 };
 
 #endif /* WORDS_BIGENDIAN */
@@ -178,8 +178,8 @@ struct vax_single {
 
 /// Structure holding the limits of s single
 static const struct sgl_limits_struct {
-  struct vax_single s;     ///<vax single struct
-  struct ieee_single ieee; ///<ieee single struct
+  struct vax_single s;     ///< vax single struct
+  struct ieee_single ieee; ///< ieee single struct
 } sgl_limits[2] = {
     {{0x7f, 0xff, 0x0, 0xffff}, /* Max Vax */
      {0x0, 0xff, 0x0}},         /* Max IEEE */
@@ -214,20 +214,21 @@ struct vax_double {
 
 /** What IEEE double precision floating point looks like */
 struct ieee_double {
-  unsigned int mantissa1 : 20; ///<mantissa 1
-  unsigned int exp : 11;       ///<exponential
-  unsigned int sign : 1;       ///<sign
-  unsigned int mantissa2 : 32; ///<mantissa 2
+  unsigned int mantissa1 : 20; ///< mantissa 1
+  unsigned int exp : 11;       ///< exponential
+  unsigned int sign : 1;       ///< sign
+  unsigned int mantissa2 : 32; ///< mantissa 2
 };
 
 /** Vax double precision floating point */
 struct vax_double {
-  unsigned int mantissa1 : 7;  ///<mantissa 1
-  unsigned int exp : 8;        ///<exponential
-  unsigned int sign : 1;       ///<sign
-  unsigned int mantissa2 : 16; ///<mantissa 2
-                               //	unsigned int	mantissa3 : 16;  ///<mantissa 3
-                               //	unsigned int	mantissa4 : 16;  ///<mantissa 4
+  unsigned int mantissa1 : 7; ///< mantissa 1
+  unsigned int exp : 8;       ///< exponential
+  unsigned int sign : 1;      ///< sign
+  unsigned int
+      mantissa2 : 16; ///< mantissa 2
+                      //	unsigned int	mantissa3 : 16;  ///<mantissa 3
+                      //	unsigned int	mantissa4 : 16;  ///<mantissa 4
 };
 
 #endif /* WORDS_BIGENDIAN */
@@ -343,8 +344,8 @@ static int ieee_to_vax_float(float *fp) {
 
 void vaxf_to_local(float *val, const int *n, int *errcode) {
 #if defined(VAXFP)
-#include <cvtdef>
 #include <cvt$routines>
+#include <cvtdef>
 #endif
   int i;
   *errcode = 0;
@@ -411,8 +412,8 @@ void ieee_double_to_local(double *val, const int *n, int *errcode) {
   (void)n; // Avoid compiler warning
   *errcode = 0;
 #elif defined(VAXFP)
-#include <cvtdef>
 #include <cvt$routines>
+#include <cvtdef>
   int i;
   *errcode = 0;
   for (i = 0; i < *n; i++) {
@@ -433,8 +434,8 @@ void local_to_ieee_float(float *val, const int *n, int *errcode) {
   (void)n; // Avoid compiler warning
   *errcode = 0;
 #elif defined(VAXFP)
-#include <cvtdef>
 #include <cvt$routines>
+#include <cvtdef>
   int i;
   *errcode = 0;
   for (i = 0; i < *n; i++) {

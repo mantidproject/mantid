@@ -26,40 +26,50 @@ public:
 
   ReflEventPresenterTest() {}
 
-  void test_get_slicing_values() {
+  void testDefaultGetSlicingValues() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
+    ReflEventPresenter presenter(&mockView, 0);
 
-    EXPECT_CALL(mockView, getTimeSlicingValues()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getUniformEvenTimeSlicingValues()).Times(Exactly(1));
     presenter.getTimeSlicingValues();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void test_get_slicing_type() {
+  void testGetSlicingType() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
-
-    EXPECT_CALL(mockView, getTimeSlicingType()).Times(Exactly(1));
-    presenter.getTimeSlicingType();
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    ReflEventPresenter presenter(&mockView, 0);
+    presenter.notifySliceTypeChanged(SliceType::LogValue);
+    TS_ASSERT_EQUALS("LogValue", presenter.getTimeSlicingType());
   }
 
   void testDisablesControlsOnReductionResumed() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
-    EXPECT_CALL(mockView, disableAll()).Times(AtLeast(1));
+    ReflEventPresenter presenter(&mockView, 0);
+    EXPECT_CALL(mockView, disableSliceType(_)).Times(AtLeast(1));
+    EXPECT_CALL(mockView, disableSliceTypeSelection()).Times(AtLeast(1));
 
     presenter.onReductionResumed();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testEnabledControlsOnReductionPaused() {
+  void testDisablesCorrectControlsOnReductionResumed() {
     MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
-    EXPECT_CALL(mockView, enableAll()).Times(AtLeast(1));
+    ReflEventPresenter presenter(&mockView, 0);
+    presenter.notifySliceTypeChanged(SliceType::Custom);
+    EXPECT_CALL(mockView, disableSliceType(SliceType::Custom))
+        .Times(AtLeast(1));
+
+    presenter.onReductionResumed();
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testEnablesControlsOnReductionPaused() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView, 0);
+    EXPECT_CALL(mockView, enableSliceType(SliceType::UniformEven))
+        .Times(AtLeast(1));
 
     presenter.onReductionPaused();
 

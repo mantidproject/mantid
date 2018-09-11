@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_ORMD_H_
 #define MANTID_MDALGORITHMS_ORMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
 
 namespace Mantid {
@@ -37,6 +37,9 @@ class DLLExport OrMD : public BooleanBinaryOperationMD {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"AndMD", "XorMD", "NotMD"};
+  }
 
 private:
   void execHistoHisto(

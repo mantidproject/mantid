@@ -1,26 +1,26 @@
 #ifndef MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
 #define MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAlgorithms/ClearMaskFlag.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ClearMaskFlag.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Algorithms::ClearMaskFlag;
-using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::MantidVecPtr;
 
 class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:

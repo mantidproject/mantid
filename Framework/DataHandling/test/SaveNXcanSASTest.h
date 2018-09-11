@@ -6,24 +6,24 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/SaveNXcanSAS.h"
-#include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "NXcanSASTestHelper.h"
 
-#include <Poco/File.h>
 #include <H5Cpp.h>
+#include <Poco/File.h>
 #include <sstream>
 
 namespace {
 const std::string sasclass = "canSAS_class";
 const std::string nxclass = "NX_class";
 const std::string suffix = "01";
-}
+} // namespace
 
 using Mantid::DataHandling::SaveNXcanSAS;
 using namespace Mantid::DataHandling::NXcanSAS;

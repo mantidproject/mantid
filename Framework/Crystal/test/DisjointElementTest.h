@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
 #define MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include "MantidCrystal/DisjointElement.h"
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::DisjointElement;
 
@@ -139,8 +139,8 @@ public:
   }
 
   void test_complex() {
-    typedef boost::shared_ptr<DisjointElement> DisjointElement_sptr;
-    typedef std::vector<DisjointElement_sptr> VecDisjointElement;
+    using DisjointElement_sptr = boost::shared_ptr<DisjointElement>;
+    using VecDisjointElement = std::vector<DisjointElement_sptr>;
 
     // Create elements from 0-9
     VecDisjointElement vecElements;

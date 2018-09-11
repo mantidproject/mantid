@@ -204,13 +204,13 @@ signal_t MatrixWorkspaceMDIterator::getError() const {
 
 //----------------------------------------------------------------------------------------------
 /// Return a list of vertexes defining the volume pointed to
-coord_t *
+std::unique_ptr<coord_t[]>
 MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/) const {
   throw std::runtime_error(
       "MatrixWorkspaceMDIterator::getVertexesArray() not implemented yet");
 }
 
-coord_t *
+std::unique_ptr<coord_t[]>
 MatrixWorkspaceMDIterator::getVertexesArray(size_t & /*numVertices*/,
                                             const size_t /*outDimensions*/,
                                             const bool * /*maskDim*/) const {
@@ -265,7 +265,7 @@ signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const {
  * Getter for the masked state of the workspace.
  * @returns True if the detector/detector-group at the workspace index is
  * masked, or if there is no detector at that index.
-*/
+ */
 bool MatrixWorkspaceMDIterator::getIsMasked() const {
   if (!m_spectrumInfo.hasDetectors(m_workspaceIndex)) {
     return true;
@@ -302,5 +302,5 @@ bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t) const {
       "MatrixWorkspaceMDIterator does not implement isWithinBounds");
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

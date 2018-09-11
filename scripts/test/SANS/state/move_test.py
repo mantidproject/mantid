@@ -5,8 +5,9 @@ import mantid
 from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
                              StateMoveDetector, get_move_builder)
 from sans.state.data import get_data_builder
-from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType)
+from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument)
 from state_test_helper import assert_validate_error, assert_raises_nothing
+from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -115,7 +116,8 @@ class StateMoveBuilderTest(unittest.TestCase):
     def test_that_state_for_loq_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LOQ74044")
         data_builder.set_sample_scatter_period(3)
         data_info = data_builder.build()
@@ -141,7 +143,8 @@ class StateMoveBuilderTest(unittest.TestCase):
     def test_that_state_for_sans2d_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22048)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("SANS2D00022048")
         data_info = data_builder.build()
 
@@ -162,7 +165,8 @@ class StateMoveBuilderTest(unittest.TestCase):
     def test_that_state_for_larmor_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        data_builder = get_data_builder(facility)
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.LARMOR, run_number=2260)
+        data_builder = get_data_builder(facility, file_information)
         data_builder.set_sample_scatter("LARMOR00002260")
         data_info = data_builder.build()
 

@@ -78,7 +78,7 @@ template <typename ElementType>
 class DLLExport TypedValidator<boost::shared_ptr<ElementType>>
     : public IValidator {
   /// Shared ptr type
-  typedef boost::shared_ptr<ElementType> ElementType_sptr;
+  using ElementType_sptr = boost::shared_ptr<ElementType>;
 
 protected:
   /// Override this function to check the validity of the type
@@ -161,8 +161,8 @@ private:
 template <typename T>
 const std::type_info &TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID =
     typeid(boost::shared_ptr<DataItem>);
-}
+} // namespace Kernel
 /// @endcond
-}
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_TYPEDVALIDATOR_H_ */

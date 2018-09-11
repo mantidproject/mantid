@@ -79,8 +79,6 @@ public:
   bool isVectorPointingAlongBeam(const Mantid::Kernel::V3D &v) const;
 
 private:
-  /// Common setup
-  void init();
   /// Disabled assignment
   ReferenceFrame &operator=(const ReferenceFrame &);
   /// Pointing up axis

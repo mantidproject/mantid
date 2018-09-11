@@ -1,25 +1,25 @@
+#include <algorithm>
+#include <cmath>
+#include <complex>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-#include <string>
-#include <complex>
-#include <cmath>
-#include <vector>
+#include <iterator>
 #include <list>
 #include <map>
+#include <sstream>
 #include <stack>
-#include <algorithm>
-#include <iterator>
+#include <string>
+#include <vector>
 
 #include "MantidGeometry/Math/Triple.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
-#include "MantidGeometry/Objects/Rules.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 

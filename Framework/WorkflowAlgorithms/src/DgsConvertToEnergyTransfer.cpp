@@ -583,5 +583,5 @@ void DgsConvertToEnergyTransfer::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Mantid
 } // namespace WorkflowAlgorithms
+} // namespace Mantid

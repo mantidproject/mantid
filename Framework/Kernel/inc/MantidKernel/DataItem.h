@@ -20,7 +20,7 @@ namespace Mantid {
 namespace API {
 class Algorithm;
 }
-}
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
@@ -92,9 +92,9 @@ private:
 };
 
 /// Shared pointer to a DataItem
-typedef boost::shared_ptr<DataItem> DataItem_sptr;
+using DataItem_sptr = boost::shared_ptr<DataItem>;
 /// Shared pointer to a const DataItem
-typedef boost::shared_ptr<const DataItem> DataItem_const_sptr;
+using DataItem_const_sptr = boost::shared_ptr<const DataItem>;
 
 } // namespace Kernel
 } // namespace Mantid

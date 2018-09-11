@@ -1,12 +1,12 @@
 #ifndef MANTID_MDEVENTS_SAVEMDEWTEST_H_
 #define MANTID_MDEVENTS_SAVEMDEWTEST_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -114,7 +114,7 @@ public:
       ev.setCenter(0, double(i) * 0.01 + 0.4);
       ws->addEvent(ev);
     }
-    ws->splitAllIfNeeded(NULL);
+    ws->splitAllIfNeeded(nullptr);
     ws->refreshCache();
     // Manually set the flag that the algo would set
     ws->setFileNeedsUpdating(true);

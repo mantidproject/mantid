@@ -1,14 +1,14 @@
 #ifndef LOADTEST_H_
 #define LOADTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/Load.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidDataHandling/Load.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/algorithm/string/predicate.hpp> //for ends_with
 
@@ -112,16 +112,16 @@ public:
     const char *loadraw_props[NUMPROPS] = {
         "SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
     // Basic load has no additional loader properties
-    for (size_t i = 0; i < NUMPROPS; ++i) {
-      TS_ASSERT_EQUALS(loader.existsProperty(loadraw_props[i]), false);
+    for (auto &loadraw_prop : loadraw_props) {
+      TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), false);
     }
     // After setting the file property, the algorithm should have aquired the
     // appropriate properties
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("Filename", "IRS38633.raw"));
     // Now
-    for (size_t i = 0; i < NUMPROPS; ++i) {
-      TS_ASSERT_EQUALS(loader.existsProperty(loadraw_props[i]), true);
+    for (auto &loadraw_prop : loadraw_props) {
+      TS_ASSERT_EQUALS(loader.existsProperty(loadraw_prop), true);
     }
 
     // Did it find the right loader

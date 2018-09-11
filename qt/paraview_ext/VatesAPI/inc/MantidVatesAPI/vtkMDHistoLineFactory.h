@@ -1,12 +1,12 @@
 #ifndef MANTID_VATES_VTK_MD_HISTO_LINE_FACTORY_H_
 #define MANTID_VATES_VTK_MD_HISTO_LINE_FACTORY_H_
 
-#include "MantidKernel/System.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "vtkUnstructuredGrid.h"
-#include "MantidVatesAPI/Normalization.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "vtkUnstructuredGrid.h"
 #include <vtkNew.h>
 
 namespace Mantid {
@@ -59,7 +59,7 @@ public:
 
   void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
-  typedef std::vector<UnstructuredPoint> Column;
+  using Column = std::vector<UnstructuredPoint>;
 
   std::string getFactoryTypeName() const override {
     return "vtkMDHistoLineFactory";
@@ -73,6 +73,6 @@ private:
 
   VisualNormalization m_normalizationOption;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

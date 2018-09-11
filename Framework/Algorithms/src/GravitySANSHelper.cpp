@@ -9,11 +9,11 @@ namespace Algorithms {
 using Kernel::V3D;
 
 /** sets up the object with workspace data and calculates cached values ready to
-* calculate gravitional effects across a spectrum
-*  @param spectrumInfo :: SpectrumInfo of workspace
-*  @param index :: Workspace index of spectrum to do the calculation for
-*  @param extraLength :: extra length for gravity correction
-*/
+ * calculate gravitional effects across a spectrum
+ *  @param spectrumInfo :: SpectrumInfo of workspace
+ *  @param index :: Workspace index of spectrum to do the calculation for
+ *  @param extraLength :: extra length for gravity correction
+ */
 GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo,
                                      const size_t index,
                                      const double extraLength)
@@ -31,21 +31,21 @@ GravitySANSHelper::GravitySANSHelper(const API::SpectrumInfo &spectrumInfo,
       gravitationalDrop(spectrumInfo.l2(index), 1e-10, extraLength);
 }
 /** Caclulates the sin of the that the neutron left the sample at, before the
-* effect of gravity
-*  @param wavAngstroms :: the neutrons' wave length in Angstoms
-*  @return the sin of theta
-*/
+ * effect of gravity
+ *  @param wavAngstroms :: the neutrons' wave length in Angstoms
+ *  @return the sin of theta
+ */
 double GravitySANSHelper::calcSinTheta(const double wavAngstroms) const {
   getDetLoc(wavAngstroms);
   return calcSinTheta();
 }
 /** Calculate the sins and cosins of angles as required to calculate Q is 2
-* dimensions
-*  @param[in] wavAngstroms wavelength of the neutron in Angstrom
-*  @param[out] xFrac the component in the x direction
-*  @param[out] yFrac component in the y direction
-*  @return sin of the angle theta to the detector
-*/
+ * dimensions
+ *  @param[in] wavAngstroms wavelength of the neutron in Angstrom
+ *  @param[out] xFrac the component in the x direction
+ *  @param[out] yFrac component in the y direction
+ *  @return sin of the angle theta to the detector
+ */
 double GravitySANSHelper::calcComponents(const double wavAngstroms,
                                          double &xFrac, double &yFrac) const {
   const V3D &detPos = getDetLoc(wavAngstroms);
@@ -56,11 +56,11 @@ double GravitySANSHelper::calcComponents(const double wavAngstroms,
   return calcSinTheta();
 }
 /** Finds the location of the detector the neutron would have entered if it
-* followed a
-*  straight line path from the sample
-*  @param wav :: wavelength of the neutron in Angstrom
-*  @return a reference to the cached location
-*/
+ * followed a
+ *  straight line path from the sample
+ *  @param wav :: wavelength of the neutron in Angstrom
+ *  @return a reference to the cached location
+ */
 const V3D &GravitySANSHelper::getDetLoc(const double wav) const {
   // Calculate the drop
   const double drop = gravitationalDrop(wav);
@@ -72,9 +72,9 @@ const V3D &GravitySANSHelper::getDetLoc(const double wav) const {
   return m_cachedLineOfSight;
 }
 /** getDetLoc must have been called before this is used to calculate the sin of
-* the angle
-*  @return the sin of theta
-*/
+ * the angle
+ *  @return the sin of theta
+ */
 double GravitySANSHelper::calcSinTheta() const {
   // This is 0.5*cos(2theta)
   double halfcosTheta = m_cachedLineOfSight.scalar_prod(m_beamLine) /
@@ -84,19 +84,17 @@ double GravitySANSHelper::calcSinTheta() const {
 }
 
 /**Calculates the distance a neutron coming from the sample will have deviated
-* from a
-*  straight tragetory before hitting a detector. If calling this function many
-* times
-*  for the same detector you can call this function once, with waveLength=1, and
-* use
-*  the fact drop is proportional to wave length squared .This function has no
-* knowledge
-*  of which axis is vertical for a given instrument
-*  @param l2 :: distance between sample and detector the neutron entered
-*  @param waveLength :: the neutrons wave length in meters
-*  @param extraLength :: additional length
-*  @return the deviation in meters
-*/
+ * from a
+ *  straight tragetory before hitting a detector. If calling this function many
+ * times
+ *  for the same detector you can call this function once, with waveLength=1,
+ * and use the fact drop is proportional to wave length squared .This function
+ * has no knowledge of which axis is vertical for a given instrument
+ *  @param l2 :: distance between sample and detector the neutron entered
+ *  @param waveLength :: the neutrons wave length in meters
+ *  @param extraLength :: additional length
+ *  @return the deviation in meters
+ */
 double GravitySANSHelper::gravitationalDrop(const double l2,
                                             const double waveLength,
                                             const double extraLength) const {
@@ -116,5 +114,5 @@ double GravitySANSHelper::gravitationalDrop(const double l2,
 
   return waveLength * waveLength * L2;
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

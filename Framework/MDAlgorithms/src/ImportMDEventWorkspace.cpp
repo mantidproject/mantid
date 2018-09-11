@@ -29,7 +29,7 @@ template <typename T> T convert(const std::string &str) {
   }
   return obj;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -305,5 +305,5 @@ void ImportMDEventWorkspace::exec() {
   this->setProperty("OutputWorkspace", outWs);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

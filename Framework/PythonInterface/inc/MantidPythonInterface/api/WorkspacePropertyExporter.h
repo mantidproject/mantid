@@ -22,11 +22,11 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/make_constructor.hpp>
+#include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include <boost/python/args.hpp>
+#include <boost/python/make_constructor.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -37,9 +37,9 @@ namespace PythonInterface {
  */
 template <typename WorkspaceType> struct WorkspacePropertyExporter {
   /// The export type
-  typedef Mantid::API::WorkspaceProperty<WorkspaceType> TypedWorkspaceProperty;
+  using TypedWorkspaceProperty = Mantid::API::WorkspaceProperty<WorkspaceType>;
   /// Shared pointer to Worksapce type
-  typedef boost::shared_ptr<WorkspaceType> WorkspaceType_sptr;
+  using WorkspaceType_sptr = boost::shared_ptr<WorkspaceType>;
 
   /**
    * Factory function to act as a constructor so that the validator can be
@@ -154,7 +154,7 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
         .add_property("value", &value);
   }
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_WORKSPACEPROPERTYMACRO_H_ */

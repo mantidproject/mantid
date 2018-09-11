@@ -68,7 +68,7 @@ private:
   QLineEdit *listSpLineEdit;
   QLineEdit *updateLineEdit;
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 
 #endif /* MANTIDQT_CUSTOM_DIALOGSLOADDAEDIALOG_H */

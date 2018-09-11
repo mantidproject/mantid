@@ -11,7 +11,7 @@ struct EventWorkspaceAccess {
                    (DataObjects::EventWorkspace::*)(const std::size_t)) &
                   DataObjects::EventWorkspace::getSpectrum)) eventList;
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_EVENTWORKSPACEACCESS_H_ */

@@ -1,16 +1,16 @@
 #include "ReflSettingsPresenter.h"
+#include "ExperimentOptionDefaults.h"
 #include "IReflSettingsTabPresenter.h"
 #include "IReflSettingsView.h"
+#include "InstrumentOptionDefaults.h"
+#include "InstrumentParameters.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
-#include "InstrumentParameters.h"
 #include "ValueOr.h"
-#include "ExperimentOptionDefaults.h"
-#include "InstrumentOptionDefaults.h"
 #include <type_traits>
 
 #include <boost/optional.hpp>
@@ -24,10 +24,10 @@ using namespace Mantid::Geometry;
 using namespace MantidQt::MantidWidgets::DataProcessor;
 
 /** Constructor
-* @param view :: The view we are handling
-* @param group :: The number of the group this settings presenter's settings
-* correspond to.
-*/
+ * @param view :: The view we are handling
+ * @param group :: The number of the group this settings presenter's settings
+ * correspond to.
+ */
 ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
     : m_view(view), m_group(group) {
 
@@ -36,13 +36,13 @@ ReflSettingsPresenter::ReflSettingsPresenter(IReflSettingsView *view, int group)
 }
 
 /** Destructor
-*/
+ */
 ReflSettingsPresenter::~ReflSettingsPresenter() {}
 
 /** Used by the view to tell the presenter something has changed
-*
-* @param flag :: A flag used by the view to tell the presenter what happened
-*/
+ *
+ * @param flag :: A flag used by the view to tell the presenter what happened
+ */
 void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
   switch (flag) {
   case IReflSettingsPresenter::ExpDefaultsFlag:
@@ -76,15 +76,22 @@ bool ReflSettingsPresenter::hasReductionTypes(
   return summationType == "SumInQ";
 }
 
+bool ReflSettingsPresenter::hasIncludePartialBinsOption(
+    const std::string &summationType) const {
+  return summationType == "SumInQ";
+}
+
 void ReflSettingsPresenter::handleSummationTypeChange() {
   auto summationType = m_view->getSummationType();
   m_view->setReductionTypeEnabled(hasReductionTypes(summationType));
+  m_view->setIncludePartialBinsEnabled(
+      hasIncludePartialBinsOption(summationType));
 }
 
 /** Sets the current instrument name and changes accessibility status of
-* the polarisation corrections option in the view accordingly
-* @param instName :: [input] The name of the instrument to set to
-*/
+ * the polarisation corrections option in the view accordingly
+ * @param instName :: [input] The name of the instrument to set to
+ */
 void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_currentInstrumentName = instName;
   bool enable = instName != "INTER" && instName != "SURF";
@@ -102,6 +109,19 @@ OptionsQMap ReflSettingsPresenter::transmissionOptionsMap() const {
                                    "WavelengthMin", "WavelengthMax",
                                    "I0MonitorIndex", "ProcessingInstructions"});
   return options;
+}
+
+/** Get the processing instructinons.
+ * @return : the processing instructions, or an empty string if not set
+ */
+QString ReflSettingsPresenter::getProcessingInstructions() const {
+  // the processing instructions are set in the per-angle options table. We
+  // only set them if there is a default (i.e. not linked to an angle).
+  auto options = getDefaultOptions();
+  if (options.count("ProcessingInstructions"))
+    return options["ProcessingInstructions"].toString();
+
+  return QString();
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'. Note that
@@ -129,6 +149,8 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     setTransmissionOption(options, "AnalysisMode", m_view->getAnalysisMode());
     setTransmissionOption(options, "StartOverlap", m_view->getStartOverlap());
     setTransmissionOption(options, "EndOverlap", m_view->getEndOverlap());
+    setTransmissionOption(options, "ProcessingInstructions",
+                          getProcessingInstructions());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -144,8 +166,6 @@ OptionsQMap ReflSettingsPresenter::getTransmissionOptions() const {
     setTransmissionOption(options, "WavelengthMax", m_view->getLambdaMax());
     setTransmissionOption(options, "I0MonitorIndex",
                           m_view->getI0MonitorIndex());
-    setTransmissionOption(options, "ProcessingInstructions",
-                          m_view->getProcessingInstructions());
   }
 
   return options;
@@ -200,15 +220,17 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
   if (m_view->experimentSettingsEnabled()) {
     addIfNotEmpty(options, "AnalysisMode", m_view->getAnalysisMode());
-    addIfNotEmpty(options, "CRho", m_view->getCRho());
-    addIfNotEmpty(options, "CAlpha", m_view->getCAlpha());
-    addIfNotEmpty(options, "CAp", m_view->getCAp());
-    addIfNotEmpty(options, "CPp", m_view->getCPp());
-    addIfNotEmpty(options, "PolarizationAnalysis",
-                  m_view->getPolarisationCorrections());
-    addIfNotEmpty(options, "ScaleFactor", m_view->getScaleFactor());
-    addIfNotEmpty(options, "MomentumTransferStep",
-                  m_view->getMomentumTransferStep());
+    auto const pa = m_view->getPolarisationCorrections();
+    addIfNotEmpty(options, "PolarizationAnalysis", pa);
+    if (pa == "PA") {
+      addIfNotEmpty(options, "Rho", m_view->getCRho());
+      addIfNotEmpty(options, "Alpha", m_view->getCAlpha());
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    } else if (pa == "PNR") {
+      addIfNotEmpty(options, "Ap", m_view->getCAp());
+      addIfNotEmpty(options, "Pp", m_view->getCPp());
+    }
     addIfNotEmpty(options, "StartOverlap", m_view->getStartOverlap());
     addIfNotEmpty(options, "EndOverlap", m_view->getEndOverlap());
 
@@ -218,16 +240,16 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     if (hasReductionTypes(summationType))
       addIfNotEmpty(options, "ReductionType", m_view->getReductionType());
 
-    // Add transmission runs. Note that the value here may be
-    // a comma-separated list of multiple values. We return the
-    // string as entered by the user because parsing is done in
-    // the data processor widget. Note also that we can only
-    // return default values here if provided; the user may also
-    // provide per-angle transmission runs, but these need to be
-    // requested on a per-row basis when we know what the angle is
-    // for that row.
-    auto transmissionRuns = getDefaultTransmissionRuns();
-    addIfNotEmpty(options, "FirstTransmissionRun", transmissionRuns);
+    setTransmissionOption(options, "Debug",
+                          asAlgorithmPropertyBool(m_view->getDebugOption()));
+    auto const includePartialBins =
+        asAlgorithmPropertyBool(m_view->getIncludePartialBins());
+    options["IncludePartialBins"] = includePartialBins;
+
+    auto defaultOptions = getDefaultOptions();
+    for (auto iter = defaultOptions.begin(); iter != defaultOptions.end();
+         ++iter)
+      addIfNotEmpty(options, iter.key(), iter.value().toString());
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -244,8 +266,6 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
     addIfNotEmpty(options, "WavelengthMin", m_view->getLambdaMin());
     addIfNotEmpty(options, "WavelengthMax", m_view->getLambdaMax());
     addIfNotEmpty(options, "I0MonitorIndex", m_view->getI0MonitorIndex());
-    addIfNotEmpty(options, "ProcessingInstructions",
-                  m_view->getProcessingInstructions());
     addIfNotEmpty(options, "DetectorCorrectionType",
                   m_view->getDetectorCorrectionType());
     auto const correctDetectors =
@@ -258,20 +278,20 @@ OptionsQMap ReflSettingsPresenter::getReductionOptions() const {
 
 /** Check whether per-angle transmission runs are specified
  */
-bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
+bool ReflSettingsPresenter::hasPerAngleOptions() const {
   // Check the setting is enabled
   if (!m_view->experimentSettingsEnabled())
     return false;
 
   // Check we have some entries in the table
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
   if (runsPerAngle.empty())
     return false;
 
   // To save confusion, we only allow EITHER a default transmission runs string
   // OR multiple per-angle strings. Therefore if there is a default set there
   // cannot be per-angle runs.
-  if (!getDefaultTransmissionRuns().empty())
+  if (!getDefaultOptions().empty())
     return false;
 
   // Ok, we have some entries and they're not defaults, so assume they're valid
@@ -281,17 +301,17 @@ bool ReflSettingsPresenter::hasPerAngleTransmissionRuns() const {
 }
 
 /** Gets the default user-specified transmission runs from the view. Default
-* runs are those without an angle (i.e. the angle is blank)
-* @return :: the transmission run(s) as a string of comma-separated values
-* @throws :: if the settings the user entered are invalid
-*/
-std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
+ * runs are those without an angle (i.e. the angle is blank)
+ * @return :: the transmission run(s) as a string of comma-separated values
+ * @throws :: if the settings the user entered are invalid
+ */
+OptionsQMap ReflSettingsPresenter::getDefaultOptions() const {
   if (!m_view->experimentSettingsEnabled())
-    return std::string();
+    return OptionsQMap();
 
   // Values are entered as a map of angle to transmission runs. Loop
   // through them, checking for the required angle
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
   auto iter = runsPerAngle.find("");
   if (iter != runsPerAngle.end()) {
     // We found an empty angle. Check there is only one entry in the
@@ -306,22 +326,22 @@ std::string ReflSettingsPresenter::getDefaultTransmissionRuns() const {
   }
 
   // If not found, return an empty string
-  return std::string();
+  return OptionsQMap();
 }
 
 /** Gets the user-specified transmission runs from the view
-* @param angleToFind :: the run angle that transmission runs are valid for
-* @return :: the transmission run(s) as a string of comma-separated values
-*/
-std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
-    const double angleToFind) const {
-  std::string result;
+ * @param angleToFind :: the run angle that transmission runs are valid for
+ * @return :: the transmission run(s) as a string of comma-separated values
+ */
+OptionsQMap
+ReflSettingsPresenter::getOptionsForAngle(const double angleToFind) const {
+  OptionsQMap result;
 
-  if (!hasPerAngleTransmissionRuns())
+  if (!hasPerAngleOptions())
     return result;
 
   // Values are entered as a map of angle to transmission runs
-  auto runsPerAngle = m_view->getTransmissionRuns();
+  auto runsPerAngle = m_view->getPerAngleOptions();
 
   // We use a generous tolerance to check the angle because values
   // from the log are not that accurate
@@ -331,7 +351,7 @@ std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
   double smallestDist = std::numeric_limits<double>::max();
   for (auto kvp : runsPerAngle) {
     auto angleStr = kvp.first;
-    auto runsStr = kvp.second;
+    auto values = kvp.second;
 
     // Convert the angle to a double
     double angle = 0.0;
@@ -346,7 +366,7 @@ std::string ReflSettingsPresenter::getTransmissionRunsForAngle(
     double dist = std::abs(angle - angleToFind);
     if (dist <= tolerance) {
       if (dist < smallestDist) {
-        result = runsStr;
+        result = values;
         smallestDist = dist;
       }
     }
@@ -369,19 +389,16 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
 }
 
 /** Creates hints for 'Stitch1DMany'
-*/
+ */
 void ReflSettingsPresenter::createStitchHints() {
-
-  // The algorithm
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Stitch1DMany");
-  // The blacklist
-  std::set<std::string> blacklist{"InputWorkspaces", "OutputWorkspace"};
-  AlgorithmHintStrategy strategy(alg, blacklist);
-
+  auto blacklist =
+      std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
+  AlgorithmHintStrategy strategy("Stitch1DMany", blacklist);
   m_view->createStitchHints(strategy.createHints());
 }
+
 /** Fills experiment settings with default values
-*/
+ */
 void ReflSettingsPresenter::getExpDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
@@ -404,13 +421,21 @@ void ReflSettingsPresenter::getExpDefaults() {
       value_or(parameters.optional<std::string>("ReductionType"),
                alg->getPropertyValue("ReductionType"));
 
+  defaults.IncludePartialBins =
+      value_or(parameters.optional<bool>("IncludePartialBins"),
+               alg->getProperty("IncludePartialBins"));
+
   defaults.CRho = value_or(parameters.optional<std::string>("crho"), "1");
   defaults.CAlpha = value_or(parameters.optional<std::string>("calpha"), "1");
   defaults.CAp = value_or(parameters.optional<std::string>("cAp"), "1");
   defaults.CPp = value_or(parameters.optional<std::string>("cPp"), "1");
 
+  defaults.MomentumTransferMin = parameters.optional<double>("Q min");
+  defaults.MomentumTransferMax = parameters.optional<double>("Q max");
   defaults.MomentumTransferStep = parameters.optional<double>("dQ/Q");
   defaults.ScaleFactor = parameters.optional<double>("Scale");
+  defaults.ProcessingInstructions =
+      parameters.optional<std::string>("ProcessingInstructions");
   defaults.StitchParams = parameters.optional<std::string>("Stitch1DMany");
 
   if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
@@ -434,7 +459,7 @@ void ReflSettingsPresenter::getExpDefaults() {
 }
 
 /** Fills instrument settings with default values
-*/
+ */
 void ReflSettingsPresenter::getInstDefaults() {
   auto alg = createReductionAlg();
   auto instrument = createEmptyInstrument(m_currentInstrumentName);
@@ -456,8 +481,6 @@ void ReflSettingsPresenter::getInstDefaults() {
   defaults.LambdaMax = parameters.mandatory<double>("LambdaMax");
   defaults.I0MonitorIndex =
       parameters.mandatoryVariant<int, double>("I0MonitorIndex");
-  defaults.ProcessingInstructions =
-      parameters.optional<std::string>("ProcessingInstructions");
   defaults.CorrectDetectors =
       value_or(parameters.optional<bool>("CorrectDetectors"),
                alg->getProperty("CorrectDetectors"));
@@ -474,16 +497,16 @@ void ReflSettingsPresenter::getInstDefaults() {
 }
 
 /** Generates and returns an instance of the ReflectometryReductionOneAuto
-* algorithm
-* @return :: ReflectometryReductionOneAuto algorithm
-*/
+ * algorithm
+ * @return :: ReflectometryReductionOneAuto algorithm
+ */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
   return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 }
 
 /** Creates and returns an example empty instrument given an instrument name
-* @return :: Empty instrument of a name
-*/
+ * @return :: Empty instrument of a name
+ */
 Instrument_const_sptr
 ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {
   IAlgorithm_sptr loadInst =
@@ -495,5 +518,5 @@ ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {
   MatrixWorkspace_const_sptr ws = loadInst->getProperty("OutputWorkspace");
   return ws->getInstrument();
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

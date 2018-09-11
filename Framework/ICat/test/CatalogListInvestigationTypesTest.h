@@ -1,17 +1,25 @@
 #ifndef LISTINVESTIGATIONTYPES_H_
 #define LISTINVESTIGATIONTYPES_H_
 
-#include <cxxtest/TestSuite.h>
+#include "ICatTestHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
 #include "MantidICat/CatalogListInvestigationTypes.h"
 #include "MantidICat/CatalogLogin.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
-#include "ICatTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::ICat;
 
 class CatalogListInvestigationTypesTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogListInvestigationTypesTest *createSuite() {
+    return new CatalogListInvestigationTypesTest();
+  }
+  static void destroySuite(CatalogListInvestigationTypesTest *suite) {
+    delete suite;
+  }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
 

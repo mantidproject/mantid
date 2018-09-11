@@ -1,12 +1,12 @@
 #include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 
-#include <QIntValidator>
-#include <QFileDialog>
 #include <QDir>
+#include <QFileDialog>
+#include <QIntValidator>
 #include <QSettings>
 
 using namespace Mantid::API;
@@ -127,7 +127,7 @@ formattedAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr dim) {
  @return : empty string.
 */
 QString
-    formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr) {
+formatNonAlignedDimensionInput(Mantid::Geometry::IMDDimension_const_sptr) {
   // Deliberately return an empty string here, because it's not obvious how the
   // basis vectors could be automatically formed.
   return QString("");
@@ -266,7 +266,7 @@ void SlicingAlgorithmDialog::buildDimensionInputs(const bool bForceForget) {
   } else {
     makeDimensionInputs("BasisVector",
                         this->ui.non_axis_aligned_layout->layout(),
-                        formatNonAlignedDimensionInput, useHistory);
+                        formatNonAlignedDimensionInput, Remember);
   }
 }
 
@@ -437,8 +437,8 @@ bool SlicingAlgorithmDialog::doAutoFillDimensions() const {
 }
 
 /**
-  *Customise the layout for usage in the Vsi
-  */
+ *Customise the layout for usage in the Vsi
+ */
 void SlicingAlgorithmDialog::customiseLayoutForVsi(
     std::string initialWorkspace) {
   // File back-end
@@ -520,5 +520,5 @@ void BinMDDialog::customiseInitLayout() {
 /*---------------------------------------------------------------------------------------------
 End BinMDDialog Methods
 ---------------------------------------------------------------------------------------------*/
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

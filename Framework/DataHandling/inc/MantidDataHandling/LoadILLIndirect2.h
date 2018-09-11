@@ -41,6 +41,9 @@ public:
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
 
   const std::string name() const override;
   /// Summary of algorithms purpose

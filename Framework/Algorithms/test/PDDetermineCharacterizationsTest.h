@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 using Mantid::Algorithms::PDDetermineCharacterizations;
@@ -213,8 +213,8 @@ public:
 
     const std::vector<Property *> &expectedProps = expected->getProperties();
 
-    for (std::size_t i = 0; i < expectedProps.size(); ++i) {
-      const std::string name = expectedProps[i]->name();
+    for (auto expectedProp : expectedProps) {
+      const std::string name = expectedProp->name();
       TS_ASSERT_EQUALS(expected->getPropertyValue(name),
                        observed->getPropertyValue(name));
     }

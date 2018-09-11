@@ -4,8 +4,8 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/VMD.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

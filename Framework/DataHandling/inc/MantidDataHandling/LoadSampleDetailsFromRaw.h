@@ -54,6 +54,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadRaw"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Raw;Sample";
@@ -65,7 +68,7 @@ private:
   /// Execution code
   void exec() override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /*MANTIDDATAHANDLING_LOADSAMPLEDETAILSFROMRAW_H_*/

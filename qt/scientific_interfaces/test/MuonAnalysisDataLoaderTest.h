@@ -5,6 +5,7 @@
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
+#include "../Muon/MuonAnalysisDataLoader.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -14,14 +15,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "../Muon/MuonAnalysisDataLoader.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
-using MantidQt::CustomInterfaces::Muon::LoadResult;
-using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
-using MantidQt::CustomInterfaces::Muon::PlotType;
-using MantidQt::CustomInterfaces::Muon::ItemType;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::TableRow;
 using Mantid::API::Workspace;
@@ -29,6 +23,12 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::TableWorkspace_sptr;
+using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
+using MantidQt::CustomInterfaces::Muon::ItemType;
+using MantidQt::CustomInterfaces::Muon::LoadResult;
+using MantidQt::CustomInterfaces::Muon::PlotType;
+using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 
 /// Inherits from class under test so that protected methods can be tested
 class TestDataLoader : public MuonAnalysisDataLoader {
@@ -258,13 +258,13 @@ public:
         analysed = loader.createAnalysisWorkspace(corrected, options));
     // test the output
     Mantid::MantidVec expectedOutput = {
-        -0.000584754, -0.037308, -0.0183329, 0.0250825, -0.0154756,
-        0.018308,     0.0116216, -0.019053,  0.0100087, -0.0393029};
+        -0.037308, -0.0183329, 0.0250825, -0.0154756, 0.018308,
+        0.0116216, -0.019053,  0.0100087, -0.0393029, -0.001696};
     const auto outputWS =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(analysed);
     TS_ASSERT(outputWS);
     const auto &data = outputWS->y(0);
-    TS_ASSERT_EQUALS(data.size(), 2000);
+    TS_ASSERT_EQUALS(data.size(), 1958);
     auto xData = outputWS->x(0);
     auto offset = std::distance(xData.begin(),
                                 std::lower_bound(xData.begin(), xData.end(),

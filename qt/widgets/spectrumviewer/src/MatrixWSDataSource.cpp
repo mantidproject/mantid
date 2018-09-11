@@ -8,20 +8,20 @@
 
 #include <QThread>
 
-#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
-#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
-#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
+#include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 
 using namespace Mantid;
 using namespace Kernel;
@@ -242,7 +242,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
   std::string x_label = "";
   Unit_sptr &old_unit = m_matWs->getAxis(0)->unit();
-  if (old_unit != 0) {
+  if (old_unit) {
     x_label = old_unit->caption();
     SVUtils::PushNameValue(x_label, 8, 3, x, list);
   }
@@ -262,7 +262,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
   try {
 
-    if (old_unit == 0) {
+    if (!old_unit) {
       g_log.debug("No UNITS on MatrixWorkspace X-axis");
       return list;
     }

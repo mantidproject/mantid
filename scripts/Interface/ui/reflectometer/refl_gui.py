@@ -21,6 +21,7 @@ from isis_reflectometry.combineMulti import *
 import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 from mantid import UsageService
+from mantid import logger
 
 from ui.reflectometer.ui_refl_window import Ui_windowRefl
 from ui.reflectometer.refl_save import Ui_SaveWindow
@@ -43,12 +44,19 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     labelStatus = None
     accMethod = None
 
+    def show_deprecation_warning(self):
+        logger.warning("""
+The ISIS Reflectometry (Old) interface has been deprecated and will be removed from Mantid in March 2019
+We recommend you use ISIS Reflectometry instead, If this is not possible contact the development team using the "Help->Ask For Help" menu.
+""")
+
     def __init__(self):
         """
         Initialise the interface
         """
         super(QtGui.QMainWindow, self).__init__()
         self.setupUi(self)
+        self.show_deprecation_warning()
         self.loading = False
         self.clip = QtGui.QApplication.clipboard()
         self.shown_cols = {}

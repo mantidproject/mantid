@@ -1,20 +1,23 @@
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadISISNexus2.h"
-#include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "LoadRaw/isisraw2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadISISNexus2.h"
+#include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include "LoadRaw/isisraw2.h"
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <nexus/NeXusException.hpp>
 #include <MantidKernel/StringTokenizer.h>
+
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/scoped_ptr.hpp>
+// clang-format off
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+// clang-format on
 
 #include <fstream>
 
@@ -25,8 +28,8 @@ DECLARE_ALGORITHM(UpdateInstrumentFromFile)
 
 using namespace Kernel;
 using namespace API;
-using Geometry::Instrument_sptr;
 using Geometry::IDetector_sptr;
+using Geometry::Instrument_sptr;
 using Kernel::V3D;
 
 /// Empty default constructor
@@ -62,16 +65,17 @@ void UpdateInstrumentFromFile::init() {
       "as identifying components to move to new positions. Any other names in "
       "the list"
       "are added as instrument parameters.");
-  declareProperty("SkipFirstNLines", 0, "If the file is ASCII, then skip this "
-                                        "number of lines at the start of the "
-                                        "file");
+  declareProperty("SkipFirstNLines", 0,
+                  "If the file is ASCII, then skip this "
+                  "number of lines at the start of the "
+                  "file");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
-*  the output workspace
-*
-*  @throw FileError Thrown if unable to parse XML file
-*/
+ *  the output workspace
+ *
+ *  @throw FileError Thrown if unable to parse XML file
+ */
 void UpdateInstrumentFromFile::exec() {
   // Retrieve the filename from the properties
   const std::string filename = getPropertyValue("Filename");
@@ -128,9 +132,9 @@ void UpdateInstrumentFromFile::exec() {
 }
 
 /**
-* Update the detector information from a raw file
-* @param filename :: The input filename
-*/
+ * Update the detector information from a raw file
+ * @param filename :: The input filename
+ */
 void UpdateInstrumentFromFile::updateFromRaw(const std::string &filename) {
   ISISRAW2 iraw;
   if (iraw.readFromFile(filename.c_str(), false) != 0) {
@@ -156,9 +160,9 @@ void UpdateInstrumentFromFile::updateFromRaw(const std::string &filename) {
 }
 
 /**
-* Update the detector information from a NeXus file
-* @param nxFile :: Handle to a NeXus file where the root group has been opened
-*/
+ * Update the detector information from a NeXus file
+ * @param nxFile :: Handle to a NeXus file where the root group has been opened
+ */
 void UpdateInstrumentFromFile::updateFromNeXus(::NeXus::File &nxFile) {
   try {
     nxFile.openGroup("isis_vms_compat", "IXvms");

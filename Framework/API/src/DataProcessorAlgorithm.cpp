@@ -1,18 +1,18 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileFinder.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"
-#include <stdexcept>
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/System.h"
 #include "Poco/Path.h"
+#include <stdexcept>
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
@@ -36,25 +36,25 @@ GenericDataProcessorAlgorithm<Base>::GenericDataProcessorAlgorithm()
 
 //---------------------------------------------------------------------------------------------
 /** Create a Child Algorithm.  A call to this method creates a child algorithm
-*object.
-*  Using this mechanism instead of creating daughter
-*  algorithms directly via the new operator is prefered since then
-*  the framework can take care of all of the necessary book-keeping.
-*
-*  Overrides the method of the same name in Algorithm to enable history tracking
-*by default.
-*
-*  @param name ::           The concrete algorithm class of the Child Algorithm
-*  @param startProgress ::  The percentage progress value of the overall
-*algorithm where this child algorithm starts
-*  @param endProgress ::    The percentage progress value of the overall
-*algorithm where this child algorithm ends
-*  @param enableLogging ::  Set to false to disable logging from the child
-*algorithm
-*  @param version ::        The version of the child algorithm to create. By
-*default gives the latest version.
-*  @return shared pointer to the newly created algorithm object
-*/
+ *object.
+ *  Using this mechanism instead of creating daughter
+ *  algorithms directly via the new operator is prefered since then
+ *  the framework can take care of all of the necessary book-keeping.
+ *
+ *  Overrides the method of the same name in Algorithm to enable history
+ *tracking by default.
+ *
+ *  @param name ::           The concrete algorithm class of the Child Algorithm
+ *  @param startProgress ::  The percentage progress value of the overall
+ *algorithm where this child algorithm starts
+ *  @param endProgress ::    The percentage progress value of the overall
+ *algorithm where this child algorithm ends
+ *  @param enableLogging ::  Set to false to disable logging from the child
+ *algorithm
+ *  @param version ::        The version of the child algorithm to create. By
+ *default gives the latest version.
+ *  @return shared pointer to the newly created algorithm object
+ */
 template <class Base>
 boost::shared_ptr<Algorithm>
 GenericDataProcessorAlgorithm<Base>::createChildAlgorithm(
@@ -591,5 +591,5 @@ template <>
 MANTID_API_DLL void
 GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

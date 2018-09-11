@@ -17,23 +17,23 @@ namespace Kernel {
 namespace {
 
 /**
-  * Read a value from the stream based on the template type
-  * @param stream The open stream on which to perform the read
-  * @param value An object of type T to fill with the value from the file
-  */
+ * Read a value from the stream based on the template type
+ * @param stream The open stream on which to perform the read
+ * @param value An object of type T to fill with the value from the file
+ */
 template <typename T>
 inline void readFromStream(std::istream &stream, T &value) {
   stream.read(reinterpret_cast<char *>(&value), sizeof(T));
 }
 
 /**
-  * Overload to read an array of values from the stream based on the template
-  * type for the element of the array.
-  * @param stream The open stream on which to perform the read
-  * @param value An object of type std::vector<T> to fill with the value from
-  * the file
-  * @param nvals The number of values to read
-  */
+ * Overload to read an array of values from the stream based on the template
+ * type for the element of the array.
+ * @param stream The open stream on which to perform the read
+ * @param value An object of type std::vector<T> to fill with the value from
+ * the file
+ * @param nvals The number of values to read
+ */
 template <typename T>
 inline void readFromStream(std::istream &stream, std::vector<T> &value,
                            size_t nvals) {
@@ -77,7 +77,7 @@ inline void readFromStream(std::istream &stream, Matrix<T> &value,
     }
   }
 }
-}
+} // namespace
 
 //------------------------------------------------------------------------------
 // Public members
@@ -95,6 +95,16 @@ BinaryStreamReader::BinaryStreamReader(std::istream &istrm)
     throw std::runtime_error(
         "BinaryStreamReader: Input stream is in a bad state. Cannot continue.");
   }
+}
+
+/**
+ * Read a int16_t from the stream
+ * @param value the value is stored in the given stream
+ * @return BinaryStreamReader&
+ */
+BinaryStreamReader &BinaryStreamReader::operator>>(int16_t &value) {
+  readFromStream(m_istrm, value);
+  return *this;
 }
 
 /**
@@ -152,6 +162,18 @@ BinaryStreamReader &BinaryStreamReader::operator>>(std::string &value) {
   // Now the value
   value.resize(static_cast<std::string::size_type>(length));
   m_istrm.read(const_cast<char *>(value.data()), static_cast<size_t>(length));
+  return *this;
+}
+
+/**
+ * Read an array of int16_t into the given vector.
+ * @param value The array to fille. Its size is increased if necessary
+ * @param nvals The number values to attempt to read from the stream
+ * @return A reference to the BinaryStreamReader object
+ */
+BinaryStreamReader &BinaryStreamReader::read(std::vector<int16_t> &value,
+                                             const size_t nvals) {
+  readFromStream(m_istrm, value, nvals);
   return *this;
 }
 
@@ -285,6 +307,14 @@ BinaryStreamReader::read(Kernel::Matrix<double> &value,
                          BinaryStreamReader::MatrixOrdering order) {
   readFromStream(m_istrm, value, shape, order);
   return *this;
+}
+
+/**
+ * Will move the stream to the given position
+ * @param nbytes The number of bytes from position 0 to move
+ */
+void BinaryStreamReader::moveStreamToPosition(size_t nbytes) {
+  m_istrm.seekg(nbytes, std::ios_base::beg);
 }
 
 } // namespace Kernel

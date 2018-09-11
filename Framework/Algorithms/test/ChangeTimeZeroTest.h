@@ -1,19 +1,19 @@
 #ifndef CHANGETIMEZEROTEST_H_
 #define CHANGETIMEZEROTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ChangeTimeZero.h"
 #include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateTimeValidator.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -153,7 +153,7 @@ MatrixWorkspace_sptr execute_change_time(MatrixWorkspace_sptr in_ws,
   auto out_ws = alg.getProperty("OutputWorkspace");
   return out_ws;
 }
-}
+} // namespace
 
 class ChangeTimeZeroTest : public CxxTest::TestSuite {
 public:
@@ -400,12 +400,12 @@ public:
   }
 
   /**
- * Test that the algorithm can handle a WorkspaceGroup as input without
- * crashing
- * We have to use the ADS to test WorkspaceGroups
- *
- * Need to use absolute time to test this part of validateInputs
- */
+   * Test that the algorithm can handle a WorkspaceGroup as input without
+   * crashing
+   * We have to use the ADS to test WorkspaceGroups
+   *
+   * Need to use absolute time to test this part of validateInputs
+   */
   void testValidateInputsWithWSGroup() {
     const double timeShiftDouble = 1000;
     DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;
@@ -487,11 +487,11 @@ private:
 
     auto logs = ws->run().getLogData();
     // Go over each log and check the times
-    for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-      if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(*iter)) {
-        do_check_time_series(*iter, timeShift);
-      } else if (dynamic_cast<PropertyWithValue<std::string> *>(*iter)) {
-        do_check_property_with_string_value(*iter, timeShift);
+    for (auto &log : logs) {
+      if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(log)) {
+        do_check_time_series(log, timeShift);
+      } else if (dynamic_cast<PropertyWithValue<std::string> *>(log)) {
+        do_check_property_with_string_value(log, timeShift);
       }
     }
 
@@ -509,8 +509,8 @@ private:
     // Iterator over all entries of the time series and check if they are
     // altered
     double secondCounter = timeShift;
-    for (auto it = times.begin(); it != times.end(); ++it) {
-      double secs = DateAndTime::secondsFromDuration(*it - m_startTime);
+    for (auto &time : times) {
+      double secs = DateAndTime::secondsFromDuration(time - m_startTime);
       TSM_ASSERT_DELTA("Time series logs should have shifted times.", secs,
                        secondCounter, 1e-5);
       ++secondCounter;

@@ -76,6 +76,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CalculateTransmissionBeamSpreader", "ApplyTransmissionCorrection"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "SANS;CorrectionFunctions\\TransmissionCorrections";
@@ -115,7 +118,7 @@ private:
                        API::MatrixWorkspace_sptr directWS, size_t index);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CALCULATETRANSMISSION_H_*/

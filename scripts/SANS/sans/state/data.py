@@ -10,7 +10,6 @@ from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerPa
 from sans.common.enums import (SANSInstrument, SANSFacility)
 import sans.common.constants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
-from sans.common.file_information import SANSFileInformationFactory
 from sans.state.automatic_setters import automatic_setters
 
 
@@ -106,10 +105,7 @@ class StateData(StateBase):
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
-def set_information_from_file(data_info):
-    file_name = data_info.sample_scatter
-    file_information_factory = SANSFileInformationFactory()
-    file_information = file_information_factory.create_sans_file_information(file_name)
+def set_information_from_file(data_info, file_information):
     instrument = file_information.get_instrument()
     facility = file_information.get_facility()
     run_number = file_information.get_run_number()
@@ -123,18 +119,20 @@ def set_information_from_file(data_info):
 
 class StateDataBuilder(object):
     @automatic_setters(StateData)
-    def __init__(self):
+    def __init__(self, file_information):
         super(StateDataBuilder, self).__init__()
         self.state = StateData()
+        self._file_information = file_information
 
     def build(self):
         # Make sure that the product is in a valid state, ie not incomplete
         self.state.validate()
 
-        # There are some elements which need to be read from the file. This is currently:
+        # There are some elements which need to be read from the file information object.
+        #  This is currently:
         # 1. instrument
         # 2. sample_scatter_run_number
-        set_information_from_file(self.state)
+        set_information_from_file(self.state, self._file_information)
 
         return copy.copy(self.state)
 
@@ -142,9 +140,9 @@ class StateDataBuilder(object):
 # ------------------------------------------
 # Factory method for StateDataBuilder
 # ------------------------------------------
-def get_data_builder(facility):
+def get_data_builder(facility, file_information=None):
     if facility is SANSFacility.ISIS:
-        return StateDataBuilder()
+        return StateDataBuilder(file_information)
     else:
         raise NotImplementedError("StateDataBuilder: The selected facility {0} does not seem"
                                   " to exist".format(str(facility)))

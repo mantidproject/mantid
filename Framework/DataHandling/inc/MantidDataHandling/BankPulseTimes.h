@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_BANKPULSETIMES_H
 #define MANTID_KERNEL_BANKPULSETIMES_H
 
-#include "MantidKernel/Property.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Property.h"
 
 #include <nexus/NeXusFile.hpp>
 

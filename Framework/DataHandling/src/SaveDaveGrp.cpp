@@ -116,5 +116,5 @@ void SaveDaveGrp::exec() {
   file.close();
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

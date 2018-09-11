@@ -32,6 +32,7 @@
 #endif
 
 #include "PythonScript.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "PythonScripting.h"
 
 #include "sipAPI_qti.h"
@@ -537,11 +538,13 @@ QVariant PythonScript::evaluateImpl() {
       qret = QVariant(PyFloat_AS_DOUBLE(number));
       Py_DECREF(number);
     }
+    GNU_DIAG_OFF("parentheses-equality")
   }
   /* bool */
   else if (PyBool_Check(pyret)) {
     qret = QVariant(pyret == Py_True);
   }
+  GNU_DIAG_ON("parentheses-equality")
   // could handle advanced types (such as PyList->QValueList) here if needed
   /* fallback: try to convert to (unicode) string */
   if (!qret.isValid()) {
@@ -556,7 +559,7 @@ QVariant PythonScript::evaluateImpl() {
     if (pystring) {
       PyObject *asUTF8 =
           PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring),
-                               (int)PyUnicode_GET_DATA_SIZE(pystring), NULL);
+                               (int)PyUnicode_GET_DATA_SIZE(pystring), nullptr);
       Py_DECREF(pystring);
       if (asUTF8) {
         qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
@@ -692,7 +695,7 @@ private:
   Q_DISABLE_COPY(InstallTrace)
   PyObject *m_sipWrappedScript;
 };
-}
+} // namespace
 
 /**
  * Executes the compiled code object. If NULL nothing happens

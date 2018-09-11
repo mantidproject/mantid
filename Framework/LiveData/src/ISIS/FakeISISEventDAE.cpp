@@ -7,14 +7,9 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Timer.h"
 
-#include <Poco/Net/TCPServer.h>
-#include <Poco/Net/StreamSocket.h>
 #include <Poco/ActiveResult.h>
-#include <Poco/Thread.h>
-
-#include <boost/random/uniform_int.hpp>
-
-#include <numeric>
+#include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/TCPServer.h>
 
 namespace Mantid {
 namespace LiveData {
@@ -26,10 +21,10 @@ using namespace API;
 
 namespace {
 /**
-* Implements Poco TCPServerConnection and does the actual job of interpreting
-* commands
-* from a client and sending data.
-*/
+ * Implements Poco TCPServerConnection and does the actual job of interpreting
+ * commands
+ * from a client and sending data.
+ */
 class TestServerConnection : public Poco::Net::TCPServerConnection {
   int m_nPeriods;
   int m_nSpectra;
@@ -39,9 +34,9 @@ class TestServerConnection : public Poco::Net::TCPServerConnection {
 
 public:
   /**
-  * Constructor. Defines the simulated dataset dimensions.
-  * @param soc :: A socket that provides communication with the client.
-  */
+   * Constructor. Defines the simulated dataset dimensions.
+   * @param soc :: A socket that provides communication with the client.
+   */
   TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec,
                        int rate, int nevents, boost::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper),
@@ -64,8 +59,8 @@ public:
   }
 
   /**
-  * Main method that sends out the data.
-  */
+   * Main method that sends out the data.
+   */
   void run() override {
     Kernel::MersenneTwister tof(0, 10000.0, 20000.0);
     Kernel::MersenneTwister spec(1234, 0.0, static_cast<double>(m_nSpectra));
@@ -117,8 +112,8 @@ public:
 };
 
 /**
-* Implements Poco TCPServerConnectionFactory
-*/
+ * Implements Poco TCPServerConnectionFactory
+ */
 class TestServerConnectionFactory
     : public Poco::Net::TCPServerConnectionFactory {
   int m_nPeriods; ///< Number of periods in the fake dataset
@@ -129,38 +124,27 @@ class TestServerConnectionFactory
 
 public:
   /**
-  * Constructor.
-  */
+   * Constructor.
+   */
   TestServerConnectionFactory(int nper, int nspec, int rate, int nevents,
                               boost::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper),
         m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents), m_prog(prog) {}
   /**
-  * The factory method.
-  * @param socket :: The socket.
-  */
+   * The factory method.
+   * @param socket :: The socket.
+   */
   Poco::Net::TCPServerConnection *
   createConnection(const Poco::Net::StreamSocket &socket) override {
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_Rate,
                                     m_nEvents, m_prog);
   }
 };
-} // end anonymous
-
-/// (Empty) Constructor
-FakeISISEventDAE::FakeISISEventDAE() : m_server(nullptr) {}
-
-/// Destructor
-FakeISISEventDAE::~FakeISISEventDAE() {
-  if (m_server) {
-    m_server->stop();
-    delete m_server;
-  }
-}
+} // namespace
 
 /**
-* Declare the algorithm properties
-*/
+ * Declare the algorithm properties
+ */
 void FakeISISEventDAE::init() {
   declareProperty(
       make_unique<PropertyWithValue<int>>("NPeriods", 1, Direction::Input),
@@ -181,8 +165,8 @@ void FakeISISEventDAE::init() {
 }
 
 /**
-* Execute the algorithm.
-*/
+ * Execute the algorithm.
+ */
 void FakeISISEventDAE::exec() {
   int nper = getProperty("NPeriods");
   int nspec = getProperty("NSpectra");
@@ -198,19 +182,18 @@ void FakeISISEventDAE::exec() {
   histoDAE->setProperty("NPeriods", nper);
   histoDAE->setProperty("NSpectra", nspec);
   histoDAE->setProperty("Port", port + 1);
-  Poco::ActiveResult<bool> histoDAEHandle = histoDAE->executeAsync();
+  auto histoDAEHandle = histoDAE->executeAsync();
 
   auto prog = boost::make_shared<Progress>(this, 0.0, 1.0, 100);
   prog->setNotifyStep(0);
   prog->report(0, "Waiting for client");
-  std::lock_guard<std::mutex> lock(m_mutex);
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
   socket.listen();
-  m_server = new Poco::Net::TCPServer(
+  Poco::Net::TCPServer server(
       TestServerConnectionFactory::Ptr(
           new TestServerConnectionFactory(nper, nspec, rate, nevents, prog)),
       socket);
-  m_server->start();
+  server.start();
   // Keep going until you get cancelled
   while (true) {
     try {
@@ -223,19 +206,13 @@ void FakeISISEventDAE::exec() {
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
   }
+  // It's most likely that we got here from a cancel request
+  // so calling prog->report after this point
+  // will generate another CancelException
   histoDAE->cancel();
   histoDAEHandle.wait();
-  if (m_server) {
-    m_server->stop();
-    m_server = nullptr;
-  }
+  server.stop();
   socket.close();
-
-  prog->report(90, "Closing ISIS event DAE");
-  histoDAE->setLogging(false); // hide the final closedown message to the log it
-                               // is confusing as it is a child alg.
-  histoDAE->cancel();
-  histoDAEHandle.wait();
 }
 
 } // namespace LiveData

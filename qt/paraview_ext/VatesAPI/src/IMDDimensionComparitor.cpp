@@ -55,5 +55,5 @@ bool IMDDimensionComparitor::istDimension(
     return false; // MDImages may have 1 dimension or more.
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_RINGPROFILE_H_
 #define MANTID_ALGORITHMS_RINGPROFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -47,6 +47,9 @@ public:
   }
 
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LineProfile"};
+  }
   const std::string category() const override {
     return "Transforms\\Grouping";
   };

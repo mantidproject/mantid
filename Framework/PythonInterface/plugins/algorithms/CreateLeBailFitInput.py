@@ -18,6 +18,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """
         return "Diffraction\\Fitting;Utility\\Workspaces"
 
+    def seeAlso(self):
+        return [ "LeBailFit" ]
+
     def name(self):
         """
         """

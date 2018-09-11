@@ -51,8 +51,8 @@ void SaveOpenGenieAscii::init() {
 }
 
 /**
-  * Writes an OpenGenie file in ASCII at the user specified path
-  */
+ * Writes an OpenGenie file in ASCII at the user specified path
+ */
 void SaveOpenGenieAscii::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -104,8 +104,8 @@ void SaveOpenGenieAscii::exec() {
 }
 
 /**
-  * Adds ENGINX specific attributes to the output buffer
-  */
+ * Adds ENGINX specific attributes to the output buffer
+ */
 void SaveOpenGenieAscii::applyEnginxFormat() {
   // Bank number
   determineEnginXBankId();
@@ -130,13 +130,13 @@ void SaveOpenGenieAscii::applyEnginxFormat() {
 }
 
 /**
-  * Calculates the delta in the logged (i.e. not data) X Y Z values by
-  * from the minimum and maximum logged values and stores them in the
-  * output buffer
-  *
-  * @param unit :: The axis of this delta (e.g. 'X' or 'Y') as a string
-  * @param values :: Pointer to the time series log values to process
-  */
+ * Calculates the delta in the logged (i.e. not data) X Y Z values by
+ * from the minimum and maximum logged values and stores them in the
+ * output buffer
+ *
+ * @param unit :: The axis of this delta (e.g. 'X' or 'Y') as a string
+ * @param values :: Pointer to the time series log values to process
+ */
 void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
                                            const Kernel::Property *values) {
   // Cast to TimeSeries so we can use the min/max value methods
@@ -150,13 +150,13 @@ void SaveOpenGenieAscii::calculateXYZDelta(const std::string &unit,
 }
 
 /**
-  * Converts histogram X/Y/E data into a compatible string representation
-  * and stores that into the output buffer
-  *
-  * @param histoData :: The histogram data to parse
-  * @param axis :: The axis being processed (i.e 'x') as a character
-  *
-  */
+ * Converts histogram X/Y/E data into a compatible string representation
+ * and stores that into the output buffer
+ *
+ * @param histoData :: The histogram data to parse
+ * @param axis :: The axis being processed (i.e 'x') as a character
+ *
+ */
 template <typename T>
 void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
                                               const char &axis) {
@@ -186,9 +186,9 @@ void SaveOpenGenieAscii::convertWorkspaceData(const T &histoData,
 }
 
 /**
-  * Determines the current bank from the ENGIN-X detector IDs
-  * and stores the value in the output buffer if successful
-  */
+ * Determines the current bank from the ENGIN-X detector IDs
+ * and stores the value in the output buffer if successful
+ */
 void SaveOpenGenieAscii::determineEnginXBankId() {
   const auto &detectorIds = m_inputWS->getSpectrum(0).getDetectorIDs();
   const std::string firstDetectorId = std::to_string(*detectorIds.cbegin());
@@ -207,11 +207,11 @@ void SaveOpenGenieAscii::determineEnginXBankId() {
 }
 
 /** Reads the sample logs and converts them from the log name in
-  * Mantid to the expected log name in OpenGenie. If any names are
-  * unrecognised they are skipped. If the logs have multiple values
-  * the time weighted average is taken instead. These strings are
-  * then stored in the output buffer.
-  */
+ * Mantid to the expected log name in OpenGenie. If any names are
+ * unrecognised they are skipped. If the logs have multiple values
+ * the time weighted average is taken instead. These strings are
+ * then stored in the output buffer.
+ */
 void SaveOpenGenieAscii::getSampleLogs() {
   // Maps Mantid log names -> Genie save file name / type
   const std::unordered_map<std::string, std::pair<std::string, std::string>>
@@ -261,10 +261,10 @@ void SaveOpenGenieAscii::getSampleLogs() {
 }
 
 /**
-  * Checks the workspace has data within it and that the number of spectra
-  * is 1. If there is more than one spectra this could indicate that an
-  * unfocused workspace is being saved.
-  */
+ * Checks the workspace has data within it and that the number of spectra
+ * is 1. If there is more than one spectra this could indicate that an
+ * unfocused workspace is being saved.
+ */
 void SaveOpenGenieAscii::inputValidation() {
   const size_t nSpectra = m_inputWS->getNumberHistograms();
 
@@ -280,12 +280,12 @@ void SaveOpenGenieAscii::inputValidation() {
 }
 
 /**
-  * Attempts to open the file at the user specified path. If this
-  * fails an exception is thrown else it returns the handle as a
-  * std stream.
-  *
-  * @return:: The opened file as an file stream
-  */
+ * Attempts to open the file at the user specified path. If this
+ * fails an exception is thrown else it returns the handle as a
+ * std stream.
+ *
+ * @return:: The opened file as an file stream
+ */
 void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
@@ -298,10 +298,10 @@ void SaveOpenGenieAscii::openFileStream(std::ofstream &stream) {
 }
 
 /**
-  * Stores the default value OpenGENIE uses in the fields that
-  * aren't present in the input workspace but are required to be present
-  * into the output buffer.
-  */
+ * Stores the default value OpenGENIE uses in the fields that
+ * aren't present in the input workspace but are required to be present
+ * into the output buffer.
+ */
 void SaveOpenGenieAscii::storeEmptyFields() {
   const std::string floatVal = "999.000";
   addToOutputBuffer("eurotherm", m_floatType, floatVal);
@@ -322,9 +322,9 @@ void SaveOpenGenieAscii::storeEmptyFields() {
 }
 
 /**
-  * Stores common workspace attributes such as title or run number
-  * in the output buffer
-  */
+ * Stores common workspace attributes such as title or run number
+ * in the output buffer
+ */
 void SaveOpenGenieAscii::storeWorkspaceInformation() {
   // Run Number
   addToOutputBuffer("run_no", m_stringType,
@@ -347,17 +347,18 @@ void SaveOpenGenieAscii::storeWorkspaceInformation() {
 }
 
 /** Sorts the output buffer alphabetically and writes out the output
-  * buffer to the stream specified. It also formats the values to
-  * a valid OpenGenie format
-  *
-  *  @param outfile :: File it will to write the formatted buffer to
-  */
+ * buffer to the stream specified. It also formats the values to
+ * a valid OpenGenie format
+ *
+ *  @param outfile :: File it will to write the formatted buffer to
+ */
 void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   // Write header
   if (getProperty("IncludeHeader")) {
     outfile << "# Open Genie ASCII File #\r\n"
             << "# label \r\n"
-            << "GXWorkspace\r\n" << m_outputVector.size() << "\r\n";
+            << "GXWorkspace\r\n"
+            << m_outputVector.size() << "\r\n";
   }
 
   // Sort by parameter name

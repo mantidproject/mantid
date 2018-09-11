@@ -56,9 +56,9 @@ void UserFunctionMD::setAttribute(const std::string &attName,
   }
 }
 /**
-* Defining function's parameters here, ie after the workspace is set and
-* the dimensions are known.
-*/
+ * Defining function's parameters here, ie after the workspace is set and
+ * the dimensions are known.
+ */
 void UserFunctionMD::initDimensions() {
   // if (!getWorkspace()) return;
   if (m_vars.size() > 4) {
@@ -124,8 +124,8 @@ double *UserFunctionMD::AddVariable(const char *varName, void *pufun) {
 }
 
 /**
-* Initializes the mu::Parser.
-*/
+ * Initializes the mu::Parser.
+ */
 void UserFunctionMD::setFormula() {
   // variables must be already defined
   if (m_vars.empty())

@@ -9,7 +9,7 @@
 #pragma warning(disable : 4100)
 #endif
 
-typedef int fort_int;
+using fort_int = int;
 
 unsigned short local_to_vax_short(const unsigned short *s);
 unsigned short vax_to_local_short(const unsigned short *s);

@@ -1,11 +1,11 @@
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 #include <numeric>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 
 using std::size_t;
 
@@ -18,21 +18,38 @@ namespace VectorHelper {
  *,x_n-1,delta_n-1,x_n]
  *  @param[out] xnew   The newly created axis resulting from the input params
  *  @param[in] resize_xnew If false then the xnew vector is NOT resized. Useful
- *if on the number of bins needs determining. (Default=True)
+ *if the number of bins needs determining. (Default=True)
  *  @param[in] full_bins_only If true, bins of the size less than the current
- *step are not included
+ *step are not included. (Default=True)
+ *  @param[in] xMinHint x_1 if params contains only delta_1.
+ *  @param[in] xMaxHint x_2 if params contains only delta_1.
  *  @return The number of bin boundaries in the new axis
  **/
 int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
                                         std::vector<double> &xnew,
                                         const bool resize_xnew,
-                                        const bool full_bins_only) {
-  double xs;
+                                        const bool full_bins_only,
+                                        const double xMinHint,
+                                        const double xMaxHint) {
+  std::vector<double> tmp;
+  const std::vector<double> &fullParams = [&params, &tmp, xMinHint,
+                                           xMaxHint]() {
+    if (params.size() == 1) {
+      if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
+        throw std::runtime_error("createAxisFromRebinParams: xMinHint and "
+                                 "xMaxHint must be supplied if params "
+                                 "contains only the bin width.");
+      }
+      tmp.resize(3);
+      tmp = {xMinHint, params.front(), xMaxHint};
+      return tmp;
+    }
+    return params;
+  }();
   int ibound(2), istep(1), inew(1);
-  int ibounds = static_cast<int>(
-      params.size()); // highest index in params array containing a bin boundary
+  // highest index in params array containing a bin boundary
+  int ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
-  xnew.clear();
 
   // This coefficitent represents the maximum difference between the size of the
   // last bin and all
@@ -45,24 +62,30 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
     lastBinCoef = 1.0;
   }
 
-  double xcurr = params[0];
+  double xs = 0;
+  double xcurr = fullParams[0];
+
+  xnew.clear();
   if (resize_xnew)
     xnew.push_back(xcurr);
 
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
-    if (params[istep] >= 0.0)
-      xs = params[istep];
+    if (fullParams[istep] >= 0.0)
+      xs = fullParams[istep];
     else
-      xs = xcurr * fabs(params[istep]);
+      xs = xcurr * fabs(fullParams[istep]);
 
     if (fabs(xs) == 0.0) {
       // Someone gave a 0-sized step! What a dope.
       throw std::runtime_error(
           "Invalid binning step provided! Can't creating binning axis.");
+    } else if (!std::isfinite(xs)) {
+      throw std::runtime_error(
+          "An infinite or NaN value was found in the binning parameters.");
     }
 
-    if ((xcurr + xs * (1.0 + lastBinCoef)) <= params[ibound]) {
+    if ((xcurr + xs * (1.0 + lastBinCoef)) <= fullParams[ibound]) {
       // If we can still fit current bin _plus_ specified portion of a last bin,
       // continue
       xcurr += xs;
@@ -76,7 +99,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
       else
         // For non full_bins_only, finish by adding as mush as is left from the
         // range
-        xcurr = params[ibound];
+        xcurr = fullParams[ibound];
 
       ibound += 2;
       istep += 2;
@@ -84,14 +107,6 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
     if (resize_xnew)
       xnew.push_back(xcurr);
     inew++;
-
-    //    if (xnew.size() > 10000000)
-    //    {
-    //      //Max out at 1 million bins
-    //      throw std::runtime_error("Over ten million binning steps created.
-    //      Exiting to avoid infinite loops.");
-    //      return inew;
-    //    }
   }
 
   return inew;
@@ -123,12 +138,12 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
   // Make sure y and e vectors are of correct sizes
   const size_t size_xold = xold.size();
   if (size_xold != (yold.size() + 1) || size_xold != (eold.size() + 1))
-    throw std::runtime_error(
-        "rebin: y and error vectors should be of same size & 1 shorter than x");
+    throw std::runtime_error("rebin: old y and error vectors should be of same "
+                             "size & 1 shorter than x");
   const size_t size_xnew = xnew.size();
   if (size_xnew != (ynew.size() + 1) || size_xnew != (enew.size() + 1))
-    throw std::runtime_error(
-        "rebin: y and error vectors should be of same size & 1 shorter than x");
+    throw std::runtime_error("rebin: new y and error vectors should be of same "
+                             "size & 1 shorter than x");
 
   size_t size_yold = yold.size();
   size_t size_ynew = ynew.size();
@@ -211,7 +226,7 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
       }
     } else {
       // non-distribution, just square root final error value
-      typedef double (*pf)(double);
+      using pf = double (*)(double);
       pf uf = std::sqrt;
       std::transform(enew.begin(), enew.end(), enew.begin(), uf);
     }
@@ -322,7 +337,7 @@ void rebinHistogram(const std::vector<double> &xold,
                  // (should be done externally)
   {
     // Now take the root-square of the errors
-    typedef double (*pf)(double);
+    using pf = double (*)(double);
     pf uf = std::sqrt;
     std::transform(enew.begin(), enew.end(), enew.begin(), uf);
   }
@@ -333,7 +348,7 @@ void rebinHistogram(const std::vector<double> &xold,
  * Convert the given set of bin boundaries into bin centre values
  * @param bin_edges :: A vector of values specifying bin boundaries
  * @param bin_centres :: An output vector of bin centre values.
-*/
+ */
 void convertToBinCentre(const std::vector<double> &bin_edges,
                         std::vector<double> &bin_centres) {
   const std::vector<double>::size_type npoints = bin_edges.size();
@@ -434,10 +449,9 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
         return n - 1;
       }
       size_t binIndex = std::distance(bin_centers.begin(), it);
-      if (binIndex > 0 &&
-          value <
-              bin_centers[binIndex - 1] +
-                  0.5 * (bin_centers[binIndex] - bin_centers[binIndex - 1])) {
+      if (binIndex > 0 && value < bin_centers[binIndex - 1] +
+                                      0.5 * (bin_centers[binIndex] -
+                                             bin_centers[binIndex - 1])) {
         binIndex--;
       }
       return binIndex;
@@ -479,9 +493,9 @@ size_t indexOfValueFromEdges(const std::vector<double> &bin_edges,
 
 //-------------------------------------------------------------------------------------------------
 /** Assess if all the values in the vector are equal or if there are some
-* different values
-*  @param[in] arra the vector to examine
-*/
+ * different values
+ *  @param[in] arra the vector to examine
+ */
 bool isConstantValue(const std::vector<double> &arra) {
   // make comparisons with the first value
   auto i = arra.cbegin();
@@ -523,7 +537,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
   // Split the string and turn it into a vector.
   std::vector<NumT> values;
 
-  typedef std::vector<std::string> split_vector_type;
+  using split_vector_type = std::vector<std::string>;
   split_vector_type strs;
 
   boost::split(strs, listString, boost::is_any_of(", "));
@@ -572,16 +586,16 @@ int getBinIndex(const std::vector<double> &bins, const double value) {
 
 namespace {
 /** internal function converted from Lambda to identify interval around
-* specified  point and  run average around this point
-*
-*@param index      -- index to average around
-*@param startIndex -- index in the array of data (input to start average
-*                     from) should be: index>=startIndex>=0
-*@param endIndex   -- index in the array of data (input to end average at)
-*                     should be: index<=endIndex<=input.size()
-*@param halfWidth  -- half width of the interval to integrate.
-*@param input      -- vector of input signal
-*@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
+ * specified  point and  run average around this point
+ *
+ *@param index      -- index to average around
+ *@param startIndex -- index in the array of data (input to start average
+ *                     from) should be: index>=startIndex>=0
+ *@param endIndex   -- index in the array of data (input to end average at)
+ *                     should be: index<=endIndex<=input.size()
+ *@param halfWidth  -- half width of the interval to integrate.
+ *@param input      -- vector of input signal
+ *@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
  */
 double runAverage(size_t index, size_t startIndex, size_t endIndex,
                   const double halfWidth, const std::vector<double> &input,
@@ -657,32 +671,32 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     }
   }
 }
-}
+} // namespace
 
 /** Basic running average of input vector within specified range, considering
-*  variable bin-boundaries if such boundaries are provided.
-* The algorithm performs trapezium integration, so some peak shift
-* related to the first derivative of the integrated function can be observed.
-*
-* @param input::   input vector to smooth
-* @param output::  resulting vector (can not coincide with input)
-* @param avrgInterval:: the interval to average function in.
-*                      the function is averaged within +-0.5*avrgInterval
-* @param binBndrs :: pointer to the vector, containing bin boundaries.
-*                    If provided, its length has to be input.size()+1,
-*                    if not, equal size bins of size 1 are assumed,
-*                    so avrgInterval becomes the number of points
-*                    to average over. Bin boundaries array have to
-*                    increase and can not contain equal boundaries.
-* @param startIndex:: if provided, its start index to run averaging from.
-*                     if not, averaging starts from the index 0
-* @param endIndex ::  final index to run average to, if provided. If
-*                     not, or higher then number of elements in input array,
-*                     averaging is performed to the end point of the input
-*                     array
-* @param outBins ::   if present, pointer to a vector to return
-*                     bin boundaries for output array.
-*/
+ *  variable bin-boundaries if such boundaries are provided.
+ * The algorithm performs trapezium integration, so some peak shift
+ * related to the first derivative of the integrated function can be observed.
+ *
+ * @param input::   input vector to smooth
+ * @param output::  resulting vector (can not coincide with input)
+ * @param avrgInterval:: the interval to average function in.
+ *                      the function is averaged within +-0.5*avrgInterval
+ * @param binBndrs :: pointer to the vector, containing bin boundaries.
+ *                    If provided, its length has to be input.size()+1,
+ *                    if not, equal size bins of size 1 are assumed,
+ *                    so avrgInterval becomes the number of points
+ *                    to average over. Bin boundaries array have to
+ *                    increase and can not contain equal boundaries.
+ * @param startIndex:: if provided, its start index to run averaging from.
+ *                     if not, averaging starts from the index 0
+ * @param endIndex ::  final index to run average to, if provided. If
+ *                     not, or higher then number of elements in input array,
+ *                     averaging is performed to the end point of the input
+ *                     array
+ * @param outBins ::   if present, pointer to a vector to return
+ *                     bin boundaries for output array.
+ */
 void smoothInRange(const std::vector<double> &input,
                    std::vector<double> &output, const double avrgInterval,
                    std::vector<double> const *const binBndrs, size_t startIndex,

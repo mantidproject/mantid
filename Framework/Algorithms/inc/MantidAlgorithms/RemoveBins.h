@@ -9,7 +9,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace API {
 class SpectrumInfo;
 }
@@ -71,6 +71,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"CropWorkspace"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Transforms\\Splitting";
@@ -102,7 +105,7 @@ private:
   bool m_interpolate; ///< Whether removed bins should be interpolated
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REMOVEBINS_H_*/

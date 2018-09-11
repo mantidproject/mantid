@@ -76,14 +76,15 @@ void SplineInterpolation::init() {
   declareProperty("DerivOrder", 2, validator,
                   "Order to derivatives to calculate.");
 
-  declareProperty("Linear2Points", false, "Set to true to perform linear "
-                                          "interpolation if only 2 points are "
-                                          "present.");
+  declareProperty("Linear2Points", false,
+                  "Set to true to perform linear "
+                  "interpolation if only 2 points are "
+                  "present.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Input validation for the WorkspaceToInterpolate
-  */
+ */
 std::map<std::string, std::string> SplineInterpolation::validateInputs() {
   // initialise map (result)
   std::map<std::string, std::string> result;
@@ -93,22 +94,32 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
   const int derivOrder = getProperty("DerivOrder");
 
   MatrixWorkspace_const_sptr iwsValid = getProperty("WorkspaceToInterpolate");
-  const size_t binsNo = iwsValid->blocksize();
+  if (iwsValid) {
+    try {
+      const size_t binsNo = iwsValid->blocksize();
 
-  // The minimum number of points for cubic splines is 3
-  if (binsNo < 2) {
-    result["WorkspaceToInterpolate"] = "Workspace must have minimum 2 points.";
-  } else if (binsNo == 2) {
-    if (!linear) {
-      result["WorkspaceToInterpolate"] =
-          "Workspace has only 2 points, "
-          "you can enable linear interpolation by "
-          "setting the property Linear2Points. Otherwise "
-          "provide a minimum of 3 points.";
-    } else if (derivOrder == 2) {
-      result["DerivOrder"] = "Linear interpolation is requested, hence "
-                             "derivative order can be maximum 1.";
+      // The minimum number of points for cubic splines is 3
+      if (binsNo < 2) {
+        result["WorkspaceToInterpolate"] =
+            "Workspace must have minimum 2 points.";
+      } else if (binsNo == 2) {
+        if (!linear) {
+          result["WorkspaceToInterpolate"] =
+              "Workspace has only 2 points, "
+              "you can enable linear interpolation by "
+              "setting the property Linear2Points. Otherwise "
+              "provide a minimum of 3 points.";
+        } else if (derivOrder == 2) {
+          result["DerivOrder"] = "Linear interpolation is requested, hence "
+                                 "derivative order can be maximum 1.";
+        }
+      }
+    } catch (std::length_error &) {
+      result["WorkspaceToInterpolate"] = "The input workspace does not have "
+                                         "the same number of bins per spectrum";
     }
+  } else {
+    result["WorkspaceToInterpolate"] = "The input is not a MatrixWorkspace";
   }
 
   return result;
@@ -341,7 +352,7 @@ void SplineInterpolation::calculateSpline(
  * @param indices : the pair of x-axis indices defining the extrapolation range
  * @param doDerivs : whether derivatives are requested
  * @param derivs : the vector of derivative workspaces
-*/
+ */
 void SplineInterpolation::extrapolateFlat(
     MatrixWorkspace_sptr ows, MatrixWorkspace_const_sptr iwspt,
     const size_t row, const std::pair<size_t, size_t> &indices,
@@ -375,7 +386,7 @@ void SplineInterpolation::extrapolateFlat(
  * @param mwspt : workspace to match
  * @param row : the workspace index
  * @return : pair of indices for representing the interpolation range
-*/
+ */
 std::pair<size_t, size_t>
 SplineInterpolation::findInterpolationRange(MatrixWorkspace_const_sptr iwspt,
                                             MatrixWorkspace_sptr mwspt,

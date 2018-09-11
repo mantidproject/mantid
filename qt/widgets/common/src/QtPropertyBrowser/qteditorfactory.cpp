@@ -86,22 +86,22 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-#include <QSpinBox>
-#include <QScrollBar>
-#include <QComboBox>
 #include <QAbstractItemView>
-#include <QLineEdit>
-#include <QDateTimeEdit>
-#include <QHBoxLayout>
-#include <QMenu>
-#include <QKeyEvent>
 #include <QApplication>
-#include <QLabel>
-#include <QToolButton>
 #include <QColorDialog>
+#include <QComboBox>
+#include <QDateTimeEdit>
 #include <QFontDialog>
-#include <QSpacerItem>
+#include <QHBoxLayout>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QLineEdit>
 #include <QMap>
+#include <QMenu>
+#include <QScrollBar>
+#include <QSpacerItem>
+#include <QSpinBox>
+#include <QToolButton>
 
 #if defined(Q_CC_MSVC)
 #pragma warning(                                                               \
@@ -841,7 +841,7 @@ void QtLineEditFactoryPrivate::slotRegExpChanged(QtProperty *property,
     QLineEdit *editor = itEditor.next();
     editor->blockSignals(true);
     const QValidator *oldValidator = editor->validator();
-    QValidator *newValidator = 0;
+    QValidator *newValidator = nullptr;
     if (regExp.isValid()) {
       newValidator = new QRegExpValidator(regExp, editor);
     }

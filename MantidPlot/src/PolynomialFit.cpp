@@ -28,11 +28,11 @@
  ***************************************************************************/
 #include "PolynomialFit.h"
 
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 
-#include <gsl/gsl_multifit.h>
 #include <gsl/gsl_fit.h>
+#include <gsl/gsl_multifit.h>
 
 PolynomialFit::PolynomialFit(ApplicationWindow *parent, Graph *g, int order,
                              bool legend)
@@ -147,7 +147,8 @@ void PolynomialFit::fit() {
     QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
                           tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
-                             "operation. Operation aborted!").arg(d_p));
+                             "operation. Operation aborted!")
+                              .arg(d_p));
     return;
   }
 
@@ -266,7 +267,8 @@ void LinearFit::fit() {
     QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
                           tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
-                             "operation. Operation aborted!").arg(d_p));
+                             "operation. Operation aborted!")
+                              .arg(d_p));
     return;
   }
 
@@ -373,7 +375,8 @@ void LinearSlopeFit::fit() {
     QMessageBox::critical(static_cast<ApplicationWindow *>(parent()),
                           tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
-                             "operation. Operation aborted!").arg(d_p));
+                             "operation. Operation aborted!")
+                              .arg(d_p));
     return;
   }
 

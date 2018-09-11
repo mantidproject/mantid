@@ -1,11 +1,11 @@
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
-#include "MantidCurveFitting/Functions/CrystalFieldSusceptibility.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
+#include "MantidCurveFitting/Functions/CrystalFieldSusceptibility.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -98,7 +98,7 @@ public:
     m_PPChi0IdxSelf[iSpec] = parameterIndex("Chi0" + si);
   }
 };
-}
+} // namespace
 
 /// Constructor
 CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
@@ -192,10 +192,20 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
     }
   } else if (boost::regex_match(name, match, FWHMX_ATTR_REGEX)) {
     auto iSpec = std::stoul(match[1]);
-    m_fwhmX[iSpec].clear();
+    if (m_fwhmX.size() > iSpec) {
+      m_fwhmX[iSpec].clear();
+    } else {
+      throw std::invalid_argument(
+          "Temperatures must be defined before resolution model");
+    }
   } else if (boost::regex_match(name, match, FWHMY_ATTR_REGEX)) {
     auto iSpec = std::stoul(match[1]);
-    m_fwhmY[iSpec].clear();
+    if (m_fwhmY.size() > iSpec) {
+      m_fwhmY[iSpec].clear();
+    } else {
+      throw std::invalid_argument(
+          "Temperatures must be defined before resolution model");
+    }
   }
   FunctionGenerator::setAttribute(name, attr);
 }

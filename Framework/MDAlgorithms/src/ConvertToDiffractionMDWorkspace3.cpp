@@ -54,7 +54,7 @@ void ConvertToDiffractionMDWorkspace3::init() {
  *
  * @return minVal and maxVal -- two vectors with minimal and maximal values of
  *the momentums in the target workspace.
-*/
+ */
 void ConvertToDiffractionMDWorkspace3::convertExtents(
     const std::vector<double> &Extents, std::vector<double> &minVal,
     std::vector<double> &maxVal) {
@@ -114,7 +114,21 @@ void ConvertToDiffractionMDWorkspace3::calculateExtentsFromData(
   std::replace(maxVal.begin(), maxVal.end(), INF, DEFAULT_BOUND);
   std::replace(minVal.begin(), minVal.end(), MAX_DBL, -DEFAULT_BOUND);
   std::replace(maxVal.begin(), maxVal.end(), -MAX_DBL, DEFAULT_BOUND);
+
+  // Increases bounds by a small margin and ensures they aren't too close to
+  // zero. This is to prevent events from being incorrectly discarded as out
+  // of bounds by calcMatrixCoord functions (or, if fixed there, later causing
+  // further issues in MDGridBox::calculateChildIndex due to events sitting
+  // on maximum boundaries)
+  for (size_t i = 0; i < maxVal.size(); ++i) {
+    minVal[i] *= (1 - 1.e-5 * boost::math::sign(minVal[i]));
+    if (fabs(minVal[i]) < 1.e-5)
+      minVal[i] = -1.e-5;
+    maxVal[i] *= (1 + 1.e-5 * boost::math::sign(maxVal[i]));
+    if (fabs(maxVal[i]) < 1.e-5)
+      maxVal[i] = 1.e-5;
+  }
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

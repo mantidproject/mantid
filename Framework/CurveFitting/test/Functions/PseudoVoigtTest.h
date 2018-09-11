@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
+#include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidKernel/MersenneTwister.h"
 

@@ -5,8 +5,8 @@
 #include "MantidQtWidgets/Common/MultifitSetupDialog.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 //---------------------------------------
@@ -32,7 +32,7 @@ MultifitSetupDialog::MultifitSetupDialog(FitPropertyBrowser *fitBrowser)
     ui.paramTable->insertRow(ui.paramTable->rowCount());
     model->setData(model->index(j, 0),
                    QString::fromStdString(f->parameterName(i)));
-    ui.paramTable->item(j, 0)->setFlags(0);
+    ui.paramTable->item(j, 0)->setFlags(nullptr);
     model->setData(model->index(j, 1), "");
     ui.paramTable->item(j, 1)->setCheckState(Qt::Unchecked);
   }
@@ -67,5 +67,5 @@ void MultifitSetupDialog::cellChanged(int row, int col) {
     }
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

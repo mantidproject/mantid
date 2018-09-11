@@ -3,7 +3,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -34,7 +34,7 @@ Finally, ChiSquaredWeightedDividedByDOF is
 :math:`\chi_{4}^{2} = \chi_{3}^{2} / DOF`
 
 Parameter errors
-================
+################
 
 Setting the Output property to a non-empty string makes the algorithm explore the surface of the :math:`\chi^{2}`
 around its minimum and estimate the standard deviations for the parameters. The value of the property is a base name

@@ -32,6 +32,10 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 2; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"CentroidPeaksMD", "IntegratePeaksHybrid", "IntegratePeaksMDHKL",
+            "IntegratePeaksUsingClusters", "IntegratePeaksCWSD"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "MDAlgorithms\\Peaks"; }
 
@@ -62,7 +66,7 @@ private:
                     double radius);
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

@@ -3,6 +3,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -10,6 +11,10 @@
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
@@ -30,7 +35,7 @@ namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string OUTPUT_WORKSPACE_PROPERTY = "OutputWorkspace";
 static const std::string SAMPLE_LOG_X_AXIS_PROPERTY = "SampleLogAsXAxis";
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConjoinXRuns)
@@ -109,20 +114,28 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       getProperty(INPUT_WORKSPACE_PROPERTY);
   m_logEntry = getPropertyValue(SAMPLE_LOG_X_AXIS_PROPERTY);
 
-  // find if there are workspaces that are not Matrix or not a point-data
-  for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
+  std::vector<std::string> workspaces;
+  try { // input workspace must be a group or a MatrixWorkspace
+    workspaces = RunCombinationHelper::unWrapGroups(inputs_given);
+  } catch (const std::exception &e) {
+    issues[INPUT_WORKSPACE_PROPERTY] = std::string(e.what());
+  }
+
+  // find if there are grouped workspaces that are not Matrix or not a
+  // point-data
+  for (const auto &input : workspaces) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
     if (!ws) {
       issues[INPUT_WORKSPACE_PROPERTY] +=
-          "Workspace " + ws->getName() + " is not a MatrixWorkspace\n";
+          "Workspace " + input + " is not a MatrixWorkspace\n";
     } else if (ws->isHistogramData()) {
       issues[INPUT_WORKSPACE_PROPERTY] +=
           "Workspace " + ws->getName() + " is not a point-data\n";
     } else {
       try {
         ws->blocksize();
-      } catch (std::length_error) {
+      } catch (std::length_error &) {
         issues[INPUT_WORKSPACE_PROPERTY] +=
             "Workspace " + ws->getName() +
             " has different number of points per histogram\n";
@@ -142,9 +155,9 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
       // check if all the others are compatible with the first one
       std::string compatible = combHelper.checkCompatibility(ws, true);
       if (!compatible.empty()) {
-        issues[INPUT_WORKSPACE_PROPERTY] += "Workspace " + ws->getName() +
-                                            " is not compatible: " +
-                                            compatible + "\n";
+        issues[INPUT_WORKSPACE_PROPERTY] +=
+            "Workspace " + ws->getName() + " is not compatible: " + compatible +
+            "\n";
       }
       // if the log entry is given, validate it
       const std::string logValid = checkLogEntry(ws);
@@ -162,10 +175,10 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
 
 //----------------------------------------------------------------------------------------------
 /** Check if the log entry is valid
-* @param ws : input workspace to test
-* @return : empty if the log exists, is numeric, and matches the size of the
-* workspace, error message otherwise
-*/
+ * @param ws : input workspace to test
+ * @return : empty if the log exists, is numeric, and matches the size of the
+ * workspace, error message otherwise
+ */
 std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
   std::string result;
   if (!m_logEntry.empty()) {
@@ -178,7 +191,8 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
       try {
         run.getLogAsSingleValue(m_logEntry);
 
-        // try if numeric time series, then the size must match to the blocksize
+        // try if numeric time series, then the size must match to the
+        // blocksize
         const int blocksize = static_cast<int>(ws->blocksize());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
@@ -214,9 +228,9 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
 //----------------------------------------------------------------------------------------------
 /** Return the to-be axis of the workspace dependent on the log entry
-* @param ws : the input workspace
-* @return : the x-axis to use for the output workspace
-*/
+ * @param ws : the input workspace
+ * @return : the x-axis to use for the output workspace
+ */
 std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
   std::vector<double> axis;
@@ -248,14 +262,14 @@ std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
 
 //----------------------------------------------------------------------------------------------
 /** Makes up the correct history of the output workspace
-*/
+ */
 void ConjoinXRuns::fillHistory() {
   // If this is not a child algorithm add the history
   if (!isChild()) {
     // Loop over the input workspaces, making the call that copies their
     // history to the output one
-    for (auto inWS = m_inputWS.begin(); inWS != m_inputWS.end(); ++inWS) {
-      m_outWS->history().addHistory((*inWS)->getHistory());
+    for (auto &inWS : m_inputWS) {
+      m_outWS->history().addHistory(inWS->getHistory());
     }
     // Add the history for the current algorithm to the output
     m_outWS->history().addHistory(m_history);
@@ -268,31 +282,37 @@ void ConjoinXRuns::fillHistory() {
 
 //----------------------------------------------------------------------------------------------
 /** Joins the given spectrum for the list of workspaces
-* @param wsIndex : the workspace index
-*/
+ * @param wsIndex : the workspace index
+ */
 void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> spectrum;
   std::vector<double> errors;
   std::vector<double> axis;
+  std::vector<double> x;
+  std::vector<double> xerrors;
   spectrum.reserve(m_outWS->blocksize());
   errors.reserve(m_outWS->blocksize());
   axis.reserve(m_outWS->blocksize());
   size_t index = static_cast<size_t>(wsIndex);
-
   for (const auto &input : m_inputWS) {
-    auto y = input->y(index).rawData();
-    auto e = input->e(index).rawData();
-    std::vector<double> x;
+    const auto &y = input->y(index);
+    spectrum.insert(spectrum.end(), y.begin(), y.end());
+    const auto &e = input->e(index);
+    errors.insert(errors.end(), e.begin(), e.end());
     if (m_logEntry.empty()) {
-      x = input->x(index).rawData();
+      const auto &x = input->x(index);
+      axis.insert(axis.end(), x.begin(), x.end());
     } else {
       x = m_axisCache[input->getName()];
+      axis.insert(axis.end(), x.begin(), x.end());
     }
-    spectrum.insert(spectrum.end(), y.begin(), y.end());
-    errors.insert(errors.end(), e.begin(), e.end());
-    axis.insert(axis.end(), x.begin(), x.end());
+    if (input->hasDx(index)) {
+      const auto &dx = input->dx(index);
+      xerrors.insert(xerrors.end(), dx.begin(), dx.end());
+    }
   }
-
+  if (!xerrors.empty())
+    m_outWS->setPointStandardDeviations(index, xerrors);
   m_outWS->mutableY(index) = spectrum;
   m_outWS->mutableE(index) = errors;
   m_outWS->mutableX(index) = axis;

@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_SYMMETRYOPERATION_H_
 #define MANTID_GEOMETRY_SYMMETRYOPERATION_H_
 
+#include "MantidGeometry/Crystal/MatrixVectorPair.h"
+#include "MantidGeometry/Crystal/V3R.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Crystal/V3R.h"
-#include "MantidGeometry/Crystal/MatrixVectorPair.h"
 
 #include <boost/shared_ptr.hpp>
 

@@ -1,7 +1,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
-#include <pqApplicationCore.h>
-#include <QWidget>
 #include <QDialog>
+#include <QWidget>
+#include <pqApplicationCore.h>
 
 namespace Mantid {
 namespace Vates {
@@ -72,6 +72,6 @@ bool ColorMapEditorPanel::eventFilter(QObject *obj, QEvent *ev) {
   }
   return QDialog::eventFilter(obj, ev);
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

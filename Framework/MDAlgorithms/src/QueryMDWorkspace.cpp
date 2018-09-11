@@ -211,7 +211,7 @@ void QueryMDWorkspace::exec() {
   output->getColumn(signalColumnName)->setPlotType(2);
   output->getColumn(errorColumnName)->setPlotType(5);
 
-  IMDIterator *it = input->createIterator();
+  auto it = input->createIterator();
   it->setNormalization(requestedNormalisation);
 
   bool bLimitRows = getProperty("LimitRows");
@@ -251,12 +251,11 @@ void QueryMDWorkspace::exec() {
     rowCounter++;
   }
   setProperty("OutputWorkspace", output);
-  delete it;
 
   //
   IMDEventWorkspace_sptr mdew;
   CALL_MDEVENT_FUNCTION(this->getBoxData, input);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

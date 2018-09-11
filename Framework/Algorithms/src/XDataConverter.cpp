@@ -9,11 +9,11 @@
 namespace Mantid {
 namespace Algorithms {
 
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
-using API::WorkspaceFactory;
+using API::MatrixWorkspace_sptr;
 using API::Progress;
+using API::WorkspaceFactory;
+using API::WorkspaceProperty;
 using Mantid::MantidVecPtr;
 
 //------------------------------------------------------------------------------
@@ -69,6 +69,9 @@ void XDataConverter::exec() {
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
     setXData(outputWS, inputWS, i);
+    if (inputWS->hasDx(i)) {
+      outputWS->setSharedDx(i, inputWS->sharedDx(i));
+    }
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -107,5 +110,5 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
     outputWS->setSharedX(index, calculateXPoints(inputWS->sharedX(index)));
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

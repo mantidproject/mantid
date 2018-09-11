@@ -9,8 +9,8 @@
 
 using PulseTimeGenerator =
     Mantid::Parallel::IO::PulseTimeGenerator<int32_t, int32_t>;
-using Mantid::Parallel::IO::detail::scaleFromUnit;
 using Mantid::Parallel::IO::detail::IntOrFloat64Bit;
+using Mantid::Parallel::IO::detail::scaleFromUnit;
 
 class PulseTimeGeneratorTest : public CxxTest::TestSuite {
 public:

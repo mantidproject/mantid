@@ -23,7 +23,7 @@
 namespace {
 // Track number of attachments to generate a unique channel name
 int ATTACH_COUNT = 0;
-}
+} // namespace
 
 using Mantid::Kernel::ConfigService;
 
@@ -43,8 +43,7 @@ namespace MantidWidgets {
 void MessageDisplay::readSettings(const QSettings &storage) {
   const int logLevel = storage.value("MessageDisplayPriority", 0).toInt();
   if (logLevel > 0) {
-    ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
-                                                       logLevel, true);
+    ConfigService::Instance().setLogLevel(logLevel, true);
   }
 }
 
@@ -54,10 +53,8 @@ void MessageDisplay::readSettings(const QSettings &storage) {
  * @param storage A pointer to an existing QSettings instance opened
  * at the group where the values should be stored.
  */
-void MessageDisplay::writeSettings(QSettings *storage) {
-  Q_ASSERT(storage);
-  storage->setValue("MessageDisplayPriority",
-                    static_cast<int>(m_filterChannel->getPriority()));
+void MessageDisplay::writeSettings(QSettings &storage) const {
+  storage.setValue("MessageDisplayPriority", Poco::Logger::root().getLevel());
 }
 
 /**
@@ -65,7 +62,6 @@ void MessageDisplay::writeSettings(QSettings *storage) {
  */
 MessageDisplay::MessageDisplay(QWidget *parent)
     : QWidget(parent), m_logChannel(new QtSignalChannel),
-      m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(),
       m_loglevels(new QActionGroup(this)),
       m_logLevelMapping(new QSignalMapper(this)),
@@ -73,7 +69,7 @@ MessageDisplay::MessageDisplay(QWidget *parent)
       m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)),
       m_information(new QAction(tr("&Information"), this)),
-      m_debug(new QAction(tr("&Debug"), this)), m_filterChannelName() {
+      m_debug(new QAction(tr("&Debug"), this)) {
   initActions();
   initFormats();
   setupTextArea();
@@ -84,7 +80,6 @@ MessageDisplay::MessageDisplay(QWidget *parent)
 MessageDisplay::~MessageDisplay() {
   // The Channel class is ref counted and will
   // delete itself when required
-  m_filterChannel->release();
   m_logChannel->release();
   delete m_textDisplay;
 }
@@ -102,17 +97,14 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   auto *rootChannel = Poco::Logger::root().getChannel();
   // The root channel might be a SplitterChannel
   if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
-    splitChannel->addChannel(m_filterChannel);
+    splitChannel->addChannel(m_logChannel);
   } else {
-    Poco::Logger::setChannel(rootLogger.name(), m_filterChannel);
+    Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
   }
-  m_filterChannel->addChannel(m_logChannel);
-  m_filterChannelName = "MessageDisplayChannel" + std::to_string(ATTACH_COUNT);
-  configSvc.registerLoggingFilterChannel(m_filterChannelName, m_filterChannel);
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this,
           SLOT(append(const Message &)));
   if (logLevel > 0) {
-    configSvc.setFilterChannelLogLevel(m_filterChannelName, logLevel, true);
+    configSvc.setLogLevel(logLevel, true);
   }
   ++ATTACH_COUNT;
 }
@@ -266,12 +258,7 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
   logLevelMenu->addAction(m_debug);
 
   // check the right level
-  int level = m_filterChannel->getPriority();
-  // get the root logger logging level
-  int rootLevel = Poco::Logger::root().getLevel();
-  if (rootLevel < level) {
-    level = rootLevel;
-  }
+  int level = Poco::Logger::root().getLevel();
   if (level == Poco::Message::PRIO_ERROR)
     m_error->setChecked(true);
   if (level == Poco::Message::PRIO_WARNING)
@@ -292,8 +279,7 @@ void MessageDisplay::showContextMenu(const QPoint &mousePos) {
  * enumeration
  */
 void MessageDisplay::setLogLevel(int priority) {
-  ConfigService::Instance().setFilterChannelLogLevel(m_filterChannelName,
-                                                     priority);
+  ConfigService::Instance().setLogLevel(priority);
 }
 
 //-----------------------------------------------------------------------------
@@ -375,5 +361,5 @@ void MessageDisplay::setupTextArea() {
 QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

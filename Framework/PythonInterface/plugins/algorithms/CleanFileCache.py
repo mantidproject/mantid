@@ -17,6 +17,9 @@ class CleanFileCache(PythonAlgorithm):
         """
         return "Workflow\\DataHandling"
 
+    def seeAlso(self):
+        return [ "ClearCache" ]
+
     def name(self):
         """
         """

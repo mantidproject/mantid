@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_FindPeakBackground_H_
 #define MANTID_ALGORITHMS_FindPeakBackground_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -11,7 +11,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 
@@ -49,6 +49,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Fit"}; }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Utility\\Calculation"; }
@@ -80,8 +81,7 @@ private:
   /// Implement abstract Algorithm methods
   void exec() override;
   double moment4(MantidVec &X, size_t n, double mean);
-  void estimateBackground(const HistogramData::HistogramX &X,
-                          const HistogramData::HistogramY &Y,
+  void estimateBackground(const HistogramData::Histogram &histogram,
                           const size_t i_min, const size_t i_max,
                           const size_t p_min, const size_t p_max,
                           const bool hasPeak, double &out_bg0, double &out_bg1,

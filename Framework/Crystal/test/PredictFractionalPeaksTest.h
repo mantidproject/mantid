@@ -8,16 +8,16 @@
 #ifndef PREDICTFRACTIONALPEAKSTEST_H_
 #define PREDICTFRACTIONALPEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidCrystal/IndexPeaks.h"
+#include "MantidCrystal/LoadIsawUB.h"
+#include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidCrystal/LoadIsawUB.h"
-#include "MantidCrystal/IndexPeaks.h"
-#include "MantidCrystal/PredictFractionalPeaks.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -77,7 +77,7 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
     alg.setPropertyValue("FracPeaks", "FracPeaks");
-    IPeaksWorkspace_sptr FracPeaks = alg.getProperty("FracPeaks");
+    PeaksWorkspace_sptr FracPeaks = alg.getProperty("FracPeaks");
 
     TS_ASSERT_EQUALS(FracPeaks->getNumberPeaks(), 117);
 

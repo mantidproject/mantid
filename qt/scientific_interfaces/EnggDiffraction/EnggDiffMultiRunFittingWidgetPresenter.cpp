@@ -92,6 +92,11 @@ void EnggDiffMultiRunFittingWidgetPresenter::displayFitResults(
   }
 }
 
+std::vector<RunLabel>
+EnggDiffMultiRunFittingWidgetPresenter::getAllRunLabels() const {
+  return m_view->getAllRunLabels();
+}
+
 std::unique_ptr<IEnggDiffMultiRunFittingWidgetAdder>
 EnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
   return Mantid::Kernel::make_unique<EnggDiffMultiRunFittingWidgetAdder>(

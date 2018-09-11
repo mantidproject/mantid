@@ -93,7 +93,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -859,13 +859,6 @@ The NXcanSAS format can be used to save 1D and 2D data. </string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="saveNIST_Qxy_check">
-               <property name="text">
-                <string>NIST Qxy(2D)</string>
-               </property>
-              </widget>
-             </item>
              <item row="3" column="4">
               <spacer name="horizontalSpacer_26">
                <property name="orientation">
@@ -1034,8 +1027,8 @@ The NXcanSAS format can be used to save 1D and 2D data. </string>
          </layout>
         </item>
         <item row="1" column="0" rowspan="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
            <widget class="QGroupBox" name="limits_group">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1052,10 +1045,7 @@ The NXcanSAS format can be used to save 1D and 2D data. </string>
             <property name="checkable">
              <bool>false</bool>
             </property>
-            <layout class="QGridLayout" name="gridLayout_4">
-             <property name="verticalSpacing">
-              <number>5</number>
-             </property>
+            <layout class="QGridLayout" name="gridLayout_16">
              <item row="0" column="0">
               <spacer name="horizontalSpacer_2">
                <property name="orientation">
@@ -1148,7 +1138,17 @@ p, li { white-space: pre-wrap; }
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="1" column="3">
+              <widget class="QLabel" name="l_events_label">
+               <property name="text">
+                <string>Events</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4" colspan="2">
+              <widget class="QLineEdit" name="l_events_binning"/>
+             </item>
+             <item row="2" column="0">
               <widget class="QLabel" name="wavlength_lb">
                <property name="toolTip">
                 <string>Controls the output from convert to wavelength</string>
@@ -1158,7 +1158,7 @@ p, li { white-space: pre-wrap; }
                </property>
               </widget>
              </item>
-             <item row="3" column="1" colspan="2">
+             <item row="2" column="1" colspan="2">
               <widget class="QStackedWidget" name="wav_stack">
                <property name="autoFillBackground">
                 <bool>false</bool>
@@ -1257,14 +1257,14 @@ intermediate ranges are there for comparison</string>
                </widget>
               </widget>
              </item>
-             <item row="3" column="3">
+             <item row="2" column="3">
               <widget class="QLabel" name="wav_step_lbl">
                <property name="text">
                 <string>step</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="4">
+             <item row="2" column="4">
               <widget class="QLineEdit" name="wav_dw">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -1283,7 +1283,7 @@ intermediate ranges are there for comparison</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="5">
+             <item row="2" column="5">
               <widget class="QComboBox" name="wav_dw_opt">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -1322,7 +1322,31 @@ intermediate ranges are there for comparison</string>
                </item>
               </widget>
              </item>
-             <item row="4" column="0" colspan="5">
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_12">
+               <property name="text">
+                <string>RCut (mm)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLineEdit" name="r_cut_line_edit"/>
+             </item>
+             <item row="3" column="3">
+              <widget class="QLabel" name="label_20">
+               <property name="text">
+                <string>WCut (A)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <widget class="QLineEdit" name="w_cut_line_edit">
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" rowspan="3" colspan="5">
               <widget class="QStackedWidget" name="q_stack">
                <property name="autoFillBackground">
                 <bool>false</bool>
@@ -1331,23 +1355,18 @@ intermediate ranges are there for comparison</string>
                 <number>1</number>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="page_2">
-                <layout class="QGridLayout" name="gridLayout_16">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item row="0" column="2">
+                <layout class="QHBoxLayout" name="horizontalLayout_17">
+                 <item>
+                  <widget class="QLabel" name="qx_lb">
+                   <property name="text">
+                    <string>Qx (A^-1)     </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QLineEdit" name="q_min">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1363,7 +1382,7 @@ intermediate ranges are there for comparison</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="3">
+                 <item>
                   <widget class="QLineEdit" name="q_max">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1379,14 +1398,14 @@ intermediate ranges are there for comparison</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="4">
+                 <item>
                   <widget class="QLabel" name="q_step_lbl">
                    <property name="text">
                     <string>stepping</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="5">
+                 <item>
                   <widget class="QLineEdit" name="q_dq">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -1402,51 +1421,14 @@ intermediate ranges are there for comparison</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="qx_lb">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>120</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Qx (A^-1)</string>
-                   </property>
-                  </widget>
-                 </item>
                 </layout>
                </widget>
                <widget class="QWidget" name="page_4">
-                <layout class="QHBoxLayout" name="horizontalLayout_17">
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_29">
                  <item>
-                  <widget class="QLabel" name="label_37">
-                   <property name="minimumSize">
-                    <size>
-                     <width>120</width>
-                     <height>0</height>
-                    </size>
-                   </property>
+                  <widget class="QLabel" name="qx_lb_2">
                    <property name="text">
-                    <string>Qx (Å^-1)</string>
+                    <string>Qx (A^-1)     </string>
                    </property>
                   </widget>
                  </item>
@@ -1457,7 +1439,7 @@ intermediate ranges are there for comparison</string>
                </widget>
               </widget>
              </item>
-             <item row="4" column="5">
+             <item row="5" column="5">
               <widget class="QComboBox" name="q_dq_opt">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -1497,14 +1479,7 @@ intermediate ranges are there for comparison</string>
                </item>
               </widget>
              </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="qxy_lb">
-               <property name="text">
-                <string>Qxy (A^-1)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1">
+             <item row="6" column="1" rowspan="2">
               <widget class="QLineEdit" name="qy_max">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1520,14 +1495,14 @@ intermediate ranges are there for comparison</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="3">
+             <item row="6" column="3" rowspan="2">
               <widget class="QLabel" name="qy_step_lbl">
                <property name="text">
                 <string>step</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="4">
+             <item row="6" column="4" rowspan="2">
               <widget class="QLineEdit" name="qy_dqy">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
@@ -1543,7 +1518,7 @@ intermediate ranges are there for comparison</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="5">
+             <item row="6" column="5" rowspan="2">
               <widget class="QComboBox" name="qy_dqy_opt">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1558,7 +1533,14 @@ intermediate ranges are there for comparison</string>
                </item>
               </widget>
              </item>
-             <item row="6" column="0">
+             <item row="7" column="0">
+              <widget class="QLabel" name="qxy_lb">
+               <property name="text">
+                <string>Qxy (A^-1)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
               <widget class="QComboBox" name="trans_selector_opt">
                <item>
                 <property name="text">
@@ -1572,27 +1554,27 @@ intermediate ranges are there for comparison</string>
                </item>
               </widget>
              </item>
-             <item row="6" column="1">
+             <item row="8" column="1">
               <widget class="QCheckBox" name="transFitOnOff">
                <property name="text">
                 <string>Trans Fit</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="2">
+             <item row="8" column="2">
               <widget class="QCheckBox" name="transFit_ck">
                <property name="text">
                 <string>Use</string>
                </property>
               </widget>
              </item>
-             <item row="6" column="3">
+             <item row="8" column="3">
               <widget class="QLineEdit" name="trans_min"/>
              </item>
-             <item row="6" column="4">
+             <item row="8" column="4">
               <widget class="QLineEdit" name="trans_max"/>
              </item>
-             <item row="6" column="5">
+             <item row="8" column="5">
               <widget class="QComboBox" name="trans_opt">
                <item>
                 <property name="text">
@@ -1631,7 +1613,37 @@ intermediate ranges are there for comparison</string>
                </item>
               </widget>
              </item>
-             <item row="7" column="5">
+             <item row="9" column="0">
+              <widget class="QLabel" name="trans_can_label">
+               <property name="text">
+                <string>Can</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="QCheckBox" name="transFitOnOff_can">
+               <property name="text">
+                <string>Trans Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="2">
+              <widget class="QCheckBox" name="transFit_ck_can">
+               <property name="text">
+                <string>Use</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="3">
+              <widget class="QLineEdit" name="trans_min_can"/>
+             </item>
+             <item row="9" column="4">
+              <widget class="QLineEdit" name="trans_max_can"/>
+             </item>
+             <item row="9" column="5">
               <widget class="QComboBox" name="trans_opt_can">
                <item>
                 <property name="text">
@@ -1669,46 +1681,6 @@ intermediate ranges are there for comparison</string>
                 </property>
                </item>
               </widget>
-             </item>
-             <item row="7" column="4">
-              <widget class="QLineEdit" name="trans_max_can"/>
-             </item>
-             <item row="7" column="3">
-              <widget class="QLineEdit" name="trans_min_can"/>
-             </item>
-             <item row="7" column="2">
-              <widget class="QCheckBox" name="transFit_ck_can">
-               <property name="text">
-                <string>Use</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="1">
-              <widget class="QCheckBox" name="transFitOnOff_can">
-               <property name="text">
-                <string>Trans Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="trans_can_label">
-               <property name="text">
-                <string>Can</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <widget class="QLabel" name="l_events_label">
-               <property name="text">
-                <string>Events</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="4" colspan="2">
-              <widget class="QLineEdit" name="l_events_binning"/>
              </item>
             </layout>
            </widget>
@@ -4739,7 +4711,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>saveDefault_btn</tabstop>
   <tabstop>outfile_edit</tabstop>
   <tabstop>saveSel_btn</tabstop>
-  <tabstop>q_min</tabstop>
   <tabstop>q_max</tabstop>
   <tabstop>q_dq</tabstop>
   <tabstop>q_rebin</tabstop>

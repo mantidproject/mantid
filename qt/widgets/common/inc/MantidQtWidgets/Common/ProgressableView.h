@@ -31,10 +31,25 @@ namespace MantidWidgets {
 */
 class EXPORT_OPT_MANTIDQT_COMMON ProgressableView {
 public:
-  virtual void setProgressRange(int min, int max) = 0;
+  /// The style of the progress bar: either a standard percentage progress bar
+  /// or an endless busy indicator
+  enum class Style { PERCENTAGE, ENDLESS };
+
+  ProgressableView() : m_style{Style::PERCENTAGE}, m_min(0), m_max(100) {}
+  virtual ~ProgressableView() {}
+
   virtual void setProgress(int progress) = 0;
   virtual void clearProgress() = 0;
-  virtual ~ProgressableView() {}
+  virtual void setProgressRange(int min, int max);
+
+  bool isPercentageIndicator() const;
+  void setAsPercentageIndicator();
+  void setAsEndlessIndicator();
+
+protected:
+  Style m_style;
+  int m_min;
+  int m_max;
 };
 
 } // namespace MantidWidgets

@@ -1,13 +1,13 @@
 #ifndef MANTID_MDALGORITHMS_MINUSMDTEST_H_
 #define MANTID_MDALGORITHMS_MINUSMDTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -105,7 +105,7 @@ public:
       TS_ASSERT_EQUALS(ws->getNPoints(), 10000);
     }
 
-    IMDIterator *it = ws->createIterator();
+    auto it = ws->createIterator();
     if (mask_ws_num == 0) {
       while (it->next()) {
         // Signal of all boxes is zero since they got subtracted

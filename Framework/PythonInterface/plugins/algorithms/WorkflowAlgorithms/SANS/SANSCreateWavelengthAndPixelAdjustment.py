@@ -196,8 +196,8 @@ class SANSCreateWavelengthAndPixelAdjustment(ParallelDataProcessorAlgorithm):
         return pixel_adjustment_workspace
 
     def _get_rebin_string(self, wavelength_and_pixel_adjustment_state):
-        wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_low
-        wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high
+        wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_low[0]
+        wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high[0]
         wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
         wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type \
                                        is RangeStepType.Log else 1.0  # noqa

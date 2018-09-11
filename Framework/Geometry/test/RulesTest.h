@@ -1,20 +1,20 @@
 #ifndef MANTID_RULESTEST__
 #define MANTID_RULESTEST__
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <vector>
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
-#include <cfloat>
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/make_unique.h"
+#include <cfloat>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "boost/make_shared.hpp"
 

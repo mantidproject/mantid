@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_PEAKTRANSFORMFACTORY_H_
 #define MANTID_GEOMETRY_PEAKTRANSFORMFACTORY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -21,8 +21,8 @@ public:
 };
 
 /// Factory Shared Pointer typedef.
-typedef boost::shared_ptr<PeakTransformFactory> PeakTransformFactory_sptr;
-}
-}
+using PeakTransformFactory_sptr = boost::shared_ptr<PeakTransformFactory>;
+} // namespace Geometry
+} // namespace Mantid
 
 #endif

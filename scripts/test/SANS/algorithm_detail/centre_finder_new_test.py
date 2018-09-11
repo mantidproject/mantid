@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import sys
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
-from sans.common.enums import (SANSDataType, FindDirectionEnum)
+from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
 
 if sys.version_info.major == 3:
     from unittest import mock
@@ -31,14 +31,14 @@ class CentreFinderNewTest(unittest.TestCase):
             SANSDataType.SampleScatter: [mock.MagicMock()]}
 
         beam_centre_finder = "SANSBeamCentreFinder"
-        beam_centre_finder_options = {"Iterations": iterations, "RMin": r_min / 1000, "RMax": r_max / 1000,
+        beam_centre_finder_options = {"Component":'LAB', "Iterations": iterations, "RMin": r_min / 1000, "RMax": r_max / 1000,
                                       "Position1Start": position_1_start, "Position2Start": position_2_start,
                                       "Tolerance": tolerance, "Direction": FindDirectionEnum.to_string(find_direction),
                                       "Verbose": verbose}
 
         centre_finder_new(self.state, r_min=r_min, r_max=r_max, iterations=iterations, position_1_start=position_1_start
                           ,position_2_start=position_2_start, tolerance=tolerance, find_direction=find_direction
-                          ,verbose=verbose)
+                          ,verbose=verbose, component=DetectorType.LAB)
 
         make_algorithm_mock.assert_called_once_with(beam_centre_finder, **beam_centre_finder_options)
 
@@ -57,10 +57,10 @@ class CentreFinderNewTest(unittest.TestCase):
         beam_centre_finder = "SANSBeamCentreFinderMassMethod"
         beam_centre_finder_options = {"RMin": r_min / 1000,
                                       "Centre1": position_1_start, "Centre2": position_2_start,
-                                      "Tolerance": tolerance}
+                                      "Component": 'LAB', "Tolerance": tolerance}
 
         centre_finder_mass(self.state, r_min=r_min, max_iter=iterations, position_1_start=position_1_start
-                           , position_2_start=position_2_start, tolerance=tolerance)
+                           , position_2_start=position_2_start, tolerance=tolerance, component=DetectorType.LAB)
 
         make_algorithm_mock.assert_called_once_with(beam_centre_finder, **beam_centre_finder_options)
 

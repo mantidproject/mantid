@@ -43,8 +43,8 @@
 #include <cstdlib>
 #include <cstring>
 
-using std::vector;
 using std::string;
+using std::vector;
 
 const char *colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 #define MAX_LEVEL 20
@@ -85,8 +85,9 @@ int strcmp_i(const char *s1,
   {                                                                            \
     size_t retval = fread(ptr, size, nmemb, stream);                           \
     if (static_cast<size_t>(size * nmemb) != retval) {                         \
-      fprintf(debug, " WARNING : could not read %llu bytes from file, read: "  \
-                     "%llu bytes\n",                                           \
+      fprintf(debug,                                                           \
+              " WARNING : could not read %llu bytes from file, read: "         \
+              "%llu bytes\n",                                                  \
               static_cast<unsigned long long>(size) * nmemb,                   \
               static_cast<unsigned long long>(retval));                        \
     }                                                                          \
@@ -594,9 +595,8 @@ int OPJFile::ParseFormatOld() {
         POS += 0x25A0 +
                static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
       else if (version == 601)
-        POS +=
-            0x2560 +
-            static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP; // ?
+        POS += 0x2560 + static_cast<int>(SPREADSHEET[i - 1].column.size()) *
+                            COL_JUMP; // ?
       else if (version == 600)
         POS += 0x2560 +
                static_cast<int>(SPREADSHEET[i - 1].column.size()) * COL_JUMP;
@@ -1475,8 +1475,9 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
       }
 
       if (file_size < sec_size) {
-        fprintf(debug, "Error in readSpread: found section size (%d) bigger "
-                       "than total file size: %d\n",
+        fprintf(debug,
+                "Error in readSpread: found section size (%d) bigger "
+                "than total file size: %d\n",
                 sec_size, file_size);
         fflush(debug);
         return;
@@ -1725,8 +1726,9 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
       }
 
       if (file_size < sec_size) {
-        fprintf(debug, "Error in readExcel: found section size (%d) bigger "
-                       "than total file size: %d\n",
+        fprintf(debug,
+                "Error in readExcel: found section size (%d) bigger "
+                "than total file size: %d\n",
                 sec_size, file_size);
         fflush(debug);
         return;
@@ -2016,8 +2018,9 @@ void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug) {
     }
 
     if (file_size < sec_size) {
-      fprintf(debug, "Error in readMatrix: found section size (%d) bigger than "
-                     "total file size: %d\n",
+      fprintf(debug,
+              "Error in readMatrix: found section size (%d) bigger than "
+              "total file size: %d\n",
               sec_size, file_size);
       fflush(debug);
       return;
@@ -2355,8 +2358,9 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
         SwapBytes(sec_size);
 
       if (file_size < sec_size) {
-        fprintf(debug, "Error in readGraph: found section size (%d) bigger "
-                       "than total file size: %d\n",
+        fprintf(debug,
+                "Error in readGraph: found section size (%d) bigger "
+                "than total file size: %d\n",
                 sec_size, file_size);
         fflush(debug);
         return;
@@ -3279,8 +3283,9 @@ void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug,
 
   if (INT_MAX == namesize) {
     // this would cause an overflow and it's anyway obviously wrong
-    fprintf(debug, "Error: while reading project tree folder, found "
-                   "project/folder name size: %d\n",
+    fprintf(debug,
+            "Error: while reading project tree folder, found "
+            "project/folder name size: %d\n",
             namesize);
     fflush(debug);
   }

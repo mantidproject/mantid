@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
-#include "MantidCurveFitting//Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
@@ -18,16 +18,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/normal_distribution.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/version.hpp>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <random>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,7 +39,9 @@ const size_t LOWER_CONVERGENCE_LIMIT = 350;
 const size_t JUMP_CHECKING_RATE = 200;
 // low jump limit
 const double LOW_JUMP_LIMIT = 1e-25;
-}
+// random number generator
+std::mt19937 rng;
+} // namespace
 
 DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 
@@ -116,10 +115,10 @@ FABADAMinimizer::FABADAMinimizer()
 }
 
 /** Initialize minimizer. Set initial values for all private members
-*
-* @param function :: the fit function
-* @param maxIterations :: maximum number of iterations
-*/
+ *
+ * @param function :: the fit function
+ * @param maxIterations :: maximum number of iterations
+ */
 void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
                                  size_t maxIterations) {
 
@@ -163,9 +162,9 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 }
 
 /** Do one iteration.
-*
-* @return :: true if iterations must be continued, false otherwise
-*/
+ *
+ * @return :: true if iterations must be continued, false otherwise
+ */
 bool FABADAMinimizer::iterate(size_t) {
 
   if (!m_leastSquares) {
@@ -281,8 +280,8 @@ bool FABADAMinimizer::iterate(size_t) {
 double FABADAMinimizer::costFunctionVal() { return m_chi2; }
 
 /** When all the iterations have been done, calculate and show all the results.
-*
-*/
+ *
+ */
 void FABADAMinimizer::finalize() {
 
   // Creating the reduced chain (considering only one each
@@ -350,27 +349,21 @@ void FABADAMinimizer::finalize() {
 }
 
 /** Returns the step from a Gaussian given sigma = jump
-*
-* @param jump :: sigma
-* @return :: the step
-*/
+ *
+ * @param jump :: sigma
+ * @return :: the step
+ */
 double FABADAMinimizer::gaussianStep(const double &jump) {
-  boost::mt19937 mt;
-  mt.seed(123 * (int(m_counter) + 45 * int(jump)) +
-          14 * int(time_t())); // Numbers for the seed
-  boost::normal_distribution<double> distr(0.0, std::abs(jump));
-  boost::variate_generator<boost::mt19937, boost::normal_distribution<double>>
-      step(mt, distr);
-  return step();
+  return Kernel::normal_distribution<double>(0.0, std::abs(jump))(rng);
 }
 
 /** If the new point is out of its bounds, it is changed to fit in the bound
-* limits
-*
-* @param parameterIndex :: the index of the parameter
-* @param newValue :: the value of the parameter
-* @param step :: the step used to modify the parameter value
-*/
+ * limits
+ *
+ * @param parameterIndex :: the index of the parameter
+ * @param newValue :: the value of the parameter
+ * @param step :: the step used to modify the parameter value
+ */
 void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
                                        double &newValue, double &step) {
   API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
@@ -410,12 +403,12 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
 }
 
 /** Applies ties to parameters. Ties are applied to other parameters first and
-*sequentially, finally ties are applied to the current parameter
-*
-* @param parameterIndex :: the index of the parameter
-* @param newParameters :: the value of the parameters after applying ties
-* @param newValue :: new value of the current parameter
-*/
+ *sequentially, finally ties are applied to the current parameter
+ *
+ * @param parameterIndex :: the index of the parameter
+ * @param newParameters :: the value of the parameters after applying ties
+ * @param newValue :: new value of the current parameter
+ */
 void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
                                      GSLVector &newParameters,
                                      double &newValue) {
@@ -458,11 +451,11 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
 }
 
 /** Given the new chi2, next position is calculated and updated.
-*
-* @param parameterIndex :: the index of the parameter
-* @param chi2New :: the new value of chi2
-* @param newParameters :: new value of the fitting parameters
-*/
+ *
+ * @param parameterIndex :: the index of the parameter
+ * @param chi2New :: the new value of chi2
+ * @param newParameters :: new value of the fitting parameters
+ */
 void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
                                             const double &chi2New,
                                             GSLVector &newParameters) {
@@ -484,10 +477,7 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
     double prob = exp((m_chi2 - chi2New) / (2.0 * m_temperature));
 
     // Decide if changing or not
-    boost::mt19937 mt;
-    mt.seed(int(time_t()) + 48 * (int(m_counter) + 76 * int(parameterIndex)));
-    boost::uniform_real<> distr(0.0, 1.0);
-    double p = distr(mt);
+    double p = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
     if (p <= prob) {
       for (size_t j = 0; j < m_nParams; j++) {
         m_chain[j].push_back(newParameters.get(j));
@@ -521,9 +511,9 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
 }
 
 /** Updates the parameterIndex-th parameter jump if appropriate
-*
-* @param parameterIndex :: the index of the current parameter
-*/
+ *
+ * @param parameterIndex :: the index of the current parameter
+ */
 void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
   const double jumpAR = getProperty("JumpAcceptanceRate");
   double newJump;
@@ -568,9 +558,9 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
 }
 
 /** Check if Chi square has converged for all the parameters if overexploring or
-* Simulated Annealing completed
-*
-*/
+ * Simulated Annealing completed
+ *
+ */
 void FABADAMinimizer::convergenceCheck() {
   size_t innactConvCriterion = getProperty("InnactiveConvergenceCriterion");
 
@@ -623,8 +613,8 @@ void FABADAMinimizer::convergenceCheck() {
 }
 
 /** Refrigerates the system if appropriate
-*
-*/
+ *
+ */
 void FABADAMinimizer::simAnnealingRefrigeration() {
   // Update jump to separate different temperatures
   for (size_t i = 0; i < m_nParams; ++i)
@@ -646,8 +636,8 @@ void FABADAMinimizer::simAnnealingRefrigeration() {
 }
 
 /* @return :: true if iteration must continue, false otherwise.
-*
-*/
+ *
+ */
 bool FABADAMinimizer::iterationContinuation() {
 
   // If still through Simulated Annealing
@@ -674,8 +664,9 @@ bool FABADAMinimizer::iterationContinuation() {
           "Convegence NOT reached after " +
           std::to_string(m_maxIter - m_chainIterations) +
           " iterations.\n   Try to set better initial values for parameters: " +
-          failed + " Or increase the maximum number of iterations "
-                   "(MaxIterations property).");
+          failed +
+          " Or increase the maximum number of iterations "
+          "(MaxIterations property).");
     }
   } else {
     // If convergence has been reached, continue until we complete the chain
@@ -688,9 +679,9 @@ bool FABADAMinimizer::iterationContinuation() {
 }
 
 /** Create the workspace for the complete parameters chain (the last histogram
-*is for the Chi square).
-*
-*/
+ *is for the Chi square).
+ *
+ */
 void FABADAMinimizer::outputChains() {
 
   size_t chainLength = m_chain[0].size();
@@ -712,11 +703,11 @@ void FABADAMinimizer::outputChains() {
 }
 
 /** Create the workspace containing the converged chain
-*
-* @param convLength :: length of the converged chain
-* @param nSteps :: number of steps done between chain points to avoid
-*correlation
-*/
+ *
+ * @param convLength :: length of the converged chain
+ * @param nSteps :: number of steps done between chain points to avoid
+ *correlation
+ */
 void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
 
   // Create the workspace for the converged part of the chain.
@@ -749,11 +740,11 @@ void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
 }
 
 /** Create the workspace containing chi2 values
-*
-* @param convLength :: length of the converged chain
-* @param mostProbableChi2 :: most probable chi2 value
-*correlation
-*/
+ *
+ * @param convLength :: length of the converged chain
+ * @param mostProbableChi2 :: most probable chi2 value
+ *correlation
+ */
 void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
                                               double mostProbableChi2) {
   // Create the workspace for the Chi square values.
@@ -789,11 +780,11 @@ void FABADAMinimizer::outputCostFunctionTable(size_t convLength,
 }
 
 /** Create the workspace containing probability density function (PDF)
-*
-* @param convLength :: length of the converged chain
-* @param reducedChain :: the reduced chain (will be sorted)
-* @return :: most probable chi square value
-*/
+ *
+ * @param convLength :: length of the converged chain
+ * @param reducedChain :: the reduced chain (will be sorted)
+ * @return :: most probable chi square value
+ */
 double
 FABADAMinimizer::outputPDF(size_t convLength,
                            std::vector<std::vector<double>> &reducedChain) {
@@ -872,13 +863,13 @@ FABADAMinimizer::outputPDF(size_t convLength,
 }
 
 /** Create the table workspace containing parameter values
-*
-* @param bestParameters :: vector containing best values for fitting parameters
-* @param errorLeft :: [output] vector containing the sqrt of the mean square
-*left deviation
-* @param errorRight :: [output] vector containing the sqrt of the mean square
-*right deviation
-*/
+ *
+ * @param bestParameters :: vector containing best values for fitting parameters
+ * @param errorLeft :: [output] vector containing the sqrt of the mean square
+ *left deviation
+ * @param errorRight :: [output] vector containing the sqrt of the mean square
+ *right deviation
+ */
 void FABADAMinimizer::outputParameterTable(
     const std::vector<double> &bestParameters,
     const std::vector<double> &errorLeft,
@@ -902,18 +893,18 @@ void FABADAMinimizer::outputParameterTable(
 }
 
 /** Create the reduced convergence chain and calculate the best parameter values
-*and errors
-*
-* @param convLength :: length of the converged chain
-* @param nSteps :: number of steps done between chain points to avoid
-* @param reducedChain :: [output] the reduced chain
-* @param bestParameters :: [output] vector containing best values for fitting
-*parameters
-* @param errorLeft :: [output] vector containing the sqrt of the mean square
-*left deviation
-* @param errorRight :: [output] vector containing the sqrt of the mean square
-*right deviation
-*/
+ *and errors
+ *
+ * @param convLength :: length of the converged chain
+ * @param nSteps :: number of steps done between chain points to avoid
+ * @param reducedChain :: [output] the reduced chain
+ * @param bestParameters :: [output] vector containing best values for fitting
+ *parameters
+ * @param errorLeft :: [output] vector containing the sqrt of the mean square
+ *left deviation
+ * @param errorRight :: [output] vector containing the sqrt of the mean square
+ *right deviation
+ */
 void FABADAMinimizer::calculateConvChainAndBestParameters(
     size_t convLength, int nSteps,
     std::vector<std::vector<double>> &reducedChain,
@@ -959,12 +950,12 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
       auto posBestPar = std::find(reducedChain[j].begin(),
                                   reducedChain[j].end(), bestParameters[j]);
       double varLeft = 0, varRight = 0;
-      for (auto k = reducedChain[j].begin(); k < reducedChain[j].end(); k++) {
+      for (auto k = reducedChain[j].begin(); k < reducedChain[j].end();
+           k += 2) {
         if (k < posBestPar)
           varLeft += (*k - bestParameters[j]) * (*k - bestParameters[j]);
         else if (k > posBestPar)
           varRight += (*k - bestParameters[j]) * (*k - bestParameters[j]);
-        ++k;
       }
       if (posBestPar != reducedChain[j].begin())
         varLeft /= double(posBestPar - reducedChain[j].begin());
@@ -988,8 +979,8 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
 }
 
 /** Initialze member variables related to fitting parameters
-*
-*/
+ *
+ */
 void FABADAMinimizer::initChainsAndParameters() {
   // The "real" parametersare got (not the active ones)
   m_nParams = m_fitFunction->nParams();
@@ -1043,8 +1034,8 @@ void FABADAMinimizer::initChainsAndParameters() {
 }
 
 /** Initialize member variables used for simulated annealing
-*
-*/
+ *
+ */
 void FABADAMinimizer::initSimulatedAnnealing() {
 
   // Obs: Simulated Annealing with maximum temperature = 1.0, 1step,

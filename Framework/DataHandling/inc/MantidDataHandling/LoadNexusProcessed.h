@@ -7,8 +7,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include "MantidNexus/NexusClasses.h"
 
@@ -76,6 +76,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

@@ -34,7 +34,6 @@ set ( SRC_FILES
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
 	src/FileValidator.cpp
-	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
@@ -79,7 +78,6 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
-	src/NormalDistribution.cpp
 	src/NullValidator.cpp
 	src/OptionalBool.cpp
 	src/ParaViewVersion.cpp
@@ -134,7 +132,6 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
 	src/NeutronAtom.cpp
 	src/FacilityInfo.cpp
-	src/FilterChannel.cpp
 	src/FileValidator.cpp
 	src/DirectoryValidator.cpp
 	src/PropertyManager.cpp
@@ -167,7 +164,7 @@ set ( INC_FILES
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ConfigObserver.h
 	inc/MantidKernel/ConfigPropertyObserver.h
-  inc/MantidKernel/DateAndTime.h
+        inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTimeHelpers.h
@@ -192,7 +189,6 @@ set ( INC_FILES
 	inc/MantidKernel/Fast_Exponential.h
 	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
-	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
@@ -220,7 +216,6 @@ set ( INC_FILES
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MDAxisValidator.h
 	inc/MantidKernel/MDUnit.h
-	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -248,7 +243,7 @@ set ( INC_FILES
 	inc/MantidKernel/NetworkProxy.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-	inc/MantidKernel/NormalDistribution.h
+        inc/MantidKernel/normal_distribution.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/OptionalBool.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -362,7 +357,6 @@ set ( TEST_FILES
 	FacilitiesTest.h
 	FileDescriptorTest.h
 	FileValidatorTest.h
-	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
 	FloatingPointComparisonTest.h
 	FreeBlockTest.h
@@ -406,7 +400,6 @@ set ( TEST_FILES
 	NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
-	NormalDistributionTest.h
 	NullValidatorTest.h
 	OptionalBoolTest.h
 	ProgressBaseTest.h
@@ -578,9 +571,9 @@ set ( QT_PLUGINS_DIR "." )
 if ( MAKE_VATES )
   set ( PV_PLUGINS_DIR "./plugins/paraview/qt%V" )
   if ( MSVC )
-    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;")
   else()
-    set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+    set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;")
   endif()
 else ()
   set ( PV_PLUGINS_DIR "" )
@@ -634,12 +627,6 @@ if ( MPI_BUILD )
   set ( PV_PLUGINS_DIR "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
-  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
-  if ( ENABLE_FILE_LOGGING )
-    set ( FILELOGGER_CHANNEL fileFilterChannel )
-  else ()
-    set ( FILELOGGER_CHANNEL "" )
-  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
@@ -673,7 +660,7 @@ install ( TARGETS Kernel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
 set ( MANTID_ROOT_BUILD ${MANTID_ROOT} )
-if ( APPLE )
+if ( APPLE AND ENABLE_MANTIDPLOT )
   set ( MANTID_ROOT ../.. )
 else ()
   set ( MANTID_ROOT .. )
@@ -681,23 +668,21 @@ endif ()
 
 # Log to file for installed packages but not mpi
 if ( MPI_BUILD OR MPI_EXPERIMENTAL )
-  set ( FILELOGGER_CHANNEL "" )
   set ( ENABLE_NETWORK_ACCESS 0 )
 else ()
-  set ( FILELOGGER_CHANNEL fileFilterChannel )
   set ( ENABLE_NETWORK_ACCESS 1 )
 endif ()
 set ( FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python" )
 if(MAKE_VATES)
   if (APPLE)
-    set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;../Python/vtk")
+    set ( PARAVIEW_PYTHON_PATHS "../Libraries;../Python;")
   elseif (WIN32)
     set ( PV_LIBS "../lib/paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}" )
-    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk" )
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS}/site-packages;" )
   else () #Linux
     set ( PV_LIBS "${CMAKE_INSTALL_PREFIX}/lib/paraview-${PARAVIEW_VERSION}")
-    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;${PV_LIBS}/site-packages/vtk")
+    set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS};${PV_LIBS}/site-packages;")
   endif ()
 else ()
     set ( PARAVIEW_PYTHON_PATHS "")
@@ -737,7 +722,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
   set ( QT_PLUGINS_DIR "${MANTID_ROOT}/plugins/qt%V" )
-  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt%V" )
+  set ( PV_PLUGINS_DIR "${MANTID_ROOT}/plugins/${PVPLUGINS_SUBDIR}/qt%V" )
   set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
 endif ()
 

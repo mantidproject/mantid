@@ -7,7 +7,7 @@ namespace Mantid {
 namespace API {
 // Forward declare
 class MatrixWorkspace;
-}
+} // namespace API
 namespace Algorithms {
 /** Normalises a workspace according to the good proton charge figure taken from
    the
@@ -58,6 +58,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Divide"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
@@ -72,7 +73,7 @@ private:
                        const bool integratePCharge) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_ */

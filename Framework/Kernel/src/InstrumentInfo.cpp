@@ -3,13 +3,13 @@
 //----------------------------------------------------------------------
 #include <algorithm>
 
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
@@ -21,13 +21,13 @@ namespace Kernel {
 namespace {
 // static logger object
 Logger g_log("InstrumentInfo");
-}
+} // namespace
 
 /** Constructor.
-* @param f :: The facility
-* @param elem :: The Poco::XML::Element to read the data from
-* @throw std::runtime_error if name or at least one technique are not defined
-*/
+ * @param f :: The facility
+ * @param elem :: The Poco::XML::Element to read the data from
+ * @throw std::runtime_error if name or at least one technique are not defined
+ */
 InstrumentInfo::InstrumentInfo(const FacilityInfo *f,
                                const Poco::XML::Element *elem)
     : m_facility(f) {
@@ -54,11 +54,11 @@ InstrumentInfo::InstrumentInfo(const FacilityInfo *f,
 }
 
 /**
-* Equality operator. Two objects are considered equal if their names and short
-* names are the same.
-* @param rhs :: The object to compare this with
-* @returns True if the objects are considered equal, false otherwise
-*/
+ * Equality operator. Two objects are considered equal if their names and short
+ * names are the same.
+ * @param rhs :: The object to compare this with
+ * @returns True if the objects are considered equal, false otherwise
+ */
 bool InstrumentInfo::operator==(const InstrumentInfo &rhs) const {
   return (this->name() == rhs.name() && this->shortName() == rhs.shortName());
 }

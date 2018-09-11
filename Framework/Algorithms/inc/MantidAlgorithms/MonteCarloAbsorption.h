@@ -5,8 +5,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 
 namespace Mantid {
 namespace API {
@@ -49,6 +49,10 @@ public:
   const std::string name() const override { return "MonteCarloAbsorption"; }
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"MayersSampleCorrection", "CarpenterSampleCorrection",
+            "PearlMCAbsorption", "VesuvioCalculateMS"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "CorrectionFunctions\\AbsorptionCorrections";
@@ -78,7 +82,7 @@ private:
       const Mantid::Algorithms::InterpolationOption &interpOpt,
       const DetectorGridDefinition &detGrid);
 };
-}
-}
+} // namespace Algorithms
+} // namespace Mantid
 
 #endif // MANTID_ALGORITHMS_MONTECARLOABSORPTION_H_

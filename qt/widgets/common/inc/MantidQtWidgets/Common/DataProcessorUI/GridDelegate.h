@@ -1,5 +1,5 @@
-#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -7,7 +7,8 @@ namespace DataProcessor {
 
 class GridDelegate : public QStyledItemDelegate {
 public:
-  explicit GridDelegate(QObject *parent = 0) : QStyledItemDelegate(parent){};
+  explicit GridDelegate(QObject *parent = nullptr)
+      : QStyledItemDelegate(parent){};
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override {
@@ -23,4 +24,4 @@ public:
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt

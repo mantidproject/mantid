@@ -10,9 +10,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,10 +49,10 @@ void RemoveBins::init() {
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
 
   // remove some known units that will not work
-  units.erase(std::remove(units.begin(), units.end(), "Empty"));
-  units.erase(std::remove(units.begin(), units.end(), "Label"));
-  units.erase(std::remove(units.begin(), units.end(), "Time"));
-  units.erase(std::remove(units.begin(), units.end(), "Degrees"));
+  units.erase(std::remove(units.begin(), units.end(), "Empty"), units.end());
+  units.erase(std::remove(units.begin(), units.end(), "Label"), units.end());
+  units.erase(std::remove(units.begin(), units.end(), "Time"), units.end());
+  units.erase(std::remove(units.begin(), units.end(), "Degrees"), units.end());
 
   // add a default do nothing value
   units.insert(units.begin(), "AsInput");
@@ -78,8 +78,8 @@ void RemoveBins::init() {
 }
 
 /** Checks cross property validation
-*   @returns a map of PropertyName->ErrorMessage
-*/
+ *   @returns a map of PropertyName->ErrorMessage
+ */
 std::map<std::string, std::string> RemoveBins::validateInputs() {
   std::map<std::string, std::string> result;
   const std::string rangeUnit = getProperty("RangeUnit");
@@ -385,5 +385,5 @@ void RemoveBins::RemoveFromMiddle(const int &start, const int &end,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

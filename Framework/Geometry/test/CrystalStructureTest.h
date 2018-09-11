@@ -7,8 +7,8 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
-#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/CompositeBraggScatterer.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -29,7 +29,7 @@ public:
     m_scatterers->addScatterer(
         BraggScattererFactory::Instance().createScatterer(
             "IsotropicAtomBraggScatterer",
-            "{\"Element\":\"Si\",\"Position\":\"0,0,0\"}"));
+            R"({"Element":"Si","Position":"0,0,0"})"));
   }
 
   void testConstructionSpaceGroup() {

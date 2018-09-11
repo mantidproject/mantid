@@ -1,9 +1,9 @@
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <boost/variant/get.hpp>
 
@@ -31,7 +31,7 @@ const std::string typeFromName(const std::string &name) {
   // We should enter the critical section if the map has not been fully filled.
   // Be sure to keep the value tested against in sync with the number of inserts
   // below
-  if (TYPE_INDEX.size() != 17) {
+  if (TYPE_INDEX.size() != 18) {
     PARALLEL_CRITICAL(fill_column_index_map) {
       if (TYPE_INDEX.empty()) // check again inside the critical block
       {
@@ -53,6 +53,7 @@ const std::string typeFromName(const std::string &name) {
         TYPE_INDEX.emplace("Col", "double");
         TYPE_INDEX.emplace("QLab", "V3D");
         TYPE_INDEX.emplace("QSample", "V3D");
+        TYPE_INDEX.emplace("PeakNumber", "int");
         // If adding an entry, be sure to increment the size comparizon in the
         // first line
       }
@@ -68,7 +69,7 @@ const std::string typeFromName(const std::string &name) {
         "Peak column names/types must be explicitly marked in PeakColumn.cpp");
   }
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -79,14 +80,15 @@ PeakColumn::PeakColumn(std::vector<Peak> &peaks, const std::string &name)
     : m_peaks(peaks), m_oldRows() {
   this->m_name = name;
   this->m_type = typeFromName(name); // Throws if the name is unknown
-  this->m_hklPrec = 2;
   const std::string key = "PeakColumn.hklPrec";
-  int gotit = ConfigService::Instance().getValue(key, this->m_hklPrec);
-  if (!gotit)
+  auto hklPrec = ConfigService::Instance().getValue<int>(key);
+  this->m_hklPrec = hklPrec.get_value_or(2);
+  if (!hklPrec.is_initialized()) {
     g_log.information()
         << "In PeakColumn constructor, did not find any value for '" << key
         << "' from the Config Service. Using default: " << this->m_hklPrec
         << "\n";
+  }
 }
 
 /// Returns typeid for the data in the column
@@ -134,7 +136,7 @@ const std::type_info &PeakColumn::get_pointer_type_info() const {
  */
 void PeakColumn::print(size_t index, std::ostream &s) const {
   Peak &peak = m_peaks[index];
-
+  s.imbue(std::locale("C"));
   std::ios::fmtflags fflags(s.flags());
   if (m_name == "RunNumber")
     s << peak.getRunNumber();
@@ -152,6 +154,8 @@ void PeakColumn::print(size_t index, std::ostream &s) const {
     s << std::fixed << std::setprecision(m_hklPrec) << peak.getK();
   } else if (m_name == "l") {
     s << std::fixed << std::setprecision(m_hklPrec) << peak.getL();
+  } else if (m_name == "PeakNumber") {
+    s << peak.getPeakNumber();
   } else
     s << peak.getValueByColName(m_name);
   s.flags(fflags);
@@ -210,6 +214,8 @@ bool PeakColumn::getReadOnly() const {
 //-------------------------------------------------------------------------------------
 /// Specialized type check
 bool PeakColumn::isBool() const { return false; }
+
+bool PeakColumn::isNumber() const { return false; }
 
 /// @returns overall memory size taken by the column.
 long int PeakColumn::sizeOfData() const {
@@ -291,6 +297,9 @@ const void *PeakColumn::void_pointer(size_t index) const {
   } else if (m_name == "RunNumber") {
     value = peak.getRunNumber();
     return boost::get<int>(&value);
+  } else if (m_name == "PeakNumber") {
+    value = peak.getPeakNumber();
+    return boost::get<int>(&value);
   } else if (m_name == "DetID") {
     value = peak.getDetectorID();
     return boost::get<int>(&value);
@@ -338,5 +347,5 @@ void PeakColumn::setPeakHKLOrRunNumber(const size_t index, const double val) {
     throw std::runtime_error("Unexpected column " + m_name + " being set.");
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

@@ -6,13 +6,13 @@ namespace Mantid {
 namespace Indexing {
 
 /** Return IndexInfo with grouped spectra as specified in the arguments.
-*
-* @param source IndexInfo to use as starting point for grouping.
-* @param specNums Vector of spectrum numbers to use for the ouput IndexInfo.
-* @param grouping Vector for specifying the grouping. The i-th entry in this
-* vector describes the group for the i-th entry in 'specNums'. Each entry is a
-* vector of indices of spectra in 'source' that are to be grouped.
-*/
+ *
+ * @param source IndexInfo to use as starting point for grouping.
+ * @param specNums Vector of spectrum numbers to use for the ouput IndexInfo.
+ * @param grouping Vector for specifying the grouping. The i-th entry in this
+ * vector describes the group for the i-th entry in 'specNums'. Each entry is a
+ * vector of indices of spectra in 'source' that are to be grouped.
+ */
 IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
                 const std::vector<std::vector<size_t>> &grouping) {
   if (specNums.size() != grouping.size())

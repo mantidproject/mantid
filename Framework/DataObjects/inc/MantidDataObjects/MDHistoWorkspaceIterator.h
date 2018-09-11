@@ -1,26 +1,26 @@
 #ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_
 #define MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATOR_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidDataObjects/SkippingPolicy.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/System.h"
+#include <boost/tuple/tuple.hpp>
 #include <map>
 #include <vector>
-#include <boost/tuple/tuple.hpp>
 
 namespace Mantid {
 namespace DataObjects {
 
 // Typedef for a map for mapping width of neighbours (key) to permutations
 // needed in the calcualtion.
-typedef std::map<std::vector<int>, std::vector<int64_t>> PermutationsMap;
+using PermutationsMap = std::map<std::vector<int>, std::vector<int64_t>>;
 // Typedef for extents
-typedef boost::tuple<Mantid::coord_t, Mantid::coord_t>
-    MDExtentPair; // Min/Max pair
+using MDExtentPair =
+    boost::tuple<Mantid::coord_t, Mantid::coord_t>; // Min/Max pair
 // Typedef for vector of extents
-typedef std::vector<MDExtentPair> VecMDExtents;
+using VecMDExtents = std::vector<MDExtentPair>;
 
 /** An implementation of IMDIterator that iterates through
   a MDHistoWorkspace. It treats the bin in the workspace as
@@ -95,10 +95,12 @@ public:
 
   signal_t getError() const override;
 
-  coord_t *getVertexesArray(size_t &numVertices) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const override;
 
-  coord_t *getVertexesArray(size_t &numVertices, const size_t outDimensions,
-                            const bool *maskDim) const override;
+  std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const override;
 
   Mantid::Kernel::VMD getCenter() const override;
 

@@ -11,22 +11,14 @@
 # main()
 #=============================================================
 
-
-FIND_FILE(_find_sphinx_py FindSphinx.py PATHS ${CMAKE_MODULE_PATH})
-
-if (version_string)   # chop out the version number
-  string (REGEX REPLACE ".*([0-9]+\\.[0-9]+\\.[0-9]+).*" "\\1" SPHINX_VERSION ${version_string})
-endif()
-
+find_file (_find_sphinx_py FindSphinx.py PATHS ${CMAKE_MODULE_PATH})
 
 # import sphinx-build to attempt to get the version
 execute_process (COMMAND ${PYTHON_EXECUTABLE} ${_find_sphinx_py} OUTPUT_VARIABLE sphinx_output
                                                                  RESULT_VARIABLE sphinx_result)
+string (STRIP "${sphinx_output}" sphinx_output)
 
-if (${sphinx_result} STREQUAL "0")# AND version_string)
-  if (version_string)
-    list(GET sphinx_output 0 version_string)
-  endif()
+if (${sphinx_result} STREQUAL "0")
   list(GET sphinx_output 1 SPHINX_PACKAGE_DIR)
 else()
   message(STATUS "failed to run FindSphinx.py returned ${sphinx_result}")

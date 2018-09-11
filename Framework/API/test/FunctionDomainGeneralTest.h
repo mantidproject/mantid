@@ -1,8 +1,8 @@
 #ifndef FUNCTIONDOMAINGENERALTEST_H_
 #define FUNCTIONDOMAINGENERALTEST_H_
 
-#include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/FunctionDomainGeneral.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -29,6 +29,7 @@ public:
   }
   /// Specialized type check
   bool isBool() const override { return false; }
+  bool isNumber() const override { return false; }
   /// Must return overall memory size taken by the column.
   long int sizeOfData() const override {
     throw std::logic_error("Not implemented");
@@ -61,7 +62,7 @@ protected:
   std::vector<T> m_data;
 };
 
-} // anonymoius namespace
+} // namespace
 
 class FunctionDomainGeneralTest : public CxxTest::TestSuite {
 public:

@@ -2,12 +2,12 @@
 #define MANTID_ALGORITHMS_BINARYOPERATEMASKSTEST_H_
 
 #include "MantidAlgorithms/BinaryOperateMasks.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -72,7 +72,7 @@ public:
 
     std::cout << "\nTest I Is Completed\n";
 
-    if (ws1 == NULL) {
+    if (ws1 == nullptr) {
       std::cout << "\nWorkspace1 is NULL\n";
     }
 
@@ -100,13 +100,13 @@ public:
       ws4 = AnalysisDataService::Instance()
                 .retrieveWS<DataObjects::MaskWorkspace>(ws4name);
 
-      if (ws4 == NULL) {
+      if (ws4 == nullptr) {
         std::cout << "Workspace4 is NULL\n";
       } else {
         std::cout << "Workspace4 is good at output of NOT.  Number Histogram = "
                   << ws4->getNumberHistograms() << '\n';
       }
-      if (ws1 == NULL) {
+      if (ws1 == nullptr) {
         std::cout << "Workspace1 is NULL\n";
       } else {
         std::cout << "Workspace1 is good at output of NOT.  Number Histogram = "

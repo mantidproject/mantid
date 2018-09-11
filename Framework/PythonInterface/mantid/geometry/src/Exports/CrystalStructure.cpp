@@ -73,7 +73,7 @@ std::string __repr__implementation(const CrystalStructure &self) {
 
   return ss.str();
 }
-}
+} // namespace
 
 void export_CrystalStructure() {
   class_<CrystalStructure>("CrystalStructure", no_init)

@@ -1,13 +1,13 @@
 #ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 #define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/optional.hpp>
 #include <map>
 #include <unordered_set>
 
@@ -22,17 +22,17 @@ class ICluster;
  * Namespace containing useful typedefs
  */
 namespace ConnectedComponentMappingTypes {
-typedef boost::tuple<double, double> SignalErrorSQPair;
-typedef std::map<size_t, SignalErrorSQPair> LabelIdIntensityMap;
-typedef std::map<Mantid::Kernel::V3D, size_t> PositionToLabelIdMap;
-typedef std::vector<size_t> VecIndexes;
-typedef std::vector<DisjointElement> VecElements;
-typedef std::unordered_set<size_t> SetIds;
-typedef std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>
-    ClusterMap;
-typedef boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>
-    ClusterTuple;
-}
+using SignalErrorSQPair = boost::tuple<double, double>;
+using LabelIdIntensityMap = std::map<size_t, SignalErrorSQPair>;
+using PositionToLabelIdMap = std::map<Mantid::Kernel::V3D, size_t>;
+using VecIndexes = std::vector<size_t>;
+using VecElements = std::vector<DisjointElement>;
+using SetIds = std::unordered_set<size_t>;
+using ClusterMap =
+    std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>;
+using ClusterTuple =
+    boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>;
+} // namespace ConnectedComponentMappingTypes
 
 class BackgroundStrategy;
 

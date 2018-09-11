@@ -11,7 +11,7 @@
 namespace Poco {
 class AbstractObserver;
 template <class T> class ActiveResult;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace API {
@@ -21,7 +21,7 @@ namespace API {
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
-typedef void *AlgorithmID;
+using AlgorithmID = void *;
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
@@ -76,6 +76,9 @@ public:
 
   /// Function to return the separator token for the category string
   virtual const std::string categorySeparator() const = 0;
+
+  /// Function to return all of the seeAlso algorithms related to this algorithm
+  virtual const std::vector<std::string> seeAlso() const = 0;
 
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;

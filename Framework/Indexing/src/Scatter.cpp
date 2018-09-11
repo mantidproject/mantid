@@ -1,6 +1,6 @@
-#include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/Scatter.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"

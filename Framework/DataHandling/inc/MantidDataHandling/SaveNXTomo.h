@@ -4,10 +4,10 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include <vector>
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -60,6 +60,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveNexusProcessed"};
+  }
 
   /// Algorithm's category for identification
   const std::string category() const override {

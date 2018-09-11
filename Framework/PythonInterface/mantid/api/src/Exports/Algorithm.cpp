@@ -3,10 +3,10 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/SerialAlgorithm.h"
-#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAPI/SerialAlgorithm.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
@@ -21,11 +21,11 @@
 #include <boost/python/scope.hpp>
 
 using Mantid::API::Algorithm;
-using Mantid::API::SerialAlgorithm;
-using Mantid::API::ParallelAlgorithm;
 using Mantid::API::DistributedAlgorithm;
-using Mantid::PythonInterface::AlgorithmAdapter;
+using Mantid::API::ParallelAlgorithm;
+using Mantid::API::SerialAlgorithm;
 using Mantid::Kernel::Direction;
+using Mantid::PythonInterface::AlgorithmAdapter;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Algorithm)
@@ -34,38 +34,34 @@ GET_POINTER_SPECIALIZATION(ParallelAlgorithm)
 GET_POINTER_SPECIALIZATION(DistributedAlgorithm)
 
 namespace {
-typedef AlgorithmAdapter<Algorithm> PythonAlgorithm;
-typedef AlgorithmAdapter<SerialAlgorithm> PythonSerialAlgorithm;
-typedef AlgorithmAdapter<ParallelAlgorithm> PythonParallelAlgorithm;
-typedef AlgorithmAdapter<DistributedAlgorithm> PythonDistributedAlgorithm;
+using PythonAlgorithm = AlgorithmAdapter<Algorithm>;
+using PythonSerialAlgorithm = AlgorithmAdapter<SerialAlgorithm>;
+using PythonParallelAlgorithm = AlgorithmAdapter<ParallelAlgorithm>;
+using PythonDistributedAlgorithm = AlgorithmAdapter<DistributedAlgorithm>;
 
 // declarePyAlgProperty(property*,doc)
-typedef void (*declarePropertyType1)(boost::python::object &self,
-                                     Mantid::Kernel::Property *,
-                                     const std::string &);
+using declarePropertyType1 = void (*)(boost::python::object &,
+                                      Mantid::Kernel::Property *,
+                                      const std::string &);
 // declarePyAlgProperty(name, defaultValue, validator, doc, direction)
-typedef void (*declarePropertyType2)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &,
-                                     const boost::python::object &,
-                                     const std::string &, const int);
+using declarePropertyType2 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, doc, direction)
-typedef void (*declarePropertyType3)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &,
-                                     const std::string &, const int);
+using declarePropertyType3 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &,
+                                      const std::string &, const int);
 // declarePyAlgProperty(name, defaultValue, direction)
-typedef void (*declarePropertyType4)(boost::python::object &self,
-                                     const std::string &,
-                                     const boost::python::object &, const int);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+using declarePropertyType4 = void (*)(boost::python::object &,
+                                      const std::string &,
+                                      const boost::python::object &, const int);
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 // Overload types
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType1_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 2, 3)
@@ -73,10 +69,9 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 3, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
+
 /**
  * Map a CancelException to a Python KeyboardInterupt
  * @param exc A cancel exception to translate. Unused here as the message is
@@ -86,7 +81,7 @@ void translateCancel(const Algorithm::CancelException &exc) {
   UNUSED_ARG(exc);
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
 }
-}
+} // namespace
 
 void export_leaf_classes() {
   register_ptr_to_python<boost::shared_ptr<Algorithm>>();

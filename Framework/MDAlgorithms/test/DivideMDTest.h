@@ -1,14 +1,14 @@
 #ifndef MANTID_MDALGORITHMS_DIVIDEMDTEST_H_
 #define MANTID_MDALGORITHMS_DIVIDEMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/DivideMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -64,7 +64,7 @@ public:
     TS_ASSERT(ws);
     if (!ws)
       return;
-    IMDIterator *it = ws->createIterator(NULL);
+    auto it = ws->createIterator(nullptr);
     do {
       TS_ASSERT_EQUALS(it->getNumEvents(), 1);
       TS_ASSERT_DELTA(it->getInnerSignal(0), expectedSignal, 1e-5);

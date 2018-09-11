@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_RebinByPulseTimesTEST_H_
 #define MANTID_ALGORITHMS_RebinByPulseTimesTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "RebinByTimeBaseTest.h"
 #include "MantidAlgorithms/RebinByPulseTimes.h"
+#include "RebinByTimeBaseTest.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::RebinByPulseTimes;
 
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-typedef RebinByTimeBaseTest<RebinByPulseTimes> Super;
+using Super = RebinByTimeBaseTest<RebinByPulseTimes>;
 class RebinByPulseTimesTest : public CxxTest::TestSuite, public Super {
 
 public:
@@ -144,8 +144,8 @@ public:
 //=====================================================================================
 // clang-format off
 class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite, public RebinByTimeBaseTestPerformance<RebinByPulseTimes>
-      // clang-format on
-      {
+// clang-format on
+{
 
 public:
   static RebinByPulseTimesTestPerformance *createSuite() {

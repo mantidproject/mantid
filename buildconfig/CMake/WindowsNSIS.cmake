@@ -44,7 +44,7 @@ endforeach()
 # Other third party dependencies
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
-    boost_python-mt.dll
+    boost_python27-mt.dll
     boost_regex-mt.dll
     boost_serialization-mt.dll
 )

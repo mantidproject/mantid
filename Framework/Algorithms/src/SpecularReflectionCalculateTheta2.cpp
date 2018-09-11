@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta2.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <cmath>
 
@@ -15,7 +15,7 @@ namespace {
 const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
 const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
 const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {

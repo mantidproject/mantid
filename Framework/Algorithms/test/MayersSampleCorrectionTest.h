@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
-#include "MantidKernel/Material.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::MayersSampleCorrection;
 
 class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:
@@ -41,11 +41,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37666067, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37553044, signal.back(), delta);
+    TS_ASSERT_DELTA(0.374435, signal.front(), delta);
+    TS_ASSERT_DELTA(0.377909, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26633931, error.front(), delta);
-    TS_ASSERT_DELTA(0.26554012, error.back(), delta);
+    TS_ASSERT_DELTA(0.264766, error.front(), delta);
+    TS_ASSERT_DELTA(0.267222, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {
@@ -106,8 +106,8 @@ private:
   MatrixWorkspace_sptr createTestWorkspaceForCorrection() {
     using ComponentCreationHelper::createCappedCylinder;
     using ComponentCreationHelper::createTestInstrumentCylindrical;
-    using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::CSGObject;
+    using Mantid::Geometry::ObjComponent;
     using Mantid::Kernel::Material;
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
@@ -155,8 +155,8 @@ private:
 
   MatrixWorkspace_sptr createTestWorkspaceWithNoSampleShape() {
     using ComponentCreationHelper::createTestInstrumentCylindrical;
-    using Mantid::Geometry::ObjComponent;
     using Mantid::Geometry::CSGObject;
+    using Mantid::Geometry::ObjComponent;
     using Mantid::Kernel::V3D;
     using WorkspaceCreationHelper::create2DWorkspaceBinned;
 

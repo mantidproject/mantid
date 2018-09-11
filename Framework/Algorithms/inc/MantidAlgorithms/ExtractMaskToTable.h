@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_EXTRACTMASKTOTABLE_H_
 #define MANTID_ALGORITHMS_EXTRACTMASKTOTABLE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -46,6 +46,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"ExtractMask"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
 

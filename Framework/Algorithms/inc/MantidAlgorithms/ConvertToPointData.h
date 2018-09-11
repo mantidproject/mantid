@@ -46,7 +46,9 @@ public:
     return "Converts a workspace containing histogram data into one containing "
            "point data.";
   }
-
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToHistogram"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Axes"; }
 
@@ -61,7 +63,7 @@ private:
       Kernel::cow_ptr<HistogramData::HistogramX> inputX) const override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_CONVERTTOPOINTDATA_H_*/

@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/UnitFactory.h"
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
-#include "MantidKernel/UnitFactory.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
 using namespace Mantid::Poldi;
@@ -123,10 +123,9 @@ public:
     std::vector<double> testXData(testYData.size());
 
     double x = 0.0;
-    for (std::vector<double>::iterator iterX = testXData.begin();
-         iterX != testXData.end(); ++iterX) {
+    for (double &iterX : testXData) {
       x += 1.0;
-      *iterX = x;
+      iterX = x;
     }
 
     std::list<std::vector<double>::const_iterator> maxima =

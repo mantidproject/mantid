@@ -45,8 +45,8 @@ public:
   LibraryWrapper(const LibraryWrapper &) = delete;
   LibraryWrapper &operator=(const LibraryWrapper &) = delete;
 
-  LibraryWrapper(LibraryWrapper &&src);
-  LibraryWrapper &operator=(LibraryWrapper &&rhs);
+  LibraryWrapper(LibraryWrapper &&src) noexcept;
+  LibraryWrapper &operator=(LibraryWrapper &&rhs) noexcept;
   ~LibraryWrapper();
 
   bool openLibrary(const std::string &filepath);

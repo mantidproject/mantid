@@ -1,5 +1,5 @@
-#include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/CompositeCatalog.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -108,5 +108,5 @@ std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
 size_t CatalogManagerImpl::numberActiveSessions() const {
   return m_activeCatalogs.size();
 }
-}
-}
+} // namespace API
+} // namespace Mantid

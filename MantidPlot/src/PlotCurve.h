@@ -29,9 +29,9 @@
 #ifndef PLOTCURVE_H
 #define PLOTCURVE_H
 
+#include "Table.h"
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
-#include "Table.h"
 
 class PlotMarker;
 class Graph;
@@ -41,7 +41,7 @@ namespace Mantid {
 namespace Kernel {
 class Unit;
 }
-}
+} // namespace Mantid
 
 //! Abstract 2D plot curve class
 class PlotCurve : public QObject, public QwtPlotCurve {

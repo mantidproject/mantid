@@ -91,6 +91,8 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
+#include "Process.h"
+#include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
 #include "QwtHistogram.h"
@@ -246,25 +248,14 @@ void file_uncompress(const char *file);
 }
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-    : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
-      blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
-#ifdef Q_OS_MAC // Mac
-      settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
-               "MantidPlot")
-#else
-      settings("Mantid", "MantidPlot")
-#endif
-{
-  QStringList empty;
-  init(factorySettings, empty);
-}
+    // Delegate with an empty string list for the arguments
+    : ApplicationWindow(factorySettings, QStringList{}) {}
 
 ApplicationWindow::ApplicationWindow(bool factorySettings,
                                      const QStringList &args)
     : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this)),
       blockWindowActivation(false), m_enableQtiPlotFitting(false),
-      m_exitCode(0),
+      m_projectRecovery(this), m_exitCode(0),
 #ifdef Q_OS_MAC // Mac
       settings(QSettings::IniFormat, QSettings::UserScope, "Mantid",
                "MantidPlot")
@@ -278,7 +269,7 @@ ApplicationWindow::ApplicationWindow(bool factorySettings,
 /**
  * This function is responsible for copying the old configuration
  * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
- * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * area. The old area is deleted once the transfer is complete. On subsequent
  * runs, if the old configuration area is missing or empty, the copying
  * is ignored.
  */
@@ -348,7 +339,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   setAttribute(Qt::WA_DeleteOnClose);
 
 #ifdef SHARED_MENUBAR
-  m_sharedMenuBar = new QMenuBar(NULL);
+  m_sharedMenuBar = new QMenuBar(nullptr);
   m_sharedMenuBar->setNativeMenuBar(true);
 #endif
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
@@ -902,7 +893,7 @@ void ApplicationWindow::initGlobalConstants() {
 
 QMenuBar *ApplicationWindow::myMenuBar() {
 #ifdef SHARED_MENUBAR
-  return m_sharedMenuBar == NULL ? menuBar() : m_sharedMenuBar;
+  return m_sharedMenuBar == nullptr ? menuBar() : m_sharedMenuBar;
 #else
   return menuBar();
 #endif
@@ -1131,7 +1122,7 @@ void ApplicationWindow::initMainMenu() {
 
   newMenu = new QMenu(this);
   recentProjectsMenu = new QMenu(this);
-  recentFilesMenu = new QMenu(this);
+  recentFilesMenu = new MenuWithToolTips(this);
   newMenu->setObjectName("newMenu");
   exportPlotMenu = new QMenu(this);
   exportPlotMenu->setObjectName("exportPlotMenu");
@@ -2446,7 +2437,7 @@ Graph3D *ApplicationWindow::dataPlot3D(const QString &caption,
   posX = formula.indexOf("(", pos);
   QString yCol = formula.mid(pos + 1, posX - pos - 1);
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->addData(w, xCol, yCol, xl, xr, yl, yr, zl, zr);
   plot->update();
 
@@ -2466,7 +2457,7 @@ Graph3D *ApplicationWindow::newPlot3D() {
 
   QString label = generateUniqueName(tr("Graph"));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->setWindowTitle(label);
   plot->setName(label);
 
@@ -2486,7 +2477,7 @@ Graph3D *ApplicationWindow::plotXYZ(Table *table, const QString &zColName,
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   QString label = generateUniqueName(tr("Graph"));
   plot->setWindowTitle(label);
   plot->setName(label);
@@ -2531,7 +2522,7 @@ Graph3D *ApplicationWindow::openPlotXYZ(const QString &caption,
   int yCol = w->colIndex(yColName);
   int zCol = w->colIndex(zColName);
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->loadData(w, xCol, yCol, zCol, xl, xr, yl, yr, zl, zr);
 
   QString label = caption;
@@ -2584,7 +2575,7 @@ void ApplicationWindow::exportMatrix() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, m != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, m != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -2604,7 +2595,8 @@ void ApplicationWindow::exportMatrix() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!").arg(file_name));
+           "you have the right to write to this location!")
+            .arg(file_name));
     return;
   }
 
@@ -2971,8 +2963,8 @@ void ApplicationWindow::setAutoUpdateTableValues(bool on) {
     QList<MdiSubWindow *> folderWindows = f->windowsList();
     foreach (MdiSubWindow *w, folderWindows) {
       if (w->inherits("Table"))
-        dynamic_cast<Table *>(w)
-            ->setAutoUpdateValues(d_auto_update_table_values);
+        dynamic_cast<Table *>(w)->setAutoUpdateValues(
+            d_auto_update_table_values);
     }
     f = f->folderBelow();
   }
@@ -3051,7 +3043,7 @@ void ApplicationWindow::setPreferences(Graph *g) {
  *creates a new empty table
  */
 Table *ApplicationWindow::newTable() {
-  Table *w = new Table(scriptingEnv(), 30, 2, "", this, 0);
+  Table *w = new Table(scriptingEnv(), 30, 2, "", this, nullptr);
   initTable(w, generateUniqueName(tr("Table")));
   w->showNormal();
   return w;
@@ -3061,7 +3053,7 @@ Table *ApplicationWindow::newTable() {
  *used when opening a project file
  */
 Table *ApplicationWindow::newTable(const QString &caption, int r, int c) {
-  Table *w = new Table(scriptingEnv(), r, c, "", this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, "", this, nullptr);
   initTable(w, caption);
   if (w->objectName() != caption) { // the table was renamed
     renamedTables << caption << w->objectName();
@@ -3083,7 +3075,7 @@ bool ApplicationWindow::isDeleteWorkspacePromptEnabled() {
 
 Table *ApplicationWindow::newTable(int r, int c, const QString &name,
                                    const QString &legend) {
-  Table *w = new Table(scriptingEnv(), r, c, legend, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, legend, this, nullptr);
   initTable(w, name);
   return w;
 }
@@ -3095,7 +3087,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c,
   if (lst.count() == 2)
     legend = lst[1];
 
-  Table *w = new Table(scriptingEnv(), r, c, legend, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, legend, this, nullptr);
 
   QStringList rows = text.split("\n", QString::SkipEmptyParts);
   QString rlist = rows[0];
@@ -3117,7 +3109,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c,
 Table *ApplicationWindow::newHiddenTable(const QString &name,
                                          const QString &label, int r, int c,
                                          const QString &text) {
-  Table *w = new Table(scriptingEnv(), r, c, label, this, 0);
+  Table *w = new Table(scriptingEnv(), r, c, label, this, nullptr);
 
   if (!text.isEmpty()) {
     QStringList rows = text.split("\n", QString::SkipEmptyParts);
@@ -3194,14 +3186,14 @@ Note *ApplicationWindow::newNote(const QString &caption) {
 }
 
 Matrix *ApplicationWindow::newMatrix(int rows, int columns) {
-  Matrix *m = new Matrix(scriptingEnv(), rows, columns, "", this, 0);
+  Matrix *m = new Matrix(scriptingEnv(), rows, columns, "", this, nullptr);
   initMatrix(m, generateUniqueName(tr("Matrix")));
   m->showNormal();
   return m;
 }
 
 Matrix *ApplicationWindow::newMatrix(const QString &caption, int r, int c) {
-  Matrix *w = new Matrix(scriptingEnv(), r, c, "", this, 0);
+  Matrix *w = new Matrix(scriptingEnv(), r, c, "", this, nullptr);
   initMatrix(w, caption);
   if (w->objectName() != caption) // the matrix was renamed
     renamedTables << caption << w->objectName();
@@ -3397,14 +3389,14 @@ ApplicationWindow::matrixToTable(Matrix *m,
 
   Table *w = nullptr;
   if (conversionType == Direct) {
-    w = new Table(scriptingEnv(), rows, cols, "", this, 0);
+    w = new Table(scriptingEnv(), rows, cols, "", this, nullptr);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++)
         w->setCell(i, j, m->cell(i, j));
     }
   } else if (conversionType == XYZ) {
     int tableRows = rows * cols;
-    w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
+    w = new Table(scriptingEnv(), tableRows, 3, "", this, nullptr);
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         int cell = i * cols + j;
@@ -3415,7 +3407,7 @@ ApplicationWindow::matrixToTable(Matrix *m,
     }
   } else if (conversionType == YXZ) {
     int tableRows = rows * cols;
-    w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
+    w = new Table(scriptingEnv(), tableRows, 3, "", this, nullptr);
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
         int cell = i * rows + j;
@@ -3575,11 +3567,12 @@ MantidTable *ApplicationWindow::convertTableToTableWorkspace(Table *t) {
   }
   std::string wsName = t->objectName().toStdString();
   if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
-    if (QMessageBox::question(
-            this, "MantidPlot", "Workspace with name " + t->objectName() +
-                                    " already exists\n"
-                                    "Do you want to overwrite it?",
-            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+    if (QMessageBox::question(this, "MantidPlot",
+                              "Workspace with name " + t->objectName() +
+                                  " already exists\n"
+                                  "Do you want to overwrite it?",
+                              QMessageBox::Yes | QMessageBox::No) ==
+        QMessageBox::Yes) {
       Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, tws);
     } else {
       return nullptr;
@@ -3600,7 +3593,7 @@ Matrix *ApplicationWindow::tableToMatrix(Table *t) {
   int cols = t->numCols();
 
   QString caption = generateUniqueName(tr("Matrix"));
-  Matrix *m = new Matrix(scriptingEnv(), rows, cols, "", this, 0);
+  Matrix *m = new Matrix(scriptingEnv(), rows, cols, "", this, nullptr);
   initMatrix(m, caption);
 
   for (int i = 0; i < rows; i++) {
@@ -3757,9 +3750,10 @@ void ApplicationWindow::addErrorBars() {
 
   ErrDialog *ed = new ErrDialog(this);
   ed->setAttribute(Qt::WA_DeleteOnClose);
-  connect(ed, SIGNAL(options(const QString &, int, const QString &, int, bool)),
-          this, SLOT(defineErrorBars(const QString &, int, const QString &, int,
-                                     bool)));
+  connect(
+      ed, SIGNAL(options(const QString &, int, const QString &, int, bool)),
+      this,
+      SLOT(defineErrorBars(const QString &, int, const QString &, int, bool)));
   connect(ed, SIGNAL(options(const QString &, const QString &, int)), this,
           SLOT(defineErrorBars(const QString &, const QString &, int)));
 
@@ -4500,7 +4494,8 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
       int choice = QMessageBox::question(
           this, tr("MantidPlot - File opening error"), // Mantid
           tr("The file <b>%1</b> is corrupted, but there exists a backup "
-             "copy.<br>Do you want to open the backup instead?").arg(fn),
+             "copy.<br>Do you want to open the backup instead?")
+              .arg(fn),
           QMessageBox::Yes | QMessageBox::Default,
           QMessageBox::No | QMessageBox::Escape);
       if (choice == QMessageBox::Yes)
@@ -4541,7 +4536,8 @@ void ApplicationWindow::openRecentFile(QAction *action) {
       QMessageBox::critical(
           this, tr("MantidPlot - File Open Error"), // Mantid
           tr("The file: <b> %1 </b> <p>is not there anymore!"
-             "<p>It will be removed from the list of recent files.").arg(fn));
+             "<p>It will be removed from the list of recent files.")
+              .arg(fn));
 
       recentFiles.removeAll(fn);
       updateRecentFilesList();
@@ -4562,7 +4558,8 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     QMessageBox::critical(
         this, tr("MantidPlot - File Open Error"), // Mantid
         tr("The file: <b> %1 </b> <p>does not exist anymore!"
-           "<p>It will be removed from the list of recent projects.").arg(fn));
+           "<p>It will be removed from the list of recent projects.")
+            .arg(fn));
 
     recentProjects.removeAll(fn);
     updateRecentProjectsList();
@@ -4628,29 +4625,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   d_opening_file = true;
 
-  QFile file(filename);
-  QFileInfo fileInfo(filename);
-
-  if (!file.open(QIODevice::ReadOnly))
-    throw std::runtime_error("Couldn't open project file");
-
-  QTextStream fileTS(&file);
-  fileTS.setCodec(QTextCodec::codecForName("UTF-8"));
-
-  QString baseName = fileInfo.fileName();
-
-  // Skip mantid version line
-  fileTS.readLine();
-
-  // Skip the <scripting-lang> line. We only really use python now anyway.
-  fileTS.readLine();
-  setScriptingLanguage("Python");
-
-  // Skip the <windows> line.
-  fileTS.readLine();
-
   folders->blockSignals(true);
   blockSignals(true);
+
+  // Open as a top level folder
+  ProjectSerialiser serialiser(this);
+  try {
+    serialiser.load(filename.toStdString(), fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - reset and bail out
+    d_opening_file = false;
+    folders->blockSignals(false);
+    blockSignals(false);
+    return this;
+  }
 
   Folder *curFolder = projectFolder();
 
@@ -4659,29 +4648,21 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   if (!item)
     throw std::runtime_error("Couldn't retrieve folder list items.");
 
+  QFile file(filename);
+  QFileInfo fileInfo(filename);
+  QString baseName = fileInfo.fileName();
   item->setText(0, fileInfo.baseName());
   item->folder()->setObjectName(fileInfo.baseName());
 
-  // Read the rest of the project file in for parsing
-  std::string lines = fileTS.readAll().toUtf8().constData();
-
   d_loaded_current = nullptr;
-
-  // Open as a top level folder
-  ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
 
   if (d_loaded_current)
     curFolder = d_loaded_current;
 
-  {
-    // WHY use another fileinfo?
-    QFileInfo fi2(file);
-    QString fileName = fi2.absoluteFilePath();
-    recentProjects.removeAll(filename);
-    recentProjects.push_front(filename);
-    updateRecentProjectsList();
-  }
+  QString fileName = fileInfo.absoluteFilePath();
+  recentProjects.removeAll(filename);
+  recentProjects.push_front(filename);
+  updateRecentProjectsList();
 
   folders->setCurrentItem(curFolder->folderListItem());
   folders->blockSignals(false);
@@ -4701,6 +4682,7 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
 
   return this;
 }
+
 bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
   if (lang.isEmpty())
     return false;
@@ -4791,8 +4773,8 @@ void ApplicationWindow::readSettings() {
       settings.value("/Language", QLocale::system().name().section('_', 0, 0))
           .toString();
   show_windows_policy =
-      (ShowWindowsPolicy)settings.value("/ShowWindowsPolicy",
-                                        ApplicationWindow::ActiveFolder)
+      (ShowWindowsPolicy)settings
+          .value("/ShowWindowsPolicy", ApplicationWindow::ActiveFolder)
           .toInt();
 
   recentProjects = settings.value("/RecentProjects").toStringList();
@@ -5039,8 +5021,8 @@ void ApplicationWindow::readSettings() {
     settings.remove("/AutoDistribution1D");
   }
   // Pull default from config service
-  const std::string propStr = cfgSvc.getString("graph1d.autodistribution");
-  autoDistribution1D = (propStr == "On");
+  autoDistribution1D =
+      cfgSvc.getValue<bool>("graph1d.autodistribution").get_value_or(false);
 
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
@@ -5345,7 +5327,7 @@ void ApplicationWindow::saveSettings() {
 #endif
 
   // Root level is named "General" by Qt
-  resultsLog->writeSettings(&settings);
+  resultsLog->writeSettings(settings);
 
   // Our named group General, displayed as %General in the file
   settings.beginGroup("/General");
@@ -5701,7 +5683,7 @@ void ApplicationWindow::exportGraph() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, plot2D != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, plot2D != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -5721,7 +5703,8 @@ void ApplicationWindow::exportGraph() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!").arg(file_name));
+           "you have the right to write to this location!")
+            .arg(file_name));
     return;
   }
   file.close();
@@ -5764,7 +5747,7 @@ void ApplicationWindow::exportLayer() {
     return;
 
   ImageExportDialog *ied =
-      new ImageExportDialog(this, g != NULL, d_extended_export_dialog);
+      new ImageExportDialog(this, g != nullptr, d_extended_export_dialog);
   ied->setDirectory(workingDir);
   ied->selectFilter(d_image_export_filter);
   if (ied->exec() != QDialog::Accepted)
@@ -5784,7 +5767,8 @@ void ApplicationWindow::exportLayer() {
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!").arg(file_name));
+           "you have the right to write to this location!")
+            .arg(file_name));
     return;
   }
   file.close();
@@ -5837,7 +5821,7 @@ void ApplicationWindow::exportAllGraphs() {
   foreach (MdiSubWindow *w, windows) {
     const std::string windowClassName = w->metaObject()->className();
     if (windowClassName == "MultiLayer") {
-      plot3D = 0;
+      plot3D = nullptr;
       plot2D = dynamic_cast<MultiLayer *>(w);
       if (!plot2D)
         continue;
@@ -5846,12 +5830,13 @@ void ApplicationWindow::exportAllGraphs() {
         QMessageBox::warning(
             this, tr("MantidPlot - Warning"), // Mantid
             tr("There are no plot layers available in window <b>%1</b>.<br>"
-               "Graph window not exported!").arg(plot2D->objectName()));
+               "Graph window not exported!")
+                .arg(plot2D->objectName()));
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         continue;
       }
     } else if (windowClassName == "Graph3D") {
-      plot2D = 0;
+      plot2D = nullptr;
       plot3D = dynamic_cast<Graph3D *>(w);
       if (!plot3D)
         continue;
@@ -5864,7 +5849,8 @@ void ApplicationWindow::exportAllGraphs() {
       QApplication::restoreOverrideCursor();
 
       QString msg = tr("A file called: <p><b>%1</b><p>already exists. "
-                       "Do you want to overwrite it?").arg(file_name);
+                       "Do you want to overwrite it?")
+                        .arg(file_name);
       QMessageBox msgBox(QMessageBox::Question,
                          tr("MantidPlot - Overwrite file?"), msg, // Mantid
                          QMessageBox::Yes | QMessageBox::YesToAll |
@@ -6018,7 +6004,6 @@ bool ApplicationWindow::saveProject(bool compress) {
       projectname.endsWith(".ogg", Qt::CaseInsensitive)) {
     saveProjectAs();
     return true;
-    ;
   }
 
   ProjectSerialiser serialiser(this);
@@ -6056,9 +6041,31 @@ int ApplicationWindow::execSaveProjectDialog() {
       windows.push_back(win);
   }
 
+  const QString pyInterfaceMarkerProperty("launcher");
+  std::vector<std::string> activePythonInterfaces;
+  auto serialisablePythonInterfaces =
+      ProjectSerialiser::serialisablePythonInterfaces();
+  auto activeWidgets = QApplication::allWidgets();
+  for (auto widget : activeWidgets) {
+    QVariant launcherScript =
+        widget->property(pyInterfaceMarkerProperty.toLatin1().data());
+    if (launcherScript.isValid()) {
+      auto launcherScriptName = launcherScript.toString();
+      if (serialisablePythonInterfaces.contains(launcherScriptName)) {
+        activePythonInterfaces.emplace_back(launcherScriptName.toStdString());
+      } else {
+        g_log.warning()
+            << "Widget contains property "
+            << pyInterfaceMarkerProperty.toStdString() << " with value "
+            << launcherScriptName.toStdString()
+            << " but this is not an interface we know how to save.\n";
+      }
+    }
+  }
+
   auto serialiser = new ProjectSerialiser(this, currentFolder());
   m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(
-      projectname, *serialiser, windows, this);
+      projectname, *serialiser, windows, activePythonInterfaces, this);
   connect(m_projectSaveView, SIGNAL(projectSaved()), this,
           SLOT(postSaveProject()));
   return m_projectSaveView->exec();
@@ -6137,7 +6144,7 @@ void ApplicationWindow::savetoNexusFile() {
 void ApplicationWindow::loadDataFile() {
   // Ask user for file
   QString fn = QFileDialog::getOpenFileName(
-      0, tr("Mantidplot - Open file to load"),
+      nullptr, tr("Mantidplot - Open file to load"),
       AlgorithmInputHistory::Instance().getPreviousDirectory());
   if (fn != "") {
     loadDataFileByName(fn);
@@ -6438,7 +6445,7 @@ void ApplicationWindow::showTitleDialog() {
 
     Graph *g = ml->activeGraph();
     if (g) {
-      TextDialog *td = new TextDialog(TextDialog::LayerTitle, this, 0);
+      TextDialog *td = new TextDialog(TextDialog::LayerTitle, this, nullptr);
       td->setGraph(g);
       td->exec();
     }
@@ -6462,7 +6469,7 @@ void ApplicationWindow::showAxisTitleDialog() {
   if (!g)
     return;
 
-  TextDialog *td = new TextDialog(TextDialog::AxisTitle, this, 0);
+  TextDialog *td = new TextDialog(TextDialog::AxisTitle, this, nullptr);
   td->setGraph(g);
   td->exec();
 }
@@ -6507,7 +6514,8 @@ void ApplicationWindow::exportAllTables(const QString &sep, bool colNames,
           auto result = QMessageBox::question(
               this, tr("MantidPlot - Overwrite file?"),
               tr("A file called: <p><b>%1</b><p>already exists. "
-                 "Do you want to overwrite it?").arg(fileName),
+                 "Do you want to overwrite it?")
+                  .arg(fileName),
               tr("&Yes"), tr("&All"), tr("&Cancel"), 0, 1);
 
           if (result == 1)
@@ -6717,9 +6725,9 @@ void ApplicationWindow::autoCorrelate() {
 
   QStringList s = t->selectedColumns();
   if ((int)s.count() != 1) {
-    QMessageBox::warning(
-        this, tr("MantidPlot - Error"),
-        tr("Please select exactly one columns for this operation!")); // Mantid
+    QMessageBox::warning(this, tr("MantidPlot - Error"),
+                         tr("Please select exactly one columns for this "
+                            "operation!")); // Mantid
     return;
   }
 
@@ -6795,7 +6803,8 @@ void ApplicationWindow::showRowStatistics() {
         targets << i;
     newTableStatistics(t, TableStatistics::row, targets)->showNormal();
   } else
-    QMessageBox::warning(this, tr("MantidPlot - Row selection error"), // Mantid
+    QMessageBox::warning(this,
+                         tr("MantidPlot - Row selection error"), // Mantid
                          tr("Please select a row first!"));
 }
 
@@ -7606,7 +7615,7 @@ void ApplicationWindow::removePoints() {
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
            "want to continue?"),
-        tr("Continue"), tr("Cancel"), 0, 1)) {
+        tr("Continue"), tr("Cancel"), nullptr, 1)) {
     case 0:
       g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Remove, info,
                                           SLOT(setText(const QString &))));
@@ -7651,7 +7660,7 @@ void ApplicationWindow::movePoints() {
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
            "want to continue?"),
-        tr("Continue"), tr("Cancel"), 0, 1)) {
+        tr("Continue"), tr("Cancel"), nullptr, 1)) {
     case 0:
       if (g) {
         g->setActiveTool(new DataPickerTool(g, this, DataPickerTool::Move, info,
@@ -7697,8 +7706,10 @@ void ApplicationWindow::exportPDF() {
       QMessageBox::critical(
           this, tr("MantidPlot - Export error"), // Mantid
           tr("Could not write to file: <h4>%1</h4><p>Please verify that you "
-             "have the right to write to this location or that the file is not "
-             "being used by another application!").arg(fname));
+             "have the right to write to this location or that the file is "
+             "not "
+             "being used by another application!")
+              .arg(fname));
       return;
     }
 
@@ -8108,7 +8119,8 @@ void ApplicationWindow::selectMultiPeak(bool showFitPropertyBrowser) {
   selectMultiPeak(plot, showFitPropertyBrowser);
 }
 
-/**  Switch on the multi-peak selecting tool for fitting with the Fit algorithm.
+/**  Switch on the multi-peak selecting tool for fitting with the Fit
+ * algorithm.
  * @param plot :: The MultiLayer the tool will apply to.
  * @param showFitPropertyBrowser :: Set if FitPropertyBrowser must be shown as
  * well.
@@ -8145,9 +8157,9 @@ void ApplicationWindow::selectMultiPeak(MultiLayer *plot,
       PeakPickerTool *ppicker = new PeakPickerTool(
           g, mantidUI->fitFunctionBrowser(), mantidUI, showFitPropertyBrowser);
       if (!ppicker->isInitialized()) {
-        QMessageBox::warning(
-            this, tr("MantidPlot - Warning"),
-            tr("This functionality is not available for the underlying data."));
+        QMessageBox::warning(this, tr("MantidPlot - Warning"),
+                             tr("This functionality is not available for the "
+                                "underlying data."));
         delete ppicker;
         btnPointer->setChecked(true);
         return;
@@ -8345,7 +8357,7 @@ void ApplicationWindow::showTextDialog() {
     if (!l)
       return;
 
-    TextDialog *td = new TextDialog(TextDialog::TextMarker, this, 0);
+    TextDialog *td = new TextDialog(TextDialog::TextMarker, this, nullptr);
     td->setLegendWidget(l);
     td->exec();
   }
@@ -8601,7 +8613,8 @@ void ApplicationWindow::pasteSelection() {
 }
 
 /**
- * Clone an MDI window. TODO: if this method is to be used it needs refactoring.
+ * Clone an MDI window. TODO: if this method is to be used it needs
+ * refactoring.
  *
  * @param w :: A window to clone.
  * @return :: Pointer to the cloned window if successful or NULL if failed.
@@ -8915,8 +8928,8 @@ void ApplicationWindow::setActiveWindow(MdiSubWindow *w) {
     // is active> or the
     // latter one is NULL (when floating window is active).
     if (d_active_window->getFloatingWindow()) {
-      // If floating window is activated, we set MdiArea to not have any active
-      // sub-window.
+      // If floating window is activated, we set MdiArea to not have any
+      // active sub-window.
       d_workspace->setActiveSubWindow(nullptr);
     } else if (QMdiSubWindow *w = d_active_window->getDockedWindow()) {
       // If docked window activated, activate it in MdiArea as well.
@@ -8969,8 +8982,8 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w,
     return;
   }
 
-  // return any non-active QMdiSubWindows to normal so that the active could be
-  // seen
+  // return any non-active QMdiSubWindows to normal so that the active could
+  // be seen
   QMdiSubWindow *qw = dynamic_cast<QMdiSubWindow *>(w->parent());
   QList<MdiSubWindow *> windows = currentFolder()->windowsList();
   foreach (MdiSubWindow *ow, windows) {
@@ -9514,7 +9527,7 @@ void ApplicationWindow::windowsMenuAboutToShow() {
 }
 
 namespace // anonymous
-    {
+{
 /**
  * Helper function used with Qt's qSort to make sure interfaces are in
  * alphabetical order.
@@ -9529,9 +9542,8 @@ void ApplicationWindow::interfaceMenuAboutToShow() {
   interfaceMenu->clear();
   m_interfaceActions.clear();
 
-  // Create a submenu for each category.  Make sure submenus are in alphabetical
-  // order,
-  // and ignore any hidden categories.
+  // Create a submenu for each category.  Make sure submenus are in
+  // alphabetical order, and ignore any hidden categories.
   const QString hiddenProp = QString::fromStdString(
       Mantid::Kernel::ConfigService::Instance().getString(
           "interfaces.categories.hidden"));
@@ -9727,7 +9739,8 @@ void ApplicationWindow::modifiedProject() {
     return;
   // enable actionSaveProject, but not actionSaveFile (which is Save Nexus and
   // doesn't
-  // seem to make sense for qti objects (graphs, tables, matrices, notes, etc.)
+  // seem to make sense for qti objects (graphs, tables, matrices, notes,
+  // etc.)
   if (actionSaveProject)
     actionSaveProject->setEnabled(true);
   if (actionSaveProjectAs)
@@ -9797,11 +9810,20 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
+  if (m_projectRecoveryRunOnStart) {
+    // Stop background saving thread, so it doesn't try to use a destroyed
+    // resource
+    m_projectRecovery.stopProjectSaving();
+    m_projectRecovery.clearAllCheckpoints();
+  }
+
   // Close the remaining MDI windows. The Python API is required to be active
   // when the MDI window destructor is called so that those references can be
   // cleaned up meaning we cannot rely on the deleteLater functionality to
-  // work correctly as this will happen in the next iteration of the event loop,
-  // i.e after the python shutdown code has been run below.
+  // work correctly as this will happen in the next iteration of the event
+  // loop, i.e after the python shutdown code has been run below.
+  m_shuttingDown = true;
+
   MDIWindowList windows = getAllWindows();
   for (auto &win : windows) {
     win->confirmClose(false);
@@ -9825,9 +9847,10 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     delete scriptingWindow;
     scriptingWindow = nullptr;
   }
-  /// Ensure interface python references are cleaned up before the interpreter
-  /// shuts down
+  // Ensure all python references are cleaned up before the interpreter shuts
+  // down
   delete m_iface_script;
+  delete m_interpreterDock;
 
   // Emit a shutting_down() signal that can be caught by
   // independent QMainWindow objects to know when MantidPlot
@@ -10467,7 +10490,7 @@ void ApplicationWindow::chooseHelpFolder() {
   QFileInfo hfi(helpFilePath);
   QString dir = QFileDialog::getExistingDirectory(
       this, tr("Choose the location of the MantidPlot help folder!"),
-      hfi.dir().absolutePath(), 0 /**QFileDialog::ShowDirsOnly*/);
+      hfi.dir().absolutePath(), nullptr /**QFileDialog::ShowDirsOnly*/);
 
   if (!dir.isEmpty()) {
     helpFilePath = dir + "index.html";
@@ -10508,9 +10531,11 @@ void ApplicationWindow::showHelp() {
     QMessageBox::critical(
         this, tr("MantidPlot - Help Profile Not Found!"), // Mantid
         tr("The assistant could not start because the file <b>%1</b> was not "
-           "found in the help file directory!").arg("qtiplot.adp") +
+           "found in the help file directory!")
+                .arg("qtiplot.adp") +
             "<br>" +
-            tr("This file is provided with the MantidPlot manual which can be "
+            tr("This file is provided with the MantidPlot manual which can "
+               "be "
                "downloaded from the following internet address:") +
             "<p><a href = "
             "http://www.mantidproject.org/MantidPlot:_Help>http://"
@@ -10522,7 +10547,7 @@ void ApplicationWindow::showHelp() {
 void ApplicationWindow::showPlotWizard() {
   QStringList lst = tableNames();
   if (lst.count() > 0) {
-    PlotWizard *pw = new PlotWizard(this, 0);
+    PlotWizard *pw = new PlotWizard(this, nullptr);
     pw->setAttribute(Qt::WA_DeleteOnClose);
     connect(pw, SIGNAL(plot(const QStringList &)), this,
             SLOT(multilayerPlot(const QStringList &)));
@@ -11258,8 +11283,7 @@ void ApplicationWindow::addLayer() {
       tr("MantidPlot - Guess best origin for the new layer?"), // Mantid
       tr("Do you want MantidPlot to guess the best position for the new "
          "layer?\n Warning: this will rearrange existing layers!"), // Mantid
-      tr("&Guess"),
-      tr("&Top-left corner"), tr("&Cancel"), 0, 2)) {
+      tr("&Guess"), tr("&Top-left corner"), tr("&Cancel"), 0, 2)) {
   case 0: {
     setPreferences(plot->addLayer());
     plot->arrangeLayers(true, false);
@@ -11567,12 +11591,13 @@ void ApplicationWindow::setUpdateCurvesFromTable(Table *table, bool on) {
   colour for ToolTipText on the other hand affects all three of
   these.
 
-  The default pallete shows light text on a pale background which, although not
-  affecting tooltips, makes LineEdit hints and 'What's This' boxes difficuilt
-  if not impossible to read.
+  The default pallete shows light text on a pale background which, although
+  not affecting tooltips, makes LineEdit hints and 'What's This' boxes
+  difficuilt if not impossible to read.
 
-  Changing the tooltip text to a darker colour fixes the problem for 'LineEdit'
-  hints and 'What's This' boxes but creates one for ordinary tooltips.
+  Changing the tooltip text to a darker colour fixes the problem for
+  'LineEdit' hints and 'What's This' boxes but creates one for ordinary
+  tooltips.
 
   Setting the tooltip background colour to a darker colour works fine on
   Fedora 26-7+ and Ubuntu 14.04 but not for RHEL7 where the tooltip text
@@ -11612,7 +11637,8 @@ void ApplicationWindow::patchPaletteForLinux(QPalette &palette) const {
 }
 
 bool ApplicationWindow::isUnityDesktop() const {
-  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity";
+  return QString::fromLocal8Bit(qgetenv("XDG_SESSION_DESKTOP")) == "Unity" ||
+         QString::fromLocal8Bit(qgetenv("XDG_CURRENT_DESKTOP")) == "Unity";
 }
 
 void ApplicationWindow::setAppColors(const QColor &wc, const QColor &pc,
@@ -13366,7 +13392,7 @@ Graph3D *ApplicationWindow::openMatrixPlot3D(const QString &caption,
   if (!m)
     return nullptr;
 
-  Graph3D *plot = new Graph3D("", this, 0, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr, nullptr);
   plot->setWindowTitle(caption);
   plot->setName(caption);
   plot->addMatrixData(m, xl, xr, yl, yr, zl, zr);
@@ -13390,7 +13416,7 @@ Graph3D *ApplicationWindow::plot3DMatrix(Matrix *m, int style) {
   QApplication::setOverrideCursor(Qt::WaitCursor);
   QString label = generateUniqueName(tr("Graph"));
 
-  Graph3D *plot = new Graph3D("", this, 0);
+  Graph3D *plot = new Graph3D("", this, nullptr);
   plot->addMatrixData(m);
   plot->customPlotStyle(style);
   customPlot3D(plot);
@@ -13677,42 +13703,25 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
     recentFiles.removeAll(fname);
     recentFiles.push_front(fname);
   }
-  while ((int)recentFiles.size() > MaxRecentFiles)
+  while ((int)recentFiles.size() > MaxRecentFiles) {
     recentFiles.pop_back();
+  }
 
   recentFilesMenu->clear();
-  int menuCount = 1;
+  const QString itemTemplate("&%1 %2");
+  const int maxItemLength(50);
   for (int i = 0; i < (int)recentFiles.size(); i++) {
-    std::ostringstream ostr;
-    try {
-      Mantid::API::MultipleFileProperty mfp("tester");
-      mfp.setValue(recentFiles[i].toStdString());
-      const std::vector<std::string> files =
-          Mantid::Kernel::VectorHelper::flattenVector(mfp());
-      if (files.size() == 1) {
-        ostr << "&" << menuCount << " " << files[0];
-      } else if (files.size() > 1) {
-        ostr << "&" << menuCount << " " << files[0] << " && "
-             << files.size() - 1 << " more";
-      } else {
-        // mfp.setValue strips out any filenames that cannot be resolved.
-        // So if your recent file history contains a file that you have
-        // since deleted or renamed, files will be empty so do not
-        // register this entry and go on to the next one
-        continue;
-      }
-    } catch (Poco::PathSyntaxException &) {
-      // mfp could not find the file
-      continue;
-    } catch (std::exception &) {
-      // The file property could not parse the string, use as is
-      ostr << "&" << menuCount << " " << recentFiles[i].toStdString();
+    QString filePath = recentFiles[i];
+    // elide the text if it is over the allowed limit
+    QString itemText = filePath;
+    if (filePath.size() > maxItemLength) {
+      itemText = "..." + filePath.right(maxItemLength);
     }
-    QString actionText = QString::fromStdString(ostr.str());
-    QAction *ma = new QAction(actionText, nullptr);
+    QString actionText = itemTemplate.arg(QString::number(i + 1), itemText);
+    QAction *ma = new QAction(actionText, recentFilesMenu);
+    ma->setToolTip("<p>" + filePath + "</p>");
     ma->setData(recentFiles[i]);
     recentFilesMenu->addAction(ma);
-    menuCount++;
   }
 }
 
@@ -13874,9 +13883,9 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     if ((str == "-v" || str == "--version") ||
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
-      g_log.warning()
-          << qPrintable(str)
-          << ": This command line option must be used without other arguments!";
+      g_log.warning() << qPrintable(str)
+                      << ": This command line option must be used without "
+                         "other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
     } else if (str.endsWith("--execute") || str.endsWith("-x")) {
@@ -14146,7 +14155,14 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 
   // Open folders
   ProjectSerialiser serialiser(this);
-  serialiser.load(lines, fileVersion);
+
+  try {
+    serialiser.load(lines, fileVersion);
+  } catch (std::runtime_error &e) {
+    g_log.error(e.what());
+    // We failed to load - bail out
+    return nullptr;
+  }
 
   // Restore the selected folder
   folders->setCurrentItem(curFolder->folderListItem());
@@ -14409,7 +14425,7 @@ bool ApplicationWindow::deleteFolder(Folder *f) {
           this, tr("MantidPlot - Delete folder?"), // Mantid
           tr("Delete folder '%1' and all the windows it contains?")
               .arg(f->objectName()),
-          tr("Yes"), tr("No"), 0, 0))
+          tr("Yes"), tr("No"), nullptr, 0))
     return false;
   else {
     Folder *parent = projectFolder();
@@ -14854,11 +14870,12 @@ void ApplicationWindow::goToColumn() {
  */
 void ApplicationWindow::showScriptWindow(bool forceVisible, bool quitting) {
   if (!scriptingWindow) {
-    // MG 09/02/2010 : Removed parent from scripting window. If it has one then
-    // it doesn't respect the always on top
-    // flag, it is treated as a sub window of its parent
+    // MG 09/02/2010 : Removed parent from scripting window. If it has one
+    // then it doesn't respect the always on top flag, it is treated as a sub
+    // window of its parent
     const bool capturePrint = !quitting;
-    scriptingWindow = new ScriptingWindow(scriptingEnv(), capturePrint, NULL);
+    scriptingWindow =
+        new ScriptingWindow(scriptingEnv(), capturePrint, nullptr);
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this,
@@ -14990,8 +15007,8 @@ void ApplicationWindow::cascade() {
 /**
  *  Load a script file into a new or existing project
  *
- * @param fn :: is read as a Python script file and loaded in the command script
- * window.
+ * @param fn :: is read as a Python script file and loaded in the command
+ * script window.
  * @param existingProject :: True if loading into an already existing project
  */
 ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
@@ -15005,7 +15022,8 @@ ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
   QApplication::restoreOverrideCursor();
   return this;
 #else
-  QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"), // Mantid
+  QMessageBox::critical(this,
+                        tr("MantidPlot") + " - " + tr("Error"), // Mantid
                         tr("MantidPlot was not built with Python scripting "
                            "support included!")); // Mantid
   return 0;
@@ -15084,15 +15102,15 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
 /**
  * Run Python code
  * @param code :: An arbitrary string of python code
- * @param async :: If true the code will be run asynchronously but only if it is
- * called from the GUI thread
+ * @param async :: If true the code will be run asynchronously but only if it
+ * is called from the GUI thread
  * @param quiet :: If true then no output is produced concerning script
  * start/finished
  * @param redirect :: If true redirect stdout/stderr to results log
  */
 bool ApplicationWindow::runPythonScript(const QString &code, bool async,
                                         bool quiet, bool redirect) {
-  if (code.isEmpty())
+  if (code.isEmpty() || m_shuttingDown)
     return false;
   if (!m_iface_script) {
     if (setScriptingLanguage("Python")) {
@@ -15354,11 +15372,11 @@ void ApplicationWindow::saveFitFunctions(const QStringList &lst) {
                        "defined fit models to a different location.");
   explain += " " + tr("If you want to save your already defined models, please "
                       "choose a destination folder.");
-  if (QMessageBox::Ok !=
-      QMessageBox::information(this, tr("MantidPlot") + " - " +
-                                         tr("Import fit models"),
-                               explain, // Mantid
-                               QMessageBox::Ok, QMessageBox::Cancel))
+  if (QMessageBox::Ok != QMessageBox::information(
+                             this,
+                             tr("MantidPlot") + " - " + tr("Import fit models"),
+                             explain, // Mantid
+                             QMessageBox::Ok, QMessageBox::Cancel))
     return;
 
   QString dir = QFileDialog::getExistingDirectory(
@@ -15717,8 +15735,9 @@ void ApplicationWindow::performCustomAction(QAction *action) {
       connect(user_interface,
               SIGNAL(setFitPropertyBrowser(
                   MantidQt::MantidWidgets::FitPropertyBrowser *)),
-              mantidUI, SLOT(setFitFunctionBrowser(
-                            MantidQt::MantidWidgets::FitPropertyBrowser *)));
+              mantidUI,
+              SLOT(setFitFunctionBrowser(
+                  MantidQt::MantidWidgets::FitPropertyBrowser *)));
       user_interface->initializeLocalPython();
     } else {
       delete usr_win;
@@ -15922,11 +15941,10 @@ void ApplicationWindow::tileMdiWindows() {
   d_workspace->tileSubWindows();
   // hack to redraw the graphs
   shakeViewport();
-  // QMdiArea::tileSubWindows() aranges the windows and enables automatic tiling
-  // after subsequent resizing of the mdi area until a window is moved or
-  // resized
-  // separatly. Unfortunately Graph behaves badly during this.
-  // The following code disables automatic tiling.
+  // QMdiArea::tileSubWindows() aranges the windows and enables automatic
+  // tiling after subsequent resizing of the mdi area until a window is moved
+  // or resized separatly. Unfortunately Graph behaves badly during this. The
+  // following code disables automatic tiling.
   auto winList = d_workspace->subWindowList();
   if (!winList.isEmpty()) {
     auto p = winList[0]->pos();
@@ -15969,6 +15987,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer *w) {
     btnPointer->setChecked(true);
     return;
   }
+
+  btnMultiPeakPick->setEnabled(w->layers() == 1);
 
   Graph *g = w->activeGraph();
   if (g) {
@@ -16161,9 +16181,9 @@ MultiLayer *ApplicationWindow::waterfallPlot(Table *t,
  * Add a sub-window either as a docked or a floating window. The desision is
  * made by isDefalutFloating() method.
  * @param w :: Pointer to a MdiSubWindow which to add.
- * @param showNormal :: If true (default) show as a normal window, if false show
- * as a minimized docked window
- *   regardless of what isDefalutFloating() returns.
+ * @param showNormal :: If true (default) show as a normal window, if false
+ * show as a minimized docked window regardless of what isDefalutFloating()
+ * returns.
  */
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal) {
   addMdiSubWindow(w, isDefaultFloating(w), showNormal);
@@ -16286,9 +16306,8 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const {
         // Get a screen space which we can use
         const QRect screen = QApplication::desktop()->availableGeometry(this);
 
-        // How mush we need to move in X so that cascading direction is diagonal
-        // according to
-        // screen size
+        // How mush we need to move in X so that cascading direction is
+        // diagonal according to screen size
         const int yDelta = 40;
         const int xDelta =
             static_cast<int>(yDelta * (1.0 * screen.width() / screen.height()));
@@ -16463,8 +16482,8 @@ bool ApplicationWindow::event(QEvent *e) {
       if (qCurrent) {
         QWidget *wgt = qCurrent->widget();
         MdiSubWindow *sw = dynamic_cast<MdiSubWindow *>(wgt);
-        if (!sw) { // this should never happen - all MDI subwindow widgets must
-                   // inherit from MdiSubwindow
+        if (!sw) { // this should never happen - all MDI subwindow widgets
+                   // must inherit from MdiSubwindow
           throw std::logic_error("Non-MdiSubwindow widget found in MDI area");
         }
         activateWindow(sw);
@@ -16634,8 +16653,8 @@ void ApplicationWindow::onAboutToStart() {
   std::string local_rep = Mantid::Kernel::ConfigService::Instance().getString(
       "ScriptLocalRepository");
   if (!local_rep.empty()) {
-    // there is no reason to trigger UpdataScriptRepository if it has never been
-    // installed
+    // there is no reason to trigger UpdataScriptRepository if it has never
+    // been installed
     Mantid::API::IAlgorithm_sptr update_script_repo =
         mantidUI->createAlgorithm("UpdateScriptRepository");
     update_script_repo->initialize();
@@ -16645,6 +16664,22 @@ void ApplicationWindow::onAboutToStart() {
 
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
+
+  // Kick off project recovery iff we are able to determine if we are the only
+  // instance currently running
+  try {
+    if (!Process::isAnotherInstanceRunning()) {
+      g_log.debug("Starting project autosaving.");
+      checkForProjectRecovery();
+    } else {
+      g_log.debug("Another MantidPlot process is running. Project recovery is "
+                  "disabled.");
+    }
+  } catch (std::runtime_error &exc) {
+    g_log.warning("Unable to determine if other MantidPlot processes are "
+                  "running. Project recovery is disabled. Error msg: " +
+                  std::string(exc.what()));
+  }
 }
 
 /**
@@ -16746,4 +16781,61 @@ void ApplicationWindow::dropInTiledWindow(MdiSubWindow *w, QPoint pos) {
 bool ApplicationWindow::isOfType(const QObject *obj,
                                  const char *toCompare) const {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
+}
+
+/**
+ * Loads a project file as part of project recovery
+ *
+ * @param sourceFile The full path to the .project file
+ * @return True is loading was successful, false otherwise
+ */
+bool ApplicationWindow::loadProjectRecovery(std::string sourceFile) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  // File version is not applicable to project recovery - so set to 0
+  return projectWriter.load(sourceFile, 0);
+}
+
+/**
+ * Triggers saving project recovery on behalf of an external thread
+ * or caller, such as project recovery.
+ *
+ * @param destination:: The full path to write the recovery file to
+ * @return True if saving is successful, false otherwise
+ */
+bool ApplicationWindow::saveProjectRecovery(std::string destination) {
+  const bool isRecovery = true;
+  ProjectSerialiser projectWriter(this, isRecovery);
+  return projectWriter.save(QString::fromStdString(destination));
+}
+
+/**
+ * Checks for any recovery checkpoint and starts project
+ * saving if one doesn't exist. If one does, it prompts
+ * the user whether they would like to recover
+ */
+void ApplicationWindow::checkForProjectRecovery() {
+  m_projectRecoveryRunOnStart = true;
+  if (!m_projectRecovery.checkForRecovery()) {
+    m_projectRecovery.startProjectSaving();
+    return;
+  }
+
+  // Recovery file present
+  try {
+    m_projectRecovery.attemptRecovery();
+  } catch (std::exception &e) {
+    std::string err{
+        "Project Recovery failed to recover this checkpoint. Details: "};
+    err.append(e.what());
+    g_log.error(err);
+    QMessageBox::information(this, "Could Not Recover",
+                             "We could not fully recover your work.\nMantid "
+                             "will continue to run normally now.",
+                             "OK");
+
+    // Restart project recovery manually
+    m_projectRecovery.clearAllCheckpoints();
+    m_projectRecovery.startProjectSaving();
+  }
 }

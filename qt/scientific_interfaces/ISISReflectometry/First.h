@@ -1,8 +1,8 @@
 #ifndef MANTID_ISISREFLECTOMETRY_FIRST_H
 #define MANTID_ISISREFLECTOMETRY_FIRST_H
-#include <vector>
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,6 +33,6 @@ public:
       return boost::none;
   }
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_FIRST_H

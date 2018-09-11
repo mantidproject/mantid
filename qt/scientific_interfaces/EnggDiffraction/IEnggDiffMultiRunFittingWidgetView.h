@@ -19,6 +19,9 @@ class IEnggDiffMultiRunFittingWidgetView {
 public:
   virtual ~IEnggDiffMultiRunFittingWidgetView() = default;
 
+  /// Get RunLabels of all runs loaded into the widget
+  virtual std::vector<RunLabel> getAllRunLabels() const = 0;
+
   /// Get run number and bank ID of the run currently selected in the list
   virtual boost::optional<RunLabel> getSelectedRunLabel() const = 0;
 
@@ -56,6 +59,9 @@ public:
   /// Clear the plot area to avoid overplotting
   virtual void resetCanvas() = 0;
 
+  /// Enable/disable the widget
+  virtual void setEnabled(const bool enabled) = 0;
+
   /// Connect a message provider to the view.  Used to remove circular
   /// dependency between view and presenter
   virtual void setMessageProvider(
@@ -73,7 +79,7 @@ public:
   virtual void updateRunList(const std::vector<RunLabel> &runLabels) = 0;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETVIEW_H_

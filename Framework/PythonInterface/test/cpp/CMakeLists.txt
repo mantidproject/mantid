@@ -2,10 +2,13 @@
 ## C++ unit tests
 ##
 set ( TEST_FILES
+  IFunction1DAdapterTest.h
+  IPeakFunctionAdapterTest.h
   PropertyWithValueFactoryTest.h
-  PythonObjectInstantiatorTest.h
+  PythonAlgorithmInstantiatorTest.h
   PySequenceToVectorTest.h
   RunPythonScriptTest.h
+  ToPyListTest.h
 )
 
 if ( CXXTEST_FOUND )

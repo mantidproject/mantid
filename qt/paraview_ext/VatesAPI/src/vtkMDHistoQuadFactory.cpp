@@ -1,25 +1,25 @@
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
-#include "vtkQuad.h"
 #include "vtkNew.h"
+#include "vtkQuad.h"
 #include <vector>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 
-using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::DataObjects::MDHistoWorkspaceIterator;
+using Mantid::Kernel::CPUTimer;
 
 namespace {
 Mantid::Kernel::Logger g_log("vtkMDHistoQuadFactory");
@@ -88,10 +88,9 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
     coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
     coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
 
-    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(
-            createIteratorWithNormalization(m_normalizationOption,
-                                            m_workspace.get())));
+    auto it = createIteratorWithNormalization(m_normalizationOption,
+                                              m_workspace.get());
+    auto iterator = dynamic_cast<MDHistoWorkspaceIterator *>(it.get());
     if (!iterator) {
       throw std::runtime_error(
           "Could not convert IMDIterator to a MDHistoWorkspaceIterator");
@@ -247,5 +246,5 @@ void vtkMDHistoQuadFactory::validate() const {
 
 /// Destructor
 vtkMDHistoQuadFactory::~vtkMDHistoQuadFactory() {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

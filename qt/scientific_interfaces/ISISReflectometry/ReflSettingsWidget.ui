@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>764</width>
-    <height>612</height>
+    <width>858</width>
+    <height>679</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -27,16 +27,7 @@
    <string>Settings Tab</string>
   </property>
   <layout class="QVBoxLayout" name="settingsMainLayout" stretch="1,1">
-   <property name="leftMargin">
-    <number>5</number>
-   </property>
-   <property name="topMargin">
-    <number>5</number>
-   </property>
-   <property name="rightMargin">
-    <number>5</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>5</number>
    </property>
    <item>
@@ -49,28 +40,141 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="10,2">
       <item>
-       <layout class="QGridLayout" name="expSettingsLayout0" rowstretch="1,1,1,1,1,1,1,1,0,0,0,0" columnstretch="1,1,1,1">
-        <property name="leftMargin">
+       <layout class="QGridLayout" name="expSettingsLayout0" rowstretch="1,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0">
+        <property name="margin">
          <number>10</number>
         </property>
-        <property name="topMargin">
-         <number>10</number>
-        </property>
-        <property name="rightMargin">
-         <number>10</number>
-        </property>
-        <property name="bottomMargin">
-         <number>10</number>
-        </property>
-        <item row="3" column="2">
-         <widget class="QLabel" name="startOverlapLabel">
+        <item row="3" column="1" rowspan="2" colspan="3">
+         <widget class="QTableWidget" name="optionsTable">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>600</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Specify options based on the run angle. Leave the angle empty to specify defaults for all runs.</string>
+          </property>
+          <property name="whatsThis">
+           <string>This table allows you to specify default values for runs that do not have values specified on the Runs tab. You can specify these on a per-angle basis, where the angle from the Runs table will be looked up in the this table and those options will be used where a match is found. You may also leave the angle blank in this table to specify the default options that should be used for all runs.</string>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="rowCount">
+           <number>3</number>
+          </property>
+          <property name="columnCount">
+           <number>7</number>
+          </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>40</number>
+          </attribute>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
+          <row>
+           <property name="text">
+            <string>New Row</string>
+           </property>
+          </row>
+          <column>
+           <property name="text">
+            <string>Angle</string>
+           </property>
+           <property name="toolTip">
+            <string/>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Transmission Run(s)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Q min</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Q max</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>dQ/Q</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Scale</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>ProcessingInstructions</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item row="6" column="2">
+         <widget class="QLabel" name="endOverlapLabel">
+          <property name="minimumSize">
+           <size>
+            <width>117</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
-           <string>TransRunStartOverlap</string>
+           <string>TransRunEndOverlap</string>
           </property>
          </widget>
         </item>
-        <item row="9" column="1">
-         <widget class="QLineEdit" name="CApEdit"/>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="analysisModeComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <item>
+           <property name="text">
+            <string>PointDetectorAnalysis</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>MultiDetectorAnalysis</string>
+           </property>
+          </item>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="summationTypeLabel">
@@ -85,14 +189,189 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="1">
-         <widget class="QLineEdit" name="momentumTransferStepEdit"/>
-        </item>
-        <item row="9" column="0">
-         <widget class="QLabel" name="CApLabel">
-          <property name="text">
-           <string>CAp</string>
+        <item row="8" column="1">
+         <widget class="QComboBox" name="polCorrComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
+          <item>
+           <property name="text">
+            <string>None</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PA</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PNR</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ParameterFile</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="analysisModeLabel">
+          <property name="text">
+           <string>AnalysisMode</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QPushButton" name="addPerAngleOptionsButton">
+          <property name="toolTip">
+           <string>Add another row to the per-angle options table</string>
+          </property>
+          <property name="whatsThis">
+           <string>Adds another row to the per-angle options table so that additional angles can be added</string>
+          </property>
+          <property name="text">
+           <string>Add row</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLineEdit" name="startOverlapEdit"/>
+        </item>
+        <item row="6" column="3">
+         <widget class="QLineEdit" name="endOverlapEdit"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="perAngleTableLabel">
+          <property name="text">
+           <string>Per-angle defaults</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="summationTypeComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <item>
+           <property name="text">
+            <string>SumInLambda</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SumInQ</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="polCorrLabel">
+          <property name="minimumSize">
+           <size>
+            <width>117</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>PolarisationCorrections</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="startOverlapLabel">
+          <property name="text">
+           <string>TransRunStartOverlap</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0" colspan="4">
+         <widget class="QStackedWidget" name="polCorStackedWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="pageNone"/>
+          <widget class="QWidget" name="pagePA_PNR">
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <layout class="QGridLayout" name="gridLayout">
+              <item row="0" column="2">
+               <widget class="QLabel" name="CPpLabel">
+                <property name="minimumSize">
+                 <size>
+                  <width>117</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>CPp</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="CApLabel">
+                <property name="text">
+                 <string>CAp</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QLineEdit" name="CPpEdit"/>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="CApEdit"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="CAlphaLabel">
+                <property name="minimumSize">
+                 <size>
+                  <width>117</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>CAlpha</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="CRhoEdit"/>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="CRhoLabel">
+                <property name="text">
+                 <string>CRho</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QLineEdit" name="CAlphaEdit"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="pageParamFile">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="parametersLabel">
+              <property name="text">
+               <string>Use parameters from the instrument parameter file</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
         <item row="2" column="1">
@@ -123,6 +402,23 @@
           </item>
          </widget>
         </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="includePartialBinsLabel">
+          <property name="text">
+           <string>IncludePartialBins</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QCheckBox" name="includePartialBinsCheckBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="reductionTypeLabel">
           <property name="minimumSize">
@@ -136,235 +432,24 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="3">
-         <widget class="QLineEdit" name="startOverlapEdit"/>
-        </item>
         <item row="7" column="0">
-         <widget class="QLabel" name="polCorrLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>PolarisationCorrections</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="analysisModeLabel">
-          <property name="text">
-           <string>AnalysisMode</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="transmissionRunsLabel">
-          <property name="text">
-           <string>Transmission run(s)</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="summationTypeComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <item>
-           <property name="text">
-            <string>SumInLambda</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>SumInQ</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="endOverlapLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>TransRunEndOverlap</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="endOverlapEdit"/>
-        </item>
-        <item row="10" column="2">
-         <widget class="QLabel" name="scaleFactorLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Scale</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0">
-         <widget class="QLabel" name="CRhoLabel">
-          <property name="text">
-           <string>CRho</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="analysisModeComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <item>
-           <property name="text">
-            <string>PointDetectorAnalysis</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>MultiDetectorAnalysis</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QComboBox" name="polCorrComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>PA</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>PNR</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="9" column="2">
-         <widget class="QLabel" name="CPpLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>CPp</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="momentumTransferStepLabel">
-          <property name="text">
-           <string>dQ/Q</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="3">
-         <widget class="QLineEdit" name="CAlphaEdit"/>
-        </item>
-        <item row="8" column="2">
-         <widget class="QLabel" name="CAlphaLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>CAlpha</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QLineEdit" name="CRhoEdit"/>
-        </item>
-        <item row="9" column="3">
-         <widget class="QLineEdit" name="CPpEdit"/>
-        </item>
-        <item row="11" column="0">
          <widget class="QLabel" name="stitchLabel">
           <property name="text">
            <string>Stitch1DMany</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1" rowspan="3">
-         <widget class="QTableWidget" name="transmissionRunsTable">
-          <property name="toolTip">
-           <string>Specify which transmission runs to use based on the run angle. Leave the angle empty to specify defaults for all runs.</string>
+        <item row="0" column="2">
+         <widget class="QLabel" name="debugLabel">
+          <property name="text">
+           <string>Debug</string>
           </property>
-          <property name="whatsThis">
-           <string>This table allows you to specify the default transmission runs that should be used for rows that do not have transmission runs specified on Runs tab. You can specify these on a per-angle basis, where the angle from the Runs table will be looked up in the Transmission table and those transmission runs will be used where a match is found. You may also leave the angle blank in the Transmission table to specify the default transmission runs that should be used for all runs.</string>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="sortingEnabled">
-           <bool>true</bool>
-          </property>
-          <property name="rowCount">
-           <number>3</number>
-          </property>
-          <property name="columnCount">
-           <number>2</number>
-          </property>
-          <attribute name="horizontalHeaderVisible">
-           <bool>true</bool>
-          </attribute>
-          <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-          <row/>
-          <row/>
-          <row/>
-          <column/>
-          <column/>
          </widget>
         </item>
-        <item row="10" column="3">
-         <widget class="QLineEdit" name="scaleFactorEdit"/>
-        </item>
-        <item row="6" column="1">
-         <widget class="QPushButton" name="addTransmissionRowButton">
-          <property name="toolTip">
-           <string>Add another row to the per-angle Transmission runs table</string>
-          </property>
-          <property name="whatsThis">
-           <string>Adds another row to the Transmission runs table so that additional angles can be added</string>
-          </property>
+        <item row="0" column="3">
+         <widget class="QCheckBox" name="debugCheckBox">
           <property name="text">
-           <string>Add row</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -409,17 +494,8 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="10,2">
       <item>
-       <layout class="QGridLayout" name="instSettingsLayout0" rowstretch="1,1,1,1,1,1" columnstretch="1,1,1,1">
-        <property name="leftMargin">
-         <number>10</number>
-        </property>
-        <property name="topMargin">
-         <number>10</number>
-        </property>
-        <property name="rightMargin">
-         <number>10</number>
-        </property>
-        <property name="bottomMargin">
+       <layout class="QGridLayout" name="instSettingsLayout0" rowstretch="1,1,1,1,1,1" columnstretch="0,1,0,1">
+        <property name="margin">
          <number>10</number>
         </property>
         <item row="5" column="0">
@@ -519,9 +595,6 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="procInstEdit"/>
-        </item>
         <item row="4" column="0">
          <widget class="QLabel" name="I0MonIndexLabel">
           <property name="minimumSize">
@@ -537,19 +610,6 @@
         </item>
         <item row="2" column="3">
          <widget class="QLineEdit" name="monBgMaxEdit"/>
-        </item>
-        <item row="4" column="2">
-         <widget class="QLabel" name="procInstLabel">
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>ProcessingInstructions</string>
-          </property>
-         </widget>
         </item>
         <item row="3" column="2">
          <widget class="QLabel" name="lamMaxLabel">
@@ -581,7 +641,11 @@
          <widget class="QLineEdit" name="lamMaxEdit"/>
         </item>
         <item row="0" column="1">
-         <widget class="QCheckBox" name="intMonCheckBox"/>
+         <widget class="QCheckBox" name="intMonCheckBox">
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="monBgMinLabel">

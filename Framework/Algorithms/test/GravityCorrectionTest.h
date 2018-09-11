@@ -368,8 +368,8 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws{
         WorkspaceCreationHelper::
             create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-                tof, 0.25, 4, 50, 0.02, slit1, slit2, source, monitor, sample,
-                detector1, detector2)};
+                tof, 0.25, slit1, slit2, 0.2, 0.3, source, monitor, sample,
+                detector1, 4, 50, 0.02)};
 
     TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4) / 2, finalAngle, 1e-6);
 
@@ -454,11 +454,11 @@ private:
   Mantid::API::MatrixWorkspace_sptr inWS3{
       WorkspaceCreationHelper::
           create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-              0.5, 0.25, 4, 50, 0.02, Mantid::Kernel::V3D(-3., 40., 0.),
-              Mantid::Kernel::V3D(-2., 29.669, 0.),
+              0.5, 0.25, Mantid::Kernel::V3D(-3., 40., 0.),
+              Mantid::Kernel::V3D(-2., 29.669, 0.), 0.2, 0.3,
               Mantid::Kernel::V3D(-5.94366667, 52.99776017, 0.),
               Mantid::Kernel::V3D(1., 0., 0.), Mantid::Kernel::V3D(0., 0., 0.),
-              Mantid::Kernel::V3D(0.854, 35.73, 0.))};
+              Mantid::Kernel::V3D(0.854, 35.73, 0.), 4, 50, 0.02)};
 };
 
 // Performance testing

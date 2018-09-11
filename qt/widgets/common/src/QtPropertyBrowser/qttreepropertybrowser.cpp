@@ -86,24 +86,24 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include <QSet>
-#include <QIcon>
-#include <QTreeWidget>
-#include <QItemDelegate>
+#include <QApplication>
+#include <QCheckBox>
+#include <QFocusEvent>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QPainter>
-#include <QApplication>
-#include <QFocusEvent>
-#include <QStyle>
-#include <QPalette>
-#include <QCheckBox>
+#include <QIcon>
+#include <QItemDelegate>
 #include <QLineEdit>
+#include <QPainter>
+#include <QPalette>
+#include <QSet>
+#include <QStyle>
+#include <QTreeWidget>
 
 namespace {
 // Translation function for Qt4/Qt5. Qt5 has no encoding option
 QString translateUtf8Encoded(const char *context, const char *key,
-                             const char *disambiguation = 0, int n = -1) {
+                             const char *disambiguation = nullptr, int n = -1) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   return QApplication::translate(context, key, disambiguation,
                                  QApplication::UnicodeUTF8, n);
@@ -111,7 +111,7 @@ QString translateUtf8Encoded(const char *context, const char *key,
   return QApplication::translate(context, key, disambiguation, n);
 #endif
 }
-}
+} // namespace
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -483,8 +483,8 @@ QtBrowserItem *QtTreePropertyBrowserPrivate::currentItem() const {
 void QtTreePropertyBrowserPrivate::setCurrentItem(QtBrowserItem *browserItem,
                                                   bool block) {
   const bool blocked = block ? m_treeWidget->blockSignals(true) : false;
-  if (browserItem == 0)
-    m_treeWidget->setCurrentItem(0);
+  if (browserItem == nullptr)
+    m_treeWidget->setCurrentItem(nullptr);
   else
     m_treeWidget->setCurrentItem(m_indexToItem.value(browserItem));
   if (block)
@@ -575,7 +575,7 @@ void QtTreePropertyBrowserPrivate::propertyRemoved(QtBrowserItem *index) {
   QTreeWidgetItem *item = m_indexToItem.value(index);
 
   if (m_treeWidget->currentItem() == item) {
-    m_treeWidget->setCurrentItem(0);
+    m_treeWidget->setCurrentItem(nullptr);
   }
 
   delete item;

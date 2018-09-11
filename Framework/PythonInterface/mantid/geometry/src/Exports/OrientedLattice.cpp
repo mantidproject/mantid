@@ -1,7 +1,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidPythonInterface/kernel/Converters/MatrixToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
 #include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
 #include <boost/python/class.hpp>
@@ -12,7 +12,7 @@ using Mantid::Geometry::angDegrees;
 using namespace boost::python;
 
 namespace //<unnamed>
-    {
+{
 using namespace Mantid::PythonInterface;
 
 /// Set the U vector via a numpy array
@@ -41,12 +41,12 @@ Mantid::Kernel::V3D qFromHKL(OrientedLattice &self, const object &vec) {
 Mantid::Kernel::V3D hklFromQ(OrientedLattice &self, const object &vec) {
   return self.hklFromQ(Converters::PyObjectToV3D(vec)());
 }
-}
+} // namespace
 
 void export_OrientedLattice() {
   /// return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::MatrixRefToNumpy<
-      Converters::WrapReadOnly>> return_readonly_numpy;
+  using return_readonly_numpy =
+      return_value_policy<Policies::MatrixRefToNumpy<Converters::WrapReadOnly>>;
 
   class_<OrientedLattice, bases<UnitCell>>(
       "OrientedLattice",

@@ -1,10 +1,10 @@
 #include "MantidMatrixExtensionRequest.h"
-#include "MantidMatrixModel.h"
-#include "MantidMatrix.h"
-#include "MantidMatrixNullExtensionHandler.h"
-#include "MantidMatrixDxExtensionHandler.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidMatrix.h"
+#include "MantidMatrixDxExtensionHandler.h"
+#include "MantidMatrixModel.h"
+#include "MantidMatrixNullExtensionHandler.h"
 
 MantidMatrixExtensionRequest::MantidMatrixExtensionRequest()
     : m_extensionHandler(new MantidMatrixNullExtensionHandler()) {}
@@ -78,7 +78,7 @@ void MantidMatrixExtensionRequest::setNumberFormatForAll(
  * @param type: the type which requires recording
  * @param extensions: the extensions
  * @param format: the format
-  *@param precision: the precision
+ *@param precision: the precision
  */
 void MantidMatrixExtensionRequest::recordFormat(
     MantidMatrixModel::Type type, MantidMatrixTabExtensionMap &extensions,

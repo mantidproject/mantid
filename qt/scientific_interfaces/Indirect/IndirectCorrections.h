@@ -4,12 +4,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectCorrections.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectTab.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
+#include "ui_IndirectCorrections.h"
 
-#include <Poco/NObserver.h>
 #include "MantidKernel/ConfigService.h"
+#include <Poco/NObserver.h>
 
 class DoubleEditorFactory;
 class QtCheckBoxFactory;
@@ -83,7 +83,8 @@ private:
 
   /// Change Observer for ConfigService (monitors user directories)
   Poco::NObserver<IndirectCorrections,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, CorrectionsTab *> m_tabs;

@@ -13,7 +13,7 @@ namespace Mantid {
 namespace DataObjects {
 class Histogram1D;
 class EventList;
-}
+} // namespace DataObjects
 namespace API {
 class MatrixWorkspace;
 

@@ -56,7 +56,7 @@ getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
   }
   return keys;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -510,15 +510,15 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   };
 
   // Comparison function for doubles
-  auto numericalCompare =
-      [](const std::string &first, const std::string &second) {
-        try {
-          return boost::lexical_cast<double>(first) <
-                 boost::lexical_cast<double>(second);
-        } catch (boost::bad_lexical_cast & /*e*/) {
-          return false;
-        }
-      };
+  auto numericalCompare = [](const std::string &first,
+                             const std::string &second) {
+    try {
+      return boost::lexical_cast<double>(first) <
+             boost::lexical_cast<double>(second);
+    } catch (boost::bad_lexical_cast & /*e*/) {
+      return false;
+    }
+  };
 
   // Range of log values
   auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);
@@ -1016,9 +1016,13 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           // Single run
           runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
-          throw std::invalid_argument("Failed to parse run label: " + label);
+          throw std::invalid_argument("Failed to parse run label: " + label +
+                                      " too many tokens ");
         }
       } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label +
+                                    " not a good run number");
+      } catch (...) {
         throw std::invalid_argument("Failed to parse run label: " + label);
       }
     }
@@ -1098,7 +1102,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   QMap<int, QColor> colors; // position, color
 
   // Vector of <number of runs in fit, parameters in fit> pairs
-  typedef std::pair<size_t, std::vector<std::string>> FitProp;
+  using FitProp = std::pair<size_t, std::vector<std::string>>;
   std::vector<FitProp> fitProperties;
 
   // Get fit properties for each input workspace
@@ -1158,4 +1162,4 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
 }
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

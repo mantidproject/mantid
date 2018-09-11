@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_CENTERINGGROUP_H_
 #define MANTID_GEOMETRY_CENTERINGGROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/DllConfig.h"
 #include <map>
 
 #include "MantidKernel/SingletonHolder.h"
@@ -65,8 +65,8 @@ protected:
   std::string m_symbol;
 };
 
-typedef boost::shared_ptr<CenteringGroup> CenteringGroup_sptr;
-typedef boost::shared_ptr<const CenteringGroup> CenteringGroup_const_sptr;
+using CenteringGroup_sptr = boost::shared_ptr<CenteringGroup>;
+using CenteringGroup_const_sptr = boost::shared_ptr<const CenteringGroup>;
 
 /// Helper class to keep this out of the interface of CenteringGroup.
 class MANTID_GEOMETRY_DLL CenteringGroupCreatorImpl {
@@ -94,8 +94,8 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<CenteringGroupCreatorImpl>;
 };
 
-typedef Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>
-    CenteringGroupCreator;
+using CenteringGroupCreator =
+    Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -105,6 +105,6 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_CENTERINGGROUP_H_ */

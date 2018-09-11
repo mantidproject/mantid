@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_NOTMDTEST_H_
 #define MANTID_MDALGORITHMS_NOTMDTEST_H_
 
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/NotMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 

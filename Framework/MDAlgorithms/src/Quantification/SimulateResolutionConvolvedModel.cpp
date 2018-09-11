@@ -1,10 +1,10 @@
 #include "MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h"
 
-#include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFunctionMD.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -33,7 +33,7 @@ const char *RESOLUTION_NAME = "ResolutionFunction";
 const char *FOREGROUND_NAME = "ForegroundModel";
 const char *PARS_NAME = "Parameters";
 const char *APPEND_NAME = "AppendToExisting";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -79,10 +79,11 @@ void SimulateResolutionConvolvedModel::init() {
                   "documentation for format",
                   Direction::Input);
 
-  declareProperty(APPEND_NAME, false, "If true then the simulated events will "
-                                      "be added to an existing workspace. If "
-                                      "the workspace does "
-                                      "not exist then it is created",
+  declareProperty(APPEND_NAME, false,
+                  "If true then the simulated events will "
+                  "be added to an existing workspace. If "
+                  "the workspace does "
+                  "not exist then it is created",
                   Direction::Input);
 }
 

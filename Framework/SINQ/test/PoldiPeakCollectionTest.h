@@ -1,19 +1,19 @@
 #ifndef MANTID_SINQ_POLDIPEAKCOLLECTIONTEST_H
 #define MANTID_SINQ_POLDIPEAKCOLLECTIONTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 #include <boost/bind.hpp>
 #include <stdexcept>
@@ -390,10 +390,10 @@ private:
 
     BraggScatterer_sptr cs = BraggScattererFactory::Instance().createScatterer(
         "IsotropicAtomBraggScatterer",
-        "{\"Element\":\"Cs\",\"Position\":\"0.5,0.5,0.5\",\"U\":\"0.005\"}");
+        R"({"Element":"Cs","Position":"0.5,0.5,0.5","U":"0.005"})");
     BraggScatterer_sptr cl = BraggScattererFactory::Instance().createScatterer(
         "IsotropicAtomBraggScatterer",
-        "{\"Element\":\"Cl\",\"Position\":\"0,0,0\",\"U\":\"0.005\"}");
+        R"({"Element":"Cl","Position":"0,0,0","U":"0.005"})");
 
     CompositeBraggScatterer_sptr atoms = CompositeBraggScatterer::create();
     atoms->addScatterer(cs);

@@ -1,7 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/lexical_cast.hpp>
@@ -290,7 +290,7 @@ void DgsDiagnose::exec() {
     diag->execute();
     maskWS = diag->getProperty("OutputWorkspace");
   } else {
-    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    using tokenizer = Mantid::Kernel::StringTokenizer;
     tokenizer tokens(diag_spectra[0], "(,);",
                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     for (auto tok_iter = tokens.begin(); tok_iter != tokens.end();) {

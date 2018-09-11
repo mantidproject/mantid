@@ -25,6 +25,9 @@ class CompareSampleLogs(PythonAlgorithm):
         """
         return "Utility\\Workspaces"
 
+    def seeAlso(self):
+        return [ "CompareWorkspaces","CheckForSampleLogs","CopySample" ]
+
     def name(self):
         """
         Returns name

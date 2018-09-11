@@ -48,6 +48,7 @@ public:
   }
   /// Algorithm's version
   int version() const override { return (1); }
+
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Workflow\\Reflectometry";
@@ -71,7 +72,7 @@ private:
   int m_nYPixel;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_RefRoi_H_*/

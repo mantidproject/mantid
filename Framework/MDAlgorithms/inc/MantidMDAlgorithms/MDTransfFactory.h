@@ -110,7 +110,7 @@ private:
 
 /// The specialization of the SingletonHolder class that holds the
 /// MDTransformations Factory
-typedef Kernel::SingletonHolder<MDTransfFactoryImpl> MDTransfFactory;
+using MDTransfFactory = Kernel::SingletonHolder<MDTransfFactoryImpl>;
 
 } // namespace MDAlgorithms
 } // namespace Mantid
@@ -120,6 +120,6 @@ namespace Kernel {
 EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
     Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif

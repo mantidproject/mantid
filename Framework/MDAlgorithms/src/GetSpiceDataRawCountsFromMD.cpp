@@ -378,7 +378,7 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   vecY.clear();
 
   // Go through all events to find out their positions
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
 
   bool scancell = true;
   size_t nextindex = 1;
@@ -429,8 +429,6 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
       scancell = false;
     }
   } // ENDOF(while)
-
-  delete (mditer);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -465,8 +463,9 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
       std::stringstream ess;
       ess << "Workspace " << mdws->getName() << "'s " << iexp
           << "-th ExperimentInfo with "
-             "run number " << thisrunnumber
-          << " does not have specified property " << samplelogname;
+             "run number "
+          << thisrunnumber << " does not have specified property "
+          << samplelogname;
       throw std::runtime_error(ess.str());
     }
     // Get experiment value
@@ -502,7 +501,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
+  outws->setHistogram(0, Points(vecX), Counts(vecY));
   auto &dataE = outws->mutableE(0);
   std::replace_if(dataE.begin(), dataE.end(),
                   [](double val) { return val < 1.0; }, 1.0);
@@ -513,8 +512,9 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     try {
       outws->getAxis(0)->setUnit(xlabel);
     } catch (...) {
-      g_log.information() << "Label " << xlabel << " for X-axis is not a unit "
-                                                   "registered."
+      g_log.information() << "Label " << xlabel
+                          << " for X-axis is not a unit "
+                             "registered."
                           << "\n";
     }
   }

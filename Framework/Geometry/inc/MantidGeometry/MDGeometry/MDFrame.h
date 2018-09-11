@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/UnitLabel.h"
 #include <memory>
 
 namespace Mantid {
@@ -50,10 +50,10 @@ public:
   virtual ~MDFrame() = default;
 };
 
-typedef std::unique_ptr<MDFrame> MDFrame_uptr;
-typedef std::unique_ptr<const MDFrame> MDFrame_const_uptr;
-typedef std::shared_ptr<MDFrame> MDFrame_sptr;
-typedef std::shared_ptr<const MDFrame> MDFrame_const_sptr;
+using MDFrame_uptr = std::unique_ptr<MDFrame>;
+using MDFrame_const_uptr = std::unique_ptr<const MDFrame>;
+using MDFrame_sptr = std::shared_ptr<MDFrame>;
+using MDFrame_const_sptr = std::shared_ptr<const MDFrame>;
 
 } // namespace Geometry
 } // namespace Mantid

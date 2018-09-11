@@ -2,8 +2,8 @@
 #define MANTID_SINQ_POLDIINSTRUMENTADAPTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
@@ -195,7 +195,7 @@ public:
     TestablePoldiInstrumentAdapter instrumentAdapter;
 
     // Throw on null-pointer
-    TS_ASSERT_THROWS(instrumentAdapter.getExtractorForProperty(0),
+    TS_ASSERT_THROWS(instrumentAdapter.getExtractorForProperty(nullptr),
                      std::invalid_argument);
     TS_ASSERT_THROWS_NOTHING(instrumentAdapter.getExtractorForProperty(
         m_run.getProperty("chopperspeed_double")));

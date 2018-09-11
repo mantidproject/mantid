@@ -34,7 +34,7 @@ public:
                                   outerBackgroundRadius);
 
     // Act + Assert
-    TSM_ASSERT(radius, peak.getEffectiveRadius());
+    TS_ASSERT_EQUALS(radius, peak.getEffectiveRadius());
   }
 
   void test_getRadius_gets_outer_background_radius_if_background_is_shown() {
@@ -49,7 +49,7 @@ public:
     peak.showBackgroundRadius(true);
 
     // Act + Assert
-    TSM_ASSERT(outerBackgroundRadius, peak.getEffectiveRadius());
+    TS_ASSERT_EQUALS(outerBackgroundRadius, peak.getEffectiveRadius());
   }
 
   void test_handle_outer_background_radius_zero() {
@@ -259,7 +259,7 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.push_back(boost::make_shared<
-              PeakRepresentationSphereExposeProtectedWrapper>(
+                            PeakRepresentationSphereExposeProtectedWrapper>(
               peakOrigin, radius, innerBackgroundRadius,
               outerBackgroundRadius));
         }
@@ -316,10 +316,10 @@ public:
   }
 
 private:
-  typedef boost::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>
-      PeaksRepresentationSphere_sptr;
-  typedef std::vector<PeaksRepresentationSphere_sptr>
-      VecPeaksRepresentationSphere;
+  using PeaksRepresentationSphere_sptr =
+      boost::shared_ptr<PeakRepresentationSphereExposeProtectedWrapper>;
+  using VecPeaksRepresentationSphere =
+      std::vector<PeaksRepresentationSphere_sptr>;
 
   /// Collection to store a large number of physicalPeaks.
   VecPeaksRepresentationSphere m_peaks;

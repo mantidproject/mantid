@@ -1,10 +1,10 @@
 #ifndef MANTID_TESTTRIPLE__
 #define MANTID_TESTTRIPLE__
 
-#include <cxxtest/TestSuite.h>
+#include "MantidGeometry/Math/Triple.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Math/Triple.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 

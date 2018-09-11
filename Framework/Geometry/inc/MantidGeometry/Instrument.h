@@ -2,22 +2,22 @@
 #define MANTID_GEOMETRY_INSTRUMENT_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DateAndTime.h"
 
-#include <string>
 #include <map>
+#include <string>
 #include <tuple>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace Mantid {
 /// Typedef of a map from detector ID to detector shared pointer.
-typedef std::map<detid_t, Geometry::IDetector_const_sptr> detid2det_map;
+using detid2det_map = std::map<detid_t, Geometry::IDetector_const_sptr>;
 
 namespace Geometry {
 class ComponentInfo;
@@ -26,9 +26,9 @@ class XMLInstrumentParameter;
 class ParameterMap;
 class ReferenceFrame;
 /// Convenience typedef
-typedef std::map<std::pair<std::string, const IComponent *>,
-                 boost::shared_ptr<XMLInstrumentParameter>>
-    InstrumentParameterCache;
+using InstrumentParameterCache =
+    std::map<std::pair<std::string, const IComponent *>,
+             boost::shared_ptr<XMLInstrumentParameter>>;
 
 /**
 Base Instrument Class.
@@ -349,7 +349,7 @@ double MANTID_GEOMETRY_DLL
 tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
                     const std::vector<detid_t> &detectors,
                     const std::map<detid_t, double> &offsets);
-}
+} // namespace Conversion
 
 } // namespace Geometry
 } // Namespace Mantid

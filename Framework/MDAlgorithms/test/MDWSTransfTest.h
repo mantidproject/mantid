@@ -1,12 +1,12 @@
 #ifndef MANTID_MDWS_SLICE_H_
 #define MANTID_MDWS_SLICE_H_
 
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
-#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -78,7 +78,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TargWSDescription.setMinMax(minVal, maxVal);
-    spws->mutableSample().setOrientedLattice(NULL);
+    spws->mutableSample().setOrientedLattice(nullptr);
 
     TargWSDescription.buildFromMatrixWS(spws, "Q3D", "Direct");
 

@@ -135,11 +135,11 @@ private:
 };
 
 /// boost::shared_ptr typedef
-typedef boost::shared_ptr<ForegroundModel> ForegroundModel_sptr;
+using ForegroundModel_sptr = boost::shared_ptr<ForegroundModel>;
 /// boost::shared_ptr to const typedef
-typedef boost::shared_ptr<const ForegroundModel> ForegroundModel_const_sptr;
-}
-}
+using ForegroundModel_const_sptr = boost::shared_ptr<const ForegroundModel>;
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 /*
  * Register a class into the factory using a global RegistrationHelper

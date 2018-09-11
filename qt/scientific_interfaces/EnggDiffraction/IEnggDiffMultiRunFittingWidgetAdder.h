@@ -9,10 +9,11 @@ namespace CustomInterfaces {
 class IEnggDiffMultiRunFittingWidgetAdder {
 
 public:
+  virtual ~IEnggDiffMultiRunFittingWidgetAdder() = default;
   virtual void operator()(IEnggDiffMultiRunFittingWidgetOwner &owner) = 0;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_IENGGDIFFMULTIRUNFITTINGWIDGETADDER_H_

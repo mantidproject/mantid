@@ -2,6 +2,8 @@
 :2_HeaderViewItem	{container=':tableMain_QHeaderView' text='2' type='HeaderViewItem'}
 :Discard_QPushButton	{text='Discard' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox_2'}
 :Don't Save_QPushButton	{text='Don\\'t Save' type='QPushButton' unnamed='1' visible='1' window=':_QMessageBox_2'}
+:ISIS Reflectometry (Old) - DEPRECATED.splitterList_QSplitter	{name='splitterList' type='QSplitter' visible='1' window=':ISIS Reflectometry (Old) - DEPRECATED_ReflGui'}
+:ISIS Reflectometry (Old) - DEPRECATED_ReflGui	{name='windowRefl' type='ReflGui' visible='1' windowTitle='ISIS Reflectometry (Old) - DEPRECATED'}
 :ISIS Reflectometry (Old).splitterList_QSplitter	{name='splitterList' type='QSplitter' visible='1' window=':ISIS Reflectometry (Old)_ReflGui'}
 :ISIS Reflectometry (Old)_ReflGui	{name='windowRefl' type='ReflGui' visible='1' windowTitle='ISIS Reflectometry (Old)'}
 :ISIS Reflectometry.File_QMenu	{name='menuFile' title='File' type='QMenu' visible='1' window=':ISIS Reflectometry_ReflGui'}
@@ -28,13 +30,14 @@
 :_QMessageBox_2	{type='QMessageBox' unnamed='1' visible='1'}
 :comboInstrument_QComboBox	{buddy=':ISIS Reflectometry.Instrument:_QLabel' name='comboInstrument' type='QComboBox' visible='1'}
 :splitterList.Process_QPushButton	{container=':ISIS Reflectometry.splitterList_QSplitter' name='buttonProcess' text='Process' type='QPushButton' visible='1'}
-:splitterList.buttonProcess_QPushButton	{container=':ISIS Reflectometry (Old).splitterList_QSplitter' name='buttonProcess' text='Process' type='QPushButton' visible='1'}
+:splitterList.buttonProcess_QPushButton	{container=':ISIS Reflectometry (Old) - DEPRECATED.splitterList_QSplitter' name='buttonProcess' text='Process' type='QPushButton' visible='1'}
 :splitterList.tableMain_QTableWidget	{container=':ISIS Reflectometry.splitterList_QSplitter' name='tableMain' type='QTableWidget' visible='1'}
 :splitterList.tableMain_QTableWidget_2	{container=':ISIS Reflectometry (Old).splitterList_QSplitter' name='tableMain' type='QTableWidget' visible='1'}
+:splitterList.tableMain_QTableWidget_3	{container=':ISIS Reflectometry (Old) - DEPRECATED.splitterList_QSplitter' name='tableMain' type='QTableWidget' visible='1'}
 :splitterList.widgetBottomRight_QWidget	{container=':ISIS Reflectometry.splitterList_QSplitter' name='widgetBottomRight' type='QWidget' visible='1'}
-:tableMain.Plot_QPushButton	{container=':splitterList.tableMain_QTableWidget_2' text='Plot' type='QPushButton' unnamed='1' visible='1'}
-:tableMain.Yes_QPushButton	{container=':splitterList.tableMain_QTableWidget_2' text='Yes' type='QPushButton' unnamed='1' visible='1'}
-:tableMain_QCheckBox	{container=':splitterList.tableMain_QTableWidget_2' type='QCheckBox' unnamed='1' visible='1'}
+:tableMain.Plot_QPushButton	{container=':splitterList.tableMain_QTableWidget_3' text='Plot' type='QPushButton' unnamed='1' visible='1'}
+:tableMain.Yes_QPushButton	{container=':splitterList.tableMain_QTableWidget_3' text='Yes' type='QPushButton' unnamed='1' visible='1'}
+:tableMain_QCheckBox	{container=':splitterList.tableMain_QTableWidget_3' type='QCheckBox' unnamed='1' visible='1'}
 :tableMain_QExpandingLineEdit	{columnIndex='0' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
 :tableMain_QExpandingLineEdit_2	{columnIndex='1' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}
 :tableMain_QExpandingLineEdit_3	{columnIndex='2' container=':splitterList.tableMain_QTableWidget' rowIndex='0' type='QExpandingLineEdit' unnamed='1' visible='1'}

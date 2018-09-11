@@ -1,15 +1,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/def.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/reference_existing_object.hpp>
 
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
@@ -32,24 +32,19 @@ std::string getStringUsingCache(ConfigServiceImpl &self,
   return self.getString(key, true);
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 /// Overload generator for getInstrument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 0,
                                        1)
 /// Overload generator for getString
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-}
+
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
+} // namespace
 
 void export_ConfigService() {
   using Mantid::PythonInterface::std_vector_exporter;
@@ -59,6 +54,9 @@ void export_ConfigService() {
   class_<ConfigServiceImpl, boost::noncopyable>("ConfigServiceImpl", no_init)
       .def("reset", &ConfigServiceImpl::reset, arg("self"),
            "Clears all user settings and removes the user properties file")
+
+      .def("getAppDataDirectory", &ConfigServiceImpl::getAppDataDir,
+           arg("self"), "Returns the path to Mantid's application directory")
 
       .def("getLocalFilename", &ConfigServiceImpl::getLocalFilename,
            arg("self"), "Returns the path to the system wide properties file.")
@@ -86,14 +84,15 @@ void export_ConfigService() {
       .def("getFacilities", &ConfigServiceImpl::getFacilities, arg("self"),
            "Returns the default facility")
 
-      .def("getFacility", (const FacilityInfo &(ConfigServiceImpl::*)() const) &
-                              ConfigServiceImpl::getFacility,
+      .def("getFacility",
+           (const FacilityInfo &(ConfigServiceImpl::*)() const) &
+               ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(),
            "Returns the default facility")
 
       .def("getFacility",
-           (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
-                const) &
+           (const FacilityInfo &(
+               ConfigServiceImpl::*)(const std::string &)const) &
                ConfigServiceImpl::getFacility,
            (arg("self"), arg("facilityName")),
            return_value_policy<reference_existing_object>(),
@@ -159,14 +158,9 @@ void export_ConfigService() {
            "Saves the keys that have changed from their default to the given "
            "filename")
 
-      .def("setFileLogLevel", &ConfigServiceImpl::setFileLogLevel,
-           (arg("self"), arg("logLevel")), "Sets the log level priority for "
-                                           "the File log channel, logLevel 1 = "
-                                           "Fatal, 6 = information, 7 = Debug")
-
-      .def("setConsoleLogLevel", &ConfigServiceImpl::setConsoleLogLevel,
-           (arg("self"), arg("logLevel")),
-           "Sets the log level priority for the Console log channel, logLevel "
+      .def("setLogLevel", &ConfigServiceImpl::setLogLevel,
+           (arg("self"), arg("logLevel"), arg("quiet") = false),
+           "Sets the log level priority for all the log channels, logLevel "
            "1 = Fatal, 6 = information, 7 = Debug")
 
       .def("keys", &ConfigServiceImpl::keys, arg("self"))

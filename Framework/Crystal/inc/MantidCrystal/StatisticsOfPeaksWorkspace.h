@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_StatisticsOfPeaksWorkspace_H_
 #define MANTID_CRYSTAL_StatisticsOfPeaksWorkspace_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -28,6 +28,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"ShowPeakHKLOffsets"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Crystal\\Peaks;DataHandling\\Text";
@@ -46,7 +49,7 @@ private:
   DataObjects::PeaksWorkspace_sptr ws;
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_StatisticsOfPeaksWorkspace_H_ */

@@ -41,7 +41,7 @@ class GLColor {
 public:
   /// Default Constructor
   GLColor(float red = 0, float green = 0, float blue = 0, float alpha = 1.0f);
-  GLColor(int r, int g, int b);
+  GLColor(int r, int g, int b, int a = 255);
   /// Destructor
   virtual ~GLColor();
 
@@ -66,7 +66,7 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &ostr, const GLColor &c);
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*GLCOLOR_H_*/

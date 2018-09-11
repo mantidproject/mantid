@@ -5,17 +5,17 @@ namespace Mantid {
 namespace Kernel {
 
 /** Based on the article: A Fast, Compact Approximation of the Exponential
-*Function
-* by Nicol N. Schraudolph and on the slighly modified version:
-* On a Fast, Compact Approximation of the Exponential Function
-* Neural Computation archive
-* Volume 12 ,  Issue 9  (September 2000)
-* Pages 2009-2012
-* Author: Gavin C. Cawley 	 University of East Anglia, Norwich, Norfolk
-*NR4 7TJ, England
-* This is actually a bit faster than a LookupTable with linear interpolation,
-*however it seems less accurate
-* with error as big as a few % for some values of y.
+ *Function
+ * by Nicol N. Schraudolph and on the slighly modified version:
+ * On a Fast, Compact Approximation of the Exponential Function
+ * Neural Computation archive
+ * Volume 12 ,  Issue 9  (September 2000)
+ * Pages 2009-2012
+ * Author: Gavin C. Cawley 	 University of East Anglia, Norwich, Norfolk
+ *NR4 7TJ, England
+ * This is actually a bit faster than a LookupTable with linear interpolation,
+ *however it seems less accurate
+ * with error as big as a few % for some values of y.
  **/
 
 #define EXP_A (1048576 / M_LN2)

@@ -53,8 +53,8 @@ public:
   const FunctionDomain &getDomain(size_t i) const override;
 
 protected:
-  mutable IMDIterator *m_iterator; ///< IMDIterator
-  size_t m_totalSize;              ///< The total size of the domain
+  mutable std::unique_ptr<IMDIterator> m_iterator; ///< IMDIterator
+  size_t m_totalSize; ///< The total size of the domain
   mutable std::vector<FunctionDomainMD *>
       m_domains; ///< smaller parts of the domain
 };

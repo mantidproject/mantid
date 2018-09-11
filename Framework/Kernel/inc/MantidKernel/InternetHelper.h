@@ -19,8 +19,8 @@ class HTTPResponse;
 class HTTPRequest;
 class HostNotFoundException;
 class HTMLForm;
-}
-}
+} // namespace Net
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -99,7 +99,7 @@ public:
   virtual ~InternetHelper();
 
   // Convenience typedef
-  typedef std::map<std::string, std::string> StringToStringMap;
+  using StringToStringMap = std::map<std::string, std::string>;
 
   // getters and setters
   void setTimeout(int seconds);

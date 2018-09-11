@@ -1,15 +1,16 @@
 /* Test functions for algorithms for single crystal diffraction
  */
 
+#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
+#include "MantidKernel/normal_distribution.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
@@ -169,9 +170,9 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto tofSigma = std::get<2>(sigmas);
 
   // distributions for beam divergence and TOF broadening
-  std::normal_distribution<> xDist(0, xSigma);
-  std::normal_distribution<> yDist(0, ySigma);
-  std::normal_distribution<> tofDist(tofExact, tofSigma);
+  Kernel::normal_distribution<> xDist(0, xSigma);
+  Kernel::normal_distribution<> yDist(0, ySigma);
+  Kernel::normal_distribution<> tofDist(tofExact, tofSigma);
 
   // add events to the workspace
   for (int i = 0; i < nEvents; ++i) {
@@ -255,5 +256,5 @@ void WorkspaceBuilder::rebinWorkspace() {
   rebinAlg->execute();
   m_workspace = rebinAlg->getProperty("OutputWorkspace");
 }
-}
-}
+} // namespace SingleCrystalDiffractionTestHelper
+} // namespace Mantid

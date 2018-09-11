@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_SingleValueParameter_H_
 #define MANTID_MDALGORITHMS_SingleValueParameter_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -43,7 +43,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <typename Derived, typename ValType>
 class DLLExport SingleValueParameter : public ImplicitFunctionParameter {
 public:
-  typedef ValType ValueType;
+  using ValueType = ValType;
   SingleValueParameter(ValType value);
   SingleValueParameter();
   SingleValueParameter(const SingleValueParameter<Derived, ValType> &other);
@@ -159,14 +159,14 @@ std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
   class classname                                                              \
       : public Mantid::API::SingleValueParameter<classname, type_> {           \
   public:                                                                      \
-    typedef Mantid::API::SingleValueParameter<classname, type_> SuperType;     \
+    using SuperType = Mantid::API::SingleValueParameter<classname, type_>;     \
     static std::string parameterName() { return #classname; }                  \
     classname(type_ value) : SuperType(value) {}                               \
     classname() : SuperType() {}                                               \
     std::string getName() const override { return #classname; }                \
     classname *clone() const override { return new classname(m_value); }       \
   };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

@@ -23,7 +23,7 @@ const double ONE = 1.0;
 const double TWO = 2.0;
 const double HALF = 0.5;
 const double SIXTEENTH = 0.0625;
-}
+} // namespace
 
 struct nlls_options {
 
@@ -183,14 +183,14 @@ struct nlls_inform {
 
   ///  the value of the objective function at the best estimate of the solution
   ///   determined by NLLS_solve
-  double obj = HUGE;
+  double obj = std::numeric_limits<float>::max();
 
   ///  the norm of the gradient of the objective function at the best estimate
   ///   of the solution determined by NLLS_solve
-  double norm_g = HUGE;
+  double norm_g = std::numeric_limits<float>::max();
 
   /// the norm of the gradient, scaled by the norm of the residual
-  double scaled_g = HUGE;
+  double scaled_g = std::numeric_limits<float>::max();
 
 }; //  END TYPE nlls_inform
 
@@ -270,8 +270,8 @@ struct NLLS_workspace {
   void initialize(int n, int m, const nlls_options &options);
 };
 
-} // NLLS
-} // CurveFitting
-} // Mantid
+} // namespace NLLS
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // CURVEFITTING_RAL_NLLS_WORKSPACES_H_

@@ -55,7 +55,7 @@ private:
   std::unique_ptr<IReflEventTabPresenter> m_presenter;
 };
 
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLEVENTTABVIEW_H_ */

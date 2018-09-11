@@ -2,9 +2,9 @@
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/make_unique.h"
 #include <memory>
 #include <vector>
 
@@ -22,9 +22,9 @@ namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
-typedef std::vector<SplittingInterval> TimeSplitterType;
+using TimeSplitterType = std::vector<SplittingInterval>;
 class PropertyManager;
-}
+} // namespace Kernel
 
 namespace API {
 
@@ -209,9 +209,9 @@ private:
       m_singleValueCache;
 };
 /// shared pointer to the logManager base class
-typedef boost::shared_ptr<LogManager> LogManager_sptr;
+using LogManager_sptr = boost::shared_ptr<LogManager>;
 /// shared pointer to the logManager base class (const version)
-typedef boost::shared_ptr<const LogManager> LogManager_const_sptr;
+using LogManager_const_sptr = boost::shared_ptr<const LogManager>;
 
 /**
  * Add a property of a specified type (Simply creates a Kernel::Property of that
@@ -245,7 +245,7 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
   newProp->setUnits(units);
   addProperty(std::move(newProp), overwrite);
 }
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_API_LOGMANAGER_H_

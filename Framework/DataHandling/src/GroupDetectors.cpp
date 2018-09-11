@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <set>
 #include <numeric>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {

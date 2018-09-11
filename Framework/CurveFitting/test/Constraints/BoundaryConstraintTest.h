@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Expression.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

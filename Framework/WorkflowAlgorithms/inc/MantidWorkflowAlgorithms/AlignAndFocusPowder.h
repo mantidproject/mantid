@@ -65,6 +65,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"AlignAndFocusPowderFromFiles"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -77,6 +80,8 @@ public:
            "histograms "
            "according to a grouping scheme defined in a CalFile.";
   }
+
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods
@@ -148,7 +153,7 @@ private:
   std::unique_ptr<API::Progress> m_progress = nullptr; ///< Progress reporting
 };
 
-} // namespace WorkflowAlgorithm
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_AlignAndFocusPowder_H_*/

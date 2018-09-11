@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -43,7 +43,7 @@ and isotropic scattering to determine instrument efficiency per detector. If
 no vanadium is provided, all detectors are assumed to have the same efficiency
 
 Determine Single Crystal Diffraction
-====================================
+####################################
 
 Creates a diffraction pattern from a set of runs
 implementing a rotational scan of the sample around the vertical axis. The
@@ -52,7 +52,7 @@ corresponding goniometer's rotation should be logged under log name
 angle.
 
 Sample orientation
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
 
 **VectorU**: Vector along k_i, when goniometer is at offset.
 
@@ -60,7 +60,7 @@ Sample orientation
 offset.
 
 Diffraction preferences
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Most of the scattering occurs in the plane defined by VectorU and VectorV.
 Please choose Uproj and Vproj defining a plane that is as close as possible

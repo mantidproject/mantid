@@ -1,21 +1,21 @@
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <list>
-#include <vector>
-#include <map>
-#include <stack>
 #include <algorithm>
+#include <cmath>
+#include <fstream>
+#include <list>
+#include <map>
+#include <sstream>
+#include <stack>
+#include <vector>
 
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Tolerance.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Torus.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Tolerance.h"
+#include "MantidKernel/V3D.h"
 
 #ifdef ENABLE_OPENCASCADE
 // Opencascade defines _USE_MATH_DEFINES without checking whether it is already
@@ -29,15 +29,11 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <TopoDS_Shape.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {
@@ -333,6 +329,6 @@ TopoDS_Shape Torus::createShape() {
 }
 #endif
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

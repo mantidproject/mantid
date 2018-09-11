@@ -1,5 +1,5 @@
-#include "MantidAPI/ColumnFactory.h"
 #include "MantidDataObjects/VectorColumn.h"
+#include "MantidAPI/ColumnFactory.h"
 
 namespace Mantid {
 namespace DataObjects {

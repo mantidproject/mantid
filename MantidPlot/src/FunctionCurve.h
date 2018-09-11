@@ -38,8 +38,8 @@ namespace Mantid {
 namespace API {
 class IFunction;
 class MatrixWorkspace;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 // Function curve class
 class FunctionCurve : public PlotCurve {

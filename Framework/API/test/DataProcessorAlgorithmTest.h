@@ -1,13 +1,13 @@
 #ifndef MANTID_API_DATAPROCESSORALGORITHMTEST_H_
 #define MANTID_API_DATAPROCESSORALGORITHMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

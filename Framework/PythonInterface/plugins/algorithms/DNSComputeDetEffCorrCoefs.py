@@ -29,6 +29,9 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
         """
         return 'Workflow\\MLZ\\DNS;CorrectionFunctions\\SpecialCorrections'
 
+    def seeAlso(self):
+        return [ "DNSFlippingRatioCorr" ]
+
     def name(self):
         """
         Returns name

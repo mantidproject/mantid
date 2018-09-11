@@ -6,9 +6,10 @@ from qtpy.QtCore import QModelIndex
 from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout,
                             QHBoxLayout, QCompleter, QTreeWidgetItem)
 
+from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
-from mantidqt.widgets.interfacemanager import InterfaceManager
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
+
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
 

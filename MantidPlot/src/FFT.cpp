@@ -27,12 +27,12 @@
  *                                                                         *
  ***************************************************************************/
 #include "FFT.h"
+#include "ColorBox.h"
 #include "MultiLayer.h"
 #include "Plot.h"
-#include "ColorBox.h"
 
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <gsl/gsl_fft_complex.h>
 #include <gsl/gsl_fft_halfcomplex.h>

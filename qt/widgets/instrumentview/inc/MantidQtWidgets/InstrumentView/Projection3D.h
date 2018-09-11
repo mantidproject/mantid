@@ -9,8 +9,8 @@
 #include <QGLWidget>
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -39,9 +39,9 @@ public:
   void set3DAxesState(bool on);
   void setWireframe(bool on);
 
-  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
-  void getSelectedDetectors(QList<int> &dets) override;
-  void getMaskedDetectors(QList<int> &dets) const override;
+  void componentSelected(size_t componentIndex) override;
+  void getSelectedDetectors(std::vector<size_t> &detIndices) override;
+  void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
   void resize(int, int) override;
   QString getInfoText() const override;
   /// Load settings for the 3D projection from a project file
@@ -76,7 +76,7 @@ protected:
   Viewport m_viewport;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* PROJECTION3D_H_ */

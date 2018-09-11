@@ -14,7 +14,7 @@ This algorithm is frequently run after making a phase quadrature transformation 
 article by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
 
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 

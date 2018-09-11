@@ -1,14 +1,14 @@
 #ifndef MANTID_ALGORITHMS_ADDLOGDERIVATIVETEST_H_
 #define MANTID_ALGORITHMS_ADDLOGDERIVATIVETEST_H_
 
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/AddLogDerivative.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Run.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

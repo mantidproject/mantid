@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_FILTERBADPULSES_H_
 #define MANTID_ALGORITHMS_FILTERBADPULSES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -56,6 +56,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"FilterByTime", "FilterByLogValue"};
+  }
 
   const std::string category() const override;
 

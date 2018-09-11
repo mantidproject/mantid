@@ -1,13 +1,13 @@
 #ifndef MANTID_VATES_PEAKS_PRESENTER_VSI_H
 #define MANTID_VATES_PEAKS_PRESENTER_VSI_H
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include "MantidVatesAPI/ViewFrustum.h"
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace VATES {
@@ -29,8 +29,8 @@ public:
                                   const bool ascending) = 0;
 };
 
-typedef boost::shared_ptr<PeaksPresenterVsi> PeaksPresenterVsi_sptr;
-typedef boost::shared_ptr<const PeaksPresenterVsi> PeaksPresenterVsi_const_sptr;
-}
-}
+using PeaksPresenterVsi_sptr = boost::shared_ptr<PeaksPresenterVsi>;
+using PeaksPresenterVsi_const_sptr = boost::shared_ptr<const PeaksPresenterVsi>;
+} // namespace VATES
+} // namespace Mantid
 #endif

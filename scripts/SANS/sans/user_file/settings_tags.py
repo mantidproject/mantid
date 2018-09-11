@@ -80,7 +80,7 @@ class SampleId(object):
 
 
 # --- SET
-@serializable_enum("scales", "centre")
+@serializable_enum("scales", "centre", "centre_HAB")
 class SetId(object):
     pass
 
@@ -137,6 +137,7 @@ class BackId(object):
 @serializable_enum("reduction_dimensionality", "use_full_wavelength_range", "event_slices",
                    "use_compatibility_mode", "save_types", "save_as_zero_error_free", "user_specified_output_name",
                    "user_specified_output_name_suffix", "use_reduction_mode_as_suffix", "sample_width", "sample_height",
-                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "show_transmission")
+                   "sample_thickness", "sample_shape", "merge_mask", "merge_min", "merge_max", "show_transmission",
+                   "wavelength_range")
 class OtherId(object):
     pass

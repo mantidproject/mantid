@@ -3,14 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/Crystal/IPeak.h"
 
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -48,8 +48,9 @@ void CheckWorkspacesMatch::init() {
       "Tolerance", 0.0,
       "The maximum amount by which values may differ between the workspaces.");
 
-  declareProperty("CheckType", true, "Whether to check that the data types "
-                                     "(Workspace2D vs EventWorkspace) match.");
+  declareProperty("CheckType", true,
+                  "Whether to check that the data types "
+                  "(Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes", true, "Whether to check that the axes match.");
   declareProperty("CheckSpectraMap", true,
                   "Whether to check that the spectra-detector maps match. ");

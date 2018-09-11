@@ -82,7 +82,8 @@ class UserProperties(object):
         self._rb_exist[recent_date_id] = rb_exist
 
         # a data which define the cycle ID e.g 2014_3 or something
-        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:10]))
+        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:]))
+
         self._instrument[recent_date_id] = str(instrument).upper()
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
@@ -259,7 +260,15 @@ class UserProperties(object):
         if isinstance(cycle, int):
             cycle = convert_cycle_int(cycle)
         if isinstance(cycle, str):
-            if len(cycle) != 10:
+            if len(cycle) == 11:
+                last_letter = cycle[-1]
+                if not last_letter.upper() in {'A','B','C','D','E'}:
+                    raise  RuntimeError("Cycle should be a string in the form CYCLEYYYYN[A,B,C,D "
+                                        "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
+                                        "but it is {0}".format(cycle))
+                else:
+                    cycle = cycle.upper()
+            elif len(cycle) < 10:
                 cycle = cycle.replace('_', '')
                 try:
                     cycle = int(cycle)
@@ -384,7 +393,7 @@ class MantidConfigDirectInelastic(object):
         # instrument and cycle number.
         # the common part of all strings, generated dynamically as function of input class parameters.
         self._dynamic_options_base = ['default.facility=ISIS']
-        # Path to python scripts, defined and used by mantid wrt to Mantid Root (this path may be version specific)
+        # Path to python scripts, defined and used by Mantid wrt to Mantid Root (this path may be version specific)
         self._python_mantid_path = ['scripts/Calibration/', 'scripts/Examples/', 'scripts/Interface/', 'scripts/Vates/']
         # Static paths to user scripts, defined wrt script repository root
         self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
@@ -421,17 +430,10 @@ class MantidConfigDirectInelastic(object):
                         "##\n"
                         "\n"
                         "## Uncomment to change logging level\n"
-                        "## Default is information\n"
+                        "## Default is notice\n"
                         "## Valid values are: error, warning, notice, information, debug\n"
                         "#logging.loggers.root.level=information\n"
                         "\n"
-                        "## Sets the lowest level messages to be logged to file\n"
-                        "## Default is warning\n"
-                        "## Valid values are: error, warning, notice, information, debug\n"
-                        "#logging.channels.fileFilterChannel.level=debug\n"
-                        "## Sets the file to write logs to\n"
-                        "#logging.channels.fileChannel.path=../mantid.log\n"
-                        "##\n"
                         "## MantidPlot\n"
                         "##\n"
                         "## Show invisible workspaces\n"
@@ -653,7 +655,7 @@ class MantidConfigDirectInelastic(object):
         # does not work if user is not defined
         if self._user is None:
             return None
-        # parse job description file, fail down on default behavior if
+        # parse job description file, fail down on default behaviour if
         # user files description is not there
         try:
             domObj = minidom.parse(job_description_file)
@@ -692,11 +694,13 @@ class MantidConfigDirectInelastic(object):
            (cycle ID)
            The agreement on the naming as currently in ISIS:
            e.g: /archive/NDXMERLIN/Instrument/data/cycle_08_1
+
+            Note: will fail if cycle numbers ever become a 2-digit numbers e.g. cycle_22_10
         """
         # cycle folder have short form without leading numbers
         cycle_fold_n = int(cycle_ID[0]) - 2000
         folder = os.path.join(self._root_data_folder, 'NDX' + instr.upper(),
-                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1])))
+                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1][0])))
         return folder
 
     def is_inelastic(self, instr_name):

@@ -1,8 +1,8 @@
 #ifndef MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 #define MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_
 
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/LegacyQwt/DllOption.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "ui_ColorBarWidget.h"
 #include <QMouseEvent>
 #include <QWidget>
@@ -147,6 +147,6 @@ private:
 };
 
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // MANTID_MANTIDWIDGETS_COLORBARWIDGET_H_

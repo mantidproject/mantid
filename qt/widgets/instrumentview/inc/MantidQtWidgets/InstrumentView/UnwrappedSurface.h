@@ -1,20 +1,20 @@
 #ifndef UNWRAPPEDSURFACE_H
 #define UNWRAPPEDSURFACE_H
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Objects/IObject.h"
 #include "InstrumentActor.h"
+#include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include "ProjectionSurface.h"
+#include "UnwrappedDetector.h"
 #include <boost/shared_ptr.hpp>
 
 #include <QImage>
 #include <QList>
-#include <QStack>
-#include <QSet>
 #include <QMap>
 #include <QPainter>
+#include <QSet>
+#include <QStack>
 
 namespace Mantid {
 namespace Geometry {
@@ -23,7 +23,7 @@ class IDetector;
 namespace API {
 class IPeaksWorkspace;
 }
-}
+} // namespace Mantid
 
 class GLColor;
 class QGLWidget;
@@ -31,59 +31,26 @@ class GL3DWidget;
 
 namespace MantidQt {
 namespace MantidWidgets {
-
 /**
-\class UnwrappedDetector
-\brief Class helper for drawing detectors on unwraped surfaces
-\date 15 Nov 2010
-\author Roman Tolchenov, Tessella plc
-
-This class keeps information used to draw a detector on an unwrapped surface.
-
-*/
-class UnwrappedDetector {
-public:
-  UnwrappedDetector();
-  UnwrappedDetector(const unsigned char *c,
-                    const Mantid::Geometry::IDetector &det);
-  UnwrappedDetector(const UnwrappedDetector &other);
-  UnwrappedDetector &operator=(const UnwrappedDetector &other);
-  bool isValid() const;
-  unsigned char color[3]; ///< red, green, blue colour components (0 - 255)
-  double u;               ///< horizontal "unwrapped" coordinate
-  double v;               ///< vertical "unwrapped" coordinate
-  double width;           ///< detector width in units of u
-  double height;          ///< detector height in units of v
-  double uscale;          ///< scaling factor in u direction
-  double vscale;          ///< scaling factor in v direction
-  Mantid::detid_t detID;  ///< Detector ID
-  Mantid::Kernel::V3D position;  ///< Detector position
-  Mantid::Kernel::Quat rotation; ///< Detector orientation
-  boost::shared_ptr<const Mantid::Geometry::IObject>
-      shape;                       ///< Shape of the detector
-  Mantid::Kernel::V3D scaleFactor; ///< Detector's scale factor
-};
-
-/**
-* @class UnwrappedSurface
-* @brief Performs projection of an instrument onto a 2D surface and unwrapping
-*it into a plane. Draws the resulting image
-*        on the screen.
-* @author Roman Tolchenov, Tessella plc
-* @date 18 Nov 2010
-*
-* Inherited classes must implement methods:
-*
-*   project(...)
-*   rotate(...)
-*   init()
-*
-* In init() the implementation must set values for:
-*
-*   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max, m_viewRect,
-*   m_unwrappedDetectors, m_assemblies
-*
-*/
+ * @class UnwrappedSurface
+ * @brief Performs projection of an instrument onto a 2D surface and unwrapping
+ *it into a plane. Draws the resulting image
+ *        on the screen.
+ * @author Roman Tolchenov, Tessella plc
+ * @date 18 Nov 2010
+ *
+ * Inherited classes must implement methods:
+ *
+ *   project(...)
+ *   rotate(...)
+ *   init()
+ *
+ * In init() the implementation must set values for:
+ *
+ *   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max, m_viewRect,
+ *   m_unwrappedDetectors, m_assemblies
+ *
+ */
 
 class UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
@@ -92,9 +59,9 @@ public:
 
   /** @name Implemented public virtual methods */
   //@{
-  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
-  void getSelectedDetectors(QList<int> &dets) override;
-  void getMaskedDetectors(QList<int> &dets) const override;
+  void componentSelected(size_t componentIndex) override;
+  void getSelectedDetectors(std::vector<size_t> &detIndices) override;
+  void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   QString getInfoText() const override;
   RectF getSurfaceBounds() const override;
@@ -103,20 +70,20 @@ public:
   /** @name New public virtual methods */
   //@{
   /**
-  * Project a point in the 3D space onto the surface. The method returns the u-
-  *and v- coordinates of the projection
-  * as well as the scaling factors along the u and v axes. The scaling factors
-  *help to draw an approximate projection
-  * of a 3D object on the surface which is an orthographic projection of the
-  *object onto the tagent plane to the
-  * surface at point (uv) and scaled along u and v by the corresponding factor.
-  *
-  * @param pos :: A position of a 3D point.
-  * @param u (output) :: u-coordinate of the projection.
-  * @param v (output) :: v-coordinate of the projection.
-  * @param uscale (output) :: The scaling factor along the u-coordinate.
-  * @param vscale (output) :: The scaling factor along the v-coordinate.
-  */
+   * Project a point in the 3D space onto the surface. The method returns the u-
+   *and v- coordinates of the projection
+   * as well as the scaling factors along the u and v axes. The scaling factors
+   *help to draw an approximate projection
+   * of a 3D object on the surface which is an orthographic projection of the
+   *object onto the tagent plane to the
+   * surface at point (uv) and scaled along u and v by the corresponding factor.
+   *
+   * @param pos :: A position of a 3D point.
+   * @param u (output) :: u-coordinate of the projection.
+   * @param v (output) :: v-coordinate of the projection.
+   * @param uscale (output) :: The scaling factor along the u-coordinate.
+   * @param vscale (output) :: The scaling factor along the v-coordinate.
+   */
   virtual void project(const Mantid::Kernel::V3D &pos, double &u, double &v,
                        double &uscale, double &vscale) const = 0;
   //@}
@@ -158,14 +125,14 @@ protected:
   /** @name New protected virtual methods */
   //@{
   /**
-  * Calculate a rotation needed to see a detector from the correct angle on the
-  * surface.
-  * The rotation should be such that the detector is seen from the tip of the
-  * normal
-  * to the surface at the detector's position.
-  * @param udet :: A detector.
-  * @param R :: The result rotaion.
-  */
+   * Calculate a rotation needed to see a detector from the correct angle on the
+   * surface.
+   * The rotation should be such that the detector is seen from the tip of the
+   * normal
+   * to the surface at the detector's position.
+   * @param udet :: A detector.
+   * @param R :: The result rotaion.
+   */
   virtual void rotate(const UnwrappedDetector &udet,
                       Mantid::Kernel::Quat &R) const = 0;
   virtual void calcUV(UnwrappedDetector &udet, Mantid::Kernel::V3D &pos);
@@ -179,10 +146,7 @@ protected:
 
   /** @name Protected methods */
   //@{
-  void setColor(int index, bool picking) const;
-  void calcAssemblies(const Mantid::Geometry::IComponent *comp,
-                      const QRectF &compRect);
-  void cacheAllAssemblies();
+  void setColor(size_t index, bool picking) const;
   void createPeakShapes(const QRect &viewport) const;
   //@}
 
@@ -196,9 +160,6 @@ protected:
   /// Info needed to draw detectors onto unwrapped image
   std::vector<UnwrappedDetector> m_unwrappedDetectors;
 
-  /// Bounding rectangles of detector assemblies
-  QMap<Mantid::Geometry::ComponentID, QRectF> m_assemblies;
-
   bool m_flippedView; ///< if false the image is seen from the sample. if true
   /// the view is looking towards the sample.
   mutable bool m_startPeakShapes; ///< set to true to start creating
@@ -209,7 +170,7 @@ protected:
   QStack<RectF> m_zoomStack;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // UNWRAPPEDSURFACE_H

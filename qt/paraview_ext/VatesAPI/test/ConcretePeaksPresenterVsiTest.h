@@ -23,7 +23,7 @@
 
 using namespace ::testing;
 using namespace Mantid::VATES;
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockPeakConcrete : public Mantid::DataObjects::Peak {
 public:
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D(void));
@@ -38,7 +38,7 @@ public:
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak &(int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak &(int peakNum));
 };
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 class ConcretePeaksPresenterVsiTest : public CxxTest::TestSuite {
 public:
   void testSetupPresenterCorrectly() {

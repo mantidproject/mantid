@@ -1,9 +1,9 @@
 #ifndef MANTID_SINQ_POLDISOURCESPECTRUM_H
 #define MANTID_SINQ_POLDISOURCESPECTRUM_H
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include "boost/shared_ptr.hpp"
 
@@ -59,10 +59,10 @@ protected:
   Kernel::Interpolation m_spectrum;
 };
 
-typedef boost::shared_ptr<PoldiSourceSpectrum> PoldiSourceSpectrum_sptr;
-typedef boost::shared_ptr<const PoldiSourceSpectrum>
-    PoldiSourceSpectrum_const_sptr;
-}
-}
+using PoldiSourceSpectrum_sptr = boost::shared_ptr<PoldiSourceSpectrum>;
+using PoldiSourceSpectrum_const_sptr =
+    boost::shared_ptr<const PoldiSourceSpectrum>;
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // MANTID_SINQ_POLDISOURCESPECTRUM_H

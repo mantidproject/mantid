@@ -1,14 +1,14 @@
 #ifndef VSI_PEAKSWORKWIDGET_H
 #define VSI_PEAKSWORKWIDGET_H
 
-#include "ui_PeaksWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "ui_PeaksWidget.h"
 
 #include <QWidget>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace Mantid {
 namespace Vates {
@@ -41,7 +41,7 @@ private:
   int m_originalTableWidth;
 };
 
-} // namespace
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 #endif // PEAKSWORKSPACEWIDGET_H

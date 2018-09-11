@@ -7,10 +7,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidVatesAPI/MDHWLoadingPresenter.h"
-#include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidVatesAPI/MDHWLoadingPresenter.h"
+#include "MantidVatesAPI/MDLoadingView.h"
 
 #include "MockObjects.h"
 
@@ -31,7 +31,7 @@ private:
   */
   class ConcreteMDHWLoadingPresenter : public MDHWLoadingPresenter {
   private:
-    typedef MDHWLoadingPresenter BaseClass;
+    using BaseClass = MDHWLoadingPresenter;
 
   public:
     ConcreteMDHWLoadingPresenter(std::unique_ptr<MDLoadingView> view)

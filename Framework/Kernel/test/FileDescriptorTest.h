@@ -1,14 +1,14 @@
 #ifndef MANTID_KERNEL_FILEDESCRIPTORTEST_H_
 #define MANTID_KERNEL_FILEDESCRIPTORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cstdio>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileDescriptor.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 using Mantid::Kernel::FileDescriptor;
 
@@ -23,14 +23,14 @@ public:
     auto &cfg = Mantid::Kernel::ConfigService::Instance();
     cfg.reset();
     const auto &dataPaths = cfg.getDataSearchDirs();
-    for (auto it = dataPaths.begin(); it != dataPaths.end(); ++it) {
-      Poco::Path nxsPath(*it, "CNCS_7860_event.nxs");
+    for (const auto &dataPath : dataPaths) {
+      Poco::Path nxsPath(dataPath, "CNCS_7860_event.nxs");
       if (Poco::File(nxsPath).exists())
         m_testNexusPath = nxsPath.toString();
-      Poco::Path nonNxsPath(*it, "CSP79590.raw");
+      Poco::Path nonNxsPath(dataPath, "CSP79590.raw");
       if (Poco::File(nonNxsPath).exists())
         m_testNonNexusPath = nonNxsPath.toString();
-      Poco::Path asciiPath(*it, "AsciiExample.txt");
+      Poco::Path asciiPath(dataPath, "AsciiExample.txt");
       if (Poco::File(asciiPath).exists())
         m_testAsciiPath = asciiPath.toString();
 

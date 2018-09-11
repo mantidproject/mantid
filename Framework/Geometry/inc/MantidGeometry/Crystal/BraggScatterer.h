@@ -4,8 +4,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
-#include <complex>
 #include <boost/shared_ptr.hpp>
+#include <complex>
 
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TypedValidator.h"
@@ -13,11 +13,11 @@
 namespace Mantid {
 namespace Geometry {
 
-typedef std::complex<double> StructureFactor;
+using StructureFactor = std::complex<double>;
 
 class BraggScatterer;
 
-typedef boost::shared_ptr<BraggScatterer> BraggScatterer_sptr;
+using BraggScatterer_sptr = boost::shared_ptr<BraggScatterer>;
 
 /**
     @class BraggScatterer

@@ -36,9 +36,9 @@
 #define LIBORIGIN_VERSION 0x00070926
 #define LIBORIGIN_VERSION_STRING "2007-09-26"
 
+#include "tree.hh"
 #include <string>
 #include <vector>
-#include "tree.hh"
 
 struct rect {
   short left;

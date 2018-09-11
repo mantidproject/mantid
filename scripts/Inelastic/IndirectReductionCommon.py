@@ -575,7 +575,41 @@ def scale_detectors(workspace_name, e_mode='Indirect'):
 # -------------------------------------------------------------------------------
 
 
-def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
+def get_group_from_string(grouping_string):
+    if '-' in grouping_string:
+        return list(create_range_from(grouping_string, '-'))
+    elif ':' in grouping_string:
+        return list(create_range_from(grouping_string, ':'))
+    elif '+' in grouping_string:
+        return [int(i) for i in grouping_string.split('+')]
+    else:
+        return [int(grouping_string)]
+
+
+def create_group_from_string(input_workspace, grouping_string):
+    from mantid.simpleapi import GroupDetectors
+    return GroupDetectors(InputWorkspace=input_workspace,
+                          Behaviour='Average',
+                          SpectraList=get_group_from_string(grouping_string),
+                          StoreInADS=False)
+
+
+def conjoin_workspaces(*workspaces):
+    from mantid.simpleapi import AppendSpectra
+
+    conjoined = workspaces[0]
+    for workspace in workspaces[1:]:
+        conjoined = AppendSpectra(conjoined, workspace, StoreInADS=False)
+    return conjoined
+
+
+def group_on_string(input_workspace, grouping_string):
+    grouping_string.replace(' ', '')
+    groups = [create_group_from_string(input_workspace, group) for group in grouping_string.split(',')]
+    return conjoin_workspaces(*groups)
+
+
+def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -585,14 +619,15 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
+    @param group_string String for custom method - comma separated list or range
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string)
 
     if grouped_ws is not None:
         mtd.addOrReplace(workspace_name, grouped_ws)
 
 
-def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
+def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
     Workflow.GroupingFile parameters and GroupingPolicy property.
@@ -602,6 +637,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     @param method Grouping method (IPF, All, Individual, File, Workspace)
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
+    @param group_string String for custom method - comma separated list or range
     """
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
@@ -663,6 +699,12 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     elif grouping_method == 'Workspace':
         # Apply the grouping
         group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
+
+    elif grouping_method == 'Custom':
+        # Mask detectors if required
+        if len(masked_detectors) > 0:
+            _mask_detectors(workspace, masked_detectors)
+        return group_on_string(workspace, group_string)
 
     else:
         raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))

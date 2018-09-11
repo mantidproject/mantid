@@ -1,11 +1,11 @@
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ICompAssembly;
+using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ObjComponent;
 using namespace boost::python;
 

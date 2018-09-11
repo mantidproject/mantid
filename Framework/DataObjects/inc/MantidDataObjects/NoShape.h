@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAOBJECTS_NOSHAPE_H_
 #define MANTID_DATAOBJECTS_NOSHAPE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {

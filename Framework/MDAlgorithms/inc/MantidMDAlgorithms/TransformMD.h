@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_TRANSFORMMD_H_
 #define MANTID_MDALGORITHMS_TRANSFORMMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -42,6 +42,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"InvertMDDim"};
+  }
   const std::string category() const override;
 
 private:

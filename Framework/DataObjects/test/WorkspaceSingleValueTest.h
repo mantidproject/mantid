@@ -1,10 +1,10 @@
 #ifndef TESTWORKSPACESINGLEVALUE_
 #define TESTWORKSPACESINGLEVALUE_
 
-#include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "PropertyManagerHelper.h"
@@ -64,9 +64,9 @@ public:
   }
 
   /**
-  * Test declaring an input WorkspaceSingleValue and retrieving it as const_sptr
-  * or sptr
-  */
+   * Test declaring an input WorkspaceSingleValue and retrieving it as
+   * const_sptr or sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     WorkspaceSingleValue_sptr wsInput(new WorkspaceSingleValue());
@@ -78,10 +78,10 @@ public:
     WorkspaceSingleValue_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<WorkspaceSingleValue_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(
         wsNonConst = manager.getValue<WorkspaceSingleValue_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -90,9 +90,9 @@ public:
     WorkspaceSingleValue_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst =
                                  (WorkspaceSingleValue_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (WorkspaceSingleValue_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

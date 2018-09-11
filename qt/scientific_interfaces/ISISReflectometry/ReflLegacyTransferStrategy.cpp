@@ -1,15 +1,76 @@
 #include "ReflLegacyTransferStrategy.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/Tolerance.h"
 #include "ReflTableSchema.h"
 #include <algorithm>
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-TransferResults ReflLegacyTransferStrategy::transferRuns(
-    SearchResultMap &searchResults, Mantid::Kernel::ProgressBase &progress) {
+
+// unnamed namespace
+namespace {
+/** Check that the given row contains a valid theta value
+ * @param row : row values as a map of field name to value
+ * @throws : std::invalid_argument if failed
+ */
+void validateTheta(std::map<std::string, std::string> &row) {
+  // Exclude empty strings
+  auto const angleString = row[ReflTableSchema::ANGLE];
+  if (angleString.empty())
+    throw std::invalid_argument("Theta is not specified");
+
+  // Exclude zero or negative angles
+  try {
+    auto const angle = std::stod(angleString);
+    if (angle < Mantid::Kernel::Tolerance)
+      throw std::invalid_argument("Theta is zero or negative");
+  } catch (const std::exception &e) {
+    throw std::invalid_argument(std::string("Error parsing Theta: ") +
+                                e.what());
+  }
+}
+
+/** Check that the given row values are all valid
+ * @param row : row values as a map of field name to value
+ * @throws : std::invalid_argument if failed
+ */
+void validateStrict(std::map<std::string, std::string> &row) {
+  validateTheta(row);
+}
+
+/** Check that the given row contains valid data
+ * @param row : row values as a map of field name to value
+ * @param matchType : defines how strictly to match criteria
+ * @throws : std::invalid_argument if failed
+ */
+void validateRow(std::map<std::string, std::string> &row,
+                 const TransferMatch matchType) {
+  switch (matchType) {
+  case TransferMatch::Any:
+    // no checks required
+    break;
+  case TransferMatch::ValidTheta:
+    validateTheta(row);
+    break;
+  case TransferMatch::Strict:
+    validateStrict(row);
+    break;
+  };
+}
+} // namespace
+
+/** Transfer runs from the search results table to the data processor table.
+ * @param searchResults : the search results
+ * @param progress : the progress bar to update with progress of the transfer
+ * @param matchType : an enum defining how strictly to check that run titles
+ * match the required pattern
+ */
+TransferResults
+ReflLegacyTransferStrategy::transferRuns(SearchResultMap &searchResults,
+                                         Mantid::Kernel::ProgressBase &progress,
+                                         const TransferMatch matchType) {
   /*
    * If the descriptions are the same except for theta: same group, different
    * rows.
@@ -81,6 +142,12 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     row[ReflTableSchema::RUNS] = runDescriptionPair.second;
     row[ReflTableSchema::ANGLE] = descriptionToTheta[runDescriptionPair.first];
     row[ReflTableSchema::GROUP] = descriptionToGroup[runDescriptionPair.first];
+    try {
+      validateRow(row, matchType);
+    } catch (const std::exception &e) {
+      results.addErrorRow(row[ReflTableSchema::RUNS], e.what());
+      continue;
+    }
     // add our successful row
     results.addTransferRow(row);
   }
@@ -103,5 +170,5 @@ bool MantidQt::CustomInterfaces::ReflLegacyTransferStrategy::knownFileType(
   boost::smatch match; // Unused.
   return boost::regex_search(filename, match, pattern);
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

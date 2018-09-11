@@ -19,9 +19,7 @@
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
-// clang-format off
-GCC_DIAG_OFF(unused-variable)
-// clang-format on
+GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
@@ -36,7 +34,7 @@ DECLARE_LISTENER(ISISLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISLiveEventDataListener");
-}
+} // namespace
 
 /**
  * The constructor
@@ -235,6 +233,8 @@ void ISISLiveEventDataListener::run() {
       // get the header with the type of the packet
       Receive(events.head, "Events header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       if (!(events.head.type == TCPStreamEventHeader::Neutron)) {
         // don't know what to do with it - stop
         throw std::runtime_error("Unknown packet type.");
@@ -244,6 +244,8 @@ void ISISLiveEventDataListener::run() {
       // get the header with the sream size
       Receive(events.head_n, "Neutrons header",
               "Corrupt stream - you should reconnect.");
+      if (m_stopThread)
+        break;
       CollectJunk(events.head_n);
 
       // absolute pulse (frame) time
@@ -282,8 +284,7 @@ void ISISLiveEventDataListener::run() {
       saveEvents(events.data, pulseTime, events.head_n.period);
     }
 
-  } catch (std::runtime_error &
-               e) { // exception handler for generic runtime exceptions
+  } catch (std::runtime_error &e) {
 
     g_log.error() << "Caught a runtime exception.\nException message: "
                   << e.what() << '\n';
@@ -291,8 +292,8 @@ void ISISLiveEventDataListener::run() {
 
     m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
-  } catch (std::invalid_argument &
-               e) { // TimeSeriesProperty (and possibly some other things) can
+  } catch (std::invalid_argument &e) {
+    // TimeSeriesProperty (and possibly some other things) can
     // can throw these errors
     g_log.error()
         << "Caught an invalid argument exception.\nException message: "
@@ -303,7 +304,7 @@ void ISISLiveEventDataListener::run() {
     newMsg += e.what();
     m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
 
-  } catch (...) { // Default exception handler
+  } catch (...) {
     g_log.error() << "Uncaught exception in ISISLiveEventDataListener network "
                      "read thread.\n";
     m_isConnected = false;
@@ -396,8 +397,8 @@ void ISISLiveEventDataListener::saveEvents(
 }
 
 /**
-  * Set the spectra-detector map to the buffer workspace.
-  */
+ * Set the spectra-detector map to the buffer workspace.
+ */
 void ISISLiveEventDataListener::loadSpectraMap() {
   // Read in the number of detectors
   int ndet = getInt("NDET");
@@ -412,9 +413,9 @@ void ISISLiveEventDataListener::loadSpectraMap() {
 }
 
 /**
-  * Load the instrument
-  * @param instrName :: Instrument name
-  */
+ * Load the instrument
+ * @param instrName :: Instrument name
+ */
 void ISISLiveEventDataListener::loadInstrument(const std::string &instrName) {
   // try to load the instrument. if it doesn't load give a warning and carry on
   if (instrName.empty()) {
@@ -464,16 +465,16 @@ void ISISLiveEventDataListener::getIntArray(const std::string &par,
 }
 
 /** Function called by IDC routines to report an error. Passes the error through
-* to the logger
-* @param status ::  The status code of the error (disregarded)
-* @param code ::    The error code (disregarded)
-* @param message :: The error message - passed to the logger at error level
-*/
+ * to the logger
+ * @param status ::  The status code of the error (disregarded)
+ * @param code ::    The error code (disregarded)
+ * @param message :: The error message - passed to the logger at error level
+ */
 void ISISLiveEventDataListener::IDCReporter(int status, int code,
                                             const char *message) {
   (void)status;
   (void)code; // Avoid compiler warning
   g_log.error(message);
 }
-}
-}
+} // namespace LiveData
+} // namespace Mantid

@@ -67,6 +67,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"IntegrateByComponent", "Rebin"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Arithmetic;Transforms\\Rebin";
@@ -90,7 +93,7 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_INTEGRATION_H_*/

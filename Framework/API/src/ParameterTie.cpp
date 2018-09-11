@@ -1,5 +1,5 @@
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
@@ -81,7 +81,7 @@ void ParameterTie::set(const std::string &expr) {
   }
 
   // Create the template m_expression
-  boost::regex rx("\\b(([[:alpha:]]|_)([[:alnum:]]|_|\\.)*)\\b(?!(\\s*\\())");
+  boost::regex rx(R"(\b(([[:alpha:]]|_)([[:alnum:]]|_|\.)*)\b(?!(\s*\()))");
   std::string input = expr;
   boost::smatch res;
   std::string::const_iterator start = input.begin();
@@ -194,5 +194,5 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
  */
 bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid

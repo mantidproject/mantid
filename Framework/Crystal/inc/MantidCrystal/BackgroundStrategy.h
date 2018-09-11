@@ -38,6 +38,6 @@ public:
   virtual BackgroundStrategy *clone() const = 0;
   virtual ~BackgroundStrategy() = default;
 };
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 #endif /* BACKGROUNDSTRATEGY_H_ */

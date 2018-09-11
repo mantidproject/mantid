@@ -5,7 +5,7 @@ from mantid.simpleapi import SaveHKL
 
 # List of file format names supported by this algorithm
 SUPPORTED_FORMATS = ["Fullprof", "GSAS", "Jana", "SHELX"]
-NUM_PEAKSWS_COLUMNS = 17
+NUM_PEAKSWS_COLUMNS = 18
 
 
 def has_modulated_indexing(workspace):

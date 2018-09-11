@@ -38,7 +38,7 @@ class FlatPlatePaalmanPingsCorrectionTest(stresstesting.MantidStressTest):
                                                       CanFrontThickness=can_front_thickness, CanBackThickness=can_back_thickness)
 
         LoadNexusProcessed(Filename="FlatPlatePaalmanPings_" + name + ".nxs", OutputWorkspace='ref')
-        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6)
+        result = CompareWorkspaces(Workspace1=FPPP_Result, Workspace2='ref', Tolerance=1e-6, CheckInstrument=False)
         if not result[0]:
             self.assertTrue(result[0], "Mismatch in " + name + ": " + result[1].row(0)['Message'])
 

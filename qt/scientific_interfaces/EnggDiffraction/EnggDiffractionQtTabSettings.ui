@@ -240,7 +240,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="1" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -252,36 +252,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_focusing">
-     <property name="title">
-      <string>Focusing settings:</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_9">
-      <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QLabel" name="label_focusing_dir">
-          <property name="text">
-           <string>Output folder:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lineEdit_dir_focusing"/>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_browse_dir_focusing">
-          <property name="text">
-           <string>Browse</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
    </item>
   </layout>
  </widget>

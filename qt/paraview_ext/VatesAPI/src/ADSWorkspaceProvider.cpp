@@ -42,5 +42,5 @@ template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDWorkspace>;
 template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>;
 template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>;
 ///@endcond
-}
-}
+} // namespace VATES
+} // namespace Mantid

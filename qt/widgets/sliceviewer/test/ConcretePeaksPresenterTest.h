@@ -1,22 +1,22 @@
 #ifndef SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
 #define SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockObjects.h"
-#include <boost/make_shared.hpp>
-#include <string>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -26,12 +26,12 @@ using namespace testing;
 using boost::regex;
 
 // Alias.
-typedef boost::shared_ptr<Mantid::API::MDGeometry> MDGeometry_sptr;
+using MDGeometry_sptr = boost::shared_ptr<Mantid::API::MDGeometry>;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   /// Alias.
-  typedef boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>
-      ConcretePeaksPresenter_sptr;
+  using ConcretePeaksPresenter_sptr =
+      boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter>;
 
   /// Helper method to create a good 'Integrated' peaks workspace
   Mantid::API::IPeaksWorkspace_sptr

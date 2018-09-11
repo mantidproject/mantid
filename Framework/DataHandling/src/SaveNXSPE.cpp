@@ -16,9 +16,9 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <nexus/NeXusFile.hpp>
 #include <boost/scoped_array.hpp>
 #include <limits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -194,7 +194,7 @@ void SaveNXSPE::exec() {
   nxFile.closeData();
 
   // let's create some blank arrays in the nexus file
-  typedef std::vector<int64_t> Dimensions;
+  using Dimensions = std::vector<int64_t>;
   Dimensions arrayDims(2);
   arrayDims[0] = nHist;
   arrayDims[1] = nBins;
@@ -221,7 +221,7 @@ void SaveNXSPE::exec() {
   slabSize[1] = nBins;
 
   // Allocate the temporary buffers for the signal and errors
-  typedef boost::scoped_array<double> Buffer;
+  using Buffer = boost::scoped_array<double>;
   const size_t bufferSize(slabSize[0] * slabSize[1]);
   Buffer signalBuffer(new double[bufferSize]);
   Buffer errorBuffer(new double[bufferSize]);

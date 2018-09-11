@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_VectorParameter_H_
 #define MANTID_MDALGORITHMS_VectorParameter_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -39,7 +39,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <typename Derived, typename ElemType>
 class DLLExport VectorParameter : public ImplicitFunctionParameter {
 public:
-  typedef ElemType ValueType;
+  using ValueType = ElemType;
   VectorParameter();
   VectorParameter(size_t size);
   VectorParameter(const VectorParameter<Derived, ElemType> &other);
@@ -245,14 +245,14 @@ ElemType &VectorParameter<Derived, ElemType>::at(size_t index) {
 #define DECLARE_VECTOR_PARAMETER(classname, type_)                             \
   class classname : public Mantid::API::VectorParameter<classname, type_> {    \
   public:                                                                      \
-    typedef Mantid::API::VectorParameter<classname, type_> SuperType;          \
+    using SuperType = Mantid::API::VectorParameter<classname, type_>;          \
     static std::string parameterName() { return #classname; }                  \
     classname() : SuperType() {}                                               \
     classname(size_t index) : SuperType(index) {}                              \
     std::string getName() const override { return #classname; }                \
     classname *clone() const override { return new classname(*this); }         \
   };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

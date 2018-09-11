@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParameterTie.h"
 
 using namespace Mantid;

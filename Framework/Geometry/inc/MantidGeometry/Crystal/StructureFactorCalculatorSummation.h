@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORSUMMATION_H_
 #define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORSUMMATION_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
+#include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -54,8 +54,8 @@ protected:
   CompositeBraggScatterer_sptr m_unitCellScatterers;
 };
 
-typedef boost::shared_ptr<StructureFactorCalculatorSummation>
-    StructureFactorSummation_sptr;
+using StructureFactorSummation_sptr =
+    boost::shared_ptr<StructureFactorCalculatorSummation>;
 
 } // namespace Geometry
 } // namespace Mantid

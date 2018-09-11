@@ -23,7 +23,7 @@ namespace VATES {
 class ProgressAction;
 
 /* Helper struct allows recognition of points that we should not bother to draw.
-*/
+ */
 struct UnstructuredPoint {
   bool isSparse;
   vtkIdType pointId;
@@ -159,9 +159,8 @@ protected:
                bool bExactMatch = true) const {
     boost::shared_ptr<IMDWorkspaceType> imdws =
         boost::dynamic_pointer_cast<IMDWorkspaceType>(workspace);
-    if (imdws &&
-        this->checkWorkspace<IMDWorkspaceType, ExpectedNDimensions>(
-            *imdws, bExactMatch)) {
+    if (imdws && this->checkWorkspace<IMDWorkspaceType, ExpectedNDimensions>(
+                     *imdws, bExactMatch)) {
       return imdws;
     } else {
       // Abort as imdws cannot be dynamically cast to the target type.
@@ -247,9 +246,9 @@ private:
   bool m_bCheckDimensionality;
 };
 
-typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
-typedef std::unique_ptr<vtkDataSetFactory> vtkDataSetFactory_uptr;
-}
-}
+using vtkDataSetFactory_sptr = boost::shared_ptr<vtkDataSetFactory>;
+using vtkDataSetFactory_uptr = std::unique_ptr<vtkDataSetFactory>;
+} // namespace VATES
+} // namespace Mantid
 
 #endif

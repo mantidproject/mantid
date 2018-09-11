@@ -11,7 +11,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /**
 
@@ -67,6 +67,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Rebin"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Rebin"; }
 
@@ -96,7 +97,7 @@ private:
                      HistogramData::HistogramE &enew, const size_t n_bunch);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REBUNCH_H_*/

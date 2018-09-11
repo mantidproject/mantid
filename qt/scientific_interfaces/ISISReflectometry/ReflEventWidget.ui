@@ -53,6 +53,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="uniformEvenEdit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>The number of evenly sized slices to split the event data into</string>
           </property>
@@ -60,6 +63,9 @@
         </item>
         <item row="0" column="2">
          <widget class="QLabel" name="uniformEvenLabel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>even time slices</string>
           </property>
@@ -87,6 +93,9 @@
         </item>
         <item row="1" column="1">
          <widget class="QLineEdit" name="uniformEdit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>The length of time in seconds each slice should cover</string>
           </property>
@@ -94,6 +103,9 @@
         </item>
         <item row="1" column="2">
          <widget class="QLabel" name="uniformLabel">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>(sec) slices</string>
           </property>
@@ -132,6 +144,9 @@
       </item>
       <item>
        <widget class="QLabel" name="customLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Python list (sec)</string>
         </property>
@@ -139,6 +154,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="customEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>A comma separated list of values indicating the times (in seconds) at which to slice the data</string>
         </property>
@@ -175,6 +193,9 @@
       </item>
       <item>
        <widget class="QLabel" name="logValueLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Python list</string>
         </property>
@@ -182,6 +203,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="logValueEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>A comma separated list of values indicating the log values at which to slice the data</string>
         </property>
@@ -189,6 +213,9 @@
       </item>
       <item>
        <widget class="QLabel" name="logValueTypeLabel">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Log name</string>
         </property>
@@ -196,6 +223,9 @@
       </item>
       <item>
        <widget class="QLineEdit" name="logValueTypeEdit">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>The name of the log value to slice on</string>
         </property>

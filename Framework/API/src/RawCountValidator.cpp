@@ -5,10 +5,10 @@ namespace Mantid {
 namespace API {
 
 /** Constructor
-  * @param mustNotBeDistribution :: Flag indicating whether the check is that
-  * a workspace should not be a distribution (true, default) or should be
+ * @param mustNotBeDistribution :: Flag indicating whether the check is that
+ * a workspace should not be a distribution (true, default) or should be
  * (false).
-  */
+ */
 RawCountValidator::RawCountValidator(const bool &mustNotBeDistribution)
     : m_mustNotBeDistribution(mustNotBeDistribution) {}
 
@@ -18,10 +18,10 @@ Kernel::IValidator_sptr RawCountValidator::clone() const {
 }
 
 /** Checks if the workspace must be a distribution but isn't and vice-versa
-  *  @param value :: The workspace to test
-  *  @return A user level description of any problem that exists or "" no
-  * problem
-  */
+ *  @param value :: The workspace to test
+ *  @return A user level description of any problem that exists or "" no
+ * problem
+ */
 std::string
 RawCountValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   if (m_mustNotBeDistribution) {

@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADNXCANSAS_H_
 #define MANTID_DATAHANDLING_LOADNXCANSAS_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace H5 {
 class Group;
@@ -50,6 +50,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadCanSAS1D", "SaveNXcanSAS"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Nexus"; }
 

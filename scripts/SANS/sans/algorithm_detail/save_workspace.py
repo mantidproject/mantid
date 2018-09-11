@@ -43,7 +43,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options):
         file_name = get_file_name(file_format_bundle, file_name, "", ".xml")
         save_name = "SaveCanSAS1D"
     elif file_format is SaveType.NXcanSAS:
-        file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".nxs")
+        file_name = get_file_name(file_format_bundle, file_name, "_nxcansas", ".h5")
         save_name = "SaveNXcanSAS"
     elif file_format is SaveType.NistQxy:
         file_name = get_file_name(file_format_bundle, file_name, "_nistqxy", ".dat")

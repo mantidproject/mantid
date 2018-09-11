@@ -1,11 +1,11 @@
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -64,6 +64,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   /// Output peaks workspace, create if needed
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
+
   if (peakWS != inPeakWS)
     peakWS = inPeakWS->clone();
 
@@ -114,6 +115,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           centroid[d] /= static_cast<coord_t>(signal);
 
         V3D vecCentroid(centroid[0], centroid[1], centroid[2]);
+        p.setBinCount(static_cast<double>(signal));
 
         // Save it back in the peak object, in the dimension specified.
         try {
@@ -156,5 +158,5 @@ void CentroidPeaksMD2::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

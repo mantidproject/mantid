@@ -57,6 +57,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveRKH"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";
@@ -101,6 +104,6 @@ private:
                          HistogramData::PointStandardDeviations &xe,
                          API::Progress &prog, bool readXError = false);
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif /*MANTID_DATAHANDLING_LOADRKH_H_*/

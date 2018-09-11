@@ -1,13 +1,12 @@
 #include "MantidKernel/ConfigPropertyObserver.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/pure_virtual.hpp>
 
 using namespace boost::python;
 using Mantid::Kernel::ConfigPropertyObserver;
-using Mantid::PythonInterface::Environment::GlobalInterpreterLock;
 using Mantid::PythonInterface::Environment::callMethod;
 
 class ConfigPropertyObserverWrapper : public ConfigPropertyObserver {
@@ -28,8 +27,8 @@ namespace boost {
 namespace python {
 template <>
 struct has_back_reference<ConfigPropertyObserverWrapper> : mpl::true_ {};
-}
-}
+} // namespace python
+} // namespace boost
 
 void export_ConfigPropertyObserver() {
   class_<ConfigPropertyObserverWrapper, boost::noncopyable>(

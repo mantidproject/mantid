@@ -73,7 +73,7 @@ public:
   const std::string category() const override { return "Background"; }
 };
 
-typedef boost::shared_ptr<BackgroundFunction> BackgroundFunction_sptr;
+using BackgroundFunction_sptr = boost::shared_ptr<BackgroundFunction>;
 
 } // namespace Functions
 } // namespace CurveFitting

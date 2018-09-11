@@ -6,10 +6,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Crystal/ConventionalCell.h"
+#include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 namespace Geometry {

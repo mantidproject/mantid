@@ -5,11 +5,11 @@
 //   Includes
 //----------------------------
 
-#include <qdialog.h>
-#include <qcheckbox.h>
-#include <qlineedit.h>
-#include <boost/shared_ptr.hpp>
 #include "ui_UserFitFunctionDialog.h"
+#include <boost/shared_ptr.hpp>
+#include <qcheckbox.h>
+#include <qdialog.h>
+#include <qlineedit.h>
 
 //----------------------------
 //   Forward declarations

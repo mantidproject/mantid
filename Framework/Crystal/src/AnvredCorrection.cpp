@@ -5,12 +5,12 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *

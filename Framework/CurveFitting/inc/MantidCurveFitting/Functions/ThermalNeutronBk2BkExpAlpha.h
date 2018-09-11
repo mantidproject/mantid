@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPALPHA_H_
 #define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPALPHA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -66,8 +66,8 @@ private:
                              double alph1t) const;
 };
 
-typedef boost::shared_ptr<ThermalNeutronBk2BkExpAlpha>
-    ThermalNeutronBk2BkExpAlpha_sptr;
+using ThermalNeutronBk2BkExpAlpha_sptr =
+    boost::shared_ptr<ThermalNeutronBk2BkExpAlpha>;
 
 } // namespace Functions
 } // namespace CurveFitting

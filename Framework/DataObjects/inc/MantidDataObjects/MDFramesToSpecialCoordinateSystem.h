@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_
 #define MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/System.h"
 #include "boost/optional.hpp"
 namespace Mantid {
 namespace DataObjects {

@@ -4,8 +4,8 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_MuonAnalysis.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "ui_MuonAnalysis.h"
 #include <QTableWidget>
 #include <functional>
 
@@ -16,7 +16,7 @@ class MuonAnalysis;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Muon {
-typedef QMap<QString, QMap<QString, double>> WSParameterList;
+using WSParameterList = QMap<QString, QMap<QString, double>>;
 
 /**
 This is a Helper class for MuonAnalysis. In particular this helper class deals
@@ -147,8 +147,8 @@ private:
 
   QList<QString> m_unselectedFittings;
 };
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_

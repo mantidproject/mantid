@@ -26,9 +26,9 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-}
+} // namespace
 
-typedef std::vector<std::string> StringVector;
+using StringVector = std::vector<std::string>;
 
 class ADSValidatorTest : public CxxTest::TestSuite {
 public:

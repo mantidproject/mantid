@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_SAVEDIFFCAL_H_
 #define MANTID_DATAHANDLING_SAVEDIFFCAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace H5 {
 class Group;
@@ -40,6 +40,9 @@ class DLLExport SaveDiffCal : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadDiffCal"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

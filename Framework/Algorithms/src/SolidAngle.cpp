@@ -1,14 +1,14 @@
 #include "MantidAlgorithms/SolidAngle.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 
 #include <cfloat>
 
@@ -52,7 +52,7 @@ void SolidAngle::init() {
 }
 
 /** Executes the algorithm
-*/
+ */
 void SolidAngle::exec() {
   // Get the workspaces
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -127,5 +127,5 @@ void SolidAngle::exec() {
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

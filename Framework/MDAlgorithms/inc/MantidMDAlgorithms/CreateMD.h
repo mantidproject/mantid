@@ -1,15 +1,14 @@
 #ifndef MANTID_MDALGORITHMS_CREATEMD_H_
 #define MANTID_MDALGORITHMS_CREATEMD_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
-void MANTID_MDALGORITHMS_DLL
-padParameterVector(std::vector<double> &param_vector,
-                   const size_t grow_to_size);
+void MANTID_MDALGORITHMS_DLL padParameterVector(
+    std::vector<double> &param_vector, const size_t grow_to_size);
 
 bool any_given(const std::vector<std::vector<double>> &params);
 
@@ -45,6 +44,9 @@ class MANTID_MDALGORITHMS_DLL CreateMD : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateMDWorkspace"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

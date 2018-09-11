@@ -2,9 +2,9 @@
 #define MANTID_DATAHANDLING_LOADILLTOF2_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -45,6 +45,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return 2; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadNexus"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "DataHandling\\Nexus;ILL\\Direct";

@@ -9,7 +9,7 @@ namespace HistogramData {
 class HistogramX;
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 namespace Algorithms {
 /** Multiple scattering absorption correction, originally used to
     correct vanadium spectrum at IPNS.  Algorithm originally worked
@@ -49,6 +49,10 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"MonteCarloAbsorption", "MayersSampleCorrection",
+            "PearlMCAbsorption", "VesuvioCalculateMS"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
@@ -73,7 +77,7 @@ private:
                             HistogramData::HistogramE &errors);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_*/

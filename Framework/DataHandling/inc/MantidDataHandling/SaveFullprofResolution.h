@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_
 #define MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -44,6 +44,9 @@ public:
 
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SaveFocusedXYE"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Text";

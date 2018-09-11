@@ -162,7 +162,7 @@ double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
   }
   return theta;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -463,5 +463,5 @@ ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs,
   return outWS;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

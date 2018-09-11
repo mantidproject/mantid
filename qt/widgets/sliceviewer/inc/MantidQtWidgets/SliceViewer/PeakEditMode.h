@@ -6,6 +6,6 @@ namespace SliceViewer {
 
 // Possible edit modes.
 enum EditMode { None = 0, AddPeaks = 1, DeletePeaks = 2 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

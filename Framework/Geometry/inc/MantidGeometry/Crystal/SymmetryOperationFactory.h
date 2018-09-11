@@ -4,11 +4,11 @@
 #include <list>
 #include <map>
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -78,8 +78,8 @@ private:
   SymmetryOperationFactoryImpl();
 };
 
-typedef Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>
-    SymmetryOperationFactory;
+using SymmetryOperationFactory =
+    Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
 
 } // namespace Geometry
 } // namespace Mantid
@@ -89,7 +89,7 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #define DECLARE_SYMMETRY_OPERATION(operation, name)                            \
   namespace {                                                                  \

@@ -42,6 +42,9 @@ class InstrumentSettings(object):
     # __getattr__ is only called if the attribute was not set so we already know
     #  were going to throw at this point unless the attribute was optional.
     def __getattr__(self, item):
+        if item == "__setstate__":
+            raise AttributeError(item)
+
         # Check if it is in our parameter mapping
         known_param = next((param_entry for param_entry in self._param_map if item == param_entry.int_name), None)
 
@@ -123,9 +126,12 @@ class InstrumentSettings(object):
             param_val = _check_value_is_in_enum(param_val, param_map.enum_class)
 
         # Does the attribute exist - has it changed and are we suppressing warnings
+
         if not suppress_warnings:
+
             previous_value = getattr(self, attribute_name) if hasattr(self, attribute_name) else None
-            if previous_value and previous_value != param_val:
+            if previous_value is not None and previous_value != param_val:
+
                 # Print warning of what we value we are replacing for which parameter
                 warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
                               str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")

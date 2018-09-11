@@ -56,7 +56,7 @@ class MANTID_API_DLL DetectorSearcher {
 public:
   /// Search result type representing whether a detector was found and if so
   /// which detector index it was.
-  typedef std::tuple<bool, size_t> DetectorSearchResult;
+  using DetectorSearchResult = std::tuple<bool, size_t>;
 
   /// Create a new DetectorSearcher with the given instrument & detectors
   DetectorSearcher(Geometry::Instrument_const_sptr instrument,
@@ -101,7 +101,7 @@ private:
   /// instrument ray tracer object for searching in rectangular detectors
   std::unique_ptr<Geometry::InstrumentRayTracer> m_rayTracer;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

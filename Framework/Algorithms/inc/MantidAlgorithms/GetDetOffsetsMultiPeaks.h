@@ -2,11 +2,11 @@
 #define MANTID_ALGORITHMS_GetDetOffsetsMultiPeaks_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -70,6 +70,9 @@ public:
   const std::string name() const override { return "GetDetOffsetsMultiPeaks"; }
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"GetDetectorOffsets"};
+  }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
     return "Diffraction\\Calibration";
@@ -186,7 +189,7 @@ private:
   std::vector<std::vector<double>> m_vecFitWindow;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_GetDetOffsetsMultiPeaks_H_*/

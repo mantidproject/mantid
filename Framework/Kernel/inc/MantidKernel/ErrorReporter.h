@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_ERRORSERVICE_H_
 #define MANTID_KERNEL_ERRORSERVICE_H_
 
-#include <string>
 #include <Poco/ActiveMethod.h>
+#include <string>
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
@@ -44,7 +44,7 @@ public:
                 std::string exitCode, bool share, std::string name,
                 std::string email);
   /// Sends an error report
-  void sendErrorReport();
+  int sendErrorReport();
 
 protected:
   /// Generates an error string in json format

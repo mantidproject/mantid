@@ -1,15 +1,15 @@
 #ifndef MANTID_ALGORITHMS_FILTEREVENTS_H_
 #define MANTID_ALGORITHMS_FILTEREVENTS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ISplittersWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/ISplittersWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -67,6 +67,9 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"GenerateEventsFilter", "FilterByTime", "FilterByLogValue"};
+  }
 
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -158,11 +161,6 @@ private:
   template <typename TYPE>
   void splitTimeSeriesProperty(
       Kernel::TimeSeriesProperty<TYPE> *tsp,
-      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
-      const int max_target_index);
-
-  void splitDoubleTimeSeriesLogs(
-      const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
       std::vector<Types::Core::DateAndTime> &split_datetime_vec,
       const int max_target_index);
 

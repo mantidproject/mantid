@@ -5,8 +5,8 @@
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
 
-using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::CompositeRelation;
+using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::IValidator;
 using Mantid::Kernel::IValidator_sptr;
 using namespace boost::python;
@@ -32,7 +32,7 @@ createCompositeValidator(const boost::python::list &validators,
   }
   return composite;
 }
-}
+} // namespace
 
 void export_CompositeValidator() {
   enum_<CompositeRelation>("CompositeRelation")
@@ -45,7 +45,8 @@ void export_CompositeValidator() {
            make_constructor(
                &createCompositeValidator, default_call_policies(),
                (arg("validators"), arg("relation") = CompositeRelation::AND)))
-      .def("add", (void (CompositeValidator::*)(IValidator_sptr)) &
-                      CompositeValidator::add,
+      .def("add",
+           (void (CompositeValidator::*)(IValidator_sptr)) &
+               CompositeValidator::add,
            (arg("self"), arg("other")), "Add another validator to the list");
 }

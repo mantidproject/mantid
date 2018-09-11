@@ -1,10 +1,11 @@
 include(ExternalProject)
 
-# Use version 3.2.10 of Eigen
-# A newer version existed at the time of choosing this version (3.3.2), but this had warnings when building
-set(eigen_version "3.2.10")
-
 option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OFF)
+
+if ( WIN32 )
+  # Installed by 3rd party dependencies bundle
+  set ( USE_SYSTEM_EIGEN ON )
+endif ()
 
 if(USE_SYSTEM_EIGEN)
   message(STATUS "Using system Eigen")
@@ -18,7 +19,7 @@ else()
   # for static libraries, object libraries, and executables without exports.
   cmake_policy(SET CMP0063 "OLD")
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
 
   set(Eigen3_DIR "${CMAKE_BINARY_DIR}/extern-eigen/install/share/eigen3/cmake" CACHE PATH "")

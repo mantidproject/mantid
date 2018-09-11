@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_SETBEAM_H_
 #define MANTID_DATAHANDLING_SETBEAM_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 namespace Mantid {
 namespace DataHandling {
 
@@ -34,6 +34,9 @@ class MANTID_DATAHANDLING_DLL SetBeam final : public API::Algorithm {
 public:
   const std::string name() const override final;
   int version() const override final;
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetSample"};
+  }
   const std::string category() const override final;
   const std::string summary() const override final;
 

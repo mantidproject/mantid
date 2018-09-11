@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_FULLPROFPOLYNOMIAL_H_
 #define MANTID_CURVEFITTING_FULLPROFPOLYNOMIAL_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -73,7 +73,7 @@ private:
   double m_bkpos;
 };
 
-typedef boost::shared_ptr<FullprofPolynomial> FullprofPolynomial_sptr;
+using FullprofPolynomial_sptr = boost::shared_ptr<FullprofPolynomial>;
 
 } // namespace Functions
 } // namespace CurveFitting

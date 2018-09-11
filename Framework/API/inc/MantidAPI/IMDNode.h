@@ -1,22 +1,23 @@
 #ifndef IMD_NODE_H_
 #define IMD_NODE_H_
 
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/VMD.h"
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <vector>
-#include "MantidKernel/VMD.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid {
 namespace Kernel {
 class ISaveable;
 class ThreadScheduler;
-}
+} // namespace Kernel
 
 namespace Geometry {
 template <typename T> class MDDimensionExtents;
 class MDImplicitFunction;
-}
+} // namespace Geometry
 
 namespace API {
 
@@ -193,19 +194,19 @@ public:
   // -------------------------------------------------------------------------------------------
 
   /** Sphere (peak) integration
-  * The CoordTransform object could be used for more complex shapes, e.g.
-  *"lentil" integration, as long
-  * as it reduces the dimensions to a single value.
-  *
-  * @param radiusTransform :: nd-to-1 coordinate transformation that converts
-  *from these
-  *        dimensions to the distance (squared) from the center of the sphere.
-  * @param radiusSquared :: radius^2 below which to integrate
-  * @param signal [out] :: set to the integrated signal
-  * @param errorSquared [out] :: set to the integrated squared error.
-  * @param innerRadiusSquared :: radius^2 of inner background
-  * @param useOnePercentBackgroundCorrection :: if one percent correction should
-  *be applied to background.
+   * The CoordTransform object could be used for more complex shapes, e.g.
+   *"lentil" integration, as long
+   * as it reduces the dimensions to a single value.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts
+   *from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param signal [out] :: set to the integrated signal
+   * @param errorSquared [out] :: set to the integrated squared error.
+   * @param innerRadiusSquared :: radius^2 of inner background
+   * @param useOnePercentBackgroundCorrection :: if one percent correction
+   *should be applied to background.
    */
   virtual void integrateSphere(
       Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
@@ -213,16 +214,16 @@ public:
       const coord_t innerRadiusSquared = 0.0,
       const bool useOnePercentBackgroundCorrection = true) const = 0;
   /** Find the centroid of all events contained within by doing a weighted
-  *average
-  * of their coordinates.
-  *
-  * @param radiusTransform :: nd-to-1 coordinate transformation that converts
-  *from these
-  *        dimensions to the distance (squared) from the center of the sphere.
-  * @param radiusSquared :: radius^2 below which to integrate
-  * @param[out] centroid :: array of size [nd]; its centroid will be added
-  * @param[out] signal :: set to the integrated signal
-  */
+   *average
+   * of their coordinates.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts
+   *from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param[out] centroid :: array of size [nd]; its centroid will be added
+   * @param[out] signal :: set to the integrated signal
+   */
   virtual void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                               const coord_t radiusSquared, coord_t *centroid,
                               signal_t &signal) const = 0;
@@ -238,7 +239,7 @@ public:
    * @param signal [out] :: set to the integrated signal
    * @param errorSquared [out] :: set to the integrated squared error.
    * @param signal_fit [out] :: array of values for the fit.
-    */
+   */
   virtual void integrateCylinder(Mantid::API::CoordTransform &radiusTransform,
                                  const coord_t radius, const coord_t length,
                                  signal_t &signal, signal_t &errorSquared,
@@ -277,10 +278,11 @@ public:
   // -------------------------------- Geometry/vertexes-Related
   // -------------------------------------------
   virtual std::vector<Mantid::Kernel::VMD> getVertexes() const = 0;
-  virtual coord_t *getVertexesArray(size_t &numVertices) const = 0;
-  virtual coord_t *getVertexesArray(size_t &numVertices,
-                                    const size_t outDimensions,
-                                    const bool *maskDim) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices) const = 0;
+  virtual std::unique_ptr<coord_t[]>
+  getVertexesArray(size_t &numVertices, const size_t outDimensions,
+                   const bool *maskDim) const = 0;
   virtual void transformDimensions(std::vector<double> &scaling,
                                    std::vector<double> &offset) = 0;
 
@@ -321,7 +323,7 @@ public:
     std::sort(boxes.begin(), boxes.end(), CompareFilePosition);
   }
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

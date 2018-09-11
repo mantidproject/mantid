@@ -3,6 +3,14 @@
 //----------------------
 #include "IndirectDataReduction.h"
 
+#include "ILLEnergyTransfer.h"
+#include "ISISCalibration.h"
+#include "ISISDiagnostics.h"
+#include "ISISEnergyTransfer.h"
+#include "IndirectMoments.h"
+#include "IndirectSqw.h"
+#include "IndirectSymmetrise.h"
+#include "IndirectTransmission.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -12,14 +20,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "IndirectMoments.h"
-#include "IndirectSqw.h"
-#include "IndirectSymmetrise.h"
-#include "IndirectTransmission.h"
-#include "ISISCalibration.h"
-#include "ISISDiagnostics.h"
-#include "ISISEnergyTransfer.h"
-#include "ILLEnergyTransfer.h"
 
 #include <QDir>
 #include <QMessageBox>
@@ -29,7 +29,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectDataReduction)
 }
-}
+} // namespace MantidQt
 
 namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
@@ -138,8 +138,9 @@ void IndirectDataReduction::initLayout() {
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(
               const QString &, const QString &, const QString &)),
-          this, SLOT(instrumentSetupChanged(const QString &, const QString &,
-                                            const QString &)));
+          this,
+          SLOT(instrumentSetupChanged(const QString &, const QString &,
+                                      const QString &)));
 
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -177,9 +178,9 @@ void IndirectDataReduction::instrumentSetupChanged(
   m_instWorkspace = loadInstrumentIfNotExist(instrumentName.toStdString(),
                                              analyser.toStdString(),
                                              reflection.toStdString());
-  instrumentLoadingDone(m_instWorkspace == NULL);
+  instrumentLoadingDone(m_instWorkspace == nullptr);
 
-  if (m_instWorkspace != NULL)
+  if (m_instWorkspace != nullptr)
     emit newInstrumentConfiguration();
 }
 
@@ -261,23 +262,26 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
 
   // List of values to get from IPF
   std::vector<std::string> ipfElements{
-      "analysis-type", "spectra-min", "spectra-max", "Efixed", "peak-start",
-      "peak-end", "back-start", "back-end", "rebin-default",
-      "cm-1-convert-choice", "save-nexus-choice", "save-ascii-choice",
+      "analysis-type",      "spectra-min",
+      "spectra-max",        "Efixed",
+      "peak-start",         "peak-end",
+      "back-start",         "back-end",
+      "rebin-default",      "cm-1-convert-choice",
+      "save-nexus-choice",  "save-ascii-choice",
       "fold-frames-choice", "resolution"};
 
   // In the IRIS IPF there is no fmica component
   if (instrumentName == "IRIS" && analyser == "fmica")
     analyser = "mica";
 
-  if (m_instWorkspace == NULL) {
+  if (m_instWorkspace == nullptr) {
     g_log.warning("Instrument workspace not loaded");
     return instDetails;
   }
 
   // Get the instrument
   auto instrument = m_instWorkspace->getInstrument();
-  if (instrument == NULL) {
+  if (instrument == nullptr) {
     g_log.warning("Instrument workspace has no instrument");
     return instDetails;
   }
@@ -292,7 +296,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails() {
 
       QString value = getInstrumentParameterFrom(instrument, key);
 
-      if (value.isEmpty() && component != NULL)
+      if (value.isEmpty() && component != nullptr)
         value = getInstrumentParameterFrom(component, key);
 
       instDetails[QString::fromStdString(key)] = value;

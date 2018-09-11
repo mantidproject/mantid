@@ -43,9 +43,10 @@ void AverageLogData::init() {
                   "An input workspace that contains a Sample log property, and "
                   "a proton charge property.");
   declareProperty("LogName", "", "Name of the log to be averaged");
-  declareProperty("FixZero", true, "If true, the proton charge and the log "
-                                   "value time series are assumed to start at "
-                                   "the same moment.");
+  declareProperty("FixZero", true,
+                  "If true, the proton charge and the log "
+                  "value time series are assumed to start at "
+                  "the same moment.");
   declareProperty("Average", EMPTY_DBL(), "", Direction::Output);
   declareProperty("Error", EMPTY_DBL(), "", Direction::Output);
 }

@@ -1,25 +1,25 @@
 #ifndef MDBOX_SAVEABLE_TEST_H
 #define MDBOX_SAVEABLE_TEST_H
 
-#include <boost/scoped_ptr.hpp>
-#include <cxxtest/TestSuite.h>
-#include <map>
-#include <memory>
-#include <Poco/File.h>
-#include <nexus/NeXusFile.hpp>
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <Poco/File.h>
+#include <boost/scoped_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -215,7 +215,7 @@ public:
     TS_ASSERT_DELTA(events[9].getErrorSquared(), (base + 9) * (base + 9), 1e-5);
   }
   /** Test splitting of a MDBox into a MDGridBox when the
-     * original box is backed by a file. */
+   * original box is backed by a file. */
   void test_fileBackEnd_construction() {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
@@ -254,7 +254,7 @@ public:
     MDBox<MDLeanEvent<3>, 3> *b =
         dynamic_cast<MDBox<MDLeanEvent<3>, 3> *>(gb->getChild(22));
     TSM_ASSERT_EQUALS("Child has 8 events", b->getNPoints(), 8);
-    TSM_ASSERT("The child is also saveabele", b->getISaveable() != NULL);
+    TSM_ASSERT("The child is also saveabele", b->getISaveable() != nullptr);
     if (!b->getISaveable())
       return;
 
@@ -753,7 +753,7 @@ public:
         bin.m_max[d] = 4.0;
         bin.m_signal = 0;
       }
-      c.centerpointBin(bin, NULL);
+      c.centerpointBin(bin, nullptr);
       TS_ASSERT_DELTA(bin.m_signal, 8.0, 1e-4);
       TS_ASSERT_DELTA(bin.m_errorSquared, 8.0, 1e-4);
     }
@@ -795,7 +795,7 @@ public:
    */
   void test_splitAllIfNeeded_fileBacked() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
-    typedef MDLeanEvent<2> MDE;
+    using MDE = MDLeanEvent<2>;
 
     // Create the grid box and make it file-backed.
     MDBoxBase<MDE, 2> *b = MDEventsTestHelper::makeMDGridBox<2>();
@@ -840,14 +840,13 @@ public:
     size_t numOnDisk = 0;
     uint64_t eventsOnDisk = 0;
     uint64_t maxFilePos = 0;
-    for (size_t i = 0; i < boxes.size(); i++) {
-      API::IMDNode *box = boxes[i];
+    for (auto box : boxes) {
       TS_ASSERT_EQUALS(box->getNPoints(), num_repeat);
       auto mdbox = dynamic_cast<MDBox<MDE, 2> *>(box);
       TS_ASSERT(mdbox);
 
       auto pIO = mdbox->getISaveable();
-      TS_ASSERT(pIO != NULL);
+      TS_ASSERT(pIO != nullptr);
       if (!pIO)
         continue;
 

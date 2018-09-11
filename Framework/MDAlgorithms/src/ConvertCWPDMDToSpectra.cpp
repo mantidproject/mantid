@@ -19,8 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
 using HistogramData::BinEdges;
-using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
@@ -132,8 +132,9 @@ void ConvertCWPDMDToSpectra::exec() {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
               << ", either NeutronWaveLength "
-                 " is to be specified or property " << wavelengthpropertyname
-              << " must exist for run " << runid << ".";
+                 " is to be specified or property "
+              << wavelengthpropertyname << " must exist for run " << runid
+              << ".";
         throw std::runtime_error(errss.str());
       }
       map_runWavelength.emplace(runid, thislambda);
@@ -449,7 +450,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                 << sourcepos.Y() << ", " << sourcepos.Z() << "\n";
 
   // Go through all events to find out their positions
-  IMDIterator *mditer = mdws->createIterator();
+  auto mditer = mdws->createIterator();
   bool scancell = true;
   size_t nextindex = 1;
   int currRunIndex = -1;

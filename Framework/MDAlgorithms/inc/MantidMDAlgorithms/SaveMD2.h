@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_SAVEMD2_H_
 #define MANTID_MDALGORITHMS_SAVEMD2_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -43,6 +43,9 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 2; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"LoadMD", "SaveZODS"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "MDAlgorithms\\DataHandling";
@@ -64,7 +67,7 @@ private:
                   std::string tag = "");
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_SAVEMD2_H_ */

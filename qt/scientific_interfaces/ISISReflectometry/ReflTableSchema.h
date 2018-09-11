@@ -2,17 +2,17 @@
 #define MANTID_ISISREFLECTOMETRY_REFLTABLESCHEMA_H_
 
 #include "DllConfig.h"
-#include "string"
 #include "map"
+#include "string"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ReflTableSchema {
 
-typedef std::string ColumnNameType;
-typedef std::string ColumnValueType;
-typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
-typedef std::map<ColumnNameType, int> ColumnNameIndexMap;
+using ColumnNameType = std::string;
+using ColumnValueType = std::string;
+using ColumnIndexNameMap = std::map<int, ColumnNameType>;
+using ColumnNameIndexMap = std::map<ColumnNameType, int>;
 
 /// Label for run number column
 static const std::string RUNS("Run(s)");
@@ -57,8 +57,8 @@ ColumnIndexNameMap makeColumnIndexMap();
 /// Make the column name map.
 ColumnNameIndexMap makeColumnNameMap();
 
-} // ReflTableSchema
+} // namespace ReflTableSchema
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_ISISREFLECTOMETRY_REFLTABLESCHEMA_H_ */

@@ -30,6 +30,14 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   else()
     set ( _python_path ${PYTHON_XMLRUNNER_DIR}:${_test_src_dir}:$ENV{PYTHONPATH} )
   endif()
+  # Define the environment
+  list ( APPEND _test_environment "PYTHONPATH=${_python_path}" )
+  if ( PYUNITTEST_QT_API )
+    list ( APPEND _test_environment "QT_API=${PYUNITTEST_QT_API}" )
+  endif()
+  if ( PYUNITTEST_TESTRUNNER_IMPORT_MANTID )
+    list ( APPEND _test_environment "TESTRUNNER_IMPORT_MANTID=1" )
+  endif()
 
   # Add all of the individual tests so that they can be run in parallel
   foreach ( part ${ARGN} )
@@ -41,9 +49,13 @@ function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
                COMMAND ${_test_runner} --classic ${_test_runner_module} ${_test_src_dir}/${_filename} )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                           ENVIRONMENT "PYTHONPATH=${_python_path}"
                            WORKING_DIRECTORY ${_working_dir}
+                           ENVIRONMENT "${_test_environment}"
                            TIMEOUT ${TESTING_TIMEOUT} )
+    if ( PYUNITTEST_RUN_SERIAL )
+      set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
+                             RUN_SERIAL 1 )
+    endif ()
   endforeach ( part ${ARGN} )
 endfunction ()
 

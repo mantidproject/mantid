@@ -1,18 +1,20 @@
-#include "MantidKernel/OptionalBool.h"
+#include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
+// clang-format off
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
+// clang-format on
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +25,7 @@ using namespace Mantid::Kernel;
 using Types::Core::DateAndTime;
 using namespace std;
 
-typedef Mantid::Kernel::StringTokenizer tokenizer;
+using tokenizer = Mantid::Kernel::StringTokenizer;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChunkingFromInstrument)
@@ -47,7 +49,7 @@ const string PARAM_MAX_RECURSE("MaxRecursionDepth");
 const string PARAM_OUT_WKSP("OutputWorkspace");
 /// Maximum number of banks to look for
 const string PARAM_MAX_BANK_NUM("MaxBankNumber");
-}
+} // namespace
 
 /// Algorithm's name for identification. @see Algorithm::name
 const string CreateChunkingFromInstrument::name() const {

@@ -1,17 +1,17 @@
 #include "MantidDataHandling/LoadQKK.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidIndexing/IndexInfo.h"
 
 #include <Poco/File.h>
 
@@ -153,20 +153,21 @@ void LoadQKK::exec() {
   // Define shape of a pixel as an XML string. See
   // http://www.mantidproject.org/HowToDefineGeometricShape for details
   // on shapes in Mantid.
-  std::string detXML =
-      "<cuboid id=\"pixel\">"
-      "<left-front-bottom-point   x= \"" +
-      pixel_width_str + "\" y=\"-" + pixel_height_str +
-      "\" z=\"0\"  />"
-      "<left-front-top-point      x= \"" +
-      pixel_width_str + "\" y=\"-" + pixel_height_str + "\" z=\"" +
-      pixel_depth_str + "\"  />"
-                        "<left-back-bottom-point    x=\"-" +
-      pixel_width_str + "\" y=\"-" + pixel_height_str +
-      "\" z=\"0\"  />"
-      "<right-front-bottom-point  x= \"" +
-      pixel_width_str + "\" y= \"" + pixel_height_str + "\" z=\"0\"  />"
-                                                        "</cuboid>";
+  std::string detXML = "<cuboid id=\"pixel\">"
+                       "<left-front-bottom-point   x= \"" +
+                       pixel_width_str + "\" y=\"-" + pixel_height_str +
+                       "\" z=\"0\"  />"
+                       "<left-front-top-point      x= \"" +
+                       pixel_width_str + "\" y=\"-" + pixel_height_str +
+                       "\" z=\"" + pixel_depth_str +
+                       "\"  />"
+                       "<left-back-bottom-point    x=\"-" +
+                       pixel_width_str + "\" y=\"-" + pixel_height_str +
+                       "\" z=\"0\"  />"
+                       "<right-front-bottom-point  x= \"" +
+                       pixel_width_str + "\" y= \"" + pixel_height_str +
+                       "\" z=\"0\"  />"
+                       "</cuboid>";
   // Create a shape object which will be shared by all pixels.
   auto shape = Geometry::ShapeFactory().createShape(detXML);
   // Initialise the detector specifying the sizes.
@@ -203,5 +204,5 @@ void LoadQKK::exec() {
   setProperty("OutputWorkspace", std::move(outputWorkspace));
 }
 
-} // namespace
-} // namespace
+} // namespace DataHandling
+} // namespace Mantid

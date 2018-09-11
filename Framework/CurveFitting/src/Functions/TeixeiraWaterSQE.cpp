@@ -5,8 +5,8 @@
 // N/A
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/Jacobian.h"
 // third party library headers
 // N/A
 // standard library headers

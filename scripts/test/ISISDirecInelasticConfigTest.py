@@ -110,6 +110,9 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
     def test_UserProperties(self):
         user = UserProperties(self.userID)
 
+        user.set_user_properties(self.instrument,self.rbdir,'CYCLE20144B',self.start_date)
+        self.assertEqual(user.cycleID,'2014_4B')
+
         #set_user_properties(self,instrument,rb_folder_or_id,cycle,start_date):
         user.set_user_properties(self.instrument,self.rbdir,self.cycle,self.start_date)
 

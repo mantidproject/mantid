@@ -1,8 +1,7 @@
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
@@ -10,6 +9,7 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
@@ -53,7 +53,7 @@ DECLARE_ALGORITHM(LeBailFit)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 LeBailFit::LeBailFit()
     : m_lebailFunction(), m_dataWS(), m_outputWS(), parameterWS(),
       reflectionWS(), m_wsIndex(0), m_startX(DBL_MAX), m_endX(DBL_MIN),
@@ -72,7 +72,7 @@ LeBailFit::LeBailFit()
 
 //----------------------------------------------------------------------------------------------
 /** Declare the input properties for this algorithm
-*/
+ */
 void LeBailFit::init() {
   // --------------  Input and output Workspaces  -----------------
 
@@ -140,7 +140,7 @@ void LeBailFit::init() {
                   peaktypevalidator, "Peak profile type.");
 
   /*------------------------  Background Related Properties
-  * ---------------------------------*/
+   * ---------------------------------*/
   // About background:  Background type, input (table workspace or array)
   std::vector<std::string> bkgdtype{"Polynomial", "Chebyshev",
                                     "FullprofPolynomial"};
@@ -169,7 +169,7 @@ void LeBailFit::init() {
       "PeakRadius", 5, "Range (multiplier relative to FWHM) for a full peak. ");
 
   /*------------------------  Properties for Calculation Mode
-  * --------------------------------*/
+   * --------------------------------*/
   // Output option to plot each individual peak
   declareProperty("PlotIndividualPeaks", false,
                   "Option to output each individual peak in mode Calculation.");
@@ -195,7 +195,7 @@ void LeBailFit::init() {
                           "Function", IS_EQUAL_TO, "Calculation"));
 
   /*---------------------------  Properties for Fitting Mode
-  * ---------------------------------*/
+   * ---------------------------------*/
   // Minimizer
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys(); // :Instance().getKeys();
@@ -284,7 +284,7 @@ void LeBailFit::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
-*/
+ */
 void LeBailFit::exec() {
   // Process input properties
   processInputProperties();
@@ -378,8 +378,8 @@ void LeBailFit::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process input background properties and do the calculation upon it
-* and also calculate the input data with (input) background reduced
-*/
+ * and also calculate the input data with (input) background reduced
+ */
 void LeBailFit::processInputBackground() {
   // FIXME - Need to think of FullprofPolynomial
   // Type
@@ -413,7 +413,8 @@ void LeBailFit::processInputBackground() {
     }
 
     g_log.information() << "[Input] Use background specified with vector with "
-                           "input vector sized " << numparams << ".\n";
+                           "input vector sized "
+                        << numparams << ".\n";
   } else {
     g_log.information()
         << "[Input] Use background specified by table workspace.\n";
@@ -448,11 +449,11 @@ void LeBailFit::processInputBackground() {
 
 //----------------------------------------------------------------------------------------------
 /** Calcualte LeBail diffraction pattern:
-*  Output spectra:
-*  0: data;  1: calculated pattern; 3: difference
-*  4: input pattern w/o background
-*  5~5+(N-1): optional individual peak
-*/
+ *  Output spectra:
+ *  0: data;  1: calculated pattern; 3: difference
+ *  4: input pattern w/o background
+ *  5~5+(N-1): optional individual peak
+ */
 void LeBailFit::execPatternCalculation() {
   // Generate domain and values vectors
   const auto &vecX = m_dataWS->x(m_wsIndex).rawData();
@@ -517,12 +518,12 @@ void LeBailFit::execPatternCalculation() {
 //====================================
 //----------------------------------------------------------------------------------------------
 /** Calculate background of the specified diffraction pattern
-* by
-* 1. fix the peak parameters but height;
-* 2. fit only heights of the peaks in a peak-group and background coefficients
-* (assumed order 2 or 3 polynomial)
-* 3. remove peaks by the fitting result
-*/
+ * by
+ * 1. fix the peak parameters but height;
+ * 2. fit only heights of the peaks in a peak-group and background coefficients
+ * (assumed order 2 or 3 polynomial)
+ * 3. remove peaks by the fitting result
+ */
 void LeBailFit::execRefineBackground() {
   // Set up class variables for background
   m_bkgdParameterNames = m_backgroundFunction->getParameterNames();
@@ -673,9 +674,9 @@ void LeBailFit::execRefineBackground() {
 
 //----------------------------------------------------------------------------------------------
 /** Store/buffer current background parameters
-* @param bkgdparamvec :: vector to save the background parameters whose order
-* is same in background function
-*/
+ * @param bkgdparamvec :: vector to save the background parameters whose order
+ * is same in background function
+ */
 void LeBailFit::storeBackgroundParameters(vector<double> &bkgdparamvec) {
   for (size_t i = 0; i < m_numberBkgdParameters; ++i) {
     bkgdparamvec[i] = m_backgroundFunction->getParameter(i);
@@ -683,9 +684,9 @@ void LeBailFit::storeBackgroundParameters(vector<double> &bkgdparamvec) {
 }
 
 /** Restore/recover the buffered background parameters to m_background function
-* @param bkgdparamvec :: vector holding the background parameters whose order
-* is same in background function
-*/
+ * @param bkgdparamvec :: vector holding the background parameters whose order
+ * is same in background function
+ */
 void LeBailFit::recoverBackgroundParameters(
     const vector<double> &bkgdparamvec) {
   for (size_t i = 0; i < m_numberBkgdParameters; ++i) {
@@ -694,7 +695,7 @@ void LeBailFit::recoverBackgroundParameters(
 }
 
 /** Propose new background parameters
-*/
+ */
 void LeBailFit::proposeNewBackgroundValues() {
   int iparam = m_roundBkgd % static_cast<int>(m_numberBkgdParameters);
 
@@ -717,8 +718,8 @@ void LeBailFit::proposeNewBackgroundValues() {
 //================================
 //----------------------------------------------------------------------------------------------
 /** Create LeBailFunction, including creating Le Bail function, add peaks and
-* background
-*/
+ * background
+ */
 void LeBailFit::createLeBailFunction() {
   // Generate Le Bail function
   m_lebailFunction =
@@ -753,9 +754,9 @@ void LeBailFit::createLeBailFunction() {
 
 //----------------------------------------------------------------------------------------------
 /** Crop workspace if user required
-* @param inpws :  input workspace to crop
-* @param wsindex: workspace index of the data to fit against
-*/
+ * @param inpws :  input workspace to crop
+ * @param wsindex: workspace index of the data to fit against
+ */
 API::MatrixWorkspace_sptr
 LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
   // Process input property 'FitRegion' for range of data to fit/calculate
@@ -814,7 +815,7 @@ LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
 //===================================
 //----------------------------------------------------------------------------------------------
 /** Process input properties to class variables and do some initial check
-*/
+ */
 void LeBailFit::processInputProperties() {
   // Peak type
   m_peakType = getPropertyValue("PeakType");
@@ -900,8 +901,8 @@ void LeBailFit::processInputProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse the input TableWorkspace to some maps for easy access
-* Output : m_functionParameters
-*/
+ * Output : m_functionParameters
+ */
 void LeBailFit::parseInstrumentParametersTable() {
   // 1. Check column orders
   if (parameterWS->columnCount() < 3) {
@@ -952,10 +953,11 @@ void LeBailFit::parseInstrumentParametersTable() {
         // string data
         g_log.debug() << "Col-name = " << colname << ", ";
         trow >> strvalue;
-        strvalue.erase(std::find_if(strvalue.rbegin(), strvalue.rend(),
-                                    std::not1(std::ptr_fun<int, int>(
-                                        std::isspace))).base(),
-                       strvalue.end());
+        strvalue.erase(
+            std::find_if(strvalue.rbegin(), strvalue.rend(),
+                         std::not1(std::ptr_fun<int, int>(std::isspace)))
+                .base(),
+            strvalue.end());
 
         g_log.debug() << "Value = " << strvalue << ".\n";
         tempstrmap.emplace(colname, strvalue);
@@ -1067,9 +1069,9 @@ void LeBailFit::parseInstrumentParametersTable() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse the reflections workspace to a list of reflections;
-* Output --> mPeakHKLs
-* It will NOT screen the peaks whether they are in the data range.
-*/
+ * Output --> mPeakHKLs
+ * It will NOT screen the peaks whether they are in the data range.
+ */
 void LeBailFit::parseBraggPeaksParametersTable() {
   // 1. Check column orders
   std::vector<std::string> colnames = reflectionWS->getColumnNames();
@@ -1135,8 +1137,8 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse table workspace (from Fit()) containing background parameters to a
-* vector
-*/
+ * vector
+ */
 void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
                                               vector<string> &bkgdparnames,
                                               vector<double> &bkgdorderparams) {
@@ -1212,9 +1214,9 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
 
 //----------------------------------------------------------------------------------------------
 /** Create and set up an output TableWorkspace for each individual peaks
-* Parameters include H, K, L, Height, TOF_h, PeakGroup, Chi^2, FitStatus
-* Where chi^2 and fit status are used only in 'CalculateBackground'
-*/
+ * Parameters include H, K, L, Height, TOF_h, PeakGroup, Chi^2, FitStatus
+ * Where chi^2 and fit status are used only in 'CalculateBackground'
+ */
 void LeBailFit::exportBraggPeakParameterToTable() {
   // Create peaks workspace
   DataObjects::TableWorkspace_sptr peakWS =
@@ -1270,10 +1272,10 @@ void LeBailFit::exportBraggPeakParameterToTable() {
 
 //----------------------------------------------------------------------------------------------
 /** Create a new table workspace for parameter values and set to output
-* to replace the input peaks' parameter workspace
-* @param parammap : map of Parameters whose values are written to
-* TableWorkspace
-*/
+ * to replace the input peaks' parameter workspace
+ * @param parammap : map of Parameters whose values are written to
+ * TableWorkspace
+ */
 void LeBailFit::exportInstrumentParameterToTable(
     std::map<std::string, Parameter> parammap) {
   // 1. Create table workspace
@@ -1360,19 +1362,19 @@ void LeBailFit::exportInstrumentParameterToTable(
 
 //----------------------------------------------------------------------------------------------
 /** Create output data workspace
-* Basic spectra list:
-* (0) original data
-* (1) fitted data
-* (2) difference
-* (3) fitted pattern w/o background
-* (4) background (being fitted after peak)
-* (5) calculation based on input only (no fit)
-* (6) background (input)
-* (7) original data with background removed;
-* (8) Smoothed background
-* In mode of CALCULATION
-* (9+) One spectrum for each peak
-*/
+ * Basic spectra list:
+ * (0) original data
+ * (1) fitted data
+ * (2) difference
+ * (3) fitted pattern w/o background
+ * (4) background (being fitted after peak)
+ * (5) calculation based on input only (no fit)
+ * (6) background (input)
+ * (7) original data with background removed;
+ * (8) Smoothed background
+ * In mode of CALCULATION
+ * (9+) One spectrum for each peak
+ */
 void LeBailFit::createOutputDataWorkspace() {
   // 1. Determine number of output spectra
   size_t nspec = 9;
@@ -1432,10 +1434,10 @@ void LeBailFit::createOutputDataWorkspace() {
 // ====================================
 //----------------------------------------------------------------------------------------------
 /** Refine instrument parameters by random walk algorithm (MC)
-*
-* @param maxcycles: number of Monte Carlo steps/cycles
-* @param parammap:  map containing Parameters to refine in MC algorithm
-*/
+ *
+ * @param maxcycles: number of Monte Carlo steps/cycles
+ * @param parammap:  map containing Parameters to refine in MC algorithm
+ */
 void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
                                         map<string, Parameter> &parammap) {
   // Set up random walk parameters
@@ -1522,7 +1524,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
 
 //----------------------------------------------------------------------------------------------
 /** Work on Markov chain to 'solve' LeBail function
-*/
+ */
 void LeBailFit::doMarkovChain(
     const map<string, Parameter> &parammap,
     const Mantid::HistogramData::HistogramX &vecX,
@@ -1737,8 +1739,8 @@ void LeBailFit::doMarkovChain(
 
 //----------------------------------------------------------------------------------------------
 /** Set up Monte Carlo random walk strategy
-* @param tablews :: TableWorkspace containing the Monte Carlo setup
-*/
+ * @param tablews :: TableWorkspace containing the Monte Carlo setup
+ */
 void LeBailFit::setupRandomWalkStrategyFromTable(
     DataObjects::TableWorkspace_sptr tablews) {
   g_log.information("Set up random walk strategy from table.");
@@ -1790,7 +1792,7 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
 
 //----------------------------------------------------------------------------------------------
 /** Set up Monte Carlo random walk strategy
-*/
+ */
 void LeBailFit::setupBuiltInRandomWalkStrategy() {
   g_log.information("Set up random walk strategy from build-in. ");
 
@@ -1928,12 +1930,12 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
 
 //----------------------------------------------------------------------------------------------
 /** Add parameter (to a vector of string/name) for MC random walk
-* according to Fit in Parameter
-*
-* @param parnamesforMC: vector of parameter for MC minimizer
-* @param parname: name of parameter to check whether to put into refinement
-*list
-*/
+ * according to Fit in Parameter
+ *
+ * @param parnamesforMC: vector of parameter for MC minimizer
+ * @param parname: name of parameter to check whether to put into refinement
+ *list
+ */
 void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
                                          string parname) {
   map<string, Parameter>::iterator pariter;
@@ -1952,24 +1954,24 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
 
 //----------------------------------------------------------------------------------------------
 /** Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-*  (1) The calculation will be cased on vectors.
-*  (2) m_lebailFunction will NOT be used;
-*  (3) background will not be calculated.
-*
-* @param vecX :: vector of X
-* @param vecY ::  vector of Y (may be raw data or pure peak data/background
-*removed)
-* @param inputraw ::  True if vecY is raw data. Otherwise, with background
-*removed
-* @param outputwithbkgd :: output vector (values) should include background
-*values
-* @param vecBkgd:: vector of background values (input)
-* @param values :: (output) function values, i.e., summation of all peaks and
-*background in option
-* @param rfactor:  R-factor (Rwp and Rp) as output
-*
-* @return :: boolean value.  whether all the peaks' parameters are physical.
-*/
+ *  (1) The calculation will be cased on vectors.
+ *  (2) m_lebailFunction will NOT be used;
+ *  (3) background will not be calculated.
+ *
+ * @param vecX :: vector of X
+ * @param vecY ::  vector of Y (may be raw data or pure peak data/background
+ *removed)
+ * @param inputraw ::  True if vecY is raw data. Otherwise, with background
+ *removed
+ * @param outputwithbkgd :: output vector (values) should include background
+ *values
+ * @param vecBkgd:: vector of background values (input)
+ * @param values :: (output) function values, i.e., summation of all peaks and
+ *background in option
+ * @param rfactor:  R-factor (Rwp and Rp) as output
+ *
+ * @return :: boolean value.  whether all the peaks' parameters are physical.
+ */
 bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
                                             const HistogramY &vecY,
                                             bool inputraw, bool outputwithbkgd,
@@ -2080,18 +2082,18 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
 
 //----------------------------------------------------------------------------------------------
 /** Propose new parameters
-* @param mcgroup:  monte carlo group
-* @param r: R factor (Rp, Rwp)
-* @param curparammap:  current map of Parameters whose values are used for
-*propose new values
-* @param newparammap:  map of Parameters hold new values
-* @param prevBetterRwp: boolean.  true if previously proposed value resulted
-*in a better Rwp
-*
-* Return: Boolean to indicate whether there is any parameter that have
-*proposed new values in
-*         this group
-*/
+ * @param mcgroup:  monte carlo group
+ * @param r: R factor (Rp, Rwp)
+ * @param curparammap:  current map of Parameters whose values are used for
+ *propose new values
+ * @param newparammap:  map of Parameters hold new values
+ * @param prevBetterRwp: boolean.  true if previously proposed value resulted
+ *in a better Rwp
+ *
+ * Return: Boolean to indicate whether there is any parameter that have
+ *proposed new values in
+ *         this group
+ */
 bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
                                  map<string, Parameter> &curparammap,
                                  map<string, Parameter> &newparammap,
@@ -2236,16 +2238,16 @@ bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
 
 //-----------------------------------------------------------------------------------------------
 /** Limit proposed value in the specified boundary
-* @param param     :: Parameter
-* @param newvalue  :: proposed new value that is out of boundary
-* @param direction :: direction of parameter moved.  -1 for lower.  1 for
-*upper
-* @param choice    :: option for various method  0: half distance.  1:
-*periodic / reflection
-*                     based on boundary
-*
-* @return :: new value in boundary
-*/
+ * @param param     :: Parameter
+ * @param newvalue  :: proposed new value that is out of boundary
+ * @param direction :: direction of parameter moved.  -1 for lower.  1 for
+ *upper
+ * @param choice    :: option for various method  0: half distance.  1:
+ *periodic / reflection
+ *                     based on boundary
+ *
+ * @return :: new value in boundary
+ */
 double LeBailFit::limitProposedValueInBound(const Parameter &param,
                                             double newvalue, double direction,
                                             int choice) {
@@ -2291,10 +2293,10 @@ double LeBailFit::limitProposedValueInBound(const Parameter &param,
 
 //-----------------------------------------------------------------------------------------------
 /** Determine whether the proposed value should be accepted or denied
-* @param currR:  current R-factor Rwp
-* @param newR:  R-factor of function whose parameters' values are the
-* proposed.
-*/
+ * @param currR:  current R-factor Rwp
+ * @param newR:  R-factor of function whose parameters' values are the
+ * proposed.
+ */
 bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
   bool accept;
 
@@ -2325,13 +2327,13 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
 
 //----------------------------------------------------------------------------------------------
 /** Book keep the (sopposed) best MC result including
-* a) best MC step, Rp, Rwp
-* b) parameter values of these
-* @param parammap:  map of Parameters to book keep with
-* @param bkgddata:  background data to book keep with
-* @param rfactor :: R-factor (Rwp and Rp)
-* @param istep:     current MC step to be recorded
-*/
+ * a) best MC step, Rp, Rwp
+ * b) parameter values of these
+ * @param parammap:  map of Parameters to book keep with
+ * @param bkgddata:  background data to book keep with
+ * @param rfactor :: R-factor (Rwp and Rp)
+ * @param istep:     current MC step to be recorded
+ */
 void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap,
                                      const vector<double> &bkgddata,
                                      Rfactor rfactor, size_t istep) {
@@ -2367,10 +2369,10 @@ void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap,
 
 //------------------------------------------------------------------------------------------------
 /** Apply the value of parameters in the source to target
-* @param srcparammap:  map of Parameters whose values to be copied to others;
-* @param tgtparammap:  map of Parameters whose values to be copied from
-* others;
-*/
+ * @param srcparammap:  map of Parameters whose values to be copied to others;
+ * @param tgtparammap:  map of Parameters whose values to be copied from
+ * others;
+ */
 void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap,
                                      map<string, Parameter> &tgtparammap) {
   map<string, Parameter>::iterator srcmapiter;
@@ -2411,7 +2413,7 @@ LeBailFit::convertToDoubleMap(std::map<std::string, Parameter> &inmap) {
 // =================================
 
 /** Write a set of (XY) data to a column file
-*/
+ */
 void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR,
                          string filename) {
   ofstream ofile;

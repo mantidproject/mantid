@@ -7,13 +7,13 @@
 #include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // Mantid headers from other projects
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/EmptyValues.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 // 3rd party library headers
 #include <cxxtest/TestSuite.h>
 // Standard library

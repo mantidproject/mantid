@@ -1,13 +1,13 @@
 #include "ReflSaveTabPresenter.h"
-#include "IReflSaveTabView.h"
 #include "IReflMainWindowPresenter.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "IReflSaveTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ConfigService.h"
 #include "Poco/File.h"
 #include "Poco/Path.h"
 
@@ -18,32 +18,42 @@ namespace CustomInterfaces {
 
 using namespace Mantid::API;
 
-/** Constructor
-* @param view :: The view we are handling
-*/
-ReflSaveTabPresenter::ReflSaveTabPresenter(IReflSaveTabView *view)
-    : m_view(view), m_mainPresenter() {
+/**
+ * @param saver :: The model to use to save the files
+ * @param view :: The view we are handling
+ */
+ReflSaveTabPresenter::ReflSaveTabPresenter(
+    std::unique_ptr<IReflAsciiSaver> saver,
+    std::unique_ptr<IReflSaveTabView> view)
+    : m_view(std::move(view)), m_saver(std::move(saver)), m_mainPresenter(),
+      m_shouldAutosave(false) {
 
-  m_saveAlgs = {"SaveReflCustomAscii", "SaveReflThreeColumnAscii",
-                "SaveANSTOAscii", "SaveILLCosmosAscii"};
-  m_saveExts = {".dat", ".dat", ".txt", ".mft"};
+  m_view->subscribe(this);
 }
 
 /** Destructor
-*/
+ */
 ReflSaveTabPresenter::~ReflSaveTabPresenter() {}
 
 /** Accept a main presenter
-* @param mainPresenter :: [input] The main presenter
-*/
+ * @param mainPresenter :: [input] The main presenter
+ */
 void ReflSaveTabPresenter::acceptMainPresenter(
     IReflMainWindowPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
 }
 
-void ReflSaveTabPresenter::onAnyReductionPaused() { populateWorkspaceList(); }
+void ReflSaveTabPresenter::onAnyReductionPaused() {
+  populateWorkspaceList();
+  m_view->enableAutosaveControls();
+  m_view->enableFileFormatAndLocationControls();
+}
 
-void ReflSaveTabPresenter::onAnyReductionResumed() {}
+void ReflSaveTabPresenter::onAnyReductionResumed() {
+  m_view->disableAutosaveControls();
+  if (shouldAutosave())
+    m_view->disableFileFormatAndLocationControls();
+}
 
 void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
   switch (flag) {
@@ -57,24 +67,77 @@ void ReflSaveTabPresenter::notify(IReflSaveTabPresenter::Flag flag) {
     populateParametersList();
     break;
   case saveWorkspacesFlag:
-    saveWorkspaces();
+    saveSelectedWorkspaces();
     break;
   case suggestSaveDirFlag:
     suggestSaveDir();
     break;
+  case autosaveDisabled:
+    disableAutosave();
+    break;
+  case autosaveEnabled:
+    enableAutosave();
+    break;
+  case savePathChanged:
+    onSavePathChanged();
+  }
+}
+
+void ReflSaveTabPresenter::enableAutosave() {
+  if (isValidSaveDirectory(m_view->getSavePath())) {
+    m_shouldAutosave = true;
+  } else {
+    m_shouldAutosave = false;
+    m_view->disallowAutosave();
+    errorInvalidSaveDirectory();
+  }
+}
+
+void ReflSaveTabPresenter::disableAutosave() { m_shouldAutosave = false; }
+
+void ReflSaveTabPresenter::onSavePathChanged() {
+  if (shouldAutosave() && !isValidSaveDirectory(m_view->getSavePath()))
+    warnInvalidSaveDirectory();
+}
+
+void ReflSaveTabPresenter::completedGroupReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &group,
+    std::string const &workspaceName) {
+  UNUSED_ARG(group);
+  if (shouldAutosave()) {
+    try {
+      saveWorkspaces(std::vector<std::string>({workspaceName}));
+    } catch (InvalidWorkspaceName &) {
+      // ignore workspaces that don't exist
+    }
+  }
+}
+
+bool ReflSaveTabPresenter::shouldAutosave() const { return m_shouldAutosave; }
+
+void ReflSaveTabPresenter::completedRowReductionSuccessfully(
+    MantidWidgets::DataProcessor::GroupData const &group,
+    std::string const &workspaceName) {
+  if (!MantidWidgets::DataProcessor::canPostprocess(group) &&
+      shouldAutosave()) {
+    try {
+      saveWorkspaces(std::vector<std::string>({workspaceName}));
+    } catch (InvalidWorkspaceName &) {
+      // ignore workspaces that don't exist
+    }
   }
 }
 
 /** Fills the 'List of Workspaces' widget with the names of all available
-* workspaces
-*/
+ * workspaces
+ */
 void ReflSaveTabPresenter::populateWorkspaceList() {
   m_view->clearWorkspaceList();
   m_view->setWorkspaceList(getAvailableWorkspaceNames());
 }
 
 /** Filters the names in the 'List of Workspaces' widget
-*/
+ */
 void ReflSaveTabPresenter::filterWorkspaceNames() {
   m_view->clearWorkspaceList();
 
@@ -108,8 +171,8 @@ void ReflSaveTabPresenter::filterWorkspaceNames() {
 }
 
 /** Fills the 'List of Logged Parameters' widget with the parameters of the
-* currently selected workspace
-*/
+ * currently selected workspace
+ */
 void ReflSaveTabPresenter::populateParametersList() {
   m_view->clearParametersList();
 
@@ -125,71 +188,94 @@ void ReflSaveTabPresenter::populateParametersList() {
   m_view->setParametersList(logs);
 }
 
-/** Saves selected workspaces
-*/
-void ReflSaveTabPresenter::saveWorkspaces() {
-  // Check that save directory is valid
-  std::string saveDir = m_view->getSavePath();
-  if (saveDir.empty() || Poco::File(saveDir).isDirectory() == false) {
-    m_mainPresenter->giveUserCritical("Directory specified doesn't exist or "
-                                      "was invalid for your operating system",
-                                      "Invalid directory");
-    return;
-  }
+bool ReflSaveTabPresenter::isValidSaveDirectory(std::string const &directory) {
+  return m_saver->isValidSaveDirectory(directory);
+}
 
+void ReflSaveTabPresenter::error(std::string const &message,
+                                 std::string const &title) {
+  m_view->giveUserCritical(message, title);
+}
+
+void ReflSaveTabPresenter::warn(std::string const &message,
+                                std::string const &title) {
+  m_view->giveUserInfo(message, title);
+}
+
+void ReflSaveTabPresenter::warnInvalidSaveDirectory() {
+  warn("You just changed the save path to a directory which "
+       "doesn't exist or is not writable.",
+       "Invalid directory");
+}
+
+void ReflSaveTabPresenter::errorInvalidSaveDirectory() {
+  error("The save path specified doesn't exist or is "
+        "not writable.",
+        "Invalid directory");
+}
+
+NamedFormat ReflSaveTabPresenter::formatFromIndex(int formatIndex) const {
+  switch (formatIndex) {
+  case 0:
+    return NamedFormat::Custom;
+  case 1:
+    return NamedFormat::ThreeColumn;
+  case 2:
+    return NamedFormat::ANSTO;
+  case 3:
+    return NamedFormat::ILLCosmos;
+  default:
+    throw std::runtime_error("Unknown save format.");
+  }
+}
+
+FileFormatOptions ReflSaveTabPresenter::getSaveParametersFromView() const {
+  return FileFormatOptions(
+      /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
+      /*prefix=*/m_view->getPrefix(),
+      /*includeTitle=*/m_view->getTitleCheck(),
+      /*separator=*/m_view->getSeparator(),
+      /*includeQResolution=*/m_view->getQResolutionCheck());
+}
+
+void ReflSaveTabPresenter::saveWorkspaces(
+    std::vector<std::string> const &workspaceNames,
+    std::vector<std::string> const &logParameters) {
+  auto savePath = m_view->getSavePath();
+  if (m_saver->isValidSaveDirectory(savePath))
+    m_saver->save(savePath, workspaceNames, logParameters,
+                  getSaveParametersFromView());
+  else
+    errorInvalidSaveDirectory();
+}
+
+/** Saves workspaces with the names specified. */
+void ReflSaveTabPresenter::saveWorkspaces(
+    std::vector<std::string> const &workspaceNames) {
+  auto selectedLogParameters = m_view->getSelectedParameters();
+  saveWorkspaces(workspaceNames, selectedLogParameters);
+}
+
+/** Saves selected workspaces */
+void ReflSaveTabPresenter::saveSelectedWorkspaces() {
   // Check that at least one workspace has been selected for saving
-  auto wsNames = m_view->getSelectedWorkspaces();
-  if (wsNames.empty()) {
-    m_mainPresenter->giveUserCritical("No workspaces selected. You must select "
-                                      "the workspaces to save.",
-                                      "No workspaces selected");
-  }
-
-  // Obtain workspace titles
-  std::vector<std::string> wsTitles(wsNames.size());
-  std::transform(wsNames.begin(), wsNames.end(), wsTitles.begin(),
-                 [](std::string s) {
-                   return AnalysisDataService::Instance()
-                       .retrieveWS<MatrixWorkspace>(s)
-                       ->getTitle();
-                 });
-
-  // Create the appropriate save algorithm
-  bool titleCheck = m_view->getTitleCheck();
-  auto selectedParameters = m_view->getSelectedParameters();
-  bool qResolutionCheck = m_view->getQResolutionCheck();
-  std::string separator = m_view->getSeparator();
-  std::string prefix = m_view->getPrefix();
-  int formatIndex = m_view->getFileFormatIndex();
-  std::string algName = m_saveAlgs[formatIndex];
-  std::string extension = m_saveExts[formatIndex];
-  IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create(algName);
-
-  for (size_t i = 0; i < wsNames.size(); i++) {
-    // Add any additional algorithm-specific properties and execute
-    if (algName != "SaveANSTOAscii") {
-      if (titleCheck)
-        saveAlg->setProperty("Title", wsTitles[i]);
-      saveAlg->setProperty("LogList", selectedParameters);
+  auto workspaceNames = m_view->getSelectedWorkspaces();
+  if (workspaceNames.empty()) {
+    error("No workspaces selected", "No workspaces selected. "
+                                    "You must select the workspaces to save.");
+  } else {
+    try {
+      saveWorkspaces(workspaceNames);
+    } catch (std::exception &e) {
+      error(e.what(), "Error");
+    } catch (...) {
+      error("Unknown error while saving workspaces", "Error");
     }
-    if (algName == "SaveReflCustomAscii") {
-      saveAlg->setProperty("WriteDeltaQ", qResolutionCheck);
-    }
-
-    auto path = Poco::Path(saveDir);
-    auto wsName = wsNames[i];
-    path.append(prefix + wsName + extension);
-    saveAlg->setProperty("Separator", separator);
-    saveAlg->setProperty("Filename", path.toString());
-    saveAlg->setProperty(
-        "InputWorkspace",
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-    saveAlg->execute();
   }
 }
 
 /** Suggests a save directory and sets it in the 'Save path' text field
-*/
+ */
 void ReflSaveTabPresenter::suggestSaveDir() {
   std::string path = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
@@ -197,8 +283,8 @@ void ReflSaveTabPresenter::suggestSaveDir() {
 }
 
 /** Obtains all available workspace names to save
-* @return :: list of workspace names
-*/
+ * @return :: list of workspace names
+ */
 std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
   auto allNames = AnalysisDataService::Instance().getObjectNames();
   // Exclude workspace groups and table workspaces as they cannot be saved to
@@ -215,5 +301,5 @@ std::vector<std::string> ReflSaveTabPresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

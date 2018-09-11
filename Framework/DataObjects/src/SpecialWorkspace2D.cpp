@@ -1,6 +1,6 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #include <fstream>
@@ -68,11 +68,11 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
 
 //----------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and initializes arrays to zero
-*  @param NVectors :: The number of vectors/histograms/detectors in the
-* workspace
-*  @param XLength :: Must be 1
-*  @param YLength :: Must be 1
-*/
+ *  @param NVectors :: The number of vectors/histograms/detectors in the
+ * workspace
+ *  @param XLength :: Must be 1
+ *  @param YLength :: Must be 1
+ */
 void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength,
                               const size_t &YLength) {
   if ((XLength != 1) || (YLength != 1))
@@ -375,7 +375,7 @@ bool SpecialWorkspace2D::isCompatible(
 
 //----------------------------------------------------------------------------------------------
 /** Duplicate SpecialWorkspace2D
-  */
+ */
 void SpecialWorkspace2D::copyFrom(
     boost::shared_ptr<const SpecialWorkspace2D> sourcews) {
   // Check
@@ -414,8 +414,8 @@ void SpecialWorkspace2D::copyFrom(
   this->detID_to_WI = sourcews->detID_to_WI;
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 /// @cond TEMPLATE
 

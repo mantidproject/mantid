@@ -60,8 +60,8 @@ protected:
   PoldiAbstractChopper() = default;
 };
 
-typedef boost::shared_ptr<PoldiAbstractChopper> PoldiAbstractChopper_sptr;
-}
-}
+using PoldiAbstractChopper_sptr = boost::shared_ptr<PoldiAbstractChopper>;
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // POLDIABSTRACTCHOPPER_H

@@ -13,8 +13,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include <gsl/gsl_linalg.h>
 #include <algorithm>
+#include <gsl/gsl_linalg.h>
 #include <numeric>
 
 namespace Mantid {
@@ -52,42 +52,38 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 const double THRESHOLD = 1E-6;
 
 /** removes zeros from converged results
-* @param ws :: [input] The input workspace with zeros
-* @param maxIt :: [input] The max number of iteration this alg used
-* @param yLabel :: [input] y-label to use for returned ws
-* @return : ws cut down in lenght to maxIt
-*/
-MatrixWorkspace_sptr removeZeros(const MatrixWorkspace_sptr &ws,
-                                 const size_t maxIt,
-                                 const ::std::string yLabel) {
+ * @param ws :: [input] The input workspace with zeros
+ * @param itCount [input] The number of iterations this alg used for each
+ * spectrum
+ * @param yLabel :: [input] y-label to use for returned ws
+ * @return : ws cut down in lenght to maxIt
+ */
+MatrixWorkspace_sptr removeZeros(MatrixWorkspace_sptr &ws,
+                                 const std::vector<size_t> &itCount,
+                                 const std::string &yLabel) {
 
   ws->setYUnitLabel(yLabel);
-  try {
-    ws->getAxis(0)->unit() =
-        UnitFactory::Instance().create("Number of Iterations");
-  } catch (Exception::NotFoundError &) {
-    ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-    Unit_sptr unit = ws->getAxis(0)->unit();
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(unit);
-    label->setLabel("Number of Iterations", "");
-  }
+  ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+  Unit_sptr unit = ws->getAxis(0)->unit();
+  boost::shared_ptr<Units::Label> label =
+      boost::dynamic_pointer_cast<Units::Label>(unit);
+  label->setLabel("Number of Iterations", "");
 
-  if (maxIt == ws->readY(0).size()) {
-    return ws;
-  }
   const size_t nspec = ws->getNumberHistograms();
-  MatrixWorkspace_sptr outWS =
-      WorkspaceFactory::Instance().create(ws, nspec, maxIt, maxIt);
-  for (size_t spec = 0; spec < nspec; spec++) {
-    outWS->setPoints(spec, Points(maxIt, LinearGenerator(0.0, 1.0)));
-    auto Data = ws->readY(spec);
-    outWS->setCounts(spec,
-                     std::vector<double>(Data.begin(), Data.begin() + maxIt));
+  if (itCount.empty()) {
+    return ws; // In case, we don't have any spectra
   }
-  return outWS;
+  for (size_t spec = 0; spec < nspec; spec++) {
+    auto &dataX = ws->dataX(spec);
+    dataX.resize(itCount[spec]);
+    auto &dataY = ws->dataY(spec);
+    dataY.resize(itCount[spec]);
+    auto &dataE = ws->dataE(spec);
+    dataE.resize(itCount[spec]);
+  }
+  return ws;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 
@@ -226,7 +222,7 @@ void MaxEnt::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Validate the input properties.
-*/
+ */
 std::map<std::string, std::string> MaxEnt::validateInputs() {
 
   std::map<std::string, std::string> result;
@@ -274,14 +270,14 @@ void MaxEnt::exec() {
   // Distance penalty for current image
   const double distEps = getProperty("DistancePenalty");
   // Maximum number of iterations
-  const size_t niter = getProperty("MaxIterations");
+  const size_t nIter = getProperty("MaxIterations");
   // Maximum number of iterations in alpha chop
   const size_t alphaIter = getProperty("AlphaChopIterations");
   // Number of spectra and datapoints
   // Read input workspace
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
-  size_t nspec = inWS->getNumberHistograms();
+  size_t nSpec = inWS->getNumberHistograms();
   // Number of data points - assumed to be constant between spectra or
   // this will throw an exception
   size_t npoints = inWS->blocksize() * resolutionFactor;
@@ -290,7 +286,7 @@ void MaxEnt::exec() {
 
   // For now have the requirement that data must have non-zero
   // (and positive!) errors
-  for (size_t s = 0; s < nspec; s++) {
+  for (size_t s = 0; s < nSpec; s++) {
     auto errors = inWS->e(s).rawData();
 
     size_t npoints = errors.size();
@@ -337,22 +333,24 @@ void MaxEnt::exec() {
   MatrixWorkspace_sptr outEvolChi;
   MatrixWorkspace_sptr outEvolTest;
 
-  nspec = complexData ? nspec / 2 : nspec;
+  nSpec = complexData ? nSpec / 2 : nSpec;
   outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npoints, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npoints, npoints);
   for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
     outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outDataWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nSpec, npointsX, npoints);
   for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
     outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
-  outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
-  outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
+  outEvolChi = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
+  outEvolTest = WorkspaceFactory::Instance().create(inWS, nSpec, nIter, nIter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-  size_t maxIt = 0; // used to determine max iterations used by alg
-  outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
-  for (size_t s = 0; s < nspec; s++) {
+  std::vector<size_t> iterationCounts;
+  iterationCounts.reserve(nSpec);
+  outEvolChi->setPoints(0, Points(nIter, LinearGenerator(0.0, 1.0)));
+
+  for (size_t spec = 0; spec < nSpec; spec++) {
 
     // Start distribution (flat background)
     std::vector<double> image(npoints, background);
@@ -360,22 +358,22 @@ void MaxEnt::exec() {
     std::vector<double> data;
     std::vector<double> errors;
     if (complexData) {
-      data = toComplex(inWS, s, false);  // false -> data
-      errors = toComplex(inWS, s, true); // true -> errors
+      data = toComplex(inWS, spec, false);  // false -> data
+      errors = toComplex(inWS, spec, true); // true -> errors
     } else {
-      data = inWS->y(s).rawData();
-      errors = inWS->e(s).rawData();
+      data = inWS->y(spec).rawData();
+      errors = inWS->e(spec).rawData();
     }
 
     // To record the algorithm's progress
-    std::vector<double> evolChi(niter, 0.);
-    std::vector<double> evolTest(niter, 0.);
+    std::vector<double> evolChi(nIter, 0.);
+    std::vector<double> evolTest(nIter, 0.);
 
     // Progress
-    Progress progress(this, 0.0, 1.0, niter);
+    Progress progress(this, 0.0, 1.0, nIter);
 
     // Run maxent algorithm
-    for (size_t it = 0; it < niter; it++) {
+    for (size_t it = 0; it < nIter; it++) {
 
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
@@ -397,15 +395,15 @@ void MaxEnt::exec() {
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
       evolTest[it] = currAngle;
-      if (it > maxIt) {
-        maxIt = it;
-      }
+
       // Stop condition, solution found
       if ((std::abs(currChisq / ChiTargetOverN - 1.) < chiEps) &&
           (currAngle < angle)) {
 
-        g_log.information() << "Stopped after " << it << " iterations"
-                            << std::endl;
+        // it + 1 iterations have been done because we count from zero
+        g_log.information()
+            << "Stopped after " << it + 1 << " iterations" << std::endl;
+        iterationCounts.push_back(it + 1);
         break;
       }
 
@@ -416,32 +414,32 @@ void MaxEnt::exec() {
 
       progress.report();
 
-    } // iterations
+    } // Next Iteration
 
     // Get calculated data
     auto solData = maxentCalculator.getReconstructedData();
     auto solImage = maxentCalculator.getImage();
 
     // Populate the output workspaces
-    populateDataWS(inWS, s, nspec, solData, complexData, outDataWS);
-    populateImageWS(inWS, s, nspec, solImage, complexImage, outImageWS,
+    populateDataWS(inWS, spec, nSpec, solData, complexData, outDataWS);
+    populateImageWS(inWS, spec, nSpec, solImage, complexImage, outImageWS,
                     autoShift);
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
-    outEvolChi->setSharedX(s, outEvolChi->sharedX(0));
-    outEvolTest->setSharedX(s, outEvolChi->sharedX(0));
+    outEvolChi->setSharedX(spec, outEvolChi->sharedX(0));
+    outEvolTest->setSharedX(spec, outEvolChi->sharedX(0));
 
     // Y values
-    outEvolChi->setCounts(s, std::move(evolChi));
-    outEvolTest->setCounts(s, std::move(evolTest));
+    outEvolChi->setCounts(spec, std::move(evolChi));
+    outEvolTest->setCounts(spec, std::move(evolTest));
     // No errors
 
   } // Next spectrum
-  // add 1 to maxIt to account for starting at 0
-  maxIt++;
-  setProperty("EvolChi", removeZeros(outEvolChi, maxIt, "Chi squared"));
-  setProperty("EvolAngle", removeZeros(outEvolTest, maxIt, "Maximum Angle"));
+  setProperty("EvolChi",
+              removeZeros(outEvolChi, iterationCounts, "Chi squared"));
+  setProperty("EvolAngle",
+              removeZeros(outEvolTest, iterationCounts, "Maximum Angle"));
   setProperty("ReconstructedImage", outImageWS);
   setProperty("ReconstructedData", outDataWS);
 }
@@ -449,12 +447,12 @@ void MaxEnt::exec() {
 //----------------------------------------------------------------------------------------------
 
 /** Returns a given spectrum as a complex number
-* @param inWS :: [input] The input workspace containing all the spectra
-* @param spec :: [input] The spectrum of interest
-* @param errors :: [input] If true, returns the errors, otherwise returns the
-* counts
-* @return : Spectrum 'spec' as a complex vector
-*/
+ * @param inWS :: [input] The input workspace containing all the spectra
+ * @param spec :: [input] The spectrum of interest
+ * @param errors :: [input] If true, returns the errors, otherwise returns the
+ * counts
+ * @return : Spectrum 'spec' as a complex vector
+ */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       size_t spec, bool errors) {
   const size_t numBins = inWS->y(0).size();
@@ -481,14 +479,14 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 }
 
 /** Bisection method to move delta one step closer towards the solution
-* @param coeffs :: [input] The current quadratic coefficients
-* @param ChiTargetOverN :: [input] The requested Chi target over N
-* (data points)
-* @param chiEps :: [input] Precision required for Chi target
-* @param alphaIter :: [input] Maximum number of iterations in the bisection
-* method (alpha chop)
-* @return : The increment length to be added to the current image
-*/
+ * @param coeffs :: [input] The current quadratic coefficients
+ * @param ChiTargetOverN :: [input] The requested Chi target over N
+ * (data points)
+ * @param chiEps :: [input] Precision required for Chi target
+ * @param alphaIter :: [input] Maximum number of iterations in the bisection
+ * method (alpha chop)
+ * @return : The increment length to be added to the current image
+ */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
                                  double ChiTargetOverN, double chiEps,
                                  size_t alphaIter) {
@@ -557,12 +555,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 }
 
 /** Calculates Chi given the quadratic coefficients and an alpha value by
-* solving the matrix equation A*b = B
-* @param coeffs :: [input] The quadratic coefficients
-* @param a :: [input] The alpha value
-* @param b :: [output] The solution
-* @return :: The calculated chi-square
-*/
+ * solving the matrix equation A*b = B
+ * @param coeffs :: [input] The quadratic coefficients
+ * @param a :: [input] The alpha value
+ * @param b :: [output] The solution
+ * @return :: The calculated chi-square
+ */
 double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
                             std::vector<double> &b) {
 
@@ -605,10 +603,10 @@ double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
 }
 
 /** Solves A*x = B using SVD
-* @param A :: [input] The matrix A
-* @param B :: [input] The vector B
-* @return :: The solution x
-*/
+ * @param A :: [input] The matrix A
+ * @param B :: [input] The vector B
+ * @return :: The solution x
+ */
 std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   size_t dim = A.size().first;
@@ -645,13 +643,13 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 }
 
 /** Applies a distance penalty
-* @param delta :: [input] The current increment
-* @param coeffs :: [input] The quadratic coefficients
-* @param image :: [input] The current image
-* @param background :: [input] The background
-* @param distEps :: [input] The distance constraint
-* @return :: The new increment
-*/
+ * @param delta :: [input] The current increment
+ * @param coeffs :: [input] The quadratic coefficients
+ * @param image :: [input] The current image
+ * @param background :: [input] The background
+ * @param distEps :: [input] The distance constraint
+ * @return :: The new increment
+ */
 std::vector<double> MaxEnt::applyDistancePenalty(
     const std::vector<double> &delta, const QuadraticCoefficients &coeffs,
     const std::vector<double> &image, double background, double distEps) {
@@ -682,13 +680,13 @@ std::vector<double> MaxEnt::applyDistancePenalty(
 }
 
 /**
-* Updates the image according to an increment delta
-* @param image : [input] The current image as a vector (can be real or complex)
-* @param delta : [input] The increment delta as a vector (can be real or
-* complex)
-* @param dirs : [input] The search directions
-* @return : The new image
-*/
+ * Updates the image according to an increment delta
+ * @param image : [input] The current image as a vector (can be real or complex)
+ * @param delta : [input] The increment delta as a vector (can be real or
+ * complex)
+ * @param dirs : [input] The search directions
+ * @return : The new image
+ */
 std::vector<double>
 MaxEnt::updateImage(const std::vector<double> &image,
                     const std::vector<double> &delta,
@@ -710,16 +708,16 @@ MaxEnt::updateImage(const std::vector<double> &image,
 }
 
 /** Populates the output workspaces
-* @param inWS :: [input] The input workspace
-* @param spec :: [input] The current spectrum being analyzed
-* @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The image to be written in the output workspace (can
-* be real or complex vector)
-* @param complex :: [input] True if the result is a complex vector, false
-* otherwise
-* @param outWS :: [input] The output workspace to populate
-* @param autoShift :: [input] Whether or not to correct the phase shift
-*/
+ * @param inWS :: [input] The input workspace
+ * @param spec :: [input] The current spectrum being analyzed
+ * @param nspec :: [input] The total number of histograms in the input workspace
+ * @param result :: [input] The image to be written in the output workspace (can
+ * be real or complex vector)
+ * @param complex :: [input] True if the result is a complex vector, false
+ * otherwise
+ * @param outWS :: [input] The output workspace to populate
+ * @param autoShift :: [input] Whether or not to correct the phase shift
+ */
 void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                              size_t nspec, const std::vector<double> &result,
                              bool complex, MatrixWorkspace_sptr &outWS,
@@ -800,14 +798,14 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
 }
 
 /** Populates the output workspaces
-* @param inWS :: [input] The input workspace
-* @param spec :: [input] The current spectrum being analyzed
-* @param nspec :: [input] The total number of histograms in the input workspace
-* @param result :: [input] The reconstructed data to be written in the output
-* workspace (can be a real or complex vector)
-* @param complex :: [input] True if result is a complex vector, false otherwise
-* @param outWS :: [input] The output workspace to populate
-*/
+ * @param inWS :: [input] The input workspace
+ * @param spec :: [input] The current spectrum being analyzed
+ * @param nspec :: [input] The total number of histograms in the input workspace
+ * @param result :: [input] The reconstructed data to be written in the output
+ * workspace (can be a real or complex vector)
+ * @param complex :: [input] True if result is a complex vector, false otherwise
+ * @param outWS :: [input] The output workspace to populate
+ */
 void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
                             bool complex, MatrixWorkspace_sptr &outWS) {

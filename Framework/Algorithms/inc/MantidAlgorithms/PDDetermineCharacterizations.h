@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS_H_
 #define MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -15,8 +15,8 @@ namespace Kernel {
 /// forward declaration
 class PropertyMantager;
 /// Typedef for a shared pointer to a PropertyManager
-typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
-}
+using PropertyManager_sptr = boost::shared_ptr<PropertyManager>;
+} // namespace Kernel
 
 namespace Algorithms {
 

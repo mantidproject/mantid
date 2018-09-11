@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_ROTATESOURCE_H_
 #define MANTID_DATAHANDLING_ROTATESOURCE_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/DllConfig.h"
 namespace Mantid {
 namespace DataHandling {
 
@@ -36,6 +36,9 @@ class DLLExport RotateSource : public API::Algorithm {
 public:
   const std::string name() const override { return "RotateSource"; };
   int version() const override { return 1; };
+  const std::vector<std::string> seeAlso() const override {
+    return {"RotateInstrumentComponent"};
+  }
   const std::string category() const override {
     return "DataHandling\\Instrument";
   };

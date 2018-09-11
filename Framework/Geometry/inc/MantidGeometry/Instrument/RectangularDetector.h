@@ -1,13 +1,13 @@
 #ifndef RECTANGULAR_DETECTOR_H
 #define RECTANGULAR_DETECTOR_H
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/IObject.h"
-#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -211,9 +211,9 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const RectangularDetector &);
 
-typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
-typedef boost::shared_ptr<const RectangularDetector>
-    RectangularDetector_const_sptr;
+using RectangularDetector_sptr = boost::shared_ptr<RectangularDetector>;
+using RectangularDetector_const_sptr =
+    boost::shared_ptr<const RectangularDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid

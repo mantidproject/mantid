@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
 #define MANTID_CURVEFITTING_NORMALISEBYPEAKAREA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -10,7 +10,7 @@ namespace Mantid {
 namespace HistogramData {
 class HistogramY;
 class HistogramE;
-}
+} // namespace HistogramData
 
 namespace CurveFitting {
 namespace Algorithms {
@@ -47,6 +47,10 @@ public:
   const std::string summary() const override {
     return "Normalises the input data by the area of of peak defined by the "
            "input mass value.";
+  }
+
+  const std::vector<std::string> seeAlso() const override {
+    return {"MonitorEfficiencyCorUser", "Divide"};
   }
 
   int version() const override;

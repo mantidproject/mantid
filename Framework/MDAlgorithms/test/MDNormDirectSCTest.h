@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/MDNormDirectSC.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/MDNormDirectSC.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MDAlgorithms::MDNormDirectSC;

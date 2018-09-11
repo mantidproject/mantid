@@ -1,10 +1,10 @@
 #ifndef DIMENSIONSLICEWIDGET_H
 #define DIMENSIONSLICEWIDGET_H
 
-#include <QWidget>
-#include "ui_DimensionSliceWidget.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "DllOption.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "ui_DimensionSliceWidget.h"
+#include <QWidget>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -90,6 +90,6 @@ private:
 };
 
 } // namespace SliceViewer
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // DIMENSIONSLICEWIDGET_H

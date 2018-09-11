@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_DOWNLOADFILE_H_
 #define MANTID_DATAHANDLING_DOWNLOADFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
 namespace Kernel {
 // forward Declaration
 class InternetHelper;
-}
+} // namespace Kernel
 
 namespace DataHandling {
 
@@ -43,6 +43,9 @@ public:
 
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"Load", "CatalogDownloadDataFiles"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

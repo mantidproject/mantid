@@ -34,6 +34,9 @@ class SuggestTibCNCS(PythonAlgorithm):
         """
         return "Inelastic\\Utility"
 
+    def seeAlso(self):
+        return [ "SuggestTibHYSPEC" ]
+
     def name(self):
         """ Return name
         """

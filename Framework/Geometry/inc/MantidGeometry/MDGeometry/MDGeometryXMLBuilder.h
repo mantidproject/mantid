@@ -1,11 +1,11 @@
 #ifndef MDGEOMETRYXMLBUILDER_H_
 #define MDGEOMETRYXMLBUILDER_H_
 
-#include <vector>
-#include <string>
-#include <algorithm>
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include <algorithm>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {
@@ -95,7 +95,7 @@ public:
   bool hasIntegratedTDimension() const;
 
 private:
-  typedef std::vector<IMDDimension_const_sptr> DimensionContainerType;
+  using DimensionContainerType = std::vector<IMDDimension_const_sptr>;
 
   mutable DimensionContainerType m_vecDimensions;
 
@@ -151,7 +151,7 @@ struct MANTID_GEOMETRY_DLL NoDimensionPolicy {
     // Do nothing.
   }
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* GEOMETRYXMLBUILDER_H_ */

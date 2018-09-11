@@ -64,6 +64,18 @@ class SettingsDiagnosticPresenterTest(unittest.TestCase):
         if os.path.exists(dummy_file_path):
             os.remove(dummy_file_path)
 
+    def test_catches_exception_when_cant_find_file(self):
+        parent_presenter = create_run_tab_presenter_mock()
+        presenter = SettingsDiagnosticPresenter(parent_presenter)
+        view = mock.MagicMock()
+        view.get_current_row.result = 1
+        presenter.set_view(view)
+        parent_presenter.get_state_for_row = mock.MagicMock()
+        parent_presenter.get_state_for_row.side_effect = RuntimeError('Test Error')
+
+        presenter.on_row_changed()
+
+        parent_presenter.display_warning_box.assert_called_once_with('Warning', 'Unable to find files.', 'Test Error')
 
 if __name__ == '__main__':
     unittest.main()

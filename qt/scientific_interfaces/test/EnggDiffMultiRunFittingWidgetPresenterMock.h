@@ -9,7 +9,7 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockEnggDiffMultiRunFittingWidgetPresenter
     : public IEnggDiffMultiRunFittingWidgetPresenter {
@@ -19,6 +19,8 @@ public:
                     const Mantid::API::MatrixWorkspace_sptr ws));
 
   MOCK_METHOD1(addFocusedRun, void(const Mantid::API::MatrixWorkspace_sptr ws));
+
+  MOCK_CONST_METHOD0(getAllRunLabels, std::vector<RunLabel>());
 
   MOCK_CONST_METHOD1(getFittedPeaks,
                      boost::optional<Mantid::API::MatrixWorkspace_sptr>(
@@ -46,6 +48,6 @@ MockEnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
   return Mantid::Kernel::make_unique<FakeEnggDiffMultiRunFittingWidgetAdder>();
 }
 
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERMOCK_H_

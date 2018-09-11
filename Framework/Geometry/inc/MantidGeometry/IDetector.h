@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/IObjComponent.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -15,7 +15,7 @@ namespace Kernel {
 // Forward declaration
 //----------------------------------------------------------------------
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 /** Describes the topology of a detectors group used to calculate angular
@@ -115,10 +115,10 @@ public:
 };
 
 /// Shared pointer to IDetector
-typedef boost::shared_ptr<Mantid::Geometry::IDetector> IDetector_sptr;
+using IDetector_sptr = boost::shared_ptr<Mantid::Geometry::IDetector>;
 /// Shared pointer to IDetector (const version)
-typedef boost::shared_ptr<const Mantid::Geometry::IDetector>
-    IDetector_const_sptr;
+using IDetector_const_sptr =
+    boost::shared_ptr<const Mantid::Geometry::IDetector>;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -101,11 +101,11 @@ public:
     }
 
     auto features = root["features"];
-    for (Json::ArrayIndex i = 0; i < features.size(); i++) {
-      std::string name = features[i]["name"].asString();
-      std::string type = features[i]["type"].asString();
-      bool internal = features[i]["internal"].asBool();
-      size_t count = features[i]["count"].asUInt();
+    for (auto &feature : features) {
+      std::string name = feature["name"].asString();
+      std::string type = feature["type"].asString();
+      bool internal = feature["internal"].asBool();
+      size_t count = feature["count"].asUInt();
 
       bool correct = false;
 

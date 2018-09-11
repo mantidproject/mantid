@@ -14,17 +14,17 @@
 #include "MantidKernel/Diffraction.h"
 #include "MantidKernel/OptionalBool.h"
 
-#include <cmath>
 #include <H5Cpp.h>
+#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
 
 using Mantid::API::FileProperty;
-using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::Progress;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::Progress;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::GroupingWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
@@ -400,7 +400,12 @@ void LoadDiffCal::exec() {
   try {
     calibrationGroup = file.openGroup("calibration");
   } catch (FileIException &e) {
-    e.printError();
+#if H5_VERSION_GE(1, 8, 13)
+    UNUSED_ARG(e);
+    H5::Exception::printErrorStack();
+#else
+    e.printError(stderr);
+#endif
     throw std::runtime_error("Did not find group \"/calibration\"");
   }
 

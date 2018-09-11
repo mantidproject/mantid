@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 #define MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -52,7 +52,7 @@ public:
   static void destroySuite(MDEventInserterTest *suite) { delete suite; }
 
   void test_add_md_lean_events() {
-    typedef MDEventWorkspace<MDLeanEvent<2>, 2> MDEW_LEAN_2D;
+    using MDEW_LEAN_2D = MDEventWorkspace<MDLeanEvent<2>, 2>;
 
     // Check the type deduction used internally in the MDEventInserter template.
     TS_ASSERT_EQUALS(sizeof(MDEW_LEAN_2D::MDEventType),
@@ -84,7 +84,7 @@ public:
   }
 
   void test_add_md_full_events() {
-    typedef MDEventWorkspace<MDEvent<2>, 2> MDEW_2D;
+    using MDEW_2D = MDEventWorkspace<MDEvent<2>, 2>;
 
     // Check the type deduction used internally in the MDEventInserter template.
     TS_ASSERT_EQUALS(sizeof(MDEW_2D::MDEventType),

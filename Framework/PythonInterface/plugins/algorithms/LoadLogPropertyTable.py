@@ -18,6 +18,9 @@ class LoadLogPropertyTable(PythonAlgorithm):
         return "Creates a table of Run number against the log values for that run for a range of files.\
          It can use a single log value or a list of log values."
 
+    def seeAlso(self):
+        return [ "LoadLog", "LoadMuonLog" ]
+
     # same concept as built in "CreateLogPropertyTable" but loads its own workspaces and needn't hold all in memory at once
     # select log values to put in table (list)
     # special cases for:

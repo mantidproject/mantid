@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/DllConfig.h"
 
+#include <algorithm>
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
 
 namespace Mantid {
 namespace API {

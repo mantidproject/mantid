@@ -37,7 +37,7 @@ private:
     if (!ws)
       return;
 
-    IMDIterator *it = ws->createIterator();
+    auto it = ws->createIterator();
     size_t nMasked = 0;
     for (size_t i = 0; i < it->getDataSize(); ++i) {
       if (it->getIsMasked()) {

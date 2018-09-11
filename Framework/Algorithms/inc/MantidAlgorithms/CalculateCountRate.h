@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_CALCCOUNTRATE_H_
 #define MANTID_ALGORITHMS_CALCCOUNTRATE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,6 +47,9 @@ class DLLExport CalculateCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ChangePulsetime"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
   /// Helper function: true if count rate should be normalized and false

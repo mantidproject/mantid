@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/AnnularRingAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAlgorithms/AnnularRingAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -45,9 +45,9 @@ public:
 
     const double delta(1e-04);
     const size_t middle_index = 4;
-    TS_ASSERT_DELTA(0.9694, outWS->readY(0).front(), delta);
-    TS_ASSERT_DELTA(0.8035, outWS->readY(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.6530, outWS->readY(0).back(), delta);
+    TS_ASSERT_DELTA(0.9678, outWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.7950, outWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.6590, outWS->readY(0).back(), delta);
   }
 
   //-------------------- Failure cases --------------------------------

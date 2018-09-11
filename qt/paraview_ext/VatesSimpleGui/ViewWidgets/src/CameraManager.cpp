@@ -6,13 +6,13 @@
 #pragma warning disable 1170
 #endif
 
-#include <pqView.h>
-#include <pqActiveObjects.h>
-#include <vtkSMRenderViewProxy.h>
-#include <vtkCamera.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
 #include <boost/make_shared.hpp>
+#include <pqActiveObjects.h>
+#include <pqView.h>
+#include <vtkCamera.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkSMRenderViewProxy.h>
 namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
@@ -89,12 +89,12 @@ Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum() {
 }
 
 /**
-* Set the view onto a peak
-* @param xpos X position of the peak.
-* @param ypos Y position of the peak.
-* @param zpos Z position of the peak.
-* @param peakRadius The radius of the peak.
-*/
+ * Set the view onto a peak
+ * @param xpos X position of the peak.
+ * @param ypos Y position of the peak.
+ * @param zpos Z position of the peak.
+ * @param peakRadius The radius of the peak.
+ */
 void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos,
                                     double peakRadius) {
   pqView *view = pqActiveObjects::instance().activeView();
@@ -123,6 +123,6 @@ void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos,
 
   view->forceRender();
 }
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid

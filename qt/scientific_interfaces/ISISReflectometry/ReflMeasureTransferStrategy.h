@@ -13,8 +13,8 @@ namespace Mantid {
 namespace Kernel {
 // Forward dec
 class ICatalogInfo;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -56,8 +56,10 @@ public:
 
   ReflMeasureTransferStrategy(const ReflMeasureTransferStrategy &other);
 
-  TransferResults transferRuns(SearchResultMap &searchResults,
-                               Mantid::Kernel::ProgressBase &progress) override;
+  TransferResults
+  transferRuns(SearchResultMap &searchResults,
+               Mantid::Kernel::ProgressBase &progress,
+               const TransferMatch matchType = TransferMatch::Any) override;
 
   std::unique_ptr<ReflMeasureTransferStrategy> clone() const;
 

@@ -1,12 +1,12 @@
 #ifndef MANTID_MDALGORITHMS_LOGARITHMMDTEST_H_
 #define MANTID_MDALGORITHMS_LOGARITHMMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/LogarithmMD.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/LogarithmMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;

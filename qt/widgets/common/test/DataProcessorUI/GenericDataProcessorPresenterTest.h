@@ -94,16 +94,17 @@ public:
 
 private:
   // non-async row reduce
-  void startAsyncRowReduceThread(RowItem *rowItem, int groupIndex) override {
+  void startAsyncRowReduceThread(RowData_sptr rowData, const int rowIndex,
+                                 const int groupIndex) override {
     try {
-      reduceRow(rowItem->second);
-      m_manager->update(groupIndex, rowItem->first, rowItem->second->data());
-      m_manager->setProcessed(true, rowItem->first, groupIndex);
+      reduceRow(rowData);
+      m_manager->update(groupIndex, rowIndex, rowData->data());
+      m_manager->setProcessed(true, rowIndex, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
-      threadFinished(1);
+      rowThreadFinished(1);
     }
-    threadFinished(0);
+    rowThreadFinished(0);
   }
 
   // non-async group reduce
@@ -115,15 +116,17 @@ private:
         m_manager->setProcessed(true, groupIndex);
     } catch (std::exception &ex) {
       reductionError(QString(ex.what()));
-      threadFinished(1);
+      groupThreadFinished(1);
     }
-    threadFinished(0);
+    groupThreadFinished(0);
   }
 
   // Overriden non-async methods have same implementation as parent class
-  void process() override { GenericDataProcessorPresenter::process(); }
+  void process(TreeData itemsToProcess) override {
+    GenericDataProcessorPresenter::process(itemsToProcess);
+  }
   void plotRow() override { GenericDataProcessorPresenter::plotRow(); }
-  void plotGroup() override { GenericDataProcessorPresenter::process(); }
+  void plotGroup() override { GenericDataProcessorPresenter::plotGroup(); }
 };
 
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
@@ -149,21 +152,21 @@ private:
   const std::map<QString, PreprocessingAlgorithm>
   createReflectometryPreprocessingStep() {
     return {{"Run(s)", PreprocessingAlgorithm(
-                           "Plus", "TOF_",
+                           "Plus", "TOF_", "+",
                            std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                              "OutputWorkspace"})},
             {"Transmission Run(s)",
              PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                    "_",
                                     std::set<QString>{"FirstTransmissionRun",
                                                       "SecondTransmissionRun",
                                                       "OutputWorkspace"})}};
   }
 
   ProcessingAlgorithm createReflectometryProcessor() {
-
     return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
-        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
+        std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
                           "FirstTransmissionRun", "SecondTransmissionRun"});
@@ -199,7 +202,8 @@ private:
   void createTOFWorkspace(const QString &wsName,
                           const QString &runNumber = "") {
     auto tinyWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            2000);
     auto inst = tinyWS->getInstrument();
 
     inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
@@ -271,8 +275,7 @@ private:
         << "1.6"
         << "0.04"
         << "1"
-
-        << "";
+        << "ProcessingInstructions='0'";
     row = ws->appendRow();
     row << "1"
         << "24682"
@@ -282,8 +285,8 @@ private:
         << "2.9"
         << "0.04"
         << "1"
+        << "ProcessingInstructions='0'";
 
-        << "";
     return ws;
   }
 
@@ -473,20 +476,23 @@ private:
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
+    constexpr int GROUP = 0;
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
+          .Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
+          .Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes);
     } else {
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
           .Times(numTimes)
           .WillRepeatedly(Return(ColumnOptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
           .Times(numTimes)
           .WillRepeatedly(Return(OptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
           .Times(numTimes)
           .WillRepeatedly(
               Return(QString::fromStdString(postprocessingOptions)));
@@ -543,7 +549,8 @@ private:
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
       EXPECT_CALL(mockDataProcessorView,
-                  askUserString(_, _, QString("Workspace"))).Times(numTimes);
+                  askUserString(_, _, QString("Workspace")))
+          .Times(numTimes);
     } else {
       EXPECT_CALL(mockDataProcessorView,
                   askUserString(_, _, QString("Workspace")))
@@ -570,17 +577,32 @@ private:
     EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
   }
 
+  void expectInstrumentIsINTER(MockDataProcessorView &mockDataProcessorView,
+                               Cardinality numTimes) {
+    if (numTimes.IsSatisfiedByCallCount(0)) {
+      // If 0 calls, don't check return value
+      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+          .Times(numTimes);
+    } else {
+      EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+          .Times(numTimes)
+          .WillRepeatedly(Return("INTER"));
+    }
+  }
+
   // A list of commonly used input/output workspace names
   std::vector<std::string> m_defaultWorkspaces = {
-      "TestWorkspace", "TOF_12345", "TOF_12346", "IvsQ_binned_TOF_12345",
-      "IvsQ_TOF_12345", "IvsLam_TOF_12345", "IvsQ_binned_TOF_12346",
-      "IvsQ_TOF_12346", "IvsLam_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
+      "TestWorkspace",  "TOF_12345",
+      "TOF_12346",      "IvsQ_binned_TOF_12345",
+      "IvsQ_TOF_12345", "IvsQ_binned_TOF_12346",
+      "IvsQ_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
 
   // Same as above but input workspaces don't have TOF_ prefix
   std::vector<std::string> m_defaultWorkspacesNoPrefix = {
-      "TestWorkspace", "12345", "12346", "IvsQ_binned_TOF_12345",
-      "IvsQ_TOF_12345", "IvsLam_TOF_12345", "IvsQ_binned_TOF_12346",
-      "IvsQ_TOF_12346", "IvsLam_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
+      "TestWorkspace",  "12345",
+      "12346",          "IvsQ_binned_TOF_12345",
+      "IvsQ_TOF_12345", "IvsQ_binned_TOF_12346",
+      "IvsQ_TOF_12346", "IvsQ_TOF_12345_TOF_12346"};
 
   void checkWorkspacesExistInADS(std::vector<std::string> workspaceNames) {
     for (auto &ws : workspaceNames)
@@ -1204,6 +1226,36 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 
+  void testDeleteAll() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+
+    auto presenter = makeDefaultPresenter();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    // "delete all" is called with no groups selected
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
+    presenter->notify(DataProcessorPresenter::DeleteAllFlag);
+
+    // The user hits "save"
+    presenter->notify(DataProcessorPresenter::SaveFlag);
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 0);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
+
   void expectNotifiedReductionPaused(MockMainPresenter &mockMainPresenter) {
     EXPECT_CALL(mockMainPresenter,
                 confirmReductionPaused(DEFAULT_GROUP_NUMBER));
@@ -1236,15 +1288,66 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
     expectNotifiedReductionResumed(mockMainPresenter);
+    expectInstrumentIsINTER(mockDataProcessorView, Exactly(2));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspaces);
     removeWorkspacesFromADS(m_defaultWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testProcessAll() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = makeDefaultPresenterNoThread();
+    expectGetOptions(mockMainPresenter, Exactly(1), "Params = \"0.1\"");
+    expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    GroupList grouplist;
+    grouplist.insert(0);
+    grouplist.insert(1);
+
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
+    createTOFWorkspace("TOF_24681", "24681");
+    createTOFWorkspace("TOF_24682", "24682");
+
+    // The user hits the "process" button with the first group selected
+    expectNoWarningsOrErrors(mockDataProcessorView);
+    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(1));
+    expectNotebookIsDisabled(mockDataProcessorView, Exactly(1));
+    expectInstrumentIsINTER(mockDataProcessorView, Exactly(4));
+    expectNotifiedReductionResumed(mockMainPresenter);
+
+    presenter->notify(DataProcessorPresenter::ProcessAllFlag);
+
+    // Check output and tidy up
+    auto firstGroupWorkspaces = m_defaultWorkspaces;
+    auto secondGroupWorkspaces =
+        std::vector<std::string>{"TestWorkspace",  "TOF_24681",
+                                 "TOF_24682",      "IvsQ_binned_TOF_24681",
+                                 "IvsQ_TOF_24681", "IvsQ_binned_TOF_24682",
+                                 "IvsQ_TOF_24682", "IvsQ_TOF_24681_TOF_24682"};
+
+    checkWorkspacesExistInADS(firstGroupWorkspaces);
+    checkWorkspacesExistInADS(secondGroupWorkspaces);
+    removeWorkspacesFromADS(secondGroupWorkspaces);
+    removeWorkspacesFromADS(firstGroupWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -1271,7 +1374,7 @@ public:
 
     // The user hits the "process" button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(0));
+    expectGetSelection(mockDataProcessorView, AtLeast(1));
     expectUpdateViewToProcessingState(mockDataProcessorView, Exactly(0));
     expectNotebookIsDisabled(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
@@ -1296,6 +1399,8 @@ public:
     auto ws =
         createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     ws->String(0, ThetaCol) = "";
+    ws->String(1, ThetaCol) = "";
+    ws->String(0, ScaleCol) = "";
     ws->String(1, ScaleCol) = "";
     expectGetWorkspace(mockDataProcessorView, Exactly(1), "TestWorkspace");
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
@@ -1308,7 +1413,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1318,6 +1423,8 @@ public:
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
     TS_ASSERT(ws->String(0, ThetaCol) != "");
+    TS_ASSERT(ws->String(0, ScaleCol) != "");
+    TS_ASSERT(ws->String(1, ThetaCol) != "");
     TS_ASSERT(ws->String(1, ScaleCol) != "");
 
     // Check output and tidy up
@@ -1355,7 +1462,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
@@ -1403,7 +1510,7 @@ public:
     // This means we will process the selected rows but we will not
     // post-process them
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), rowlist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), rowlist);
     expectAskUserYesNo(mockDataProcessorView, Exactly(0));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1437,7 +1544,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     expectNotebookIsEnabled(mockDataProcessorView, Exactly(1));
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
@@ -1562,7 +1669,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
@@ -1572,8 +1679,8 @@ public:
         AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataB"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
     TS_ASSERT(
         AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA_TOF_dataB"));
 
@@ -2359,8 +2466,8 @@ public:
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t\n"
-        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\t\t");
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
+        "1\t24682\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2431,7 +2538,7 @@ public:
     const auto expected = QString(
         "0\t12345\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t\n"
         "0\t12346\t1.5\t\t1.4\t2.9\t0.04\t1\tProcessingInstructions='0'\t\n"
-        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\t\t");
+        "1\t24681\t0.5\t\t0.1\t1.6\t0.04\t1\tProcessingInstructions='0'\t");
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(expected));
@@ -2947,13 +3054,13 @@ public:
 
     // Test the names of the reduced workspaces
     TS_ASSERT_EQUALS(row0->reducedName().toStdString(),
-                     "TOF_12345_TRANS_11115+11116");
+                     "TOF_12345_TRANS_11115_11116");
     TS_ASSERT_EQUALS(row1->reducedName().toStdString(),
-                     "TOF_12346_TRANS_11115+11116");
+                     "TOF_12346_TRANS_11115_11116");
     // Test the names of the post-processed ws
     TS_ASSERT_EQUALS(
         presenter->getPostprocessedWorkspaceName(group).toStdString(),
-        "IvsQ_TOF_12345_TRANS_11115+11116_TOF_12346_TRANS_11115+11116");
+        "IvsQ_TOF_12345_TRANS_11115_11116_TOF_12346_TRANS_11115_11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
@@ -3028,7 +3135,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output and tidy up
@@ -3179,7 +3286,7 @@ public:
 
     // The user hits the "process" button with the first group selected
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectGetSelection(mockDataProcessorView, Exactly(1), RowList(), grouplist);
+    expectGetSelection(mockDataProcessorView, AtLeast(1), RowList(), grouplist);
     presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspace was stitched with params = '-0.04'
@@ -3191,16 +3298,16 @@ public:
             "IvsQ_TOF_12345_TOF_12346");
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[0], 0.100, 1e-5);
+        out->x(0)[0], 0.01108, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[1], 0.104, 1e-5);
+        out->x(0)[1], 0.01153, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[2], 0.10816, 1e-5);
+        out->x(0)[2], 0.01199, 1e-5);
     TSM_ASSERT_DELTA(
         "Logarithmic rebinning should have been applied, with param 0.04",
-        out->x(0)[3], 0.11248, 1e-5);
+        out->x(0)[3], 0.01247, 1e-5);
 
     // Check output and tidy up
     checkWorkspacesExistInADS(m_defaultWorkspacesNoPrefix);
@@ -3216,6 +3323,8 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     auto presenter = makeDefaultPresenter();
+    constexpr int GROUP_NUMBER = 0;
+
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     // Now accept the views
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
@@ -3223,8 +3332,9 @@ public:
 
     // User hits the 'pause' button
     expectNoWarningsOrErrors(mockDataProcessorView);
-    expectUpdateViewToPausedState(mockDataProcessorView, Exactly(1));
-    EXPECT_CALL(mockMainPresenter, pause()).Times(1);
+    // The widget states are not updated immediately (only on confirm)
+    expectUpdateViewToPausedState(mockDataProcessorView, Exactly(0));
+    EXPECT_CALL(mockMainPresenter, pause(GROUP_NUMBER)).Times(1);
     presenter->notify(DataProcessorPresenter::PauseFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -3242,7 +3352,8 @@ public:
     EXPECT_CALL(mockDataProcessorView,
                 setInstrumentList(
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
-                    QString::fromStdString("INTER"))).Times(1);
+                    QString::fromStdString("INTER")))
+        .Times(1);
     presenter.setInstrumentList(
         QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"}, "INTER");
 

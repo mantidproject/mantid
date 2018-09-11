@@ -56,7 +56,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport PlotPeakByLogValue : public API::Algorithm {
   /** Structure to identify data for fitting
-    */
+   */
   struct InputData {
     /// Constructor
     InputData(const std::string &nam, int ix, int s, int p, double st = 0,
@@ -88,6 +88,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"Fit"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Optimization"; }
 

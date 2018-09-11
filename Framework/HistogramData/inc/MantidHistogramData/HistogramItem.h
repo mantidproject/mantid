@@ -84,7 +84,7 @@ public:
     if (yModeIsCounts()) {
       return y[m_index];
     } else {
-      return y[m_index] / binWidth();
+      return y[m_index] * binWidth();
     }
   }
 
@@ -111,7 +111,7 @@ public:
   double frequency() const {
     const auto &y = m_histogram.y();
     if (yModeIsCounts()) {
-      return y[m_index] * binWidth();
+      return y[m_index] / binWidth();
     } else {
       return y[m_index];
     }
@@ -136,29 +136,6 @@ public:
       return e[m_index] / width;
     }
   }
-
-  void advance(int64_t delta) {
-    m_index = delta < 0 ? std::max(static_cast<uint64_t>(0),
-                                   static_cast<uint64_t>(m_index) + delta)
-                        : std::min(m_histogram.size(),
-                                   m_index + static_cast<size_t>(delta));
-  }
-
-  void incrementIndex() {
-    if (m_index < m_histogram.size()) {
-      ++m_index;
-    }
-  }
-
-  void decrementIndex() {
-    if (m_index > 0) {
-      --m_index;
-    }
-  }
-
-  size_t getIndex() const { return m_index; }
-
-  void setIndex(const size_t index) { m_index = index; }
 
 private:
   friend class HistogramIterator;

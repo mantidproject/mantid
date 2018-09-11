@@ -1,11 +1,11 @@
 #ifndef MANTID_CURVEFITTING_PAWLEYFIT_H_
 #define MANTID_CURVEFITTING_PAWLEYFIT_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -69,6 +69,9 @@ public:
   PawleyFit();
   const std::string name() const override { return "PawleyFit"; }
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"PoldiPeakSearch"};
+  }
   const std::string summary() const override;
   const std::string category() const override { return "Diffraction\\Fitting"; }
 

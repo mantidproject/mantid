@@ -7,8 +7,8 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/OptionsQMap.h"
-#include <vector>
 #include <initializer_list>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -53,12 +53,12 @@ public:
   void setInstrumentName(const std::string &instName) override;
 
   /// Returns per-angle values passed for 'Transmission run(s)'
-  std::string
-  getTransmissionRunsForAngle(const double angleToFind) const override;
+  MantidWidgets::DataProcessor::OptionsQMap
+  getOptionsForAngle(const double angleToFind) const override;
   /// Returns default values passed for 'Transmission run(s)'
-  std::string getDefaultTransmissionRuns() const;
+  MantidWidgets::DataProcessor::OptionsQMap getDefaultOptions() const;
   /// Whether per-angle transmission runs are specified
-  bool hasPerAngleTransmissionRuns() const override;
+  bool hasPerAngleOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
   MantidWidgets::DataProcessor::OptionsQMap
   getTransmissionOptions() const override;
@@ -78,7 +78,8 @@ private:
   void getExpDefaults();
   void getInstDefaults();
   void handleSettingsChanged();
-  bool hasReductionTypes(const std::string &reductionType) const;
+  bool hasReductionTypes(const std::string &summationType) const;
+  bool hasIncludePartialBinsOption(const std::string &summationType) const;
   void handleSummationTypeChange();
   static QString asAlgorithmPropertyBool(bool value);
   Mantid::Geometry::Instrument_const_sptr
@@ -97,6 +98,7 @@ private:
   void
   addTransmissionOptions(MantidWidgets::DataProcessor::OptionsQMap &options,
                          std::initializer_list<QString> keys) const;
+  QString getProcessingInstructions() const;
 
   /// The view we are managing
   IReflSettingsView *m_view;
@@ -105,6 +107,6 @@ private:
   std::string m_currentInstrumentName;
   int m_group;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H */

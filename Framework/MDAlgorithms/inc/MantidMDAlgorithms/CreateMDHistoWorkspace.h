@@ -42,6 +42,9 @@ public:
   }
 
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"ConvertToMD", "CreateMDWorkspace"};
+  }
   const std::string category() const override;
 
 private:
@@ -49,7 +52,7 @@ private:
   void exec() override;
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_CREATEMDHISTOWORKSPACE_H_ */

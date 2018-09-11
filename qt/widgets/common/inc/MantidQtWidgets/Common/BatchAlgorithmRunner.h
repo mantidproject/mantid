@@ -59,9 +59,9 @@ class EXPORT_OPT_MANTIDQT_COMMON BatchAlgorithmRunner : public QObject {
   Q_OBJECT
 
 public:
-  typedef std::map<std::string, std::string> AlgorithmRuntimeProps;
-  typedef std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>
-      ConfiguredAlgorithm;
+  using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+  using ConfiguredAlgorithm =
+      std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>;
 
   explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
@@ -112,12 +112,13 @@ private:
 
   /// Active method to run batch runner on separate thread
   Poco::ActiveMethod<bool, Poco::Void, BatchAlgorithmRunner,
-                     Poco::ActiveStarter<BatchAlgorithmRunner>> m_executeAsync;
+                     Poco::ActiveStarter<BatchAlgorithmRunner>>
+      m_executeAsync;
   /// Holds result of async execution
   Poco::ActiveResult<bool> executeAsync();
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_BATCHALGORITHMRUNNER_H_ */

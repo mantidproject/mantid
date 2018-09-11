@@ -24,6 +24,9 @@ public:
   }
   /// Algorithm's version
   int version() const override { return (1); }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SANSSolidAngleCorrection"};
+  }
   /// Algorithm's category for identification
   const std::string category() const override {
     return "Workflow\\SANS\\UsesPropertyManager;"
@@ -41,7 +44,7 @@ private:
   std::string m_output_message;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSBEAMFLUXCORRECTION_H_*/

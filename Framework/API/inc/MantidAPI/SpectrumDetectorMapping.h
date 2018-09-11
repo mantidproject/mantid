@@ -1,14 +1,14 @@
 #ifndef MANTID_API_SPECTRUMDETECTORMAPPING_H_
 #define MANTID_API_SPECTRUMDETECTORMAPPING_H_
 
-#include <vector>
 #include <set>
+#include <vector>
 #ifndef Q_MOC_RUN
 #include <unordered_map>
 #endif
 
-#include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace API {
@@ -50,7 +50,7 @@ class MatrixWorkspace;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL SpectrumDetectorMapping {
-  typedef std::unordered_map<specnum_t, std::set<detid_t>> sdmap;
+  using sdmap = std::unordered_map<specnum_t, std::set<detid_t>>;
 
 public:
   explicit SpectrumDetectorMapping(const MatrixWorkspace *const workspace,

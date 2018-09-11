@@ -2,27 +2,29 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Matrix.h"
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
-#include <boost/regex.hpp>
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace {
 /**
-* Return the number of pixels to make a texture in, given the
-* desired pixel size. A texture has to have 2^n pixels per side.
-* @param desired :: the requested pixel size
-* @return number of pixels for texture
-*/
+ * Return the number of pixels to make a texture in, given the
+ * desired pixel size. A texture has to have 2^n pixels per side.
+ * @param desired :: the requested pixel size
+ * @return number of pixels for texture
+ */
 int getOneTextureSize(int desired) {
   int size = 2;
   while (desired > size) {
@@ -35,8 +37,8 @@ int getOneTextureSize(int desired) {
 namespace Mantid {
 namespace Geometry {
 
-using Kernel::V3D;
 using Kernel::Matrix;
+using Kernel::V3D;
 
 /** Empty constructor
  */
@@ -45,7 +47,7 @@ RectangularDetector::RectangularDetector()
       m_minDetId(0), m_maxDetId(0) {
 
   init();
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Constructor for a parametrized RectangularDetector
@@ -57,7 +59,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
     : CompAssembly(base, map), IObjComponent(nullptr), m_rectBase(base),
       m_minDetId(0), m_maxDetId(0) {
   init();
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 /** Valued constructor
@@ -75,7 +77,7 @@ RectangularDetector::RectangularDetector(const std::string &n,
       m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
-  setGeometryHandler(new BitmapGeometryHandler(this));
+  setGeometryHandler(new GeometryHandler(this));
 }
 
 bool RectangularDetector::compareName(const std::string &proposedMatch) {
@@ -455,7 +457,7 @@ void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the minimum detector id
-  * @return minimum detector id
+ * @return minimum detector id
  */
 int RectangularDetector::minDetectorID() {
   if (m_map)
@@ -465,7 +467,7 @@ int RectangularDetector::minDetectorID() {
 
 //-------------------------------------------------------------------------------------------------
 /** Returns the maximum detector id
-  * @return maximum detector id
+ * @return maximum detector id
  */
 int RectangularDetector::maxDetectorID() {
   if (m_map)
@@ -673,7 +675,7 @@ void RectangularDetector::draw() const {
   if (Handle() == nullptr)
     return;
   // Render the ObjComponent and then render the object
-  Handle()->Render();
+  Handle()->render();
 }
 
 /**
@@ -696,7 +698,7 @@ void RectangularDetector::initDraw() const {
     return;
   // Render the ObjComponent and then render the object
   // if(shape!=NULL)    shape->initDraw();
-  Handle()->Initialize();
+  Handle()->initialize();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -732,7 +734,7 @@ const Kernel::Material RectangularDetector::material() const {
 
 size_t RectangularDetector::registerContents(
     ComponentVisitor &componentVisitor) const {
-  return componentVisitor.registerStructuredBank(*this);
+  return componentVisitor.registerRectangularBank(*this);
 }
 
 //-------------------------------------------------------------------------------------------------

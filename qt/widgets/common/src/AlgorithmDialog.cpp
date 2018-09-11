@@ -1,7 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 
@@ -945,7 +944,7 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
   }
 }
 
-QString AlgorithmDialog::getPreviousValue(const QString &propName) {
+QString AlgorithmDialog::getPreviousValue(const QString &propName) const {
   QString value;
 
   if (!isForScript()) {

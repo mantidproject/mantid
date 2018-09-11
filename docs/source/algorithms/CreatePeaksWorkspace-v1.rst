@@ -2,7 +2,7 @@
 
 .. summary::
 
-.. alias::
+.. relatedalgorithms::
 
 .. properties::
 
@@ -16,6 +16,9 @@ create a peaks workspace with peaks.
 This workspace can serve as a starting point for modifying the
 :ref:`PeaksWorkspace <PeaksWorkspace>`, using the GUI or python scripting,
 for example.
+
+If the input workspace is a MDWorkspace then the instrument from the
+first experiment info is used.
 
 Usage
 -----

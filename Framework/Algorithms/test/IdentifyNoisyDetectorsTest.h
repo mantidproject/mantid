@@ -3,15 +3,22 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/IdentifyNoisyDetectors.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 
 class IdentifyNoisyDetectorsTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IdentifyNoisyDetectorsTest *createSuite() {
+    return new IdentifyNoisyDetectorsTest();
+  }
+  static void destroySuite(IdentifyNoisyDetectorsTest *suite) { delete suite; }
+
   void testMetaInfo() {
     alg = new IdentifyNoisyDetectors();
     TS_ASSERT_EQUALS(alg->name(), "IdentifyNoisyDetectors");
@@ -58,29 +65,29 @@ public:
             "identifynoisydetectors_output"));
 
     // Check that it's got all the bad ones
-    TS_ASSERT_EQUALS(workspace->readY(0)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(1)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(13)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(27)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(28)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(41)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(55)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(69)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(70)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(83)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(97)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(111)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(125)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(127)[0], 0.0);
-    TS_ASSERT_EQUALS(workspace->readY(139)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(0)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(1)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(13)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(27)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(28)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(41)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(55)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(69)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(70)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(83)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(97)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(111)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(125)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(127)[0], 0.0);
+    TS_ASSERT_EQUALS(workspace->y(139)[0], 0.0);
 
     // And a quick check of some of the good ones
-    TS_ASSERT_EQUALS(workspace->readY(4)[0], 1.0);
-    TS_ASSERT_EQUALS(workspace->readY(17)[0], 1.0);
-    TS_ASSERT_EQUALS(workspace->readY(21)[0], 1.0);
-    TS_ASSERT_EQUALS(workspace->readY(75)[0], 1.0);
-    TS_ASSERT_EQUALS(workspace->readY(112)[0], 1.0);
-    TS_ASSERT_EQUALS(workspace->readY(134)[0], 1.0);
+    TS_ASSERT_EQUALS(workspace->y(4)[0], 1.0);
+    TS_ASSERT_EQUALS(workspace->y(17)[0], 1.0);
+    TS_ASSERT_EQUALS(workspace->y(21)[0], 1.0);
+    TS_ASSERT_EQUALS(workspace->y(75)[0], 1.0);
+    TS_ASSERT_EQUALS(workspace->y(112)[0], 1.0);
+    TS_ASSERT_EQUALS(workspace->y(134)[0], 1.0);
 
     delete alg;
 

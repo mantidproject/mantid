@@ -60,6 +60,7 @@ public:
   }
 
   int version() const override { return 1; }
+
   const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
   }
@@ -88,7 +89,7 @@ private:
   std::unique_ptr<API::Progress> m_progress;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_UNWRAPSNS_H_ */

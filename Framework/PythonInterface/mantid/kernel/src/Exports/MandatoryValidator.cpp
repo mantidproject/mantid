@@ -2,8 +2,8 @@
 #include <boost/python/class.hpp>
 #include <string>
 
-using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::IValidator;
+using Mantid::Kernel::MandatoryValidator;
 using namespace boost::python;
 
 namespace {

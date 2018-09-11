@@ -31,13 +31,13 @@ public:
   void removeRun(const RunLabel &runLabel) override;
 
 private:
-  static constexpr size_t MAX_BANKS = 2;
+  static constexpr size_t MAX_BANKS = 3;
 
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_fittedPeaksMap;
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedRunMap;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_

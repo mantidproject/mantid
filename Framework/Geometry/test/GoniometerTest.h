@@ -1,17 +1,17 @@
 #ifndef MANTID_TESTGONIOMETER__
 #define MANTID_TESTGONIOMETER__
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include <stdexcept>
-#include <string>
 #include "MantidKernel/Quat.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
+#include <string>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Quat;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class GoniometerTest : public CxxTest::TestSuite {
 public:
@@ -177,6 +177,56 @@ public:
           G.setRotationAngle("omega", angles[0]);
           TS_ASSERT(rotA.equals(G.getR(), 0.0001));
         }
+  }
+
+  void test_calcFromQSampleAndWavelength() {
+    Goniometer G;
+    double wavelength = 2 * M_PI; // k=1
+    DblMatrix R;
+    V3D Q;
+
+    // 0 degree rotation
+    Q = V3D(-1, 0, 1);
+    G.calcFromQSampleAndWavelength(Q, wavelength);
+    R = G.getR();
+    TS_ASSERT_DELTA(R[0][0], 1.0, 0.001);
+    TS_ASSERT_DELTA(R[0][1], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[0][2], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[1][0], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[1][1], 1.0, 0.001);
+    TS_ASSERT_DELTA(R[1][2], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][0], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][1], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][2], 1.0, 0.001);
+
+    // -90 degree rotation
+    Q = V3D(1, 0, 1);
+    G.calcFromQSampleAndWavelength(Q, wavelength);
+    R = G.getR();
+    TS_ASSERT_DELTA(R[0][0], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[0][1], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[0][2], -1.0, 0.001);
+    TS_ASSERT_DELTA(R[1][0], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[1][1], 1.0, 0.001);
+    TS_ASSERT_DELTA(R[1][2], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][0], 1.0, 0.001);
+    TS_ASSERT_DELTA(R[2][1], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][2], 0.0, 0.001);
+
+    // 30 degree rotation
+    wavelength = 1.54;
+    Q = V3D(-0.63523489, -0.12302677, -0.29517982);
+    G.calcFromQSampleAndWavelength(Q, wavelength);
+    R = G.getR();
+    TS_ASSERT_DELTA(R[0][0], 0.866, 0.001);
+    TS_ASSERT_DELTA(R[0][1], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[0][2], 0.5, 0.01);
+    TS_ASSERT_DELTA(R[1][0], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[1][1], 1.0, 0.001);
+    TS_ASSERT_DELTA(R[1][2], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][0], -0.5, 0.01);
+    TS_ASSERT_DELTA(R[2][1], 0.0, 0.001);
+    TS_ASSERT_DELTA(R[2][2], 0.866, 0.001);
   }
 
   /** Save and load to NXS file */

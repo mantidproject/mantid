@@ -12,9 +12,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
@@ -41,7 +41,7 @@ std::vector<std::string> parseNames(const std::string &names_string) {
   // The second part matches anything that doesn't contain a comma
   // NB, the order of the two parts matters
 
-  regex expression("\\[([^\\[]*)\\]|[^,]+");
+  regex expression(R"(\[([^\[]*)\]|[^,]+)");
 
   boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
                                     expression, 0);
@@ -293,5 +293,5 @@ bool CreateMDWorkspace::checkIfFrameValid(
   return false;
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

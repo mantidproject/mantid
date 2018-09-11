@@ -1,11 +1,11 @@
 #ifndef MANTID_CURVEFITTING_SPLINESMOOTHING_H_
 #define MANTID_CURVEFITTING_SPLINESMOOTHING_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -45,6 +45,9 @@ public:
 
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"Fit", "SplineInterpolation", "SplineBackground"};
+  }
   const std::string category() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

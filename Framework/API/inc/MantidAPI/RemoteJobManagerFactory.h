@@ -87,8 +87,8 @@ private:
 };
 
 // The factory is just a specialisation of SingletonHolder
-typedef Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>
-    RemoteJobManagerFactory;
+using RemoteJobManagerFactory =
+    Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>;
 
 } // namespace API
 } // namespace Mantid
@@ -98,7 +98,7 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::RemoteJobManagerFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 /* Macro to register (remote job manager) classes into the factory. As
  * with the equivalent macros of the workspace factory or the

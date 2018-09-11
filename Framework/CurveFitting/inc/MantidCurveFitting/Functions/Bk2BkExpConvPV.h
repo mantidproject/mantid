@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
 #define MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/System.h"
 #include <complex>
 
 namespace Mantid {
@@ -90,7 +90,7 @@ private:
 
 // typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
 
-typedef boost::shared_ptr<Bk2BkExpConvPV> Bk2BkExpConvPV_sptr;
+using Bk2BkExpConvPV_sptr = boost::shared_ptr<Bk2BkExpConvPV>;
 
 } // namespace Functions
 } // namespace CurveFitting

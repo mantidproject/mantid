@@ -299,9 +299,9 @@ def mask_angle(mask_info, workspace):
     return workspace
 
 
-def mask_beam_stop(mask_info, workspace, instrument):
+def mask_beam_stop(mask_info, workspace, instrument, detector_names):
     """
-    The beam stop is being masked here. Note that this is only implemented for SANS2D
+    The beam stop is being masked here.
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
@@ -313,18 +313,17 @@ def mask_beam_stop(mask_info, workspace, instrument):
     beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
     beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
     if beam_stop_arm_width is not None and beam_stop_arm_angle is not None:
-        if instrument is SANSInstrument.SANS2D:
-            detector = workspace.getInstrument().getComponentByName('rear-detector')
-            z_position = detector.getPos().getZ()
-            start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
-            line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
+        detector = workspace.getInstrument().getComponentByName(detector_names['LAB'])
+        z_position = detector.getPos().getZ()
+        start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
+        line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
 
-            mask_name = "MaskDetectorsInShape"
-            mask_options = {"Workspace": workspace,
-                            "ShapeXML": line_mask}
-            mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-            mask_alg.execute()
-            workspace = mask_alg.getProperty("Workspace").value
+        mask_name = "MaskDetectorsInShape"
+        mask_options = {"Workspace": workspace,
+                        "ShapeXML": line_mask}
+        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+        mask_alg.execute()
+        workspace = mask_alg.getProperty("Workspace").value
     return workspace
 
 
@@ -351,10 +350,11 @@ class NullMasker(Masker):
 
 
 class MaskerISIS(Masker):
-    def __init__(self, spectra_block, instrument):
+    def __init__(self, spectra_block, instrument, detector_names):
         super(MaskerISIS, self).__init__()
         self._spectra_block = spectra_block
         self._instrument = instrument
+        self._detector_names = detector_names
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
         """
@@ -388,7 +388,7 @@ class MaskerISIS(Masker):
 
         # Mask beam stop
         progress.report("Masking beam stop.")
-        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument)
+        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
 
 
 class MaskFactory(object):
@@ -406,13 +406,14 @@ class MaskFactory(object):
         """
         data_info = state.data
         instrument = data_info.instrument
+        detector_names = state.reduction.detector_names
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
                         instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
             run_number = data_info.sample_scatter_run_number
             file_name = data_info.sample_scatter
             _, ipf_path = get_instrument_paths_for_sans_file(file_name)
             spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
-            masker = MaskerISIS(spectra_block, instrument)
+            masker = MaskerISIS(spectra_block, instrument, detector_names)
         else:
             masker = NullMasker()
             NotImplementedError("MaskFactory: Other instruments are not implemented yet.")

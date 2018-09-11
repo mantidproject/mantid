@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <cmath>
 #include <ostream>
-#include <string>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
+#include <string>
 
 namespace Mantid {
 

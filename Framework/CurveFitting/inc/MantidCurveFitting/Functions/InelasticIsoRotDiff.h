@@ -4,9 +4,9 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 // Mantid headers from other projects
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParamFunction.h"
 // 3rd party library headers (N/A)
 // standard library headers (N/A)
 

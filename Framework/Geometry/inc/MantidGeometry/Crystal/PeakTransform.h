@@ -1,11 +1,11 @@
 #ifndef MANTID_GEOMETRY_PEAKTRANSFORM_H_
 #define MANTID_GEOMETRY_PEAKTRANSFORM_H_
 
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/V3D.h"
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
-#include "MantidKernel/SpecialCoordinateSystem.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -56,8 +56,8 @@ protected:
 };
 
 /// Typedef for a PeakTransform wrapped in a shared_pointer.
-typedef boost::shared_ptr<PeakTransform> PeakTransform_sptr;
-typedef boost::shared_ptr<const PeakTransform> PeakTransform_const_sptr;
+using PeakTransform_sptr = boost::shared_ptr<PeakTransform>;
+using PeakTransform_const_sptr = boost::shared_ptr<const PeakTransform>;
 
 /**
 @class PeakTransformException
@@ -67,7 +67,7 @@ class PeakTransformException : public std::exception {
 public:
   PeakTransformException() : std::exception() {}
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_PEAKTRANSFORM_H_ */

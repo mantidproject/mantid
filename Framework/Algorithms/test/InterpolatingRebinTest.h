@@ -3,12 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/InterpolatingRebin.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include <cmath>
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include <limits>
 
 using namespace Mantid::Kernel;
@@ -54,9 +52,9 @@ public:
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 1);
     TS_ASSERT(rebindata)
 
-    const Mantid::MantidVec outX = rebindata->dataX(0);
-    const Mantid::MantidVec outY = rebindata->dataY(0);
-    const Mantid::MantidVec outE = rebindata->dataE(0);
+    const auto &outX = rebindata->x(0);
+    const auto &outY = rebindata->y(0);
+    const auto &outE = rebindata->e(0);
     TS_ASSERT_EQUALS(outX.size(), ceil((15 - 2.225) / 0.2) + 1);
     TS_ASSERT_EQUALS(outY.size(), ceil((15 - 2.225) / 0.2));
     TS_ASSERT_EQUALS(outE.size(), ceil((15 - 2.225) / 0.2));
@@ -120,9 +118,9 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "InterpolatingRebinTest_out_nondist");
     TS_ASSERT(rebindata)
-    const Mantid::MantidVec outX = rebindata->dataX(0);
-    const Mantid::MantidVec outY = rebindata->dataY(0);
-    const Mantid::MantidVec outE = rebindata->dataE(0);
+    const auto &outX = rebindata->x(0);
+    const auto &outY = rebindata->y(0);
+    const auto &outE = rebindata->e(0);
 
     // this intepolated data was found by running the debugger on this test
     TS_ASSERT_DELTA(outX[0], 2.225, 0.00001);
@@ -186,12 +184,12 @@ public:
             "InterpolatingRebinTest_outclose");
     TS_ASSERT(rebindata)
 
-    const Mantid::MantidVec outX = rebindata->dataX(0);
-    const Mantid::MantidVec outY = rebindata->dataY(0);
-    const Mantid::MantidVec outE = rebindata->dataE(0);
+    const auto &outX = rebindata->x(0);
+    const auto &outY = rebindata->y(0);
+    const auto &outE = rebindata->e(0);
     // the output workspace should be the same as the input
-    TS_ASSERT_EQUALS(outX.size(), test_in1D->readX(0).size())
-    TS_ASSERT_EQUALS(outY.size(), test_in1D->readY(0).size())
+    TS_ASSERT_EQUALS(outX.size(), test_in1D->x(0).size())
+    TS_ASSERT_EQUALS(outY.size(), test_in1D->y(0).size())
 
     TS_ASSERT_DELTA(outX[0], 0.49999999, 0.00001)
     TS_ASSERT_DELTA(outY[0], 1, 0.00001)
@@ -231,9 +229,9 @@ public:
             "InterpolatingRebinTest_out_nulldata");
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 2);
 
-    Mantid::MantidVec outX = rebindata->dataX(0);
-    Mantid::MantidVec outY = rebindata->dataY(0);
-    Mantid::MantidVec outE = rebindata->dataE(0);
+    const auto &outX = rebindata->x(0);
+    const auto &outY = rebindata->y(0);
+    const auto &outE = rebindata->e(0);
     TS_ASSERT_EQUALS(outX.size(), ceil((11 - 2.0) / 0.2) + 1);
     TS_ASSERT_EQUALS(outY.size(), ceil((11 - 2.0) / 0.2));
     TS_ASSERT_EQUALS(outE.size(), ceil((11 - 2.0) / 0.2));
@@ -254,14 +252,14 @@ public:
     TS_ASSERT_DELTA(outE[44], 0, 0.0001);
 
     // the second spectrum is NAN
-    outX = rebindata->dataX(1);
-    outY = rebindata->dataY(1);
-    outE = rebindata->dataE(1);
+    const auto &outX1 = rebindata->x(1);
+    const auto &outY1 = rebindata->y(1);
+    const auto &outE1 = rebindata->e(1);
     // test a random one
-    TS_ASSERT_DELTA(outX[7], 3.4, 0.00001);
+    TS_ASSERT_DELTA(outX1[7], 3.4, 0.00001);
     // check for numeric_limits<double>::quiet_NaN()
-    TS_ASSERT(outY[7] != outY[7]);
-    TS_ASSERT_DELTA(outE[7], 2, 0.00001);
+    TS_ASSERT(outY1[7] != outY1[7]);
+    TS_ASSERT_DELTA(outE1[7], 2, 0.00001);
 
     AnalysisDataService::Instance().remove(
         "InterpolatingRebinTest_in_nulldata");
@@ -277,12 +275,17 @@ private:
 
     double j = 1.0;
     int i = 0;
+
+    auto &x = retVal->mutableX(0);
+    auto &y = retVal->mutableY(0);
+    auto &e = retVal->mutableE(0);
+    const auto &yConst = retVal->y(0);
     for (; i < nBins; i++, j += 1.5) {
-      retVal->dataX(0)[i] = j * 0.5;
-      retVal->dataY(0)[i] = j;
-      retVal->dataE(0)[i] = retVal->dataY(0)[i] / 8;
+      x[i] = j * 0.5;
+      y[i] = j;
+      e[i] = yConst[i] / 8;
     }
-    retVal->dataX(0)[i] = j * 0.5;
+    x[i] = j * 0.5;
 
     return retVal;
   }
@@ -294,16 +297,14 @@ private:
 
     // the first histogram has all zeros
     retVal->setBinEdges(0, nBins + 1, LinearGenerator(0.0, 1.0));
-    for (int i = 0; i < nBins - 1; i++) {
-      retVal->dataY(0)[i] = 0;
-      retVal->dataE(0)[i] = 0;
-    }
+    retVal->mutableY(0).assign(retVal->mutableY(0).size(), 0.0);
+    retVal->mutableE(0).assign(retVal->mutableE(0).size(), 0.0);
+
     // the second has NAN values
     retVal->setBinEdges(1, nBins + 1, LinearGenerator(0.0, 1.0));
-    for (int i = 0; i < nBins - 1; i++) {
-      retVal->dataY(1)[i] = std::numeric_limits<double>::quiet_NaN();
-      retVal->dataE(1)[i] = 2;
-    }
+    retVal->mutableY(1).assign(retVal->mutableY(1).size(),
+                               std::numeric_limits<double>::quiet_NaN());
+    retVal->mutableE(1).assign(retVal->mutableE(1).size(), 2.0);
 
     return retVal;
   }

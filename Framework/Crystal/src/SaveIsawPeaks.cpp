@@ -1,17 +1,17 @@
+#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
-#include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include <fstream>
 #include <Poco/File.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <fstream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -32,8 +32,9 @@ void SaveIsawPeaks::init() {
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
 
-  declareProperty("AppendFile", false, "Append to file if true.\n"
-                                       "If false, new file (default).");
+  declareProperty("AppendFile", false,
+                  "Append to file if true.\n"
+                  "If false, new file (default).");
 
   const std::vector<std::string> exts{".peaks", ".integrate"};
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
@@ -62,8 +63,8 @@ void SaveIsawPeaks::exec() {
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t>> bankMap_t;
-  typedef std::map<int, bankMap_t> runMap_t;
+  using bankMap_t = std::map<int, std::vector<size_t>>;
+  using runMap_t = std::map<int, bankMap_t>;
   std::set<int, std::less<int>> uniqueBanks;
   if (!inst)
     throw std::runtime_error(
@@ -259,13 +260,14 @@ void SaveIsawPeaks::exec() {
     qSign = 1.0;
   // ============================== Save all Peaks
   // =========================================
-  // Sequence number
-  int seqNum = 1;
 
   // Go in order of run numbers
+  int maxPeakNumb = 0;
+  int appendPeakNumb = 0;
   runMap_t::iterator runMap_it;
   for (runMap_it = runMap.begin(); runMap_it != runMap.end(); ++runMap_it) {
     // Start of a new run
+    appendPeakNumb += maxPeakNumb;
     int run = runMap_it->first;
     bankMap_t &bankMap = runMap_it->second;
 
@@ -310,7 +312,8 @@ void SaveIsawPeaks::exec() {
           Peak &p = peaks[wi];
 
           // Sequence (run) number
-          out << "3" << std::setw(7) << seqNum;
+          maxPeakNumb = std::max(maxPeakNumb, p.getPeakNumber());
+          out << "3" << std::setw(7) << p.getPeakNumber() + appendPeakNumb;
 
           // HKL's are flipped by -1 because of the internal Q convention
           // unless Crystallography convention
@@ -383,8 +386,6 @@ void SaveIsawPeaks::exec() {
               }
             }
           }
-          // Count the sequence
-          seqNum++;
         }
       }
     }
@@ -502,5 +503,5 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

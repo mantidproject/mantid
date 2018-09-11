@@ -1,9 +1,9 @@
 #ifndef MANTID_API_MUTLIPERIODGROUPALGORITHM_H_
 #define MANTID_API_MUTLIPERIODGROUPALGORITHM_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MultiPeriodGroupWorker.h"
+#include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
@@ -52,7 +52,7 @@ private:
   virtual bool useCustomInputPropertyName() const { return false; }
 
   /// Convenience typdef for workspace names.
-  typedef MultiPeriodGroupWorker::VecWSGroupType VecWSGroupType;
+  using VecWSGroupType = MultiPeriodGroupWorker::VecWSGroupType;
   /// multi period group workspaces.
   VecWSGroupType m_multiPeriodGroups;
   /// Multiperiod group worker.

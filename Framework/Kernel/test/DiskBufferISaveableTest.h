@@ -1,17 +1,17 @@
 #ifndef MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
 #define MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
 
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index_container.hpp>
 #include <cxxtest/TestSuite.h>
 #include <mutex>
 
@@ -90,15 +90,14 @@ public:
   }
 
   void tearDown() override {
-    for (size_t i = 0; i < data.size(); i++) {
-      delete data[i];
-      data[i] = NULL;
+    for (auto &item : data) {
+      delete item;
     }
 
-    for (size_t i = 0; i < bigData.size(); i++) {
-      delete bigData[i];
-      bigData[i] = NULL;
+    for (auto &bigItem : bigData) {
+      delete bigItem;
     }
+
     ISaveableTester::fakeFile = "";
   }
   void testIsaveable() {
@@ -358,7 +357,8 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, 1 "
-                 "thread in " << clock.elapsed() << " sec\n";
+                 "thread in "
+              << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory
@@ -398,7 +398,8 @@ public:
       dbuf.toWrite(bigData[indexToRemove[i]]);
     }
     std::cout << "Finished DiskBuffer inserting/deleting performance test, "
-                 "multithread in " << clock.elapsed() << " sec\n";
+                 "multithread in "
+              << clock.elapsed() << " sec\n";
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), BIG_NUM + DATA_SIZE);
 
     // cleanup memory
@@ -435,9 +436,9 @@ public:
   void test_smallCache_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(3);
-    for (size_t i = 0; i < data.size(); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num << " into MRU.\n";
   }
@@ -445,13 +446,13 @@ public:
   void test_smallCache_no_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (size_t i = 0; i < data.size(); i++) {
-      data[i]->setBusy(true); // Items won't do any real saving
+    for (auto &i : data) {
+      i->setBusy(true); // Items won't do any real saving
     }
 
-    for (int i = 0; i < int(data.size()); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num
               << " into MRU (no write cache).\n";
@@ -460,9 +461,9 @@ public:
   void test_largeCache_writeBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(1000);
-    for (int i = 0; i < int(data.size()); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << tim << " to load " << num << " into MRU.\n";
   }
@@ -470,9 +471,9 @@ public:
   void test_largeCache_noWriteBuffer() {
     CPUTimer tim;
     DiskBuffer dbuf(0);
-    for (int i = 0; i < int(data.size()); i++) {
-      dbuf.toWrite(data[i]);
-      data[i]->setBusy(false);
+    for (auto &i : data) {
+      dbuf.toWrite(i);
+      i->setBusy(false);
     }
     std::cout << " Elapsed : " << tim << " to load " << num
               << " into MRU (no write buffer).\n";

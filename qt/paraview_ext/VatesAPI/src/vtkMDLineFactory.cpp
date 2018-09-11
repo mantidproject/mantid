@@ -1,21 +1,21 @@
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ReadLock.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/CoordTransform.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <vtkUnstructuredGrid.h>
+#include <boost/shared_ptr.hpp>
+#include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkLine.h>
-#include <vtkCellData.h>
 #include <vtkNew.h>
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
+#include <vtkUnstructuredGrid.h>
 
 #include <cmath>
 
@@ -75,8 +75,8 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     }
 
     // Ensure destruction in any event.
-    boost::scoped_ptr<IMDIterator> it(
-        createIteratorWithNormalization(m_normalizationOption, imdws.get()));
+    auto it =
+        createIteratorWithNormalization(m_normalizationOption, imdws.get());
 
     // Create 2 points per box.
     vtkNew<vtkPoints> points;
@@ -116,8 +116,8 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-        auto coords = std::unique_ptr<coord_t[]>(
-            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
+        auto coords =
+            it->getVertexesArray(nVertexes, nNonIntegrated, masks.get());
 
         // Iterate through all coordinates. Candidate for speed improvement.
         for (size_t v = 0; v < nVertexes; ++v) {
@@ -185,5 +185,5 @@ void vtkMDLineFactory::validate() const {
         "vtkMDLineFactory has no workspace to run against");
   }
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

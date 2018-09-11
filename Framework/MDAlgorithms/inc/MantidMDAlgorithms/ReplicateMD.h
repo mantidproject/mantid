@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_REPLICATEMD_H_
 #define MANTID_MDALGORITHMS_REPLICATEMD_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidMDAlgorithms/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -45,6 +45,9 @@ class MANTID_MDALGORITHMS_DLL ReplicateMD : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
+  const std::vector<std::string> seeAlso() const override {
+    return {"CreateMDWorkspace", "MergeMD"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
   /// Valdiate the algorithm inputs

@@ -1,9 +1,9 @@
 #ifndef MANTID_API_WORKSPACEPROPERTY_H_
 #define MANTID_API_WORKSPACEPROPERTY_H_
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <string>
 
@@ -95,8 +95,7 @@ public:
 
   WorkspaceProperty &operator=(const WorkspaceProperty &right);
 
-  boost::shared_ptr<TYPE> &
-  operator=(const boost::shared_ptr<TYPE> &value) override;
+  WorkspaceProperty &operator=(const boost::shared_ptr<TYPE> &value) override;
 
   WorkspaceProperty &operator+=(Kernel::Property const *) override;
 

@@ -4,10 +4,31 @@ import unittest
 
 from mantid.api import IFunction1D, FunctionFactory
 
-class TestFunction(IFunction1D):
+
+class TestFunctionNoAttrs(IFunction1D):
+    pass
+
+
+class TestFunctionOnlyInit(IFunction1D):
+
+    def init(self):
+       pass
+
+
+class TestFunctionOnlyFunction1D(IFunction1D):
+
+    def function1D(self, xvals):
+        pass
+
+
+class TestFunctionCorrectForm(IFunction1D):
 
     def init(self):
         pass
+
+    def function1D(self, xvals):
+        pass
+
 
 class FunctionFactoryTest(unittest.TestCase):
 
@@ -26,18 +47,36 @@ class FunctionFactoryTest(unittest.TestCase):
         self.assertTrue(len(func.__repr__()) > len(name))
         self.assertTrue("Peak" in func.categories())
 
+    def test_function_subscription_of_non_class_type_raises_error(self):
+        def not_a_fit_function(*args, **kwargs):
+            pass
+        self.assertRaises(ValueError, FunctionFactory.subscribe, not_a_fit_function)
 
-    def test_function_subscription(self):
+    def test_function_subscription_of_class_without_IFunction_base_raises_error(self):
+        class NotAFitFunction(object):
+            pass
+        self.assertRaises(ValueError, FunctionFactory.subscribe, NotAFitFunction)
+
+    def test_function_subscription_without_required_attrs_fails(self):
+        self.assertRaises(RuntimeError, FunctionFactory.Instance().subscribe, TestFunctionNoAttrs)
+        self.assertTrue("TestFunctionNoAttrs" not in FunctionFactory.getFunctionNames())
+        self.assertRaises(RuntimeError, FunctionFactory.Instance().subscribe, TestFunctionOnlyInit)
+        self.assertTrue("TestFunctionOnlyInit" not in FunctionFactory.getFunctionNames())
+
+    def test_function_with_expected_attrs_subscribes_successfully(self):
         nfuncs_orig = len(FunctionFactory.getFunctionNames())
-        FunctionFactory.subscribe(TestFunction)
+        FunctionFactory.subscribe(TestFunctionCorrectForm)
         new_funcs = FunctionFactory.getFunctionNames()
         self.assertEquals(nfuncs_orig+1, len(new_funcs))
-        self.assertTrue("TestFunction" in new_funcs)
+        self.assertTrue("TestFunctionCorrectForm" in new_funcs)
 
-        FunctionFactory.unsubscribe("TestFunction")
-        new_funcs = FunctionFactory.getFunctionNames()
-        self.assertEquals(nfuncs_orig, len(new_funcs))
-        self.assertTrue("TestFunction" not in new_funcs)
+    def test_function_existing_function_can_be_unsubscribed(self):
+        FunctionFactory.subscribe(TestFunctionCorrectForm)
+        nfuncs_before = len(FunctionFactory.getFunctionNames())
+        FunctionFactory.unsubscribe("TestFunctionCorrectForm")
+        available_functions = FunctionFactory.getFunctionNames()
+        self.assertEquals(nfuncs_before - 1, len(available_functions))
+        self.assertTrue("TestFunctionCorrectForm" not in available_functions)
 
 
 if __name__ == '__main__':

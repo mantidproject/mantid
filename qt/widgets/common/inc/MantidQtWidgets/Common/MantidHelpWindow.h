@@ -1,8 +1,8 @@
 #ifndef MANTIDHELPWINDOW_H
 #define MANTIDHELPWINDOW_H
 
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include <QWidget>
 #include <string>
 
@@ -20,7 +20,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow
   Q_OBJECT
 
 public:
-  MantidHelpWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+  MantidHelpWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
   ~MantidHelpWindow() override;
 
   void showPage(const std::string &url = std::string()) override;

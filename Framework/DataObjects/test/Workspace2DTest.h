@@ -1,17 +1,17 @@
 #ifndef WORKSPACE2DTEST_H_
 #define WORKSPACE2DTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace std;
 using namespace Mantid;
@@ -20,8 +20,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::Counts;
 using HistogramData::LinearGenerator;
 using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
@@ -250,10 +250,10 @@ public:
     Workspace2D_sptr wsNonConst;
     TS_ASSERT_THROWS_NOTHING(
         wsConst = manager.getValue<Workspace2D_const_sptr>(wsName));
-    TS_ASSERT(wsConst != NULL);
+    TS_ASSERT(wsConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsNonConst =
                                  manager.getValue<Workspace2D_sptr>(wsName));
-    TS_ASSERT(wsNonConst != NULL);
+    TS_ASSERT(wsNonConst != nullptr);
     TS_ASSERT_EQUALS(wsConst, wsNonConst);
 
     // Check TypedValue can be cast to const_sptr or to sptr
@@ -261,9 +261,9 @@ public:
     Workspace2D_const_sptr wsCastConst;
     Workspace2D_sptr wsCastNonConst;
     TS_ASSERT_THROWS_NOTHING(wsCastConst = (Workspace2D_const_sptr)val);
-    TS_ASSERT(wsCastConst != NULL);
+    TS_ASSERT(wsCastConst != nullptr);
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (Workspace2D_sptr)val);
-    TS_ASSERT(wsCastNonConst != NULL);
+    TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };

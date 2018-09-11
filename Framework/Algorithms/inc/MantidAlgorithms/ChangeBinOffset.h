@@ -51,6 +51,7 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
+  const std::vector<std::string> seeAlso() const override { return {"ScaleX"}; }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Axes"; }
   /// Algorithm's Alternate Name
@@ -63,7 +64,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_CHANGEBINOFFSET_H_*/
