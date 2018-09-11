@@ -52,7 +52,6 @@ constexpr double inRad(const double a) noexcept { return a / 180. * M_PI; }
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
