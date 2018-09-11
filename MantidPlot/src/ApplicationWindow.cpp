@@ -16856,3 +16856,7 @@ void ApplicationWindow::checkForProjectRecovery() {
     m_projectRecovery.startProjectSaving();
   }
 }
+
+void ApplicationWindow::saveRecoveryCheckpoint(){
+  m_projectRecovery.saveAll();
+}

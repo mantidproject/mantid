@@ -174,6 +174,7 @@ void ProjectRecovery::attemptRecovery() {
       QObject::tr("Only open script in editor"), 0, 1);
 
   if (userChoice == 1) {
+    this->saveAll();
     // User selected no
     this->startProjectSaving();
     return;
@@ -434,29 +435,9 @@ void ProjectRecovery::projectSavingThread() {
         return;
       }
     }
-
-    // "Timeout" - Save out again
-    const auto &ads = Mantid::API::AnalysisDataService::Instance();
-    if (ads.size() == 0) {
-      g_log.debug("Nothing to save");
-      continue;
-    }
-
-    g_log.debug("Project Recovery: Saving started");
-    const auto basePath = getOutputPath();
-
-    Poco::File(basePath).createDirectories();
-    auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
-
-    saveWsHistories(basePath);
-    saveOpenWindows(projectFile.toString());
-
-    // Purge any excessive folders
-    deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
-    g_log.debug("Project Recovery: Saving finished");
+    this->saveAll();
   }
 }
-
 /**
  * Saves open all open windows using the main GUI thread
  *
@@ -466,7 +447,7 @@ void ProjectRecovery::projectSavingThread() {
 void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
   bool saveCompleted = false;
   if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
-                                 Qt::BlockingQueuedConnection,
+                                 Qt::QueuedConnection,
                                  Q_RETURN_ARG(bool, saveCompleted),
                                  Q_ARG(const std::string, projectDestFile))) {
     throw std::runtime_error("Project Recovery: Failed to save project "
@@ -521,6 +502,33 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
 
     alg->execute();
   }
+}
+
+/**
+ * @brief A function that brings the two seperate save methods together
+ * This won't run if it is locked by the background thread but then it saving
+ * Anyway so thats no issue.
+ */
+void ProjectRecovery::saveAll() {
+  // "Timeout" - Save out again
+  const auto &ads = Mantid::API::AnalysisDataService::Instance();
+  //if (ads.size() == 0) {
+  //  g_log.debug("Nothing to save");
+  //  return;
+  //}
+
+  g_log.debug("Project Recovery: Saving started");
+
+  const auto basePath = getOutputPath();
+  Poco::File(basePath).createDirectories();
+
+  saveWsHistories(basePath);
+  auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
+  saveOpenWindows(projectFile.toString());
+
+  // Purge any excessive folders
+  deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
+  g_log.debug("Project Recovery: Saving finished");
 }
 
 } // namespace MantidQt

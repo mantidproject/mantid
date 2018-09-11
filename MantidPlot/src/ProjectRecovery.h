@@ -67,6 +67,9 @@ public:
   /// Stops the background thread
   void stopProjectSaving();
 
+  /// Saves a project recovery checkpoint
+  void saveAll();
+
 private:
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();
