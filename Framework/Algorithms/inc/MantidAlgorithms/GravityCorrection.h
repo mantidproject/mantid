@@ -3,8 +3,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidGeometry/Instrument_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument_fwd.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
@@ -16,7 +17,7 @@ namespace API {
 // class AlgorithmHistory;
 class Progess;
 class SpectrumInfo;
-}
+} // namespace API
 namespace Geometry {
 class DetectorInfo;
 }
@@ -91,6 +92,9 @@ private:
 
   /// Initialisation code
   void init() override;
+  /// Name of a string component wich may be defined in sample log
+  std::string componentName(std::string propertyName, std::string testName,
+                            const Mantid::API::Run &run);
   /// Final angle definition between source and sample
   double finalAngle(const double k, size_t i);
   /// Retrieve the coordinate of an instrument component

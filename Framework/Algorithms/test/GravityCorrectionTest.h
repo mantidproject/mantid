@@ -1,15 +1,13 @@
 #ifndef GRAVITYCORRECTIONTEST_H
 #define GRAVITYCORRECTIONTEST_H
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidAlgorithms/GravityCorrection.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
+#include "MantidAlgorithms/GravityCorrection.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -17,8 +15,8 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;
 
@@ -391,6 +389,23 @@ public:
   // TOF values modified
   void testOutputTOFCorrected() {}
 
+  // Use of slit1 and slit2 default values from sample logs
+  // Example: FIGARO parameter file defines slit1 and slit2
+  void testDefaultSlitNames() {
+    Mantid::API::FrameworkManager::Instance().exec("LoadILLReflectometry", 6, "Filename",
+                                                   "ILL/Figaro/592724.nxs",
+                                                   "OutputWorkspace", "592724",
+                                                   "XUnit", "TimeOfFlight");
+    GravityCorrection gc21;
+    TS_ASSERT_THROWS_NOTHING(gc21.initialize());
+    gc21.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("InputWorkspace", "592724"));
+    TS_ASSERT_THROWS_NOTHING(
+        gc21.setProperty("OutputWorkspace", "default_test"));
+    TS_ASSERT_THROWS_NOTHING(gc21.execute());
+    TS_ASSERT(gc21.isExecuted());
+  }
+
   Mantid::API::MatrixWorkspace_sptr runGravityCorrection(
       GravityCorrection &gravityCorrection,
       Mantid::API::MatrixWorkspace_sptr &inWS, const std::string outName,
@@ -449,7 +464,7 @@ private:
   Mantid::Kernel::V3D detector{Mantid::Kernel::V3D(4., 4., 0.)};
   Mantid::API::MatrixWorkspace_sptr inWS1{
       WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
-          0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector, 2, 100,
+          0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector, 100,
           2000.0)};
   Mantid::API::MatrixWorkspace_sptr inWS3{
       WorkspaceCreationHelper::

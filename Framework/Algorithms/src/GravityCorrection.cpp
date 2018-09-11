@@ -11,10 +11,10 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -22,9 +22,10 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <iterator>
@@ -42,8 +43,8 @@ using Mantid::API::SpectrumInfo;
 using Mantid::API::WorkspaceHistory;
 using Mantid::API::WorkspaceProperty;
 using Mantid::API::WorkspaceUnitValidator;
-using Mantid::DataObjects::create;
 using Mantid::DataObjects::Workspace2D;
+using Mantid::DataObjects::create;
 using Mantid::Geometry::ComponentInfo;
 using Mantid::Geometry::DetectorInfo;
 using Mantid::Geometry::IComponent_const_sptr;
@@ -54,14 +55,14 @@ using Mantid::Indexing::IndexInfo;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::make_unique;
+using Mantid::Kernel::Property;
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
+using Mantid::Kernel::make_unique;
 using Mantid::PhysicalConstants::g;
 
 using boost::const_pointer_cast;
 using boost::make_shared;
-
 using std::abs;
 using std::find_if;
 using std::map;
@@ -83,17 +84,28 @@ void GravityCorrection::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
   this->declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       wsValidator),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, wsValidator),
       "The name of the input Workspace2D. Values of X and Y must be "
       "TOF and counts, respectively.");
-  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                         Direction::Output),
+  this->declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                            "OutputWorkspace", "", Direction::Output),
                         "The name of the output Workspace2D.");
   this->declareProperty("FirstSlitName", "slit1",
                         "Component name of the first slit.");
   this->declareProperty("SecondSlitName", "slit2",
                         "Component name of the second slit.");
+}
+
+string GravityCorrection::componentName(string propertyName, string testName,
+                                        const Mantid::API::Run &run) {
+  if (this->getPointerToProperty(propertyName)->isDefault()) {
+    if (run.hasProperty(testName))
+      return run.getProperty(testName)->value();
+    else
+      return this->getPropertyValue(propertyName);
+  }
+  return testName;
 }
 
 /**
@@ -125,24 +137,26 @@ map<string, string> GravityCorrection::validateInputs() {
   m_beamDirection = refFrame->pointingAlongBeam();
   m_upDirection = refFrame->pointingUp();
   m_horizontalDirection = refFrame->pointingHorizontal();
+  const Mantid::API::Run &run = this->m_ws->run();
   map<string, string> slits;
-  const string slit1 = this->getProperty("FirstSlitName");
-  const string slit2 = this->getProperty("SecondSlitName");
-  slits["FirstSlitName"] = slit1;
-  slits["SecondSlitName"] = slit2;
+  slits["FirstSlitName"] = this->componentName("FirstSlitName", "slit1", run);
+  slits["SecondSlitName"] = this->componentName("SecondSlitName", "slit2", run);
   double iposition{0.}, last{0.};
   for (auto mapit = slits.begin(); mapit != slits.end(); ++mapit) {
     if (mapit->second.empty())
-      result[mapit->first] = "Provide a name for the second slit.";
-    IComponent_const_sptr slit = instrument->getComponentByName(mapit->second);
-    if (slit == nullptr)
-      result[mapit->first] = "Instrument component with name " +
-                             (mapit->second) + " does not exist. ";
+      result[mapit->first] = "Provide a name.";
     else {
-      last = this->coordinate(mapit->second, m_beamDirection, instrument);
-      iposition += last;
-      if ((mapit->first == "SecondSlitName") && (iposition / 2 == last))
-        result["SecondSlitName"] = "Position of slits must differ.";
+      IComponent_const_sptr slit =
+          instrument->getComponentByName(mapit->second);
+      if (slit == nullptr)
+        result[mapit->first] = "Instrument component with name " +
+                               (mapit->second) + " does not exist. ";
+      else {
+        last = this->coordinate(mapit->second, m_beamDirection, instrument);
+        iposition += last;
+        if ((mapit->first == "SecondSlitName") && (iposition / 2 == last))
+          result["SecondSlitName"] = "Position of slits must differ.";
+      }
     }
   }
   return result;
@@ -265,8 +279,9 @@ void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
 void GravityCorrection::slitCheck() {
   const string sourceName = this->m_virtualInstrument->getSource()->getName();
   const string sampleName = this->m_virtualInstrument->getSample()->getName();
-  const string slit1{this->getPropertyValue("FirstSlitName")};
-  const string slit2{this->getPropertyValue("SecondSlitName")};
+  const Mantid::API::Run &run = this->m_ws->run();
+  const string slit1{this->componentName("FirstSlitName", "slit1", run)};
+  const string slit2{this->componentName("SecondSlitName", "slit2", run)};
   // in beam directions
   const double sourceD = this->coordinate(sourceName, this->m_beamDirection);
   const double sampleD = this->coordinate(sampleName, this->m_beamDirection);
@@ -606,8 +621,8 @@ void GravityCorrection::exec() {
       }
 
       double v{((spectrumInfo.l1() + spectrumInfo.l2(i)) / *tofit) *
-               1.e6};                   // unit is m/s
-      double k = g / (2. * pow(v, 2.)); // unit is 1/m
+               1.e6};                        // unit is m/s
+      double k = g / (2. * pow(v, 2.));      // unit is 1/m
       double angle = this->finalAngle(k, i); // unit is radians
       if (cos(angle) == 0.) {
         this->g_log.error("Cannot divide by zero for calculating new tof "

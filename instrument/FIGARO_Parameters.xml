@@ -5,6 +5,12 @@
 		<parameter name="deltaE-mode" type="string">
 			<value val="direct" />
 		</parameter>
+                <parameter name="slit1" type="string">
+                        <value val="slit2" />
+                </parameter>
+                <parameter name="slit2" type="string">
+                        <value val="slit3" />
+                </parameter>
 	</component-link>
 
 </parameter-file>
