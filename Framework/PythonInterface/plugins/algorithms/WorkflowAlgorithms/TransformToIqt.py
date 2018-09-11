@@ -5,6 +5,8 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
                         ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger, IntBoundedValidator
 
+import time
+
 DEFAULT_ITERATIONS = 50
 DEFAULT_SEED = 89631139
 
@@ -232,15 +234,24 @@ class TransformToIqt(PythonAlgorithm):
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
-        iqt = CalculateIqt(InputWorkspace=self._sample, ResolutionWorkspace=self._resolution, EnergyMin=self._e_min,
-                           EnergyMax=self._e_max, EnergyWidth=self._e_width, CalculateErrors=self._calculate_errors,
-                           NumberOfIterations=self._number_of_iterations, SeedValue=self._seed,
-                           StoreInADS=False, OutputWorkspace="__ciqt")#, startProgress=0.0, endProgress=1.0)
+        calculateiqt_alg = self.createChildAlgorithm(name='CalculateIqt', startProgress=0.3,
+                                                     endProgress=1.0, enableLogging=True)
+        calculateiqt_alg.setAlwaysStoreInADS(False)
+        args = {"InputWorkspace": self._sample, "OutputWorkspace": "iqt", "ResolutionWorkspace": self._resolution,
+                "EnergyMin": self._e_min, "EnergyMax": self._e_max, "EnergyWidth": self._e_width,
+                "CalculateErrors": self._calculate_errors, "NumberOfIterations": self._number_of_iterations,
+                "SeedValue": self._seed}
+        for key, value in args.items():
+            calculateiqt_alg.setProperty(key, value)
+        calculateiqt_alg.execute()
+
+        iqt = calculateiqt_alg.getProperty("OutputWorkspace").value
 
         # Set Y axis unit and label
         iqt.setYUnit('')
         iqt.setYUnitLabel('Intensity')
         return iqt
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(TransformToIqt)
