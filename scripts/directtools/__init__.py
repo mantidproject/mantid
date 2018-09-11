@@ -91,6 +91,13 @@ def _globalnanminmax(workspaces):
             globalMax = cMax
     return globalMin, globalMax
 
+
+def _horizontalLineAtZero(axes):
+    """Add a horizontal line at Y = 0."""
+    spine = axes.spines['bottom']
+    axes.axhline(linestyle=spine.get_linestyle(), color=spine.get_edgecolor(), linewidth=spine.get_linewidth())
+
+
 def _incidentEnergy(logs):
     """Return the incident energy value from the logs or None."""
     if logs.hasProperty('Ei'):
@@ -505,6 +512,7 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 axes.errorbar(line, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
+    _horizontalLineAtZero(axes)
     _profileytitle(workspaces[0], axes)
     return figure, axes, cutWSList
 
@@ -545,6 +553,7 @@ def plotprofiles(workspaces, labels=None, style='l', xscale='linear', yscale='li
         axes.errorbar(ws, specNum=0, linestyle=lineStyle, marker=markerStyle, label=label, distribution=True)
     axes.set_xscale(xscale)
     axes.set_yscale(yscale)
+    _horizontalLineAtZero(axes)
     _profileytitle(workspaces[0], axes)
     xUnit = workspaces[0].getAxis(0).getUnit().unitID()
     if xUnit == 'DeltaE':
