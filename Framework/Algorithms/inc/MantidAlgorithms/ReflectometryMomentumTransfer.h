@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {

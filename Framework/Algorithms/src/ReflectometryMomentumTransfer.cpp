@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
