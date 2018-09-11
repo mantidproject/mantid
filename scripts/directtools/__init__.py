@@ -60,7 +60,6 @@ def _finalizeprofileE(axes):
     axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
     axes.set_ylim(0.)
     xMin, xMax = axes.get_xlim()
-    print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
 
 
 def _finalizeprofileQ(workspaces, axes):
@@ -75,7 +74,6 @@ def _finalizeprofileQ(workspaces, axes):
             cMax = c
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
     xMin, xMax = axes.get_xlim()
-    print('Auto E-range: {}...{} meV'.format(xMin, xMax))
 
 
 def _globalnanminmax(workspaces):
@@ -405,7 +403,6 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
     axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
     axes.set_ylim(0.)
     xMin, xMax = axes.get_xlim()
-    print('Auto Q-range: {}...{} \xc5-1'.format(xMin, xMax))
     return figure, axes, cutWSList
 
 
@@ -443,7 +440,6 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     cMin, cMax = _globalnanminmax(workspaces)
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
     xMin, xMax = axes.get_xlim()
-    print('Auto E-range: {}...{} meV'.format(xMin, xMax))
     return figure, axes, cutWSList
 
 
@@ -620,7 +616,6 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         colorNormalization = matplotlib.colors.LogNorm()
     else:
         raise RuntimeError('Unknown colorscale: ' + colorscale)
-    print('Plotting intensity range: {}...{}'.format(VMin, VMax))
     contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap, norm=colorNormalization)
     colorbar = figure.colorbar(contours)
     if isSusceptibility:
