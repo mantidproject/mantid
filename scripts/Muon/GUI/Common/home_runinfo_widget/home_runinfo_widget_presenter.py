@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class HomePlotWidgetPresenter(object):
+class HomeRunInfoWidgetPresenter(object):
 
     def __init__(self, view, model):
         self._view = view
