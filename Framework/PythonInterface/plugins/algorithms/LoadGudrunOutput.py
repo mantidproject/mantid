@@ -19,15 +19,37 @@ class LoadGudrunOutput(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty(name='InputFile', defaultValue='', action=FileAction.Load,
-                                          extensions=['dcs01', 'mdcs01', 'mint01', 'mdor01', 'mgor01']))
-        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='', direction=Direction.Output))
+                                          extensions=["*.dcs01 *.mdcs01 *.mint01 *.mdor01 *.mgor01",
+                                                      ".dcs01",
+                                                      ".mdsc01",
+                                                      ".mint01",
+                                                      ".mdor01",
+                                                      ".mgor01"]),
+                             doc="Gudrun output file to be loaded.")
+        self.declareProperty(WorkspaceProperty(name='OutputWorkspace', defaultValue='None',
+                                               direction=Direction.Output),
+                             doc="If OutputWorkpsace is None,"
+                                 " then the workpsace name will be obtained from the input file.")
 
     def PyExec(self):
         input_file = self.getProperty('InputFile').value
         output_ws = self.getPropertyValue('OutputWorkspace')
+        if output_ws == 'None':
+            output_ws = self.get_title(input_file)
         number_of_columns, data_line_start = self.find_number_of_columns(input_file)
         self.load_gudrun_file(input_file, output_ws, number_of_columns, data_line_start)
         self.setProperty('OutputWorkspace', output_ws)
+
+    def get_title(self, input_file):
+        """
+        Return the title from the file meta data
+        :param input_file: file to get meta data from
+        :return: (title)
+        """
+        with open(input_file, 'r') as gudrun_file:
+            first_line = gudrun_file.readline()
+            first_line = first_line[2:]
+            return first_line.replace('.', '-')
 
     def find_number_of_columns(self, input_file):
         """
@@ -50,7 +72,7 @@ class LoadGudrunOutput(PythonAlgorithm):
         :param output_workspace: The workspace to be the result of the load
         :param number_of_columns: The number of columns in the file being loaded
         :param first_data_line: The first line to expect data on
-        :return: The outputWorkspace of the Load Algoritm
+        :return: The outputWorkspace of the Load Algorithm
         """
 
         if number_of_columns % 2 == 0:
