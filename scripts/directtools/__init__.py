@@ -54,26 +54,37 @@ def _denormalizeLine(line):
     Es *= height
 
 
+def _energyLimits(workspaces):
+    """Find suitable xmin and xmax for energy transfer plots."""
+    workspaces = _normwslist(workspaces)
+    Xs = workspaces[0].readX(0)
+    eMax = Xs[-1]
+    eMin = -eMax
+    logs = workspaces[0].run()
+    ei = _incidentEnergy(logs)
+    T = _applyIfTimeSeries(_sampleTemperature(logs), numpy.mean)
+    if ei is not None:
+        if T is not None:
+            eMin = min(-T / 6.0, -0.2 * ei)
+        else:
+            eMin = -0.2 * ei
+    return eMin, eMax
+
 def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     axes.set_xlim(xmin=0.)
     axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
     axes.set_ylim(0.)
-    xMin, xMax = axes.get_xlim()
 
 
 def _finalizeprofileQ(workspaces, axes):
     """Set axes for const Q axes."""
     workspaces = _normwslist(workspaces)
-    axes.set_xlim(xmin=-10.)
+    eMin, eMax = _energyLimits(workspaces)
+    axes.set_xlim(eMin, eMax)
     axes.set_xlabel('Energy (meV)')
-    cMax = 0.
-    for ws in workspaces:
-        c = numpy.nanmax(ws.readY(0))
-        if c > cMax:
-            cMax = c
+    unusedMin, cMax = _globalnanminmax(workspaces)
     axes.set_ylim(ymin=0., ymax=cMax / 100.)
-    xMin, xMax = axes.get_xlim()
 
 
 def _globalnanminmax(workspaces):
@@ -83,10 +94,8 @@ def _globalnanminmax(workspaces):
     globalMax = -numpy.inf
     for ws in workspaces:
         cMin, cMax = nanminmax(ws)
-        if cMin < globalMin:
-            globalMin = cMin
-        if cMax > globalMax:
-            globalMax = cMax
+        globalMin = min(globalMin, cMin)
+        globalMax = max(globalMax, cMax)
     return globalMin, globalMax
 
 
@@ -361,7 +370,7 @@ def nanminmax(workspace, horMin=-numpy.inf, horMax=numpy.inf, vertMin=-numpy.inf
     xs = workspace.extractX()
     ys = workspace.extractY()
     if xs.shape[1] > ys.shape[1]:
-        xs = _binCentres(xs)
+        xs = numpy.apply_along_axis(_binCentres, 1, xs)
     vertAxis = workspace.getAxis(1).extractValues()
     box = box2D(xs, vertAxis, horMin, horMax, vertMin, vertMax)
     ys = ys[box]
@@ -399,10 +408,7 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
                                        xscale, yscale)
     _profiletitle(workspaces, '$E$', 'meV', E, dE, figure)
     axes.legend()
-    axes.set_xlim(xmin=0.)
-    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
-    axes.set_ylim(0.)
-    xMin, xMax = axes.get_xlim()
+    _finalizeprofileE(axes)
     return figure, axes, cutWSList
 
 
@@ -435,11 +441,7 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
                                        xscale, yscale)
     _profiletitle(workspaces, '$Q$', '\\AA$^{-1}$', Q, dQ, figure)
     axes.legend()
-    axes.set_xlim(xmin=-10.)
-    axes.set_xlabel('Energy (meV)')
-    cMin, cMax = _globalnanminmax(workspaces)
-    axes.set_ylim(ymin=0., ymax=cMax / 100.)
-    xMin, xMax = axes.get_xlim()
+    _finalizeprofileQ(workspaces, axes)
     return figure, axes, cutWSList
 
 
@@ -594,7 +596,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
         if isSusceptibility:
             EMin = 0.
         else:
-            EMin = -10.
+            EMin, unusedEMax = _energyLimits(workspace)
     if EMax is None:
         EAxis = workspace.getAxis(1).extractValues()
         EMax = numpy.amax(EAxis)
@@ -612,7 +614,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
             if VMax > 0.:
                 VMin = VMax / 1000.
             else:
-                raise RuntimeError('Cannot plot negative range in log scale.')
+                raise RuntimeError('Cannot plot nonpositive range in log scale.')
         colorNormalization = matplotlib.colors.LogNorm()
     else:
         raise RuntimeError('Unknown colorscale: ' + colorscale)
