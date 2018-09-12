@@ -28,10 +28,17 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
   return index;
 }
 
-void updateVisited(std::vector<bool> &visited,
-                   const std::vector<size_t> &components) {
-  for (auto component : components)
-    visited[component] = true;
+void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo,
+                   const size_t bankIndex, std::vector<bool> &visited) {
+  visited[bankIndex] = true;
+  const auto &children = compInfo.children(bankIndex);
+  for (auto child : children) {
+    const auto &subchildren = compInfo.children(child);
+    if (subchildren.size() > 0)
+      updateVisited(compInfo, child, visited);
+    else
+      visited[child] = true;
+  }
 }
 } // namespace
 
@@ -102,29 +109,33 @@ void InstrumentRenderer::draw(const std::vector<bool> &visibleComps,
       continue;
 
     if (type == ComponentType::Grid) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
-      if (visibleComps[i])
+      if (visibleComps[i]) {
         drawGridBank(i, picking);
+        updateVisited(compInfo, i, visited);
+      }
       continue;
     }
     if (type == ComponentType::Rectangular) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
-      if (visibleComps[i])
+      if (visibleComps[i]) {
         drawRectangularBank(i, picking);
+        updateVisited(compInfo, i, visited);
+      }
       continue;
     }
 
     if (type == ComponentType::OutlineComposite) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
-      if (visibleComps[i])
+      if (visibleComps[i]) {
         drawTube(i, picking);
+        updateVisited(compInfo, i, visited);
+      }
       continue;
     }
 
     if (type == ComponentType::Structured) {
-      updateVisited(visited, compInfo.componentsInSubtree(i));
-      if (visibleComps[i])
+      if (visibleComps[i]) {
         drawStructuredBank(i, picking);
+        updateVisited(compInfo, i, visited);
+      }
       continue;
     }
 

@@ -316,7 +316,7 @@ void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
                     V3D((xstep * 0.5), (ystep * 0.5), (zstep * -0.5)), basePos);
     break;
   case GridTextureFace::Top:
-    render2DTexture(corners, nZ, bank.nY,
+    render2DTexture(corners, bank.nX, nZ,
                     V3D((xstep * -0.5), (ystep * +0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * +0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * +0.5), (zstep * -0.5)),
@@ -324,7 +324,7 @@ void renderGridBankFull(const Mantid::Geometry::ComponentInfo &compInfo,
                     basePos);
     break;
   case GridTextureFace::Bottom:
-    render2DTexture(corners, nZ, bank.nY,
+    render2DTexture(corners, bank.nX, nZ,
                     V3D((xstep * -0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * 0.5)),
                     V3D((xstep * 0.5), (ystep * -0.5), (zstep * -0.5)),

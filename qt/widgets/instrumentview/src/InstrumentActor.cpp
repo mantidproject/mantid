@@ -195,7 +195,7 @@ void InstrumentActor::setupPhysicalInstrumentIfExists() {
 }
 
 void InstrumentActor::setComponentVisible(size_t componentIndex) {
-  setChildVisibility(false);
+  setAllComponentsVisibility(false);
   const auto &compInfo = componentInfo();
   auto children = compInfo.componentsInSubtree(componentIndex);
   m_isCompVisible[componentIndex] = true;
@@ -205,7 +205,7 @@ void InstrumentActor::setComponentVisible(size_t componentIndex) {
   resetColors();
 }
 
-void InstrumentActor::setChildVisibility(bool on) {
+void InstrumentActor::setAllComponentsVisibility(bool on) {
   std::fill(m_isCompVisible.begin(), m_isCompVisible.end(), on);
 }
 

@@ -61,8 +61,8 @@ public:
                       Mantid::Kernel::V3D &maxBound) const;
   /// Set a component (and all its children) visible.
   void setComponentVisible(size_t componentIndex);
-  /// Toggle the visibility of the child actors (if exist).
-  void setChildVisibility(bool);
+  /// Set visibilit of all components.
+  void setAllComponentsVisibility(bool);
   /// Check if any child is visible
   bool hasChildVisible() const;
   /// Get the underlying instrument
