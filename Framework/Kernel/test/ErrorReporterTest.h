@@ -64,7 +64,7 @@ public:
     std::string name = "My testing application name";
     Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", true, "name",
-                                       "email");
+                                       "email", "textBox");
     std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -87,6 +87,71 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
     TS_ASSERT_EQUALS(root["name"].asString(), "name");
     TS_ASSERT_EQUALS(root["email"].asString(), "email");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
+  }
+
+  void test_errorMessageWithShareAndRecoveryFileHash() {
+    std::string name = "My testing application name";
+    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    TestableErrorReporter errorService(name, upTime, "0", true, "name",
+                                       "email", "textBox", "fileHash");
+    std::string message = errorService.generateErrorMessage();
+
+    ::Json::Reader reader;
+    ::Json::Value root;
+    reader.parse(message, root);
+    auto members = root.getMemberNames();
+    std::vector<std::string> expectedMembers{
+        "ParaView",      "application", "host",     "mantidSha1",
+        "mantidVersion", "osArch",      "osName",   "osReadable",
+        "osVersion",     "uid",         "facility", "upTime",
+        "exitCode",      "textBox",     "name",     "email",
+        "fileHash"};
+    for (auto expectedMember : expectedMembers) {
+      TSM_ASSERT(expectedMember + " not found",
+                 std::find(members.begin(), members.end(), expectedMember) !=
+                     members.end());
+    }
+
+    TS_ASSERT_EQUALS(root["application"].asString(), name);
+    TS_ASSERT_EQUALS(root["upTime"].asString(), to_simple_string(upTime));
+    TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
+    TS_ASSERT_EQUALS(root["name"].asString(), "name");
+    TS_ASSERT_EQUALS(root["email"].asString(), "email");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
+    TS_ASSERT_EQUALS(root["fileHash"].asString(), "fileHash");
+  }
+
+  void test_errorMessageWithNoShareAndRecoveryFileHash() {
+    std::string name = "My testing application name";
+    Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    TestableErrorReporter errorService(name, upTime, "0", false, "name",
+                                       "email", "textBox", "fileHash");
+    std::string message = errorService.generateErrorMessage();
+
+    ::Json::Reader reader;
+    ::Json::Value root;
+    reader.parse(message, root);
+    auto members = root.getMemberNames();
+    std::vector<std::string> expectedMembers{
+        "ParaView",      "application", "host",     "mantidSha1",
+        "mantidVersion", "osArch",      "osName",   "osReadable",
+        "osVersion",     "uid",         "facility", "upTime",
+        "exitCode",      "textBox",     "name",     "email",
+        "fileHash"};
+    for (auto expectedMember : expectedMembers) {
+      TSM_ASSERT(expectedMember + " not found",
+                 std::find(members.begin(), members.end(), expectedMember) !=
+                     members.end());
+    }
+
+    TS_ASSERT_EQUALS(root["application"].asString(), name);
+    TS_ASSERT_EQUALS(root["upTime"].asString(), to_simple_string(upTime));
+    TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
+    TS_ASSERT_EQUALS(root["name"].asString(), "");
+    TS_ASSERT_EQUALS(root["email"].asString(), "");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "");
+    TS_ASSERT_EQUALS(root["fileHash"].asString(), "");
   }
 };
 
