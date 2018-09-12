@@ -63,8 +63,8 @@ public:
   void test_errorMessageWithShare() {
     std::string name = "My testing application name";
     Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", true, "name",
-                                       "email", "textBox");
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
+                                       "textBox");
     std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -93,8 +93,8 @@ public:
   void test_errorMessageWithShareAndRecoveryFileHash() {
     std::string name = "My testing application name";
     Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", true, "name",
-                                       "email", "textBox", "fileHash");
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
+                                       "textBox", "fileHash");
     std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -102,11 +102,10 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{
-        "ParaView",      "application", "host",     "mantidSha1",
-        "mantidVersion", "osArch",      "osName",   "osReadable",
-        "osVersion",     "uid",         "facility", "upTime",
-        "exitCode",      "textBox",     "name",     "email",
-        "fileHash"};
+        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
+        "facility", "upTime",      "exitCode",   "textBox",    "name",
+        "email",    "fileHash"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
@@ -134,11 +133,10 @@ public:
     reader.parse(message, root);
     auto members = root.getMemberNames();
     std::vector<std::string> expectedMembers{
-        "ParaView",      "application", "host",     "mantidSha1",
-        "mantidVersion", "osArch",      "osName",   "osReadable",
-        "osVersion",     "uid",         "facility", "upTime",
-        "exitCode",      "textBox",     "name",     "email",
-        "fileHash"};
+        "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
+        "osArch",   "osName",      "osReadable", "osVersion",  "uid",
+        "facility", "upTime",      "exitCode",   "textBox",    "name",
+        "email",    "fileHash"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
