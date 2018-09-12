@@ -106,11 +106,12 @@ Known Issues
 
 Related Bugs/Notes
 ^^^^^^^^^^^^^^^^^^
-- `Matplitlib Issue #4786`_: a workaround is used in ``plotting_view.py`` (commented)
+- `Matplotlib Issue #4786`_: a workaround is used in ``plotting_view.py`` (commented)
 - ``plot.set_subplotspec(...)`` is required where ``plot.set_position(...)`` is used with ``tight_layout()``
-- ``matplotlib.pyplot`` `should not<https://stackoverflow.com/posts/comments/26295260>`_ be imported when using ``FigureCanvasQTAgg``
+- ``matplotlib.pyplot`` `should not`_ be imported when using ``FigureCanvasQTAgg``
 
-.. _`Matplitlib Issue #4786`: https://github.com/matplotlib/matplotlib/issues/4786
+.. _`Matplotlib Issue #4786`: https://github.com/matplotlib/matplotlib/issues/4786
+.. _`should not`: https://stackoverflow.com/posts/comments/26295260
 
 AxisChanger
 ^^^^^^^^^^^
