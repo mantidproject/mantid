@@ -45,7 +45,7 @@ class PlottingPresenterTest(unittest.TestCase):
 
     def test_update_canvas(self):
         self.presenter.update_canvas()
-        self.view.canvas.draw.assert_called_once_with()
+        self.assertEquals(self.view.canvas.draw.call_count, 1)
 
     def test_add_moveable_vline(self):
         """
