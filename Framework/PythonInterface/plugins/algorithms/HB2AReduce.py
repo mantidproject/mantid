@@ -46,6 +46,8 @@ class HB2AReduce(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("ExcludeDetectors", []),
                              doc="Detectors to exclude. If not provided the HB2A_exp???__exclude_detectors.txt adjacent "
                              "to the data file will be used if it exist")
+        self.declareProperty('DefX', '',
+                             "By default the def_x (x-axis) from the file will be used, it can be overridden by setting it here")
         self.declareProperty('IndividualDetectors', False,
                              "If True the workspace will include each anode as a separate spectrum, useful for debugging issues")
         condition = EnabledWhenProperty("IndividualDetectors", PropertyCriterion.IsDefault)
@@ -124,7 +126,20 @@ class HB2AReduce(PythonAlgorithm):
                                                                     data['m1'][0], data['colltrans'][0],
                                                                     exp, indir)
 
-        x = twotheta+self._gaps[:, np.newaxis][detector_mask]
+        def_x = self.getProperty("DefX").value
+        if not def_x:
+            def_x = metadata['def_x']
+
+        if def_x not in data.dtype.names:
+            logger.warning("Could not find {} property in datafile, using 2theta instead".format(def_x))
+            def_x = '2theta'
+
+        if def_x == '2theta':
+            x = twotheta+self._gaps[:, np.newaxis][detector_mask]
+            UnitX='Degrees'
+        else:
+            x = np.tile(data[def_x], (44,1))[detector_mask]
+            UnitX=def_x
 
         if self.getProperty("IndividualDetectors").value:
             # Separate spectrum per anode
@@ -143,7 +158,7 @@ class HB2AReduce(PythonAlgorithm):
         createWS_alg.setProperty("DataY", y)
         createWS_alg.setProperty("DataE", e)
         createWS_alg.setProperty("NSpec", NSpec)
-        createWS_alg.setProperty("UnitX", "Degrees")
+        createWS_alg.setProperty("UnitX", UnitX)
         createWS_alg.setProperty("YUnitLabel", "Counts")
         createWS_alg.setProperty("WorkspaceTitle", str(metadata['scan_title']))
         createWS_alg.execute()
