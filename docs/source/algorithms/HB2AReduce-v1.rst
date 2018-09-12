@@ -11,7 +11,7 @@ Description
 
 This algorithm reduces HFIR POWDER (HB-2A) data.
 
-You can either specify the filenames of data you want to reduce or provide the IPTS, exp and scan number. *e.g.* the following are equivalent:
+You can either specify the filenames of data you want to reduce or provide the IPTS, exp and scan number. If only one experiment exists in an IPTS then exp can be omitted. *e.g.* the following are equivalent:
 
 .. code-block:: python
 

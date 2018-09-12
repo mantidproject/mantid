@@ -36,9 +36,13 @@ class HB2AReduce(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad,
                                                   extensions=[".dat"]), "Data files to load")
+        condition = EnabledWhenProperty("Filename", PropertyCriterion.IsDefault)
         self.declareProperty('IPTS', Property.EMPTY_INT, "IPTS number to load from")
+        self.setPropertySettings("IPTS", condition)
         self.declareProperty('Exp', Property.EMPTY_INT, "Experiment number to load from")
+        self.setPropertySettings("Exp", condition)
         self.declareProperty(IntArrayProperty("ScanNumbers", []), 'Scan numbers to load')
+        self.setPropertySettings("ScanNumbers", condition)
         self.declareProperty(FileProperty(name="Vanadium", defaultValue="", action=FileAction.OptionalLoad, extensions=[".dat", ".txt"]),
                              doc="Vanadium file, can be either the vanadium scan file or the reduced vcorr file. "
                              "If not provided the vcorr file adjacent to the data file will be used")
@@ -64,10 +68,16 @@ class HB2AReduce(PythonAlgorithm):
         issues = dict()
 
         if not self.getProperty("Filename").value:
-            if ((self.getProperty("IPTS").value == Property.EMPTY_INT) or
-                (self.getProperty("Exp").value == Property.EMPTY_INT) or
-               len(self.getProperty("ScanNumbers").value) is 0):
-                issues["Filename"] = 'Must specify either Filename or IPTS AND Exp AND ScanNumbers'
+            ipts = self.getProperty("IPTS").value
+
+            if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) is 0):
+                issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
+
+            if self.getProperty("Exp").value == Property.EMPTY_INT:
+                exp_list = sorted(e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e)
+                if len(exp_list)>1:
+                    exps = ','.join(e.replace('exp','') for e in exp_list)
+                    issues["Exp"] = 'Multiple experiments found in IPTS-{}. You must set Exp to one of {}'.format(ipts, exps)
 
         return issues
 
@@ -78,6 +88,8 @@ class HB2AReduce(PythonAlgorithm):
         if not filenames:
             ipts = self.getProperty("IPTS").value
             exp = self.getProperty("Exp").value
+            if self.getProperty("Exp").value == Property.EMPTY_INT:
+                exp = int([e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e][0].replace('exp',''))
             filenames = ['/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(ipts, exp, scan)
                          for scan in self.getProperty("ScanNumbers").value]
 
