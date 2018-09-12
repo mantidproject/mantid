@@ -292,6 +292,19 @@ void ReflectometryReductionOneAuto2::init() {
   setPropertyGroup("Rho", "Polarization Corrections");
   setPropertyGroup("Alpha", "Polarization Corrections");
 
+  // Flood correction
+  propOptions = {"Workspace", "ParameterFile"};
+  declareProperty("FloodCorrection", "Workspace",
+                  boost::make_shared<StringListValidator>(propOptions),
+                  "The way to apply flood correction: None - no correction, "
+                  "Workspace - use FloodWorkspace property to get the flood "
+                  "workspace, ParameterFile - use parameters in the parameter "
+                  "file to construct and apply flood correction workspace.");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A flood workspace to apply.");
+
   // Init properties for diagnostics
   initDebugProperties();
 
@@ -322,6 +335,7 @@ void ReflectometryReductionOneAuto2::exec() {
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
+  inputWS = applyFloodCorrection(inputWS);
 
   IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
@@ -810,6 +824,10 @@ bool ReflectometryReductionOneAuto2::processGroups() {
     alg->setProperty("OutputWorkspace", IvsQName);
     alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
     alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+    if (!isDefault("FloodWorkspace")) {
+      MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
+      alg->setProperty("FloodWorkspace", flood);
+    }
     alg->execute();
 
     IvsQGroup.push_back(IvsQName);
@@ -1006,5 +1024,21 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
   AnalysisDataService::Instance().remove(transSum);
   return result;
 }
+
+API::MatrixWorkspace_sptr ReflectometryReductionOneAuto2::applyFloodCorrection(API::MatrixWorkspace_sptr ws){
+  std::string const method = getProperty("FloodCorrection");
+  if (method == "Workspace" && !isDefault("FloodWorkspace")) {
+    MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
+    auto alg = createChildAlgorithm("ApplyFloodWorkspace");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("FloodWorkspace", flood);
+    alg->execute();
+    MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
+    return out;
+  }
+  return ws;
+}
+
 } // namespace Algorithms
 } // namespace Mantid
