@@ -65,8 +65,8 @@ void GeneratePythonScript::init() {
       boost::make_shared<StringListValidator>(saveVersions),
       "When to specify which algorithm version was used by Mantid.");
 
-  declareProperty("IgnoreGroups", false,
-                  "Whether or not groups need to be filtered for",
+  declareProperty("IgnoreTheseAlgs", std::vector<std::string>(),
+                  "A list of algorithms to filter out of the built script",
                   Direction::Input);
 }
 
@@ -79,7 +79,8 @@ void GeneratePythonScript::exec() {
   const std::string endTime = getProperty("EndTimestamp");
   const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
   const bool appendTimestamp = getProperty("AppendTimestamp");
-  const bool removeGroupAlgorithms = getProperty("IgnoreGroups");
+  const std::vector<std::string> ignoreTheseAlgs =
+      getProperty("IgnoreTheseAlgs");
 
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
@@ -111,7 +112,7 @@ void GeneratePythonScript::exec() {
     versionSpecificity = "all";
 
   ScriptBuilder builder(view, versionSpecificity, appendTimestamp,
-                        removeGroupAlgorithms);
+                        ignoreTheseAlgs);
   std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";
