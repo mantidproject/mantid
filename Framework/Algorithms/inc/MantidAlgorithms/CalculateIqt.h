@@ -76,7 +76,7 @@ private:
                                          const int seed);
   API::MatrixWorkspace_sptr setErrorsToStandardDeviation(
       const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
-  API::MatrixWorkspace_sptr CalculateIqt::setErrorsToZero(
+  API::MatrixWorkspace_sptr setErrorsToZero(
       const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
 };
 
