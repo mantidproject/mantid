@@ -10,7 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
-
 #include <Eigen/Dense>
 #include <boost/math/special_functions/pow.hpp>
 
