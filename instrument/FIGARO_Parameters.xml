@@ -5,7 +5,6 @@
 		<parameter name="deltaE-mode" type="string">
 			<value val="direct" />
 		</parameter>
-	</component-link>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="duration, monitor1.monsum, monitor2.monsum, PSD.detsum, time" />
@@ -25,4 +24,5 @@
 		<parameter name="sample_logs_fail_tolerances" type="string">
 			<value val="0, 0, 0, 0" />
 		</parameter>
+	</component-link>
 </parameter-file>
