@@ -55,7 +55,7 @@ private:
   MaskWorkspace *doClone() const override { return new MaskWorkspace(*this); }
   MaskWorkspace *doCloneEmpty() const override { return new MaskWorkspace(); }
 
-  IMaskWorkspace *doInterfaceClone() const override { return doClone(); };
+  IMaskWorkspace *doInterfaceClone() const override { return doClone(); }
   /// Clear original incorrect mask
   void clearMask();
 
