@@ -83,7 +83,7 @@ allYValuesAtIndex(const std::vector<MatrixWorkspace_sptr> &workspaces,
   return yValues;
 }
 
-std::size_t getWorkspaceNumberOfHistograms(MatrixWorkspace_sptr workspace) {
+int getWorkspaceNumberOfHistograms(MatrixWorkspace_sptr workspace) {
   return boost::numeric_cast<std::size_t>(workspace->getNumberHistograms());
 }
 
