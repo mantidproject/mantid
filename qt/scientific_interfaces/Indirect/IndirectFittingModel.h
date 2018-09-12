@@ -161,6 +161,8 @@ private:
   virtual std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(std::size_t index) const;
 
+  virtual std::string getResultXAxisUnit() const;
+
   bool isPreviousModelSelected() const;
 
   virtual IndirectFitOutput

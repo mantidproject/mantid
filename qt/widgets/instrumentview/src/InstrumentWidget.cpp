@@ -510,28 +510,30 @@ void InstrumentWidget::tabChanged(int) { updateInfoText(); }
 /**
  * Change color map button slot. This provides the file dialog box to select
  * colormap or sets it directly a string is provided
+ * @param cmapNameOrPath Name of a color map or a file path
  */
-void InstrumentWidget::changeColormap(const QString &filename) {
+void InstrumentWidget::changeColormap(const QString &cmapNameOrPath) {
   if (!m_instrumentActor)
     return;
-  QString fileselection;
-  // Use a file dialog if no parameter is passed
-  if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(
-        m_instrumentActor->getCurrentColorMap(), this);
-    if (fileselection.isEmpty())
+  const auto currentCMap = m_instrumentActor->getCurrentColorMap();
+  QString selection;
+  if (cmapNameOrPath.isEmpty()) {
+    // ask user
+    selection = ColorMap::chooseColorMap(currentCMap, this);
+    if (selection.isEmpty()) {
+      // assume cancelled request
       return;
+    }
   } else {
-    fileselection = QFileInfo(filename).absoluteFilePath();
-    if (!QFileInfo(fileselection).exists())
-      return;
+    selection = ColorMap::exists(cmapNameOrPath);
   }
 
-  if (!m_instrumentActor->getCurrentColorMap().isEmpty() &&
-      (fileselection == m_instrumentActor->getCurrentColorMap()))
+  if (selection == currentCMap) {
+    // selection matches current
     return;
+  }
+  m_instrumentActor->loadColorMap(selection);
 
-  m_instrumentActor->loadColorMap(fileselection);
   if (this->isVisible()) {
     setupColorMap();
     updateInstrumentView();
@@ -886,15 +888,7 @@ void InstrumentWidget::dragEnterEvent(QDragEnterEvent *e) {
 void InstrumentWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
-    QString text = e->mimeData()->text();
-    int endIndex = 0;
-    QStringList wsNames;
-    while (text.indexOf("[\"", endIndex) > -1) {
-      int startIndex = text.indexOf("[\"", endIndex) + 2;
-      endIndex = text.indexOf("\"]", startIndex);
-      wsNames.append(text.mid(startIndex, endIndex - startIndex));
-    }
-
+    QStringList wsNames = e->mimeData()->text().split("\n");
     foreach (const auto &wsName, wsNames) {
       if (this->overlay(wsName))
         e->accept();

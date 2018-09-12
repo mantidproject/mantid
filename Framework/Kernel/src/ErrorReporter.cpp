@@ -49,15 +49,17 @@ ErrorReporter::ErrorReporter(std::string application,
 
 /** Generates an error message and then calls an internet helper to send it
  */
-void ErrorReporter::sendErrorReport() {
+int ErrorReporter::sendErrorReport() {
   try {
     std::string message = this->generateErrorMessage();
 
     // send the report
     // Poco::ActiveResult<int> result = m_errorActiveMethod(message);
-    this->sendReport(message, m_url + "/api/error");
+    auto status = this->sendReport(message, m_url + "/api/error");
+    return status;
   } catch (std::exception &ex) {
     g_log.debug() << "Send error report failure. " << ex.what() << '\n';
+    return -1;
   }
 }
 
