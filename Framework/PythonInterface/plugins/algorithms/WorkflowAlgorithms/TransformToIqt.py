@@ -100,14 +100,17 @@ class TransformToIqt(PythonAlgorithm):
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value
-        self._number_points_per_bin = self.getProperty('BinReductionFactor').value
+        self._number_points_per_bin = self.getProperty(
+            'BinReductionFactor').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
-            self._parameter_table = getWSprefix(self._sample) + 'TransformToIqtParameters'
+            self._parameter_table = getWSprefix(
+                self._sample) + 'TransformToIqtParameters'
 
         self._calculate_errors = self.getProperty("CalculateErrors").value
-        self._number_of_iterations = self.getProperty("NumberOfIterations").value
+        self._number_of_iterations = self.getProperty(
+            "NumberOfIterations").value
         self._seed = self.getProperty("SeedValue").value
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
@@ -139,8 +142,7 @@ class TransformToIqt(PythonAlgorithm):
         """
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
-        workflow_prog.report('Croping Workspace')
-        
+        workflow_prog.report('Cropping Workspace')
         CropWorkspace(InputWorkspace=self._sample,
                       OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min,
@@ -151,7 +153,7 @@ class TransformToIqt(PythonAlgorithm):
         num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
-        workflow_prog.report('Attemping to Access IPF')
+        workflow_prog.report('Attempting to Access IPF')
         try:
             workflow_prog.report('Access IPF')
             instrument = mtd[self._sample].getInstrument()
@@ -173,15 +175,19 @@ class TransformToIqt(PythonAlgorithm):
         except (AttributeError, IndexError):
             workflow_prog.report('Resorting to Default')
             resolution = 0.0175
-            logger.warning('Could not get resolution from IPF, using default value: %f' % (resolution))
+            logger.warning(
+                'Could not get resolution from IPF, using default value: %f' %
+                (resolution))
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 
         if resolution_bins < 5:
-            logger.warning('Resolution curve has <5 points. Results may be unreliable.')
+            logger.warning(
+                'Resolution curve has <5 points. Results may be unreliable.')
 
         workflow_prog.report('Creating Parameter table')
-        param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
+        param_table = CreateEmptyTableWorkspace(
+            OutputWorkspace=self._parameter_table)
 
         workflow_prog.report('Populating Parameter table')
         param_table.addColumn('int', 'SampleInputBins')
@@ -225,14 +231,20 @@ class TransformToIqt(PythonAlgorithm):
         except ValueError:
             # A genuine error the shows that the two runs are incompatible
             raise
-        except:
-            # Checking could not be performed due to incomplete or no instrument
-            logger.warning('Could not check for matching analyser and reflection')
+        except BaseException:
+            # Checking could not be performed due to incomplete or no
+            # instrument
+            logger.warning(
+                'Could not check for matching analyser and reflection')
 
         # Process resolution data
         num_res_hist = CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
-            CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
+            CheckHistSame(
+                self._sample,
+                'Sample',
+                self._resolution,
+                'Resolution')
 
         calculateiqt_alg = self.createChildAlgorithm(name='CalculateIqt', startProgress=0.3,
                                                      endProgress=1.0, enableLogging=True)
