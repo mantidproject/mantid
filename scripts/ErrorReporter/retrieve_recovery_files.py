@@ -4,6 +4,7 @@ import shutil
 import hashlib
 import datetime
 
+
 class RetrieveRecoveryFiles(object):
     def __init__(self):
         pass
@@ -36,4 +37,3 @@ class RetrieveRecoveryFiles(object):
             shutil.make_archive(zip_file, 'zip', path)
             return zip_file, hash_value.hexdigest()
         return ''
-
