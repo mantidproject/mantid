@@ -137,8 +137,10 @@ class TransformToIqt(PythonAlgorithm):
         """
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
-        workflow_prog = Progress(self, start=0.0, end=0.3, nreports=8)
+        end_prog = 0.3 if self._calculate_errors else 0.9
+        workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
         workflow_prog.report('Croping Workspace')
+        
         CropWorkspace(InputWorkspace=self._sample,
                       OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min,
@@ -205,7 +207,7 @@ class TransformToIqt(PythonAlgorithm):
                        ('iqt_resolution_workspace', self._resolution),
                        ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))]
 
-        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.8,
+        log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.9,
                                             endProgress=1.0, enableLogging=True)
         log_alg.setProperty('Workspace', self._output_workspace)
         log_alg.setProperty('LogNames', [item[0] for item in sample_logs])
