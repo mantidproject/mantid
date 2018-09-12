@@ -35,14 +35,17 @@ ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
                              std::string email, std::string textBox)
-    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox, "") {}
+    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox,
+                    "") {}
 
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
-                             std::string email, std::string textBox, std::string recoveryFile)
+                             std::string email, std::string textBox,
+                             std::string recoveryFile)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email), m_textbox(textBox), m_recoveryFile(recoveryFile) {
+      m_share(share), m_name(name), m_email(email), m_textbox(textBox),
+      m_recoveryFile(recoveryFile) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
       "errorreports.rooturl");
   if (!url.is_initialized()) {

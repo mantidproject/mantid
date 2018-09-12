@@ -46,7 +46,8 @@ public:
   /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
-                std::string email, std::string textBox, std::string recoveryFile);
+                std::string email, std::string textBox,
+                std::string recoveryFile);
   /// Sends an error report
   int sendErrorReport();
 
