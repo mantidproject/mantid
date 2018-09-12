@@ -22,7 +22,13 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return [ "ReflectometryReductionOneAuto", "StartLiveData" ]
 
     def PyInit(self):
-        self.copyProperties('ReflectometryReductionOneAuto',[
+        self.declareProperty(name='Instrument', defaultValue='', direction=Direction.Input,
+                             validator=StringListValidator(['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']),
+                             doc='Instrument to find live value for.')
+        self.declareProperty(name='GetLiveValueAlgorithm', defaultValue='GetLiveInstrumentValue', direction=Direction.Input,
+                             doc='The algorithm to use to get live values from the instrument')
+
+        self._childProperties = [
             'InputWorkspace', 'SummationType', 'ReductionType','IncludePartialBins', 'AnalysisMode',
             'ProcessingInstructions','CorrectDetectors',
             'DetectorCorrectionType','WavelengthMin','WavelengthMax','I0MonitorIndex',
@@ -32,7 +38,8 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'SecondTransmissionRun','Params','StartOverlap','EndOverlap',
             'StrictSpectrumChecking','CorrectionAlgorithm','Polynomial','C0','C1',
             'MomentumTransferMin','MomentumTransferStep','MomentumTransferMax',
-            'PolarizationAnalysis','Pp','Ap','Rho','Alpha','Debug','OutputWorkspace'])
+            'PolarizationAnalysis','Pp','Ap','Rho','Alpha','Debug','OutputWorkspace']
+        self.copyProperties('ReflectometryReductionOneAuto', self._childProperties)
 
     def validateInputs(self):
         issues = {}
@@ -76,7 +83,9 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def setupInstrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
-        self.instrument = config.getInstrument().shortName()
+        self.instrument = self.getProperty('Instrument').value
+        if self.instrument == '':
+            self.instrument = config.getInstrument().shortName()
         LoadInstrument(Workspace=self.ws_name,RewriteSpectraMap=True,InstrumentName=self.instrument)
 
     def setupSampleLogs(self, liveValues):
@@ -103,10 +112,9 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                                Value=str(s2))
 
     def copyPropertyValuesTo(self, alg):
-        props = self.getProperties()
-        for prop in props:
-            value = self.getPropertyValue(prop.name)
-            alg.setPropertyValue(prop.name, value)
+        for prop in self._childProperties:
+            value = self.getPropertyValue(prop)
+            alg.setPropertyValue(prop, value)
 
     def getLiveValuesFromInstrument(self):
         # get values from instrument
@@ -134,6 +142,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         else:
             return 's2vg'
 
+    def getDoubleOrNone(self, propertyName):
+        value = self.getProperty(propertyName)
+        if value == Property.EMPTY_DBL:
+            return None
+        return value.value
+
     def liveValueList(self):
         """Get the list of required live value names and their unit type"""
         liveValues =  {'Theta' : LiveValue(None, 'deg'),
@@ -142,8 +156,12 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return liveValues
 
     def getLiveValueFromInstrument(self, logName):
-        from epics import caget
-        return caget('IN:' + self.instrument + ':CS:SB:' + logName, as_string=True)
+        algName = self.getProperty('GetLiveValueAlgorithm').value
+        alg = self.createChildAlgorithm(algName)
+        alg.setProperty('Instrument', self.instrument)
+        alg.setProperty('LogName', logName)
+        alg.execute()
+        return alg.getProperty("OutputValue").value
 
     def validateLiveValues(self, liveValues):
         for key in liveValues:

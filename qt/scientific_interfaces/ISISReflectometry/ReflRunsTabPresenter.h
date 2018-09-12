@@ -176,7 +176,7 @@ private:
   void stopMonitor();
   void startMonitorComplete();
   std::string liveDataReductionAlgorithm();
-  std::string liveDataReductionOptions();
+  std::string liveDataReductionOptions(const std::string &instrument);
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
   void handleError(const std::string &message, const std::exception &e);

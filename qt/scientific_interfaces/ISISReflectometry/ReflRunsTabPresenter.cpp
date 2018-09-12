@@ -820,12 +820,17 @@ std::string ReflRunsTabPresenter::liveDataReductionAlgorithm() {
   return "ReflectometryReductionOneLiveData";
 }
 
-std::string ReflRunsTabPresenter::liveDataReductionOptions() {
+std::string
+ReflRunsTabPresenter::liveDataReductionOptions(const std::string &instrument) {
   // Get the properties for the reduction algorithm from the settings tab. We
   // don't have a group associated with live data. This is not ideal but for
   // now just use the first group.
   int const group = 0;
   auto options = convertOptionsFromQMap(getProcessingOptions(group));
+  // Add other required input properties to the live data reduction algorithnm
+  options["Instrument"] = QString::fromStdString(instrument);
+  options["GetLiveValueAlgorithm"] = "GetLiveInstrumentValue";
+  // Convert the properties to a string to pass to the algorithm
   auto const optionsString =
       convertMapToString(options, ';', false).toStdString();
   return optionsString;
@@ -843,7 +848,8 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("AccumulationMethod", "Replace");
   alg->setProperty("UpdateEvery", "10");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
-  alg->setProperty("PostProcessingProperties", liveDataReductionOptions());
+  alg->setProperty("PostProcessingProperties",
+                   liveDataReductionOptions(instrument));
   alg->setProperty("RunTransitionBehavior", "Restart");
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {
