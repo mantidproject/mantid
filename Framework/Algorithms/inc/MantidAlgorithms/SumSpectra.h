@@ -110,6 +110,7 @@ private:
   // if calculating additional workspace with specially weighted averages is
   // necessary
   bool m_calculateWeightedSum{false};
+  bool m_multiplyByNumSpec{true};
 };
 
 } // namespace Algorithms

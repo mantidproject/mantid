@@ -64,7 +64,7 @@ public:
   /// Constructor
   MayersSampleCorrectionStrategy(
       MayersSampleCorrectionStrategy::Parameters params,
-      const Mantid::HistogramData::Histogram &inputHist);
+      HistogramData::Histogram inputHist);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrectionStrategy();
@@ -92,7 +92,7 @@ private:
   /// A copy of the correction parameters
   const Parameters m_pars;
   // Holds histogram to process
-  const HistogramData::Histogram &m_histogram;
+  const HistogramData::Histogram m_histogram;
   const HistogramData::Points m_tofVals;
   /// Holds the number of Y vals to process
   const size_t m_histoYSize;
