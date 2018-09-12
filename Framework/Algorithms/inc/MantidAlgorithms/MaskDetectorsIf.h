@@ -69,6 +69,8 @@ private:
   std::string allowedValuesStatement(const std::vector<std::string> &vals);
   // Typedef for det to value map
   using udet2valuem = std::unordered_map<detid_t, bool>;
+  void outputToCalFile();
+  void outputToWorkspace();
   /// Get the properties
   void retrieveProperties();
   /// Create a new cal file

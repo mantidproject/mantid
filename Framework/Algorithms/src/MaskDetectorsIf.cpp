@@ -73,7 +73,6 @@ std::map<std::string, std::string> MaskDetectorsIf::validateInputs() {
  */
 void MaskDetectorsIf::exec() {
   retrieveProperties();
-  const size_t nspec = m_inputW->getNumberHistograms();
 
   if (isDefault("InputCalFile") && isDefault("OutputWorkspace")) {
     g_log.error() << "No InputCalFle or OutputWorkspace specified; the "
@@ -81,62 +80,69 @@ void MaskDetectorsIf::exec() {
     return;
   }
   if (!isDefault("InputCalFile")) {
-    udet2valuem umap;
-    for (size_t i = 0; i < nspec; ++i) {
-      // Get the list of udets contributing to this spectra
-      const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
-
-      if (dets.empty())
-        continue;
-      else {
-        const double val = m_inputW->y(i)[0];
-        if (m_compar_f(val, value)) {
-          for (const auto det : dets) {
-            umap.emplace(det, m_select_on);
-          }
-        }
-      }
-      const double p = static_cast<double>(i) / static_cast<double>(nspec);
-      progress(p, "Generating detector map");
-    }
-    const std::string oldf = getProperty("InputCalFile");
-    const std::string newf = getProperty("OutputCalFile");
-    progress(0.99, "Creating new cal file");
-    createNewCalFile(oldf, newf, umap);
+    outputToCalFile();
   }
   if (!isDefault("OutputWorkspace")) {
-    progress(0.99, "Creating mask workspace");
-    API::MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
-    if (outputW != m_inputW)
-      outputW = m_inputW->clone();
-    std::vector<int> masked;
-    masked.reserve(m_inputW->detectorInfo().size());
-    const size_t nspec = m_inputW->getNumberHistograms();
-    for (size_t i = 0; i < nspec; ++i) {
-      // Get the list of dets contributing to this spectra
-      const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
+    outputToWorkspace();
+  }
+}
 
-      if (dets.empty())
-        continue;
-      else {
-        const auto val = m_inputW->y(i)[0];
-        const auto select = m_compar_f(val, value);
-        if (m_select_on == select) {
-          for (const auto det : dets) {
-            masked.emplace_back(det);
-          }
+void MaskDetectorsIf::outputToCalFile() {
+  const size_t nspec = m_inputW->getNumberHistograms();
+  udet2valuem umap;
+  for (size_t i = 0; i < nspec; ++i) {
+    // Get the list of udets contributing to this spectra
+    const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
+
+    if (dets.empty())
+      continue;
+    else {
+      const double val = m_inputW->y(i)[0];
+      if (m_compar_f(val, value)) {
+        for (const auto det : dets) {
+          umap.emplace(det, m_select_on);
         }
       }
-      const double p = static_cast<double>(i) / static_cast<double>(nspec);
-      progress(p, "Generating detector map");
     }
-    auto mask = createChildAlgorithm("MaskInstrument");
-    mask->setProperty("InputWorkspace", outputW);
-    mask->setProperty("DetectorIDs", masked);
-    mask->setProperty("OutputWorkspace", outputW);
-    mask->execute();
-    setProperty("OutputWorkspace", outputW);
+    const double p = static_cast<double>(i) / static_cast<double>(nspec);
+    progress(p, "Generating detector map");
   }
+  const std::string oldf = getProperty("InputCalFile");
+  const std::string newf = getProperty("OutputCalFile");
+  progress(0.99, "Creating new cal file");
+  createNewCalFile(oldf, newf, umap);
+}
+
+void MaskDetectorsIf::outputToWorkspace() {
+  API::MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
+  if (outputW != m_inputW)
+    outputW = m_inputW->clone();
+  std::vector<int> masked;
+  masked.reserve(m_inputW->detectorInfo().size());
+  const size_t nspec = m_inputW->getNumberHistograms();
+  for (size_t i = 0; i < nspec; ++i) {
+    const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
+    if (dets.empty())
+      continue;
+    else {
+      const auto val = m_inputW->y(i)[0];
+      const auto select = m_compar_f(val, value);
+      if (m_select_on == select) {
+        for (const auto det : dets) {
+          masked.emplace_back(det);
+        }
+      }
+    }
+    const double p = static_cast<double>(i) / static_cast<double>(nspec);
+    progress(p, "Generating detector map");
+  }
+  progress(0.99, "Creating mask workspace");
+  auto mask = createChildAlgorithm("MaskInstrument");
+  mask->setProperty("InputWorkspace", outputW);
+  mask->setProperty("DetectorIDs", masked);
+  mask->setProperty("OutputWorkspace", outputW);
+  mask->execute();
+  setProperty("OutputWorkspace", outputW);
 }
 
 /**
