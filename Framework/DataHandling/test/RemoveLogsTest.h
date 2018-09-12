@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/RemoveLogs.h"
 #include "MantidDataObjects/Workspace2D.h"

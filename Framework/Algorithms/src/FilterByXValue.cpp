@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/FilterByXValue.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {

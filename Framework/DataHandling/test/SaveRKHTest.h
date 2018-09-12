@@ -1,6 +1,7 @@
 #ifndef SAVERKHTEST_H_
 #define SAVERKHTEST_H_
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
