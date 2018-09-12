@@ -116,9 +116,7 @@ def get_mode_specific_variables(is_texture_mode, is_save_all):
         texture_mode_dict.update(texture_mode_on)
     else:
         texture_mode_dict.update(texture_mode_off)
-    if is_save_all:
-        save_all = {"save_all": True}
-        texture_mode_dict.update(save_all)
+    texture_mode_dict.update({"save_all": is_save_all})
     return texture_mode_dict
 
 

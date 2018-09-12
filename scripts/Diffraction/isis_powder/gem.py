@@ -68,11 +68,9 @@ class Gem(AbstractInst):
             maud_filename = filename_stub + "_MAUD.gem"
             out_file_names["maud_filename"] = maud_filename
 
-        if hasattr(self._inst_settings, "texture_mode"):
-
-            if self._inst_settings.texture_mode:
-                angles_filename = filename_stub + "_grouping.new"
-                out_file_names["angles_filename"] = angles_filename
+        if hasattr(self._inst_settings, "texture_mode") and self._inst_settings.texture_mode:
+            angles_filename = filename_stub + "_grouping.new"
+            out_file_names["angles_filename"] = angles_filename
 
         if self._inst_settings.save_maud_calib:
             maud_calib_filename = filename_stub + ".maud"
@@ -171,9 +169,7 @@ class Gem(AbstractInst):
     def _switch_texture_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "texture_mode"):
             mode = self._inst_settings.texture_mode
-        save_all = True
-        if hasattr(self._inst_settings, "save_all"):
-            save_all = False
+        save_all = not hasattr(self._inst_settings, "save_all")
         self._inst_settings.update_attributes(advanced_config=gem_advanced_config.get_mode_specific_variables(mode,
                                                                                                               save_all),
                                               suppress_warnings=True)
