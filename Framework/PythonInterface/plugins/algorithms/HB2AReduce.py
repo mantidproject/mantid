@@ -81,13 +81,16 @@ class HB2AReduce(PythonAlgorithm):
             filenames = ['/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(ipts, exp, scan)
                          for scan in self.getProperty("ScanNumbers").value]
 
+        metadata = None
+        data = None
+
         # Read in data array and append all files
-        for n, filename in enumerate(filenames):
+        for filename in filenames:
             # Read in all lines once
             with open(filename) as f:
                 lines = f.readlines()
 
-            if n==0:
+            if metadata is None:
                 # Read in metadata from first file only file
                 metadata = dict([np.char.strip(re.split('#(.*?)=(.*)', line, flags=re.U)[1:3])
                                  for line in lines if re.match('^#.*=', line)])
@@ -104,12 +107,10 @@ class HB2AReduce(PythonAlgorithm):
             try:
                 d = np.loadtxt(lines[header:], ndmin=1, dtype={'names': names, 'formats':[float]*len(names)})
             except (ValueError, IndexError):
-                raise RuntimeError("Count not read {}, file likely malformed".format(filename))
+                raise RuntimeError("Could not read {}, file likely malformed".format(filename))
 
-            try:
-                data = np.append(data, d)
-            except NameError:
-                data = d
+            # Accumulate data
+            data = d if data is None else np.append(data, d)
 
         # Get any masked detectors
         detector_mask = self.get_detector_mask(exp, indir)
@@ -137,7 +138,7 @@ class HB2AReduce(PythonAlgorithm):
                 y, e = self.process(counts, scale, monitor, vanadium_count, vanadium_monitor, vcorr)
             NSpec=1
 
-        createWS_alg = self.createChildAlgorithm("CreateWorkspace")
+        createWS_alg = self.createChildAlgorithm("CreateWorkspace", enableLogging=False)
         createWS_alg.setProperty("DataX", x)
         createWS_alg.setProperty("DataY", y)
         createWS_alg.setProperty("DataE", e)
@@ -189,8 +190,10 @@ class HB2AReduce(PythonAlgorithm):
             else:
                 vcorr_filename = vanadium_filename
         else: # Find adjacent vcorr file
+            # m1 is the monochromator angle
             # m1 = 0 -> Ge 115, 1.54A
             # m1 = 9.45 -> Ge 113, 2.41A
+            # colltrans is the collimator position, whether in or out of the beam
             # colltrans = 0 -> IN
             # colltrans = +/-80 -> OUT
             vcorr_filename = 'HB2A_{}__Ge_{}_{}_vcorr.txt'.format(exp,
@@ -211,7 +214,7 @@ class HB2AReduce(PythonAlgorithm):
         else:
             y = counts/vanadium_count[:, np.newaxis]*vanadium_monitor/monitor
             e = np.sqrt(1/counts + 1/vanadium_count[:, np.newaxis] + 1/vanadium_monitor + 1/monitor)*y
-        return y*scale, e*scale
+        return np.nan_to_num(y*scale), np.nan_to_num(e*scale)
 
     def process_binned(self, counts, x, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
         """Bin the data"""
@@ -236,14 +239,14 @@ class HB2AReduce(PythonAlgorithm):
 
         old_settings = np.seterr(all='ignore') # otherwise it will complain about divide by zero
         if vcorr is not None:
-            y = np.nan_to_num(counts_binned/vcorr_binned*number_binned/monitor_binned)[1:]
-            e = np.nan_to_num(np.sqrt(1/counts_binned)[1:])*y
+            y = (counts_binned/vcorr_binned*number_binned/monitor_binned)[1:]
+            e = (np.sqrt(1/counts_binned)[1:])*y
         else:
-            y = np.nan_to_num(counts_binned/vanadium_binned*vanadium_monitor_binned/monitor_binned)[1:]
-            e = np.nan_to_num(np.sqrt(1/counts_binned + 1/vanadium_binned + 1/vanadium_monitor + 1/monitor_binned)[1:])*y
+            y = (counts_binned/vanadium_binned*vanadium_monitor_binned/monitor_binned)[1:]
+            e = (np.sqrt(1/counts_binned + 1/vanadium_binned + 1/vanadium_monitor + 1/monitor_binned)[1:])*y
         np.seterr(**old_settings)
         x = bins
-        return x, y*scale, e*scale
+        return x, np.nan_to_num(y*scale), np.nan_to_num(e*scale)
 
     def add_metadata(self, ws, metadata, data):
         """Adds metadata to the workspace"""
