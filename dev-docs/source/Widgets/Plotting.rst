@@ -17,7 +17,7 @@ AxisChanger input boxes are automatically updated when the selected plot changes
 
 The design is such that the user has the ability to handle all matplotlib objects,
 whilst the plotting and axis changing is handled internally.
-For this reason, only functions that are *absolutely necesssary* should be exposed, as this maintains simplicity for the user of the wrapper.
+For this reason, only functions that are *absolutely necessary* should be exposed, as this maintains simplicity for the user of the wrapper.
 
 Functionality
 ^^^^^^^^^^^^^
@@ -78,7 +78,7 @@ Exposes required functions from ``plotting_view.py``.
         :raises KeyError: if the subplot name doesn't exist
         """
         return self.view.get_subplot(name)
-*Functions should only be exposed if they are necesssary for use with the plotting interface.*
+*Functions should only be exposed if they are necessary for use with the plotting interface.*
 
 Plotting View
 """""""""""""
