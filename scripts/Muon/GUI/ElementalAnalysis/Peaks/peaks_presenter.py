@@ -5,3 +5,4 @@ class PeaksPresenter(object):
         self.minor = self.view.minor
         self.gamma = self.view.gamma
         self.electron = self.view.electron
+        self.peak_checkboxes = self.view.peak_checkboxes

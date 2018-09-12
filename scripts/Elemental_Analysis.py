@@ -286,10 +286,25 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
     def table_right_clicked(self, item):
         self.element_widgets[item.symbol].view.show()
 
+    def _clear_lines(self, lines):
+        for line in lines:
+            line.remove()
+            del line
+        return []
+
+    def _clear_lines_after_data_file_selected(self):
+        for element in self.element_lines.keys():
+            self._remove_element_lines(element)
+        self.electron_lines = self._clear_lines(self.electron_lines)
+        self.gamma_lines = self._clear_lines(self.gamma_lines)
+        for checkbox in self.peaks.peak_checkboxes:
+            checkbox.setChecked(False)
+
     def select_data_file(self):
         filename = str(QtGui.QFileDialog.getOpenFileName())
         if filename:
             self.ptable.set_peak_datafile(filename)
+        self._clear_lines_after_data_file_selected()
         self._generate_element_widgets()
         self._generate_element_data()
 
