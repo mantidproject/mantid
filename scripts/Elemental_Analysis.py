@@ -191,6 +191,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
+        self.plotting.view.setWindowTitle(str(last_run))
         for plot in self.plotting.get_subplots():
             self.plotting.remove_subplot(plot)
         for detector in self.detectors.detectors:
