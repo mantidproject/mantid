@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -471,36 +472,6 @@ public:
     TS_ASSERT_EQUALS(point1In, point1Out);
   }
 
-  void test_sum_transmission_workspaces() {
-    MatrixWorkspace_sptr first = m_TOF->clone();
-    MatrixWorkspace_sptr second = m_TOF->clone();
-    MatrixWorkspace_sptr third = m_TOF->clone();
-    MatrixWorkspace_sptr fourth = m_TOF->clone();
-
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->addWorkspace(first);
-    group->addWorkspace(second);
-    group->addWorkspace(third);
-    group->addWorkspace(fourth);
-
-    ReflectometryReductionOneAuto2 alg;
-    auto sum = alg.sumTransmissionWorkspaces(group);
-
-    // Input workspaces remain the same
-    TS_ASSERT_EQUALS(first->blocksize(), 20);
-    TS_ASSERT_EQUALS(second->blocksize(), 20);
-    TS_ASSERT_EQUALS(third->blocksize(), 20);
-    TS_ASSERT_EQUALS(fourth->blocksize(), 20);
-    TS_ASSERT_EQUALS(first->y(0)[0], 2);
-    TS_ASSERT_EQUALS(second->y(0)[0], 2);
-    TS_ASSERT_EQUALS(third->y(0)[0], 2);
-    TS_ASSERT_EQUALS(fourth->y(0)[0], 2);
-
-    // Output workspace
-    TS_ASSERT_EQUALS(sum->blocksize(), 20);
-    TS_ASSERT_DELTA(sum->y(0)[0], 4 * 2, 1e-6);
-  }
-
   void test_IvsQ_linear_binning() {
 
     ReflectometryReductionOneAuto2 alg;
@@ -893,6 +864,205 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.8, 0.0001);
     TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.7, 0.0001);
     TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.6, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_one_transmissionrun() {
+    const double startX = 1000;
+    const int nBins = 3;
+    const double deltaX = 1000;
+    const std::vector<double> yValues1 = {1, 2, 3};
+    const std::vector<double> yValues2 = {4, 5, 6};
+    MatrixWorkspace_sptr input =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("input", input);
+
+    MatrixWorkspace_sptr first =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("first", first);
+    MatrixWorkspace_sptr second =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    ADS.addOrReplace("second", second);
+
+    GroupWorkspaces mkGroup;
+    mkGroup.initialize();
+    mkGroup.setProperty("InputWorkspaces", "input");
+    mkGroup.setProperty("OutputWorkspace", "inputWSGroup");
+    mkGroup.execute();
+
+    mkGroup.setProperty("InputWorkspaces", "first,second");
+    mkGroup.setProperty("OutputWorkspace", "transWSGroup");
+    mkGroup.execute();
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspace", "inputWSGroup");
+    alg.setProperty("WavelengthMin", 0.0000000001);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 2.8022, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 11.2088, 0.0001);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.3484, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.9207, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1946, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.7787, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_polarization_with_transmissionrun() {
+    const double startX = 1000;
+    const int nBins = 3;
+    const double deltaX = 1000;
+    const std::vector<double> yValues1 = {1, 2, 3};
+    const std::vector<double> yValues2 = {4, 5, 6};
+    MatrixWorkspace_sptr input =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("input", input);
+
+    MatrixWorkspace_sptr input2 =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("input2", input2);
+
+    MatrixWorkspace_sptr first =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("first", first);
+    MatrixWorkspace_sptr second =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    ADS.addOrReplace("second", second);
+
+    GroupWorkspaces mkGroup;
+    mkGroup.initialize();
+    mkGroup.setProperty("InputWorkspaces", "input,input2");
+    mkGroup.setProperty("OutputWorkspace", "inputWSGroup");
+    mkGroup.execute();
+
+    mkGroup.setProperty("InputWorkspaces", "first,second");
+    mkGroup.setProperty("OutputWorkspace", "transWSGroup");
+    mkGroup.execute();
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspace", "inputWSGroup");
+    alg.setProperty("WavelengthMin", 0.0000000001);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    alg.setProperty("Pp", "1");
+    alg.setProperty("Rho", "1");
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 2.8022, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 11.2088, 0.0001);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.3484, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.9207, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1946, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.7787, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
+
+    ADS.clear();
+  }
+
+  void test_second_transmissionrun() {
+    const double startX = 1000;
+    const int nBins = 3;
+    const double deltaX = 1000;
+    const std::vector<double> yValues1 = {1, 2, 3};
+    const std::vector<double> yValues2 = {4, 5, 6};
+    MatrixWorkspace_sptr input =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("input", input);
+
+    MatrixWorkspace_sptr first =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("first", first);
+    MatrixWorkspace_sptr second =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    ADS.addOrReplace("second", second);
+
+    MatrixWorkspace_sptr first2 =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues1);
+    ADS.addOrReplace("first2", first2);
+    MatrixWorkspace_sptr second2 =
+        createWorkspaceSingle(startX, nBins, deltaX, yValues2);
+    ADS.addOrReplace("second2", second2);
+
+    GroupWorkspaces mkGroup;
+    mkGroup.initialize();
+    mkGroup.setProperty("InputWorkspaces", "input");
+    mkGroup.setProperty("OutputWorkspace", "inputWSGroup");
+    mkGroup.execute();
+
+    mkGroup.setProperty("InputWorkspaces", "first,second");
+    mkGroup.setProperty("OutputWorkspace", "transWSGroup");
+    mkGroup.execute();
+
+    mkGroup.setProperty("InputWorkspaces", "first2,second2");
+    mkGroup.setProperty("OutputWorkspace", "transWSGroup2");
+    mkGroup.execute();
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspace", "inputWSGroup");
+    alg.setProperty("WavelengthMin", 0.0000000001);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.setPropertyValue("FirstTransmissionRun", "transWSGroup");
+    alg.setPropertyValue("SecondTransmissionRun", "transWSGroup2");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outLamGroup = retrieveOutWS("IvsLam");
+
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[0], 2.8022, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->x(0)[3], 11.2088, 0.0001);
+
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.3484, 0.0001);
+    TS_ASSERT_DELTA(outQGroup[0]->y(0)[2], 0.9207, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[0], 0.1946, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->x(0)[3], 0.7787, 0.0001);
+
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
+    TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
 
     ADS.clear();
   }

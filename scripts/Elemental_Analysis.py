@@ -277,6 +277,34 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             widget.on_finished(self._update_peak_data)
             self.element_widgets[element] = widget
 
+        self.element_widgets = {}
+        self.element_data = {}
+        self._generate_element_widgets()
+        self._generate_element_data()
+
+    def _generate_element_data(self):
+        for element in self.ptable.peak_data:
+            if element in ["Gammas", "Electrons"]:
+                continue
+            try:
+                self.element_data[element] = self.ptable.peak_data[element]["Primary"].copy(
+                )
+            except KeyError:
+                continue
+
+    def _update_peak_data(self, element, data):
+        self.element_data[element] = data
+
+    def _generate_element_widgets(self):
+        self.element_widgets = {}
+        for element in self.ptable.peak_data:
+            if element in ["Gammas", "Electrons"]:
+                continue
+            data = self.ptable.element_data(element)
+            widget = PeakSelectorPresenter(PeakSelectorView(data, element))
+            widget.on_finished(self._update_peak_data)
+            self.element_widgets[element] = widget
+
     def table_left_clicked(self, item):
         if self.ptable.is_selected(item.symbol):
             self._add_element_lines(

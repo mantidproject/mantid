@@ -25,6 +25,8 @@ from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion,
                            IntArrayProperty, FloatArrayProperty,
                            FloatArrayLengthValidator)
 
+DEPRECATION_NOTICE = """BASISDiffraction is deprecated (on 2018-08-27).
+Instead, use BASISCrystalDiffraction or BASISPowderReduction."""
 
 _SOLID_ANGLE_WS_ = '/tmp/solid_angle_diff.nxs'
 _FLUX_WS_ = '/tmp/int_flux.nxs'
@@ -101,7 +103,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
 
     @classmethod
     def summary(self):
-        return "Multiple-file BASIS reduction for diffraction detectors."
+        return DEPRECATION_NOTICE
 
     def seeAlso(self):
         return [ "AlignDetectors","DiffractionFocussing","SNSPowderReduction" ]
@@ -218,6 +220,10 @@ class BASISDiffraction(DataProcessorAlgorithm):
             self.setPropertySettings(a_property, crystal_diffraction_enabled)
 
     def PyExec(self):
+
+        # Exit with deprecation notice
+        self.log().error(DEPRECATION_NOTICE)
+
         # Facility and database configuration
         config_new_options = {'default.facility': 'SNS',
                               'default.instrument': 'BASIS',

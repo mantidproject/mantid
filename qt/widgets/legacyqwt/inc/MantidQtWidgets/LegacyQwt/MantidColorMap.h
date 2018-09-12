@@ -5,10 +5,8 @@
 // Includes
 //---------------------------------------------
 #include "DllOption.h"
-#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "qwt_color_map.h"
-#include <boost/shared_ptr.hpp>
 
 /**
    The class inherits from QwtColorMap and implements reading a color color map
@@ -38,6 +36,10 @@
 class EXPORT_OPT_MANTIDQT_LEGACYQWT MantidColorMap : public QwtColorMap {
 
 public:
+  static QString chooseColorMap(const QString &previousFile, QWidget *parent);
+  static QString exists(const QString &filename);
+
+public:
   MantidColorMap();
   explicit MantidColorMap(const QString &filename,
                           GraphOptions::ScaleType type);
@@ -51,8 +53,6 @@ public:
   double getNthPower() const { return m_nth_power; };
 
   bool loadMap(const QString &filename);
-
-  static QString loadMapDialog(QString previousFile, QWidget *parent);
 
   void setNanColor(int r, int g, int b);
 
