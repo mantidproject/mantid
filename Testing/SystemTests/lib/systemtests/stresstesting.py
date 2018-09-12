@@ -883,7 +883,7 @@ class TestManager(object):
 
                     # Search for '0123 or "0123
                     for so in string_quotation_mark:
-                        p = re.compile(so+r"\d\d\d\d")
+                        p = re.compile(so+r"\d{4}")
                         for m in p.finditer(line):
                             # Iterate forwards to find the closing quotation mark
                             for i in range(m.end(),len(line)):
@@ -896,7 +896,7 @@ class TestManager(object):
 
                     # Search for 0123' or 0123"
                     for so in string_quotation_mark:
-                        p = re.compile(r"\d\d\d\d"+so)
+                        p = re.compile(r"\d{4}"+so)
                         for m in p.finditer(line):
                             # Iterate backwards to find the opening quotation mark
                             for i in range(m.start(),1,-1):
