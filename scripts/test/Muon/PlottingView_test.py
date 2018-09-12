@@ -1,5 +1,8 @@
 import unittest
 
+import os
+os.environ["QT_API"] = "pyqt"  # noqa E402
+
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 
@@ -26,7 +29,7 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         self.plots_return_value = mock.Mock()
         self.plots_return_value.set_position = mock.Mock()
         self.plots_return_value.set_subplotspec = mock.Mock()
-        self.plots_return_value.clear = mock.Mock()
+        self.plots_return_value.remove = mock.Mock()
 
         self.view.figure = mock.Mock()
         self.view.figure.tight_layout = mock.Mock()
@@ -69,41 +72,14 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def test_redo_layout_with_plots_not_equal_to_zero(self):
         self.view.plots = [mock.Mock() for i in range(3)]
-        self.view.call_plot_method(
-            self.mock_name,
-            self.mock_func,
-            *self.mock_args)
-        self.mock_func.assert_called_once_with(*self.mock_args)
+        self.view.add_moveable_vline(*[mock.Mock() for i in range(4)])
         self.assertEquals(self.view.figure.tight_layout.call_count, 1)
         self.assertEquals(self.view.canvas.draw.call_count, 1)
 
     def test_redo_layout_with_plots_equal_to_zero(self):
         self.view.plots = []
-        self.view.call_plot_method(
-            self.mock_name,
-            self.mock_func,
-            *self.mock_args)
-        self.mock_func.assert_called_once_with(*self.mock_args)
+        self.view.add_moveable_vline(*[mock.Mock() for i in range(4)])
         self.assertEquals(self.view.canvas.draw.call_count, 1)
-
-    def test_save_addition_called_once(self):
-        self.view.call_plot_method(
-            self.mock_name,
-            self.mock_func,
-            *self.mock_args)
-        self.mock_args.insert(0, self.mock_func)
-        output = tuple([self.mock_name, tuple(self.mock_args), {}])
-        self.assertEquals(
-            self.view.plot_additions[self.mock_name][0][1:], output)
-
-    def test_save_addition_called_twice(self):
-        for i in range(2):
-            self.view.call_plot_method(
-                self.mock_name, self.mock_func, *self.mock_args)
-        self.mock_args.insert(0, self.mock_func)
-        output = (self.mock_name, tuple(self.mock_args), {})
-        self.assertEquals(
-            self.view.plot_additions[self.mock_name][1][1:], output)
 
     def test_silent_checkbox_check(self):
         test_state = mock.Mock()
@@ -233,25 +209,12 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
         args = [self.plot_name, self.plots_return_value, True]
         self.view._modify_errors_list = mock.Mock()
         self.view.plot = mock.Mock()
-        self.view._replay_additions = mock.Mock()
+        self.view.workspace_plots[args[0]] = [self.plots_return_value]
         self.view._change_plot_errors(*args)
         self.view._modify_errors_list.assert_called_once_with(*args[::2])
-        self.assertEquals(self.plots_return_value.clear.call_count, 1)
+        self.assertEquals(self.plots_return_value.remove.call_count, 1)
         self.view.plot.assert_called_once_with(
             self.plot_name, self.plots_return_value)
-        self.view._replay_additions.assert_called_once_with(self.plot_name)
-
-    def test_replay_additions(self):
-        self.view.plot_additions = {
-            self.plot_name: [
-                (self.mock_func,
-                 self.mock_name,
-                 self.mock_args,
-                 self.mock_kwargs)]}
-        self.view._replay_additions(self.plot_name)
-        args = [self.view, self.mock_name]
-        args.extend(self.mock_args)
-        self.mock_func.assert_called_once_with(*args)
 
     def test_set_positions(self):
         self.view._set_positions([[0, 0]])
@@ -319,8 +282,6 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
 
         self.plot_name = "test plot"
         self.plots_return_value = mock.Mock()
-        self.plots_return_value.axvline = mock.Mock()
-        self.plots_return_value.ahvline = mock.Mock()
 
         self.view.figure = mock.Mock()
         self.view.figure.tight_layout = mock.Mock()
@@ -359,11 +320,13 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
 
     @mock.patch("mantid.plots.plotfunctions.errorbar")
     def test_plot_workspace_errors(self, error_bar):
+        error_bar.return_value = tuple([[] for i in range(3)])
         self.view.plot_workspace_errors(self.plot_name, self.mock_workspace)
         self.assertEquals(error_bar.call_count, 1)
 
     @mock.patch("mantid.plots.plotfunctions.plot")
     def test_plot_workspace(self, plot):
+        plot.return_value = tuple([mock.Mock()])
         self.view.plot_workspace(self.plot_name, self.mock_workspace)
         self.assertEquals(plot.call_count, 1)
 
@@ -392,8 +355,7 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view.remove_subplot(self.plot_name)
         self.view.figure.delaxes.assert_called_once_with(
             self.plots_return_value)
-        for _dict in [self.view.plots, self.view.workspaces,
-                      self.view.plot_additions]:
+        for _dict in [self.view.plots, self.view.workspaces]:
             self.assertEquals(_dict, {})
         self.view._update_gridspec.assert_called_once_with(
             len(self.view.plots))
@@ -402,33 +364,6 @@ class PlottingViewPlotFunctionsTests(unittest.TestCase):
         self.view.plots = {}
         with self.assertRaises(KeyError):
             self.view.remove_subplot(self.plot_name)
-
-    def test_call_plot_method(self):
-        self.view.call_plot_method(
-            self.mock_name,
-            self.mock_func,
-            *self.mock_args)
-        self.mock_func.assert_called_once_with(*self.mock_args)
-
-    def test_add_vline(self):
-        self.view.add_vline(self.plot_name, *self.mock_args)
-        self.plots_return_value.axvline.assert_called_once_with(
-            *self.mock_args)
-
-    def test_add_vline_raises_key_error(self):
-        self.view.plots = {}
-        with self.assertRaises(KeyError):
-            self.view.add_hline(self.mock_name, *self.mock_args)
-
-    def test_add_hline(self):
-        self.view.add_hline(self.plot_name, *self.mock_args)
-        self.plots_return_value.axhline.assert_called_once_with(
-            *self.mock_args)
-
-    def test_add_hline_raises_key_error(self):
-        self.view.plots = {}
-        with self.assertRaises(KeyError):
-            self.view.add_vline(self.mock_name, *self.mock_args)
 
     def test_add_moveable_vline(self):
         """

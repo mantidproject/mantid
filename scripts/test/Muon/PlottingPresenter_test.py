@@ -14,6 +14,8 @@ class PlottingPresenterTest(unittest.TestCase):
     def setUp(self):
         view = mock.create_autospec(PlotView)
         self.presenter = PlotPresenter(view)
+        self.presenter.view.canvas = mock.Mock()
+        self.presenter.view.canvas.draw = mock.Mock()
         self.view = self.presenter.view
 
         self.mock_name = mock.Mock()
@@ -41,23 +43,9 @@ class PlottingPresenterTest(unittest.TestCase):
         self.presenter.remove_subplot(self.mock_name)
         self.view.remove_subplot.assert_called_with(self.mock_name)
 
-    def test_call_plot_method(self):
-        self.presenter.call_plot_method(
-            self.mock_name,
-            self.mock_func,
-            *self.mock_arbitrary_args)
-        self.view.call_plot_method.assert_called_with(
-            self.mock_name, self.mock_func, *self.mock_arbitrary_args)
-
-    def test_add_vline(self):
-        self.presenter.add_vline(self.mock_name, *self.mock_arbitrary_args)
-        self.view.add_vline.assert_called_with(
-            self.mock_name, *self.mock_arbitrary_args)
-
-    def test_add_hline(self):
-        self.presenter.add_hline(self.mock_name, *self.mock_arbitrary_args)
-        self.view.add_hline.assert_called_with(
-            self.mock_name, *self.mock_arbitrary_args)
+    def test_update_canvas(self):
+        self.presenter.update_canvas()
+        self.view.canvas.draw.assert_called_once_with()
 
     def test_add_moveable_vline(self):
         """
