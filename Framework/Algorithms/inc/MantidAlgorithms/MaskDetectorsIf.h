@@ -51,14 +51,13 @@ public:
   const std::string name() const override { return "MaskDetectorsIf"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Adjusts the selected field for a CalFile depending on the values "
-           "in the input workspace.";
+    return "Masks detectors depending on the values in the input workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override {
-    return {"MaskDetectors"};
+    return {"MaskDetectors", "ClearMaskedSpectra"};
   }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override {
@@ -70,24 +69,22 @@ private:
   std::string allowedValuesStatement(const std::vector<std::string> &vals);
   // Typedef for det to value map
   using udet2valuem = std::unordered_map<detid_t, bool>;
-  /// A map of detector numbers to mask boolean
-  udet2valuem umap;
   /// Get the properties
   void retrieveProperties();
   /// Create a new cal file
-  void createNewCalFile(const std::string &oldfile, const std::string &newfile);
+  void createNewCalFile(const std::string &oldfile, const std::string &newfile,
+                        const udet2valuem &umap);
   /// The input workspace
-  API::MatrixWorkspace_const_sptr inputW;
+  API::MatrixWorkspace_const_sptr m_inputW;
   /// The Value parameter
   double value = 0.0;
   /// A comparator function
-  boost::function<bool(double, double)> compar_f;
+  boost::function<bool(double, double)> m_compar_f;
   /// Whether select is on or off
-  bool select_on = false;
-  /// Overidden init
+  bool m_select_on = false;
   void init() override;
-  /// Overidden exec
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms

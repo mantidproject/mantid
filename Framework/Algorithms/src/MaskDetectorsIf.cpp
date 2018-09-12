@@ -1,6 +1,9 @@
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
@@ -22,33 +25,44 @@ void MaskDetectorsIf::init() {
   declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
                   "A 1D Workspace that contains values to select against");
-  std::vector<std::string> select_mode(2);
-  select_mode[0] = "SelectIf";
-  select_mode[1] = "DeselectIf";
+  const std::vector<std::string> select_mode{"SelectIf", "DeselectIf"};
   declareProperty(
       "Mode", "SelectIf", boost::make_shared<StringListValidator>(select_mode),
-      "Mode to select or deselect detectors based on comparison with values. " +
-          allowedValuesStatement(select_mode));
-  std::vector<std::string> select_operator(6);
-  select_operator[0] = "Equal";
-  select_operator[1] = "NotEqual";
-  select_operator[2] = "Greater";
-  select_operator[3] = "GreaterEqual";
-  select_operator[4] = "Less";
-  select_operator[5] = "LessEqual";
+      "Mode to select or deselect detectors based on comparison with values.");
+  const std::vector<std::string> select_operator{
+      "Equal", "NotEqual", "Greater", "GreaterEqual", "Less", "LessEqual"};
   declareProperty("Operator", "Equal",
                   boost::make_shared<StringListValidator>(select_operator),
-                  "Unary operator to compare to given values. " +
-                      allowedValuesStatement(select_operator));
+                  "Unary operator to compare to given values.");
   declareProperty("Value", 0.0);
   declareProperty(
       make_unique<API::FileProperty>("InputCalFile", "",
-                                     API::FileProperty::Load, ".cal"),
-      "The name of the CalFile with grouping data. Allowed Values: .cal .");
+                                     API::FileProperty::OptionalLoad, ".cal"),
+      "The name of the CalFile with grouping data.");
   declareProperty(
       make_unique<API::FileProperty>("OutputCalFile", "",
                                      API::FileProperty::OptionalSave, ".cal"),
-      "The name of the CalFile with grouping data. Allowed Values: .cal .");
+      "The name of the CalFile with grouping data.");
+  declareProperty(make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output,
+                      API::PropertyMode::Optional),
+                  "The masked workspace.");
+}
+
+/**
+ * Validates the algorithm's input properties.
+ * @return A map from property name to reported issue
+ */
+std::map<std::string, std::string> MaskDetectorsIf::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const auto noInputFile = isDefault("InputCalFile");
+  const auto noOutputFile = isDefault("OutputCalFile");
+  if (!noInputFile && noOutputFile) {
+    issues["OutputCalFile"] = "Output file name is missing.";
+  } else if (noInputFile && !noOutputFile) {
+    issues["InputCalFile"] = "Input file name is missing.";
+  }
+  return issues;
 }
 
 /** Executes the algorithm
@@ -59,36 +73,77 @@ void MaskDetectorsIf::init() {
  */
 void MaskDetectorsIf::exec() {
   retrieveProperties();
-  const size_t nspec = inputW->getNumberHistograms();
+  const size_t nspec = m_inputW->getNumberHistograms();
 
-  for (size_t i = 0; i < nspec; ++i) {
-    // Get the list of udets contributing to this spectra
-    const auto &dets = inputW->getSpectrum(i).getDetectorIDs();
+  if (isDefault("InputCalFile") && isDefault("OutputWorkspace")) {
+    g_log.error() << "No InputCalFle or OutputWorkspace specified; the "
+                     "algorithm will do nothing.";
+    return;
+  }
+  if (!isDefault("InputCalFile")) {
+    udet2valuem umap;
+    for (size_t i = 0; i < nspec; ++i) {
+      // Get the list of udets contributing to this spectra
+      const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
 
-    if (dets.empty())
-      continue;
-    else {
-      double val = inputW->y(i)[0];
-      if (compar_f(val, value)) {
-        for (auto det : dets) {
-          umap.emplace(det, select_on);
+      if (dets.empty())
+        continue;
+      else {
+        const double val = m_inputW->y(i)[0];
+        if (m_compar_f(val, value)) {
+          for (const auto det : dets) {
+            umap.emplace(det, m_select_on);
+          }
         }
       }
+      const double p = static_cast<double>(i) / static_cast<double>(nspec);
+      progress(p, "Generating detector map");
     }
-    double p = static_cast<double>(i) / static_cast<double>(nspec);
-    progress(p, "Generating detector map");
+    const std::string oldf = getProperty("InputCalFile");
+    const std::string newf = getProperty("OutputCalFile");
+    progress(0.99, "Creating new cal file");
+    createNewCalFile(oldf, newf, umap);
   }
-  std::string oldf = getProperty("InputCalFile");
-  std::string newf = getProperty("OutputCalFile");
-  progress(0.99, "Creating new cal file");
-  createNewCalFile(oldf, newf);
+  if (!isDefault("OutputWorkspace")) {
+    progress(0.99, "Creating mask workspace");
+    API::MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
+    if (outputW != m_inputW)
+      outputW = m_inputW->clone();
+    std::vector<int> masked;
+    masked.reserve(m_inputW->detectorInfo().size());
+    const size_t nspec = m_inputW->getNumberHistograms();
+    for (size_t i = 0; i < nspec; ++i) {
+      // Get the list of dets contributing to this spectra
+      const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
+
+      if (dets.empty())
+        continue;
+      else {
+        const auto val = m_inputW->y(i)[0];
+        const auto select = m_compar_f(val, value);
+        if (m_select_on == select) {
+          for (const auto det : dets) {
+            masked.emplace_back(det);
+          }
+        }
+      }
+      const double p = static_cast<double>(i) / static_cast<double>(nspec);
+      progress(p, "Generating detector map");
+    }
+    auto mask = createChildAlgorithm("MaskInstrument");
+    mask->setProperty("InputWorkspace", outputW);
+    mask->setProperty("DetectorIDs", masked);
+    mask->setProperty("OutputWorkspace", outputW);
+    mask->execute();
+    setProperty("OutputWorkspace", outputW);
+  }
 }
 
 /**
  * Get the input properties and store them in the object variables
  */
 void MaskDetectorsIf::retrieveProperties() {
-  inputW = getProperty("InputWorkspace");
+  m_inputW = getProperty("InputWorkspace");
 
   //
   value = getProperty("Value");
@@ -96,33 +151,25 @@ void MaskDetectorsIf::retrieveProperties() {
   // Get the selction mode (select if or deselect if)
   std::string select_mode = getProperty("Mode");
   if (select_mode == "SelectIf")
-    select_on = true;
+    m_select_on = true;
   else
-    select_on = false;
+    m_select_on = false;
 
   // Select function object based on the type of comparison operator
   std::string select_operator = getProperty("Operator");
 
   if (select_operator == "LessEqual")
-    compar_f = std::less_equal<double>();
+    m_compar_f = std::less_equal<double>();
   else if (select_operator == "Less")
-    compar_f = std::less<double>();
+    m_compar_f = std::less<double>();
   else if (select_operator == "GreaterEqual")
-    compar_f = std::greater_equal<double>();
+    m_compar_f = std::greater_equal<double>();
   else if (select_operator == "Greater")
-    compar_f = std::greater<double>();
+    m_compar_f = std::greater<double>();
   else if (select_operator == "Equal")
-    compar_f = std::equal_to<double>();
+    m_compar_f = std::equal_to<double>();
   else if (select_operator == "NotEqual")
-    compar_f = std::not_equal_to<double>();
-
-  std::string newf = getProperty("OutputCalFile");
-  // MG 2012-10-01: A bug fixed the save file property to be invalid by default
-  // which would have moved the argument order. The property is now
-  // optional and checked here
-  if (newf.empty()) {
-    throw std::runtime_error("OutputCalFile is empty. Enter a filename");
-  }
+    m_compar_f = std::not_equal_to<double>();
 }
 
 /**
@@ -131,7 +178,8 @@ void MaskDetectorsIf::retrieveProperties() {
  * @param newfile :: The new cal file path
  */
 void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
-                                       const std::string &newfile) {
+                                       const std::string &newfile,
+                                       const udet2valuem &umap) {
   std::ifstream oldf(oldfile.c_str());
   if (!oldf.is_open()) {
     g_log.error() << "Unable to open grouping file " << oldfile << '\n';
@@ -153,7 +201,7 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     int n, udet, sel, group;
     double offset;
     istr >> n >> udet >> offset >> sel >> group;
-    auto it = umap.find(udet);
+    const auto it = umap.find(udet);
     bool selection;
 
     if (it == umap.end())
@@ -169,16 +217,5 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
   oldf.close();
   newf.close();
 }
-
-std::string
-MaskDetectorsIf::allowedValuesStatement(const std::vector<std::string> &vals) {
-  std::ostringstream statement;
-  statement << "Allowed Values: ";
-  for (const auto &val : vals) {
-    statement << val << ", ";
-  }
-  return statement.str();
-}
-
 } // namespace Algorithms
 } // namespace Mantid
