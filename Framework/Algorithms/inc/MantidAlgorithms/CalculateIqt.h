@@ -45,7 +45,7 @@ private:
   monteCarloErrorCalculation(API::MatrixWorkspace_sptr sample,
                              API::MatrixWorkspace_sptr resolution,
                              const std::string &rebinParams, const int seed,
-                             bool calculateErrors, const int nIterations);
+                             const bool calculateErrors, const int nIterations);
 
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr workspace,
                                   const std::string &params);
@@ -57,7 +57,7 @@ private:
   API::MatrixWorkspace_sptr divide(API::MatrixWorkspace_sptr lhsWorkspace,
                                    API::MatrixWorkspace_sptr rhsWorkspace);
   API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr workspace,
-                                          double xMax);
+                                          const double xMax);
   API::MatrixWorkspace_sptr
   replaceSpecialValues(API::MatrixWorkspace_sptr workspace);
 

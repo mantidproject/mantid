@@ -48,8 +48,6 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
-        self.declareProperty('CalculateErrors', defaultValue=True,
-                             doc="Calculate monte-carlo errors.")
         self.declareProperty('NumberOfIterations', DEFAULT_ITERATIONS, IntBoundedValidator(lower=1),
                              doc="Number of randomised simulations for monte-carlo error calculation.")
 
@@ -68,6 +66,8 @@ class TransformToIqt(PythonAlgorithm):
 
         self.declareProperty(name='DryRun', defaultValue=False,
                              doc='Only calculate and output the parameters')
+        self.declareProperty('CalculateErrors', defaultValue=True,
+                             doc="Calculate monte-carlo errors.")
 
     def PyExec(self):
         self._setup()

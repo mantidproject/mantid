@@ -127,7 +127,6 @@ void CalculateIqt::init() {
   auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(1);
 
-  declareProperty("CalculateErrors", true, "Calculate monte-carlo errors.");
   declareProperty("NumberOfIterations", DEFAULT_ITERATIONS, positiveInt,
                   "Number of randomised simulations within error to run.");
   declareProperty(
@@ -137,6 +136,8 @@ void CalculateIqt::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
+
+  declareProperty("CalculateErrors", true, "Calculate monte-carlo errors.");
 }
 
 void CalculateIqt::exec() {
@@ -165,7 +166,7 @@ std::string CalculateIqt::rebinParamsAsString() {
 
 MatrixWorkspace_sptr CalculateIqt::monteCarloErrorCalculation(
     MatrixWorkspace_sptr sample, MatrixWorkspace_sptr resolution,
-    const std::string &rebinParams, const int seed, bool calculateErrors,
+    const std::string &rebinParams, const int seed, const bool calculateErrors,
     const int nIterations) {
   auto outputWorkspace = calculateIqt(sample, resolution, rebinParams);
   std::vector<MatrixWorkspace_sptr> simulatedWorkspaces;
@@ -258,7 +259,7 @@ MatrixWorkspace_sptr CalculateIqt::divide(MatrixWorkspace_sptr lhsWorkspace,
 }
 
 MatrixWorkspace_sptr CalculateIqt::cropWorkspace(MatrixWorkspace_sptr workspace,
-                                                 double xMax) {
+                                                 const double xMax) {
   IAlgorithm_sptr cropAlgorithm = this->createChildAlgorithm("CropWorkspace");
   cropAlgorithm->initialize();
   cropAlgorithm->setProperty("InputWorkspace", workspace);
