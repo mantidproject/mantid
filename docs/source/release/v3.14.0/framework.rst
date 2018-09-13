@@ -45,15 +45,21 @@ Improvements
 ############
 
 - :ref:`AppendSpectra <algm-AppendSpectra>` can append now multiple times the same event workspace.
-- :ref:`SumSpectra <algm-SumSpectra>` has an additional option, ``MultiplyBySpectra``, which controls whether or not the output spectra are multiplied by the number of bins. This property should be set to ``False`` for summing spectra as PDFgetN does.
 - :ref:`CropToComponent <algm-CropToComponent>` now supports also scanning workspaces.
+- :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will not split the counts between bins by default.
+- :ref:`SumSpectra <algm-SumSpectra>` has an additional option, ``MultiplyBySpectra``, which controls whether or not the output spectra are multiplied by the number of bins. This property should be set to ``False`` for summing spectra as PDFgetN does.
 - :ref:`Live Data <algm-StartLiveData>` for events in PreserveEvents mode now produces workspaces that have bin boundaries which encompass the total x-range (TOF) for all events across all spectra.
 
 Bugfixes
 ########
-- :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
 
+
+- :ref:`SaveGDA <algm-SaveGDA>` Now takes a parameter of OutputFilename instead of Filename to better match with similar algorithms.
+
+- :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
+- Fixed an issue where if a workspace's history wouldn't update for some algorithms
 - Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
+
 
 
 Python

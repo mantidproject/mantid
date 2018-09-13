@@ -9,6 +9,14 @@ Direct Inelastic Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms
+----------
+
+
+New Algorithms
+##############
+
+- Added a new algorithm to ILL's reduction workflow: :ref:`DirectILLTubeBackground <algm-DirectILLTubeBackground>` which can be used to calculate the time-independent backgrounds for instruments with PSD detectors such as IN5.
 
 Interfaces
 ----------

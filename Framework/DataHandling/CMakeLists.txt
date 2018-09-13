@@ -91,6 +91,7 @@
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
+	src/LoadPSIMuonBin.cpp
 	src/LoadQKK.cpp
 	src/LoadRKH.cpp
 	src/LoadRaw/byte_rel_comp.cpp
@@ -280,6 +281,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
+	inc/MantidDataHandling/LoadPSIMuonBin.h
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw3.h
@@ -459,6 +461,7 @@ set ( TEST_FILES
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
+	LoadPSIMuonBinTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
 	LoadRaw3Test.h
