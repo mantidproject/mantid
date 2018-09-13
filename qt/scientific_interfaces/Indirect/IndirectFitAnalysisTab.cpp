@@ -762,8 +762,8 @@ void IndirectFitAnalysisTab::plotAll(
   if (numberOfSpectra > 1)
     plotSpectrum(workspace);
   else
-    showMessageBox(QString("Unable to plot result for a workspace:\n\n Cannot "
-                           "plot a single data point"));
+    showMessageBox(QString("Plotting the result of a workspace failed:\n\n "
+                           "Workspace result has only one data point"));
 }
 
 void IndirectFitAnalysisTab::plotParameter(
@@ -774,8 +774,8 @@ void IndirectFitAnalysisTab::plotParameter(
   if (numberOfSpectra > 1)
     plotSpectrum(workspace, parameterToPlot);
   else
-    showMessageBox(QString("Unable to plot result for a workspace:\n\n Cannot "
-                           "plot a single data point"));
+    showMessageBox(QString("Plotting the result of a workspace failed:\n\n "
+                           "Workspace result has only one data point"));
 }
 
 void IndirectFitAnalysisTab::plotSpectrum(
