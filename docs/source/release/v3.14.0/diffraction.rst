@@ -11,16 +11,13 @@ Diffraction Changes
 	
 Powder Diffraction
 ------------------
- Improvements
- 
+Improvements
 ############
 - Focusing in texture mode for Gem now properly saves
   .gda files.
-  
-  
+- Removed save_angles flag for Gem , as it was set by the texture mode
+- Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files
 
-Powder Diffraction
-------------------
 
 Improvements
 ############
