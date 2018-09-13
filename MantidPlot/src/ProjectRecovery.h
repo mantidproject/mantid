@@ -62,6 +62,9 @@ public:
   /// Clears all checkpoints in the existing folder
   bool clearAllCheckpoints() const noexcept;
 
+  /// Clears all checkpoints in the existing folder at the given path
+  bool clearAllCheckpoints(Poco::Path path) const noexcept;
+
   /// Starts the background thread
   void startProjectSaving();
   /// Stops the background thread
@@ -80,6 +83,10 @@ private:
 
   /// Deletes oldest checkpoints beyond the maximum number to keep
   void deleteExistingCheckpoints(size_t checkpointsToKeep) const;
+
+  /// Deletes oldest checkpoints beyond the maximum number to keep at the path
+  void deleteExistingCheckpoints(size_t checkpointsToKeep,
+                                 Poco::Path path) const;
 
   /// Loads a recovery checkpoint in the given folder
   void loadRecoveryCheckpoint(const Poco::Path &path);

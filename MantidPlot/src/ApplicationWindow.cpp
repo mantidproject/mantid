@@ -91,7 +91,6 @@
 #include "PlotWizard.h"
 #include "PolynomFitDialog.h"
 #include "PolynomialFit.h"
-#include "Process.h"
 #include "ProjectRecovery.h"
 #include "ProjectSerialiser.h"
 #include "QwtErrorPlotCurve.h"
@@ -16665,21 +16664,9 @@ void ApplicationWindow::onAboutToStart() {
   // Make sure we see all of the startup messages
   resultsLog->scrollToTop();
 
-  // Kick off project recovery iff we are able to determine if we are the only
-  // instance currently running
-  try {
-    if (!Process::isAnotherInstanceRunning()) {
-      g_log.debug("Starting project autosaving.");
-      checkForProjectRecovery();
-    } else {
-      g_log.debug("Another MantidPlot process is running. Project recovery is "
-                  "disabled.");
-    }
-  } catch (std::runtime_error &exc) {
-    g_log.warning("Unable to determine if other MantidPlot processes are "
-                  "running. Project recovery is disabled. Error msg: " +
-                  std::string(exc.what()));
-  }
+  // Kick off project recovery
+  g_log.debug("Starting project autosaving.");
+  checkForProjectRecovery();
 }
 
 /**

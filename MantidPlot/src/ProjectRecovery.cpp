@@ -2,6 +2,7 @@
 
 #include "ApplicationWindow.h"
 #include "Folder.h"
+#include "Process.h"
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
 
@@ -13,15 +14,16 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 
-#include "boost/algorithm/string/classification.hpp"
-#include "boost/optional.hpp"
-#include "boost/range/algorithm_ext/erase.hpp"
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/optional.hpp>
+#include <boost/process/environment.hpp>
+#include <boost/range/algorithm_ext/erase.hpp>
 
-#include "Poco/DirectoryIterator.h"
-#include "Poco/Environment.h"
-#include "Poco/NObserver.h"
-#include "Poco/Path.h"
-#include "Poco/Process.h"
+#include <Poco/DirectoryIterator.h>
+#include <Poco/Environment.h>
+#include <Poco/NObserver.h>
+#include <Poco/Path.h>
+#include <Poco/Process.h>
 
 #include <QMessageBox>
 #include <QMetaObject>
@@ -34,6 +36,7 @@
 #include <iomanip>
 #include <iostream>
 #include <mutex>
+#include <signal.h>
 #include <string>
 #include <thread>
 
@@ -50,14 +53,120 @@ boost::optional<bool> getConfigBool(const std::string &key) {
   return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
 }
 
+/// Returns a string to the folder it should output to
+std::string getRecoveryFolderOutput() {
+  static std::string appData =
+      Mantid::Kernel::ConfigService::Instance().getAppDataDir();
+  static std::string hostname = Poco::Environment::nodeName();
+  static std::string pid = std::to_string(boost::this_process::get_id());
+
+  static std::string recoverFolder =
+      appData + "/recovery/" + hostname + '/' + pid + '/';
+  return recoverFolder;
+}
+
 /// Returns a string to the current top level recovery folder
-std::string getRecoveryFolder() {
+std::string getRecoveryFolderCheck() {
   static std::string appData =
       Mantid::Kernel::ConfigService::Instance().getAppDataDir();
   static std::string hostname = Poco::Environment::nodeName();
 
   static std::string recoverFolder = appData + "/recovery/" + hostname + '/';
   return recoverFolder;
+}
+
+/// Determines if a process ID is being used
+bool isPIDused(pid_t pID) {
+  if (pID <= 0) {
+    return false;
+  }
+// For Windows:
+#if defined(_WIN32) || defined(_WIN64)
+  HANDLE handle = OpenProcess(SYNCHRONIZE, false, pID);
+  if (!handle) {
+    return false;
+  } else {
+    CloseHandle(handle);
+    return true;
+  }
+#endif
+// For Linux:
+#if defined(__linux__) || defined(__APPLE__)
+  // check if pid exists
+  return (0 == kill(pID, 0));
+#endif
+}
+
+std::vector<Poco::Path>
+getListOfFoldersInDirectory(const std::string &recoveryFolderPath) {
+  Poco::Path recoveryPath;
+
+  if (!recoveryPath.tryParse(recoveryFolderPath) ||
+      !Poco::File(recoveryPath).exists()) {
+    // Folder may not exist yet
+    g_log.debug("Project Saving: Working folder does not exist");
+    return {};
+  }
+
+  std::vector<Poco::Path> folderPaths;
+
+  Poco::DirectoryIterator dirIterator(recoveryFolderPath);
+  Poco::DirectoryIterator end;
+  // Find all the folders which exist in this folder
+  while (dirIterator != end) {
+    std::string iterPath = recoveryFolderPath + dirIterator.name() + '/';
+    Poco::Path foundPath(iterPath);
+
+    if (foundPath.isDirectory()) {
+      folderPaths.emplace_back(std::move(foundPath));
+    }
+    ++dirIterator;
+  }
+
+  return folderPaths;
+}
+
+std::vector<int> orderProcessIDs(std::vector<Poco::Path> paths) {
+  std::vector<int> returnValues;
+  // Sort the paths by last modified
+  std::sort(paths.begin(), paths.end(),
+            [](const Poco::Path &a, const Poco::Path &b) {
+              Poco::File a1(a);
+              Poco::File b1(b);
+              // Last modified is first!
+              return a1.getLastModified() > b1.getLastModified();
+            });
+
+  for (auto c : paths) {
+    returnValues.emplace_back(std::stoi(c.directory(c.depth() - 1)));
+  }
+  return returnValues;
+}
+
+/// Returns a string to the folder that should be recovered
+std::string getRecoveryFolderLoad() {
+  std::string recoverFolder = getRecoveryFolderCheck();
+  // Get the PIDS
+  std::vector<Poco::Path> possiblePidsPaths =
+      getListOfFoldersInDirectory(recoverFolder);
+  if (possiblePidsPaths.size() == 0) {
+    throw std::runtime_error(
+        "Project Recovery: Load failed attempted to find potential unused pid "
+        "but none were found after successful check");
+  }
+  // Order pids based on date last modified descending
+  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
+  // check if pid exists
+  for (auto c : possiblePids) {
+    if (!isPIDused(c)) {
+      // It doesn't exist so return
+      return recoverFolder.append(std::to_string(c) + "/");
+    }
+  }
+  // Throw if it gets to this point and hasn't found one.
+  throw std::runtime_error(
+      "Project Recovery: Load failed attempted to find potential unused pid "
+      "but none were found after successful check");
 }
 
 /// Gets a formatted timestamp
@@ -86,36 +195,15 @@ std::string getTimeStamp() {
 Poco::Path getOutputPath() {
 
   auto timestamp = getTimeStamp();
-  auto timestampedPath = getRecoveryFolder().append(timestamp);
+  auto timestampedPath = getRecoveryFolderOutput().append(timestamp);
 
   return Poco::Path{timestampedPath};
 }
 
 std::vector<Poco::Path>
 getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
-  Poco::Path recoveryPath;
-
-  if (!recoveryPath.tryParse(recoveryFolderPath) ||
-      !Poco::File(recoveryPath).exists()) {
-    // Folder may not exist yet
-    g_log.debug("Project Saving: Working folder does not exist");
-    return {};
-  }
-
-  std::vector<Poco::Path> folderPaths;
-
-  Poco::DirectoryIterator dirIterator(recoveryFolderPath);
-  Poco::DirectoryIterator end;
-  // Find all the folders which exist in this folder
-  while (dirIterator != end) {
-    std::string iterPath = recoveryFolderPath + dirIterator.name() + '/';
-    Poco::Path foundPath(iterPath);
-
-    if (foundPath.isDirectory()) {
-      folderPaths.push_back(std::move(foundPath));
-    }
-    ++dirIterator;
-  }
+  std::vector<Poco::Path> folderPaths =
+      getListOfFoldersInDirectory(recoveryFolderPath);
 
   // Ensure the oldest is first in the vector
   std::sort(folderPaths.begin(), folderPaths.end(),
@@ -179,8 +267,9 @@ void ProjectRecovery::attemptRecovery() {
     return;
   }
 
+  auto beforeRecoveryFolder = getRecoveryFolderLoad();
   const auto checkpointPaths =
-      getRecoveryFolderCheckpoints(getRecoveryFolder());
+      getRecoveryFolderCheckpoints(getRecoveryFolderLoad());
   auto &mostRecentCheckpoint = checkpointPaths.back();
 
   auto destFilename =
@@ -207,9 +296,10 @@ void ProjectRecovery::attemptRecovery() {
 bool ProjectRecovery::checkForRecovery() const noexcept {
   try {
     const auto checkpointPaths =
-        getRecoveryFolderCheckpoints(getRecoveryFolder());
-    return checkpointPaths.size() !=
-           0; // Non zero indicates recovery is pending
+        getRecoveryFolderCheckpoints(getRecoveryFolderCheck());
+    int procMantids = Process::numberOfMantids();   
+    return checkpointPaths.size() != 0 &&
+           (checkpointPaths.size() > Process::numberOfMantids());
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
                   "check for existing recovery");
@@ -220,6 +310,17 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
 bool ProjectRecovery::clearAllCheckpoints() const noexcept {
   try {
     deleteExistingCheckpoints(0);
+    return true;
+  } catch (...) {
+    g_log.warning("Project Recovery: Caught exception whilst attempting to "
+                  "clear existing checkpoints.");
+    return false;
+  }
+}
+
+bool ProjectRecovery::clearAllCheckpoints(Poco::Path path) const noexcept {
+  try {
+    deleteExistingCheckpoints(0, path);
     return true;
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
@@ -273,7 +374,31 @@ void ProjectRecovery::compileRecoveryScript(const Poco::Path &inputFolder,
  */
 void ProjectRecovery::deleteExistingCheckpoints(
     size_t checkpointsToKeep) const {
-  const auto folderPaths = getRecoveryFolderCheckpoints(getRecoveryFolder());
+  const auto folderPaths =
+      getRecoveryFolderCheckpoints(getRecoveryFolderOutput());
+
+  size_t numberOfDirsPresent = folderPaths.size();
+  if (numberOfDirsPresent <= checkpointsToKeep) {
+    // Nothing to do
+    return;
+  }
+
+  size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
+  bool recurse = true;
+  for (size_t i = 0; i < checkpointsToRemove; i++) {
+    Poco::File(folderPaths[i]).remove(recurse);
+  }
+}
+
+/**
+ * Deletes existing checkpoints, oldest first, in the recovery
+ * folder. This is based on the configuration key which
+ * indicates how many points to keep
+ */
+void ProjectRecovery::deleteExistingCheckpoints(size_t checkpointsToKeep,
+                                                Poco::Path path) const {
+
+  const auto folderPaths = getRecoveryFolderCheckpoints(path.toString());
 
   size_t numberOfDirsPresent = folderPaths.size();
   if (numberOfDirsPresent <= checkpointsToKeep) {
@@ -343,7 +468,6 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
     // exception
     g_log.error("Project recovery script did not finish. Your work has been "
                 "partially recovered.");
-    this->clearAllCheckpoints();
     this->startProjectSaving();
     return;
   }
@@ -357,8 +481,8 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
           Q_RETURN_ARG(bool, loadCompleted),
           Q_ARG(const std::string, projectFile.toString()))) {
     this->startProjectSaving();
-    throw std::runtime_error(
-        "Project Recovery: Failed to load project windows - Qt binding failed");
+    throw std::runtime_error("Project Recovery: Failed to load project "
+                             "windows - Qt binding failed");
   }
 
   if (!loadCompleted) {
