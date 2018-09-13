@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="D2B" valid-from="2018-05-01 00:00:00" valid-to="2018-09-01 00:00:00" last-modified="2018-09-13 09:00:00">
+<parameter-file instrument="D2B" valid-from="2018-05-01 00:00:00" last-modified="2018-09-13 09:00:00">
 	<component-link name="D2B">
 
 		<!-- The detector name for the height axis used in SumOverlappingTubes -->
