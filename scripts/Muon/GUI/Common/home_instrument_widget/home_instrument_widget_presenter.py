@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 
+
 def filter_for_extensions(extensions):
     """Filter for file browser"""
     str_list = ["*." + str(ext) for ext in extensions]
@@ -47,6 +48,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self.instrumentNotifier = InstrumentWidgetPresenter.InstrumentNotifier(self)
 
+        self._view.on_time_zero_changed(self.handle_user_changes_time_zero)
+        self._view.on_first_good_data_changed(self.handle_user_changes_first_good_data)
+
     class InstrumentNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
@@ -77,6 +81,14 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         else:
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
+
+    def handle_user_changes_first_good_data(self):
+        first_good_data = self._view.get_first_good_data()
+        self._model.set_user_first_good_data(first_good_data)
+
+    def handle_user_changes_time_zero(self):
+        time_zero = self._view.get_time_zero()
+        self._model.set_user_time_zero(time_zero)
 
     def dead_time_from_data_text(self, dead_times):
         mean = sum(dead_times) / len(dead_times)

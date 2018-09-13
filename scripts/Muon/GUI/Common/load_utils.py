@@ -150,6 +150,10 @@ def get_run_from_multi_period_data(workspace_list):
         return unique_runs[0]
 
 
+def load_dead_time_from_filename(filename):
+    # TODO : Implement
+    pass
+
 def load_workspace_from_filename(filename,
                                  input_properties=DEFAULT_INPUTS,
                                  output_properties=DEFAULT_OUTPUTS):
@@ -182,6 +186,7 @@ def create_load_algorithm(filename, property_dictionary):
 
 
 def _get_algorithm_properties(alg, property_dict):
+    print(alg.keys())
     return {key: alg.getProperty(key) for key in alg.keys() if key in property_dict}
 
 

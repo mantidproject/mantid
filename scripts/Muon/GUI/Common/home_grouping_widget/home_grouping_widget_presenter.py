@@ -10,8 +10,15 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 
         self._view.on_grouppair_selection_changed(self.handle_grouppair_selector_changed)
 
+        self._view.on_alpha_changed(self.handle_user_changes_alpha)
+
     def show(self):
         self._view.show()
+
+    def handle_user_changes_alpha(self):
+        alpha = self._view.get_current_alpha()
+        pair_name = self._view.get_currently_selected_group_pair()
+        self._model.update_pair_alpha(pair_name, alpha)
 
     def update_group_pair_list(self):
         group_names = self._model.get_group_names()
@@ -30,6 +37,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
             self._view.alpha_hidden(True)
         elif self._model.is_pair(name):
             self._view.alpha_hidden(False)
+            alpha = self._model.get_alpha(name)
+            self._view.set_current_alpha(alpha)
         else:
             self._view.alpha_hidden(True)
 

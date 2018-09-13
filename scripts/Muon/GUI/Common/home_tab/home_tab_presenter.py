@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 
+
 class HomeTabSubWidget:
     __metaclass__ = ABCMeta
     """Abstract base class which all sub-widgets must inherit from. This is used to
@@ -14,6 +15,7 @@ class HomeTabSubWidget:
         # update from model
         pass
 
+
 class Observer:
 
     def update(observable, arg):
@@ -23,6 +25,7 @@ class Observer:
         object's observers of the change.'''
         pass
 
+
 class HomeTabPresenter(object):
 
     def __init__(self, view, model,
@@ -30,7 +33,7 @@ class HomeTabPresenter(object):
                  # grouping_widget=None,
                  # plot_widget=None,
                  # run_info_widget=None,
-                 subwidgets = []
+                 subwidgets=[]
                  ):
         self._view = view
         self._model = model
@@ -43,7 +46,7 @@ class HomeTabPresenter(object):
         # self._run_info_widget = run_info_widget
 
         self.instrumentObserver = HomeTabPresenter.InstrumentObserver(self)
-
+        self.update_all_widgets()
 
     def show(self):
         self._view.show()
@@ -53,12 +56,11 @@ class HomeTabPresenter(object):
         for subwidget in self._subwidgets:
             subwidget.update_view_from_model()
 
-
     class InstrumentObserver(Observer):
 
         def __init__(self, outer):
             self.outer = outer
 
-        def update(self,observable, arg):
-            print("Bee's breakfast time!")
+        def update(self, observable, arg):
+            print("update called")
             self.outer.update_all_widgets()

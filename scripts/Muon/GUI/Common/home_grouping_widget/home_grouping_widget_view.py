@@ -53,6 +53,10 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.alpha_edit.setObjectName("alphaEdit")
         self.alpha_edit.setText("1.0")
 
+        reg_ex = QtCore.QRegExp("^[0-9]+([.][0-9]*)?$")
+        alpha_validator = QtGui.QRegExpValidator(reg_ex, self.alpha_edit)
+        self.alpha_edit.setValidator(alpha_validator)
+
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout3")
         self.horizontal_layout.addWidget(self.grouppair_label)
@@ -143,3 +147,15 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
     def on_grouppair_selection_changed(self, slot):
         self.grouppair_selector.currentIndexChanged.connect(slot)
+
+    def on_alpha_changed(self, slot):
+        self.alpha_edit.editingFinished.connect(slot)
+
+    def set_current_alpha(self, alpha):
+        self.alpha_edit.setText(str(alpha))
+
+    def get_current_alpha(self):
+        return float(self.alpha_edit.text())
+
+    def get_currently_selected_group_pair(self):
+        return self.grouppair_selector.currentText()

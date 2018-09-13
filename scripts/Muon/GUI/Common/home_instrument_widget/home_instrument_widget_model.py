@@ -41,10 +41,16 @@ class InstrumentWidgetModel(object):
     def get_file_time_zero(self):
         return self._data.loaded_data["TimeZero"].value
 
-
+    def set_user_time_zero(self, time_zero):
+        self._data.loaded_data["UserTimeZero"] = time_zero
 
     def get_user_time_zero(self):
-        return 0.0
+        if "UserTimeZero" in self._data.loaded_data.keys():
+            time_zero = self._data.loaded_data["UserTimeZero"]
+        else:
+            # default to loaded value
+            time_zero = self._data.loaded_data["TimeZero"].value
+        return time_zero
 
     def set_time_zero_to_file(self):
         pass
@@ -56,7 +62,15 @@ class InstrumentWidgetModel(object):
         return self._data.loaded_data["FirstGoodData"].value
 
     def get_user_first_good_data(self):
-        return 0.0
+        if "UserFirstGoodData" in self._data.loaded_data.keys():
+            first_good_data = self._data.loaded_data["UserFirstGoodData"]
+        else:
+            # Default to loaded value
+            first_good_data = self._data.loaded_data["FirstGoodData"].value
+        return first_good_data
+
+    def set_user_first_good_data(self, first_good_data):
+        self._data.loaded_data["UserFirstGoodData"] = first_good_data
 
     def set_first_good_data_all(self, first_good_data):
         """

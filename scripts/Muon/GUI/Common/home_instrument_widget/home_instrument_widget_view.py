@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
@@ -28,8 +29,19 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
 
+        self._on_time_zero_changed = lambda: 0
+        self._on_first_good_data_changed = lambda: 0
 
+        self.timezero_edit.editingFinished.connect(
+            lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
+        self.firstgooddata_edit.editingFinished.connect(
+            lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
 
+    def on_time_zero_changed(self, slot):
+        self._on_time_zero_changed = slot
+
+    def on_first_good_data_changed(self, slot):
+        self._on_first_good_data_changed = slot
 
     def on_dead_time_from_data_selected(self, slot):
         self._on_dead_time_from_data_selected = slot
@@ -157,12 +169,16 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_label.setText("Time Zero : ")
 
         self.timezero_edit = QtGui.QLineEdit(self)
+        reg_ex = QtCore.QRegExp("^[0-9]+([.][0-9]*)?$")
+        timezero_validator = QtGui.QRegExpValidator(reg_ex, self.timezero_edit)
+        self.timezero_edit.setValidator(timezero_validator)
         self.timezero_edit.setObjectName("timeZeroEdit")
         self.timezero_edit.setText("")
 
+
         self.timezero_unit_label = QtGui.QLabel(self)
         self.timezero_unit_label.setObjectName("timeZeroUnitLabel")
-        self.timezero_unit_label.setText("micro seconds ( ")
+        self.timezero_unit_label.setText(u" µs ( ")
 
         self.timezero_checkbox = QtGui.QCheckBox(self)
         self.timezero_checkbox.setObjectName("timeZeroCheckbox")
@@ -190,12 +206,15 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.firstgooddata_label.setText("First Good Data : ")
 
         self.firstgooddata_edit = QtGui.QLineEdit(self)
+        reg_ex = QtCore.QRegExp("^[0-9]+([.][0-9]*)?$")
+        firstgooddata_validator = QtGui.QRegExpValidator(reg_ex, self.timezero_edit)
+        self.timezero_edit.setValidator(firstgooddata_validator)
         self.firstgooddata_edit.setObjectName("firstgooddataEdit")
         self.firstgooddata_edit.setText("")
 
         self.firstgooddata_unit_label = QtGui.QLabel(self)
         self.firstgooddata_unit_label.setObjectName("firstgooddataUnitLabel")
-        self.firstgooddata_unit_label.setText("micro seconds ( ")
+        self.firstgooddata_unit_label.setText(u" µs ( ")  # "micro seconds ( ")
 
         self.firstgooddata_checkbox = QtGui.QCheckBox(self)
         self.firstgooddata_checkbox.setObjectName("firstgooddataCheckbox")
@@ -309,8 +328,10 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.horizontal_layout_5.addItem(
             QtGui.QSpacerItem(110, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
         self.horizontal_layout_5.addWidget(self.rebin_selector)
+        self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.rebin_steps_label)
         self.horizontal_layout_5.addWidget(self.rebin_steps_edit)
+        self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.rebin_variable_label)
         self.horizontal_layout_5.addWidget(self.rebin_variable_edit)
         self.rebin_steps_label.hide()
@@ -318,6 +339,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_variable_label.hide()
         self.rebin_variable_edit.hide()
         self.horizontal_layout_5.addStretch(0)
+        self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.rebin_help_button)
 
     def setup_filter_row(self):
@@ -399,3 +421,15 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_instrument_changed(self, slot):
         self.instrument_selector.currentIndexChanged.connect(slot)
+
+    def is_time_zero_checked(self):
+        return self.timezero_checkbox.checkState()
+
+    def is_first_good_data_checked(self):
+        return self.firstgooddata_checkbox.checkState()
+
+    def get_time_zero(self):
+        return float(self.timezero_edit.text())
+
+    def get_first_good_data(self):
+        return float(self.firstgooddata_edit.text())

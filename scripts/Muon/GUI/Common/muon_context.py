@@ -17,6 +17,23 @@ class MuonContext(object):
 
         print(self._loaded_data)
 
+    def get_sample_log(self, log_name):
+        log = None
+        logs = None
+        try:
+            logs = self.loaded_data["OutputWorkspace"].value.getSampleDetails()
+        except Exception:
+            print("oh dear")
+
+        print("dir logs", dir(logs))
+        if logs:
+            try:
+                log = logs.getLogData(log_name)
+            except:
+                print("Cant find log")
+        return log
+
+
     def get_result(self):
         #filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
         filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020883.nxs"

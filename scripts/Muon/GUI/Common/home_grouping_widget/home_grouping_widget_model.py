@@ -25,3 +25,13 @@ class HomeGroupingWidgetModel(object):
 
     def is_pair(self, name):
         return name in self.get_pair_names()
+
+    def update_pair_alpha(self,pair_name, alpha):
+        pair = self._data._pairs.get(pair_name, None)
+        if pair:
+            pair.alpha = alpha
+
+    def get_alpha(self,pair_name):
+        pair = self._data._pairs.get(pair_name, None)
+        if pair:
+            return pair.alpha
