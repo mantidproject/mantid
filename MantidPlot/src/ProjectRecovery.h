@@ -65,10 +65,16 @@ public:
   /// Clears all checkpoints in the existing folder at the given path
   bool clearAllCheckpoints(Poco::Path path) const noexcept;
 
+  /// Clears all checkpoints in the existing folder at the given path
+  bool clearAllUnusedCheckpoints() const noexcept;
+
   /// Starts the background thread
   void startProjectSaving();
   /// Stops the background thread
   void stopProjectSaving();
+
+  /// Removes checkpoints should they be older than a month old.
+  void removeOlderCheckpoints();
 
 private:
   /// Captures the current object in the background thread
@@ -88,6 +94,9 @@ private:
   void deleteExistingCheckpoints(size_t checkpointsToKeep,
                                  Poco::Path path) const;
 
+  /// Deletes oldest "unused" checkpoints beyond the maximum number to keep
+  void deleteExistingUnusedCheckpoints(size_t checkpointsToKeep) const;
+
   /// Loads a recovery checkpoint in the given folder
   void loadRecoveryCheckpoint(const Poco::Path &path);
 
@@ -106,6 +115,9 @@ private:
 
   /// Saves the current workspace's histories from Mantid
   void saveWsHistories(const Poco::Path &projectDestFile);
+
+  // Return true if the folder at the end of the path is older than a month.
+  bool olderThanAGivenTime(const Poco::Path &path, int64_t elapsedTime);
 
   /// Background thread which runs the saving body
   std::thread m_backgroundSavingThread;

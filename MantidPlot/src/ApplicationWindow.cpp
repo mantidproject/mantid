@@ -16803,6 +16803,9 @@ bool ApplicationWindow::saveProjectRecovery(std::string destination) {
  */
 void ApplicationWindow::checkForProjectRecovery() {
   m_projectRecoveryRunOnStart = true;
+
+  m_projectRecovery.removeOlderCheckpoints();
+
   if (!m_projectRecovery.checkForRecovery()) {
     m_projectRecovery.startProjectSaving();
     return;

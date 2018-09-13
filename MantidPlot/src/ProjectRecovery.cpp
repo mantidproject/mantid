@@ -263,6 +263,7 @@ void ProjectRecovery::attemptRecovery() {
 
   if (userChoice == 1) {
     // User selected no
+    clearAllUnusedCheckpoints();
     this->startProjectSaving();
     return;
   }
@@ -297,7 +298,6 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
   try {
     const auto checkpointPaths =
         getRecoveryFolderCheckpoints(getRecoveryFolderCheck());
-    int procMantids = Process::numberOfMantids();   
     return checkpointPaths.size() != 0 &&
            (checkpointPaths.size() > Process::numberOfMantids());
   } catch (...) {
@@ -321,6 +321,17 @@ bool ProjectRecovery::clearAllCheckpoints() const noexcept {
 bool ProjectRecovery::clearAllCheckpoints(Poco::Path path) const noexcept {
   try {
     deleteExistingCheckpoints(0, path);
+    return true;
+  } catch (...) {
+    g_log.warning("Project Recovery: Caught exception whilst attempting to "
+                  "clear existing checkpoints.");
+    return false;
+  }
+}
+
+bool ProjectRecovery::clearAllUnusedCheckpoints() const noexcept {
+  try {
+    deleteExistingUnusedCheckpoints(0);
     return true;
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
@@ -399,6 +410,42 @@ void ProjectRecovery::deleteExistingCheckpoints(size_t checkpointsToKeep,
                                                 Poco::Path path) const {
 
   const auto folderPaths = getRecoveryFolderCheckpoints(path.toString());
+
+  size_t numberOfDirsPresent = folderPaths.size();
+  if (numberOfDirsPresent <= checkpointsToKeep) {
+    // Nothing to do
+    return;
+  }
+
+  size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
+  bool recurse = true;
+  for (size_t i = 0; i < checkpointsToRemove; i++) {
+    Poco::File(folderPaths[i]).remove(recurse);
+  }
+}
+
+void ProjectRecovery::deleteExistingUnusedCheckpoints(
+    size_t checkpointsToKeep) const {
+  std::string recoverFolder = getRecoveryFolderCheck();
+  // Get the PIDS
+  std::vector<Poco::Path> possiblePidsPaths =
+      getListOfFoldersInDirectory(recoverFolder);
+  if (possiblePidsPaths.size() == 0) {
+    throw std::runtime_error(
+        "Project Recovery: Load failed attempted to find potential unused pid "
+        "but none were found after successful check");
+  }
+  // Order pids based on date last modified descending
+  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
+  // check if pid exists
+  std::vector<std::string> folderPaths;
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    if (!isPIDused(possiblePids[i])) {
+      std::string folder = recoverFolder;
+      folder.append(std::to_string(possiblePids[i]) + "/");
+      folderPaths.emplace_back(folder);
+    }
+  }
 
   size_t numberOfDirsPresent = folderPaths.size();
   if (numberOfDirsPresent <= checkpointsToKeep) {
@@ -493,7 +540,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   g_log.notice("Project Recovery finished");
 
   // Restart project recovery when the async part finishes
-  clearAllCheckpoints();
+  clearAllCheckpoints(Poco::Path(recoveryFolder));
   startProjectSaving();
 } // namespace MantidQt
 
@@ -647,4 +694,34 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   }
 }
 
+void ProjectRecovery::removeOlderCheckpoints() {
+  // Currently set to a month in microseconds
+  const int64_t timeToDeleteAfter = 2592000000000;
+  std::string recoverFolder = getRecoveryFolderCheck();
+  // Get the PIDS
+  std::vector<Poco::Path> possiblePidsPaths =
+      getListOfFoldersInDirectory(recoverFolder);
+  // Order pids based on date last modified descending
+  std::vector<int> possiblePids = orderProcessIDs(possiblePidsPaths);
+  // check if pid exists
+  std::vector<std::string> folderPaths;
+  for (auto i = 0u; i < possiblePids.size(); ++i) {
+    if (!isPIDused(possiblePids[i])) {
+      std::string folder = recoverFolder;
+      folder.append(std::to_string(possiblePids[i]) + "/");
+      if (olderThanAGivenTime(Poco::Path(folder), timeToDeleteAfter)) {
+        folderPaths.emplace_back(folder);
+      }
+    }
+  }
+
+  bool recurse = true;
+  for (size_t i = 0; i < folderPaths.size(); i++) {
+    Poco::File(folderPaths[i]).remove(recurse);
+  }
+}
+
+bool ProjectRecovery::olderThanAGivenTime(const Poco::Path &path, int64_t elapsedTime) {
+  return Poco::File(path).getLastModified().isElapsed(elapsedTime);
+}
 } // namespace MantidQt
