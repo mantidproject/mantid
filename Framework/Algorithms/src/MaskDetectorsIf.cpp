@@ -1,8 +1,6 @@
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -18,7 +16,6 @@ DECLARE_ALGORITHM(MaskDetectorsIf)
 using namespace Kernel;
 
 /** Initialisation method. Declares properties to be used in algorithm.
- *
  */
 void MaskDetectorsIf::init() {
   using namespace Mantid::Kernel;
@@ -66,10 +63,6 @@ std::map<std::string, std::string> MaskDetectorsIf::validateInputs() {
 }
 
 /** Executes the algorithm
- *
- *  @throw Exception::FileError If the grouping file cannot be opened or read
- *successfully
- *  @throw std::runtime_error If the rebinning process fails
  */
 void MaskDetectorsIf::exec() {
   retrieveProperties();
@@ -79,17 +72,7 @@ void MaskDetectorsIf::exec() {
                      "algorithm will do nothing.";
     return;
   }
-  if (!isDefault("InputCalFile")) {
-    outputToCalFile();
-  }
-  if (!isDefault("OutputWorkspace")) {
-    outputToWorkspace();
-  }
-}
-
-void MaskDetectorsIf::outputToCalFile() {
   const size_t nspec = m_inputW->getNumberHistograms();
-  udet2valuem umap;
   for (size_t i = 0; i < nspec; ++i) {
     // Get the list of udets contributing to this spectra
     const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
@@ -98,50 +81,40 @@ void MaskDetectorsIf::outputToCalFile() {
       continue;
     else {
       const double val = m_inputW->y(i)[0];
-      if (m_compar_f(val, value)) {
+      if (m_compar_f(val, m_value)) {
         for (const auto det : dets) {
-          umap.emplace(det, m_select_on);
+          m_umap.emplace(det, m_select_on);
         }
       }
     }
     const double p = static_cast<double>(i) / static_cast<double>(nspec);
     progress(p, "Generating detector map");
   }
-  const std::string oldf = getProperty("InputCalFile");
-  const std::string newf = getProperty("OutputCalFile");
-  progress(0.99, "Creating new cal file");
-  createNewCalFile(oldf, newf, umap);
+
+  if (!isDefault("InputCalFile")) {
+    createNewCalFile();
+  }
+  if (!isDefault("OutputWorkspace")) {
+    outputToWorkspace();
+  }
 }
 
+/**
+ * Create an output workspace masking/unmasking the selected/deselected spectra
+ */
 void MaskDetectorsIf::outputToWorkspace() {
   API::MatrixWorkspace_sptr outputW = getProperty("OutputWorkspace");
   if (outputW != m_inputW)
     outputW = m_inputW->clone();
-  std::vector<int> masked;
-  masked.reserve(m_inputW->detectorInfo().size());
-  const size_t nspec = m_inputW->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
-    const auto &dets = m_inputW->getSpectrum(i).getDetectorIDs();
-    if (dets.empty())
-      continue;
-    else {
-      const auto val = m_inputW->y(i)[0];
-      const auto select = m_compar_f(val, value);
-      if (m_select_on == select) {
-        for (const auto det : dets) {
-          masked.emplace_back(det);
-        }
-      }
-    }
-    const double p = static_cast<double>(i) / static_cast<double>(nspec);
+  auto &detectorInfo = outputW->mutableDetectorInfo();
+  const size_t nspec = outputW->getNumberHistograms();
+  for (auto it = m_umap.cbegin(); it != m_umap.cend(); ++it) {
+    detectorInfo.setMasked(detectorInfo.indexOf(it->first), it->second);
+    const double p =
+        static_cast<double>(std::distance(m_umap.cbegin(), it) + 1) /
+        static_cast<double>(nspec);
     progress(p, "Generating detector map");
   }
-  progress(0.99, "Creating mask workspace");
-  auto mask = createChildAlgorithm("MaskInstrument");
-  mask->setProperty("InputWorkspace", outputW);
-  mask->setProperty("DetectorIDs", masked);
-  mask->setProperty("OutputWorkspace", outputW);
-  mask->execute();
   setProperty("OutputWorkspace", outputW);
 }
 
@@ -150,9 +123,7 @@ void MaskDetectorsIf::outputToWorkspace() {
  */
 void MaskDetectorsIf::retrieveProperties() {
   m_inputW = getProperty("InputWorkspace");
-
-  //
-  value = getProperty("Value");
+  m_value = getProperty("Value");
 
   // Get the selction mode (select if or deselect if)
   std::string select_mode = getProperty("Mode");
@@ -180,12 +151,13 @@ void MaskDetectorsIf::retrieveProperties() {
 
 /**
  * Create a new cal file based on the old file
- * @param oldfile :: The old cal file path
- * @param newfile :: The new cal file path
+ * @throw Exception::FileError If a grouping file cannot be opened or read
+ * successfully
  */
-void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
-                                       const std::string &newfile,
-                                       const udet2valuem &umap) {
+void MaskDetectorsIf::createNewCalFile() {
+  const std::string oldfile = getProperty("InputCalFile");
+  const std::string newfile = getProperty("OutputCalFile");
+  progress(0.99, "Creating new cal file");
   std::ifstream oldf(oldfile.c_str());
   if (!oldf.is_open()) {
     g_log.error() << "Unable to open grouping file " << oldfile << '\n';
@@ -207,10 +179,10 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     int n, udet, sel, group;
     double offset;
     istr >> n >> udet >> offset >> sel >> group;
-    const auto it = umap.find(udet);
+    const auto it = m_umap.find(udet);
     bool selection;
 
-    if (it == umap.end())
+    if (it == m_umap.end())
       selection = sel != 0;
     else
       selection = (*it).second;

@@ -65,25 +65,21 @@ public:
   }
 
 private:
-  /// Returns an allowed values statement to insert into decumentation
-  std::string allowedValuesStatement(const std::vector<std::string> &vals);
-  // Typedef for det to value map
+  /// Typedef for det to value map
   using udet2valuem = std::unordered_map<detid_t, bool>;
-  void outputToCalFile();
-  void outputToWorkspace();
-  /// Get the properties
-  void retrieveProperties();
-  /// Create a new cal file
-  void createNewCalFile(const std::string &oldfile, const std::string &newfile,
-                        const udet2valuem &umap);
-  /// The input workspace
-  API::MatrixWorkspace_const_sptr m_inputW;
-  /// The Value parameter
-  double value = 0.0;
-  /// A comparator function
-  boost::function<bool(double, double)> m_compar_f;
+  /// A map from detid to selection
+  udet2valuem m_umap;
   /// Whether select is on or off
   bool m_select_on = false;
+  /// The Value parameter
+  double m_value = 0.0;
+  /// The input workspace
+  API::MatrixWorkspace_const_sptr m_inputW;
+  /// A comparator function
+  boost::function<bool(double, double)> m_compar_f;
+  void outputToWorkspace();
+  void retrieveProperties();
+  void createNewCalFile();
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;

@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/MaskDetectorsIf.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
@@ -28,6 +29,7 @@ public:
   void testCalFileDeselectIfNotEqual() {
     // setup and run the algorithm (includes basic checks)
     MaskDetectorsIf alg;
+    // create the workspace
     setupAlgorithmForCalFiles(alg, "DeselectIf", "NotEqual", 2.2);
     std::ifstream file;
     runAlgorithmForCalFiles(alg, file);
@@ -137,7 +139,9 @@ public:
       return ws.y(wsIndex).front() == 2.2;
     };
     MaskDetectorsIf alg;
-    setupAlgorithmForOutputWorkspace(alg, "DeselectIf", "NotEqual", 2.2);
+    MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+    maskAllDetectors(inWS);
+    setupAlgorithmForOutputWorkspace(alg, inWS, "DeselectIf", "NotEqual", 2.2);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     checkOutputWorkspace(alg, correctMasking);
@@ -148,7 +152,8 @@ public:
       return ws.y(wsIndex).front() == 2.2;
     };
     MaskDetectorsIf alg;
-    setupAlgorithmForOutputWorkspace(alg, "SelectIf", "Equal", 2.2);
+    MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+    setupAlgorithmForOutputWorkspace(alg, inWS, "SelectIf", "Equal", 2.2);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     checkOutputWorkspace(alg, correctMasking);
@@ -159,7 +164,9 @@ public:
       return ws.y(wsIndex).front() >= 2.2;
     };
     MaskDetectorsIf alg;
-    setupAlgorithmForOutputWorkspace(alg, "DeselectIf", "Less", 2.2);
+    MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+    maskAllDetectors(inWS);
+    setupAlgorithmForOutputWorkspace(alg, inWS, "DeselectIf", "Less", 2.2);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     checkOutputWorkspace(alg, correctMasking);
@@ -170,7 +177,8 @@ public:
       return ws.y(wsIndex).front() > 2.2;
     };
     MaskDetectorsIf alg;
-    setupAlgorithmForOutputWorkspace(alg, "SelectIf", "Greater", 2.2);
+    MatrixWorkspace_sptr inWS = makeFakeWorkspace();
+    setupAlgorithmForOutputWorkspace(alg, inWS, "SelectIf", "Greater", 2.2);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
     checkOutputWorkspace(alg, correctMasking);
@@ -191,6 +199,7 @@ private:
     const auto &spectrumInfo = mask->spectrumInfo();
     for (size_t i = 0; i < numHist; ++i) {
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), correctMasking(*inW, i))
+      TS_ASSERT_EQUALS(mask->y(i).front(), inW->y(i).front())
     }
   }
 
@@ -224,6 +233,13 @@ private:
     return ws;
   }
 
+  static void maskAllDetectors(MatrixWorkspace_sptr &ws) {
+    auto &detectorInfo = ws->mutableDetectorInfo();
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      detectorInfo.setMasked(i, true);
+    }
+  }
+
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input.
   static void setupAlgorithmForCalFiles(
@@ -248,12 +264,10 @@ private:
   // Initialise the algorithm and set the properties. Creates a fake
   // workspace for the input.
   static void setupAlgorithmForOutputWorkspace(MaskDetectorsIf &alg,
+                                               const MatrixWorkspace_sptr &inWS,
                                                const std::string &mode,
                                                const std::string &op,
                                                const double value) {
-    // create the workspace
-    const MatrixWorkspace_sptr inWS = makeFakeWorkspace();
-
     // set up the algorithm
     if (!alg.isInitialized())
       alg.initialize();

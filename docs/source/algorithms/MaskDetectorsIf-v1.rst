@@ -18,7 +18,7 @@ Output to a calfile
    the ``InputCalFile`` are copied over to the ``OutputCalFile``.
 
 Output to a workspace
-   For this mode the ``OutputWorkspace`` property has to be set. The algorithm masks the selected detectors for the output workspace. This does not clear the data in the spectra under question. Use :ref:`ClearMaskedSpectra <algm-ClearMaskedSpectra>` to clear the masked data manually.
+   For this mode the ``OutputWorkspace`` property has to be set. The algorithm masks the selected detectors (:literal:`Mode='SelectIf'`) or unmasks deselected ones (:literal:`Mode='DeselectIf'`) for the output workspace. Masking does not clear the data in the spectra under question. Use :ref:`ClearMaskedSpectra <algm-ClearMaskedSpectra>` to clear the masked data manually.
 
 Usage
 -----
