@@ -46,6 +46,11 @@ Usage
     plotting.remove_subplot(subplot_name) # removes the subplot (& updates the grid)
 
     (... add then delete lines, or text/annotations etc. ...)
+    # lines can be added as normal in matplotlib
+    # for example:
+    line = subplot.axvline(x_axis, y_min, y_max, **kwargs)
+    #or:
+    line = plotting.get_subplot(subplot_name).axvline(x_axis, y_min, y_max, **kwargs)
     plotting.update_canvas() # will update the canvas (generally only required for deleting things)
 
 File and Code Layout
