@@ -1429,6 +1429,65 @@ public:
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
     AnalysisDataService::Instance().clear();
   }
+
+  void test_flood_correction_parameter_file() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "Flood");
+    auto flood = createFloodWorkspace(257);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("FloodCorrection", "ParameterFile");
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    TS_ASSERT(out);
+    auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
+    TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 1e-15);
+    auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
+    TS_ASSERT_DELTA(out2->y(0)[0], 80.0, 1e-15);
+    auto out3 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(2));
+    TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 1e-15);
+    auto out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
+    TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 1e-14);
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_flood_correction_parameter_file_no_flood_parameters() {
+
+    std::string const name = "input";
+    prepareInputGroup(name, "No_Flood");
+    auto flood = createFloodWorkspace(257);
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("FloodCorrection", "ParameterFile");
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::invalid_argument & e, e.what(),
+        std::string(
+            "Instrument parameter file doesn't have the Flood_Run parameter."));
+    AnalysisDataService::Instance().clear();
+  }
 private:
 
   MatrixWorkspace_sptr createFloodWorkspace(size_t n = 4) {

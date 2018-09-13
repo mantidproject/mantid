@@ -8,6 +8,11 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/RegexStrings.h"
+
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -1025,10 +1030,58 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
   return result;
 }
 
-API::MatrixWorkspace_sptr ReflectometryReductionOneAuto2::applyFloodCorrection(API::MatrixWorkspace_sptr ws){
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
   std::string const method = getProperty("FloodCorrection");
   if (method == "Workspace" && !isDefault("FloodWorkspace")) {
-    MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
+    return getProperty("FloodWorkspace");
+  } else if (method == "ParameterFile") {
+    if (!isDefault("FloodWorkspace")) {
+      g_log.warning() << "Flood correction is performed using data in the "
+                         "Parameter File. Value of FloodWorkspace property is "
+                         "ignored."
+                      << std::endl;
+    }
+    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    auto const instrument = inputWS->getInstrument();
+    auto const floodRunParam = instrument->getParameterAsString("Flood_Run");
+    if (floodRunParam.empty()) {
+      throw std::invalid_argument("Instrument parameter file doesn't have the Flood_Run parameter.");
+    }
+    boost::regex separator("\\s*,\\s*|\\s+");
+    auto const parts = Strings::StrParts(floodRunParam, separator);
+    if (!parts.empty()) {
+      std::string fileName = floodRunParam;
+      try {
+        // If the first part is a number treat all parts as run numbers
+        boost::lexical_cast<size_t>(parts.front());
+        fileName = instrument->getName() + Strings::toString(parts);
+      } catch (boost::bad_lexical_cast) {
+        // Do nothing fileName == floodRunParam
+      }
+      auto alg = createChildAlgorithm("CreateFloodWorkspace");
+      alg->initialize();
+      alg->setProperty("Filename", fileName);
+      std::string const prefix("Flood_");
+      for (auto const prop :
+           {"StartSpectrum", "EndSpectrum", "ExcludeSpectra", "Background",
+            "CentralPixelSpectrum", "RangeLower", "RangeUpper"}) {
+        auto const param = instrument->getParameterAsString(prefix + prop);
+        if (!param.empty()) {
+          alg->setPropertyValue(prop, param);
+        }
+      }
+      alg->execute();
+      MatrixWorkspace_sptr out = alg->getProperty("OutputWorkspace");
+      return out;
+    }
+  }
+  return MatrixWorkspace_sptr();
+}
+
+MatrixWorkspace_sptr
+ReflectometryReductionOneAuto2::applyFloodCorrection(MatrixWorkspace_sptr ws) {
+  MatrixWorkspace_sptr flood = getFloodWorkspace();
+  if (flood) {
     auto alg = createChildAlgorithm("ApplyFloodWorkspace");
     alg->initialize();
     alg->setProperty("InputWorkspace", ws);

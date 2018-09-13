@@ -741,6 +741,21 @@ template <> MANTID_KERNEL_DLL std::string toString(const UnitLabel &value) {
   return value;
 }
 
+template <> MANTID_KERNEL_DLL std::string toString(const std::vector<std::string> &value) {
+  if (value.empty()) {
+    return "";
+  }
+  std::ostringstream mess;
+  auto it = value.begin();
+  auto last = value.end();
+  mess << *it;
+  ++it;
+  for(; it != last; ++it) {
+    mess << ',' << *it;
+  }
+  return mess.str();
+}
+
 //------------------------------------------------------------------------------------------------
 /**
  *  Write out the three vectors into a file of type dc 9
