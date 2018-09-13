@@ -759,8 +759,11 @@ void IndirectFitAnalysisTab::plotAll(
     Mantid::API::MatrixWorkspace_sptr workspace, const std::size_t &index) {
   const std::size_t numberOfSpectra =
       m_fittingModel->getWorkspace(index)->getNumberHistograms();
-  if (numberOfSpectra != 1 || allowPlotResultWithOneSpectra())
+  if (numberOfSpectra > 1)
     plotSpectrum(workspace);
+  else
+    showMessageBox(QString("Unable to plot result for a workspace:\n\n Cannot "
+                           "plot a single data point"));
 }
 
 void IndirectFitAnalysisTab::plotParameter(
@@ -768,8 +771,11 @@ void IndirectFitAnalysisTab::plotParameter(
     const std::string &parameterToPlot, const std::size_t &index) {
   const std::size_t numberOfSpectra =
       m_fittingModel->getWorkspace(index)->getNumberHistograms();
-  if (numberOfSpectra != 1 || allowPlotResultWithOneSpectra())
+  if (numberOfSpectra > 1)
     plotSpectrum(workspace, parameterToPlot);
+  else
+    showMessageBox(QString("Unable to plot result for a workspace:\n\n Cannot "
+                           "plot a single data point"));
 }
 
 void IndirectFitAnalysisTab::plotSpectrum(

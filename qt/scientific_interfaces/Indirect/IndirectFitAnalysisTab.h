@@ -141,7 +141,6 @@ protected:
                       const QSet<QString> &options) const;
 
   virtual bool shouldEnablePlotResult() = 0;
-  virtual bool allowPlotResultWithOneSpectra() = 0;
   virtual void setPlotResultEnabled(bool enabled) = 0;
   virtual void setSaveResultEnabled(bool enabled) = 0;
 

@@ -64,7 +64,7 @@ void MSDFit::plotClicked() { IndirectFitAnalysisTab::plotResult("All"); }
 
 bool MSDFit::shouldEnablePlotResult() {
   for (auto i = 0u; i < m_msdFittingModel->numberOfWorkspaces(); ++i)
-    if (m_msdFittingModel->getNumberOfSpectra(i) != 1)
+    if (m_msdFittingModel->getNumberOfSpectra(i) > 1)
       return true;
   return false;
 }

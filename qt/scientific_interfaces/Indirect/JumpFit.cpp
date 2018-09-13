@@ -80,7 +80,7 @@ void JumpFit::updatePlotOptions() {
 
 bool JumpFit::shouldEnablePlotResult() {
   for (auto i = 0u; i < m_jumpFittingModel->numberOfWorkspaces(); ++i)
-    if (m_jumpFittingModel->getNumberOfSpectra(i) != 1)
+    if (m_jumpFittingModel->getNumberOfSpectra(i) > 1)
       return true;
   return false;
 }
