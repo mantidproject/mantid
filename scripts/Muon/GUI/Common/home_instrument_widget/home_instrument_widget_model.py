@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
-
 # import mantid.simpleapi as mantid
+
+from Muon.GUI.Common.muon_context import MuonContext
+
 
 class MuonPreProcessParameters(object):
 
@@ -28,12 +30,21 @@ class InstrumentWidgetModel(object):
     GUI.
     """
 
-    def __init__(self, muon_data=[]):
+    def __init__(self, muon_data=MuonContext()):
         self._data = muon_data
         self._active_run = None
 
+    def clear_data(self):
+        """When e.g. instrument changed"""
+        self._data.clear()
+
     def get_file_time_zero(self):
-        pass
+        return self._data.loaded_data["TimeZero"].value
+
+
+
+    def get_user_time_zero(self):
+        return 0.0
 
     def set_time_zero_to_file(self):
         pass
@@ -42,7 +53,10 @@ class InstrumentWidgetModel(object):
         pass
 
     def get_file_first_good_data(self):
-        pass
+        return self._data.loaded_data["FirstGoodData"].value
+
+    def get_user_first_good_data(self):
+        return 0.0
 
     def set_first_good_data_all(self, first_good_data):
         """
@@ -66,6 +80,9 @@ class InstrumentWidgetModel(object):
 
     def set_dead_time_to_file(self):
         pass
+
+    def get_dead_time_table_from_data(self):
+        return self._data.loaded_data["DeadTimeTable"].value
 
     def load_dead_time(self):
         pass

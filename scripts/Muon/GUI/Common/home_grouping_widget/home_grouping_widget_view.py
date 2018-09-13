@@ -19,7 +19,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
             self.alpha_edit.hide()
         if not hidden:
             self.alpha_label_2.setVisible(True)
-            self.alpha_edit.setVisibke(True)
+            self.alpha_edit.setVisible(True)
 
     def periods_hidden(self, hidden=True):
         if hidden:
@@ -32,7 +32,6 @@ class HomeGroupingWidgetView(QtGui.QWidget):
             self.summed_period_edit.setVisible(True)
             self.minus_label.setVisible(True)
             self.subtracted_period_edit.setVisible(True)
-
 
     def setup_interface(self, show_checks=False):
         self.setObjectName("GroupingWidget")
@@ -63,7 +62,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.alpha_edit)
 
         # TODO : Enable only if data is multi-period
-        self.period_label =  QtGui.QLabel(self)
+        self.period_label = QtGui.QLabel(self)
         self.period_label.setObjectName("periodLabel")
         self.period_label.setText("Data collected in n periods. Plot/analysis period(s) : ")
 
@@ -77,8 +76,6 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.subtracted_period_edit = QtGui.QLineEdit(self)
         self.subtracted_period_edit.setText("")
 
-
-
         self.horizontal_layout_2 = QtGui.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
         self.horizontal_layout_2.addWidget(self.period_label)
@@ -88,10 +85,6 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.horizontal_layout_2.addWidget(self.minus_label)
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.subtracted_period_edit)
-
-
-
-
 
         self.group = QtGui.QGroupBox("Groups and Pairs")
         self.group.setFlat(False)
@@ -130,7 +123,23 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.group.setLayout(self.vertical_layout)
 
-
         self.widget_layout = QtGui.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
+
+    def populate_group_pair_selector(self, group_names, pair_names):
+        self.grouppair_selector.clear()
+        for name in group_names:
+            self.grouppair_selector.addItem(name)
+
+        for name in pair_names:
+            self.grouppair_selector.addItem(name)
+
+    def multi_period_widget_hidden(self, hidden=True):
+        self.periods_hidden(hidden)
+
+    def get_selected_group_or_pair_name(self):
+        return self.grouppair_selector.currentText()
+
+    def on_grouppair_selection_changed(self, slot):
+        self.grouppair_selector.currentIndexChanged.connect(slot)
