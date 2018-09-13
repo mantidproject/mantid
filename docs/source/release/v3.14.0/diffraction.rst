@@ -32,6 +32,11 @@ Improvements
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
 
+Bugfixes
+########
+- multiple_scattering flag is now optional for Polaris focus when absorb_correction is true
+
+
 Single Crystal Diffraction
 --------------------------
 
