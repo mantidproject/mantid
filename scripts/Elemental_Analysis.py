@@ -153,6 +153,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         if colour is None:
             colour = self.line_colours.next()
         for peak, intensity in iteritems(self.electron_peaks):
+            # intensity will be used in the future for labelling lines
             self.electron_lines.append(
                 subplot.axvline(
                     float(peak), 0, 1, color=colour))
@@ -227,6 +228,7 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.element_lines[element] = {}
         colour = self.line_colours.next()
         for label, x_value in iteritems(data):
+            # label will be used in the future for labelling lines
             self._add_element_line(x_value, element, colour=colour)
 
     def _remove_element_lines(self, element):
@@ -238,21 +240,25 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.element_lines[element] = {}
 
     def _update_element_lines(self, element, current_dict, new_dict):
+        # can be split up: this section removes lines
         if len(current_dict) > len(new_dict):  # i.e. item removed
             dict_difference = {k: current_dict[k]
                                for k in set(current_dict) - set(new_dict)}
             for label, x_value in iteritems(dict_difference):
+                # label will be used in the future for labelling lines
                 for line in self.element_lines[element][x_value]:
                     line.remove()
                     del line
                 self.element_lines[element][x_value] = []
                 del current_dict[label]
             self.plotting.update_canvas()
-        elif current_dict != new_dict:
+        # can be split up: this section adds lines
+        elif current_dict != new_dict:  # i.e. item added or not closed without changes
             colour = self.line_colours.next()
             dict_difference = {k: new_dict[k]
                                for k in set(new_dict) - set(current_dict)}
             for label, x_value in iteritems(dict_difference):
+                # label will be used in the future for labelling lines
                 self._add_element_line(x_value, element, colour)
             current_dict.update(dict_difference)
 
@@ -318,12 +324,13 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         colour = self.line_colours.next()
         for element in self.ptable.selection:
             for label, x_value in iteritems(self.element_data[element.symbol]):
-                l = self.plotting.get_subplot(detector).axvline(
+                # label will be used in the future for labelling lines
+                line = self.plotting.get_subplot(detector).axvline(
                     x_value, 1, 0, color=colour)
                 try:
-                    self.element_lines[element.symbol][x_value].append(l)
+                    self.element_lines[element.symbol][x_value].append(line)
                 except KeyError:
-                    self.element_lines[element.symbol][x_value] = [l]
+                    self.element_lines[element.symbol][x_value] = [line]
         self.plotting.update_canvas()
 
     def del_plot(self, checkbox):
