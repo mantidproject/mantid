@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
 from __future__ import (absolute_import, division, print_function)
-from multiprocessing import Process, Array, Manager
+from multiprocessing import Process, Array, Manager, Value, Lock
 import optparse
 import os
 import sys
+import time
 
 #########################################################################
 # Set up the command line options
 #########################################################################
+
+start_time = time.time()
 
 VERSION = "1.1"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -91,42 +94,107 @@ if __name__ == "__main__":
 
     # Configure properties file
     mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
-                                                  data_dirs=data_paths, save_dir=save_dir,
+                                                  data_dirs=data_paths,
+                                                  save_dir=save_dir,
                                                   archivesearch=options.archivesearch)
     if options.makeprop:
         mtdconf.config()
 
     #########################################################################
-    # Run the tests
+    # Generate list of tests
     #########################################################################
 
+    runner = stresstesting.TestRunner(executable=options.executable,
+                                      exec_args=options.execargs,
+                                      escape_quotes=True)
+
+    tmgr = stresstesting.TestManager(test_loc=mtdconf.testDir,
+                                     runner=runner,
+                                     quiet=options.quiet,
+                                     testsInclude=options.testsInclude,
+                                     testsExclude=options.testsExclude,
+                                     exclude_in_pr_builds=options.exclude_in_pr_builds)
+
+    test_counts, test_list, test_stats, files_required_by_test_module, data_file_lock_status = \
+        tmgr.generateMasterTestList()
+
+    number_of_test_modules = len(test_list.keys())
+    total_number_of_tests = test_stats[0]
+    maximum_name_length = test_stats[1]
+
+    #########################################################################
+    # Run the tests with a task scheduler
+    #########################################################################
+
+    # Print message if this is a cleanup run instead of a normal test run
     if options.clean:
         print("Performing cleanup run")
 
-    # Multi-core processes
-    processes = [] # an array to hold the processes
-    results_array = Array('i', 4*options.ncores) # shared array to hold skipped, failed and total number of tests + status
-    test_counter = Array('i', [0, 0, 0]) # shared array for number of executed tests, total number and max name length
-    manager = Manager() # a manager to create a shared dict to store names of skipped and failed tests
-    status_dict = manager.dict() # a shared dict to store names of skipped and failed tests
+    # Cleanup any pre-existing XML reporter files
+    entries = os.listdir(mtdconf.saveDir)
+    for file in entries:
+        if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
+            os.remove(os.path.join(mtdconf.saveDir,file))
+
+    # Multi-core processes --------------
+    # An array to hold the processes
+    processes = []
+    # A shared array to hold skipped and failed tests + status
+    results_array = Array('i', [0] * (3*options.ncores))
+    # A manager to create a shared dict to store names of skipped and failed tests
+    manager = Manager()
+    # A shared dict to store names of skipped and failed tests
+    status_dict = manager.dict()
+    # A shared dict to store the global list of tests
+    tests_dict = manager.dict()
+    # A shared array with 0s and 1s to keep track of completed tests
+    tests_lock = Array('i', [0] * number_of_test_modules)
+    # A shared value to count the number of remaining test modules
+    tests_left = Value('i', number_of_test_modules)
+    # A shared value to count the number of completed tests
+    tests_done = Value('i', 0)
+    # A shared dict to store which data files are required by each test module
+    required_files_dict = manager.dict()
+    for key in files_required_by_test_module.keys():
+        required_files_dict[key] = files_required_by_test_module[key]
+    # A shared dict to store the locked status of each data file
+    locked_files_dict = manager.dict()
+    for key in data_file_lock_status.keys():
+        locked_files_dict[key] = data_file_lock_status[key]
+
+    # Store in reverse number of number of tests in each module into the shared dictionary
+    reverse_sorted_dict = [(k, test_counts[k]) for k in sorted(test_counts, key=test_counts.get, reverse=True)]
+    counter = 0
+    for key, value in reverse_sorted_dict:
+        tests_dict[str(counter)] = test_list[key]
+        counter += 1
+        if (not options.quiet):
+            print("Test module "+key+" has %i tests:"%value)
+            for t in test_list[key]:
+                print(" - "+t._fqtestname)
+            print()
+
+    # Define a lock
+    lock = Lock()
 
     # Prepare ncores processes
     for ip in range(options.ncores):
-        processes.append(Process(target=stresstesting.testProcess,args=(mtdconf.testDir, mtdconf.saveDir,
-                         options, results_array, status_dict, test_counter, ip)))
+        processes.append(Process(target=stresstesting.testThreadsLoop,args=(mtdconf.testDir, mtdconf.saveDir,
+                         mtdconf.dataDir, options, tests_dict, tests_lock, tests_left, results_array,
+                         status_dict, total_number_of_tests, maximum_name_length, tests_done, ip, lock,
+                         required_files_dict, locked_files_dict)))
     # Start and join processes
     for p in processes:
         p.start()
     for p in processes:
         p.join()
 
-
     # Gather results
-    skippedTests = sum(results_array[:options.ncores])
+    skippedTests = sum(results_array[:options.ncores]) + (test_stats[2] - test_stats[0])
     failedTests = sum(results_array[options.ncores:2*options.ncores])
-    totalTests = sum(results_array[2*options.ncores:3*options.ncores])
+    totalTests = test_stats[2]
     # Find minimum of status: if min == 0, then success is False
-    success = bool(min(results_array[3*options.ncores:4*options.ncores]))
+    success = bool(min(results_array[2*options.ncores:3*options.ncores]))
 
     #########################################################################
     # Cleanup
@@ -136,6 +204,9 @@ if __name__ == "__main__":
     if options.makeprop:
         mtdconf.restoreconfig()
 
+    end_time = time.time()
+    total_runtime = time.strftime("%H:%M:%S", time.gmtime(end_time-start_time))
+
     #########################################################################
     # Output summary to terminal (skip if this was a cleanup run)
     #########################################################################
@@ -143,10 +214,8 @@ if __name__ == "__main__":
     if (not options.clean):
         nwidth = 80
         banner = "#" * nwidth
-        print()
-        print(banner)
-        print("#"+(" "*(int(nwidth/2)-4))+"SUMMARY")
-        print(banner)
+        print('\n' + banner)
+        print("Total runtime: "+total_runtime)
 
         if (skippedTests > 0) and options.showskipped:
             print("\nSKIPPED:")
@@ -170,5 +239,6 @@ if __name__ == "__main__":
             print("%d%s tests passed, %d tests failed out of %d (%d skipped)" %
                   (percent, '%', failedTests, (totalTests-skippedTests), skippedTests))
         print('All tests passed? ' + str(success))
+        print(banner)
         if not success:
             sys.exit(1)

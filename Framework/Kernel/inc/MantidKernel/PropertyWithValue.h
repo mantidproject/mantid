@@ -84,6 +84,7 @@ public:
   std::vector<std::string> allowedValues() const override;
   bool isMultipleSelectionAllowed() override;
   virtual void replaceValidator(IValidator_sptr newValidator);
+  IValidator_sptr getValidator() const;
 
 protected:
   /// The value of the property

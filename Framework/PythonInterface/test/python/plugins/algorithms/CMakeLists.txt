@@ -49,6 +49,7 @@ set ( TEST_PY_FILES
   FractionalIndexingTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
+  HB2AReduceTest.py
   IndirectTransmissionTest.py
   IndexSatellitePeaksTest.py
   LoadAndMergeTest.py
