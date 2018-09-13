@@ -1,5 +1,8 @@
 import unittest
 
+import os
+os.environ["QT_API"] = "pyqt"  # noqa E402
+
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_presenter import PlotPresenter
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
 

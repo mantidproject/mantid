@@ -72,12 +72,16 @@ class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def test_redo_layout_with_plots_not_equal_to_zero(self):
         self.view.plots = [mock.Mock() for i in range(3)]
+        # uses moveable_vline as this calls redo_layout, but has no other
+        # functionality
         self.view.add_moveable_vline(*[mock.Mock() for i in range(4)])
         self.assertEquals(self.view.figure.tight_layout.call_count, 1)
         self.assertEquals(self.view.canvas.draw.call_count, 1)
 
     def test_redo_layout_with_plots_equal_to_zero(self):
         self.view.plots = []
+        # uses moveable_vline as this calls redo_layout, but has no other
+        # functionality
         self.view.add_moveable_vline(*[mock.Mock() for i in range(4)])
         self.assertEquals(self.view.canvas.draw.call_count, 1)
 
