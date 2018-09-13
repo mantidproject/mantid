@@ -31,5 +31,5 @@ namespace Process {
 
 bool isAnotherInstanceRunning();
 unsigned int numberOfMantids();
-}
+} // namespace Process
 #endif // PROCESS_H_

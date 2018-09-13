@@ -721,7 +721,8 @@ void ProjectRecovery::removeOlderCheckpoints() {
   }
 }
 
-bool ProjectRecovery::olderThanAGivenTime(const Poco::Path &path, int64_t elapsedTime) {
+bool ProjectRecovery::olderThanAGivenTime(const Poco::Path &path,
+                                          int64_t elapsedTime) {
   return Poco::File(path).getLastModified().isElapsed(elapsedTime);
 }
 } // namespace MantidQt

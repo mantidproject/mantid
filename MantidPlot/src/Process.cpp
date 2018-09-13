@@ -135,8 +135,8 @@ bool isAnotherInstanceRunning() {
   return otherIsRunning;
 }
 
-unsigned int numberOfMantids(){
-    using MantidQt::API::toQStringInternal;
+unsigned int numberOfMantids() {
+  using MantidQt::API::toQStringInternal;
   // Inspired by psutil.psutil_get_pids at
   // https://github.com/giampaolo/psutil/blob/master/psutil/arch/windows/process_info.c
 
@@ -248,7 +248,7 @@ bool isAnotherInstanceRunning() {
   return otherIsRunning;
 }
 
-unsigned int numberOfMantids(){
+unsigned int numberOfMantids() {
   kinfo_proc *processes[] = {nullptr};
   size_t processesLength(0);
   int sysctlQuery[3] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
@@ -299,7 +299,7 @@ unsigned int numberOfMantids(){
   kinfo_proc *processIter = processListBegin;
   char exePath[PATH_MAX];
   int counter = 0;
-for (size_t i = 0; i < processesLength; ++i) {
+  for (size_t i = 0; i < processesLength; ++i) {
     const auto pid = processIter->kp_proc.p_pid;
     if (proc_pidpath(pid, exePath, PATH_MAX) <= 0) {
       // assume process is dead...
