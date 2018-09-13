@@ -5,8 +5,7 @@ general_params = {
     "monitor_mask_regions": array([[3.45, 2.96, 2.1,  1.73],
                                    [3.7,  3.2,  2.26, 1.98]]),
     "monitor_spectrum_number": 1,
-    "monitor_spline_coefficient": 20,
-    "spline_coefficient": 60,
+
     "generate_absorb_corrections": False,
 
     "file_names": {
@@ -41,7 +40,9 @@ long_mode_off_params = {
         (1500, 19900),  # Bank 12
         (1500, 19900),  # Bank 13
         (1500, 19900)   # Bank 14
-    ]
+    ],
+    "monitor_spline_coefficient": 20,
+    "spline_coefficient": 60,
 }
 
 long_mode_on_params = {
@@ -67,7 +68,9 @@ long_mode_on_params = {
         (20300, 39990),  # Bank 12
         (20300, 39990),  # Bank 13
         (20300, 39990)   # Bank 14
-    ]
+    ],
+    "monitor_spline_coefficient": 20,
+    "spline_coefficient": 60,
 }
 
 calibration_params = {
@@ -112,15 +115,15 @@ variable_help = {
                                  "raw data to 20,000 microseconds worth of data",
         "focused_cropping_values": "These values are used to determine the TOF range to crop a focused (not Vanadium "
                                    "calibration) workspace to. These are applied on a bank by bank basis. They must "
-                                   "be less than the values specified for raw_data_tof_cropping."
-    },
-
-    "general_params": {
-        "monitor_spectrum_number": "The spectrum number the monitor is located at in the workspace",
+                                   "be less than the values specified for raw_data_tof_cropping.",
         "monitor_spline_coefficient": "The coefficient to use whilst calculating a spline from the monitor."
                                       "workspace. This is used to normalise the workspace current.",
         "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during "
                               "a vanadium calibration."
+    },
+
+    "general_params": {
+        "monitor_spectrum_number": "The spectrum number the monitor is located at in the workspace",
     },
 
     "calibration_params": {
