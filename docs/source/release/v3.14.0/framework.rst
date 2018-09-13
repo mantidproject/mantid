@@ -57,7 +57,7 @@ Bugfixes
 - :ref:`SaveGDA <algm-SaveGDA>` Now takes a parameter of OutputFilename instead of Filename to better match with similar algorithms.
 
 - :ref:`FilterEvents <algm-FilterEvents-v1>` output workspaces now contain the goniometer.
-
+- Fixed an issue where if a workspace's history wouldn't update for some algorithms
 - Fixed a ``std::bad_cast`` error in :ref:`algm-LoadLiveData` when the data size changes.
 
 
@@ -68,8 +68,7 @@ Python
 New
 ###
 
-- New python validator type: `:class:`~mantid.geometry.OrientedLattice`. Checks whether a workspace has an oriented lattice object attached.
-
+- New python validator type: :class:`~mantid.geometry.OrientedLattice` checks whether a workspace has an oriented lattice object attached.
 - We have been making major performance improvements to geometry access in Mantid over the last few releases. We are now exposing these features via Python to give our users direct access to the same benefits as part of their scripts. The newly exposed objects are now available via workspaces and include:
 
  * :class:`mantid.geometry.ComponentInfo`

@@ -9,6 +9,15 @@ Indirect Inelastic Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Algorithms
+----------
+
+New Algorithms
+##############
+- :ref:`BASISCrystalDiffraction <algm-BASISCrystalDiffraction>` replaces :ref:`BASISDiffraction <algm-BASISDiffraction>`, now deprecated.
+- :ref:`BASISPowderDiffraction <algm-BASISPowderDiffraction>` obtains scattered elastic intensity versus momentum transfer and versus scattering angle.
+- Deprecated algorithm BASISReduction311 has been removed.
+
 :ref:`Release 3.14.0 <v3.14.0>`
 
 Data Analysis Interface
@@ -18,6 +27,9 @@ Improvements
 ############
 
 - The Run button in the Data Analysis tabs is now above the output options, and is disabled during fitting.
+- When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
+  Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash 
+  when plotting a guess.
 
 Bugfixes
 ########

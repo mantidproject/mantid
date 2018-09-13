@@ -1,6 +1,7 @@
 #ifndef GROUPWORKSPACESTEST_H_
 #define GROUPWORKSPACESTEST_H_
 
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

@@ -537,7 +537,7 @@ void SVConnections::spectrumColorScale() {
 void SVConnections::loadColorMap(const QString &file_name) {
   m_colorMapFileName = file_name;
   if (m_colorMapFileName.isEmpty())
-    m_colorMapFileName = MantidColorMap::loadMapDialog("", m_svMainWindow);
+    m_colorMapFileName = MantidColorMap::chooseColorMap("", m_svMainWindow);
 
   MantidColorMap *mantid_color_map =
       new MantidColorMap(file_name, GraphOptions::Linear);
