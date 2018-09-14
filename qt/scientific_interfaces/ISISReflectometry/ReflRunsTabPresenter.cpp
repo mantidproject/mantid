@@ -846,7 +846,7 @@ IAlgorithm_sptr ReflRunsTabPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationWorkspace", "TOF_live");
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("UpdateEvery", "10");
+  alg->setProperty("UpdateEvery", "60");
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
                    liveDataReductionOptions(instrument));
