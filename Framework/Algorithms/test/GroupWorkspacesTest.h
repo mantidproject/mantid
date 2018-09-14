@@ -368,6 +368,22 @@ public:
     removeFromADS("", inputs);
   }
 
+  void test_GlobExpression_Empty_Output_Fails_2() {
+
+    std::vector<std::string> inputs{"ws1"};
+    addTestMatrixWorkspacesToADS(inputs);
+    std::string glob{"ws\\*"};
+    std::string groupName{"test_name_output"};
+
+    runAlgorithm(glob, groupName, true);
+
+    TS_ASSERT_EQUALS(
+        false,
+        Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
+
+    removeFromADS("", inputs);
+  }
+
 private:
   void addTestMatrixWorkspacesToADS(const std::vector<std::string> &inputs) {
     for (const auto &input : inputs) {
