@@ -69,6 +69,11 @@ public:
 
   void AppendEvent(std::size_t chunkN, std::size_t listN,
                    const Types::Event::TofEvent &event);
+  template<typename InIter>
+  void AppendEvent(std::size_t chunkN, std::size_t listN,
+                   InIter from, InIter to);
+
+  std::size_t pixelCount() { return m_chunks && !m_chunks->empty() ? m_chunks->at(0).size() : 0; }
 
   static void appendEventsRandomly(std::size_t nE, unsigned nP,
                                    unsigned chunkId,
@@ -102,6 +107,15 @@ protected:
   /// Event list shared storage
   Chunks *m_chunks;
 };
+
+template<typename InIter>
+void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
+                                          InIter from, InIter to) {
+  if (!m_chunks)
+    throw ("No event lists found.");
+  auto &list = m_chunks->at(chunkN).at(listN);
+  list.insert(list.end(), from, to);
+}
 
 } // namespace IO
 } // namespace Parallel
