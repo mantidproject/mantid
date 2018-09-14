@@ -269,9 +269,9 @@ void ProjectRecovery::attemptRecovery() {
   }
 
   auto beforeRecoveryFolder = getRecoveryFolderLoad();
-  const auto checkpointPaths =
-      getRecoveryFolderCheckpoints(getRecoveryFolderLoad());
-  auto &mostRecentCheckpoint = checkpointPaths.back();
+  auto checkpointPaths =
+      getRecoveryFolderCheckpoints(beforeRecoveryFolder);
+  auto mostRecentCheckpoint = checkpointPaths.back();
 
   auto destFilename =
       Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
@@ -284,10 +284,12 @@ void ProjectRecovery::attemptRecovery() {
     std::thread recoveryThread(
         [=] { loadRecoveryCheckpoint(mostRecentCheckpoint); });
     recoveryThread.detach();
+    clearAllCheckpoints(beforeRecoveryFolder);
+    startProjectSaving();
   } else if (userChoice == 2) {
     openInEditor(mostRecentCheckpoint, destFilename);
     // Restart project recovery as we stay synchronous
-    clearAllCheckpoints();
+    clearAllCheckpoints(beforeRecoveryFolder);
     startProjectSaving();
   } else {
     throw std::runtime_error("Unknown choice in ProjectRecovery");
@@ -565,7 +567,6 @@ void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
-  startProjectSaving();
   scriptWindow->open(QString::fromStdString(historyDest.toString()));
 }
 
