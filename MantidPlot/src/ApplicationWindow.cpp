@@ -9813,7 +9813,6 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // Stop background saving thread, so it doesn't try to use a destroyed
     // resource
     m_projectRecovery.stopProjectSaving();
-    m_projectRecovery.clearAllCheckpoints();
   }
 
   // Close the remaining MDI windows. The Python API is required to be active
@@ -16825,7 +16824,6 @@ void ApplicationWindow::checkForProjectRecovery() {
                              "OK");
 
     // Restart project recovery manually
-    m_projectRecovery.clearAllCheckpoints();
     m_projectRecovery.startProjectSaving();
   }
 }

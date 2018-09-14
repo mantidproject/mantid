@@ -284,8 +284,6 @@ void ProjectRecovery::attemptRecovery() {
     std::thread recoveryThread(
         [=] { loadRecoveryCheckpoint(mostRecentCheckpoint); });
     recoveryThread.detach();
-    clearAllCheckpoints(beforeRecoveryFolder);
-    startProjectSaving();
   } else if (userChoice == 2) {
     openInEditor(mostRecentCheckpoint, destFilename);
     // Restart project recovery as we stay synchronous
@@ -322,7 +320,7 @@ bool ProjectRecovery::clearAllCheckpoints() const noexcept {
 
 bool ProjectRecovery::clearAllCheckpoints(Poco::Path path) const noexcept {
   try {
-    deleteExistingCheckpoints(0, path);
+    Poco::File(path).remove(true);
     return true;
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
@@ -389,29 +387,6 @@ void ProjectRecovery::deleteExistingCheckpoints(
     size_t checkpointsToKeep) const {
   const auto folderPaths =
       getRecoveryFolderCheckpoints(getRecoveryFolderOutput());
-
-  size_t numberOfDirsPresent = folderPaths.size();
-  if (numberOfDirsPresent <= checkpointsToKeep) {
-    // Nothing to do
-    return;
-  }
-
-  size_t checkpointsToRemove = numberOfDirsPresent - checkpointsToKeep;
-  bool recurse = true;
-  for (size_t i = 0; i < checkpointsToRemove; i++) {
-    Poco::File(folderPaths[i]).remove(recurse);
-  }
-}
-
-/**
- * Deletes existing checkpoints, oldest first, in the recovery
- * folder. This is based on the configuration key which
- * indicates how many points to keep
- */
-void ProjectRecovery::deleteExistingCheckpoints(size_t checkpointsToKeep,
-                                                Poco::Path path) const {
-
-  const auto folderPaths = getRecoveryFolderCheckpoints(path.toString());
 
   size_t numberOfDirsPresent = folderPaths.size();
   if (numberOfDirsPresent <= checkpointsToKeep) {
@@ -542,7 +517,7 @@ void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
   g_log.notice("Project Recovery finished");
 
   // Restart project recovery when the async part finishes
-  clearAllCheckpoints(Poco::Path(recoveryFolder));
+  clearAllCheckpoints(Poco::Path(recoveryFolder).popDirectory());
   startProjectSaving();
 } // namespace MantidQt
 
