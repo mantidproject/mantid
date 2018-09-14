@@ -63,8 +63,8 @@ public:
   void test_errorMessageWithShare() {
     std::string name = "My testing application name";
     Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", true, "name",
-                                       "email", "textBox");
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
+                                       "textBox");
     std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
