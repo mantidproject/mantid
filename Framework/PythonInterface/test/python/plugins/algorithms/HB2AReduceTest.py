@@ -63,6 +63,17 @@ class HB2AReduceTest(unittest.TestCase):
         self.assertAlmostEquals(np.max(HB2AReduce_ws.extractY()), 0.8336013246)
         HB2AReduce_ws.delete()
 
+    def test_anode_vs_temp(self):
+        HB2AReduce_ws = HB2AReduce('HB2A_exp0660_scan0146.dat',
+                                   Vanadium='HB2A_exp0644_scan0018.dat',
+                                   IndividualDetectors=True)
+        self.assertTrue(HB2AReduce_ws)
+        self.assertEquals(HB2AReduce_ws.getNumberHistograms(), 44)
+        self.assertEquals(HB2AReduce_ws.blocksize(), 56)
+        self.assertEquals(np.argmax(HB2AReduce_ws.readY(7)), 2)
+        self.assertAlmostEquals(np.max(HB2AReduce_ws.readY(7)), 2.13258433)
+        HB2AReduce_ws.delete()
+
 
 if __name__ == '__main__':
     unittest.main()
