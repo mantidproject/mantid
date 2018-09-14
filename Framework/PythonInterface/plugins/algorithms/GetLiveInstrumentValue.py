@@ -16,14 +16,22 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         return [ "ReflectometryReductionOneLiveData" ]
 
     def PyInit(self):
-        self.declareProperty(name='Instrument', defaultValue='', direction=Direction.Input,
-                             validator=StringListValidator(['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']),
+        instruments = sorted([item.name()
+                              for item in config.getFacility().instruments()])
+        instrument = config.getInstrument() if config.getInstrument() in instruments else ''
+        self.declareProperty(name='Instrument', defaultValue=instrument, direction=Direction.Input,
+                             validator=StringListValidator(instruments),
                              doc='Instrument to find live value for.')
 
-        self.declareProperty(name='LogName', defaultValue='', direction=Direction.Input,
-                             doc='Log name of value to find.')
+        self.declareProperty(name='PropertyType', defaultValue='Run', direction=Direction.Input,
+                             validator=StringListValidator(['Run', 'Block']),
+                             doc='The type of value to find. For Run this may include title, start time etc. and for Block e.g. theta, slit gaps, etc.')
 
-        self.declareProperty(name='OutputValue', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty(name='PropertyName', defaultValue='TITLE', direction=Direction.Input,
+                             validator=StringMandatoryValidator(),
+                             doc='Name of value to find.')
+
+        self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
                              doc='The live value from the instrument, or an empty string if not found')
 
     def validateInputs(self):
@@ -31,19 +39,33 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        instrument = self.getProperty('Instrument').value
-        logName = self.getProperty('LogName').value
-        if logName == '':
-            raise ValueError('LogName was not specified')
-        value = self.getLiveValueFromInstrument(instrument, logName)
-        if value is not None:
-            self.log().notice(logName + ' = ' + value)
-            self.setProperty('OutputValue', value)
-        else:
-            self.log().notice(logName + ' not found')
+        self._instrument = self.getProperty('Instrument').value
+        self._propertyType = self.getProperty('PropertyType').value
+        self._propertyName = self.getProperty('PropertyName').value
+        value = self.getLiveValue()
+        self.setOutputValue(value)
 
-    def getLiveValueFromInstrument(self, instrument, logName):
+    def prefix(self):
+        """Prefix to use at the start of the EPICS string"""
+        return 'IN:'
+
+    def namePrefix(self):
+        """Prefix to use in the EPICS string before the property name"""
+        if self._propertyType == 'Run':
+            return ':DAE:'
+        else:
+            return ':CS:SB:'
+
+    def getLiveValue(self):
         from epics import caget
-        return caget('IN:' + instrument + ':CS:SB:' + logName, as_string=True)
+        epicsName = self.prefix() + self._instrument + self.namePrefix() + self._propertyName
+        return caget(epicsName, as_string=True)
+
+    def setOutputValue(self, value):
+        if value is not None:
+            self.log().notice(self._propertyName + ' = ' + value)
+            self.setProperty('Value', str(value))
+        else:
+            self.log().notice(self._propertyName + ' not found')
 
 AlgorithmFactory.subscribe(GetLiveInstrumentValue)

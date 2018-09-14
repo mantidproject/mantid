@@ -22,8 +22,10 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return [ "ReflectometryReductionOneAuto", "StartLiveData" ]
 
     def PyInit(self):
-        self.declareProperty(name='Instrument', defaultValue='', direction=Direction.Input,
-                             validator=StringListValidator(['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']),
+        instruments = ['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']
+        instrument = defaultInstrument if config.getInstrument() in instruments else ''
+        self.declareProperty(name='Instrument', defaultValue=instrument, direction=Direction.Input,
+                             validator=StringListValidator(instruments),
                              doc='Instrument to find live value for.')
         self.declareProperty(name='GetLiveValueAlgorithm', defaultValue='GetLiveInstrumentValue', direction=Direction.Input,
                              doc='The algorithm to use to get live values from the instrument')
@@ -84,8 +86,6 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def setupInstrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
         self.instrument = self.getProperty('Instrument').value
-        if self.instrument == '':
-            self.instrument = config.getInstrument().shortName()
         LoadInstrument(Workspace=self.ws_name,RewriteSpectraMap=True,InstrumentName=self.instrument)
 
     def setupSampleLogs(self, liveValues):
@@ -121,7 +121,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         liveValues = self.liveValueList()
         for key in liveValues:
             if liveValues[key].value is None:
-                liveValues[key].value = self.getLiveValueFromInstrument(key)
+                liveValues[key].value = self.getBlockValueFromInstrument(key)
         # check we have all we need
         self.validateLiveValues(liveValues)
         return liveValues
@@ -155,13 +155,14 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
                        self.s2vgName() : LiveValue(None, 'm')}
         return liveValues
 
-    def getLiveValueFromInstrument(self, logName):
+    def getBlockValueFromInstrument(self, logName):
         algName = self.getProperty('GetLiveValueAlgorithm').value
         alg = self.createChildAlgorithm(algName)
         alg.setProperty('Instrument', self.instrument)
-        alg.setProperty('LogName', logName)
+        alg.setProperty('PropertyType', 'Block')
+        alg.setProperty('PropertyName', logName)
         alg.execute()
-        return alg.getProperty("OutputValue").value
+        return alg.getProperty("Value").value
 
     def validateLiveValues(self, liveValues):
         for key in liveValues:
