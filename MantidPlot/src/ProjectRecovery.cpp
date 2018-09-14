@@ -268,8 +268,7 @@ void ProjectRecovery::attemptRecovery() {
   }
 
   auto beforeRecoveryFolder = getRecoveryFolderLoad();
-  auto checkpointPaths =
-      getRecoveryFolderCheckpoints(beforeRecoveryFolder);
+  auto checkpointPaths = getRecoveryFolderCheckpoints(beforeRecoveryFolder);
   auto mostRecentCheckpoint = checkpointPaths.back();
 
   auto destFilename =

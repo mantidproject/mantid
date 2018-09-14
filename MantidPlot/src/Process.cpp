@@ -315,7 +315,5 @@ unsigned int numberOfMantids() {
   return counter;
 }
 #endif
-long long getProcessID(){
-  return QCoreApplication::applicationPid();
-}
+long long getProcessID() { return QCoreApplication::applicationPid(); }
 } // namespace Process
