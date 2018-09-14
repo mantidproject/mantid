@@ -3,6 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 # import mantid.simpleapi as mantid
 
 from Muon.GUI.Common.muon_context import MuonContext
+from mantid.api import WorkspaceGroup
+from mantid.api import ITableWorkspace
+from mantid.simpleapi import mtd
+from mantid import api
 
 
 class MuonPreProcessParameters(object):
@@ -96,9 +100,36 @@ class InstrumentWidgetModel(object):
         pass
 
     def get_dead_time_table_from_data(self):
-        return self._data.loaded_data["DeadTimeTable"].value
+        if self._data.is_multi_period():
+            return self._data.loaded_data["DeadTimeTable"].value[0]
+        else:
+            return self._data.loaded_data["DeadTimeTable"].value
 
     def load_dead_time(self):
         pass
         # TODO : Create loader class which handles loading workspaces as well as dead times
         # this way, we have all the loading algorithms in one place...
+
+    def add_fixed_binning(self, fixed_bin_size):
+        self._data.loaded_data["Rebin"] = str(fixed_bin_size)
+
+    def add_variable_binning(self, rebin_params):
+        self._data.loaded_data["Rebin"] = str(rebin_params)
+
+    def check_dead_time_file_selection(self, selection):
+        try:
+            table = api.AnalysisDataServiceImpl.Instance().retrieve(str(selection))
+        except Exception:
+            raise ValueError("Workspace "+str(selection)+" does not exist")
+        assert isinstance(table, ITableWorkspace)
+        # are column names correct?
+        col = table.getColumnNames()
+        if len(col) != 2:
+            raise ValueError("Expected 2 columns, found ", str(max(0,len(col))))
+        if col[0] != "spectrum" or col[1] != "dead-time":
+            raise ValueError("Columns are bad")
+        rows = table.rowCount()
+        if rows != self._data.loaded_workspace.getNumberHistograms():
+            raise ValueError("Columns are bad")
+        return True
+

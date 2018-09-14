@@ -55,6 +55,7 @@ class HomeTabPresenter(object):
         """Update all widgets from the context"""
         for subwidget in self._subwidgets:
             subwidget.update_view_from_model()
+        self._model._data.show_raw_data()
 
     class InstrumentObserver(Observer):
 

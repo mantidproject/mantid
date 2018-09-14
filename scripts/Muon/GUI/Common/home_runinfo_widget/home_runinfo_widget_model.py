@@ -12,13 +12,13 @@ class HomeRunInfoWidgetModel(object):
 
     def get_run_number(self):
         run = self._data.get_sample_log("run_number")
-        print("Workspace methods : ", dir(self._data.loaded_data["OutputWorkspace"].value))
-        print(self._data.loaded_data["OutputWorkspace"].value.getSampleDetails().keys())
+        #print("Workspace methods : ", dir(self._data.loaded_workspace))
+        #print(self._data.loaded_workspace.getSampleDetails().keys())
         return run.value
         # self._data["OutputWorkspace"].getSampleData().getLogData("run")
 
     def get_instrument_name(self):
-        inst = self._data.loaded_data["OutputWorkspace"].value.getInstrument()
+        inst = self._data.loaded_workspace.getInstrument()
         # print(dir(inst))
         return inst.getName()
 
@@ -27,7 +27,7 @@ class HomeRunInfoWidgetModel(object):
         return log.value
 
     def get_counts_in_MeV(self):
-        workspace = self._data.loaded_data["OutputWorkspace"].value
+        workspace = self._data.loaded_workspace
         total = 0
         for i in range(workspace.getNumberHistograms()):
             total += sum(workspace.dataY(i))
@@ -39,12 +39,12 @@ class HomeRunInfoWidgetModel(object):
         # MuonAnalysis.cpp
         # TimeSeriesProperty.cpp line 934
         temps = self._data.get_sample_log("Temp_Sample")
-        temps = self._data.loaded_data["OutputWorkspace"].value.getRun().getProperty("Temp_Sample")
+        temps = self._data.loaded_workspace.getRun().getProperty("Temp_Sample")
         # print(temps.timeAverageValue())
         # print(temps.times)
-        print("dir of temps : ", dir(temps))
+        #print("dir of temps : ", dir(temps))
         return temps.timeAverageValue()
 
     def get_workspace_comment(self):
-        ws = self._data.loaded_data["OutputWorkspace"].value
+        ws = self._data.loaded_workspace
         return ws.getComment()

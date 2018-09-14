@@ -13,6 +13,10 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self._button_height = 40
 
+        self._button = QtGui.QMessageBox.Ok
+        self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
+                                              self._button, 0, 0)  # QtGui.QMessageBox()
+
         self.setup_interface()
         self.apply_to_all_hidden(True)
         self.dead_time_file_loader_hidden(True)
@@ -31,11 +35,17 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self._on_time_zero_changed = lambda: 0
         self._on_first_good_data_changed = lambda: 0
+        self._on_dead_time_from_file_selected = lambda: 0
+        self._on_dead_time_file_option_selected = lambda: 0
 
         self.timezero_edit.editingFinished.connect(
             lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
         self.firstgooddata_edit.editingFinished.connect(
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
+        self.deadtime_file_edit.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
+
+    def on_dead_time_file_option_changed(self, slot):
+        self._on_dead_time_file_option_selected = slot
 
     def on_time_zero_changed(self, slot):
         self._on_time_zero_changed = slot
@@ -115,8 +125,16 @@ class InstrumentWidgetView(QtGui.QWidget):
             self.dead_time_file_loader_hidden(True)
             self.dead_time_data_info_hidden(False)
         if index == 2:
+            self._on_dead_time_from_file_selected()
             self.dead_time_file_loader_hidden(False)
             self.dead_time_data_info_hidden(True)
+
+    def on_dead_time_file_combo_changed(self, index):
+        if index == 0:
+            # "None" selected
+            return
+        else:
+            self._on_dead_time_file_option_selected()
 
     def apply_to_all_hidden(self, hidden=True):
         if hidden:
@@ -174,7 +192,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_edit.setValidator(timezero_validator)
         self.timezero_edit.setObjectName("timeZeroEdit")
         self.timezero_edit.setText("")
-
 
         self.timezero_unit_label = QtGui.QLabel(self)
         self.timezero_unit_label.setObjectName("timeZeroUnitLabel")
@@ -260,10 +277,11 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.deadtime_label_3.setObjectName("deadTimeInfoLabel")
         self.deadtime_label_3.setText("")
 
-        self.deadtime_file_edit = QtGui.QLineEdit(self)
+        self.deadtime_file_edit = QtGui.QComboBox(self)
         # TODO : Have edit display "No file selected (no dead time applied)" if no file has been chosen
         self.deadtime_file_edit.setObjectName("deadTimeFileEdit")
-        self.deadtime_file_edit.setText("")
+        # self.deadtime_file_edit.setText("")
+        self.deadtime_file_edit.addItem("None")
 
         self.deadtime_browse_button = QtGui.QPushButton(self)
         self.deadtime_browse_button.setObjectName("deadTimeBrowseButton")
@@ -433,3 +451,35 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def get_first_good_data(self):
         return float(self.firstgooddata_edit.text())
+
+    def on_fixed_rebin_edit_changed(self, slot):
+        self.rebin_steps_edit.editingFinished.connect(slot)
+
+    def on_variable_rebin_edit_changed(self, slot):
+        self.rebin_variable_edit.editingFinished.connect(slot)
+
+    def get_fixed_bin_text(self):
+        return self.rebin_steps_edit.text()
+
+    def get_variable_bin_text(self):
+        return self.rebin_variable_edit.text()
+
+    def on_dead_time_from_file_selected(self, slot):
+        self._on_dead_time_from_file_selected = slot
+
+    def populate_dead_time_combo(self, names):
+        self.deadtime_file_edit.clear()
+        self.deadtime_file_edit.addItem("None")
+        for name in names:
+            print("adding ", name)
+            self.deadtime_file_edit.addItem(name)
+
+    def get_dead_time_file_selection(self):
+        return self.deadtime_file_edit.currentText()
+
+    def warning_popup(self, message):
+        # message_box.warning(str(message))
+        # self._message_box.buttonClicked.emit()
+        # self._message_box.warning(self, message, "a", "b")
+        self._message_box.setText(message)
+        self._message_box.open()

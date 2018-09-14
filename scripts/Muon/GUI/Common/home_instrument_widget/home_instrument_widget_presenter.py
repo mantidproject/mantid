@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-
+import Muon.GUI.Common.load_utils as load_utils
 
 def filter_for_extensions(extensions):
     """Filter for file browser"""
@@ -50,6 +50,12 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
         self._view.on_time_zero_changed(self.handle_user_changes_time_zero)
         self._view.on_first_good_data_changed(self.handle_user_changes_first_good_data)
+
+        self._view.on_fixed_rebin_edit_changed(self.handle_fixed_rebin_changed)
+        self._view.on_variable_rebin_edit_changed(self.handle_variable_rebin_changed)
+
+        self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_file_selected)
+        self._view.on_dead_time_file_option_changed(self.handle_dead_time_from_file_changed)
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):
@@ -111,11 +117,38 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self.clear_view()
         self.instrumentNotifier.notify_subscribers()
 
+    def handle_fixed_rebin_changed(self):
+        fixed_bin_size = float(self._view.get_fixed_bin_text())
+        self._model.add_fixed_binning(fixed_bin_size)
+
+    def handle_variable_rebin_changed(self):
+        variable_bin_size = float(self._view.get_fixed_bin_text())
+        self._model.add_variable_binning(variable_bin_size)
+
     def clear_view(self):
         self._view.set_time_zero(0.0)
         self._view.set_first_good_data(0.0)
         self._view.set_combo_boxes_to_default()
         self._view.set_checkboxes_to_defualt()
+
+
+    def handle_dead_time_from_file_selected(self):
+        names = load_utils.get_table_workspace_names_from_ADS()
+        self._view.populate_dead_time_combo(names)
+
+    def handle_dead_time_from_file_changed(self):
+        print("handle_dead_time_from_file_changed")
+        selection = self._view.get_dead_time_file_selection()
+        if selection == "None" or selection == "":
+            return
+        print("selection : ", selection)
+        try:
+            self._model.check_dead_time_file_selection(selection)
+        except ValueError as e:
+            self._view.warning_popup(e.args[0])
+            #names = load_utils.get_table_workspace_names_from_ADS()
+            #self._view.populate_dead_time_combo(names)
+
 
     def show(self):
         self._view.show()

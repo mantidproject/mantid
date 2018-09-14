@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import pyqtSignal
+import Muon.GUI.Common.message_box as message_box
 
 
 class HomeGroupingWidgetView(QtGui.QWidget):
@@ -12,6 +13,10 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.setup_interface()
         self.alpha_hidden(True)
         self.periods_hidden(False)
+
+        self._button = QtGui.QMessageBox.Ok
+        self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
+                                              self._button, 0, 0)  # QtGui.QMessageBox()
 
     def alpha_hidden(self, hidden=True):
         if hidden:
@@ -39,7 +44,14 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.grouppair_label = QtGui.QLabel(self)
         self.grouppair_label.setObjectName("groupPairLabel")
-        self.grouppair_label.setText("Group / Pair : ")
+        self.grouppair_label.setText("Group / ")
+
+        self.pair_label = QtGui.QLabel(self)
+        self.pair_label.setObjectName("pairLabel")
+        myFont = QtGui.QFont()
+        myFont.setBold(True)
+        self.pair_label.setFont(myFont)
+        self.pair_label.setText("Pair : ")
 
         self.grouppair_selector = QtGui.QComboBox(self)
         self.grouppair_selector.setObjectName("groupPairSelector")
@@ -60,6 +72,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout3")
         self.horizontal_layout.addWidget(self.grouppair_label)
+        self.horizontal_layout.addWidget(self.pair_label)
         self.horizontal_layout.addWidget(self.grouppair_selector)
         self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.alpha_label_2)
@@ -72,6 +85,9 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.summed_period_edit = QtGui.QLineEdit(self)
         self.summed_period_edit.setText("1")
+        reg_ex = QtCore.QRegExp("^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$")
+        period_validator = QtGui.QRegExpValidator(reg_ex, self.summed_period_edit)
+        self.summed_period_edit.setValidator(period_validator)
 
         self.minus_label = QtGui.QLabel(self)
         self.minus_label.setObjectName("minusLabel")
@@ -79,6 +95,8 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.subtracted_period_edit = QtGui.QLineEdit(self)
         self.subtracted_period_edit.setText("")
+        period_validator = QtGui.QRegExpValidator(reg_ex, self.subtracted_period_edit)
+        self.subtracted_period_edit.setValidator(period_validator)
 
         self.horizontal_layout_2 = QtGui.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
@@ -133,11 +151,32 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
     def populate_group_pair_selector(self, group_names, pair_names):
         self.grouppair_selector.clear()
-        for name in group_names:
-            self.grouppair_selector.addItem(name)
 
+        model = self.grouppair_selector.model()
+        for name in group_names:
+            item = QtGui.QStandardItem(str(name))
+            #item.setForeground(QtGui.QColor('red'))
+            font = item.font()
+            #font.setPointSize(10)
+            item.setFont(font)
+            model.appendRow(item)
         for name in pair_names:
-            self.grouppair_selector.addItem(name)
+            item = QtGui.QStandardItem(str(name))
+            item.setForeground(QtGui.QColor('red'))
+            font = item.font()
+            #font.setPointSize(10)
+            font.setBold(True)
+            item.setFont(font)
+            model.appendRow(item)
+
+        # for name in group_names:
+        #     self.grouppair_selector.addItem(name)
+        #
+        # for name in pair_names:
+        #     self.grouppair_selector.addItem(name)
+
+    def set_period_number_in_period_label(self, n_periods):
+        self.period_label.setText("Data collected in " + str(n_periods) + " periods. Plot/analysis period(s) : ")
 
     def multi_period_widget_hidden(self, hidden=True):
         self.periods_hidden(hidden)
@@ -159,3 +198,28 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
     def get_currently_selected_group_pair(self):
         return self.grouppair_selector.currentText()
+
+    def get_summed_periods(self):
+        return self.summed_period_edit.text()
+
+    def get_subtracted_periods(self):
+        return self.subtracted_period_edit.text()
+
+    def on_summed_periods_changed(self, slot):
+        self.summed_period_edit.editingFinished.connect(slot)
+
+    def on_subtracted_periods_changed(self, slot):
+        self.subtracted_period_edit.editingFinished.connect(slot)
+
+    def warning_popup(self, message):
+        # message_box.warning(str(message))
+        # self._message_box.buttonClicked.emit()
+        # self._message_box.warning(self, message, "a", "b")
+        self._message_box.setText(message)
+        self._message_box.open()
+
+    def set_summed_periods(self, text):
+        self.summed_period_edit.setText(text)
+
+    def set_subtracted_periods(self, text):
+        self.subtracted_period_edit.setText(text)

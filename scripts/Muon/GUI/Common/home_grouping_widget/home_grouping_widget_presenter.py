@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 
+
 class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 
     def __init__(self, view, model):
@@ -11,6 +12,9 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.on_grouppair_selection_changed(self.handle_grouppair_selector_changed)
 
         self._view.on_alpha_changed(self.handle_user_changes_alpha)
+
+        self._view.on_summed_periods_changed(self.handle_periods_changed)
+        self._view.on_subtracted_periods_changed(self.handle_periods_changed)
 
     def show(self):
         self._view.show()
@@ -45,3 +49,40 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
     def update_view_from_model(self):
         self.update_group_pair_list()
         self.hide_multiperiod_widget_if_data_single_period()
+
+        n_periods = self._model.number_of_periods()
+        self._view.set_period_number_in_period_label(n_periods)
+
+    def string_to_list(self, text):
+        if text == "":
+            return []
+        return [int(i) for i in text.split(",")]
+
+    def update_period_edits(self):
+        summed_periods = self._model._data.loaded_data["SummedPeriods"]
+        subtracted_periods = self._model._data.loaded_data["SubtractedPeriods"]
+
+        self._view.set_summed_periods(",".join([str(p) for p in summed_periods]))
+        self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))
+
+
+
+    def handle_periods_changed(self):
+        summed = self.string_to_list(self._view.get_summed_periods())
+        subtracted = self.string_to_list(self._view.get_subtracted_periods())
+
+        subtracted = [i for i in subtracted if i not in summed]
+
+        n_periods = self._model.number_of_periods()
+        bad_periods = [p for p in summed if (p > n_periods) or p == 0] + [p for p in subtracted if
+                                                                          (p > n_periods) or p == 0]
+        if len(bad_periods) > 0:
+            self._view.warning_popup("The following periods are invalid : " + ",".join([str(p) for p in bad_periods]))
+
+        summed = [p for p in summed if (p <= n_periods) and p > 0]
+        subtracted = [p for p in subtracted if (p <= n_periods) and p > 0]
+
+        self._model.update_summed_periods(summed)
+        self._model.update_subtracted_periods(subtracted)
+
+        self.update_period_edits()

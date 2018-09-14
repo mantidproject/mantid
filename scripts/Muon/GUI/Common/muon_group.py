@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+from Muon.GUI.Common.load_utils import MuonWorkspace
+
 class MuonGroup:
     """Simple struct to store information on a detector group.
 
@@ -13,6 +15,17 @@ class MuonGroup:
 
         self._detector_IDs = None
         self.detectors = detector_IDs
+
+        self._workspace = None
+
+    @property
+    def workspace(self):
+        return self._workspace
+
+    @workspace.setter
+    def workspace(self, new_workspace):
+        if isinstance(new_workspace, MuonWorkspace):
+            self._workspace = new_workspace
 
     @property
     def name(self):

@@ -2,8 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
 from PyQt4 import QtGui
 
-from mantid.simpleapi import *
+import mantid.simpleapi as simpleapi
 import mantid
+import mantid.api as api
+from mantid.api import ITableWorkspace
 
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_model import InstrumentWidgetModel
 from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_view import InstrumentWidgetView
@@ -28,6 +30,18 @@ from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabPresenter
 from Muon.GUI.Common.muon_context import MuonContext
 
 if __name__ == "__main__":
+    # add dead time tables
+    correctTable = simpleapi.CreateEmptyTableWorkspace()
+    incorrectTable = simpleapi.CreateEmptyTableWorkspace()
+
+    correctTable.addColumn("int", "spectrum",0)
+    correctTable.addColumn("float", "dead-time",0)
+    for i in range(96):
+        correctTable.addRow([i, 0.01])
+
+    print(mantid.api.AnalysisDataServiceImpl.Instance().getObjectNames())
+
+
     import sys
 
     context = MuonContext()
@@ -52,7 +66,7 @@ if __name__ == "__main__":
     ui3 = HomePlotWidgetPresenter(plot_view, HomePlotWidgetModel())
     #ui3.show()
 
-    ui4 = HomeRunInfoWidgetPresenter(run_info_view, HomeRunInfoWidgetModel())
+    ui4 = HomeRunInfoWidgetPresenter(run_info_view, HomeRunInfoWidgetModel(muon_data = context))
     #ui4.show()
 
 
@@ -62,7 +76,7 @@ if __name__ == "__main__":
                            grouping_widget=grp_view,
                            plot_widget=plot_view,
                            run_info_widget=run_info_view)
-    tab_model = HomeTabModel()
+    tab_model = HomeTabModel(muon_data = context)
 
     ui_tab = HomeTabPresenter(tab_view, tab_model, subwidgets=[ui, ui2, ui3, ui4])
 
@@ -72,17 +86,3 @@ if __name__ == "__main__":
 
     sys.exit(app.exec_())
 
-    # alg = mantid.AlgorithmManager.create("Load")
-    # alg.initialize()
-    # alg.setAlwaysStoreInADS(False)
-    # alg.setProperty("OutputWorkspace", "__notUsed")
-    # alg.setProperty("Filename",
-    #                 "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs")
-    # alg.execute()
-    # workspace = alg.getProperty("OutputWorkspace").value
-    # filename = alg.getProperty("Filename").value
-
-    # print(dir(workspace[0]))
-    # print(dir(workspace[0].getSampleDetails()))
-    # print(workspace[0].getSampleDetails().keys())
-    # print(workspace[0].getSampleDetails().getLogData("FirstGoodData").value)
