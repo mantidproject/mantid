@@ -177,7 +177,6 @@ unsigned int numberOfMantids() {
   }
   return counter;
 }
-
 #elif defined(Q_OS_MAC)
 bool isAnotherInstanceRunning() {
   kinfo_proc *processes[] = {nullptr};
@@ -316,5 +315,7 @@ unsigned int numberOfMantids() {
   return counter;
 }
 #endif
-
+long long getProcessID(){
+  return QCoreApplication::applicationPid();
+}
 } // namespace Process

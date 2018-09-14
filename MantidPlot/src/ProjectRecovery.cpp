@@ -16,7 +16,6 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/optional.hpp>
-#include <boost/process/environment.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 
 #include <Poco/DirectoryIterator.h>
@@ -58,7 +57,7 @@ std::string getRecoveryFolderOutput() {
   static std::string appData =
       Mantid::Kernel::ConfigService::Instance().getAppDataDir();
   static std::string hostname = Poco::Environment::nodeName();
-  static std::string pid = std::to_string(boost::this_process::get_id());
+  static std::string pid = std::to_string(Process::getProcessID());
 
   static std::string recoverFolder =
       appData + "/recovery/" + hostname + '/' + pid + '/';
