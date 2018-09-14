@@ -7,6 +7,7 @@
 #include <numeric>
 #include <sstream>
 #include <utility>
+#include<iostream>
 
 namespace Mantid {
 namespace Beamline {
@@ -460,8 +461,12 @@ bool ComponentInfo::hasDetectorInfo() const {
 void ComponentInfo::setDetectorInfo(DetectorInfo *detectorInfo) {
   if (detectorInfo &&
       detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+    std::cout << detectorInfo->size() << " " << m_assemblySortedDetectorIndices->size() << std::endl;
     throw std::invalid_argument("ComponentInfo must have detector indices "
                                 "input of same size as size of DetectorInfo");
+  }
+  if (detectorInfo && (m_scanIntervals != detectorInfo->scanIntervals())) {
+    throw std::invalid_argument("ComponentInfo does not have the same scanIntervals as DetectorInfo");
   }
   m_detectorInfo = detectorInfo;
 }

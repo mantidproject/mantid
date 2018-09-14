@@ -66,7 +66,7 @@ private:
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
   size_t m_scanCounts = 1;
-  std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 0}};
+  std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
   // Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
       // nullptr};
   /// For (component index, time index) -> linear index conversions

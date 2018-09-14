@@ -138,7 +138,7 @@ private:
 
 //   Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
   size_t m_scanCounts = 1;
-  std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 0}};
+  std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
   // Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
   //     nullptr};
   /// For (detector index, time index) -> linear index conversions

@@ -6,6 +6,8 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_unique.h"
+#include "ComponentInfoTest.h"
+
 
 using namespace Mantid;
 using Beamline::DetectorInfo;
@@ -279,10 +281,10 @@ public:
   void test_scanInterval() {
     DetectorInfo info(PosVec(1), RotVec(1));
     TS_ASSERT_EQUALS(info.scanIntervals()[0],
-                     (std::pair<int64_t, int64_t>(0, 0)));
+                     (std::pair<int64_t, int64_t>(0, 1)));
   }
 
-  // void test_setScanInterval() {
+  // void xtest_setScanInterval() {
   //   DetectorInfo info(PosVec(1), RotVec(1));
   //   info.setScanInterval(0, {1, 2});
   //   TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
@@ -304,7 +306,7 @@ public:
     // TS_ASSERT_EQUALS(info.scanInterval({1, 0}), interval);
   }
 
-  // void test_setScanInterval_failures() {
+  // void xtest_setScanInterval_failures() {
   //   DetectorInfo info(PosVec(1), RotVec(1));
   //   TS_ASSERT_THROWS_EQUALS(
   //       info.setScanInterval(0, {1, 1}), const std::runtime_error &err,
@@ -328,7 +330,16 @@ public:
         "DetectorInfo: cannot set scan interval with start >= end");
   }
 
-  // void test_setScanInterval_sync_async_fail() {
+  void test_setDetectorInfo_fail_size() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    a.setScanInterval({0, 1});
+    Mantid::Beamline::ComponentInfo b;
+    TS_ASSERT_THROWS_EQUALS(b.setDetectorInfo(&a);, const std::invalid_argument &err,
+                            std::string(err.what()),
+                            "ComponentInfo must have detector indices input of same size as size of DetectorInfo");
+  }
+
+  // void xtest_setScanInterval_sync_async_fail() {
   //   DetectorInfo info(PosVec(1), RotVec(1));
   //   info.setScanInterval({1, 2});
   //   TS_ASSERT_THROWS_EQUALS(info.setScanInterval(0, {1, 2}),
@@ -338,7 +349,7 @@ public:
   //                           "individual detector.");
   // }
 
-  // void test_setScanInterval_async_sync_fail() {
+  // void xtest_setScanInterval_async_sync_fail() {
   //   DetectorInfo info(PosVec(1), RotVec(1));
   //   info.setScanInterval(0, {1, 2});
   //   TS_ASSERT_THROWS_EQUALS(info.setScanInterval({1, 2}),
@@ -349,22 +360,40 @@ public:
   // }
 
   void test_merge_fail_size() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    DetectorInfo b(PosVec(2), RotVec(2));
+    auto infos1 = makeFlatTree(PosVec(1), RotVec(1));
+    auto infos2 = makeFlatTree(PosVec(2), RotVec(2));
+    auto &a = *std::get<0>(infos1);
+    auto &b = *std::get<0>(infos2);
     a.setScanInterval({0, 1});
     b.setScanInterval({0, 1});
-    // b.setScanInterval(1, {0, 1});
-    Mantid::Beamline::ComponentInfo c;
-    Mantid::Beamline::ComponentInfo d;
-    c.setDetectorInfo(&a);
-    d.setDetectorInfo(&b);
+    // std::cout << "NVAYTET: got to here 1" <<std::endl;
+    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge ComponentInfo: size mismatch");
+
+
+
+
+    // DetectorInfo a(PosVec(1), RotVec(1));
+    // DetectorInfo b(PosVec(2), RotVec(2));
+    // a.setScanInterval({0, 1});
+    // b.setScanInterval({0, 1});
+    // // b.setScanInterval(1, {0, 1});
+    // Mantid::Beamline::ComponentInfo c;
+    // Mantid::Beamline::ComponentInfo d;
+    // c.setScanInterval({0, 1});
+    // d.setScanInterval({0, 1});
+    // std::cout << "NVAYTET: got to here 1" <<std::endl;
+    // c.setDetectorInfo(&a);
+    // std::cout << "NVAYTET: got to here 2" <<std::endl;
+    // d.setDetectorInfo(&b);
     
-    // TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &err,
+    // // TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &err,
+    // //                         std::string(err.what()),
+    // //                         "Cannot merge DetectorInfo: size mismatch");
+    // TS_ASSERT_THROWS_EQUALS(c.merge(d), const std::runtime_error &err,
     //                         std::string(err.what()),
-    //                         "Cannot merge DetectorInfo: size mismatch");
-    TS_ASSERT_THROWS_EQUALS(c.merge(d), const std::runtime_error &err,
-                            std::string(err.what()),
-                            "Cannot merge DetectorInfo: size mismatch");
+                            // "Cannot merge DetectorInfo: size mismatch");
   }
 
   void test_merge_fail_no_intervals() {
@@ -390,7 +419,7 @@ public:
         "Cannot merge DetectorInfo: scan intervals not defined");
   }
 
-  // void test_merge_fail_sync_async_mismatch() {
+  // void xtest_merge_fail_sync_async_mismatch() {
   //   DetectorInfo a(PosVec(1), RotVec(1));
   //   DetectorInfo b(PosVec(1), RotVec(1));
   //   a.setScanInterval({0, 1});
@@ -517,7 +546,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(d.merge(c));
   }
 
-  // void test_merge_identical_interval_failures_async() {
+  // void xtest_merge_identical_interval_failures_async() {
   //   DetectorInfo a(PosVec(1), RotVec(1));
   //   a.setScanInterval({0, 1});
   //   do_test_merge_identical_interval_failures(a);
@@ -529,7 +558,7 @@ public:
     do_test_merge_identical_interval_failures(a);
   }
 
-  // void test_merge_identical_interval_async() {
+  // void xtest_merge_identical_interval_async() {
   //   DetectorInfo a(PosVec(1), RotVec(1));
   //   a.setScanInterval(0, {0, 1});
   //   const auto b(a);
@@ -684,7 +713,7 @@ public:
     TS_ASSERT(a.isEquivalent(a0));
   }
 
-  // void test_merge_multiple() {
+  // void xtest_merge_multiple() {
   //   DetectorInfo a(PosVec(2), RotVec(2), {1});
   //   // Monitor at index 1, set up for identical interval
   //   std::pair<int64_t, int64_t> monitorInterval(0, 3);
@@ -766,7 +795,7 @@ public:
     TS_ASSERT_EQUALS(a.position({0, 2}), pos3);
   }
 
-  // void test_merge_multiple_associative() {
+  // void xtest_merge_multiple_associative() {
   //   // Test that (A + B) + C == A + (B + C)
   //   // This is implied by the ordering guaranteed by merge().
   //   DetectorInfo a1(PosVec(1), RotVec(1));
