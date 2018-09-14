@@ -29,6 +29,11 @@ New
 - Added algorithm :ref:`algm-ApplyFloodWorkspace` which applies flood corrections to a workspace.
 - :ref:`FindReflectometryLines <algm-FindReflectometryLines-v2>` has been rewritten and updated to version 2. The new version finds a single line by a Gaussian fit. Version 1 has been deprecated and will be removed in a future release.
 
+Improvements
+############
+
+- Added flood corrections to :ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto-v2>`. The correction data can be provided either via a flood workspace passed as a property or taken from the parameter file.
+
 Liquids Reflectometer
 ---------------------
 
