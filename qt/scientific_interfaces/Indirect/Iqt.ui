@@ -189,6 +189,12 @@
    </item>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -274,41 +280,19 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QCheckBox" name="cbCalculateErrors">
+           <property name="text">
+            <string>Calculate Errors</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="cbCalculateErrors">
-        <property name="text">
-         <string>Calculate Errors</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="gbOutput">
-     <property name="title">
-      <string>Output</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_9">
       <item>
        <widget class="QGroupBox" name="gbRun">
         <property name="title">
