@@ -97,15 +97,8 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   populateMonitorProperties(alg, instrument);
 
   // Processing instructions
-  std::string procInst;
-  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    procInst = convertProcessingInstructionsToWorkspaceIndexes(
-        getPropertyValue("ProcessingInstructions"), firstWS);
-    alg->setProperty("ProcessingInstructions", procInst);
-  } else {
-    procInst = populateProcessingInstructions(instrument, firstWS);
-    alg->setProperty("ProcessingInstructions", procInst);
-  }
+  convertProcessingInstructions(instrument, firstWS);
+  alg->setProperty("ProcessingInstructions", m_processingInstructions);
 
   alg->execute();
   MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");

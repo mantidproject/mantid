@@ -559,18 +559,13 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
     alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.get());
 }
 
-/** Set processing instructions
+/** Finding processing instructions from the parameters file
  * @param instrument :: the instrument attached to the workspace
  * @param inputWS :: the input workspace
  * @return :: processing instructions as a string
  */
-std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
+std::string ReflectometryWorkflowBase2::findProcessingInstructions(
     Instrument_const_sptr instrument, MatrixWorkspace_sptr inputWS) const {
-
-  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    std::string instructions = getProperty("ProcessingInstructions");
-    return instructions;
-  }
 
   const std::string analysisMode = getProperty("AnalysisMode");
 
@@ -707,8 +702,13 @@ std::string ReflectometryWorkflowBase2::workspaceIndexesToSpecNum(
   if (num == "0") {
     return "0";
   }
-  auto specNum = atoi(num.c_str());
-  auto x = ws->x(0);
+  try {
+    auto specNum = std::stoi(num.c_str());
+  } catch (std::exception &error) {
+    throw std::runtime_error(
+        "An Error occured when converting workspace indexes to specnums".append(
+            std::to_string(error.what())))
+  } 
   std::string wsIdx = std::to_string(
       ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
   return wsIdx;
@@ -740,10 +740,33 @@ std::string ReflectometryWorkflowBase2::specNumToWorkspaceIndexes(
   if (num == "0") {
     return "0";
   }
-  auto wsIndx = atoi(num.c_str());
+  auto wsIndx = std::stoi(num.c_str());
   std::string specId = std::to_string(
       static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
   return specId;
+}
+
+void ReflectometryWorkflowBase2::convertProcessingInstructions(
+    Instrument_const_sptr instrument, MatrixWorkspace_sptr inputWS) {
+  m_processingInstructions = getPropertyValue("ProcessingInstructions");
+  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
+    m_processingInstructionsWorkspaceIndex =
+        convertProcessingInstructionsToWorkspaceIndexes(
+            m_processingInstructions, inputWS);
+  } else {
+    m_processingInstructionsWorkspaceIndex =
+        findProcessingInstructions(instrument, inputWS);
+    m_processingInstructions = convertWorkspaceIndexProcInstToSpecNum(
+        m_processingInstructionsWorkspaceIndex, inputWS);
+  }
+}
+
+void ReflectometryWorkflowBase2::convertProcessingInstructions(
+    MatrixWorkspace_sptr inputWS) {
+  m_processingInstructions = getPropertyValue("ProcessingInstructions");
+  m_processingInstructionsWorkspaceIndex =
+      convertProcessingInstructionsToWorkspaceIndexes(m_processingInstructions,
+                                                      inputWS);
 }
 } // namespace Algorithms
 } // namespace Mantid

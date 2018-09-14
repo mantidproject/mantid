@@ -350,7 +350,7 @@ void ReflectometryReductionOne2::exec() {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   m_processingInstructionsWorkspaceIndex =
       convertProcessingInstructionsToWorkspaceIndexes(m_processingInstructions,
-                                                      m_runWS);
+                                                      m_runWS);                                                    
 
   // Neither TOF or Lambda? Abort.
   if ((xUnitID != "Wavelength") && (xUnitID != "TOF"))

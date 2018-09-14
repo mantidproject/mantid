@@ -84,9 +84,9 @@ protected:
   populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,
                             Mantid::Geometry::Instrument_const_sptr instrument);
   /// Populate processing instructions
-  std::string populateProcessingInstructions(
-      Mantid::Geometry::Instrument_const_sptr instrument,
-      Mantid::API::MatrixWorkspace_sptr inputWS) const;
+  std::string
+  findProcessingInstructions(Mantid::Geometry::Instrument_const_sptr instrument,
+                             Mantid::API::MatrixWorkspace_sptr inputWS) const;
   /// Populate transmission properties
   bool populateTransmissionProperties(Mantid::API::IAlgorithm_sptr alg) const;
   /// Find theta from a named log value
@@ -94,6 +94,14 @@ protected:
                           const std::string &logName);
   // Retrieve the run number from the logs of the input workspace.
   std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
+
+  void convertProcessingInstructions(Instrument_const_sptr instrument,
+                                     MatrixWorkspace_sptr inputWS);
+  void convertProcessingInstructions(MatrixWorkspace_sptr inputWS);
+  std::string m_processingInstructionsWorkspaceIndex;
+  std::string m_processingInstructions;
+
+private:
   std::string
   workspaceIndexesToSpecNum(const std::string &num,
                             Mantid::API::MatrixWorkspace_const_sptr ws) const;
@@ -106,9 +114,6 @@ protected:
   std::string convertWorkspaceIndexProcInstToSpecNum(
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
-
-  std::string m_processingInstructionsWorkspaceIndex;
-  std::string m_processingInstructions;
 };
 } // namespace Algorithms
 } // namespace Mantid

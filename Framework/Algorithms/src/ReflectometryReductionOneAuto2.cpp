@@ -339,23 +339,8 @@ void ReflectometryReductionOneAuto2::exec() {
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  std::string instructions = "";
-  m_processingInstructions = getPropertyValue("ProcessingInstructions");
-  if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    m_processingInstructionsWorkspaceIndex =
-        convertProcessingInstructionsToWorkspaceIndexes(
-            m_processingInstructions, inputWS);
-    instructions = m_processingInstructionsWorkspaceIndex;
-    alg->setProperty("ProcessingInstructions", m_processingInstructions);
-  } else {
-    m_processingInstructionsWorkspaceIndex =
-        populateProcessingInstructions(instrument, inputWS);
-    instructions = m_processingInstructionsWorkspaceIndex;
-    m_processingInstructions =
-        convertWorkspaceIndexProcInstToSpecNum(instructions, inputWS);
-    alg->setProperty("ProcessingInstructions", m_processingInstructions);
-  }
-
+  convertProcessingInstructions(instrument, firstWS);
+  alg->setProperty("ProcessingInstructions", m_processingInstructions)
   // Now that we know the detectors of interest, we can move them if necessary
   // (i.e. if theta is given). If not, we calculate theta from the current
   // detector positions
@@ -425,15 +410,14 @@ void ReflectometryReductionOneAuto2::exec() {
  * last spectrum indices in the processing instructions. It is assumed that all
  * the interim detectors have the same parent.
  *
- * @param instructions :: processing instructions defining detectors of interest
  * @param inputWS :: the input workspace
  * @return :: the names of the detectors of interest
  */
 std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS) {
+MatrixWorkspace_sptr inputWS) {
 
   std::vector<std::string> wsIndices;
-  boost::split(wsIndices, instructions, boost::is_any_of(":,-+"));
+  boost::split(wsIndices, m_processingInstructionsWorkspaceIndex, boost::is_any_of(":,-+"));
   // vector of comopnents
   std::vector<std::string> detectors;
 
@@ -463,14 +447,11 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
 /** Correct an instrument component by shifting it vertically or
  * rotating it around the sample.
  *
- * @param instructions :: processing instructions defining the detectors of
- * interest
  * @param inputWS :: the input workspace
  * @param twoTheta :: the angle to move detectors to
  * @return :: the corrected workspace
  */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS,
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(MatrixWorkspace_sptr inputWS,
     const double twoTheta) {
 
   auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
