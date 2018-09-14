@@ -184,6 +184,10 @@ class AbstractInst(object):
         return None
 
     def get_instrument_prefix(self):
+        """
+        Returns the instrument prefix which tells this abstract instrument what instrument it is
+        :return: The instrument prefix
+        """
         return self._inst_prefix
 
     def _get_input_batching_mode(self):
