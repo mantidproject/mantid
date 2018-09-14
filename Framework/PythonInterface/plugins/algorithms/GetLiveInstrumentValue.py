@@ -34,10 +34,6 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
                              doc='The live value from the instrument, or an empty string if not found')
 
-    def validateInputs(self):
-        issues = {}
-        return issues
-
     def PyExec(self):
         self._instrument = self.getProperty('Instrument').value
         self._propertyType = self.getProperty('PropertyType').value

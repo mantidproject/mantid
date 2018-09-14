@@ -43,10 +43,6 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'PolarizationAnalysis','Pp','Ap','Rho','Alpha','Debug','OutputWorkspace']
         self.copyProperties('ReflectometryReductionOneAuto', self._childProperties)
 
-    def validateInputs(self):
-        issues = {}
-        return issues
-
     def PyExec(self):
         self.setupWorkspaceForReduction()
         alg = self.setupReductionAlgorithm()
