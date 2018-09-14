@@ -20,10 +20,6 @@ digraph ReflectometryReductionOne {
 	IvsQ_final        [label="OutputWorkspace"]
   }
 
-  subgraph {
-    rank = same; trans; inputWorkspace;
-  }
-
   subgraph algorithms {
     $algorithm_style
     reflRedOne_0 [label="ReflectometryReductionOne", group=g1]
