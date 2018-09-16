@@ -51,3 +51,7 @@ class HomeTabView(QtGui.QWidget):
         # self.vertical_layout.addWidget(self.splitter3)
         # self.vertical_layout.addWidget(self.splitter4)
         self.setLayout(self.vertical_layout)
+
+    # for docking
+    def getLayout(self):
+        return self.vertical_layout

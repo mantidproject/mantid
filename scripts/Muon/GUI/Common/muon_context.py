@@ -4,11 +4,18 @@ import Muon.GUI.Common.load_utils as load_utils
 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.load_utils import MuonWorkspace
+
+from Muon.GUI.Common.muon_load_data import MuonLoadData
+
+import Muon.GUI.Common.run_string_utils as run_string_utils
 
 from collections import OrderedDict
 
 from mantid.simpleapi import mtd
+from mantid.kernel import ConfigServiceImpl
 from mantid import api
+import mantid as mantid
 
 
 class MuonContext(object):
@@ -17,12 +24,33 @@ class MuonContext(object):
         self._groups = OrderedDict()
         self._pairs = OrderedDict()
 
-        self._loaded_data = self.get_result()
+        self._loaded_data = MuonLoadData()
+        self._current_data = self.get_result()
 
-        print(self._loaded_data)
+        print(self._current_data)
+
+    def update_current_data(self):
+
+        group_name_bank = ["fwd", "bwd", "top", "bottom"]
+        pair_name_bank = ["long1", "long2"]
+
+        if self._loaded_data.num_items() > 0:
+            print("LOADING")
+            self._current_data = self._loaded_data.params["workspace"][-1]
+
+            # handle making groups/pairs
+            grouping_table = self._current_data["DetectorGroupingTable"].value
+            print("Grouping Table : ", grouping_table.toDict())
+            for i, detector_list in enumerate(grouping_table.toDict()["Detectors"]):
+                print("\t", detector_list)
+                print("\t", run_string_utils.run_list_to_string(detector_list))
+                new_group = MuonGroup(group_name=group_name_bank[i], detector_IDs=detector_list)
+                # new_group.name = group_name_bank[i]
+                self._groups[group_name_bank[i]] = new_group
+            self.get_default_grouping("EMU")
 
     def is_multi_period(self):
-        return isinstance(self._loaded_data["OutputWorkspace"], list)
+        return isinstance(self._current_data["OutputWorkspace"], list)
 
     def get_sample_log(self, log_name):
 
@@ -44,7 +72,7 @@ class MuonContext(object):
     def get_result(self):
         # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
         filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020883.nxs"
-        result, _run = load_utils.load_workspace_from_filename(filename)
+        result, _run, _filename = load_utils.load_workspace_from_filename(filename)
 
         self._groups["fwd"] = MuonGroup()
         self._groups["bwd"] = MuonGroup()
@@ -55,7 +83,7 @@ class MuonContext(object):
     def get_result_2(self):
         filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
         # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020884.nxs"
-        result, _run = load_utils.load_workspace_from_filename(filename)
+        result, _run, _filename = load_utils.load_workspace_from_filename(filename)
 
         self._groups["fwd2"] = MuonGroup()
         self._groups["bwd2"] = MuonGroup()
@@ -65,19 +93,19 @@ class MuonContext(object):
 
     @property
     def loaded_data(self):
-        return self._loaded_data
+        return self._current_data
 
     @property
     def loaded_workspace(self):
-        if isinstance(self._loaded_data["OutputWorkspace"], list):
-            return self._loaded_data["OutputWorkspace"][0].workspace
+        if isinstance(self._current_data["OutputWorkspace"], list):
+            return self._current_data["OutputWorkspace"][0].workspace
         else:
-            return self._loaded_data["OutputWorkspace"].workspace
+            return self._current_data["OutputWorkspace"].workspace
 
     def clear(self):
         self._groups = OrderedDict()
         self._pairs = OrderedDict()
-        self._loaded_data = self.get_result_2()
+        self._current_data = self.get_result_2()
 
     @property
     def instrument(self):
@@ -118,7 +146,7 @@ class MuonContext(object):
 
     def show_raw_data(self):
         ws = self.loaded_data["OutputWorkspace"]
-        print("SHOW RAW DATA")
+        # print("SHOW RAW DATA")
         names = []
         if isinstance(ws, list):
             for i, single_ws in enumerate(ws):
@@ -129,19 +157,24 @@ class MuonContext(object):
             name = self.get_raw_data_workspace_name()
             names += [name]
             ws.show(name=name)
-        print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
+        # print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
 
     def show_group_data(self, group_name):
         # TODO : complete
-        name =self.get_group_data_workspace_name(group_name)
+        name = self.get_group_data_workspace_name(group_name)
         directory = ""
+        ws = self.calculate_group_data(group_name)
+        self._groups[group_name].workspace = MuonWorkspace(ws)
+        self._groups[group_name].workspace.show(name)
 
+    def show_all_groups(self):
+        for group_name in self._groups.keys():
+            self.show_group_data(group_name)
 
     def show_pair_data(self, pair_name):
         # TODO : complete
         name = self.get_pair_data_workspace_name(pair_name)
         directory = ""
-
 
     def get_group_data_workspace_name(self, group_name):
         instrument = self.instrument
@@ -161,4 +194,93 @@ class MuonContext(object):
         else:
             return str(instrument) + str(run) + "; Group; " + pair_name + "; #1"
 
-    
+    def calculate_all_groups(self):
+        for group_name in self._groups.keys():
+            self.calculate_group_data(group_name)
+
+    def calculate_group_data(self, group_name):
+        ws = self.loaded_workspace
+
+        api.AnalysisDataServiceImpl.Instance().add("input", ws)
+
+        alg = mantid.AlgorithmManager.create("MuonPreProcess")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(False)
+        alg.setProperty("OutputWorkspace", "__notUsed")
+        alg.setProperty("InputWorkspace", "input")
+        # alg.setProperties(property_dictionary)
+        alg.execute()
+
+        api.AnalysisDataServiceImpl.Instance().remove("input")
+
+        wsOut = alg.getProperty("OutputWorkspace").value
+        api.AnalysisDataServiceImpl.Instance().add("wsOut", wsOut)
+
+        alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(False)
+        alg.setProperty("OutputWorkspace", "__notUsed")
+        alg.setProperty("InputWorkspace", "wsOut")
+        alg.setProperty("GroupName", "group")
+        alg.setProperty("Grouping", "1,2,3,4,5")
+        alg.setProperty("SummedPeriods", "1")
+        alg.setProperty("SubtractedPeriods", "")
+        alg.execute()
+
+        wsOut2 = alg.getProperty("OutputWorkspace").value
+        api.AnalysisDataServiceImpl.Instance().remove("wsOut")
+        api.AnalysisDataServiceImpl.Instance().remove("wsOut_1")
+
+        print("ADS : ", api.AnalysisDataServiceImpl.Instance().getObjectNames())
+        return wsOut2
+
+    def calculate_pair_data(self, pair_name):
+        ws = self.loaded_workspace
+
+        api.AnalysisDataServiceImpl.Instance().add("input", ws)
+
+        alg = mantid.AlgorithmManager.create("MuonPreProcess")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(False)
+        alg.setProperty("OutputWorkspace", "__notUsed")
+        alg.setProperty("InputWorkspace", "input")
+        # alg.setProperties(property_dictionary)
+        alg.execute()
+
+        wsOut = alg.getProperty("OutputWorkspace").value
+        api.AnalysisDataServiceImpl.Instance().remove("input")
+
+        api.AnalysisDataServiceImpl.Instance().add("wsOut", wsOut)
+
+        alg = mantid.AlgorithmManager.create("MuonPairingAsymmetry")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(False)
+        alg.setProperty("OutputWorkspace", "__notUsed")
+        alg.setProperty("InputWorkspace", "wsOut")
+        alg.setProperty("PairName", "pair")
+        alg.setProperty("Group1", "1,2,3,4,5")
+        alg.setProperty("Group2", "6,7,8,9,10")
+        alg.setProperty("SummedPeriods", "1")
+        alg.setProperty("SubtractedPeriods", "")
+        alg.execute()
+
+        wsOut2 = alg.getProperty("OutputWorkspace").value
+        api.AnalysisDataServiceImpl.Instance().remove("wsOut")
+
+        return wsOut2
+
+    def get_default_grouping(self, instrument):
+        parameter_name = "Default grouping file"
+
+        grouping_file = self._current_data["OutputWorkspace"].workspace.getInstrument().getStringParameter(
+            parameter_name)[0]
+        instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
+
+        print("dir : ", dir(self._current_data["OutputWorkspace"].workspace))
+        print("dir : ",
+              self._current_data["OutputWorkspace"].workspace.getInstrument())
+
+        print(ConfigServiceImpl.Instance().getInstrumentDirectory())
+
+        filename = instrument_directory + grouping_file
+        load_utils.load_grouping_from_XML(filename)

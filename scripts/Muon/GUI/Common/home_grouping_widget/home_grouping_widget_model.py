@@ -18,7 +18,7 @@ class HomeGroupingWidgetModel(object):
         return self._data._pairs.keys()
 
     def is_data_multi_period(self):
-        return isinstance(self._data.loaded_data["OutputWorkspace"], list)
+        return isinstance(self._data._current_data["OutputWorkspace"], list)
 
     def is_group(self, name):
         return name in self.get_group_names()
@@ -37,13 +37,13 @@ class HomeGroupingWidgetModel(object):
             return pair.alpha
 
     def update_summed_periods(self, summed_periods):
-        self._data.loaded_data["SummedPeriods"] = summed_periods
+        self._data._current_data["SummedPeriods"] = summed_periods
 
     def update_subtracted_periods(self, subtracted_periods):
-        self._data.loaded_data["SubtractedPeriods"] = subtracted_periods
+        self._data._current_data["SubtractedPeriods"] = subtracted_periods
 
     def number_of_periods(self):
         if self.is_data_multi_period():
-            return len(self._data.loaded_data["OutputWorkspace"])
+            return len(self._data._current_data["OutputWorkspace"])
         else:
             return 1

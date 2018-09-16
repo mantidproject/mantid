@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-
+import os
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
 from mantid.api import ITableWorkspace
@@ -28,17 +28,17 @@ class MuonWorkspace(object):
 
     @property
     def workspace(self):
-        print("GETTING WORKSPACE")
+        #print("GETTING WORKSPACE")
         if self._isInADS:
-            print("\tis in ADS!")
+            #print("\tis in ADS!")
             return mtd[self._name]
         else:
-            print ("\tis not in ADS!")
+            #print ("\tis not in ADS!")
             return self._workspace
 
     @workspace.setter
     def workspace(self, value):
-        print("SETTING WORKSPACE")
+        #print("SETTING WORKSPACE")
         # TODO : add isinstance checks
         if self._isInADS:
             mtd.remove(self._name)
@@ -48,8 +48,8 @@ class MuonWorkspace(object):
         self._workspace = value
 
     def show(self, name):
-        print("SHOWING WORKSPACE, NAME : ", str(name), " WORKSPACE ", type(self._workspace))
-        if len(name) > 0:
+        #print("SHOWING WORKSPACE, NAME : ", str(name), " WORKSPACE ", type(self._workspace))
+        if len(name) > 0 and self._isInADS == False:
             self._name = str(name)
             mtd.addOrReplace(str(self._name), self._workspace)
             if self._directory != "":
@@ -250,23 +250,30 @@ def load_dead_time_from_filename(filename):
 def load_workspace_from_filename(filename,
                                  input_properties=DEFAULT_INPUTS,
                                  output_properties=DEFAULT_OUTPUTS):
-    alg = create_load_algorithm(filename, input_properties)
-    alg.execute()
+    try:
+        alg = create_load_algorithm(filename, input_properties)
+        alg.execute()
+    except:
+        alg = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
+        alg.execute()
 
     workspace = alg.getProperty("OutputWorkspace").value
-
     if is_workspace_group(workspace):
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspace(ws) for ws in load_result["OutputWorkspace"].value]
         run = get_run_from_multi_period_data(workspace)
+
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = MuonWorkspace(load_result["OutputWorkspace"].value)
         run = int(workspace.getRunNumber())
 
-    return load_result, run
+
+    filename = alg.getProperty("Filename").value
+
+    return load_result, run, filename
 
 
 def create_load_algorithm(filename, property_dictionary):
@@ -280,7 +287,7 @@ def create_load_algorithm(filename, property_dictionary):
 
 
 def _get_algorithm_properties(alg, property_dict):
-    print(alg.keys())
+    #print(alg.keys())
     return {key: alg.getProperty(key) for key in alg.keys() if key in property_dict}
 
 
@@ -295,8 +302,83 @@ def get_table_workspace_names_from_ADS():
 
 
 if __name__ == "__main__":
-    filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
-    # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020882.nxs"
+    #filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
+    filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020882.nxs"
 
-    result = load_workspace_from_filename(filename)
-    print(result)
+    result, _run = load_workspace_from_filename(filename)
+    #print(result)
+
+    ws = result["OutputWorkspace"].workspace
+
+    api.AnalysisDataServiceImpl.Instance().add("input",ws)
+
+    alg = mantid.AlgorithmManager.create("MuonPreProcess")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("InputWorkspace", "input")
+    #alg.setProperties(property_dictionary)
+    alg.execute()
+
+    wsOut = alg.getProperty("OutputWorkspace").value
+    api.AnalysisDataServiceImpl.Instance().remove("input")
+
+    api.AnalysisDataServiceImpl.Instance().add("wsOut", wsOut)
+
+    alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperty("InputWorkspace", "wsOut")
+    alg.setProperty("GroupName", "group")
+    alg.setProperty("Grouping", "1,2,3,4,5")
+    alg.setProperty("SummedPeriods", "1")
+    alg.setProperty("SubtractedPeriods", "")
+    alg.execute()
+
+    wsOut2 = alg.getProperty("OutputWorkspace").value
+    api.AnalysisDataServiceImpl.Instance().remove("wsOut")
+
+    #print(wsOut2.dataY(0))
+    #print(sum(wsOut2.dataY(0)))
+    #print(wsOut2)
+
+    #print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
+
+import xml.etree.ElementTree as ET
+
+
+def _get_groups_from_XML(root):
+    names = []
+    ids = []
+    for child in root:
+        if child.tag == "group":
+            names += [child.attrib['name']]
+            ids +=  [child.find('ids').attrib['val']]
+    return names, ids
+
+def _get_pairs_from_XML(root):
+    names = []
+    groups = []
+    alphas = []
+    for child in root:
+        if child.tag == "pair":
+            names += [child.attrib['name']]
+            groups += [[child.find('forward-group').attrib['val'],child.find('backward-group').attrib['val'] ]]
+            alphas += [child.find('alpha').attrib['val']]
+    return names, groups, alphas
+
+def load_grouping_from_XML(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    print(tree)
+
+    group_names, group_ids = _get_groups_from_XML(root)
+    pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
+    print(group_names, group_ids)
+    print(pair_names, pair_groups, pair_alphas)
+
+    for child in root:
+        print(child.tag, child.attrib)
+        for childchild in child:
+            print(childchild.tag, childchild.attrib)

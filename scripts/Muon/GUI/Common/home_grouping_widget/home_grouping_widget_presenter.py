@@ -65,8 +65,6 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.set_summed_periods(",".join([str(p) for p in summed_periods]))
         self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))
 
-
-
     def handle_periods_changed(self):
         summed = self.string_to_list(self._view.get_summed_periods())
         subtracted = self.string_to_list(self._view.get_subtracted_periods())

@@ -62,12 +62,6 @@ class HomePlotWidgetView(QtGui.QWidget):
                            'padding-bottom: 0px;'
                             "padding-right: 10px;"
                            ' color: grey; }')
-        # self.setStyleSheet('QGroupBox:title {'
-        #                    'subcontrol-origin: margin;'
-        #                    'subcontrol-position: top center;'
-        #                    'padding-top: -50px;'
-        #                    'padding-bottom: -50px;'
-        #                    ' color: grey; }')
 
         self.group.setLayout(self.vertical_layout)
 
@@ -75,3 +69,7 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.widget_layout.addItem(self.horizontal_layout)
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
+
+    # for docking
+    def getLayout(self):
+        return self.widget_layout

@@ -63,7 +63,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             self.outer = outer  # handle to containing class
 
         def notify_subscribers(self, arg=None):
-            Observable.notify_subscribers(self)
+            Observable.notify_subscribers(self, arg)
 
     def handle_dead_time_browse_clicked(self):
         self._view.show_file_browser_and_return_selection(filter_for_extensions(['nxs']), [''], multiple_files=False)
@@ -115,7 +115,8 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         print("Instrument changed")
         self._model.clear_data()
         self.clear_view()
-        self.instrumentNotifier.notify_subscribers()
+        instrument = self._view.get_instrument()
+        self.instrumentNotifier.notify_subscribers(instrument)
 
     def handle_fixed_rebin_changed(self):
         fixed_bin_size = float(self._view.get_fixed_bin_text())

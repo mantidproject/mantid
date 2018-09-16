@@ -483,3 +483,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         # self._message_box.warning(self, message, "a", "b")
         self._message_box.setText(message)
         self._message_box.open()
+
+    def get_instrument(self):
+        return self.instrument_selector.currentText()
