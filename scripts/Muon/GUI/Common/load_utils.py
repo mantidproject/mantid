@@ -7,6 +7,9 @@ from mantid.api import ITableWorkspace
 from mantid.simpleapi import mtd
 from mantid import api
 
+from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_pair import MuonPair
+
 
 class MuonWorkspace(object):
     """A basic muon workspace which is either the workspace or the name of the workspace in the ADS"""
@@ -28,17 +31,17 @@ class MuonWorkspace(object):
 
     @property
     def workspace(self):
-        #print("GETTING WORKSPACE")
+        # print("GETTING WORKSPACE")
         if self._isInADS:
-            #print("\tis in ADS!")
+            # print("\tis in ADS!")
             return mtd[self._name]
         else:
-            #print ("\tis not in ADS!")
+            # print ("\tis not in ADS!")
             return self._workspace
 
     @workspace.setter
     def workspace(self, value):
-        #print("SETTING WORKSPACE")
+        # print("SETTING WORKSPACE")
         # TODO : add isinstance checks
         if self._isInADS:
             mtd.remove(self._name)
@@ -48,7 +51,7 @@ class MuonWorkspace(object):
         self._workspace = value
 
     def show(self, name):
-        #print("SHOWING WORKSPACE, NAME : ", str(name), " WORKSPACE ", type(self._workspace))
+        # print("SHOWING WORKSPACE, NAME : ", str(name), " WORKSPACE ", type(self._workspace))
         if len(name) > 0 and self._isInADS == False:
             self._name = str(name)
             mtd.addOrReplace(str(self._name), self._workspace)
@@ -97,7 +100,6 @@ class MuonWorkspace(object):
             last_dir = directory
 
 
-
 def get_loaded_time_zero(workspace):
     first_good_data = 0.0
     if isinstance(workspace, WorkspaceGroup):
@@ -131,6 +133,7 @@ def get_first_good_data(workspace):
         except Exception:
             raise IndexError("Cannot find loaded time zero")
     return first_good_data
+
 
 class LoadUtils(object):
     """
@@ -218,7 +221,6 @@ class LoadUtils(object):
         return final_options
 
 
-
 # Dictionary of (property name):(property value) pairs to put into Load algorithm
 # NOT including "OutputWorkspace" and "Filename"
 DEFAULT_INPUTS = {
@@ -247,6 +249,7 @@ def load_dead_time_from_filename(filename):
     # TODO : Implement
     pass
 
+
 def load_workspace_from_filename(filename,
                                  input_properties=DEFAULT_INPUTS,
                                  output_properties=DEFAULT_OUTPUTS):
@@ -270,7 +273,6 @@ def load_workspace_from_filename(filename,
         load_result["OutputWorkspace"] = MuonWorkspace(load_result["OutputWorkspace"].value)
         run = int(workspace.getRunNumber())
 
-
     filename = alg.getProperty("Filename").value
 
     return load_result, run, filename
@@ -287,7 +289,7 @@ def create_load_algorithm(filename, property_dictionary):
 
 
 def _get_algorithm_properties(alg, property_dict):
-    #print(alg.keys())
+    # print(alg.keys())
     return {key: alg.getProperty(key) for key in alg.keys() if key in property_dict}
 
 
@@ -300,24 +302,23 @@ def get_table_workspace_names_from_ADS():
     return table_names
 
 
-
 if __name__ == "__main__":
-    #filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
+    # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
     filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020882.nxs"
 
     result, _run = load_workspace_from_filename(filename)
-    #print(result)
+    # print(result)
 
     ws = result["OutputWorkspace"].workspace
 
-    api.AnalysisDataServiceImpl.Instance().add("input",ws)
+    api.AnalysisDataServiceImpl.Instance().add("input", ws)
 
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperty("InputWorkspace", "input")
-    #alg.setProperties(property_dictionary)
+    # alg.setProperties(property_dictionary)
     alg.execute()
 
     wsOut = alg.getProperty("OutputWorkspace").value
@@ -339,14 +340,14 @@ if __name__ == "__main__":
     wsOut2 = alg.getProperty("OutputWorkspace").value
     api.AnalysisDataServiceImpl.Instance().remove("wsOut")
 
-    #print(wsOut2.dataY(0))
-    #print(sum(wsOut2.dataY(0)))
-    #print(wsOut2)
+    # print(wsOut2.dataY(0))
+    # print(sum(wsOut2.dataY(0)))
+    # print(wsOut2)
 
-    #print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
+    # print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
 
 import xml.etree.ElementTree as ET
-
+import Muon.GUI.Common.run_string_utils as run_string_utils
 
 def _get_groups_from_XML(root):
     names = []
@@ -354,8 +355,9 @@ def _get_groups_from_XML(root):
     for child in root:
         if child.tag == "group":
             names += [child.attrib['name']]
-            ids +=  [child.find('ids').attrib['val']]
+            ids += [run_string_utils.run_string_to_list(child.find('ids').attrib['val'])]
     return names, ids
+
 
 def _get_pairs_from_XML(root):
     names = []
@@ -364,9 +366,10 @@ def _get_pairs_from_XML(root):
     for child in root:
         if child.tag == "pair":
             names += [child.attrib['name']]
-            groups += [[child.find('forward-group').attrib['val'],child.find('backward-group').attrib['val'] ]]
+            groups += [[child.find('forward-group').attrib['val'], child.find('backward-group').attrib['val']]]
             alphas += [child.find('alpha').attrib['val']]
     return names, groups, alphas
+
 
 def load_grouping_from_XML(filename):
     tree = ET.parse(filename)
@@ -378,7 +381,21 @@ def load_grouping_from_XML(filename):
     print(group_names, group_ids)
     print(pair_names, pair_groups, pair_alphas)
 
-    for child in root:
-        print(child.tag, child.attrib)
-        for childchild in child:
-            print(childchild.tag, childchild.attrib)
+    groups = []
+    pairs = []
+
+    for i, group_name in enumerate(group_names):
+        groups += [MuonGroup(group_name=group_name, detector_IDs=group_ids[i])]
+
+    for i, pair_name in enumerate(pair_names):
+        pairs += [MuonPair(pair_name=pair_name,
+                          group1_name=pair_groups[i][0],
+                          group2_name=pair_groups[i][1],
+                          alpha=pair_alphas[i])]
+
+    # for child in root:
+    #     print(child.tag, child.attrib)
+    #     for childchild in child:
+    #         print(childchild.tag, childchild.attrib)
+
+    return groups, pairs

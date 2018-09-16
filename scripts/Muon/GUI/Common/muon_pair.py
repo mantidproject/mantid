@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.load_utils import MuonWorkspace
+from Muon.GUI.Common.muon_workspace import MuonWorkspace
 
 
 class MuonPair:

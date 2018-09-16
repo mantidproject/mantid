@@ -101,7 +101,7 @@ class DockWidget(QtGui.QWidget):
         self.instrument_widget.instrumentNotifier.add_subscriber(self.home_tab_widget.instrumentObserver)
 
     def setup_grouping_tab(self):
-        model = GroupingTabModel()
+        model = GroupingTabModel(self.context)
         grouping_table_view = GroupingTableView()
         ui = GroupingTablePresenter(grouping_table_view, model)
         testgroup1 = MuonGroup(group_name="fwd", detector_IDs=[1, 2, 3, 4, 5])

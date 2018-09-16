@@ -83,6 +83,8 @@ class GroupingTabPresenter(object):
 
 
     def handle_new_data_loaded(self):
+        print("handle_new_data_loaded")
+        print(self._model._data._groups.keys())
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
@@ -93,4 +95,4 @@ class GroupingTabPresenter(object):
 
         def update(self, observable, arg):
             print("update called")
-            self.outer.update_all_widgets()
+            self.outer.handle_new_data_loaded()

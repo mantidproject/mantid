@@ -54,7 +54,7 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.dockWidget.instrument_widget.instrumentNotifier.add_subscriber(self.ui.instrumentObserver)
 
         self.ui.loadNotifier.add_subscriber(self.dockWidget.home_tab_widget.loadObserver)
-        #self.load_widget.loadNotifier.add_subscriber(self.grouping_tab.loadObserver)
+        self.ui.loadNotifier.add_subscriber(self.dockWidget.group_tab_presenter.loadObserver)
 
     def setup_load_widget(self):
         self.load_file_view = BrowseFileWidgetView(self)

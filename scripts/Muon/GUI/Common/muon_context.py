@@ -4,7 +4,7 @@ import Muon.GUI.Common.load_utils as load_utils
 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.load_utils import MuonWorkspace
+# from Muon.GUI.Common.load_utils import MuonWorkspace
 
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
@@ -29,7 +29,17 @@ class MuonContext(object):
 
         print(self._current_data)
 
+    def add_group(self, group):
+        assert isinstance(group, MuonGroup)
+        self._groups[group.name] = group
+
+    def add_pair(self, pair):
+        assert isinstance(pair, MuonPair)
+        self._pairs[pair.name] = pair
+
     def update_current_data(self):
+        print("update_current_data")
+        # Update the current data; resetting the groups and pairs to their default values
 
         group_name_bank = ["fwd", "bwd", "top", "bottom"]
         pair_name_bank = ["long1", "long2"]
@@ -39,15 +49,25 @@ class MuonContext(object):
             self._current_data = self._loaded_data.params["workspace"][-1]
 
             # handle making groups/pairs
-            grouping_table = self._current_data["DetectorGroupingTable"].value
-            print("Grouping Table : ", grouping_table.toDict())
-            for i, detector_list in enumerate(grouping_table.toDict()["Detectors"]):
-                print("\t", detector_list)
-                print("\t", run_string_utils.run_list_to_string(detector_list))
-                new_group = MuonGroup(group_name=group_name_bank[i], detector_IDs=detector_list)
-                # new_group.name = group_name_bank[i]
-                self._groups[group_name_bank[i]] = new_group
-            self.get_default_grouping("EMU")
+            # grouping_table = self._current_data["DetectorGroupingTable"].value
+            # print("Grouping Table : ", grouping_table.toDict())
+            # for i, detector_list in enumerate(grouping_table.toDict()["Detectors"]):
+            #     print("\t", detector_list)
+            #     print("\t", run_string_utils.run_list_to_string(detector_list))
+            #     # new_group = MuonGroup(group_name=group_name_bank[i], detector_IDs=detector_list)
+            #     ## new_group.name = group_name_bank[i]
+            #     # self._groups[group_name_bank[i]] = new_group
+            groups, pairs = self.get_default_grouping("EMU")
+            self.clear_groups()
+            for group in groups:
+                self.add_group(group)
+
+            self.clear_pairs()
+            for pair in pairs:
+                self.add_pair(pair)
+
+            print("UPDATE : GROUPS : ", self._groups.keys())
+            print("UPDATE : PAIRS : ", self._pairs.keys())
 
     def is_multi_period(self):
         return isinstance(self._current_data["OutputWorkspace"], list)
@@ -102,9 +122,15 @@ class MuonContext(object):
         else:
             return self._current_data["OutputWorkspace"].workspace
 
-    def clear(self):
+    def clear_groups(self):
         self._groups = OrderedDict()
+
+    def clear_pairs(self):
         self._pairs = OrderedDict()
+
+    def clear(self):
+        self.clear_groups()
+        self.clear_pairs()
         self._current_data = self.get_result_2()
 
     @property
@@ -164,7 +190,7 @@ class MuonContext(object):
         name = self.get_group_data_workspace_name(group_name)
         directory = ""
         ws = self.calculate_group_data(group_name)
-        self._groups[group_name].workspace = MuonWorkspace(ws)
+        self._groups[group_name].workspace = load_utils.MuonWorkspace(ws)
         self._groups[group_name].workspace.show(name)
 
     def show_all_groups(self):
@@ -272,15 +298,18 @@ class MuonContext(object):
     def get_default_grouping(self, instrument):
         parameter_name = "Default grouping file"
 
-        grouping_file = self._current_data["OutputWorkspace"].workspace.getInstrument().getStringParameter(
-            parameter_name)[0]
-        instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
+        if self.is_multi_period():
+            grouping_file = self._current_data["OutputWorkspace"][0].workspace.getInstrument().getStringParameter(
+                parameter_name)[0]
+        else:
+            grouping_file = self._current_data["OutputWorkspace"].workspace.getInstrument().getStringParameter(
+                parameter_name)[0]
 
-        print("dir : ", dir(self._current_data["OutputWorkspace"].workspace))
-        print("dir : ",
-              self._current_data["OutputWorkspace"].workspace.getInstrument())
+        instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
 
         print(ConfigServiceImpl.Instance().getInstrumentDirectory())
 
         filename = instrument_directory + grouping_file
-        load_utils.load_grouping_from_XML(filename)
+        new_groups, new_pairs = load_utils.load_grouping_from_XML(filename)
+
+        return new_groups, new_pairs
