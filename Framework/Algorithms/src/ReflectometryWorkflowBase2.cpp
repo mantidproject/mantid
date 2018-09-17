@@ -702,13 +702,7 @@ std::string ReflectometryWorkflowBase2::workspaceIndexesToSpecNum(
   if (num == "0") {
     return "0";
   }
-  try {
-    auto specNum = std::stoi(num.c_str());
-  } catch (std::exception &error) {
-    throw std::runtime_error(
-        "An Error occured when converting workspace indexes to specnums".append(
-            std::to_string(error.what())))
-  }
+  auto specNum = std::stoi(num.c_str());
   std::string wsIdx = std::to_string(
       ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
   return wsIdx;
