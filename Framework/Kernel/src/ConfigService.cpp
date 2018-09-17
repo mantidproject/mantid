@@ -166,7 +166,7 @@ private:
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(),
-      m_strBaseDir(""), m_PropertyString(""),
+      m_strBaseDir(""), m_propertyString(""),
       m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
@@ -175,7 +175,7 @@ ConfigServiceImpl::ConfigServiceImpl()
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
-      m_DataSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
+      m_dataSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
       m_isProxySet(false) {
   // getting at system details
   m_pSysConfig =
@@ -379,7 +379,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
 
   if (!append) {
     // remove the previous property string
-    m_PropertyString = "";
+    m_propertyString = "";
     m_changed_keys.clear();
   }
 
@@ -402,10 +402,10 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     temp = checkForBadConfigOptions(filename, temp);
 
     // store the property string
-    if ((append) && (!m_PropertyString.empty())) {
-      m_PropertyString = m_PropertyString + "\n" + temp;
+    if ((append) && (!m_propertyString.empty())) {
+      m_propertyString = m_propertyString + "\n" + temp;
     } else {
-      m_PropertyString = temp;
+      m_propertyString = temp;
     }
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
@@ -416,7 +416,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
   }
 
   // use the cached property string to initialise the POCO property file
-  std::istringstream istr(m_PropertyString);
+  std::istringstream istr(m_propertyString);
   m_pConf =
       std::make_unique<WrappedObject<Poco::Util::PropertyFileConfiguration>>(
           istr);
@@ -532,9 +532,9 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
 void ConfigServiceImpl::cacheDataSearchPaths() {
   std::string paths = getString("datasearch.directories", true);
   if (paths.empty()) {
-    m_DataSearchDirs.clear();
+    m_dataSearchDirs.clear();
   } else {
-    m_DataSearchDirs = splitPath(paths);
+    m_dataSearchDirs = splitPath(paths);
   }
 }
 
@@ -552,9 +552,9 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
 
   using std::placeholders::_1;
   auto it =
-      std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
+      std::find_if(m_dataSearchDirs.cbegin(), m_dataSearchDirs.cend(),
                    std::bind(std::equal_to<std::string>(), _1, correctedPath));
-  return (it != m_DataSearchDirs.end());
+  return (it != m_dataSearchDirs.end());
 }
 
 /**
@@ -1465,7 +1465,7 @@ std::string ConfigServiceImpl::getUserPropertiesDir() const {
  * @returns A vector of strings containing the defined search directories
  */
 const std::vector<std::string> &ConfigServiceImpl::getDataSearchDirs() const {
-  return m_DataSearchDirs;
+  return m_dataSearchDirs;
 }
 
 /**
@@ -1507,8 +1507,8 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
     return;
   }
 
-  auto newDataDirs = m_DataSearchDirs;
-  for (const auto &path : m_DataSearchDirs) {
+  auto newDataDirs = m_dataSearchDirs;
+  for (const auto &path : m_dataSearchDirs) {
     Poco::Path newDirPath;
     try {
       newDirPath = Poco::Path(path);
@@ -1542,8 +1542,8 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
     return;
   }
   if (!isInDataSearchList(dirPath.toString())) {
-    auto newSearchString = Strings::join(std::begin(m_DataSearchDirs),
-                                         std::end(m_DataSearchDirs), ";");
+    auto newSearchString = Strings::join(std::begin(m_dataSearchDirs),
+                                         std::end(m_dataSearchDirs), ";");
     newSearchString.append(path);
     setString("datasearch.directories", newSearchString);
   }
@@ -1555,7 +1555,7 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
  */
 void ConfigServiceImpl::setInstrumentDirectories(
     const std::vector<std::string> &directories) {
-  m_InstrumentDirs = directories;
+  m_instrumentDirs = directories;
 }
 
 /**
@@ -1564,7 +1564,7 @@ void ConfigServiceImpl::setInstrumentDirectories(
  */
 const std::vector<std::string> &
 ConfigServiceImpl::getInstrumentDirectories() const {
-  return m_InstrumentDirs;
+  return m_instrumentDirs;
 }
 
 /**
@@ -1572,7 +1572,7 @@ ConfigServiceImpl::getInstrumentDirectories() const {
  * @returns a last entry of getInstrumentDirectories
  */
 const std::string ConfigServiceImpl::getInstrumentDirectory() const {
-  return m_InstrumentDirs.back();
+  return m_instrumentDirs.back();
 }
 /**
  * Return the search directory for vtp files
@@ -1602,16 +1602,16 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
  * - The install directory/instrument
  */
 void ConfigServiceImpl::cacheInstrumentPaths() {
-  m_InstrumentDirs.clear();
+  m_instrumentDirs.clear();
 
   Poco::Path path(getAppDataDir());
   path.makeDirectory();
   path.pushDirectory("instrument");
   const std::string appdatadir = path.toString();
-  addDirectoryifExists(appdatadir, m_InstrumentDirs);
+  addDirectoryifExists(appdatadir, m_instrumentDirs);
 
 #ifndef _WIN32
-  addDirectoryifExists("/etc/mantid/instrument", m_InstrumentDirs);
+  addDirectoryifExists("/etc/mantid/instrument", m_instrumentDirs);
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
@@ -1623,7 +1623,7 @@ void ConfigServiceImpl::cacheInstrumentPaths() {
     directoryName =
         Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
   }
-  addDirectoryifExists(directoryName, m_InstrumentDirs);
+  addDirectoryifExists(directoryName, m_instrumentDirs);
 }
 
 /**

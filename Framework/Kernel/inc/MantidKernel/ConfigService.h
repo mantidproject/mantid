@@ -292,15 +292,15 @@ private:
   /// The directory that is considered to be the base directory
   std::string m_strBaseDir;
   /// The configuration properties in string format
-  std::string m_PropertyString;
+  std::string m_propertyString;
   /// The filename of the Mantid properties file
   const std::string m_properties_file_name;
   /// The filename of the Mantid user properties file
   const std::string m_user_properties_file_name;
   /// Store a list of data search paths
-  std::vector<std::string> m_DataSearchDirs;
+  std::vector<std::string> m_dataSearchDirs;
   /// Store a list of instrument directory paths
-  std::vector<std::string> m_InstrumentDirs;
+  std::vector<std::string> m_instrumentDirs;
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
