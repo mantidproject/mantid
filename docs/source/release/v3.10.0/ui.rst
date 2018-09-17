@@ -36,7 +36,7 @@ Instrument View
 - Fixed a bug where pressing delete would delete a workspace even when the dock was not focused.
 - Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on
 
-.. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.PNG
+.. figure:: ../../images/ArtRightGUIWaterfallCustom2sp1.png
    :class: screenshot
    :width: 294px
    :align: right
@@ -62,7 +62,7 @@ Plotting Improvements
 |Plots of a temperature ramp on WISH using "Temp" selected as the log:                           |
 |More details `here <https://www.mantidproject.org/MBC_Displaying_data_in_multiple_workspaces>`_ |
 +----------------------------------------------+-------------------------------------------------+
-| .. image:: ../../images/ArtWaterfallT1.PNG   |   .. image:: ../../images/ArtSurfacePlotT1.PNG  |
+| .. image:: ../../images/ArtWaterfallT1.png   |   .. image:: ../../images/ArtSurfacePlotT1.png  |
 +----------------------------------------------+-------------------------------------------------+
 
 

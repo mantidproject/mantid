@@ -42,9 +42,9 @@ public:
   /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
-                std::string email);
+                std::string email, std::string textBox);
   /// Sends an error report
-  void sendErrorReport();
+  int sendErrorReport();
 
 protected:
   /// Generates an error string in json format
@@ -65,6 +65,8 @@ private:
   const std::string m_name;
   /// User provided email
   const std::string m_email;
+  /// User provided text box
+  const std::string m_textbox;
   /// Target url
   std::string m_url;
 };

@@ -88,10 +88,9 @@ public:
   boost::shared_ptr<CSGObject> createShape(std::string shapeXML,
                                            bool addTypeTag = true);
 
-  boost::shared_ptr<CSGObject> createHexahedralShape(double xlb, double xlf,
-                                                     double xrf, double xrb,
-                                                     double ylb, double ylf,
-                                                     double yrf, double yrb);
+  static boost::shared_ptr<CSGObject>
+  createHexahedralShape(double xlb, double xlf, double xrf, double xrb,
+                        double ylb, double ylf, double yrf, double yrb);
 
 private:
   std::string parseSphere(Poco::XML::Element *pElem,

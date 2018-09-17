@@ -218,6 +218,23 @@ public:
     auto roots = findSubtreeRoots(region);
     TS_ASSERT(!roots.is_initialized())
   }
+
+  void testForDocumentationFailTree() {
+    auto findSubtreeRoots = FindSubtreeRoots();
+    // clang-format off
+    auto region = std::vector<RowLocation>({
+        RowLocation({0, 0}),
+        RowLocation({0, 0, 0}),
+        RowLocation({0, 0, 1}),
+        RowLocation({1}),
+        RowLocation({1, 0}),
+        RowLocation({1, 1}),
+        RowLocation({1, 2})
+    });
+    // clang-format on
+    auto roots = findSubtreeRoots(region);
+    TS_ASSERT(!roots.is_initialized())
+  }
 };
 
 #endif // MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H

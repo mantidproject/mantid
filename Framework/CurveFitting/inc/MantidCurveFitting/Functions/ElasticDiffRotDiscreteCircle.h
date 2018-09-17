@@ -5,6 +5,7 @@
 // Mantid Headers from the same project
 #include "DeltaFunction.h"
 // Mantid headers from other projects (N/A)
+#include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // 3rd party library headers (N/A)
 // standard library (N/A)
 
@@ -40,7 +41,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 /* Class representing the elastic portion of DiffRotDiscreteCircle
  * Contains a Delta Dirac.
  */
-class DLLExport ElasticDiffRotDiscreteCircle : public DeltaFunction {
+class DLLExport ElasticDiffRotDiscreteCircle : public DeltaFunction,
+                                               public FunctionQDepends {
 public:
   /// Constructor
   ElasticDiffRotDiscreteCircle();

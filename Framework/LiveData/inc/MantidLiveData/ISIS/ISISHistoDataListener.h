@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LiveListener.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
-
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -18,9 +18,7 @@ namespace Mantid {
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
-namespace API {
-class MatrixWorkspace;
-}
+
 namespace HistogramData {
 class BinEdges;
 }
@@ -130,6 +128,10 @@ private:
 
   /// Time regime to load
   int m_timeRegime;
+
+  /// Buffer workspace to store instrument data (or not only instrument in the
+  /// future), prevents loading for every chank of data
+  API::MatrixWorkspace_sptr m_bufferWorkspace;
 
   /// reporter function called when the IDC reading routines raise an error
   static void IDCReporter(int status, int code, const char *message);

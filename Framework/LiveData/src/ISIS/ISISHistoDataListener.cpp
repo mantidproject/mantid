@@ -124,6 +124,16 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 
   loadTimeRegimes();
 
+  // Create dummy workspace to store instrument data
+  m_bufferWorkspace =
+      WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+  m_bufferWorkspace->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("TOF");
+  m_bufferWorkspace->setYUnit("Counts");
+
+  runLoadInstrument(m_bufferWorkspace, getString("NAME"));
+
   return true;
 }
 
@@ -196,13 +206,9 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
 
   // Create the 2D workspace for the output
   auto localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
+      m_bufferWorkspace, numberOfHistograms, m_numberOfBins[m_timeRegime] + 1,
       m_numberOfBins[m_timeRegime]);
 
-  // Set the unit on the workspace to TOF
-  localWorkspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
-  localWorkspace->setYUnit("Counts");
   localWorkspace->updateSpectraUsing(
       SpectrumDetectorMapping(m_specIDs, m_detIDs));
 
@@ -232,8 +238,6 @@ boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
     }
 
     if (period == firstPeriod) {
-      // Only run the Child Algorithms once
-      runLoadInstrument(localWorkspace, getString("NAME"));
       if (m_numberOfPeriods > 1) {
         // adding first ws to the group after loading instrument
         // otherwise ws can be lost.
