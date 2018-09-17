@@ -14,22 +14,27 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
                              validator=StringListValidator(['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']),
                              doc='Instrument to find live value for.')
 
-        self.declareProperty(name='LogName', defaultValue='', direction=Direction.Input,
-                             doc='Log name of value to find.')
+        self.declareProperty(name='PropertyType', defaultValue='Run', direction=Direction.Input,
+                             validator=StringListValidator(['Run', 'Block']),
+                             doc='The type of property to find')
 
-        self.declareProperty(name='OutputValue', defaultValue=Property.EMPTY_DBL, direction=Direction.Output,
+        self.declareProperty(name='PropertyName', defaultValue='TITLE', direction=Direction.Input,
+                             validator=StringMandatoryValidator(),
+                             doc='Name of value to find.')
+
+        self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
                              doc='The live value from the instrument, or an empty string if not found')
 
     def PyExec(self):
-        logName = self.getProperty('LogName').value
-        if logName == 'Theta':
-            self.setProperty('OutputValue', 0.5)
-        elif logName == 'S1VG':
-            self.setProperty('OutputValue', 1.001)
-        elif logName == 'S2VG':
-            self.setProperty('OutputValue', 0.5)
+        propertyName = self.getProperty('PropertyName').value
+        if propertyName == 'Theta':
+            self.setProperty('Value', '0.5')
+        elif propertyName == 'S1VG':
+            self.setProperty('Value', '1.001')
+        elif propertyName == 'S2VG':
+            self.setProperty('Value', '0.5')
         else:
-            raise RuntimeError('Requested live value for unexpected log name ' + logName)
+            raise RuntimeError('Requested live value for unexpected property name ' + propertyName)
 
 AlgorithmFactory.subscribe(GetFakeLiveInstrumentValue)
 
