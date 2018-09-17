@@ -93,10 +93,6 @@ paraview.ignore = @IGNORE_PARAVIEW@
 # Root of html documentation (kept as unix-style path)
 docs.html.root = @HTML_ROOT@
 
-# A semi-colon(;) separated list of directories to use to search for files other than data
-# Use forward slash / for all paths
-usersearch.directories =
-
 # Setting this to On enables searching the facilitie's archive automatically
 datasearch.searcharchive = Off
 

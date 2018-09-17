@@ -155,8 +155,7 @@ class ConfigServiceTest(unittest.TestCase):
                            'loading.multifile', 'loading.multifilelimit',
                            'maskFiles.directory',
                            'pythonalgorithms.refresh.allowed',
-                           'sliceviewer.nonorthogonal',
-                           'usersearch.directories',
+                           'sliceviewer.nonorthogonal'
 
                            ########## TODO should these be documented?
                            'curvefitting.defaultPeak', 'curvefitting.findPeaksFWHM', 'curvefitting.findPeaksTolerance', 'curvefitting.guiExclude',

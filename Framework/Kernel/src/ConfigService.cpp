@@ -166,7 +166,7 @@ ConfigServiceImpl::ConfigServiceImpl()
 #else
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
-      m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
+      m_DataSearchDirs(), m_InstrumentDirs(), m_proxyInfo(),
       m_isProxySet(false) {
   // getting at system details
   m_pSysConfig =
@@ -592,21 +592,6 @@ void ConfigServiceImpl::cacheDataSearchPaths() {
 }
 
 /**
- * Create the store of user search paths from the 'usersearch.directories' key
- * within the Mantid.properties file.
- * The value of the key should be a semi-colon separated list of directories
- */
-void ConfigServiceImpl::cacheUserSearchPaths() {
-  m_UserSearchDirs.clear();
-  std::string paths = getString("usersearch.directories");
-  if (paths.empty()) {
-    m_UserSearchDirs.clear();
-  } else {
-    m_UserSearchDirs = splitPath(paths);
-  }
-}
-
-/**
  *  The path that is passed should be as returned by makeAbsolute() and
  *  this function will return true if that path is in the list
  *  @param path :: the absolute path name to search for
@@ -769,7 +754,6 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
     // frequently
     cacheDataSearchPaths();
     appendDataSearchDir(getString("defaultsave.directory"));
-    cacheUserSearchPaths();
     cacheInstrumentPaths();
   }
 }
@@ -1052,8 +1036,6 @@ void ConfigServiceImpl::setString(const std::string &key,
 
   if (key == "datasearch.directories") {
     cacheDataSearchPaths();
-  } else if (key == "usersearch.directories") {
-    cacheUserSearchPaths();
   } else if (key == "instrumentDefinition.directory") {
     cacheInstrumentPaths();
   } else if (key == "defaultsave.directory") {
@@ -1621,23 +1603,10 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
     return;
   }
   if (!isInDataSearchList(dirPath.toString())) {
-    std::string newSearchString;
-    std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
-    for (; it != m_DataSearchDirs.end(); ++it) {
-      newSearchString.append(*it);
-      newSearchString.append(";");
-    }
-    newSearchString.append(path);
+    auto newSearchString = Strings::join(std::begin(m_DataSearchDirs),
+                                         std::end(m_DataSearchDirs), ";");
     setString("datasearch.directories", newSearchString);
   }
-}
-
-/**
- * Return the list of user search paths
- * @returns A vector of strings containing the defined search directories
- */
-const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
-  return m_UserSearchDirs;
 }
 
 /**

@@ -194,8 +194,6 @@ public:
   void appendDataSearchDir(const std::string &path);
   /// Appends subdirectory to each of the specified data search directories
   void appendDataSearchSubDir(const std::string &subdir);
-  /// Get the list of user search paths
-  const std::vector<std::string> &getUserSearchDirs() const;
   /// Sets instrument directories
   void setInstrumentDirectories(const std::vector<std::string> &directories);
   /// Get instrument search directories
@@ -267,8 +265,6 @@ private:
                            const std::string &key) const;
   /// Create the storage of the data search directories
   void cacheDataSearchPaths();
-  /// Create the storage of the user search directories
-  void cacheUserSearchPaths();
   /// Create the storage of the instrument directories
   void cacheInstrumentPaths();
   /// Returns true if the path is in the data search list
@@ -312,8 +308,6 @@ private:
   const std::string m_user_properties_file_name;
   /// Store a list of data search paths
   std::vector<std::string> m_DataSearchDirs;
-  /// Store a list of user search paths
-  std::vector<std::string> m_UserSearchDirs;
   /// Store a list of instrument directory paths
   std::vector<std::string> m_InstrumentDirs;
 
