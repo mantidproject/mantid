@@ -35,13 +35,18 @@ public:
     TS_ASSERT_EQUALS(std::ios_base::beg, m_bytes.tellg());
   }
 
+  void test_Read_int16_t_Gives_Correct_Value() {
+    doReadSingleValueTest<int16_t>(6, sizeof(int16_t));
+  }
+
   void test_Read_int32_t_Gives_Correct_Value() {
-    doReadSingleValueTest<int32_t>(6, sizeof(int32_t));
+    moveStreamToPosition(10);
+    doReadSingleValueTest<int32_t>(580, sizeof(int32_t));
   }
 
   void test_Read_int64_t_Gives_Correct_Value() {
-    moveStreamToPosition(10);
-    doReadSingleValueTest<int64_t>(580, sizeof(int64_t));
+    moveStreamToPosition(42);
+    doReadSingleValueTest<int64_t>(200, sizeof(int64_t));
   }
 
   void test_Read_float_Gives_Correct_Value() {
@@ -58,6 +63,13 @@ public:
   void test_Read_String_Gives_Expected_String() {
     const size_t offset = sizeof(int32_t) + 6;
     doReadSingleValueTest<std::string>("mantid", offset);
+  }
+
+  void test_Read_Vector_int16_t() {
+    moveStreamToPosition(30);
+    const size_t nvals(3);
+    std::vector<int16_t> expectedValue{2, 0, 4};
+    doReadArrayValueTest(nvals, expectedValue, nvals * sizeof(int16_t));
   }
 
   void test_Read_Vector_int32_t() {

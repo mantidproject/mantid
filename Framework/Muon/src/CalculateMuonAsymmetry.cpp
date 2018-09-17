@@ -14,7 +14,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"

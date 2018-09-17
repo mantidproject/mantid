@@ -111,11 +111,10 @@ public:
 
   void verifyScatteringAngleAxis(const MatrixWorkspace_sptr &outWS,
                                  const size_t nEntries) {
-    // Check x-axis goes from -90 -> 0 with 180 bins
     const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), nEntries)
+    TS_ASSERT_EQUALS(xAxis->length(), nEntries + 1)
     for (size_t i = 0; i < N_TUBES; ++i)
-      TS_ASSERT_DELTA(xAxis->getValue(i), -90.0 + 22.5 * double(i), 1e-6)
+      TS_ASSERT_DELTA(xAxis->getValue(i), -101.25 + 22.5 * double(i), 1e-6)
   }
 
   void verifyHeightAxis(const MatrixWorkspace_sptr &outWS) {
@@ -203,12 +202,10 @@ public:
     MatrixWorkspace_sptr outWS =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
-
-    // Check x-axis goes from 0 -> 90 with 180 bins
     const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 5)
+    TS_ASSERT_EQUALS(xAxis->length(), 6)
     for (size_t i = 0; i < N_TUBES; ++i)
-      TS_ASSERT_DELTA(xAxis->getValue(i), 22.5 * double(i), 1e-6)
+      TS_ASSERT_DELTA(xAxis->getValue(i), -11.25 + 22.5 * double(i), 1e-6)
 
     verifyHeightAxis(outWS);
     verifySpectraHaveSameCounts(outWS, 2.0, sqrt(2.0));
@@ -243,7 +240,7 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
-    alg.setProperty("ScatteringAngleBinning", "-90.0, 22.5, 0.0");
+    alg.setProperty("ScatteringAngleBinning", "-101.25, 22.5, 11.25");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase();
@@ -370,11 +367,10 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
-    // Check x-axis goes from 0 -> 45 degrees
     const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 3)
-    for (size_t i = 0; i < 3; ++i)
-      TS_ASSERT_DELTA(xAxis->getValue(i), 0.0 + 22.5 * double(i), 1e-6)
+    TS_ASSERT_EQUALS(xAxis->length(), 4)
+    for (size_t i = 0; i < 4; ++i)
+      TS_ASSERT_DELTA(xAxis->getValue(i), -11.25 + 22.5 * double(i), 1e-6)
 
     verifyHeightAxis(outWS);
 
@@ -411,6 +407,7 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("ScatteringAngleTolerance", 1000.);
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -427,7 +424,7 @@ public:
 
     bin = 1;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 3.5, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
 
     for (size_t i = 2; i < 5; ++i)
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
@@ -439,7 +436,7 @@ public:
 
     bin = 6;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.5, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -456,7 +453,8 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("OutputType", "2DTubes");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("ScatteringAngleTolerance", "0.3");
+    alg.setProperty("ScatteringAngleTolerance", 5.);
+    alg.setProperty("SplitCounts", true);
     alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -573,11 +571,10 @@ public:
     auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
-    // Check x-axis goes from 0 -> 90
     const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), N_TUBES)
+    TS_ASSERT_EQUALS(xAxis->length(), N_TUBES + 1)
     for (size_t i = 0; i < N_TUBES; ++i)
-      TS_ASSERT_DELTA(xAxis->getValue(i), -90.0 + 22.5 * double(i), 1e-6)
+      TS_ASSERT_DELTA(xAxis->getValue(i), -101.25 + 22.5 * double(i), 1e-6)
 
     return outWS;
   }
@@ -591,18 +588,13 @@ public:
     for (size_t i = 0; i < N_TUBES; ++i)
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
         auto counts = outWS->getSpectrum(j).y()[i];
-        // Tolerance on error is quite large, due to repeated rounding
-        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(counts), 0.1)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(counts), 0.001)
         totalCounts += counts;
       }
 
     TS_ASSERT_DELTA(totalCounts,
                     double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
-
-    // An analytic comparison is a little harder for this case, do a quick check
-    // of an arbitary value
-    TS_ASSERT_DELTA(outWS->getSpectrum(8).y()[2], 2.0020706794, 1e-6)
-
+    TS_ASSERT_DELTA(outWS->getSpectrum(8).y()[2], 2., 1e-6)
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
   }
@@ -618,16 +610,12 @@ public:
     for (size_t i = 0; i < N_TUBES; ++i) {
       auto counts = outWS->getSpectrum(0).y()[i];
       // Tolerance on error is quite large, due to repeated rounding
-      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.1)
+      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.001)
       totalCounts += counts;
     }
-
     TS_ASSERT_DELTA(totalCounts,
                     double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
-
-    // An analytic comparison is a little harder for this case, do a quick check
-    // of an arbitary value
-    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 20.0092235812, 1e-6)
+    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 20., 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -643,8 +631,7 @@ public:
     double totalCounts = 0.0;
     for (size_t i = 0; i < N_TUBES; ++i) {
       auto counts = outWS->getSpectrum(0).y()[i];
-      // Tolerance on error is quite large, due to repeated rounding
-      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.1)
+      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.001)
       totalCounts += counts;
     }
 
@@ -653,7 +640,7 @@ public:
 
     // An analytic comparison is a little harder for this case, do a quick check
     // of an arbitary value
-    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 10.0009720239, 1e-6)
+    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 10., 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -670,15 +657,11 @@ public:
     double totalCounts = 0.0;
     for (size_t i = 0; i < N_TUBES; ++i) {
       auto counts = outWS->getSpectrum(0).y()[i];
-      // Tolerance on error is quite large, due to repeated rounding
-      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.1)
+      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.001)
       totalCounts += counts;
     }
 
     TS_ASSERT_DELTA(totalCounts, 10.0, 1e-6)
-
-    // An analytic comparison is a little harder for this case, do a quick check
-    // of an arbitary value
     TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 2.0, 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");

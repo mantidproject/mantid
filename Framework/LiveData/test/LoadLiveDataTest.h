@@ -135,6 +135,24 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
+  void test_replace_workspace_with_group() {
+    auto ws1 = doExec<EventWorkspace>("Replace");
+
+    TS_ASSERT_THROWS_NOTHING(
+        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
+                               ILiveListener_sptr(new TestGroupDataListener)));
+  }
+
+  //--------------------------------------------------------------------------------------------
+  void test_replace_group_with_workspace() {
+    auto ws1 =
+        doExec<WorkspaceGroup>("Replace", "", "", "", "", false,
+                               ILiveListener_sptr(new TestGroupDataListener));
+
+    TS_ASSERT_THROWS_NOTHING(doExec<EventWorkspace>("Replace"));
+  }
+
+  //--------------------------------------------------------------------------------------------
   void test_append() {
     EventWorkspace_sptr ws1, ws2;
 

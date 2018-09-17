@@ -1,6 +1,8 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -1031,9 +1033,22 @@ public:
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstrumentDefinitionParserTestPerformance *createSuite() {
+    return new InstrumentDefinitionParserTestPerformance();
+  }
+  static void destroySuite(InstrumentDefinitionParserTestPerformance *suite) {
+    delete suite;
+  }
+
+  InstrumentDefinitionParserTestPerformance()
+      : m_instrumentDirectoryPath(
+            ConfigService::Instance().getInstrumentDirectory()) {}
+
   void testLoadingAndParsing() {
     const std::string filename =
-        ConfigService::Instance().getInstrumentDirectory() +
+        m_instrumentDirectoryPath +
         "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     const std::string xmlText = Strings::loadFile(filename);
 
@@ -1046,6 +1061,35 @@ public:
     if (!vtpFilename.empty()) {
       Poco::File(vtpFilename).remove();
     }
+  }
+
+  void test_load_wish() {
+    const auto definition =
+        m_instrumentDirectoryPath + "/WISH_Definition_10Panels.xml";
+    std::string contents = Strings::loadFile(definition);
+    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    auto wishInstrument = parser.parseXML(nullptr);
+    TS_ASSERT_EQUALS(extractDetectorInfo(*wishInstrument)->size(),
+                     778245); // Sanity check
+  }
+
+  void test_load_sans2d() {
+    const auto definition =
+        m_instrumentDirectoryPath + "/SANS2D_Definition_Tubes.xml";
+    std::string contents = Strings::loadFile(definition);
+    InstrumentDefinitionParser parser(definition, "dummy", contents);
+    auto sansInstrument = parser.parseXML(nullptr);
+    TS_ASSERT_EQUALS(extractDetectorInfo(*sansInstrument)->size(),
+                     122888); // Sanity check
+  }
+
+private:
+  const std::string m_instrumentDirectoryPath;
+
+  std::unique_ptr<Geometry::DetectorInfo>
+  extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
+    Geometry::ParameterMap pmap;
+    return std::move(std::get<1>(instrument.makeBeamline(pmap)));
   }
 };
 

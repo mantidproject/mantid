@@ -2836,7 +2836,7 @@ void PlotDialog::changeColormap(const QString &filename) {
   QString fileselection;
   // Use a file dialog if no parameter is passed
   if (filename.isEmpty()) {
-    fileselection = MantidColorMap::loadMapDialog(mCurrentColorMap, this);
+    fileselection = MantidColorMap::chooseColorMap(mCurrentColorMap, this);
     if (fileselection.isEmpty())
       return;
   } else {
