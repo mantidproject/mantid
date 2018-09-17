@@ -25,7 +25,7 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
 
         self.declareProperty(name='PropertyType', defaultValue='Run', direction=Direction.Input,
                              validator=StringListValidator(['Run', 'Block']),
-                             doc='The type of value to find. For Run this may include title, start time etc. and for Block e.g. theta, slit gaps, etc.')
+                             doc='The type of property to find')
 
         self.declareProperty(name='PropertyName', defaultValue='TITLE', direction=Direction.Input,
                              validator=StringMandatoryValidator(),
