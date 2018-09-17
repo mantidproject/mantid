@@ -68,6 +68,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
     def PyExec(self):
         import ICCFitTools as ICCFT
         import BVGFitTools as BVGFT
+        reload(ICCFT)
+        reload(BVGFT)
         from mantid.simpleapi import LoadIsawUB
         import pickle
         from scipy.ndimage.filters import convolve

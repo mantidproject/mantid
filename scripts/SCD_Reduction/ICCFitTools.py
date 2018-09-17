@@ -282,7 +282,6 @@ def getOptimizedGoodIDX(n_events, padeCoefficients, zBG=1.96, neigh_length_m=3, 
     maxppl = maxppl_frac*pred_ppl
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck > minppl]
     pp_lambda_toCheck = pp_lambda_toCheck[pp_lambda_toCheck < maxppl]
-
     if pp_lambda_toCheck == []:
         pp_lambda_toCheck = [meanBG*1.96]
         print('Cannot find suitable background.  Consider adjusting MinpplFrac or MaxpplFrac')
@@ -862,6 +861,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
     x0 = getInitialGuess(tofWS, paramNames, energy,
                          flightPath, padeCoefficients)
     [fICC.setParameter(iii, v) for iii, v in enumerate(x0[:fICC.numParams()])]
+    print(fICC)
     x = tofWS.readX(0)
     y = tofWS.readY(0)
     bgx0 = np.polyfit(x[np.r_[0:15, -15:0]], y[np.r_[0:15, -15:0]], fitOrder)
@@ -882,10 +882,12 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         HatWidth0 = [0., 5.]
         Scale0 = [0., np.inf]
         KConv0 = [100, 140]
-
+        print(B0)
         # Now we see what instrument specific parameters we have
         if iccFitDict is not None:
+            #TODO This is only a temporary fix to not fix iccB - need to update parameters files
             possibleKeys = ['iccA', 'iccB', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
+            #possibleKeys = ['iccA', 'iccR', 'iccT0', 'iccScale0', 'iccHatWidth', 'iccKConv']
             for keyIDX, (key, bounds) in enumerate(zip(possibleKeys, [A0, B0, R0, T00, Scale0, HatWidth0, KConv0])):
                 if key in iccFitDict:
                     bounds[0] = iccFitDict[key][0]
