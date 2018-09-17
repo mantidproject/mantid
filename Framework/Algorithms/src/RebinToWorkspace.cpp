@@ -2,12 +2,14 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidHistogramData/Rebin.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 using namespace API;
 using DataObjects::EventWorkspace;
+using DataObjects::EventWorkspace_const_sptr;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinToWorkspace)
@@ -52,10 +54,14 @@ bool needToRebin(const MatrixWorkspace_sptr &left,
   if (left == rght)
     return false;
 
-  // look for first non-equal x-axis between the workspaces
+  // see if there is the same number of histograms
   const size_t numHist = left->getNumberHistograms();
+  if (numHist != rght->getNumberHistograms())
+    return true;
+
+  // look for first non-equal x-axis between the workspaces
   for (size_t i = 0; i < numHist; ++i) {
-    if (left->getSpectrum(i).readX() != rght->getSpectrum(i).readX()) {
+    if (left->getSpectrum(i).x() != rght->getSpectrum(i).x()) {
       return true;
     }
   }
@@ -71,97 +77,96 @@ void RebinToWorkspace::exec() {
   // The input workspaces ...
   MatrixWorkspace_sptr toRebin = getProperty("WorkspaceToRebin");
   MatrixWorkspace_sptr toMatch = getProperty("WorkspaceToMatch");
-  bool preserveEvents = getProperty("PreserveEvents");
 
   if (needToRebin(toRebin, toMatch)) {
-    // TODO should copy code from Rebin to do the right thing spectrum by
-    // spectrum
-    if (!WorkspaceHelpers::commonBoundaries(*toMatch)) {
-      throw std::runtime_error(
-          "WorkspaceToMatch must have common bin boundaries in all spectra");
-    }
-
-    // First we need to create the parameter vector from the workspace with
-    // which we are matching
-    std::vector<double> rb_params = createRebinParameters(toMatch);
-
-    IAlgorithm_sptr runRebin = createChildAlgorithm("Rebin");
-    runRebin->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
-    runRebin->setPropertyValue("OutputWorkspace", "rebin_out");
-    runRebin->setProperty("params", rb_params);
-    runRebin->setProperty("PreserveEvents", preserveEvents);
-    runRebin->setProperty("IgnoreBinErrors", true);
-    runRebin->setChildStartProgress(0.);
-    runRebin->setChildStartProgress(1.);
-    runRebin->executeAsChildAlg();
-    MatrixWorkspace_sptr outputWS = runRebin->getProperty("OutputWorkspace");
-    setProperty("OutputWorkspace", outputWS);
+    g_log.information("Rebinning");
+    this->rebin(toRebin, toMatch);
   } else { // don't need to rebin
-    g_log.information("Workspaces have matched binning");
-    MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-
-    bool inPlace = (toRebin == outputWS);
-    bool isEvents =
-        bool(boost::dynamic_pointer_cast<const EventWorkspace>(toRebin));
-
-    if (inPlace) {
-      if (isEvents && (!preserveEvents)) {
-        // convert to a MatrixWorkspace
-        IAlgorithm_sptr convert =
-            createChildAlgorithm("ConvertToMatrixWorkspace");
-        convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
-        convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
-        convert->setChildStartProgress(0.);
-        convert->setChildStartProgress(1.);
-        convert->executeAsChildAlg();
-        outputWS = convert->getProperty("OutputWorkspace");
-      }
-      // all other cases are already handled by not doing anything
-    } else {
-      if (isEvents && (!preserveEvents)) {
-        // convert to a MatrixWorkspace
-        // convert to a MatrixWorkspace
-        IAlgorithm_sptr convert =
-            createChildAlgorithm("ConvertToMatrixWorkspace");
-        convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
-        convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
-        convert->setChildStartProgress(0.);
-        convert->setChildStartProgress(1.);
-        convert->executeAsChildAlg();
-        outputWS = convert->getProperty("OutputWorkspace");
-      } else {
-        outputWS = toRebin->clone();
-      }
-    }
-
-    setProperty("OutputWorkspace", outputWS);
+    g_log.information("WorkspaceToRebin and WorkspaceToMatch already have matched binning");
+    auto outputWS = this->createOutputWorkspace(toRebin, 1.);
+    this->setProperty("OutputWorkspace", outputWS);
   }
 }
 
-/**
- * Create the vector of rebin parameters
- * @param toMatch :: A shared pointer to the workspace with the desired binning
- * @returns :: A vector to hold the rebin parameters once they have been
- * calculated
- */
-std::vector<double> RebinToWorkspace::createRebinParameters(
-    Mantid::API::MatrixWorkspace_sptr toMatch) {
-  using namespace Mantid::API;
+MatrixWorkspace_sptr
+RebinToWorkspace::createOutputWorkspace(MatrixWorkspace_sptr &inputWS,
+                                        const double endProgress) {
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  bool preserveEvents = getProperty("PreserveEvents");
 
-  const auto &matchXdata = toMatch->x(0);
-  // params vector should have the form [x_1, delta_1,x_2, ...
-  // ,x_n-1,delta_n-1,x_n), see Rebin.cpp
-  std::vector<double> rb_params;
-  int xsize = static_cast<int>(matchXdata.size());
-  rb_params.reserve(xsize * 2);
-  for (int i = 0; i < xsize; ++i) {
-    // bin bound
-    rb_params.push_back(matchXdata[i]);
-    // Bin width
-    if (i < xsize - 1)
-      rb_params.push_back(matchXdata[i + 1] - matchXdata[i]);
+  bool inPlace = (inputWS == outputWS);
+  bool isEvents =
+      bool(boost::dynamic_pointer_cast<const EventWorkspace>(inputWS));
+
+  if (inPlace) {
+    if (isEvents && (!preserveEvents)) {
+      // convert to a MatrixWorkspace
+      IAlgorithm_sptr convert =
+          createChildAlgorithm("ConvertToMatrixWorkspace");
+      convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+      convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+      convert->setChildStartProgress(0.);
+      convert->setChildStartProgress(endProgress);
+      convert->executeAsChildAlg();
+      outputWS = convert->getProperty("OutputWorkspace");
+    }
+    // all other cases are already handled by not doing anything
+  } else {
+    if (isEvents && (!preserveEvents)) {
+      // convert to a MatrixWorkspace
+      IAlgorithm_sptr convert =
+          createChildAlgorithm("ConvertToMatrixWorkspace");
+      convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+      convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+      convert->setChildStartProgress(0.);
+      convert->setChildStartProgress(endProgress);
+      convert->executeAsChildAlg();
+      outputWS = convert->getProperty("OutputWorkspace");
+    } else {
+      outputWS = inputWS->clone();
+    }
   }
-  return rb_params;
+
+  return outputWS;
+}
+
+// this follows closely what Rebin does except each x-axis is different
+void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin,
+                             MatrixWorkspace_sptr &toMatch) {
+  // create the output workspace
+  auto outputWS = this->createOutputWorkspace(toRebin, .5);
+
+  // rebin
+  const int numHist = static_cast<int>(toRebin->getNumberHistograms());
+  Progress prog(this, 0.5, 1.0, numHist);
+
+  if (toMatch->getNumberHistograms() == 1) {
+    // only one spectrum in the workspace being matched
+    const auto &edges = toMatch->histogram(0).binEdges();
+    PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
+    for (int i = 0; i < numHist; ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      outputWS->setHistogram(
+          i, HistogramData::rebin(outputWS->histogram(i), edges));
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  } else {
+    // matched number of workspaces
+    PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
+    for (int i = 0; i < numHist; ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      outputWS->setHistogram(
+          i, HistogramData::rebin(outputWS->histogram(i),
+                                  toMatch->histogram(i).binEdges()));
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
+
+  setProperty("OutputWorkspace", outputWS);
 }
 
 Parallel::ExecutionMode RebinToWorkspace::getParallelExecutionMode(
