@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.muon_context.muon_context import *
-
 
 class DummyLabelModel(object):
 
