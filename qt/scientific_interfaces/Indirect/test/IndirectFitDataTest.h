@@ -5,7 +5,7 @@
 
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <iostream>
 
@@ -21,24 +21,27 @@ public:
   static void destroySuite(IndirectFitDataTest *suite) { delete suite; }
 
   void test_data_is_instantiated_correctly() {
-    MatrixWorkspace_sptr workspace =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     const Spectra spec =
         std::make_pair(0u, workspace->getNumberHistograms() - 1);
-    // IndirectFitData data(workspace, spec);
 
-    // const std::string name = data.workspace()->getName();
-    // std::cout << name << "\n";
-    std::cout << "HELLO";
+    workspace->setTitle("Test Title");
+    IndirectFitData data(workspace, spec);
+
+    TS_ASSERT_EQUALS(data.workspace()->getTitle(), "Test Title");
+    TS_ASSERT_EQUALS(data.workspace()->getNumberHistograms(), 1);
   }
 
   void test_displayName_returns_correct_name() {
-    // given -
-    // the workspace and data
-    // when -
-    // the parameters equal so and so
-    // then -
-    // the output name should be
+    auto workspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
+    const Spectra spec =
+        std::make_pair(0u, workspace->getNumberHistograms() - 1);
+    IndirectFitData data(workspace, spec);
+
+    const std::string formatString = "%1%_s%2%_Result";
+    const std::string rangeDelimiter = "_to_";
+
+    TS_ASSERT_EQUALS(data.displayName(formatString, rangeDelimiter), "_s0_Result");
   }
 };
 

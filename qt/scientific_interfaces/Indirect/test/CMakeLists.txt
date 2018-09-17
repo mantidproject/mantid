@@ -13,6 +13,9 @@ mtd_add_qt_tests (TARGET_NAME MantidQtInterfacesIndirectTest
     ../../../../Framework/TestHelpers/inc
     ../
   TEST_HELPER_SRCS
+    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
