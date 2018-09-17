@@ -28,16 +28,16 @@ Logger g_log("ErrorReporter");
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share)
-    : ErrorReporter(application, upTime, exitCode, share, "", "") {}
+    : ErrorReporter(application, upTime, exitCode, share, "", "", "") {}
 
 /** Constructor
  */
 ErrorReporter::ErrorReporter(std::string application,
                              Types::Core::time_duration upTime,
                              std::string exitCode, bool share, std::string name,
-                             std::string email)
+                             std::string email, std::string textBox)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
-      m_share(share), m_name(name), m_email(email) {
+      m_share(share), m_name(name), m_email(email), m_textbox(textBox) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
       "errorreports.rooturl");
   if (!url.is_initialized()) {
@@ -104,11 +104,13 @@ std::string ErrorReporter::generateErrorMessage() {
   message["exitCode"] = m_exitCode;
 
   if (m_share) {
+    message["textBox"] = m_textbox;
     message["email"] = m_email;
     message["name"] = m_name;
   } else {
     message["email"] = "";
     message["name"] = "";
+    message["textBox"] = "";
   }
 
   ::Json::FastWriter writer;
