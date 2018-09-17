@@ -74,7 +74,10 @@ void LiveDataAlgorithm::initProps() {
       make_unique<PropertyWithValue<std::string>>("ProcessingAlgorithm", "",
                                                   Direction::Input),
       "Name of the algorithm that will be run to process each chunk of data.\n"
-      "Optional. If blank, no processing will occur.");
+      "Optional. If blank, no processing will occur. Note that, if "
+      "PreserveEvents is enabled, any rebinning done in this step will be "
+      "lost. Use the Post-Process step for custom rebinning of "
+      "EventWorkspaces.");
 
   declareProperty(
       make_unique<PropertyWithValue<std::string>>("ProcessingProperties", "",
@@ -86,13 +89,19 @@ void LiveDataAlgorithm::initProps() {
                       "ProcessingScript", "", Direction::Input),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
-                  "user interface.");
+                  "user interface. Note that, if PreserveEvents is enabled, "
+                  "any rebinning done in this step will be lost. Use the "
+                  "Post-Process step for custom rebinning of "
+                  "EventWorkspaces.");
 
   declareProperty(make_unique<FileProperty>("ProcessingScriptFilename", "",
                                             FileProperty::OptionalLoad, "py"),
                   "A Python script that will be run to process each chunk of "
                   "data. Only for command line usage, does not appear on the "
-                  "user interface.");
+                  "user interface. Note that, if PreserveEvents is enabled, "
+                  "any rebinning done in this step will be lost. Use the "
+                  "Post-Process step for custom rebinning of "
+                  "EventWorkspaces.");
 
   std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty(

@@ -4,7 +4,6 @@
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Slice.h"
 #include "MantidIndexing/Extract.h"

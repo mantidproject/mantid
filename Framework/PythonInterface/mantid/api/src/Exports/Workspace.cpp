@@ -31,10 +31,8 @@ GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
 } // namespace
 
-//--------------------------------------------------------------------------------------
-// Deprecated function
-//--------------------------------------------------------------------------------------
 /**
+ * DEPRECATED. Use DataItem.name()
  * @param self Reference to the calling object
  * @return name of the workspace.
  */

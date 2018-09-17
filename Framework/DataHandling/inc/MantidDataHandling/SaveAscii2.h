@@ -52,12 +52,9 @@ public:
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override {
     return {"LoadAscii",
-            "SaveANSTOAscii",
             "SaveCSV",
             "SaveDiffFittingAscii",
-            "SaveILLCosmosAscii",
             "SaveReflCustomAscii",
-            "SaveReflThreeColumnAscii",
             "SaveOpenGenieAscii",
             "SaveGSS",
             "SaveFocusedXYE"};

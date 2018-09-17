@@ -347,6 +347,11 @@ public:
     TS_ASSERT(group->isMultiperiod());
   }
 
+  void test_isGroup() {
+    WorkspaceGroup_sptr group = makeGroup();
+    TS_ASSERT_EQUALS(group->isGroup(), true);
+  }
+
   void test_isInGroup() {
     WorkspaceGroup_sptr group = makeGroup();
     auto ws1 = group->getItem(1);

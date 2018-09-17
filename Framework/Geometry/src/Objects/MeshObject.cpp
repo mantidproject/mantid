@@ -42,7 +42,7 @@ void MeshObject::initialize() {
         "Too many vertices (" + std::to_string(m_vertices.size()) +
         "). MeshObject cannot have more than 65535 vertices.");
   }
-  m_handler = boost::make_shared<GeometryHandler>(this);
+  m_handler = boost::make_shared<GeometryHandler>(*this);
 }
 
 /**
@@ -57,7 +57,7 @@ const Kernel::Material MeshObject::material() const { return m_material; }
  */
 bool MeshObject::hasValidShape() const {
   // May enclose volume if there are at
-  // at least 4 triangles and 4 vertices
+  // at least 4 triangles and 4 vertices (Tetrahedron)
   return (numberOfTriangles() >= 4 && numberOfVertices() >= 4);
 }
 
@@ -607,11 +607,9 @@ size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 std::vector<uint32_t> MeshObject::getTriangles() const {
   std::vector<uint32_t> faces;
   size_t nFaceCorners = m_triangles.size();
-  if (nFaceCorners > 0) {
-    faces.resize(static_cast<std::size_t>(nFaceCorners));
-    for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = static_cast<int>(m_triangles[i]);
-    }
+  faces.resize(static_cast<std::size_t>(nFaceCorners));
+  for (size_t i = 0; i < nFaceCorners; ++i) {
+    faces[i] = static_cast<int>(m_triangles[i]);
   }
   return faces;
 }
@@ -632,7 +630,7 @@ std::vector<double> MeshObject::getVertices() const {
   if (nPoints > 0) {
     points.resize(static_cast<std::size_t>(nPoints) * 3);
     for (size_t i = 0; i < nPoints; ++i) {
-      V3D pnt = m_vertices[i];
+      const auto &pnt = m_vertices[i];
       points[i * 3 + 0] = pnt.X();
       points[i * 3 + 1] = pnt.Y();
       points[i * 3 + 2] = pnt.Z();

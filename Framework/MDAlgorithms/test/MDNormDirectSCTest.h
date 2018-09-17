@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/MDNormDirectSC.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

@@ -1563,16 +1563,10 @@ bool MantidUI::canAcceptDrop(QDragEnterEvent *e) {
 bool MantidUI::drop(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
   if (name == "MantidWorkspace") {
-    QString text = e->mimeData()->text();
-    int endIndex = 0;
-    QStringList wsNames;
-    while (text.indexOf("[\"", endIndex) > -1) {
-      int startIndex = text.indexOf("[\"", endIndex) + 2;
-      endIndex = text.indexOf("\"]", startIndex);
-      wsNames.append(text.mid(startIndex, endIndex - startIndex));
+    QStringList wsNames = e->mimeData()->text().split("\n");
+    for (const auto &wsName : wsNames) {
+      importWorkspace(wsName, false);
     }
-
-    foreach (const auto &wsName, wsNames) { importWorkspace(wsName, false); }
     return true;
   } else if (e->mimeData()->hasUrls()) {
     const auto pyFiles = DropEventHelper::extractPythonFiles(e);

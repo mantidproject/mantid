@@ -31,6 +31,10 @@
   <parameter name="I0MonitorIndex">
     <value val="1"/>
   </parameter>
+  
+  <parameter name="dQ/Q">
+    <value val="0.03"/>
+  </parameter>
 
   <parameter name="LambdaMin">
     <value val="2.0"/>
@@ -60,7 +64,48 @@
     <value val="MultiDetectorAnalysis"/>
 </parameter>
 
-   
+  <parameter name="polarization_correction_method" type="string">
+    <value val="Fredrikze" />
+  </parameter>
+
+  <parameter name="polarization_correction_option" type="string">
+    <value val="PA" />
+  </parameter>
+
+  <parameter name="efficiency_lambda" type="string">
+    <value val="0.525	0.5775	0.63525	0.698775	0.768653	0.845518	0.93007	1.02308	1.12538	1.23792	1.36171	1.49789	1.64767	1.81244	1.99369	2.19306	2.41236	2.6536	2.91896	3.21085	3.53194	3.88513	4.27364	4.70101	5.17111	5.68822	6.25704	6.88275	7.57102	8.32812	9.16094	10.077	11.0847	12.1932	13.4125	14.2756
+" />
+    <description is="The wavelengths at which the efficiencies are sampled."/>
+  </parameter>
+
+  <parameter name="Pp" type="string">
+    <value val="0	0	0	0	0	0	0	0	0	0	0	0	0	0	1.0139	0.97379	0.965953	0.980644	0.979261	0.977655	0.97455	0.970945	0.974806	0.970071	0.967974	0.968093	0.97512	0.991765	0.993302	0.996431	0.977246	0.985539	0.957359	1.03561	1.01837	1.04475
+
+ " />
+    <description is="The values of the Pp efficiency."/>
+  </parameter>
+
+  <parameter name="Ap" type="string">
+    <value val="0	0	0	0	0	0	0	0	0	0	0	0	0	0	0.745479	0.967815	0.970664	0.981661	0.981843	0.976273	0.9759	0.966285	0.971235	0.968561	0.966756	0.953646	0.963183	0.955027	0.955512	0.956767	0.926777	0.931862	0.898449	0.972329	0.931238	0.975078
+
+" />
+    <description is="The values of the Ap efficiency."/> 
+  </parameter>
+
+  <parameter name="Rho" type="string">
+    <value val="0	0	0	0	0	0	0	0	0	0	0	0	-1.00258	0.24991	0.85494	0.982662	0.988821	0.986798	0.992301	0.99371	0.995676	1.00137	0.996985	0.994724	0.995284	1.00655	0.993882	0.998729	0.997638	0.997585	1.01743	1.00586	1.04017	0.958108	0.971127	0.953178
+
+" />
+    <description is="The values of the Rho efficiency."/>
+  </parameter>
+
+  <parameter name="Alpha" type="string">
+    <value val="0	0	0	0	0	0	0	0	0	0	-0.017246	0	0	0.427951	0.889674	0.990357	0.994557	0.992129	0.992332	0.99546	0.99509	1.00178	0.995673	0.994003	0.995741	1.01016	0.995621	1.00353	1.00041	0.99505	1.01836	1.00574	1.0412	0.955931	0.974025	0.937772
+
+" />
+    <description is="The values of the Alpha efficiency."/>
+  </parameter>
+
    
 </component-link>
 </parameter-file>

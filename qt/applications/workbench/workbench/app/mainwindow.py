@@ -44,14 +44,17 @@ requirements.check_qt()
 # -----------------------------------------------------------------------------
 # Qt
 # -----------------------------------------------------------------------------
-from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication)  # noqa
+from qtpy.QtCore import (QEventLoop, Qt, QCoreApplication, QSettings, QPoint, QSize)  # noqa
 from qtpy.QtGui import (QColor, QPixmap)  # noqa
 from qtpy.QtWidgets import (QApplication, QDesktopWidget, QFileDialog,
                             QMainWindow, QSplashScreen)  # noqa
 from mantidqt.utils.qt import plugins, widget_updates_disabled  # noqa
+from mantidqt.algorithminputhistory import AlgorithmInputHistory  # noqa
 
 # Pre-application setup
 plugins.setup_library_paths()
+
+from workbench.config import APPNAME, CONF, ORG_DOMAIN, ORGANIZATION  # noqa
 
 
 # -----------------------------------------------------------------------------
@@ -67,7 +70,14 @@ def qapplication():
     app = QApplication.instance()
     if app is None:
         QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-        app = QApplication(['Mantid Workbench'])
+        argv = sys.argv[:]
+        argv[0] = APPNAME # replace application name
+        app = QApplication(argv)
+        app.setOrganizationName(ORGANIZATION)
+        app.setOrganizationDomain(ORG_DOMAIN)
+        app.setApplicationName(APPNAME)
+        # not calling app.setApplicationVersion(mantid.kernel.version_str())
+        # because it needs to happen after logging is monkey-patched in
     return app
 
 
@@ -107,17 +117,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
 
-        qapp = QApplication.instance()
-        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-
+        # -- instance attributes --
         self.setWindowTitle("Mantid Workbench")
 
-        # -- instance attributes --
-        self.window_size = None
-        self.window_position = None
-        self.maximized_flag = None
+        # uses default configuration as necessary
+        self.readSettings(CONF)
+
         # widgets
         self.messagedisplay = None
         self.ipythonconsole = None
@@ -258,14 +263,8 @@ class MainWindow(QMainWindow):
     # ----------------------- Layout ---------------------------------
 
     def setup_layout(self):
-        self.setup_for_first_run()
-
-    def setup_for_first_run(self):
         """Assume this is a first run of the application and set layouts
         accordingly"""
-        self.setWindowState(Qt.WindowMaximized)
-        desktop = QDesktopWidget()
-        self.window_size = desktop.screenGeometry().size()
         self.setup_default_layouts()
 
     def prep_window_for_reset(self):
@@ -307,7 +306,8 @@ class MainWindow(QMainWindow):
             # flatten list
             widgets = [item for column in widgets_layout for row in column for item in row]
             # show everything
-            map(lambda w: w.toggle_view(True), widgets)
+            for w in widgets:
+                w.toggle_view(True)
             # split everything on the horizontal
             for i in range(len(widgets) - 1):
                 first, second = widgets[i], widgets[i+1]
@@ -335,6 +335,8 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         # Close editors
         if self.editor.app_closing():
+            self.writeSettings(CONF) # write current window information to global settings object
+
             # Close all open plots
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  #noqa
@@ -360,6 +362,58 @@ class MainWindow(QMainWindow):
 
     def open_manage_directories(self):
         ManageUserDirectories(self).exec_()
+
+    def readSettings(self, settings):
+        qapp = QApplication.instance()
+        qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+            qapp.setAttribute(Qt.AA_EnableHighDpiScaling, settings.get('main/high_dpi_scaling'))
+
+        # get the saved window geometry
+        window_size = settings.get('main/window/size')
+        if not isinstance(window_size, QSize):
+            window_size = QSize(*window_size)
+        window_pos = settings.get('main/window/position')
+        if not isinstance(window_pos, QPoint):
+            window_pos = QPoint(*window_pos)
+
+        # make sure main window is smaller than the desktop
+        desktop = QDesktopWidget()
+
+        # this gives the maximum screen number if the position is off screen
+        screen = desktop.screenNumber(window_pos)
+
+        # recalculate the window size
+        desktop_geom = desktop.screenGeometry(screen)
+        w = min(desktop_geom.size().width(), window_size.width())
+        h = min(desktop_geom.size().height(), window_size.height())
+        window_size = QSize(w, h)
+
+        # and position it on the supplied desktop screen
+        x = max(window_pos.x(), desktop_geom.left())
+        y = max(window_pos.y(), desktop_geom.top())
+        window_pos = QPoint(x, y)
+
+        # set the geometry
+        self.resize(window_size)
+        self.move(window_pos)
+
+        # restore window state
+        if settings.has('main/window/state'):
+            self.restoreState(settings.get('main/window/state'))
+        else:
+            self.setWindowState(Qt.WindowMaximized)
+
+        # have algorithm dialogs do their thing
+        AlgorithmInputHistory().readSettings(settings)
+
+    def writeSettings(self, settings):
+        settings.set('main/window/size', self.size()) # QSize
+        settings.set('main/window/position', self.pos()) # QPoint
+        settings.set('main/window/state', self.saveState()) # QByteArray
+
+        # have algorithm dialogs do their thing
+        AlgorithmInputHistory().writeSettings(settings)
 
 
 def initialize():
@@ -402,12 +456,11 @@ def start_workbench(app):
     importlib.import_module('mantid')
 
     main_window.show()
+
     if main_window.splash:
         main_window.splash.hide()
     # lift-off!
-    app.exec_()
-
-    return main_window
+    return app.exec_()
 
 
 def main():
@@ -429,9 +482,9 @@ def main():
     # the default sys check interval leads to long lags
     # when request scripts to be aborted
     sys.setcheckinterval(SYSCHECK_INTERVAL)
-    main_window = None
+    exit_value = 0
     try:
-        main_window = start_workbench(app)
+        exit_value = start_workbench(app)
     except BaseException:
         # We count this as a crash
         import traceback
@@ -439,12 +492,9 @@ def main():
         # about. Prints to stderr as we can't really count on anything
         # else
         traceback.print_exc(file=ORIGINAL_STDERR)
-
-    if main_window is None:
-        # An exception occurred don't exit here
-        return
-
-    ORIGINAL_SYS_EXIT()
+        exit_value = -1
+    finally:
+        ORIGINAL_SYS_EXIT(exit_value)
 
 
 if __name__ == '__main__':
