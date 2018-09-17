@@ -122,11 +122,12 @@ void export_ConfigService() {
                "default.instrument is returned",
                (arg("self"), arg("instrumentName") = boost::python::object()))
                [return_value_policy<copy_const_reference>()])
-      .def(
-          "getString", &ConfigServiceImpl::getString,
-          getStringOverload("Returns the named key's value. If use_cache = "
-                            "true [default] then relative paths->absolute",
-                            (arg("self"), arg("key"), arg("use_cache") = true)))
+      .def("getString", &ConfigServiceImpl::getString,
+           getString_Overload(
+               "Returns the named key's value. If use_cache = "
+               "true [default] then relative paths->absolute",
+               (arg("self"), arg("key"), arg("pathAbsolute") = true)))
+
       .def("setString", &ConfigServiceImpl::setString,
            (arg("self"), arg("key"), arg("value")),
            "Set the given property name. "

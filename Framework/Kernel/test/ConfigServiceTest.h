@@ -333,10 +333,32 @@ public:
     TS_ASSERT_EQUALS(noseCountString, "");
   }
 
-  void TestRelativeToAbsolute() {
-    // std::string path =
-    // ConfigService::Instance().getString("defaultsave.directory");
-    // TS_ASSERT( Poco::Path(path).isAbsolute() );
+  void testRelativeToAbsoluteForKeysWithCorrectIdentifier() {
+    auto &cfg = ConfigService::Instance();
+    cfg.setString("mantid.test.directory", "..");
+    cfg.setString("mantid.test.directories", "..");
+
+    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.directory")).isAbsolute());
+    TS_ASSERT(
+        Poco::Path(cfg.getString("mantid.test.directories")).isAbsolute());
+  }
+
+  void testNoRelativeToAbsoluteForKeysWithoutCorrectIdentifier() {
+    auto &cfg = ConfigService::Instance();
+    cfg.setString("mantid.test.direc", "..");
+
+    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.direc")).isRelative());
+  }
+
+  void testNoRelativeToAbsoluteForKeysOnRequest() {
+    auto &cfg = ConfigService::Instance();
+    cfg.setString("mantid.test.directory", "..");
+    cfg.setString("mantid.test.directories", "..");
+
+    TS_ASSERT(
+        Poco::Path(cfg.getString("mantid.test.directory", false)).isRelative());
+    TS_ASSERT(Poco::Path(cfg.getString("mantid.test.directories", false))
+                  .isRelative());
   }
 
   void testAppendProperties() {
@@ -629,8 +651,6 @@ public:
 
     // Returns all *root* keys, i.e. unique keys left of the first period
     std::vector<std::string> keyVector = ConfigService::Instance().getKeys("");
-    // The 4 unique in the file and the ConfigService always sets a
-    // datasearch.directories key on creation
     TS_ASSERT_EQUALS(keyVector.size(), 5);
   }
 

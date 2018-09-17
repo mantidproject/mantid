@@ -121,7 +121,7 @@ public:
   void saveConfig(const std::string &filename) const;
   /// Searches for a configuration property
   std::string getString(const std::string &keyName,
-                        bool use_cache = true) const;
+                        bool pathAbsolute = true) const;
   /// Searches for a key in the configuration property
   std::vector<std::string> getKeys(const std::string &keyName) const;
   /// Returns a list of all full keys in the config
@@ -257,9 +257,6 @@ private:
 
   /// Writes out a fresh user properties file
   void createUserPropertiesFile() const;
-  /// Convert any relative paths to absolute ones and store them locally so that
-  /// if the working directory is altered the paths will not be affected
-  void convertRelativeToAbsolute();
   /// Make a relative path or a list of relative paths into an absolute one.
   std::string makeAbsolute(const std::string &dir,
                            const std::string &key) const;
@@ -292,12 +289,6 @@ private:
   /// A set of property keys that have been changed
   mutable std::set<std::string> m_changed_keys;
 
-  /// A map storing string/key pairs where the string denotes a path
-  /// that could be relative in the user properties file
-  /// The boolean indicates whether the path needs to exist or not
-  std::map<std::string, bool> m_ConfigPaths;
-  /// Local storage for the relative path key/values that have been changed
-  std::map<std::string, std::string> m_AbsolutePaths;
   /// The directory that is considered to be the base directory
   std::string m_strBaseDir;
   /// The configuration properties in string format

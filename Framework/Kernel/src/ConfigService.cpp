@@ -84,6 +84,15 @@ namespace { // anonymous namespace for some utility functions
 /// static Logger object
 Logger g_log("ConfigService");
 
+/// Identifier for a key that will contain a path. This is defined
+/// so as to catch both the word directory and directories in a key name.
+/// Any keys found containing this string are assumed to contain paths
+/// and if their values are relative paths then when fetched they
+/// are transformed to absolute paths using the application directory
+/// as a base. This is necessary to avoid problems with the interpretation of
+/// a relative path if current directory s changed at runtime.
+std::string DIRECTORY_KEY_MAGIC{"director"};
+
 /**
  * Split the supplied string on semicolons.
  *
@@ -157,8 +166,8 @@ private:
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl()
     : m_pConf(nullptr), m_pSysConfig(nullptr), m_changed_keys(),
-      m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""),
-      m_PropertyString(""), m_properties_file_name("Mantid.properties"),
+      m_strBaseDir(""), m_PropertyString(""),
+      m_properties_file_name("Mantid.properties"),
 #ifdef MPI_BUILD
       // Use a different user properties file for an mpi-enabled build to avoid
       // confusion if both are used on the same file system
@@ -179,25 +188,6 @@ ConfigServiceImpl::ConfigServiceImpl()
       new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
   setBaseDirectory();
-
-  // Fill the list of possible relative path keys that may require conversion to
-  // absolute paths
-  m_ConfigPaths.emplace("mantidqt.python_interfaces_directory", true);
-  m_ConfigPaths.emplace("framework.plugins.directory", true);
-  m_ConfigPaths.emplace("pvplugins.directory", false);
-  m_ConfigPaths.emplace("mantidqt.plugins.directory", false);
-  m_ConfigPaths.emplace("instrumentDefinition.directory", true);
-  m_ConfigPaths.emplace("instrumentDefinition.vtpDirectory", true);
-  m_ConfigPaths.emplace("groupingFiles.directory", true);
-  m_ConfigPaths.emplace("maskFiles.directory", true);
-  m_ConfigPaths.emplace("colormaps.directory", true);
-  m_ConfigPaths.emplace("requiredpythonscript.directories", true);
-  m_ConfigPaths.emplace("pythonscripts.directory", true);
-  m_ConfigPaths.emplace("pythonscripts.directories", true);
-  m_ConfigPaths.emplace("python.plugins.directories", true);
-  m_ConfigPaths.emplace("user.python.plugins.directories", true);
-  m_ConfigPaths.emplace("datasearch.directories", true);
-  m_ConfigPaths.emplace("icatDownload.directory", true);
 
   // attempt to load the default properties file that resides in the directory
   // of the executable
@@ -471,30 +461,6 @@ void ConfigServiceImpl::configureLogging() {
 }
 
 /**
- * Searches the stored list for keys that have been loaded from the config file
- * and may contain
- * relative paths. Any it find are converted to absolute paths and stored
- * separately
- */
-void ConfigServiceImpl::convertRelativeToAbsolute() {
-  if (m_ConfigPaths.empty())
-    return;
-
-  m_AbsolutePaths.clear();
-  std::map<std::string, bool>::const_iterator send = m_ConfigPaths.end();
-  for (std::map<std::string, bool>::const_iterator sitr = m_ConfigPaths.begin();
-       sitr != send; ++sitr) {
-    std::string key = sitr->first;
-    if (!m_pConf->hasProperty(key))
-      continue;
-
-    std::string value(m_pConf->getString(key));
-    value = makeAbsolute(value, key);
-    m_AbsolutePaths.emplace(key, value);
-  }
-}
-
-/**
  * Make a relative path or a list of relative paths into an absolute one.
  * @param dir :: The directory to convert
  * @param key :: The key variable this relates to
@@ -551,25 +517,6 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   }
   converted = Poco::Path(converted).makeDirectory().toString();
 
-  // C++ doesn't have a const version of operator[] for maps so I can't call
-  // that here
-  auto it = m_ConfigPaths.find(key);
-  bool required = false;
-  if (it != m_ConfigPaths.end()) {
-    required = it->second;
-  }
-  try {
-    if (required && !Poco::File(converted).exists()) {
-      g_log.debug() << "Required properties path \"" << converted
-                    << "\" in the \"" << key << "\" variable does not exist.\n";
-      converted = "";
-    }
-  } catch (Poco::FileException &) {
-    g_log.debug() << "Required properties path \"" << converted
-                  << "\" in the \"" << key << "\" variable does not exist.\n";
-    converted = "";
-  }
-
   // Backward slashes cannot be allowed to go into our properties file
   // Note this is a temporary fix for ticket #2445.
   // Ticket #2460 prompts a review of our path handling in the config service.
@@ -583,7 +530,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
  * The value of the key should be a semi-colon separated list of directories
  */
 void ConfigServiceImpl::cacheDataSearchPaths() {
-  std::string paths = getString("datasearch.directories");
+  std::string paths = getString("datasearch.directories", true);
   if (paths.empty()) {
     m_DataSearchDirs.clear();
   } else {
@@ -747,9 +694,6 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
   if (update_caches) {
     // Only configure logging once
     configureLogging();
-    // Ensure that any relative paths given in the configuration file are
-    // relative to the correct directory
-    convertRelativeToAbsolute();
     // Configure search paths into a specially saved store as they will be used
     // frequently
     cacheDataSearchPaths();
@@ -871,21 +815,20 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
  *
  *  @param keyName :: The case sensitive name of the property that you need the
  *value of.
- *  @param use_cache :: If true, the local cache of directory names is queried
- *first.
+ *  @param pathAbsolute :: If true then any key that looks like it contains
+ * a path has this path converted to an absolute path.
  *  @returns The string value of the property, or an empty string if the key
  *cannot be found
  */
 std::string ConfigServiceImpl::getString(const std::string &keyName,
-                                         bool use_cache) const {
-  if (use_cache) {
-    auto mitr = m_AbsolutePaths.find(keyName);
-    if (mitr != m_AbsolutePaths.end()) {
-      return (*mitr).second;
-    }
-  }
+                                         bool pathAbsolute) const {
   if (m_pConf->hasProperty(keyName)) {
-    return m_pConf->getString(keyName);
+    std::string value = m_pConf->getString(keyName);
+    if (pathAbsolute &&
+        keyName.rfind(DIRECTORY_KEY_MAGIC) != std::string::npos) {
+      value = makeAbsolute(value, keyName);
+    }
+    return value;
   }
 
   g_log.debug() << "Unable to find " << keyName << " in the properties file"
@@ -1028,12 +971,10 @@ void ConfigServiceImpl::setString(const std::string &key,
   if (value == old)
     return;
 
-  // Ensure we keep a correct full path
-  std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
-  if (itr != m_ConfigPaths.end()) {
-    m_AbsolutePaths[key] = makeAbsolute(value, key);
-  }
+  // Update the internal value
+  m_pConf->setString(key, value);
 
+  // Cache things that are accessed frequently
   if (key == "datasearch.directories") {
     cacheDataSearchPaths();
   } else if (key == "instrumentDefinition.directory") {
@@ -1041,8 +982,6 @@ void ConfigServiceImpl::setString(const std::string &key,
   } else if (key == "defaultsave.directory") {
     appendDataSearchDir(value);
   }
-
-  m_pConf->setString(key, value);
 
   m_notificationCenter.postNotification(new ValueChanged(key, value, old));
   m_changed_keys.insert(key);
@@ -1605,6 +1544,7 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   if (!isInDataSearchList(dirPath.toString())) {
     auto newSearchString = Strings::join(std::begin(m_DataSearchDirs),
                                          std::end(m_DataSearchDirs), ";");
+    newSearchString.append(path);
     setString("datasearch.directories", newSearchString);
   }
 }
@@ -1640,7 +1580,7 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const {
  */
 const std::string ConfigServiceImpl::getVTPFileDirectory() {
   // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName = getString("instrumentDefinition.vtpDirectory");
+  std::string directoryName = getString("instrumentDefinition.vtp.directory");
 
   if (directoryName.empty()) {
     Poco::Path path(getAppDataDir());
@@ -1675,7 +1615,7 @@ void ConfigServiceImpl::cacheInstrumentPaths() {
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName = getString("instrumentDefinition.directory");
+  std::string directoryName = getString("instrumentDefinition.directory", true);
   if (directoryName.empty()) {
     // This is the assumed deployment directory for IDFs, where we need to be
     // relative to the
