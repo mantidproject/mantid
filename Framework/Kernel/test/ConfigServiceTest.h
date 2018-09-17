@@ -10,7 +10,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
 
@@ -20,11 +19,7 @@
 #include <memory>
 #include <string>
 
-#include <Poco/Environment.h>
-#include <Poco/File.h>
-#include <Poco/Logger.h>
 #include <Poco/NObserver.h>
-#include <Poco/SplitterChannel.h>
 
 using namespace Mantid::Kernel;
 using Mantid::TestChannel;
@@ -230,7 +225,7 @@ public:
                      "OSIRIS");
   }
 
-  void TestSystemValues() {
+  void testSystemValues() {
     // we cannot test the return values here as they will differ based on the
     // environment.
     // therfore we will just check they return a non empty string.
@@ -274,7 +269,7 @@ public:
 #endif
   }
 
-  void TestInstrumentDirectory() {
+  void testInstrumentDirectory() {
 
     auto directories = ConfigService::Instance().getInstrumentDirectories();
     TS_ASSERT_LESS_THAN(1, directories.size());
@@ -307,7 +302,7 @@ public:
     }
   }
 
-  void TestSetInstrumentDirectory() {
+  void testSetInstrumentDirectory() {
 
     auto originalDirectories =
         ConfigService::Instance().getInstrumentDirectories();
@@ -327,13 +322,14 @@ public:
     TS_ASSERT_EQUALS(readDirectories[0], originalDirectories[0]);
   }
 
-  void TestCustomProperty() {
+  void testCustomProperty() {
     std::string countString =
         ConfigService::Instance().getString("projectRecovery.secondsBetween");
     TS_ASSERT_EQUALS(countString, "60");
   }
 
-  void TestCustomPropertyAsValue() {
+  void testCustomPropertyAsValue() {
+    // Mantid.legs is defined in the properties script as 6
     int value = ConfigService::Instance()
                     .getValue<int>("projectRecovery.secondsBetween")
                     .get_value_or(0);
@@ -345,7 +341,7 @@ public:
     TS_ASSERT_EQUALS(dblValue, 60.0);
   }
 
-  void TestMissingProperty() {
+  void testMissingProperty() {
     // Mantid.noses is not defined in the properties script
     std::string noseCountString =
         ConfigService::Instance().getString("mantid.noses");
@@ -360,7 +356,7 @@ public:
     // TS_ASSERT( Poco::Path(path).isAbsolute() );
   }
 
-  void TestAppendProperties() {
+  void testAppendProperties() {
 
     // This should clear out all old properties
     const std::string propfilePath =
