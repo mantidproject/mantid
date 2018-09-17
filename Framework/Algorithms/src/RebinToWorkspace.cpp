@@ -82,7 +82,8 @@ void RebinToWorkspace::exec() {
     g_log.information("Rebinning");
     this->rebin(toRebin, toMatch);
   } else { // don't need to rebin
-    g_log.information("WorkspaceToRebin and WorkspaceToMatch already have matched binning");
+    g_log.information(
+        "WorkspaceToRebin and WorkspaceToMatch already have matched binning");
     auto outputWS = this->createOutputWorkspace(toRebin, 1.);
     this->setProperty("OutputWorkspace", outputWS);
   }
