@@ -21,10 +21,10 @@ class DummyLabelView(QtGui.QWidget):
         self.label.setText("The " + message + " has been pressed")
 
     # interact with context
-    def loadFromContext(self,subcontext):
+    def loadFromContext(self, subcontext):
         self.label.setText(subcontext["label"])
 
     def getSubContext(self):
-        subcontext ={}
+        subcontext = {}
         subcontext["label"] = str(self.label.text())
         return subcontext

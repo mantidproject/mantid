@@ -7,10 +7,10 @@ from Muon.GUI.Common.dummy_label.dummy_label_model import DummyLabelModel
 
 class DummyLabelWidget(object):
 
-    def __init__(self, context,key, parent=None):
-        model = DummyLabelModel(context,key)
+    def __init__(self, context, key, parent=None):
+        model = DummyLabelModel(context, key)
         sub_context = model.getSubContext()
-        view = DummyLabelView(sub_context,parent)
+        view = DummyLabelView(sub_context, parent)
         self._presenter = DummyLabelPresenter(view, model)
 
     def getPresenter(self):
@@ -25,13 +25,12 @@ class DummyLabelWidget(object):
 
     # interact with context
     def updateContext(self):
-       self._presenter.updateContext()
+        self._presenter.updateContext()
 
-    def loadFromContext(self,context):
+    def loadFromContext(self, context):
         # extract relevant info from context via model
         model = self._presenter.model
         sub_context = model.getSubContext()
         # update the view with the subcontext
         view = self._presenter.widget
-        view.loadFromContext(sub_context)    
-
+        view.loadFromContext(sub_context)

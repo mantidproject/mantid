@@ -6,12 +6,13 @@ from PyQt4 import QtGui
 
 from Muon.GUI.Common import table_utils
 
+
 class ContextExampleView(QtGui.QWidget):
 
     updateSignal = QtCore.pyqtSignal()
     groupChangedSignal = QtCore.pyqtSignal(object)
 
-    def __init__(self,context, parent=None):
+    def __init__(self, context, parent=None):
         super(ContextExampleView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
 
@@ -31,16 +32,19 @@ class ContextExampleView(QtGui.QWidget):
 
         # row of groups
         table_utils.setRowName(self.table, 0, "Groups")
-        group_name =["a","b","c"]
-        self.ws0 = table_utils.addDoubleToTable(self.table,group_name[0],0,1)
-        self.ws1 = table_utils.addDoubleToTable(self.table,group_name[1],0,2)
-        self.ws2 = table_utils.addDoubleToTable(self.table,group_name[2],0,3)
+        group_name = ["a", "b", "c"]
+        self.ws0 = table_utils.addDoubleToTable(
+            self.table, group_name[0], 0, 1)
+        self.ws1 = table_utils.addDoubleToTable(
+            self.table, group_name[1], 0, 2)
+        self.ws2 = table_utils.addDoubleToTable(
+            self.table, group_name[2], 0, 3)
 
         # row to describe a pair
-        table_utils.setRowName(self.table,1, "Pair")       
-        self.g1 = table_utils.addComboToTable(self.table, 1, group_name,1)
-        self.g2 = table_utils.addComboToTable(self.table, 1, group_name,2)
-        self.alpha = table_utils.addDoubleToTable(self.table,"2.",1,3)
+        table_utils.setRowName(self.table, 1, "Pair")
+        self.g1 = table_utils.addComboToTable(self.table, 1, group_name, 1)
+        self.g2 = table_utils.addComboToTable(self.table, 1, group_name, 2)
+        self.alpha = table_utils.addDoubleToTable(self.table, "2.", 1, 3)
 
         # explicit update button
         btn = QtGui.QPushButton("print context", self)
@@ -53,14 +57,14 @@ class ContextExampleView(QtGui.QWidget):
         btn.clicked.connect(self.sendUpdateSignal)
         # needed for updating the possible pairs when groups change
         self.table.itemChanged.connect(self.groupChanged)
-		# load values into GUI from context
+                # load values into GUI from context
         self.loadFromContext(context)
 
     # signals
     def sendUpdateSignal(self):
         self.updateSignal.emit()
 
-    def groupChanged(self,cell):
+    def groupChanged(self, cell):
         self.groupChangedSignal.emit(cell.row())
 
     # get layout
@@ -68,10 +72,10 @@ class ContextExampleView(QtGui.QWidget):
         return self.grid
 
     # context interaction
-    def loadFromContext(self,context):
+    def loadFromContext(self, context):
         """
         Create a simple dict of the values
-        from the GUI. This does not alter 
+        from the GUI. This does not alter
         how the information is stored
         """
         # make sure we dont fire signals during update
@@ -79,8 +83,8 @@ class ContextExampleView(QtGui.QWidget):
 
         # get the group names and update the GUI
         group_name = context["Group Names"]
- 
-        self.ws0.setText(group_name[0]) 
+
+        self.ws0.setText(group_name[0])
         self.ws1.setText(group_name[1])
         self.ws2.setText(group_name[2])
 
@@ -107,7 +111,8 @@ class ContextExampleView(QtGui.QWidget):
         into the context
         """
         context = {}
-        context["Group Names"] = [self.ws0.text(), self.ws1.text(),self.ws2.text()]
+        context["Group Names"] = [
+            self.ws0.text(), self.ws1.text(), self.ws2.text()]
         context["Pair_F"] = str(self.g1.currentText())
         context["Pair_B"] = str(self.g2.currentText())
         context["Pair_alpha"] = float(self.alpha.text())

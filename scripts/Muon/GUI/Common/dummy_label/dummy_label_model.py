@@ -5,7 +5,7 @@ from Muon.GUI.Common.muon_context.muon_context import *
 
 class DummyLabelModel(object):
 
-    def __init__(self, context,key): 
+    def __init__(self, context, key):
         self._context = context
         self._key = key
 
@@ -14,6 +14,5 @@ class DummyLabelModel(object):
         subContext["label"] = self._context.get(self._key)
         return subContext
 
-    def updateContext(self,subContext):
-        self._context.set(self._key,subContext["label"])
-
+    def updateContext(self, subContext):
+        self._context.set(self._key, subContext["label"])

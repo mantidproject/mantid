@@ -7,15 +7,17 @@ from Muon.GUI.Common.context_example.context_example_model import ContextExample
 
 
 class ContextExampleWidget(object):
+
     """
-	An example of how to use the context with a widget class. 
-	The widget class exposes the MVP to the rest of the GUI
+        An example of how to use the context with a widget class.
+        The widget class exposes the MVP to the rest of the GUI
     """
-    def __init__(self,context,parent=None):
-        model=ContextExampleModel(context)
+
+    def __init__(self, context, parent=None):
+        model = ContextExampleModel(context)
         sub_context = model.getSubContext()
-        view=ContextExampleView(sub_context,parent)
-        self._presenter = ContextExamplePresenter(view,model)
+        view = ContextExampleView(sub_context, parent)
+        self._presenter = ContextExamplePresenter(view, model)
 
     @property
     def presenter(self):
@@ -26,24 +28,22 @@ class ContextExampleWidget(object):
         return self._presenter.widget
 
     # interact with context
-    def setUpdateContext(self,slot):
-        """ 
+    def setUpdateContext(self, slot):
+        """
         This function is to set the update
         method from the main GUI to the signals
         from this GUI
         """
-        view=self._presenter.widget
+        view = self._presenter.widget
         view.updateSignal.connect(slot)
 
     def updateContext(self):
-       self._presenter.updateContext()
+        self._presenter.updateContext()
 
-    def loadFromContext(self,context):
+    def loadFromContext(self, context):
         # extract relevant info from context via model
         model = self._presenter.model
         sub_context = model.getSubContext()
         # update the view with the subcontext
         view = self._presenter.widget
-        view.loadFromContext(sub_context)    
-
-
+        view.loadFromContext(sub_context)
