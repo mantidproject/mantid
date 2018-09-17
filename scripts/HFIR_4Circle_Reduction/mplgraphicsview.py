@@ -431,13 +431,14 @@ class MplGraphicsView(QtGui.QWidget):
 
         return key_list
 
-    def add_plot_1d(self, vec_x, vec_y, y_err=None, color=None, label='', x_label=None, y_label=None,
+    def add_plot_1d(self, vec_x, vec_y, y_err=None, annotation_list=None, color=None, label='', x_label=None, y_label=None,
                     marker=None, line_style=None, line_width=1, show_legend=True, update_plot=True):
         """
         Add a 1-D plot to canvas
         :param vec_x:
         :param vec_y:
         :param y_err:
+        :param annotation_list:  list of string for annotation of each data point OR None
         :param color:
         :param label:
         :param x_label:
@@ -450,7 +451,7 @@ class MplGraphicsView(QtGui.QWidget):
         :return: line ID (key to the line)
         """
         line_id = self._myCanvas.add_plot_1d(vec_x, vec_y, y_err, color, label, x_label, y_label, marker, line_style,
-                                             line_width, show_legend)
+                                             line_width, show_legend, annotation_list)
 
         return line_id
 
@@ -1093,7 +1094,7 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
     def add_plot_1d(self, vec_x, vec_y, y_err=None, color=None, label="", x_label=None, y_label=None,
-                    marker=None, line_style=None, line_width=1, show_legend=True):
+                    marker=None, line_style=None, line_width=1, show_legend=True, annotation_list=None):
         """
 
         :param vec_x: numpy array X
@@ -1107,6 +1108,7 @@ class Qt4MplCanvas(FigureCanvas):
         :param line_style:
         :param line_width:
         :param show_legend:
+        :param annotation_list:
         :return: new key
         """
         # Check input
@@ -1181,6 +1183,11 @@ class Qt4MplCanvas(FigureCanvas):
                 # remove the un-defined extra lines
                 self.axes.lines.remove(r[i_r])
         # END-IF-ELSE
+
+        if annotation_list is not None and len(annotation_list) == len(vec_y):
+            for ipt in range(len(annotation_list)):
+                self.axes.annotate(annotation_list[ipt], (vec_x[ipt], vec_y[ipt]))
+        # END-IF
 
         # Flush/commit
         self.draw()

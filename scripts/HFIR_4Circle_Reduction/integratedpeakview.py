@@ -218,7 +218,7 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
     #     """
     #     return
 
-    def plot_data(self, vec_x, vec_y, vec_e, title, label_x, label_y):
+    def plot_data(self, vec_x, vec_y, vec_e, title, label_x, label_y, annotation_list=None):
         """
         plot current data
         :param vec_x:
@@ -227,9 +227,10 @@ class GeneralPurposedPlotView(mplgraphicsview.MplGraphicsView):
         :param title:
         :param label_x:
         :param label_y:
+        :param annotation_list:
         :return:
         """
-        self._currentDataID = self.add_plot_1d(vec_x=vec_x, vec_y=vec_y, y_err=vec_e,
+        self._currentDataID = self.add_plot_1d(vec_x=vec_x, vec_y=vec_y, y_err=vec_e, annotation_list=annotation_list,
                                                color='red', label=title, x_label=label_x, y_label=label_y,
                                                marker='.', line_style='--')
 

@@ -303,7 +303,6 @@ class MainWindow(QtGui.QMainWindow):
         # Menu and advanced tab
         self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
                      self.menu_quit)
-
         self.connect(self.ui.actionSave_Session, QtCore.SIGNAL('triggered()'),
                      self.save_current_session)
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
@@ -323,15 +322,13 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
                      self.menu_pre_process)
-
-        # menu
         self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
                      self.menu_download_data)
         self.ui.actionSingle_Pt_Integration.triggered.connect(self.menu_integrate_peak_single_pt)
         self.ui.actionSort_By_2Theta.triggered.connect(self.menu_sort_survey_2theta)
         self.ui.actionSort_By_Pt.triggered.connect(self.menu_sort_by_pt_number)
 
-        #  pop out a general figure plot window
+        # menu action: pop out a general figure plot window
         self.ui.action2theta_Sigma.triggered.connect(self.menu_pop_2theta_sigma_window)
         self.ui.actionSave_2theta_Sigma.triggered.connect(self.menu_save_2theta_sigma)
 
@@ -461,6 +458,8 @@ class MainWindow(QtGui.QMainWindow):
         # background points
         self.ui.lineEdit_backgroundPts.setText('1, 1')
         self.ui.lineEdit_scaleFactor.setText('1.')
+        self.ui.lineEdit_numPt4BackgroundLeft.setText('1')
+        self.ui.lineEdit_numPt4BackgroundRight.setText('1')
 
         # about pre-processed data
         self.ui.checkBox_searchPreprocessedFirst.setChecked(True)
@@ -1625,10 +1624,10 @@ class MainWindow(QtGui.QMainWindow):
             norm_type = ''
 
         # background Pt.
-        status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
-        if not status or num_bg_pt == 0:
-            self.pop_one_button_dialog('Number of Pt number for background must be larger than 0: %s!' % str(num_bg_pt))
-            return
+        # status, num_bg_pt = gutil.parse_integers_editors(self.ui.lineEdit_numPt4Background, allow_blank=False)
+        # if not status or num_bg_pt == 0:
+        #     self.pop_one_button_dialog('Number of Pt number for background must be larger than 0: %s!' % str(num_bg_pt))
+        #     return
 
         # get the merging information: each item should be a tuple as (scan number, pt number list, merged)
         scan_number_list = list()
@@ -1662,7 +1661,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.progressBar_mergeScans.setStatusTip('Hello')
 
         # process background setup
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_numPt4Background,
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_numPt4BackgroundLeft,
                                                         self.ui.lineEdit_numPt4BackgroundRight],
                                                        allow_blank=False)
         if not status:
@@ -3788,9 +3787,21 @@ class MainWindow(QtGui.QMainWindow):
 
         # set up the window
         try:
-            vec_x, vec_y, vec_e = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel='sigma')
+            output_arrays = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'])
+            # convert matrix to arrays
+            xye_matrix = output_arrays.transpose()
+            vec_2theta = xye_matrix[0]
+            vec_sigma = xye_matrix[1]
+            vec_sigma_error = xye_matrix[2]
+
+            vec_scan_number = xye_matrix[3]
+            notes = list()
+            for i_scan in range(len(vec_scan_number)):
+                notes.append('{}'.format(int(vec_scan_number[i_scan])))
+
             # get the latest (cached) vec_x and vec_y
-            self._general_1d_plot_window.plot_data(vec_x, vec_y, vec_e, '2theta', 'Gaussian-Sigma')
+            self._general_1d_plot_window.plot_data(vec_2theta, vec_sigma, vec_sigma_error, '2theta', 'Gaussian-Sigma',
+                                                   annotation_list=notes)
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
 
@@ -3812,18 +3823,26 @@ class MainWindow(QtGui.QMainWindow):
 
         # construct the table
         try:
-            vec_2theta, vec_sigma, vec_sigma_error, vec_scan_number\
-                = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'],
-                                                                  with_error=True)
+            output_arrays = self._myControl.get_peak_integration_parameters(xlabel='2theta', ylabel=['sigma', 'scan'],
+                                                                            with_error=True)
         except RuntimeError as run_err:
             self.pop_one_button_dialog(str(run_err))
             return
+        else:
+            # xye_matrix = output_arrays.transpose()
+            # vec_2theta = xye_matrix[0]
+            # vec_sigma = xye_matrix[1]
+            # vec_sigma_error = xye_matrix[2]
+            # vec_scan_number = xye_matrix[3]
+            pass
 
         # write to the output file
         wbuf = '# 2theta\tsigam\terror\tscan number\n'
-        for index in range(len(vec_2theta)):
-            wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(vec_2theta[index], vec_sigma[index], vec_sigma_error[index],
-                                                        vec_scan_number[index])
+        for index in range(output_arrays.shape[0]):
+            # wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(vec_2theta[index], vec_sigma[index], vec_sigma_error[index],
+            #                                             vec_scan_number[index])
+            wbuf += '{:.5f}\t{:5f}\t{:5f}\t{}\n'.format(output_arrays[index][0], output_arrays[index][1],
+                                                        output_arrays[index][2], output_arrays[index][3])
         # END-FOR
 
         out_file = open(out_file_name, 'w')

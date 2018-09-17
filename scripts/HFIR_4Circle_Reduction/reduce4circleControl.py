@@ -1429,7 +1429,7 @@ class CWSCDReductionControl(object):
 
         return vec_x, vec_y
 
-    def get_peak_integration_parameters(self, xlabel='2theta', ylabel='sigma', with_error=True):
+    def get_peak_integration_parameters(self, xlabel='2theta', ylabel=None, with_error=True):
         """
         get the parameters from peak integration
         :param xlabel: parameter name for x value
@@ -1437,42 +1437,50 @@ class CWSCDReductionControl(object):
         :param with_error: If true, then output error
         :return:
         """
-        xye_list = list()
-
-        if isinstance(ylabel, str):
+        # convert all kinds of y-label to a list of strings for y-label
+        if ylabel is None:
+            ylabel = ['sigma']
+        elif isinstance(ylabel, str):
             ylabel = [ylabel]
 
+        # create list of output
+        param_list = list()
         for (exp_number, scan_number) in self._myPeakInfoDict.keys():
             peak_int_info = self._myPeakInfoDict[exp_number, scan_number]
 
             # x value
-            x_value = peak_int_info.get_parameter(xlabel)[0]
+            try:
+                x_value = peak_int_info.get_parameter(xlabel)[0]
+            except RuntimeError as run_err:
+                print ('[ERROR] Exp {} Scan {}: {}'.format(exp_number, scan_number, run_err))
+                continue
 
             # set up
             scan_i = [x_value]
 
             for param_name in ylabel:
                 if param_name.lower() == 'scan':
+                    # scan number
                     y_value = scan_number
                     scan_i.append(y_value)
                 else:
-                    y_value, e_value = peak_int_info.get_parameter(ylabel)
+                    # parameter name
+                    y_value, e_value = peak_int_info.get_parameter(param_name.lower())
                     scan_i.append(y_value)
                     if with_error:
                         scan_i.append(e_value)
-
-            xye_list.append(scan_i)
+            # END-FOR
+            param_list.append(scan_i)
         # END-FOR
 
-        if len(xye_list) == 0:
+        if len(param_list) == 0:
             raise RuntimeError('No integrated peak is found')
 
-        # convert to 3 numpy vectors
-        xye_list.sort()
-        xye_matrix = numpy.array(xye_list)
-        xye_matrix = xye_matrix.transpose()
+        # convert to a matrix
+        param_list.sort()
+        xye_matrix = numpy.array(param_list)
 
-        return xye_matrix[0], xye_matrix[1], xye_matrix[2]
+        return xye_matrix
 
     def generate_mask_workspace(self, exp_number, scan_number, roi_start, roi_end, mask_tag=None):
         """ Generate a mask workspace

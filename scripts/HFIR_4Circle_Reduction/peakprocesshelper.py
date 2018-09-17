@@ -274,7 +274,7 @@ class PeakProcessRecord(object):
             par_value = self._integrationDict['gauss parameters']['s']
             par_error = self._gaussIntegrationInfoDict['gauss errors']['s']
         else:
-            raise RuntimeError('Parameter {0} is not set up for get_parameter()')
+            raise RuntimeError('Parameter {0} is not set up for get_parameter()'.format(par_name))
 
         return par_value, par_error
 
