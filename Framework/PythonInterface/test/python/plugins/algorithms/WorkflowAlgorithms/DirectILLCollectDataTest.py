@@ -22,7 +22,7 @@ class DirectILLCollectDataTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS,
             'OutputWorkspace': self._TEST_WS_NAME,
         }
-        run_algorithm('CloneWorkspace', **algProperties)        
+        run_algorithm('CloneWorkspace', **algProperties)
 
     def tearDown(self):
         mtd.clear()
@@ -145,6 +145,23 @@ class DirectILLCollectDataTest(unittest.TestCase):
         es = outWS.extractE()
         originalEs = inWS.extractE()
         numpy.testing.assert_almost_equal(es, originalEs[1:, :])
+
+    def testOutputIncidentEnergyWorkspaceWhenEnergyCalibrationIsOff(self):
+        outWSName = 'outWS'
+        eiWSName = 'Ei'
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'IncidentEnergyCalibration': 'Energy Calibration OFF',
+            'OutputIncidentEnergyWorkspace': eiWSName,
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(eiWSName))
+        eiWS = mtd[eiWSName]
+        inWS = mtd[self._TEST_WS_NAME]
+        E_i = inWS.run().getProperty('Ei').value
+        self.assertEquals(eiWS.readY(0)[0], E_i)
 
 
 if __name__ == '__main__':

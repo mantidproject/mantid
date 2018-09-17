@@ -23,6 +23,15 @@ New Algorithms
 Data Analysis Interface
 -----------------------
 
+Improvements
+############
+
+- When the InelasticDiffSphere, InelasticDiffRotDiscreteCircle, ElasticDiffSphere or ElasticDiffRotDiscreteCircle
+  Fit Types are selected in the ConvFit Tab, the Q values are retrieved from the workspaces, preventing a crash 
+  when plotting a guess.
+- An option to skip the calculation of Monte Carlo Errors on the I(Q,t) Tab has been added.
+- During the calculation of Monte Carlo Errors, a progress bar is now shown.
+
 Bugfixes
 ########
 
@@ -51,4 +60,5 @@ Improvements
 - Added 'Default' detector grouping option in ISISEnergyTransfer for TOSCA, to allow a default grouping 
   using the grouping specified in the Instrument Parameter File.
 - ISISEnergyTransfer now allows overlapping detector grouping.
+
 

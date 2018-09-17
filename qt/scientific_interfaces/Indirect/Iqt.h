@@ -19,6 +19,8 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
 
+  bool isErrorsEnabled();
+
 private slots:
   void algorithmComplete(bool error);
   void plotInput(const QString &wsname);
@@ -28,6 +30,7 @@ private slots:
   void updateDisplayedBinParameters();
   void saveClicked();
   void plotClicked();
+  void errorsClicked();
   void plotTiled();
 
 private:
