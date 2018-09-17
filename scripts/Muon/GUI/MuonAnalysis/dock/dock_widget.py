@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui
 
-from Muon.GUI.Common.test.test_widget import TestWidget
+from Muon.GUI.Common.context_example.context_example_widget import ContextExampleWidget
 from Muon.GUI.Common.dummy.dummy_widget import DummyWidget
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from Muon.GUI.Common.dock.dock_view import DockView
@@ -27,8 +27,8 @@ class DockWidget(QtGui.QWidget):
 
         self.dock_view = DockView(self)
 
-        self.test = TestWidget(context,parent=self)
-        self.dock_view.addDock(self.test.widget, "test")
+        self.context_example = ContextExampleWidget(context,parent=self)
+        self.dock_view.addDock(self.context_example.widget, "Example context")
 
 
         self.btn = DummyWidget("moo", self)
@@ -52,7 +52,7 @@ class DockWidget(QtGui.QWidget):
 
     # set signals and slots
     def setUpdateContext(self,slot):
-        self.test.setUpdateContext(slot)
+        self.context_example.setUpdateContext(slot)
         # the buttons change the label value
         # so we want to update context
         self.btn.setButtonConnection(slot)
@@ -67,11 +67,11 @@ class DockWidget(QtGui.QWidget):
     # interaction with context
     def updateContext(self):
         self.label.updateContext()
-        self.test.updateContext()
+        self.context_example.updateContext()
 
     def loadFromContext(self,context):
         self.label.loadFromContext(context)
-        self.test.loadFromContext(context)
+        self.context_example.loadFromContext(context)
 
     # needed for docking
     @property

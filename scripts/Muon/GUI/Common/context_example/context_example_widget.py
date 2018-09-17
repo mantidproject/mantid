@@ -1,21 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-from Muon.GUI.Common.test.test_view import TestView
-from Muon.GUI.Common.test.test_presenter import TestPresenter
-from Muon.GUI.Common.test.test_model import TestModel
+from Muon.GUI.Common.context_example.context_example_view import ContextExampleView
+from Muon.GUI.Common.context_example.context_example_presenter import ContextExamplePresenter
+from Muon.GUI.Common.context_example.context_example_model import ContextExampleModel
 
 
-class TestWidget(object):
+class ContextExampleWidget(object):
     """
 	An example of how to use the context with a widget class. 
 	The widget class exposes the MVP to the rest of the GUI
     """
     def __init__(self,context,parent=None):
-        model=TestModel(context)
+        model=ContextExampleModel(context)
         sub_context = model.getSubContext()
-        view=TestView(sub_context,parent)
-        self._presenter = TestPresenter(view,model)
+        view=ContextExampleView(sub_context,parent)
+        self._presenter = ContextExamplePresenter(view,model)
 
     @property
     def presenter(self):

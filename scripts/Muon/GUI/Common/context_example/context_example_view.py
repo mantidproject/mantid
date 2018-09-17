@@ -6,13 +6,13 @@ from PyQt4 import QtGui
 
 from Muon.GUI.Common import table_utils
 
-class TestView(QtGui.QWidget):
+class ContextExampleView(QtGui.QWidget):
 
     updateSignal = QtCore.pyqtSignal()
     groupChangedSignal = QtCore.pyqtSignal(object)
 
     def __init__(self,context, parent=None):
-        super(TestView, self).__init__(parent)
+        super(ContextExampleView, self).__init__(parent)
         self.grid = QtGui.QGridLayout(self)
 
         self.table = QtGui.QTableWidget(self)

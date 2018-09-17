@@ -5,7 +5,7 @@ from Muon.GUI.Common import pair_object
 
 from Muon.GUI.Common.muon_context.muon_context import *
 
-class TestModel(object):
+class ContextExampleModel(object):
 
     def __init__(self,context):
         self._context = context

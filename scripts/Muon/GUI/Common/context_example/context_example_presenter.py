@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class TestPresenter(object):
+class ContextExamplePresenter(object):
 
     def __init__(self,view,model):
         self._model=model
