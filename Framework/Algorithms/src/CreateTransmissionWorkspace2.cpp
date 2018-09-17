@@ -5,8 +5,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {

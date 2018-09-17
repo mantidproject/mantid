@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"

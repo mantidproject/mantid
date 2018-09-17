@@ -339,12 +339,12 @@ void ReflectometryReductionOneAuto2::exec() {
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 
-  convertProcessingInstructions(instrument, firstWS);
-  alg->setProperty("ProcessingInstructions", m_processingInstructions)
-      // Now that we know the detectors of interest, we can move them if
-      // necessary (i.e. if theta is given). If not, we calculate theta from the
-      // current detector positions
-      bool correctDetectors = getProperty("CorrectDetectors");
+  convertProcessingInstructions(instrument, inputWS);
+  alg->setProperty("ProcessingInstructions", m_processingInstructions);
+  // Now that we know the detectors of interest, we can move them if
+  // necessary (i.e. if theta is given). If not, we calculate theta from the
+  // current detector positions
+  bool correctDetectors = getProperty("CorrectDetectors");
   double theta;
   if (!getPointerToProperty("ThetaIn")->isDefault()) {
     theta = getProperty("ThetaIn");
@@ -352,7 +352,7 @@ void ReflectometryReductionOneAuto2::exec() {
     theta = getThetaFromLogs(inputWS, getPropertyValue("ThetaLogName"));
   } else {
     // Calculate theta from detector positions
-    theta = calculateTheta(instructions, inputWS);
+    theta = calculateTheta(inputWS);
     // Never correct detector positions if ThetaIn or ThetaLogName is not
     // specified
     correctDetectors = false;
@@ -362,7 +362,7 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->setProperty("ThetaIn", theta);
 
   if (correctDetectors) {
-    inputWS = correctDetectorPositions(instructions, inputWS, 2 * theta);
+    inputWS = correctDetectorPositions(inputWS, 2 * theta);
   }
 
   // Optional properties
@@ -439,7 +439,7 @@ ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
     }
   } catch (boost::bad_lexical_cast &) {
     throw std::runtime_error("Invalid processing instructions: " +
-                             instructions);
+                             m_processingInstructionsWorkspaceIndex);
   }
 
   return detectors;
@@ -455,7 +455,7 @@ ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
     MatrixWorkspace_sptr inputWS, const double twoTheta) {
 
-  auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+  auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
   // a workspace that was previously reduced using this algorithm. In this case,
@@ -493,10 +493,9 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
  * @return :: the angle of the detector (only the first detector is considered)
  */
 double
-ReflectometryReductionOneAuto2::calculateTheta(const std::string &instructions,
-                                               MatrixWorkspace_sptr inputWS) {
+ReflectometryReductionOneAuto2::calculateTheta(MatrixWorkspace_sptr inputWS) {
 
-  const auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
+  const auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
   // a workspace that was previously reduced using this algorithm. In this case,
