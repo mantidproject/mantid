@@ -1851,6 +1851,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             cell.setBackgroundColor(color)
             self.data_processor_table.setCellAt(row_location, index, cell)
 
+    def set_row_tooltip(self, tool_tip, row):
+        row_location = self.row([row])
+        cell_data = self.data_processor_table.cellsAt(row_location)
+        for index, cell in enumerate(cell_data):
+            cell.setToolTip(tool_tip)
+            self.data_processor_table.setCellAt(row_location, index, cell)
+
     def get_selected_rows(self):
         row_locations = self.data_processor_table.selectedRowLocations()
         rows = [x.rowRelativeToParent() for x in row_locations]

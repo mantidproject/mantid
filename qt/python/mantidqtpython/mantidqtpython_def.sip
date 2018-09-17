@@ -1621,6 +1621,10 @@ public:
   const std::string &contentText() const;
   void setContentText(const std::string& contentText);
 
+  const std::string &toolTip() const;
+  void setToolTip(const std::string &toolTip);
+
+
   const std::string & borderColor() const;
   void setBorderColor(const std::string& borderColor);
 

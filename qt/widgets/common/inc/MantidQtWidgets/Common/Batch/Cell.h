@@ -58,6 +58,9 @@ public:
   int borderThickness() const;
   void setBorderThickness(int borderThickness);
 
+  void setToolTip(std::string const &toolTip);
+  std::string const &toolTip() const;
+
   bool isEditable() const;
   void setEditable(bool isEditable);
   void disableEditing();
@@ -70,6 +73,7 @@ private:
   int m_borderOpacity;
   std::string m_borderColor;
   std::string m_iconFilePath;
+  std::string m_toolTip;
   bool m_isEditable;
 };
 
