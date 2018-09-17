@@ -345,6 +345,7 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   m_adaptedMainModel.removeRowFrom(indexToRemove);
 }
 
+<<<<<<< HEAD
 void JobTreeView::removeAllRows() {
   appendChildRowOf({});
   auto firstChild = std::vector<int>{0};
@@ -353,6 +354,9 @@ void JobTreeView::removeAllRows() {
   }
   clearSelection();
 }
+=======
+void JobTreeView::removeAllRows() { m_adaptedMainModel.removeAllRows(); }
+>>>>>>> origin/sans_table_change_feature_branch
 
 RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
                                           int beforeRow) {
