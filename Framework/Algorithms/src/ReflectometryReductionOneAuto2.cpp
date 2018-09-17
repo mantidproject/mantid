@@ -336,11 +336,11 @@ void ReflectometryReductionOneAuto2::init() {
  */
 void ReflectometryReductionOneAuto2::exec() {
 
+  applyFloodCorrections();
   setDefaultOutputWorkspaceNames();
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
-  inputWS = applyFloodCorrection(inputWS);
 
   IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
@@ -1078,19 +1078,29 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
   return MatrixWorkspace_sptr();
 }
 
-MatrixWorkspace_sptr
-ReflectometryReductionOneAuto2::applyFloodCorrection(MatrixWorkspace_sptr ws) {
-  MatrixWorkspace_sptr flood = getFloodWorkspace();
-  if (flood) {
+void
+ReflectometryReductionOneAuto2::applyFloodCorrection(MatrixWorkspace_sptr flood, std::string const &prop) {
+    MatrixWorkspace_sptr ws = getProperty(prop);
     auto alg = createChildAlgorithm("ApplyFloodWorkspace");
     alg->initialize();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("FloodWorkspace", flood);
     alg->execute();
     MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
-    return out;
+    setProperty(prop, out);
+}
+
+void ReflectometryReductionOneAuto2::applyFloodCorrections() {
+  MatrixWorkspace_sptr flood = getFloodWorkspace();
+  if (flood) {
+    applyFloodCorrection(flood, "InputWorkspace");
+    if (!isDefault("FirstTransmissionRun")) {
+      applyFloodCorrection(flood, "FirstTransmissionRun");
+    }
+    if (!isDefault("SecondTransmissionRun")) {
+      applyFloodCorrection(flood, "SecondTransmissionRun");
+    }
   }
-  return ws;
 }
 
 } // namespace Algorithms

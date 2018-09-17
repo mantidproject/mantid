@@ -1360,6 +1360,35 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_flood_correction_transmission() {
+    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto transWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    for(size_t i = 0; i < transWS->getNumberHistograms(); ++i) {
+      auto &y = transWS->mutableY(i);
+      y.assign(y.size(), 10.0 * double(i + 1));
+    }
+    auto flood = createFloodWorkspace();
+
+    ReflectometryReductionOneAuto2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setProperty("FloodWorkspace", flood);
+    alg.setProperty("ThetaIn", 1.5);
+    alg.setProperty("DetectorCorrectionType", "RotateAroundSample");
+    alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
+    alg.setProperty("CorrectionAlgorithm", "None");
+    alg.setProperty("MomentumTransferStep", 0.01);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "1+2");
+    alg.setProperty("FirstTransmissionRun", transWS);
+    alg.execute();
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_DELTA(out->y(0)[0], 0.0782608695, 0.000001);
+    AnalysisDataService::Instance().clear();
+  }
+
   void test_flood_correction_group() {
     auto inputWS1 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto inputWS2 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
