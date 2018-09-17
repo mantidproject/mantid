@@ -14,12 +14,14 @@ class ErrorReporterPresenter(object):
     def do_not_share(self, continue_working=True):
         self.error_log.notice("No information shared")
         self._handle_exit(continue_working)
+        return -1
 
     def share_non_identifiable_information(self, continue_working):
         uptime = UsageService.getUpTime()
-        self._send_report_to_server(share_identifiable=False, uptime=uptime)
+        status = self._send_report_to_server(share_identifiable=False, uptime=uptime)
         self.error_log.notice("Sent non-identifiable information")
         self._handle_exit(continue_working)
+        return status
 
     def share_all_information(self, continue_working, name, email, text_box):
         uptime = UsageService.getUpTime()
@@ -29,18 +31,23 @@ class ErrorReporterPresenter(object):
         self.error_log.notice("Sent complete information")
         if status == 201:
             self._upload_recovery_file(zip_recovery_file=zip_recovery_file)
+        RetrieveRecoveryFiles.remove_recovery_file(zip_recovery_file)
         self._handle_exit(continue_working)
+        return status
 
     def error_handler(self, continue_working, share, name, email, text_box):
         if share == 0:
-            self.share_all_information(continue_working, name, email, text_box)
+            status = self.share_all_information(continue_working, name, email, text_box)
         elif share == 1:
-            self.share_non_identifiable_information(continue_working)
+            status = self.share_non_identifiable_information(continue_working)
         elif share == 2:
-            self.do_not_share(continue_working)
+            status = self.do_not_share(continue_working)
         else:
             self.error_log.error("Unrecognised signal in errorreporter exiting")
             self._handle_exit(continue_working)
+            status = -2
+
+        return status
 
     def _handle_exit(self, continue_working):
         if not continue_working:

@@ -32,8 +32,15 @@ class RetrieveRecoveryFiles(object):
         path = RetrieveRecoveryFiles.get_recovery_files_path()
         directory = RetrieveRecoveryFiles._get_properties_directory()
         hash_value = hashlib.md5(str.encode(directory + str(datetime.datetime.now())))
-        zip_file = directory + hash_value.hexdigest()
+        zip_file = os.path.join(directory, hash_value.hexdigest())
         if path:
             shutil.make_archive(zip_file, 'zip', path)
             return zip_file, hash_value.hexdigest()
         return ''
+
+    @staticmethod
+    def remove_recovery_file(file):
+        directory = RetrieveRecoveryFiles._get_properties_directory()
+        zip_file = os.path.join(directory, file)
+        os.remove(zip_file + '.zip')
+
