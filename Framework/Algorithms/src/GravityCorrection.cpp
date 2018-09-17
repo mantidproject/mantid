@@ -92,9 +92,13 @@ void GravityCorrection::init() {
                             "OutputWorkspace", "", Direction::Output),
                         "The name of the output Workspace2D.");
   this->declareProperty("FirstSlitName", "slit1",
-                        "Component name of the first slit.");
+                        "Component name of the first slit; Workflow.slit1 "
+                        "value in parameter or instrument definition file may "
+                        "have priority.");
   this->declareProperty("SecondSlitName", "slit2",
-                        "Component name of the second slit.");
+                        "Component name of the second slit; Workflow.slit2 "
+                        "value in parameter or instrument definition file may "
+                        "have priority.");
 }
 
 /**

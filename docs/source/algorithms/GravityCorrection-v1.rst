@@ -3,8 +3,6 @@
 
 .. summary::
 
-.. alias::
-
 .. properties::
 
 Description
@@ -24,6 +22,27 @@ Negative time-of-flight values present in the :literal:`InputWorkspace` are not 
 
 Pay attention that the following correction for direct beam measurements (as presented in the example) is under investigation.
 Note also that an improved performance can be addressed after final validation.
+
+Support for automatic execution
+-------------------------------
+
+If the default slit names for :literal:`FirstSlitName` and :literal:`SecondSlitName` are given, this algorithm attempts to update the slit component names via the instrument's parameter file_,
+
+.. _file: http://docs.mantidproject.org/nightly/concepts/InstrumentParameterFile.html#instrumentparameterfile
+
+where the parameters :literal:`Workflow.slit1` and :literal:`Workflow.slit2` are searched for the instrument's slit component names.
+
+For example, if the instrument has slit components of names slit2 and slit3, which should be used for this algorithm, the following lines can be added to the parameter file:
+
+.. code-block:: xml
+   :linenos:
+
+    <parameter name="Workflow.slit1" type="string">
+        <value val="slit2" />
+    </parameter>
+    <parameter name="Workflow.slit2" type="string">
+        <value val="slit3" />
+    </parameter>
 
 Requirements
 ------------
