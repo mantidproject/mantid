@@ -86,11 +86,11 @@ void GravityCorrection::init() {
   this->declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
-      "The name of the input Workspace2D. Values of X and Y must be "
+      "The name of the input workspace. Values of X and Y must be "
       "TOF and counts, respectively.");
   this->declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                             "OutputWorkspace", "", Direction::Output),
-                        "The name of the output Workspace2D.");
+                        "The name of the output workspace.");
   this->declareProperty("FirstSlitName", "slit1",
                         "Component name of the first slit; Workflow.slit1 "
                         "value in parameter or instrument definition file may "
@@ -103,20 +103,18 @@ void GravityCorrection::init() {
 
 /**
  * @brief GravityCorrection::componentName checks whether the component name is
- * given in parameter file
+ * given in the parameter file
  * @param inputName :: name of the algorithm property
  * @param instr :: from which instrument to read parameter value
  * @return the name of the component
  */
 string GravityCorrection::componentName(
     string inputName, Mantid::Geometry::Instrument_const_sptr &instr) {
-  const string paramName = "Workflow." + this->getPropertyValue(inputName);
-  const string compName = instr->getParameterAsString(paramName);
+  const string propName = this->getPropertyValue(inputName);
+  const string compName = instr->getParameterAsString("Workflow." + propName);
   if (!compName.empty())
     return compName;
-  else
-    return this->getPropertyValue(inputName);
-  return paramName;
+  return propName;
 }
 
 /**
@@ -165,7 +163,8 @@ map<string, string> GravityCorrection::validateInputs() {
       else {
         last = this->coordinate(mapit->second, m_beamDirection, instrument);
         iposition += last;
-        if ((mapit->first == "SecondSlitName") && (iposition / 2 == last))
+        if ((mapit->first == "SecondSlitName") &&
+            (iposition / 2 == last && last > 0.))
           result["SecondSlitName"] = "Position of slits must differ.";
       }
     }
@@ -363,7 +362,7 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
 void GravityCorrection::virtualInstrument() {
 
   const auto instrument = this->m_ws->getInstrument();
-  DataObjects::Workspace2D_sptr ws = create<Workspace2D>(
+  MatrixWorkspace_sptr ws = create<Workspace2D>(
       instrument, this->m_ws->indexInfo().globalSize(), BinEdges(2));
 
   if (instrument->isParametrized()) {
@@ -574,12 +573,10 @@ void GravityCorrection::exec() {
 
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
-  outWS = DataObjects::create<MatrixWorkspace>(
-      *this->m_ws, BinEdges(this->m_ws->blocksize() + 1));
+  outWS = DataObjects::create<MatrixWorkspace>(*this->m_ws);
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
 
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
-    // count monitor spectra
     if (spectrumInfo.isMonitor(i)) {
       // copy monitor data into output workspace
       outWS->mutableX(i) = this->m_ws->x(i);
@@ -644,7 +641,10 @@ void GravityCorrection::exec() {
 
       // get new spectrum number for new final angle
       auto j = this->spectrumNumber(angle, spectrumInfo, i);
+      // Sanity checks: are spectrum and bin part of the output workspace?
       if (j >= (spectrumInfo.size() - 1 - this->m_numberOfMonitors) && i != j)
+        continue;
+      if (i_tofit > outWS->mutableY(j).size())
         continue;
 
       // offset due to variable sample position
@@ -672,6 +672,8 @@ void GravityCorrection::exec() {
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableY(j)[i_tofit] += this->m_ws->y(i)[i_tofit];
       outWS->mutableE(j)[i_tofit] += this->m_ws->e(i)[i_tofit];
+      if (this->m_ws->hasDx(i))
+        outWS->mutableDx(j)[i_tofit] += this->m_ws->dx(i)[i_tofit];
       i_tofit++;
       this->m_progress->report();
     }

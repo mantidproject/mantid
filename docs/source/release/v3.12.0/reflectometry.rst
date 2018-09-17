@@ -6,14 +6,6 @@ Reflectometry Changes
    :local:
 
 
-- :ref:`algm-LoadILLReflectometry` has received a few improvements.
-    - Figaro NeXus files are now properly handled.
-    - A new property, *BeamCentre* allows user to manually specify the beam position on the detector.
-    - The *BeamPosition* property was renamed to *DirectBeamPosition* to better reflect its usage.
-    - The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak on the detector will be at twice *BraggAngle*.
-- The new algorithm :ref:`algm-LoadILLPolarizationFactors` can load the polarization efficiency files used on D17 at ILL.
-- The *BraggAngle* property of :ref:`algm-LoadILLReflectometry` now works as expected: the detector will be rotated such that the reflected peak will be at twice *BraggAngle*.
-=======
 ISIS Reflectometry Interface
 ----------------------------
 

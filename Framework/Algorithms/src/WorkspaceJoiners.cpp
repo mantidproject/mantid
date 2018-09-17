@@ -42,10 +42,6 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
   // masking
   WorkspaceFactory::Instance().initializeFromParent(ws1, *output, true);
 
-  // Create the X values inside a cow pointer - they will be shared in the
-  // output workspace
-  auto XValues = ws1.refX(0);
-
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 

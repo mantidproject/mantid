@@ -11,12 +11,17 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/make_cow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace Mantid::Algorithms;
 
@@ -33,7 +38,7 @@ public:
 
   void testName() {
     GravityCorrection gc0;
-    TS_ASSERT_EQUALS(gc0.name(), "GravityCorrection");
+    TS_ASSERT_EQUALS(gc0.name(), "GravityCorrection")
   }
 
   void testCategory() {
@@ -43,39 +48,39 @@ public:
 
   void testInit() {
     GravityCorrection gc2;
-    TS_ASSERT_THROWS_NOTHING(gc2.initialize());
+    TS_ASSERT_THROWS_NOTHING(gc2.initialize())
     gc2.setRethrows(true);
-    TS_ASSERT(gc2.isInitialized());
+    TS_ASSERT(gc2.isInitialized())
   }
 
   void testInvalidSlitName() {
     GravityCorrection gc6;
-    TS_ASSERT_THROWS_NOTHING(gc6.initialize());
+    TS_ASSERT_THROWS_NOTHING(gc6.initialize())
     gc6.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc6.setProperty("InputWorkspace", inWS1));
-    TS_ASSERT_THROWS_NOTHING(gc6.setProperty("OutputWorkspace", "out1"));
+    TS_ASSERT_THROWS_NOTHING(gc6.setProperty("InputWorkspace", inWS1))
+    TS_ASSERT_THROWS_NOTHING(gc6.setProperty("OutputWorkspace", "out1"))
     TSM_ASSERT_THROWS_NOTHING("FirstSlitName slitt does not exist",
-                              gc6.setProperty("FirstSlitName", "slitt"));
-    TS_ASSERT_THROWS_ANYTHING(gc6.execute());
-    TS_ASSERT(!gc6.isExecuted());
+                              gc6.setProperty("FirstSlitName", "slitt"))
+    TS_ASSERT_THROWS_ANYTHING(gc6.execute())
+    TS_ASSERT(!gc6.isExecuted())
   }
 
   void testReplaceInputWS() {
-    // if OutputWorkspace should replace the InputWorkspace
+    // OutputWorkspace should replace the InputWorkspace
     GravityCorrection gc31;
     runGravityCorrection(gc31, inWS1, "myOutput1");
 
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().addOrReplace("myOutput2",
-                                                                  inWS1));
+                                                                  inWS1))
 
     GravityCorrection gc30;
-    TS_ASSERT_THROWS_NOTHING(gc30.initialize());
+    TS_ASSERT_THROWS_NOTHING(gc30.initialize())
     gc30.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc30.setProperty("InputWorkspace", "myOutput2"));
-    TS_ASSERT_THROWS_NOTHING(gc30.setProperty("OutputWorkspace", "myOutput2"));
-    TS_ASSERT_THROWS_NOTHING(gc30.execute());
-    TS_ASSERT(gc30.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(gc30.setProperty("InputWorkspace", "myOutput2"))
+    TS_ASSERT_THROWS_NOTHING(gc30.setProperty("OutputWorkspace", "myOutput2"))
+    TS_ASSERT_THROWS_NOTHING(gc30.execute())
+    TS_ASSERT(gc30.isExecuted())
 
     CompareWorkspaces replace;
     comparer(replace, "myOutput1", "myOutput2", "1", "1", "1");
@@ -88,14 +93,14 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
             0.5, slit, slit, 0.2, 0.2, source, monitor, sample, detector)};
     GravityCorrection gc21;
-    TS_ASSERT_THROWS_NOTHING(gc21.initialize());
+    TS_ASSERT_THROWS_NOTHING(gc21.initialize())
     gc21.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("InputWorkspace", ws1));
-    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("OutputWorkspace", "ws1out"));
+    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("InputWorkspace", ws1))
+    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("OutputWorkspace", "ws1out"))
     TSM_ASSERT_THROWS_NOTHING("Position of slits must differ",
-                              gc21.setProperty("SecondSlitName", "slit2"));
-    TS_ASSERT_THROWS_ANYTHING(gc21.execute());
-    TS_ASSERT(!gc21.isExecuted());
+                              gc21.setProperty("SecondSlitName", "slit2"))
+    TS_ASSERT_THROWS_ANYTHING(gc21.execute())
+    TS_ASSERT(!gc21.isExecuted())
   }
 
   void testBeamDirectionInvariant() {
@@ -147,10 +152,8 @@ public:
       Mantid::API::ITableWorkspace_sptr table =
           Mantid::API::AnalysisDataService::Instance()
               .retrieveWS<Mantid::API::ITableWorkspace>("compare_msgs");
-      TS_ASSERT_EQUALS(table->cell<std::string>(0, 0),
-                       "DetectorInfo mismatch (position differences larger "
-                       "than 1e-9 m or other difference found)");
-      TS_ASSERT_THROWS_ANYTHING(table->cell<std::string>(1, 0));
+      TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Data mismatch")
+      TS_ASSERT_THROWS_ANYTHING(table->cell<std::string>(1, 0))
     }
   }
 
@@ -158,7 +161,7 @@ public:
     GravityCorrection gc9;
     this->runGravityCorrection(gc9, inWS1, outWSName);
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().add(inWSName, inWS1));
+        Mantid::API::AnalysisDataService::Instance().add(inWSName, inWS1))
     CompareWorkspaces instrumentNotModified;
     comparer(instrumentNotModified, inWS1->getName(), outWSName, FALSE);
     if (instrumentNotModified.getPropertyValue("Result") == FALSE) {
@@ -166,11 +169,11 @@ public:
       Mantid::API::ITableWorkspace_sptr table =
           Mantid::API::AnalysisDataService::Instance()
               .retrieveWS<Mantid::API::ITableWorkspace>("compare_msgs");
-      TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Data mismatch");
-      TS_ASSERT_THROWS_ANYTHING(table->cell<std::string>(1, 0));
+      TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Data mismatch")
+      TS_ASSERT_THROWS_ANYTHING(table->cell<std::string>(1, 0))
     }
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().clear());
+        Mantid::API::AnalysisDataService::Instance().clear())
   }
 
   void testBinMask() {
@@ -185,24 +188,26 @@ public:
     auto ws2 = this->runGravityCorrection(gc10, ws1, "ws2");
     Mantid::API::MatrixWorkspace::MaskList mList = ws2->maskedBins(0);
     auto iterator = mList.begin();
-    TS_ASSERT_EQUALS(iterator->second, 0.4);
+    TS_ASSERT_EQUALS(iterator->second, 0.4)
     ++iterator;
-    TS_ASSERT_EQUALS(iterator->second, 1.0);
+    TS_ASSERT_EQUALS(iterator->second, 1.0)
     ++iterator;
-    TS_ASSERT_EQUALS(iterator->second, 0.1);
+    TS_ASSERT_EQUALS(iterator->second, 0.1)
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().clear())
   }
 
   void testHistoryCheck() {
     GravityCorrection gc11;
     auto ws = this->runGravityCorrection(gc11, inWS1, "out1");
-    TS_ASSERT_THROWS_NOTHING(gc11.initialize());
+    TS_ASSERT_THROWS_NOTHING(gc11.initialize())
     gc11.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc11.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(gc11.setProperty("OutputWorkspace", "out2"));
+    TS_ASSERT_THROWS_NOTHING(gc11.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(gc11.setProperty("OutputWorkspace", "out2"))
     TSM_ASSERT_THROWS_ANYTHING(
         "Running GravityCorrection again should not be possible",
-        gc11.execute());
-    TS_ASSERT(gc11.isExecuted());
+        gc11.execute())
+    TS_ASSERT(gc11.isExecuted())
   }
 
   void testMonitor() {
@@ -210,19 +215,19 @@ public:
     auto ws2 = this->runGravityCorrection(gc12, inWS1, "out1");
     // spectrum 1 is a monitor, compare input and output spectrum 1
     for (size_t i = 0; i < ws2->blocksize(); ++i) {
-      TS_ASSERT_EQUALS(ws2->x(1)[i], inWS1->x(1)[i]);
-      TS_ASSERT_EQUALS(ws2->y(1)[i], inWS1->y(1)[i]);
-      TS_ASSERT_EQUALS(ws2->e(1)[i], inWS1->e(1)[i]);
+      TS_ASSERT_EQUALS(ws2->x(1)[i], inWS1->x(1)[i])
+      TS_ASSERT_EQUALS(ws2->y(1)[i], inWS1->y(1)[i])
+      TS_ASSERT_EQUALS(ws2->e(1)[i], inWS1->e(1)[i])
     }
   }
 
   void testSizes() {
     GravityCorrection gc13;
     auto ws3 = this->runGravityCorrection(gc13, inWS1, "out1");
-    TSM_ASSERT_EQUALS("Number indexable items", ws3->size(), inWS1->size());
-    TSM_ASSERT_EQUALS("Number of bins", ws3->blocksize(), inWS1->blocksize());
+    TSM_ASSERT_EQUALS("Number indexable items", ws3->size(), inWS1->size())
+    TSM_ASSERT_EQUALS("Number of bins", ws3->blocksize(), inWS1->blocksize())
     TSM_ASSERT_EQUALS("Number of spectra", ws3->getNumberHistograms(),
-                      inWS1->getNumberHistograms());
+                      inWS1->getNumberHistograms())
   }
 
   void testInstrumentRotation() {
@@ -254,7 +259,7 @@ public:
 
     // sample should not be at (15., 0., 0.) position test:
     TS_ASSERT_DIFFERS(ws->getInstrument()->getSample()->getPos(),
-                      Mantid::Kernel::V3D(15., 0., 0.));
+                      Mantid::Kernel::V3D(15., 0., 0.))
 
     GravityCorrection gc16;
     this->runGravityCorrection(gc16, ws, "out1", "slit1",
@@ -266,11 +271,11 @@ public:
     CompareWorkspaces rotatedWS;
     comparer(rotatedWS, "out1", "out2", "1", "0", "1");
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().clear());
+        Mantid::API::AnalysisDataService::Instance().clear())
   }
 
   void testInstrumentTranslation() {
-    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(-5., 0., 0.);
+    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(-5.4, 2.2, 1.7);
     auto origin =
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
             0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector);
@@ -289,7 +294,7 @@ public:
     CompareWorkspaces translatedWS;
     comparer(translatedWS, "origin", "translated", "1", "0", "1");
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().clear());
+        Mantid::API::AnalysisDataService::Instance().clear())
   }
 
   // Real data tests
@@ -303,9 +308,9 @@ public:
         lAlg->setProperty("OutputWorkspace", "ws");
         lAlg->setProperty("XUnit", "TimeOfFlight"); lAlg->setChild(true);
         lAlg->initialize(); lAlg->execute();)
-    TS_ASSERT(lAlg->isExecuted());
+    TS_ASSERT(lAlg->isExecuted())
     Mantid::API::MatrixWorkspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"))
     GravityCorrection gc00;
     auto corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace",
                                                 "slit2", "slit3");
@@ -318,6 +323,20 @@ public:
       }
     }
     TS_ASSERT_EQUALS(totalCounts, totalCountsCorrected);
+  }
+
+  void testDx() {
+    auto ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+    auto dx = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramDx>(
+        ws->y(0).size(), Mantid::HistogramData::LinearGenerator(0.1, 0.33));
+    ws->setSharedDx(1, dx);
+    GravityCorrection gc23;
+    const auto out = this->runGravityCorrection(gc23, ws, "hasDx");
+    TS_ASSERT_EQUALS(out->hasDx(1), ws->hasDx(1))
+    if (out->hasDx(1) && ws->hasDx(1))
+      TS_ASSERT_EQUALS(out->dx(1), ws->dx(1))
+    TS_ASSERT_EQUALS(!out->hasDx(0), !ws->hasDx(0))
   }
 
   void testInputWorkspace2D() {}
@@ -369,7 +388,7 @@ public:
                 tof, 0.25, slit1, slit2, 0.2, 0.3, source, monitor, sample,
                 detector1, 4, 50, 0.02)};
 
-    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4) / 2, finalAngle, 1e-6);
+    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(4) / 2, finalAngle, 1e-6)
 
     // input counts
     // error: no match for ‘operator==’ (operand types are
@@ -380,7 +399,7 @@ public:
     auto res = this->runGravityCorrection(gc20, ws, "ws");
 
     // resulting final angle
-    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(3), 2. * .5, 1e-6);
+    TS_ASSERT_DELTA(ws->detectorInfo().signedTwoTheta(3), 2. * .5, 1e-6)
     // resulting counts
     // TS_ASSERT_EQUALS(ws->y(4), 0); // counts removed
     // TS_ASSERT_EQUALS(ws->y(3), 2); // counts inserted
@@ -392,42 +411,46 @@ public:
   // Use of slit1 and slit2 default values from sample logs
   // Example: FIGARO parameter file defines slit1 and slit2
   void testDefaultSlitNames() {
-    Mantid::API::FrameworkManager::Instance().exec("LoadILLReflectometry", 6, "Filename",
-                                                   "ILL/Figaro/592724.nxs",
-                                                   "OutputWorkspace", "592724",
-                                                   "XUnit", "TimeOfFlight");
+    Mantid::API::FrameworkManager::Instance().exec(
+        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/592724.nxs",
+        "OutputWorkspace", "592724", "XUnit", "TimeOfFlight");
     GravityCorrection gc21;
-    TS_ASSERT_THROWS_NOTHING(gc21.initialize());
+    TS_ASSERT_THROWS_NOTHING(gc21.initialize())
     gc21.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("InputWorkspace", "592724"));
+    TS_ASSERT_THROWS_NOTHING(gc21.setProperty("InputWorkspace", "592724"))
     TS_ASSERT_THROWS_NOTHING(
-        gc21.setProperty("OutputWorkspace", "default_test"));
-    TS_ASSERT_THROWS_NOTHING(gc21.execute());
-    TS_ASSERT(gc21.isExecuted());
+        gc21.setProperty("OutputWorkspace", "default_test"))
+    TS_ASSERT_THROWS_NOTHING(gc21.execute())
+    TS_ASSERT(gc21.isExecuted())
   }
 
   Mantid::API::MatrixWorkspace_sptr runGravityCorrection(
       GravityCorrection &gravityCorrection,
       Mantid::API::MatrixWorkspace_sptr &inWS, const std::string outName,
       std::string firstSlitName = "", std::string secondSlitName = "") {
-    TS_ASSERT_THROWS_NOTHING(gravityCorrection.initialize());
+    TS_ASSERT_THROWS_NOTHING(gravityCorrection.initialize())
     gravityCorrection.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(
-        gravityCorrection.setProperty("InputWorkspace", inWS));
+        gravityCorrection.setProperty("InputWorkspace", inWS))
     TS_ASSERT_THROWS_NOTHING(
-        gravityCorrection.setProperty("OutputWorkspace", outName));
+        gravityCorrection.setProperty("OutputWorkspace", outName))
     if (!firstSlitName.empty())
       TSM_ASSERT_THROWS_NOTHING(
           "FirstSlitName should be slit2",
-          gravityCorrection.setProperty("FirstSlitName", firstSlitName));
+          gravityCorrection.setProperty("FirstSlitName", firstSlitName))
     if (!secondSlitName.empty())
       TSM_ASSERT_THROWS_NOTHING(
           "SecondSlitName should be slit1",
-          gravityCorrection.setProperty("SecondSlitName", secondSlitName));
-    TS_ASSERT_THROWS_NOTHING(gravityCorrection.execute());
-    TS_ASSERT(gravityCorrection.isExecuted());
-    return Mantid::API::AnalysisDataService::Instance()
-        .retrieveWS<Mantid::API::MatrixWorkspace>(outName);
+          gravityCorrection.setProperty("SecondSlitName", secondSlitName))
+    TS_ASSERT_THROWS_NOTHING(gravityCorrection.execute())
+    TS_ASSERT(gravityCorrection.isExecuted())
+    try {
+      return Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<Mantid::API::MatrixWorkspace>(outName);
+      TS_FAIL("OutputWorkspace was not created.");
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      return inWS;
+    }
   }
 
   void comparer(CompareWorkspaces &compare, const std::string &in1,
@@ -436,15 +459,15 @@ public:
                 std::string property_axes = "0") {
     // Output workspace comparison
     compare.initialize();
-    TS_ASSERT_THROWS_NOTHING(compare.setPropertyValue("Workspace1", in1));
+    TS_ASSERT_THROWS_NOTHING(compare.setPropertyValue("Workspace1", in1))
     compare.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", in2));
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("Workspace2", in2))
     TS_ASSERT_THROWS_NOTHING(
-        compare.setProperty("CheckInstrument", property_instrument));
-    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckAxes", property_axes));
-    TS_ASSERT(compare.execute());
-    TS_ASSERT(compare.isExecuted());
-    TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), property_value);
+        compare.setProperty("CheckInstrument", property_instrument))
+    TS_ASSERT_THROWS_NOTHING(compare.setProperty("CheckAxes", property_axes))
+    TS_ASSERT(compare.execute())
+    TS_ASSERT(compare.isExecuted())
+    TS_ASSERT_EQUALS(compare.getPropertyValue("Result"), property_value)
   }
 
 private:

@@ -68,14 +68,4 @@ Magnetism Reflectometer
 - Allow for the use of workspace groups as input to the reduction.
 - Added algorithm to compute scattering angle from a workspace.
 
-
-Algorithms
-----------
-
-New features
-############
-
-- The new algorithm :ref:`algm-GravityCorrection` cancels gravity effects in 2DWorkspaces (updated counts for detectors and time-of-flight values).
-
-
 :ref:`Release 3.13.0 <v3.13.0>`

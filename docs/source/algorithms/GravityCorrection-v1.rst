@@ -3,6 +3,8 @@
 
 .. summary::
 
+.. relatedalgorithms::
+
 .. properties::
 
 Description
@@ -19,6 +21,9 @@ Please note that the output workspace likely has varying bins and consider a sub
 The instrument definition can only contain the position in beam direction and the height of the slits will always be computed internally.
 The potential output workspace adds " cancelled gravitation " to its title. This can be seen when visualising the data or reading the sample log information of the :literal::`OutputWorkspace`.
 Negative time-of-flight values present in the :literal:`InputWorkspace` are not prohibited.
+The input workspace can have a varying number of bins for each spectrum.
+However, sizes of output workspace and input workspace match.
+In conclusion, this algorithm supports a wide range of special input workspaces, i.e. which can be masked, ragged, have data errors `Dx`.
 
 Pay attention that the following correction for direct beam measurements (as presented in the example) is under investigation.
 Note also that an improved performance can be addressed after final validation.
@@ -27,10 +32,9 @@ Support for automatic execution
 -------------------------------
 
 If the default slit names for :literal:`FirstSlitName` and :literal:`SecondSlitName` are given, this algorithm attempts to update the slit component names via the instrument's parameter file_,
+where the parameters :literal:`Workflow.slit1` and :literal:`Workflow.slit2` are searched for the instrument's slit component names.
 
 .. _file: http://docs.mantidproject.org/nightly/concepts/InstrumentParameterFile.html#instrumentparameterfile
-
-where the parameters :literal:`Workflow.slit1` and :literal:`Workflow.slit2` are searched for the instrument's slit component names.
 
 For example, if the instrument has slit components of names slit2 and slit3, which should be used for this algorithm, the following lines can be added to the parameter file:
 
@@ -43,6 +47,8 @@ For example, if the instrument has slit components of names slit2 and slit3, whi
     <parameter name="Workflow.slit2" type="string">
         <value val="slit3" />
     </parameter>
+
+Currently the case for ILL reflectometers.
 
 Requirements
 ------------

@@ -70,6 +70,8 @@ New
 ###
 
 
+- The new algorithm :ref:`algm-GravityCorrection` cancels gravity effects (updated counts for detectors and time-of-flight values).
+
 
 Improved
 ########

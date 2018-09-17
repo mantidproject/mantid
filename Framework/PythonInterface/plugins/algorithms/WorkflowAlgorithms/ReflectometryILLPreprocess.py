@@ -8,7 +8,7 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValid
                            IntArrayLengthValidator, IntArrayBoundedValidator, IntArrayProperty,
                            IntBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import (AddSampleLog, CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
-                              CreateEmptyTableWorkspace, Divide, ExtractMonitors, Fit,
+                              CreateEmptyTableWorkspace, Divide, ExtractMonitors, Fit, GravityCorrection,
                               Integration, LoadILLReflectometry, MergeRuns, Minus, mtd, NormaliseToMonitor,
                               RebinToWorkspace, Scale, Transpose)
 import numpy
@@ -121,6 +121,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ws = self._subtractFlatBkg(ws, beamPosWS)
 
         self._cleanup.cleanup(beamPosWS)
+
+        if ws.getRun().getLogData("instrument.name"):
+            ws = self._gravityCorrection(ws)
 
         ws = self._convertToWavelength(ws)
 
@@ -270,6 +273,16 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             NumberType='Int',
             EnableLogging=self._subalgLogging)
         return ws
+
+    def _gravityCorrection(self, ws):
+        """Perform gravity correction"""
+        gravityWSName = self._names.withSuffix('gravity_corrected')
+        correctedWS = GravityCorrection(
+            InputWorkspace=ws,
+            OutputWorkspace=gravityWSName,
+            EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return correctedWS
 
     def _convertToWavelength(self, ws):
         """Convert the X units of ws to wavelength."""
