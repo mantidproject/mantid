@@ -989,9 +989,18 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
     else:
         try:
             # If user does not want to rebin then just ensure uniform binning across spectra
-            RebinToWorkspace(WorkspaceToRebin=workspace_name,
-                             WorkspaceToMatch=workspace_name,
-                             OutputWorkspace=workspace_name)
+            # extract the binning parameters from the first spectrum.
+            # there is probably a better way to calculate the binning parameters, but this
+            # gets the right answer.
+            xaxis = mtd[workspace_name].readX(0)
+            params = []
+            for i, x in enumerate(xaxis):
+                params.append(x)
+                if i < len(xaxis) -1:
+                    params.append(xaxis[i+1] - x) # delta
+            Rebin(InputWorkspace=workspace_name,
+                  OutputWorkspace=workspace_name,
+                  Params=params)
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 
