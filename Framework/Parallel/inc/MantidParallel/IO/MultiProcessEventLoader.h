@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <thread>
 #include <mutex>
+#include <queue>
+#include <atomic>
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"
@@ -59,7 +61,7 @@ public:
 
   enum struct LoadType {
     preCalcEvents,
-    doubleBuffering
+    producerConsumer
   };
 
 private:
@@ -158,114 +160,104 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
 
 template<>
 template<typename T>
-void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::doubleBuffering>::loadFromGroup(
+void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::producerConsumer>::loadFromGroup(
     EventsListsShmemStorage &storage, const H5::Group &instrument,
     const std::vector<std::string> &bankNames,
     const std::vector<int32_t> &bankOffsets, unsigned from,
     unsigned to) {
 
+  const std::size_t chLen{(from - to) / 100};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
 
-  std::atomic<int> cnt{0};
-  std::atomic<bool> firstHalf{true};
-  std::atomic<bool> secondHalf{true};
+  struct Task {
+    std::vector<int32_t> eventId;
+    std::vector<T> eventTimeOffset;
+    IO::NXEventDataLoader<T> loader;
+    decltype(loader.setBankIndex(0)) partitioner;
+
+    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames) : loader(1, instrument, bankNames) {}
+  };
+
+  std::vector<std::vector<TofEvent> > pixels(storage.pixelCount());
+  std::atomic<int> pixNum{0};
+  std::queue<std::unique_ptr<Task>> queue;
+  std::mutex guard;
   std::atomic<int> finished{0};
 
-  std::vector<std::vector<TofEvent> > pixels[2] =
-      {std::vector<std::vector<TofEvent> >(storage.pixelCount()),
-       std::vector<std::vector<TofEvent> >(storage.pixelCount())};
+  std::thread producer([&]() {
+    std::size_t eventCounter{0};
+    for (unsigned bankIdx = 0; bankIdx < bankNames.size(); ++bankIdx) {
+      auto count = bankSizes[bankIdx];
+      bool isFirstBank = (eventCounter < from);
 
-  std::vector<int32_t> eventId[2];
-  std::vector<T> eventTimeOffset[2];
+      if (eventCounter + count > from) {
+        size_t start{0};
+        size_t finish{count};
+        if (isFirstBank)
+          start = from - eventCounter;
+        if (eventCounter + count > to)
+          finish = to - eventCounter;
 
-  IO::NXEventDataLoader<T> loader[2] =
-      {IO::NXEventDataLoader<T>(1, instrument, bankNames), IO::NXEventDataLoader<T>(1, instrument, bankNames)};
-  decltype(loader[0].setBankIndex(0)) part[2];
+        std::size_t cur = start;
+        while (cur < finish) {
+          auto cnt(chLen);
+          if (cur + chLen >= finish)
+            cnt = finish - cur;
 
-  std::vector<std::thread> workers;
-  for (unsigned i = 0; i < 2; ++i)
-    workers.emplace_back([&](unsigned mark) {
-      std::size_t eventCounter{0};
-      for (unsigned bankIdx = 0; bankIdx < bankNames.size(); ++bankIdx) {
-        auto count = bankSizes[bankIdx];
-        bool isFirstBank = (eventCounter < from);
+          std::unique_ptr<Task> task(new Task(instrument, bankNames));
+          task->partitioner = task->loader.setBankIndex(bankIdx);
+          task->eventTimeOffset.resize(cnt);
+          task->loader.readEventTimeOffset(task->eventTimeOffset.data(), start, cnt);
+          task->eventId.resize(cnt);
+          task->loader.readEventID(task->eventId.data(), start, cnt);
+          detail::eventIdToGlobalSpectrumIndex(task->eventId.data(), cnt, bankOffsets[bankIdx]);
 
-        if (eventCounter + count > from) {
-          size_t start{0};
-          size_t finish{count};
-          if (isFirstBank)
-            start = from - eventCounter;
-          if (eventCounter + count > to)
-            finish = to - eventCounter;
-
-          std::size_t cnt = finish - start;
-          std::size_t mid = cnt / 2;
-
-          unsigned halfs{0};
-          while (true) {
-            if (!mark) {
-              if (firstHalf) {
-                part[0] = loader[0].setBankIndex(bankIdx);
-                eventTimeOffset[0].resize(mid);
-                loader[0].readEventTimeOffset(eventTimeOffset[0].data(), start, mid);
-                eventId[0].resize(mid);
-                loader[0].readEventID(eventId[0].data(), start, mid);
-
-                detail::eventIdToGlobalSpectrumIndex(eventId[0].data(), mid, bankOffsets[bankIdx]);
-                firstHalf = false;
-                ++halfs;
-              }
-
-              if (secondHalf) {
-                part[1] = loader[1].setBankIndex(bankIdx);
-                eventTimeOffset[1].resize(cnt - mid);
-                loader[1].readEventTimeOffset(eventTimeOffset[1].data(), start, cnt - mid);
-                eventId[1].resize(cnt - mid);
-                loader[1].readEventID(eventId[1].data(), start, cnt - mid);
-
-                detail::eventIdToGlobalSpectrumIndex(eventId[1].data(), cnt - mid, bankOffsets[bankIdx]);
-                secondHalf = false;
-                ++halfs;
-              }
-            } else {
-              if (!firstHalf) {
-                for (unsigned i = 0; i < eventId[0].size(); ++i)
-                  pixels[0].at(eventId[0][i]).emplace_back((double) eventTimeOffset[0][i], part[0]->next());
-                firstHalf = true;
-                ++halfs;
-              }
-
-              if (!secondHalf) {
-                for (unsigned i = 0; i < eventId[1].size(); ++i)
-                  pixels[1].at(eventId[1][i]).emplace_back((double) eventTimeOffset[1][i], part[1]->next());
-                secondHalf = true;
-                ++halfs;
-              }
-            }
-            if (halfs > 1)
-              break;
+          {
+            std::lock_guard<std::mutex> lock(guard);
+            queue.push(std::move(task));
           }
-        }
-        eventCounter += count;
-        if (eventCounter >= to) {
-          ++finished;
-          break;
+          cur += cnt;
         }
       }
-
-      while (finished != 2); //both workers have finished loading from file and ready to transfer to shmem
-
-      for (unsigned pixel = atomic_fetch_add(&cnt, 1); pixel < storage.pixelCount();
-           pixel = atomic_fetch_add(&cnt, 1)) {
-        storage.AppendEvent(0, pixel, pixels[0][pixel].begin(), pixels[0][pixel].end());
-        storage.AppendEvent(0, pixel, pixels[1][pixel].begin(), pixels[1][pixel].end());
+      eventCounter += count;
+      if (eventCounter >= to) {
+        ++finished;
+        break;
       }
+    }
 
-    }, i);
+    while (finished != 2) {
+    }; // consumer have finished his work ready to transfer to shmem
 
-  for (auto &worker: workers)
-    worker.join();
+    for (unsigned pixel = atomic_fetch_add(&pixNum, 1); pixel < storage.pixelCount();
+         pixel = atomic_fetch_add(&pixNum, 1))
+      storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+  });
 
+  std::thread consumer([&]() {
+    while (finished < 1) { // producer whant to produce smth
+      while (!queue.empty()) {
+        std::unique_ptr<Task> task;
+        {
+          std::lock_guard<std::mutex> lock(guard);
+          task = std::move(queue.front());
+          queue.pop();
+        }
+        for (unsigned i = 0; i < task->eventId.size(); ++i)
+          pixels.at(task->eventId[i]).emplace_back((double) task->eventTimeOffset[i], task->partitioner->next());
+      }
+    }
+
+    ++finished; // all consumed
+
+    for (unsigned pixel = atomic_fetch_add(&pixNum, 1); pixel < storage.pixelCount();
+         pixel = atomic_fetch_add(&pixNum, 1))
+      storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+
+  });
+
+  producer.join();
+  consumer.join();
 }
 
 
