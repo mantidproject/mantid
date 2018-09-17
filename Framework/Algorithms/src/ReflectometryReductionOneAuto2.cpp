@@ -487,8 +487,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
 /** Calculate the theta value of the detector of interest specified via
  * processing instructions
  *
- * @param instructions :: processing instructions defining the detectors of
- * interest
  * @param inputWS :: the input workspace
  * @return :: the angle of the detector (only the first detector is considered)
  */

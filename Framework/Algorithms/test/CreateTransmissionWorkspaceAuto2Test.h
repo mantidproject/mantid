@@ -83,7 +83,7 @@ public:
 
     alg->setProperty("FirstTransmissionRun", m_dataWS);
     alg->setPropertyValue("OutputWorkspace", "outWS");
-    alg->execute();
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
     MatrixWorkspace_sptr outWS =

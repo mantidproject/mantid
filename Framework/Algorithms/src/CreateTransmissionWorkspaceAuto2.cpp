@@ -98,7 +98,7 @@ void CreateTransmissionWorkspaceAuto2::exec() {
 
   // Processing instructions
   convertProcessingInstructions(instrument, firstWS);
-  alg->setProperty("ProcessingInstructions", m_processingInstructions);
+  alg->setProperty("ProcessingInstructions", m_processingInstructionsWorkspaceIndex);
 
   alg->execute();
   MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
