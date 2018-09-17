@@ -38,7 +38,6 @@ set ( TEST_FILES
   test/EnggDiffFittingPresenterTest.h
   test/EnggDiffractionPresenterTest.h
   test/EnggVanadiumCorrectionsModelTest.h
-  test/IndirectFitDataTest.h
   test/IO_MuonGroupingTest.h
   test/MDFLogValueFinderTest.h
   test/MeasurementItemTest.h
@@ -92,7 +91,6 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     MantidScientificInterfacesISISReflectometry
     MantidScientificInterfacesEnggDiffraction
     MantidScientificInterfacesMultiDatasetFit
-	MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
   PARENT_DEPENDENCIES
     GUITests
