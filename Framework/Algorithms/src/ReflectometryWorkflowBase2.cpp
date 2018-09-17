@@ -708,7 +708,7 @@ std::string ReflectometryWorkflowBase2::workspaceIndexesToSpecNum(
     throw std::runtime_error(
         "An Error occured when converting workspace indexes to specnums".append(
             std::to_string(error.what())))
-  } 
+  }
   std::string wsIdx = std::to_string(
       ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
   return wsIdx;

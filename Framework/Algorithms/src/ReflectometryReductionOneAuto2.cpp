@@ -341,10 +341,10 @@ void ReflectometryReductionOneAuto2::exec() {
 
   convertProcessingInstructions(instrument, firstWS);
   alg->setProperty("ProcessingInstructions", m_processingInstructions)
-  // Now that we know the detectors of interest, we can move them if necessary
-  // (i.e. if theta is given). If not, we calculate theta from the current
-  // detector positions
-  bool correctDetectors = getProperty("CorrectDetectors");
+      // Now that we know the detectors of interest, we can move them if
+      // necessary (i.e. if theta is given). If not, we calculate theta from the
+      // current detector positions
+      bool correctDetectors = getProperty("CorrectDetectors");
   double theta;
   if (!getPointerToProperty("ThetaIn")->isDefault()) {
     theta = getProperty("ThetaIn");
@@ -413,11 +413,12 @@ void ReflectometryReductionOneAuto2::exec() {
  * @param inputWS :: the input workspace
  * @return :: the names of the detectors of interest
  */
-std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
-MatrixWorkspace_sptr inputWS) {
+std::vector<std::string>
+ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
 
   std::vector<std::string> wsIndices;
-  boost::split(wsIndices, m_processingInstructionsWorkspaceIndex, boost::is_any_of(":,-+"));
+  boost::split(wsIndices, m_processingInstructionsWorkspaceIndex,
+               boost::is_any_of(":,-+"));
   // vector of comopnents
   std::vector<std::string> detectors;
 
@@ -451,8 +452,8 @@ MatrixWorkspace_sptr inputWS) {
  * @param twoTheta :: the angle to move detectors to
  * @return :: the corrected workspace
  */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(MatrixWorkspace_sptr inputWS,
-    const double twoTheta) {
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
+    MatrixWorkspace_sptr inputWS, const double twoTheta) {
 
   auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
 
