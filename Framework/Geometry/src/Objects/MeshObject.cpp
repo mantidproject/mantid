@@ -58,8 +58,8 @@ const Kernel::Material MeshObject::material() const { return m_material; }
  */
 bool MeshObject::hasValidShape() const {
   // May enclose volume if there are at
-  // at least 2 triangles and 4 vertices
-  return (numberOfTriangles() >= 2 && numberOfVertices() >= 4);
+  // at least 4 triangles and 4 vertices (Tetrahedron)
+  return (numberOfTriangles() >= 4 && numberOfVertices() >= 4);
 }
 
 /**
@@ -447,9 +447,6 @@ const BoundingBox &MeshObject::getBoundingBox() const {
         minZ = std::min(minZ, vz);
         maxZ = std::max(maxZ, vz);
       }
-      if (minZ == maxZ)
-        maxZ += 0.001;
-
       // Cache bounding box, so we do not need to repeat calculation
       m_boundingBox = BoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
     }
@@ -611,11 +608,9 @@ size_t MeshObject::numberOfTriangles() const { return m_triangles.size() / 3; }
 std::vector<uint32_t> MeshObject::getTriangles() const {
   std::vector<uint32_t> faces;
   size_t nFaceCorners = m_triangles.size();
-  if (nFaceCorners > 0) {
-    faces.resize(static_cast<std::size_t>(nFaceCorners));
-    for (size_t i = 0; i < nFaceCorners; ++i) {
-      faces[i] = static_cast<int>(m_triangles[i]);
-    }
+  faces.resize(static_cast<std::size_t>(nFaceCorners));
+  for (size_t i = 0; i < nFaceCorners; ++i) {
+    faces[i] = static_cast<int>(m_triangles[i]);
   }
   return faces;
 }

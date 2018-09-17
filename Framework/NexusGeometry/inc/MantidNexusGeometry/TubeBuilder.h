@@ -42,8 +42,6 @@ class MANTID_NEXUSGEOMETRY_DLL TubeBuilder {
 public:
   TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
               Eigen::Vector3d firstDetectorPosition, int firstDetectorId);
-  ~TubeBuilder();
-
   const Eigen::Vector3d &tubePosition() const;
   const std::vector<Eigen::Vector3d> &detPositions() const;
   const std::vector<int> &detIDs() const;

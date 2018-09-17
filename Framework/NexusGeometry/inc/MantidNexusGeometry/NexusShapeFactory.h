@@ -53,7 +53,8 @@ DLLExport std::unique_ptr<const Geometry::IObject>
 createMesh(std::vector<uint16_t> &&triangularFaces,
            std::vector<Mantid::Kernel::V3D> &&vertices);
 
-/// Creates a triangular mesh shape based on OFF polygon inputs
+/// Creates a triangular mesh shape based on OFF (Object File Format) polygon
+/// inputs https://en.wikipedia.org/wiki/OFF_(file_format)
 DLLExport std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint16_t> &faceIndices,
                   const std::vector<uint16_t> &windingOrder,

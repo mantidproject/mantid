@@ -112,8 +112,6 @@ std::vector<ValueType> extractVector(const DataSet &data) {
   values.resize(dataSpace.getSelectNpoints());
   // Read data into vector
   data.read(values.data(), data.getDataType(), dataSpace);
-
-  // Return the data vector
   return values;
 }
 
@@ -121,7 +119,6 @@ std::vector<ValueType> extractVector(const DataSet &data) {
 template <typename ValueType>
 std::vector<ValueType> get1DDataset(const H5std_string &dataset,
                                     const H5::Group &group) {
-  // Open data set
   DataSet data = group.openDataSet(dataset);
   return extractVector<ValueType>(data);
 }
@@ -218,7 +215,9 @@ Pixels getPixelOffsets(const Group &detectorGroup) {
 
   // Initialise matrix
   Pixels offsetData;
-  std::vector<double> xValues, yValues, zValues;
+  std::vector<double> xValues;
+  std::vector<double> yValues;
+  std::vector<double> zValues;
   for (unsigned int i = 0; i < detectorGroup.getNumObjs(); i++) {
     H5std_string objName = detectorGroup.getObjnameByIdx(i);
     if (objName == X_PIXEL_OFFSET) {
@@ -267,7 +266,7 @@ Pixels getPixelOffsets(const Group &detectorGroup) {
 }
 
 /**
- * Creates a Homogemous transfomation for nexus groups
+ * Creates a Homogeneous transfomation for nexus groups
  *
  * Walks the chain of transformations described in the file where W1 is first
  *transformation and Wn is last and assembles them as
@@ -297,11 +296,8 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
     return Eigen::Transform<double, 3, Eigen::Affine>::Identity();
   }
 
-  // Initialise transformation holder as zero-degree rotation
-  Eigen::Transform<double, 3, Eigen::Affine> transforms;
-  Eigen::Vector3d axis(1.0, 0.0, 0.0);
-  transforms = Eigen::AngleAxisd(0.0, axis);
-
+  // Initialise transformation holder as identity matrix
+  auto transforms = Eigen::Transform<double, 3, Eigen::Affine>::Identity();
   // Breaks when no more dependencies (dependency = ".")
   // Transformations must be applied in the order of direction of discovery
   // (they are _passive_ transformations)
@@ -365,15 +361,18 @@ getTransformations(const H5File &file, const Group &detectorGroup) {
       }
       Eigen::AngleAxisd rotation(angle, transformVector);
       transforms = rotation * transforms;
+    } else {
+      throw std::runtime_error(
+          "Unknown Transform type in Nexus Geometry Parsing");
     }
   }
   return transforms;
 }
 
 // Function to return the detector ids in the same order as the offsets
-std::vector<int> getDetectorIds(const Group &detectorGroup) {
+std::vector<Mantid::detid_t> getDetectorIds(const Group &detectorGroup) {
 
-  std::vector<int> detIds;
+  std::vector<Mantid::detid_t> detIds;
 
   for (unsigned int i = 0; i < detectorGroup.getNumObjs(); ++i) {
     H5std_string objName = detectorGroup.getObjnameByIdx(i);
@@ -381,9 +380,10 @@ std::vector<int> getDetectorIds(const Group &detectorGroup) {
       const auto data = detectorGroup.openDataSet(objName);
       if (data.getDataType().getSize() == 8) {
         // Note the narrowing here!
-        detIds = convertVector<int64_t, int32_t>(extractVector<int64_t>(data));
+        detIds = convertVector<int64_t, Mantid::detid_t>(
+            extractVector<int64_t>(data));
       } else {
-        detIds = extractVector<int32_t>(data);
+        detIds = extractVector<Mantid::detid_t>(data);
       }
     }
   }
@@ -443,7 +443,7 @@ void extractFacesAndIDs(const std::vector<uint16_t> &detFaces,
     detVerts.reserve(vertsPerFace);
     detWinding.reserve(vertsPerFace);
     for (size_t v = 0; v < vertsPerFace; ++v) {
-      auto vi = windingOrder[i + v] * vertStride;
+      const auto vi = windingOrder[i + v] * vertStride;
       detVerts.emplace_back(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
       detWinding.push_back(static_cast<uint16_t>(detWinding.size()));
     }
@@ -574,11 +574,12 @@ void parseAndAddSample(const H5File &file, const Group &root,
   H5std_string samplePath = "raw_data_1/sample";
   Group sampleGroup = root.openGroup(samplePath);
   auto sampleTransforms = getTransformations(file, sampleGroup);
-  auto samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
+  Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
   builder.addSample(sampleName, samplePos);
 }
 
-void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
+void parseMonitors(const H5File &file, const H5::Group &root,
+                   InstrumentBuilder &builder) {
   std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
 
   // Open all instrument groups within rawDataGroups
@@ -590,11 +591,11 @@ void parseMonitors(const H5::Group &root, InstrumentBuilder &builder) {
       for (auto &monitor : monitorGroups) {
         auto detectorId = get1DDataset<int64_t>(DETECTOR_ID, monitor)[0];
         bool proxy = false;
-        boost::shared_ptr<const Geometry::IObject> monitorShape =
-            parseNexusShape(monitor, proxy);
-        builder.addMonitor(std::to_string(detectorId),
-                           static_cast<int32_t>(detectorId),
-                           Eigen::Vector3d{0, 0, 0}, monitorShape);
+        auto monitorShape = parseNexusShape(monitor, proxy);
+        auto monitorTransforms = getTransformations(file, monitor);
+        builder.addMonitor(
+            std::to_string(detectorId), static_cast<int32_t>(detectorId),
+            monitorTransforms * Eigen::Vector3d{0, 0, 0}, monitorShape);
       }
     }
   }
@@ -634,9 +635,8 @@ extractInstrument(const H5File &file, const Group &root) {
     // Extract shape
     auto detShape = parseNexusShape(detectorGroup, searchTubes);
 
-    std::vector<detail::TubeBuilder> tubes;
     if (searchTubes) {
-      tubes =
+      auto tubes =
           TubeHelpers::findAndSortTubes(*detShape, detectorPixels, detectorIds);
       builder.addTubes(bankName, tubes, detShape);
     } else {
@@ -654,7 +654,7 @@ extractInstrument(const H5File &file, const Group &root) {
   // Parse source and sample and add to instrument
   parseAndAddSample(file, root, builder);
   parseAndAddSource(file, root, builder);
-  parseMonitors(root, builder);
+  parseMonitors(file, root, builder);
   return builder.createInstrument();
 }
 } // namespace

@@ -11,8 +11,6 @@
 namespace Mantid {
 namespace Geometry {
 
-namespace {}
-
 GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
 GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)

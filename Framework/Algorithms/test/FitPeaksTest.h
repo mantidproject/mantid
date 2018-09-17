@@ -8,7 +8,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FitPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"

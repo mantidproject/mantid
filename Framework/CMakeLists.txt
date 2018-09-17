@@ -118,8 +118,6 @@ add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
 add_subdirectory (Nexus)
-
-
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
 add_subdirectory (WorkflowAlgorithms)

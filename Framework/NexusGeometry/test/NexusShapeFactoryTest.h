@@ -1,7 +1,3 @@
-//----------------
-// Includes
-//----------------
-
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObject2D.h"
@@ -14,6 +10,13 @@ using Mantid::Kernel::V3D;
 
 class NexusShapeFactoryTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NexusShapeFactoryTest *createSuite() {
+    return new NexusShapeFactoryTest();
+  }
+  static void destroySuite(NexusShapeFactoryTest *suite) { delete suite; }
+
   void test_make_2D_mesh() {
 
     std::vector<V3D> vertices;

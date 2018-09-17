@@ -365,7 +365,7 @@ PanelsSurface::processUnstructured(const std::vector<size_t> &children,
   visited[children[1]] = true;
 
   y.normalize();
-  // at first set the normal to an argbitrary vector orthogonal to
+  // at first set the normal to an arbitrary vector orthogonal to
   // the line between the first two detectors
   setupBasisAxes(y, normal, x);
 

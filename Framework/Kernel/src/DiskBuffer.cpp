@@ -1,6 +1,5 @@
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/ISaveable.h"
-#include <iterator>
 #include <sstream>
 #include <utility>
 

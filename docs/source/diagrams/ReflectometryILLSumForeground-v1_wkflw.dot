@@ -57,9 +57,7 @@ digraph ReflectometryILLSumForeground {
 
   if_direct_foreground      -> l_rebin [label="Yes"]
   l_direct_foreground       -> l_rebin
-  l_rebin                   -> divide_after [label="LHS"]
-  l_direct_foreground       -> divide_after [label="RHS"]
-  divide_after              -> crop
+  l_rebin                   -> crop
 
   wavelength_range          -> crop
   crop                      -> output

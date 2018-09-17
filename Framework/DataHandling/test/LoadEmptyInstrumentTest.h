@@ -25,6 +25,13 @@ using ScopedFileHelper::ScopedFile;
 
 class LoadEmptyInstrumentTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadEmptyInstrumentTest *createSuite() {
+    return new LoadEmptyInstrumentTest();
+  }
+  static void destroySuite(LoadEmptyInstrumentTest *suite) { delete suite; }
+
   /// Helper that checks that each spectrum has one detector
   void check_workspace_detectors(MatrixWorkspace_sptr output,
                                  size_t numberDetectors) {
@@ -1041,6 +1048,39 @@ public:
 
     TS_ASSERT_EQUALS(0, detectorInfo.detectorIDs()[0])
     TS_ASSERT_EQUALS(1, detectorInfo.detectorIDs()[1])
+  }
+
+  void test_compare_wish_idf_vs_nexus() {
+    // Now rerun
+    LoadEmptyInstrument alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("Filename", "WISH_Definition_10Panels.hdf5");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    Mantid::API::MatrixWorkspace_sptr wish_nexus =
+        alg.getProperty("OutputWorkspace");
+
+    // Now re-run
+    alg.setPropertyValue("Filename", "WISH_Definition_10Panels.xml");
+    alg.execute();
+    Mantid::API::MatrixWorkspace_sptr wish_xml =
+        alg.getProperty("OutputWorkspace");
+
+    // Sanity check that we are not comparing the same instrument (i.e. via some
+    // smart caching)
+    TSM_ASSERT("Premise of comparision test broken!",
+               wish_xml->getInstrument()->baseInstrument().get() !=
+                   wish_nexus->getInstrument()->baseInstrument().get());
+
+    const auto &wish_nexus_detinfo = wish_nexus->detectorInfo();
+    const auto &wish_xml_detinfo = wish_xml->detectorInfo();
+    TS_ASSERT_EQUALS(wish_nexus_detinfo.size(), wish_xml_detinfo.size());
+    for (size_t i = 0; i < wish_nexus_detinfo.size(); ++i) {
+      TSM_ASSERT_EQUALS("Detector position mismatch",
+                        wish_nexus_detinfo.position(i),
+                        wish_xml_detinfo.position(i));
+    }
   }
 
 private:

@@ -5,11 +5,12 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/System.h"
 
+#include <Poco/DOM/Document.h>
+
 #include <fstream>
 
 namespace Poco {
 namespace XML {
-class Document;
 class Element;
 class Node;
 } // namespace XML
@@ -166,9 +167,7 @@ private:
   bool m_userGiveDescription;
 
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
-  /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
   /// Data structures to store XML to Group/Detector conversion map
   std::map<int, std::vector<std::string>> m_groupComponentsMap;
   std::map<int, std::vector<detid_t>> m_groupDetectorsMap;

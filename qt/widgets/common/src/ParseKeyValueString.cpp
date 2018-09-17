@@ -190,5 +190,21 @@ QString convertMapToString(const std::map<QString, QString> &optionsMap) {
 
   return result;
 }
+
+std::string optionsToString(std::map<std::string, std::string> const &options) {
+  if (!options.empty()) {
+    std::ostringstream resultStream;
+    auto optionsKvpIt = options.cbegin();
+    auto const &firstKvp = (*optionsKvpIt);
+    resultStream << firstKvp.first << "='" << firstKvp.second << '\'';
+    for (; optionsKvpIt != options.cend(); ++optionsKvpIt) {
+      auto kvp = (*optionsKvpIt);
+      resultStream << ", " << kvp.first << "='" << kvp.second << '\'';
+    }
+    return resultStream.str();
+  } else {
+    return std::string();
+  }
+}
 } // namespace MantidWidgets
 } // namespace MantidQt

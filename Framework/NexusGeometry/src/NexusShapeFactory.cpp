@@ -36,7 +36,9 @@ std::unique_ptr<const Geometry::IObject> createCylinderShape(
   shape->defineBoundingBox(boundingBox[0], boundingBox[2], boundingBox[4],
                            boundingBox[1], boundingBox[3], boundingBox[5]);
   shape->getGeometryHandler()->setShapeInfo(std::move(shapeInfo));
-  return Mantid::Kernel::make_unique<const Geometry::CSGObject>(*shape);
+  // Some older compilers (Apple clang 7) don't support copy construction
+  // std::unique_ptr<const T>(const std::ptr<T>&)
+  return std::unique_ptr<const Geometry::IObject>(shape.release());
 }
 
 void createTrianglesFromPolygon(const std::vector<uint16_t> &windingOrder,
@@ -81,7 +83,6 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 
   return triangularFaces;
 }
-
 } // namespace
 
 /** Refer to NX_Cylinder definition here
@@ -93,7 +94,7 @@ createTriangularFaces(const std::vector<uint16_t> &faceIndices,
 std::unique_ptr<const Geometry::IObject>
 createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
   // Calculate cylinder parameters
-  auto centre = (pointsDef.col(2) + pointsDef.col(0)) / 2;
+  auto centre = (pointsDef.col(2) + pointsDef.col(0)) * 0.5;
   auto axisVector = pointsDef.col(2) - pointsDef.col(0);
   auto height = axisVector.norm();
   auto axisUnitVector = axisVector.normalized();

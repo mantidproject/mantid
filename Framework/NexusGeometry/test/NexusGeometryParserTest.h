@@ -1,7 +1,3 @@
-//----------------
-// Includes
-//----------------
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument.h"
@@ -39,6 +35,13 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
 } // namespace
 class NexusGeometryParserTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static NexusGeometryParserTest *createSuite() {
+    return new NexusGeometryParserTest();
+  }
+  static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
+
   std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
     H5std_string nexusFilename = "SMALLFAKE_example_geometry.hdf5";
     const auto fullpath = Kernel::ConfigService::Instance().getFullPath(
@@ -98,6 +101,15 @@ public:
                                                   // z defaults to 0
     Eigen::Vector3d expectedDet0Position = offset + (magnitude * unitVector);
     TS_ASSERT(det0Position.isApprox(expectedDet0Position));
+
+    // Test monitor position
+    Mantid::detid_t monitorDetId = 1;
+    auto mon0Position = Kernel::toVector3d(
+        detectorInfo->position(detectorInfo->indexOf(monitorDetId)));
+    // Sanity check that this is a monitor
+    TS_ASSERT(detectorInfo->isMonitor(detectorInfo->indexOf(monitorDetId)));
+    // Check against location in file
+    TS_ASSERT(mon0Position.isApprox(Eigen::Vector3d{0, 0, -12.064}));
   }
 
   void test_complex_translation() {
@@ -109,9 +121,9 @@ public:
         detectorInfo->position(detectorInfo->indexOf(2100000)));
     Eigen::Vector3d unitVectorTranslation(
         0.2651564830210424, 0.0,
-        0.9642053928037905);         // Fixed in file location vector attribute
-    const double magnitude = 4.148;  // Fixed in file location value
-    const double rotation = -15.376; // Fixed in file orientation value
+        0.9642053928037905); // Fixed in file location vector attribute
+    const double magnitude = 4.148493; // Fixed in file location value
+    const double rotation = -15.37625; // Fixed in file orientation value
     Eigen::Vector3d rotationAxis(
         0, -1, 0); // Fixed in file orientation vector attribute
     Eigen::Vector3d offset(-0.498, -0.200, 0.00); // All offsets for pixel x,
@@ -132,8 +144,8 @@ public:
       sin(theta)    0    cos(theta)      U.M.z
       0             0    0               1
      */
-    auto expectedPosition = affine * offset;
-    TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-3));
+    Eigen::Vector3d expectedPosition = affine * offset;
+    TS_ASSERT(det0Postion.isApprox(expectedPosition, 1e-5));
   }
 
   void test_shape_cylinder_shape() {

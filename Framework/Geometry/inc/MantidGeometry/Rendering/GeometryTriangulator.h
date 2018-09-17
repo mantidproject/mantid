@@ -51,7 +51,7 @@ private:
 
 public:
   GeometryTriangulator(const CSGObject *obj = nullptr);
-  GeometryTriangulator(std::unique_ptr<RenderingMesh> &&obj);
+  GeometryTriangulator(std::unique_ptr<RenderingMesh> obj);
   GeometryTriangulator(const GeometryTriangulator &) = delete;
   GeometryTriangulator &operator=(const GeometryTriangulator &) = delete;
   ~GeometryTriangulator();

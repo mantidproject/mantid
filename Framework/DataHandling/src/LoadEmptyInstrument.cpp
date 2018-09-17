@@ -39,7 +39,8 @@ bool isNexus(const std::string &filename) {
   if (!filename.empty() && !FileDescriptor(filename).isAscii(filename)) {
     NexusDescriptor descriptor(filename);
     return descriptor.isHDF(filename) &&
-           descriptor.classTypeExists("NXinstrument");
+           (descriptor.classTypeExists("NXcylindrical_geometry") ||
+            descriptor.classTypeExists("NXoff_geometry"));
   }
   return false;
 }

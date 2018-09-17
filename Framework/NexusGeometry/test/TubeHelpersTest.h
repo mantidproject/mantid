@@ -1,10 +1,6 @@
 #ifndef TUBEHELPERS_TEST_H_
 #define TUBEHELPERS_TEST_H_
 
-//---------------------------
-// Includes
-//---------------------------
-
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include "MantidNexusGeometry/TubeHelpers.h"
@@ -17,6 +13,11 @@ using namespace NexusGeometryTestHelpers;
 
 class TubeHelpersTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TubeHelpersTest *createSuite() { return new TubeHelpersTest(); }
+  static void destroySuite(TubeHelpersTest *suite) { delete suite; }
+
   void test_CoLinearDetectorsProduceTubes() {
     auto pixels = generateCoLinearPixels();
     auto shape = createShape();

@@ -14,7 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <Poco/Glob.h>
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
 
@@ -253,7 +252,7 @@ public:
   Kernel::ProxyInfo &getProxy(const std::string &url);
 
   std::string getFullPath(const std::string &filename, const bool ignoreDirs,
-                          const Poco::Glob::Options option) const;
+                          const int options) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;

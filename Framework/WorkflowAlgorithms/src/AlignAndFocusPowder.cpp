@@ -46,6 +46,11 @@ void AlignAndFocusPowder::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "UnfocussedWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "Treated data in d-spacing before focussing (optional). This will likely "
+      "need rebinning.");
   // declareProperty(
   //   new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "",
   //   Direction::Output, PropertyMode::Optional),
@@ -125,7 +130,7 @@ void AlignAndFocusPowder::init() {
                                                          Direction::Input),
                   "Compress events (in "
                   "microseconds) within this "
-                  "tolerance. (Default 0.01)");
+                  "tolerance. (Default 1e-5)");
   declareProperty(
       make_unique<PropertyWithValue<double>>("CompressWallClockTolerance",
                                              EMPTY_DBL(), mustBePositive,
@@ -179,6 +184,20 @@ void AlignAndFocusPowder::init() {
                   "Otherwise, the low resolution spectra will have spectrum "
                   "IDs offset from normal ones. ");
   declareProperty("ReductionProperties", "__powdereduction", Direction::Input);
+}
+
+std::map<std::string, std::string> AlignAndFocusPowder::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault("UnfocussedWorkspace")) {
+    if (getPropertyValue("OutputWorkspace") ==
+        getPropertyValue("UnfocussedWorkspace")) {
+      result["OutputWorkspace"] = "Cannot be the same as UnfocussedWorkspace";
+      result["UnfocussedWorkspace"] = "Cannot be the same as OutputWorkspace";
+    }
+  }
+
+  return result;
 }
 
 template <typename NumT> struct RegLowVectorPair {
@@ -375,7 +394,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = make_unique<Progress>(this, 0., 1., 22);
+  m_progress = make_unique<Progress>(this, 0., 1., 21);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");
@@ -618,6 +637,13 @@ void AlignAndFocusPowder::exec() {
     doSortEvents(m_lowResW);
   m_progress->report();
 
+  // copy the output workspace just before `DiffractionFocusing`
+  // this probably should be binned by callers before inspecting
+  if (!isDefault("UnfocussedWorkspace")) {
+    auto wkspCopy = m_outputW->clone();
+    setProperty("UnfocussedWorkspace", std::move(wkspCopy));
+  }
+
   // Diffraction focus
   m_outputW = diffractionFocus(m_outputW);
   if (m_processLowResTOF)
@@ -699,18 +725,6 @@ void AlignAndFocusPowder::exec() {
     m_outputEW = compressAlg->getProperty("OutputWorkspace");
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
   }
-  m_progress->report();
-
-  if ((!m_params.empty()) && (m_params.size() != 1)) {
-    m_params.erase(m_params.begin());
-    m_params.pop_back();
-  }
-  if (!m_dmins.empty())
-    m_dmins.clear();
-  if (!m_dmaxs.empty())
-    m_dmaxs.clear();
-
-  m_outputW = rebin(m_outputW);
   m_progress->report();
 
   // return the output workspace

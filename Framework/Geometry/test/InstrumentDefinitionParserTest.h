@@ -1066,35 +1066,21 @@ public:
   void test_load_wish() {
     const auto definition =
         m_instrumentDirectoryPath + "/WISH_Definition_10Panels.xml";
-    auto start = std::chrono::high_resolution_clock::now();
     std::string contents = Strings::loadFile(definition);
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto wishInstrument = parser.parseXML(nullptr);
-    auto stop = std::chrono::high_resolution_clock::now();
     TS_ASSERT_EQUALS(extractDetectorInfo(*wishInstrument)->size(),
                      778245); // Sanity check
-    std::cout << "Creating WISH instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
-                                                                       start)
-                     .count()
-              << " ms" << std::endl;
   }
 
   void test_load_sans2d() {
     const auto definition =
         m_instrumentDirectoryPath + "/SANS2D_Definition_Tubes.xml";
-    auto start = std::chrono::high_resolution_clock::now();
     std::string contents = Strings::loadFile(definition);
     InstrumentDefinitionParser parser(definition, "dummy", contents);
     auto sansInstrument = parser.parseXML(nullptr);
-    auto stop = std::chrono::high_resolution_clock::now();
     TS_ASSERT_EQUALS(extractDetectorInfo(*sansInstrument)->size(),
                      122888); // Sanity check
-    std::cout << "Creating SANS2D instrument took: "
-              << std::chrono::duration_cast<std::chrono::milliseconds>(stop -
-                                                                       start)
-                     .count()
-              << " ms" << std::endl;
   }
 
 private:

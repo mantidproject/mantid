@@ -11,7 +11,7 @@ std::vector<double> getVertices(const std::vector<Kernel::V3D> &vertices) {
   if (nPoints > 0) {
     points.resize(static_cast<std::size_t>(nPoints) * 3);
     for (size_t i = 0; i < nPoints; ++i) {
-      V3D pnt = vertices[i];
+      const auto &pnt = m_vertices[i];
       points[i * 3] = pnt.X();
       points[i * 3 + 1] = pnt.Y();
       points[i * 3 + 2] = pnt.Z();

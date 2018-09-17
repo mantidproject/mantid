@@ -1998,7 +1998,7 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 
 std::string ConfigServiceImpl::getFullPath(const std::string &filename,
                                            const bool ignoreDirs,
-                                           Poco::Glob::Options options) const {
+                                           const int options) const {
   std::string fName = Kernel::Strings::strip(filename);
   g_log.debug() << "getFullPath(" << fName << ")\n";
   // If this is already a full path, nothing to do
@@ -2014,11 +2014,10 @@ std::string ConfigServiceImpl::getFullPath(const std::string &filename,
   } catch (std::exception &) {
   }
 
-  const std::vector<std::string> &searchPaths =
-      Kernel::ConfigService::Instance().getDataSearchDirs();
-  for (const auto &searchPath : searchPaths) {
+  for (const auto &searchPath :
+       Kernel::ConfigService::Instance().getDataSearchDirs()) {
     g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
-// On windows globbing is note working properly with network drives
+// On windows globbing is not working properly with network drives
 // for example a network drive containing a $
 // For this reason, and since windows is case insensitive anyway
 // a special case is made for windows

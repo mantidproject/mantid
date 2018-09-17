@@ -1,6 +1,7 @@
 #ifndef MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
 #define MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
 
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include "MantidNexusGeometry/TubeBuilder.h"
@@ -46,6 +47,8 @@ class MANTID_NEXUSGEOMETRY_DLL InstrumentBuilder {
 public:
   /// Constructor creates the instrument
   explicit InstrumentBuilder(const std::string &instrumentName);
+  InstrumentBuilder(const InstrumentBuilder &) = delete;
+  InstrumentBuilder &operator=(const InstrumentBuilder &) = delete;
   /// Adds component to instrument
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);
@@ -55,15 +58,16 @@ public:
                 boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(
-      const std::string &detName, int detId, const Eigen::Vector3d &position,
+      const std::string &detName, detid_t detId,
+      const Eigen::Vector3d &position,
       boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Adds detector to the last registered bank
   void addDetectorToLastBank(
-      const std::string &detName, int detId,
+      const std::string &detName, detid_t detId,
       const Eigen::Vector3d &relativeOffset,
       boost::shared_ptr<const Mantid::Geometry::IObject> shape);
   /// Adds detector to instrument
-  void addMonitor(const std::string &detName, int detId,
+  void addMonitor(const std::string &detName, detid_t detId,
                   const Eigen::Vector3d &position,
                   boost::shared_ptr<const Mantid::Geometry::IObject> &shape);
   /// Add sample
@@ -77,7 +81,7 @@ public:
                const Eigen::Quaterniond &rotation);
 
   /// Returns underlying instrument
-  std::unique_ptr<const Geometry::Instrument> createInstrument() const;
+  std::unique_ptr<const Geometry::Instrument> createInstrument();
 
 private:
   /// Add a single tube to the last registed bank
@@ -85,14 +89,10 @@ private:
                  boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
   /// Sorts detectors
   void sortDetectors() const;
-  /// Check that this instance is not locked
-  void verifyMutable() const;
   /// product
-  mutable std::unique_ptr<Geometry::Instrument> m_instrument;
+  std::unique_ptr<Geometry::Instrument> m_instrument;
   /// Last bank added. The instrument is the owner of the bank.
   Geometry::ICompAssembly *m_lastBank = nullptr;
-  /// completed
-  mutable bool m_finalized = false;
 };
 } // namespace NexusGeometry
 } // namespace Mantid

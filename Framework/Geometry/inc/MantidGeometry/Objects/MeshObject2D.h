@@ -108,6 +108,7 @@ private:
     double k;
     Kernel::V3D normal;
     Kernel::V3D p0;
+    double abs_normal;
   } m_planeParameters;
 
   void initialize();

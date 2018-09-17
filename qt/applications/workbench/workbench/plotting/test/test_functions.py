@@ -112,7 +112,7 @@ class FunctionsTest(TestCase):
     def test_plot_from_names_produces_single_error_plot_for_valid_name(self, get_spectra_selection_mock):
         fig = self._do_plot_from_names_test(get_spectra_selection_mock,
                                             # matplotlib does not set labels on the lines for error plots
-                                            expected_labels=[None, None, None],
+                                            expected_labels=[],
                                             wksp_indices=[0], errors=True, overplot=False)
         self.assertEqual(1, len(fig.gca().containers))
 
@@ -184,7 +184,7 @@ class FunctionsTest(TestCase):
         if target_fig is not None:
             self.assertEqual(target_fig, fig)
 
-        plotted_lines = fig.gca().get_lines()
+        plotted_lines = fig.gca().get_legend().get_lines()
         self.assertEqual(len(expected_labels), len(plotted_lines))
         for label_part, line in zip(expected_labels, plotted_lines):
             if label_part is not None:

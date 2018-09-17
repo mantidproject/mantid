@@ -6,6 +6,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/V3D.h"
 #include <boost/make_shared.hpp>
+#include <cmath>
 #include <numeric>
 
 namespace Mantid {
@@ -16,33 +17,50 @@ bool sufficientPoints(const std::vector<Mantid::Kernel::V3D> &vertices) {
   return vertices.size() >= 3; // Not a plane with < 3 points
 }
 
+/**
+ * Establish the first surface normal. Tries to establish normal fron
+ * non-colinear points
+ * @param vertices : All vertices
+ * @return surface normal, or 0,0,0 if not found
+ */
 Kernel::V3D surfaceNormal(const std::vector<Kernel::V3D> &vertices) {
   auto v0 = vertices[1] - vertices[0];
   Kernel::V3D normal{0, 0, 0};
+  const static double tolerance_sq = std::pow(1e-9, 2);
   // Look for normal amongst first 3 non-colinear points
-  auto v1 = vertices[2] - vertices[1];
   for (size_t i = 1; i < vertices.size() - 1; ++i) {
-    v1 = vertices[i + 1] - vertices[i];
+    auto v1 = vertices[i + 1] - vertices[i];
     normal = v0.cross_prod(v1);
-    if (normal.norm2() != 0) {
+    if (normal.norm2() > tolerance_sq) {
       break;
     }
   }
   return normal;
 }
 
+/**
+ * Establish if all vertices are coplanar
+ * @param vertices : All vertices to check
+ * @param normal : Surface normal
+ * @return True only if all vertices are coplanar
+ */
 bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
-                 const Kernel::V3D normal) {
+                 const Kernel::V3D &normal) {
   bool in_plane = true;
   auto v0 = vertices[0];
   const auto nx = normal[0];
   const auto ny = normal[1];
   const auto nz = normal[2];
-  auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
+  const auto k = nx * v0.X() + ny * v0.Y() + nz * v0.Z();
+  const auto denom = normal.norm();
+  const static double tolerance =
+      1e-9; // Fixed Tolerance. Too expensive to calculate
+            // based on machine uncertaintly for each
+            // vertex.
 
   for (const auto &vertex : vertices) {
-    auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k);
-    if (d != 0) {
+    auto d = (nx * vertex.X() + ny * vertex.Y() + nz * vertex.Z() - k) / denom;
+    if (d > tolerance || d < -1 * tolerance) {
       in_plane = false;
       break;
     }
@@ -50,12 +68,18 @@ bool allCoplanar(const std::vector<Kernel::V3D> &vertices,
   return in_plane;
 }
 
+/**
+ * Establish the surface normal for a set of vertices. Throw invalid_argument if
+ * colinear or non-coplanar vertices found.
+ * @param vertices : all vertices to consider
+ * @return : normal to surface formed by points
+ */
 Kernel::V3D
 validatePointsCoplanar(const std::vector<Mantid::Kernel::V3D> &vertices) {
   if (!sufficientPoints(vertices))
     throw std::invalid_argument("Insufficient vertices to create a plane");
 
-  Mantid::Kernel::V3D normal = CoplanarChecks::surfaceNormal(vertices);
+  const auto normal = CoplanarChecks::surfaceNormal(vertices);
   // Check that a valid normal was found amongst collection of vertices
   if (normal.norm2() == 0) {
     // If all points are colinear. Not a plane.
@@ -151,6 +175,11 @@ bool MeshObject2D::isOnTriangle(const Kernel::V3D &point, const Kernel::V3D &a,
   return (u >= 0) && (v >= 0) && (u + v <= 1);
 }
 
+/**
+ * Estalish if points are coplanar.
+ * @param vertices : All vertices to consider
+ * @return : Return True only if all coplanar
+ */
 bool MeshObject2D::pointsCoplanar(
     const std::vector<Mantid::Kernel::V3D> &vertices) {
   if (!CoplanarChecks::sufficientPoints(vertices))
@@ -166,6 +195,9 @@ bool MeshObject2D::pointsCoplanar(
   return CoplanarChecks::allCoplanar(vertices, normal);
 }
 
+/**
+ * Constructor
+ */
 MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
                            const std::vector<Kernel::V3D> &vertices,
                            const Kernel::Material &material)
@@ -173,6 +205,9 @@ MeshObject2D::MeshObject2D(const std::vector<uint16_t> &faces,
   initialize();
 }
 
+/**
+ * Move constructor
+ */
 MeshObject2D::MeshObject2D(std::vector<uint16_t> &&faces,
                            std::vector<Kernel::V3D> &&vertices,
                            const Kernel::Material &&material)
@@ -181,6 +216,9 @@ MeshObject2D::MeshObject2D(std::vector<uint16_t> &&faces,
   initialize();
 }
 
+/**
+ * Common initialization
+ */
 void MeshObject2D::initialize() {
   auto surfaceNormal = CoplanarChecks::validatePointsCoplanar(m_vertices);
   const auto v0 = m_vertices[0];
@@ -192,6 +230,7 @@ void MeshObject2D::initialize() {
   parameters.k =
       parameters.a * v0.X() + parameters.b * v0.Y() + parameters.c * v0.Z();
   parameters.normal = surfaceNormal;
+  parameters.abs_normal = surfaceNormal.norm();
   parameters.p0 = v0;
   m_planeParameters = parameters;
 
@@ -209,19 +248,22 @@ bool MeshObject2D::hasValidShape() const {
 }
 
 double MeshObject2D::distanceToPlane(const Kernel::V3D &point) const {
-  return (point.X() * m_planeParameters.a) + (point.Y() * m_planeParameters.b) +
-         (point.Z() * m_planeParameters.c) + m_planeParameters.k;
+  return ((point.X() * m_planeParameters.a) +
+          (point.Y() * m_planeParameters.b) +
+          (point.Z() * m_planeParameters.c) + m_planeParameters.k);
 }
 
 /**
- * Check that the point is on the plane AND that it is inside or on one of the
- * triangles that defines the plane. Both must be true.
+ * Check that the point is on the plane AND that it is inside or on@brief
+ * MeshObject2D::isOnSide one of the triangles that defines the plane. Both must
+ * be true.
  * @param point : Point to test
  * @return : True only if the point is valid
  */
 bool MeshObject2D::isValid(const Kernel::V3D &point) const {
 
-  if (distanceToPlane(point) == 0) {
+  static const double tolerance = 1e-9;
+  if (distanceToPlane(point) < tolerance) {
     for (size_t i = 0; i < m_vertices.size(); i += 3) {
       if (isOnTriangle(point, m_vertices[i], m_vertices[i + 1],
                        m_vertices[i + 2]))
@@ -231,6 +273,11 @@ bool MeshObject2D::isValid(const Kernel::V3D &point) const {
   return false;
 }
 
+/**
+ * Determine if point is on the side of the object
+ * @param point : Point to test
+ * @return : True if the point is on the side
+ */
 bool MeshObject2D::isOnSide(const Kernel::V3D &point) const {
   return isValid(point);
 }

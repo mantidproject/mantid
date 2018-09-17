@@ -64,6 +64,10 @@ void ReflSearchModel::addDataFromTable(
     newRunDetails[run] = SearchResult{description, location};
   }
 
+  if (newRunDetails.empty()) {
+    return;
+  }
+
   // To append, insert the new runs after the last element in the model
   const auto first = static_cast<int>(m_runs.size());
   const auto last = static_cast<int>(m_runs.size() + newRunDetails.size() - 1);

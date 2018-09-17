@@ -35,8 +35,6 @@ TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
   m_baseVec = firstDetectorPosition - m_halfHeightVec;
 }
 
-TubeBuilder::~TubeBuilder() {}
-
 const Eigen::Vector3d &TubeBuilder::tubePosition() const { return m_baseVec; }
 
 size_t TubeBuilder::size() const { return m_positions.size(); }
@@ -48,21 +46,22 @@ const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const {
 const std::vector<int> &TubeBuilder::detIDs() const { return m_detIDs; }
 
 boost::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
-  Eigen::Matrix<double, 3, 3> points;
+  using namespace Eigen;
+  Matrix<double, 3, 3> points;
   // calcualte height vector;
   // Centre shape about (0, 0, 0)
-  auto p1 = m_positions.front();
-  auto p2 = m_positions.back();
+  Eigen::Vector3d p1 = m_positions.front();
+  Eigen::Vector3d p2 = m_positions.back();
   p1 = p1 - m_halfHeightVec;
   p2 = p2 + m_halfHeightVec;
-  auto centre = (p1 + p2) / 2;
+  const Eigen::Vector3d centre = (p1 + p2) / 2;
 
   points.col(0) = p1 - centre;
   points.col(2) = p2 - centre;
 
   // Find point on outer circle
-  auto normVec = p1.cross(p2);
-  auto norm = normVec.norm();
+  Vector3d normVec = p1.cross(p2);
+  const auto norm = normVec.norm();
   auto factor = m_pixelRadius / norm;
   points.col(1) = (normVec * factor) + (points.col(0));
 
@@ -83,7 +82,7 @@ bool TubeBuilder::addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID) {
 
     // Recalculate height as distance between base of tube and tip of new
     // detector
-    auto dist = (m_baseVec) - (pos + m_halfHeightVec);
+    const Eigen::Vector3d dist = (m_baseVec) - (pos + m_halfHeightVec);
 
     if (dist.norm() > m_tubeHeight)
       m_tubeHeight = dist.norm();
@@ -94,9 +93,9 @@ bool TubeBuilder::addDetectorIfCoLinear(const Eigen::Vector3d &pos, int detID) {
 
 bool TubeBuilder::checkCoLinear(const Eigen::Vector3d &pos) const {
   // Check if pos is on the same line as p1 and p2
-  auto numVec = ((m_p2 - m_p1).cross(m_p1 - pos));
-  auto denomVec = (m_p2 - m_p1);
-  auto num = numVec.norm();
+  const Eigen::Vector3d numVec = ((m_p2 - m_p1).cross(m_p1 - pos));
+  const Eigen::Vector3d denomVec = (m_p2 - m_p1);
+  const auto num = numVec.norm();
 
   if (num == 0)
     return true;
