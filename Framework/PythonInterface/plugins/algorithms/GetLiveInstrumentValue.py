@@ -38,26 +38,26 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         self._instrument = self.getProperty('Instrument').value
         self._propertyType = self.getProperty('PropertyType').value
         self._propertyName = self.getProperty('PropertyName').value
-        value = self.getLiveValue()
-        self.setOutputValue(value)
+        value = self._get_live_value()
+        self._set_output_value(value)
 
-    def prefix(self):
+    def _prefix(self):
         """Prefix to use at the start of the EPICS string"""
         return 'IN:'
 
-    def namePrefix(self):
+    def _name_prefix(self):
         """Prefix to use in the EPICS string before the property name"""
         if self._propertyType == 'Run':
             return ':DAE:'
         else:
             return ':CS:SB:'
 
-    def getLiveValue(self):
+    def _get_live_value(self):
         from epics import caget
-        epicsName = self.prefix() + self._instrument + self.namePrefix() + self._propertyName
+        epicsName = self._prefix() + self._instrument + self._name_prefix() + self._propertyName
         return caget(epicsName, as_string=True)
 
-    def setOutputValue(self, value):
+    def _set_output_value(self, value):
         if value is not None:
             self.log().notice(self._propertyName + ' = ' + value)
             self.setProperty('Value', str(value))

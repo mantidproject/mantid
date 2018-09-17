@@ -41,22 +41,22 @@ AlgorithmFactory.subscribe(GetFakeLiveInstrumentValue)
 
 class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def setUp(self):
-        self._setupEnvironment()
-        self._setupWorkspaces()
+        self._setup_environment()
+        self._setup_workspaces()
 
     def tearDown(self):
-        self._resetWorkspaces()
-        self._resetEnvironment()
+        self._reset_workspaces()
+        self._reset_environment()
 
     def test_basic_reduction_works(self):
-        workspace = self._runAlgorithmWithDefaults()
+        workspace = self._run_algorithm_with_defaults()
         self.assertEquals(workspace.dataX(0).size, 55)
-        self._assertDelta(workspace.dataX(0)[0],  0.006462)
-        self._assertDelta(workspace.dataX(0)[33], 0.027376)
-        self._assertDelta(workspace.dataX(0)[54], 0.066421)
-        self._assertDelta(workspace.dataY(0)[4],  0.043630)
-        self._assertDelta(workspace.dataY(0)[33], 0.000029)
-        self._assertDelta(workspace.dataY(0)[53], 0.0)
+        self._assert_delta(workspace.dataX(0)[0],  0.006462)
+        self._assert_delta(workspace.dataX(0)[33], 0.027376)
+        self._assert_delta(workspace.dataX(0)[54], 0.066421)
+        self._assert_delta(workspace.dataY(0)[4],  0.043630)
+        self._assert_delta(workspace.dataY(0)[33], 0.000029)
+        self._assert_delta(workspace.dataY(0)[53], 0.0)
 
     def test_missing_inputs(self):
         self.assertRaises(RuntimeError,
@@ -74,12 +74,12 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                           OutputWorkspace='')
 
     def test_instrument_was_set_on_output_workspace(self):
-        workspace = self._runAlgorithmWithDefaults()
+        workspace = self._run_algorithm_with_defaults()
         self.assertEquals(self.__class__._input_ws.getInstrument().getName(), '')
         self.assertEquals(workspace.getInstrument().getName(), self._instrument_name)
 
     def test_sample_log_values_were_set_on_output_workspace(self):
-        workspace = self._runAlgorithmWithDefaults()
+        workspace = self._run_algorithm_with_defaults()
 
         names = ['Theta', 'S1VG', 'S2VG']
         values = [0.5, 1.001, 0.5]
@@ -95,39 +95,39 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertEquals(sorted(matched_names), sorted(names))
 
     def test_slits_gaps_are_set_up_on_output_workspace(self):
-        workspace = self._runAlgorithmWithDefaults()
+        workspace = self._run_algorithm_with_defaults()
         slit1vg = workspace.getInstrument().getComponentByName('slit1').getNumberParameter('vertical gap')
         slit2vg = workspace.getInstrument().getComponentByName('slit2').getNumberParameter('vertical gap')
         self.assertEquals(slit1vg[0], 1.001)
         self.assertEquals(slit2vg[0], 0.5)
 
-    def _setupEnvironment(self):
-        self._oldFacility = config['default.facility']
-        if self._oldFacility.strip() == '':
-            self._oldFacility = 'TEST_LIVE'
+    def _setup_environment(self):
+        self._old_facility = config['default.facility']
+        if self._old_facility.strip() == '':
+            self._old_facility = 'TEST_LIVE'
         config.setFacility('ISIS')
 
         self._instrument_name = 'INTER'
-        self._oldInstrument = config['default.instrument']
+        self._old_instrument = config['default.instrument']
         config['default.instrument'] = self._instrument_name
 
-    def _resetEnvironment(self):
-        config.setFacility(self._oldFacility)
-        config['default.instrument'] = self._oldInstrument
+    def _reset_environment(self):
+        config.setFacility(self._old_facility)
+        config['default.instrument'] = self._old_instrument
 
-    def _setupWorkspaces(self):
-        self.__class__._input_ws = self._createTestWorkspace()
-        self._defaultArgs = {
+    def _setup_workspaces(self):
+        self.__class__._input_ws = self._create_test_workspace()
+        self._default_args = {
             'InputWorkspace': self.__class__._input_ws,
             'OutputWorkspace': 'output',
             'Instrument': 'INTER',
             'GetLiveValueAlgorithm': 'GetFakeLiveInstrumentValue'
         }
 
-    def _resetWorkspaces(self):
+    def _reset_workspaces(self):
         mtd.clear()
 
-    def _createTestWorkspace(self):
+    def _create_test_workspace(self):
         """Create a test workspace with reflectometry data but no instrument or sample logs"""
         nSpec = 4
         x = range(5, 100000, 1000)
@@ -144,12 +144,12 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         CreateWorkspace(NSpec=nSpec, UnitX='TOF', DataX=dataX, DataY=dataY, OutputWorkspace='input_ws')
         return mtd['input_ws']
 
-    def _runAlgorithmWithDefaults(self):
-        alg = create_algorithm('ReflectometryReductionOneLiveData', **self._defaultArgs)
+    def _run_algorithm_with_defaults(self):
+        alg = create_algorithm('ReflectometryReductionOneLiveData', **self._default_args)
         assertRaisesNothing(self, alg.execute)
         return mtd['output']
 
-    def _assertDelta(self, value1, value2):
+    def _assert_delta(self, value1, value2):
         self.assertEquals(round(value1, 6), round(value2, 6))
 
 
