@@ -97,15 +97,22 @@ void GravityCorrection::init() {
                         "Component name of the second slit.");
 }
 
-string GravityCorrection::componentName(string propertyName, string testName,
-                                        const Mantid::API::Run &run) {
-  if (this->getPointerToProperty(propertyName)->isDefault()) {
-    if (run.hasProperty(testName))
-      return run.getProperty(testName)->value();
-    else
-      return this->getPropertyValue(propertyName);
-  }
-  return testName;
+/**
+ * @brief GravityCorrection::componentName checks whether the component name is
+ * given in parameter file
+ * @param inputName :: name of the algorithm property
+ * @param instr :: from which instrument to read parameter value
+ * @return the name of the component
+ */
+string GravityCorrection::componentName(
+    string inputName, Mantid::Geometry::Instrument_const_sptr &instr) {
+  const string paramName = "Workflow." + this->getPropertyValue(inputName);
+  const string compName = instr->getParameterAsString(paramName);
+  if (!compName.empty())
+    return compName;
+  else
+    return this->getPropertyValue(inputName);
+  return paramName;
 }
 
 /**
@@ -132,15 +139,15 @@ map<string, string> GravityCorrection::validateInputs() {
                                "(check workspace history).";
   // Slits (name empty? component exists? positions differ?)
   // Get a pointer to the instrument of the input workspace
-  const auto instrument = this->m_ws->getInstrument();
+  Mantid::Geometry::Instrument_const_sptr instrument =
+      this->m_ws->getInstrument();
   const auto refFrame = instrument->getReferenceFrame();
   m_beamDirection = refFrame->pointingAlongBeam();
   m_upDirection = refFrame->pointingUp();
   m_horizontalDirection = refFrame->pointingHorizontal();
-  const Mantid::API::Run &run = this->m_ws->run();
   map<string, string> slits;
-  slits["FirstSlitName"] = this->componentName("FirstSlitName", "slit1", run);
-  slits["SecondSlitName"] = this->componentName("SecondSlitName", "slit2", run);
+  slits["FirstSlitName"] = this->componentName("FirstSlitName", instrument);
+  slits["SecondSlitName"] = this->componentName("SecondSlitName", instrument);
   double iposition{0.}, last{0.};
   for (auto mapit = slits.begin(); mapit != slits.end(); ++mapit) {
     if (mapit->second.empty())
@@ -279,9 +286,10 @@ void GravityCorrection::setCoordinate(V3D &pos, PointingAlong direction,
 void GravityCorrection::slitCheck() {
   const string sourceName = this->m_virtualInstrument->getSource()->getName();
   const string sampleName = this->m_virtualInstrument->getSample()->getName();
-  const Mantid::API::Run &run = this->m_ws->run();
-  const string slit1{this->componentName("FirstSlitName", "slit1", run)};
-  const string slit2{this->componentName("SecondSlitName", "slit2", run)};
+  const string slit1{
+      this->componentName("FirstSlitName", this->m_virtualInstrument)};
+  const string slit2{
+      this->componentName("SecondSlitName", this->m_virtualInstrument)};
   // in beam directions
   const double sourceD = this->coordinate(sourceName, this->m_beamDirection);
   const double sampleD = this->coordinate(sampleName, this->m_beamDirection);

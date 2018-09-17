@@ -5,7 +5,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"

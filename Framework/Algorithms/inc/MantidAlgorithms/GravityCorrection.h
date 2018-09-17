@@ -3,7 +3,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include <boost/shared_ptr.hpp>
@@ -92,9 +91,9 @@ private:
 
   /// Initialisation code
   void init() override;
-  /// Name of a string component wich may be defined in sample log
-  std::string componentName(std::string propertyName, std::string testName,
-                            const Mantid::API::Run &run);
+  /// Name of a string component wich may be defined in parameters file
+  std::string componentName(std::string propertyName,
+                            Mantid::Geometry::Instrument_const_sptr &instr);
   /// Final angle definition between source and sample
   double finalAngle(const double k, size_t i);
   /// Retrieve the coordinate of an instrument component
