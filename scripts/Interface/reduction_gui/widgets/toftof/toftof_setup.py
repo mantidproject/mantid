@@ -336,7 +336,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem = TOFTOFScriptElement()
 
         def line_text(lineEdit):
-            return lineEdit.text().strip()
+            return str(lineEdit.text()).strip()
 
         def is_checked(checkBox):
             return checkBox.isChecked() and checkBox.isEnabled()

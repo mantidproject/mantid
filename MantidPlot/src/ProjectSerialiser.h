@@ -57,6 +57,8 @@ using groupNameToWsNamesT =
 class ProjectSerialiser : public QObject {
   Q_OBJECT
 public:
+  static QStringList serialisablePythonInterfaces();
+
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
   explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
@@ -67,7 +69,8 @@ public:
 
   /// Save the current state of the project to disk
   bool save(const QString &projectName, const std::vector<std::string> &wsNames,
-            const std::vector<std::string> &windowNames, bool compress = false);
+            const std::vector<std::string> &windowNames,
+            const std::vector<std::string> &interfaces, bool compress = false);
   bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
@@ -95,6 +98,8 @@ private:
   std::vector<std::string> m_windowNames;
   /// Vector of names of workspaces to save to file
   std::vector<std::string> m_workspaceNames;
+  /// Vector of names of python interfaces to save to file
+  std::vector<std::string> m_interfacesNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
   /// Flag to check if we should save all workspaces
@@ -125,6 +130,10 @@ private:
   QString saveWorkspaces();
   /// Save additional windows
   QString saveAdditionalWindows();
+  /// Save Python interfaces
+  QString savePythonInterfaces();
+  /// Save Python interfaces
+  QString savePythonInterface(const QString &launcherModuleName);
 
   // Loading Functions
 
@@ -151,6 +160,11 @@ private:
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
   void loadAdditionalWindows(const std::string &lines, const int fileVersion);
+  /// Load any PythonInterfaces in the project
+  void loadPythonInterfaces(const std::string &lines);
+  /// Load a single Python interface
+  void loadPythonInterface(const std::string &launcherModuleName,
+                           const std::string &pySection);
 
   // Misc functions
 
