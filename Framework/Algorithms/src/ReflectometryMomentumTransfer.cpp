@@ -1,10 +1,9 @@
 #include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -53,7 +52,6 @@ constexpr double inRad(const double a) noexcept { return a / 180. * M_PI; }
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
@@ -72,6 +70,11 @@ int ReflectometryMomentumTransfer::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ReflectometryMomentumTransfer::category() const {
   return "ILL\\Reflectometry;Reflectometry";
+}
+
+/// Return a vector of related algorithms.
+const std::vector<std::string> ReflectometryMomentumTransfer::seeAlso() const {
+  return {"ConvertToReflectometryQ", "ConvertUnits"};
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -99,11 +102,12 @@ void ReflectometryMomentumTransfer::init() {
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::INPUT_WS, "", Direction::Input, inWavelength),
-      "A reflectivity workspace in wavelenght.");
+      "A reflectivity workspace with X units in wavelength.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::OUTPUT_WS, "", Direction::Output, inWavelength),
-      "The input workspace with DX values set to the Qz resolution.");
+      "The input workspace with X units converted to Q and DX values set to "
+      "the Q resolution.");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::REFLECTED_BEAM_WS, "", Direction::Input, inWavelength),
