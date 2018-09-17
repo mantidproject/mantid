@@ -360,7 +360,7 @@ public:
             AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1360.200, 1E-3),
                   QwtDataX(1, 1364.520, 1E-3), QwtDataX(2, 1398.090, 1E-3),
                   QwtDataY(0, 0.14289, 1E-5), QwtDataY(1, 0.12837, 1E-5),
-                  QwtDataY(2, 0.15004, 1E-5)), 
+                  QwtDataY(2, 0.15004, 1E-5)),
             AllOf(Property(&std::vector<double>::size, 3),
                   VectorValue(0, 1.284E-3, 1E-6),
                   VectorValue(1, 1.280E-3, 1E-6),
