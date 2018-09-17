@@ -43,4 +43,3 @@ class RetrieveRecoveryFiles(object):
         directory = RetrieveRecoveryFiles._get_properties_directory()
         zip_file = os.path.join(directory, file)
         os.remove(zip_file + '.zip')
-
