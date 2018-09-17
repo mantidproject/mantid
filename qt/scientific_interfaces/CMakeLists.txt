@@ -92,6 +92,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     MantidScientificInterfacesISISReflectometry
     MantidScientificInterfacesEnggDiffraction
     MantidScientificInterfacesMultiDatasetFit
+	MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
   PARENT_DEPENDENCIES
     GUITests

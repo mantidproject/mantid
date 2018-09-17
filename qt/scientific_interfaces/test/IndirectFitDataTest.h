@@ -4,41 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "Indirect/IndirectFitData.h"
-//#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
-//#include "MantidAPI/AlgorithmManager.h"
-//#include "MantidAPI/FunctionFactory.h"
-//#include "MantidAPI/IFunction.h"
-//#include "MantidAPI/MatrixWorkspace.h"
-//#include "MantidAPI/WorkspaceFactory.h"
+//#include "Indirect/IndirectFitData.cpp"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <iostream>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::IDA;
-
-namespace {
-void setUpFunction() {
-  // MatrixWorkspace_sptr workspace =
-  //    WorkspaceFactory::Instance().create("workspace_name_red", 1, 9, 9);
-  // Spectra spec = "";
-  // const std::string function =
-  //    "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
-  //    "(composite=Convolution,FixResolution=true,NumDeriv=true;"
-  //    "name=Resolution,Workspace=resolution,WorkspaceIndex=0;"
-  //    "name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)";
-
-  // IFunction_sptr ifun =
-  // FunctionFactory::Instance().createInitialized(function);
-
-  // IAlgorithm_sptr fit = AlgorithmManager::Instance().createUnmanaged("Fit");
-  // fit->initialize();
-  // fit->setProperty("Function", ifun);
-  // fit->setProperty("InputWorkspace", workspace);
-  // fit->setProperty("CreateOutput", true);
-  // fit->execute();
-}
-
-} // namespace
 
 class IndirectFitDataTest : public CxxTest::TestSuite {
 public:
@@ -48,21 +21,24 @@ public:
 
   static void destroySuite(IndirectFitDataTest *suite) { delete suite; }
 
-  //void test_algorithm_initializes() {
-  //  QENSFitSequential alg;
-  //  TS_ASSERT_THROWS_NOTHING(alg.initialize());
-  //  TS_ASSERT(alg.isInitialized());
-  //}
+  void test_data_is_instantiated_correctly() {
+    MatrixWorkspace_sptr workspace =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
+    const Spectra spec =
+        std::make_pair(0u, workspace->getNumberHistograms() - 1);
+    IndirectFitData data(workspace, spec);
 
-  void test_test() {
+    const std::string name = data.workspace()->getName();
+    std::cout << name << "\n";
+  }
 
-    // IndirectFitData::displayName("%1%_s%2%_Result", "_to_");
-
-    // IndirectFitData data(workspace, spec);
-    //setUpFunction();
-    // data->displayName();
-
-    std::cout << "hello";
+  void test_displayName_returns_correct_name() {
+  //given -
+  //the workspace and data
+  //when -
+  //the parameters equal so and so
+  //then -
+  //the output name should be
   }
 };
 

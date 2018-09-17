@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATA_H_
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -152,7 +153,7 @@ private:
    File change history is stored at: <https://github.com/mantidproject/mantid>.
    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IndirectFitData {
+class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
   IndirectFitData(Mantid::API::MatrixWorkspace_sptr workspace,
                   const Spectra &spectra);
