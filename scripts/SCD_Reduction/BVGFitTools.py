@@ -238,6 +238,13 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
                 max(fitMaxIDX[1] - dP, 0):min(fitMaxIDX[1] + dP, goodIDX.shape[1]),
                 max(fitMaxIDX[2] - dP, 0):min(fitMaxIDX[2] + dP, goodIDX.shape[2])] = True
     goodIDX = np.logical_and(goodIDX, conv_n_events > 0)
+    plt.figure(19); plt.clf()
+    plt.imshow(n_events[:,:,n_events.shape[2]//2])
+    plt.figure(20); plt.clf()
+    plt.imshow(goodIDX[:,:,n_events.shape[2]//2])
+    TOF = 1./np.sqrt(QX*QX+QY*QY+QZ*QZ)
+    plt.figure(21); plt.clf()
+    plt.imshow(TOF[:,:,n_events.shape[2]//2])
     # A1 = slope, A0 = offset
     scaleLinear = Polynomial(n=1)
     scaleLinear.constrain("A1>0")
@@ -616,9 +623,9 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         #plt.figure(18); plt.clf(); plt.imshow(m.function2D(pos)); plt.title('BVG Initial guess')
         bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
         fitFun = m
+        print(m)
         fitResults = Fit(Function=fitFun, InputWorkspace=bvgWS,
                          Output='bvgfit', Minimizer='Levenberg-MarquardtMD')
-
     # Recover the result
     m = BivariateGaussian.BivariateGaussian()
     m.init()
