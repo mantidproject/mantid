@@ -29,7 +29,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 namespace Process {
 
-bool isAnotherInstanceRunning();
 unsigned int numberOfMantids();
 long long getProcessID();
 } // namespace Process
