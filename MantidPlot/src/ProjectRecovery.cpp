@@ -39,6 +39,9 @@
 #include <string>
 #include <thread>
 
+#ifdef _WIN32
+#define pid_t int
+#endif
 namespace {
 Mantid::Kernel::Logger g_log("ProjectRecovery");
 
