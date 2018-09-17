@@ -119,7 +119,7 @@ void export_ConfigService() {
            getString_Overload(
                "Returns the named key's value. If use_cache = "
                "true [default] then relative paths->absolute",
-               (arg("self"), arg("key"), arg("use_cache") = true)))
+               (arg("self"), arg("key"), arg("pathAbsolute") = true)))
 
       .def("setString", &ConfigServiceImpl::setString,
            (arg("self"), arg("key"), arg("value")),
