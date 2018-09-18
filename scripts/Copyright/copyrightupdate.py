@@ -9,8 +9,10 @@ import argparse
 import os
 import re
 
-#Compiled Regexes
+######################################################################################################################
+# Script level variables
 
+#Compiled Regexes
 #old style statement, year in group 1
 regex_old_style = re.compile("$\W*Copyright\s.*?(\d{4}).*License for more details.*?$" + #required section
                              "(.*licenses(\/){0,1}\>.*?$){0,1}" +                        #optional license link section
@@ -29,7 +31,7 @@ accepted_file_extensions = [".py",".cpp",".h",".tcc",".in",".hh"]
 #python file exxtensions
 python_file_extensions = [".py"]
 #extensions to ignore, don't even report these
-exts_to_ignore = [".txt",".pyc",".sh"]
+exts_to_ignore = [".txt",".pyc",".sh",".template",".png",".odg",".md",".doxyfile",".properties",".pbs"]
 
 #global reporting dictionaries
 report_new_statements_updated = {}
@@ -46,6 +48,8 @@ reporting_dictionaries = {"new_statements_updated.txt":report_new_statements_upd
                           "unrecognized_statement.txt":report_unrecognized_statement,
                           "unmatched_files.txt":report_unmatched_files
                           }
+######################################################################################################################
+# Functions
 
 def get_copyright(year,comment_prefix = "//"):
     """
@@ -143,9 +147,19 @@ def process_file(filename):
             myfile.write(file_text)
 
 def remove_text_section(text,start,end):
+    """
+    Removes a section from a string
+    :param text: the input string
+    :param start: the start index of the section to remove
+    :param end: the end section of the string to remove
+    :return: the string after the section has been removed
+    """
     return text[:start] + text[end:]
 
+######################################################################################################################
+# Main function
 
+# Set up command line arguments
 parser = argparse.ArgumentParser(description='Updates copyright statements in Python and C++.')
 parser.add_argument("-i", "--input", type=str,
                     help="The root path for files")
@@ -155,13 +169,16 @@ parser.add_argument("-n", "--noreport", help="Suppress the writing of reporting 
                     action="store_true")
 args = parser.parse_args()
 
+# Handle the arguments
 root_path = args.input
 if root_path is None:
     root_path = '.'
 dry_run = args.dryrun
 
+# Process the files
 process_file_tree(root_path)
 
+# Reporting
 if not args.noreport:
     #write out reporting files
     for reporting_filename, reporting_dict in reporting_dictionaries.iteritems():
