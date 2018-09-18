@@ -226,13 +226,13 @@ void IndirectFitPlotPresenter::updateAvailableSpectra() {
 }
 
 void IndirectFitPlotPresenter::disableAllDataSelection() {
-  m_view->disableSpectrumSelection();
-  m_view->disableFitRangeSelection();
+  m_view->enableSpectrumSelection(false);
+  m_view->enableFitRangeSelection(false);
 }
 
 void IndirectFitPlotPresenter::enableAllDataSelection() {
-  m_view->enableSpectrumSelection();
-  m_view->enableFitRangeSelection();
+  m_view->enableSpectrumSelection(true);
+  m_view->enableFitRangeSelection(true);
 }
 
 void IndirectFitPlotPresenter::updatePlots() {
@@ -310,19 +310,19 @@ void IndirectFitPlotPresenter::plotCurrentPreview() {
 
 void IndirectFitPlotPresenter::updateGuess() {
   if (m_model->canCalculateGuess()) {
-    m_view->enablePlotGuess();
+    m_view->enablePlotGuess(true);
     updateGuess(m_view->isPlotGuessChecked());
   } else {
-    m_view->disablePlotGuess();
+    m_view->enablePlotGuess(false);
     clearGuess();
   }
 }
 
 void IndirectFitPlotPresenter::updateGuessAvailability() {
   if (m_model->canCalculateGuess())
-    m_view->enablePlotGuess();
+    m_view->enablePlotGuess(true);
   else
-    m_view->disablePlotGuess();
+    m_view->enablePlotGuess(false);
 }
 
 void IndirectFitPlotPresenter::updateGuess(bool doPlotGuess) {

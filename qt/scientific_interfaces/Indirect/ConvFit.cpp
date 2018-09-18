@@ -180,6 +180,7 @@ void ConvFit::setSaveResultEnabled(bool enabled) {
 }
 
 void ConvFit::setRunEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
   m_uiForm->pbRun->setEnabled(enabled);
   m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
 }

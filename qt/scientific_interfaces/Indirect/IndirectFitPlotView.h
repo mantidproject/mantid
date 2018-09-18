@@ -46,14 +46,10 @@ public:
   void removeFromTopPreview(const QString &name);
   void removeFromBottomPreview(const QString &name);
 
-  void disablePlotGuess();
-  void enablePlotGuess();
-
-  void disableSpectrumSelection();
-  void enableSpectrumSelection();
-
-  void disableFitRangeSelection();
-  void enableFitRangeSelection();
+  void enableFitSingleSpectrum(bool enable);
+  void enablePlotGuess(bool enable);
+  void enableSpectrumSelection(bool enable);
+  void enableFitRangeSelection(bool enable);
 
   void setBackgroundLevel(double value);
 

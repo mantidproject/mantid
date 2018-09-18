@@ -71,6 +71,7 @@ void MSDFit::setSaveResultEnabled(bool enabled) {
 }
 
 void MSDFit::setRunEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
   m_uiForm->pbRun->setEnabled(enabled);
   m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
 }
