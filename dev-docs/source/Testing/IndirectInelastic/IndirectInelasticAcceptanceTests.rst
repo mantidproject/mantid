@@ -188,6 +188,15 @@ Data analysis I(Q, T) Fit
 1.  Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 2.  Go to the ``I(Q, T) Fit`` tab
 3.  Load the ``_iqt`` workspace from the previous test
+4.  Set ``Exponential`` to 1
+5.  Set ``EndX`` to 0.14
+6.  Click ``Run``
+7.  This should produce a fit and a difference plot in the window
+8.  Click ``Plot current preview`` this should open a plot with three datasets plotted
+9.  Change ``Range`` to 0 - 10
+10. Click ``Run``
+11. Select Lifetime from the ``Plot Output`` drop-down
+12. Click ``Plot Result`` this should open a new plot with the lifetimes plotted
   
 
 
