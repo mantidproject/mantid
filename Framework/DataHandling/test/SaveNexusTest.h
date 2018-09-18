@@ -13,7 +13,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/SaveNexus.h"

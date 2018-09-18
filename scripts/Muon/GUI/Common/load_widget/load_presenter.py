@@ -12,9 +12,11 @@ class LoadPresenter(object):
         self.co_thread = None
 
         self.view.on_load_clicked(self.equalise_loaded_runs)
+        self.view.on_load_clicked(self.equalise_last_loaded_run)
         self.view.on_load_clicked(self.load_run)
         self.view.on_load_clicked(self.co_model.wipe_co_runs)
         self.view.on_co_add_clicked(self.equalise_loaded_runs)
+        self.view.on_co_add_clicked(self.equalise_last_loaded_run)
         self.view.on_co_add_clicked(self.co_add_run)
         self.view.on_spinbox_changed(self.update_models)
 
@@ -24,6 +26,13 @@ class LoadPresenter(object):
             self.load_model.loaded_runs)
         self.co_model.loaded_runs = loaded_runs
         self.load_model.loaded_runs = loaded_runs
+
+    def equalise_last_loaded_run(self):
+        last_run = max(
+            self.co_model.last_loaded_runs,
+            self.load_model.last_loaded_runs)
+        self.co_model.last_loaded_runs = last_run
+        self.load_model.last_loaded_runs = last_run
 
     def update_models(self, run):
         self.load_model.set_run(run)
@@ -59,3 +68,15 @@ class LoadPresenter(object):
 
     def new_thread(self, model):
         return thread_model.ThreadModel(model)
+
+    def last_loaded_run(self):
+        try:
+            return self.load_model.last_loaded_runs[-1]
+        except IndexError:
+            return None
+
+    def on_loading_finished(self, slot):
+        self.view.on_loading_finished(slot)
+
+    def unreg_on_loading_finished(self, slot):
+        self.view.unreg_on_loading_finished(slot)

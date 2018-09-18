@@ -520,6 +520,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
+        eiCalibrationWS = None
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -539,10 +540,15 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                                     subalgLogging)
                 wsCleanup.cleanup(monWS)
                 monWS = eiCalibratedMonWS
-            if not self.getProperty(
-                    common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
-                self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
-            wsCleanup.cleanup(eiCalibrationWS)
+        if not self.getProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
+            if eiCalibrationWS is None:
+                eiCalibrationWSName = wsNames.withSuffix('incident_energy_from_logs')
+                Ei = mainWS.run().getProperty('Ei').value
+                eiCalibrationWS = CreateSingleValuedWorkspace(OutputWorkspace=eiCalibrationWSName,
+                                                              DataValue=Ei,
+                                                              EnableLogging=subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
+        wsCleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
 
     def _chooseElasticChannelMode(self, mainWS, report):

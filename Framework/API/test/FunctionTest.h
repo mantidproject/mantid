@@ -8,7 +8,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 
