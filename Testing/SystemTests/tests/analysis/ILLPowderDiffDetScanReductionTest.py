@@ -1,7 +1,7 @@
 import stresstesting
 
 from mantid.simpleapi import PowderDiffILLDetScanReduction, \
-    CompareWorkspaces, ExtractSpectra, GroupWorkspaces
+    CompareWorkspaces, ExtractSpectra, GroupWorkspaces, CropWorkspace
 from mantid import config
 
 
@@ -22,6 +22,7 @@ class ILLPowderDiffDetScanReductionTest(stresstesting.MantidStressTest):
     def d2b_2d_tubes_test(self):
         ws_2d_tubes = PowderDiffILLDetScanReduction(
             Run='508093:508095',
+            UseCalibratedData = False,
             Output2DTubes = True,
             Output2D = False,
             Output1D = False,
@@ -69,10 +70,29 @@ class ILLPowderDiffDetScanReductionTest(stresstesting.MantidStressTest):
             OutputWorkspace='outWS_1d')
         return ws_1d
 
+    def reduce_component_test(self):
+        PowderDiffILLDetScanReduction(Run='508093.nxs',
+                                      UseCalibratedData=False,
+                                      Output2DTubes=True, Output1D=False,
+                                      CropNegativeScatteringAngles=False,
+                                      OutputWorkspace='alltubes',
+                                      InitialMask='0', FinalMask='0')
+        PowderDiffILLDetScanReduction(Run='508093.nxs',
+                                      UseCalibratedData=False,
+                                      Output2DTubes=True, Output1D=False,
+                                      CropNegativeScatteringAngles=False,
+                                      OutputWorkspace='tube128',
+                                      InitialMask='0', FinalMask='0',
+                                      ComponentsToReduce='tube_128')
+        CropWorkspace(InputWorkspace='alltubes_2DTubes', OutputWorkspace='alltubes_tube128', XMin=147.471)
+        match = CompareWorkspaces(Workspace1='tube128_2DTubes', Workspace2='alltubes_tube128', Tolerance=0.000001)
+        self.assertTrue(match[0])
+
     def runTest(self):
         ws_2d_tubes = self.d2b_2d_tubes_test()
         ws_2d = self.d2b_2d_test()
         ws_1d = self.d2b_1d_test()
+        self.reduce_component_test()
 
         # Check loading and merging, and keeping files separate gives the same results
         ws_2d_merge = self.d2b_2d_tubes_test_using_merge()

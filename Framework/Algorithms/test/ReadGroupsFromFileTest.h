@@ -6,7 +6,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"

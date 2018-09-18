@@ -1,10 +1,11 @@
 import unittest
 
+import os
+os.environ["QT_API"] = "pyqt"  # noqa E402
+
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
-
 from Muon.GUI.Common import mock_widget
-
 
 try:
     from unittest import mock

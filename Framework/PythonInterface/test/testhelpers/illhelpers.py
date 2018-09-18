@@ -377,11 +377,12 @@ def refl_rotate_detector(ws, angle):
     run_algorithm('RotateInstrumentComponent', **args)
 
 
-def refl_sum_in_lambda(outputWSName, ws):
+def refl_sum_foreground(outputWSName, sumType, ws, dirFgdWS=None):
     args = {
         'InputWorkspace': ws,
         'OutputWorkspace': outputWSName,
-        'SummationType': 'SumInLambda',
+        'SummationType': sumType,
+        'DirectForegroundWorkspace': dirFgdWS,
         'WavelengthRange': [0.1]
     }
     alg = create_algorithm('ReflectometryILLSumForeground', **args)

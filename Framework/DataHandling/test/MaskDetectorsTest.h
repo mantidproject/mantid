@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/EventWorkspace.h"
