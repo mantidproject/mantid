@@ -8,13 +8,15 @@ from qtpy import QtWidgets
 from matplotlib.figure import Figure
 from matplotlib import gridspec
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+
 # pyplot should not be imported:
 # https://stackoverflow.com/posts/comments/26295260
+
+from Muon.GUI.ElementalAnalysis.Plotting.navigation_toolbar import myToolbar
 
 from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
-
 
 class PlotView(QtWidgets.QWidget):
     def __init__(self):
@@ -56,8 +58,13 @@ class PlotView(QtWidgets.QWidget):
         button_layout.addWidget(self.errors)
 
         grid = QtWidgets.QGridLayout()
-        grid.addWidget(self.canvas, 0, 0)
-        grid.addLayout(button_layout, 1, 0)
+
+        self.toolbar = myToolbar(self.canvas,self)
+        
+        self.toolbar.update()
+        grid.addWidget(self.toolbar,0,0)
+        grid.addWidget(self.canvas, 1, 0)
+        grid.addLayout(button_layout, 2, 0)
         self.setLayout(grid)
 
     def _redo_layout(func):
