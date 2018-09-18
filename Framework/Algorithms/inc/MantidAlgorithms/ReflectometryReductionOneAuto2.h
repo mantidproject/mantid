@@ -79,7 +79,8 @@ private:
   getPolarizationEfficiencies();
   void applyPolarizationCorrection(std::string const &outputIvsLam);
   API::MatrixWorkspace_sptr getFloodWorkspace();
-  void applyFloodCorrection(API::MatrixWorkspace_sptr flood, std::string const &prop);
+  void applyFloodCorrection(API::MatrixWorkspace_sptr flood,
+                            std::string const &prop);
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue);

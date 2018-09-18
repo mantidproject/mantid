@@ -1337,7 +1337,8 @@ public:
   }
 
   void test_flood_correction() {
-    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS =
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     auto flood = createFloodWorkspace();
 
     // Correct by rotating detectors around the sample
@@ -1361,9 +1362,11 @@ public:
   }
 
   void test_flood_correction_transmission() {
-    auto inputWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto transWS = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    for(size_t i = 0; i < transWS->getNumberHistograms(); ++i) {
+    auto inputWS =
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto transWS =
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    for (size_t i = 0; i < transWS->getNumberHistograms(); ++i) {
       auto &y = transWS->mutableY(i);
       y.assign(y.size(), 10.0 * double(i + 1));
     }
@@ -1390,8 +1393,10 @@ public:
   }
 
   void test_flood_correction_group() {
-    auto inputWS1 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
-    auto inputWS2 = create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS1 =
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
+    auto inputWS2 =
+        create2DWorkspaceWithReflectometryInstrumentMultiDetector(0, 0.1);
     inputWS2 *= 2.0;
     auto group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(inputWS1);
@@ -1416,7 +1421,8 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQb");
     alg.execute();
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 4.5, 0.000001);
     auto out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
@@ -1446,7 +1452,8 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     TS_ASSERT(out);
     auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 0.001);
@@ -1479,7 +1486,8 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
+    WorkspaceGroup_sptr out =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IvsQ");
     TS_ASSERT(out);
     auto out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0));
     TS_ASSERT_DELTA(out1->y(0)[0], 90.0, 1e-15);
@@ -1517,8 +1525,8 @@ public:
             "Instrument parameter file doesn't have the Flood_Run parameter."));
     AnalysisDataService::Instance().clear();
   }
-private:
 
+private:
   MatrixWorkspace_sptr createFloodWorkspace(size_t n = 4) {
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {
@@ -1527,13 +1535,12 @@ private:
       flood->mutableY(2)[0] = 0.8;
       flood->mutableY(3)[0] = 0.9;
     } else {
-      for(size_t i = 0; i < n; ++i) {
+      for (size_t i = 0; i < n; ++i) {
         flood->mutableY(i)[0] = i * 0.01;
       }
     }
     return flood;
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */

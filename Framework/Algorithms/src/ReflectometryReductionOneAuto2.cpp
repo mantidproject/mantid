@@ -7,9 +7,9 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -1015,7 +1015,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
     auto const instrument = inputWS->getInstrument();
     auto const floodRunParam = instrument->getParameterAsString("Flood_Run");
     if (floodRunParam.empty()) {
-      throw std::invalid_argument("Instrument parameter file doesn't have the Flood_Run parameter.");
+      throw std::invalid_argument(
+          "Instrument parameter file doesn't have the Flood_Run parameter.");
     }
     boost::regex separator("\\s*,\\s*|\\s+");
     auto const parts = Strings::StrParts(floodRunParam, separator);
@@ -1048,16 +1049,16 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
   return MatrixWorkspace_sptr();
 }
 
-void
-ReflectometryReductionOneAuto2::applyFloodCorrection(MatrixWorkspace_sptr flood, std::string const &prop) {
-    MatrixWorkspace_sptr ws = getProperty(prop);
-    auto alg = createChildAlgorithm("ApplyFloodWorkspace");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("FloodWorkspace", flood);
-    alg->execute();
-    MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
-    setProperty(prop, out);
+void ReflectometryReductionOneAuto2::applyFloodCorrection(
+    MatrixWorkspace_sptr flood, std::string const &prop) {
+  MatrixWorkspace_sptr ws = getProperty(prop);
+  auto alg = createChildAlgorithm("ApplyFloodWorkspace");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("FloodWorkspace", flood);
+  alg->execute();
+  MatrixWorkspace_sptr out = alg->getProperty("OutputWOrkspace");
+  setProperty(prop, out);
 }
 
 void ReflectometryReductionOneAuto2::applyFloodCorrections() {
