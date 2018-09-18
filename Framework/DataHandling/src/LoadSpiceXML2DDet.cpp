@@ -24,6 +24,10 @@
 
 #include <algorithm>
 #include <fstream>
+#include <fstream>
+#include <iostream>
+
+using namespace std;
 
 namespace Mantid {
 namespace DataHandling {
@@ -159,9 +163,12 @@ const std::string LoadSpiceXML2DDet::summary() const {
  * @brief LoadSpiceXML2DDet::init
  */
 void LoadSpiceXML2DDet::init() {
+  std::vector<std::string> exts;
+  exts.push_back(".xml");
+  exts.push_back(".bin");
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::FileAction::Load,
-                                ".xml"),
+                                exts),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
   declareProperty(
@@ -323,17 +330,26 @@ void LoadSpiceXML2DDet::exec() {
   // Load input
   processInputs();
 
-  // Parse detector XML file
-  std::vector<SpiceXMLNode> vec_xmlnode = parseSpiceXML(m_detXMLFileName);
-
-  // Create output workspace
+  // check the file end
   MatrixWorkspace_sptr outws;
-  if (m_numPixelX * m_numPixelY > 0)
-    outws = createMatrixWorkspace(vec_xmlnode, m_numPixelX, m_numPixelY,
-                                  m_detXMLNodeName, m_loadInstrument);
-  else
-    outws = createMatrixWorkspaceVersion2(vec_xmlnode, m_detXMLNodeName,
-                                          m_loadInstrument);
+  if (m_detXMLFileName.substr(m_detXMLFileName.find_last_of('.') + 1) ==
+      "bin") {
+    std::vector<unsigned int> vec_counts =
+        binaryParseIntegers(m_detXMLFileName);
+    outws = createMatrixWorkspace(vec_counts);
+  } else {
+    // Parse detector XML file
+    std::vector<SpiceXMLNode> vec_xmlnode = xmlParseSpice(m_detXMLFileName);
+
+    // Create output workspace
+    if (m_numPixelX * m_numPixelY > 0)
+      outws = xmlCreateMatrixWorkspaceKnownGeometry(
+          vec_xmlnode, m_numPixelX, m_numPixelY, m_detXMLNodeName,
+          m_loadInstrument);
+    else
+      outws = xmlCreateMatrixWorkspaceUnknowGeometry(
+          vec_xmlnode, m_detXMLNodeName, m_loadInstrument);
+  }
 
   // Set up log for loading instrument
   bool can_set_instrument = setupSampleLogs(outws);
@@ -362,7 +378,7 @@ void LoadSpiceXML2DDet::exec() {
  * @return vector of SpiceXMLNode containing information in XML file
  */
 std::vector<SpiceXMLNode>
-LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
+LoadSpiceXML2DDet::xmlParseSpice(const std::string &xmlfilename) {
   // Declare output
   std::vector<SpiceXMLNode> vecspicenode;
 
@@ -454,6 +470,68 @@ LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
   return vecspicenode;
 }
 
+//-----
+/// parse binary integer file
+std::vector<unsigned int>
+LoadSpiceXML2DDet::binaryParseIntegers(std::string &binary_file_name) {
+  // check binary file size
+  ifstream infile(binary_file_name.c_str(), ios::binary);
+  streampos begin, end;
+  begin = infile.tellg();
+  infile.seekg(0, ios::end);
+  end = infile.tellg();
+  cout << "size is: " << (end - begin) << " bytes.\n";
+
+  size_t num_dets = static_cast<size_t>(end - begin) / sizeof(unsigned int);
+  cout << "size is: " << num_dets << " bytes.\n";
+
+  // define output vector
+  std::vector<unsigned int> vec_counts(num_dets);
+
+  // read each integer... time consuming
+  //  int max_count = 0;
+  // char buffer[sizeof(int)];
+  unsigned int buffer;
+  unsigned int total_counts(0);
+  //  int *counts = new int[num_int];
+  for (size_t i = 0; i < num_dets; ++i) {
+    // infile.read(buffer, sizeof(int));
+    infile.read((char *)&buffer, sizeof(buffer));
+    vec_counts[i] = buffer;
+    total_counts += buffer;
+    //    if (counts[i] > max_count)
+    //      max_count = counts[i];
+  }
+
+  std::cout << "total counts = " << total_counts << "\n";
+
+  return vec_counts;
+}
+
+//-----
+MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
+    const std::vector<unsigned int> &vec_counts) {
+  // Create matrix workspace
+  size_t numspec = vec_counts.size();
+  MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+
+  // set up value
+  for (size_t i = 0; i < numspec; ++i) {
+    outws->mutableX(i)[0] = 0.;
+    outws->mutableX(i)[1] = 1;
+    double counts = static_cast<double>(vec_counts[i]);
+    outws->mutableY(i)[0] = counts;
+    if (counts > 0.5)
+      outws->mutableE(i)[0] = sqrt(counts);
+    else
+      outws->mutableE(i)[0] = 1.0;
+  }
+
+  return outws;
+}
+
+//-----
 /** Create MatrixWorkspace from Spice XML file
  * @brief LoadSpiceXML2DDet::createMatrixWorkspace
  * @param vecxmlnode :: vector of SpiceXMLNode obtained from XML file
@@ -463,7 +541,7 @@ LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
  * @param loadinstrument :: flag to load instrument to output workspace or not.
  * @return
  */
-MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
+MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceKnownGeometry(
     const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
     const size_t &numpixely, const std::string &detnodename,
     const bool &loadinstrument) {
@@ -617,7 +695,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
 /** create the output matrix workspace without knowledge of detector geometry
  *
  */
-MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
+MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
     const std::vector<SpiceXMLNode> &vecxmlnode, const std::string &detnodename,
     const bool &loadinstrument) {
 
@@ -641,7 +719,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
       // Get node value string (256x256 as a whole)
       const std::string detvaluestr = xmlnode.getValue();
 
-      outws = this->parseDetectorNode(detvaluestr, loadinstrument, max_counts);
+      outws =
+          this->xmlParseDetectorNode(detvaluestr, loadinstrument, max_counts);
 
       // Set flag
       parsedDet = true;
@@ -699,9 +778,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
 
 /**
  */
-API::MatrixWorkspace_sptr
-LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
-                                     bool loadinstrument, double &max_counts) {
+API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
+    const std::string &detvaluestr, bool loadinstrument, double &max_counts) {
   // Split to lines
   std::vector<std::string> vecLines;
   boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
