@@ -17,10 +17,11 @@ int main(int argc, char **argv) {
   std::size_t size = std::atoll(argv[7]);
   const std::string fileName(argv[8]);
   const std::string groupName(argv[9]);
+  const bool precalcEvents = std::atoi(argv[10]);
 
   std::vector<std::string> bankNames;
   std::vector<int32_t> bankOffsets;
-  for (unsigned i = 10; i < argc; i += 2) {
+  for (unsigned i = 11; i < argc; i += 2) {
     bankNames.emplace_back(argv[i]);
     bankOffsets.emplace_back(std::atoi(argv[i + 1]));
   }

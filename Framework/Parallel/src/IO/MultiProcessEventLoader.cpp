@@ -84,6 +84,7 @@ void MultiProcessEventLoader::load(
       command += std::to_string(storageSize) + " "; // memory size
       command += filename + " ";                    // nexus file name
       command += groupname + " ";                   // instrument group name
+      command += m_precalculateEvents ? "1 " : "0 ";// variant of algorithm used for loading
       for (unsigned j = 0; j < bankNames.size(); ++j) {
         command += bankNames[j] + " ";                   // bank name
         command += std::to_string(bankOffsets[j]) + " "; // bank size
