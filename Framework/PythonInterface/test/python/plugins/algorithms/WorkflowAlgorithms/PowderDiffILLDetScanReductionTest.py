@@ -5,13 +5,14 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import PowderDiffILLDetScanReduction, config, mtd
 
 
+# This is just a light test for the default options.
+# More options are covered by system tests, since it takes too long for a unit test.
 class PowderDiffILLDetScanReductionTest(unittest.TestCase):
 
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'D2B'
         config.appendDataSearchSubDir('ILL/D2B/')
-        config.appendDataSearchSubDir('ILL/D20/')
 
     def tearDown(self):
         mtd.clear()
