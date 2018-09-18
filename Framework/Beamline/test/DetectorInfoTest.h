@@ -445,21 +445,21 @@ public:
   // }
 
 
-  void test_merge_fail_monitor_mismatch() {
-    auto infos1 = makeFlatTree(PosVec(2), RotVec(2));
-    auto infos2 = makeFlatTree(PosVec(2), RotVec(2));
-    auto &a = *std::get<0>(infos1);
-    auto &b = *std::get<0>(infos2);
-    DetectorInfo c(PosVec(2), RotVec(2), {1});
+  // void xtest_merge_fail_monitor_mismatch() {
+  //   auto infos1 = makeFlatTree(PosVec(2), RotVec(2));
+  //   auto infos2 = makeFlatTree(PosVec(2), RotVec(2));
+  //   auto &a = *std::get<0>(infos1);
+  //   auto &b = *std::get<0>(infos2);
+  //   DetectorInfo c(PosVec(2), RotVec(2), {1});
 
-    b.setDetectorInfo(&c);
-    a.setScanInterval({0, 1});
-    b.setScanInterval({0, 1});
+  //   b.setDetectorInfo(&c);
+  //   a.setScanInterval({0, 1});
+  //   b.setScanInterval({0, 1});
 
-    TS_ASSERT_THROWS_EQUALS(
-        a.merge(b), const std::runtime_error &err, std::string(err.what()),
-        "Cannot merge DetectorInfo: monitor flags mismatch");
-  }
+  //   TS_ASSERT_THROWS_EQUALS(
+  //       a.merge(b), const std::runtime_error &err, std::string(err.what()),
+  //       "Cannot merge DetectorInfo: monitor flags mismatch");
+  // }
 
   // void xtest_merge_fail_monitor_mismatch() {
   //   DetectorInfo a(PosVec(2), RotVec(2));
@@ -525,55 +525,55 @@ public:
   //                           "overlap but not identical");
   // }
 
-  void do_test_merge_identical_interval_failures(DetectorInfo &a) {
-    Eigen::Vector3d pos1(1, 0, 0);
-    Eigen::Vector3d pos2(2, 0, 0);
-    Eigen::Quaterniond rot1(
-        Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
-    Eigen::Quaterniond rot2(
-        Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
-    a.setMasked(0, true);
-    a.setPosition(0, pos1);
-    a.setRotation(0, rot1);
-    auto b(a);
+  // void do_test_merge_identical_interval_failures(DetectorInfo &a) {
+  //   Eigen::Vector3d pos1(1, 0, 0);
+  //   Eigen::Vector3d pos2(2, 0, 0);
+  //   Eigen::Quaterniond rot1(
+  //       Eigen::AngleAxisd(30.0, Eigen::Vector3d{1, 2, 3}.normalized()));
+  //   Eigen::Quaterniond rot2(
+  //       Eigen::AngleAxisd(31.0, Eigen::Vector3d{1, 2, 3}.normalized()));
+  //   a.setMasked(0, true);
+  //   a.setPosition(0, pos1);
+  //   a.setRotation(0, rot1);
+  //   auto b(a);
 
-    Mantid::Beamline::ComponentInfo c;
-    Mantid::Beamline::ComponentInfo d;
-    c.setDetectorInfo(&a);
-    d.setDetectorInfo(&b);
+  //   Mantid::Beamline::ComponentInfo c;
+  //   Mantid::Beamline::ComponentInfo d;
+  //   c.setDetectorInfo(&a);
+  //   d.setDetectorInfo(&b);
 
-    TS_ASSERT_THROWS_NOTHING(d.merge(c));
+  //   TS_ASSERT_THROWS_NOTHING(d.merge(c));
 
-    b = a;
-    b.setMasked(0, false);
-    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
-                            std::string(err.what()),
-                            "Cannot merge DetectorInfo: "
-                            "matching scan interval but "
-                            "mask flags differ");
-    b.setMasked(0, true);
-    TS_ASSERT_THROWS_NOTHING(d.merge(c));
+  //   b = a;
+  //   b.setMasked(0, false);
+  //   TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+  //                           std::string(err.what()),
+  //                           "Cannot merge DetectorInfo: "
+  //                           "matching scan interval but "
+  //                           "mask flags differ");
+  //   b.setMasked(0, true);
+  //   TS_ASSERT_THROWS_NOTHING(d.merge(c));
 
-    b = a;
-    b.setPosition(0, pos2);
-    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
-                            std::string(err.what()),
-                            "Cannot merge DetectorInfo: "
-                            "matching scan interval but "
-                            "positions differ");
-    b.setPosition(0, pos1);
-    TS_ASSERT_THROWS_NOTHING(d.merge(c));
+  //   b = a;
+  //   b.setPosition(0, pos2);
+  //   TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+  //                           std::string(err.what()),
+  //                           "Cannot merge DetectorInfo: "
+  //                           "matching scan interval but "
+  //                           "positions differ");
+  //   b.setPosition(0, pos1);
+  //   TS_ASSERT_THROWS_NOTHING(d.merge(c));
 
-    b = a;
-    b.setRotation(0, rot2);
-    TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
-                            std::string(err.what()),
-                            "Cannot merge DetectorInfo: "
-                            "matching scan interval but "
-                            "rotations differ");
-    b.setRotation(0, rot1);
-    TS_ASSERT_THROWS_NOTHING(d.merge(c));
-  }
+  //   b = a;
+  //   b.setRotation(0, rot2);
+  //   TS_ASSERT_THROWS_EQUALS(d.merge(c), const std::runtime_error &err,
+  //                           std::string(err.what()),
+  //                           "Cannot merge DetectorInfo: "
+  //                           "matching scan interval but "
+  //                           "rotations differ");
+  //   b.setRotation(0, rot1);
+  //   TS_ASSERT_THROWS_NOTHING(d.merge(c));
+  // }
 
   // void xtest_merge_identical_interval_failures_async() {
   //   DetectorInfo a(PosVec(1), RotVec(1));

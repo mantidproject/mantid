@@ -19,6 +19,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTypes/SpectrumDefinition.h"
+#include<iostream>
 
 #include <cmath>
 #include <ctime>
@@ -233,20 +234,29 @@ void CreateSampleWorkspace::exec() {
       bankDistanceFromSample, sourceSampleDistance);
 
   int numBins = static_cast<int>((xMax - xMin) / binWidth);
+  std::cout << "AND NOW: here 0" << std::endl;
+  
 
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
                               binWidth, inst, functionString, isRandom);
   } else if (numScanPoints > 1) {
+    std::cout << "Calling createScanningWorkspace" << std::endl;
     ws = createScanningWorkspace(numBins, xMin, binWidth, inst, functionString,
                                  isRandom, numScanPoints);
+    std::cout << "Finished createScanningWorkspace" << std::endl;
+    
+
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
                                   binWidth, inst, functionString, isRandom);
   }
+  std::cout << "AND NOW: here 1" << std::endl;
   // add chopper
   this->addChopperParameters(ws);
+  std::cout << "AND NOW: here 2" << std::endl;
+  
 
   // Set the Unit of the X Axis
   try {
@@ -258,6 +268,8 @@ void CreateSampleWorkspace::exec() {
         boost::dynamic_pointer_cast<Units::Label>(unit);
     label->setLabel(xUnit, xUnit);
   }
+  std::cout << "AND NOW: here 3" << std::endl;
+  
 
   ws->setYUnit("Counts");
   ws->setTitle("Test Workspace");
@@ -270,6 +282,8 @@ void CreateSampleWorkspace::exec() {
       "run_start", run_start.toISO8601String()));
   theRun.addLogData(
       new PropertyWithValue<std::string>("run_end", run_end.toISO8601String()));
+  std::cout << "AND NOW: here 4" << std::endl;
+  
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", ws);
@@ -331,26 +345,37 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
     int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom, int numScanPoints) {
+  std::cout << "nvaytet got to here 1" << std::endl;
   auto builder = ScanningWorkspaceBuilder(inst, numScanPoints, numBins);
-
+  std::cout << "nvaytet got to here 2" << std::endl;
+  
   auto angles = std::vector<double>();
+  std::cout << "nvaytet got to here 3" << std::endl;
   auto timeRanges = std::vector<double>();
+  std::cout << "nvaytet got to here 4" << std::endl;
   for (int i = 0; i < numScanPoints; ++i) {
     angles.push_back(double(i));
     timeRanges.push_back(double(i + 1));
   }
-
+std::cout << "nvaytet got to here 5" << std::endl;
+  
   builder.setTimeRanges(Types::Core::DateAndTime(0), timeRanges);
+  std::cout << "nvaytet got to here 6" << std::endl;
   builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
                                        V3D(0, 1, 0));
 
+  std::cout << "nvaytet got to here 7" << std::endl;
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
+  std::cout << "nvaytet got to here 8" << std::endl;
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
+  std::cout << "nvaytet got to here 9" << std::endl;
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
 
+  std::cout << "nvaytet got to here 10" << std::endl;
   builder.setHistogram(Histogram(x, y));
-
+std::cout << "nvaytet got to here 11" << std::endl;
+  
   return builder.buildWorkspace();
 }
 
