@@ -86,7 +86,7 @@ class D20_Mask_ReductionTest(_DiffReductionTest):
     def runTest(self):
         ws = LoadILLDiffraction(Filename='967076')
         MaskDetectors(ws, DetectorList='0-63')
-        red = SumOverlappingTubes(InputWorkspaces=ws, OutputType='1D')
+        SumOverlappingTubes(InputWorkspaces=ws, OutputType='1D', OutputWorkspace='red')
 
     def validate(self):
         return ['red', 'D20_Mask.nxs']
@@ -116,10 +116,13 @@ class D2B_Component_ReductionTest(_DiffReductionTest):
 class D2B_HeightRange_ReductionTest(_DiffReductionTest):
 
     def runTest(self):
-        PowderDiffILLDetScanReduction(Run='508093:508095', Output2D=True, Output1D=False, InitialMask=0, FinalMask=0, OutputWorkspace='out')
-        PowderDiffILLDetScanReduction(Run='508093:508095', Output2D=True, Output1D=False, InitialMask=0, FinalMask=0, HeightRange='-0.05,0.05', OutputWorkspace='out_height')
+        PowderDiffILLDetScanReduction(Run='508093:508095', Output2D=True, Output1D=False, InitialMask=0, FinalMask=0,
+                                      UseCalibratedData= False, NormaliseTo='None', OutputWorkspace='out')
+        PowderDiffILLDetScanReduction(Run='508093:508095', Output2D=True, Output1D=False, InitialMask=0, FinalMask=0,
+                                      UseCalibratedData= False, NormaliseTo='None', OutputWorkspace='out_height',
+                                      HeightRange='-0.05,0.05')
         ExtractSpectra(InputWorkspace='out_2D', StartWorkspaceIndex=43, EndWorkspaceIndex=84, OutputWorkspace='cropped')
-        match = CompareWorkspaces(Workspace1='cropped', Workspace2='out_height_2D', Tolerance=self._tolerance)
+        match = CompareWorkspaces(Workspace1='cropped', Workspace2='out_height_2D', CheckSpectraMap=False, Tolerance=self._tolerance)
         self.assertTrue(match[0])
 
 
