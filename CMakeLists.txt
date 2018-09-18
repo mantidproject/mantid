@@ -321,7 +321,7 @@ if ( ENABLE_CPACK )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4" )
       else()
         # Require matplotlib >= 1.5 to fix bug in latex rendering
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python2-matplotlib-qt4 >= 1.5.2,python2-QtAwesome,boost >= 1.53.0" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla,qwt5-qt4,python2-matplotlib-qt4 >= 1.5.2,python2-QtAwesome,python-requests,boost >= 1.53.0" )
       endif()
 
       # Add software collections for RHEL
@@ -369,7 +369,8 @@ if ( ENABLE_CPACK )
                            "libhdf5-cpp-11,"
                            "python-pycifrw (>= 4.2.1),"
                            "python-yaml,"
-                           "python-qtawesome")
+                           "python-qtawesome,"
+                           "python-requests")
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "bionic")
             list ( APPEND DEPENDS_LIST ",libgsl23,liboce-foundation11,liboce-modeling11,libqscintilla2-qt4-13,jupyter-notebook,libhdf5-cpp-100")
