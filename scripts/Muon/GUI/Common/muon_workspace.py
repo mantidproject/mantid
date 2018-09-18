@@ -18,7 +18,7 @@ class MuonWorkspace(object):
 
     @name.setter
     def name(self, full_name):
-        self._directory = full_name.split("/")[0]
+        self._directory = "/".join(full_name.split("/")[0:-1])
         self._name = full_name.split("/")[-1]
 
     @property
@@ -43,13 +43,18 @@ class MuonWorkspace(object):
         self._workspace = value
 
     def show(self, name):
-        # print("SHOWING WORKSPACE, NAME : ", str(name), " WORKSPACE ", type(self._workspace))
-        if len(name) > 0 and self._isInADS == False:
-            self._name = str(name)
-            mtd.addOrReplace(str(self._name), self._workspace)
+        if len(name) > 0 and self._isInADS is False:
+            self.name = str(name)
+            print("\t\t Adding ", type(self._workspace), " as ", self._name)
+            if mtd.doesExist(self._name):
+                mtd.remove(self._name)
+            mtd.addOrReplace(self._name, self._workspace)
             if self._directory != "":
+                self.add_directory_structure()
                 # Add to the appropriate group
                 group = self._directory.split("/")[-1]
+                print("\t\t Adding ", self._name, " to ", group)
+                print("and now : ", api.AnalysisDataServiceImpl.Instance().getObjectNames())
                 mtd[group].add(self._name)
             self._workspace = None
             self._isInADS = True
@@ -59,23 +64,24 @@ class MuonWorkspace(object):
 
     def hide(self):
         try:
-            print("Y : ", mtd[self._name].readY(0))
             self._workspace = mtd[self._name]
-            print("here")
             mtd.remove(self._name)
             self._name = ""
+            self._directory = ""
             self._isInADS = False
         except:
             print("Cannot remove from ADS")
             pass
 
     def add_directory_structure(self):
-
+        print("add directory structure start: ", api.AnalysisDataServiceImpl.Instance().getObjectNames())
         dirs = self._directory.split("/")
         for directory in dirs:
             try:
                 mtd[directory]
-            except KeyError:
+            except KeyError as e:
+                print("\t\t ", e.args)
+                print("\t\t PRODUCING GROUP : ", directory)
                 group = api.WorkspaceGroup()
                 mtd.addOrReplace(directory, group)
 
@@ -90,3 +96,5 @@ class MuonWorkspace(object):
                 continue
             mtd[last_dir].add(directory)
             last_dir = directory
+
+        print("add directory structure end: ", api.AnalysisDataServiceImpl.Instance().getObjectNames())

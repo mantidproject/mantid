@@ -59,8 +59,8 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         return [int(i) for i in text.split(",")]
 
     def update_period_edits(self):
-        summed_periods = self._model._data.loaded_data["SummedPeriods"]
-        subtracted_periods = self._model._data.loaded_data["SubtractedPeriods"]
+        summed_periods = self._model.get_summed_periods()
+        subtracted_periods = self._model.get_subtracted_periods()
 
         self._view.set_summed_periods(",".join([str(p) for p in summed_periods]))
         self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))

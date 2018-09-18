@@ -37,8 +37,6 @@ class GroupingTabView(QtGui.QWidget):
 
         self.setup_description_layout()
 
-
-
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
 
@@ -52,7 +50,6 @@ class GroupingTabView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.load_grouping_button)
         self.horizontal_layout.addWidget(self.save_grouping_button)
         self.horizontal_layout.addWidget(self.clear_grouping_button)
-
 
         self.vertical_layout = QtGui.QVBoxLayout(self)
         self.vertical_layout.setObjectName("verticalLayout")
@@ -101,5 +98,21 @@ class GroupingTabView(QtGui.QWidget):
     def on_clear_grouping_button_clicked(self, slot):
         self.clear_grouping_button.clicked.connect(slot)
 
-    def on_update_button_clicked(self,slot):
+    def on_update_button_clicked(self, slot):
         self.update_button.clicked.connect(slot)
+
+    def on_load_grouping_button_clicked(self, slot):
+        self.load_grouping_button.clicked.connect(slot)
+
+    def on_save_grouping_button_clicked(self, slot):
+        self.save_grouping_button.clicked.connect(slot)
+
+    def show_file_browser_and_return_selection(self, file_filter, search_directories):
+        default_directory = search_directories[0]
+        chosen_file = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
+                                                        file_filter)
+        return chosen_file
+
+    def show_file_save_browser_and_return_selection(self):
+        chosen_file = QtGui.QFileDialog.getSaveFileName(self, "Select file")
+        return chosen_file

@@ -14,7 +14,10 @@ class HomeRunInfoWidgetModel(object):
         run = self._data.get_sample_log("run_number")
         #print("Workspace methods : ", dir(self._data.loaded_workspace))
         #print(self._data.loaded_workspace.getSampleDetails().keys())
-        return run.value
+        if run:
+            return run.value
+        else:
+            return "Log not found"
         # self._data["OutputWorkspace"].getSampleData().getLogData("run")
 
     def get_instrument_name(self):
@@ -24,7 +27,10 @@ class HomeRunInfoWidgetModel(object):
 
     def get_log_value(self, log_name):
         log = self._data.get_sample_log(log_name)
-        return log.value
+        if log:
+            return log.value
+        else:
+            return "Log not found"
 
     def get_counts_in_MeV(self):
         workspace = self._data.loaded_workspace
@@ -39,11 +45,17 @@ class HomeRunInfoWidgetModel(object):
         # MuonAnalysis.cpp
         # TimeSeriesProperty.cpp line 934
         temps = self._data.get_sample_log("Temp_Sample")
-        temps = self._data.loaded_workspace.getRun().getProperty("Temp_Sample")
+        try:
+            temps = self._data.loaded_workspace.getRun().getProperty("Temp_Sample")
+        except:
+            return "Log not found"
         # print(temps.timeAverageValue())
         # print(temps.times)
         #print("dir of temps : ", dir(temps))
-        return temps.timeAverageValue()
+        if temps:
+            return temps.timeAverageValue()
+        else:
+            return "Log not found"
 
     def get_workspace_comment(self):
         ws = self._data.loaded_workspace

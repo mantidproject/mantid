@@ -6,98 +6,12 @@ from mantid.api import WorkspaceGroup
 from mantid.api import ITableWorkspace
 from mantid.simpleapi import mtd
 from mantid import api
+import mantid.kernel as kernel
+
+from Muon.GUI.Common.muon_workspace import MuonWorkspace
 
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-
-
-class MuonWorkspace(object):
-    """A basic muon workspace which is either the workspace or the name of the workspace in the ADS"""
-
-    def __init__(self, workspace):
-        self._isInADS = False
-        self._workspace = workspace
-        self._directory = ""
-        self._name = ""
-
-    @property
-    def name(self):
-        return self._directory + self._name
-
-    @name.setter
-    def name(self, full_name):
-        self._directory = full_name.split("/")[0]
-        self._name = full_name.split("/")[-1]
-
-    @property
-    def workspace(self):
-        # print("GETTING WORKSPACE")
-        if self._isInADS:
-            # print("\tis in ADS!")
-            return mtd[self._name]
-        else:
-            # print ("\tis not in ADS!")
-            return self._workspace
-
-    @workspace.setter
-    def workspace(self, value):
-        # print("SETTING WORKSPACE")
-        # TODO : add isinstance checks
-        if self._isInADS:
-            mtd.remove(self._name)
-            self._isInADS = False
-            self._name = ""
-            self._directory = ""
-        self._workspace = value
-
-    def show(self, name):
-        # print("SHOWING WORKSPACE, NAME : ", str(name), " WORKSPACE ", type(self._workspace))
-        if len(name) > 0 and self._isInADS == False:
-            self._name = str(name)
-            mtd.addOrReplace(str(self._name), self._workspace)
-            if self._directory != "":
-                # Add to the appropriate group
-                group = self._directory.split("/")[-1]
-                mtd[group].add(self._name)
-            self._workspace = None
-            self._isInADS = True
-        else:
-            print("Cannot store is ADS : name is empty")
-            pass
-
-    def hide(self):
-        try:
-            print("Y : ", mtd[self._name].readY(0))
-            self._workspace = mtd[self._name]
-            print("here")
-            mtd.remove(self._name)
-            self._name = ""
-            self._isInADS = False
-        except:
-            print("Cannot remove from ADS")
-            pass
-
-    def add_directory_structure(self):
-
-        dirs = self._directory.split("/")
-        for directory in dirs:
-            try:
-                mtd[directory]
-            except KeyError:
-                group = api.WorkspaceGroup()
-                mtd.addOrReplace(directory, group)
-
-            if not isinstance(mtd[directory], api.WorkspaceGroup):
-                break
-            # add an else for if workspace not a group
-
-        last_dir = ""
-        for i, directory in enumerate(dirs):
-            if i == 0:
-                last_dir = directory
-                continue
-            mtd[last_dir].add(directory)
-            last_dir = directory
 
 
 def get_loaded_time_zero(workspace):
@@ -230,6 +144,19 @@ DEFAULT_INPUTS = {
 DEFAULT_OUTPUTS = ["OutputWorkspace", "DeadTimeTable", "DetectorGroupingTable", "TimeZero", "FirstGoodData"]
 
 
+class floatPropertyWithValue:
+
+    def __init__(self, value):
+        self.value = value
+
+
+DEFAULT_OUTPUT_VALUES = [MuonWorkspace(api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)),
+                         floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
+                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+                         floatPropertyWithValue(0.0),
+                         floatPropertyWithValue(0.0)]
+
+
 def is_workspace_group(workspace):
     return isinstance(workspace, WorkspaceGroup)
 
@@ -278,6 +205,10 @@ def load_workspace_from_filename(filename,
     return load_result, run, filename
 
 
+def empty_loaded_data():
+    return dict(zip(DEFAULT_OUTPUTS, DEFAULT_OUTPUT_VALUES))
+
+
 def create_load_algorithm(filename, property_dictionary):
     alg = mantid.AlgorithmManager.create("LoadMuonNexus")
     alg.initialize()
@@ -300,6 +231,127 @@ def get_table_workspace_names_from_ADS():
         if isinstance(mtd[name], ITableWorkspace):
             table_names += [name]
     return table_names
+
+
+import xml.etree.ElementTree as ET
+import Muon.GUI.Common.run_string_utils as run_string_utils
+
+
+def _get_groups_from_XML(root):
+    names = []
+    ids = []
+    for child in root:
+        if child.tag == "group":
+            names += [child.attrib['name']]
+            ids += [run_string_utils.run_string_to_list(child.find('ids').attrib['val'])]
+    return names, ids
+
+
+def _get_pairs_from_XML(root):
+    names = []
+    groups = []
+    alphas = []
+    for child in root:
+        if child.tag == "pair":
+            names += [child.attrib['name']]
+            groups += [[child.find('forward-group').attrib['val'], child.find('backward-group').attrib['val']]]
+            alphas += [child.find('alpha').attrib['val']]
+    return names, groups, alphas
+
+
+def save_grouping_to_XML(groups, pairs, filename):
+    root = ET.Element("detector-grouping")
+
+    # doc = ET.SubElement(root, "group")
+    # ET.SubElement(doc, "field1", name="fwd").text = "some value1"
+    # ET.SubElement(doc, "field2", name="asdfasd").text = "some vlaue2"
+
+    group_nodes = []
+    for group in groups:
+        child = ET.SubElement(root, 'group', name=group.name)
+        id_string = run_string_utils.run_list_to_string(group.detectors)
+        ids = ET.SubElement(child, 'ids', val=id_string)
+        child.extend(ids)
+        group_nodes += [child]
+
+    for child in group_nodes:
+        root.extend(child)
+
+    pair_nodes = []
+    for pair in pairs:
+        child = ET.SubElement(root, 'pair', name=pair.name)
+        fwd_group = ET.SubElement(child, 'forward-group', val=pair.group1)
+        bwd_group = ET.SubElement(child, 'backward-group', val=pair.group2)
+        alpha = ET.SubElement(child, 'alpha', val=str(pair.alpha))
+        child.extend(fwd_group)
+        child.extend(bwd_group)
+        child.extend(alpha)
+        # root.extend(child)
+        pair_nodes += [child]
+
+    for child in pair_nodes:
+        root.extend(child)
+
+    tree = ET.ElementTree(root)
+    tree.write(filename)
+
+
+def load_grouping_from_XML(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    print(tree)
+
+    group_names, group_ids = _get_groups_from_XML(root)
+    pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
+    print(group_names, group_ids)
+    print(pair_names, pair_groups, pair_alphas)
+
+    groups = []
+    pairs = []
+
+    for i, group_name in enumerate(group_names):
+        groups += [MuonGroup(group_name=group_name, detector_IDs=group_ids[i])]
+
+    for i, pair_name in enumerate(pair_names):
+        pairs += [MuonPair(pair_name=pair_name,
+                           group1_name=pair_groups[i][0],
+                           group2_name=pair_groups[i][1],
+                           alpha=pair_alphas[i])]
+
+    # for child in root:
+    #     print(child.tag, child.attrib)
+    #     for childchild in child:
+    #         print(childchild.tag, childchild.attrib)
+
+    return groups, pairs
+
+
+def run_MuonPreProcess(parameter_dict):
+    alg = mantid.AlgorithmManager.create("MuonPreProcess")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+
+    processed_data = alg.getProperty("OutputWorkspace").value
+    return processed_data
+
+
+def run_MuonGroupingCounts(parameter_dict):
+    alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    workspace = parameter_dict["InputWorkspace"]
+    alg.setProperty("InputWorkspace", workspace)
+    del parameter_dict["InputWorkspace"]
+    print("\t\t\t ", parameter_dict)
+    alg.setProperties(parameter_dict)
+    alg.execute()
+
+    group_data = alg.getProperty("OutputWorkspace").value
+    return group_data
 
 
 if __name__ == "__main__":
@@ -345,57 +397,3 @@ if __name__ == "__main__":
     # print(wsOut2)
 
     # print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
-
-import xml.etree.ElementTree as ET
-import Muon.GUI.Common.run_string_utils as run_string_utils
-
-def _get_groups_from_XML(root):
-    names = []
-    ids = []
-    for child in root:
-        if child.tag == "group":
-            names += [child.attrib['name']]
-            ids += [run_string_utils.run_string_to_list(child.find('ids').attrib['val'])]
-    return names, ids
-
-
-def _get_pairs_from_XML(root):
-    names = []
-    groups = []
-    alphas = []
-    for child in root:
-        if child.tag == "pair":
-            names += [child.attrib['name']]
-            groups += [[child.find('forward-group').attrib['val'], child.find('backward-group').attrib['val']]]
-            alphas += [child.find('alpha').attrib['val']]
-    return names, groups, alphas
-
-
-def load_grouping_from_XML(filename):
-    tree = ET.parse(filename)
-    root = tree.getroot()
-    print(tree)
-
-    group_names, group_ids = _get_groups_from_XML(root)
-    pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
-    print(group_names, group_ids)
-    print(pair_names, pair_groups, pair_alphas)
-
-    groups = []
-    pairs = []
-
-    for i, group_name in enumerate(group_names):
-        groups += [MuonGroup(group_name=group_name, detector_IDs=group_ids[i])]
-
-    for i, pair_name in enumerate(pair_names):
-        pairs += [MuonPair(pair_name=pair_name,
-                          group1_name=pair_groups[i][0],
-                          group2_name=pair_groups[i][1],
-                          alpha=pair_alphas[i])]
-
-    # for child in root:
-    #     print(child.tag, child.attrib)
-    #     for childchild in child:
-    #         print(childchild.tag, childchild.attrib)
-
-    return groups, pairs

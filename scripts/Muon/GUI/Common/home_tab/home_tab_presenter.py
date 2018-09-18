@@ -47,18 +47,25 @@ class HomeTabPresenter(object):
 
         self.instrumentObserver = HomeTabPresenter.InstrumentObserver(self)
         self.loadObserver = HomeTabPresenter.LoadObserver(self)
+        self.groupingObserver = HomeTabPresenter.GroupingObserver(self)
         self.update_all_widgets()
 
     def show(self):
         self._view.show()
 
-    def update_all_widgets(self):
-        """Update all widgets from the context"""
-        self._model._data.update_current_data()
-        for subwidget in self._subwidgets:
-            subwidget.update_view_from_model()
+    def show_all_data(self):
         self._model._data.show_raw_data()
         self._model._data.show_all_groups()
+
+    def update_current_data(self):
+        self._model._data.update_current_data()
+
+    def update_all_widgets(self):
+        """Update all widgets from the context"""
+
+        for subwidget in self._subwidgets:
+            subwidget.update_view_from_model()
+
 
     class InstrumentObserver(Observer):
 
@@ -66,7 +73,6 @@ class HomeTabPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            print("update called")
             self.outer.update_all_widgets()
 
     class LoadObserver(Observer):
@@ -75,5 +81,16 @@ class HomeTabPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            print("update called")
+            self.outer.update_current_data()
             self.outer.update_all_widgets()
+            self.outer.show_all_data()
+
+    class GroupingObserver(Observer):
+
+        def __init__(self, outer):
+            self.outer = outer
+
+        def update(self, observable, arg):
+            print("HOME TAB : Grouping Observer Update")
+            self.outer.update_all_widgets()
+            #self.outer.show_all_data()

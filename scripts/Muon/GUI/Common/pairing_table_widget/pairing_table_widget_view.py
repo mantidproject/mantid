@@ -32,42 +32,54 @@ class PairingTableView(QtGui.QWidget):
         # The active groups that can be selected from the group combo box
         self._group_selections = []
 
-        # whether the table is updating and therefore
-        # we shouldn't respond to signals
+        # whether the table is updating and therefore we shouldn't respond to signals
         self._updating = False
-
         # Flag for context menus
         self._disabled = False
 
     def disable_editing(self):
         self.disable_updates()
         self._disabled = True
+        self._disable_all_buttons()
+        self._disable_all_table_items()
+        self.enable_updates()
+
+    def _disable_all_table_items(self):
+        for row in range(self.num_rows()):
+            for col in range(self.num_cols()):
+                if col == 1 or col == 2 or col == 4:
+                    item = self.pairing_table.cellWidget(row, col)
+                    item.setEnabled(False)
+                else:
+                    item = self.pairing_table.item(row, col)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable)
+
+    def _disable_all_buttons(self):
         self.add_pair_button.setEnabled(False)
         self.remove_pair_button.setEnabled(False)
-        for i in range(self.num_rows()):
-            for j in range(4):
-                try:
-                    item = self.pairing_table.item(i, j)
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-                except:
-                    item = self.pairing_table.cellWidget(i, j)
-                    item.setEnabled(False)
-        self.enable_updates()
 
     def enable_editing(self):
         self.disable_updates()
         self._disabled = False
+        self._enable_all_buttons()
+        self._enable_all_table_items()
+        self.enable_updates()
+
+    def _enable_all_table_items(self):
+        for row in range(self.num_rows()):
+            for col in range(self.num_cols()):
+                if col == 1 or col == 2 or col == 4:
+                    item = self.pairing_table.cellWidget(row, col)
+                    item.setEnabled(True)
+                else:
+                    item = self.pairing_table.item(row, col)
+                    item.setFlags(QtCore.Qt.ItemIsSelectable |
+                                  QtCore.Qt.ItemIsEditable |
+                                  QtCore.Qt.ItemIsEnabled)
+
+    def _enable_all_buttons(self):
         self.add_pair_button.setEnabled(True)
         self.remove_pair_button.setEnabled(True)
-        for i in range(self.num_rows()):
-            for j in range(4):
-                try:
-                    item = self.pairing_table.item(i, j)
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled)
-                except:
-                    item = self.pairing_table.cellWidget(i, j)
-                    item.setEnabled(True)
-        self.enable_updates()
 
     def update_group_selections(self, group_name_list):
         self._group_selections = group_name_list
@@ -92,12 +104,12 @@ class PairingTableView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.remove_pair_button.sizePolicy().hasHeightForWidth())
 
         self.add_pair_button.setSizePolicy(size_policy)
-        self.add_pair_button.setMinimumSize(QtCore.QSize(25, 25))
+        self.add_pair_button.setMinimumSize(QtCore.QSize(40, 40))
         self.add_pair_button.setObjectName("addGroupButton")
         self.add_pair_button.setText("+")
 
         self.remove_pair_button.setSizePolicy(size_policy)
-        self.remove_pair_button.setMinimumSize(QtCore.QSize(25, 25))
+        self.remove_pair_button.setMinimumSize(QtCore.QSize(40, 40))
         self.remove_pair_button.setObjectName("removeGroupButton")
         self.remove_pair_button.setText("-")
 
@@ -117,14 +129,14 @@ class PairingTableView(QtGui.QWidget):
         self.setLayout(self.vertical_layout)
 
     def set_up_table(self):
-        self.pairing_table.setColumnCount(4)
-        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Group 1", "Group 2", "Alpha"])
-        # QtCore.QString("Pair Name;Group 1; Group 2;Alpha").split(";"))
+        self.pairing_table.setColumnCount(5)
+        self.pairing_table.setHorizontalHeaderLabels(["Pair Name", "Group 1", " Group 2", "Alpha", "Guess Alpha"])
         header = self.pairing_table.horizontalHeader()
         header.setResizeMode(0, QtGui.QHeaderView.Stretch)
         header.setResizeMode(1, QtGui.QHeaderView.Stretch)
         header.setResizeMode(2, QtGui.QHeaderView.Stretch)
-        header.setResizeMode(3, QtGui.QHeaderView.ResizeToContents)
+        header.setResizeMode(3, QtGui.QHeaderView.Stretch)
+        header.setResizeMode(4, QtGui.QHeaderView.ResizeToContents)
         vertical_headers = self.pairing_table.verticalHeader()
         vertical_headers.setMovable(False)
         vertical_headers.setResizeMode(QtGui.QHeaderView.ResizeToContents)
@@ -169,6 +181,11 @@ class PairingTableView(QtGui.QWidget):
         selector.addItems(self._group_selections)
         return selector
 
+    def _guess_alpha_button(self):
+        guess_alpha = QtGui.QPushButton(self)
+        guess_alpha.setText("Guess")
+        return guess_alpha
+
     def get_index_of_text(self, selector, text):
         for i in range(selector.count()):
             if str(selector.itemText(i)) == text:
@@ -176,7 +193,7 @@ class PairingTableView(QtGui.QWidget):
         return 0
 
     def add_entry_to_table(self, row_entries):
-        assert len(row_entries) == self.pairing_table.columnCount()
+        assert len(row_entries) == self.pairing_table.columnCount() - 1
 
         row_position = self.pairing_table.rowCount()
         self.pairing_table.insertRow(row_position)
@@ -204,9 +221,10 @@ class PairingTableView(QtGui.QWidget):
                 alpha_widget.setText(entry)
                 self.pairing_table.setItem(row_position, 3, alpha_widget)
                 continue
-                # item.setFlags(QtCore.Qt.ItemIsEnabled)
-                # item.setFlags(QtCore.Qt.ItemIsSelectable)
             self.pairing_table.setItem(row_position, i, item)
+        # guess alpha button
+        guess_alpha_widget = self._guess_alpha_button()
+        self.pairing_table.setCellWidget(row_position, 4, guess_alpha_widget)
 
     def on_add_pair_button_clicked(self, slot):
         self.add_pair_button.clicked.connect(slot)
@@ -237,9 +255,13 @@ class PairingTableView(QtGui.QWidget):
     def num_rows(self):
         return self.pairing_table.rowCount()
 
+    def num_cols(self):
+        return self.pairing_table.columnCount()
+
     def on_item_changed(self):
         """Not yet implemented."""
-        pass
+        if not self._updating:
+            pass
 
     def on_cell_changed(self, _row, _col):
         if not self._updating:
@@ -248,13 +270,17 @@ class PairingTableView(QtGui.QWidget):
     def get_table_contents(self):
         if self._updating:
             return []
-        ret = [[None for _ in range(4)] for _ in range(self.num_rows())]
-        for i in range(self.num_rows()):
-            for j in range(4):
-                if j == 1 or j == 2:
-                    ret[i][j] = str(self.pairing_table.cellWidget(i, j).currentText())
+        ret = [[None for _ in range(self.num_cols())] for _ in range(self.num_rows())]
+        for row in range(self.num_rows()):
+            for col in range(self.num_cols()):
+                if col == 1 or col == 2:
+                    # columns with widgets
+                    ret[row][col] = str(self.pairing_table.cellWidget(row, col).currentText())
+                elif col == 4:
+                    ret[row][col] = "Guess"
                 else:
-                    ret[i][j] = str(self.pairing_table.item(i, j).text())
+                    # columns without widgets
+                    ret[row][col] = str(self.pairing_table.item(row, col).text())
         return ret
 
     def clear(self):

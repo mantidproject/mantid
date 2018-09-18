@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
-
+from Muon.GUI.Common.run_string_utils import valid_name_regex, valid_alpha_regex
 
 class PairingTablePresenter(object):
 
@@ -19,21 +19,16 @@ class PairingTablePresenter(object):
 
         self._view.on_table_data_changed(self.handle_data_change)
 
-    def validate_pair_name(self, text):
-        if sum(text == name for name in self._model.group_names) > 0 or sum(
-                text == name for name in self._model.pair_names) > 1:
-            self._view.warning_popup("Groups and pairs must have unique names")
-            return False
-        if not re.match("^\w+$", text):
-            self._view.warning_popup("Pair names should only contain digits, characters and _")
-            return False
-        return True
+        self._dataChangedNotifier = lambda: 0
 
-    def validate_alpha(self, alpha_text):
-        if not re.match("[+]?\d*\.\d+|\d+", alpha_text) or float(alpha_text < 0.0):
-            self._view.warning_popup("Alpha must be > 0")
-            return False
-        return True
+    def show(self):
+        self._view.show()
+
+    def on_data_changed(self, notifier):
+        self._dataChangedNotifier = notifier
+
+    def notify_data_changed(self):
+        self._dataChangedNotifier()
 
     def disable_editing(self):
         self._view.disable_editing()
@@ -41,12 +36,12 @@ class PairingTablePresenter(object):
     def enable_editing(self):
         self._view.enable_editing()
 
-    def show(self):
-        self._view.show()
-
     def add_pair(self, pair):
-        print("Pairing : Add pair (no notify)")
+        """Add a pair to the model and view"""
         self.add_pair_to_view(pair)
+        self.add_pair_to_model(pair)
+
+    def add_pair_to_model(self, pair):
         self._model.add_pair(pair)
 
     def add_pair_to_view(self, pair):
@@ -67,7 +62,6 @@ class PairingTablePresenter(object):
         self.add_pair(pair)
 
     def handle_remove_pair_button_clicked(self):
-        print("Pairing : Remove pair (no notify)")
         pair_names = self._view.get_selected_pair_names()
         if not pair_names:
             self.remove_last_row_in_view_and_model()
@@ -82,7 +76,6 @@ class PairingTablePresenter(object):
             self._model.remove_pairs_by_name([name])
 
     def handle_data_change(self):
-        print("Pairing : Handle data change (not notify)")
         self.update_model_from_view()
         self.update_view_from_model()
         # self._view.notify_data_changed()
@@ -91,7 +84,9 @@ class PairingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_pairs()
         for entry in table:
-            pair = MuonPair(pair_name=str(entry[0]), group1_name=str(entry[1]), group2_name=str(entry[2]),
+            pair = MuonPair(pair_name=str(entry[0]),
+                            group1_name=str(entry[1]),
+                            group2_name=str(entry[2]),
                             alpha=float(entry[3]))
             self._model.add_pair(pair)
 
@@ -99,7 +94,6 @@ class PairingTablePresenter(object):
         self._view.disable_updates()
 
         self._view.clear()
-        # self.update_group_selections()
         for pair in self._model.pairs:
             self.add_pair_to_view(pair)
 
@@ -108,3 +102,28 @@ class PairingTablePresenter(object):
     def update_group_selections(self):
         groups = self._model.group_names
         self._view.update_group_selections(groups)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Table entry validation
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _is_edited_name_duplicated(self, new_name):
+        is_name_column_being_edited = self._view.pairing_table.currentColumn() == 0
+        is_name_unique = (sum(
+            [new_name == name for name in self._model.group_and_pair_names]) == 0)
+        return is_name_column_being_edited and not is_name_unique
+
+    def validate_pair_name(self, text):
+        if self._is_edited_name_duplicated(text):
+            self._view.warning_popup("Groups and pairs must have unique names")
+            return False
+        if not re.match(valid_name_regex, text):
+            self._view.warning_popup("Pair names should only contain digits, characters and _")
+            return False
+        return True
+
+    def validate_alpha(self, alpha_text):
+        if not re.match(valid_alpha_regex, alpha_text) or float(alpha_text < 0.0):
+            self._view.warning_popup("Alpha must be > 0")
+            return False
+        return True

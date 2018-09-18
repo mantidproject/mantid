@@ -20,14 +20,22 @@ class GroupingTablePresenter(object):
 
         self._view.on_table_data_changed(self.handle_data_change)
 
-    def _is_edited_name_unique(self, new_name):
+        self._dataChangedNotifier = lambda: 0
+
+    def on_data_changed(self, notifier):
+        self._dataChangedNotifier = notifier
+
+    def notify_data_changed(self):
+        self._dataChangedNotifier()
+
+    def _is_edited_name_duplicated(self, new_name):
         is_name_column_being_edited = self._view.grouping_table.currentColumn() == 0
         is_name_unique = (sum(
             [new_name == name for name in self._model.group_and_pair_names]) == 0)
-        return is_name_column_being_edited and is_name_unique
+        return is_name_column_being_edited and not is_name_unique
 
     def validate_group_name(self, text):
-        if self._is_edited_name_unique(text):
+        if self._is_edited_name_duplicated(text):
             self._view.warning_popup("Groups and pairs must have unique names")
             return False
         if not re.match("^\w+$", text):
@@ -51,19 +59,21 @@ class GroupingTablePresenter(object):
         self._view.show()
 
     def add_group(self, group):
-        print("Grouping : Add group")
+        """Adds a group to the model and view"""
+        if self._view.num_rows() > 19:
+            self._view.warning_popup("Cannot add more than 20 groups.")
+            return
         self.add_group_to_view(group)
-        self._model.add_group(group)
+        self.add_group_to_model(group)
         self._view.notify_data_changed()
+        self.notify_data_changed()
+
+    def add_group_to_model(self, group):
+        self._model.add_group(group)
 
     def add_group_to_view(self, group):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        if self._view.num_rows() > 20:
-            self._view.warning_popup("Cannot add more than 20 groups.")
-            self._view.enable_updates()
-            return
-
         entry = [str(group.name), run_utils.run_list_to_string(group.detectors), str(group.n_detectors)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
@@ -73,7 +83,6 @@ class GroupingTablePresenter(object):
         self.add_group(group)
 
     def handle_remove_group_button_clicked(self):
-        print("Grouping : Remove group")
         group_names = self._view.get_selected_group_names()
         if not group_names:
             self.remove_last_row_in_view_and_model()
@@ -92,10 +101,10 @@ class GroupingTablePresenter(object):
             self._model.remove_groups_by_name([name])
 
     def handle_data_change(self):
-        print("Grouping : Handle data changed")
         self.update_model_from_view()
         self.update_view_from_model()
         self._view.notify_data_changed()
+        self.notify_data_changed()
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()
