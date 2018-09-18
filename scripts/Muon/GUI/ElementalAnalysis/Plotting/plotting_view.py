@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 from mantid import plots
@@ -60,7 +61,9 @@ class PlotView(QtWidgets.QWidget):
         grid = QtWidgets.QGridLayout()
 
         self.toolbar = myToolbar(self.canvas,self)
-        
+        self.toolbar.setAddConnection(self.add)
+        self.toolbar.setRmConnection(self.rm)
+
         self.toolbar.update()
         grid.addWidget(self.toolbar,0,0)
         grid.addWidget(self.canvas, 1, 0)
@@ -297,3 +300,14 @@ class PlotView(QtWidgets.QWidget):
     @_redo_layout
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
+
+    def add(self):
+        print("hi")
+
+    def rm(self):
+        print(self.workspaces.keys())
+        for line in self.get_subplot(self.workspaces.keys()[0]).lines:
+            print(line.get_label())
+        label = self.get_subplot(self.workspaces.keys()[0]).lines[1]
+        self.get_subplot(self.workspaces.keys()[0]).lines.remove(label)
+        self.canvas.draw() 
