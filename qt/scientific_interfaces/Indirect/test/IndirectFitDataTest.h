@@ -91,16 +91,40 @@ public:
     }
   }
 
-  void test_that_correct_range_for_a_spectrum_is_returned() {
-    auto data = getIndirectFitData(1, 10);
+  void test_that_correct_excludeRegion_is_returned() {
+    auto data = getIndirectFitData(10, 3);
 
-    data.setStartX(0.0, 0);
-    data.setEndX(5.0, 0);
+    data.setExcludeRegionString("1,8", 1);
+    data.setExcludeRegionString("1,5", 2);
+    data.setExcludeRegionString("2,6", 3);
 
-    TS_ASSERT_EQUALS(data.getRange(0).first, 0.0);
-    TS_ASSERT_EQUALS(data.getRange(0).second, 5.0);
-    TS_ASSERT_DIFFERS(data.getRange(1).first, 0.0);
-    TS_ASSERT_DIFFERS(data.getRange(1).second, 5.0);
+    std::vector<double> regionVector1;
+    regionVector1.emplace_back(1.0);
+    regionVector1.emplace_back(8.0);
+    std::vector<double> regionVector2;
+    regionVector2.emplace_back(1.0);
+    regionVector2.emplace_back(5.0);
+    std::vector<double> regionVector3;
+    regionVector3.emplace_back(2.0);
+    regionVector3.emplace_back(6.0);
+    TS_ASSERT_EQUALS(data.getExcludeRegion(1), "1,8");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(2), "1,5");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(3), "2,6");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(4), "");
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(1), regionVector1);
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(2), regionVector2);
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(3), regionVector3);
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(4).empty(), true);
+  }
+
+  void test_that_Spectra_is_set_correctly() {
+    auto data = getIndirectFitData(1, 3);
+
+    const Spectra spec = std::make_pair(0u, 5u);
+    data.setSpectra(spec);
+	// NOT FINISHED
+    TS_ASSERT_EQUALS(data.spectra().empty(), false);
+	//TS_ASSERT_EQUALS(data.spectra().which(), spec.type());
   }
 };
 
