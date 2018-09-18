@@ -6,8 +6,8 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as Navigatio
 
 class myToolbar(NavigationToolbar):
     # only display the buttons we need
-    toolitems = [t for t in NavigationToolbar.toolitems if
-                 t[0] in ("Home","Save","Pan","Zoom" )]
+    toolitems = [tool for tool in NavigationToolbar.toolitems if
+                 tool[0] in ("Home","Save","Pan","Zoom" )]
 
     def __init__(self, *args, **kwargs):
         super(myToolbar, self).__init__(*args, **kwargs)
