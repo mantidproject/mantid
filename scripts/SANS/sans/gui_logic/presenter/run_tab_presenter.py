@@ -14,6 +14,7 @@ from mantid.api import (FileFinder)
 
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 from sans.gui_logic.models.table_model import TableModel, TableIndexModel
 from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
@@ -30,7 +31,6 @@ from sans.sans_batch import SANSCentreFinder
 from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
-from sans.sans_batch import SANSBatchReduction
 
 try:
     import mantidplot
@@ -114,6 +114,7 @@ class RunTabPresenter(object):
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
+        self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished, self.on_processing_error)
 
         # Models that are being used by the presenter
         self._state_model = None
@@ -353,10 +354,13 @@ class RunTabPresenter(object):
             # 1. Set up the states and convert them into property managers
             selected_rows = self._view.get_selected_rows()
             selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
-            states = self.get_states(row_index=selected_rows)
+            states, errors = self.get_states(row_index=selected_rows)
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
                                    " has been loaded")
+
+            for row, error in errors.items():
+                self.on_processing_error(row, error)
 
             # 4. Create the graph if continuous output is specified
             if mantidplot:
@@ -374,11 +378,10 @@ class RunTabPresenter(object):
 
             # Get the name of the graph to output to
             output_graph = self.output_graph
-            sans_batch = SANSBatchReduction()
-            listener = RunTabPresenter.ProcessListener(self)
 
-            self.work_handler.process(listener, sans_batch, states=states.values(), use_optimizations=use_optimizations,
-                                      output_mode=output_mode, plot_results=plot_results, output_graph=output_graph)
+            setattr(self._view, 'progress_bar_value', 0)
+            setattr(self._view, 'progress_bar_maximum', len(states))
+            self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results, output_graph)
 
         except Exception as e:
             self._view.enable_buttons()
@@ -394,13 +397,17 @@ class RunTabPresenter(object):
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
+    def notify_progress(self, row):
+        setattr(self._view, 'progress_bar_value', row + 1)
+        self._view.change_row_color("#d0f4d0", row)
+
     def on_processing_finished(self, result):
         self._view.enable_buttons()
         self._processing = False
 
-    def on_processing_error(self, error):
-        self._view.enable_buttons()
-        self._processing = False
+    def on_processing_error(self, row, error_msg):
+        self._view.change_row_color("#accbff", row)
+        self._view.set_row_tooltip(error_msg, row)
 
     def on_row_inserted(self, index, row):
         row_table_index = TableIndexModel(*row)
@@ -538,14 +545,15 @@ class RunTabPresenter(object):
 
         # 3. Go through each row and construct a state object
         if table_model and state_model_with_view_update:
-            states = create_states(state_model_with_view_update, table_model, self._view.instrument
-                                   , self._facility, row_index=row_index, file_lookup=file_lookup)
+            states, errors = create_states(state_model_with_view_update, table_model, self._view.instrument
+                                           , self._facility, row_index=row_index, file_lookup=file_lookup)
         else:
             states = None
+            errors = None
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
         self.sans_logger.information("The generation of all states took {}s".format(time_taken))
-        return states
+        return states, errors
 
     def get_state_for_row(self, row_index, file_lookup=True):
         """
@@ -553,7 +561,7 @@ class RunTabPresenter(object):
         :param row_index: the row index
         :return: a state if the index is valid and there is a state else None
         """
-        states = self.get_states(row_index=[row_index], file_lookup=file_lookup)
+        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup)
         if states is None:
             self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None

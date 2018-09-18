@@ -343,6 +343,13 @@ QGroupBox::title {
              <layout class="QVBoxLayout" name="data_processor_widget_layout"/>
             </item>
             <item>
+             <widget class="QProgressBar" name="batch_progress_bar">
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
+            </item>
+            <item>
              <layout class="QGridLayout" name="gridLayout_7">
               <item row="0" column="3">
                <widget class="QGroupBox" name="reduction_dimensionality_group_box">
