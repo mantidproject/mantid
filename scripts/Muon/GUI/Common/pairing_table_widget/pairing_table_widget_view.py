@@ -37,6 +37,8 @@ class PairingTableView(QtGui.QWidget):
         # Flag for context menus
         self._disabled = False
 
+        self._on_guess_alpha_clicked = lambda row: 0
+
     def disable_editing(self):
         self.disable_updates()
         self._disabled = True
@@ -143,7 +145,7 @@ class PairingTableView(QtGui.QWidget):
         vertical_headers.setVisible(True)
 
     def _context_menu_add_pair_action(self, slot):
-        add_pair_action = QtGui.QAction('Add Group', self)
+        add_pair_action = QtGui.QAction('Add Pair', self)
         if len(self._get_selected_row_indices()) > 0:
             add_pair_action.setEnabled(False)
         add_pair_action.triggered.connect(slot)
@@ -164,15 +166,15 @@ class PairingTableView(QtGui.QWidget):
         """Overridden method"""
         self.menu = QtGui.QMenu(self)
 
-        add_pair_action = self._context_menu_add_pair_action(self.add_pair_button.clicked.emit)
-        remove_pair_action = self._context_menu_remove_pair_action(self.remove_pair_button.clicked.emit)
+        self.add_pair_action = self._context_menu_add_pair_action(self.add_pair_button.clicked.emit)
+        self.remove_pair_action = self._context_menu_remove_pair_action(self.remove_pair_button.clicked.emit)
 
         if self._disabled:
-            add_pair_action.setEnabled(False)
-            remove_pair_action.setEnabled(False)
+            self.add_pair_action.setEnabled(False)
+            self.remove_pair_action.setEnabled(False)
 
-        self.menu.addAction(add_pair_action)
-        self.menu.addAction(remove_pair_action)
+        self.menu.addAction(self.add_pair_action)
+        self.menu.addAction(self.remove_pair_action)
 
         self.menu.popup(QtGui.QCursor.pos())
 
@@ -206,12 +208,16 @@ class PairingTableView(QtGui.QWidget):
                 continue
             if i == 1:
                 group1_selector_widget = self._group_selection_cell_widget()
+                # ensure changing the selection sends an update signal
+                group1_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 1))
                 index = self.get_index_of_text(group1_selector_widget, entry)
                 group1_selector_widget.setCurrentIndex(index)
                 self.pairing_table.setCellWidget(row_position, 1, group1_selector_widget)
                 continue
             if i == 2:
                 group2_selector_widget = self._group_selection_cell_widget()
+                # ensure changing the selection sends an update signal
+                group2_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row_position, 2))
                 index = self.get_index_of_text(group2_selector_widget, entry)
                 group2_selector_widget.setCurrentIndex(index)
                 self.pairing_table.setCellWidget(row_position, 2, group2_selector_widget)
@@ -224,7 +230,14 @@ class PairingTableView(QtGui.QWidget):
             self.pairing_table.setItem(row_position, i, item)
         # guess alpha button
         guess_alpha_widget = self._guess_alpha_button()
+        guess_alpha_widget.clicked.connect(lambda: self.guess_alpha_clicked_from_row(row_position))
         self.pairing_table.setCellWidget(row_position, 4, guess_alpha_widget)
+
+    def on_guess_alpha_clicked(self, slot):
+        self._on_guess_alpha_clicked = slot
+
+    def guess_alpha_clicked_from_row(self, row):
+        self._on_guess_alpha_clicked(row)
 
     def on_add_pair_button_clicked(self, slot):
         self.add_pair_button.clicked.connect(slot)
@@ -297,3 +310,6 @@ class PairingTableView(QtGui.QWidget):
 
     def enable_updates(self):
         self._updating = False
+
+    def get_table_item_text(self, row, col):
+        return self.pairing_table.item(row, col).text()

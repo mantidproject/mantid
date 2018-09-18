@@ -165,6 +165,11 @@ class InstrumentWidgetView(QtGui.QWidget):
     def get_instrument(self):
         return self.instrument_selector.currentText()
 
+    def set_instrument(self, instrument):
+        index = self.instrument_selector.findText(instrument)
+        if index != -1:
+            self.instrument_selector.setCurrentIndex(index)
+
     def on_instrument_changed(self, slot):
         self.instrument_selector.currentIndexChanged.connect(slot)
 

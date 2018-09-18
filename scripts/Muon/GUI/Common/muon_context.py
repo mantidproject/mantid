@@ -10,7 +10,6 @@ from Muon.GUI.Common.muon_file_utils import format_run_for_file
 from collections import OrderedDict
 
 from mantid.kernel import ConfigServiceImpl
-import mantid as mantid
 
 
 class MuonContext(object):
@@ -22,6 +21,9 @@ class MuonContext(object):
 
         self._loaded_data = MuonLoadData()
         self._current_data = load_utils.empty_loaded_data()  # self.get_result(False)
+
+    def is_data_loaded(self):
+        return self._loaded_data.num_items() > 0
 
     @property
     def current_data(self):
@@ -65,19 +67,9 @@ class MuonContext(object):
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
-
         if self._loaded_data.num_items() > 0:
             self._current_data = self._loaded_data.params["workspace"][-1]
-
-            groups, pairs = self.get_default_grouping("EMU")
-
-            self.clear_groups()
-            for group in groups:
-                self.add_group(group)
-
-            self.clear_pairs()
-            for pair in pairs:
-                self.add_pair(pair)
+            self.set_groups_and_pairs_to_default()
         else:
             self._current_data = load_utils.empty_loaded_data()
 
@@ -209,29 +201,37 @@ class MuonContext(object):
         for group_name in self._groups.keys():
             self.show_group_data(group_name)
 
-    def show_group_data(self, group_name):
+    def show_group_data(self, group_name, show=True):
         name = self.get_group_data_workspace_name(group_name)
         directory = self.get_base_data_directory() + self.get_group_data_directory()
         workspace = self.calculate_group_data(group_name)
 
         self._groups[group_name].workspace = load_utils.MuonWorkspace(workspace)
-        self._groups[group_name].workspace.show(directory + name)
+        if show:
+            self._groups[group_name].workspace.show(directory + name)
 
     def show_all_pairs(self):
         for pair_name in self._pairs.keys():
             self.show_pair_data(pair_name)
 
-    def show_pair_data(self, pair_name):
+    def show_pair_data(self, pair_name, show=True):
         name = self.get_pair_data_workspace_name(pair_name)
         directory = self.get_base_data_directory() + self.get_pair_data_directory()
         workspace = self.calculate_pair_data(pair_name)
 
         self._pairs[pair_name].workspace = load_utils.MuonWorkspace(workspace)
-        self._pairs[pair_name].workspace.show(directory + name)
+        if show:
+            self._pairs[pair_name].workspace.show(directory + name)
 
     def calculate_all_groups(self):
         for group_name in self._groups.keys():
             self.calculate_group_data(group_name)
+
+    def _run_pre_processing(self):
+        params = self._get_pre_processing_params()
+        params["InputWorkspace"] = self.loaded_workspace
+        processed_data = load_utils.run_MuonPreProcess(params)
+        return processed_data
 
     def _get_pre_processing_params(self):
         pre_process_params = {}
@@ -261,12 +261,6 @@ class MuonContext(object):
 
         return pre_process_params
 
-    def _run_pre_processing(self):
-        params = self._get_pre_processing_params()
-        params["InputWorkspace"] = self.loaded_workspace
-        processed_data = load_utils.run_MuonPreProcess(params)
-        return processed_data
-
     def _get_MuonGroupingCounts_parameters(self, group_name):
         params = {}
         try:
@@ -288,6 +282,33 @@ class MuonContext(object):
 
         return params
 
+    def _get_MuonPairingAsymmetry_parameters(self, pair_name):
+        params = {}
+        try:
+            summed_periods = self.loaded_data["SummedPeriods"]
+            params["SummedPeriods"] = str(summed_periods)
+        except KeyError:
+            params["SummedPeriods"] = "1"
+
+        try:
+            subtracted_periods = self.loaded_data["SubtractedPeriods"]
+            params["SubtractedPeriods"] = str(subtracted_periods)
+        except KeyError:
+            params["SubtractedPeriods"] = ""
+
+        pair = self._pairs.get(pair_name, None)
+
+        if pair:
+            params["SpecifyGroupsManually"] = True
+            params["PairName"] = str(pair_name)
+            detectors1 = ",".join([str(i) for i in self._groups[pair.group1].detectors])
+            detectors2 = ",".join([str(i) for i in self._groups[pair.group2].detectors])
+            params["Group1"] = detectors1
+            params["Group2"] = detectors2
+            params["Alpha"] = str(pair.alpha)
+
+        return params
+
     def calculate_group_data(self, group_name):
         processed_data = self._run_pre_processing()
 
@@ -300,22 +321,22 @@ class MuonContext(object):
     def calculate_pair_data(self, pair_name):
         processed_data = self._run_pre_processing()
 
-        alg = mantid.AlgorithmManager.create("MuonPairingAsymmetry")
-        alg.initialize()
-        alg.setAlwaysStoreInADS(False)
-        alg.setProperty("OutputWorkspace", "__notUsed")
-        alg.setProperty("InputWorkspace", processed_data)
-        alg.setProperty("SpecifyGroupsManually", True)
-        alg.setProperty("PairName", pair_name)
-        alg.setProperty("Group1", "1,2,3,4,5")
-        alg.setProperty("Group2", "6,7,8,9,10")
-        alg.setProperty("SummedPeriods", "1")
-        alg.setProperty("SubtractedPeriods", "")
-        alg.execute()
-
-        pair_data = alg.getProperty("OutputWorkspace").value
+        params = self._get_MuonPairingAsymmetry_parameters(pair_name)
+        params["InputWorkspace"] = processed_data
+        pair_data = load_utils.run_MuonPairingAsymmetry(params)
 
         return pair_data
+
+    def set_groups_and_pairs_to_default(self):
+        groups, pairs = self.get_default_grouping("_dummy_args")
+
+        self.clear_groups()
+        for group in groups:
+            self.add_group(group)
+
+        self.clear_pairs()
+        for pair in pairs:
+            self.add_pair(pair)
 
     def get_default_grouping(self, _instrument):
         parameter_name = "Default grouping file"

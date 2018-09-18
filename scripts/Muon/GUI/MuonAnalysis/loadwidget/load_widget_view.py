@@ -3,8 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 
 
-# from mantidqtpython import MantidQt
-
 class LoadWidgetView(QtGui.QWidget):
 
     def __init__(self, parent=None, load_run_view=None, load_file_view=None):
@@ -19,7 +17,7 @@ class LoadWidgetView(QtGui.QWidget):
     def setup_interface_layout(self):
 
         self.clear_button = QtGui.QPushButton(self)
-        self.clear_button.setMinimumSize(QtCore.QSize(100, 25))
+        #self.clear_button.setMinimumSize(QtCore.QSize(100, 25))
         self.clear_button.setObjectName("clearButton")
         self.clear_button.setToolTip("Clear the currently loaded data")
         self.clear_button.setText("Clear")
@@ -32,10 +30,6 @@ class LoadWidgetView(QtGui.QWidget):
         self.multiple_loading_check.setToolTip("Enable/disable loading multiple runs at once")
         self.multiple_loading_check.setChecked(False)
 
-        # self.load_behaviour_label = QtWidgets.QLabel(self)
-        # self.load_behaviour_label.setObjectName("load_behaviour_label")
-        # self.load_behaviour_label.setText("Load Behaviour : ")
-
         self.load_behaviour_combo = QtGui.QComboBox(self)
         self.load_behaviour_combo.setObjectName("load_behaviour_combo")
         self.load_behaviour_combo.addItem("Co-Add")
@@ -43,30 +37,38 @@ class LoadWidgetView(QtGui.QWidget):
         self.load_behaviour_combo.setToolTip("The behaviour of the loaded data in multiple file mode")
         self.load_behaviour_combo.setEnabled(False)
 
-        self.manage_directories_button = QtGui.QPushButton(self)
-        self.manage_directories_button.setMinimumSize(QtCore.QSize(100, 25))
-        self.manage_directories_button.setObjectName("manageDirectoriesButton")
-        self.manage_directories_button.setText("Manage User Directories")
-
-        self.spacer = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-
         # Set the layout of the tools at the bottom of the widget
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.clear_button)
+        self.horizontal_layout.addStretch(0)
         self.horizontal_layout.addWidget(self.multiple_loading_label)
         self.horizontal_layout.addWidget(self.multiple_loading_check)
-        # self.horizontalLayout.addWidget(self.load_behaviour_label)
         self.horizontal_layout.addWidget(self.load_behaviour_combo)
-        self.horizontal_layout.addWidget(self.manage_directories_button)
-        self.horizontal_layout.addItem(self.spacer)
 
         # Set the layout vertically
-        self.vertical_layout = QtGui.QVBoxLayout(self)
+        self.vertical_layout = QtGui.QVBoxLayout()
         self.vertical_layout.addWidget(self.load_run_widget)
         self.vertical_layout.addWidget(self.load_file_widget)
         self.vertical_layout.addLayout(self.horizontal_layout)
         self.vertical_layout.addStretch(1)
+
+        self.group = QtGui.QGroupBox("Loading")
+        self.group.setFlat(False)
+        self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
+                           "QGroupBox:title {"
+                           'subcontrol-origin: margin;'
+                           "padding: 0 3px;"
+                           'subcontrol-position: top center;'
+                           'padding-top: -10px;'
+                           'padding-bottom: 0px;'
+                           "padding-right: 10px;"
+                           ' color: grey; }')
+        self.group.setLayout(self.vertical_layout)
+
+        self.widget_layout = QtGui.QVBoxLayout(self)
+        self.widget_layout.addWidget(self.group)
+        self.setLayout(self.widget_layout)
 
     def set_connections(self):
         self.on_multiple_loading_check_changed(self.change_multiple_loading_state)
@@ -107,6 +109,3 @@ class LoadWidgetView(QtGui.QWidget):
     def enable_loading(self):
         self.clear_button.setEnabled(True)
         self.multiple_loading_check.setEnabled(True)
-
-    # def show_directory_manager(self):
-    #     MantidQt.API.ManageUserDirectories.openUserDirsDialog(self)

@@ -181,26 +181,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
             self.assertFalse(self.view.add_pair_action.isEnabled())
 
-    # def test_context_menu_add_pair_adds_pair_if_two_groups_selected(self):
-    #     self.add_three_groups_to_table()
-    #
-    #     self.view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
-    #     self.view.contextMenuEvent(0)
-    #     self.view.add_pair_action.triggered.emit(True)
-    #
-    #     self.assertEqual(len(self.model.pairs), 1)
-    #
-    # def test_context_menu_add_pair_adds_correct_pair_if_two_groups_selected(self):
-    #     self.add_three_groups_to_table()
-    #
-    #     self.view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
-    #     self.view.contextMenuEvent(0)
-    #     self.view.add_pair_action.triggered.emit(True)
-    #
-    #     pair_name = self.model.pair_names[0]
-    #
-    #     self.assertEqual(self.model.pairs[pair_name].group1_name, "group_0")
-    #     self.assertEqual(self.model.pairs[pair_name].group2_name, "group_1")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Group name validation

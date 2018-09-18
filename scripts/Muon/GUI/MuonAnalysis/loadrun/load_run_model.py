@@ -68,6 +68,18 @@ class LoadRunWidgetModel(object):
     def cancel(self):
         pass
 
+    def get_instrument(self):
+        instrument = "None"
+        try:
+            workspace = self.loaded_workspaces[0]["OutputWorkspace"]
+            if isinstance(workspace, list):
+                instrument = workspace[0].workspace.getInstrument().getName()
+            else:
+                instrument = workspace.workspace.getInstrument().getName()
+        except IndexError:
+            instrument = "None"
+        return instrument
+
     def load_workspace_from_filename(self, filename):
         print("load_workspace_from_filename")
 
@@ -94,7 +106,6 @@ class LoadRunWidgetModel(object):
         # else:
         #     workspaces = [workspace]
         #     run = int(workspace.getRunNumber())
-
 
         workspaces, run, filename = load_utils.load_workspace_from_filename(filename)
 

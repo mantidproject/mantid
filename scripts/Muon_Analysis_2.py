@@ -6,6 +6,8 @@ import sys
 import PyQt4.QtGui as QtGui
 import PyQt4.QtCore as QtCore
 
+import mantid.simpleapi as simpleapi
+
 from Muon.GUI.Common.muon_context import MuonContext
 
 from Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
@@ -32,6 +34,8 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(MuonAnalysis2Gui, self).__init__(parent)
+
+        self.add_table_workspace()
 
         self.context = MuonContext()
         self.data = self.context._loaded_data  # MuonLoadData()
@@ -60,6 +64,16 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
 
         self.dockWidget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.dockWidget.home_tab_widget.groupingObserver)
+
+    def add_table_workspace(self):
+        # add dead time tables
+        correctTable = simpleapi.CreateEmptyTableWorkspace()
+        incorrectTable = simpleapi.CreateEmptyTableWorkspace()
+
+        correctTable.addColumn("int", "spectrum", 0)
+        correctTable.addColumn("float", "dead-time", 0)
+        for i in range(96):
+            correctTable.addRow([i, 0.01])
 
     def setup_load_widget(self):
         self.load_file_view = BrowseFileWidgetView(self)

@@ -22,6 +22,21 @@ class GroupingTabModel(object):
 
         self._data = data
 
+    def get_group_workspace(self, group_name):
+        """
+        Return the workspace associated to group_name, creating one if
+        it doesn't already exist (e.g. if group added to table but no update yet triggered).
+        """
+        try:
+            workspace = self._data.groups[group_name].workspace.workspace
+        except AttributeError:
+            self._data.show_group_data(group_name, show=False)
+            workspace = self._data.groups[group_name].workspace.workspace
+        return workspace
+
+    def update_pair_alpha(self, pair_name, new_alpha):
+        self._data.pairs[pair_name].alpha = new_alpha
+
     @property
     def groups(self):
         return self._data._groups.values()

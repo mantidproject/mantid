@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import mtd
 from mantid import api
 
+
 class MuonWorkspace(object):
     """A basic muon workspace which is either the workspace or the name of the workspace in the ADS"""
 

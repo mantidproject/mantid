@@ -33,9 +33,9 @@ class ValidatedTableItem(QtGui.QTableWidgetItem):
         @wraps(func)
         def wrapper(*args, **kw):
             try:
-                #if validator(args[1].toString()):
+                if validator(args[1].toString()):
                 #print(type(args[1]))
-                if validator(args[1]):
+                #if validator(args[1]):
                     res = func(*args, **kw)
                 else:
                     res = None

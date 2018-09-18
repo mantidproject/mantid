@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.muon_context import MuonContext
 
 
-class GroupingTableModel(object):
+class PairingTableModel(object):
 
     def __init__(self, data=MuonContext()):
         self._data = data

@@ -42,11 +42,11 @@ class MuonPair:
 
     @property
     def alpha(self):
-        return self._alpha
+        return float("{0:.3f}".format(round(self._alpha,3)))
 
     @alpha.setter
     def alpha(self, new_alpha):
-        if new_alpha >= 0.0:
+        if float(new_alpha) >= 0.0:
             self._alpha = new_alpha
         else:
             raise ValueError("Alpha must be > 0.0.")

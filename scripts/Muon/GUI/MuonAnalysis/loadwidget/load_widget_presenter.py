@@ -35,13 +35,7 @@ class LoadWidgetPresenter(object):
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
 
-    class LoadNotifier(Observable):
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
 
-        def notify_subscribers(self, arg=None):
-            Observable.notify_subscribers(self, arg)
 
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
@@ -72,13 +66,6 @@ class LoadWidgetPresenter(object):
         self.load_file_widget.update_view_from_model(self._model.filenames)
         self.loadNotifier.notify_subscribers()
 
-    def handle_instrument_changed(self, new_instrument):
-        # TODO : Implement
-        # clear both run and browse
-        # set new instrument in browse
-        # set new instrument in run
-        pass
-
     def disable_loading(self):
         self.load_run_widget.disable_loading()
         self.load_file_widget.disable_loading()
@@ -99,6 +86,7 @@ class LoadWidgetPresenter(object):
         self._model.clear_data()
         self.handle_run_widget_data_changed()
         self.handle_run_widget_data_changed()
+        self.load_run_widget.set_current_instrument("Instrument")
         self.loadNotifier.notify_subscribers()
 
     @property
@@ -112,6 +100,17 @@ class LoadWidgetPresenter(object):
     def update_new_instrument(self, instrument):
         self.clear_data_and_view()
         self.set_current_instrument(instrument)
+
+    class LoadNotifier(Observable):
+        """
+        Notify when loaded data changes from file widget or run widget, or when clear button is pressed.
+        """
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, arg=None):
+            Observable.notify_subscribers(self, arg)
 
     class InstrumentObserver(Observer):
 

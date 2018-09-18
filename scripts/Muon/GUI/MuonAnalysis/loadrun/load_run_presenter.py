@@ -16,8 +16,7 @@ class LoadRunWidgetPresenter(object):
 
         self._load_multiple_runs = False
 
-        # TODO : Replace lines below with code to get the instrument
-        self._instrument = "EMU"
+        self._instrument = "Instrument"
         self._view.set_current_instrument(self._instrument)
 
         self._set_connections()
@@ -180,10 +179,6 @@ class LoadRunWidgetPresenter(object):
             run_list = runUtils.decrement_run_list(run_list)
         return run_list
 
-    def set_new_instrument(self):
-        # TODO : implement
-        pass
-
     def enable_multiple_files(self, enabled):
         self._load_multiple_runs = enabled
 
@@ -202,6 +197,8 @@ class LoadRunWidgetPresenter(object):
     # used by parent widget
     def update_view_from_model(self, run_list):
         self.set_run_edit_from_list(run_list)
+        instrument = self._model.get_instrument()
+        self.set_current_instrument(instrument)
 
     def set_current_instrument(self, instrument):
         self._instrument = instrument

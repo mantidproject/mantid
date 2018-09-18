@@ -29,9 +29,11 @@ class HomeGroupingWidgetModel(object):
             pair.alpha = alpha
 
     def get_alpha(self, pair_name):
-        pair = self._data.pairs.get(pair_name, None)
+        pair = self._data.pairs[pair_name]
         if pair:
             return pair.alpha
+        else:
+            return None
 
     def update_summed_periods(self, summed_periods):
         self._data.current_data["SummedPeriods"] = summed_periods

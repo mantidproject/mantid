@@ -29,19 +29,19 @@ class LoadRunWidgetView(QtGui.QWidget):
 
         self.loadCurrentRunButton = QtGui.QPushButton(Form)
         self.loadCurrentRunButton.setText("Load Current Run")
-        self.loadCurrentRunButton.setMinimumSize(QtCore.QSize(100, 25))
+        #self.loadCurrentRunButton.setMinimumSize(QtCore.QSize(100, 25))
         self.loadCurrentRunButton.setToolTip("Load the current run for the current instrument")
         self.loadCurrentRunButton.setObjectName("loadCurrentRunButton")
 
         self.incrementRunButton = QtGui.QToolButton(Form)
         self.incrementRunButton.setText(">")
-        self.incrementRunButton.setMinimumSize(QtCore.QSize(25, 25))
+        #self.incrementRunButton.setMinimumSize(QtCore.QSize(25, 25))
         self.incrementRunButton.setToolTip("Increment the run")
         self.incrementRunButton.setObjectName("incrementRunButton")
 
         self.decrementRunButton = QtGui.QToolButton(Form)
         self.decrementRunButton.setText("<")
-        self.decrementRunButton.setMinimumSize(QtCore.QSize(25, 25))
+        #self.decrementRunButton.setMinimumSize(QtCore.QSize(25, 25))
         self.decrementRunButton.setToolTip("Decrement the run")
         self.decrementRunButton.setObjectName("decrementRunButton")
 
@@ -51,7 +51,7 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.instrumentLabel.setObjectName("instrumentLabel")
 
         self.runEdit = QtGui.QLineEdit(Form)
-        self.runEdit.setMinimumSize(QtCore.QSize(0, 25))
+        #self.runEdit.setMinimumSize(QtCore.QSize(0, 25))
         self.runEdit.setToolTip(
             "Enter run number using " + runUtils.delimiter
             + " and " + runUtils.range_separator + " as delimiter and range-separator respectively")
@@ -67,7 +67,10 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.horizontalLayout.addWidget(self.incrementRunButton)
         self.horizontalLayout.addItem(self.spacerItem)
 
-        # self.setLayout(self.horizontalLayout)
+        self.setLayout(self.horizontalLayout)
+
+    def getLayout(self):
+        return self.horizontalLayout
 
     def set_run_edit_regex(self):
         regex = QtCore.QRegExp(runUtils.run_string_regex)  # "^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$"

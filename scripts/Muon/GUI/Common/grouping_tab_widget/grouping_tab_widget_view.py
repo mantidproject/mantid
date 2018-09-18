@@ -46,10 +46,13 @@ class GroupingTabView(QtGui.QWidget):
         self.save_grouping_button.setText("Save Grouping")
         self.clear_grouping_button = QtGui.QPushButton(self)
         self.clear_grouping_button.setText("Clear Grouping")
+        self.default_grouping_button = QtGui.QPushButton(self)
+        self.default_grouping_button.setText("Default Grouping")
 
         self.horizontal_layout.addWidget(self.load_grouping_button)
         self.horizontal_layout.addWidget(self.save_grouping_button)
         self.horizontal_layout.addWidget(self.clear_grouping_button)
+        self.horizontal_layout.addWidget(self.default_grouping_button)
 
         self.vertical_layout = QtGui.QVBoxLayout(self)
         self.vertical_layout.setObjectName("verticalLayout")
@@ -69,6 +72,13 @@ class GroupingTabView(QtGui.QWidget):
         self.vertical_layout.addItem(self.horizontal_layout_base)
 
         self.setLayout(self.vertical_layout)
+
+    def set_buttons_enabled(self, enabled=True):
+        self.load_grouping_button.setEnabled(enabled)
+        self.save_grouping_button.setEnabled(enabled)
+        self.clear_grouping_button.setEnabled(enabled)
+        self.default_grouping_button.setEnabled(enabled)
+        self.update_button.setEnabled(enabled)
 
     def getLayout(self):
         return self.vertical_layout
@@ -97,6 +107,9 @@ class GroupingTabView(QtGui.QWidget):
 
     def on_clear_grouping_button_clicked(self, slot):
         self.clear_grouping_button.clicked.connect(slot)
+
+    def on_default_grouping_button_clicked(self, slot):
+        self.default_grouping_button.clicked.connect(slot)
 
     def on_update_button_clicked(self, slot):
         self.update_button.clicked.connect(slot)

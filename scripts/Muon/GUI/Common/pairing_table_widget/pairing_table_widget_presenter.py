@@ -4,6 +4,9 @@ import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.run_string_utils import valid_name_regex, valid_alpha_regex
+from Muon.GUI.Common.home_tab.home_tab_presenter import Observer
+from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import Observable
+
 
 class PairingTablePresenter(object):
 
@@ -20,6 +23,13 @@ class PairingTablePresenter(object):
         self._view.on_table_data_changed(self.handle_data_change)
 
         self._dataChangedNotifier = lambda: 0
+
+        self._on_alpha_clicked = lambda: 0
+        self._on_guess_alpha_requested = lambda pair_name, group1, group2: 0
+
+        self.guessAlphaNotifier = PairingTablePresenter.GuessAlphaNotifier(self)
+
+        self._view.on_guess_alpha_clicked(self.handle_guess_alpha_clicked)
 
     def show(self):
         self._view.show()
@@ -38,6 +48,9 @@ class PairingTablePresenter(object):
 
     def add_pair(self, pair):
         """Add a pair to the model and view"""
+        if self._view.num_rows() > 19:
+            self._view.warning_popup("Cannot add more than 20 pairs.")
+            return
         self.add_pair_to_view(pair)
         self.add_pair_to_model(pair)
 
@@ -48,11 +61,6 @@ class PairingTablePresenter(object):
         self._view.disable_updates()
         self.update_group_selections()
         assert isinstance(pair, MuonPair)
-        if self._view.num_rows() > 20:
-            self._view.warning_popup("Cannot add more than 20 pairs.")
-            self._view.enable_updates()
-            return
-
         entry = [str(pair.name), str(pair.group1), str(pair.group2), str(pair.alpha)]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
@@ -60,6 +68,7 @@ class PairingTablePresenter(object):
     def handle_add_pair_button_clicked(self):
         pair = self._model.construct_empty_pair(self._view.num_rows() + 1)
         self.add_pair(pair)
+        self.notify_data_changed()
 
     def handle_remove_pair_button_clicked(self):
         pair_names = self._view.get_selected_pair_names()
@@ -68,12 +77,20 @@ class PairingTablePresenter(object):
         else:
             self._view.remove_selected_pairs()
             self._model.remove_pairs_by_name(pair_names)
+        self.notify_data_changed()
 
     def remove_last_row_in_view_and_model(self):
         if self._view.num_rows() > 0:
             name = self._view.get_table_contents()[-1][0]
             self._view.remove_last_row()
             self._model.remove_pairs_by_name([name])
+
+    def handle_guess_alpha_clicked(self, row):
+        table_row = self._view.get_table_contents()[row]
+        pair_name = table_row[0]
+        group1 = table_row[1]
+        group2 = table_row[2]
+        self.guessAlphaNotifier.notify_subscribers([pair_name, group1, group2])
 
     def handle_data_change(self):
         self.update_model_from_view()
@@ -84,6 +101,7 @@ class PairingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_pairs()
         for entry in table:
+            print("ENTRY : ", entry)
             pair = MuonPair(pair_name=str(entry[0]),
                             group1_name=str(entry[1]),
                             group2_name=str(entry[2]),
@@ -123,7 +141,15 @@ class PairingTablePresenter(object):
         return True
 
     def validate_alpha(self, alpha_text):
-        if not re.match(valid_alpha_regex, alpha_text) or float(alpha_text < 0.0):
+        if not re.match(valid_alpha_regex, alpha_text) or float(alpha_text) < 0.0:
             self._view.warning_popup("Alpha must be > 0")
             return False
         return True
+
+    class GuessAlphaNotifier(Observable):
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, arg=["", "", ""]):
+            Observable.notify_subscribers(self, arg)

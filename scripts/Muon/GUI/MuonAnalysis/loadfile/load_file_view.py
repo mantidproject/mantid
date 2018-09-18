@@ -38,7 +38,7 @@ class BrowseFileWidgetView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.browse_button.sizePolicy().hasHeightForWidth())
 
         self.browse_button.setSizePolicy(size_policy)
-        self.browse_button.setMinimumSize(QtCore.QSize(100, 50))
+        # self.browse_button.setMinimumSize(QtCore.QSize(100, 50))
         self.browse_button.setObjectName("browseButton")
         self.browse_button.setText("Browse")
 
@@ -50,16 +50,19 @@ class BrowseFileWidgetView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.file_path_edit.sizePolicy().hasHeightForWidth())
 
         self.file_path_edit.setSizePolicy(size_policy)
-        self.file_path_edit.setMinimumSize(QtCore.QSize(200, 50))
+        # self.file_path_edit.setMinimumSize(QtCore.QSize(200, 50))
         self.file_path_edit.setToolTip("")
         self.file_path_edit.setObjectName("filePathEdit")
 
-        self.horizontal_layout = QtGui.QHBoxLayout(self)
+        self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
         self.horizontal_layout.addWidget(self.file_path_edit)
         self.horizontal_layout.addWidget(self.browse_button)
 
-        #self.setLayout(self.horizontal_layout)
+        self.setLayout(self.horizontal_layout)
+
+    def getLayout(self):
+        return self.horizontal_layout
 
     def on_browse_clicked(self, slot):
         self.browse_button.clicked.connect(slot)

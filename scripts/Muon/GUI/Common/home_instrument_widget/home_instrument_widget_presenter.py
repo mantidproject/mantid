@@ -68,6 +68,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def update_view_from_model(self):
         self.handle_loaded_first_good_data_checkState_change()
         self.handle_loaded_time_zero_checkState_change()
+        self._view.set_instrument(self._model._data.instrument)
 
     def handle_loaded_time_zero_checkState_change(self):
         if self._view.time_zero_state():
@@ -101,10 +102,13 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.set_dead_time_label(text)
 
     def handle_instrument_changed(self):
-        self._model.clear_data()
-        self.clear_view()
         instrument = self._view.get_instrument()
-        self.instrumentNotifier.notify_subscribers(instrument)
+        if instrument != self._model._data.instrument:
+            # only update if the view and model are not the same
+            self._model.clear_data()
+            self.clear_view()
+            self._view.warning_popup("Changing instrument will reset interface!")
+            self.instrumentNotifier.notify_subscribers(instrument)
 
     def handle_fixed_rebin_changed(self):
         fixed_bin_size = float(self._view.get_fixed_bin_text())

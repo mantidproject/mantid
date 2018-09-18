@@ -7,6 +7,8 @@ from mantid.api import ITableWorkspace
 from mantid.simpleapi import mtd
 from mantid import api
 import mantid.kernel as kernel
+import xml.etree.ElementTree as ET
+import Muon.GUI.Common.run_string_utils as run_string_utils
 
 from Muon.GUI.Common.muon_workspace import MuonWorkspace
 
@@ -152,7 +154,7 @@ class floatPropertyWithValue:
 
 DEFAULT_OUTPUT_VALUES = [MuonWorkspace(api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)),
                          floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
-                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+                         floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
                          floatPropertyWithValue(0.0),
                          floatPropertyWithValue(0.0)]
 
@@ -220,21 +222,16 @@ def create_load_algorithm(filename, property_dictionary):
 
 
 def _get_algorithm_properties(alg, property_dict):
-    # print(alg.keys())
     return {key: alg.getProperty(key) for key in alg.keys() if key in property_dict}
 
 
 def get_table_workspace_names_from_ADS():
+    """
+    Return a list of names of TableWorkspace objects which are in the ADS.
+    """
     names = api.AnalysisDataService.Instance().getObjectNames()
-    table_names = []
-    for name in names:
-        if isinstance(mtd[name], ITableWorkspace):
-            table_names += [name]
+    table_names = [name for name in names if isinstance(mtd[name], ITableWorkspace)]
     return table_names
-
-
-import xml.etree.ElementTree as ET
-import Muon.GUI.Common.run_string_utils as run_string_utils
 
 
 def _get_groups_from_XML(root):
@@ -327,73 +324,74 @@ def load_grouping_from_XML(filename):
 
 
 def run_MuonPreProcess(parameter_dict):
+    """
+    Apply the MuonPreProcess algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated workspace.
+    """
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
     alg.setProperties(parameter_dict)
     alg.execute()
-
-    processed_data = alg.getProperty("OutputWorkspace").value
-    return processed_data
+    return alg.getProperty("OutputWorkspace").value
 
 
 def run_MuonGroupingCounts(parameter_dict):
+    """
+    Apply the MuonGroupingCounts algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated workspace.
+    """
     alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
-    workspace = parameter_dict["InputWorkspace"]
-    alg.setProperty("InputWorkspace", workspace)
-    del parameter_dict["InputWorkspace"]
-    print("\t\t\t ", parameter_dict)
     alg.setProperties(parameter_dict)
     alg.execute()
-
-    group_data = alg.getProperty("OutputWorkspace").value
-    return group_data
+    return alg.getProperty("OutputWorkspace").value
 
 
-if __name__ == "__main__":
-    # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
-    filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020882.nxs"
-
-    result, _run = load_workspace_from_filename(filename)
-    # print(result)
-
-    ws = result["OutputWorkspace"].workspace
-
-    api.AnalysisDataServiceImpl.Instance().add("input", ws)
-
-    alg = mantid.AlgorithmManager.create("MuonPreProcess")
+def run_MuonPairingAsymmetry(parameter_dict):
+    """
+    Apply the MuonPairingAsymmetry algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated workspace.
+    """
+    alg = mantid.AlgorithmManager.create("MuonPairingAsymmetry")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
-    alg.setProperty("InputWorkspace", "input")
-    # alg.setProperties(property_dictionary)
+    alg.setProperties(parameter_dict)
     alg.execute()
+    return alg.getProperty("OutputWorkspace").value
 
-    wsOut = alg.getProperty("OutputWorkspace").value
-    api.AnalysisDataServiceImpl.Instance().remove("input")
 
-    api.AnalysisDataServiceImpl.Instance().add("wsOut", wsOut)
-
-    alg = mantid.AlgorithmManager.create("MuonGroupingCounts")
+def run_AppendSpectra(ws1, ws2):
+    """
+    Apply the AppendSpectra algorithm to two given workspaces (no checks made).
+    Returns the appended workspace.
+    """
+    alg = mantid.AlgorithmManager.create("AppendSpectra")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
     alg.setProperty("OutputWorkspace", "__notUsed")
-    alg.setProperty("InputWorkspace", "wsOut")
-    alg.setProperty("GroupName", "group")
-    alg.setProperty("Grouping", "1,2,3,4,5")
-    alg.setProperty("SummedPeriods", "1")
-    alg.setProperty("SubtractedPeriods", "")
+    alg.setProperty("InputWorkspace1", ws1)
+    alg.setProperty("InputWorkspace2", ws2)
     alg.execute()
+    return alg.getProperty("OutputWorkspace").value
 
-    wsOut2 = alg.getProperty("OutputWorkspace").value
-    api.AnalysisDataServiceImpl.Instance().remove("wsOut")
 
-    # print(wsOut2.dataY(0))
-    # print(sum(wsOut2.dataY(0)))
-    # print(wsOut2)
-
-    # print(api.AnalysisDataServiceImpl.Instance().getObjectNames())
+def run_AlphaCalc(parameter_dict):
+    """
+    Apply the AlphaCalc algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated value of alpha.
+    """
+    alg = mantid.AlgorithmManager.create("AlphaCalc")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("Alpha").value

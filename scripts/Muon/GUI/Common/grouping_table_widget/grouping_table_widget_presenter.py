@@ -89,6 +89,7 @@ class GroupingTablePresenter(object):
         else:
             self.remove_selected_rows_in_view_and_model(group_names)
         self._view.notify_data_changed()
+        self.notify_data_changed()
 
     def remove_selected_rows_in_view_and_model(self, group_names):
         self._view.remove_selected_groups()

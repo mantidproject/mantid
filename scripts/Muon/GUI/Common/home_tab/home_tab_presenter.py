@@ -54,8 +54,10 @@ class HomeTabPresenter(object):
         self._view.show()
 
     def show_all_data(self):
-        self._model._data.show_raw_data()
-        self._model._data.show_all_groups()
+        if self._model.is_data_loaded():
+            self._model._data.show_raw_data()
+            self._model._data.show_all_groups()
+            self._model._data.show_all_pairs()
 
     def update_current_data(self):
         self._model._data.update_current_data()
@@ -65,7 +67,6 @@ class HomeTabPresenter(object):
 
         for subwidget in self._subwidgets:
             subwidget.update_view_from_model()
-
 
     class InstrumentObserver(Observer):
 
@@ -91,6 +92,4 @@ class HomeTabPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            print("HOME TAB : Grouping Observer Update")
             self.outer.update_all_widgets()
-            #self.outer.show_all_data()
