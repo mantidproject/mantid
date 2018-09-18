@@ -13,6 +13,9 @@ UI & Usability Changes
 
 Project Recovery
 ----------------
+New
+###
+-Project recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
 
 Changes
 #######
