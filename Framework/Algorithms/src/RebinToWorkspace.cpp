@@ -141,6 +141,7 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin,
                              MatrixWorkspace_sptr &toMatch) {
   // create the output workspace
   auto outputWS = this->createOutputWorkspace(toRebin, .5);
+  auto outputWSEvents = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
   const int numHist = static_cast<int>(toRebin->getNumberHistograms());
   Progress prog(this, 0.5, 1.0, numHist);
@@ -154,8 +155,11 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin,
     PARALLEL_START_INTERUPT_REGION
     const auto &edges = matchingX ? toMatch->histogram(0).binEdges()
                                   : toMatch->histogram(i).binEdges();
-    outputWS->setHistogram(i,
-                           HistogramData::rebin(toRebin->histogram(i), edges));
+    if (m_isEvents)
+      outputWSEvents->getSpectrum(i).mutableX() = edges.rawData();
+    else
+      outputWS->setHistogram(
+          i, HistogramData::rebin(toRebin->histogram(i), edges));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
@@ -184,6 +188,7 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin,
     const auto &edges = matchingX ? toMatch->histogram(0).binEdges()
                                   : toMatch->histogram(i).binEdges();
 
+    // TODO this should be in HistogramData/Rebin
     const auto &eventlist = inputWS->getSpectrum(i);
     MantidVec y_data(edges.size() - 1), e_data(edges.size() - 1);
     eventlist.generateHistogram(edges.rawData(), y_data, e_data);
@@ -197,6 +202,8 @@ void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin,
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 Parallel::ExecutionMode RebinToWorkspace::getParallelExecutionMode(
