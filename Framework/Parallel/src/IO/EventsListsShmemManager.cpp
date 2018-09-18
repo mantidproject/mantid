@@ -18,7 +18,7 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
       std::make_shared<VoidAllocator>(m_segment->get_segment_manager());
   m_chunks = m_segment->find<Chunks>(m_chunksName.c_str()).first;
   if (!m_chunks)
-    throw ("No event lists found.");
+    throw std::invalid_argument("No event lists found.");
 }
 
 EventsListsShmemManager::~EventsListsShmemManager() {}
@@ -29,8 +29,17 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
 
 void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
                                           const Types::Event::TofEvent &event) {
-  if (!m_chunks)
-    throw ("No event lists found.");
+  assert(m_chunks);
+  if (chunkN >= m_chunks->size())
+    throw std::invalid_argument(std::string("Number of chunks is ") +
+        std::to_string(m_chunks->size()) +
+        ", asked for index " + std::to_string(chunkN));
+
+  if (listN >= m_chunks->at(chunkN).size())
+    throw std::invalid_argument(std::string("Number of pixels is ") +
+        std::to_string(m_chunks->at(chunkN).size()) +
+        ", asked for index " + std::to_string(listN));
+
   auto &list = m_chunks->at(chunkN).at(listN);
   list.emplace_back(event);
 }

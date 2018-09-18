@@ -31,6 +31,53 @@ using namespace Mantid::DataHandling;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
+void run_multiprocess_load(const std::string &file) {
+  Mantid::API::FrameworkManager::Instance();
+  LoadEventNexus ld;
+  ld.initialize();
+  ld.setPropertyValue("Load type", "multiprocess");
+  std::string outws_name = "multiprocess";
+  ld.setPropertyValue("Filename", file);
+  ld.setPropertyValue("OutputWorkspace", outws_name);
+  ld.setPropertyValue("Precount", "1");
+  ld.setProperty<bool>("LoadLogs", false); // Time-saver
+  TS_ASSERT_THROWS_NOTHING(ld.execute());
+  TS_ASSERT(ld.isExecuted())
+
+  EventWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+  TS_ASSERT(ws);
+
+  LoadEventNexus ldRef;
+  ldRef.initialize();
+  ldRef.setPropertyValue("Load type", "default");
+  outws_name = "reference";
+  ldRef.setPropertyValue("Filename", file);
+  ldRef.setPropertyValue("OutputWorkspace", outws_name);
+  ldRef.setPropertyValue("Precount", "1");
+  ldRef.setProperty<bool>("LoadLogs", false); // Time-saver
+  TS_ASSERT_THROWS_NOTHING(ldRef.execute());
+  TS_ASSERT(ldRef.isExecuted())
+
+  EventWorkspace_sptr wsRef =
+      AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+  TS_ASSERT(wsRef);
+
+  TSM_ASSERT_EQUALS("Different spectrum number in reference ws.",
+                    wsRef->getNumberHistograms(),
+                    ws->getNumberHistograms());
+
+  for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
+    auto &eventList = ws->getSpectrum(i).getEvents();
+    auto &eventListRef = wsRef->getSpectrum(i).getEvents();
+    TSM_ASSERT_EQUALS("Different events number in reference spectra", eventList.size(), eventListRef.size());
+    for (size_t j = 0; j < eventListRef.size(); ++j) {
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(), eventListRef[j].tof());
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(), eventListRef[j].pulseTime());
+    }
+  }
+}
+
 namespace {
 boost::shared_ptr<const EventWorkspace>
 load_reference_workspace(const std::string &filename) {
@@ -849,16 +896,8 @@ public:
   }
 
   void test_multiprocess_load() {
-    Mantid::API::FrameworkManager::Instance();
-    LoadEventNexus ld;
-    ld.initialize();
-    ld.setPropertyValue("Load type", "multiprocess");
-    std::string outws_name = "multiprocess";
-    ld.setPropertyValue("Filename", "/home/igudich/work/nexus-sandbox/realtest_500M.nxs");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
-    ld.setPropertyValue("Precount", "0");
-    ld.setProperty<bool>("LoadLogs", false); // Time-saver
-    ld.execute();
+    run_multiprocess_load("SANS2D00022048.nxs");
+    run_multiprocess_load("LARMOR00003368.nxs");
   }
 
 private:

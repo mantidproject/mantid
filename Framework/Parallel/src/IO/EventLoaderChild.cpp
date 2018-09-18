@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
                                   false);
 
   MultiProcessEventLoader::fillFromFile(storage, fileName, groupName, bankNames,
-                                        bankOffsets, firstEvent, upperEvent, false);
+                                        bankOffsets, firstEvent, upperEvent, true);
 
   return 0;
 }

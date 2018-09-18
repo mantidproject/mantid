@@ -34,7 +34,6 @@ namespace IO {
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -45,7 +44,7 @@ class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
   MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
                           unsigned int numThreads, const std::string &binary,
-                          bool precalc = false);
+                          bool precalc = true);
   void
   load(const std::string &filename, const std::string &groupname,
        const std::vector<std::string> &bankNames,
@@ -108,7 +107,6 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
   IO::NXEventDataLoader<T> loader(1, instrument, bankNames);
   for (unsigned bankIdx = 0; bankIdx < bankNames.size(); ++bankIdx) {
-
     auto count = bankSizes[bankIdx];
 
     bool isFirstBank = (eventCounter < from);
@@ -143,10 +141,11 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
       for (const auto &pair: eventsPerPixel)
         storage.reserve(0, pair.first, pair.second);
 
+      part->setEventOffset(start);
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
-          storage.AppendEvent(0, eventId[i],
-                              {(double) eventTimeOffset[i], part->next()});
+          TofEvent event{(double) eventTimeOffset[i], part->next()};
+          storage.AppendEvent(0, eventId[i], event);
         } catch (std::exception const &ex) {
           std::rethrow_if_nested(ex);
         }

@@ -21,6 +21,7 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
         chunksCnt, EventLists(pixelsCount, EventList(alloc()), alloc()),
         alloc());
   } catch (std::exception const &ex) {
+    std::cout << ex.what() << "\n";
     std::rethrow_if_nested(ex);
   }
 }
@@ -31,6 +32,17 @@ EventsListsShmemStorage::~EventsListsShmemStorage() {
 }
 
 void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size) {
+  assert(m_chunks);
+  if (chunkN >= m_chunks->size())
+    throw std::invalid_argument(std::string("Number of chunks is ") +
+        std::to_string(m_chunks->size()) +
+        ", asked for index " + std::to_string(chunkN));
+
+  if (pixelN >= m_chunks->at(chunkN).size())
+    throw std::invalid_argument(std::string("Number of pixels is ") +
+        std::to_string(m_chunks->at(chunkN).size()) +
+        ", asked for index " + std::to_string(pixelN));
+
   m_chunks->at(chunkN)[pixelN].reserve(size);
 }
 

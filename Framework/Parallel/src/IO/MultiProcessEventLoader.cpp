@@ -20,11 +20,11 @@ MultiProcessEventLoader::MultiProcessEventLoader(unsigned int numPixels,
                                                  unsigned int numThreads,
                                                  const std::string &binary,
                                                  bool precalc)
-    : m_numPixels(numPixels), m_numProcesses(numProcesses),
+    : m_precalculateEvents(precalc),
+      m_numPixels(numPixels), m_numProcesses(numProcesses),
       m_numThreads(numThreads), m_binaryToLaunch(binary),
       m_segmentNames(GenerateSegmentsName(numProcesses)),
-      m_storageName(GenerateStoragename()),
-      m_precalculateEvents(precalc) {}
+      m_storageName(GenerateStoragename()) {}
 
 std::vector<std::string>
 MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
@@ -204,11 +204,12 @@ void MultiProcessEventLoader::fillFromFile(
 }
 
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
-  float factor = m_precalculateEvents ? 1.3 : 100;
-  std::size_t eventBased{eventCount / m_numProcesses * sizeof(TofEvent) +
-      m_numPixels *
-          sizeof(std::vector<std::vector<TofEvent>>)};
-  return eventBased * factor;
+  std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses)
+                      * sizeof(TofEvent)
+                      + m_numPixels *
+                          sizeof(EventLists)
+                      + sizeof(Chunks)};
+  return len * 10;
   // of reallocation memory for eventlists
 }
 
