@@ -66,6 +66,9 @@ protected:
       const override;
 
 private:
+  bool m_preserveEvents;
+  bool m_isEvents;
+
   /// Initialisation code
   void init() override;
   /// Execution code
@@ -73,6 +76,8 @@ private:
 
   void rebin(API::MatrixWorkspace_sptr &toRebin,
              API::MatrixWorkspace_sptr &toMatch);
+  void histogram(API::MatrixWorkspace_sptr &toRebin,
+                 API::MatrixWorkspace_sptr &toMatch);
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::MatrixWorkspace_sptr &inputWS,
                         const double endProgress);

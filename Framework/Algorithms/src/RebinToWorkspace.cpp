@@ -2,6 +2,8 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Rebin.h"
 
 namespace Mantid {
@@ -77,10 +79,16 @@ void RebinToWorkspace::exec() {
   // The input workspaces ...
   MatrixWorkspace_sptr toRebin = getProperty("WorkspaceToRebin");
   MatrixWorkspace_sptr toMatch = getProperty("WorkspaceToMatch");
+  m_preserveEvents = getProperty("PreserveEvents");
+  m_isEvents = bool(boost::dynamic_pointer_cast<const EventWorkspace>(toRebin));
 
   if (needToRebin(toRebin, toMatch)) {
     g_log.information("Rebinning");
-    this->rebin(toRebin, toMatch);
+    if (m_isEvents && (!m_preserveEvents)) {
+      this->histogram(toRebin, toMatch);
+    } else {
+      this->rebin(toRebin, toMatch);
+    }
   } else { // don't need to rebin
     g_log.information(
         "WorkspaceToRebin and WorkspaceToMatch already have matched binning");
@@ -93,14 +101,11 @@ MatrixWorkspace_sptr
 RebinToWorkspace::createOutputWorkspace(MatrixWorkspace_sptr &inputWS,
                                         const double endProgress) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  bool preserveEvents = getProperty("PreserveEvents");
 
   bool inPlace = (inputWS == outputWS);
-  bool isEvents =
-      bool(boost::dynamic_pointer_cast<const EventWorkspace>(inputWS));
 
   if (inPlace) {
-    if (isEvents && (!preserveEvents)) {
+    if (m_isEvents && (!m_preserveEvents)) {
       // convert to a MatrixWorkspace
       IAlgorithm_sptr convert =
           createChildAlgorithm("ConvertToMatrixWorkspace");
@@ -113,7 +118,7 @@ RebinToWorkspace::createOutputWorkspace(MatrixWorkspace_sptr &inputWS,
     }
     // all other cases are already handled by not doing anything
   } else {
-    if (isEvents && (!preserveEvents)) {
+    if (m_isEvents && (!m_preserveEvents)) {
       // convert to a MatrixWorkspace
       IAlgorithm_sptr convert =
           createChildAlgorithm("ConvertToMatrixWorkspace");
@@ -137,37 +142,61 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin,
   // create the output workspace
   auto outputWS = this->createOutputWorkspace(toRebin, .5);
 
-  // rebin
   const int numHist = static_cast<int>(toRebin->getNumberHistograms());
   Progress prog(this, 0.5, 1.0, numHist);
 
-  if (toMatch->getNumberHistograms() == 1) {
-    // only one spectrum in the workspace being matched
-    const auto &edges = toMatch->histogram(0).binEdges();
-    PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
-    for (int i = 0; i < numHist; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      outputWS->setHistogram(
-          i, HistogramData::rebin(outputWS->histogram(i), edges));
-      prog.report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-  } else {
-    // matched number of workspaces
-    PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
-    for (int i = 0; i < numHist; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-      outputWS->setHistogram(
-          i, HistogramData::rebin(outputWS->histogram(i),
-                                  toMatch->histogram(i).binEdges()));
-      prog.report();
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
+  // everything gets the same bin boundaries
+  const bool matchingX = (toMatch->getNumberHistograms() == 1);
+
+  // rebin
+  PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
+  for (int i = 0; i < numHist; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto &edges = matchingX ? toMatch->histogram(0).binEdges()
+                                  : toMatch->histogram(i).binEdges();
+    outputWS->setHistogram(i,
+                           HistogramData::rebin(toRebin->histogram(i), edges));
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", outputWS);
+}
+
+// handles the special case when binning from EventWorkspace to Workspace2D most
+// efficiently by histogramming the events to the correct binning directly
+void RebinToWorkspace::histogram(API::MatrixWorkspace_sptr &toRebin,
+                                 API::MatrixWorkspace_sptr &toMatch) {
+  const auto &inputWS =
+      boost::dynamic_pointer_cast<const EventWorkspace>(toRebin);
+  const int numHist = static_cast<int>(toRebin->getNumberHistograms());
+  // everything gets the same bin boundaries
+  const bool matchingX = (toMatch->getNumberHistograms() == 1);
+
+  auto outputWS = DataObjects::create<API::HistoWorkspace>(*toRebin);
+  Progress prog(this, 0.25, 1.0, numHist);
+
+  // histogram
+  PARALLEL_FOR_IF(Kernel::threadSafe(*toMatch, *outputWS))
+  for (int i = 0; i < numHist; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto &edges = matchingX ? toMatch->histogram(0).binEdges()
+                                  : toMatch->histogram(i).binEdges();
+
+    const auto &eventlist = inputWS->getSpectrum(i);
+    MantidVec y_data(edges.size() - 1), e_data(edges.size() - 1);
+    eventlist.generateHistogram(edges.rawData(), y_data, e_data);
+
+    auto histo = HistogramData::Histogram(edges);
+    histo.setCounts(y_data);
+    histo.setCountStandardDeviations(e_data);
+
+    outputWS->setHistogram(i, histo);
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 Parallel::ExecutionMode RebinToWorkspace::getParallelExecutionMode(
