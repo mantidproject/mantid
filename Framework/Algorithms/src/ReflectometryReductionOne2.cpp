@@ -1179,7 +1179,6 @@ Check whether the spectra for the given workspaces are the same.
 
 @param ws1 : First workspace to compare
 @param ws2 : Second workspace to compare against
-@param severe: True to indicate that failure to verify should result in an
 exception. Otherwise a warning is generated.
 */
 void ReflectometryReductionOne2::verifySpectrumMaps(
