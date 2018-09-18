@@ -386,7 +386,6 @@ class RunTabPresenter(object):
             self._view.enable_buttons()
             self.sans_logger.error("Process halted due to: {}".format(str(e)))
             self.display_warning_box('Warning', 'Process halted', str(e))
-            raise
 
     def on_multiperiod_changed(self, show_periods):
         if show_periods:
@@ -408,7 +407,6 @@ class RunTabPresenter(object):
     def on_processing_error(self, row, error_msg):
         self._view.change_row_color("#accbff", row)
         self._view.set_row_tooltip(error_msg, row)
-        # self.display_warning_box('Warning', 'Processing row {} failed'.format(row), error_msg)
 
     def on_row_inserted(self, index, row):
         row_table_index = TableIndexModel(*row)
