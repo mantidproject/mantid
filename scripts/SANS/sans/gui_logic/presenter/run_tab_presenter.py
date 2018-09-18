@@ -270,6 +270,7 @@ class RunTabPresenter(object):
             self._table_model.clear_table_entries()
             for index, row in enumerate(parsed_rows):
                 self._add_row_to_table_model(row, index)
+            self._table_model.remove_table_entries([len(parsed_rows)])
 
             self.update_view_from_table_model()
 

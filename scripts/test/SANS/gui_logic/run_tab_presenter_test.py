@@ -170,7 +170,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertEqual(view.add_row.call_count, 3)
+        self.assertEqual(view.add_row.call_count, 2)
         if use_multi_period:
             expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '',
                                   '', 'test_file', '', '1.0', '']
@@ -210,7 +210,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Assert
-        self.assertEqual(view.add_row.call_count, 2)
+        self.assertEqual(view.add_row.call_count, 1)
         self.assertEqual(view.show_period_columns.call_count, 1)
 
         expected_row = ['SANS2D00022024', '3', '', '', '', '', '', '', '', '', '', '', 'test_file', '', '1.0', '']
