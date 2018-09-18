@@ -1536,7 +1536,7 @@ private:
       flood->mutableY(3)[0] = 0.9;
     } else {
       for (size_t i = 0; i < n; ++i) {
-        flood->mutableY(i)[0] = i * 0.01;
+        flood->mutableY(i)[0] = double(i) * 0.01;
       }
     }
     return flood;
