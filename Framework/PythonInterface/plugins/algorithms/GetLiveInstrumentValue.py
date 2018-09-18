@@ -55,8 +55,9 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
     def _get_live_value(self):
         try:
             from epics import caget
-        except:
-            raise RuntimeError("PyEpics must be installed to use this algorithm")
+        except ImportError:
+            raise RuntimeError("PyEpics must be installed to use this algorithm. "
+                               "For details, see https://www.mantidproject.org/PyEpics_In_Mantid")
         epicsName = self._prefix() + self._instrument + self._name_prefix() + self._propertyName
         return caget(epicsName, as_string=True)
 
