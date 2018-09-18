@@ -49,6 +49,7 @@ def _create_row_state(row, table_model, state_model, facility, instrument, file_
     except (ValueError, RuntimeError) as e:
         return "{}".format(row, str(e))
 
+
 def __is_empty_row(row, table):
     for key, value in table._table_entries[row].__dict__.items():
         if value and key in ['sample_scatter']:
