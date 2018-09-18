@@ -18,6 +18,7 @@
 */
 #include <boost/python/borrowed.hpp>
 #include <boost/python/object.hpp>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace Widgets {
@@ -49,19 +50,15 @@ public:
   /**
    * Construct an InstanceHolder with an existing Python object.
    * @param obj An existing Python instance
+   * @param attr The name of an attribute that must exist on the wrapped
+   * object
    */
-  explicit InstanceHolder(Object obj) : m_instance(std::move(obj)) {}
-  /**
-   * Construct an InstanceHolder with an existing Python object, providing
-   * an object to verify the instance has the correct type.
-   * @param obj An existing Python instance
-   * @param objectChecker A type defining an operator()(const Object &)
-   * that when called throws an exception if the instance is invalid
-   */
-  template <typename InstanceCheck>
-  InstanceHolder(Object obj, const InstanceCheck &objectChecker)
+  explicit InstanceHolder(Object obj, const char *attr)
       : m_instance(std::move(obj)) {
-    objectChecker(m_instance);
+    if (PyObject_HasAttrString(pyobj().ptr(), attr) == 0) {
+      throw std::invalid_argument(
+          "object has no attribute 'remove'. An Artist object was expected.");
+    }
   }
 
   /// Return the held instance object

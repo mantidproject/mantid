@@ -39,7 +39,7 @@ Python::Object createCanvas() {
  * @param parent The owning parent widget
  */
 FigureCanvasQt::FigureCanvasQt(QWidget *parent)
-    : QWidget(parent), InstanceHolder(createCanvas()),
+    : QWidget(parent), InstanceHolder(createCanvas(), "draw"),
       m_axes(this->pyobj().attr("figure").attr("add_subplot")(111)) {
   setLayout(new QVBoxLayout());
   QWidget *canvas = Python::extract<QWidget>(this->pyobj());

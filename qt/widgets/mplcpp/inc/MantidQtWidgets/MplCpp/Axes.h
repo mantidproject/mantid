@@ -33,6 +33,11 @@ public:
   void setYLabel(const char *label);
   void setTitle(const char *label);
   /// @}
+
+  /// @name Plotting
+  /// @{
+
+  /// @}
 };
 
 } // namespace MplCpp
