@@ -33,5 +33,6 @@ BugFixes
 ########
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
+- Fixed an issue where MantidPlot would crash when renaming workspaces.
 
 :ref:`Release 3.14.0 <v3.14.0>`
