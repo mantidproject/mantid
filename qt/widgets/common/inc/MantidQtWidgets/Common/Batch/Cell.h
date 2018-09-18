@@ -73,8 +73,8 @@ private:
   int m_borderOpacity;
   std::string m_borderColor;
   std::string m_iconFilePath;
-  std::string m_toolTip;
   bool m_isEditable;
+  std::string m_toolTip;
 };
 
 EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,
