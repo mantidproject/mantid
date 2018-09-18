@@ -4,6 +4,7 @@ import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
+import numpy
 import os
 
 
@@ -19,7 +20,8 @@ def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_d
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details, vanadium_path):
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details,
+                  vanadium_path):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -55,7 +57,8 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 
-    calibrated_spectra = _apply_vanadium_corrections(input_workspace=focused_ws,
+    calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
+                                                     input_workspace=focused_ws,
                                                      perform_vanadium_norm=perform_vanadium_norm,
                                                      vanadium_splines=vanadium_path)
 
@@ -82,13 +85,14 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     return d_spacing_group
 
 
-def _apply_vanadium_corrections(input_workspace, perform_vanadium_norm, vanadium_splines):
+def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
     split_data_spectra = common.extract_ws_spectra(input_workspace)
 
     if perform_vanadium_norm:
         processed_spectra = _divide_by_vanadium_splines(spectra_list=split_data_spectra,
-                                                        vanadium_splines=vanadium_splines)
+                                                        vanadium_splines=vanadium_splines,
+                                                        instrument=instrument)
     else:
         processed_spectra = split_data_spectra
 
@@ -111,28 +115,29 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     return output
 
 
-def _divide_one_spectrum_by_spline(spectrum, spline):
+def _divide_one_spectrum_by_spline(spectrum, spline, instrument):
     rebinned_spline = mantid.RebinToWorkspace(WorkspaceToRebin=spline, WorkspaceToMatch=spectrum, StoreInADS=False)
+    if instrument.get_instrument_prefix() == "GEM":
+        divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum,
+                                StoreInADS=False)
+        output = _crop_spline_to_percent_of_max(rebinned_spline, divided)
+        mantid.mtd['output'] = output
+        return output
     divided = mantid.Divide(LHSWorkspace=spectrum, RHSWorkspace=rebinned_spline, OutputWorkspace=spectrum)
     return divided
 
 
-def _divide_by_vanadium_splines(spectra_list, vanadium_splines):
-
+def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     if hasattr(vanadium_splines, "OutputWorkspace"):  # vanadium_splines is a group
         vanadium_splines = vanadium_splines.OutputWorkspace
-
         num_splines = len(vanadium_splines)
         num_spectra = len(spectra_list)
-
         if num_splines != num_spectra:
             raise RuntimeError("Mismatch between number of banks in vanadium and number of banks in workspace to focus"
                                "\nThere are {} banks for vanadium but {} for the run".format(num_splines, num_spectra))
-
-        output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws)
+        output_list = [_divide_one_spectrum_by_spline(data_ws, van_ws, instrument)
                        for data_ws, van_ws in zip(spectra_list, vanadium_splines)]
         return output_list
-
     output_list = [_divide_one_spectrum_by_spline(spectra_list[0], vanadium_splines)]
     common.remove_intermediate_workspace(vanadium_splines)
     return output_list
@@ -160,3 +165,15 @@ def _test_splined_vanadium_exists(instrument, run_details):
         raise ValueError("Processed vanadium runs not found at this path: "
                          + str(run_details.splined_vanadium_file_path) +
                          " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
+
+
+def _crop_spline_to_percent_of_max(spline, input_ws):
+    spline_spectrum = spline.readY(0)
+    y_val = numpy.amax(spline_spectrum)
+    y_val = y_val / 100
+    x_list = input_ws.readX(0)
+    small_spline_indecies = numpy.nonzero(spline_spectrum > y_val)[0]
+    x_max = x_list[small_spline_indecies[-1]]
+    x_min = x_list[small_spline_indecies[0]]
+    output = mantid.CropWorkspace(inputWorkspace=input_ws, XMin=x_min, XMax=x_max, StoreInADS=False)
+    return output
