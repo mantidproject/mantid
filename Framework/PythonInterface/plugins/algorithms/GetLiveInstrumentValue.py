@@ -53,7 +53,10 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
             return ':CS:SB:'
 
     def _get_live_value(self):
-        from epics import caget
+        try:
+            from epics import caget
+        except:
+            raise RuntimeError("PyEpics must be installed to use this algorithm")
         epicsName = self._prefix() + self._instrument + self._name_prefix() + self._propertyName
         return caget(epicsName, as_string=True)
 
