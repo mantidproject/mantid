@@ -44,7 +44,7 @@ class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
   MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
                           unsigned int numThreads, const std::string &binary,
-                          bool precalc = true);
+                          bool precalc = false);
   void
   load(const std::string &filename, const std::string &groupname,
        const std::vector<std::string> &bankNames,
@@ -205,6 +205,7 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
 
           std::unique_ptr<Task> task(new Task(instrument, bankNames));
           task->partitioner = task->loader.setBankIndex(bankIdx);
+          task->partitioner->setEventOffset(cur);
           task->eventTimeOffset.resize(cnt);
           task->loader.readEventTimeOffset(task->eventTimeOffset.data(), start, cnt);
           task->eventId.resize(cnt);
