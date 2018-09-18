@@ -315,8 +315,8 @@ public:
 
   void test_transmission_processing_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4", m_transmissionWS,
-                                         false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4",
+                                         m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "3-4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
@@ -326,16 +326,16 @@ public:
 
   void test_transmission_processing_instructions_with_bad_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1-2", m_transmissionWS,
-                                         false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1-2",
+                                         m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "1");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_transmission_processing_instructions_that_are_different() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4", m_transmissionWS,
-                                         false);
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4",
+                                         m_transmissionWS, false);
     alg.setPropertyValue("TransmissionProcessingInstructions", "3");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 

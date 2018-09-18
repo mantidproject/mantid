@@ -367,9 +367,8 @@ void ReflectometryReductionOneAuto2::exec() {
 
   // Optional properties
 
-  alg->setPropertyValue(
-      "TransmissionProcessingInstructions",
-      getPropertyValue("TransmissionProcessingInstructions"));
+  alg->setPropertyValue("TransmissionProcessingInstructions",
+                        getPropertyValue("TransmissionProcessingInstructions"));
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
