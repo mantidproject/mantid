@@ -155,11 +155,12 @@ void RebinToWorkspace::rebin(MatrixWorkspace_sptr &toRebin,
     PARALLEL_START_INTERUPT_REGION
     const auto &edges = matchingX ? toMatch->histogram(0).binEdges()
                                   : toMatch->histogram(i).binEdges();
-    if (m_isEvents)
-      outputWSEvents->getSpectrum(i).mutableX() = edges.rawData();
-    else
+    if (m_isEvents) {
+      outputWSEvents->getSpectrum(i).setHistogram(edges);
+    } else {
       outputWS->setHistogram(
           i, HistogramData::rebin(toRebin->histogram(i), edges));
+    }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
