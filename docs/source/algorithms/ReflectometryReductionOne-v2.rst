@@ -113,10 +113,8 @@ transmission runs or specific correction algorithms.
 When normalizing by transmission runs, i.e. when one or two transmission runs
 are given, the spectrum numbers in the
 transmission workspaces must be the same as those in the input run
-workspace. If spectrum numbers do not match, the algorithm will throw and exception
-and execution of the algorithm will be stopped. This behaviour can be optionally
-switched off by setting :literal:`StrictSpectrumChecking` to false, in which case
-a warning message will be shown instead.
+workspace. You can pass individual processing instructions to the transmission
+runs. 
 
 When normalizing by transmission run, this algorithm will run
 :ref:`algm-CreateTransmissionWorkspace` as a child algorithm, with properties :literal:`WavelengthMin`,

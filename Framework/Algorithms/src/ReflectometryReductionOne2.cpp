@@ -81,131 +81,6 @@ double getLambda(const HistogramX &xValues, const int xIdx) {
 }
 
 /**
- * Map a spectrum index from the given map to the given workspace
- * @param originWS : the original workspace
- * @param mapIdx : the index in the original workspace
- * @param destWS : the destination workspace
- * @return : the index in the destination workspace
- */
-size_t mapSpectrumIndexToWorkspace(MatrixWorkspace_const_sptr originWS,
-                                   const size_t originIdx,
-                                   MatrixWorkspace_const_sptr destWS) {
-
-  SpectrumNumber specId = originWS->indexInfo().spectrumNumber(originIdx);
-  size_t wsIdx =
-      destWS->getIndexFromSpectrumNumber(static_cast<specnum_t>(specId));
-  return wsIdx;
-}
-
-/**
- * @param originWS : Origin workspace, which provides the original workspace
- * index to spectrum number mapping.
- * @param hostWS : Workspace onto which the resulting workspace indexes will be
- * hosted
- * @throws :: If the specId are not found to exist on the host end-point
- *workspace.
- * @return :: Remapped workspace indexes applicable for the host workspace,
- *as a vector of groups of vectors of spectrum indices
- */
-std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
-    MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
-    const std::vector<std::vector<size_t>> &detectorGroups) {
-
-  std::vector<std::vector<size_t>> hostGroups;
-
-  for (auto group : detectorGroups) {
-    std::vector<size_t> hostDetectors;
-    for (auto i : group) {
-      const size_t hostIdx = mapSpectrumIndexToWorkspace(originWS, i, hostWS);
-      hostDetectors.push_back(hostIdx);
-    }
-    hostGroups.push_back(hostDetectors);
-  }
-
-  return hostGroups;
-}
-
-/**
- * Translate all the workspace indexes in an origin workspace into workspace
- * indexes of a host end-point workspace. This is done using spectrum numbers as
- * the intermediate.
- *
- * @param originWS : Origin workspace, which provides the original workspace
- * index to spectrum number mapping.
- * @param hostWS : Workspace onto which the resulting workspace indexes will be
- * hosted
- * @throws :: If the specId are not found to exist on the host end-point
- *workspace.
- * @return :: Remapped workspace indexes applicable for the host workspace,
- *as comma separated string.
- */
-std::string createProcessingCommandsFromDetectorWS(
-    MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
-    const std::vector<std::vector<size_t>> &detectorGroups) {
-
-  std::string result;
-
-  // Map the original indices to the host workspace
-  std::vector<std::vector<size_t>> hostGroups =
-      mapSpectrumIndicesToWorkspace(originWS, hostWS, detectorGroups);
-
-  // Add each group to the output, separated by ','
-
-  /// @todo Low priority: Add support to separate contiguous groups by ':' to
-  /// avoid having long lists of spectrum indices in the processing
-  /// instructions. This would not make any functional difference but would be
-  /// a cosmetic improvement when you view the history.
-  for (auto groupIt = hostGroups.begin(); groupIt != hostGroups.end();
-       ++groupIt) {
-    const auto &hostDetectors = *groupIt;
-
-    // Add each detector index to the output string separated by '+' to indicate
-    // that all detectors in this group will be summed. We also check for
-    // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
-    bool contiguous = false;
-    size_t contiguousStart = 0;
-
-    for (auto it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
-      // Check if the next iterator is a contiguous increment from this one
-      auto nextIt = it + 1;
-      if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
-        // If this is a start of a new contiguous region, remember the start
-        // index
-        if (!contiguous) {
-          contiguousStart = *it;
-          contiguous = true;
-        }
-        // Continue to find the end of the contiguous region
-        continue;
-      }
-
-      if (contiguous) {
-        // Output the contiguous range, then reset the flag
-        result.append(std::to_string(contiguousStart))
-            .append("-")
-            .append(std::to_string(*it));
-        contiguousStart = 0;
-        contiguous = false;
-      } else {
-        // Just output the value
-        result.append(std::to_string(*it));
-      }
-
-      // Add a separator ready for the next value/range
-      if (nextIt != hostDetectors.end()) {
-        result.append("+");
-      }
-    }
-
-    if (groupIt + 1 != hostGroups.end()) {
-      result.append(",");
-    }
-  }
-
-  return result;
-}
-
-/**
  * Get the topbottom extent of a detector for the given axis
  *
  * @param axis [in] : the axis to get the extent for
@@ -522,8 +397,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   } else {
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_processingInstructionsWorkspaceIndex,
-                              m_convertUnits);
+      result = makeDetectorWS(result, m_convertUnits);
       outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -616,7 +490,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
 MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
-  const bool strictSpectrumChecking = getProperty("StrictSpectrumChecking");
   MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
 
   // Reduce the transmission workspace, if not already done (assume that if
@@ -624,20 +497,15 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
   if (xUnit->unitID() == "TOF") {
 
-    // Processing instructions for transmission workspace. If strict spectrum
-    // checking is not enabled then just use the same processing instructions
-    // that were passed in.
-    std::string transmissionCommands = m_processingInstructionsWorkspaceIndex;
-    if (strictSpectrumChecking) {
-      // If we have strict spectrum checking, we should have the same
-      // spectrum numbers in both workspaces, but not necessarily with the
-      // same workspace indices. Therefore, map the processing instructions
-      // from the original workspace to the correct indices in the
-      // transmission workspace. Note that we use the run workspace here
-      // because the detectorWS may already have been reduced and may not
-      // contain the original spectra.
-      transmissionCommands = createProcessingCommandsFromDetectorWS(
-          m_runWS, transmissionWS, detectorGroups());
+    // If TransmissionProcessingInstructions are not passed then use
+    // passed processing instrucions
+    std::string transmissionCommands = "";
+    if (getPointerToProperty("TransmissionProcessingInstructions")
+            ->isDefault()) {
+      transmissionCommands = m_processingInstructions;
+    } else {
+      transmissionCommands =
+          getPropertyValue("TransmissionProcessingInstructions");
     }
 
     MatrixWorkspace_sptr secondTransmissionWS =
@@ -677,7 +545,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   // If the detector workspace has been reduced then the spectrum maps
   // should match AFTER reducing the transmission workspace
   if (detectorWSReduced) {
-    verifySpectrumMaps(detectorWS, transmissionWS, strictSpectrumChecking);
+    verifySpectrumMaps(detectorWS, transmissionWS);
   }
 
   MatrixWorkspace_sptr normalized = divide(detectorWS, transmissionWS);
@@ -1315,8 +1183,7 @@ Check whether the spectra for the given workspaces are the same.
 exception. Otherwise a warning is generated.
 */
 void ReflectometryReductionOne2::verifySpectrumMaps(
-    MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2,
-    const bool severe) {
+    MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2) {
 
   bool mismatch = false;
   // Check that the number of histograms is the same
@@ -1337,11 +1204,7 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
   if (mismatch) {
     const std::string message =
         "Spectrum maps between workspaces do NOT match up.";
-    if (severe) {
-      throw std::invalid_argument(message);
-    } else {
-      g_log.warning(message);
-    }
+    g_log.warning(message);
   }
 }
 } // namespace Algorithms

@@ -117,18 +117,17 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
 
   initStitchProperties();
 
-  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
-                                                       true, Direction::Input),
-                  "Enforces spectrum number checking prior to normalization by "
-                  "transmission workspace. Applies to input workspace and "
-                  "transmission workspace.");
+  declareProperty(
+      make_unique<PropertyWithValue<std::string>>(
+          "TransmissionProcessingInstructions", "", Direction::Input),
+      "These processing instructions will be passed to the transmission "
+      "workspace algorithm");
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
-  setPropertyGroup("StrictSpectrumChecking", "Transmission");
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -418,11 +417,11 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
  */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
-                                           std::string processingCommands,
                                            const bool convert) {
   auto groupAlg = createChildAlgorithm("GroupDetectors");
   groupAlg->initialize();
-  groupAlg->setProperty("GroupingPattern", processingCommands);
+  groupAlg->setProperty("GroupingPattern",
+                        m_processingInstructionsWorkspaceIndex);
   groupAlg->setProperty("InputWorkspace", inputWS);
   groupAlg->execute();
   MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");

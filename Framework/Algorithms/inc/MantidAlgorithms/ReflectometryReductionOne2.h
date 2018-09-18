@@ -145,8 +145,7 @@ private:
                                const bool outerCorners = true);
   // Check whether two spectrum maps match
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
-                          API::MatrixWorkspace_const_sptr ws2,
-                          const bool severe);
+                          API::MatrixWorkspace_const_sptr ws2);
 
   // Find and cache constants
   void findDetectorGroups();

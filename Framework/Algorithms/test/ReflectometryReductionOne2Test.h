@@ -313,19 +313,45 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_transmission_correction_with_different_spectra() {
-    // Run workspace spectrum numbers are 1,2,3,4.  Transmission workspace has
-    // spectrum numbers 2,3,4,5.  Processing instructions 3-4 are used in the
-    // run and transmission workspaces without any mapping i.e. spectra 3-4 in
-    // the run and spectra 4-5 in the transmission workspace are used.
+  void test_transmission_processing_instructions() {
     ReflectometryReductionOne2 alg;
-    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4",
-                                         m_transmissionWS, true);
-    alg.setProperty("StrictSpectrumChecking", "0");
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4", m_transmissionWS,
+                                         false);
+    alg.setPropertyValue("TransmissionProcessingInstructions", "3-4");
     MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
 
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.0571, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.0571, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.0807, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.0802, 0.0001);
+  }
+
+  void test_transmission_processing_instructions_with_bad_instructions() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "1-2", m_transmissionWS,
+                                         false);
+    alg.setPropertyValue("TransmissionProcessingInstructions", "1");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_transmission_processing_instructions_that_are_different() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3-4", m_transmissionWS,
+                                         false);
+    alg.setPropertyValue("TransmissionProcessingInstructions", "3");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.2029, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.2009, 0.0001);
+  }
+
+  void test_transmission_processing_instructions_two_runs() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3", m_transmissionWS,
+                                         true);
+    alg.setPropertyValue("TransmissionProcessingInstructions", "3");
+    MatrixWorkspace_sptr outLam = runAlgorithmLam(alg);
+
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.1009, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.1003, 0.0001);
   }
 
   void test_exponential_correction() {
