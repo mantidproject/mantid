@@ -8,7 +8,7 @@ Diffraction Changes
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
-	
+
 Powder Diffraction
 ------------------
 Improvements
@@ -31,10 +31,10 @@ Improvements
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
 
-
 Bugfixes
 ########
 - multiple_scattering flag is now optional for Polaris focus when absorb_correction is true
+- Normalisation is fixed in :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>`, which was causing very low peak to background ratio for reduced D2B data.
 
 
 Single Crystal Diffraction
