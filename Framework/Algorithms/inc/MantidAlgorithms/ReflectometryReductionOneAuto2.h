@@ -49,10 +49,6 @@ public:
   bool checkGroups() override;
   bool processGroups() override;
 
-  /// Sums transmission workspaces belonging to a group
-  Mantid::API::MatrixWorkspace_sptr
-  sumTransmissionWorkspaces(Mantid::API::WorkspaceGroup_sptr &transGroup);
-
 private:
   void init() override;
   void exec() override;

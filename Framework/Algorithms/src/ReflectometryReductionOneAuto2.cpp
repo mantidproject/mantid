@@ -1000,37 +1000,6 @@ void ReflectometryReductionOneAuto2::applyPolarizationCorrection(
   }
 }
 
-/**
- * Sum transmission workspaces that belong to a workspace group
- * @param transGroup : The transmission group containing the transmission runs
- * @return :: A workspace pointer containing the sum of transmission
- * workspaces
- */
-MatrixWorkspace_sptr ReflectometryReductionOneAuto2::sumTransmissionWorkspaces(
-    WorkspaceGroup_sptr &transGroup) {
-
-  const std::string transSum = "trans_sum";
-  Workspace_sptr sumWS = transGroup->getItem(0)->clone();
-
-  /// For this step to appear in the history of the output workspaces I need
-  /// to set child to false and work with the ADS
-  auto plusAlg = createChildAlgorithm("Plus");
-  plusAlg->setChild(false);
-  plusAlg->initialize();
-
-  for (size_t item = 1; item < transGroup->size(); item++) {
-    plusAlg->setProperty("LHSWorkspace", sumWS);
-    plusAlg->setProperty("RHSWorkspace", transGroup->getItem(item));
-    plusAlg->setProperty("OutputWorkspace", transSum);
-    plusAlg->execute();
-    sumWS = AnalysisDataService::Instance().retrieve(transSum);
-  }
-  MatrixWorkspace_sptr result =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(sumWS);
-  AnalysisDataService::Instance().remove(transSum);
-  return result;
-}
-
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::getFloodWorkspace() {
   std::string const method = getProperty("FloodCorrection");
   if (method == "Workspace" && !isDefault("FloodWorkspace")) {
