@@ -108,14 +108,14 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
   const auto *multiProp =
       dynamic_cast<const Mantid::API::MultipleFileProperty *>(baseProp);
   if (bool(multiProp))
-    return getFilter(multiProp->getExts(), multiProp->getDefaultExt());
+    return getFilter(multiProp->getExts());
 
   // regular file version
   const auto *singleProp =
       dynamic_cast<const Mantid::API::FileProperty *>(baseProp);
   // The allowed values in this context are file extensions
   if (bool(singleProp))
-    return getFilter(singleProp->allowedValues(), singleProp->getDefaultExt());
+    return getFilter(singleProp->allowedValues());
 
   // otherwise only the all files exists
   return ALL_FILES;
@@ -128,22 +128,24 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
  * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
-QString getFilter(const std::vector<std::string> &exts,
-                  const std::string &defaultExt) {
+QString getFilter(const std::vector<std::string> &exts) {
   QString filter("");
 
-  if (!defaultExt.empty()) {
-    filter.append(QString::fromStdString(defaultExt) + " (*" +
-                  QString::fromStdString(defaultExt) + ");;");
-  }
-
   if (!exts.empty()) {
-    // Push a wild-card onto the front of each file suffix
-    for (auto &itr : exts) {
-      if (itr != defaultExt) {
-        filter.append(QString::fromStdString(itr) + " (*" +
-                      QString::fromStdString(itr) + ");;");
+    // Generate the display all filter
+    if (exts.size() > 1) {
+      QString displayAllFilter = "Data Files (";
+      for (auto &itr : exts) {
+        displayAllFilter.append(" *" + QString::fromStdString(itr));
       }
+      displayAllFilter.append(" );;");
+      filter.append(displayAllFilter);
+    }
+
+    // Append individual file filters
+    for (auto &itr : exts) {
+      filter.append(QString::fromStdString(itr) + " (*" +
+                    QString::fromStdString(itr) + ");;");
     }
     filter = filter.trimmed();
   }

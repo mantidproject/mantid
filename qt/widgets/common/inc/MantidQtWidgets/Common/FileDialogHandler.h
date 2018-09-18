@@ -72,8 +72,7 @@ DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
  * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
-DLLExport QString getFilter(const std::vector<std::string> &exts,
-                            const std::string &defaultExt);
+DLLExport QString getFilter(const std::vector<std::string> &exts);
 
 DLLExport QString getCaption(const std::string &dialogName,
                              const Mantid::Kernel::Property *prop);

@@ -29,6 +29,11 @@ Bugfixes
 MantidPlot
 ----------
 
+Changes
+#######
+
+- All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
+
 BugFixes
 ########
 
