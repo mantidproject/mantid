@@ -6,14 +6,13 @@ digraph ReflectometryReductionOne {
     $param_style
     floodWorkspace    [label="FloodWorkspace"]
     inputWorkspace    [label="InputWorkspace"]
-    inputWorkspaceFC  [label="OutputWorkspace"]
-	trans             [label="FirstTransmissionRun"]
+    trans             [label="FirstTransmissionRun"]
     IvsLam_0          [label="OutputWorkspaceWavelength"]
     IvsLam_1          [label="OutputWorkspaceWavelength"]
-	IvsLam_temp       [label="OutputWorkspaceWavelength"]
+    IvsLam_temp       [label="OutputWorkspaceWavelength"]
     IvsQ_0            [label="OutputWorkspace"]
     IvsQ_1            [label="OutputWorkspace"]
-	IvsQ_temp         [label="OutputWorkspace"]
+    IvsQ_temp         [label="OutputWorkspace"]
   }
 
   subgraph algorithms {
@@ -22,20 +21,22 @@ digraph ReflectometryReductionOne {
     reflRedOne_1 [label="ReflectometryReductionOne", group=g2]
     groupIvsQ    [label="GroupWorkspaces", group=g1]
     groupIvsLam  [label="GroupWorkspaces", group=g2]
-    applyFlood   [label="ApplyFloodWorkspace"]
+    applyFloodI  [label="ApplyFloodWorkspace"]
+    applyFloodT  [label="ApplyFloodWorkspace"]
   }
 
   subgraph decisions {
     $decision_style
   }
 
-  inputWorkspace -> applyFlood
-  floodWorkspace -> applyFlood
-  applyFlood -> inputWorkspaceFC
-  inputWorkspaceFC -> reflRedOne_0  [label="[0]"]
-  inputWorkspaceFC -> reflRedOne_1  [label="[1]"]
-  trans          -> reflRedOne_0  [label="[0]      "]
-  trans          -> reflRedOne_1  [label="[1]"]
+  inputWorkspace -> applyFloodI
+  floodWorkspace -> applyFloodI
+  floodWorkspace -> applyFloodT
+  applyFloodI    -> reflRedOne_0  [label="[0]"]
+  applyFloodI    -> reflRedOne_1  [label="[1]"]
+  trans          -> applyFloodT
+  applyFloodT    -> reflRedOne_0
+  applyFloodT    -> reflRedOne_1
 
   reflRedOne_0   -> IvsLam_0
   reflRedOne_0   -> IvsQ_0

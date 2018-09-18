@@ -301,14 +301,15 @@ void ReflectometryReductionOneAuto2::init() {
   propOptions = {"Workspace", "ParameterFile"};
   declareProperty("FloodCorrection", "Workspace",
                   boost::make_shared<StringListValidator>(propOptions),
-                  "The way to apply flood correction: None - no correction, "
+                  "The way to apply flood correction: "
                   "Workspace - use FloodWorkspace property to get the flood "
                   "workspace, ParameterFile - use parameters in the parameter "
                   "file to construct and apply flood correction workspace.");
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FloodWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "A flood workspace to apply.");
+      "A flood workspace to apply. If empty and FloodCorrection property is "
+      "Workspace then no correction is applied.");
 
   // Init properties for diagnostics
   initDebugProperties();
