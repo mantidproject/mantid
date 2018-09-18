@@ -33,9 +33,7 @@ void Cell::setContentText(std::string const &contentText) {
   m_contentText = contentText;
 }
 
-void Cell::setToolTip(std::string const &toolTip) {
-  m_toolTip = toolTip;
-}
+void Cell::setToolTip(std::string const &toolTip) { m_toolTip = toolTip; }
 
 void Cell::setBorderThickness(int borderThickness) {
   m_borderThickness = borderThickness;
