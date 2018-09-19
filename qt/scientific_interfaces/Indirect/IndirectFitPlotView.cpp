@@ -4,6 +4,8 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
+#include <QMessageBox>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -252,6 +254,11 @@ void IndirectFitPlotView::setBackgroundRangeVisible(bool visible) {
 
 void IndirectFitPlotView::setHWHMRangeVisible(bool visible) {
   m_plotForm->ppPlotTop->getRangeSelector("HWHM")->setVisible(visible);
+}
+
+void IndirectFitPlotView::displayMessage(const std::string &message) const {
+  QMessageBox::information(parentWidget(), "MantidPlot - Warning",
+                           QString::fromStdString(message));
 }
 
 void IndirectFitPlotView::emitSelectedFitDataChanged(int index) {

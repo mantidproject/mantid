@@ -304,8 +304,11 @@ void IndirectFitPlotPresenter::updateFitRangeSelector() {
 }
 
 void IndirectFitPlotPresenter::plotCurrentPreview() {
-  const auto plotString = getPlotString(m_model->getActiveSpectrum());
-  m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  if (m_model->getWorkspace()) {
+    const auto plotString = getPlotString(m_model->getActiveSpectrum());
+    m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  } else
+    m_view->displayMessage("Workspace not found - data may not be loaded.");
 }
 
 void IndirectFitPlotPresenter::updateGuess() {
