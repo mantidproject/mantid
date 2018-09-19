@@ -219,6 +219,9 @@ install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
+# Add the script that sources the system and user defined environment before launching executables
+install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/environment
+          DESTINATION MantidPlot.app/Contents/MacOS )
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt )
