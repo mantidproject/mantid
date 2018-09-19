@@ -2273,11 +2273,11 @@ void clear();
 std::string outputLines() const;
 std::vector<std::string> sections(const std::string &name) const;
 
-MantidQt::API::TSVSerialiser writeLine(const std::string &name);
+MantidQt::API::TSVSerialiser &writeLine(const std::string &name);
 void writeSection(const std::string &name, const std::string &body);
 
 
-bool selectLine(const std::string &name); 
+bool selectLine(const std::string &name);
 bool selectSection(const std::string &name);
 
 void storeDouble(const double value);
