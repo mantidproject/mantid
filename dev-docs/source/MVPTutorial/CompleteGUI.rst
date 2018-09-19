@@ -41,9 +41,9 @@ Main module
         def qapp():
             if QtGui.QApplication.instance():
                 _app = QtGui.QApplication.instance()
-	    else:
-		_app = QtGui.QApplication(sys.argv)
-	    return _app
+            else:
+                _app = QtGui.QApplication(sys.argv)
+            return _app
 
     app = qapp()
     window = demo()
@@ -82,10 +82,10 @@ Master View
 
             self.setLayout(grid)
 
-	def getOptionView(self):
+        def getOptionView(self):
             return self.options_view
 
-	def getPlotView(self):
+        def getPlotView(self):
             return self.plot_view
 
 Master Presenter
@@ -114,13 +114,13 @@ Master Presenter
         # connect statements
         self.view.getOptionView().plotSignal.connect(self.updatePlot)             
        
-	# handle signals 
-	def updatePlot(self):
-	    # only care about the colour if the button is pressed
-	    colour, freq,phi = self.presenter.getPlotInfo()
-	    grid_lines = self.presenter.getGridLines()
+        # handle signals 
+        def updatePlot(self):
+            # only care about the colour if the button is pressed
+            colour, freq,phi = self.presenter.getPlotInfo()
+            grid_lines = self.presenter.getGridLines()
  
-	    self.data_model.genData(freq,phi )
+            self.data_model.genData(freq,phi )
             x_data = self.data_model.getXData()
             y_data = self.data_model.getYData()
  
@@ -140,7 +140,7 @@ Plot Presenter
         def __init__(self, view):
             self.view = view
 
-	def plot(self, x_data, y_data, grid_lines, colour_code):
+        def plot(self, x_data, y_data, grid_lines, colour_code):
             self.view.addData(x_data, y_data, grid_lines, colour_code, "x")
 
 PlotView
@@ -160,12 +160,12 @@ Presenter
 
         def __init__(self, view, colours):
             self.view = view
-	    self.view.setColours(colours)
+            self.view.setColours(colours)
        
-	def getPlotInfo(self):
+        def getPlotInfo(self):
             return str(self.view.getColour()), self.view.getFreq(), self.view.getPhase()
 
-	def getGridLines(self):
+        def getGridLines(self):
             return self.view.getGridLines()
 
 View

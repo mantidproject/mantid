@@ -45,29 +45,29 @@ the plot and creating an empty plot (no data).
         def __init__(self, parent=None):
             super(PlotView, self).__init__(parent)
 
-	    self.figure = plt.figure()
-	    grid = QtGui.QVBoxLayout(self)
-	    self.draw() 
-	    self.canvas = self.getWidget()
-	    grid.addWidget(self.canvas)
-	    self.setLayout(grid) 
+            self.figure = plt.figure()
+            grid = QtGui.QVBoxLayout(self)
+            self.draw() 
+            self.canvas = self.getWidget()
+            grid.addWidget(self.canvas)
+            self.setLayout(grid) 
 
-	def draw(self):
+        def draw(self):
             ax = self.figure.add_subplot(111)
-	    ax.clear()
-	    ax.set_xlim([0.0, 10.5])
-	    ax.set_ylim([-1.05, 1.05])
-	    ax.set_xlabel("time ($s$)")
-	    ax.set_ylabel("$f(t)$")
-	    return ax
+            ax.clear()
+            ax.set_xlim([0.0, 10.5])
+            ax.set_ylim([-1.05, 1.05])
+            ax.set_xlabel("time ($s$)")
+            ax.set_ylabel("$f(t)$")
+            return ax
 
-	def getWidget(self):
+        def getWidget(self):
             return FigureCanvas(self.figure)
 
-	def addData(self, xvalues, yvalues, colour, marker):
+        def addData(self, xvalues, yvalues, colour, marker):
             ax = self.draw()
-	    ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--") 
-	    self.canvas.draw()
+            ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--") 
+            self.canvas.draw()
 
 The ``draw`` method creates the plot area without any data. The widget
 is obtained from the ``getWidget`` function. The final method adds

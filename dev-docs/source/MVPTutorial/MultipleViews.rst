@@ -74,12 +74,12 @@ The main only needs to import the masterView:
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
-	def qapp():
+        def qapp():
             if QtGui.QApplication.instance():
                 _app = QtGui.QApplication.instance()
-	    else:
-		_app = QtGui.QApplication(sys.argv)
-	    return _app
+            else:
+                _app = QtGui.QApplication(sys.argv)
+            return _app
 
     app = qapp()
     window = demo()

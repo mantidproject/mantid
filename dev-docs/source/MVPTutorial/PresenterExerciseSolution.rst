@@ -98,15 +98,15 @@ Presenter
         def __init__(self, view):
             self.view = view
 
-        self.view.plotSignal.connect(self.updatePlot)             
+            self.view.plotSignal.connect(self.updatePlot)             
        
         # handle signals 
         def updatePlot(self):
             print("The table settings are:")
-        print("   colour     : " + str(self.view.getColour()))
-        print("   Grid lines : " + str(self.view.getGridLines()))
-        print("   Frequency  : " + str(self.view.getFreq()))
-        print("   Phase      : " + str(self.view.getPhase()))
+            print("   colour     : " + str(self.view.getColour()))
+            print("   Grid lines : " + str(self.view.getGridLines()))
+            print("   Frequency  : " + str(self.view.getFreq()))
+            print("   Phase      : " + str(self.view.getPhase()))
 
 Main module
 ###########

@@ -38,12 +38,12 @@ Next we create a layout and add a button to it
 
 .. code-block:: python
 
-        grid = QtGui.QGridLayout()
-        self.button = QtGui.QPushButton('Hi', self)
-        self.button.setStyleSheet("background-color:lightgrey")
+    grid = QtGui.QGridLayout()
+    self.button = QtGui.QPushButton('Hi', self)
+    self.button.setStyleSheet("background-color:lightgrey")
 
-        # connect button to signal
-        self.button.clicked.connect(self.btn_click)
+    # connect button to signal
+    self.button.clicked.connect(self.btn_click)
     # add button to layout
     grid.addWidget(self.button)
     # set the layout for the view widget
@@ -54,8 +54,8 @@ function ``btn_click`` is called:
 
 .. code-block:: python
 
-        def btn_click(self):
-            print("Hello world")
+    def btn_click(self):
+        print("Hello world")
 
 The Main
 ########
