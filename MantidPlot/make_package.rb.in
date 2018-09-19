@@ -338,6 +338,11 @@ end
 path = "/Library/Python/2.7/site-packages"
 directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports", "qtawesome", "qtpy",
                "certifi","tornado","markupsafe","jinja2","jsonschema","functools32","ptyprocess","CifFile","yaml"]
+if Dir.exists?(path + "/h5py")
+  directories.push("h5py")
+else
+  addPythonLibrary("/usr/local/lib/python2.7/site-packages/h5py","Contents/MacOS/")
+end
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end
@@ -359,15 +364,8 @@ end
 # ---------------------------------------------
 # H5Py section
 # ---------------------------------------------
-h5py_path = "/usr/local/lib/python2.7/site-packages"
-h5py_directories = ["h5py"]
-h5py_directories.each do |directory|
-  addPythonLibrary("#{h5py_path}/#{directory}","Contents/MacOS/")
-end
-
 h5py_patterns = ["**/h5py/*.so"]
 change_id(h5py_patterns, "Contents/MacOS/h5py/")
-
 h5py_linking_dir = find_linking_directories(h5py_patterns, 'lib/libhdf5', '/usr/local/opt/hdf5/lib')
 
 h5py_patterns.each do |pattern|
