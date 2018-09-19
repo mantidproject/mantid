@@ -124,6 +124,11 @@ set ( INBUNDLE MantidPlot.app/ )
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/Mantid_osx_launcher 
                  ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/Mantid_osx_launcher COPYONLY )
 
+# Copy also the environment setter
+# This is needed when launching the application from finder
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/environment
+                 ${CMAKE_BINARY_DIR}/bin/MantidPlot.app/Contents/MacOS/environment COPYONLY )
+
 # We know exactly where this has to be on Darwin, but separate whether we have
 # kit build or a regular build.
 if ( ENABLE_CPACK AND MAKE_VATES )
@@ -214,7 +219,6 @@ install ( FILES ${CMAKE_MODULE_PATH}/Packaging/osx/mantidnotebook_Info.plist
           RENAME Info.plist )
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidNotebook.icns
           DESTINATION MantidNotebook\ \(optional\).app/Contents/Resources/ )
-
 
 set ( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png )
 set ( CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt )

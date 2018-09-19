@@ -17,4 +17,5 @@ popd  > /dev/null
 
 MANTID_PATH=${SCRIPT_PATH}/../../../MantidPlot.app/Contents/MacOS
 
+source "${MANTID_PATH}"/environment
 ."${MANTID_PATH}"/mantidpython notebook --notebook-dir=$HOME
