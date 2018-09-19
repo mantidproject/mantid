@@ -31,7 +31,7 @@ regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
 regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
-directories_to_ignore = ["external"]
+directories_to_ignore = ["external","CMake"]
 #Accepted file extensions
 accepted_file_extensions = [".py",".cpp",".h",".tcc",".in",".hh"]
 #python file exxtensions
