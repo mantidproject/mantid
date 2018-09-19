@@ -71,6 +71,8 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.plotting = PlotPresenter(PlotView())
         self.plotting.view.setMinimumSize(self.plotting.view.sizeHint())
 
+        self.plotting.removeSubplotConnection(self.subplotRemoved)
+
         self.box = QtGui.QHBoxLayout()
         self.box.addWidget(self.ptable.view)
         self.box.addLayout(self.widget_list)
@@ -339,6 +341,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             if not self.plotting.get_subplots():
                 self.plotting.view.close()
 
+    def subplotRemoved(self,name):
+        return
+        #self.detectors.setState(name,False)
 
 def qapp():
     if QtGui.QApplication.instance():

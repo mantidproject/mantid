@@ -4,7 +4,7 @@ from six import iteritems
 from mantid import plots
 from collections import OrderedDict
 
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from matplotlib.figure import Figure
 from matplotlib import gridspec
@@ -20,6 +20,9 @@ from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter impo
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
 class PlotView(QtWidgets.QWidget):
+    subplotRemovedSignal = QtCore.Signal(object)
+    plotCloseSignal = QtCore.Signal()
+
     def __init__(self):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
@@ -296,6 +299,7 @@ class PlotView(QtWidgets.QWidget):
         del self.plots[name]
         del self.workspaces[name]
         self._update_gridspec(len(self.plots))
+        self.subplotRemovedSignal.emit(name)
 
     @_redo_layout
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
@@ -304,3 +308,9 @@ class PlotView(QtWidgets.QWidget):
     @_redo_layout
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
+
+    def closeEvent(self,event):
+        self.plotCloseSignal.emit()
+
+    def plotCloseConnection(self,slot):
+        self.plotCloseSignal.connect(slot)

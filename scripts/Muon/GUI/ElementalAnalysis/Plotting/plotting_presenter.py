@@ -8,6 +8,7 @@ class PlotPresenter(object):
         self.view = view
         self.view.setAddConnection(self.add)
         self.view.setRmConnection(self.rm)
+        self.view.plotCloseConnection(self.close)
         self.rmWidget = None
         self.selectorWindow = None
 
@@ -58,6 +59,16 @@ class PlotPresenter(object):
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
 
+    def removeSubplotConnection(self,slot):
+        self.view.subplotRemovedSignal.connect(slot)
+
+    def close(self):
+        if  self.selectorWindow is not None:
+            self.closeSelectorWindow()
+        if self.rmWidget is not None:
+            self.closeRmWindow()
+            
+
     def add(self):
         print("hi")
 
@@ -105,8 +116,11 @@ class PlotPresenter(object):
              # add a signal to this method - so we can catch it
              self.remove_subplot(self.rmWidget.subplot)
         self.update_canvas()
-        self.rmWidget.close
-        self.rmWidget = None
+        self.closeRmWindow()
         # if no subplots then close plotting window
         if not self.get_subplots():
             self.view.close()
+
+    def closeRmWindow(self):
+        self.rmWidget.close
+        self.rmWidget = None
