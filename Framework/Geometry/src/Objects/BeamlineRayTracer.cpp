@@ -164,6 +164,49 @@ Links getResults(Track &resultsTrack) {
 }
 
 /**
+ * Add a link to the track for the intersected component
+ *
+ * @param track :: a track to add a link to for the intersected component
+ * @param componentInfo :: a ComponentInfo instance containing the intersected component
+ * @param index :: the index of the interesected component
+ * @return whether the intersected component has children that need to be searched.
+ */
+bool addLink(Track &track, const ComponentInfo &componentInfo, const size_t index) {
+    // Store the type of the child component
+    auto componentType = componentInfo.componentType(index);
+
+    // Process a rectangular bank or normal component
+    if (componentType == Types::Rectangular) {
+        checkIntersectionWithRectangularBank(track, componentInfo, index);
+        return false; // Rectangular panel: we don't need to look at any children
+    } else {
+        checkIntersectionWithComponent(track, componentInfo, index);
+        return true; // We don't know what the children of this are
+    }
+}
+
+/**
+ * Recursively search for the intersection of the component.
+ *
+ * @param track :: a track to add a links to for any intersected component
+ * @param componentInfo :: a ComponentInfo instance containing components to search for intersection with the test ray.
+ * @param children :: the children of the previous component to search for intersections.
+ */
+void fireRayInner(Track &track, const ComponentInfo &componentInfo, const std::vector<size_t>& children) {
+    for (const auto& index : children) {
+        auto boundingBox = componentInfo.boundingBox(index);
+        if (boundingBox.doesLineIntersect(track)) {
+            // add link to this component
+            const auto lookAtChildren = addLink(track, componentInfo, index);
+            if (lookAtChildren) {
+                const auto& nextChildren = componentInfo.children(index);
+                fireRayInner(track, componentInfo, nextChildren);
+            }
+        }
+    }
+}
+
+/**
  * Fire the test ray at the instrument and perform a bread-first search of the
  * object tree to find the objects that were intersected.
  *
@@ -173,40 +216,11 @@ Links getResults(Track &resultsTrack) {
  * information.
  */
 void fireRay(Track &track, const ComponentInfo &componentInfo) {
-  // Cast size of componentInfo to int
-  int size = static_cast<int>(componentInfo.size());
-  --size;
-
-  // Loop through the bounding boxes in reverse
-  // (essentially a breadth first search)
-  for (int i = size; i >= 0; --i) {
-    // Store the bounding box
-    BoundingBox box = componentInfo.boundingBox(i);
-
-    // Test for intersection
-    if (box.doesLineIntersect(track)) {
-
-      // Store the type of the child component
-      auto childComponentType = componentInfo.componentType(i);
-      // Store the type of the child's grandparent
-      auto grandParent = componentInfo.componentType(
-          componentInfo.parent(componentInfo.parent(i)));
-
-      // Don't want to count the bank and the detector
-      if (grandParent == Types::Rectangular &&
-          childComponentType == Types::Detector) {
-        continue;
-      }
-
-      // Process a rectangular bank or normal component
-      if (childComponentType == Types::Rectangular) {
-        checkIntersectionWithRectangularBank(track, componentInfo, i);
-      } else {
-        checkIntersectionWithComponent(track, componentInfo, i);
-      }
-    }
-  }
+    const auto root = componentInfo.root();
+    const auto& children = componentInfo.children(root);
+    fireRayInner(track, componentInfo, children);
 }
+
 } // namespace
 
 namespace BeamlineRayTracer {
