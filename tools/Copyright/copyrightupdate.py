@@ -15,20 +15,20 @@ import re
 
 #Compiled Regexes
 #old style statement, year in group 1
-regex_old_style = re.compile("$\W*Copyright\s.*?(\d{4}).*License for more details.*?$" + #required section
+regex_old_style = re.compile("^\s*Copyright\s.*?(\d{4}).*License for more details.*?$" + #required section
                              "(.*licenses(\/){0,1}\>.*?$){0,1}" +                        #optional license link section
                              "(.*mantid\>.*?$){0,1}" +                                   #optional change history line
                              "(.*http://doxygen.mantidproject.org.*?$){0,1}",            #optional code doc line
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #new style statement, year in group 1
-regex_new_style = re.compile("^\W*Mantid.*?(\d{4}).*SPDX - License - Identifier.*?$[\W]*",
+regex_new_style = re.compile("^\s*Mantid.*?(\d{4}).*SPDX - License - Identifier.*?$[\s]*",
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #Other copyright statement
 regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
                              re.IGNORECASE |  re.MULTILINE)
 
 #lines to skip when determining where to put the copyright statement (they must be from the start of the file)
-regex_lines_to_skip = [re.compile("^#!.*?$[\W]*",re.MULTILINE)]
+regex_lines_to_skip = [re.compile("^#!.*?$[\s]*",re.MULTILINE)]
 
 #Directories to ignore - any pathss including these strings will be ignored, so it will cascade
 directories_to_ignore = ["external"]
