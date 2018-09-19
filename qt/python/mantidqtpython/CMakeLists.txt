@@ -12,6 +12,7 @@ set ( SLICEVIEWER_INC ${WIDGETS_DIR}/sliceviewer/inc )
 set ( REFVIEWER_INC ${WIDGETS_DIR}/refdetectorview/inc )
 set ( HEADER_DEPENDS
   SIPVector.h
+  string.sip
   vector.sip
   ${FACTORY_INC}/MantidQtWidgets/Factory/WidgetFactory.h
 
