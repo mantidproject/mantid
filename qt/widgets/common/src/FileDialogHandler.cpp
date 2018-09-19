@@ -135,9 +135,9 @@ QString getFilter(const std::vector<std::string> &exts) {
     if (exts.size() > 1) {
       QString displayAllFilter = "Data Files (";
       for (auto &itr : exts) {
-		  // Add a space to between each extension
-		  displayAllFilter.append(" ");
-		  displayAllFilter.append(formatExtension(itr));
+        // Add a space to between each extension
+        displayAllFilter.append(" ");
+        displayAllFilter.append(formatExtension(itr));
       }
       displayAllFilter.append(" );;");
       filter.append(displayAllFilter);
@@ -160,22 +160,19 @@ QString getFilter(const std::vector<std::string> &exts) {
  * @return a QString of the expected form
  */
 QString formatExtension(const std::string &extension) {
-	QString formattedExtension = QString::fromStdString(extension);
-	if (extension.at(0) == '*' && extension.at(1) == '.') {
-		return formattedExtension;
-	}
-	else {
-		if (extension.at(0) == '*') {
-			formattedExtension.insert(1, ".");
-		} 
-		else if (extension.at(0) == '.') {
-			formattedExtension.prepend("*");
-		}
-		else {
-			formattedExtension.prepend("*.");
-		}
-	}
-	return formattedExtension;
+  QString formattedExtension = QString::fromStdString(extension);
+  if (extension.at(0) == '*' && extension.at(1) == '.') {
+    return formattedExtension;
+  } else {
+    if (extension.at(0) == '*') {
+      formattedExtension.insert(1, ".");
+    } else if (extension.at(0) == '.') {
+      formattedExtension.prepend("*");
+    } else {
+      formattedExtension.prepend("*.");
+    }
+  }
+  return formattedExtension;
 }
 
 QString getCaption(const std::string &dialogName,
