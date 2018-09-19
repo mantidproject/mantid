@@ -2,6 +2,7 @@ from __future__ import absolute_import, print_function
 
 import re
 
+import qtpy
 from qtpy.QtCore import QModelIndex, Qt
 from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout,
                             QHBoxLayout, QCompleter, QTreeWidgetItem)
@@ -64,7 +65,9 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         search_box = QComboBox(self)
         search_box.setEditable(True)
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
-        search_box.completer().setFilterMode(Qt.MatchContains)
+        # setFilterMode behaviour changing is only available on Qt5, if this check is not present the Qt4 tests fail
+        if qtpy.PYQT5:
+            search_box.completer().setFilterMode(Qt.MatchContains)
         search_box.setInsertPolicy(QComboBox.NoInsert)
         search_box.editTextChanged.connect(self._on_search_box_selection_changed)
         search_box.lineEdit().returnPressed.connect(self.execute_algorithm)
