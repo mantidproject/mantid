@@ -74,12 +74,13 @@ class PlotPresenter(object):
 
     def rm(self):
         # if only one subplot just skip selector
-        if self.view.workspaces.keys() == 1:
+        if len(self.view.workspaces.keys()) == 1:
             self.createRmWindow(self.view.workspaces.keys()[0])
         # if no selector and no remove window -> let user pick which subplot to change
         elif self.selectorWindow is None and self.rmWidget is None:
             self.selectorWindow = SelectSubplot(self.view.workspaces.keys())
             self.selectorWindow.subplotSelectorSignal.connect(self.createRmWindow)
+            self.selectorWindow.closeEventSignal.connect(self.closeSelectorWindow)
             self.selectorWindow.setMinimumSize(300,100)
             self.selectorWindow.show()
         # if the remove window is not visable
@@ -90,8 +91,9 @@ class PlotPresenter(object):
             self.selectorWindow.raise_()
 
     def closeSelectorWindow(self):
-        self.selectorWindow.close
-        self.selectorWindow = None
+        if self.selectorWindow is not None:
+            self.selectorWindow.close
+            self.selectorWindow = None
 
     def createRmWindow(self,subplot):
         # always close selector after making a selection
@@ -99,16 +101,19 @@ class PlotPresenter(object):
         # create the remove window
         self.rmWidget = RemovePlotWindowView(lines=self.view.get_subplot(subplot).lines,subplot=subplot,parent=self)
         self.rmWidget.applyRemoveSignal.connect(self.applyRm)
+        self.rmWidget.closeEventSignal.connect(self.closeRmWindow)
         self.rmWidget.setMinimumSize(200,200)
         self.rmWidget.show()
 
     def applyRm(self, names):
+        self.closeRmWindow()
         remove_subplot = True
         # remove the lines from the subplot
         for name in names:
             if self.rmWidget.getState(name):
                  line = self.rmWidget.getLine(name)
-                 self.view.get_subplot(self.rmWidget.subplot).lines.remove(line)
+                 #self.view.get_subplot(self.rmWidget.subplot).lines.remove(line)
+                 self.view.removeLine(self.rmWidget.subplot,line)
             else:
                  remove_subplot = False
         # if all of the lines have been removed -> delete subplot
@@ -116,7 +121,6 @@ class PlotPresenter(object):
              # add a signal to this method - so we can catch it
              self.remove_subplot(self.rmWidget.subplot)
         self.update_canvas()
-        self.closeRmWindow()
         # if no subplots then close plotting window
         if not self.get_subplots():
             self.view.close()

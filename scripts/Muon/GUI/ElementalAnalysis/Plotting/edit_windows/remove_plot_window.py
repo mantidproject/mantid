@@ -15,6 +15,7 @@ class RemovePlotWindow(QtWidgets.QDialog):
 
 class RemovePlotWindowView(QtWidgets.QDialog):
     applyRemoveSignal = QtCore.Signal(object)
+    closeEventSignal = QtCore.Signal()
 
     def __init__(self,lines, subplot, parent=None):
         super(RemovePlotWindowView, self).__init__()
@@ -49,6 +50,9 @@ class RemovePlotWindowView(QtWidgets.QDialog):
         self.setLayout(self.grid)
         self.setWindowTitle("Remove Lines For "+self._subplot)
         btn.clicked.connect(self.buttonClick)
+
+    def closeEvent(self,event):
+        self.closeEventSignal.emit()
 
     def buttonClick(self):
         self.applyRemoveSignal.emit(self.widgets.keys())

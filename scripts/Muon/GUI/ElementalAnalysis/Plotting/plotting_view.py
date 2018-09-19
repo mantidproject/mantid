@@ -14,6 +14,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 # https://stackoverflow.com/posts/comments/26295260
 
 from Muon.GUI.ElementalAnalysis.Plotting.navigation_toolbar import myToolbar
+from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 
 from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
@@ -27,6 +28,7 @@ class PlotView(QtWidgets.QWidget):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
         self.errors_list = set()
+        self.subplots = {}
         self.workspaces = {}
         self.workspace_plots = {}  # stores the plotted 'graphs' for deletion
         self.current_grid = None
@@ -188,6 +190,10 @@ class PlotView(QtWidgets.QWidget):
         # get the limits before replotting, so they appear unchanged.
         x, y = plot.get_xlim(), plot.get_ylim()
         for old_plot in self.workspace_plots[name]:
+            print("moo", old_plot)
+            print("Start")
+            self.subplots[name].myprint()
+            print("end")
             old_plot.remove()
             del old_plot
         self.workspace_plots[name] = []
@@ -196,6 +202,7 @@ class PlotView(QtWidgets.QWidget):
         plot.set_xlim(x)
         plot.set_ylim(y)
         self._set_bounds(name)  # set AxisChanger bounds again.
+
 
     @_redo_layout
     def _errors_changed(self, state):
@@ -257,8 +264,9 @@ class PlotView(QtWidgets.QWidget):
             self.plot_workspace(name, workspace)
         self._set_bounds(name)
 
-    def _add_plotted_line(self, name, lines):
+    def _add_plotted_line(self, name,label, lines,workspace):
         """ Appends plotted lines to the related subplot list. """
+        self.subplots[name].addLine(label,lines,workspace)
         try:
             self.workspace_plots[name].extend(lines)
         except KeyError:
@@ -269,16 +277,24 @@ class PlotView(QtWidgets.QWidget):
         subplot = self.get_subplot(name)
         line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
             subplot, workspace, specNum=1)
+        # make a tmp plot to get auto generated legend name 
+        tmp, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
+        label = tmp.get_label()
+        #delete tmp
+        tmp.remove()
+        del tmp
+        print("yipee", label)
+
         all_lines = [line]
         all_lines.extend(cap_lines)
         all_lines.extend(bar_lines)
-        self._add_plotted_line(name, all_lines)
+        self._add_plotted_line(name, label, all_lines,workspace)
 
     def plot_workspace(self, name, workspace):
         """ Plots a workspace normally. """
         subplot = self.get_subplot(name)
         line, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
-        self._add_plotted_line(name, [line])
+        self._add_plotted_line(name, line.get_label(),[line],workspace)
 
     def get_subplot(self, name):
         """ Returns the subplot corresponding to a given name """
@@ -291,6 +307,7 @@ class PlotView(QtWidgets.QWidget):
     def add_subplot(self, name):
         """ will raise KeyError if: plots exceed 4 """
         self._update_gridspec(len(self.plots) + 1, last=name)
+        self.subplots[name] = subPlot(name)
         return self.get_subplot(name)
 
     def remove_subplot(self, name):
@@ -298,6 +315,7 @@ class PlotView(QtWidgets.QWidget):
         self.figure.delaxes(self.get_subplot(name))
         del self.plots[name]
         del self.workspaces[name]
+        del self.subplots[name]
         self._update_gridspec(len(self.plots))
         self.subplotRemovedSignal.emit(name)
 
