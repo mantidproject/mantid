@@ -1,13 +1,13 @@
 #ifndef MANTID_PARALLEL_MULTIPROCESSEVENTLOADER_H_
 #define MANTID_PARALLEL_MULTIPROCESSEVENTLOADER_H_
 
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <thread>
+#include <atomic>
 #include <mutex>
 #include <queue>
-#include <atomic>
+#include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 #include "MantidParallel/IO/EventsListsShmemStorage.h"
@@ -18,7 +18,23 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
-/** MultiProcessEventLoader : TODO: DESCRIPTION
+/** MultiProcessEventLoader : Loades events from nexus file using
+ * shared memory API from boost::interprocess library:
+ * every child process reads own chunk of data from file and loads
+ * to the own shared memory segment.
+ *
+ * The issue with shared memory: shared memory allocator is not smart enough,
+ * so the dynamic allocation leads to memory fragmentation and unreasonable
+ * memory consumption. For this reason we need to know the size of the data,
+ * before loading to the shared memory. 2 strategies avaliable for doing this:
+ * 1. Load data from bank -> precalculate number events for each pixel
+ *      -> sort by pixels directly in shared memory: LoadType::precalcEvents.
+ * 2. Load data from bank -> sort by pixels in local memory
+ *      -> copy from local to shared memory: LoadType::producerConsumer
+ *      (uses dynamic allocation in local memory that is not so bad).
+
+  @author Igor Gudich
+  @date 2018
 
   Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -44,7 +60,7 @@ class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
   MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
                           unsigned int numThreads, const std::string &binary,
-                          bool precalc = false);
+                          bool precalc = true);
   void
   load(const std::string &filename, const std::string &groupname,
        const std::vector<std::string> &bankNames,
@@ -58,17 +74,15 @@ public:
                            const std::vector<int32_t> &bankOffsets,
                            unsigned from, unsigned to, bool precalc);
 
-  enum struct LoadType {
-    preCalcEvents,
-    producerConsumer
-  };
+  enum struct LoadType { preCalcEvents, producerConsumer };
 
 private:
   static std::vector<std::string> GenerateSegmentsName(unsigned procNum);
   static std::string GenerateStoragename();
   static std::string GenerateTimeBasedPrefix();
 
-  template<typename MultiProcessEventLoader::LoadType LT = LoadType::preCalcEvents>
+  template<typename MultiProcessEventLoader::LoadType LT =
+  LoadType::preCalcEvents>
   struct GroupLoader {
     template<typename T>
     static void loadFromGroup(EventsListsShmemStorage &storage,
@@ -93,13 +107,18 @@ private:
   std::string m_storageName;
 };
 
+/**Loades the portion of data from hdf5 given group and banks list to shared
+ * memory, 'from' and 'to' represent the range in global number of events.
+ * Implements the 'precalculation of events' strategy*/
+
 template<>
 template<typename T>
-void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::preCalcEvents>::loadFromGroup(
-    EventsListsShmemStorage &storage, const H5::Group &instrument,
-    const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, unsigned from,
-    unsigned to) {
+void MultiProcessEventLoader::GroupLoader<
+    MultiProcessEventLoader::LoadType::preCalcEvents>::
+loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
+              const std::vector<std::string> &bankNames,
+              const std::vector<int32_t> &bankOffsets, unsigned from,
+              unsigned to) {
   std::vector<int32_t> eventId;
   std::vector<T> eventTimeOffset;
 
@@ -131,14 +150,14 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
                                            bankOffsets[bankIdx]);
 
       std::unordered_map<int32_t, std::size_t> eventsPerPixel;
-      for (auto &pixId: eventId) {
+      for (auto &pixId : eventId) {
         auto iter = eventsPerPixel.find(pixId);
         if (iter == eventsPerPixel.end())
           iter = eventsPerPixel.insert(std::make_pair(pixId, 0)).first;
         ++iter->second;
       }
 
-      for (const auto &pair: eventsPerPixel)
+      for (const auto &pair : eventsPerPixel)
         storage.reserve(0, pair.first, pair.second);
 
       part->setEventOffset(start);
@@ -157,13 +176,17 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pre
   }
 }
 
+/**Loades the portion of data from hdf5 given group and banks list to shared
+ * memory, 'from' and 'to' represent the range in global number of events.
+ * Implements the 'producer-consumer' strategy*/
 template<>
 template<typename T>
-void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::producerConsumer>::loadFromGroup(
-    EventsListsShmemStorage &storage, const H5::Group &instrument,
-    const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, unsigned from,
-    unsigned to) {
+void MultiProcessEventLoader::GroupLoader<
+    MultiProcessEventLoader::LoadType::producerConsumer>::
+loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
+              const std::vector<std::string> &bankNames,
+              const std::vector<int32_t> &bankOffsets, unsigned from,
+              unsigned to) {
 
   const std::size_t chLen{(from - to) / 100};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
@@ -174,10 +197,11 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
     IO::NXEventDataLoader<T> loader;
     decltype(loader.setBankIndex(0)) partitioner;
 
-    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames) : loader(1, instrument, bankNames) {}
+    Task(const H5::Group &instrument, const std::vector<std::string> &bankNames)
+        : loader(1, instrument, bankNames) {}
   };
 
-  std::vector<std::vector<TofEvent> > pixels(storage.pixelCount());
+  std::vector<std::vector<TofEvent>> pixels(storage.pixelCount());
   std::atomic<int> pixNum{0};
   std::queue<std::unique_ptr<Task>> queue;
   std::mutex guard;
@@ -207,10 +231,12 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
           task->partitioner = task->loader.setBankIndex(bankIdx);
           task->partitioner->setEventOffset(cur);
           task->eventTimeOffset.resize(cnt);
-          task->loader.readEventTimeOffset(task->eventTimeOffset.data(), start, cnt);
+          task->loader.readEventTimeOffset(task->eventTimeOffset.data(), start,
+                                           cnt);
           task->eventId.resize(cnt);
           task->loader.readEventID(task->eventId.data(), start, cnt);
-          detail::eventIdToGlobalSpectrumIndex(task->eventId.data(), cnt, bankOffsets[bankIdx]);
+          detail::eventIdToGlobalSpectrumIndex(task->eventId.data(), cnt,
+                                               bankOffsets[bankIdx]);
 
           {
             std::lock_guard<std::mutex> lock(guard);
@@ -229,8 +255,8 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
     while (finished != 2) {
     }; // consumer have finished his work ready to transfer to shmem
 
-    for (unsigned pixel = atomic_fetch_add(&pixNum, 1); pixel < storage.pixelCount();
-         pixel = atomic_fetch_add(&pixNum, 1))
+    for (unsigned pixel = atomic_fetch_add(&pixNum, 1);
+         pixel < storage.pixelCount(); pixel = atomic_fetch_add(&pixNum, 1))
       storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
   });
 
@@ -244,14 +270,16 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
           queue.pop();
         }
         for (unsigned i = 0; i < task->eventId.size(); ++i)
-          pixels.at(task->eventId[i]).emplace_back((double) task->eventTimeOffset[i], task->partitioner->next());
+          pixels.at(task->eventId[i])
+              .emplace_back((double) task->eventTimeOffset[i],
+                            task->partitioner->next());
       }
     }
 
     ++finished; // all consumed
 
-    for (unsigned pixel = atomic_fetch_add(&pixNum, 1); pixel < storage.pixelCount();
-         pixel = atomic_fetch_add(&pixNum, 1))
+    for (unsigned pixel = atomic_fetch_add(&pixNum, 1);
+         pixel < storage.pixelCount(); pixel = atomic_fetch_add(&pixNum, 1))
       storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
 
   });
@@ -259,7 +287,6 @@ void MultiProcessEventLoader::GroupLoader<MultiProcessEventLoader::LoadType::pro
   producer.join();
   consumer.join();
 }
-
 
 } // namespace IO
 } // namespace Parallel
