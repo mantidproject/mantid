@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BeamlineRayTracer.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Strings.h"
@@ -351,6 +352,18 @@ public:
     }
   }
 
+  void test_RectangularDetector_instrument_v1() {
+
+    InstrumentRayTracer tracer(m_inst);
+    // Directly in Z+ = towards the detector center
+    V3D testDir(0.0, 0.0, 1.0);
+    for (size_t i = 0; i < 100; i++) {
+        tracer.traceFromSample(testDir);
+        Links results = tracer.getResults();
+        TS_ASSERT_EQUALS(results.size(), 3);
+    }
+  }
+
   void test_TOPAZ() {
     // Directly in Z+ = towards the detector center
     for (int azimuth = 0; azimuth < 360; azimuth += 3) {
@@ -361,6 +374,23 @@ public:
 
         // Track it
         Links results = RayTracer::traceFromSample(testDir, *m_compInfoTopaz);
+      }
+    }
+  }
+
+  void test_TOPAZ_instrument_v1() {
+    // Directly in Z+ = towards the detector center
+    InstrumentRayTracer tracer(m_instTopaz);
+
+    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
+      for (int elev = -89; elev < 89; elev += 3) {
+        // Make a vector pointing in every direction
+        V3D testDir;
+        testDir.spherical(1, double(elev), double(azimuth));
+
+        // Track it
+        tracer.traceFromSample(testDir);
+        Links results = tracer.getResults();
       }
     }
   }
