@@ -39,6 +39,7 @@ Initialise the Interface
 void QtReflSettingsView::initLayout() {
   m_ui.setupUi(this);
   initOptionsTable();
+  initFloodCorControls();
 
   connect(m_ui.getExpDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestExpDefaults()));
@@ -76,6 +77,12 @@ void QtReflSettingsView::initOptionsTable() {
   }
   const int padding = 2;
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
+}
+
+void QtReflSettingsView::initFloodCorControls()
+{
+  m_ui.floodWorkspaceWsSelector->setOptional(true);
+  m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
 
 void QtReflSettingsView::connectSettingsChange(QLineEdit &edit) {
@@ -158,6 +165,8 @@ void QtReflSettingsView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.CApEdit, "Ap", alg);
   registerSettingWidget(*m_ui.CPpEdit, "Pp", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
+  registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
+  registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
 }
 
 void QtReflSettingsView::notifySettingsChanged() {
@@ -496,7 +505,7 @@ void QtReflSettingsView::createStitchHints(const std::vector<Hint> &hints) {
                                            &rowSpan, &colSpan);
   // Create the new edit box and add it to the right of the label
   m_stitchEdit = new HintingLineEdit(this, hints);
-  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 3);
+  m_ui.expSettingsLayout0->addWidget(m_stitchEdit, row, col + colSpan, 1, 1);
 }
 
 /** Return selected analysis mode
@@ -600,6 +609,16 @@ std::string QtReflSettingsView::getCAp() const {
  */
 std::string QtReflSettingsView::getCPp() const {
   return getText(*m_ui.CPpEdit);
+}
+
+std::string QtReflSettingsView::getFloodCorrection() const
+{
+  return getText(*m_ui.floodCorComboBox);
+}
+
+std::string QtReflSettingsView::getFloodWorkspace() const
+{
+  return getText(*m_ui.floodWorkspaceWsSelector);
 }
 
 /** Return integrated monitors option
