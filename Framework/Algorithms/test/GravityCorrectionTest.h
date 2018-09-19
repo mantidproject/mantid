@@ -275,7 +275,7 @@ public:
   }
 
   void testInstrumentTranslation() {
-    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(-5.4, 2.2, 1.7);
+    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(-5.4, -2.2, -1.7);
     auto origin =
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
             0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector);
@@ -380,7 +380,7 @@ public:
     const double sy{up2 + k * pow(s2 - sx, 2.)};
     const double finalAngle{atan(2. * k * sqrt(abs(sy / k)))};
 
-    V3D detector2{cos(finalAngle) * l2.norm(), sin(finalAngle) * l2.norm(), 0.};
+    //V3D detector2{cos(finalAngle) * l2.norm(), sin(finalAngle) * l2.norm(), 0.};
 
     Mantid::API::MatrixWorkspace_sptr ws{
         WorkspaceCreationHelper::

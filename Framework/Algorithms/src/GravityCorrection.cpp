@@ -109,7 +109,7 @@ void GravityCorrection::init() {
  * @return the name of the component
  */
 string GravityCorrection::componentName(
-    string inputName, Mantid::Geometry::Instrument_const_sptr &instr) {
+    const string &inputName, Mantid::Geometry::Instrument_const_sptr &instr) {
   const string propName = this->getPropertyValue(inputName);
   const string compName = instr->getParameterAsString("Workflow." + propName);
   if (!compName.empty())
@@ -181,7 +181,7 @@ map<string, string> GravityCorrection::validateInputs() {
  * @return the coordinate of the instrument component (unit metres)
  */
 double GravityCorrection::coordinate(
-    const string componentName, PointingAlong direction,
+    const string &componentName, PointingAlong direction,
     Mantid::Geometry::Instrument_const_sptr instrument) const {
   double position{0.};
   IComponent_const_sptr component;
@@ -207,7 +207,7 @@ double GravityCorrection::coordinate(
  * PointingAlong::Y, PointingAlong::Z)
  * @return the coordinate of a detector at index i (unit metres)
  */
-double GravityCorrection::coordinate(DetectorInfo &detectorInfo, size_t i,
+double GravityCorrection::coordinate(const DetectorInfo &detectorInfo, size_t i,
                                      PointingAlong direction) const {
   V3D position{detectorInfo.position(i)};
   return this->coordinate(position, direction);
@@ -222,7 +222,7 @@ double GravityCorrection::coordinate(DetectorInfo &detectorInfo, size_t i,
  * @return the coordinate of a detector or group of detectors of a spectrum at
  * index 1 (unit metres)
  */
-double GravityCorrection::coordinate(SpectrumInfo &spectrumInfo, size_t i,
+double GravityCorrection::coordinate(const SpectrumInfo &spectrumInfo, size_t i,
                                      PointingAlong direction) const {
   V3D position{spectrumInfo.position(i)};
   return this->coordinate(position, direction);
@@ -235,7 +235,7 @@ double GravityCorrection::coordinate(SpectrumInfo &spectrumInfo, size_t i,
  * PointingAlong::Y, PointingAlong::Z)
  * @return the coordinate of the position in direction in metres
  */
-double GravityCorrection::coordinate(V3D &pos, PointingAlong direction) const {
+double GravityCorrection::coordinate(const V3D &pos, PointingAlong direction) const {
   double position{0.};
   switch (direction) {
   case Mantid::Geometry::X:
@@ -435,7 +435,7 @@ void GravityCorrection::virtualInstrument() {
                     tanAngle);
             detectorInfo.setPosition(i, position);
             // rotate detectors
-            V3D vvector{V3D(0., 0., 0.)};
+            V3D vvector{0., 0., 0.};
             double vangle = atan(tanAngle);
             this->setCoordinate(vvector, this->m_upDirection, sin(vangle));
             this->setCoordinate(vvector, this->m_beamDirection, cos(vangle));
@@ -473,7 +473,7 @@ void GravityCorrection::virtualInstrument() {
                     tanAngle);
             detectorInfo.setPosition(i, position);
             // rotate detectors
-            V3D hvector{V3D(0., 0., 0.)};
+            V3D hvector{0., 0., 0.};
             double hangle = atan(tanAngle);
             this->setCoordinate(hvector, this->m_horizontalDirection,
                                 sin(hangle));
@@ -502,7 +502,7 @@ void GravityCorrection::virtualInstrument() {
  * @return true if spectrum can be considered for gravity correction, false
  * otherwise
  */
-bool GravityCorrection::spectrumCheck(SpectrumInfo &spectrumInfo, size_t i) {
+bool GravityCorrection::spectrumCheck(const SpectrumInfo &spectrumInfo, size_t i) {
   if (spectrumInfo.isMonitor(i))
     this->g_log.debug("Found monitor spectrum, will be ignored.");
   if (!spectrumInfo.hasDetectors(i))
@@ -518,7 +518,7 @@ bool GravityCorrection::spectrumCheck(SpectrumInfo &spectrumInfo, size_t i) {
  * @return spectrum number closest to the given final angle
  */
 size_t GravityCorrection::spectrumNumber(const double angle,
-                                         SpectrumInfo &spectrumInfo, size_t i) {
+                                         const SpectrumInfo &spectrumInfo, size_t i) {
   size_t n = i;
   // counts are dropping down due to gravitation -> move counts
   // up and n cannot be smaller than 0, only larger than
@@ -530,9 +530,9 @@ size_t GravityCorrection::spectrumNumber(const double angle,
 
   double tol = 0.;
   // the upper range for the updated final angle
-  if ((spectrumInfo.size() >= it->second + 1) &&
-      (this->spectrumCheck(spectrumInfo, it->second + 1))) {
-    double signedNextAngle = spectrumInfo.signedTwoTheta(it->second + 1) / 2;
+  if ((it->second < spectrumInfo.size()) &&
+      (this->spectrumCheck(spectrumInfo, it->second))) {
+    double signedNextAngle = spectrumInfo.signedTwoTheta(it->second) / 2;
     tol = 0.5 * (signedNextAngle - signedCurrentAngle);
   }
   tol = 0.; // crazy
@@ -569,7 +569,7 @@ void GravityCorrection::exec() {
   this->m_progress->report("Checking slits ...");
   this->slitCheck();
 
-  auto spectrumInfo = this->m_ws->spectrumInfo();
+  const auto &spectrumInfo = this->m_ws->spectrumInfo();
 
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
@@ -659,7 +659,7 @@ void GravityCorrection::exec() {
       double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
-      auto detectorInfo = outWS->detectorInfo();
+      const auto &detectorInfo = outWS->detectorInfo();
       double detZ = this->coordinate(detectorInfo, j, m_beamDirection);
       // possible trajectory from sample to detector
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);

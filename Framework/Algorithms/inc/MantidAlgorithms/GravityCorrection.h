@@ -92,23 +92,23 @@ private:
   /// Initialisation code
   void init() override;
   /// Name of a string component wich may be defined in parameters file
-  std::string componentName(std::string propertyName,
+  std::string componentName(const std::string &propertyName,
                             Mantid::Geometry::Instrument_const_sptr &instr);
   /// Final angle definition between source and sample
   double finalAngle(const double k, size_t i);
   /// Retrieve the coordinate of an instrument component
   double coordinate(
-      const std::string componentName,
+      const std::string &componentName,
       Mantid::Geometry::PointingAlong direction,
       Mantid::Geometry::Instrument_const_sptr instrument = nullptr) const;
   /// Retrieve the coodinate of a detector component
-  double coordinate(Mantid::Geometry::DetectorInfo &detectorInfo, size_t i,
+  double coordinate(const Mantid::Geometry::DetectorInfo &detectorInfo, size_t i,
                     Mantid::Geometry::PointingAlong direction) const;
   /// Retrieve the coordinate of an instrument component
-  double coordinate(Mantid::API::SpectrumInfo &spectrumInfo, size_t i,
+  double coordinate(const Mantid::API::SpectrumInfo &spectrumInfo, size_t i,
                     Mantid::Geometry::PointingAlong direction) const;
   /// Retrieve the coordinate of a vector
-  double coordinate(Kernel::V3D &pos,
+  double coordinate(const Kernel::V3D &pos,
                     Mantid::Geometry::PointingAlong direction) const;
   /// Modify the coordinate of a Vector V3D
   void setCoordinate(Kernel::V3D &pos,
@@ -119,9 +119,9 @@ private:
   void slitCheck();
   /// The corrected spectrum number for the initialSpectrumNumber
   size_t spectrumNumber(const double angle,
-                        Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
+                        const Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
   /// Tells if the corresponding spectrum will be considered for execution
-  bool spectrumCheck(Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
+  bool spectrumCheck(const Mantid::API::SpectrumInfo &spectrumInfo, size_t i);
   /// Parabola arc length
   double parabolaArcLength(const double arg, double constant = 1.) const;
   /// Execution code
