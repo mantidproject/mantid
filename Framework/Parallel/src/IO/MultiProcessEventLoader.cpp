@@ -50,6 +50,8 @@ std::string MultiProcessEventLoader::GenerateTimeBasedPrefix() {
   return ss.str();
 }
 
+/**Main API function for loading data from given file, group list of banks,
+ * launches child processes for hdf5 parallel reading*/
 void MultiProcessEventLoader::load(
     const std::string &filename, const std::string &groupname,
     const std::vector<std::string> &bankNames,
@@ -57,6 +59,8 @@ void MultiProcessEventLoader::load(
     std::vector<std::vector<Types::Event::TofEvent> *> eventLists) const {
 
   try {
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
     auto instrument = file.openGroup(groupname);
 
@@ -69,6 +73,7 @@ void MultiProcessEventLoader::load(
 
     std::vector<bp::child> vChilds;
 
+    //prepare command for launching of parallel processes
     for (unsigned i = 1; i < m_numProcesses; ++i) {
       std::size_t upperBound =
           i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
@@ -91,6 +96,7 @@ void MultiProcessEventLoader::load(
       }
 
       try {
+        // launch child processes
         vChilds.emplace_back(command.c_str());
       } catch (std::exception const &ex) {
         std::rethrow_if_nested(ex);
@@ -102,11 +108,23 @@ void MultiProcessEventLoader::load(
     fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0,
                  numEvents / m_numProcesses, m_precalculateEvents);
 
+    //waiting for child processes
     for (auto &c : vChilds)
       c.wait();
 
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Multiprocess: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
+              << std::endl;
+
+    begin = std::chrono::steady_clock::now();
+
     assembleFromShared(eventLists);
 
+    end = std::chrono::steady_clock::now();
+    std::cout << "Multithreading: " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count()
+              << std::endl;
+
+    //clean up shared memory
     for (const auto &name : m_segmentNames)
       ip::shared_memory_object::remove(name.c_str());
   } catch (std::exception const &ex) {
@@ -116,6 +134,7 @@ void MultiProcessEventLoader::load(
   }
 }
 
+/**Collects data from the chunks in shared memory to the final structure*/
 void MultiProcessEventLoader::assembleFromShared(
     std::vector<std::vector<Mantid::Types::Event::TofEvent> *> &result) const {
   std::vector<std::thread> workers;
@@ -133,12 +152,16 @@ void MultiProcessEventLoader::assembleFromShared(
                 .first);
       }
 
-      for (unsigned pixel = atomic_fetch_add(&cnt, 1); pixel < m_numPixels;
-           pixel = atomic_fetch_add(&cnt, 1)) {
-        auto &res = result[pixel];
-        for (unsigned i = 0; i < m_numProcesses; ++i) {
-          for (auto &chunk : *chunksPtrs[i]) {
-            res->insert(res->end(), chunk[pixel].begin(), chunk[pixel].end());
+      const unsigned portion{std::max<unsigned>(m_numPixels / m_numThreads / 3, 1)};
+      for (unsigned startPixel = cnt.fetch_add(portion); startPixel < m_numPixels;
+           startPixel = cnt.fetch_add(portion)) {
+
+        for (auto pixel = startPixel; pixel < std::min(startPixel + portion, m_numPixels); ++pixel) {
+          auto &res = result[pixel];
+          for (unsigned i = 0; i < m_numProcesses; ++i) {
+            for (auto &chunk : *chunksPtrs[i]) {
+              res->insert(res->end(), chunk[pixel].begin(), chunk[pixel].end());
+            }
           }
         }
       }
@@ -149,6 +172,8 @@ void MultiProcessEventLoader::assembleFromShared(
     worker.join();
 }
 
+/**Wrapper for loading the PART of ("from" event "to" event) data
+ * from nexus file with different strategies*/
 void MultiProcessEventLoader::fillFromFile(
     EventsListsShmemStorage &storage, const std::string &filename,
     const std::string &groupname, const std::vector<std::string> &bankNames,
@@ -204,6 +229,7 @@ void MultiProcessEventLoader::fillFromFile(
   }
 }
 
+// Estimates the memory amount for shared memory segments
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses)
                       * sizeof(TofEvent)
@@ -211,7 +237,6 @@ size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
                           sizeof(EventLists)
                       + sizeof(Chunks)};
   return len * 10;
-  // of reallocation memory for eventlists
 }
 
 } // namespace IO
