@@ -76,4 +76,4 @@ Follow these steps to narrow down the root of potential errors:
 - In the command prompt open the Python interpreter with ``python``.
 - Try to import the package where the error is happening. For example if there is an error on ``import qtpy``, ``from PyQt5 import QtCore``, try running that line in the interpreter.
 - If the import succeeds, then there is a problem with the ``PATH`` configuration in PyCharm.
-- If the import fails, then it is possible that Mantid has not been fully built. If you are trying to import ``PyQt4``/``PyQt5``/``qtpy``, and it fails to import from the command prompt, then the ``external`` dependencies might not be dowloaded or are corrupted.
+- If the import fails, then it is possible that Mantid has not been fully built. If you are trying to import ``PyQt4``/``PyQt5``/``qtpy``, and it fails to import from the command prompt, then the ``external`` dependencies might not be downloaded or are corrupted.
