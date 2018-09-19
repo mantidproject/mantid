@@ -41,6 +41,20 @@ using namespace Geometry;
 namespace {
 /// static logger
 Kernel::Logger g_log("IFunction");
+
+/// Struct that helps sort ties in correct order of application.
+struct TieNode {
+  // Iindex of the tied parameter
+  size_t left;
+  // Indices of parameters on the right-hand-side of the expression
+  std::vector<size_t> right;
+  // This tie must be applied before the other if the RHS of the other
+  // contains this (left) parameter.
+  bool operator<(TieNode const &other) {
+    return std::find(other.right.begin(), other.right.end(), left) !=
+           other.right.end();
+  }
+};
 }
 
 /**
@@ -252,12 +266,28 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   }
 }
 
+bool IFunction::hasOrderedTies() const
+{
+  return !m_orderedTies.empty();
+}
+
+void IFunction::applyOrderedTies()
+{
+  for (auto &&tie : m_orderedTies) {
+    tie->eval();
+  }
+}
+
 /**
  * Apply the ties.
  */
 void IFunction::applyTies() {
-  for (auto &m_tie : m_ties) {
-    m_tie->eval();
+  if (hasOrderedTies()) {
+    applyOrderedTies();
+  } else {
+    for (auto &tie : m_ties) {
+      tie->eval();
+    }
   }
 }
 
@@ -1449,6 +1479,46 @@ size_t IFunction::getNumberDomains() const { return 1; }
 std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
   return std::vector<IFunction_sptr>(
       1, FunctionFactory::Instance().createInitialized(asString()));
+}
+
+/// Put all ties in order in which they will be applied correctly.
+void IFunction::makeOrderedTies() {
+  m_orderedTies.clear();
+  std::list<TieNode> orderedTieNodes;
+  for (size_t i = 0; i < nParams(); ++i) {
+    auto tie = getTie(i);
+    if (!tie) {
+      continue;
+    }
+    std::vector<size_t> right;
+    auto rhsParameters = tie->getRHSParameters();
+    for (auto &&p : rhsParameters) {
+      right.push_back(this->getParameterIndex(p));
+    }
+    TieNode newNode{getParameterIndex(*tie), right};
+    bool before(false), after(false);
+    for (auto &&node : orderedTieNodes) {
+      if (newNode < node) {
+        before = true;
+      }
+      if (node < newNode) {
+        after = true;
+      }
+    }
+    if (before) {
+      if (after) {
+        throw std::runtime_error("Circular dependency in ties: " +
+                                 tie->asString(this));
+      }
+      orderedTieNodes.push_front(newNode);
+    } else {
+      orderedTieNodes.push_back(newNode);
+    }
+  }
+  for (auto &&node : orderedTieNodes) {
+    auto tie = getTie(node.left);
+    m_orderedTies.push_back(tie);
+  }
 }
 
 } // namespace API

@@ -194,5 +194,15 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
  */
 bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 
+/** Get a list of parameters on the right-hand side of the equation
+ */
+std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
+  std::vector<ParameterReference> out;
+  for (auto &&varPair : m_varMap) {
+    out.emplace_back(varPair.second);
+  }
+  return out;
+}
+
 } // namespace CurveFitting
 } // namespace Mantid
