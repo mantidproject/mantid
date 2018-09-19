@@ -13,6 +13,9 @@ UI & Usability Changes
 
 Project Recovery
 ----------------
+New
+###
+-Project recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
 
 Changes
 #######
@@ -33,5 +36,6 @@ BugFixes
 ########
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
+- Fixed an issue where MantidPlot would crash when renaming workspaces.
 
 :ref:`Release 3.14.0 <v3.14.0>`

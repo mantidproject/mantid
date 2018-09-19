@@ -21,6 +21,7 @@ creation is outlined in :ref:`issue_tracking`.
    :maxdepth: 1
 
    MuonInterface/MuonTesting
+   IndirectInelastic/IndirectInelasticAcceptanceTests
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
 
