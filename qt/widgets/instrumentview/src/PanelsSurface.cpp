@@ -310,7 +310,7 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
-  PRAGMA_OMP(parallel for)
+#pragma omp parallel for
   for (int i = 0; i < static_cast<int>(detectors.size()); ++i) {
     auto detector = detectors[i];
     addDetector(detector, pos0, index, info->rotation);

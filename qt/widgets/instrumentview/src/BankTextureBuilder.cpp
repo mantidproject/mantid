@@ -65,7 +65,7 @@ void addColorsToTopAndBottomTextures(
   }
 }
 
-void upload2DTexture(const std::pair<size_t, size_t> textSizes,
+void upload2DTexture(const std::pair<size_t, size_t> &textSizes,
                      GLuint &textureID, std::vector<char> &texture) {
   auto w = textSizes.first;
   auto h = textSizes.second;
