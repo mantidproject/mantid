@@ -1,10 +1,10 @@
 #ifndef ALGORITHMFACTORYTEST_H_
 #define ALGORITHMFACTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "FakeAlgorithms.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Instantiator.h"
-#include "FakeAlgorithms.h"
+#include <cxxtest/TestSuite.h>
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite {
 public:

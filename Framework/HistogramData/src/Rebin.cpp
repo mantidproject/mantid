@@ -5,14 +5,14 @@
 #include <algorithm>
 #include <numeric>
 
-using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::Exception::InvalidBinEdgesError;
+using Mantid::HistogramData::Histogram;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
@@ -138,12 +138,12 @@ namespace Mantid {
 namespace HistogramData {
 
 /** Rebins data according to a new set of bin edges.
-* @param input :: input histogram data to be rebinned.
-* @param binEdges :: input will be rebinned according to this set of bin edges.
-* @returns The rebinned histogram.
-* @throws std::runtime_error if the input histogram xmode is not BinEdges,
-* the input yMode is undefined, or for non-positive input/output bin widths
-*/
+ * @param input :: input histogram data to be rebinned.
+ * @param binEdges :: input will be rebinned according to this set of bin edges.
+ * @returns The rebinned histogram.
+ * @throws std::runtime_error if the input histogram xmode is not BinEdges,
+ * the input yMode is undefined, or for non-positive input/output bin widths
+ */
 Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
   if (input.xMode() != Histogram::XMode::BinEdges)
     throw std::runtime_error(

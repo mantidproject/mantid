@@ -13,9 +13,9 @@
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces;
-using testing::TypedEq;
 using testing::Return;
 using testing::ReturnRef;
+using testing::TypedEq;
 
 // Use this mocked presenter for tests that will start the focusing
 // workers/threads. Otherwise you'll run into trouble with issues like
@@ -306,8 +306,9 @@ public:
     const auto paramMock =
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
-        &mockView, Mantid::Kernel::make_unique<
-                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -335,8 +336,9 @@ public:
     const auto paramMock =
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
-        &mockView, Mantid::Kernel::make_unique<
-                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -370,8 +372,9 @@ public:
     const auto paramMock =
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
-        &mockView, Mantid::Kernel::make_unique<
-                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -397,8 +400,9 @@ public:
     const auto paramMock =
         boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
-        &mockView, Mantid::Kernel::make_unique<
-                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
         paramMock);
 
     const auto &userDir(Poco::Path::home());
@@ -568,8 +572,9 @@ public:
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(
-        &mockView, Mantid::Kernel::make_unique<
-                       testing::NiceMock<MockEnggDiffFittingModel>>(),
+        &mockView,
+        Mantid::Kernel::make_unique<
+            testing::NiceMock<MockEnggDiffFittingModel>>(),
         nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
@@ -643,8 +648,9 @@ public:
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel))
         .Times(1)
         .WillOnce(Return(WorkspaceCreationHelper::create2DWorkspace(10, 10)));
-    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
-                                        testing::_)).Times(2);
+    EXPECT_CALL(mockView,
+                setDataVector(testing::_, testing::_, testing::_, testing::_))
+        .Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(
@@ -675,8 +681,9 @@ public:
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
-    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
-                                        testing::_)).Times(1);
+    EXPECT_CALL(mockView,
+                setDataVector(testing::_, testing::_, testing::_, testing::_))
+        .Times(1);
     EXPECT_CALL(mockView, userWarning("Cannot plot fitted peaks", testing::_))
         .Times(1);
 
@@ -709,8 +716,9 @@ public:
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*mockModel_ptr, getFittedPeaksWS(runLabel)).Times(0);
-    EXPECT_CALL(mockView, setDataVector(testing::_, testing::_, testing::_,
-                                        testing::_)).Times(1);
+    EXPECT_CALL(mockView,
+                setDataVector(testing::_, testing::_, testing::_, testing::_))
+        .Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::updatePlotFittedPeaks);
     TSM_ASSERT(

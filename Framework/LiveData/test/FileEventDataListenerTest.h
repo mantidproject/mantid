@@ -1,10 +1,10 @@
 #ifndef MANTID_LIVEDATA_FILEEVENTDATALISTENERTEST_H_
 #define MANTID_LIVEDATA_FILEEVENTDATALISTENERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

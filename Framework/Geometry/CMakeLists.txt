@@ -106,17 +106,18 @@ set ( SRC_FILES
 	src/Objects/BoundingBox.cpp
 	src/Objects/CSGObject.cpp
 	src/Objects/InstrumentRayTracer.cpp
+        src/Objects/MeshObject2D.cpp
 	src/Objects/MeshObject.cpp
 	src/Objects/RuleItems.cpp
 	src/Objects/Rules.cpp
 	src/Objects/ShapeFactory.cpp
 	src/Objects/Track.cpp
 	src/Rendering/GeometryHandler.cpp
-        src/Rendering/RenderingHelpers.cpp
-        src/Rendering/ShapeInfo.cpp
+	src/Rendering/GeometryTriangulator.cpp
+	src/Rendering/RenderingHelpers.cpp
+	src/Rendering/ShapeInfo.cpp
 	src/Rendering/vtkGeometryCacheReader.cpp
 	src/Rendering/vtkGeometryCacheWriter.cpp
-	src/Rendering/GeometryTriangulator.cpp
 	src/Surfaces/Cone.cpp
 	src/Surfaces/Cylinder.cpp
 	src/Surfaces/General.cpp
@@ -223,6 +224,8 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/StructuredDetector.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/Instrument_fwd.h
+	inc/MantidGeometry/Instrument/DetectorInfoIterator.h
+	inc/MantidGeometry/Instrument/DetectorInfoItem.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/GeneralFrame.h
 	inc/MantidGeometry/MDGeometry/HKL.h
@@ -262,17 +265,19 @@ set ( INC_FILES
 	inc/MantidGeometry/Objects/CSGObject.h
 	inc/MantidGeometry/Objects/IObject.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
-        inc/MantidGeometry/Objects/MeshObject.h
+	inc/MantidGeometry/Objects/MeshObject.h
+	inc/MantidGeometry/Objects/MeshObject2D.h
 	inc/MantidGeometry/Objects/Rules.h
 	inc/MantidGeometry/Objects/ShapeFactory.h
 	inc/MantidGeometry/Objects/Track.h
 	inc/MantidGeometry/Rendering/GeometryHandler.h
-    	inc/MantidGeometry/Rendering/RenderingHelpers.h
-    	inc/MantidGeometry/Rendering/ShapeInfo.h
+	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
+	inc/MantidGeometry/Rendering/RenderingHelpers.h
+	inc/MantidGeometry/Rendering/RenderingMesh.h
+	inc/MantidGeometry/Rendering/ShapeInfo.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
-	inc/MantidGeometry/Rendering/GeometryTriangulator.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h
 	inc/MantidGeometry/Surfaces/Cone.h
 	inc/MantidGeometry/Surfaces/Cylinder.h
@@ -349,6 +354,7 @@ set ( TEST_FILES
 	MathSupportTest.h
 	MatrixVectorPairParserTest.h
 	MatrixVectorPairTest.h
+        MeshObject2DTest.h
 	MeshObjectTest.h
 	NiggliCellTest.h
 	NullImplicitFunctionTest.h
@@ -397,7 +403,7 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	ScalarUtilsTest.h
 	ShapeFactoryTest.h
-        ShapeInfoTest.h
+	ShapeInfoTest.h
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
@@ -417,6 +423,7 @@ set ( TEST_FILES
 	UnitCellTest.h
 	V3RTest.h
 	XMLInstrumentParameterTest.h
+	DetectorInfoIteratorTest.h
 )
 
 set ( GMOCK_TEST_FILES

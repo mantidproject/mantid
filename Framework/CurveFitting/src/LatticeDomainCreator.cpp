@@ -8,8 +8,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidDataObjects/Peak.h"
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
+#include "MantidDataObjects/Peak.h"
 
 namespace Mantid {
 namespace CurveFitting {

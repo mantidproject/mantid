@@ -1,25 +1,25 @@
 #ifndef MDBOX_SAVEABLE_TEST_H
 #define MDBOX_SAVEABLE_TEST_H
 
-#include <boost/scoped_ptr.hpp>
-#include <cxxtest/TestSuite.h>
-#include <map>
-#include <memory>
-#include <Poco/File.h>
-#include <nexus/NeXusFile.hpp>
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <Poco/File.h>
+#include <boost/scoped_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -215,7 +215,7 @@ public:
     TS_ASSERT_DELTA(events[9].getErrorSquared(), (base + 9) * (base + 9), 1e-5);
   }
   /** Test splitting of a MDBox into a MDGridBox when the
-     * original box is backed by a file. */
+   * original box is backed by a file. */
   void test_fileBackEnd_construction() {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));

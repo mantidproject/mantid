@@ -1,12 +1,12 @@
 #include "MantidAlgorithms/SetInstrumentParameter.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -44,9 +44,10 @@ void SetInstrumentParameter::init() {
                       "Workspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace to add the log entry to");
-  declareProperty("ComponentName", "", "The name of the component to attach "
-                                       "the parameter to. Default: the whole "
-                                       "instrument");
+  declareProperty("ComponentName", "",
+                  "The name of the component to attach "
+                  "the parameter to. Default: the whole "
+                  "instrument");
   declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
                   "The detector ID list to attach the parameter to. If set "
                   "this will override any ComponentName");

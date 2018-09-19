@@ -18,13 +18,13 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
-using boost::scoped_ptr;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
+using boost::scoped_ptr;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
@@ -91,7 +91,7 @@ MATCHER_P3(QwtDataY, i, value, delta, "") {
 MATCHER_P3(VectorValue, i, value, delta, "") {
   return fabs(arg.at(i) - value) < delta;
 }
-GCC_DIAG_ON_SUGGEST_OVERRIDE
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
   MockALCBaselineModellingView *m_view;

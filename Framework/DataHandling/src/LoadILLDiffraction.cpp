@@ -50,7 +50,7 @@ constexpr double RAD_TO_DEG = 180. / M_PI;
 constexpr double WAVE_TO_E = 81.8;
 // Number of pixels in the tubes for D2B
 constexpr size_t D2B_NUMBER_PIXELS_IN_TUBES = 128;
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
@@ -106,6 +106,10 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("AlignTubes", true,
+                                           Direction::Input),
+      "Apply vertical and horizontal alignment of tubes as defined in IPF");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -144,24 +148,24 @@ void LoadILLDiffraction::exec() {
 }
 
 /**
-* Loads the scanned detector data
-*/
+ * Loads the scanned detector data
+ */
 void LoadILLDiffraction::loadDataScan() {
 
   // open the root entry
   NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
-
   m_instName = firstEntry.getString("instrument/name");
-
   m_startTime = DateAndTime(
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
-
-  // read the detector data
-
+  const std::string dataType = getPropertyValue("DataType");
+  const bool hasCalibratedData = containsCalibratedData(m_filename);
+  if (dataType != "Raw" && hasCalibratedData) {
+    m_useCalibratedData = true;
+  }
+  // Load the data
   std::string dataName;
-  if (getPropertyValue("DataType") == "Raw" &&
-      containsCalibratedData(m_filename))
+  if (dataType == "Raw" && hasCalibratedData)
     dataName = "data_scan/detector_data/raw_data";
   else
     dataName = "data_scan/detector_data/data";
@@ -225,8 +229,8 @@ void LoadILLDiffraction::loadDataScan() {
 }
 
 /**
-* Dumps the metadata from the whole file to SampleLogs
-*/
+ * Dumps the metadata from the whole file to SampleLogs
+ */
 void LoadILLDiffraction::loadMetaData() {
 
   auto &mutableRun = m_outWorkspace->mutableRun();
@@ -289,6 +293,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
   referenceComponentPosition.getSpherical(refR, refTheta, refPhi);
 
   if (m_instName == "D2B") {
+    const bool doAlign = getProperty("AlignTubes");
     auto &compInfo = instrumentWorkspace->mutableComponentInfo();
 
     Geometry::IComponent_const_sptr detectors =
@@ -309,7 +314,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
     m_pixelHeight = bb.yMax() - bb.yMin();
 
     const auto tubeAnglesStr = params.getString("D2B", "tube_angles");
-    if (!tubeAnglesStr.empty()) {
+    if (!tubeAnglesStr.empty() && doAlign) {
       std::vector<std::string> tubeAngles;
       boost::split(tubeAngles, tubeAnglesStr[0], boost::is_any_of(","));
       const double ref = -refTheta;
@@ -333,7 +338,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
     }
 
     const auto tubeCentersStr = params.getString("D2B", "tube_centers");
-    if (!tubeCentersStr.empty()) {
+    if (!tubeCentersStr.empty() && doAlign) {
       std::vector<std::string> tubeCenters;
       double maxYOffset = 0.;
       boost::split(tubeCenters, tubeCentersStr[0], boost::is_any_of(","));
@@ -371,7 +376,8 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String() << "\n";
+                       .toISO8601String()
+                << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
@@ -477,7 +483,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-      if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+      if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
         pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
       }
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
@@ -519,7 +525,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     auto &errors = m_outWorkspace->mutableE(i);
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
     auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
-    if (m_instName == "D2B" && tubeNumber % 2 == 1) {
+    if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
       pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
     }
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
@@ -753,8 +759,8 @@ void LoadILLDiffraction::resolveInstrument() {
 }
 
 /**
-* Runs LoadInstrument as child to link the non-moving instrument to workspace
-*/
+ * Runs LoadInstrument as child to link the non-moving instrument to workspace
+ */
 void LoadILLDiffraction::loadStaticInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
@@ -783,9 +789,9 @@ LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
 }
 
 /**
-* Rotates the detector to the 2theta0 read from the file
-* @param twoTheta0Read : 2theta0 read from the file
-*/
+ * Rotates the detector to the 2theta0 read from the file
+ * @param twoTheta0Read : 2theta0 read from the file
+ */
 void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
@@ -802,11 +808,11 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
 }
 
 /**
-* Makes up the full path of the relevant IDF dependent on resolution mode
-* @param instName : the name of the instrument (including the resolution mode
-* suffix)
-* @return : the full path to the corresponding IDF
-*/
+ * Makes up the full path of the relevant IDF dependent on resolution mode
+ * @param instName : the name of the instrument (including the resolution mode
+ * suffix)
+ * @return : the full path to the corresponding IDF
+ */
 std::string
 LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 
@@ -817,7 +823,7 @@ LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 }
 
 /** Adds some sample logs needed later by reduction
-*/
+ */
 void LoadILLDiffraction::setSampleLogs() {
   Run &run = m_outWorkspace->mutableRun();
   std::string scanTypeStr = "NoScan";

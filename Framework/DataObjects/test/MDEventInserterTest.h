@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 #define MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/Timer.h"
 
 #include <boost/shared_ptr.hpp>
 

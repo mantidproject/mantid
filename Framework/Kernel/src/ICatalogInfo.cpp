@@ -1,6 +1,6 @@
 #include "MantidKernel/ICatalogInfo.h"
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Kernel {

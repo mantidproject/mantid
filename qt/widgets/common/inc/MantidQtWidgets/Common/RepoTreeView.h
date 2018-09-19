@@ -55,6 +55,6 @@ protected slots:
 };
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_API_REPOTREEVIEW_H_ */

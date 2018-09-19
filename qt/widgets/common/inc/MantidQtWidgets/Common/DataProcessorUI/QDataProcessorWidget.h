@@ -2,14 +2,14 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/HintStrategy.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
-#include "MantidQtWidgets/Common/HintStrategy.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -121,6 +121,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const QString &text) override;
+  void setItemDelegate() override;
 
   // Transfer runs
   void transfer(const QList<QString> &runs);
@@ -203,5 +204,5 @@ private slots:
 
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_ */

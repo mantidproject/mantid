@@ -38,5 +38,5 @@ void NullCoordTransform::apply(const Mantid::coord_t *inputVector,
     outVector[i] = inputVector[i];
   }
 }
-}
-}
+} // namespace API
+} // namespace Mantid

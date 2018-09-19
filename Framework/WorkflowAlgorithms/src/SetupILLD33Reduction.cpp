@@ -2,16 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SetupILLD33Reduction.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "Poco/NumberFormatter.h"
 
 namespace Mantid {
@@ -119,9 +119,10 @@ void SetupILLD33Reduction::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
-                                        "from the sample data will also be "
-                                        "subtracted from the flood field.");
+  declareProperty("UseDefaultDC", true,
+                  "If true, the dark current subtracted "
+                  "from the sample data will also be "
+                  "subtracted from the flood field.");
   declareProperty(make_unique<API::FileProperty>(
                       "SensitivityDarkCurrentFile", "",
                       API::FileProperty::OptionalLoad, "_event.nxs"),

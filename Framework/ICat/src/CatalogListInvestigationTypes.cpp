@@ -25,5 +25,5 @@ void CatalogListInvestigationTypes::exec() {
       ->listInvestigationTypes(investigationTypes);
   setProperty("InvestigationTypes", investigationTypes);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

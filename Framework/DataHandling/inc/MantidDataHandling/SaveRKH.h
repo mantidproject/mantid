@@ -84,7 +84,7 @@ private:
   /// The output filehandle
   std::ofstream m_outRKH;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_SAVERKH_H_

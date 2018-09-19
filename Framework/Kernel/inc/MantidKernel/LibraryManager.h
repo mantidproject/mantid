@@ -15,7 +15,7 @@
 namespace Poco {
 class File;
 class Path;
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {

@@ -1,10 +1,10 @@
 #ifndef Geometry_Surface_h
 #define Geometry_Surface_h
 
-#include "MantidGeometry/DllConfig.h"
 #include "BaseVisit.h"
-#include <string>
+#include "MantidGeometry/DllConfig.h"
 #include <memory>
+#include <string>
 
 class TopoDS_Shape;
 
@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Kernel {
 class V3D;
 template <class T> class Matrix;
-}
+} // namespace Kernel
 namespace Geometry {
 
 /**

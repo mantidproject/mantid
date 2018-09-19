@@ -2,8 +2,8 @@
 #define MANTID_MDALGORITHMS_NOQ_TRANSF_H
 
 #include "MantidAPI/NumericAxis.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -117,7 +117,7 @@ private:
                       API::NumericAxis *&pXAxis, API::NumericAxis *&pYAxis);
 };
 
-} // End MDAlgorighms namespace
-} // End Mantid namespace
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

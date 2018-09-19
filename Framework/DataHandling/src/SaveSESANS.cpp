@@ -162,7 +162,7 @@ void SaveSESANS::writeHeaders(std::ofstream &outfile,
  * @param outfile ofstream to the output file
  * @param name The name of the attribute being written
  * @param value The attribute's value
-*/
+ */
 void SaveSESANS::writeHeader(std::ofstream &outfile, const std::string &name,
                              const std::string &value) {
   outfile << std::setfill(' ') << std::setw(MAX_HDR_LENGTH) << std::left << name

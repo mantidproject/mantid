@@ -20,7 +20,7 @@ public:
     RENDERMODE_SIZE
   };
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*INSTRUMENTWIDGETTYPES_H_*/

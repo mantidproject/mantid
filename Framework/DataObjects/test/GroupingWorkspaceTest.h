@@ -6,8 +6,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include "PropertyManagerHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -95,9 +95,9 @@ public:
   }
 
   /**
-  * Test declaring an input workspace property and retrieving as const_sptr or
-  * sptr
-  */
+   * Test declaring an input workspace property and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     GroupingWorkspace_sptr wsInput(new GroupingWorkspace());

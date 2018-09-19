@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
 #define MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include "MantidCrystal/DisjointElement.h"
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::DisjointElement;
 

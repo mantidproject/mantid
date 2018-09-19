@@ -1,11 +1,11 @@
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 #include <numeric>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 
 using std::size_t;
 
@@ -25,26 +25,27 @@ namespace VectorHelper {
  *  @param[in] xMaxHint x_2 if params contains only delta_1.
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport
-createAxisFromRebinParams(const std::vector<double> &params,
-                          std::vector<double> &xnew, const bool resize_xnew,
-                          const bool full_bins_only, const double xMinHint,
-                          const double xMaxHint) {
+int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
+                                        std::vector<double> &xnew,
+                                        const bool resize_xnew,
+                                        const bool full_bins_only,
+                                        const double xMinHint,
+                                        const double xMaxHint) {
   std::vector<double> tmp;
-  const std::vector<double> &fullParams =
-      [&params, &tmp, xMinHint, xMaxHint]() {
-        if (params.size() == 1) {
-          if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
-            throw std::runtime_error("createAxisFromRebinParams: xMinHint and "
-                                     "xMaxHint must be supplied if params "
-                                     "contains only the bin width.");
-          }
-          tmp.resize(3);
-          tmp = {xMinHint, params.front(), xMaxHint};
-          return tmp;
-        }
-        return params;
-      }();
+  const std::vector<double> &fullParams = [&params, &tmp, xMinHint,
+                                           xMaxHint]() {
+    if (params.size() == 1) {
+      if (std::isnan(xMinHint) || std::isnan(xMaxHint)) {
+        throw std::runtime_error("createAxisFromRebinParams: xMinHint and "
+                                 "xMaxHint must be supplied if params "
+                                 "contains only the bin width.");
+      }
+      tmp.resize(3);
+      tmp = {xMinHint, params.front(), xMaxHint};
+      return tmp;
+    }
+    return params;
+  }();
   int ibound(2), istep(1), inew(1);
   // highest index in params array containing a bin boundary
   int ibounds = static_cast<int>(fullParams.size());
@@ -347,7 +348,7 @@ void rebinHistogram(const std::vector<double> &xold,
  * Convert the given set of bin boundaries into bin centre values
  * @param bin_edges :: A vector of values specifying bin boundaries
  * @param bin_centres :: An output vector of bin centre values.
-*/
+ */
 void convertToBinCentre(const std::vector<double> &bin_edges,
                         std::vector<double> &bin_centres) {
   const std::vector<double>::size_type npoints = bin_edges.size();
@@ -448,10 +449,9 @@ size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
         return n - 1;
       }
       size_t binIndex = std::distance(bin_centers.begin(), it);
-      if (binIndex > 0 &&
-          value <
-              bin_centers[binIndex - 1] +
-                  0.5 * (bin_centers[binIndex] - bin_centers[binIndex - 1])) {
+      if (binIndex > 0 && value < bin_centers[binIndex - 1] +
+                                      0.5 * (bin_centers[binIndex] -
+                                             bin_centers[binIndex - 1])) {
         binIndex--;
       }
       return binIndex;
@@ -493,9 +493,9 @@ size_t indexOfValueFromEdges(const std::vector<double> &bin_edges,
 
 //-------------------------------------------------------------------------------------------------
 /** Assess if all the values in the vector are equal or if there are some
-* different values
-*  @param[in] arra the vector to examine
-*/
+ * different values
+ *  @param[in] arra the vector to examine
+ */
 bool isConstantValue(const std::vector<double> &arra) {
   // make comparisons with the first value
   auto i = arra.cbegin();
@@ -586,16 +586,16 @@ int getBinIndex(const std::vector<double> &bins, const double value) {
 
 namespace {
 /** internal function converted from Lambda to identify interval around
-* specified  point and  run average around this point
-*
-*@param index      -- index to average around
-*@param startIndex -- index in the array of data (input to start average
-*                     from) should be: index>=startIndex>=0
-*@param endIndex   -- index in the array of data (input to end average at)
-*                     should be: index<=endIndex<=input.size()
-*@param halfWidth  -- half width of the interval to integrate.
-*@param input      -- vector of input signal
-*@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
+ * specified  point and  run average around this point
+ *
+ *@param index      -- index to average around
+ *@param startIndex -- index in the array of data (input to start average
+ *                     from) should be: index>=startIndex>=0
+ *@param endIndex   -- index in the array of data (input to end average at)
+ *                     should be: index<=endIndex<=input.size()
+ *@param halfWidth  -- half width of the interval to integrate.
+ *@param input      -- vector of input signal
+ *@param binBndrs   -- pointer to vector of bin boundaries or NULL pointer.
  */
 double runAverage(size_t index, size_t startIndex, size_t endIndex,
                   const double halfWidth, const std::vector<double> &input,
@@ -671,32 +671,32 @@ double runAverage(size_t index, size_t startIndex, size_t endIndex,
     }
   }
 }
-}
+} // namespace
 
 /** Basic running average of input vector within specified range, considering
-*  variable bin-boundaries if such boundaries are provided.
-* The algorithm performs trapezium integration, so some peak shift
-* related to the first derivative of the integrated function can be observed.
-*
-* @param input::   input vector to smooth
-* @param output::  resulting vector (can not coincide with input)
-* @param avrgInterval:: the interval to average function in.
-*                      the function is averaged within +-0.5*avrgInterval
-* @param binBndrs :: pointer to the vector, containing bin boundaries.
-*                    If provided, its length has to be input.size()+1,
-*                    if not, equal size bins of size 1 are assumed,
-*                    so avrgInterval becomes the number of points
-*                    to average over. Bin boundaries array have to
-*                    increase and can not contain equal boundaries.
-* @param startIndex:: if provided, its start index to run averaging from.
-*                     if not, averaging starts from the index 0
-* @param endIndex ::  final index to run average to, if provided. If
-*                     not, or higher then number of elements in input array,
-*                     averaging is performed to the end point of the input
-*                     array
-* @param outBins ::   if present, pointer to a vector to return
-*                     bin boundaries for output array.
-*/
+ *  variable bin-boundaries if such boundaries are provided.
+ * The algorithm performs trapezium integration, so some peak shift
+ * related to the first derivative of the integrated function can be observed.
+ *
+ * @param input::   input vector to smooth
+ * @param output::  resulting vector (can not coincide with input)
+ * @param avrgInterval:: the interval to average function in.
+ *                      the function is averaged within +-0.5*avrgInterval
+ * @param binBndrs :: pointer to the vector, containing bin boundaries.
+ *                    If provided, its length has to be input.size()+1,
+ *                    if not, equal size bins of size 1 are assumed,
+ *                    so avrgInterval becomes the number of points
+ *                    to average over. Bin boundaries array have to
+ *                    increase and can not contain equal boundaries.
+ * @param startIndex:: if provided, its start index to run averaging from.
+ *                     if not, averaging starts from the index 0
+ * @param endIndex ::  final index to run average to, if provided. If
+ *                     not, or higher then number of elements in input array,
+ *                     averaging is performed to the end point of the input
+ *                     array
+ * @param outBins ::   if present, pointer to a vector to return
+ *                     bin boundaries for output array.
+ */
 void smoothInRange(const std::vector<double> &input,
                    std::vector<double> &output, const double avrgInterval,
                    std::vector<double> const *const binBndrs, size_t startIndex,

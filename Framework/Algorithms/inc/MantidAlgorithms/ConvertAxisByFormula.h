@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_
 #define MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidKernel/System.h"
 
 // forward declaration
 namespace mu {

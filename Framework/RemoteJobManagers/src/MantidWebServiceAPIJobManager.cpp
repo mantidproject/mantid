@@ -1,7 +1,7 @@
+#include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
-#include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidRemoteJobManagers/SimpleJSON.h"
 
 #include <fstream>
@@ -15,7 +15,7 @@ DECLARE_REMOTEJOBMANAGER(MantidWebServiceAPIJobManager)
 namespace {
 // static logger object
 Mantid::Kernel::Logger g_log("MantidWebServiceAPIJobManager");
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 using Mantid::Types::Core::DateAndTime;
@@ -101,8 +101,8 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
     const std::string &localFileName) {
 
   std::istream &respStream =
-      httpGet("/download", std::string("TransID=") + transactionID + "&File=" +
-                               remoteFileName);
+      httpGet("/download", std::string("TransID=") + transactionID +
+                               "&File=" + remoteFileName);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 

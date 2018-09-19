@@ -1,12 +1,12 @@
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include <vtkDataSet.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <vtkDataSet.h>
 
 namespace Mantid {
 namespace VATES {
@@ -56,5 +56,5 @@ std::string vtkDataSetToWsLocation::execute() {
 
 /// Destructor
 vtkDataSetToWsLocation::~vtkDataSetToWsLocation() {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

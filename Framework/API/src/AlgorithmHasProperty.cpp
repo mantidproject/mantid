@@ -46,5 +46,5 @@ std::string AlgorithmHasProperty::checkValidity(
   return message;
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

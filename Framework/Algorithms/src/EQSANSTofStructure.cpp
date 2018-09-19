@@ -2,9 +2,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -34,13 +34,15 @@ void EQSANSTofStructure::init() {
   declareProperty("FlightPathCorrection", false,
                   "If True, the neutron flight path correction will be applied",
                   Kernel::Direction::Input);
-  declareProperty("LowTOFCut", 0.0, "Width of the TOF margin to cut on the "
-                                    "lower end of the TOF distribution of each "
-                                    "frame",
+  declareProperty("LowTOFCut", 0.0,
+                  "Width of the TOF margin to cut on the "
+                  "lower end of the TOF distribution of each "
+                  "frame",
                   Kernel::Direction::Input);
-  declareProperty("HighTOFCut", 0.0, "Width of the TOF margin to cut on the "
-                                     "upper end of the TOF distribution of "
-                                     "each frame",
+  declareProperty("HighTOFCut", 0.0,
+                  "Width of the TOF margin to cut on the "
+                  "upper end of the TOF distribution of "
+                  "each frame",
                   Kernel::Direction::Input);
 
   // Output parameters
@@ -347,12 +349,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
     bool passed = false;
 
     do {
-      frame_wl_1 = c_wl_1[0] =
-          chopper_wl_1[0] +
-          3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
-      frame_wl_2 = c_wl_2[0] =
-          chopper_wl_2[0] +
-          3.9560346 * n_frame[0] * tof_frame_width / CHOPPER_LOCATION[0];
+      frame_wl_1 = c_wl_1[0] = chopper_wl_1[0] + 3.9560346 * n_frame[0] *
+                                                     tof_frame_width /
+                                                     CHOPPER_LOCATION[0];
+      frame_wl_2 = c_wl_2[0] = chopper_wl_2[0] + 3.9560346 * n_frame[0] *
+                                                     tof_frame_width /
+                                                     CHOPPER_LOCATION[0];
 
       for (int i = 1; i < 4; i++) {
         n_frame[i] = n_frame[i - 1] - 1;
@@ -360,12 +362,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
 
         do {
           n_frame[i] += 1;
-          c_wl_1[i] =
-              chopper_wl_1[i] +
-              3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
-          c_wl_2[i] =
-              chopper_wl_2[i] +
-              3.9560346 * n_frame[i] * tof_frame_width / CHOPPER_LOCATION[i];
+          c_wl_1[i] = chopper_wl_1[i] + 3.9560346 * n_frame[i] *
+                                            tof_frame_width /
+                                            CHOPPER_LOCATION[i];
+          c_wl_2[i] = chopper_wl_2[i] + 3.9560346 * n_frame[i] *
+                                            tof_frame_width /
+                                            CHOPPER_LOCATION[i];
 
           if (frame_wl_1 < c_wl_2[i] && frame_wl_2 > c_wl_1[i]) {
             passed = true;
@@ -399,12 +401,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
         chopper_wl_1[i] = c_wl_1[i];
         chopper_wl_2[i] = c_wl_2[i];
         if (frame_skipping) {
-          chopper_frameskip_wl_1[i] =
-              c_wl_1[i] +
-              3.9560346 * 2. * tof_frame_width / CHOPPER_LOCATION[i];
-          chopper_frameskip_wl_2[i] =
-              c_wl_2[i] +
-              3.9560346 * 2. * tof_frame_width / CHOPPER_LOCATION[i];
+          chopper_frameskip_wl_1[i] = c_wl_1[i] + 3.9560346 * 2. *
+                                                      tof_frame_width /
+                                                      CHOPPER_LOCATION[i];
+          chopper_frameskip_wl_2[i] = c_wl_2[i] + 3.9560346 * 2. *
+                                                      tof_frame_width /
+                                                      CHOPPER_LOCATION[i];
           if (i == 0) {
             frameskip_wl_1 = chopper_frameskip_wl_1[i];
             frameskip_wl_2 = chopper_frameskip_wl_2[i];

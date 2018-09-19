@@ -3,13 +3,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidMDAlgorithms/Integrate3DEvents.h"
-#include "MantidMDAlgorithms/UnitsConversionHelper.h"
-#include "MantidMDAlgorithms/MDTransfInterface.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/MDTransfInterface.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 namespace Mantid {
 namespace Geometry {

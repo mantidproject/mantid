@@ -1,9 +1,9 @@
 #include "ResNorm.h"
 
+#include "../General/UserInputValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "../General/UserInputValidator.h"
 
 using namespace Mantid::API;
 

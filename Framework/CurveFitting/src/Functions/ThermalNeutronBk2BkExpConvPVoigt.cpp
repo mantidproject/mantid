@@ -6,9 +6,9 @@
 
 #include "MantidKernel/ConfigService.h"
 
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
-#include <boost/lexical_cast.hpp>
 
 const double PEAKRANGE = 5.0;
 const double NEG_DBL_MAX = -1. * DBL_MAX;
@@ -27,13 +27,13 @@ using namespace CurveFitting;
 namespace {
 /// static reference to the logger
 Kernel::Logger g_log("ThermalNeutronBk2BkExpConvPV");
-}
+} // namespace
 
 DECLARE_FUNCTION(ThermalNeutronBk2BkExpConvPVoigt)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt()
     : IPowderDiffPeakFunction(), m_Alpha(0.), m_Beta(0.), m_Sigma2(0.),
       m_Gamma(0.), m_eta(0.), m_N(0.), m_cancel(false),
@@ -96,19 +96,25 @@ void ThermalNeutronBk2BkExpConvPVoigt::init() {
       "exponential constant of decaying part of thermal neutron pulse");
 
   // Pseudo-Voigt (17 ~ 22)
-  declareParameter("Sig0", 1.0, "variance parameter 1 of the Gaussian "
-                                "component of the psuedovoigt function");
-  declareParameter("Sig1", 1.0, "variance parameter 2 of the Gaussian "
-                                "component of the psuedovoigt function");
-  declareParameter("Sig2", 1.0, "variance parameter 3 of the Gaussian "
-                                "component of the psuedovoigt function");
+  declareParameter("Sig0", 1.0,
+                   "variance parameter 1 of the Gaussian "
+                   "component of the psuedovoigt function");
+  declareParameter("Sig1", 1.0,
+                   "variance parameter 2 of the Gaussian "
+                   "component of the psuedovoigt function");
+  declareParameter("Sig2", 1.0,
+                   "variance parameter 3 of the Gaussian "
+                   "component of the psuedovoigt function");
 
-  declareParameter("Gam0", 0.0, "FWHM parameter 1 of the Lorentzian component "
-                                "of the psuedovoigt function");
-  declareParameter("Gam1", 0.0, "FWHM parameter 2 of the Lorentzian component "
-                                "of the psuedovoigt function");
-  declareParameter("Gam2", 0.0, "FWHM parameter 3 of the Lorentzian component "
-                                "of the psuedovoigt function");
+  declareParameter("Gam0", 0.0,
+                   "FWHM parameter 1 of the Lorentzian component "
+                   "of the psuedovoigt function");
+  declareParameter("Gam1", 0.0,
+                   "FWHM parameter 2 of the Lorentzian component "
+                   "of the psuedovoigt function");
+  declareParameter("Gam2", 0.0,
+                   "FWHM parameter 3 of the Lorentzian component "
+                   "of the psuedovoigt function");
 
   // Lattice parameter (23)
   declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
@@ -225,8 +231,8 @@ ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
 //------------- Public Functions (Overwrite) Calculation
 //---------------------------------------------
 /** Calculate peak parameters (fundamential Back-to-back PV),including
-* alpha, beta, sigma^2, eta, H
-*/
+ * alpha, beta, sigma^2, eta, H
+ */
 void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
     bool explicitoutput) const {
   // Obtain parameters (class) with pre-set order
@@ -405,10 +411,10 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
 
 //----------------------------------------------------------------------------------------------
 /** Function (local) of the vector version
-  * @param out: The calculated peak intensities. This is assume to been
+ * @param out: The calculated peak intensities. This is assume to been
  * initialized to the correct length
-  * with a value of zero everywhere.
-  * @param xValues: The x-values to evaluate the peak at.
+ * with a value of zero everywhere.
+ * @param xValues: The x-values to evaluate the peak at.
  */
 void ThermalNeutronBk2BkExpConvPVoigt::function(
     vector<double> &out, const vector<double> &xValues) const {
@@ -443,7 +449,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::function(
 
 //----------------------------------------------------------------------------------------------
 /** Disabled derivative
-*/
+ */
 void ThermalNeutronBk2BkExpConvPVoigt::functionDerivLocal(API::Jacobian *,
                                                           const double *,
                                                           const size_t) {
@@ -452,7 +458,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionDerivLocal(API::Jacobian *,
 }
 
 /** Calculate derivative of this peak function
-*/
+ */
 void ThermalNeutronBk2BkExpConvPVoigt::functionDeriv(
     const API::FunctionDomain &domain, API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
@@ -501,7 +507,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::fwhm() const
 //-------------  Private Function To Calculate Peak Profile
 //--------------------------------------------
 /** Calcualte H and eta for the peak
-*/
+ */
 void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
                                                   double &H,
                                                   double &eta) const {
@@ -529,8 +535,8 @@ void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
 
 //----------------------------------------------------------------------------------------------
 /** Calculate Omega(x) = ... ...
-* This is the core component to calcualte peak profile
-*/
+ * This is the core component to calcualte peak profile
+ */
 double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
     const double x, const double eta, const double N, const double alpha,
     const double beta, const double H, const double sigma2,
@@ -585,7 +591,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
 
 //----------------------------------------------------------------------------------------------
 /** Override setting parameter by parameter index
-  */
+ */
 void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i,
                                                     const double &value,
                                                     bool explicitlySet) {
@@ -607,7 +613,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i,
 
 //----------------------------------------------------------------------------------------------
 /** Overriding setting parameter by parameter name
-  */
+ */
 void ThermalNeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
                                                     const double &value,
                                                     bool explicitlySet) {

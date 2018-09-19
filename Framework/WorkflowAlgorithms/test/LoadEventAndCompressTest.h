@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
 

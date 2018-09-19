@@ -12,9 +12,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
@@ -293,5 +293,5 @@ bool CreateMDWorkspace::checkIfFrameValid(
   return false;
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

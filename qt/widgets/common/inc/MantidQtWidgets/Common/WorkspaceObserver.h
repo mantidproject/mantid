@@ -1,12 +1,12 @@
 #ifndef WORKSPACE_OBSERVER_H
 #define WORKSPACE_OBSERVER_H
 
+#include "DllOption.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include <Poco/NObserver.h>
-#include <QObject>
-#include "DllOption.h"
 #include <QMetaType>
+#include <QObject>
 
 Q_DECLARE_METATYPE(std::string)
 Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
@@ -23,19 +23,19 @@ namespace API {
 class WorkspaceObserver;
 
 /**
-* A simple callback class so that we avoid multiple inheritance issues with
-*QObject.
-*
-* This adds an extra level of indirection to the call between a Poco
-*notification handler and the call to the correct WorkspaceObserver handler.
-* It is necessary to do this rather than just call the function directly so that
-*the function call gets executed in the object's thread rather than
-* in the thread that the notification was received in.
-*
-* Multiple inheritance is not used in WorkspaceObserver as their seems to be
-*some problem using it and QObject
-*
-*/
+ * A simple callback class so that we avoid multiple inheritance issues with
+ *QObject.
+ *
+ * This adds an extra level of indirection to the call between a Poco
+ *notification handler and the call to the correct WorkspaceObserver handler.
+ * It is necessary to do this rather than just call the function directly so
+ *that the function call gets executed in the object's thread rather than in the
+ *thread that the notification was received in.
+ *
+ * Multiple inheritance is not used in WorkspaceObserver as their seems to be
+ *some problem using it and QObject
+ *
+ */
 class EXPORT_OPT_MANTIDQT_COMMON ObserverCallback : public QObject {
   Q_OBJECT
 
@@ -183,8 +183,8 @@ protected:
   }
 
   /** Handle an ADS clear notification
-  *
-  */
+   *
+   */
   virtual void clearADSHandle() {}
 
 protected:
@@ -258,7 +258,7 @@ private:
       m_rename_observed, m_clr_observed;
 };
 
-} // MantidQt
-} // API
+} // namespace API
+} // namespace MantidQt
 
 #endif

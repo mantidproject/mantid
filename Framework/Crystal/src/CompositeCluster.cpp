@@ -15,7 +15,7 @@ public:
     return pCluster->containsLabel(m_label);
   }
 };
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {

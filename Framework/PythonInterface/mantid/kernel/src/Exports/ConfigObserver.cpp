@@ -1,6 +1,6 @@
 #include "MantidKernel/ConfigObserver.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
 #include <boost/python/pure_virtual.hpp>
@@ -26,8 +26,8 @@ private:
 namespace boost {
 namespace python {
 template <> struct has_back_reference<ConfigObserverWrapper> : mpl::true_ {};
-}
-}
+} // namespace python
+} // namespace boost
 
 void export_ConfigObserver() {
   class_<ConfigObserverWrapper, boost::noncopyable>("ConfigObserver")

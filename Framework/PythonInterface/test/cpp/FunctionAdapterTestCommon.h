@@ -103,7 +103,7 @@ private:
   size_t m_np;
   std::vector<double> m_data;
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // FUNCTIONADAPTERTESTCOMMON_H

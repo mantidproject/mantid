@@ -268,10 +268,10 @@ QVariant QTwoLevelTreeModel::getToolTipRole(const QModelIndex &index) const {
 }
 
 /** Returns data for specified index
-* @param index : The index
-* @param role : The role
-* @return : The data associated with the given index
-*/
+ * @param index : The index
+ * @param role : The role
+ * @return : The data associated with the given index
+ */
 QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
 
   if (!index.isValid())
@@ -308,11 +308,11 @@ std::string QTwoLevelTreeModel::cellValue(int groupIndex, int rowIndex,
 }
 
 /** Returns the column name (header data for given section)
-* @param section : The section (column) index
-* @param orientation : The orientation
-* @param role : The role
-* @return : The column name
-*/
+ * @param section : The section (column) index
+ * @param orientation : The orientation
+ * @param role : The role
+ * @return : The column name
+ */
 QVariant QTwoLevelTreeModel::headerData(int section,
                                         Qt::Orientation orientation,
                                         int role) const {
@@ -328,9 +328,9 @@ QVariant QTwoLevelTreeModel::headerData(int section,
 
 /** Returns row data struct (which includes metadata about the row)
  * for specified index
-* @param index : The index
-* @return : The data associated with the given index as a RowData class
-*/
+ * @param index : The index
+ * @return : The data associated with the given index as a RowData class
+ */
 RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) const {
 
   RowData_sptr result;
@@ -352,21 +352,21 @@ RowData_sptr QTwoLevelTreeModel::rowData(const QModelIndex &index) const {
 
 /** Returns row data struct (which includes metadata about the row)
  * for specified index
-* @param groupIndex : The group index
-* @param rowIndex : The row index within the group
-* @return : The data associated with the given index as a RowData class
-*/
+ * @param groupIndex : The group index
+ * @param rowIndex : The row index within the group
+ * @return : The data associated with the given index as a RowData class
+ */
 RowData_sptr QTwoLevelTreeModel::rowData(int groupIndex, int rowIndex) const {
   const auto rowQIndex = index(rowIndex, 0, index(groupIndex, 0));
   return rowData(rowQIndex);
 }
 
 /** Returns the index of an element specified by its row, column and parent
-* @param row : The row
-* @param column : The column
-* @param parent : The parent element
-* @return : The index of the element
-*/
+ * @param row : The row
+ * @param column : The column
+ * @param parent : The parent element
+ * @return : The index of the element
+ */
 QModelIndex QTwoLevelTreeModel::index(int row, int column,
                                       const QModelIndex &parent) const {
 
@@ -375,10 +375,10 @@ QModelIndex QTwoLevelTreeModel::index(int row, int column,
 }
 
 /** Gets the 'processed' status of a data item
-* @param position : The position of the item
-* @param parent : The parent of this item
-* @return : The 'processed' status
-*/
+ * @param position : The position of the item
+ * @param parent : The parent of this item
+ * @return : The 'processed' status
+ */
 bool QTwoLevelTreeModel::isProcessed(int position,
                                      const QModelIndex &parent) const {
 
@@ -406,10 +406,10 @@ bool QTwoLevelTreeModel::isProcessed(int position,
 }
 
 /** Check whether the reduction failed for a group/row
-* @param position : The position of the item
-* @param parent : The parent of this item
-* @return : true if the reduction failed
-*/
+ * @param position : The position of the item
+ * @param parent : The parent of this item
+ * @return : true if the reduction failed
+ */
 bool QTwoLevelTreeModel::reductionFailed(int position,
                                          const QModelIndex &parent) const {
 
@@ -437,9 +437,9 @@ bool QTwoLevelTreeModel::reductionFailed(int position,
 }
 
 /** Returns the parent of a given index
-* @param index : The index
-* @return : Its parent
-*/
+ * @param index : The index
+ * @return : Its parent
+ */
 QModelIndex QTwoLevelTreeModel::parent(const QModelIndex &index) const {
 
   int internalIdInt = int(index.internalId());
@@ -448,11 +448,11 @@ QModelIndex QTwoLevelTreeModel::parent(const QModelIndex &index) const {
 }
 
 /** Adds elements to the tree
-* @param position : The position where to insert the new elements
-* @param count : The number of elements to insert
-* @param parent : The parent of the set of elements
-* @return : Boolean indicating whether the insertion was successful or not
-*/
+ * @param position : The position where to insert the new elements
+ * @param count : The number of elements to insert
+ * @param parent : The parent of the set of elements
+ * @return : Boolean indicating whether the insertion was successful or not
+ */
 bool QTwoLevelTreeModel::insertRows(int position, int count,
                                     const QModelIndex &parent) {
 
@@ -470,11 +470,11 @@ bool QTwoLevelTreeModel::insertRows(int position, int count,
 }
 
 /** Insert new rows as children of a given parent. Parent must exist.
-* @param position : The position where new rows will be added
-* @param count : The number of new rows to insert
-* @param parent : The parent index (as integer)
-* @return : Boolean indicating if the insertion was successful
-*/
+ * @param position : The position where new rows will be added
+ * @param count : The number of new rows to insert
+ * @param parent : The parent index (as integer)
+ * @return : Boolean indicating if the insertion was successful
+ */
 bool QTwoLevelTreeModel::insertRows(int position, int count, int parent) {
 
   // Parent does not exist
@@ -534,10 +534,10 @@ bool QTwoLevelTreeModel::insertRows(int position, int count, int parent) {
 }
 
 /** Insert new groups at a given position
-* @param position : The position where new groups will be inserted
-* @param count : The number of groups to insert
-* @return : True if insertion was successful, false otherwise
-*/
+ * @param position : The position where new groups will be inserted
+ * @param count : The number of groups to insert
+ * @return : True if insertion was successful, false otherwise
+ */
 bool QTwoLevelTreeModel::insertGroups(int position, int count) {
 
   // Invalid position
@@ -566,12 +566,12 @@ bool QTwoLevelTreeModel::insertGroups(int position, int count) {
 }
 
 /** Removes elements from the tree
-* @param position : The position of the first element in the set to be removed
-* @param count : The number of elements to remove
-* @param parent : The parent of the set of elements
-* @return : Boolean indicating whether the elements were removed successfully or
-* not
-*/
+ * @param position : The position of the first element in the set to be removed
+ * @param count : The number of elements to remove
+ * @param parent : The parent of the set of elements
+ * @return : Boolean indicating whether the elements were removed successfully
+ * or not
+ */
 bool QTwoLevelTreeModel::removeRows(int position, int count,
                                     const QModelIndex &parent) {
 
@@ -589,10 +589,10 @@ bool QTwoLevelTreeModel::removeRows(int position, int count,
 }
 
 /** Removes groups from the tree
-* @param position : The position of the first group that will be removed
-* @param count : The number of groups to remove
-* @return : Boolean indicating whether or not groups were removed
-*/
+ * @param position : The position of the first group that will be removed
+ * @param count : The number of groups to remove
+ * @return : Boolean indicating whether or not groups were removed
+ */
 bool QTwoLevelTreeModel::removeGroups(int position, int count) {
 
   // Invalid position
@@ -637,11 +637,11 @@ bool QTwoLevelTreeModel::removeGroups(int position, int count) {
 }
 
 /** Removes rows from a group
-* @param position : The position of the first row that will be removed
-* @param count : The number of rows to remove
-* @param parent : The parent item
-* @return : Boolean indicating whether or not rows were removed
-*/
+ * @param position : The position of the first row that will be removed
+ * @param count : The number of rows to remove
+ * @param parent : The parent item
+ * @return : Boolean indicating whether or not rows were removed
+ */
 bool QTwoLevelTreeModel::removeRows(int position, int count, int parent) {
 
   // Parent does not exist
@@ -690,8 +690,8 @@ bool QTwoLevelTreeModel::removeRows(int position, int count, int parent) {
 }
 
 /** Remove all rows and groups
-* @return : Boolean indicating whether or not rows were removed
-*/
+ * @return : Boolean indicating whether or not rows were removed
+ */
 bool QTwoLevelTreeModel::removeAll() {
   beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
 
@@ -709,9 +709,9 @@ bool QTwoLevelTreeModel::removeAll() {
 }
 
 /** Returns the number of rows of a given parent
-* @param parent : The parent item
-* @return : The number of rows
-*/
+ * @param parent : The parent item
+ * @return : The number of rows
+ */
 int QTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
 
   // We are counting the number of groups
@@ -731,10 +731,10 @@ int QTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
 }
 
 /** Updates an index with given data
-* @param index : the index
-* @param value : the new value
-* @param role : the role
-*/
+ * @param index : the index
+ * @param value : the new value
+ * @param role : the role
+ */
 bool QTwoLevelTreeModel::setData(const QModelIndex &index,
                                  const QVariant &value, int role) {
 
@@ -783,9 +783,9 @@ bool QTwoLevelTreeModel::setData(const QModelIndex &index,
 }
 
 /** Setup the data, initialize member variables using a table workspace and
-* whitelist
-* @param table : A table workspace containing the data
-*/
+ * whitelist
+ * @param table : A table workspace containing the data
+ */
 void QTwoLevelTreeModel::setupModelData(ITableWorkspace_sptr table) {
 
   int nrows = static_cast<int>(table->rowCount());
@@ -813,19 +813,19 @@ void QTwoLevelTreeModel::setupModelData(ITableWorkspace_sptr table) {
 }
 
 /** Return the underlying data structure, i.e. the table workspace this model is
-* representing
-* @return :: the underlying table workspace
-*/
+ * representing
+ * @return :: the underlying table workspace
+ */
 ITableWorkspace_sptr QTwoLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
 /** Sets the 'processed' status of a data item
-* @param processed : True to set processed, false to set unprocessed
-* @param position : The position of the item
-* @param parent : The parent of this item
-* @return : Boolean indicating whether process status was set successfully
-*/
+ * @param processed : True to set processed, false to set unprocessed
+ * @param position : The position of the item
+ * @param parent : The parent of this item
+ * @return : Boolean indicating whether process status was set successfully
+ */
 bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
                                       const QModelIndex &parent) {
 
@@ -851,11 +851,11 @@ bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
 }
 
 /** Sets the error status of a data item
-* @param error : the error message
-* @param position : The position of the item
-* @param parent : The parent of this item
-* @return : Boolean indicating whether process status was set successfully
-*/
+ * @param error : the error message
+ * @param position : The position of the item
+ * @param parent : The parent of this item
+ * @return : Boolean indicating whether process status was set successfully
+ */
 bool QTwoLevelTreeModel::setError(const std::string &error, int position,
                                   const QModelIndex &parent) {
 
@@ -983,12 +983,12 @@ bool QTwoLevelTreeModel::runListsMatch(const std::string &newValue,
                                        const bool exactMatch) const {
   // Parse the individual runs from each list and check that they all
   // match, allowing for additional runs in one of the lists.
-  auto newRuns =
-      Mantid::Kernel::StringTokenizer(
-          newValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
-  auto oldRuns =
-      Mantid::Kernel::StringTokenizer(
-          oldValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM).asVector();
+  auto newRuns = Mantid::Kernel::StringTokenizer(
+                     newValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM)
+                     .asVector();
+  auto oldRuns = Mantid::Kernel::StringTokenizer(
+                     oldValue, ",+", Mantid::Kernel::StringTokenizer::TOK_TRIM)
+                     .asVector();
 
   // Loop through all values in the shortest list and check they exist
   // in the longer list (or they all match if they're the same length).
@@ -1075,7 +1075,7 @@ bool QTwoLevelTreeModel::rowMatches(int groupIndex, int rowIndex,
  * @param rowValues : the row values to look for
  * @return : an optional value that is set with the row's index if
  * it was found or is unset if it is not
-  */
+ */
 boost::optional<int> QTwoLevelTreeModel::findRowIndex(
     int groupIndex, const std::map<QString, QString> &rowValues) const {
   boost::optional<int> result;
@@ -1196,8 +1196,8 @@ void QTwoLevelTreeModel::insertRowAndGroupWithValues(
 }
 
 /** Transfer data to the model
-* @param runs :: [input] Data to transfer as a vector of maps
-*/
+ * @param runs :: [input] Data to transfer as a vector of maps
+ */
 void QTwoLevelTreeModel::transfer(
     const std::vector<std::map<QString, QString>> &runs) {
   // If the table only has one row, check if it is empty and if so, remove it.
@@ -1221,4 +1221,4 @@ void QTwoLevelTreeModel::transfer(
 }
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt

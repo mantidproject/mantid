@@ -1,23 +1,23 @@
 #include "MantidCrystal/PredictPeaks.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
-#include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Crystal/EdgePixel.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/make_unique.h"
 
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
@@ -43,7 +43,7 @@ double get_factor_for_q_convention(const std::string &convention) {
 
   return 1.0;
 }
-}
+} // namespace
 
 /** Constructor
  */
@@ -193,7 +193,8 @@ void PredictPeaks::exec() {
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
-                       "InputWorkspace.\n" << e.what() << '\n';
+                       "InputWorkspace.\n"
+                    << e.what() << '\n';
       g_log.warning() << "Using identity goniometer rotation matrix instead.\n";
     }
   } else if (peaksWS) {
@@ -236,7 +237,8 @@ void PredictPeaks::exec() {
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
-               "InputWorkspace.\n" << e.what() << '\n';
+               "InputWorkspace.\n"
+            << e.what() << '\n';
         g_log.warning()
             << "Using identity goniometer rotation matrix instead.\n";
       }
@@ -294,7 +296,6 @@ void PredictPeaks::exec() {
 
   if (getProperty("CalculateGoniometerForCW")) {
     size_t allowedPeakCount = 0;
-    int seqNum = 1;
 
     double wavelength = getProperty("Wavelength");
     if (wavelength == DBL_MAX) {
@@ -322,8 +323,7 @@ void PredictPeaks::exec() {
         g_log.information() << "Found goniometer rotation to be "
                             << goniometer.getEulerAngles()[0]
                             << " degrees for HKL = " << possibleHKL << "\n";
-        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR(),
-                                 seqNum);
+        calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR());
         ++allowedPeakCount;
       }
       prog.report();
@@ -341,7 +341,6 @@ void PredictPeaks::exec() {
       HKLFilterWavelength lambdaFilter(orientedUB, lambdaMin, lambdaMax);
 
       size_t allowedPeakCount = 0;
-      int seqNum = 1;
 
       bool useExtendedDetectorSpace =
           getProperty("PredictPeaksOutsideDetectors");
@@ -353,8 +352,7 @@ void PredictPeaks::exec() {
 
       for (auto &possibleHKL : possibleHKLs) {
         if (lambdaFilter.isAllowed(possibleHKL)) {
-          calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix,
-                                   seqNum);
+          calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
           ++allowedPeakCount;
         }
         prog.report();
@@ -364,6 +362,17 @@ void PredictPeaks::exec() {
     }
   }
 
+  // Sort peaks by run number so that peaks with equal goniometer matrices are
+  // adjacent
+  std::vector<std::pair<std::string, bool>> criteria;
+  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  m_pw->sort(criteria);
+
+  auto &peaks = m_pw->getPeaks();
+  for (int i = 0; i < static_cast<int>(m_pw->getNumberPeaks()); ++i) {
+    peaks[i].setPeakNumber(i);
+  }
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
@@ -542,12 +551,10 @@ void PredictPeaks::setStructureFactorCalculatorFromSample(
  * @param hkl
  * @param orientedUB
  * @param goniometerMatrix
- * @param seqNum
  */
 void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
                                             const DblMatrix &orientedUB,
-                                            const DblMatrix &goniometerMatrix,
-                                            int &seqNum) {
+                                            const DblMatrix &goniometerMatrix) {
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
@@ -608,8 +615,6 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Save the run number found before.
   peak->setRunNumber(m_runNumber);
   peak->setHKL(hkl * m_qConventionFactor);
-  peak->setPeakNumber(seqNum);
-  seqNum++;
 
   if (m_sfCalculator) {
     peak->setIntensity(m_sfCalculator->getFSquared(hkl));
@@ -645,5 +650,5 @@ void PredictPeaks::setReferenceFrameAndBeamDirection() {
   m_refBeamDir = m_refFrame->vecPointingAlongBeam();
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

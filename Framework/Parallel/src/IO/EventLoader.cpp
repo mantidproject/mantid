@@ -44,7 +44,7 @@ void load(const Communicator &comm, const std::string &filename,
   load(readDataType(group, bankNames, "event_time_offset"), comm, group,
        bankNames, bankOffsets, std::move(eventLists));
 }
-}
+} // namespace EventLoader
 
 } // namespace IO
 } // namespace Parallel

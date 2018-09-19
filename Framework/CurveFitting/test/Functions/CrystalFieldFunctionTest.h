@@ -4,13 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

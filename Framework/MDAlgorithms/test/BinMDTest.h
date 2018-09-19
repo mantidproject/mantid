@@ -34,7 +34,7 @@ using namespace Mantid::MDAlgorithms;
 using Mantid::coord_t;
 
 class BinMDTest : public CxxTest::TestSuite {
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   // Helper class. Mock Implicit function.
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
@@ -45,7 +45,7 @@ private:
     std::string getName() const override { return "MockImplicitFunction"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
   };
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
   // Helper class. Builds mock implicit functions.
   class MockImplicitFunctionBuilder
       : public Mantid::API::ImplicitFunctionBuilder {
@@ -104,10 +104,10 @@ public:
   }
 
   /** Test the algo
-  * @param nameX : name of the axis
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  */
+   * @param nameX : name of the axis
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   */
   void do_test_exec(const std::string &functionXML, const std::string &name1,
                     const std::string &name2, const std::string &name3,
                     const std::string &name4, const double expected_signal,
@@ -412,11 +412,11 @@ public:
 
   /** Test the algorithm, with a coordinate transformation.
    *
-  * @param binsX : # of bins in the output
-  * @param expected_signal :: how many events in each resulting bin
-  * @param expected_numBins :: how many points/bins in the output
-  * @param FlipYBasis :: flip the Y basis vector
-  */
+   * @param binsX : # of bins in the output
+   * @param expected_signal :: how many events in each resulting bin
+   * @param expected_numBins :: how many points/bins in the output
+   * @param FlipYBasis :: flip the Y basis vector
+   */
   void do_test_transform(int binsX, int binsY, int binsZ,
                          double expected_signal, size_t expected_numBins,
                          bool IterateEvents, bool ForceOrthogonal,

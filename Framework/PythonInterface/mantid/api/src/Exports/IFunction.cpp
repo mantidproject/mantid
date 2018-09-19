@@ -1,9 +1,9 @@
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidAPI/CompositeFunction.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -50,14 +50,11 @@ double getError(IFunction &self, std::string const &name) {
 // -- Set property overloads --
 // setProperty(index,value,explicit)
 using setParameterType1 = void (IFunction::*)(size_t, const double &, bool);
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType1_Overloads,
                                        setParameter, 2, 3)
 // setProperty(index,value,explicit)
@@ -74,12 +71,10 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
 using removeTieByName = void (IFunction::*)(const std::string &);
 
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 ///@endcond
-}
+} // namespace
 
 void export_IFunction() {
 
@@ -134,8 +129,9 @@ void export_IFunction() {
                IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
-      .def("__getitem__", (double (IFunction::*)(const std::string &) const) &
-                              IFunction::getParameter,
+      .def("__getitem__",
+           (double (IFunction::*)(const std::string &) const) &
+               IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,

@@ -19,8 +19,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,7 +31,7 @@ bool compareMomentum(const std::array<double, 4> &v1,
                      const std::array<double, 4> &v2) {
   return (v1[3] < v2[3]);
 }
-}
+} // namespace
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MDNormSCD)
@@ -64,8 +64,8 @@ const std::string MDNormSCD::summary() const {
 const std::string MDNormSCD::name() const { return "MDNormSCD"; }
 
 /**
-  * Initialize the algorithm's properties.
-  */
+ * Initialize the algorithm's properties.
+ */
 void MDNormSCD::init() {
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -144,20 +144,26 @@ void MDNormSCD::exec() {
   m_normWS->setDisplayNormalization(Mantid::API::NoNormalization);
   setProperty("OutputNormalizationWorkspace", m_normWS);
 
-  // Check for other dimensions if we could measure anything in the original
-  // data
-  bool skipNormalization = false;
-  const std::vector<coord_t> otherValues =
-      getValuesFromOtherDimensions(skipNormalization);
-  const auto affineTrans =
-      findIntergratedDimensions(otherValues, skipNormalization);
-  cacheDimensionXValues();
+  m_numExptInfos = outputWS->getNumExperimentInfo();
+  // loop over all experiment infos
+  for (uint16_t expInfoIndex = 0; expInfoIndex < m_numExptInfos;
+       expInfoIndex++) {
+    // Check for other dimensions if we could measure anything in the original
+    // data
+    bool skipNormalization = false;
+    const std::vector<coord_t> otherValues =
+        getValuesFromOtherDimensions(skipNormalization, expInfoIndex);
+    const auto affineTrans =
+        findIntergratedDimensions(otherValues, skipNormalization);
+    cacheDimensionXValues();
 
-  if (!skipNormalization) {
-    calculateNormalization(otherValues, affineTrans);
-  } else {
-    g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
-                  "Not applying normalization.");
+    if (!skipNormalization) {
+      calculateNormalization(otherValues, affineTrans, expInfoIndex);
+    } else {
+      g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
+                    "Not applying normalization.");
+    }
+    m_accumulate = true;
   }
 }
 
@@ -269,12 +275,14 @@ void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
  * Retrieve logged values from non-HKL dimensions
  * @param skipNormalization [InOut] Updated to false if any values are outside
  * range measured by input workspace
+ * @param expInfoIndex current experiment info index
  * @return A vector of values from other dimensions to be include in normalized
  * MD position calculation
  */
 std::vector<coord_t>
-MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization) const {
-  const auto &runZero = m_inputWS->getExperimentInfo(0)->run();
+MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
+                                        uint16_t expInfoIndex) const {
+  const auto &currentRun = m_inputWS->getExperimentInfo(expInfoIndex)->run();
 
   std::vector<coord_t> otherDimValues;
   for (size_t i = 3; i < m_inputWS->getNumDims(); i++) {
@@ -282,7 +290,7 @@ MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization) const {
     float dimMin = static_cast<float>(dimension->getMinimum());
     float dimMax = static_cast<float>(dimension->getMaximum());
     auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-        runZero.getProperty(dimension->getName()));
+        currentRun.getProperty(dimension->getName()));
     if (dimProp) {
       coord_t value = static_cast<coord_t>(dimProp->firstValue());
       otherDimValues.push_back(value);
@@ -393,19 +401,20 @@ void MDNormSCD::cacheDimensionXValues() {
  * m_normWS
  * @param otherValues
  * @param affineTrans
+ * @param expInfoIndex current experiment info index
  */
 void MDNormSCD::calculateNormalization(
     const std::vector<coord_t> &otherValues,
-    const Kernel::Matrix<coord_t> &affineTrans) {
+    const Kernel::Matrix<coord_t> &affineTrans, uint16_t expInfoIndex) {
   API::MatrixWorkspace_const_sptr integrFlux = getProperty("FluxWorkspace");
   integrFlux->getXMinMax(m_kiMin, m_kiMax);
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
 
-  const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
+  const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   using VectorDoubleProperty = Kernel::PropertyWithValue<std::vector<double>>;
-  auto *rubwLog =
-      dynamic_cast<VectorDoubleProperty *>(exptInfoZero.getLog("RUBW_MATRIX"));
+  auto *rubwLog = dynamic_cast<VectorDoubleProperty *>(
+      currentExptInfo.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
     throw std::runtime_error(
         "Wokspace does not contain a log entry for the RUBW matrix."
@@ -413,12 +422,12 @@ void MDNormSCD::calculateNormalization(
   } else {
     Kernel::DblMatrix rubwValue(
         (*rubwLog)()); // includes the 2*pi factor but not goniometer for now :)
-    m_rubw = exptInfoZero.run().getGoniometerMatrix() * rubwValue;
+    m_rubw = currentExptInfo.run().getGoniometerMatrix() * rubwValue;
     m_rubw.Invert();
   }
-  const double protonCharge = exptInfoZero.run().getProtonCharge();
+  const double protonCharge = currentExptInfo.run().getProtonCharge();
 
-  const auto &spectrumInfo = exptInfoZero.spectrumInfo();
+  const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mappings
   const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
@@ -432,7 +441,10 @@ void MDNormSCD::calculateNormalization(
   std::vector<std::array<double, 4>> intersections;
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
-  auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
+  double progStep = 0.7 / m_numExptInfos;
+  auto prog =
+      make_unique<API::Progress>(this, 0.3 + progStep * expInfoIndex,
+                                 0.3 + progStep * (expInfoIndex + 1.), ndets);
   // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {
@@ -491,7 +503,9 @@ for (int64_t i = 0; i < ndets; i++) {
     // Average between two intersections for final position
     std::transform(curIntSec.begin(), curIntSec.begin() + vmdDims - 1,
                    prevIntSec.begin(), pos.begin(),
-                   VectorHelper::SimpleAverage<coord_t>());
+                   [](const double lhs, const double rhs) {
+                     return static_cast<coord_t>(0.5 * (lhs + rhs));
+                   });
     affineTrans.multiplyPoint(pos, posNew);
     size_t linIndex = m_normWS->getLinearIndexAtCoord(posNew.data());
     if (linIndex == size_t(-1))

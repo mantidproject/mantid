@@ -11,13 +11,15 @@ namespace SliceViewer {
  * @param dimensions: a vector of dimension objects of the workspace which will
  * be sliced
  * @returns true if the slice goes fully or partially through the workspace
-*/
+ */
 bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
     const Mantid::Kernel::VMD &min, const Mantid::Kernel::VMD &max,
     const std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions) {
-  auto valueBetweenMinMax = [](
-      const Mantid::Kernel::VMD_t value, const Mantid::Kernel::VMD_t min,
-      const Mantid::Kernel::VMD_t max) { return value >= min && value <= max; };
+  auto valueBetweenMinMax = [](const Mantid::Kernel::VMD_t value,
+                               const Mantid::Kernel::VMD_t min,
+                               const Mantid::Kernel::VMD_t max) {
+    return value >= min && value <= max;
+  };
 
   int dimCounter = 0;
   auto cutsThroughWorkspace = true;
@@ -52,10 +54,9 @@ bool EXPORT_OPT_MANTIDQT_SLICEVIEWER doesSliceCutThroughWorkspace(
  * time
  * @param isAutoScalingOnLoad: is auto scaling on load selected
  * @returns true if autos scaling on load should be performed else false
-*/
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
-shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen,
-                                    bool isAutoScalingOnLoad) {
+ */
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER shouldAutoScaleForNewlySetWorkspace(
+    bool isFirstWorkspaceOpen, bool isAutoScalingOnLoad) {
   return !isFirstWorkspaceOpen || isAutoScalingOnLoad;
 }
 
@@ -69,11 +70,10 @@ shouldAutoScaleForNewlySetWorkspace(bool isFirstWorkspaceOpen,
  * @param rebinnedWS: a pointer to an MD overlay workspace
  * @param useRebinMode: indicates if rebinning is to be used
  * @returns true rebin state is consistent, else false
-*/
-bool EXPORT_OPT_MANTIDQT_SLICEVIEWER
-isRebinInConsistentState(Mantid::API::IMDWorkspace *rebinnedWS,
-                         bool useRebinMode) {
+ */
+bool EXPORT_OPT_MANTIDQT_SLICEVIEWER isRebinInConsistentState(
+    Mantid::API::IMDWorkspace *rebinnedWS, bool useRebinMode) {
   return rebinnedWS && useRebinMode;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

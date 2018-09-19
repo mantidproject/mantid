@@ -4,9 +4,9 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
+#include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -14,15 +14,15 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FitResolutionConvolvedModel)
 
+using API::IMDEventWorkspace;
+using API::IMDEventWorkspace_sptr;
+using API::ITableWorkspace;
+using API::ITableWorkspace_sptr;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 using Kernel::Direction;
 using Kernel::ListValidator;
 using Kernel::MandatoryValidator;
-using API::ITableWorkspace;
-using API::ITableWorkspace_sptr;
-using API::IMDEventWorkspace;
-using API::IMDEventWorkspace_sptr;
-using API::MatrixWorkspace_sptr;
-using API::WorkspaceProperty;
 
 namespace {
 // Property names
@@ -34,7 +34,7 @@ const char *RESOLUTION_NAME = "ResolutionFunction";
 const char *FOREGROUND_NAME = "ForegroundModel";
 const char *PARS_NAME = "Parameters";
 const char *MAX_ITER_NAME = "MaxIterations";
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

@@ -15,9 +15,9 @@
 
 #include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
+#include <QHash>
 #include <QMap>
 #include <QMetaType>
-#include <QHash>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -286,6 +286,6 @@ signals:
   void signalClearView();
   void signalUpdateTree(const TopLevelItems &);
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H

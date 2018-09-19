@@ -169,7 +169,15 @@ _translations = {
     'Mantid-Matthew'          : 'Andrew, Matthew',
     'Keith Butler'            : 'Butler, Keith T.',
     'fodblog'                 : 'Butler, Keith T.',
-    'Marshall McDonnell'      : 'Mcdonnell, Marshall'
+    'Marshall McDonnell'      : 'McDonnell, Marshall',
+    'McDonnell, Marshall T'      : 'McDonnell, Marshall',
+    'Neil Vaytet'             : 'Vaytet, Neil',
+    'Sam'                     : 'Sam Jones',
+    'Tom Jubb'                : 'Jubb, Tom',
+    'T Jubb'                  : 'Jubb, Tom',
+    'TWJubb'                  : 'Jubb, Tom',
+    'Brendan Sullivan'        : 'Sullivan, Brendan',
+    'Joachim Coenen'          : 'Coenen, Joachim'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -187,6 +195,7 @@ _blacklist = [
     'Bartomeu Llopis',
     'dpaj',
     'Daniel Pajerowski',
+    'thomueller'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,

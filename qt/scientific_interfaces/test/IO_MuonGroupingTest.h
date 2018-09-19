@@ -3,14 +3,14 @@
 
 #include <numeric>
 
-#include <cxxtest/TestSuite.h>
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
+#include "../Muon/IO_MuonGrouping.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "../Muon/IO_MuonGrouping.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

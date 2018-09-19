@@ -5,9 +5,9 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/lexical_cast.hpp>
@@ -75,14 +75,14 @@ void GetEi::init() {
 }
 
 /** Executes the algorithm
-*  @throw out_of_range if the peak runs off the edge of the histogram
-*  @throw NotFoundError if one of the requested spectrum numbers was not found
-* in the workspace
-*  @throw IndexError if there is a problem converting spectra indexes to spectra
-* numbers, which would imply there is a problem with the workspace
-*  @throw invalid_argument if a good peak fit wasn't made or the input workspace
-* does not have common binning
-*/
+ *  @throw out_of_range if the peak runs off the edge of the histogram
+ *  @throw NotFoundError if one of the requested spectrum numbers was not found
+ * in the workspace
+ *  @throw IndexError if there is a problem converting spectra indexes to
+ * spectra numbers, which would imply there is a problem with the workspace
+ *  @throw invalid_argument if a good peak fit wasn't made or the input
+ * workspace does not have common binning
+ */
 void GetEi::exec() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const specnum_t mon1Spec = getProperty("Monitor1Spec");
@@ -100,14 +100,14 @@ void GetEi::exec() {
   // write a lot of stuff to the log at user level as it is very possible for
   // fit routines not to the expected thing
   g_log.information() << "Based on the user selected energy the first peak "
-                         "will be searched for at TOF " << peakLoc0
-                      << " micro seconds +/-"
+                         "will be searched for at TOF "
+                      << peakLoc0 << " micro seconds +/-"
                       << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
                       << "%\n";
   const double peakLoc1 = 1e6 * timeToFly(dist2moni1, E_est);
   g_log.information() << "Based on the user selected energy the second peak "
-                         "will be searched for at TOF " << peakLoc1
-                      << " micro seconds +/-"
+                         "will be searched for at TOF "
+                      << peakLoc1 << " micro seconds +/-"
                       << boost::lexical_cast<std::string>(100.0 * HALF_WINDOW)
                       << "%\n";
 
@@ -148,15 +148,15 @@ void GetEi::exec() {
   inWS->mutableRun().addProperty(incident_energy, true);
 }
 /** Gets the distances between the source and detectors whose IDs you pass to it
-*  @param WS :: the input workspace
-*  @param mon0Spec :: Spectrum number of the output from the first monitor
-*  @param mon1Spec :: Spectrum number of the output from the second monitor
-*  @param monitor0Dist :: the calculated distance to the detector whose ID was
-* passed to this function first
-*  @param monitor1Dist :: calculated distance to the detector whose ID was
-* passed to this function second
-*  @throw NotFoundError if no detector is found for the detector ID given
-*/
+ *  @param WS :: the input workspace
+ *  @param mon0Spec :: Spectrum number of the output from the first monitor
+ *  @param mon1Spec :: Spectrum number of the output from the second monitor
+ *  @param monitor0Dist :: the calculated distance to the detector whose ID was
+ * passed to this function first
+ *  @param monitor1Dist :: calculated distance to the detector whose ID was
+ * passed to this function second
+ *  @throw NotFoundError if no detector is found for the detector ID given
+ */
 void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
                         specnum_t mon1Spec, double &monitor0Dist,
                         double &monitor1Dist) const {
@@ -205,14 +205,14 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
   monitor1Dist = spectrumInfo.l1() + spectrumInfo.l2(monWI);
 }
 /** Converts detector IDs to spectra indexes
-*  @param WS :: the workspace on which the calculations are being performed
-*  @param specNum1 :: spectrum number of the output of the first monitor
-*  @param specNum2 :: spectrum number of the output of the second monitor
-*  @return the indexes of the histograms created by the detector whose ID were
-* passed
-*  @throw NotFoundError if one of the requested spectrum numbers was not found
-* in the workspace
-*/
+ *  @param WS :: the workspace on which the calculations are being performed
+ *  @param specNum1 :: spectrum number of the output of the first monitor
+ *  @param specNum2 :: spectrum number of the output of the second monitor
+ *  @return the indexes of the histograms created by the detector whose ID were
+ * passed
+ *  @throw NotFoundError if one of the requested spectrum numbers was not found
+ * in the workspace
+ */
 std::vector<size_t> GetEi::getMonitorWsIndexs(
     API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
     specnum_t specNum2) const { // getting spectra numbers from detector IDs is
@@ -228,7 +228,8 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   if (wsInds.size() != 1) { // the monitor spectrum isn't present in the
     // workspace, we can't continue from here
     g_log.error() << "Couldn't find the first monitor "
-                     "spectrum, number " << specNum1 << '\n';
+                     "spectrum, number "
+                  << specNum1 << '\n';
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
@@ -238,7 +239,8 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
     // workspace, we can't continue from here
     g_log.error() << "Couldn't find the second "
-                     "monitor spectrum, number " << specNum2 << '\n';
+                     "monitor spectrum, number "
+                  << specNum2 << '\n';
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum2);
   }
 
@@ -246,11 +248,11 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   return wsInds;
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
-*  to travel a distance, s
-* @param s :: ditance travelled in meters
-* @param E_KE :: kinetic energy in meV
-* @return the time to taken to travel that uninterrupted distance in seconds
-*/
+ *  to travel a distance, s
+ * @param s :: ditance travelled in meters
+ * @param E_KE :: kinetic energy in meV
+ * @return the time to taken to travel that uninterrupted distance in seconds
+ */
 double GetEi::timeToFly(double s, double E_KE) const {
   // E_KE = mv^2/2, s = vt
   // t = s/v, v = sqrt(2*E_KE/m)
@@ -263,20 +265,20 @@ double GetEi::timeToFly(double s, double E_KE) const {
 }
 
 /** Looks for and examines a peak close to that specified by the input
-* parameters and
-*  examines it to find a representative time for when the neutrons hit the
-* detector
-*  @param WS :: the workspace containing the monitor spectrum
-*  @param monitIn :: the index of the histogram that contains the monitor
-* spectrum
-*  @param peakTime :: the estimated TOF of the monitor peak in the time units of
-* the workspace
-*  @return a time of flight value in the peak in microseconds
-*  @throw invalid_argument if a good peak fit wasn't made or the input workspace
-* does not have common binning
-*  @throw out_of_range if the peak runs off the edge of the histogram
-*  @throw runtime_error a Child Algorithm just falls over
-*/
+ * parameters and
+ *  examines it to find a representative time for when the neutrons hit the
+ * detector
+ *  @param WS :: the workspace containing the monitor spectrum
+ *  @param monitIn :: the index of the histogram that contains the monitor
+ * spectrum
+ *  @param peakTime :: the estimated TOF of the monitor peak in the time units
+ * of the workspace
+ *  @return a time of flight value in the peak in microseconds
+ *  @throw invalid_argument if a good peak fit wasn't made or the input
+ * workspace does not have common binning
+ *  @throw out_of_range if the peak runs off the edge of the histogram
+ *  @throw runtime_error a Child Algorithm just falls over
+ */
 double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
                             const size_t monitIn, const double peakTime) {
   const auto &timesArray = WS->x(monitIn);
@@ -321,17 +323,17 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
   return (lHalf + rHalf) / 2;
 }
 /** Calls CropWorkspace as a Child Algorithm and passes to it the InputWorkspace
-* property
-*  @param wsInd :: the index number of the histogram to extract
-*  @param start :: the number of the first bin to include (starts counting bins
-* at 0)
-*  @param end :: the number of the last bin to include (starts counting bins at
-* 0)
-*  @throw out_of_range if start, end or wsInd are set outside of the valid
-* range for the workspace
-*  @throw runtime_error if the algorithm just falls over
-*  @throw invalid_argument if the input workspace does not have common binning
-*/
+ * property
+ *  @param wsInd :: the index number of the histogram to extract
+ *  @param start :: the number of the first bin to include (starts counting bins
+ * at 0)
+ *  @param end :: the number of the last bin to include (starts counting bins at
+ * 0)
+ *  @throw out_of_range if start, end or wsInd are set outside of the valid
+ * range for the workspace
+ *  @throw runtime_error if the algorithm just falls over
+ *  @throw invalid_argument if the input workspace does not have common binning
+ */
 void GetEi::extractSpec(int wsInd, double start, double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm(
       "CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
@@ -356,15 +358,15 @@ void GetEi::extractSpec(int wsInd, double start, double end) {
 }
 
 /** Finds the largest peak by looping through the histogram and finding the
-* maximum
-*  value
-* @param height :: its passed value ignored it is set to the peak height
-* @param centreInd :: passed value is ignored it will be set to the bin index of
-* the peak center
-* @param background :: passed value ignored set mean number of counts per bin in
-* the spectrum
-* @throw invalid_argument if the peak is not clearly above the background
-*/
+ * maximum
+ *  value
+ * @param height :: its passed value ignored it is set to the peak height
+ * @param centreInd :: passed value is ignored it will be set to the bin index
+ * of the peak center
+ * @param background :: passed value ignored set mean number of counts per bin
+ * in the spectrum
+ * @throw invalid_argument if the peak is not clearly above the background
+ */
 void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
                              double &background) const {
 
@@ -399,19 +401,19 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
                 << height << " counts/microsecond)\n";
 }
 /** Estimates the closest time, looking either or back, when the number of
-* counts is
-*  half that in the bin whose index that passed
-*  @param startInd :: index of the bin to search around, e.g. the index of the
-* peak centre
-*  @param height :: the number of counts (or count rate) to compare against e.g.
-* a peak height
-*  @param noise :: mean number of counts in each bin in the workspace
-*  @param go :: either GetEi::GO_LEFT or GetEi::GO_RIGHT
-*  @return estimated TOF of the half maximum point
-*  @throw out_of_range if the end of the histogram is reached before the point
-* is found
-*  @throw invalid_argument if the peak is too thin
-*/
+ * counts is
+ *  half that in the bin whose index that passed
+ *  @param startInd :: index of the bin to search around, e.g. the index of the
+ * peak centre
+ *  @param height :: the number of counts (or count rate) to compare against
+ * e.g. a peak height
+ *  @param noise :: mean number of counts in each bin in the workspace
+ *  @param go :: either GetEi::GO_LEFT or GetEi::GO_RIGHT
+ *  @return estimated TOF of the half maximum point
+ *  @throw out_of_range if the end of the histogram is reached before the point
+ * is found
+ *  @throw invalid_argument if the peak is too thin
+ */
 double GetEi::findHalfLoc(size_t startInd, const double height,
                           const double noise, const direction go) const {
   auto endInd = startInd;
@@ -482,9 +484,9 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
   return halfTime;
 }
 /** Get the kinetic energy of a neuton in joules given it speed using E=mv^2/2
-*  @param speed :: the instantanious speed of a neutron in metres per second
-*  @return the energy in joules
-*/
+ *  @param speed :: the instantanious speed of a neutron in metres per second
+ *  @return the energy in joules
+ */
 double GetEi::neutron_E_At(double speed) const {
   // E_KE = mv^2/2
   return PhysicalConstants::NeutronMass * speed * speed / (2);

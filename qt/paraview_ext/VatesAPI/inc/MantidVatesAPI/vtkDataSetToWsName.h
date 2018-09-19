@@ -1,8 +1,8 @@
 #ifndef VTKDATASET_TO_WS_NAME_H
 #define VTKDATASET_TO_WS_NAME_H
 
-#include <string>
 #include "MantidKernel/System.h"
+#include <string>
 
 class vtkDataSet;
 namespace Mantid {
@@ -49,7 +49,7 @@ public:
 private:
   vtkDataSet *m_dataset;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

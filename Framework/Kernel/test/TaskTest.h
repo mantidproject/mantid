@@ -1,10 +1,10 @@
 #ifndef TASKTEST_H_
 #define TASKTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
-#include <MantidKernel/Timer.h>
 #include "MantidKernel/Task.h"
+#include <MantidKernel/Timer.h>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 

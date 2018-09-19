@@ -53,7 +53,7 @@ using OffsetsWorkspace_sptr = boost::shared_ptr<OffsetsWorkspace>;
 /// shared pointer to a const OffsetsWorkspace
 using OffsetsWorkspace_const_sptr = boost::shared_ptr<const OffsetsWorkspace>;
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_ */

@@ -111,6 +111,7 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/NumericAxisValidator.cpp
+        src/OrientedLatticeValidator.cpp
 	src/ParallelAlgorithm.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -310,6 +311,7 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/NumericAxisValidator.h
+	inc/MantidAPI/OrientedLatticeValidator.h
 	inc/MantidAPI/ParallelAlgorithm.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
@@ -354,6 +356,8 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
+	inc/MantidAPI/SpectrumInfoIterator.h
+	inc/MantidAPI/SpectrumInfoItem.h
 )
 
 set ( TEST_FILES
@@ -435,6 +439,7 @@ set ( TEST_FILES
 	NotebookWriterTest.h
 	NumericAxisTest.h
 	NumericAxisValidatorTest.h
+	OrientedLatticeValidatorTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
 	ParameterTieTest.h

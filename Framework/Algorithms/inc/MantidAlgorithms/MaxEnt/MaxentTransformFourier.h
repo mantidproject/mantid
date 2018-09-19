@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_MAXENTTRANSFORM1DFOURIER_H_
 #define MANTID_ALGORITHMS_MAXENTTRANSFORM1DFOURIER_H_
 
-#include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
+#include "MantidAlgorithms/MaxEnt/MaxentTransform.h"
 #include <memory>
 
 namespace Mantid {

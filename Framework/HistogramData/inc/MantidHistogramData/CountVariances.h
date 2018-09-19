@@ -2,8 +2,8 @@
 #define MANTID_HISTOGRAMDATA_COUNTVARIANCES_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VarianceVectorOf.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/VarianceVectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -60,9 +60,9 @@ public:
   /// Move constructor.
   CountVariances(CountVariances &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  CountVariances &operator=(const CountVariances &)& = default;
+  CountVariances &operator=(const CountVariances &) & = default;
   /// Move assignment.
-  CountVariances &operator=(CountVariances &&)& = default;
+  CountVariances &operator=(CountVariances &&) & = default;
 
   CountVariances(const FrequencyVariances &frequencies, const BinEdges &edges);
   CountVariances(FrequencyVariances &&frequencies, const BinEdges &edges);

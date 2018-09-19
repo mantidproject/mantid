@@ -1,18 +1,18 @@
 #ifndef MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_
 #define MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_
 
-#include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

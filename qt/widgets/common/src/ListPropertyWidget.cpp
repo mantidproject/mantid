@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/Common/ListPropertyWidget.h"
-#include "MantidKernel/System.h"
-#include <QLabel>
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
+#include <QLabel>
 
 #include <sstream>
 
@@ -83,5 +83,5 @@ void ListPropertyWidget::setValueImpl(const QString &value) {
     m_list->scrollToItem(item);
   }
 }
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

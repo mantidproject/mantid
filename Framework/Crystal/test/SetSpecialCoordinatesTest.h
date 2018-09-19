@@ -1,14 +1,14 @@
 #ifndef MANTID_CRYSTAL_SETSPECIALCOORDINATESTEST_H_
 #define MANTID_CRYSTAL_SETSPECIALCOORDINATESTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidCrystal/SetSpecialCoordinates.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidCrystal/SetSpecialCoordinates.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::Crystal::SetSpecialCoordinates;

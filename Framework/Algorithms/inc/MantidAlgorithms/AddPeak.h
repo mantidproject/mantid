@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_ADDPEAK_H_
 #define MANTID_ALGORITHMS_ADDPEAK_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -56,7 +56,7 @@ private:
   void exec() override;
 };
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_ADDPEAK_H_ */

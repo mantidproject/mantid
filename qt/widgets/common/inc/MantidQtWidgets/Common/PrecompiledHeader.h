@@ -2,14 +2,14 @@
 #define MANTIDQT_API_PRECOMPILEDHEADER_H_
 
 // Mantid
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/System.h"
 
 // STL
-#include <vector>
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #endif // MANTIDQT_API_PRECOMPILEDHEADER_H_

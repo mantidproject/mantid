@@ -37,7 +37,7 @@ EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromCfgPath(std::string key);
 
 /// Load plugins from a path
 EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromPath(std::string path);
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // PLUGINLIBRARYLOADER_H

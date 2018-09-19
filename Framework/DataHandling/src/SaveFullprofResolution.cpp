@@ -1,9 +1,9 @@
 #include "MantidDataHandling/SaveFullprofResolution.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include "Poco/File.h"
 #include "boost/algorithm/string.hpp"
@@ -33,7 +33,7 @@ SaveFullprofResolution::SaveFullprofResolution()
 
 //----------------------------------------------------------------------------------------------
 /** Init to define parameters
-  */
+ */
 void SaveFullprofResolution::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
@@ -60,14 +60,15 @@ void SaveFullprofResolution::init() {
   declareProperty("ProfileFunction", "Jason Hodge's function (profile 10)",
                   funcvalidator, "Profile number defined in Fullprof.");
 
-  declareProperty("Append", false, "If true and the output file exists, the "
-                                   "bank will be appended to the existing "
-                                   "one.");
+  declareProperty("Append", false,
+                  "If true and the output file exists, the "
+                  "bank will be appended to the existing "
+                  "one.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Main execution body
-  */
+ */
 void SaveFullprofResolution::exec() {
   // Get input parameters
   processProperties();
@@ -112,7 +113,7 @@ void SaveFullprofResolution::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Process properties
-  */
+ */
 void SaveFullprofResolution::processProperties() {
   // Parameter table
   m_profileTableWS = getProperty("InputWorkspace");
@@ -150,8 +151,8 @@ void SaveFullprofResolution::processProperties() {
 
 //----------------------------------------------------------------------------------------------
 /** Parse the table workspace to a map of parameters (name and value)
-  * to look up
-  */
+ * to look up
+ */
 void SaveFullprofResolution::parseTableWorkspace() {
   // Check the table workspace
   std::vector<std::string> colnames = m_profileTableWS->getColumnNames();
@@ -230,7 +231,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
 
 //----------------------------------------------------------------------------------------------
 /**  Convert the parameters to Fullprof resolution file string
-  */
+ */
 std::string SaveFullprofResolution::toProf10IrfString() {
   // Get all parameter values
   double tofmin = m_profileParamMap["tof-min"];
@@ -359,7 +360,7 @@ std::string SaveFullprofResolution::toProf10IrfString() {
 
 //----------------------------------------------------------------------------------------------
 /** Write out the string for Fullprof profile 9
-  */
+ */
 std::string SaveFullprofResolution::toProf9IrfString() {
   // Get all parameter values
   double tofmin = m_profileParamMap["tof-min"];
@@ -471,7 +472,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
 
 //
 /** Check wether a profile parameter map has the parameter
-  */
+ */
 bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap,
                                      std::string key) {
   map<string, double>::iterator fiter;

@@ -5,8 +5,8 @@
 #include "UserFitFunctionDialog.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include <qcheckbox.h>
-#include <qmessagebox.h>
 #include <qheaderview.h>
+#include <qmessagebox.h>
 
 //---------------------------------------
 // Public member functions

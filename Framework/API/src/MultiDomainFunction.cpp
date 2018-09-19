@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/CompositeDomain.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <boost/lexical_cast.hpp>
 #include <set>

@@ -63,7 +63,7 @@ private:
   void init() override;
   void exec() override;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 
 #endif

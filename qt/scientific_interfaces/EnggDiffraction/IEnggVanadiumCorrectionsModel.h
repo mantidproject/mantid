@@ -28,7 +28,7 @@ public:
   fetchCorrectionWorkspaces(const std::string &vanadiumRunNumber) const = 0;
 };
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_IENGGVANADIUMCORRECTIONSMODEL_H_

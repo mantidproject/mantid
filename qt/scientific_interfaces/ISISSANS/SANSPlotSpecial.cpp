@@ -943,5 +943,5 @@ void SANSPlotSpecial::Transform::tidyGeneral() {
     }
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

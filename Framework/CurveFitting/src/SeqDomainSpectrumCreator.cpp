@@ -1,14 +1,14 @@
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
-#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
+#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -25,10 +25,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_CELLDELEGATE_H_
 #define MANTIDQTMANTIDWIDGETS_CELLDELEGATE_H_
+#include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
+#include <QStandardItemModel>
 #include <QStyledItemDelegate>
 #include <QTreeView>
-#include <QStandardItemModel>
-#include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,7 +46,7 @@ private:
   FilteredTreeModel const &m_filteredModel;
   QStandardItemModel const &m_mainModel;
 };
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_CELLDELEGATE_H_

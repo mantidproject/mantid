@@ -3,7 +3,6 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include <cxxtest/TestSuite.h>
 

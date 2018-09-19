@@ -72,9 +72,9 @@ public:
   /// Move constructor.
   Counts(Counts &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  Counts &operator=(const Counts &)& = default;
+  Counts &operator=(const Counts &) & = default;
   /// Move assignment.
-  Counts &operator=(Counts &&)& = default;
+  Counts &operator=(Counts &&) & = default;
 
   Counts(const Frequencies &frequencies, const BinEdges &edges);
   Counts(Frequencies &&frequencies, const BinEdges &edges);

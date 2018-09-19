@@ -14,10 +14,11 @@ DECLARE_ALGORITHM(Divide)
 
 void Divide::init() {
   BinaryOperation::init();
-  declareProperty("WarnOnZeroDivide", true, "Algorithm usually warns if "
-                                            "division by 0 occurs. Set this "
-                                            "value to false if one does not "
-                                            "want this message appearing ");
+  declareProperty("WarnOnZeroDivide", true,
+                  "Algorithm usually warns if "
+                  "division by 0 occurs. Set this "
+                  "value to false if one does not "
+                  "want this message appearing ");
 }
 
 void Divide::exec() {

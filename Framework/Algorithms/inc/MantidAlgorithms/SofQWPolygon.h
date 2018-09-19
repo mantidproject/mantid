@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SofQCommon.h"
 #include "MantidAlgorithms/Rebin2D.h"
+#include "MantidAlgorithms/SofQCommon.h"
 #include <list>
 
 namespace Mantid {

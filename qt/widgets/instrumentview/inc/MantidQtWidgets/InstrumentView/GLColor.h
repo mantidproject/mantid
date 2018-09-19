@@ -66,7 +66,7 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &ostr, const GLColor &c);
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*GLCOLOR_H_*/

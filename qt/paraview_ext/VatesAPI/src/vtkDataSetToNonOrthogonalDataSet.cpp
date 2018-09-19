@@ -4,8 +4,8 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
@@ -25,8 +25,8 @@
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
 
-#include <vtkPointData.h>
 #include "vtkNew.h"
+#include <vtkPointData.h>
 
 #include <algorithm>
 #include <boost/algorithm/string/find.hpp>
@@ -70,7 +70,7 @@ void addChangeOfBasisMatrixToFieldData(
                   "the data set.\n");
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace VATES {
@@ -122,7 +122,7 @@ struct Worker {
     }
   }
 };
-} // end anon namespace
+} // namespace
 
 void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // Downcast to a vtkPointSet

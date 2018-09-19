@@ -8,9 +8,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, In
                         WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Minus,
-                              NormaliseToMonitor, Scale, LoadAndMerge)
+from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP,
+                              CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, Divide, ExtractMonitors,
+                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale)
 import numpy
 
 
@@ -42,7 +42,7 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
                  LogText=str(wavelength),
                  LogType='Number',
                  NumberType='Double',
-                 LogUnit='Ångström',
+                 LogUnit='Angstrom',
                  EnableLogging=algorithmLogging)
     report.notice("Applied Ei calibration to '" + str(ws) + "'.")
     report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
@@ -248,7 +248,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return common.CATEGORIES
 
     def seeAlso(self):
-        return [ "DirectILLReduction" ]
+        return ['DirectILLReduction']
 
     def name(self):
         """Return the algorithm's name."""
@@ -263,7 +263,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         return 1
 
     def PyExec(self):
-        """Executes the data reduction workflow."""
+        """Execute the data collection workflow."""
         progress = Progress(self, 0.0, 1.0, 9)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
@@ -297,8 +297,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
         # Time-independent background.
         progress.report('Calculating backgrounds')
-        mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
-        wsCleanup.cleanupLater(bkgWS)
+        mainWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Calibrate incident energy, if requested.
         progress.report('Calibrating incident energy')
@@ -435,8 +434,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue=30,
                              validator=mandatoryPositiveInt,
                              direction=Direction.Input,
-                             doc='Running average window width (in bins) ' +
-                                 'for flat background.')
+                             doc='Running average window width (in bins) for flat background.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, PROPGROUP_FLAT_BKG)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_FLAT_BKG_WS,
@@ -491,7 +489,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             defaultValue='',
             direction=Direction.Output,
             optional=PropertyMode.Optional),
-            doc='Output workspace for calibrated inciden energy.')
+            doc='Output workspace for calibrated incident energy.')
         self.setPropertyGroup(common.PROP_OUTPUT_INCIDENT_ENERGY_WS,
                               common.PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(WorkspaceProperty(
@@ -522,6 +520,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _calibrateEi(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
         """Perform and apply incident energy calibration."""
+        eiCalibrationWS = None
         if self._eiCalibrationEnabled(mainWS, report):
             if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, report, subalgLogging)
@@ -541,10 +540,15 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                                                     subalgLogging)
                 wsCleanup.cleanup(monWS)
                 monWS = eiCalibratedMonWS
-            if not self.getProperty(
-                    common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
-                self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
-            wsCleanup.cleanup(eiCalibrationWS)
+        if not self.getProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS).isDefault:
+            if eiCalibrationWS is None:
+                eiCalibrationWSName = wsNames.withSuffix('incident_energy_from_logs')
+                Ei = mainWS.run().getProperty('Ei').value
+                eiCalibrationWS = CreateSingleValuedWorkspace(OutputWorkspace=eiCalibrationWSName,
+                                                              DataValue=Ei,
+                                                              EnableLogging=subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_INCIDENT_ENERGY_WS, eiCalibrationWS)
+        wsCleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
 
     def _chooseElasticChannelMode(self, mainWS, report):
@@ -636,6 +640,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if sigma == Property.EMPTY_DBL:
                 sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
             detEPPWS = _calculateEPP(mainWS, sigma, wsNames, subalgLogging)
+        wsCleanup.cleanupLater(detEPPWS)
         return detEPPWS
 
     def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
@@ -658,7 +663,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if instrument.hasParameter('enable_incident_energy_calibration'):
                 enabled = instrument.getBoolParameter('enable_incident_energy_calibration')[0]
                 if not enabled:
-                    report.notice('Inciden energy calibration disabled by the IPF.')
+                    report.notice('Incident energy calibration disabled by the IPF.')
                     return False
             report.notice('Incident energy calibration enabled.')
             return True
@@ -667,20 +672,21 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Subtract flat background from a detector workspace."""
         if not self._flatBgkEnabled(mainWS, report):
-            return mainWS, None
-        windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-        if self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
-            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
-        else:
+            return mainWS
+        if not self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
             bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
             wsCleanup.protect(bkgWS)
+        else:
+            windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
+            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, wsNames, subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
         bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
         bkgSubtractedWS = _subtractFlatBkg(mainWS, common.WS_CONTENT_DETS, bkgWS, bkgScaling, wsNames,
                                            wsCleanup, subalgLogging)
         wsCleanup.cleanup(mainWS)
-        return bkgSubtractedWS, bkgWS
+        wsCleanup.cleanup(bkgWS)
+        return bkgSubtractedWS
 
     def _flatBgkEnabled(self, mainWS, report):
         """Returns true if flat background subtraction is enabled, false otherwise."""
@@ -694,7 +700,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     return False
             report.notice('Flat background subtraction enabled.')
             return True
-        return flatBkgOption == common.BKG_ON
+        return flatBkgOption != common.BKG_OFF
 
     def _flatBkgMon(self, monWS, wsNames, wsCleanup, subalgLogging):
         """Subtract flat background from a monitor workspace."""

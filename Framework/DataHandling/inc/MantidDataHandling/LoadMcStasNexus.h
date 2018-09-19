@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADMCSTASNEXUS_H_
 #define MANTID_DATAHANDLING_LOADMCSTASNEXUS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

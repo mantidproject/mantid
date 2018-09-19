@@ -120,8 +120,7 @@ void FortranVector<VectorClass>::allocate(int newSize) {
 /// The "index" operator
 template <class VectorClass>
 typename FortranVector<VectorClass>::ElementConstType
-    FortranVector<VectorClass>::
-    operator()(int i) const {
+FortranVector<VectorClass>::operator()(int i) const {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 
@@ -135,8 +134,7 @@ operator()(int i) {
 /// The "index" operator
 template <class VectorClass>
 typename FortranVector<VectorClass>::ElementConstType
-    FortranVector<VectorClass>::
-    operator[](int i) const {
+    FortranVector<VectorClass>::operator[](int i) const {
   return this->VectorClass::operator[](static_cast<size_t>(i - m_base));
 }
 

@@ -5,7 +5,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/Load.h"
@@ -22,10 +21,10 @@
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Kernel::make_cow;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::Kernel::make_cow;
 
 using ConvolutionFitSequential =
     Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;

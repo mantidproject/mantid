@@ -1,13 +1,13 @@
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidDataHandling/ModifyDetectorDotDatFile.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataHandling/ModifyDetectorDotDatFile.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
 #include <fstream>
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/ExperimentInfo.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -169,5 +169,5 @@ void ModifyDetectorDotDatFile::exec() {
   in.close();
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

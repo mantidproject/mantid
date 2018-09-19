@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_CENTERINGGROUP_H_
 #define MANTID_GEOMETRY_CENTERINGGROUP_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/DllConfig.h"
 #include <map>
 
 #include "MantidKernel/SingletonHolder.h"
@@ -105,6 +105,6 @@ namespace Kernel {
 EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_CENTERINGGROUP_H_ */

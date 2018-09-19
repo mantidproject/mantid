@@ -50,13 +50,13 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsSpectrumViewer
+  INSTALL_DIR
+    ${LIB_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../MacOS
+  LINUX_INSTALL_RPATH
+    "\$ORIGIN/../${LIB_DIR}"
 )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties( MantidQtWidgetsRefDetectorViewQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-elseif ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  set_target_properties( MantidQtWidgetsRefDetectorViewQt4 PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
-endif ()
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS

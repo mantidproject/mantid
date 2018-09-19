@@ -14,8 +14,8 @@ namespace Poco {
 namespace XML {
 class Attributes;
 class XMLWriter;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace Geometry {
@@ -161,38 +161,38 @@ public:
                     bool recursive = true) const override;
 
   /**
-  * Get a parameter defined as a double
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a double
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<double> getNumberParameter(const std::string &pname,
                                          bool recursive = true) const override {
     return getParameter<double>(pname, recursive);
   }
 
   /**
-  * Get a parameter defined as an int
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as an int
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<int> getIntParameter(const std::string &pname,
                                    bool recursive = true) const override {
     return getParameter<int>(pname, recursive);
   }
 
   /**
-  * Get a parameter's type -- this is HACK until Python can export property
-  * regardless of the property type
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns std::string describing parameter type or empty string if the type
-  * is not found
-  */
+   * Get a parameter's type -- this is HACK until Python can export property
+   * regardless of the property type
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns std::string describing parameter type or empty string if the type
+   * is not found
+   */
   std::string getParameterType(const std::string &pname,
                                bool recursive = true) const override {
     Parameter_sptr param = Parameter_sptr(); // Null shared pointer
@@ -222,24 +222,24 @@ public:
   /**Set components description. Works for parameterized components only */
   void setDescription(const std::string &descr);
   /**
-  * Get a parameter defined as a bool
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a bool
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<bool> getBoolParameter(const std::string &pname,
                                      bool recursive = true) const override {
     return getParameter<bool>(pname, recursive);
   }
 
   /**
-  * Get a parameter defined as a Kernel::V3D
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a Kernel::V3D
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<Kernel::V3D>
   getPositionParameter(const std::string &pname,
                        bool recursive = true) const override {
@@ -247,12 +247,12 @@ public:
   }
 
   /**
-  * Get a parameter defined as a Kernel::Quaternion
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a Kernel::Quaternion
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<Kernel::Quat>
   getRotationParameter(const std::string &pname,
                        bool recursive = true) const override {
@@ -260,12 +260,12 @@ public:
   }
 
   /**
-  * Get a parameter defined as a string
-  * @param pname :: The name of the parameter
-  * @param recursive :: If true the search will walk up through the parent
-  * components
-  * @returns A list of values
-  */
+   * Get a parameter defined as a string
+   * @param pname :: The name of the parameter
+   * @param recursive :: If true the search will walk up through the parent
+   * components
+   * @returns A list of values
+   */
   std::vector<std::string>
   getStringParameter(const std::string &pname,
                      bool recursive = true) const override {
@@ -323,13 +323,13 @@ protected:
   Kernel::Quat m_rot;
 
   /**
-  *  Get a parameter from the parameter map
-  * @param p_name :: The name of the parameter
-  * @param recursive :: If true then the lookup will walk up the tree if this
-  * component does not have parameter
-  * @return A list of size 0 or 1 containing the parameter value or
-  * nothing if it does not exist
-  */
+   *  Get a parameter from the parameter map
+   * @param p_name :: The name of the parameter
+   * @param recursive :: If true then the lookup will walk up the tree if this
+   * component does not have parameter
+   * @return A list of size 0 or 1 containing the parameter value or
+   * nothing if it does not exist
+   */
   template <class TYPE>
   std::vector<TYPE> getParameter(const std::string &p_name,
                                  bool recursive) const {

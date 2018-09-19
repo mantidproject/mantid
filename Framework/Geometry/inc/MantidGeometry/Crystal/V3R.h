@@ -4,8 +4,8 @@
 #include "MantidGeometry/DllConfig.h"
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/rational.hpp>
 

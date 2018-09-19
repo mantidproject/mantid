@@ -12,7 +12,7 @@ public:
   virtual DimensionView *create() const = 0;
   virtual ~DimensionViewFactory() {}
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

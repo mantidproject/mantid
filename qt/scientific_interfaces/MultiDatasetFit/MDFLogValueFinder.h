@@ -1,8 +1,8 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
 
-#include "MantidKernel/Statistics.h"
 #include "DllConfig.h"
+#include "MantidKernel/Statistics.h"
 #include <QStringList>
 
 namespace MantidQt {

@@ -1,7 +1,7 @@
 #include "MantidDataObjects/CoordTransformDistanceParser.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
+#include "MantidAPI/VectorParameterParser.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -80,5 +80,5 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   return transform;
 }
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

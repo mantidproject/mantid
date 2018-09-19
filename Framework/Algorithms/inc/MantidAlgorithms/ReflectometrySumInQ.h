@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYSUMINQ_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYSUMINQ_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <cmath>
 
 namespace Mantid {
@@ -14,7 +14,7 @@ namespace HistogramData {
 class BinEdges;
 class Counts;
 class CountStandardDeviations;
-}
+} // namespace HistogramData
 namespace Algorithms {
 
 /** ReflectometrySumInQ : Sum counts from the input workspace in lambda

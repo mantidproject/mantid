@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Projection.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Projection.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
@@ -122,7 +122,7 @@ public:
       throw std::runtime_error("unknown column: " + name);
   }
 };
-}
+} // namespace
 
 class ProjectionTest : public CxxTest::TestSuite {
 public:

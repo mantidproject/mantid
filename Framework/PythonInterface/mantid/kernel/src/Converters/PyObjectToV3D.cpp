@@ -64,6 +64,6 @@ Kernel::V3D PyObjectToV3D::operator()() {
   return Kernel::V3D(toDouble(m_obj[0]), toDouble(m_obj[1]),
                      toDouble(m_obj[2]));
 }
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

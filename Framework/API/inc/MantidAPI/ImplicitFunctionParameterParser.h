@@ -21,19 +21,19 @@
 #include <vector>
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
 
+#include "ImplicitFunctionParameter.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "ImplicitFunctionParameter.h"
 
 namespace Poco {
 namespace DOM {
 class Element;
 }
-}
+} // namespace Poco
 
 /** XML Parser for parameter types for ImplicitFunctions
 
@@ -94,7 +94,7 @@ public:
 protected:
   SuccessorType m_successor;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

@@ -1,10 +1,10 @@
 #ifndef SCALETEST_H_
 #define SCALETEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/Scale.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
+#include <cxxtest/TestSuite.h>
 
 using Mantid::MantidVec;
 

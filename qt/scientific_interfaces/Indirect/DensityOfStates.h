@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DENSITYOFSTATES_H_
 #define MANTIDQTCUSTOMINTERFACES_DENSITYOFSTATES_H_
 
-#include "ui_DensityOfStates.h"
 #include "IndirectSimulationTab.h"
+#include "ui_DensityOfStates.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

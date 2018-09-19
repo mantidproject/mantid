@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_TRANSPOSEMD_H_
 #define MANTID_MDALGORITHMS_TRANSPOSEMD_H_
 
-#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/MDAxisValidator.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace MDAlgorithms {
 

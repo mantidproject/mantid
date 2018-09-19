@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <map>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
+#include <map>
 
 #include <mutex>
 

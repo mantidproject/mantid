@@ -1,11 +1,11 @@
 #ifndef BOXCONTROLLER_H_
 #define BOXCONTROLLER_H_
 
+#include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/IBoxControllerIO.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/optional.hpp>

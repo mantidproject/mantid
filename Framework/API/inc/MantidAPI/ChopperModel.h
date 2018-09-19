@@ -103,7 +103,7 @@ private:
   /// Current value of the variance of the pulse
   double m_pulseVariance;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif /* MANTID_API_CHOPPERMODEL_H_ */

@@ -83,7 +83,7 @@ private:
   setUncertainties(API::MatrixWorkspace_sptr workspace);
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MULTIPLE_SCATTERING_ABSORPTION_H_*/

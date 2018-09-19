@@ -47,7 +47,7 @@ private:
   std::vector<CalibrationParams> parseParamsFile() const;
 };
 
-} // DataHandling
-} // Mantid
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif // MANTID_DATAHANDLING_SAVEGDA_H_

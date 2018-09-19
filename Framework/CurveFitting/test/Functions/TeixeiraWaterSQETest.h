@@ -11,8 +11,8 @@
 #include <cxxtest/TestSuite.h>
 // third party library headers (n/a)
 // standard library headers (n/a)
-#include <random>
 #include <numeric>
+#include <random>
 
 #include <boost/make_shared.hpp>
 using Mantid::CurveFitting::Functions::TeixeiraWaterSQE;

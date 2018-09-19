@@ -1,17 +1,17 @@
 #ifndef MANTID_KERNEL_DISKBUFFERTEST_H_
 #define MANTID_KERNEL_DISKBUFFERTEST_H_
 
+#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
+#include <boost/multi_index_container.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -241,8 +241,8 @@ public:
     TS_ASSERT_EQUALS(dbuf.getWriteBufferUsed(), 6);
     TSM_ASSERT_EQUALS("It is still free space mapping the data on hdd",
                       dbuf.getFreeSpaceMap().size(), 2);
-    TSM_ASSERT_EQUALS(" and file is still the same size: ",
-                      dbuf.getFileLength(), 10);
+    TSM_ASSERT_EQUALS(
+        " and file is still the same size: ", dbuf.getFileLength(), 10);
   }
 
   //--------------------------------------------------------------------------------

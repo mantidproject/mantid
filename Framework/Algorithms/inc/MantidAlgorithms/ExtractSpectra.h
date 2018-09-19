@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_EXTRACTSPECTRA_H_
 #define MANTID_ALGORITHMS_EXTRACTSPECTRA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

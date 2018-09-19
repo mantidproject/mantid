@@ -56,15 +56,15 @@ class DivideByVolumeISIS(DivideByVolume):
         shape = scale_info.shape if scale_info.shape is not None else scale_info.shape_from_file
 
         # Now we calculate the volume
-        if shape is SampleShape.CylinderAxisUp:
+        if shape is SampleShape.Cylinder:
             # Volume = circle area * height
             # Factor of four comes from radius = width/2
             volume = height * math.pi
             volume *= math.pow(width, 2) / 4.0
-        elif shape is SampleShape.Cuboid:
+        elif shape is SampleShape.FlatPlate:
             # Flat plate sample
             volume = width * height * thickness
-        elif shape is SampleShape.CylinderAxisAlong:
+        elif shape is SampleShape.Disc:
             # Factor of four comes from radius = width/2
             # Disc - where height is not used
             volume = thickness * math.pi

@@ -32,10 +32,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "ImplicitFunctionParameterParser.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "ImplicitFunctionParameterParser.h"
 
 namespace Mantid {
 namespace API {
@@ -64,14 +64,14 @@ private:
 
 using ImplicitFunctionParameterParserFactory =
     Mantid::Kernel::SingletonHolder<ImplicitFunctionParameterParserFactoryImpl>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
     Mantid::API::ImplicitFunctionParameterParserFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif

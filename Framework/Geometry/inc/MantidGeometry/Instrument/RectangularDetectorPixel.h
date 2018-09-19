@@ -3,6 +3,9 @@
 
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidKernel/System.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {

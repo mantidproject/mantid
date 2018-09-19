@@ -22,18 +22,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include <cstdint>
-#include <vector>
 
 /*
- * A minimal wrapper around Python's psutil package to gather information
- * about processes
+ * Access information about the process and others
  */
 
 namespace Process {
 
 bool isAnotherInstanceRunning();
-
-std::vector<int64_t> otherInstancePIDs();
 }
 #endif // PROCESS_H_

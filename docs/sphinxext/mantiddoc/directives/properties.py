@@ -207,6 +207,10 @@ class PropertiesDirective(AlgorithmBaseDirective):
             else:
                 defaultstr = "False"
 
+        if str(prop.type) == "Dictionary":
+            if defaultstr == r"null\\n":
+                defaultstr = "dict()"
+
         return defaultstr
 
     def _create_property_description_string(self, prop):

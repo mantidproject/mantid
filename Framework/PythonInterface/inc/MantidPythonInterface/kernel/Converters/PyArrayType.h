@@ -36,8 +36,8 @@ namespace Converters {
 
 // Numpy array type
 DLLExport PyTypeObject *getNDArrayType();
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* PYARRAYTYPE_H_ */

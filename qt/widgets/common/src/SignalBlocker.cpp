@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include <QAction>
-#include <QPushButton>
 #include <QComboBox>
+#include <QPushButton>
 #include <stdexcept>
 
 namespace MantidQt {
@@ -12,8 +12,7 @@ namespace API {
  * @param obj : QObject to block signals for.
  */
 template <typename Type>
-SignalBlocker<Type>::SignalBlocker(Type *obj)
-    : m_obj(obj) {
+SignalBlocker<Type>::SignalBlocker(Type *obj) : m_obj(obj) {
   if (m_obj == nullptr) {
     throw std::runtime_error("Object to block is NULL");
   }
@@ -48,4 +47,4 @@ template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QPushButton>;
 template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QComboBox>;
 
 } // namespace API
-} // namespace Mantid
+} // namespace MantidQt

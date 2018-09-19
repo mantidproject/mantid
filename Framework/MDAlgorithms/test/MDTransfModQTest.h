@@ -1,11 +1,11 @@
 #ifndef MANTID_MDEVENTS_MDTRANSF_MODQTEST_H_
 #define MANTID_MDEVENTS_MDTRANSF_MODQTEST_H_
 
-#include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -124,15 +124,15 @@ public:
         for (size_t j = 0; j < nDims; j++) {
           if (locCoord[j] < minCoord[j]) {
             result = "Local transformed coordinate in direction " +
-                     boost::lexical_cast<std::string>(j) + " at bin N: " +
-                     boost::lexical_cast<std::string>(i) +
+                     boost::lexical_cast<std::string>(j) +
+                     " at bin N: " + boost::lexical_cast<std::string>(i) +
                      " is smaller then identified conversion range";
             return result;
           }
           if (locCoord[j] > maxCoord[j]) {
             result = "Local transformed coordinate in direction " +
-                     boost::lexical_cast<std::string>(j) + " at bin N: " +
-                     boost::lexical_cast<std::string>(i) +
+                     boost::lexical_cast<std::string>(j) +
+                     " at bin N: " + boost::lexical_cast<std::string>(i) +
                      " is bigger then identified conversion range";
             return result;
           }

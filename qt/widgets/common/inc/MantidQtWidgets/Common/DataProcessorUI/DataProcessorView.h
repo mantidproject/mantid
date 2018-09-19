@@ -97,6 +97,7 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
   virtual void setClipboard(const QString &text) = 0;
+  virtual void setItemDelegate() = 0;
   virtual void setModel(QString const &name) = 0;
 
   // Accessor methods
@@ -119,7 +120,7 @@ public:
   virtual void enableGrouping() = 0;
   virtual void disableGrouping() = 0;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H*/

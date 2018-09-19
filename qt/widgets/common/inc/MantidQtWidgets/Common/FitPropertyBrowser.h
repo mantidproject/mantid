@@ -408,6 +408,8 @@ protected:
   void doFit(int maxIterations);
   /// Create CompositeFunction from string
   void createCompositeFunction(const QString &str = "");
+  /// Catches unexpected not found exceptions
+  Mantid::API::IFunction_sptr tryCreateFitFunction(const QString &str);
   /// Create CompositeFunction from pointer
   void createCompositeFunction(const Mantid::API::IFunction_sptr func);
 

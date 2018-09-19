@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/GetEiMonDet2.h"
-#include "MantidAlgorithms/ExtractSingleSpectrum.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ExtractSingleSpectrum.h"
+#include "MantidAlgorithms/GetEiMonDet2.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"

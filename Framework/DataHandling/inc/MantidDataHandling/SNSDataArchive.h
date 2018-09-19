@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidAPI/IArchiveSearch.h"
+#include "MantidKernel/System.h"
 
 #include <string>
 
@@ -45,7 +45,7 @@ public:
   getArchivePath(const std::set<std::string> &filenames,
                  const std::vector<std::string> &exts) const override;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_SNSDATAARCHIVE_H_ */

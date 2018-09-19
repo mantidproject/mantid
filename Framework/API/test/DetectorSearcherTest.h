@@ -4,8 +4,8 @@
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>

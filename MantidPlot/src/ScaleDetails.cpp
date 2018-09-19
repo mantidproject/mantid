@@ -6,30 +6,30 @@
 #include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 #include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "Plot.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
 
 #include "MantidKernel/Logger.h"
 
-#include <QSpinBox>
 #include <QComboBox>
+#include <QDateTimeEdit>
 #include <QGroupBox>
 #include <QRadioButton>
-#include <QDateTimeEdit>
+#include <QSpinBox>
 
 namespace {
 Mantid::Kernel::Logger g_log("ScaleDetails");
 }
 
 /** The constructor for a single set of widgets containing parameters for the
-* scale of an axis.
-*  @param app :: the containing application window
-*  @param graph :: the graph the dialog is settign the options for
-*  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
-*  @param parent :: the QWidget that acts as this widget's parent in the
-* hierachy
-*/
+ * scale of an axis.
+ *  @param app :: the containing application window
+ *  @param graph :: the graph the dialog is settign the options for
+ *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
+ *  @param parent :: the QWidget that acts as this widget's parent in the
+ * hierachy
+ */
 ScaleDetails::ScaleDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
                            QWidget *parent)
     : QWidget(parent) {
@@ -243,8 +243,8 @@ ScaleDetails::~ScaleDetails() {}
 
 /** Initialisation method. Sets up all widgets and variables not done in the
  * constructor.
-*
-*/
+ *
+ */
 void ScaleDetails::initWidgets() {
   if (m_initialised) {
     return;
@@ -491,8 +491,8 @@ void ScaleDetails::axisEnabled(bool enabled) {
 }
 
 /** Checks to see if this axis has valid parameters
-*
-*/
+ *
+ */
 bool ScaleDetails::valid() {
   if (m_radStep->isChecked() &&
       (m_dspnStep->value() < m_dspnStep->getMinimum()))
@@ -503,8 +503,8 @@ bool ScaleDetails::valid() {
 }
 
 /** Applies this axis' parameters to the graph
-*
-*/
+ *
+ */
 void ScaleDetails::apply() {
   if (m_modified && valid()) {
     // as the classes are separate now this may cause a problem as ideally i'd
@@ -582,14 +582,14 @@ void ScaleDetails::apply() {
 }
 
 /** Sets the modifed flag to true so that the changes may be applied.
-*
-*/
+ *
+ */
 void ScaleDetails::setModified() { m_modified = true; }
 
 /** enables and disables the appropriate field depending on the current radio
  * button
-*
-*/
+ *
+ */
 void ScaleDetails::radiosSwitched() {
   if (m_radStep->isChecked()) {
     m_dspnStep->setEnabled(true);
@@ -606,8 +606,8 @@ void ScaleDetails::radiosSwitched() {
 
 /** Enables or disables widgets corresponding to the current value of the step
  * parameter.
-*
-*/
+ *
+ */
 void ScaleDetails::checkstep() {
   if (m_dspnStep->value() != 0.0) {
     m_radStep->setChecked(true);

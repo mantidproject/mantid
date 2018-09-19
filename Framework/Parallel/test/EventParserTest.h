@@ -130,7 +130,7 @@ private:
   std::vector<std::vector<TofEvent>> m_referenceEventLists;
   std::vector<std::vector<TofEvent>> test_event_lists;
 };
-}
+} // namespace anonymous
 
 class EventParserTest : public CxxTest::TestSuite {
 public:

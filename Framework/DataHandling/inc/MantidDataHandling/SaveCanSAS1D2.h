@@ -13,8 +13,8 @@ namespace XML {
 class Document;
 class Element;
 class Text;
-}
-}
+} // namespace XML
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -104,7 +104,7 @@ protected:
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_trans_ws, m_transcan_ws;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif

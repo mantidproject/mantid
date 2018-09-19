@@ -44,7 +44,7 @@ AlgorithmOutputs execute_integration(const MDEventPeaksWSTuple &inputWorkspaces,
   WorkspaceGroup_sptr outClustersWS = alg.getProperty("OutputWorkspaces");
   return AlgorithmOutputs(outClustersWS, outPeaksWS);
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests

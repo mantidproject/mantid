@@ -10,8 +10,8 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -104,8 +104,8 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
-  if (!m_currentColorMapFilename.isEmpty()) {
-    loadColorMap(m_currentColorMapFilename, false);
+  if (!m_currentCMap.isEmpty()) {
+    loadColorMap(m_currentCMap, false);
   }
 
   // set up data ranges and colours
@@ -362,7 +362,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
   return sharedWorkspace->getInstrument();
 }
 
-const MantidColorMap &InstrumentActor::getColorMap() const {
+const ColorMap &InstrumentActor::getColorMap() const {
   return m_renderer->getColorMap();
 }
 
@@ -645,7 +645,7 @@ void InstrumentActor::draw(bool picking) const {
  */
 void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
   m_renderer->loadColorMap(fname);
-  m_currentColorMapFilename = fname;
+  m_currentCMap = fname;
   if (reset_colors)
     resetColors();
 }
@@ -688,7 +688,7 @@ void InstrumentActor::loadSettings() {
   m_scaleType = static_cast<GraphOptions::ScaleType>(
       settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentColorMapFilename = settings.value("ColormapFile", "").toString();
+  m_currentCMap = settings.value("ColormapFile", "").toString();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
@@ -697,7 +697,7 @@ void InstrumentActor::loadSettings() {
 void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  settings.setValue("ColormapFile", m_currentColorMapFilename);
+  settings.setValue("ColormapFile", m_currentCMap);
   settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
@@ -1121,8 +1121,8 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     auto id = paramComp->getComponentID();
     auto &compParamNames = mapCmptToNameVector[id];
     if (compParamNames.size() > 0) {
-      text += QString::fromStdString("\nParameters from: " +
-                                     paramComp->getName() + "\n");
+      text += QString::fromStdString(
+          "\nParameters from: " + paramComp->getName() + "\n");
       std::sort(compParamNames.begin(), compParamNames.end(),
                 Mantid::Kernel::CaseInsensitiveStringComparator());
       for (auto itParamName = compParamNames.begin();
@@ -1224,9 +1224,9 @@ const Mantid::Geometry::ComponentInfo &InstrumentActor::componentInfo() const {
 }
 
 /** If instrument.geometry.view is set to Default or Physical, then the physical
-* instrument detectorInfo is returned. Othewise this returns the neutronic
-* version.
-*/
+ * instrument detectorInfo is returned. Othewise this returns the neutronic
+ * version.
+ */
 const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   if (m_isPhysicalInstrument)
     return *m_physicalDetectorInfo;

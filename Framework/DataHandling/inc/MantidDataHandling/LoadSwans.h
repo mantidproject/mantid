@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADSWANS_H_
 #define MANTID_DATAHANDLING_LOADSWANS_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <map>
 

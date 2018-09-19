@@ -20,48 +20,13 @@ from __future__ import (absolute_import, unicode_literals)
 import functools
 
 # third-party library imports
-from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
-from mantid.kernel import Logger
-from mantidqt.widgets.workspacewidget.plotselectiondialog import get_plot_selection
+from mantid.api import AnalysisDataService
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
 from qtpy.QtWidgets import QMessageBox, QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.figuretype import figure_type, FigureType
-from workbench.plotting.functions import current_figure_or_none, pcolormesh, plot
-
-LOGGER = Logger(b"workspacewidget")
-
-
-def _workspaces_from_names(names):
-    """
-    Convert a list of workspace names to a list of MatrixWorkspace handles. Any WorkspaceGroup
-    encountered is flattened and its members inserted into the list at this point
-
-    Flattens any workspace groups with the list, preserving the order of the remaining elements
-    :param names: A list of workspace names
-    :return: A list where each element is a single MatrixWorkspace
-    """
-    ads = AnalysisDataService.Instance()
-    flat = []
-    for name in names:
-        try:
-            ws = ads[name.encode('utf-8')]
-        except KeyError:
-            LOGGER.warning("Skipping {} as it does not exist".format(name))
-            continue
-
-        if isinstance(ws, MatrixWorkspace):
-            flat.append(ws)
-        elif isinstance(ws, WorkspaceGroup):
-            group_len = len(ws)
-            for i in range(group_len):
-                flat.append(ws[i])
-        else:
-            LOGGER.warning("{} it is not a MatrixWorkspace or WorkspaceGroup.".format(name))
-
-    return flat
+from workbench.plotting.functions import can_overplot, pcolormesh, plot_from_names
 
 
 class WorkspaceWidget(PluginWidget):
@@ -69,6 +34,8 @@ class WorkspaceWidget(PluginWidget):
 
     def __init__(self, parent):
         super(WorkspaceWidget, self).__init__(parent)
+
+        self._ads = AnalysisDataService.Instance()
 
         # layout
         self.workspacewidget = WorkspaceTreeWidget()
@@ -110,20 +77,12 @@ class WorkspaceWidget(PluginWidget):
                          exists and it is a compatible figure
         """
         if overplot:
-            compatible, error_msg = self._can_overplot()
+            compatible, error_msg = can_overplot()
             if not compatible:
                 QMessageBox.warning(self, "", error_msg)
                 return
 
-        try:
-            selection = get_plot_selection(_workspaces_from_names(names), self)
-            if selection is not None:
-                plot(selection.workspaces, spectrum_nums=selection.spectra,
-                     wksp_indices=selection.wksp_indices,
-                     errors=errors, overplot=overplot)
-        except BaseException:
-            import traceback
-            traceback.print_exc()
+        plot_from_names(names, errors, overplot)
 
     def _do_plot_colorfill(self, names):
         """
@@ -132,26 +91,7 @@ class WorkspaceWidget(PluginWidget):
         :param names: A list of workspace names
         """
         try:
-            pcolormesh(_workspaces_from_names(names))
+            pcolormesh(self._ads.retrieveWorkspaces(names, unrollGroups=True))
         except BaseException:
             import traceback
             traceback.print_exc()
-
-    def _can_overplot(self):
-        """
-        Checks if overplotting can proceed with the given options
-
-        :return: A 2-tuple of boolean indicating compatability and
-        a string containing an error message if the current figure is not
-        compatible.
-        """
-        compatible = False
-        msg = "Unable to overplot on currently active plot type.\n" \
-              "Please select another plot."
-        fig = current_figure_or_none()
-        if fig is not None:
-            figtype = figure_type(fig)
-            if figtype is FigureType.Line or figtype is FigureType.Errorbar:
-                compatible, msg = True, None
-
-        return compatible, msg

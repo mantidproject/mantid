@@ -1,7 +1,7 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidAPI/Progress.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 #include "MantidKernel/make_unique.h"

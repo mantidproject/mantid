@@ -55,5 +55,5 @@ int loadPluginsFromPath(std::string path) {
   return LibraryManager::Instance().openLibraries(
       path, LibraryManagerImpl::NonRecursive, excludes);
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

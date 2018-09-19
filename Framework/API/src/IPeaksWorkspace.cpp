@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
 namespace API {
@@ -22,9 +22,9 @@ const std::string IPeaksWorkspace::toString() const {
   return os.str();
 }
 
-} // API namespace
+} // namespace API
 
-} // Mantid namespace
+} // namespace Mantid
 
 ///\cond TEMPLATE
 

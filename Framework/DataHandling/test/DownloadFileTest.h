@@ -11,8 +11,8 @@
 #include <fstream>
 #include <sstream>
 
-using Mantid::Kernel::InternetHelper;
 using Mantid::DataHandling::DownloadFile;
+using Mantid::Kernel::InternetHelper;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -37,8 +37,8 @@ protected:
 };
 
 /**
-*Mock out the internet calls of this algorithm
-*/
+ *Mock out the internet calls of this algorithm
+ */
 class MockedDownloadFile : public DownloadFile {
 public:
   MockedDownloadFile() {
@@ -46,7 +46,7 @@ public:
     m_internetHelper = new MockedInternetHelper();
   }
 };
-}
+} // namespace
 
 class DownloadFileTest : public CxxTest::TestSuite {
 public:

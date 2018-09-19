@@ -75,6 +75,6 @@ std::string getBackgroundColor(QStandardItem const &item) {
 QColor getBorderColor(QStandardItem const &item) {
   return item.data(CellUserRoles::BorderColor).value<QColor>();
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

@@ -4,7 +4,6 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/StartLiveDataDialog.cpp
                 src/FitDialog.cpp
                 src/LoadDialog.cpp
-                src/LoadAsciiDialog.cpp
                 src/LoadDAEDialog.cpp
                 src/LoadRawDialog.cpp
                 src/LOQScriptInputDialog.cpp
@@ -22,7 +21,6 @@ set ( MOC_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialo
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/StartLiveDataDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h
-                inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadAsciiDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDAEDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LoadRawDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/LOQScriptInputDialog.h

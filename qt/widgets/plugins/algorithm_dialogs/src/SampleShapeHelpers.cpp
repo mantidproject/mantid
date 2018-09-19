@@ -3,10 +3,10 @@
 //-----------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h"
 
-#include <QLabel>
-#include <QLineEdit>
 #include <QComboBox>
 #include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QRadioButton>
 
 using namespace MantidQt::CustomDialogs;
@@ -250,8 +250,9 @@ QString SphereDetails::writeXML() const {
   }
   QString xmldef = "<sphere id=\"" + m_idvalue + "\">\n" +
                    m_centre->write3DElement("centre") + "<radius val=\"" +
-                   valr + "\" />\n"
-                          "</sphere>\n";
+                   valr +
+                   "\" />\n"
+                   "</sphere>\n";
   return xmldef;
 }
 
@@ -310,10 +311,12 @@ QString CylinderDetails::writeXML() const {
     valh = convertToMetres(m_height_box->text(),
                            ShapeDetails::Unit(m_hunits->currentIndex()));
   }
-  QString xmldef = "<cylinder id=\"" + m_idvalue + "\" >\n"
-                                                   "<radius val=\"" +
-                   valr + "\" />\n"
-                          "<height val=\"" +
+  QString xmldef = "<cylinder id=\"" + m_idvalue +
+                   "\" >\n"
+                   "<radius val=\"" +
+                   valr +
+                   "\" />\n"
+                   "<height val=\"" +
                    valh + "\" />\n" +
                    m_lower_centre->write3DElement("centre-of-bottom-base") +
                    m_axis->write3DElement("axis") + "</cylinder>\n";
@@ -363,8 +366,9 @@ QString InfiniteCylinderDetails::writeXML() const {
     valr = convertToMetres(m_radius_box->text(),
                            ShapeDetails::Unit(m_runits->currentIndex()));
   }
-  QString xmldef = "<infinite-cylinder id=\"" + m_idvalue + "\" >\n"
-                                                            "<radius val=\"" +
+  QString xmldef = "<infinite-cylinder id=\"" + m_idvalue +
+                   "\" >\n"
+                   "<radius val=\"" +
                    valr + "\" />\n" + m_centre->write3DElement("centre") +
                    m_axis->write3DElement("axis") + "</infinite-cylinder>\n";
   return xmldef;
@@ -443,14 +447,18 @@ QString SliceOfCylinderRingDetails::writeXML() const {
   QString xmldef = "<slice-of-cylinder-ring id=\"" + m_idvalue +
                    "\" >\n"
                    "<inner-radius val=\"" +
-                   valir + "\" />\n"
-                           "<outer-radius val=\"" +
-                   valor + "\" />\n"
-                           "<depth val=\"" +
-                   vald + "\" />\n"
-                          "<arc val=\"" +
-                   vala + "\" />\n"
-                          "</slice-of-cylinder-ring>\n";
+                   valir +
+                   "\" />\n"
+                   "<outer-radius val=\"" +
+                   valor +
+                   "\" />\n"
+                   "<depth val=\"" +
+                   vald +
+                   "\" />\n"
+                   "<arc val=\"" +
+                   vala +
+                   "\" />\n"
+                   "</slice-of-cylinder-ring>\n";
 
   return xmldef;
 }
@@ -509,10 +517,12 @@ QString ConeDetails::writeXML() const {
     valan = m_angle_box->text();
   }
 
-  QString xmldef = "<cone id=\"" + m_idvalue + "\" >\n"
-                                               "<height val=\"" +
-                   valh + "\" />\n"
-                          "<angle val=\"" +
+  QString xmldef = "<cone id=\"" + m_idvalue +
+                   "\" >\n"
+                   "<height val=\"" +
+                   valh +
+                   "\" />\n"
+                   "<angle val=\"" +
                    valan + "\" />\n" + m_tippoint->write3DElement("tip-point") +
                    m_axis->write3DElement("axis") + "</cone>\n";
 
@@ -561,8 +571,9 @@ QString InfiniteConeDetails::writeXML() const {
     valan = m_angle_box->text();
   }
 
-  QString xmldef = "<infinite-cone id=\"" + m_idvalue + "\" >\n"
-                                                        "<angle val=\"" +
+  QString xmldef = "<infinite-cone id=\"" + m_idvalue +
+                   "\" >\n"
+                   "<angle val=\"" +
                    valan + "\" />\n" + m_tippoint->write3DElement("tip-point") +
                    m_axis->write3DElement("axis") + "</infinite-cone>\n";
 

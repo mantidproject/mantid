@@ -81,6 +81,6 @@ public:
   ///@}
 };
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTER_H_ */

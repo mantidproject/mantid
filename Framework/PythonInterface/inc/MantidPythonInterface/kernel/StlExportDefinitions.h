@@ -32,8 +32,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/tuple.hpp>
 
-#include <vector>
 #include <set>
+#include <vector>
 
 using boost::python::arg;
 
@@ -160,7 +160,7 @@ template <typename ElementType> struct std_set_exporter {
         .def("append", insert_element, (arg("self"), arg("element")))
         .def("insert", insert_set, (arg("self"), arg("set")))
         .def("extend", insert_set, (arg("self"), arg("set")))
-        .def("erase", (std::size_t (w_t::*)(e_t const &)) & w_t::erase,
+        .def("erase", (std::size_t(w_t::*)(e_t const &)) & w_t::erase,
              (arg("self"), arg("index")))
         .def("clear", &w_t::clear, arg("self"))
         .enable_pickling()
@@ -168,7 +168,7 @@ template <typename ElementType> struct std_set_exporter {
         ;
   }
 };
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_STLEXPORTDEFINITIONS_H_ */

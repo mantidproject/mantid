@@ -7,21 +7,21 @@
 #include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
-using Mantid::HistogramData::getHistogramXMode;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::PointStandardDeviations;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::Frequencies;
-using Mantid::HistogramData::FrequencyVariances;
-using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::PointStandardDeviations;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::getHistogramXMode;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -1123,8 +1123,9 @@ public:
 
   void test_that_can_change_histogram_size_when_only_x_is_present() {
     Histogram h(BinEdges{1, 2, 3});
-    auto isSizeAsSpecified =
-        [](const Histogram &h, size_t n) { return (h.x().size() == (n + 1)); };
+    auto isSizeAsSpecified = [](const Histogram &h, size_t n) {
+      return (h.x().size() == (n + 1));
+    };
     TS_ASSERT(isSizeAsSpecified(h, 2));
 
     // Increase the size

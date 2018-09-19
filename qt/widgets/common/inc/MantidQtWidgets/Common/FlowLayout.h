@@ -77,7 +77,7 @@ private:
   int m_hSpace;
   int m_vSpace;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif

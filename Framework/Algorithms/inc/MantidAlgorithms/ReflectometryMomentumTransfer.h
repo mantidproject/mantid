@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFER_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -37,6 +38,7 @@ public:
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
+  const std::vector<std::string> seeAlso() const override;
   const std::string summary() const override;
 
 private:
@@ -51,8 +53,6 @@ private:
     size_t foregroundEnd{0};
     size_t directForegroundStart{0};
     size_t directForegroundEnd{0};
-    double l1{0.};
-    double l2{0.};
     double pixelSize{0.};
     bool polarized{false};
     double slit1Slit2Distance{0.};

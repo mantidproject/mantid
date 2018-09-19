@@ -14,14 +14,14 @@
 #include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
-#include <tuple>
 #include <random>
+#include <tuple>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects;
-using Mantid::Kernel::V3D;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::V3D;
 using namespace Mantid::SingleCrystalDiffractionTestHelper;
 
 class IntegrateEllipsoidsTwoStepTest : public CxxTest::TestSuite {

@@ -1,8 +1,8 @@
 #ifndef MANTID_KERNEL_CHECKSUMHELPERTEST_H_
 #define MANTID_KERNEL_CHECKSUMHELPERTEST_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/ChecksumHelper.h"
+#include "MantidKernel/System.h"
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>

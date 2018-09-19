@@ -102,5 +102,5 @@ int SANSConstants::getDecimals() { return 6; }
  * @returns the max integer value
  */
 int SANSConstants::getMaxIntValue() { return std::numeric_limits<int>::max(); }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertToConstantL2.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ConvertToConstantL2.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using namespace Mantid::API;

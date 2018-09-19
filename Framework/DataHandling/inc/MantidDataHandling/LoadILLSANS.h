@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADILLSANS_H_
 #define MANTID_DATAHANDLING_LOADILLSANS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/System.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {

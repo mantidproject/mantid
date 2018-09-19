@@ -1,13 +1,13 @@
 #ifndef MANTID_API_ALGORITHMPROPERTYTEST_H_
 #define MANTID_API_ALGORITHMPROPERTYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/AlgorithmHasProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmHasProperty.h"
+#include "MantidAPI/AlgorithmProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

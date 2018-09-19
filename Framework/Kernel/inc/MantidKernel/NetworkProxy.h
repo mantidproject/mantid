@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_NETWORKPROXY_H_
 #define MANTID_KERNEL_NETWORKPROXY_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/ProxyInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/ProxyInfo.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Kernel {

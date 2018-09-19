@@ -4,8 +4,8 @@
 //------------------------------------------
 // Includes
 //------------------------------------------
-#include <QEvent>
 #include "customevents.h"
+#include <QEvent>
 
 //-------------------------------------------
 // Forward declarations

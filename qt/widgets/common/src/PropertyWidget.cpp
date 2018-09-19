@@ -1,12 +1,12 @@
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/EmptyValues.h"
-#include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/System.h"
 
-#include <cmath>
-#include <climits>
 #include <cfloat>
+#include <climits>
+#include <cmath>
 
 #include <algorithm>
 #include <sstream>
@@ -18,7 +18,7 @@ using namespace Mantid::API;
 using Mantid::API::IWorkspaceProperty;
 
 namespace // anonymous
-    {
+{
 /**
  * Attempts to convert the given string into a double representation of a
  * number.
@@ -76,8 +76,12 @@ bool isEmptyNumMacro(const std::string &value, const double value_d) {
     return true;
 
   static const std::vector<double> EMPTY_NUM_MACROS = {
-      EMPTY_DBL(), -DBL_MAX, DBL_MAX, static_cast<double>(EMPTY_INT()),
-      static_cast<double>(EMPTY_LONG()), static_cast<double>(-INT_MAX),
+      EMPTY_DBL(),
+      -DBL_MAX,
+      DBL_MAX,
+      static_cast<double>(EMPTY_INT()),
+      static_cast<double>(EMPTY_LONG()),
+      static_cast<double>(-INT_MAX),
       static_cast<double>(-LONG_MAX)};
 
   return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), value_d) !=
@@ -460,5 +464,5 @@ void PropertyWidget::setFieldPlaceholderText(Mantid::Kernel::Property *prop,
       QString::fromStdString(createFieldPlaceholderText(prop)));
 }
 
-} // namespace MantidQt
 } // namespace API
+} // namespace MantidQt

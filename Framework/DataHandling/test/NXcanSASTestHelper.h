@@ -103,5 +103,5 @@ provide2DWorkspace(NXcanSASTestParameters &parameters);
 void set2DValues(Mantid::API::MatrixWorkspace_sptr ws);
 
 void removeFile(std::string filename);
-}
+} // namespace NXcanSASTestHelper
 #endif

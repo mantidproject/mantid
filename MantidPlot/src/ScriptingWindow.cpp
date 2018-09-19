@@ -3,8 +3,8 @@
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
@@ -43,7 +43,7 @@ namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptingWindow");
-}
+} // namespace
 
 //-------------------------------------------
 // Public member functions
@@ -438,12 +438,12 @@ void ScriptingWindow::showPythonHelp() {
 }
 
 /**
-  * Calls MultiTabScriptInterpreter to save the currently opened
-  * script file names to a string.
-  *
-  * @param app :: the current application window instance
-  * @return script file names in the matid project format
-  */
+ * Calls MultiTabScriptInterpreter to save the currently opened
+ * script file names to a string.
+ *
+ * @param app :: the current application window instance
+ * @return script file names in the matid project format
+ */
 std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
   (void)app; // suppress unused variable warnings
   return m_manager->saveToString().toStdString();

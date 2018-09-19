@@ -330,6 +330,6 @@ bool RowData::hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,
   }
   return false;
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

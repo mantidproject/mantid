@@ -1,10 +1,10 @@
 #ifndef MANTIDWIDGETS_PROCESSINGALGOWIDGET_H_
 #define MANTIDWIDGETS_PROCESSINGALGOWIDGET_H_
 
-#include <QWidget>
 #include "DllOption.h"
-#include "ui_ProcessingAlgoWidget.h"
 #include "MantidAPI/Algorithm.h"
+#include "ui_ProcessingAlgoWidget.h"
+#include <QWidget>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -85,6 +85,6 @@ private:
   QString m_lastFile;
 };
 
-} // Namespace
-} // Namespace
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif

@@ -40,7 +40,7 @@ void markReadOnly(PyArrayObject *arr) {
   arr->flags &= ~NPY_WRITEABLE;
 #endif
 }
-}
+} // namespace
 
 /**
  * Defines the wrapWithNDArray specialization for C array types
@@ -84,7 +84,7 @@ INSTANTIATE_WRAPNUMPY(unsigned long long)
 INSTANTIATE_WRAPNUMPY(double)
 INSTANTIATE_WRAPNUMPY(float)
 ///@endcond
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

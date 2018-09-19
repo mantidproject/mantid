@@ -1,50 +1,49 @@
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/CoordTransform.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidKernel/Matrix.h"
 
-#include <boost/pointer_cast.hpp>
 #include <algorithm>
 #include <array>
+#include <boost/pointer_cast.hpp>
 #include <cmath>
 
 /**
-*
-* There are several things which should be clarified.
-*
-* 1. We are dealing with a (potentially non-orthogonal system) defined by
-* the basisi vectors a*, b* and c* with the coordinates h, k, l. On occasion
-* H, K, and L are used to describe the basisi vectors.
-*
-* 2. What we call a skewMatrix is a modified BW (and sometimes a modified
-*(BW)^-1) matrix.
-* The BW matrix transforms from the non-orhtogonal presentation to the
-*orthogonal representation.
-* The (BW)^-1 transforms form the orhtogonal presentation to the non-orthogonal
-*representation.
-* The orthogonal representation is a orthogonal coordinate system with
-*coordinates (x, y, z),
-* where the basis vector eX assoicated with x is aligned with the H. The basis
-*vector eY
-* associated with y is in the H-K plane and perpendicular to x. The basis vector
-*eZ associated
-* with z is orthgonal to x and y.
-*
-* This is important. H is always parallel to eX, K is always in the x-y plane
-*and L can be pretty
-* much anything.
-*
-* 3. The screen coordinate system consists of Xs and Ys.
-*
-*
-*/
+ *
+ * There are several things which should be clarified.
+ *
+ * 1. We are dealing with a (potentially non-orthogonal system) defined by
+ * the basisi vectors a*, b* and c* with the coordinates h, k, l. On occasion
+ * H, K, and L are used to describe the basisi vectors.
+ *
+ * 2. What we call a skewMatrix is a modified BW (and sometimes a modified
+ *(BW)^-1) matrix.
+ * The BW matrix transforms from the non-orhtogonal presentation to the
+ *orthogonal representation.
+ * The (BW)^-1 transforms form the orhtogonal presentation to the non-orthogonal
+ *representation.
+ * The orthogonal representation is a orthogonal coordinate system with
+ *coordinates (x, y, z),
+ * where the basis vector eX assoicated with x is aligned with the H. The basis
+ *vector eY
+ * associated with y is in the H-K plane and perpendicular to x. The basis
+ *vector eZ associated with z is orthgonal to x and y.
+ *
+ * This is important. H is always parallel to eX, K is always in the x-y plane
+ *and L can be pretty
+ * much anything.
+ *
+ * 3. The screen coordinate system consists of Xs and Ys.
+ *
+ *
+ */
 
 namespace {
 void checkForSampleAndRunEntries(
@@ -223,12 +222,12 @@ template <typename T, size_t N> void normalizeVector(std::array<T, N> &vector) {
   }
 }
 /**
-* Gets the normal vector for two specified vectors
-*
-*/
+ * Gets the normal vector for two specified vectors
+ *
+ */
 std::array<Mantid::coord_t, 3>
-    getNormalVector(std::array<Mantid::coord_t, 3> vector1,
-                    std::array<Mantid::coord_t, 3> vector2) {
+getNormalVector(std::array<Mantid::coord_t, 3> vector1,
+                std::array<Mantid::coord_t, 3> vector2) {
   std::array<Mantid::coord_t, 3> normalVector;
   for (size_t index = 0; index < 3; ++index) {
     normalVector[index] = vector1[(index + 1) % 3] * vector2[(index + 2) % 3] -
@@ -241,13 +240,13 @@ std::array<Mantid::coord_t, 3>
 }
 
 /**
-* The normal vector will depend on the chosen dimensions and the order of these
-*dimensions:
-* It is essentially the cross product of vect(dimX) x vect(dimY), e.g.
-* x-y -> z
-* y-x -> -z ...
-*
-*/
+ * The normal vector will depend on the chosen dimensions and the order of these
+ *dimensions:
+ * It is essentially the cross product of vect(dimX) x vect(dimY), e.g.
+ * x-y -> z
+ * y-x -> -z ...
+ *
+ */
 std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
   std::array<Mantid::coord_t, 3> vector1 = {{0., 0., 0.}};
   std::array<Mantid::coord_t, 3> vector2 = {{0., 0., 0.}};
@@ -265,9 +264,9 @@ std::array<Mantid::coord_t, 3> getNormalVector(size_t dimX, size_t dimY) {
   return normalVector;
 }
 /**
-* Calculate the angle for a given dimension. Note that this function expects all
-* vectors to be normalized.
-*/
+ * Calculate the angle for a given dimension. Note that this function expects
+ * all vectors to be normalized.
+ */
 template <size_t N>
 double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
                         std::array<Mantid::coord_t, N> nonOrthogonalVector,
@@ -340,7 +339,7 @@ double getAngleInRadian(std::array<Mantid::coord_t, N> orthogonalVector,
   }
   return angle;
 }
-}
+} // namespace
 
 namespace MantidQt {
 namespace API {
@@ -446,27 +445,27 @@ void transformLookpointToWorkspaceCoord(
 }
 
 /**
-* We get the angles that are used for plotting of the grid lines. There are
-*several scenarios:
-* x-y (when H and K are selected)
-* y-x (when K and H are selected)
-* x-z (when H and L are selected)
-* z-x (when L and H are selected)
-* y-z (when K and L are selected)
-* z-y (when L and K are selected)
-*
-* Some things to consider the BW transformation provides a system where x is
-*aligned with a*,
-* where y is in the same plane as
-*
-*
-* @param skewMatrixCoord The tranformation matrix from the non-orthogonal system
-*to the orthogonal system
-* @param dimX the selected orthogonal dimension for the x axis of the screen
-* @param dimY the selected orthogonal dimension for the y axis of the screen
-* @return an angle for the x grid lines and an angle for the y grid lines. Both
-*are measured from the x axis.
-*/
+ * We get the angles that are used for plotting of the grid lines. There are
+ *several scenarios:
+ * x-y (when H and K are selected)
+ * y-x (when K and H are selected)
+ * x-z (when H and L are selected)
+ * z-x (when L and H are selected)
+ * y-z (when K and L are selected)
+ * z-y (when L and K are selected)
+ *
+ * Some things to consider the BW transformation provides a system where x is
+ *aligned with a*,
+ * where y is in the same plane as
+ *
+ *
+ * @param skewMatrixCoord The tranformation matrix from the non-orthogonal
+ *system to the orthogonal system
+ * @param dimX the selected orthogonal dimension for the x axis of the screen
+ * @param dimY the selected orthogonal dimension for the y axis of the screen
+ * @return an angle for the x grid lines and an angle for the y grid lines. Both
+ *are measured from the x axis.
+ */
 std::pair<double, double>
 getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
                           size_t dimX, size_t dimY) {
@@ -490,5 +489,5 @@ getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
       getAngleInRadian(dimYOriginal, dimYTransformed, normalVector, dimY, dimX);
   return std::make_pair(angleDimX, angleDimY);
 }
-}
-}
+} // namespace API
+} // namespace MantidQt

@@ -5,42 +5,42 @@
 #include "AxisDetails.h"
 #include "ApplicationWindow.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
-#include <qwt_scale_widget.h>
+#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
 #include "MyParser.h"
 #include "Plot.h"
-#include "MantidQtWidgets/LegacyQwt/qwt_compat.h"
-#include "MantidQtWidgets/LegacyQwt/ScaleEngine.h"
+#include <qwt_scale_widget.h>
 
-#include <QWidget>
-#include <QSpinBox>
-#include <QRadioButton>
+#include <ColorButton.h>
 #include <QCheckBox>
-#include <QGroupBox>
 #include <QComboBox>
-#include <QLabel>
-#include <QDateTimeEdit>
-#include <QTimeEdit>
-#include <QLayout>
 #include <QDate>
+#include <QDateTimeEdit>
+#include <QFontDialog>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QLayout>
 #include <QList>
 #include <QListWidget>
-#include <QVector>
-#include <QTextEdit>
-#include <QPushButton>
-#include <QGridLayout>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QTextEdit>
+#include <QTimeEdit>
+#include <QVector>
+#include <QWidget>
 #include <TextFormatButtons.h>
-#include <ColorButton.h>
-#include <QFontDialog>
 
 /** The constructor for a single set of widgets containing parameters for the
-* labeling and format of an axis.
-*  @param app :: the containing application window
-*  @param graph :: the graph the dialog is settign the options for
-*  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
-*  @param parent :: the QWidget that acts as this widget's parent in the
-* hierachy
-*/
+ * labeling and format of an axis.
+ *  @param app :: the containing application window
+ *  @param graph :: the graph the dialog is settign the options for
+ *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
+ *  @param parent :: the QWidget that acts as this widget's parent in the
+ * hierachy
+ */
 AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
                          QWidget *parent)
     : QWidget(parent) {
@@ -206,9 +206,9 @@ AxisDetails::AxisDetails(ApplicationWindow *app, Graph *graph, int mappedaxis,
 AxisDetails::~AxisDetails() {}
 
 /** Initialisation method. Sets up all widgets and variables not done in the
-*constructor.
-*
-*/
+ *constructor.
+ *
+ */
 void AxisDetails::initWidgets() {
   if (m_initialised) {
     return;
@@ -337,13 +337,13 @@ void AxisDetails::initWidgets() {
 }
 
 /** Sets the modifed flag to true so that the changes may be applied.
-*
-*/
+ *
+ */
 void AxisDetails::setModified() { m_modified = true; }
 
 /** Checks to see if this axis has valid parameters
-*
-*/
+ *
+ */
 bool AxisDetails::valid() {
   if (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric) {
     if (m_chkShowFormula->isChecked()) {
@@ -375,8 +375,8 @@ bool AxisDetails::valid() {
 }
 
 /** Applies the grid paremeters to the graphs
-*
-*/
+ *
+ */
 void AxisDetails::apply() {
   if (m_modified && valid()) {
     Table *w = m_app->table(m_cmbColName->currentText());
@@ -414,8 +414,8 @@ void AxisDetails::apply() {
 }
 
 /** Applies the grid paremeters to the graphs
-*
-*/
+ *
+ */
 void AxisDetails::showAxis() {
   bool shown = m_chkShowAxis->isChecked();
   bool labels = m_grpShowLabels->isChecked();
@@ -446,9 +446,9 @@ void AxisDetails::showAxis() {
 }
 
 /** Enables, Disables, Hides or Shows widgets apropriate to the current Axis
-*Format
-*
-*/
+ *Format
+ *
+ */
 void AxisDetails::setAxisFormatOptions(int type) {
   m_cmbFormat->clear();
   m_cmbFormat->setEditable(false);
@@ -569,8 +569,8 @@ void AxisDetails::setAxisFormatOptions(int type) {
 }
 
 /** enables or disables the formula text entry fields
-*
-*/
+ *
+ */
 void AxisDetails::enableFormulaBox() {
   if (m_chkShowFormula->isChecked()) {
     m_txtFormula->setEnabled(true);
@@ -580,8 +580,8 @@ void AxisDetails::enableFormulaBox() {
 }
 
 /** sets the font to use on the scale title
-*
-*/
+ *
+ */
 void AxisDetails::setLabelFont() {
   bool okF;
   QFont oldFont = m_graph->axisTitleFont(m_mappedaxis);
@@ -592,8 +592,8 @@ void AxisDetails::setLabelFont() {
 }
 
 /** sets the font to use on the scale numbers
-*
-*/
+ *
+ */
 void AxisDetails::setScaleFont() {
   bool okF;
   QFont oldFont = m_graph->axisFont(m_mappedaxis);

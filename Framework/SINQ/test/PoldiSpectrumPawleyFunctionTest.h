@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
-#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
-#include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/V3D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <gmock/gmock.h>
@@ -18,10 +18,10 @@ using namespace Mantid::API;
 
 using Mantid::Kernel::V3D;
 
-using ::testing::_;
 using ::testing::Mock;
+using ::testing::_;
 
-GCC_DIAG_OFF_SUGGEST_OVERRIDE
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPawleyFunction : public IPawleyFunction {
 public:
@@ -45,7 +45,7 @@ public:
 
   MOCK_METHOD4(setMatrixWorkspace,
                void(MatrixWorkspace_const_sptr, size_t, double, double));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 protected:
   void init() override { setDecoratedFunction("Gaussian"); }
 };

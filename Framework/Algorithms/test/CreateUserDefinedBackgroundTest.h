@@ -3,19 +3,19 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
-using Mantid::Algorithms::CreateUserDefinedBackground;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::Algorithms::CreateUserDefinedBackground;
 
 namespace {
 // Gaussian
@@ -40,7 +40,7 @@ double peaks(double xPoint) {
 double dataFunction(double xPoint, int iSpec) {
   return background(xPoint, iSpec) + peaks(xPoint);
 }
-}
+} // namespace
 
 class CreateUserDefinedBackgroundTest : public CxxTest::TestSuite {
 public:

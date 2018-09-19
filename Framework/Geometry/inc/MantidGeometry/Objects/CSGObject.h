@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidGeometry/Rendering/ShapeInfo.h"
 
 #include "BoundingBox.h"
 #include <map>
@@ -20,7 +20,7 @@ namespace Kernel {
 class PseudoRandomNumberGenerator;
 class Material;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Geometry {
 class CompGrp;
@@ -124,8 +124,7 @@ public:
   bool isValid(const std::map<int, int> &)
       const; ///< Check if a set of surfaces are valid.
   bool isOnSide(const Kernel::V3D &) const override;
-  int calcValidType(const Kernel::V3D &Pt,
-                    const Kernel::V3D &uVec) const override;
+  int calcValidType(const Kernel::V3D &Pt, const Kernel::V3D &uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)

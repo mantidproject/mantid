@@ -849,10 +849,12 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
     def get_reference_files(self):
         self.tolerance = 1e-3
         ref_files = ['II.IRISFury.nxs']
-        if platform.system() == "Darwin" or platform.linux_distribution()[0] == "Ubuntu":
-            ref_files += ['II.IRISFuryFitSeq.nxs']
+        # gsl v2 gives a slightly different result than v1
+        # we could do with a better check than this
+        if platform.linux_distribution()[0] == "Ubuntu":
+            ref_files += ['II.IRISFuryFitSeq_gslv2.nxs']
         else:
-            ref_files += ['II.IRISFuryFitSeq_win.nxs']
+            ref_files += ['II.IRISFuryFitSeq_gslv1.nxs']
         return ref_files
 
 #==============================================================================

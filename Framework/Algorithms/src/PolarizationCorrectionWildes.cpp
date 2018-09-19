@@ -4,6 +4,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -224,8 +225,9 @@ double twoInputsErrorEstimate01(const double i00, const double e00,
                    ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
       (f2 * i11 * p1 * (1. - 2. * p2) +
        f2 * i11 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) -
-       2. * f1 * i00 * (-f2 * pow<2>(1. - 2. * p2) +
-                        pow<2>(f2) * pow<2>(1. - 2. * p2) + (-1. + p2) * p2)) /
+       2. * f1 * i00 *
+           (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
+            (-1. + p2) * p2)) /
           (f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
            f1 * (-1. + 2. * p1) *
                ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)));
@@ -235,8 +237,9 @@ double twoInputsErrorEstimate01(const double i00, const double e00,
               (-f2 * pow<2>(1. - 2. * p2) + pow<2>(f2) * pow<2>(1. - 2. * p2) +
                (-1. + p2) * p2)) *
          (f2 * (2. - 2. * p1) * p1 +
-          f1 * (-1. + 2. * p1) * (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
-                                  f2 * (-1. + 2. * p2)))) /
+          f1 * (-1. + 2. * p1) *
+              (1. - 2. * p2 + 2. * f2 * (-1. + p1 + p2) +
+               f2 * (-1. + 2. * p2)))) /
         pow<2>(f2 * p1 * (-1. + p1 + 2. * p2 - 2. * p1 * p2) +
                f1 * (-1. + 2. * p1) *
                    ((1. - p2) * p2 + f2 * (-1. + p1 + p2) * (-1. + 2. * p2)))) +
@@ -346,6 +349,14 @@ double twoInputsErrorEstimate10(const double i00, const double e00,
   const auto e10_P1 = pow<2>(mpdp1 * p1E);
   const auto e10_P2 = pow<2>(mpdp2 * p2E);
   return std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
+}
+
+Mantid::API::MatrixWorkspace_sptr
+createWorkspaceWithHistory(Mantid::API::MatrixWorkspace_const_sptr inputWS) {
+  Mantid::API::MatrixWorkspace_sptr outputWS =
+      Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(*inputWS);
+  outputWS->history().addHistory(inputWS->getHistory());
+  return outputWS;
 }
 } // namespace
 
@@ -460,28 +471,30 @@ std::map<std::string, std::string>
 PolarizationCorrectionWildes::validateInputs() {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_const_sptr factorWS = getProperty(Prop::EFFICIENCIES);
-  const auto &factorAxis = factorWS->getAxis(1);
-  if (!factorAxis) {
-    issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
-  } else if (!factorAxis->isText()) {
-    issues[Prop::EFFICIENCIES] =
-        "The vertical axis in the workspace is not text axis.";
-  } else if (factorWS->getNumberHistograms() < 4) {
-    issues[Prop::EFFICIENCIES] =
-        "The workspace should contain at least 4 histograms.";
-  } else {
-    std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
-    for (size_t i = 0; i != factorAxis->length(); ++i) {
-      const auto label = factorAxis->label(i);
-      auto found = std::find(tags.begin(), tags.end(), label);
-      if (found != tags.cend()) {
-        std::swap(tags.back(), *found);
-        tags.pop_back();
+  if (factorWS) {
+    const auto &factorAxis = factorWS->getAxis(1);
+    if (!factorAxis) {
+      issues[Prop::EFFICIENCIES] = "The workspace is missing a vertical axis.";
+    } else if (!factorAxis->isText()) {
+      issues[Prop::EFFICIENCIES] =
+          "The vertical axis in the workspace is not text axis.";
+    } else if (factorWS->getNumberHistograms() < 4) {
+      issues[Prop::EFFICIENCIES] =
+          "The workspace should contain at least 4 histograms.";
+    } else {
+      std::vector<std::string> tags{{"P1", "P2", "F1", "F2"}};
+      for (size_t i = 0; i != factorAxis->length(); ++i) {
+        const auto label = factorAxis->label(i);
+        auto found = std::find(tags.begin(), tags.end(), label);
+        if (found != tags.cend()) {
+          std::swap(tags.back(), *found);
+          tags.pop_back();
+        }
       }
-    }
-    if (!tags.empty()) {
-      issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() +
-                                   " is missing from the workspace.";
+      if (!tags.empty()) {
+        issues[Prop::EFFICIENCIES] = "A histogram labeled " + tags.front() +
+                                     " is missing from the workspace.";
+      }
     }
   }
   const std::vector<std::string> inputs = getProperty(Prop::INPUT_WS);
@@ -541,19 +554,19 @@ void PolarizationCorrectionWildes::checkConsistentX(
   // Compare everything to F1 efficiency.
   const auto &F1x = efficiencies.F1->x();
   // A local helper function to check a HistogramX against F1.
-  auto checkX =
-      [&F1x](const HistogramData::HistogramX &x, const std::string &tag) {
-        if (x.size() != F1x.size()) {
-          throw std::runtime_error(
-              "Mismatch of histogram lengths between F1 and " + tag + '.');
-        }
-        for (size_t i = 0; i != x.size(); ++i) {
-          if (x[i] != F1x[i]) {
-            throw std::runtime_error("Mismatch of X data between F1 and " +
-                                     tag + '.');
-          }
-        }
-      };
+  auto checkX = [&F1x](const HistogramData::HistogramX &x,
+                       const std::string &tag) {
+    if (x.size() != F1x.size()) {
+      throw std::runtime_error("Mismatch of histogram lengths between F1 and " +
+                               tag + '.');
+    }
+    for (size_t i = 0; i != x.size(); ++i) {
+      if (x[i] != F1x[i]) {
+        throw std::runtime_error("Mismatch of X data between F1 and " + tag +
+                                 '.');
+      }
+    }
+  };
   const auto &F2x = efficiencies.F2->x();
   checkX(F2x, "F2");
   const auto &P1x = efficiencies.P1->x();
@@ -561,13 +574,13 @@ void PolarizationCorrectionWildes::checkConsistentX(
   const auto &P2x = efficiencies.P2->x();
   checkX(P2x, "P2");
   // A local helper function to check an input workspace against F1.
-  auto checkWS =
-      [&checkX](const API::MatrixWorkspace_sptr &ws, const std::string &tag) {
-        const auto nHist = ws->getNumberHistograms();
-        for (size_t i = 0; i != nHist; ++i) {
-          checkX(ws->x(i), tag);
-        }
-      };
+  auto checkWS = [&checkX](const API::MatrixWorkspace_sptr &ws,
+                           const std::string &tag) {
+    const auto nHist = ws->getNumberHistograms();
+    for (size_t i = 0; i != nHist; ++i) {
+      checkX(ws->x(i), tag);
+    }
+  };
   if (inputs.mmWS) {
     checkWS(inputs.mmWS, Flippers::OffOff);
   }
@@ -660,7 +673,7 @@ PolarizationCorrectionWildes::directBeamCorrections(
   using namespace boost::math;
   checkInputExists(inputs.ppWS, Flippers::Off);
   WorkspaceMap outputs;
-  outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
   const size_t nHisto = inputs.ppWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &ppY = inputs.ppWS->y(wsIndex);
@@ -699,8 +712,8 @@ PolarizationCorrectionWildes::analyzerlessCorrections(
   checkInputExists(inputs.mmWS, Flippers::On);
   checkInputExists(inputs.ppWS, Flippers::Off);
   WorkspaceMap outputs;
-  outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
-  outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  outputs.mmWS = createWorkspaceWithHistory(inputs.mmWS);
+  outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
   const size_t nHisto = inputs.mmWS->getNumberHistograms();
   for (size_t wsIndex = 0; wsIndex != nHisto; ++wsIndex) {
     const auto &mmY = inputs.mmWS->y(wsIndex);
@@ -764,8 +777,8 @@ PolarizationCorrectionWildes::twoInputCorrections(
   checkInputExists(inputs.mmWS, Flippers::OnOn);
   checkInputExists(inputs.ppWS, Flippers::OffOff);
   WorkspaceMap fullInputs = inputs;
-  fullInputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
-  fullInputs.pmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  fullInputs.mpWS = createWorkspaceWithHistory(inputs.mmWS);
+  fullInputs.pmWS = createWorkspaceWithHistory(inputs.ppWS);
   twoInputsSolve01And10(fullInputs, inputs, efficiencies);
   return fullCorrections(fullInputs, efficiencies);
 }
@@ -812,10 +825,10 @@ PolarizationCorrectionWildes::fullCorrections(
   checkInputExists(inputs.pmWS, Flippers::OffOn);
   checkInputExists(inputs.ppWS, Flippers::OffOff);
   WorkspaceMap outputs;
-  outputs.mmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mmWS);
-  outputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.mpWS);
-  outputs.pmWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
-  outputs.ppWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.ppWS);
+  outputs.mmWS = createWorkspaceWithHistory(inputs.mmWS);
+  outputs.mpWS = createWorkspaceWithHistory(inputs.mpWS);
+  outputs.pmWS = createWorkspaceWithHistory(inputs.pmWS);
+  outputs.ppWS = createWorkspaceWithHistory(inputs.ppWS);
   const auto F1 = efficiencies.F1->y();
   const auto F1E = efficiencies.F1->e();
   const auto F2 = efficiencies.F2->y();
@@ -907,8 +920,7 @@ PolarizationCorrectionWildes::mapInputsToDirections(
  */
 void PolarizationCorrectionWildes::threeInputsSolve01(
     WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
-  using namespace Mantid::DataObjects;
-  inputs.pmWS = create<Workspace2D>(*inputs.mpWS);
+  inputs.pmWS = createWorkspaceWithHistory(inputs.mpWS);
   const auto &F1 = efficiencies.F1->y();
   const auto &F2 = efficiencies.F2->y();
   const auto &P1 = efficiencies.P1->y();
@@ -944,7 +956,7 @@ void PolarizationCorrectionWildes::threeInputsSolve01(
  */
 void PolarizationCorrectionWildes::threeInputsSolve10(
     WorkspaceMap &inputs, const EfficiencyMap &efficiencies) {
-  inputs.mpWS = DataObjects::create<DataObjects::Workspace2D>(*inputs.pmWS);
+  inputs.mpWS = createWorkspaceWithHistory(inputs.pmWS);
   const auto &F1 = efficiencies.F1->y();
   const auto &F2 = efficiencies.F2->y();
   const auto &P1 = efficiencies.P1->y();

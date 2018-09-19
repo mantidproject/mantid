@@ -32,6 +32,11 @@ numbers, see Usage example bellow. If multiple files are loaded they
 will be named 'OutputWorkspace'+'_runnumber' and be grouped in
 'OutputWorkspace'.
 
+There is a grouping option to group pixels by either 2x2 or 4x4 which
+will help in reducing memory usage and speed up the later reduction
+steps. In most cases you will not see a difference in reduced data
+with 4x4 pixel grouping.
+
 Usage
 -----
 

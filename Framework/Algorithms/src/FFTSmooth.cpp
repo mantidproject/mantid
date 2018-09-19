@@ -185,5 +185,5 @@ void FFTSmooth::zero(int n) {
             m_filteredWS->mutableY(1).begin());
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

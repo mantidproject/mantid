@@ -29,11 +29,11 @@
 #ifndef MDHISTOTOWORKSPACE2D_H_
 #define MDHISTOTOWORKSPACE2D_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidSINQ/DllConfig.h"
 
 class MANTID_SINQ_DLL MDHistoToWorkspace2D : public Mantid::API::Algorithm {
 public:

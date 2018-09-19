@@ -1,6 +1,6 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidKernel/MaterialXMLParser.h"
 #include "MantidKernel/make_unique.h"
@@ -10,8 +10,8 @@
 #include "Poco/DOM/DOMWriter.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/NamedNodeMap.h"
-#include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 
@@ -31,7 +31,7 @@ std::string CONTAINERS_TAG = "containers";
 std::string CONTAINER_TAG = "container";
 std::string COMPONENTGEOMETRY_TAG = "geometry";
 std::string SAMPLEGEOMETRY_TAG = "samplegeometry";
-}
+} // namespace
 
 namespace Mantid {
 namespace Geometry {
@@ -62,7 +62,8 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
   } catch (SAXParseException &exc) {
     std::ostringstream msg;
     msg << "SampleEnvironmentSpecParser::parse() - Error parsing content "
-           "as valid XML: " << exc.what();
+           "as valid XML: "
+        << exc.what();
     throw std::runtime_error(msg.str());
   }
   return parse(name, doc->documentElement());
@@ -109,8 +110,8 @@ void SampleEnvironmentSpecParser::validateRootElement(
   if (element->nodeName() != ROOT_TAG) {
     std::ostringstream msg;
     msg << "SampleEnvironmentSpecParser::validateRootElement() - Element tag "
-           "does not match '" << ROOT_TAG << "'. Found " << element->nodeName()
-        << "\n";
+           "does not match '"
+        << ROOT_TAG << "'. Found " << element->nodeName() << "\n";
     throw std::invalid_argument(msg.str());
   }
 }

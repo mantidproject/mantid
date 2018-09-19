@@ -9,8 +9,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <limits>
 #include <cxxtest/TestSuite.h>
+#include <limits>
 
 using namespace Mantid;
 using namespace Mantid::API;

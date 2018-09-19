@@ -25,7 +25,7 @@ As a result, two workspaces are created:
 
 - `NormalizationWorkspace` contains the choosen normalization data (either monitor counts or experiment duration time).
 
-Both workspaces have :math:`(H,K,L)` dimensions. The metadata are loaded into time series sample logs.
+Both workspaces have :math:`(H,K,L,dE)` dimensions. The metadata are loaded into time series sample logs.
 
 .. note::
 
@@ -36,11 +36,11 @@ Restrictions
 
 - This algorithm only supports the *DNS* instrument in its configuration with one detector bank (polarisation analysis).
 
-- This algorithm does not support DNS TOF mode data. It is meant only for single crystal diffraction experiments with 1 TOF channel.
+- This algorithm does not allow to merge datasets with different number of TOF channels.
 
 
 Data replication
-________________
+----------------
 
 For standard data (vanadium, NiCr, background) the sample rotation angle is assumed to be not important. These data are typically measured only for one sample rotation angle. The algorithm can replicate these data for the same sample rotation angles as a single crystal sample has been measured. For this purpose optional input fields *SaveHuberTo* and *LoadHuberFrom* can be used.
 
@@ -91,7 +91,7 @@ Usage
              dimension.getUnits()))
 
    # print information about the table workspace
-   print ("TableWorkspace '{0}' has {1} row in the column '{2}'.".format(huber_ws.getName(),
+   print ("TableWorkspace '{0}' has {1} row in the column '{2}'.".format(huber_ws.name(),
                                                                          huber_ws.rowCount(),
                                                                          huber_ws.getColumnNames()[0]))
    print("It contains sample rotation angle {} degrees".format(huber_ws.cell(0, 0)))
@@ -100,11 +100,12 @@ Usage
 
 .. testoutput:: LoadDNSSCDEx1
 
-    Output Workspace Type is:  MDEventWorkspace<MDEvent,3>
-    It has 24 events and 3 dimensions:
+    Output Workspace Type is:  MDEventWorkspace<MDEvent,4>
+    It has 24 events and 4 dimensions:
     Dimension 0 has name: H, id: H, Range: -15.22 to 15.22 r.l.u
     Dimension 1 has name: K, id: K, Range: -15.22 to 15.22 r.l.u
     Dimension 2 has name: L, id: L, Range: -41.95 to 41.95 r.l.u
+    Dimension 3 has name: DeltaE, id: DeltaE, Range: -10.00 to 4.64 r.l.u
     TableWorkspace 'huber_ws' has 1 row in the column 'Huber(degrees)'.
     It contains sample rotation angle 79.0 degrees
 
@@ -147,10 +148,10 @@ Usage
 
 .. testoutput:: LoadDNSSCDEx2
 
-    Output Workspace Type is:  MDEventWorkspace<MDEvent,3>
-    It has 10 events and 3 dimensions.
-    Normalization Workspace Type is:  MDEventWorkspace<MDEvent,3>
-    It has 10 events and 3 dimensions.
+    Output Workspace Type is:  MDEventWorkspace<MDEvent,4>
+    It has 10 events and 4 dimensions.
+    Normalization Workspace Type is:  MDEventWorkspace<MDEvent,4>
+    It has 10 events and 4 dimensions.
 
 **Example 3 - Load sample rotation angles from the table**
 
@@ -186,17 +187,18 @@ Usage
    print("It has {0} events and {1} dimensions.".format(ws.getNEvents(), ws.getNumDims()))
 
    # setting for the BinMD algorithm
-   bvec0 = '[100],unit,1,0,0'
-   bvec1 = '[001],unit,0,0,1'
-   bvec2 = '[010],unit,0,1,0'
-   extents = '-2,1.5,-0.2,6.1,-10,10'
-   bins = '10,10,1'
+   bvec0 = '[100],unit,1,0,0,0'
+   bvec1 = '[001],unit,0,0,1,0'
+   bvec2 = '[010],unit,0,1,0,0'
+   bvec3 = 'dE,meV,0,0,0,1'
+   extents = '-2,1.5,-0.2,6.1,-10,10,-10,4.6'
+   bins = '10,10,1,1'
    # bin the data
-   data_raw = BinMD(ws, AxisAligned='0', BasisVector0=bvec0, BasisVector1=bvec1,
-                    BasisVector2=bvec2, OutputExtents=extents, OutputBins=bins, NormalizeBasisVectors='0')
+   data_raw = BinMD(ws, AxisAligned='0', BasisVector0=bvec0, BasisVector1=bvec1, BasisVector2=bvec2,
+                    BasisVector3=bvec3, OutputExtents=extents, OutputBins=bins, NormalizeBasisVectors='0')
    # bin normalization
-   data_norm = BinMD(ws_norm, AxisAligned='0', BasisVector0=bvec0, BasisVector1=bvec1,
-                     BasisVector2=bvec2, OutputExtents=extents, OutputBins=bins, NormalizeBasisVectors='0')
+   data_norm = BinMD(ws_norm, AxisAligned='0', BasisVector0=bvec0, BasisVector1=bvec1, BasisVector2=bvec2,
+                     BasisVector3=bvec3, OutputExtents=extents, OutputBins=bins, NormalizeBasisVectors='0')
    # normalize data
    data = data_raw/data_norm
 
@@ -204,16 +206,17 @@ Usage
    print("Reduced Workspace Type is:  {}".format(data.id()))
    print("It has {} dimensions.".format(data.getNumDims()))
    s =  data.getSignalArray()
-   print("Signal at some points: {0:.4f}, {1:.4f}, {2:.4f}".format(s[7,1][0], s[7,2][0], s[7,3][0]))
+   print("Signal at some points: {0:.4f}, {1:.4f}, {2:.4f}".format(
+         float(s[7,1][0]), float(s[7,2][0]), float(s[7,3][0])))
 
 **Output:**
 
 .. testoutput:: LoadDNSSCDEx3
 
-    Output Workspace Type is:  MDEventWorkspace<MDEvent,3>
-    It has 240 events and 3 dimensions.
+    Output Workspace Type is:  MDEventWorkspace<MDEvent,4>
+    It has 240 events and 4 dimensions.
     Reduced Workspace Type is:  MDHistoWorkspace
-    It has 3 dimensions.
+    It has 4 dimensions.
     Signal at some points: 0.0035, 0.0033, 0.0035
 
 .. categories::

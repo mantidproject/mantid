@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_HKLFILTERWAVELENGTH_H_
 #define MANTID_GEOMETRY_HKLFILTERWAVELENGTH_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/HKLFilter.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid {

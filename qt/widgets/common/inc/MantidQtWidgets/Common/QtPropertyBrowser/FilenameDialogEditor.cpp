@@ -20,5 +20,5 @@ void FilenameDialogEditor::runDialog() {
     updateProperty();
   }
 }
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt

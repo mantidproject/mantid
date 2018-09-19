@@ -19,5 +19,5 @@ InvalidParameter *InvalidParameter::clone() const {
 std::string InvalidParameter::toXMLString() const {
   throw std::runtime_error("Invalid parameters cannot be represented in xml.");
 }
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid

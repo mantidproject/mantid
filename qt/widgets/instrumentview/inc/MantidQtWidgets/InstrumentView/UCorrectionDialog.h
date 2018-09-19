@@ -24,7 +24,7 @@ private:
   Ui::UCorrectionDialog *ui;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // REMOVEERRORSDIALOG_H

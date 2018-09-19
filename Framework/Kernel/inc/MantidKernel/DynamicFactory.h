@@ -4,11 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/CaseInsensitiveMap.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/RegistrationHelper.h"
-#include "MantidKernel/CaseInsensitiveMap.h"
 
 // Boost
 #ifndef Q_MOC_RUN

@@ -1,7 +1,7 @@
 #include "MantidCurveFitting/Functions/ComptonScatteringCountRate.h"
-#include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
 #include <boost/bind.hpp>
@@ -22,7 +22,7 @@ const char *CONSTRAINT_MATRIX_NAME = "IntensityConstraints";
 const char *BKGD_ORDER_ATTR_NAME = "BackgroundOrderAttr";
 /// static logger
 Logger g_log("ComptonScatteringCountRate");
-}
+} // namespace
 
 DECLARE_FUNCTION(ComptonScatteringCountRate)
 
@@ -127,7 +127,7 @@ struct BkgdNorm2 {
   size_t ncols;
   const std::vector<double> &rhs;
 };
-}
+} // namespace
 
 /**
  * Calculates the new values for the intensity coefficents
@@ -340,8 +340,9 @@ void ComptonScatteringCountRate::cacheBackground(
   } else {
     std::ostringstream os;
     os << "ComptonScatteringCountRate - Background function does not have "
-          "attribute named '" << m_bkgdOrderAttr
-       << "' that specifies its order. Use the '" << BKGD_ORDER_ATTR_NAME
+          "attribute named '"
+       << m_bkgdOrderAttr << "' that specifies its order. Use the '"
+       << BKGD_ORDER_ATTR_NAME
        << "' attribute to specify the name of the order attribute.";
     throw std::runtime_error(os.str());
   }
@@ -361,7 +362,8 @@ void ComptonScatteringCountRate::createConstraintMatrices() {
   if (m_eqMatrix.numCols() > 0 && m_eqMatrix.numCols() != nmasses) {
     std::ostringstream os;
     os << "ComptonScatteringCountRate - Equality constraint matrix (Aeq) has "
-          "incorrect number of columns (" << m_eqMatrix.numCols()
+          "incorrect number of columns ("
+       << m_eqMatrix.numCols()
        << "). The number of columns should match the number of masses ("
        << nmasses << ")";
     throw std::invalid_argument(os.str());

@@ -2,22 +2,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/Convolution.h"
-#include "MantidCurveFitting/Functions/DeltaFunction.h"
-#include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/IFunction1D.h"
+#include "MantidCurveFitting/Functions/DeltaFunction.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <functional>
 
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_real.h>
 #include <gsl/gsl_fft_halfcomplex.h>
+#include <gsl/gsl_fft_real.h>
 
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 namespace {
 const double tolerance{0.02};
@@ -81,7 +81,7 @@ struct RealFFTWorkspace {
   gsl_fft_real_workspace *workspace;
   gsl_fft_real_wavetable *wavetable;
 };
-}
+} // namespace
 
 /**
  * Calculates convolution of the two member functions. Switches from FFT mode
@@ -471,9 +471,9 @@ size_t Convolution::addFunction(IFunction_sptr f) {
 }
 
 /**
-  * Make sure that the resolution is updated if this function is reused in
+ * Make sure that the resolution is updated if this function is reused in
  * several Fits.
-  */
+ */
 void Convolution::setUpForFit() { m_resolution.clear(); }
 
 /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate

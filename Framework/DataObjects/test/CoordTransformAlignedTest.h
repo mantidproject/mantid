@@ -1,13 +1,13 @@
 #ifndef MANTID_DATAOBJECTS_COORDTRANSFORMALIGNEDTEST_H_
 #define MANTID_DATAOBJECTS_COORDTRANSFORMALIGNEDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
 
 #include <boost/scoped_ptr.hpp>
 

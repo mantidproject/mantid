@@ -4,16 +4,16 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidAPI/IFunction.h"
+#include "../Muon/MuonAnalysisFitFunctionPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "../Muon/MuonAnalysisFitFunctionPresenter.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitFunctionModel.h"
 
-using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::CustomInterfaces::Muon::MultiFitState;
+using MantidQt::CustomInterfaces::MuonAnalysisFitFunctionPresenter;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;
@@ -25,7 +25,7 @@ public:
     m_func =
         Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
   }
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(getFunctionString, QString());
   Mantid::API::IFunction_sptr getGlobalFunction() override { return m_func; }
   MOCK_METHOD0(functionStructureChanged, void());
@@ -46,7 +46,7 @@ public:
   MOCK_METHOD3(setLocalParameterFixed, void(const QString &, int, bool));
   MOCK_METHOD3(setLocalParameterTie, void(const QString &, int, QString));
   MOCK_METHOD1(setCurrentDataset, void(int));
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 private:
   Mantid::API::IFunction_sptr m_func;
@@ -55,7 +55,7 @@ private:
 // Mock muon fit property browser
 class MockFitFunctionControl : public IMuonFitFunctionModel {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(setFunction, void(const Mantid::API::IFunction_sptr));
   MOCK_METHOD0(runFit, void());
   MOCK_METHOD0(runSequentialFit, void());
@@ -70,7 +70,7 @@ public:
   MOCK_METHOD0(doRemoveGuess, void());
   MOCK_METHOD0(doPlotGuess, void());
   MOCK_CONST_METHOD0(hasGuess, bool());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {
@@ -241,8 +241,9 @@ private:
     const auto &function = createFunction();
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(times);
-    EXPECT_CALL(*m_funcBrowser, updateMultiDatasetParameters(
-                                    testing::Ref(*function))).Times(times);
+    EXPECT_CALL(*m_funcBrowser,
+                updateMultiDatasetParameters(testing::Ref(*function)))
+        .Times(times);
     m_presenter->handleFitFinished(wsName);
   }
 

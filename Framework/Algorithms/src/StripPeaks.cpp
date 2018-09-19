@@ -29,14 +29,16 @@ void StripPeaks::init() {
   auto min = boost::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("FWHM", 7, min, "The number of points covered, on average, "
-                                  "by the fwhm of a peak (default 7).\nPassed "
-                                  "through to [[FindPeaks]].");
+  declareProperty("FWHM", 7, min,
+                  "The number of points covered, on average, "
+                  "by the fwhm of a peak (default 7).\nPassed "
+                  "through to [[FindPeaks]].");
   // The tolerance allowed in meeting the conditions
-  declareProperty("Tolerance", 4, min, "A measure of the strictness desired in "
-                                       "meeting the condition on peak "
-                                       "candidates,\n"
-                                       "Mariscotti recommends 2 (default 4)");
+  declareProperty("Tolerance", 4, min,
+                  "A measure of the strictness desired in "
+                  "meeting the condition on peak "
+                  "candidates,\n"
+                  "Mariscotti recommends 2 (default 4)");
 
   declareProperty(make_unique<ArrayProperty<double>>("PeakPositions"),
                   "Optional: enter a comma-separated list of the expected "
@@ -54,9 +56,10 @@ void StripPeaks::init() {
       boost::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
-  declareProperty("HighBackground", true, "Flag to indicate that the peaks are "
-                                          "relatively weak comparing to "
-                                          "background.");
+  declareProperty("HighBackground", true,
+                  "Flag to indicate that the peaks are "
+                  "relatively weak comparing to "
+                  "background.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);

@@ -120,7 +120,7 @@ Base *PythonObjectInstantiator<Base>::createUnwrappedInstance() const {
   throw std::runtime_error(
       "Unable to create unwrapped instance of Python object");
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_PYTHONALGORITHMINSTANTIATOR_H_ */

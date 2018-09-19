@@ -9,7 +9,6 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -25,12 +24,12 @@
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
+using Mantid::DataHandling::LoadNexusMonitorsAlg::MonitorInfo;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
-using Mantid::DataHandling::LoadNexusMonitorsAlg::MonitorInfo;
 
 namespace Mantid {
 namespace DataHandling {
@@ -143,9 +142,9 @@ void LoadNexusMonitors2::init() {
 
 //------------------------------------------------------------------------------
 /**
-* Executes the algorithm. Reading in the file and creating and populating
-* the output workspace
-*/
+ * Executes the algorithm. Reading in the file and creating and populating
+ * the output workspace
+ */
 void LoadNexusMonitors2::exec() {
   // Retrieve the filename from the properties
   m_filename = this->getPropertyValue("Filename");
@@ -221,10 +220,10 @@ void LoadNexusMonitors2::exec() {
     // already know spectrum and detector numbers
     g_log.debug() << "monIndex = " << m_monitorInfo[ws_index].detNum << '\n';
     g_log.debug() << "spectrumNo = " << m_monitorInfo[ws_index].specNum << '\n';
-    m_workspace->getSpectrum(ws_index)
-        .setSpectrumNo(m_monitorInfo[ws_index].specNum);
-    m_workspace->getSpectrum(ws_index)
-        .setDetectorID(m_monitorInfo[ws_index].detNum);
+    m_workspace->getSpectrum(ws_index).setSpectrumNo(
+        m_monitorInfo[ws_index].specNum);
+    m_workspace->getSpectrum(ws_index).setDetectorID(
+        m_monitorInfo[ws_index].detNum);
 
     // Don't actually read all of the monitors
     g_log.information() << "Loading " << m_monitorInfo[ws_index].name;
@@ -338,11 +337,11 @@ void LoadNexusMonitors2::exec() {
 
 //------------------------------------------------------------------------------
 /**
-* Fix the detector numbers if the defaults are not correct. Currently checks
-* the isis_vms_compat block and reads them from there if possible.
-*
-* @param file :: A reference to the NeXus file opened at the root entry
-*/
+ * Fix the detector numbers if the defaults are not correct. Currently checks
+ * the isis_vms_compat block and reads them from there if possible.
+ *
+ * @param file :: A reference to the NeXus file opened at the root entry
+ */
 void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
   const size_t nmonitors = m_monitorInfo.size();
   boost::scoped_array<detid_t> det_ids(new detid_t[nmonitors]);
@@ -414,11 +413,11 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
 
 //------------------------------------------------------------------------------
 /**
-* Helper method to make sure that a file is / can be openend as a NeXus file
-*
-* @param fname :: name of the file
-* @return True if opening the file as NeXus and retrieving entries succeeds
-**/
+ * Helper method to make sure that a file is / can be openend as a NeXus file
+ *
+ * @param fname :: name of the file
+ * @return True if opening the file as NeXus and retrieving entries succeeds
+ **/
 bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
   bool res = true;
   ::NeXus::File *f = nullptr;
@@ -438,11 +437,11 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
 
 //------------------------------------------------------------------------------
 /**
-* Splits multiperiod histogram data into seperate workspaces and puts them in
-* a group
-*
-* @param numPeriods :: number of periods
-**/
+ * Splits multiperiod histogram data into seperate workspaces and puts them in
+ * a group
+ *
+ * @param numPeriods :: number of periods
+ **/
 void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
     const size_t numPeriods) {
   // protection - we should not have entered the routine if these are not true

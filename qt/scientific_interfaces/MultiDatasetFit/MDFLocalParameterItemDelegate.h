@@ -54,8 +54,8 @@ private:
   mutable LocalParameterEditor *m_currentEditor;
 };
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /*MDFLOCALPARAMETERITEMDELEGATE_H_*/

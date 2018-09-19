@@ -2,17 +2,17 @@
 #define EVENT_NEXUS_LOADING_PRESENTER_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <vtkUnstructuredGrid.h>
 #include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
 
+#include "MockObjects.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MockObjects.h"
 
 #include "MantidAPI/FileFinder.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
-#include "MantidKernel/make_unique.h"
 
 using namespace Mantid::VATES;
 using namespace testing;

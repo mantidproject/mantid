@@ -52,7 +52,7 @@ public:
   }
   QString shortcut() override { return QString("Ctrl+V"); }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPASTESELECTEDCOMMAND_H*/

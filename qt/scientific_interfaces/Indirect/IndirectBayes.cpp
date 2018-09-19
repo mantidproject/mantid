@@ -1,6 +1,6 @@
+#include "IndirectBayes.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "IndirectBayes.h"
 #include "Quasi.h"
 #include "ResNorm.h"
 #include "Stretch.h"
@@ -10,7 +10,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectBayes)
 }
-}
+} // namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 

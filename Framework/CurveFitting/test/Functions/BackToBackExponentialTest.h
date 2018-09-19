@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Functions/BackToBackExponential.h"
 
 #include <cmath>
 
@@ -41,7 +41,7 @@ public:
     return (a + b) / (a * b);
   }
 };
-}
+} // namespace
 
 class BackToBackExponentialTest : public CxxTest::TestSuite {
 public:

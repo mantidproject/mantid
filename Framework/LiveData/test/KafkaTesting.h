@@ -8,13 +8,13 @@
 #include "MantidTypes/Core/DateAndTime.h"
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 #include "Kafka/private/Schema/ba57_run_info_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
-GCC_DIAG_ON(conversion)
+GNU_DIAG_ON("conversion")
 
 #include <ctime>
 
@@ -29,7 +29,7 @@ public:
       std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>;
   using IKafkaStreamSubscriber_ptr = Mantid::LiveData::IKafkaStreamSubscriber *;
 
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   // GMock cannot mock non-copyable return types so we resort to a small
   // adapter method. Users have to use EXPECT_CALL(subscribe_) instead
   MOCK_CONST_METHOD2(subscribe_, IKafkaStreamSubscriber_ptr(
@@ -50,7 +50,7 @@ public:
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
         this->subscribe_(s, offset, option));
   }
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 // -----------------------------------------------------------------------------
@@ -141,7 +141,8 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
       builder.CreateVector(tof), builder.CreateVector(spec),
       FacilityData_ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
-                     RunState_RUNNING, protonCharge).Union());
+                     RunState_RUNNING, protonCharge)
+          .Union());
   FinishEventMessageBuffer(builder, messageFlatbuf);
 
   // Copy to provided buffer
@@ -188,10 +189,11 @@ void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(
-      builder, InfoTypes_RunStart,
-      CreateRunStart(builder, startTimestamp, runNumber,
-                     builder.CreateString(instName), nPeriods).Union());
+  auto runInfo =
+      CreateRunInfo(builder, InfoTypes_RunStart,
+                    CreateRunStart(builder, startTimestamp, runNumber,
+                                   builder.CreateString(instName), nPeriods)
+                        .Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),

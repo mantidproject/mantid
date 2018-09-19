@@ -33,8 +33,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 #include "MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h"
 
-#include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
+#include "boost/shared_ptr.hpp"
 
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
@@ -79,8 +79,8 @@
 #include <pqCollaborationBehavior.h>
 #include <pqCommandLineOptionsBehavior.h>
 #include <pqCrashRecoveryBehavior.h>
-#include <pqDataTimeStepBehavior.h>
 #include <pqDataRepresentation.h>
+#include <pqDataTimeStepBehavior.h>
 #include <pqDefaultViewBehavior.h>
 #include <pqInterfaceTracker.h>
 #include <pqObjectPickingBehavior.h>
@@ -88,16 +88,16 @@
 #include <pqPipelineSource.h>
 #include <pqPluginManager.h>
 #include <pqPluginSettingsBehavior.h>
+#include <pqSaveDataReaction.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
 #include <pqStandardPropertyWidgetInterface.h>
 #include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
+#include <pqVerifyRequiredPluginBehavior.h>
 #include <pqView.h>
 #include <pqViewStreamingBehavior.h>
-#include <pqVerifyRequiredPluginBehavior.h>
-#include <pqSaveDataReaction.h>
 
 #include <QAction>
 #include <QDragEnterEvent>
@@ -105,11 +105,11 @@
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QModelIndex>
+#include <QRect>
 #include <QUrl>
 #include <QWidget>
-#include <QMessageBox>
-#include <QRect>
 
 namespace Mantid {
 namespace Vates {
@@ -757,7 +757,7 @@ void MdViewerWidget::resetCurrentView(int workspaceType,
  * @param instrumentName The name of the instrument with which the workspace
  *                       data was measured.
  * @returns An initial view.
-*/
+ */
 ModeControlWidget::Views
 MdViewerWidget::getInitialView(int workspaceType,
                                const std::string &instrumentName) {
@@ -844,12 +844,12 @@ bool MdViewerWidget::checkIfTechniqueContainsKeyword(
 }
 
 /*
-  * Check that the selected default view is compatible with the workspace type
-  *
-  * @param view An initial view.
-  * @param workspaceType The type of workspace.
-  * @returns A user-specified inital view or the standard view.
-*/
+ * Check that the selected default view is compatible with the workspace type
+ *
+ * @param view An initial view.
+ * @param workspaceType The type of workspace.
+ * @returns A user-specified inital view or the standard view.
+ */
 ModeControlWidget::Views
 MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view,
                                           int workspaceType) {
@@ -1576,8 +1576,8 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
 }
 
 /**
-* Set the listener for when sources are being destroyed
-*/
+ * Set the listener for when sources are being destroyed
+ */
 void MdViewerWidget::setDestroyedListener() {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
@@ -1642,20 +1642,17 @@ bool otherWorkspacePresent() {
 }
 
 /**
-  * Handle the drag and drop events of peaks workspaces.
-  * @param e The event.
-  * @param text String containing information regarding the workspace name.
-  * @param wsNames  Reference to a list of workspaces names, which are being
+ * Handle the drag and drop events of peaks workspaces.
+ * @param e The event.
+ * @param text String containing information regarding the workspace name.
+ * @param wsNames  Reference to a list of workspaces names, which are being
  * extracted.
-  */
+ */
 void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e,
                                                       const QString &text,
                                                       QStringList &wsNames) {
-  int endIndex = 0;
-  while (text.indexOf("[\"", endIndex) > -1) {
-    int startIndex = text.indexOf("[\"", endIndex) + 2;
-    endIndex = text.indexOf("\"]", startIndex);
-    QString candidate = text.mid(startIndex, endIndex - startIndex);
+  const QStringList selectedWorkspaces = text.split("\n");
+  for (const auto &candidate : selectedWorkspaces) {
     // Only append the candidate if SplattorPlotView is selected and an
     // MDWorkspace is loaded.
     if (currentView->getViewType() == ModeControlWidget::Views::SPLATTERPLOT &&

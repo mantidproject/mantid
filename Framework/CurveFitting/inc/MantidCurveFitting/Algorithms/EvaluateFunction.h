@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_EVALUATEFUNCTION_H_
 #define MANTID_CURVEFITTING_EVALUATEFUNCTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

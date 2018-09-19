@@ -27,8 +27,8 @@ public:
 
   void
   test_constuctor_with_equality_matrix_whose_num_columns_dont_match_nparams_throws() {
-    using Mantid::Kernel::Math::SLSQPMinimizer;
     using Mantid::Kernel::DblMatrix;
+    using Mantid::Kernel::Math::SLSQPMinimizer;
 
     const size_t nparams(2);
     DblMatrix equality(1, nparams + 1); // cols > number parameters
@@ -45,8 +45,8 @@ public:
 
   void
   test_constuctor_with_inequality_matrix_whose_num_columns_dont_match_nparams_throws() {
-    using Mantid::Kernel::Math::SLSQPMinimizer;
     using Mantid::Kernel::DblMatrix;
+    using Mantid::Kernel::Math::SLSQPMinimizer;
 
     const size_t nparams(2);
     DblMatrix equality; // Empty indicates no constraint
@@ -125,8 +125,8 @@ public:
 
 private:
   std::vector<double> runMinimizer(const CONSTRAINT_TYPE type) {
-    using Mantid::Kernel::Math::SLSQPMinimizer;
     using Mantid::Kernel::DblMatrix;
+    using Mantid::Kernel::Math::SLSQPMinimizer;
 
     auto lsqmin = boost::shared_ptr<SLSQPMinimizer>();
     const size_t nparams = m_nparams;

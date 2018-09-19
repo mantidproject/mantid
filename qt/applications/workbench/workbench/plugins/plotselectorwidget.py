@@ -36,7 +36,7 @@ class PlotSelector(PluginWidget):
         plot_selector_presenter = PlotSelectorPresenter(GlobalFigureManager)
 
         # layout
-        self.plot_selector_widget = plot_selector_presenter.widget
+        self.plot_selector_widget = plot_selector_presenter.view
         layout = QVBoxLayout()
         layout.addWidget(self.plot_selector_widget)
         self.setLayout(layout)

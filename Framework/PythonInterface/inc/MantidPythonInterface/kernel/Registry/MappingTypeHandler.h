@@ -29,9 +29,9 @@ namespace PythonInterface {
 namespace Registry {
 
 /**
-  *  Defines a handler class for converting a Python mapping type object
-  * to a C++ PropertyManager type.
-  */
+ *  Defines a handler class for converting a Python mapping type object
+ * to a C++ PropertyManager type.
+ */
 class MappingTypeHandler final : public PropertyValueHandler {
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::api::object &mapping) const override;
@@ -41,8 +41,8 @@ class MappingTypeHandler final : public PropertyValueHandler {
          const boost::python::api::object &validator,
          const unsigned int direction) const override;
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif // MANTID_PYTHONINTERFACE_MAPPINGTYPEHANDLER_H

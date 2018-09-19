@@ -34,6 +34,43 @@ The algorithms takes two input workspaces:
 -  The OutputParamsWorkspace is a TableWorkspace containing the fit parameters.
    Peaks which could not be fit are omitted.
 
+Instrument-Defined Parameters
+-----------------------------
+In addition to the input parameters defined above, there are several other parameters
+to be aware of which are pre-defined for each instrument.  The instrument is determined
+from the instrument that is loaded into PeaksWorkspace. If the instrument parameters file
+does not contain paramters, the algorithm defaults to MaNDi parameters. Default 
+values are below:
+
++--------------+----------------------------+----------+----------+---------+
+| Parameter    |  Description               |  MaNDi   |  TOPAZ   | CORELLI |
++==============+============================+==========+==========+=========+
+| DQPixel      | The side length for each   |          |          |         |
+|              | voxel used for fitting.    | 0.003    | 0.01     | 0.007   |
+|              | Units: 1/Angstrom          |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| FracHKL      | The distance between peaks |          |          |         |
+|              | (in fraction of hkl) that  | 0.4      | 0.4      | 0.4     |
+|              | is used for fitting.       |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| MinDtBinWidth| The smallest time bin used |          |          |         |
+|              | for fitting the TOF profile| 15       | 2        | 2       |
+|              | Units: microseconds        |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| MaxDtBinWidth| The largest time bin used  |          |          |         |
+|              | for fitting the TOF profile| 50       | 15       | 60      |
+|              | Units: microseconds        |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| NTheta       | The number of bins along   |          |          |         |
+|              | the scattering direction   | 50       | 50       | 50      |
+|              | used for BVG fitting.      |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+| NPhi         | The number of bins along   |          |          |         |
+|              | the azimuthal direction    | 50       | 50       | 50      |
+|              | used for BVG fitting.      |          |          |         |
++--------------+----------------------------+----------+----------+---------+
+
+
 Calculations
 ------------
 This algorithm will fit a set of peaks in a PeaksWorkspace.  The intensity profile
@@ -43,10 +80,10 @@ Constructing the Measured Intensity Distribution
 ##################################################
 To construct the measured distribution to be fit, a histogram of events is made around the peak.
 This histogram is in (q\ :sub:`x`\ ,  q\ :sub:`y`\, q\ :sub:`z`\) and composed of voxels of side
-length **dQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable 
+length **DQPixel**.  To minimize the effect of neighboring peaks on profile fitting, the variable 
 **qMask** is used to only consider a region around the peak in (h,k,l) space.  It will filter voxels
-outside of (h ± **fracHKL**, k ± **fracHKL**, l ± **fracHKL**) from calculations used for profile
-fitting. In practice, values of 0.35 < **fracHKL** < 0.5 seem to work best. 
+outside of (h ± **FracHKL**, k ± **FracHKL**, l ± **FracHKL**) from calculations used for profile
+fitting. In practice, values of 0.25 < **fracHKL** < 0.5 seem to work best. 
 
 Fitting the Time-of-Flight Coordinate
 #####################################
@@ -58,7 +95,7 @@ The time-of-flight (TOF), t, of each voxel is determined as:
 The events are histogrammed by their `t` values to create a TOF profile.  This profile can then be fit 
 to the Ikeda Carpenter function.  To separate the peak and background, different levels of intensity are
 filtered out.  The predicted background level is determined as the average background not near the peak or off the edge
-and values within **minppl_frac** and **maxppl_frac** times the predicted value are tried.  The best fit to the expected 
+and values within **Minppl_frac** and **Maxppl_frac** times the predicted value are tried.  The best fit to the expected 
 moderator emission (determined by the moderator coefficients defined in **ModeratorCoefficientsFile**) is
 taken and these voxels are considered to be signal.
 
@@ -67,13 +104,18 @@ Fitting the Non-TOF Coordinate
 TOF goes as :math:`1/|\vec{q}|` and so it is natural to use spherical coordinate.  In that sense, the other two coordinates
 are  :math:`(q_{\theta} ,  q_{\phi_az})` - along the scattering angle and azimuthal angle, respectively.  From the
 MDHisto Workspace (filtered by **qMask** and using only the signal voxels from the TOF fight), a 2D histogram is constructed
-which is fit to a bivariate normal distribution.  The histogram has **nTheta** :math:`\times` **nPhi** bins.
+which is fit to a bivariate normal distribution.  The histogram has **NTheta** :math:`\times` **NPhi** bins.
 
 For weak peaks or peaks near detector edges, the 2D histogram likely does not reflect the full profile.  To address this, the
 profile of the nearest strong peaks is forced when doing the BVG fit.  The profile is fit (allowed to vary 10% in
 :math:`\sigma_x, \sigma_y, \rho` ) and location and amplitude are not fixed.  Weak peaks are defined as peaks with fewer 
-than **forceCutoff** counts from peak-minus-background integration or within **dEdge** pixels of the detector edge.
+than **IntensityCutoff** counts from peak-minus-background integration or within **EdgeCutoff** pixels of the detector edge.
 
+The strong peaks library can be generated in two ways.  First, it can be provided as an input file through **StrongPeakParamsFile**.
+The **StrongPeakParamsFile** should be a .pkl file which contains a Numpy array containing the parameters used for strong peaks.
+Alternatively, if no file is provided, the algorithm will go through and fit strong peaks first, building the strong peaks library
+as it goes.  After fitting all of the strong peaks, defined as peaks with spherical intensities above **IntensityCutoff** and further 
+than **EdgeCutoff** pixels from the edge, it will fit weak peaks using those profiles. 
 
 Integrating the Model
 #####################
@@ -114,10 +156,9 @@ Usage
     LoadIsawPeaks(Filename='/SNS/MANDI/shared/ProfileFitting/demo_5921.integrate', OutputWorkspace='peaks_ws')
 
     IntegratePeaksProfileFitting(OutputPeaksWorkspace='peaks_ws_out', OutputParamsWorkspace='params_ws',
-            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws', RunNumber=5921, DtSpread=0.015,
-            UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat',
+            InputWorkspace='MANDI_5921_md', PeaksWorkspace='peaks_ws', RunNumber=5921,
+            UBFile='/SNS/MANDI/shared/ProfileFitting/demo_5921.mat', MinpplFrac=0.9, MaxpplFrac=1.1,
             ModeratorCoefficientsFile='/SNS/MANDI/shared/ProfileFitting/franz_coefficients_2017.dat',
-            MinpplFrac=0.9, MaxpplFrac=1.1, MindtBinWidth=15,
             StrongPeakParamsFile='/SNS/MANDI/shared/ProfileFitting/strongPeakParams_beta_lac_mut_mbvg.pkl',
             peakNumber=30)
 

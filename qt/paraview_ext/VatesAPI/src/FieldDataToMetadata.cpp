@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/FieldDataToMetadata.h"
-#include <boost/algorithm/string.hpp>
-#include "vtkFieldData.h"
 #include "vtkCharArray.h"
+#include "vtkFieldData.h"
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid {
 namespace VATES {
@@ -33,5 +33,5 @@ std::string FieldDataToMetadata::execute(vtkFieldData *fieldData,
   }
   return sXml;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

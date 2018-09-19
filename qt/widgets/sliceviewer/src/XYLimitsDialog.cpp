@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/SliceViewer/XYLimitsDialog.h"
-#include "MantidQtWidgets/Common/QStringUtils.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidQtWidgets/Common/QStringUtils.h"
 #include <QIntValidator>
 
 using MantidQt::API::toQStringInternal;

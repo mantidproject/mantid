@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PAUSETEST_H_
 #define MANTID_ALGORITHMS_PAUSETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Pause.h"
 

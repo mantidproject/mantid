@@ -1,13 +1,13 @@
 #ifndef MANTID_MDALGORITHMS_MINUSMDTEST_H_
 #define MANTID_MDALGORITHMS_MINUSMDTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 #include <cxxtest/TestSuite.h>
 

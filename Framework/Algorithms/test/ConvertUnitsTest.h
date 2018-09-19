@@ -8,7 +8,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -25,10 +24,10 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Points;
-using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::CountStandardDeviations;
 
 namespace {
 
@@ -101,7 +100,7 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
   loader.execute();
 }
-}
+} // namespace
 
 class ConvertUnitsTest : public CxxTest::TestSuite {
 public:

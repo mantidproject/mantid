@@ -1,12 +1,12 @@
 #ifndef MANTID_CURVEFITTING_GSLJACOBIAN_H_
 #define MANTID_CURVEFITTING_GSLJACOBIAN_H_
 
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace CurveFitting {

@@ -245,5 +245,5 @@ void EnggDiffMultiRunFittingQtWidget::userError(
   m_userMessageProvider->userError(errorTitle, errorDescription);
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

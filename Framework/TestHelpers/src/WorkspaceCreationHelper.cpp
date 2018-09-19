@@ -29,17 +29,17 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidHistogramData/HistogramDx.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/V3D.h"
 
 #include <cmath>
 #include <sstream>
@@ -81,17 +81,17 @@ void removeWS(const std::string &name) {
 }
 
 /**
-  * Creates bin or point based histograms based on the data passed
-  * in for Y and E values and the bool specified.
-  *
-  * @param isHistogram :: Specifies whether the returned histogram
-  * should use points or bin edges for the x axis. True gives bin edges.
-  * @param yAxis :: Takes an rvalue (move) of the y axis for the new histogram
-  * @param eAxis :: Takes an rvalue (move) of the e axis for the new histogram
-  *
-  * @return :: Returns a histogram with the user specified X axis type
-  * and the data the user passed in.
-  */
+ * Creates bin or point based histograms based on the data passed
+ * in for Y and E values and the bool specified.
+ *
+ * @param isHistogram :: Specifies whether the returned histogram
+ * should use points or bin edges for the x axis. True gives bin edges.
+ * @param yAxis :: Takes an rvalue (move) of the y axis for the new histogram
+ * @param eAxis :: Takes an rvalue (move) of the e axis for the new histogram
+ *
+ * @return :: Returns a histogram with the user specified X axis type
+ * and the data the user passed in.
+ */
 template <typename YType, typename EType>
 Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
   // We don't need to check if y.size() == e.size() as the histogram
@@ -667,23 +667,23 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 }
 
 /**
-* Create a very small 2D workspace for a virtual reflectometry instrument with
-* multiple detectors
-* @return workspace with instrument attached.
-* @param startX :: X Tof start value for the workspace.
-* @param detSize :: detector height
-* @param slit1Pos :: position of the first slit (counting from source)
-* @param slit2Pos :: position of the second slit (counting from source)
-* @param vg1 :: slit 1 vertical gap
-* @param vg2 :: slit 2 vertical gap
-* @param sourcePos :: source position
-* @param monitorPos :: monitor position
-* @param samplePos :: sample position
-* @param detectorCenterPos :: position of the detector center
-* @param nSpectra :: number of spectra (detectors + monitor)
-* @param nBins :: number of TOF channels
-* @param deltaX :: TOF channel width
-*/
+ * Create a very small 2D workspace for a virtual reflectometry instrument with
+ * multiple detectors
+ * @return workspace with instrument attached.
+ * @param startX :: X Tof start value for the workspace.
+ * @param detSize :: detector height
+ * @param slit1Pos :: position of the first slit (counting from source)
+ * @param slit2Pos :: position of the second slit (counting from source)
+ * @param vg1 :: slit 1 vertical gap
+ * @param vg2 :: slit 2 vertical gap
+ * @param sourcePos :: source position
+ * @param monitorPos :: monitor position
+ * @param samplePos :: sample position
+ * @param detectorCenterPos :: position of the detector center
+ * @param nSpectra :: number of spectra (detectors + monitor)
+ * @param nBins :: number of TOF channels
+ * @param deltaX :: TOF channel width
+ */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const double startX, const double detSize, const V3D &slit1Pos,
     const V3D &slit2Pos, const double vg1, const double vg2,
@@ -1317,17 +1317,17 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
 }
 
 /**
-  * Populates the destination array (usually a mutable histogram)
-  * starting at the index specified with the doubles provided in an
-  * initializer list. Note the caller is responsible for ensuring
-  * the destination has capacity for startingIndex + size(initializer list)
-  * number of values
-  *
-  * @param destination :: The array to populate with data
-  * @param startingIndex :: The index to start populating data at
-  * @param values :: The initializer list to populate the array with
-  * starting at the index specified
-  */
+ * Populates the destination array (usually a mutable histogram)
+ * starting at the index specified with the doubles provided in an
+ * initializer list. Note the caller is responsible for ensuring
+ * the destination has capacity for startingIndex + size(initializer list)
+ * number of values
+ *
+ * @param destination :: The array to populate with data
+ * @param startingIndex :: The index to start populating data at
+ * @param values :: The initializer list to populate the array with
+ * starting at the index specified
+ */
 template <typename T>
 void populateWsWithInitList(T &destination, size_t startingIndex,
                             const std::initializer_list<double> &values) {
@@ -1365,25 +1365,18 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   // set the target workspace
   auto targWS = boost::make_shared<TableWorkspace>(nHist);
   // detectors positions
-  if (!targWS->addColumn("V3D", "DetDirections"))
-    throw(std::runtime_error("Can not add column DetDirectrions"));
+  targWS->addColumn("V3D", "DetDirections");
   // sample-detector distance;
-  if (!targWS->addColumn("double", "L2"))
-    throw(std::runtime_error("Can not add column L2"));
+  targWS->addColumn("double", "L2");
   // Diffraction angle
-  if (!targWS->addColumn("double", "TwoTheta"))
-    throw(std::runtime_error("Can not add column TwoTheta"));
-  if (!targWS->addColumn("double", "Azimuthal"))
-    throw(std::runtime_error("Can not add column Azimuthal"));
+  targWS->addColumn("double", "TwoTheta");
+  targWS->addColumn("double", "Azimuthal");
   // the detector ID;
-  if (!targWS->addColumn("int", "DetectorID"))
-    throw(std::runtime_error("Can not add column DetectorID"));
+  targWS->addColumn("int", "DetectorID");
   // stores spectra index which corresponds to a valid detector index;
-  if (!targWS->addColumn("size_t", "detIDMap"))
-    throw(std::runtime_error("Can not add column detIDMap"));
+  targWS->addColumn("size_t", "detIDMap");
   // stores detector index which corresponds to the workspace index;
-  if (!targWS->addColumn("size_t", "spec2detMap"))
-    throw(std::runtime_error("Can not add column spec2detMap"));
+  targWS->addColumn("size_t", "spec2detMap");
 
   // will see about that
   // sin^2(Theta)
@@ -1396,7 +1389,7 @@ createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
 
 /** method does preliminary calculations of the detectors positions to convert
  results into k-dE space ;
- and places the resutls into static cash to be used in subsequent calls to this
+ and places the results into static cash to be used in subsequent calls to this
  algorithm */
 void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
                                DataObjects::TableWorkspace_sptr &targWS,
@@ -1408,7 +1401,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   if ((!source) || (!sample)) {
 
     throw Kernel::Exception::InstrumentDefinitionError(
-        "Instrubment not sufficiently defined: failed to get source and/or "
+        "Instrument not sufficiently defined: failed to get source and/or "
         "sample");
   }
 

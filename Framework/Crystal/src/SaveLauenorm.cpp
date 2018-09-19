@@ -1,23 +1,23 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveLauenorm.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Utils.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidCrystal/AnvredCorrection.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Strings.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Utils.h"
 #include "boost/math/special_functions/round.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <iomanip>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -59,10 +59,11 @@ void SaveLauenorm::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty("UseDetScale", false, "Scale intensity and sigI by scale "
-                                        "factor of detector if set in "
-                                        "SetDetScale.\n"
-                                        "If false, no change (default).");
+  declareProperty("UseDetScale", false,
+                  "Scale intensity and sigI by scale "
+                  "factor of detector if set in "
+                  "SetDetScale.\n"
+                  "If false, no change (default).");
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
                                                       Direction::Input),
@@ -523,5 +524,5 @@ void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
   }
 }
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid

@@ -1,9 +1,9 @@
 #ifndef MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_H
 #define MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_H
 
-#include "MantidKernel/VMD.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "DllOption.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/VMD.h"
 #include <array>
 #include <memory>
 
@@ -46,6 +46,6 @@ private:
 std::unique_ptr<CoordinateTransform> EXPORT_OPT_MANTIDQT_SLICEVIEWER
 createCoordinateTransform(const Mantid::API::IMDWorkspace &ws, size_t dimX,
                           size_t dimY);
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 #endif

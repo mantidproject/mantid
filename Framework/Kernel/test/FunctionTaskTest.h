@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <MantidKernel/Timer.h>
-#include "MantidKernel/Task.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/Task.h"
+#include <MantidKernel/Timer.h>
 
 using namespace Mantid::Kernel;
 

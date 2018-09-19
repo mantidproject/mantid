@@ -1,22 +1,22 @@
 #ifndef MDBOXTEST_H
 #define MDBOXTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <map>
-#include <memory>
-#include <Poco/File.h>
-#include <nexus/NeXusFile.hpp>
-#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <map>
+#include <memory>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

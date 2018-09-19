@@ -1,17 +1,17 @@
 #ifndef MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
 #define MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Strings.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/Strings.h"
+#include "MantidLiveData/MonitorLiveData.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
 #include <Poco/ActiveResult.h>
@@ -162,7 +162,7 @@ public:
   //--------------------------------------------------------------------------------------------
   /** Executes the given algorithm asynchronously, until you reach the given
    * chunk number.
-     * @return false if test failed*/
+   * @return false if test failed*/
   bool runAlgoUntilChunk(boost::shared_ptr<MonitorLiveData> alg1,
                          size_t stopAtChunk) {
     Poco::ActiveResult<bool> res1 = alg1->executeAsync();

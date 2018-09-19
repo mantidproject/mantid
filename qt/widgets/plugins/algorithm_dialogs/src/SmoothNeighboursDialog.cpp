@@ -1,7 +1,7 @@
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SmoothNeighboursDialog.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QGroupBox>
 

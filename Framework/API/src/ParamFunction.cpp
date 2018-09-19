@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/ParamFunction.h"
 
 #include <cmath>
 #include <limits>
@@ -141,7 +141,7 @@ double ParamFunction::getParameter(const std::string &name) const {
  * Check if function has a parameter with a particular name.
  * @param name :: A name of a parameter.
  * @return True if the parameter exists.
-*/
+ */
 bool ParamFunction::hasParameter(const std::string &name) const {
   return std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name) !=
          m_parameterNames.end();

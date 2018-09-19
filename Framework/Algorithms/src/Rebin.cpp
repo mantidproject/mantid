@@ -4,9 +4,9 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistoWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -20,27 +20,27 @@ DECLARE_ALGORITHM(Rebin)
 
 using namespace Kernel;
 using namespace API;
-using HistogramData::Histogram;
-using HistogramData::BinEdges;
-using HistogramData::Frequencies;
-using HistogramData::FrequencyStandardDeviations;
-using HistogramData::Exception::InvalidBinEdgesError;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
+using HistogramData::BinEdges;
+using HistogramData::Exception::InvalidBinEdgesError;
+using HistogramData::Frequencies;
+using HistogramData::FrequencyStandardDeviations;
+using HistogramData::Histogram;
 
 //---------------------------------------------------------------------------------------------
 // Public static methods
 //---------------------------------------------------------------------------------------------
 
 /**
-* Return the rebin parameters from a user input
-* @param inParams Input vector from user
-* @param inputWS Input workspace from user
-* @param logger A reference to a logger
-* @returns A new vector containing the rebin parameters
-*/
+ * Return the rebin parameters from a user input
+ * @param inParams Input vector from user
+ * @param inputWS Input workspace from user
+ * @param logger A reference to a logger
+ * @returns A new vector containing the rebin parameters
+ */
 std::vector<double>
 Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
                             const API::MatrixWorkspace &inputWS,
@@ -77,8 +77,8 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
 //---------------------------------------------------------------------------------------------
 
 /** Initialisation method. Declares properties to be used in algorithm.
-*
-*/
+ *
+ */
 void Rebin::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
@@ -122,10 +122,10 @@ void Rebin::init() {
 }
 
 /** Executes the rebin algorithm
-*
-*  @throw runtime_error Thrown if the bin range does not intersect the range of
-*the input workspace
-*/
+ *
+ *  @throw runtime_error Thrown if the bin range does not intersect the range of
+ *the input workspace
+ */
 void Rebin::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -296,13 +296,13 @@ void Rebin::exec() {
 }
 
 /** Takes the masks in the input workspace and apportions the weights into the
-*new bins that overlap
-*  with a masked bin. These bins are then masked with the calculated weight.
-*
-*  @param inputWS ::  The input workspace
-*  @param outputWS :: The output workspace
-*  @param hist ::    The index of the current histogram
-*/
+ *new bins that overlap
+ *  with a masked bin. These bins are then masked with the calculated weight.
+ *
+ *  @param inputWS ::  The input workspace
+ *  @param outputWS :: The output workspace
+ *  @param hist ::    The index of the current histogram
+ */
 void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
                            API::MatrixWorkspace_sptr outputWS, int hist) {
   // Not too happy with the efficiency of this way of doing it, but it's a lot
@@ -355,5 +355,5 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   }
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

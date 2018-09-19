@@ -9,15 +9,15 @@
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/AutoPtr.h>
 #include <Poco/XML/XMLWriter.h>
 
 #include <fstream>
@@ -29,8 +29,8 @@ using namespace Mantid::Kernel;
 using namespace std;
 using namespace Poco::XML;
 
-using Geometry::Instrument_sptr;
 using Geometry::Instrument_const_sptr;
+using Geometry::Instrument_sptr;
 
 namespace Mantid {
 namespace DataHandling {
@@ -92,7 +92,7 @@ void LoadFullprofResolution::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
-  */
+ */
 void LoadFullprofResolution::exec() {
   // Get input
   string datafile = getProperty("Filename");
@@ -232,9 +232,9 @@ void LoadFullprofResolution::exec() {
 
 //----------------------------------------------------------------------------------------------
 /** Load file to a vector of strings.  Each string is a non-empty line.
-  * @param filename :: string for name of the .irf file
-  * @param lines :: vector of strings for each non-empty line in .irf file
-  */
+ * @param filename :: string for name of the .irf file
+ * @param lines :: vector of strings for each non-empty line in .irf file
+ */
 void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
   string line;
 
@@ -268,8 +268,8 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
 
 //----------------------------------------------------------------------------------------------
 /** Get the NPROF number
-  * @param lines :: vector of string of all non-empty lines in input file;
-  */
+ * @param lines :: vector of string of all non-empty lines in input file;
+ */
 int LoadFullprofResolution::getProfNumber(const vector<string> &lines) {
   // Assume the NPROF number is on the second line
   if (lines[1].find("NPROF") != string::npos) {
@@ -289,15 +289,15 @@ int LoadFullprofResolution::getProfNumber(const vector<string> &lines) {
 
 //----------------------------------------------------------------------------------------------
 /** Scan lines for bank IDs
-  * @param lines :: vector of string of all non-empty lines in input file;
-  * @param useFileBankIDs :: use bank IDs as given in file rather than ordinal
+ * @param lines :: vector of string of all non-empty lines in input file;
+ * @param useFileBankIDs :: use bank IDs as given in file rather than ordinal
  * number of bank
-  * @param banks :: [output] vector of integers for existing banks in .irf file;
-  * @param bankstartindexmap :: [output] map to indicate the first line of each
+ * @param banks :: [output] vector of integers for existing banks in .irf file;
+ * @param bankstartindexmap :: [output] map to indicate the first line of each
  * bank in vector lines.
-  * @param bankendindexmap :: [output] map to indicate the last line of each
+ * @param bankendindexmap :: [output] map to indicate the last line of each
  * bank in vector lines
-  */
+ */
 void LoadFullprofResolution::scanBanks(const vector<string> &lines,
                                        const bool useFileBankIDs,
                                        vector<int> &banks,
@@ -353,17 +353,17 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
 
 //----------------------------------------------------------------------------------------------
 /** Parse one bank in a .irf file to a map of parameter name and value
-  * @param parammap :: [output] parameter name and value map
-  * @param lines :: [input] vector of lines from .irf file;
-  * @param useFileBankIDs :: use bank IDs as given in file rather than ordinal
+ * @param parammap :: [output] parameter name and value map
+ * @param lines :: [input] vector of lines from .irf file;
+ * @param useFileBankIDs :: use bank IDs as given in file rather than ordinal
  * number of bank
-  * @param bankid :: [input] ID of the bank to get parsed
-  * @param startlineindex :: [input] index of the first line of the bank in
+ * @param bankid :: [input] ID of the bank to get parsed
+ * @param startlineindex :: [input] index of the first line of the bank in
  * vector of lines
-  * @param endlineindex :: [input] index of the last line of the bank in vector
+ * @param endlineindex :: [input] index of the last line of the bank in vector
  * of lines
-  * @param profNumber :: [input] index of the profile number
-  */
+ * @param profNumber :: [input] index of the profile number
+ */
 void LoadFullprofResolution::parseResolutionStrings(
     map<string, double> &parammap, const vector<string> &lines,
     const bool useFileBankIDs, int bankid, int startlineindex, int endlineindex,
@@ -586,7 +586,7 @@ void LoadFullprofResolution::parseResolutionStrings(
 
 //----------------------------------------------------------------------------------------------
 /** Parse a line containig bank information
-  */
+ */
 void LoadFullprofResolution::parseBankLine(string line, double &cwl,
                                            int &bankid) {
   // 1. Split along 'Bank'
@@ -645,7 +645,7 @@ double LoadFullprofResolution::parseDoubleValue(const std::string &value,
 
 //----------------------------------------------------------------------------------------------
 /** Generate output workspace
-  */
+ */
 TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
     map<int, map<string, double>> bankparammap) {
   g_log.notice() << "Start to generate table workspace ...."
@@ -738,13 +738,13 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(
 
 //----------------------------------------------------------------------------------------------
 /** create a map of the workspaces corresponding to each bank
-  * @param banks :: [input] list of bank IDs; must not be empty. must not have
+ * @param banks :: [input] list of bank IDs; must not be empty. must not have
  * duplicate entries.
-  * @param workspaces :: [input] list of corresponding workspaces or empty
+ * @param workspaces :: [input] list of corresponding workspaces or empty
  * vector for default  MAY NEED TO BE size_t <int, size_t>
-  * @param workspaceOfBank :: [output] map to indicate the workspace that a
+ * @param workspaceOfBank :: [output] map to indicate the workspace that a
  * bank's parameters will be put in
-  */
+ */
 void LoadFullprofResolution::createBankToWorkspaceMap(
     const std::vector<int> &banks, const std::vector<int> &workspaces,
     std::map<int, size_t> &workspaceOfBank) {
@@ -761,13 +761,13 @@ void LoadFullprofResolution::createBankToWorkspaceMap(
 
 //----------------------------------------------------------------------------------------------
 /** Put the parameters into one workspace
-  * @param column :: [input] column of the output table workspace
-  * @param ws :: [input/output] the group workspace parameters are to be put in
-  * @param nProf :: the PROF Number, which is used to determine fitting function
+ * @param column :: [input] column of the output table workspace
+ * @param ws :: [input/output] the group workspace parameters are to be put in
+ * @param nProf :: the PROF Number, which is used to determine fitting function
  * for the parameters.
-  * @param parameterXMLString :: string where the XML document filename is
+ * @param parameterXMLString :: string where the XML document filename is
  * stored
-  */
+ */
 void LoadFullprofResolution::putParametersIntoWorkspace(
     API::Column_const_sptr column, API::MatrixWorkspace_sptr ws, int nProf,
     std::string &parameterXMLString) {
@@ -824,10 +824,10 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
 }
 
 /* Add an Ikeda Carpenter PV ALFBE parameter to the XML document according to
-*the table workspace
-*
-*  paramName is the name of the parameter as it appears in the table workspace
-*/
+ *the table workspace
+ *
+ *  paramName is the name of the parameter as it appears in the table workspace
+ */
 void LoadFullprofResolution::addALFBEParameter(
     const API::Column_const_sptr column, Poco::XML::Document *mDoc,
     Element *parent, const std::string &paramName) {
@@ -848,9 +848,9 @@ void LoadFullprofResolution::addALFBEParameter(
 }
 
 /* Add a set of Ikeda Carpenter PV SIGMA parameters to the XML document
-* according to the table workspace
-* for the bank at the given column of the table workspace
-*/
+ * according to the table workspace
+ * for the bank at the given column of the table workspace
+ */
 void LoadFullprofResolution::addSigmaParameters(
     const API::Column_const_sptr column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
@@ -870,9 +870,9 @@ void LoadFullprofResolution::addSigmaParameters(
 }
 
 /* Add a set of Ikeda Carpenter PV GAMMA parameters to the XML document
-* according to the table workspace
-* for the bank at the given column of the table workspace
-*/
+ * according to the table workspace
+ * for the bank at the given column of the table workspace
+ */
 void LoadFullprofResolution::addGammaParameters(
     const API::Column_const_sptr column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
@@ -891,9 +891,9 @@ void LoadFullprofResolution::addGammaParameters(
 }
 
 /* Add a set of BackToBackExponential S parameters to the XML document according
-* to the table workspace
-* for the bank at the given column of the table workspace
-*/
+ * to the table workspace
+ * for the bank at the given column of the table workspace
+ */
 void LoadFullprofResolution::addBBX_S_Parameters(
     const API::Column_const_sptr column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
@@ -915,9 +915,9 @@ void LoadFullprofResolution::addBBX_S_Parameters(
 }
 
 /* Add a set of BackToBackExponential A parameters to the XML document according
-* to the table workspace
-* for the bank at the given column of the table workspace
-*/
+ * to the table workspace
+ * for the bank at the given column of the table workspace
+ */
 void LoadFullprofResolution::addBBX_A_Parameters(
     const API::Column_const_sptr column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
@@ -940,9 +940,9 @@ void LoadFullprofResolution::addBBX_A_Parameters(
 }
 
 /* Add a set of BackToBackExponential B parameters to the XML document according
-* to the table workspace
-* for the bank at the given column of the table workspace
-*/
+ * to the table workspace
+ * for the bank at the given column of the table workspace
+ */
 void LoadFullprofResolution::addBBX_B_Parameters(
     const API::Column_const_sptr column, Poco::XML::Document *mDoc,
     Poco::XML::Element *parent) {
@@ -965,8 +965,8 @@ void LoadFullprofResolution::addBBX_B_Parameters(
 }
 
 /*
-*  Get the XML name of a parameter given its Table Workspace name
-*/
+ *  Get the XML name of a parameter given its Table Workspace name
+ */
 std::string
 LoadFullprofResolution::getXMLParameterName(const std::string &name) {
   // Only used for ALFBE parameters
@@ -983,10 +983,10 @@ LoadFullprofResolution::getXMLParameterName(const std::string &name) {
 }
 
 /*
-* Get the value string to put in the XML eq attribute of the formula element of
-* the paramenter element
-* given the name of the parameter in the table workspace.
-*/
+ * Get the value string to put in the XML eq attribute of the formula element of
+ * the paramenter element
+ * given the name of the parameter in the table workspace.
+ */
 std::string
 LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr column,
                                       const std::string &name) {
@@ -997,10 +997,10 @@ LoadFullprofResolution::getXMLEqValue(const API::Column_const_sptr column,
 }
 
 /*
-* Get the value string to put in the XML eq attribute of the formula element of
-* the SQUARED paramenter element
-* given the name of the parameter in the table workspace.
-*/
+ * Get the value string to put in the XML eq attribute of the formula element of
+ * the SQUARED paramenter element
+ * given the name of the parameter in the table workspace.
+ */
 std::string LoadFullprofResolution::getXMLSquaredEqValue(
     const API::Column_const_sptr column, const std::string &name) {
   size_t paramNumber = LoadFullprofResolution::m_rowNumbers[name];

@@ -1,10 +1,10 @@
 #ifndef RAWFILEINFOTEST_H_
 #define RAWFILEINFOTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/RawFileInfo.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataHandling/RawFileInfo.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataHandling;
 

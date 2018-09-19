@@ -1,17 +1,17 @@
 #include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
 using Mantid::Kernel::LogFilter;
-using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
+using Mantid::Kernel::TimeSeriesProperty;
 
 namespace {
 /// static Logger definition
 Mantid::Kernel::Logger g_log("LogFilterGenerator");
-}
+} // namespace
 
 namespace Mantid {
 namespace API {

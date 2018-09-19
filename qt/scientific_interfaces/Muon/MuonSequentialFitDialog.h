@@ -3,11 +3,11 @@
 
 #include "ui_MuonSequentialFitDialog.h"
 
+#include "DllConfig.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidKernel/System.h"
-#include "DllConfig.h"
-#include "MuonAnalysisHelper.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MuonAnalysisHelper.h"
 
 #include <QDialog>
 
@@ -138,6 +138,6 @@ private slots:
 };
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_ */

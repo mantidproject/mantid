@@ -47,9 +47,10 @@ void SetMDUsingMask::init() {
       "Workspace to copy to the output workspace over the input. Optional - "
       "specify this or Value.");
 
-  declareProperty("Value", DBL_MAX, "Single number to set in the output "
-                                    "workspace. Optional - specify this or "
-                                    "ValueWorkspace");
+  declareProperty("Value", DBL_MAX,
+                  "Single number to set in the output "
+                  "workspace. Optional - specify this or "
+                  "ValueWorkspace");
 
   declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -121,5 +122,5 @@ void SetMDUsingMask::exec() {
   setProperty("OutputWorkspace", outIWS);
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

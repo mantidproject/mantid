@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
-#include <unordered_set>
-#include <sstream>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <sstream>
+#include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -184,6 +184,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*MANTID_API_ALGORITHMFACTORY_H_*/

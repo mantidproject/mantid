@@ -164,5 +164,5 @@ double gsl_peak_wrapper(double x, void *parameters) {
 
   return y;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

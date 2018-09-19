@@ -193,5 +193,5 @@ void EventNexusLoadingPresenter::executeLoadMetadata() {
 std::string EventNexusLoadingPresenter::getWorkspaceTypeName() {
   return m_wsTypeName;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

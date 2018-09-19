@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 using Mantid::MDAlgorithms::IntegrateMDHistoWorkspace;
 using namespace Mantid::API;
@@ -20,7 +20,7 @@ void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
     signal = static_cast<Mantid::signal_t>(i);
   }
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests
@@ -499,11 +499,12 @@ public:
                      outWS->getSignalAt(0), 1e-4);
 
     Mantid::coord_t point[1] = {3.0}; // Roughly centre of the single output bin
-    TSM_ASSERT_DELTA("Number of events normalization. Weights for n-events "
-                     "used incorrectly.",
-                     1.0, outWS->getSignalAtCoord(
-                              point, Mantid::API::NumEventsNormalization),
-                     1e-4);
+    TSM_ASSERT_DELTA(
+        "Number of events normalization. Weights for n-events "
+        "used incorrectly.",
+        1.0,
+        outWS->getSignalAtCoord(point, Mantid::API::NumEventsNormalization),
+        1e-4);
   }
 
   //-----------------------------------------------

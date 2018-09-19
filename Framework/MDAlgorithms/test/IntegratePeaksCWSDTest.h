@@ -4,12 +4,12 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventInserter.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidKernel/V3D.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidDataObjects/MDEventInserter.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -26,8 +26,8 @@ using Mantid::Kernel::V3D;
 
 namespace {
 /** Add a list of MDEvents around Q = (1, 2, 3)
-* @brief createMDWorkspace
-*/
+ * @brief createMDWorkspace
+ */
 IMDEventWorkspace_sptr
 createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
                   const std::vector<double> &vec_event_signal,
@@ -132,9 +132,9 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
 }
 
 /** Add a peak at Q = (1, 2, 3)
-* @brief buildPW
-* @return
-*/
+ * @brief buildPW
+ * @return
+ */
 PeaksWorkspace_sptr
 buildPeakWorkspace(std::vector<int> vec_run_number,
                    std::vector<Mantid::Kernel::V3D> vec_q_sample) {
@@ -166,12 +166,12 @@ buildPeakWorkspace(std::vector<int> vec_run_number,
 }
 
 /** Create MDEventsWorkspace containing data of 1 run
-* @brief createMDEvents1Run
-* @param vec_qsample
-* @param vec_signal
-* @param vec_detid
-* @param vec_runnumber
-*/
+ * @brief createMDEvents1Run
+ * @param vec_qsample
+ * @param vec_signal
+ * @param vec_detid
+ * @param vec_runnumber
+ */
 void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
                         std::vector<double> &vec_signal,
                         std::vector<Mantid::detid_t> &vec_detid,
@@ -207,12 +207,12 @@ void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
 }
 
 /** Create MDEventsWorkspace containing data of 2 runs
-* @brief createMDEvents2Run
-* @param vec_qsample
-* @param vec_signal
-* @param vec_detid
-* @param vec_runnumber
-*/
+ * @brief createMDEvents2Run
+ * @param vec_qsample
+ * @param vec_signal
+ * @param vec_detid
+ * @param vec_runnumber
+ */
 void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
                         std::vector<double> &vec_signal,
                         std::vector<Mantid::detid_t> &vec_detid,
@@ -272,7 +272,7 @@ void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
 
   return;
 }
-}
+} // namespace
 
 class IntegratePeaksCWSDTest : public CxxTest::TestSuite {
 public:

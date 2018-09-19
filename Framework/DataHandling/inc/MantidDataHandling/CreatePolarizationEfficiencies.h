@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIES_H_
 #define MANTID_DATAHANDLING_CREATEPOLARIZATIONEFFICIENCIES_H_
 
-#include "MantidKernel/System.h"
 #include "MantidDataHandling/CreatePolarizationEfficienciesBase.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

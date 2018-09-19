@@ -34,11 +34,12 @@ void export_Instrument() {
            (arg("self"), arg("cname")),
            "Returns the named :class:`~mantid.geometry.Component`")
 
-      .def("getDetector", (boost::shared_ptr<IDetector>(
-                              Instrument::*)(const detid_t &) const) &
-                              Instrument::getDetector,
-           (arg("self"), arg("detector_id")),
-           "Returns the :class:`~mantid.geometry.Detector` with the given ID")
+      .def(
+          "getDetector",
+          (boost::shared_ptr<IDetector>(Instrument::*)(const detid_t &) const) &
+              Instrument::getDetector,
+          (arg("self"), arg("detector_id")),
+          "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &

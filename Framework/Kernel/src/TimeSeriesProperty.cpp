@@ -14,7 +14,7 @@ namespace Kernel {
 namespace {
 /// static Logger definition
 Logger g_log("TimeSeriesProperty");
-}
+} // namespace
 
 /**
  * Constructor
@@ -56,13 +56,12 @@ TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
 }
 
 /** Return time series property, containing time derivative of current property.
-* The property itself and the returned time derivative become sorted by time and
-* the derivative is calculated in seconds^-1.
-* (e.g. dValue/dT where dT=t2-t1 is time difference in seconds
-* for subsequent time readings and dValue=Val1-Val2 is difference in
-* subsequent values)
-*
-*/
+ * The property itself and the returned time derivative become sorted by time
+ * and the derivative is calculated in seconds^-1. (e.g. dValue/dT where
+ * dT=t2-t1 is time difference in seconds for subsequent time readings and
+ * dValue=Val1-Val2 is difference in subsequent values)
+ *
+ */
 template <typename TYPE>
 std::unique_ptr<TimeSeriesProperty<double>>
 TimeSeriesProperty<TYPE>::getDerivative() const {
@@ -540,7 +539,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     errss << "Try to split TSP " << this->m_name
           << ": Input time vector's size " << splitter_time_vec.size()
           << " does not match (one more larger than) taget "
-             "workspace index vector's size " << target_vec.size() << "\n";
+             "workspace index vector's size "
+          << target_vec.size() << "\n";
     throw std::runtime_error(errss.str());
   }
   // return if the output vector TimeSeriesProperties is not defined
@@ -908,6 +908,22 @@ void TimeSeriesProperty<std::string>::expandFilterToRange(
                                        "properties");
 }
 
+/** Calculates the time-weighted average of a property.
+ *  @return The time-weighted average value of the log.
+ */
+template <typename TYPE>
+double TimeSeriesProperty<TYPE>::timeAverageValue() const {
+  double retVal = 0.0;
+  try {
+    const auto &filter = getSplittingIntervals();
+    retVal = this->averageValueInFilter(filter);
+  } catch (std::exception &) {
+    // just return nan
+    retVal = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
 /** Calculates the time-weighted average of a property in a filtered range.
  *  This is written for that case of logs whose values start at the times given.
  *  @param filter The splitter/filter restricting the range of values included
@@ -959,21 +975,6 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
   // 'Normalise' by the total time
   return numerator / totalTime;
 }
-/** Calculates the time-weighted average of a property.
- *  @return The time-weighted average value of the log.
- */
-template <typename TYPE>
-double TimeSeriesProperty<TYPE>::timeAverageValue() const {
-  double retVal = 0.0;
-  try {
-    const auto &filter = getSplittingIntervals();
-    retVal = this->averageValueInFilter(filter);
-  } catch (std::exception &) {
-    // just return nan
-    retVal = std::numeric_limits<double>::quiet_NaN();
-  }
-  return retVal;
-}
 
 /** Function specialization for TimeSeriesProperty<std::string>
  *  @throws Kernel::Exception::NotImplementedError always
@@ -983,6 +984,78 @@ double TimeSeriesProperty<std::string>::averageValueInFilter(
     const TimeSplitterType &) const {
   throw Exception::NotImplementedError("TimeSeriesProperty::"
                                        "averageValueInFilter is not "
+                                       "implemented for string properties");
+}
+
+template <typename TYPE>
+std::pair<double, double>
+TimeSeriesProperty<TYPE>::timeAverageValueAndStdDev() const {
+  std::pair<double, double> retVal{0., 0.}; // mean and stddev
+  try {
+    const auto &filter = getSplittingIntervals();
+    retVal = this->averageAndStdDevInFilter(filter);
+  } catch (std::exception &) {
+    retVal.first = std::numeric_limits<double>::quiet_NaN();
+    retVal.second = std::numeric_limits<double>::quiet_NaN();
+  }
+  return retVal;
+}
+
+template <typename TYPE>
+std::pair<double, double> TimeSeriesProperty<TYPE>::averageAndStdDevInFilter(
+    const std::vector<SplittingInterval> &filter) const {
+  // the mean to calculate the standard deviation about
+  // this will sort the log as necessary as well
+  const double mean = this->averageValueInFilter(filter);
+
+  // First of all, if the log or the filter is empty or is a single value,
+  // return NaN for the uncertainty
+  if (realSize() <= 1 || filter.empty()) {
+    return std::pair<double, double>{mean,
+                                     std::numeric_limits<double>::quiet_NaN()};
+  }
+
+  double numerator(0.0), totalTime(0.0);
+  // Loop through the filter ranges
+  for (const auto &time : filter) {
+    // Calculate the total time duration (in seconds) within by the filter
+    totalTime += time.duration();
+
+    // Get the log value and index at the start time of the filter
+    int index;
+    double value = getSingleValue(time.start(), index);
+    double valuestddev = (value - mean) * (value - mean);
+    DateAndTime startTime = time.start();
+
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
+      ++index;
+
+      numerator +=
+          DateAndTime::secondsFromDuration(m_values[index].time() - startTime) *
+          valuestddev;
+      startTime = m_values[index].time();
+      value = static_cast<double>(m_values[index].value());
+      valuestddev = (value - mean) * (value - mean);
+    }
+
+    // Now close off with the end of the current filter range
+    numerator +=
+        DateAndTime::secondsFromDuration(time.stop() - startTime) * valuestddev;
+  }
+
+  // Normalise by the total time
+  return std::pair<double, double>{mean, std::sqrt(numerator / totalTime)};
+}
+
+/** Function specialization for TimeSeriesProperty<std::string>
+ *  @throws Kernel::Exception::NotImplementedError always
+ */
+template <>
+std::pair<double, double>
+TimeSeriesProperty<std::string>::averageAndStdDevInFilter(
+    const TimeSplitterType &) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::"
+                                       "averageAndStdDevInFilter is not "
                                        "implemented for string properties");
 }
 
@@ -1035,11 +1108,11 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::valuesAsVector() const {
 }
 
 /**
-  * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
-  * This method is used in parsing the ISIS ICPevent log file: different
+ * Return the time series as a C++ multimap<DateAndTime, TYPE>. All values.
+ * This method is used in parsing the ISIS ICPevent log file: different
  * commands
-  * can be recorded against the same time stamp but all must be present.
-  */
+ * can be recorded against the same time stamp but all must be present.
+ */
 template <typename TYPE>
 std::multimap<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
@@ -1173,9 +1246,9 @@ void TimeSeriesProperty<TYPE>::addValues(
 
 /** replace vectors of values to the map. First we clear the vectors
  * and then we run addValues
-*  @param times :: The time as a boost::posix_time::ptime value
-*  @param values :: The associated value
-*/
+ *  @param times :: The time as a boost::posix_time::ptime value
+ *  @param values :: The associated value
+ */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::replaceValues(
     const std::vector<Types::Core::DateAndTime> &times,
@@ -1254,12 +1327,14 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::minValue() const {
   return std::min_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)->value();
+                          TimeValueUnit<TYPE>::valueCmp)
+      ->value();
 }
 
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::maxValue() const {
   return std::max_element(m_values.begin(), m_values.end(),
-                          TimeValueUnit<TYPE>::valueCmp)->value();
+                          TimeValueUnit<TYPE>::valueCmp)
+      ->value();
 }
 
 /// Returns the number of values at UNIQUE time intervals in the time series
@@ -1929,7 +2004,12 @@ TimeSeriesPropertyStatistics TimeSeriesProperty<TYPE>::getStatistics() const {
       duration_sec += interval.duration();
     }
     out.duration = duration_sec;
+    const auto time_weighted = this->timeAverageValueAndStdDev();
+    out.time_mean = time_weighted.first;
+    out.time_standard_deviation = time_weighted.second;
   } else {
+    out.time_mean = std::numeric_limits<double>::quiet_NaN();
+    out.time_standard_deviation = std::numeric_limits<double>::quiet_NaN();
     out.duration = std::numeric_limits<double>::quiet_NaN();
   }
 
@@ -2352,15 +2432,15 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   file->closeGroup();
 }
 /** Calculate constant step histogram of the time series data.
-* @param tMin    -- minimal time to include in histogram
-* @param tMax    -- maximal time to constrain the histogram data
-* @param counts  -- vector of output histogrammed data.
-*   On input, the size of the vector defines the number of points in the
-*   histogram.
-*   On output, adds all property elements belonging to the time interval
-*  [tMin+n*dT;tMin+(n+1)*dT]
-*  to the initial values of each n-th element of the counts vector,
-*  where dT = (tMax-tMin)/counts.size()  */
+ * @param tMin    -- minimal time to include in histogram
+ * @param tMax    -- maximal time to constrain the histogram data
+ * @param counts  -- vector of output histogrammed data.
+ *   On input, the size of the vector defines the number of points in the
+ *   histogram.
+ *   On output, adds all property elements belonging to the time interval
+ *  [tMin+n*dT;tMin+(n+1)*dT]
+ *  to the initial values of each n-th element of the counts vector,
+ *  where dT = (tMax-tMin)/counts.size()  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::histogramData(
     const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
@@ -2573,5 +2653,5 @@ filterByStatistic(TimeSeriesProperty<double> const *const propertyToFilter,
   };
   return singleValue;
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

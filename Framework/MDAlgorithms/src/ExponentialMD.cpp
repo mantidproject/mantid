@@ -40,5 +40,5 @@ void ExponentialMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   out->exp();
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

@@ -117,6 +117,6 @@ private:
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLMAINWINDOWPRESENTER_H */

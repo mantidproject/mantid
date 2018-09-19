@@ -40,7 +40,7 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"MonteCarloAbsorption", "MultipleScatteringCylinderAbsorption"};
+    return {"MonteCarloAbsorption", "CarpenterSampleCorrection"};
   }
 
 private:

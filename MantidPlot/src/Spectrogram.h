@@ -30,24 +30,24 @@
 #define SPECTROGRAM_H
 
 #include "Matrix.h"
-#include "UserFunction.h"
-#include <qwt_raster_data.h>
-#include <qwt_plot.h>
-#include <qwt_plot_spectrogram.h>
-#include <qwt_color_map.h>
-#include <qwt_plot_marker.h>
-#include "qwt_color_map.h"
 #include "PlotCurve.h"
+#include "UserFunction.h"
+#include "qwt_color_map.h"
+#include <qwt_color_map.h>
+#include <qwt_plot.h>
+#include <qwt_plot_marker.h>
+#include <qwt_plot_spectrogram.h>
+#include <qwt_raster_data.h>
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 
-#include <fstream>
-#include <float.h>
-#include <boost/shared_ptr.hpp>
 #include <QPainter>
+#include <boost/shared_ptr.hpp>
+#include <float.h>
+#include <fstream>
 #include <qobject.h>
 
 class MatrixData;
@@ -57,7 +57,7 @@ namespace MantidQt {
 namespace API {
 class QwtRasterDataMD;
 }
-}
+} // namespace MantidQt
 
 class Spectrogram : public QObject,
                     public QwtPlotSpectrogram,

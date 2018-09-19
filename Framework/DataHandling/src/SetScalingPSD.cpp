@@ -2,10 +2,10 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -278,7 +278,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
   } else {
     g_log.debug() << "Average abs scaling fraction cannot ba calculated "
                      "because the scale count is 0! Its value before dividing "
-                     "by the count is " << aveScale << "\n";
+                     "by the count is "
+                  << aveScale << "\n";
   }
 }
 

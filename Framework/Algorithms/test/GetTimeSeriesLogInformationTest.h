@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_
 #define MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -18,10 +18,10 @@ using namespace Mantid::API;
 
 namespace {
 /*
-* Create an EventWorkspace including
-* (1) proton charge log from
-* (2) test log in sin function with time
-*/
+ * Create an EventWorkspace including
+ * (1) proton charge log from
+ * (2) test log in sin function with time
+ */
 DataObjects::EventWorkspace_sptr createEventWorkspace() {
   using namespace WorkspaceCreationHelper;
 
@@ -81,7 +81,7 @@ DataObjects::EventWorkspace_sptr createEventWorkspace() {
 
   return eventws;
 }
-}
+} // namespace
 class GetTimeSeriesLogInformationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

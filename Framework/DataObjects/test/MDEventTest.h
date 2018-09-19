@@ -1,10 +1,9 @@
 #ifndef MDEVENTTEST_H
 #define MDEVENTTEST_H
 
+#include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataObjects/MDEvent.h"
-#include "MantidDataObjects/MDEvent.h"
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>

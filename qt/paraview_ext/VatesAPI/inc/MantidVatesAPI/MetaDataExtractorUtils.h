@@ -1,8 +1,8 @@
 #ifndef MANTID_VATES_METADATAEXTRACTORUTILS_H_
 #define MANTID_VATES_METADATAEXTRACTORUTILS_H_
 
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <string>
 
 /**
@@ -42,12 +42,12 @@ public:
   ~MetaDataExtractorUtils();
 
   /**
-    * Extracts the instrument from the workspace.
-    * @param workspace A pointer to a workspace.
-    * @returns The instrument.
-    */
+   * Extracts the instrument from the workspace.
+   * @param workspace A pointer to a workspace.
+   * @returns The instrument.
+   */
   std::string extractInstrument(const Mantid::API::IMDWorkspace *workspace);
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_SYMMETRYELEMENT_H_
 #define MANTID_GEOMETRY_SYMMETRYELEMENT_H_
 
+#include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidGeometry/Crystal/V3R.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Crystal/V3R.h"
-#include "MantidGeometry/Crystal/SymmetryOperation.h"
 
 #include <boost/shared_ptr.hpp>
 #include <gsl/gsl_matrix.h>

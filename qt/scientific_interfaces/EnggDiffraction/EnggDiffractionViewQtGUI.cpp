@@ -1,10 +1,10 @@
 #include "EnggDiffractionViewQtGUI.h"
+#include "EnggDiffractionPresenter.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MWRunFiles.h"
-#include "EnggDiffractionPresenter.h"
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
@@ -53,10 +53,10 @@ const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
 
 /**
-* Default constructor.
-*
-* @param parent Parent window (most likely the Mantid main app window).
-*/
+ * Default constructor.
+ *
+ * @param parent Parent window (most likely the Mantid main app window).
+ */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), IEnggDiffractionView(), m_fittingWidget(nullptr),
       m_currentInst("ENGINX"), m_splashMsg(nullptr), m_presenter(nullptr) {}

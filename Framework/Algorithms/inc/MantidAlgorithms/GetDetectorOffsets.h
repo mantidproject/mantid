@@ -3,8 +3,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -80,7 +80,7 @@ private:
   /// information
   double m_step = 0.0; ///< The step size
 };
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_GETDETECTOROFFSETS_H_*/

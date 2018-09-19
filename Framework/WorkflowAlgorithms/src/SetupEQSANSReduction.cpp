@@ -2,16 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/SetupEQSANSReduction.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "Poco/NumberFormatter.h"
 
 namespace Mantid {
@@ -30,16 +30,20 @@ void SetupEQSANSReduction::init() {
   declareProperty("UseConfigTOFCuts", false,
                   "If true, the edges of the TOF distribution will be cut "
                   "according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be "
-                                    "loaded into the workspace at load-time");
-  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be "
-                                     "loaded into the workspace at load-time");
-  declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
-                                         "rebinning the data before performing "
-                                         "the reduction");
-  declareProperty("UseConfigMask", false, "If true, the masking information "
-                                          "found in the configuration file "
-                                          "will be used");
+  declareProperty("LowTOFCut", 0.0,
+                  "TOF value below which events will not be "
+                  "loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0,
+                  "TOF value above which events will not be "
+                  "loaded into the workspace at load-time");
+  declareProperty("WavelengthStep", 0.1,
+                  "Wavelength steps to be used when "
+                  "rebinning the data before performing "
+                  "the reduction");
+  declareProperty("UseConfigMask", false,
+                  "If true, the masking information "
+                  "found in the configuration file "
+                  "will be used");
   declareProperty("UseConfig", true,
                   "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false,
@@ -203,9 +207,10 @@ void SetupEQSANSReduction::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
-  declareProperty("UseDefaultDC", true, "If true, the dark current subtracted "
-                                        "from the sample data will also be "
-                                        "subtracted from the flood field.");
+  declareProperty("UseDefaultDC", true,
+                  "If true, the dark current subtracted "
+                  "from the sample data will also be "
+                  "subtracted from the flood field.");
   declareProperty(make_unique<API::FileProperty>(
                       "SensitivityDarkCurrentFile", "",
                       API::FileProperty::OptionalLoad, "_event.nxs"),
@@ -551,9 +556,10 @@ void SetupEQSANSReduction::init() {
                   "Number of I(q) bins when binning is not specified");
   declareProperty("IQLogBinning", false,
                   "I(q) log binning when binning is not specified");
-  declareProperty("IQIndependentBinning", true, "If true and frame skipping is "
-                                                "used, each frame will have "
-                                                "its own binning");
+  declareProperty("IQIndependentBinning", true,
+                  "If true and frame skipping is "
+                  "used, each frame will have "
+                  "its own binning");
   declareProperty(
       "IQScaleResults", true,
       "If true and frame skipping is used, frame 1 will be scaled to frame 2");

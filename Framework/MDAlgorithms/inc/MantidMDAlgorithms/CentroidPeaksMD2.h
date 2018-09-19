@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_CENTROIDPEAKSMD2_H_
 #define MANTID_MDALGORITHMS_CENTROIDPEAKSMD2_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -47,7 +47,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 };
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_CENTROIDPEAKSMD2_H_ */

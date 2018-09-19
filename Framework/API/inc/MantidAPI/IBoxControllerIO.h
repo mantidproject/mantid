@@ -1,7 +1,7 @@
 #ifndef H_IBOXCONTROLLER_IO
 #define H_IBOXCONTROLLER_IO
-#include "MantidKernel/System.h"
 #include "MantidKernel/DiskBuffer.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {
@@ -85,6 +85,6 @@ public:
                            const std::string &typeName) = 0;
   virtual void getDataType(size_t &blockSize, std::string &typeName) const = 0;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 #endif

@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/UnaryOperation.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
@@ -117,8 +117,8 @@ void UnaryOperation::execEvent() {
     case TOF:
       // Switch to weights if needed.
       evlist.switchTo(WEIGHTED);
-    /* no break */
-    // Fall through
+      /* no break */
+      // Fall through
 
     case WEIGHTED:
       unaryOperationEventHelper(evlist.getWeightedEvents());
@@ -155,5 +155,5 @@ void UnaryOperation::unaryOperationEventHelper(std::vector<T> &wevector) {
     it->m_errorSquared = static_cast<float>(eout * eout);
   }
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

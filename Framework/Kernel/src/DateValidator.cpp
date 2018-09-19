@@ -83,7 +83,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
 
   return timeinfo;
 }
-}
+} // namespace
 
 /// create a copy of the the validator
 IValidator_sptr DateValidator::clone() const {
@@ -123,5 +123,5 @@ std::string DateValidator::checkValidity(const std::string &value) const {
   }
   return "";
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

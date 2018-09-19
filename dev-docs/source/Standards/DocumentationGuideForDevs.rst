@@ -1,4 +1,4 @@
-.. _DocumentationGuideForDevs:
+﻿.. _DocumentationGuideForDevs:
 
 ============================
 Documentation Guide for Devs
@@ -247,3 +247,10 @@ For multi-configuration generators such as Visual Studio or XCode you will need 
 ::
 
    bin\Debug\MantidPlot -xq docs\runsphinx_doctest.py -R Rebin
+
+Building the HTML Development Documentation
+===========================================
+
+The developer documentation is written as `.rst` files in the mantid source folder under ``dev-docs/``, the html files can be built using the `dev-docs-html` target. This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
+
+In Visual Studio, this can be found in the "Documentation" folder in the solution explorer for the Mantid solution. Simply right click `dev-docs-html` and select build.

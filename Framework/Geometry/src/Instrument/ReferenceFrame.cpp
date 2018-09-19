@@ -12,7 +12,7 @@ namespace {
  * 3D vectors.
  * @param direction : direction marker
  * @return 3D vector
-*/
+ */
 V3D directionToVector(const PointingAlong &direction) {
   V3D result;
   if (direction == X) {
@@ -41,7 +41,7 @@ std::string directionToString(const PointingAlong &direction) {
   }
   return result;
 }
-}
+} // namespace
 
 /**
  * Default constructor. up=Y, beam=Z, thetaSign=Y
@@ -53,7 +53,7 @@ ReferenceFrame::ReferenceFrame() : ReferenceFrame(Y, Z, Y, Right, "source") {}
  * @param alongBeam : axis pointing along the beam
  * @param handedness : Handedness
  * @param origin : origin
-*/
+ */
 ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                                Handedness handedness, std::string origin)
     : ReferenceFrame(up, alongBeam, up, handedness, std::move(origin)) {}
@@ -65,7 +65,7 @@ ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
  * @param thetaSign : axis defining the sign of 2theta
  * @param handedness : Handedness
  * @param origin : origin
-*/
+ */
 ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                                PointingAlong thetaSign, Handedness handedness,
                                std::string origin)
@@ -96,17 +96,17 @@ PointingAlong ReferenceFrame::pointingUp() const { return m_up; }
 PointingAlong ReferenceFrame::pointingAlongBeam() const { return m_alongBeam; }
 
 /**
-* Get the axis label for the pointing up direction.
-* @return label for up
-*/
+ * Get the axis label for the pointing up direction.
+ * @return label for up
+ */
 std::string ReferenceFrame::pointingUpAxis() const {
   return directionToString(m_up);
 }
 
 /**
-* Get the axis label for the pointing along direction.
-* @return label for up
-*/
+ * Get the axis label for the pointing along direction.
+ * @return label for up
+ */
 std::string ReferenceFrame::pointingAlongBeamAxis() const {
   return directionToString(m_alongBeam);
 }
@@ -187,5 +187,5 @@ bool ReferenceFrame::isVectorPointingAlongBeam(const V3D &v) const {
   return m_vecPointingAlongBeam.scalar_prod(vec) == 1;
 }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid

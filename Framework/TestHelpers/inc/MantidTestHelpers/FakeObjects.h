@@ -37,9 +37,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::SpecialCoordinateSystem;
+using Mantid::MantidVec;
 using Mantid::coord_t;
 using Mantid::detid_t;
-using Mantid::MantidVec;
 using Mantid::signal_t;
 using Mantid::specnum_t;
 
@@ -663,7 +663,7 @@ public:
     throw std::runtime_error("Not Implemented");
   }
 
-  double &operator[](const size_t &index)override {
+  double &operator[](const size_t &index) override {
     UNUSED_ARG(index)
     throw std::runtime_error("Not Implemented");
   }

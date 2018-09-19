@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include <QWidget>
 #include <QVariant>
+#include <QWidget>
 
 namespace MantidQt {
 namespace API {
@@ -69,7 +69,7 @@ private:
   /// as a runAsPythonScript signal
   PythonRunner m_pyRunner;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQTAPI_MANTIDWIDGET_H_

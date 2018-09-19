@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/SetSample.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -13,7 +14,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidAPI/Sample.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -131,8 +131,8 @@ public:
   }
 
   void test_Setting_Environment_No_Geometry_Overrides() {
-    using Mantid::Kernel::ConfigService;
     using Mantid::Geometry::SampleEnvironment;
+    using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
@@ -162,8 +162,8 @@ public:
   }
 
   void test_Setting_Environment_With_Geometry_Overrides() {
-    using Mantid::Kernel::ConfigService;
     using Mantid::Geometry::SampleEnvironment;
+    using Mantid::Kernel::ConfigService;
 
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto testInst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
@@ -195,8 +195,9 @@ public:
     // radius was 0.1 in <samplegeometry> set in constructor now 0.4
     // from createOverrideGeometryProps
     TS_ASSERT_DELTA(
-        0.4, getSphereRadius(dynamic_cast<const Mantid::Geometry::CSGObject &>(
-                 sampleShape)),
+        0.4,
+        getSphereRadius(
+            dynamic_cast<const Mantid::Geometry::CSGObject &>(sampleShape)),
         1e-08);
   }
 
@@ -566,8 +567,8 @@ private:
   }
 
   double getSphereRadius(const Mantid::Geometry::CSGObject &shape) {
-    using Mantid::Geometry::SurfPoint;
     using Mantid::Geometry::Sphere;
+    using Mantid::Geometry::SurfPoint;
     auto topRule = shape.topRule();
     if (auto surfpoint = dynamic_cast<const SurfPoint *>(topRule)) {
       if (auto sphere = dynamic_cast<Sphere *>(surfpoint->getKey())) {

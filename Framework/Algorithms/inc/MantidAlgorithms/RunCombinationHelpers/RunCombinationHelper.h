@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_RUNCOMBINATIONHELPER_H_
 #define MANTID_ALGORITHMS_RUNCOMBINATIONHELPER_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/Logger.h"
 
 #include <list>
@@ -42,7 +42,7 @@ static const std::string SKIP_BEHAVIOUR = "Skip File";
 static const std::string STOP_BEHAVIOUR = "Stop";
 static const std::string REBIN_BEHAVIOUR = "Rebin";
 static const std::string FAIL_BEHAVIOUR = "Fail";
-}
+} // namespace RunCombinationOptions
 
 class MANTID_ALGORITHMS_DLL RunCombinationHelper {
 public:

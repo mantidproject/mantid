@@ -1,5 +1,5 @@
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
@@ -194,5 +194,5 @@ bool ParameterTie::findParametersOf(const IFunction *fun) const {
  */
 bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid

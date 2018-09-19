@@ -1,13 +1,13 @@
 #ifndef MANTID_PARAVIEW_VIEWFRUSTUM
 #define MANTID_PARAVIEW_VIEWFRUSTUM
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
-#include <stdexcept>
-#include <cmath>
-#include <cfloat>
-#include <vector>
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
+#include <cfloat>
+#include <cmath>
+#include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 namespace VATES {
@@ -159,6 +159,6 @@ void ViewFrustum::initializeMatrix(Mantid::Kernel::Matrix<T> &matrix,
 using ViewFrustum_sptr = boost::shared_ptr<Mantid::VATES::ViewFrustum>;
 using ViewFrustum_const_sptr =
     boost::shared_ptr<const Mantid::VATES::ViewFrustum>;
-}
-}
+} // namespace VATES
+} // namespace Mantid
 #endif

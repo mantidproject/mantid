@@ -1,8 +1,8 @@
 #ifndef MANTID_SINQ_POLDIANALYSERESIDUALS_H_
 #define MANTID_SINQ_POLDIANALYSERESIDUALS_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"

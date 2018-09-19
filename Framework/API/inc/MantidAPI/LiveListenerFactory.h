@@ -21,10 +21,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/ILiveListener.h"
+#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/LiveListenerInfo.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
 namespace API {
@@ -90,6 +90,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /* MANTID_API_LIVELISTENERFACTORYIMPL_H_ */

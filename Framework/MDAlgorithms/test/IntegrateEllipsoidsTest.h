@@ -1,17 +1,17 @@
-#include <cxxtest/TestSuite.h>
-#include "MantidMDAlgorithms/IntegrateEllipsoids.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidMDAlgorithms/IntegrateEllipsoids.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
@@ -93,7 +93,7 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   return boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>(eventWS,
                                                                 peaksWS);
 }
-}
+} // namespace
 
 class IntegrateEllipsoidsTest : public CxxTest::TestSuite {
 

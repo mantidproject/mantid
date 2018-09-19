@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 
-#include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/TCPServer.h>
 
 namespace Mantid {
 namespace LiveData {
@@ -12,6 +12,9 @@ namespace LiveData {
 DECLARE_ALGORITHM(FakeISISHistoDAE)
 
 namespace {
+
+// Time we'll wait on a receive call (in seconds)
+const long RECV_TIMEOUT = 30;
 
 typedef enum {
   ISISDSUnknown = 0,
@@ -307,7 +310,7 @@ public:
   }
 };
 
-} // end anonymous
+} // namespace
 
 using namespace Kernel;
 using namespace API;
@@ -340,6 +343,8 @@ void FakeISISHistoDAE::exec() {
   int port = getProperty("Port");
 
   Poco::Net::ServerSocket socket(static_cast<Poco::UInt16>(port));
+  socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0));
+
   socket.listen();
 
   Poco::Net::TCPServer server(

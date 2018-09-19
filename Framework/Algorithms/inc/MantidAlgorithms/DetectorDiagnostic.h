@@ -150,7 +150,7 @@ protected:
   //@}
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_DETECTORDIAGNOSTIC_H_*/

@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNXSPE.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -25,10 +25,10 @@
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
-using Mantid::Kernel::UnitFactory;
-using Mantid::Geometry::ParameterMap;
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IDetector_const_sptr;
+using Mantid::Geometry::Instrument;
+using Mantid::Geometry::ParameterMap;
+using Mantid::Kernel::UnitFactory;
 
 static const int THEMASKED = 1;
 

@@ -1,9 +1,9 @@
 #ifndef ARRAYBOUNDEDVALIDATORTEST_H_
 #define ARRAYBOUNDEDVALIDATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include <cxxtest/TestSuite.h>
 #include <string>
 #include <vector>
 

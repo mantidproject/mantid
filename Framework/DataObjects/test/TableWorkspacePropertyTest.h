@@ -1,17 +1,17 @@
 #ifndef TESTTABLEWORKSPACEPROPERTY_
 #define TESTTABLEWORKSPACEPROPERTY_
 
-#include <vector>
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Property.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/ColumnFactory.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/Property.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

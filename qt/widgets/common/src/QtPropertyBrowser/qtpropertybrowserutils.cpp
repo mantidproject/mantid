@@ -87,12 +87,12 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
 #include <QApplication>
-#include <QPainter>
-#include <QHBoxLayout>
-#include <QMouseEvent>
 #include <QCheckBox>
+#include <QHBoxLayout>
 #include <QLineEdit>
 #include <QMenu>
+#include <QMouseEvent>
+#include <QPainter>
 
 namespace {
 // Translation function for Qt4/Qt5. Qt5 has no encoding option
@@ -105,7 +105,7 @@ QString translateUtf8Encoded(const char *context, const char *key,
   return QApplication::translate(context, key, disambiguation, n);
 #endif
 }
-}
+} // namespace
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

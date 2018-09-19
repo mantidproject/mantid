@@ -1,15 +1,15 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidAlgorithms/InterpolationOption.h"
-#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
-#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
@@ -67,7 +67,7 @@ private:
   const DeltaEMode::Type m_emode;
   double m_value;
 };
-}
+} // namespace
 /// @endcond
 
 namespace Mantid {
@@ -108,10 +108,11 @@ void MonteCarloAbsorption::init() {
 
   InterpolationOption interpolateOpt;
   declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
-  declareProperty("SparseInstrument", false, "Enable simulation on special "
-                                             "instrument with a sparse grid of "
-                                             "detectors interpolating the "
-                                             "results to the real instrument.");
+  declareProperty("SparseInstrument", false,
+                  "Enable simulation on special "
+                  "instrument with a sparse grid of "
+                  "detectors interpolating the "
+                  "results to the real instrument.");
   auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
   threeOrMore->setLower(3);
   declareProperty(
@@ -124,8 +125,9 @@ void MonteCarloAbsorption::init() {
   auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
   twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
-                  twoOrMore, "Number of detector columns in the detector grid "
-                             "of the sparse instrument.");
+                  twoOrMore,
+                  "Number of detector columns in the detector grid "
+                  "of the sparse instrument.");
   setPropertySettings(
       "NumberOfDetectorColumns",
       Kernel::make_unique<EnabledWhenProperty>(
@@ -372,5 +374,5 @@ void MonteCarloAbsorption::interpolateFromSparse(
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

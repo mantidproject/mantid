@@ -38,9 +38,10 @@ void export_IMDWorkspace() {
       .def("isMDHistoWorkspace", &IMDWorkspace::isMDHistoWorkspace, arg("self"),
            "Returns True if this is considered to be binned data.")
       .def("displayNormalization", &IMDWorkspace::displayNormalization,
-           args("self"), "Returns the visual "
-                         ":class:`~mantid.api.MDNormalization` of the "
-                         "workspace.")
+           args("self"),
+           "Returns the visual "
+           ":class:`~mantid.api.MDNormalization` of the "
+           "workspace.")
       .def("displayNormalizationHisto",
            &IMDWorkspace::displayNormalizationHisto, arg("self"),
            "For MDEventWorkspaces returns the visual "

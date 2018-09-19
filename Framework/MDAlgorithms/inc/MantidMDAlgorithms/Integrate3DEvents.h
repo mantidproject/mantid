@@ -3,8 +3,8 @@
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/shared_ptr.hpp>
 

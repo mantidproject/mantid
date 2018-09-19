@@ -34,7 +34,7 @@ protected slots:
 private:
   QtProperty *m_property;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // STRINGEDITORFACTORY_H

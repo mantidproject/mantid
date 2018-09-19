@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

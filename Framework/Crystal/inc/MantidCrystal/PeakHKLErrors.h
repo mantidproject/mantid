@@ -10,14 +10,12 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -67,22 +65,22 @@ public:
   void init() override;
 
   /**
-     * Creates a new peak, matching the old peak except for a different
-    *instrument.
-     *
-     * The Time of flightis the same except offset by T0. L0 should be the L0
-    *for the new instrument.
-     * It is added as a parameter in case the instrument will have the initial
-    *flight path adjusted later.
-     *  NOTE: the wavelength is changed.
-     *
-     * @param peak_old - The old peak
-     * @param instrNew -The new instrument
-     * @param T0 :
-     * @param L0 :
-     * @return The new peak with the new instrument( adjusted with the
-    *parameters) and time adjusted.
-     */
+   * Creates a new peak, matching the old peak except for a different
+   *instrument.
+   *
+   * The Time of flightis the same except offset by T0. L0 should be the L0
+   *for the new instrument.
+   * It is added as a parameter in case the instrument will have the initial
+   *flight path adjusted later.
+   *  NOTE: the wavelength is changed.
+   *
+   * @param peak_old - The old peak
+   * @param instrNew -The new instrument
+   * @param T0 :
+   * @param L0 :
+   * @return The new peak with the new instrument( adjusted with the
+   *parameters) and time adjusted.
+   */
   static DataObjects::Peak createNewPeak(const Geometry::IPeak &peak_old,
                                          Geometry::Instrument_sptr instrNew,
                                          double T0, double L0);
@@ -170,7 +168,7 @@ private:
 
   void setUpOptRuns();
 };
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* PEAKHKLERRORS_H_ */

@@ -70,7 +70,7 @@ public:
   /// Return next random value
   double operator()() { return nextValue(); }
 };
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_PSEUDORANDOMNUMBERGENERATOR_H_ */

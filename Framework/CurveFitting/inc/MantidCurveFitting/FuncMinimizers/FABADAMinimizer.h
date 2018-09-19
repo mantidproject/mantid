@@ -1,20 +1,20 @@
 #ifndef MANTID_CURVEFITTING_FABADAMINIMIZER_H_
 #define MANTID_CURVEFITTING_FABADAMINIMIZER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFuncMinimizer.h"
-#include "MantidCurveFitting/GSLVector.h"
-#include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
 namespace CostFunctions {
 /// Forward Declaration
 class CostFuncLeastSquares;
-}
-}
-}
+} // namespace CostFunctions
+} // namespace CurveFitting
+} // namespace Mantid
 
 namespace Mantid {
 namespace CurveFitting {

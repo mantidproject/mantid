@@ -3,8 +3,8 @@
 
 #include "IndirectDataReductionTab.h"
 
-#include "ui_IndirectMoments.h"
 #include "MantidKernel/System.h"
+#include "ui_IndirectMoments.h"
 
 #include <QFont>
 
@@ -66,6 +66,6 @@ private:
   Ui::IndirectMoments m_uiForm;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_INDIRECTMOMENTS_H_ */

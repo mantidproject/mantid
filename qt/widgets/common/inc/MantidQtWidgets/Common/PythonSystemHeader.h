@@ -10,8 +10,8 @@
 // A few more Python headers
 #include <compile.h>
 #include <eval.h>
-#include <traceback.h>
 #include <frameobject.h>
+#include <traceback.h>
 
 // Macros for 2/3 compatability
 #if PY_VERSION_HEX >= 0x03000000
@@ -29,7 +29,7 @@
 #define STR_CHECK PyString_Check
 #define TO_CSTRING PyString_AsString
 #define FROM_CSTRING PyString_FromString
-#define CODE_OBJECT(x) (PyCodeObject *) x
+#define CODE_OBJECT(x) (PyCodeObject *)x
 #define FROM_LONG PyInt_FromLong
 #endif
 

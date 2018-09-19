@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAOBJECTS_AFFINE_MATRIX_PARAMETER
 #define MANTID_DATAOBJECTS_AFFINE_MATRIX_PARAMETER
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -12,10 +12,10 @@ namespace DataObjects {
 using AffineMatrixType = Mantid::Kernel::Matrix<coord_t>;
 
 /** Type to wrap an affine matrix and allow serialization via xml.
-*
-* @author Owen Arnold
-* @date 20/07/2011
-*/
+ *
+ * @author Owen Arnold
+ * @date 20/07/2011
+ */
 class DLLExport AffineMatrixParameter
     : public Mantid::API::ImplicitFunctionParameter {
 public:
@@ -36,7 +36,7 @@ public:
   /**
    * Gets the type parameter name.
    * @return parameter name.
-  */
+   */
   static std::string parameterName() { return "AffineMatrixParameter"; }
 
 private:
@@ -50,7 +50,7 @@ private:
   /// Affine matrix.
   AffineMatrixType m_affineMatrix;
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif

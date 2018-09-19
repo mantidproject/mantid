@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_MERGELOGSTEST_H_
 #define MANTID_DATAHANDLING_MERGELOGSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/MergeLogs.h"
 

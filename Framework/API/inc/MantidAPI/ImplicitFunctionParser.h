@@ -18,22 +18,22 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include <memory> //HACK
+#include <vector>
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include "MantidAPI/DllConfig.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "ImplicitFunctionBuilder.h"
 #include "ImplicitFunctionParameterParser.h"
+#include "MantidAPI/DllConfig.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace API {
@@ -100,7 +100,7 @@ public:
   virtual void setParameterParser(ImplicitFunctionParameterParser *parser) = 0;
   virtual ~ImplicitFunctionParser() = default;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif

@@ -12,8 +12,8 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
@@ -22,8 +22,8 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
 using Poco::XML::Node;
+using Poco::XML::NodeList;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -43,7 +43,7 @@ int getGeometryID(const std::string &selection) {
   }
   return geometryID;
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -98,10 +98,10 @@ void LoadCanSAS1D::init() {
 }
 
 /** Overwrites Algorithm exec method
-* @throw FileError if the file isn't valid xml
-* @throw NotFoundError if any expected elements couldn't be read
-* @throw NotImplementedError if any SASentry doesn't contain exactly one run
-*/
+ * @throw FileError if the file isn't valid xml
+ * @throw NotFoundError if any expected elements couldn't be read
+ * @throw NotImplementedError if any SASentry doesn't contain exactly one run
+ */
 void LoadCanSAS1D::exec() {
   const std::string fileName = getPropertyValue("Filename");
   // Set up the DOM parser and parse xml file
@@ -150,12 +150,12 @@ void LoadCanSAS1D::exec() {
   setProperty("OutputWorkspace", outputWork);
 }
 /** Load an individual "<SASentry>" element into a new workspace
-* @param[in] workspaceData points to a "<SASentry>" element
-* @param[out] runName the name this workspace should take
-* @return dataWS this workspace will be filled with data
-* @throw NotFoundError if any expected elements couldn't be read
-* @throw NotImplementedError if the entry doesn't contain exactly one run
-*/
+ * @param[in] workspaceData points to a "<SASentry>" element
+ * @param[out] runName the name this workspace should take
+ * @return dataWS this workspace will be filled with data
+ * @throw NotFoundError if any expected elements couldn't be read
+ * @throw NotImplementedError if the entry doesn't contain exactly one run
+ */
 MatrixWorkspace_sptr
 LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
                         std::string &runName) {
@@ -274,7 +274,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
 /* This method throws not found error if a element is not found in the xml file
  * @param[in] toCheck pointer to  element
  * @param[in] name element name
-*  @throw NotFoundError if the pointer is NULL
+ *  @throw NotFoundError if the pointer is NULL
  */
 void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
                          const std::string &name) const {
@@ -285,14 +285,14 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
   }
 }
 /** Appends the first workspace to the second workspace. The second workspace
-* will became a group unless
-*  it was initially empty, in that situation it becames a copy of the first
-* workspace
-* @param[in] newWork the new data to add
-* @param[in] newWorkName the name that the new workspace will take
-* @param[out] container the data will be added to this group
-* @throw ExistsError if a workspace with this name had already been added
-*/
+ * will became a group unless
+ *  it was initially empty, in that situation it becames a copy of the first
+ * workspace
+ * @param[in] newWork the new data to add
+ * @param[in] newWorkName the name that the new workspace will take
+ * @param[out] container the data will be added to this group
+ * @throw ExistsError if a workspace with this name had already been added
+ */
 void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
                                       const std::string &newWorkName,
                                       API::WorkspaceGroup_sptr container) {
@@ -334,9 +334,9 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
   }
 }
 /** Loads data into the run log
-*  @param[in] sasEntry the entry corresponding to the passed workspace
-*  @param[in] wSpace the log will be created in this workspace
-*/
+ *  @param[in] sasEntry the entry corresponding to the passed workspace
+ *  @param[in] wSpace the log will be created in this workspace
+ */
 void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
                               API::MatrixWorkspace_sptr wSpace) const {
   API::Run &run = wSpace->mutableRun();
@@ -446,5 +446,5 @@ void LoadCanSAS1D::createSampleInformation(
     }
   }
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

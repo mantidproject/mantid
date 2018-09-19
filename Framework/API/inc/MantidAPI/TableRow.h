@@ -8,8 +8,8 @@
 #endif
 
 #include <ostream>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace Mantid {
 

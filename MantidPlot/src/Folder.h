@@ -30,8 +30,8 @@
 #ifndef FOLDER_H
 #define FOLDER_H
 
-#include <QObject>
 #include <QEvent>
+#include <QObject>
 #include <QTreeWidget>
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"

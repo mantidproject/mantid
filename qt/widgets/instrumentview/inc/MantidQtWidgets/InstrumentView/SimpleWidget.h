@@ -11,8 +11,8 @@ namespace MantidWidgets {
 class ProjectionSurface;
 
 /**
-* A simple widget for drawing unwrapped instrument images.
-*/
+ * A simple widget for drawing unwrapped instrument images.
+ */
 class SimpleWidget : public QWidget {
 public:
   /// Constructor
@@ -42,7 +42,7 @@ protected:
   ///< The projection surface
   boost::shared_ptr<ProjectionSurface> m_surface;
 };
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif // SIMPLEWIDGET_H

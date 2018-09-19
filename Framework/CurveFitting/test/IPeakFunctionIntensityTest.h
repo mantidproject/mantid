@@ -1,11 +1,11 @@
 #ifndef IPEAKFUNCTIONINTENSITYTEST_H
 #define IPEAKFUNCTIONINTENSITYTEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
 #include <boost/lexical_cast.hpp>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 

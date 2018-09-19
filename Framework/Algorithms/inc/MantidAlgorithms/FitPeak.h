@@ -1,19 +1,19 @@
 #ifndef MANTID_ALGORITHMS_FITPEAK_H_
 #define MANTID_ALGORITHMS_FITPEAK_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 /// Get an index of a value in a sorted vector.  The index should be the item
@@ -21,7 +21,7 @@ namespace Algorithms {
 size_t getIndex(const HistogramData::HistogramX &vecx, double x);
 
 /** FitOneSinglePeak: a class to perform peak fitting on a single peak
-  */
+ */
 class DLLExport FitOneSinglePeak : public API::Algorithm {
 public:
   /// Constructor

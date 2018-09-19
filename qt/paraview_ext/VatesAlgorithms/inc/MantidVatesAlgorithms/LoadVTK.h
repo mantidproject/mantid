@@ -1,10 +1,10 @@
 #ifndef LOADVTK_H_
 #define LOADVTK_H_
 
-#include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
 
 class vtkUnsignedShortArray;
 class vtkDataSet;
@@ -52,7 +52,7 @@ private:
 
   void exec() override;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

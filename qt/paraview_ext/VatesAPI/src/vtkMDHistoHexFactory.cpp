@@ -1,13 +1,13 @@
+#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/CPUTimer.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/ReadLock.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullStructuredGrid.h"
-#include "MantidVatesAPI/vtkMDHistoHexFactory.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidKernel/ReadLock.h"
 
 // For vtkMDHWSignalArray.h
 #include "vtkArrayDispatchArrayList.h"
@@ -124,7 +124,7 @@ struct PointsWorker {
     }
   }
 };
-} // end anon namespace
+} // namespace
 
 template <class ValueTypeT>
 static void InitializevtkMDHWSignalArray(
@@ -263,5 +263,5 @@ vtkMDHistoHexFactory::create(ProgressAction &progressUpdating) const {
 }
 
 vtkMDHistoHexFactory::~vtkMDHistoHexFactory() {}
-}
-}
+} // namespace VATES
+} // namespace Mantid

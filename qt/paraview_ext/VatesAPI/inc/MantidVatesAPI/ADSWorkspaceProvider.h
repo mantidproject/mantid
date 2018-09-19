@@ -48,7 +48,7 @@ public:
 
 private:
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

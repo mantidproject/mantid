@@ -30,8 +30,8 @@ class BinEdges;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-MANTID_HISTOGRAMDATA_DLL Histogram
-rebin(const Histogram &input, const BinEdges &binEdges);
+MANTID_HISTOGRAMDATA_DLL Histogram rebin(const Histogram &input,
+                                         const BinEdges &binEdges);
 } // namespace HistogramData
 } // namespace Mantid
 

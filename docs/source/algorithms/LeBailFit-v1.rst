@@ -53,9 +53,9 @@ library might be supported.
 Supported functionalities
 #########################
 
-| ``* LeBailFit: fit profile parameters by Le bail algorithm; ``
-| ``* Calculation: pattern calculation by Le bail algorithm; ``
-| ``* MonteCarlo: fit profile parameters by Le bail algorithm with Monte Carlo random wal; ``
+| ``* LeBailFit: fit profile parameters by Le bail algorithm;``
+| ``* Calculation: pattern calculation by Le bail algorithm;``
+| ``* MonteCarlo: fit profile parameters by Le bail algorithm with Monte Carlo random wal;``
 | ``* RefineBackground: refine background parameters``
 
 Further Information

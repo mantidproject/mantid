@@ -29,11 +29,11 @@ WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
 }
 
 /** Does nothing in this case
-*  @param NVectors :: This value can only be equal to one, otherwise exception
-* is thrown
-*  @param XLength :: The number of X data points/bin boundaries
-*  @param YLength :: The number of data/error points
-*/
+ *  @param NVectors :: This value can only be equal to one, otherwise exception
+ * is thrown
+ *  @param XLength :: The number of X data points/bin boundaries
+ *  @param YLength :: The number of data/error points
+ */
 void WorkspaceSingleValue::init(const std::size_t &NVectors,
                                 const std::size_t &XLength,
                                 const std::size_t &YLength) {

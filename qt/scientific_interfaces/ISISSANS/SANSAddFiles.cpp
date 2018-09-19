@@ -1,20 +1,20 @@
 #include "SANSAddFiles.h"
-#include "SANSRunWindow.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyHelper.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "SANSRunWindow.h"
 
-#include <QStringList>
 #include <QFileDialog>
-#include <QSettings>
 #include <QMessageBox>
+#include <QSettings>
+#include <QStringList>
 #include <QVariant>
 
-#include <Poco/Path.h>
 #include <Poco/Exception.h>
+#include <Poco/Path.h>
 
 #include <algorithm>
 
@@ -44,7 +44,7 @@ Logger g_log("SANSAddFiles");
 bool isNonEmptyItem(const QListWidgetItem *item) {
   return item->data(Qt::WhatsThisRole).toString().trimmed().length() > 0;
 }
-}
+} // namespace
 
 const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
@@ -140,7 +140,7 @@ void SANSAddFiles::initLayout() {
 }
 
 /** sets tool tip strings for the components on the form
-*/
+ */
 void SANSAddFiles::setToolTips() {
   m_SANSForm->summedPath_lb->setToolTip("The output files from summing the "
                                         "workspaces\nwill be saved to this "
@@ -155,10 +155,10 @@ void SANSAddFiles::setToolTips() {
   m_SANSForm->add_Btn->setToolTip("Select a run to add to the sum");
 }
 /** Creates a QListWidgetItem with the given text and inserts it
-*  into the list box
-*  @param[in] text the text to insert
-*  @return a pointer to the inserted widget
-*/
+ *  into the list box
+ *  @param[in] text the text to insert
+ *  @return a pointer to the inserted widget
+ */
 QListWidgetItem *SANSAddFiles::insertListFront(const QString &text) {
   QListWidgetItem *newItem = new QListWidgetItem(text);
   newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
@@ -166,18 +166,18 @@ QListWidgetItem *SANSAddFiles::insertListFront(const QString &text) {
   return newItem;
 }
 /** Sets directory to which files will be saved and the label
-*  that users see
-*  @param dir :: full path of the output directory
-*/
+ *  that users see
+ *  @param dir :: full path of the output directory
+ */
 void SANSAddFiles::setOutDir(std::string dir) {
   m_outDir = QString::fromStdString(dir);
   m_SANSForm->summedPath_lb->setText(OUT_MSG + m_outDir);
 }
 /** Update the output directory label if the Mantid system output
-*  directory has changed
-*  @param pDirInfo :: a pointer to an object with the output directory name in
-* it
-*/
+ *  directory has changed
+ *  @param pDirInfo :: a pointer to an object with the output directory name in
+ * it
+ */
 void SANSAddFiles::changeOutputDir(
     Mantid::Kernel::ConfigValChangeNotification_ptr pDirInfo) {
   if (pDirInfo->key() == "defaultsave.directory") {
@@ -185,8 +185,8 @@ void SANSAddFiles::changeOutputDir(
   }
 }
 /**Moves the entry in the line edit new2Add_edit to the
-*  listbox toAdd_List, expanding any run number lists
-*/
+ *  listbox toAdd_List, expanding any run number lists
+ */
 void SANSAddFiles::add2Runs2Add() {
   // split comma separated file names or run numbers into a list
   ArrayProperty<std::string> commaSep(
@@ -249,7 +249,7 @@ void SANSAddFiles::add2Runs2Add() {
   m_SANSForm->new2Add_edit->clear();
 }
 /** Executes the add_runs() function inside the SANSadd2 script
-*/
+ */
 void SANSAddFiles::runPythonAddFiles() {
   // Check the validty of the input for the
   if (!checkValidityTimeShiftsForAddedEventFiles()) {
@@ -356,14 +356,14 @@ void SANSAddFiles::runPythonAddFiles() {
   }
 }
 /** This slot opens a manage user directories dialog to allowing the default
-*  output directory to be changed
-*/
+ *  output directory to be changed
+ */
 void SANSAddFiles::outPathSel() {
   MantidQt::API::ManageUserDirectories::openUserDirsDialog(this);
 }
 /** This slot opens a file browser allowing a user select files, which is
-* copied into the new2Add_edit ready to be copied to the listbox (toAdd_List)
-*/
+ * copied into the new2Add_edit ready to be copied to the listbox (toAdd_List)
+ */
 void SANSAddFiles::new2AddBrowse() {
   QSettings prevVals;
   prevVals.beginGroup("CustomInterfaces/SANSRunWindow/AddRuns");
@@ -395,8 +395,8 @@ void SANSAddFiles::new2AddBrowse() {
   }
 }
 /** Normally in responce to an edit this sets data associated with the cell
-*  to the cells text and removes the tooltip
-*/
+ *  to the cells text and removes the tooltip
+ */
 void SANSAddFiles::setCellData(QListWidgetItem *) {
   QListWidgetItem *editting = m_SANSForm->toAdd_List->currentItem();
   if (editting) {
@@ -405,8 +405,8 @@ void SANSAddFiles::setCellData(QListWidgetItem *) {
   }
 }
 /** Called when the clear button is clicked it clears the list of file
-* names to add table
-*/
+ * names to add table
+ */
 void SANSAddFiles::clearClicked() {
   m_SANSForm->toAdd_List->clear();
   insertListFront("");

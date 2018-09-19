@@ -1,8 +1,8 @@
 #ifndef MANTIDHELPWINDOW_H
 #define MANTIDHELPWINDOW_H
 
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include <QWidget>
 #include <string>
 

@@ -5,10 +5,10 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
-* Converts a vector of real values to a vector of complex numbers
-* @param values : [input] The real values as a vector
-* @return : The input as a vector of complex numbers
-*/
+ * Converts a vector of real values to a vector of complex numbers
+ * @param values : [input] The real values as a vector
+ * @return : The input as a vector of complex numbers
+ */
 std::vector<double>
 MaxentSpaceReal::toComplex(const std::vector<double> &values) {
 
@@ -22,10 +22,10 @@ MaxentSpaceReal::toComplex(const std::vector<double> &values) {
 }
 
 /**
-* Converts a vector of complex numbers to a vector of real numbers
-* @param values : [input] The complex values as a vector
-* @return : The input as a vector of real numbers
-*/
+ * Converts a vector of complex numbers to a vector of real numbers
+ * @param values : [input] The complex values as a vector
+ * @return : The input as a vector of real numbers
+ */
 std::vector<double>
 MaxentSpaceReal::fromComplex(const std::vector<double> &values) {
 

@@ -120,7 +120,7 @@ private:
   bool m_solidAngle;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_WBVMEDIANTEST_H_*/

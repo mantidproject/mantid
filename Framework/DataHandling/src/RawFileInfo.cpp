@@ -2,8 +2,8 @@
 // Includes
 //----------------------------
 #include "MantidDataHandling/RawFileInfo.h"
-#include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -270,5 +270,5 @@ void RawFileInfo::exec() {
   progress(1.0);
 }
 
-} // namespace
-}
+} // namespace DataHandling
+} // namespace Mantid

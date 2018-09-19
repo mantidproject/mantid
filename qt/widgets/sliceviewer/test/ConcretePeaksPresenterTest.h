@@ -1,22 +1,22 @@
 #ifndef SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
 #define SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidQtWidgets/SliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockObjects.h"
-#include <boost/make_shared.hpp>
-#include <string>
 #include <algorithm>
+#include <boost/make_shared.hpp>
+#include <cxxtest/TestSuite.h>
+#include <string>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -858,7 +858,7 @@ public:
 
     /*
      * Create a Cursor region.
-    */
+     */
     Top top(0.5);
     Bottom bottom(-0.5);
     Left left(0);

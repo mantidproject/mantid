@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/Common/Batch/ExtractSubtrees.h"
-#include <tuple>
 #include <boost/iterator/transform_iterator.hpp>
+#include <tuple>
 
 namespace MantidQt {
 namespace MantidWidgets {

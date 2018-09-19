@@ -1,10 +1,10 @@
 #ifndef MANTID_CURVEFITTING_VESUVIORESOLUTION_H_
 #define MANTID_CURVEFITTING_VESUVIORESOLUTION_H_
 
-#include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -13,7 +13,7 @@ namespace Algorithms {
 // Forward declarations
 //---------------------------------------------------------------------------
 struct DetectorParams;
-}
+} // namespace Algorithms
 namespace Functions {
 
 //---------------------------------------------------------------------------

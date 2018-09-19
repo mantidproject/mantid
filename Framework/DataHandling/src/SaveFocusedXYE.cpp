@@ -1,17 +1,17 @@
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <fstream>
 #include <cmath>
 #include <exception>
+#include <fstream>
 
 using namespace Mantid::DataHandling;
 

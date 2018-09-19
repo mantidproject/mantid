@@ -1,26 +1,26 @@
 #ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
 #define MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
 
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cmath>
+#include "PropertyManagerHelper.h"
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <cmath>
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidKernel/Strings.h"
-#include "PropertyManagerHelper.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
@@ -745,10 +745,10 @@ public:
     VMD start(0.9, 0.5);
     VMD end(1.9, 1.5);
     auto line = ws->getLineData(start, end, NoNormalization);
-    std::cout << "X\n" << Strings::join(line.x.begin(), line.x.end(), ",")
-              << '\n';
-    std::cout << "Y\n" << Strings::join(line.y.begin(), line.y.end(), ",")
-              << '\n';
+    std::cout << "X\n"
+              << Strings::join(line.x.begin(), line.x.end(), ",") << '\n';
+    std::cout << "Y\n"
+              << Strings::join(line.y.begin(), line.y.end(), ",") << '\n';
 
     TS_ASSERT_EQUALS(line.x.size(), 4);
     TS_ASSERT_DELTA(line.x[0], 0.0, 1e-5);
@@ -1240,9 +1240,9 @@ public:
                hw->isMDHistoWorkspace());
   }
   /**
-  * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or
-  * sptr
-  */
+   * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or
+   * sptr
+   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
     Mantid::Geometry::GeneralFrame frame("m", "m");

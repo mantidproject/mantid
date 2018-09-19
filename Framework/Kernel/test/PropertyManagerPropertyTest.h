@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 
 #include <boost/scoped_ptr.hpp>
 

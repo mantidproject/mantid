@@ -30,9 +30,11 @@ def main():
         return int(command_line_args.exit_code)
     app = QtGui.QApplication(sys.argv)
     form = CrashReportPage(show_continue_terminate=False)
-    ErrorReporterPresenter(form, command_line_args.exit_code)
+    presenter = ErrorReporterPresenter(form, command_line_args.exit_code)
+    presenter.show_view()
     app.exec_()
     return int(command_line_args.exit_code)
+
 
 if __name__ == '__main__':              # if we're running file directly and not importing it
     sys.exit(main())                              # run the main function

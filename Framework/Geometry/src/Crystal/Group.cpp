@@ -116,10 +116,10 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
  */
 bool Group::isInvariant(const Kernel::DblMatrix &tensor,
                         double tolerance) const {
-  auto transformTensor =
-      [](const Kernel::DblMatrix &opMatrix, const Kernel::DblMatrix &tensor) {
-        return opMatrix.Tprime() * tensor * opMatrix;
-      };
+  auto transformTensor = [](const Kernel::DblMatrix &opMatrix,
+                            const Kernel::DblMatrix &tensor) {
+    return opMatrix.Tprime() * tensor * opMatrix;
+  };
 
   return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(),
                      [&](const SymmetryOperation &op) {

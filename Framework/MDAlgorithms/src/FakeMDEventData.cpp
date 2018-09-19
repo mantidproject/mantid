@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------------------------------
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/FakeMD.h"
+#include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

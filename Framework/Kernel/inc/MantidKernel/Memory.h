@@ -3,8 +3,8 @@
 
 #include "MantidKernel/DllConfig.h"
 
-#include <mutex>
 #include <iosfwd>
+#include <mutex>
 #include <string>
 
 namespace Mantid {
@@ -19,7 +19,7 @@ enum MemoryStatsIgnore {
 namespace MemoryOptions {
 /// Initialize platform-dependent options for memory management
 MANTID_KERNEL_DLL void initAllocatorOptions();
-}
+} // namespace MemoryOptions
 
 /**
 This class is responsible for memory statistics.

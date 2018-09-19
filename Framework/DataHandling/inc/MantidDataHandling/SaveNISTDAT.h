@@ -45,7 +45,7 @@ private:
   void exec() override;
 };
 
-} // namespace Algorithms
+} // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SAVENISTDAT_H_*/

@@ -21,9 +21,10 @@ void MaskDetectorsInShape::init() {
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the user defined shape.");
-  declareProperty("IncludeMonitors", false, "Whether to include monitors if "
-                                            "they are contained in the shape "
-                                            "(default false)");
+  declareProperty("IncludeMonitors", false,
+                  "Whether to include monitors if "
+                  "they are contained in the shape "
+                  "(default false)");
 }
 
 void MaskDetectorsInShape::exec() {

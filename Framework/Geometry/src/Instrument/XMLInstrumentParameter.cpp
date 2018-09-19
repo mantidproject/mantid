@@ -5,12 +5,12 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/regex.hpp>
 #include <ctime>
 #include <fstream>
-#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -21,29 +21,29 @@ Kernel::Logger g_log("XMLInstrumentParameter");
 using namespace Kernel;
 
 /** Constructor
-*  @param logfileID :: The logfile id -- the part of the file name which
-* identifies the log
-*  @param value :: Rather then extracting value from logfile, specify a value
-* directly
-*  @param paramName :: The name of the parameter which will be created based on
-* the log values
-*  @param type :: The type
-*  @param extractSingleValueAs :: Describes the way to extract a single value
-* from the log file( average, first number, etc)
-*  @param eq :: muParser equation to calculate the parameter value from the log
-* value
-*  @param comp :: The pointer to the instrument component
-*  @param interpolation :: The pointer to the interpolation class
-*  @param formula :: The string formula to apply
-*  @param formulaUnit :: The unit that the formula requires the input value in
-*  @param resultUnit :: The unit of the result of the formula
-*  @param tie :: What to tie the value to
-*  @param constraint :: The constraint associated with this parameter
-*  @param penaltyFactor :: The level of penalty associated with the constraint
-*  @param fitFunc :: What fit function this applies to
-*  @param angleConvertConst :: angle conversion constant?????
-*  @param description :: text description of the parameter
-*/
+ *  @param logfileID :: The logfile id -- the part of the file name which
+ * identifies the log
+ *  @param value :: Rather then extracting value from logfile, specify a value
+ * directly
+ *  @param paramName :: The name of the parameter which will be created based on
+ * the log values
+ *  @param type :: The type
+ *  @param extractSingleValueAs :: Describes the way to extract a single value
+ * from the log file( average, first number, etc)
+ *  @param eq :: muParser equation to calculate the parameter value from the log
+ * value
+ *  @param comp :: The pointer to the instrument component
+ *  @param interpolation :: The pointer to the interpolation class
+ *  @param formula :: The string formula to apply
+ *  @param formulaUnit :: The unit that the formula requires the input value in
+ *  @param resultUnit :: The unit of the result of the formula
+ *  @param tie :: What to tie the value to
+ *  @param constraint :: The constraint associated with this parameter
+ *  @param penaltyFactor :: The level of penalty associated with the constraint
+ *  @param fitFunc :: What fit function this applies to
+ *  @param angleConvertConst :: angle conversion constant?????
+ *  @param description :: text description of the parameter
+ */
 XMLInstrumentParameter::XMLInstrumentParameter(
     const std::string &logfileID, const std::string &value,
     const boost::shared_ptr<Kernel::Interpolation> &interpolation,
@@ -70,18 +70,18 @@ XMLInstrumentParameter::XMLInstrumentParameter(
 
 /** Returns the parameter value.
  * This interprets the XML parameter specification in order to do one of these
-*things:
+ *things:
  *  - Calculate an equation result, if specified
  *  - Interpolate the value, if desired.
  *  - Just extract the value (perhaps the man or just the n-th position) and
-*return that.
-*
-*  @param logData :: Data in logfile
-*  @return parameter value
-*
-*  @throw InstrumentDefinitionError Thrown if issues with the content of XML
-*instrument definition file
-*/
+ *return that.
+ *
+ *  @param logData :: Data in logfile
+ *  @return parameter value
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
+ *instrument definition file
+ */
 double XMLInstrumentParameter::createParamValue(
     TimeSeriesProperty<double> *logData) const {
   // If this parameter is a <look-up-table> or <formula> return 0.0. Such
@@ -175,8 +175,8 @@ double XMLInstrumentParameter::createParamValue(
   found = equationStr.find("value");
   if (found == std::string::npos) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        std::string("Equation attribute for <parameter>") + " element (eq=" +
-        m_eq +
+        std::string("Equation attribute for <parameter>") +
+        " element (eq=" + m_eq +
         ") in instrument definition file must contain the string: \"value\"." +
         ". \"value\" is replaced by a value from the logfile.");
   }

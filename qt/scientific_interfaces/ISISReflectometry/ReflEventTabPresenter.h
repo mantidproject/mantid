@@ -62,6 +62,6 @@ private:
   std::vector<IReflEventPresenter *> m_eventPresenters;
   IReflMainWindowPresenter *m_mainPresenter;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTTABPRESENTER_H */

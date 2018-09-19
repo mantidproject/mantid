@@ -1,11 +1,11 @@
 #ifndef LOADILLTOF2TEST_H_
 #define LOADILLTOF2TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadILLTOF2.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLTOF2;

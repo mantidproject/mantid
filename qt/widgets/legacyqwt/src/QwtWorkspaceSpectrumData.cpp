@@ -29,7 +29,8 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
 
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution),
-                                     workspace).title();
+                                     workspace)
+                 .title();
 
   // Calculate the min and max values
   calculateYMinAndMax();
@@ -43,7 +44,7 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copy() const {
 /**
  * @param workspace A new workspace source
  * @return
-*/
+ */
 QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
     const Mantid::API::MatrixWorkspace &workspace) const {
   return new QwtWorkspaceSpectrumData(workspace, m_wsIndex, logScaleY(),

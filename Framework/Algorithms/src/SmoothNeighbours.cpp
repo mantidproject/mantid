@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/SmoothNeighbours.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -11,6 +10,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -87,10 +87,11 @@ void SmoothNeighbours::init() {
       "IgnoreMaskedDetectors", true,
       "If true, do not consider masked detectors in the NN search.");
 
-  declareProperty("PreserveEvents", true, "If the InputWorkspace is an "
-                                          "EventWorkspace, this will preserve "
-                                          "the full event list (warning: this "
-                                          "will use much more memory!).");
+  declareProperty("PreserveEvents", true,
+                  "If the InputWorkspace is an "
+                  "EventWorkspace, this will preserve "
+                  "the full event list (warning: this "
+                  "will use much more memory!).");
 
   // -- Rectangular properties
   // ----------------------------------------------------------------------
@@ -685,7 +686,7 @@ void SmoothNeighbours::execWorkspace2D() {
 
 //--------------------------------------------------------------------------------------------
 /** Build the instrument/detector setup in workspace
-  */
+ */
 void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(*inWS, *outws, false);
@@ -710,7 +711,7 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
 }
 //--------------------------------------------------------------------------------------------
 /** Spread the average over all the pixels
-  */
+ */
 void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = inWS->getNumberHistograms();

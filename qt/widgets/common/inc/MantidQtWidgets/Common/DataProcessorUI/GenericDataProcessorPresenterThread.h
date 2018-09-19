@@ -3,8 +3,8 @@
 
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 
-#include <QThread>
 #include <QMetaType>
+#include <QThread>
 
 namespace MantidQt {
 namespace MantidWidgets {

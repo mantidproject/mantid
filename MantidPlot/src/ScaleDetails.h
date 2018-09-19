@@ -31,8 +31,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef SCALEDETAILS_H_
 #define SCALEDETAILS_H_
 
-#include <QWidget>
 #include <QList>
+#include <QWidget>
 class ApplicationWindow;
 class QTimeEdit;
 class QDateTimeEdit;

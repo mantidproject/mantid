@@ -132,6 +132,6 @@ void PostprocessingStep::postProcessGroup(
                              m_algorithm.name().toStdString());
   }
 }
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt

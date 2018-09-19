@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include <json/json.h>
-#include <json/writer.h>
 #include <json/reader.h>
+#include <json/writer.h>
 
 namespace Mantid {
 namespace VATES {
@@ -82,5 +82,5 @@ void MetadataJsonManager::setSpecialCoordinates(int specialCoordinates) {
  * @returns The special coordinates.
  */
 int MetadataJsonManager::getSpecialCoordinates() { return specialCoordinates; }
-}
-}
+} // namespace VATES
+} // namespace Mantid

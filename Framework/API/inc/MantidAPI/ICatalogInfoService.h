@@ -55,7 +55,7 @@ public:
 using ICatalogInfoService_sptr = boost::shared_ptr<ICatalogInfoService>;
 using ICatalogInfoService_const_sptr =
     boost::shared_ptr<const ICatalogInfoService>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif /*MANTID_API_ICATLOGINFOSERVICE_H_*/

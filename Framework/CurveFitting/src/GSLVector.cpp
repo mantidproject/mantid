@@ -3,13 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLVector.h"
 
-#include <gsl/gsl_blas.h>
 #include <algorithm>
 #include <cmath>
+#include <gsl/gsl_blas.h>
 #include <iomanip>
-#include <stdexcept>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {

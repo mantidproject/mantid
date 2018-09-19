@@ -3,12 +3,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -17,8 +17,8 @@
 #include <boost/lexical_cast.hpp>
 
 using Poco::XML::Element;
-using Poco::XML::NodeList;
 using Poco::XML::Node;
+using Poco::XML::NodeList;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -111,16 +111,16 @@ void LoadCanSAS1D2::processTransmission(
 }
 
 /** Load an individual "<SASentry>" element into a new workspace. It extends the
-*LoadCanSAS1D
-* in the direction of loading the SAStransmission_spectrum as well. (which was
-*introduced in version 1.1)
-*
-* @param[in] workspaceData points to a "<SASentry>" element
-* @param[out] runName the name this workspace should take
-* @return dataWS this workspace will be filled with data
-* @throw NotFoundError if any expected elements couldn't be read
-* @throw NotImplementedError if the entry doesn't contain exactly one run
-*/
+ *LoadCanSAS1D
+ * in the direction of loading the SAStransmission_spectrum as well. (which was
+ *introduced in version 1.1)
+ *
+ * @param[in] workspaceData points to a "<SASentry>" element
+ * @param[out] runName the name this workspace should take
+ * @return dataWS this workspace will be filled with data
+ * @throw NotFoundError if any expected elements couldn't be read
+ * @throw NotImplementedError if the entry doesn't contain exactly one run
+ */
 MatrixWorkspace_sptr
 LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
                          std::string &runName) {
@@ -223,5 +223,5 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
   }
   return main_out;
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

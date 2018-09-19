@@ -173,8 +173,8 @@ protected:
   /// This method sets the raw file data to workspace vectors
   void setWorkspaceData(
       DataObjects::Workspace2D_sptr newWorkspace,
-      const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &
-          timeChannelsVec,
+      const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+          &timeChannelsVec,
       int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
       int64_t lengthIn, int64_t binStart);
 

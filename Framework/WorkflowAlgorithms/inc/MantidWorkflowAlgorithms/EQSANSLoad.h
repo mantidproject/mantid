@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 namespace Mantid {
@@ -90,7 +90,7 @@ private:
   int m_slit_to_source[3];
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_EQSANSLOAD_H_*/

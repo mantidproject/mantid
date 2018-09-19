@@ -2,8 +2,8 @@
 
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidKernel/V2D.h"
 
 #include <cmath>
@@ -143,7 +143,7 @@ double polyArea(T &v1, T &v2, Ts &&... vertices) {
   return v2.X() * v1.Y() - v2.Y() * v1.X() +
          polyArea(v2, std::forward<Ts>(vertices)...);
 }
-} // Private namespace
+} // namespace
 
 /**
  * Computes the output grid bins which intersect the input quad and their
@@ -324,8 +324,8 @@ void calcTrapezoidYIntersections(
       // Checks if this bin is completely inside new quadrilateral
       if (yAxis[yi] > std::max(nll.Y(), nlr.Y()) &&
           yAxis[yi + 1] < std::min(nul.Y(), nur.Y())) {
-        areaInfo.emplace_back(xi, yi, (nlr.X() - nll.X()) *
-                                          (yAxis[yi + 1] - yAxis[yi]));
+        areaInfo.emplace_back(
+            xi, yi, (nlr.X() - nll.X()) * (yAxis[yi + 1] - yAxis[yi]));
         // Checks if this bin is not completely outside new quadrilateral
       } else if (yAxis[yi + 1] >= std::min(nll.Y(), nlr.Y()) &&
                  yAxis[yi] <= std::max(nul.Y(), nur.Y())) {

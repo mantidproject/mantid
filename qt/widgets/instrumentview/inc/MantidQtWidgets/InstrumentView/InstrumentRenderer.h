@@ -1,12 +1,15 @@
 #ifndef INSTRUMENTRENDERER_H_
 #define INSTRUMENTRENDERER_H_
 
+#include "ColorMap.h"
 #include "DllOption.h"
 #include "GLColor.h"
+
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include <QString>
+#include <map>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -22,7 +25,7 @@ private:
   mutable std::vector<detail::BankTextureBuilder> m_textures;
   mutable std::map<size_t, size_t> m_reverseTextureIndexMap;
   std::vector<double> m_specIntegrs;
-  MantidColorMap m_colorMap;
+  ColorMap m_colorMap;
   bool m_isUsingLayers;
   size_t m_layer;
 
@@ -42,7 +45,7 @@ public:
 
   void loadColorMap(const QString &fname);
 
-  const MantidColorMap &getColorMap() const { return m_colorMap; }
+  const ColorMap &getColorMap() const { return m_colorMap; }
 
   GLColor getColor(size_t index) const;
 

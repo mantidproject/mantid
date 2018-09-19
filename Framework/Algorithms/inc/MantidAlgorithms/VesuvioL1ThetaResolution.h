@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTION_H_
 #define MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTION_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {

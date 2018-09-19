@@ -11,8 +11,8 @@
 namespace Mantid {
 using namespace Geometry;
 namespace API {
-using Mantid::detid_t;
 using Kernel::V3D;
+using Mantid::detid_t;
 
 /**
  * Constructor
@@ -161,7 +161,7 @@ void WorkspaceNearestNeighbours::build(const int noNeighbours) {
                         nnIndexList,    // Index list of results
                         nnDistList,     // List of distances to each of these
                         0.0 // Error bound (?) is this the radius to search in?
-                        );
+    );
     // The distances that are returned are in our scaled coordinate
     // system. We store the real space ones.
     V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2]) * m_scale;
@@ -234,5 +234,5 @@ std::vector<size_t> WorkspaceNearestNeighbours::getSpectraDetectors() {
   }
   return indices;
 }
-}
-}
+} // namespace API
+} // namespace Mantid

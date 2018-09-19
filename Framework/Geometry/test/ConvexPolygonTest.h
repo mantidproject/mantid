@@ -4,12 +4,12 @@
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V2D.h"
-#include <cxxtest/TestSuite.h>
-#include <cmath>
 #include <cfloat>
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
-using Mantid::Kernel::V2D;
 using Mantid::Geometry::ConvexPolygon;
+using Mantid::Kernel::V2D;
 
 class ConvexPolygonTest : public CxxTest::TestSuite {
 public:

@@ -376,5 +376,5 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

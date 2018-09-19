@@ -92,7 +92,7 @@ public:
   virtual void completedRowReductionSuccessfully(GroupData const &,
                                                  std::string const &){};
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H */

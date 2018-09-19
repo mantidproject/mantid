@@ -31,27 +31,27 @@ QString SANSBackgroundCorrectionSettings::getRunNumber() const {
 }
 
 /**
-* Get a string list with monitor numbers
-* @returns a run number or an empty string
-*/
+ * Get a string list with monitor numbers
+ * @returns a run number or an empty string
+ */
 QString SANSBackgroundCorrectionSettings::getMonNumber() const {
   return m_hasValidSettings ? m_monNumber : QString();
 }
 
 /**
-* Get the setting if mean is to be used
-* @returns the setting or default to false
-*/
+ * Get the setting if mean is to be used
+ * @returns the setting or default to false
+ */
 bool SANSBackgroundCorrectionSettings::getUseMean() const {
   return m_hasValidSettings ? m_useMean : false;
 }
 
 /**
-* Get the setting if monitors or detectors are to be used
-* @returns the setting or default to false
-*/
+ * Get the setting if monitors or detectors are to be used
+ * @returns the setting or default to false
+ */
 bool SANSBackgroundCorrectionSettings::getUseMon() const {
   return m_hasValidSettings ? m_useMon : false;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MaterialBuilder.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidKernel/EmptyValues.h"
 
 using Mantid::Kernel::Material;
 using Mantid::Kernel::MaterialBuilder;

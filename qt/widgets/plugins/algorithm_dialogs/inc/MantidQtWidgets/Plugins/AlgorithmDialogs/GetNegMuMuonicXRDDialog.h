@@ -60,6 +60,6 @@ signals:
   /// signal emitted when validateDialogInput passes
   void validInput();
 };
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt
 #endif // !MANTIDQT_CUSTOM_DIALOGS_GETNEGMUMUONICXRD_H_

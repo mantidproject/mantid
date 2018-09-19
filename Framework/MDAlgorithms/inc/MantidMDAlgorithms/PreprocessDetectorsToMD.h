@@ -87,6 +87,6 @@ protected: // for testing
   double getEi(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };
 
-} // DataObjects
-} // Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 #endif

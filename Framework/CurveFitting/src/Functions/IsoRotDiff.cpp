@@ -6,8 +6,8 @@
 #include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
 // Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ImmutableCompositeFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ImmutableCompositeFunction.h"
 // third party library headers (N/A)
 #include <boost/math/special_functions/bessel.hpp>
 // standard library headers (N/A)

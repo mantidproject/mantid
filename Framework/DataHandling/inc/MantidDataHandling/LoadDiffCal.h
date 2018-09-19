@@ -8,7 +8,7 @@
 namespace H5 {
 class H5File;
 class Group;
-}
+} // namespace H5
 
 namespace Mantid {
 namespace DataHandling {

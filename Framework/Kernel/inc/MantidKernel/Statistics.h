@@ -40,7 +40,7 @@ enum StatisticType {
   TimeAveragedMean,
   Median
 };
-}
+} // namespace Math
 
 /**
    Simple struct to store statistics.
@@ -72,7 +72,7 @@ struct StatOptions {
 };
 
 /** R factor for powder data analysis
-  */
+ */
 struct Rfactor {
   /// Rwp
   double Rwp;

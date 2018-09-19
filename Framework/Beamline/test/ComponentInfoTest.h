@@ -396,12 +396,12 @@ public:
 
   void test_throw_if_instrument_tree_not_same_size_as_number_of_components() {
     /*
-    * Positions are rotations are only currently stored for non-detector
-    * components
-    * We should have as many detectorRanges as we have non-detector components
-    * too.
-    * All vectors should be the same size.
-    */
+     * Positions are rotations are only currently stored for non-detector
+     * components
+     * We should have as many detectorRanges as we have non-detector components
+     * too.
+     * All vectors should be the same size.
+     */
     auto detectorsInSubtree =
         boost::make_shared<const std::vector<size_t>>(); // No detector indices
                                                          // in this example!
@@ -701,8 +701,8 @@ public:
 
     TSM_ASSERT("For a root (no parent) relative positions are always the same "
                "as absolute ones",
-               compInfo.position(rootIndex)
-                   .isApprox(compInfo.relativePosition(rootIndex)));
+               compInfo.position(rootIndex).isApprox(
+                   compInfo.relativePosition(rootIndex)));
 
     const Eigen::Vector3d expectedRelativePos =
         compInfo.position(detectorIndex) -
@@ -786,8 +786,8 @@ public:
         info.relativeRotation(rootIndex).isApprox(info.rotation(rootIndex)));
     TSM_ASSERT_DELTA(
         "90 degree RELATIVE rotation between root ans sub-assembly",
-        info.relativeRotation(rootIndex)
-            .angularDistance(info.relativeRotation(subAssemblyIndex)),
+        info.relativeRotation(rootIndex).angularDistance(
+            info.relativeRotation(subAssemblyIndex)),
         theta, 1e-6);
   }
 

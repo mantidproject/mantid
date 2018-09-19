@@ -1,19 +1,19 @@
-#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidCrystal/ShowPeakHKLOffsets.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidCrystal/ShowPeakHKLOffsets.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
-using Mantid::DataObjects::PeaksWorkspace;
+using Mantid::API::ITableWorkspace;
+using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceProperty;
-using Mantid::Kernel::Direction;
+using Mantid::DataObjects::Peak;
+using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 using Mantid::DataObjects::TableWorkspace_sptr;
-using Mantid::DataObjects::Peak;
+using Mantid::Kernel::Direction;
 using Mantid::Kernel::V3D;
-using Mantid::API::WorkspaceFactory;
-using Mantid::API::ITableWorkspace;
 /*
  * ShowPeakHKLOffsets.cpp *
  *  Created on: May 13, 2013

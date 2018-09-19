@@ -45,11 +45,11 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/format.hpp>
 #include <cmath>
@@ -73,7 +73,7 @@ std::string extractFormattedPropertyFromDimension(
   std::string id = dimension->getDimensionId();
   return boost::str(boost::format("%s, %f, %f, %d") % id % min % max % nBins);
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Crystal {

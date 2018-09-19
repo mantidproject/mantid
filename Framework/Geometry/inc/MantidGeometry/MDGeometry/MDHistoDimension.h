@@ -2,10 +2,10 @@
 #define MANTID_GEOMETRY_MDHISTODIMENSION_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/VMD.h"
@@ -24,13 +24,13 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL MDHistoDimension : public IMDDimension {
 public:
   /** Constructor for simple MDHistoDimension
-  * @param name :: full name of the axis
-  * @param ID :: identifier string
-  * @param frame :: MDFrame
-  * @param min :: minimum extent
-  * @param max :: maximum extent
-  * @param numBins :: number of bins (evenly spaced)
-  */
+   * @param name :: full name of the axis
+   * @param ID :: identifier string
+   * @param frame :: MDFrame
+   * @param min :: minimum extent
+   * @param max :: maximum extent
+   * @param numBins :: number of bins (evenly spaced)
+   */
   MDHistoDimension(std::string name, std::string ID, const MDFrame &frame,
                    coord_t min, coord_t max, size_t numBins)
       : m_name(name), m_dimensionId(ID), m_frame(frame.clone()), m_min(min),
@@ -152,7 +152,7 @@ using MDHistoDimension_sptr = boost::shared_ptr<MDHistoDimension>;
 /// Shared pointer to a const MDHistoDimension
 using MDHistoDimension_const_sptr = boost::shared_ptr<const MDHistoDimension>;
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_MDHISTODIMENSION_H_ */

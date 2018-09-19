@@ -10,7 +10,7 @@ namespace Mantid {
 namespace Kernel {
 class Material;
 class V3D;
-}
+} // namespace Kernel
 
 namespace Algorithms {
 

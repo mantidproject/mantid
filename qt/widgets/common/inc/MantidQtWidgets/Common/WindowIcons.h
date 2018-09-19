@@ -29,6 +29,6 @@ private:
   /// Internal map instance
   QMap<std::string, std::string> m_idToPixmapName;
 };
-}
-}
+} // namespace API
+} // namespace MantidQt
 #endif // MANTIDQT_API_WINDOWICONS_H_

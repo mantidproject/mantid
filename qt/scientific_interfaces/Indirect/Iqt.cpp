@@ -59,7 +59,7 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
       propsTable->getColumn("SampleOutputBins")->cell<int>(0),
       propsTable->getColumn("ResolutionBins")->cell<int>(0));
 }
-}
+} // namespace
 
 using namespace Mantid::API;
 
@@ -128,6 +128,8 @@ void Iqt::setup() {
   connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(plotTiled()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+  connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this,
+          SLOT(errorsClicked()));
 }
 
 void Iqt::run() {
@@ -143,6 +145,7 @@ void Iqt::run() {
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
   QString nIterations = m_uiForm.spIterations->cleanText();
+  bool calculateErrors = m_uiForm.cbCalculateErrors->isChecked();
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
@@ -155,6 +158,7 @@ void Iqt::run() {
   IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
   IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
   IqtAlg->setProperty("NumberOfIterations", nIterations.toStdString());
+  IqtAlg->setProperty("CalculateErrors", calculateErrors);
 
   IqtAlg->setProperty("EnergyMin", energyMin);
   IqtAlg->setProperty("EnergyMax", energyMax);
@@ -195,6 +199,12 @@ void Iqt::plotClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
   plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
+
+void Iqt::errorsClicked() {
+  m_uiForm.spIterations->setEnabled(isErrorsEnabled());
+}
+
+bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 void Iqt::plotTiled() {
   MatrixWorkspace_const_sptr outWs =

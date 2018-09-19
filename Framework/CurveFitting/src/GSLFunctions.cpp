@@ -2,18 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ICostFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {
 
 /** Fit GSL function wrapper
-* @param x :: Input function parameters
-* @param params :: Input data
-* @param f :: Output function values = (y_cal-y_data)/sigma for each data point
-* @return A GSL status information
-*/
+ * @param x :: Input function parameters
+ * @param params :: Input data
+ * @param f :: Output function values = (y_cal-y_data)/sigma for each data point
+ * @return A GSL status information
+ */
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   assert(x->data);
   struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
@@ -72,11 +72,11 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
 }
 
 /** Fit GSL derivative function wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param J :: Output derivatives
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param J :: Output derivatives
+ * @return A GSL status information
+ */
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
@@ -140,12 +140,12 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 }
 
 /** Fit derivatives and function GSL wrapper
-* @param x :: Input function arguments
-* @param params :: Input data
-* @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
-* @param J :: Output derivatives
-* @return A GSL status information
-*/
+ * @param x :: Input function arguments
+ * @param params :: Input data
+ * @param f :: Output function values = (y_cal-y_cal)/sigma for each data point
+ * @param J :: Output derivatives
+ * @return A GSL status information
+ */
 int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
   gsl_f(x, params, f);
   gsl_df(x, params, J);

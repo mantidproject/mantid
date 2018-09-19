@@ -682,5 +682,5 @@ std::vector<double> ReducedCell::norm_vals(const ReducedCell &info) const {
  */
 Kernel::DblMatrix ReducedCell::GetTransformation() { return transform; }
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
