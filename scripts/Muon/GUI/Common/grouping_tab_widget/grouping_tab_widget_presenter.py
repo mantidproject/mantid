@@ -1,12 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-import time
-
-from Muon.GUI.Common.threading_worker import Worker
 from Muon.GUI.Common.threading_manager import WorkerManager
-from Muon.GUI.Common.home_tab.home_tab_presenter import Observer
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import Observable
-from Muon.GUI.Common.home_tab.home_tab_presenter import Observer
+from Muon.GUI.Common.observer_pattern import Observer, Observable
 
 import Muon.GUI.Common.muon_file_utils as file_utils
 import Muon.GUI.Common.load_utils as load_utils
@@ -20,14 +15,9 @@ class GroupingTabPresenter(object):
 
     @staticmethod
     def text_for_description():
-        # TODO :  implement automatic update for decsription.
+        # TODO :  implement automatic update for description.
         text = "EMU longitudinal (?? detectors)"
         return text
-
-    @staticmethod
-    def timing(time_s):
-        time.sleep(time_s)
-        return
 
     def __init__(self, view, model,
                  grouping_table_widget=None,
@@ -74,13 +64,18 @@ class GroupingTabPresenter(object):
     def pair_table_changed(self):
         self.groupingNotifier.notify_subscribers()
 
-    def add_pair_from_grouping_table(self, name1, name2):
-        """If user requests to add a pair from the grouping table."""
-        pair = self._model.construct_empty_pair_with_group_names(name1, name2)
+    def add_pair_from_grouping_table(self, group_name1, group_name2):
+        """
+        If user requests to add a pair from the grouping table.
+        """
+        pair = self._model.construct_empty_pair_with_group_names(group_name1, group_name2)
         self._model.add_pair(pair)
         self.pairing_table_widget.update_view_from_model()
 
     def handle_guess_alpha(self, pair_name, group1_name, group2_name):
+        """
+        Calculate alpha for the pair for which "Guess Alpha" button was clicked.
+        """
         ws1 = self._model.get_group_workspace(group1_name)
         ws2 = self._model.get_group_workspace(group2_name)
 
@@ -110,18 +105,18 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
+        self.groupingNotifier.notify_subscribers()
+
     def disable_editing(self):
         self._view.set_buttons_enabled(False)
         self.grouping_table_widget.disable_editing()
         self.pairing_table_widget.disable_editing()
 
     def calculate_all_data(self, arg):
-        self._model._data.show_all_groups()
-        self._model._data.show_all_pairs()
+        self._model.show_all_groups_and_pairs()
 
     def handle_update_all_clicked(self):
         self.disable_editing()
-        # TODO : Update here using threading
         if self.thread_manager:
             self.thread_manager.clear()
             self.thread_manager.deleteLater()
@@ -131,8 +126,7 @@ class GroupingTabPresenter(object):
         self.thread_manager.start()
 
     def handle_default_grouping_button_clicked(self):
-        #self._model.clear()
-        self._model._data.set_groups_and_pairs_to_default()
+        self._model.reset_groups_and_pairs_to_default()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
@@ -146,6 +140,8 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
 
+        self.groupingNotifier.notify_subscribers()
+
     def handle_new_data_loaded(self):
         if self._model._data.is_data_loaded():
             self.grouping_table_widget.update_view_from_model()
@@ -155,7 +151,8 @@ class GroupingTabPresenter(object):
 
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
-        load_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
+        if filename != "":
+            load_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
 
     class LoadObserver(Observer):
 
@@ -163,6 +160,7 @@ class GroupingTabPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
+            print("LoadObserver : update")
             self.outer.handle_new_data_loaded()
 
     class InstrumentObserver(Observer):
@@ -185,6 +183,7 @@ class GroupingTabPresenter(object):
     class GuessAlphaObserver(Observer):
 
         def __init__(self, outer):
+            # super(GuessAlphaObserver).__init__()
             self.outer = outer
 
         def update(self, observable, arg=["", "", ""]):

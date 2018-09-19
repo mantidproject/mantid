@@ -4,8 +4,7 @@ import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.run_string_utils import valid_name_regex, valid_alpha_regex
-from Muon.GUI.Common.home_tab.home_tab_presenter import Observer
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import Observable
+from Muon.GUI.Common.observer_pattern import Observer, Observable
 
 
 class PairingTablePresenter(object):

@@ -1,9 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 class HomeGroupingWidgetPresenter(HomeTabSubWidget):
+
+    @staticmethod
+    def string_to_list(text):
+        if text == "":
+            return []
+        return [int(i) for i in text.split(",")]
 
     def __init__(self, view, model):
         self._view = view
@@ -16,13 +23,17 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._view.on_summed_periods_changed(self.handle_periods_changed)
         self._view.on_subtracted_periods_changed(self.handle_periods_changed)
 
+        self.pairAlphaNotifier = HomeGroupingWidgetPresenter.PairAlphaNotifier(self)
+
     def show(self):
         self._view.show()
 
     def handle_user_changes_alpha(self):
         alpha = self._view.get_current_alpha()
-        pair_name = self._view.get_currently_selected_group_pair()
+        pair_name = str(self._view.get_currently_selected_group_pair())
         self._model.update_pair_alpha(pair_name, alpha)
+        # notify any observers of the change
+        self.pairAlphaNotifier.notify_subscribers()
 
     def update_group_pair_list(self):
         group_names = self._model.get_group_names()
@@ -53,11 +64,6 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         n_periods = self._model.number_of_periods()
         self._view.set_period_number_in_period_label(n_periods)
 
-    def string_to_list(self, text):
-        if text == "":
-            return []
-        return [int(i) for i in text.split(",")]
-
     def update_period_edits(self):
         summed_periods = self._model.get_summed_periods()
         subtracted_periods = self._model.get_subtracted_periods()
@@ -84,3 +90,12 @@ class HomeGroupingWidgetPresenter(HomeTabSubWidget):
         self._model.update_subtracted_periods(subtracted)
 
         self.update_period_edits()
+
+    class PairAlphaNotifier(Observable):
+
+        def __init__(self, outer):
+            Observable.__init__(self)
+            self.outer = outer  # handle to containing class
+
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args, **kwargs)

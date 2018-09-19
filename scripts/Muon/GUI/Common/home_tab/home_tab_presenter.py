@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-
+from Muon.GUI.Common.observer_pattern import Observer
 
 class HomeTabSubWidget:
     __metaclass__ = ABCMeta
@@ -16,14 +16,14 @@ class HomeTabSubWidget:
         pass
 
 
-class Observer:
-
-    def update(observable, arg):
-        '''Called when the observed object is
-        modified. You call an Observable object's
-        notifyObservers method to notify all the
-        object's observers of the change.'''
-        pass
+# class Observer:
+#
+#     def update(observable, arg):
+#         '''Called when the observed object is
+#         modified. You call an Observable object's
+#         notifyObservers method to notify all the
+#         object's observers of the change.'''
+#         pass
 
 
 class HomeTabPresenter(object):

@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.home_tab.home_tab_presenter import Observer
-from Muon.GUI.Common.home_instrument_widget.home_instrument_widget_presenter import Observable
+from Muon.GUI.Common.observer_pattern import Observer, Observable
+
 
 class LoadWidgetPresenter(object):
     """
@@ -34,8 +34,6 @@ class LoadWidgetPresenter(object):
 
         self.instrumentObserver = LoadWidgetPresenter.InstrumentObserver(self)
         self.loadNotifier = LoadWidgetPresenter.LoadNotifier(self)
-
-
 
     def set_load_run_widget(self, widget):
         self.load_run_widget = widget
@@ -105,6 +103,7 @@ class LoadWidgetPresenter(object):
         """
         Notify when loaded data changes from file widget or run widget, or when clear button is pressed.
         """
+
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class

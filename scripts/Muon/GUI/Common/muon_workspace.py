@@ -5,97 +5,113 @@ from mantid import api
 
 
 class MuonWorkspace(object):
-    """A basic muon workspace which is either the workspace or the name of the workspace in the ADS"""
+    """
+    A wrapper around a single workspace for use with MuonAnalysis.
+
+    A single instance of the wrapped workspace exists, but it is either in the ADS or stored in a class
+    attribute. Either way, a single property "workspace" will always return it; with the show() and hide()
+    methods storing/retrieving it from the the ADS. The show() attribute takes a name, which is a string
+    using a folder-like syntax to describe the workspaces location within a nested structure of group workspaces
+
+    so for example name = "group1/group2/workspace" would store the workspace in the ADS inside group2, which
+    is inside group1. The "/" character is used to separate folders in the name as in the example.
+
+    A basic muon workspace which is either the workspace or the name of the workspace in the ADS
+    """
 
     def __init__(self, workspace):
-        self._isInADS = False
+        self._is_in_ADS = False
         self._workspace = workspace
-        self._directory = ""
-        self._name = ""
+        self._directory_structure = ""
+        self._workspace_name = ""
 
     @property
     def name(self):
-        return self._directory + self._name
-
-    @name.setter
-    def name(self, full_name):
-        self._directory = "/".join(full_name.split("/")[0:-1])
-        self._name = full_name.split("/")[-1]
+        return self._directory_structure + self._workspace_name
 
     @property
     def workspace(self):
-        # print("GETTING WORKSPACE")
-        if self._isInADS:
-            # print("\tis in ADS!")
-            return mtd[self._name]
+        if self._is_in_ADS:
+            return mtd[self._workspace_name]
         else:
-            # print ("\tis not in ADS!")
             return self._workspace
+
+    @name.setter
+    def name(self, full_name):
+        self._directory_structure = "/".join(full_name.split("/")[0:-1])
+        self._workspace_name = full_name.split("/")[-1]
 
     @workspace.setter
     def workspace(self, value):
-        # print("SETTING WORKSPACE")
-        # TODO : add isinstance checks
-        if self._isInADS:
-            mtd.remove(self._name)
-            self._isInADS = False
-            self._name = ""
-            self._directory = ""
+        if self._is_in_ADS:
+            if mtd.doesExist(self._workspace_name):
+                mtd.remove(self._workspace_name)
+            self._is_in_ADS = False
+            self._workspace_name = ""
+            self._directory_structure = ""
         self._workspace = value
 
     def show(self, name):
-        if len(name) > 0 and self._isInADS is False:
+        """
+        Show the workspace in the ADS inside the WorkspaceGroup structure specified in name
+        name = dirs/../dirs/workspace_name
+        """
+        if len(name) > 0 and self._is_in_ADS is False:
             self.name = str(name)
-            print("\t\t Adding ", type(self._workspace), " as ", self._name)
-            if mtd.doesExist(self._name):
-                mtd.remove(self._name)
-            mtd.addOrReplace(self._name, self._workspace)
-            if self._directory != "":
+            # remove workspace with the same name if exists
+            if mtd.doesExist(self._workspace_name):
+                mtd.remove(self._workspace_name)
+            # add workspace to ADS
+            mtd.addOrReplace(self._workspace_name, self._workspace)
+
+            if self._directory_structure != "":
                 self.add_directory_structure()
                 # Add to the appropriate group
-                group = self._directory.split("/")[-1]
-                print("\t\t Adding ", self._name, " to ", group)
-                print("and now : ", api.AnalysisDataServiceImpl.Instance().getObjectNames())
-                mtd[group].add(self._name)
+                group = self._directory_structure.split("/")[-1]
+                mtd[group].add(self._workspace_name)
+
             self._workspace = None
-            self._isInADS = True
+            self._is_in_ADS = True
         else:
-            print("Cannot store is ADS : name is empty")
-            pass
+            raise RuntimeError("Cannot store workspace in ADS with name : ", str(name))
 
     def hide(self):
-        try:
-            self._workspace = mtd[self._name]
-            mtd.remove(self._name)
-            self._name = ""
-            self._directory = ""
-            self._isInADS = False
-        except:
-            print("Cannot remove from ADS")
-            pass
+        """
+        Remove the workspace from the ADS and store it in the class instance
+        """
+        if mtd.doesExist(self._workspace_name):
+            self._workspace = mtd[self._workspace_name]
+            mtd.remove(self._workspace_name)
+            self._workspace_name = ""
+            self._directory_structure = ""
+            self._is_in_ADS = False
+        else:
+            print("Cannot remove workspace from ADS with name : ", self._workspace_name)
 
     def add_directory_structure(self):
-        print("add directory structure start: ", api.AnalysisDataServiceImpl.Instance().getObjectNames())
-        dirs = self._directory.split("/")
+        """
+        create the nested WorkspaceGroup structure in the ADS specified by the
+        stored directory attribute.
+        """
+
+        dirs = self._directory_structure.split("/")
         for directory in dirs:
-            try:
-                mtd[directory]
-            except KeyError as e:
-                print("\t\t ", e.args)
-                print("\t\t PRODUCING GROUP : ", directory)
-                group = api.WorkspaceGroup()
-                mtd.addOrReplace(directory, group)
+            if not mtd.doesExist(directory):
+                workspace_group = api.WorkspaceGroup()
+                mtd.addOrReplace(directory, workspace_group)
+            elif not isinstance(mtd[directory], api.WorkspaceGroup):
+                mtd.remove(directory)
+                workspace_group = api.WorkspaceGroup()
+                mtd.addOrReplace(directory, workspace_group)
+            else:
+                # exists and is a workspace group
+                pass
 
-            if not isinstance(mtd[directory], api.WorkspaceGroup):
-                break
-            # add an else for if workspace not a group
-
-        last_dir = ""
+        # Create the nested group structure in the ADS
+        previous_dir = ""
         for i, directory in enumerate(dirs):
             if i == 0:
-                last_dir = directory
+                previous_dir = directory
                 continue
-            mtd[last_dir].add(directory)
-            last_dir = directory
-
-        print("add directory structure end: ", api.AnalysisDataServiceImpl.Instance().getObjectNames())
+            mtd[previous_dir].add(directory)
+            previous_dir = directory

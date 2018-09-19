@@ -3,29 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 import Muon.GUI.Common.load_utils as load_utils
 from Muon.GUI.Common.muon_file_utils import filter_for_extensions
-
-
-class Observable:
-
-    def __init__(self):
-        self._subscribers = []
-
-    def add_subscriber(self, observer):
-        if observer not in self._subscribers:
-            self._subscribers.append(observer)
-
-    def delete_subscriber(self, observer):
-        self._subscribers.remove(observer)
-
-    def delete_subscribers(self):
-        self._subscribers = []
-
-    def count_subscribers(self):
-        return len(self._subscribers)
-
-    def notify_subscribers(self, arg=None):
-        for observer in self._subscribers:
-            observer.update(self, arg)
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 class InstrumentWidgetPresenter(HomeTabSubWidget):

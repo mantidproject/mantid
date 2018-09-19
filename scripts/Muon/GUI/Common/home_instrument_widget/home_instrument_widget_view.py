@@ -213,7 +213,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.horizontal_layout_2.addWidget(self.timezero_label_2)
 
     def set_time_zero(self, time_zero):
-        self.timezero_edit.setText(str(time_zero))
+        self.timezero_edit.setText("{0:.3f}".format(round(float(time_zero), 3)))
 
     def get_time_zero(self):
         return float(self.timezero_edit.text())
@@ -279,7 +279,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_first_good_data_changed = slot
 
     def set_first_good_data(self, first_good_data):
-        self.firstgooddata_edit.setText(str(first_good_data))
+        self.firstgooddata_edit.setText("{0:.3f}".format(round(float(first_good_data), 3)))
 
     def on_first_good_data_checkState_changed(self, slot):
         self.firstgooddata_checkbox.stateChanged.connect(slot)

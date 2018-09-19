@@ -24,9 +24,11 @@ class HomeGroupingWidgetModel(object):
         return name in self.get_pair_names()
 
     def update_pair_alpha(self, pair_name, alpha):
-        pair = self._data.pairs.get(pair_name, None)
-        if pair:
-            pair.alpha = alpha
+        try:
+            self._data.pairs[pair_name].alpha = alpha
+        except:
+            print("Exception in update_pair_alpha")
+
 
     def get_alpha(self, pair_name):
         pair = self._data.pairs[pair_name]

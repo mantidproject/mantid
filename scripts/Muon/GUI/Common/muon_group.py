@@ -4,15 +4,15 @@ from Muon.GUI.Common.muon_workspace import MuonWorkspace
 import six
 
 
-class MuonGroup:
+class MuonGroup(object):
     """Simple struct to store information on a detector group.
 
     The name is set at initialization and after that cannot be changed.
     The detector list can be modified by passing a list of ints (type checks for this)
-    The number of detetors is stored
+    The number of detectors is stored
     """
 
-    def __init__(self, group_name="", detector_IDs=[]):
+    def __init__(self, group_name, detector_IDs=[]):
         self._group_name = group_name
 
         self._detector_IDs = None
@@ -28,10 +28,17 @@ class MuonGroup:
     def workspace(self, new_workspace):
         if isinstance(new_workspace, MuonWorkspace):
             self._workspace = new_workspace
+        else:
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
+                             " but should be MuonWorkspace")
 
     @property
     def name(self):
         return self._group_name
+
+    @name.setter
+    def name(self, _name):
+        raise AttributeError("Cannot change name of MuonGroup object")
 
     @property
     def detectors(self):
@@ -44,11 +51,11 @@ class MuonGroup:
     @detectors.setter
     def detectors(self, detector_IDs):
         if isinstance(detector_IDs, six.string_types):
-            raise ValueError("detectors must be a list of ints.")
+            raise AttributeError("MuonGroup : detectors must be a list of ints.")
         elif isinstance(detector_IDs, list):
             if sum([not isinstance(item, int) for item in detector_IDs]) == 0:
-                self._detector_IDs = detector_IDs
+                self._detector_IDs = list(set(sorted(detector_IDs)))
             else:
-                raise ValueError("detectors must be a list of ints.")
+                raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:
             raise ValueError("detectors must be a list of ints.")

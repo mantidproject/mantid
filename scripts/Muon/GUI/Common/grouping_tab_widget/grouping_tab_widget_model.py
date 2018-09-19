@@ -16,10 +16,6 @@ class GroupingTabModel(object):
     """
 
     def __init__(self, data=MuonContext()):
-        # ordered dictionary to preserve order in which use enters data
-        # self._groups = OrderedDict()
-        # self._pairs = OrderedDict()
-
         self._data = data
 
     def get_group_workspace(self, group_name):
@@ -34,28 +30,29 @@ class GroupingTabModel(object):
             workspace = self._data.groups[group_name].workspace.workspace
         return workspace
 
-    def update_pair_alpha(self, pair_name, new_alpha):
-        self._data.pairs[pair_name].alpha = new_alpha
-
     @property
     def groups(self):
-        return self._data._groups.values()
+        return self._data.groups.values()
 
     @property
     def pairs(self):
-        return self._data._pairs.values()
+        return self._data.pairs.values()
 
     @property
     def group_names(self):
-        return self._data._groups.keys()
+        return self._data.groups.keys()
 
     @property
     def pair_names(self):
-        return self._data._pairs.keys()
+        return self._data.pairs.keys()
 
     @property
     def group_and_pair_names(self):
         return self.group_names + self.pair_names
+
+    def show_all_groups_and_pairs(self):
+        self._data.show_all_groups()
+        self._data.show_all_pairs()
 
     def clear_groups(self):
         self._data._groups = OrderedDict()
@@ -69,45 +66,25 @@ class GroupingTabModel(object):
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
-        self._data._groups[group.name] = group
+        self._data.groups[group.name] = group
 
     def add_pair(self, pair):
         assert isinstance(pair, MuonPair)
-        self._data._pairs[pair.name] = pair
+        self._data.pairs[pair.name] = pair
 
     def remove_groups_by_name(self, name_list):
         for name in name_list:
-            del self._data._groups[name]
+            del self._data.groups[name]
 
     def remove_pairs_by_name(self, name_list):
         for name in name_list:
-            del self._data._pairs[name]
+            del self._data.pairs[name]
 
     def construct_empty_group(self, _group_index):
-        group_index = 0
-        new_group_name = "group_" + str(group_index)
-        while new_group_name in self.group_names:
-            group_index += 1
-            new_group_name = "group_" + str(group_index)
-        return MuonGroup(group_name=new_group_name, detector_IDs=[1])
+        return self._data.construct_empty_group(_group_index)
 
     def construct_empty_pair(self, _pair_index):
-        pair_index = 0
-        new_pair_name = "pair_" + str(pair_index)
-        while new_pair_name in self.pair_names:
-            pair_index += 1
-            new_pair_name = "pair_" + str(pair_index)
-        if len(self.group_names) == 0:
-            group1 = None
-            group2 = None
-        if len(self.group_names) == 1:
-            group1 = self.group_names[0]
-            group2 = self.group_names[0]
-        if len(self.group_names) >= 2:
-            group1 = self.group_names[0]
-            group2 = self.group_names[1]
-        return MuonPair(pair_name=new_pair_name,
-                        group1_name=group1, group2_name=group2, alpha=1.0)
+        return self._data.construct_empty_pair(_pair_index)
 
     def construct_empty_pair_with_group_names(self, name1, name2):
         pair_index = 0
@@ -117,3 +94,9 @@ class GroupingTabModel(object):
             new_pair_name = "pair_" + str(pair_index)
         return MuonPair(pair_name=new_pair_name,
                         group1_name=name1, group2_name=name2, alpha=1.0)
+
+    def reset_groups_and_pairs_to_default(self):
+        self._data.set_groups_and_pairs_to_default()
+
+    def update_pair_alpha(self, pair_name, new_alpha):
+        self._data.pairs[pair_name].alpha = new_alpha
