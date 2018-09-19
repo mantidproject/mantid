@@ -125,7 +125,6 @@ QString getFilter(const Mantid::Kernel::Property *baseProp) {
  * the first.
  *
  * @param exts :: vector of extensions
- * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
 QString getFilter(const std::vector<std::string> &exts) {
@@ -136,7 +135,9 @@ QString getFilter(const std::vector<std::string> &exts) {
     if (exts.size() > 1) {
       QString displayAllFilter = "Data Files (";
       for (auto &itr : exts) {
-        displayAllFilter.append(" *" + QString::fromStdString(itr));
+		  // Add a space to between each extension
+		  displayAllFilter.append(" ");
+		  displayAllFilter.append(formatExtension(itr));
       }
       displayAllFilter.append(" );;");
       filter.append(displayAllFilter);
@@ -151,6 +152,30 @@ QString getFilter(const std::vector<std::string> &exts) {
   }
   filter.append(ALL_FILES);
   return filter;
+}
+
+/** Format extension into expected form (*.ext)
+ *
+ * @param extension :: extension to be formatted
+ * @return a QString of the expected form
+ */
+QString formatExtension(const std::string &extension) {
+	QString formattedExtension = QString::fromStdString(extension);
+	if (extension.at(0) == '*' && extension.at(1) == '.') {
+		return formattedExtension;
+	}
+	else {
+		if (extension.at(0) == '*') {
+			formattedExtension.insert(1, ".");
+		} 
+		else if (extension.at(0) == '.') {
+			formattedExtension.prepend("*");
+		}
+		else {
+			formattedExtension.prepend("*.");
+		}
+	}
+	return formattedExtension;
 }
 
 QString getCaption(const std::string &dialogName,
