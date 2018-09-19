@@ -342,8 +342,9 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
                 self.plotting.view.close()
 
     def subplotRemoved(self,name):
-        return
-        #self.detectors.setState(name,False)
+        # need to change the state without sending signal
+        # as the plot has already been removed
+        self.detectors.setStateQuietly(name,False)
 
 def qapp():
     if QtGui.QApplication.instance():
