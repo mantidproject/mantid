@@ -243,7 +243,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
 
         # Act
-        states = presenter.get_states(row_index=[0, 1])
+        states, errors = presenter.get_states(row_index=[0, 1])
 
         # Assert
         self.assertTrue(len(states) == 2)

@@ -32,7 +32,6 @@ from sans.gui_logic.models.create_state import create_states
 from ui.sans_isis.work_handler import WorkHandler
 from sans.common.file_information import SANSFileInformationFactory
 
-
 try:
     import mantidplot
 except (Exception, Warning):
@@ -359,10 +358,13 @@ class RunTabPresenter(object):
             # 1. Set up the states and convert them into property managers
             selected_rows = self._view.get_selected_rows()
             selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
-            states = self.get_states(row_index=selected_rows)
+            states, errors = self.get_states(row_index=selected_rows)
             if not states:
                 raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
                                    " has been loaded")
+
+            for row, error in errors.items():
+                self.on_processing_error(row, error)
 
             # 4. Create the graph if continuous output is specified
             if mantidplot:
@@ -408,8 +410,8 @@ class RunTabPresenter(object):
         self._processing = False
 
     def on_processing_error(self, row, error_msg):
-        self._view.change_row_color("#ff6363", row)
-        self.display_warning_box('Warning', 'Processing row {} failed'.format(row), error_msg)
+        self._view.change_row_color("#accbff", row)
+        self._view.set_row_tooltip(error_msg, row)
 
     def on_row_inserted(self, index, row):
         row_table_index = TableIndexModel(*row)
@@ -547,14 +549,15 @@ class RunTabPresenter(object):
 
         # 3. Go through each row and construct a state object
         if table_model and state_model_with_view_update:
-            states = create_states(state_model_with_view_update, table_model, self._view.instrument
-                                   , self._facility, row_index=row_index, file_lookup=file_lookup)
+            states, errors = create_states(state_model_with_view_update, table_model, self._view.instrument
+                                           , self._facility, row_index=row_index, file_lookup=file_lookup)
         else:
             states = None
+            errors = None
         stop_time_state_generation = time.time()
         time_taken = stop_time_state_generation - start_time_state_generation
         self.sans_logger.information("The generation of all states took {}s".format(time_taken))
-        return states
+        return states, errors
 
     def get_state_for_row(self, row_index, file_lookup=True):
         """
@@ -562,7 +565,7 @@ class RunTabPresenter(object):
         :param row_index: the row index
         :return: a state if the index is valid and there is a state else None
         """
-        states = self.get_states(row_index=[row_index], file_lookup=file_lookup)
+        states, errors = self.get_states(row_index=[row_index], file_lookup=file_lookup)
         if states is None:
             self.sans_logger.warning("There does not seem to be data for a row {}.".format(row_index))
             return None
