@@ -387,7 +387,11 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
 
   BoundingBox absoluteBB;
   const auto compFlag = componentType(componentIndex);
-  const auto parentFlag = componentType(parent(componentIndex));
+
+  auto parentFlag = Beamline::ComponentType::Generic;
+  if (size() > 1)
+    parentFlag = componentType(parent(componentIndex));
+
   if (hasSource() && componentIndex == source()) {
     // Do nothing. Source is not considered part of the beamline for bounding
     // box calculations.

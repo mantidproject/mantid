@@ -4,10 +4,10 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -1288,7 +1288,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     const int64_t parentIndex = componentInfo.parent(i);
     const bool makeTransform = parentIndex != oldParentIndex;
-    bool isRectangularDetectorPixel = false;
+    bool isGridDetectorPixel = false;
 
     if (makeTransform) {
       oldParentIndex = parentIndex;
@@ -1305,15 +1305,15 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       const boost::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
-      isRectangularDetectorPixel = bool(
-          boost::dynamic_pointer_cast<const RectangularDetectorPixel>(baseDet));
+      isGridDetectorPixel =
+          bool(boost::dynamic_pointer_cast<const GridDetectorPixel>(baseDet));
       if (detectorInfo.isMasked(i)) {
         pmap->forceUnsafeSetMasked(baseDet.get(), true);
       }
 
       if (makeTransform) {
-        // Special case: scaling for RectangularDetectorPixel.
-        if (isRectangularDetectorPixel) {
+        // Special case: scaling for GridDetectorPixel.
+        if (isGridDetectorPixel) {
 
           size_t panelIndex = componentInfo.parent(parentIndex);
           const auto panelID = componentInfo.componentID(panelIndex);
@@ -1347,9 +1347,9 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(baseComponent->getRelativePos())).norm() >= 1e-9) {
-      if (isRectangularDetectorPixel) {
+      if (isGridDetectorPixel) {
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
-                                 "parameters for RectangularDetectorPixel are "
+                                 "parameters for GridDetectorPixel are "
                                  "not supported");
       }
       pmap->addV3D(componentId, ParameterMap::pos(), Kernel::toV3D(relPos));

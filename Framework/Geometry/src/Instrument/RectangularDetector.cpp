@@ -179,7 +179,7 @@ void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
                                      int idstepbyrow, int idstep) {
 
   GridDetector::initialize(
-      shape, xpixels, xstart, ystep, ypixels, ystart, ystep, 0, 0, 0, idstart,
+      shape, xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0, idstart,
       idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
 }
 

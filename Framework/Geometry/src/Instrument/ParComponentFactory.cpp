@@ -3,10 +3,10 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include <boost/make_shared.hpp>
 
@@ -24,7 +24,7 @@ namespace Geometry {
 boost::shared_ptr<IDetector>
 ParComponentFactory::createDetector(const IDetector *base,
                                     const ParameterMap *map) {
-  // Clone may be a Detector or RectangularDetectorPixel instance (or nullptr)
+  // Clone may be a Detector or GridDetectorPixel instance (or nullptr)
   auto clone = base->cloneParameterized(map);
   return boost::shared_ptr<IDetector>(clone);
 }
