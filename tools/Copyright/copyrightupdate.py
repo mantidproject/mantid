@@ -3,6 +3,7 @@
 # Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge
 #     National Laboratory, European Spallation Source & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+
 from __future__ import (absolute_import, division, print_function)
 import datetime
 import argparse
@@ -20,18 +21,27 @@ regex_old_style = re.compile("$\W*Copyright\s.*?(\d{4}).*License for more detail
                              "(.*http://doxygen.mantidproject.org.*?$){0,1}",            #optional code doc line
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #new style statement, year in group 1
-regex_new_style = re.compile("$\W*Mantid.*?(\d{4}).*SPDX - License - Identifier.*?$",
+regex_new_style = re.compile("^\W*Mantid.*?(\d{4}).*SPDX - License - Identifier.*?$[\W]*",
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #Other copyright statement
 regex_other_style = re.compile("^.*?Copyright\s.*?(\d{4}).*?$",
                              re.IGNORECASE |  re.MULTILINE)
 
+#lines to skip when determining where to put the copyright statement (they must be from the start of the file)
+regex_lines_to_skip = [re.compile("^#!.*?$[\W]*",re.MULTILINE)]
+
+#Directories to ignore - any pathss including these strings will be ignored, so it will cascade
+directories_to_ignore = ["external"]
 #Accepted file extensions
 accepted_file_extensions = [".py",".cpp",".h",".tcc",".in",".hh"]
 #python file exxtensions
 python_file_extensions = [".py"]
 #extensions to ignore, don't even report these
-exts_to_ignore = [".txt",".pyc",".sh",".template",".png",".odg",".md",".doxyfile",".properties",".pbs"]
+exts_to_ignore = [".txt",".pyc",".sh",".template",".png",".odg",".md",
+                  ".doxyfile",".properties",".pbs",".rst",".md5",".xml",
+                  ".dot",".ui",".jpg",".png",".svg"]
+
+
 
 #global reporting dictionaries
 report_new_statements_updated = {}
@@ -69,6 +79,14 @@ def process_file_tree(path):
     """
     for dir_name, subdir_list, file_list in os.walk(path):
         print('Found directory: %s' % dir_name)
+        skipdir=False
+        for ignore_directory in directories_to_ignore:
+            if ignore_directory in dir_name:
+                print("\tignoring directory as it includes ", ignore_directory)
+                skipdir = True
+        if skipdir:
+            #skip this directory
+            continue
         for filename in file_list:
             print('\t%s' % filename)
             basename, file_extension = os.path.splitext(filename)
@@ -139,12 +157,37 @@ def process_file(filename):
 
     #add the new copyright statement
     copyright_statement = get_copyright(year,comment_prefix)
-    file_text = copyright_statement+os.linesep+file_text
+    file_text = add_copyright_statement(copyright_statement, file_text)
 
     if not dry_run:
     #save file text
         with open (filename, "w") as myfile:
             myfile.write(file_text)
+
+
+def add_copyright_statement(copyright_statement, file_text):
+    """
+    Adds the new copyright statement to the top of the file,
+    unless the first line is identified as a like to skip,
+    in which case it will be afterwards.
+    :param copyright_statement: the copyright statement to add
+    :param file_text: the text of the file
+    :return: the text of the file including the copyright statement
+    """
+    start_pos = 0
+    for regex in regex_lines_to_skip:
+        match = regex.match(file_text)
+        if match:
+            print("FOUND A MATCH",match.end(0))
+            if match.end(0) > start_pos:
+                start_pos = match.end(0)
+
+    output_text=""
+    if start_pos > 0:
+        output_text = file_text[:start_pos]
+    output_text += copyright_statement + "\n" + file_text[start_pos:]
+    return output_text
+
 
 def remove_text_section(text,start,end):
     """
