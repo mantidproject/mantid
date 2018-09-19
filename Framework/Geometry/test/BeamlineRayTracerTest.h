@@ -319,14 +319,8 @@ public:
     m_compInfo = std::move(infos.first);
     m_detInfo = std::move(infos.second);
 
-    // Parse test file
-    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
-                           "TOPAZ_Definition_2010.xml";
-    std::string xmlText = Mantid::Kernel::Strings::loadFile(filename);
-    InstrumentDefinitionParser IDP(filename, "UnitTesting", xmlText);
-
     // Get the instrument
-    m_instTopaz = IDP.parseXML(nullptr);
+    m_instTopaz = loadInstrumentDefinition("TOPAZ_Definition_2010.xml");
 
     // Create an instrument visitor
     InstrumentVisitor visitor2{m_instTopaz};
@@ -340,7 +334,33 @@ public:
     // Unpack the pair
     m_compInfoTopaz = std::move(infos2.first);
     m_detInfoTopaz = std::move(infos2.second);
+
+    m_instWish = loadInstrumentDefinition("WISH_Definition_10Panels.xml");
+
+    // Create an instrument visitor
+    InstrumentVisitor visitor3{m_instWish};
+
+    // Visit everything
+    visitor3.walkInstrument();
+
+    // Get ComponentInfo and DetectorInfo objects and set them
+    auto infos3 = InstrumentVisitor::makeWrappers(*m_instWish, nullptr);
+
+    // Unpack the pair
+    m_compInfoWish = std::move(infos3.first);
+    m_detInfoWish = std::move(infos3.second);
   }
+
+  Instrument_sptr loadInstrumentDefinition(const std::string& idfName) {
+    // Parse test file
+    std::string filename = ConfigService::Instance().getInstrumentDirectory() +
+                           idfName;
+    std::string xmlText = Mantid::Kernel::Strings::loadFile(filename);
+    InstrumentDefinitionParser IDP(filename, "UnitTesting", xmlText);
+
+    // Get the instrument
+    return IDP.parseXML(nullptr);
+  } 
 
   void test_RectangularDetector() {
 
@@ -395,6 +415,36 @@ public:
     }
   }
 
+  void test_WISH() {
+    // Directly in Z+ = towards the detector center
+    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
+      for (int elev = -89; elev < 89; elev += 3) {
+        // Make a vector pointing in every direction
+        V3D testDir;
+        testDir.spherical(1, double(elev), double(azimuth));
+
+        // Track it
+        Links results = RayTracer::traceFromSample(testDir, *m_compInfoWish);
+      }
+    }
+  }
+
+  void test_WISH_instrument_v1() {
+    // Directly in Z+ = towards the detector center
+    InstrumentRayTracer tracer(m_instWish);
+    for (int azimuth = 0; azimuth < 360; azimuth += 3) {
+      for (int elev = -89; elev < 89; elev += 3) {
+        // Make a vector pointing in every direction
+        V3D testDir;
+        testDir.spherical(1, double(elev), double(azimuth));
+
+        // Track it
+        tracer.traceFromSample(testDir);
+        Links results = tracer.getResults();
+      }
+    }
+  }
+
 private:
   // For Rectangular instrument
   Instrument_sptr m_inst;
@@ -405,6 +455,11 @@ private:
   Instrument_sptr m_instTopaz;
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoTopaz;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoTopaz;
+
+  // For Wish
+  Instrument_sptr m_instWish;
+  std::unique_ptr<Mantid::Geometry::ComponentInfo> m_compInfoWish;
+  std::unique_ptr<Mantid::Geometry::DetectorInfo> m_detInfoWish;
 };
 
 #endif /* BEAMLINERAYTRACERTEST_H_ */
