@@ -65,7 +65,6 @@ set ( SRC_FILES
 	src/Instrument/Parameter.cpp
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
-	src/Instrument/RectangularDetectorPixel.cpp
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/SampleEnvironment.cpp
 	src/Instrument/SampleEnvironmentFactory.cpp
@@ -215,7 +214,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ParameterFactory.h
 	inc/MantidGeometry/Instrument/ParameterMap.h
 	inc/MantidGeometry/Instrument/RectangularDetector.h
-	inc/MantidGeometry/Instrument/RectangularDetectorPixel.h
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/SampleEnvironment.h
 	inc/MantidGeometry/Instrument/SampleEnvironmentFactory.h
@@ -382,7 +380,6 @@ set ( TEST_FILES
 	QLabTest.h
 	QSampleTest.h
 	QuadrilateralTest.h
-	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
 	ReducedCellTest.h
 	ReferenceFrameTest.h

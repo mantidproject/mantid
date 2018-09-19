@@ -102,7 +102,7 @@ public:
 
   int idstart() const;
   bool idfillbyfirst_y() const;
-  const std::string &idFillOrder() const;
+  std::string idFillOrder() const;
   int idstepbyrow() const;
   int idstep() const;
 

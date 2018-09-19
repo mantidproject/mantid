@@ -409,7 +409,7 @@ bool GridDetector::idfillbyfirst_y() const {
 }
 
 /// Returns the id fill order
-const std::string &GridDetector::idFillOrder() const {
+std::string GridDetector::idFillOrder() const {
   if (m_map)
     return m_gridBase->m_idFillOrder;
   else

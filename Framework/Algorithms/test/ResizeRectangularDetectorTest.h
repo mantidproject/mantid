@@ -63,7 +63,7 @@ public:
     const auto &pixel = spectrumInfo.detector(11);
     recDetPix =
         dynamic_cast<const GridDetectorPixel *>(det->getAtXY(1, 1).get());
-    TSM_ASSERT("getDetector() returns a RectangularDetectorPixel", recDetPix);
+    TSM_ASSERT("getDetector() returns a GridDetectorPixel", recDetPix);
     pos = pixel.getPos();
     TS_ASSERT_EQUALS(pos, V3D(0.008 * 2, 0.008 * 0.5, 5.0));
 

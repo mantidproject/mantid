@@ -108,7 +108,7 @@ public:
   }
 
   /** Test on a rectangular detector that will be
-   * repeated on an un-moved pRectangularDetectorPixelarametrized version.
+   * repeated on an un-moved pGridDetectorPixelarametrized version.
    */
   void do_test_on(RectangularDetector *det) {
     TS_ASSERT_EQUALS(det->xpixels(), 100);

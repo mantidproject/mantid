@@ -47,8 +47,6 @@ class ComponentVisitor;
 */
 
 class MANTID_GEOMETRY_DLL RectangularDetector : public GridDetector {
-  friend class RectangularDetectorPixel;
-
 public:
   /// String description of the type of component
   std::string type() const override { return "RectangularDetector"; }

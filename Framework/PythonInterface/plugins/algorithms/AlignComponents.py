@@ -441,7 +441,7 @@ class AlignComponents(PythonAlgorithm):
         """
         recursive search to find first detID of a component
         """
-        if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
+        if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
             return component.getID()
         else:
             return self._getFirstDetID(component[0])
@@ -450,7 +450,7 @@ class AlignComponents(PythonAlgorithm):
         """
         recursive search to find last detID of a component
         """
-        if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
+        if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
             return component.getID()
         else:
             return self._getLastDetID(component[component.nelements() - 1])
