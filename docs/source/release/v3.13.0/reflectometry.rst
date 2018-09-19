@@ -15,6 +15,7 @@ New
 ###
 
 - Fully-automatic processing has been added to the interface. Click ``Autoprocess`` to process all of the runs for an investigation and to start polling for new runs. Whenever new runs are found, they will automatically be added to the table and processed.
+- Live data monitoring has been added to the interface. This will periodically load live data from the instrument and reduce it with ``ReflectometryReductionOneAuto`` using live values for ``Theta`` and the slit gaps. Other algorithm properties are taken from ``Group 1`` of the Settings tab. Note that changes to the Settings tab will **not** be updated in the monitor algorithm unless you stop and re-start monitoring.
 - A new option has been added to the Settings tab to control whether partial bins should be included when summing in Q.
 - ``ReflectometryReductionOneAuto`` takes the polarization correction properties from the instrument parameter file when ``PolarizationAnalysis`` is set to ``ParameterFile``. The instrument parameter file can store the efficiencies as vectors of doubles.
 

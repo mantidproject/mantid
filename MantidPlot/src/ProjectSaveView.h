@@ -48,14 +48,21 @@ public:
   ProjectSaveView(
       const QString &projectName, MantidQt::API::ProjectSerialiser &serialiser,
       const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
+      const std::vector<std::string> &activePythonInterfaces,
       QWidget *parent = nullptr);
 
   /// Get all of the window handles passed to the view
   std::vector<MantidQt::API::IProjectSerialisable *> getWindows() override;
+  /// Get all of the python interfaces passed to the view
+  virtual std::vector<std::string> getAllPythonInterfaces() override;
   /// Get any checked workspace names on the view
   std::vector<std::string> getCheckedWorkspaceNames() override;
   /// Get any unchecked workspace names on the view
   std::vector<std::string> getUncheckedWorkspaceNames() override;
+  /// Get any checked interface names on the view
+  std::vector<std::string> getCheckedPythonInterfaces() override;
+  /// Get any unchecked workspace names on the view
+  std::vector<std::string> getUncheckedPythonInterfaces() override;
   /// Get the current path of the project
   QString getProjectPath() override;
   /// Set the current path of the project
@@ -63,6 +70,9 @@ public:
   /// Update the list of workspaces with a collection of workspace info
   void
   updateWorkspacesList(const std::vector<WorkspaceInfo> &workspaces) override;
+  /// Update the list of interfaces
+  virtual void
+  updateInterfacesList(const std::vector<std::string> &interfaces) override;
   /// Update the list of included windows with a collection of window info
   void
   updateIncludedWindowsList(const std::vector<WindowInfo> &windows) override;
@@ -91,9 +101,10 @@ private slots:
 private:
   /// Get a list of included windows names to be saved
   std::vector<std::string> getIncludedWindowNames() const;
-  /// Get the name value of all items with a given check state
+  /// Get the name value of all items with a given check state in the given tree
   std::vector<std::string>
-  getItemsWithCheckState(const Qt::CheckState state) const;
+  getItemsWithCheckState(const QTreeWidget &tree,
+                         const Qt::CheckState state) const;
   /// Remove an item from a QTreeWidget
   void removeItem(QTreeWidget *widget, const std::string &name);
   /// Add an new window item QTreeWidget
@@ -115,6 +126,8 @@ private:
 
   /// List of windows to be serialised
   std::vector<MantidQt::API::IProjectSerialisable *> m_serialisableWindows;
+  /// List of possible python interfaces to save
+  std::vector<std::string> m_allPythonInterfaces;
   /// Handle to the presenter for this view
   std::unique_ptr<ProjectSavePresenter> m_presenter;
   /// Handle to the project serialiser

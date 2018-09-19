@@ -1059,7 +1059,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="min", default_value="-90")
 
     @phi_limit_min.setter
     def phi_limit_min(self, value):
@@ -1067,7 +1067,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="")
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="max", default_value="90")
 
     @phi_limit_max.setter
     def phi_limit_max(self, value):
@@ -1075,7 +1075,7 @@ class StateGuiModel(object):
 
     @property
     def phi_limit_use_mirror(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=False)  # noqa
+        return self.get_simple_element_with_attribute(element_id=LimitsId.angle, attribute="use_mirror", default_value=True)  # noqa
 
     @phi_limit_use_mirror.setter
     def phi_limit_use_mirror(self, value):

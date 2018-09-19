@@ -5,7 +5,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/MDNormSCD.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

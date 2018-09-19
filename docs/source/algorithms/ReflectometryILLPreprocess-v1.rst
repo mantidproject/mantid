@@ -90,6 +90,11 @@ The following figure exemplifies the foreground and background for the D17 instr
    ax2.set_ylim(ymin=theta0, ymax=theta1)
    ax2.set_ylabel('Angle (degrees)')
 
+InputWorkspace
+##############
+
+The *InputWorkspace* and *BeamPositionWorkspace* can be used instead of *Run* if the data is already loaded into Mantid for example using :ref:`LoadILLReflectometry <algm-LoadILLReflectometry>`. This option exists mainly for testing purposes.
+
 Usage
 -----
 

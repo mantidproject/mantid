@@ -7,7 +7,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidCurveFitting/Algorithms/ConvolutionFit.h"

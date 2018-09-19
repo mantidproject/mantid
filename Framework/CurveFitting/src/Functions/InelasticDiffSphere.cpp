@@ -38,8 +38,7 @@ InelasticDiffSphere::InelasticDiffSphere()
                          "if energy in ueV");
   this->declareParameter("Shift", 0.0, "Shift in domain");
 
-  this->declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
-  this->declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
+  declareAttributes();
 }
 
 /**
