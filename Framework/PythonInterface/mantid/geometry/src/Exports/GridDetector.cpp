@@ -11,9 +11,9 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(GridDetector)
 
 /**
-* Enables boost.python to automatically "cast" an object up to the
-* appropriate Detector leaf type
-*/
+ * Enables boost.python to automatically "cast" an object up to the
+ * appropriate Detector leaf type
+ */
 void export_GridDetector() {
   register_ptr_to_python<boost::shared_ptr<GridDetector>>();
 
