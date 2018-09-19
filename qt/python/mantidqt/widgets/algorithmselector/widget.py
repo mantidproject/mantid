@@ -2,15 +2,13 @@ from __future__ import absolute_import, print_function
 
 import re
 
-from qtpy.QtCore import QModelIndex
+from qtpy.QtCore import QModelIndex, Qt
 from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout,
                             QHBoxLayout, QCompleter, QTreeWidgetItem)
-from qtpy import QtCore
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
-from mantidqt.widgets.algorithmselector.fuzzyqcompleter import CustomQCompleter
 
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
@@ -66,7 +64,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         search_box = QComboBox(self)
         search_box.setEditable(True)
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
-        search_box.completer().setFilterMode(QtCore.Qt.MatchContains)
+        search_box.completer().setFilterMode(Qt.MatchContains)
         search_box.setInsertPolicy(QComboBox.NoInsert)
         search_box.editTextChanged.connect(self._on_search_box_selection_changed)
         search_box.lineEdit().returnPressed.connect(self.execute_algorithm)
