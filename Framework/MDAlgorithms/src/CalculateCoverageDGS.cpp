@@ -261,8 +261,17 @@ void CalculateCoverageDGS::exec() {
 
   // Qmax is at  kf=kfmin or kf=kfmax
   m_ki = std::sqrt(energyToK * m_Ei);
-  m_kfmin = std::sqrt(energyToK * (m_Ei - m_dEmin));
-  m_kfmax = std::sqrt(energyToK * (m_Ei - m_dEmax));
+  if (m_Ei > m_dEmin) {
+    m_kfmin = std::sqrt(energyToK * (m_Ei - m_dEmin));
+  } else {
+    m_kfmin=0.;
+  }
+  if (m_Ei > m_dEmax) {
+    m_kfmax = std::sqrt(energyToK * (m_Ei - m_dEmax));
+  } else {
+    m_kfmax =0;
+  }
+
   double QmaxTemp =
       sqrt(m_ki * m_ki + m_kfmin * m_kfmin - 2 * m_ki * m_kfmin * cos(ttmax));
   double Qmax = QmaxTemp;
