@@ -1156,11 +1156,11 @@ def envAsString():
 
 #########################################################################
 # Function to keep a pool of threads active in a loop to run the tests.
-# Each threads starts a loop and gathers a first test module from the
+# Each thread starts a loop and gathers a first test module from the
 # master test list which is stored in the tests_dict shared dictionary,
 # starting with the number in the module list equal to the process id.
 #
-# Each process then checks if all the data files requird by the current
+# Each process then checks if all the data files required by the current
 # test module are available (i.e. have not been locked by another
 # thread). If all files are unlocked, the thread proceeds with that test
 # module. If not, it goes further down the list until it finds a module

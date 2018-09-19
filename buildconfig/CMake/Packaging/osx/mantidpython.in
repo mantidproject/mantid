@@ -2,6 +2,7 @@
 #
 # For OS X only
 # Launch IPython with paths set for the Mantid environment
+# Find out where we are
 
 # Get the path of this script so that we know where Mantid is installed
 # This method should be robust; work through nested symlinks etc
@@ -15,7 +16,7 @@ cd "`dirname "${SCRIPT_PATH}"`" > /dev/null
 SCRIPT_PATH="`pwd`";
 popd  > /dev/null
 
-PROG=${SCRIPT_PATH}/bin/ipython@PYTHON_VERSION_MAJOR@
+INSTALLDIR=${SCRIPT_PATH%/*}
 
 # Define extra libraries for python
 LOCAL_PYTHONPATH=${SCRIPT_PATH}
@@ -24,14 +25,22 @@ if [ -n "${PYTHONPATH}" ]; then
 	LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
+# Define MANTIDPATH
+MANTIDPATH="${INSTALLDIR}"
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     shift
-    PROG=@PYTHON_EXECUTABLE@
+
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
+
+else
+    IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
+
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ -c "${IPYTHON_STARTUP}" $*@WRAPPER_POSTFIX@
+
 fi
 
-# Define MANTIDPATH
-MANTIDPATH="${SCRIPT_PATH}"
 
-PYTHONPATH=${LOCAL_PYTHONPATH} \
-    MANTIDPATH=$MANTIDPATH \
-    ${PROG} $*
+PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+  MANTIDPATH=${MANTIDPATH} \
+  PYTHONPATH=${LOCAL_PYTHONPATH} \
+  exec "$@"
