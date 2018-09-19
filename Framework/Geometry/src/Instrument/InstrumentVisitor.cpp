@@ -270,10 +270,10 @@ size_t InstrumentVisitor::registerRectangularBank(const ICompAssembly &bank) {
 }
 
 /**
-* Register a structured bank
-* @param bank : Grid Detector
-* @return index assigned
-*/
+ * Register a structured bank
+ * @param bank : Grid Detector
+ * @return index assigned
+ */
 size_t InstrumentVisitor::registerGridBank(const ICompAssembly &bank) {
   auto index = registerComponentAssembly(bank);
   size_t rangesIndex = index - m_orderedDetectorIds->size();
@@ -282,10 +282,10 @@ size_t InstrumentVisitor::registerGridBank(const ICompAssembly &bank) {
 }
 
 /**
-* @brief InstrumentVisitor::registerInfiniteObjComponent
-* @param objComponent : IObjComponent being visited
-* @return Component index of this component
-*/
+ * @brief InstrumentVisitor::registerInfiniteObjComponent
+ * @param objComponent : IObjComponent being visited
+ * @return Component index of this component
+ */
 size_t InstrumentVisitor::registerInfiniteObjComponent(
     const IObjComponent &objComponent) {
   auto index = registerInfiniteComponent(objComponent);

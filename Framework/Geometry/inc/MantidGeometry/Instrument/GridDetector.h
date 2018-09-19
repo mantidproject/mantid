@@ -183,7 +183,6 @@ private:
   /// Private copy assignment operator
   GridDetector &operator=(const ICompAssembly &);
 
-
   /// The number of pixels in the X (horizontal) direction
   int m_xpixels;
   /// The number of pixels in the Y (vertical) direction

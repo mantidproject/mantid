@@ -145,8 +145,8 @@ void RotationSurface::createUnwrappedDetectors() {
 }
 
 /**
-* Initialize the surface.
-*/
+ * Initialize the surface.
+ */
 void RotationSurface::init() {
   // the actor calls this->callback for each detector
   m_unwrappedDetectors.clear();

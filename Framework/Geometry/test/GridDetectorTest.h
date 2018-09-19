@@ -13,8 +13,8 @@
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class GridDetectorTest : public CxxTest::TestSuite {
 public:
@@ -118,8 +118,8 @@ public:
   }
 
   /** Create a parametrized GridDetector with a parameter that
-  * resizes it.
-  */
+   * resizes it.
+   */
   void testResizingParameter() {
     auto cuboidShape = ComponentCreationHelper::createCuboid(0.5);
 

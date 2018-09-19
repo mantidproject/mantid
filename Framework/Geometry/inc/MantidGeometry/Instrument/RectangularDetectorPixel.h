@@ -1,9 +1,8 @@
 #ifndef MANTID_GEOMETRY_RECTANGULARDETECTORPIXEL_H_
 #define MANTID_GEOMETRY_RECTANGULARDETECTORPIXEL_H_
 
-#include "MantidGeometry/Instrument/GridDetectorPixel.h"
-#include "MantidKernel/System.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/GridDetectorPixel.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
