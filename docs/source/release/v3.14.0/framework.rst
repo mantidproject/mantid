@@ -12,7 +12,7 @@ Framework Changes
 Logging
 -------
 
-- We have changed the logging in Mantid to stop writing the a high level version of the log to a file.  This had been causing numerous problems including inconsistent behaviour with multiple instances of Mantid, performance problems when logging at detailed levels, and excessive network usage in some scenarios.  This does not change the rest of the logging that you see in the message display in Mantidplot or the console window. A warning message will appear if configuration for the removed componets of logging is found.
+- We have changed the logging in Mantid to stop writing the a high level version of the log to a file.  This had been causing numerous problems including inconsistent behaviour with multiple instances of Mantid, performance problems when logging at detailed levels, and excessive network usage in some scenarios.  This does not change the rest of the logging that you see in the message display in Mantidplot or the console window. A warning message will appear if configuration for the removed components of logging is found.
 
   - Associated with this we have also simplified the python methods used to control logging.
 
@@ -32,6 +32,9 @@ Nexus Geometry Loading
 Stability
 ---------
 
+Bugfixes
+--------
+- The macOS bundle has been fixed to pick up the system and user defined environment of the host machine, when starting the application from launcher.
 
 Algorithms
 ----------
