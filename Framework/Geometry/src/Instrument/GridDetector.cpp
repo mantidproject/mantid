@@ -441,7 +441,7 @@ int GridDetector::idstep() const {
  * pixels (i.e. unrotated).
  * @param x :: x pixel integer
  * @param y :: y pixel integer
- * @param y :: z pixel integer
+ * @param z :: z pixel integer
  * @return a V3D vector of the relative position
  */
 V3D GridDetector::getRelativePosAtXYZ(int x, int y, int z) const {
@@ -595,16 +595,11 @@ void GridDetector::initializeValues(boost::shared_ptr<IObject> shape,
  * @param zstep :: step size between pixels in the beam direction (in length
  *units, normally meters)
  * @param idstart :: detector ID of the first pixel
- * @param idfillbyfirst_y :: set to true if ID numbers increase with Y indices
- *first. That is: (0,0)=0; (0,1)=1, (0,2)=2 and so on.
- * @param idfillbyfirst_z :: set to true if ID numbers increase with Z indices
- *first. That is: (0,0,0)=0; (0,0,1)=1, (0,0,2)=2 and so on.
+ * @param idFillOrder :: string of size 3 which contains axis order e.g "xyz"
  * @param idstepbyrow :: amount to increase the ID number on each row. e.g, if
  *you fill by Y first,
  *            and set  idstepbyrow = 100, and have 50 Y pixels, you would get:
  *            (0,0)=0; (0,1)=1; ... (0,49)=49; (1,0)=100; (1,1)=101; etc.
- * @param idlayerstep :: amount to increase each individual ID number with a
- *layer.
  * @param idstep :: amount to increase each individual ID number with a row.
  *e.g, if you fill by Y first,
  *            and idstep=100 and idstart=1 then (0,0)=1; (0,1)=101; and so on
