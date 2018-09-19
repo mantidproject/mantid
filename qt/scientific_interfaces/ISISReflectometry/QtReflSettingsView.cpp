@@ -79,8 +79,7 @@ void QtReflSettingsView::initOptionsTable() {
   table->setMinimumHeight(totalRowHeight + header->height() + padding);
 }
 
-void QtReflSettingsView::initFloodCorControls()
-{
+void QtReflSettingsView::initFloodCorControls() {
   m_ui.floodWorkspaceWsSelector->setOptional(true);
   m_ui.floodWorkspaceWsSelector->setWorkspaceTypes({"Workspace2D"});
 }
@@ -611,13 +610,11 @@ std::string QtReflSettingsView::getCPp() const {
   return getText(*m_ui.CPpEdit);
 }
 
-std::string QtReflSettingsView::getFloodCorrection() const
-{
+std::string QtReflSettingsView::getFloodCorrection() const {
   return getText(*m_ui.floodCorComboBox);
 }
 
-std::string QtReflSettingsView::getFloodWorkspace() const
-{
+std::string QtReflSettingsView::getFloodWorkspace() const {
   return getText(*m_ui.floodWorkspaceWsSelector);
 }
 
