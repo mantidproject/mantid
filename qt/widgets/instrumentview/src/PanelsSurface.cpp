@@ -403,7 +403,7 @@ void PanelsSurface::processTubes(size_t rootIndex) {
 
   for (int i = 0; i < static_cast<int>(tubes.size()); ++i) {
     const auto &children = componentInfo.children(tubes[i]);
-    PRAGMA_OMP(parallel for)
+#pragma omp parallel for
     for (int j = 0; j < static_cast<int>(children.size()); ++j) {
       addDetector(children[j], pos0, index, info->rotation);
     }
