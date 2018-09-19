@@ -401,9 +401,14 @@ class RunTabPresenter(object):
     def display_warning_box(self, title, text, detailed_text):
         self._view.display_message_box(title, text, detailed_text)
 
-    def notify_progress(self, row):
+    def notify_progress(self, row, out_shift_factors, out_scale_factors):
         setattr(self._view, 'progress_bar_value', row + 1)
         self._view.change_row_color("#d0f4d0", row)
+        if out_scale_factors and out_shift_factors:
+            out_shift_factors = [round(factor, 3) for factor in out_shift_factors]
+            out_scale_factors = [round(factor, 3) for factor in out_scale_factors]
+            message = 'scale={}, shift={}'.format(out_scale_factors, out_shift_factors)
+            self._view.set_row_tooltip(message, row)
 
     def on_processing_finished(self, result):
         self._view.enable_buttons()
