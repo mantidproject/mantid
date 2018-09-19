@@ -53,13 +53,13 @@ void RebinToWorkspace::init() {
 
 bool RebinToWorkspace::needToRebin(const MatrixWorkspace_sptr &left,
                                    const MatrixWorkspace_sptr &rght) {
-  // if pointers match they are the same object
-  if (left == rght)
-    return false;
-
   // converting from EventWorkspace to Workspace2D is a rebin
   if (m_isEvents && (!m_preserveEvents))
     return true;
+
+  // if pointers match they are the same object
+  if (left == rght)
+    return false;
 
   // see if there is the same number of histograms
   const size_t numHist = left->getNumberHistograms();
