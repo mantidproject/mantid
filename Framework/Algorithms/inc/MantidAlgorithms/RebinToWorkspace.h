@@ -66,21 +66,20 @@ protected:
       const override;
 
 private:
-  bool m_preserveEvents;
-  bool m_isEvents;
+  bool m_preserveEvents{true};
+  bool m_isEvents{true};
 
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
 
+  bool needToRebin(const API::MatrixWorkspace_sptr &left,
+                   const API::MatrixWorkspace_sptr &rght);
   void rebin(API::MatrixWorkspace_sptr &toRebin,
              API::MatrixWorkspace_sptr &toMatch);
   void histogram(API::MatrixWorkspace_sptr &toRebin,
                  API::MatrixWorkspace_sptr &toMatch);
-  API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_sptr &inputWS,
-                        const double endProgress);
 };
 } // namespace Algorithms
 } // namespace Mantid
