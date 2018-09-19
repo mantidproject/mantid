@@ -5,10 +5,12 @@ import re
 from qtpy.QtCore import QModelIndex
 from qtpy.QtWidgets import (QWidget, QPushButton, QComboBox, QTreeWidget, QVBoxLayout,
                             QHBoxLayout, QCompleter, QTreeWidgetItem)
+from qtpy import QtCore
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.algorithmprogress import AlgorithmProgressWidget
+from mantidqt.widgets.algorithmselector.fuzzyqcompleter import CustomQCompleter
 
 from .presenter import IAlgorithmSelectorView, SelectedAlgorithm
 
@@ -34,6 +36,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     """
     An algorithm selector view implemented with qtpy.
     """
+
     def __init__(self, parent=None, include_hidden=False):
         """
         Initialise a new instance of AlgorithmSelectorWidget
@@ -57,12 +60,13 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
 
     def _make_search_box(self):
         """
-        Make a algorithm search box.
+        Make an algorithm search box.
         :return: A QComboBox
         """
         search_box = QComboBox(self)
         search_box.setEditable(True)
         search_box.completer().setCompletionMode(QCompleter.PopupCompletion)
+        search_box.completer().setFilterMode(QtCore.Qt.MatchContains)
         search_box.setInsertPolicy(QComboBox.NoInsert)
         search_box.editTextChanged.connect(self._on_search_box_selection_changed)
         search_box.lineEdit().returnPressed.connect(self.execute_algorithm)
@@ -133,6 +137,10 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Called when text in the search box is changed by the user or script.
         :param text: New text in the search box.
         """
+        # if the function is called without text, avoid doing anything
+        if text == '':
+            return
+
         with block_signals(self.tree):
             self.tree.setCurrentIndex(QModelIndex())
         with block_signals(self.search_box):
