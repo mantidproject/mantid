@@ -32,10 +32,11 @@ def _chooseMarker(markers, index):
     return marker, index
 
 
-def _clearlatex(s):
-    """Return string s with special LaTeX characters removed."""
-    for c in ['%', '_', '$', '&', '\\', '^', '{', '}',]:
+def _clearmath(s):
+    """Return string s with special math characters removed."""
+    for c in ['%', '_', '$', '&',  '\\', '^', '{', '}',]:
         s = s.replace(c, '')
+    s = s.replace(ur'\u00c5', 'A')
     return s
 
 
@@ -87,7 +88,7 @@ def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     if axes.get_xscale() == 'linear':
         axes.set_xlim(xmin=0.)
-    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
+    axes.set_xlabel(ur'$Q$ (\u00c5$^{-1}$)')
     if axes.get_yscale() == 'linear':
         axes.set_ylim(0.)
 
@@ -148,17 +149,17 @@ def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
         logs = ws.run()
         run = _runNumber(logs)
         if run is not None:
-            wsLabel = wsLabel + '\\#{:06d} '.format(run)
+            wsLabel = wsLabel + r'\#{:06d} '.format(run)
         T = _sampleTemperature(logs)
         if T is not None:
             T = _applyIfTimeSeries(T, numpy.mean)
-            wsLabel = wsLabel + '$T$ = {:0.1f} K '.format(T)
+            wsLabel = wsLabel + r'$T$ = {:0.1f} K '.format(T)
         ei = _incidentEnergy(logs)
         if ei is not None:
-            wsLabel =  wsLabel + '$E_i$ = {:0.2f} meV'.format(ei)
+            wsLabel =  wsLabel + r'$E_i$ = {:0.2f} meV'.format(ei)
     cutLabel = ''
     if not singleCut or not singleWidth:
-        cutLabel = quantity + ' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
+        cutLabel = quantity + r' = {:0.2f} $\pm$ {:1.2f}'.format(cut, width) + ' ' + units
     return wsLabel + ' ' + cutLabel
 
 
@@ -195,7 +196,7 @@ def _profiletitle(workspaces, cuts, scan, units, figure):
     if len(cuts) == 1:
         title = _singledatatitle(workspaces[0])
         centre, width = _cutCentreAndWidth(cuts[0])
-        title = title + '\n' + scan + ' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
+        title = title + '\n' + scan + r' = {:0.2f} $\pm$ {:0.2f}'.format(centre, width) + ' ' + units
     else:
         title = _plottingtime()
         logs = workspaces[0].run()
@@ -208,9 +209,9 @@ def _profiletitle(workspaces, cuts, scan, units, figure):
 def _profileytitle(workspace, axes):
     """Set the correct y label for profile axes."""
     if workspace.YUnit() == 'Dynamic susceptibility':
-        axes.set_ylabel("$\\chi''(Q,E)$")
+        axes.set_ylabel(r"$\chi''(Q,E)$")
     else:
-        axes.set_ylabel('$S(Q,E)$')
+        axes.set_ylabel(r'$S(Q,E)$')
 
 
 def _removesingularity(ws, epsilon):
@@ -244,12 +245,8 @@ def _sampleTemperature(logs):
         return None
 
 
-def _sanitizeforlatex(s):
-    """Return a string with LaTeX special characters escaped."""
-    s = s.replace('_', '\\_')
-    s = s.replace('#', '\\#')
-    s = s.replace('@', '\\@')
-    s = s.replace('&', '\\@')
+def _sanitize(s):
+    """Return a string with special characters escaped."""
     s = s.replace('$', '\\$')
     return s
 
@@ -257,7 +254,7 @@ def _sanitizeforlatex(s):
 def _singledatatitle(workspace):
     """Return title for a single data dataset."""
     workspace = _normws(workspace)
-    wsName = _sanitizeforlatex(str(workspace))
+    wsName = _sanitize(str(workspace))
     title = wsName
     logs = workspace.run()
     instrument= _instrumentName(logs)
@@ -265,15 +262,15 @@ def _singledatatitle(workspace):
         title = title + ' ' + instrument
     run = _runNumber(logs)
     if run is not None:
-        title = title + ' \\#{:06d}'.format(run)
+        title = title + ' #{:06d}'.format(run)
     title = title + '\n' + _plottingtime() + '\n'
     T = _sampleTemperature(logs)
     if T is not None:
         T = _applyIfTimeSeries(T, numpy.mean)
-        title = title + '$T$ = {:0.1f} K'.format(T)
+        title = title + r'$T$ = {:0.1f} K'.format(T)
     ei = _incidentEnergy(logs)
     if ei is not None:
-        title = title + ' $E_i$ = {:0.2f} meV'.format(ei)
+        title = title + r' $E_i$ = {:0.2f} meV'.format(ei)
     return title
 
 
@@ -324,8 +321,7 @@ def defaultrcParams():
     :returns: a :class:`dict` of default :mod:`matplotlib` rc parameters needed by :mod:`directtools`
     """
     params = {
-        'legend.numpoints': 1,
-        'text.usetex': True,
+        'legend.numpoints': 1
     }
     return params
 
@@ -422,10 +418,11 @@ def plotconstE(workspaces, E, dE, style='l', keepCutWorkspaces=True, xscale='lin
     :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, '$E$', 'meV', style, keepCutWorkspaces,
+    figure, axes, cutWSList = plotcuts('Horizontal', workspaces, E, dE, r'$E$', 'meV', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, '$E$', 'meV', figure)
-    axes.legend()
+    _profiletitle(workspaces, cutWSList, r'$E$', 'meV', figure)
+    if len(cutWSList) > 1:
+        axes.legend()
     _finalizeprofileE(axes)
     return figure, axes, cutWSList
 
@@ -455,10 +452,11 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, '$Q$', '\\AA$^{-1}$', style, keepCutWorkspaces,
+    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, r'$Q$', ur'\u00c5$^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, '$Q$', '\\AA$^{-1}$', figure)
-    axes.legend()
+    _profiletitle(workspaces, cutWSList, r'$Q$', ur'\u00c5$^{-1}$', figure)
+    if len(cutWSList) > 1:
+        axes.legend()
     _finalizeprofileQ(workspaces, axes)
     return figure, axes, cutWSList
 
@@ -513,8 +511,8 @@ def plotcuts(direction, workspaces, cuts, widths, quantity, unit, style='l', kee
                 wsStr = str(ws)
                 if wsStr == '':
                     wsStr = str(wsCount)
-                quantityStr = _clearlatex(quantity)
-                unitStr = _clearlatex(unit)
+                quantityStr = _clearmath(quantity)
+                unitStr = _clearmath(unit)
                 wsName = 'cut_{}_{}={}+-{}{}'.format(wsStr, quantityStr, cut, width, unitStr)
                 if keepCutWorkspaces:
                     cutWSList.append(wsName)
@@ -641,15 +639,15 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     contours = axes.pcolor(workspace, vmin=VMin, vmax=VMax, distribution=True, cmap=colormap, norm=colorNormalization)
     colorbar = figure.colorbar(contours)
     if isSusceptibility:
-        colorbar.set_label("$\\chi''(Q,E)$ (arb. units)")
+        colorbar.set_label(r"$\chi''(Q,E)$ (arb. units)")
     else:
-        colorbar.set_label('$S(Q,E)$ (arb. units)')
+        colorbar.set_label(r'$S(Q,E)$ (arb. units)')
     axes.set_xlim(left=QMin)
     axes.set_xlim(right=QMax)
     axes.set_ylim(bottom=EMin)
     if EMax is not None:
         axes.set_ylim(top=EMax)
-    axes.set_xlabel('$Q$ (\\AA$^{-1}$)')
+    axes.set_xlabel(ur'$Q$ (\u00c5$^{-1}$)')
     axes.set_ylabel('Energy (meV)')
     _SofQWtitle(workspace, figure)
     return figure, axes
@@ -716,7 +714,7 @@ def wsreport(workspace):
     ei = _incidentEnergy(logs)
     wavelength = _wavelength(logs)
     if ei is not None and wavelength is not None:
-        print('Ei = {:0.2f} meV    lambda = {:0.2f} \xc5'.format(ei, wavelength))
+        print(ur'Ei = {:0.2f} meV    lambda = {:0.2f} \u00c5'.format(ei, wavelength))
     T = _sampleTemperature(logs)
     if T is not None:
         if isinstance(T, collections.Iterable):
