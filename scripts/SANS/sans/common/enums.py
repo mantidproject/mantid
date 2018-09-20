@@ -375,3 +375,11 @@ class IntegralEnum(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+@string_convertible
+@serializable_enum("Unprocessed", "Processed", "Error")
+class RowState(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass

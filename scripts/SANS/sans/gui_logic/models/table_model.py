@@ -11,6 +11,7 @@ import re
 
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+from sans.common.enums import RowState
 
 
 class TableModel(object):
@@ -86,6 +87,8 @@ class TableModel(object):
 
     def update_table_entry(self, row, column, value):
         self._table_entries[row].update_attribute(self.column_name_converter[column], value)
+        self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
+        self._table_entries[row].update_attribute('tool_tip', '')
 
     def is_empty_row(self, row):
         return self._table_entries[row].is_empty()
@@ -97,6 +100,18 @@ class TableModel(object):
 
     def get_options_hint_strategy(self):
         return OptionsColumnModel.get_hint_strategy()
+
+    def set_row_to_processed(self, row, tool_tip):
+        self._table_entries[row].update_attribute('row_state', RowState.Processed)
+        self._table_entries[row].update_attribute('tool_tip', tool_tip)
+
+    def reset_row_state(self, row):
+        self._table_entries[row].update_attribute('row_state', RowState.Unprocessed)
+        self._table_entries[row].update_attribute('tool_tip', '')
+
+    def set_row_to_error(self, row, tool_tip):
+        self._table_entries[row].update_attribute('row_state', RowState.Error)
+        self._table_entries[row].update_attribute('tool_tip', tool_tip)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -133,6 +148,10 @@ class TableIndexModel(object):
         self.output_name = output_name
 
         self.options_column_model = options_column_string
+
+        self.row_state = RowState.Unprocessed
+
+        self.tool_tip = ''
 
     # Options column entries
     @property

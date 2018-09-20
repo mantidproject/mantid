@@ -358,7 +358,7 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
 
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         merged_q, hab_q = self._calculate_merged_q(cF=cF, nF=nF, cR=cR, nR=nR, scale_factor=scale_factor,
-                                            shift_factor=shift_factor)
+                                                   shift_factor=shift_factor)
 
         if self.getProperty('ProcessCan').value:
             cF_can = self._crop_to_x_range(cF_can, min_q, max_q)
@@ -372,7 +372,7 @@ class SANSStitch(ParallelDataProcessorAlgorithm):
 
             # Calculate merged q for the can
             merged_q_can, hab_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
-                                                        scale_factor=scale_factor)
+                                                                   scale_factor=scale_factor)
 
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)

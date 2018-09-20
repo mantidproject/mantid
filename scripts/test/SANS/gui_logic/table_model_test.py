@@ -4,6 +4,7 @@ import unittest
 
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel, OptionsColumnModel)
 from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
+from sans.common.enums import RowState
 
 
 class TableModelTest(unittest.TestCase):
@@ -131,6 +132,53 @@ class TableModelTest(unittest.TestCase):
                                   'it must be enclosed in quotes'})
 
         self.assertEqual(expected_hint_strategy, hint_strategy)
+
+    def test_that_row_state_is_initially_unprocessed(self):
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+
+        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.tool_tip, '')
+
+    def test_that_set_processed_sets_state_to_processed(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        row = 0
+        tool_tip = 'Processesing succesful'
+
+        table_model.set_row_to_processed(row, tool_tip)
+
+        self.assertEqual(table_index_model.row_state, RowState.Processed)
+        self.assertEqual(table_index_model.tool_tip, tool_tip)
+
+    def test_that_reset_row_state_sets_row_to_unproceesed_and_sets_tool_tip_to_empty(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        row = 0
+        tool_tip = 'Processesing succesful'
+        table_model.set_row_to_processed(row, tool_tip)
+
+        table_model.reset_row_state(row)
+
+        self.assertEqual(table_index_model.row_state, RowState.Unprocessed)
+        self.assertEqual(table_index_model.tool_tip, '')
+
+    def test_that_set_row_to_error_sets_row_to_error_and_tool_tip(self):
+        table_model = TableModel()
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                            "", "", "", "", "", "")
+        table_model.add_table_entry(0, table_index_model)
+        row = 0
+        tool_tip = 'There was an error'
+
+        table_model.set_row_to_error(row, tool_tip)
+
+        self.assertEqual(table_index_model.row_state, RowState.Error)
+        self.assertEqual(table_index_model.tool_tip, tool_tip)
 
     def _do_test_file_setting(self, func, prop):
         # Test that can set to empty string

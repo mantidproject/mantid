@@ -9,7 +9,7 @@ from mantid.kernel import PropertyManagerDataService
 
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
-                               RangeStepType, FitType, SANSInstrument)
+                               RangeStepType, FitType, SANSInstrument, RowState)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file)
@@ -697,6 +697,47 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
         self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_1)
+
+    def test_notify_progress_increments_progress(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                      'test_file', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+
+        presenter.notify_progress(0, [0.0], [1.0])
+
+        self.assertEqual(presenter.progress, 1)
+        self.assertEqual(presenter._view.progress_bar_value, 1)
+
+    def test_that_notify_progress_updates_state_and_tooltip_of_row_for_scale_and_shift(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                      'test_file', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+
+
+        presenter.notify_progress(0, [0.0], [1.0])
+
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, 'scale=[1.0], shift=[0.0]')
+
+    def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
+        presenter = RunTabPresenter(SANSFacility.ISIS)
+        view = mock.MagicMock()
+        presenter.set_view(view)
+        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
+                      'test_file', '', '1.0', '']
+        presenter.on_row_inserted(0, test_row_0)
+
+
+        presenter.notify_progress(0, [], [])
+
+        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
+        self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
 
     @staticmethod
     def _clear_property_manager_data_service():

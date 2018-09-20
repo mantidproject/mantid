@@ -47,7 +47,7 @@ def _create_row_state(row, table_model, state_model, facility, instrument, file_
                 state = gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup)
         return state
     except (ValueError, RuntimeError) as e:
-        return "{}".format(row, str(e))
+        return "{}".format(str(e))
 
 
 def __is_empty_row(row, table):
