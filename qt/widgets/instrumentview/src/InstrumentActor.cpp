@@ -1063,14 +1063,19 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
 
 /// Add a range of bins for masking
 void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
-  std::vector<size_t> wsIndices;
-  wsIndices.reserve(indices.size());
+  // Ensure we do not have duplicate workspace indices.
+  std::set<size_t> wi;
   for (auto det : indices) {
     auto index = getWorkspaceIndex(det);
     if (index == INVALID_INDEX)
       continue;
-    wsIndices.emplace_back(index);
+    wi.insert(index);
   }
+
+  // We will be able to do this more efficiently in C++17
+  std::vector<size_t> wsIndices(wi.size());
+  std::copy(wi.begin(), wi.end(), wsIndices.begin());
+
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
     auto workspace = getWorkspace();
