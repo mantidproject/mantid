@@ -75,7 +75,6 @@ private:
   void captureImplExcept();
   API::Workspace_sptr extractDataImpl();
 
-  DataObjects::Workspace2D_sptr copyBufferWorkspace(size_t NVectors = -1, size_t XLength = -1, size_t YLength = -1);
   DataObjects::Workspace2D_sptr createBufferWorkspace();
 
   /// Broker to use to subscribe to topics

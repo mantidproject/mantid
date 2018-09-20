@@ -248,18 +248,6 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(workspace);
 }
 
-/**
- * Create new buffer workspace from an existing copy
- * @param parent A pointer to an existing workspace
- */
-DataObjects::Workspace2D_sptr
-KafkaHistoStreamDecoder::copyBufferWorkspace(size_t NVectors, size_t XLength,
-                                             size_t YLength) {
-  auto copy = API::WorkspaceFactory::Instance().create(m_workspace, NVectors,
-                                                       XLength, YLength);
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(copy);
-}
-
 
 } // namespace LiveData
 } // namespace Mantid
