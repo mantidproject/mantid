@@ -95,10 +95,12 @@ class ISIS1DMerger(Merger):
         shift_from_alg = stitch_alg.getProperty("OutShiftFactor").value
         scale_from_alg = stitch_alg.getProperty("OutScaleFactor").value
         merged_workspace = stitch_alg.getProperty("OutputWorkspace").value
+        scaled_HAB_workspace = stitch_alg.getProperty("OutputWorkspaceHAB").value
 
         # Return a merge bundle with the merged workspace and the fitted scale and shift factor (they are good
         # diagnostic tools which are desired by the instrument scientists.
-        return MergeBundle(merged_workspace=merged_workspace, shift=shift_from_alg, scale=scale_from_alg)
+        return MergeBundle(merged_workspace=merged_workspace, shift=shift_from_alg, scale=scale_from_alg,
+                           scaled_hab_workspace=scaled_HAB_workspace)
 
 
 class NullMerger(Merger):
