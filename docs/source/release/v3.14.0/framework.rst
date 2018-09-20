@@ -49,6 +49,8 @@ Improvements
 - :ref:`SumOverlappingTubes <algm-SumOverlappingTubes>` will produce histogram data, and will not split the counts between bins by default.
 - :ref:`SumSpectra <algm-SumSpectra>` has an additional option, ``MultiplyBySpectra``, which controls whether or not the output spectra are multiplied by the number of bins. This property should be set to ``False`` for summing spectra as PDFgetN does.
 - :ref:`Live Data <algm-StartLiveData>` for events in PreserveEvents mode now produces workspaces that have bin boundaries which encompass the total x-range (TOF) for all events across all spectra.
+- Bugfix in :ref:`ConvertToMatrixWorkspace <algm-ConvertToMatrixWorkspace>` with ``Workspace2D`` as the ``InputWorkspace`` not being cloned to the ``OutputWorkspace``. Added support for ragged workspaces.
+- :ref:`RebinToWorkspace <algm-RebinToWorkspace>` now checks if the ``WorkspaceToRebin`` and ``WorkspaceToMatch`` already have the same binning. Added support for ragged workspaces.
 - :ref:`GroupWorkspaces <algm-GroupWorkspaces>` supports glob patterns for matching workspaces in the ADS.
 
 Bugfixes

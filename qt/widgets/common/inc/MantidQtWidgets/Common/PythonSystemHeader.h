@@ -20,14 +20,18 @@
 #define TO_LONG PyLong_AsLong
 #define FROM_LONG PyLong_FromLong
 #define STR_CHECK PyUnicode_Check
+#define BYTES_CHECK PyBytes_Check
 #define TO_CSTRING _PyUnicode_AsString
+#define PYBYTES_TO_CSTRING PyBytes_AsString
 #define FROM_CSTRING PyUnicode_FromString
 #define CODE_OBJECT(x) x
 #else
 #define INT_CHECK PyInt_Check
 #define TO_LONG PyInt_AsLong
 #define STR_CHECK PyString_Check
+#define BYTES_CHECK PyString_Check
 #define TO_CSTRING PyString_AsString
+#define PYBYTES_TO_CSTRING PyString_AsString
 #define FROM_CSTRING PyString_FromString
 #define CODE_OBJECT(x) (PyCodeObject *)x
 #define FROM_LONG PyInt_FromLong

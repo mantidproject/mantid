@@ -54,7 +54,7 @@ function ( mtd_add_sip_module )
   endforeach ()
 
   # Add absolute paths for header dependencies
-  foreach ( _header ${PARSED_HEADER_DEPENDS} )
+  foreach ( _header ${PARSED_HEADER_DEPS} )
     if ( IS_ABSOLUTE ${_header} )
       list ( APPEND _sip_include_deps "${_header}" )
     else ()
