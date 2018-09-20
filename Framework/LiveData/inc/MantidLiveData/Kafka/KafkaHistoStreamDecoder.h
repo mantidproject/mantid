@@ -73,19 +73,10 @@ public:
 private:
   void captureImpl();
   void captureImplExcept();
+  API::Workspace_sptr extractDataImpl();
 
-  /*
-  DataObjects::Workspace2D_sptr createBufferWorkspace(const size_t nspectra,
-                                                         const int32_t *spec,
-                                                         const int32_t *udet,
-                                                         const uint32_t length);
-  //*/
   DataObjects::Workspace2D_sptr copyBufferWorkspace(size_t NVectors = -1, size_t XLength = -1, size_t YLength = -1);
   DataObjects::Workspace2D_sptr createBufferWorkspace();
-//  void loadInstrument(const std::string &name,
-//                      DataObjects::Workspace2D_sptr workspace);
-
-  API::Workspace_sptr extractDataImpl();
 
   /// Broker to use to subscribe to topics
   std::shared_ptr<IKafkaBroker> m_broker;
@@ -95,47 +86,21 @@ private:
   const std::string m_instrumentName;
   /// Subscriber for the histo stream
   std::unique_ptr<IKafkaStreamSubscriber> m_histoStream;
-  /// Local buffer workspace
+  /// Workspace used as template for workspaces created when extracting
   DataObjects::Workspace2D_sptr m_workspace;
-  /// Detector ID to Workspace Index mapping
-  std::vector<size_t> m_indexMap;
-  detid_t m_indexOffset;
-
-
+  /// Buffer for latest FlatBuffers message
   std::string m_buffer;
 
   /// Associated thread running the capture process
   std::thread m_thread;
-  /// Flag indicating if user interruption has been requested
-  std::atomic<bool> m_interrupt;
-
-//  /// Mapping of spectrum number to workspace index.
-//  spec2index_map m_specToIdx; // ?
-
   /// Mutex protecting histo buffers
   mutable std::mutex m_buffer_mutex;
-
-
-//  /// Mutex protecting the wait flag
-//  mutable std::mutex m_waitMutex;
-//  /// Mutex protecting the runStatusSeen flag
-//  mutable std::mutex m_runStatusMutex;
+  /// Flag indicating if user interruption has been requested
+  std::atomic<bool> m_interrupt;
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error
   boost::shared_ptr<std::runtime_error> m_exception;
-
-//  /// For notifying other threads of changes to conditions (the following bools)
-//  std::condition_variable m_cv;
-//  std::condition_variable m_cvRunStatus;
-//  /// Indicate that decoder has reached the last message in a run
-//  std::atomic<bool> m_endRun;
-//  /// Indicate that LoadLiveData is waiting for access to the buffer workspace
-//  std::atomic<bool> m_extractWaiting;
-//  /// Indicate that MonitorLiveData has seen the runStatus since it was set to
-//  /// EndRun
-//  bool m_runStatusSeen;
-//  std::atomic<bool> m_extractedEndRunData;
 };
 
 } // namespace LiveData
