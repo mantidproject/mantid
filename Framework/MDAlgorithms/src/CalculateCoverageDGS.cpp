@@ -264,12 +264,12 @@ void CalculateCoverageDGS::exec() {
   if (m_Ei > m_dEmin) {
     m_kfmin = std::sqrt(energyToK * (m_Ei - m_dEmin));
   } else {
-    m_kfmin=0.;
+    m_kfmin = 0.;
   }
   if (m_Ei > m_dEmax) {
     m_kfmax = std::sqrt(energyToK * (m_Ei - m_dEmax));
   } else {
-    m_kfmax =0;
+    m_kfmax = 0;
   }
 
   double QmaxTemp =
