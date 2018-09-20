@@ -7,14 +7,27 @@
 ###########################################################################
 set( CPACK_GENERATOR "NSIS" )
 set( CPACK_INSTALL_PREFIX "/")
-set( CPACK_NSIS_DISPLAY_NAME "Mantid${CPACK_PACKAGE_SUFFIX}")
 set( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
-set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}")
 set( CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_PACKAGE_NAME}" )
 set( CPACK_NSIS_INSTALL_ROOT "C:")
-set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images\\\\MantidPlot_Icon_32offset.png" )
-set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/images\\\\MantidPlot_Icon_32offset.ico" )
-set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/images\\\\MantidPlot_Icon_32offset.ico" )
+set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot_Icon_32offset.png" )
+set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot_Icon_32offset.ico" )
+set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot_Icon_32offset.ico" )
+
+# Choose the proper suffix for the build.
+if ( CPACK_PACKAGE_SUFFIX STREQUAL "nightly" )
+# TODO probably needs a better name than windows icon suffix
+  set ( WINDOWS_ICON_SUFFIX "Nightly" )
+elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "unstable" )
+  set ( WINDOWS_ICON_SUFFIX "Unstable" )
+else()
+  # this is the release suffix, which is empty
+  set ( WINDOWS_ICON_SUFFIX "" )
+endif()
+
+# have the properly capitalsed name for the start menu and install folder
+set( CPACK_NSIS_DISPLAY_NAME "Mantid${WINDOWS_ICON_SUFFIX}")
+set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${WINDOWS_ICON_SUFFIX}")
 
 ###########################################################################
 # Deployment type - currently only works for Release!
@@ -23,11 +36,6 @@ set( WINDOWS_DEPLOYMENT_TYPE "Release" CACHE STRING "Type of deployment used")
 set_property(CACHE WINDOWS_DEPLOYMENT_TYPE PROPERTY STRINGS Release Debug)
 mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 
-message("INSIDE WINDOWSNSIS.CMAKE CHECKING VARIABLE")
-message("yeah boi the suffix is: ${CPACK_PACKAGE_SUFFIX}")
-
-# MESSAGE(FATAL_ERRORO "Could not find FOO_EXEC.")
-# exit()
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
@@ -149,14 +157,6 @@ install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt4
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-# install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
-    # RENAME mantidpython.bat )
-
-###########################################################################
-# Icons for shortcuts
-###########################################################################
-# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_notebook.ico DESTINATION bin )
-# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_python.ico DESTINATION bin )
 
 ###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
@@ -165,29 +165,17 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_m
 ###########################################################################
 # On install. The blank lines seem to be required or it doesn't create the shortcut
 
-if ( CPACK_PACKAGE_SUFFIX STREQUAL "release" )
-  set ( WINDOWS_ICON_SUFFIX "" )
-elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "nightly" )
-  set ( WINDOWS_ICON_SUFFIX "Nightly" )
-elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "unstable" )
-  set ( WINDOWS_ICON_SUFFIX "Unstable" )
-elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "mantidunstable-pvnext" )
-# TODO: check with Martyn for proper suffix for this one
-  set ( WINDOWS_ICON_SUFFIX "PVNext" ) 
-endif()
-
-# TODO DEBUG REMOVE
-message("The suffix for this is ${WINDOWS_ICON_SUFFIX}")
+set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_ICON_SUFFIX}.lnk" )
 
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot${WINDOWS_ICON_SUFFIX}.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-  CreateShortCut '$DESKTOP\\\\MantidPlot${WINDOWS_ICON_SUFFIX}.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
+  CreateShortCut '$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
@@ -195,7 +183,7 @@ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 ")
 # On uninstall reverse stages listed above.
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-  Delete \\\"$DESKTOP\\\\MantidPlot${WINDOWS_ICON_SUFFIX}.lnk\\\"
+  Delete \\\"$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
