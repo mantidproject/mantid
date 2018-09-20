@@ -25,7 +25,7 @@ class MantidPlotProjectRecovery(unittest.TestCase):
         CreateWorkspace(OutputWorkspace="ws", DataX=[
                         1, 2, 3], DataY=[1, 2, 3], NSpec=1)
         path = os.path.join(
-            ConfigService.getUserPropertiesDir(), 'recovery', platform.node())
+            ConfigService.getAppDataDirectory(), 'recovery', platform.node())
         listOfCheckpointsBefore = glob(os.path.join(path, "*", ""))
         for ii in listOfCheckpointsBefore:
             shutil.rmtree(ii)
