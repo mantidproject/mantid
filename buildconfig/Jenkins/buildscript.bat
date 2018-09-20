@@ -62,8 +62,6 @@ if NOT DEFINED MANTID_DATA_STORE (
 set CLEANBUILD=
 set BUILDPKG=
 
-:: This seems to be the condition hit when building a release package (a master:clean build)
-:: TODO: verify with Martyn and add more comments if true (or false)
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
@@ -81,9 +79,6 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
   set BUILDPKG=no
 )
-:: DEBUG ONLY, force package building
-set BUILDPKG=yes
-echo "am gonna be building a package? %BUILDPKG%"
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Setup the build directory
@@ -100,10 +95,10 @@ set BUILD_DIR_REL=build
 set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
 call %~dp0setupcompiler.bat %BUILD_DIR%
 
-REM if "!CLEANBUILD!" == "yes" (
-REM   echo Removing build directory for a clean build
-REM   rmdir /S /Q %BUILD_DIR%
-REM )
+if "!CLEANBUILD!" == "yes" (
+  echo Removing build directory for a clean build
+  rmdir /S /Q %BUILD_DIR%
+)
 
 if EXIST %BUILD_DIR% (
   git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
@@ -118,7 +113,6 @@ if EXIST %BUILD_DIR% (
   md %BUILD_DIR%
 )
 
-REM set PACKAGE_SUFFIX=thisismysuffixthankyou
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Packaging options
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -133,17 +127,11 @@ if "%BUILDPKG%" == "yes" (
     set PACKAGE_SUFFIX=
   ) else if not "%JOB_NAME%" == "%JOB_NAME:master=%" (
     set PACKAGE_SUFFIX=nightly
-  ) else if not "%JOB_NAME%" == "%JOB_NAME:pvnext=%" (
-    set PACKAGE_SUFFIX=mantidunstable-pvnext
   ) else (
     set PACKAGE_SUFFIX=unstable
   )
   set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=!PACKAGE_SUFFIX!
 )
-
-echo SUFFIX HAPPENS TO BE %PACKAGE_SUFFIX%
-echo ---------------------------
-echo PACKAGE OPTS ARE %PACKAGE_OPTS%
 
 cd %BUILD_DIR%
 
@@ -174,12 +162,9 @@ if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
 if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=OFF
 ) else (
-:: DEBUG ONLY disable VATES for release build as it was causing an error -- will figure it out some other time
-  set VATES_OPT_VAL=OFF
+  set VATES_OPT_VAL=ON
 )
-@echo on
 
-:: TODO remove %PACKAGE_SUFFIX% from here and put back at PACKAGE_OPTS
 call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=OFF -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
 
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
@@ -204,7 +189,7 @@ mkdir %CONFIGDIR%
 :: use a fixed number of openmp threads to avoid overloading the system
 echo MultiThreaded.MaxCores=2 > %USERPROPS%
 
-REM call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
+call ctest.exe -C %BUILD_CONFIG% -j%BUILD_THREADS% --schedule-random --output-on-failure
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -225,9 +210,9 @@ echo Note: not running doc-test target as it currently takes too long
 
 if "%BUILDPKG%" == "yes" (
   :: Build offline documentation
-  REM msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
+  msbuild /nologo /nr:false /p:Configuration=%BUILD_CONFIG% docs/docs-qthelp.vcxproj
   :: Ignore errors as the exit code of msbuild is wrong here.
   :: It always marks the build as a failure even though MantidPlot exits correctly
   echo Building package
-  cpack.exe -C %BUILD_CONFIG% --config %BUILD_DIR%\CPackConfig.cmake
+  cpack.exe -C %BUILD_CONFIG% --config CPackConfig.cmake
 )
