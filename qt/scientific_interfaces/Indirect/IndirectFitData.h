@@ -9,6 +9,8 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include <cctype>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -31,7 +33,11 @@ std::vector<T> vectorFromString(const std::string &listString) {
 template <typename T> class DiscontinuousSpectra {
 public:
   explicit DiscontinuousSpectra(const std::string &str)
-      : m_str(str), m_vec(vectorFromString<T>(str)) {}
+      : m_str(str), m_vec(vectorFromString<T>(str)) {
+    m_str.erase(std::remove_if(m_str.begin(), m_str.end(),
+                               static_cast<int (*)(int)>(std::isspace)),
+                m_str.end());
+  }
   DiscontinuousSpectra(const DiscontinuousSpectra &vec)
       : m_str(vec.m_str), m_vec(vec.m_vec) {}
   DiscontinuousSpectra(DiscontinuousSpectra &&vec)

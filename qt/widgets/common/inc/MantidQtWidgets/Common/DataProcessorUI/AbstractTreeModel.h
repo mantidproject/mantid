@@ -18,7 +18,7 @@ constexpr const char *SUCCESS =
     "#d0f4d0"; // processing completed successfully (green)
 constexpr const char *COMPLETE =
     "#f2fcf2"; // complete but no processing was required (pale green)
-}
+} // namespace Colour
 
 class RowData;
 using RowData_sptr = std::shared_ptr<RowData>;
@@ -90,6 +90,6 @@ protected:
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_ABSTRACTDATAPROCESSORTREEMODEL_H_ */

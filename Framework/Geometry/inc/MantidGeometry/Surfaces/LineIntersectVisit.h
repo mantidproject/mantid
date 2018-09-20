@@ -80,7 +80,7 @@ public:
   void setLine(const Kernel::V3D &, const Kernel::V3D &);
 };
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid
 

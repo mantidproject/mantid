@@ -1,8 +1,8 @@
 #ifndef VECTOR_IMPLICIT_FUNCTION_PARAMETER_PARSER_TEST_H_
 #define VECTOR_IMPLICIT_FUNCTION_PARAMETER_PARSER_TEST_H_
 
-#include "MantidAPI/VectorParameterParser.h"
 #include "MantidAPI/VectorParameter.h"
+#include "MantidAPI/VectorParameterParser.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

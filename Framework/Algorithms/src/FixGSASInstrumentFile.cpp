@@ -1,17 +1,17 @@
 #include "MantidAlgorithms/FixGSASInstrumentFile.h"
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <fstream>
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;

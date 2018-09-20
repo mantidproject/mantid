@@ -222,7 +222,7 @@ boost::shared_ptr<ChebfunBase> ChebfunBase::bestFitAnyTolerance(
 }
 
 } // namespace Functions
-} // CurveFitting
-} // Mantid
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // MANTID_CURVEFITTING_CHEBFUNBASE_H

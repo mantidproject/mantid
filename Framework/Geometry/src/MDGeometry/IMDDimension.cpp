@@ -41,6 +41,6 @@ namespace Geometry {
 
   }*/
 }
-}
+} // namespace Mantid
 
 #endif

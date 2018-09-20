@@ -1,10 +1,10 @@
 #include "MantidAlgorithms/CopySample.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/System.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -13,8 +13,8 @@ DECLARE_ALGORITHM(CopySample)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Geometry::SampleEnvironment;
 using Geometry::IObject;
+using Geometry::SampleEnvironment;
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -137,11 +137,12 @@ void CopySample::exec() {
                         << "). Will use sample number 0 instead\n";
         outputSampleNumber = 0;
       }
-      copyParameters(sample, outMDWS->getExperimentInfo(static_cast<uint16_t>(
-                                                            outputSampleNumber))
-                                 ->mutableSample(),
-                     copyName, copyMaterial, copyEnvironment, copyShape,
-                     copyLattice, copyOrientation);
+      copyParameters(
+          sample,
+          outMDWS->getExperimentInfo(static_cast<uint16_t>(outputSampleNumber))
+              ->mutableSample(),
+          copyName, copyMaterial, copyEnvironment, copyShape, copyLattice,
+          copyOrientation);
     }
   } else // peaks workspace or matrix workspace
   {
@@ -192,5 +193,5 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

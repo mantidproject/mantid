@@ -1,21 +1,21 @@
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
-#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
 #include <boost/regex.hpp>
 
 #include "Poco/DirectoryIterator.h"
-#include "Poco/NumberParser.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/NumberParser.h"
 #include "Poco/String.h"
 
 #include <fstream>
@@ -50,30 +50,37 @@ void EQSANSLoad::init() {
   declareProperty(
       "NoBeamCenter", false,
       "If true, the detector will not be moved according to the beam center");
-  declareProperty("UseConfigBeam", false, "If true, the beam center defined in "
-                                          "the configuration file will be "
-                                          "used");
-  declareProperty("BeamCenterX", EMPTY_DBL(), "Beam position in X pixel "
-                                              "coordinates (used only if "
-                                              "UseConfigBeam is false)");
-  declareProperty("BeamCenterY", EMPTY_DBL(), "Beam position in Y pixel "
-                                              "coordinates (used only if "
-                                              "UseConfigBeam is false)");
+  declareProperty("UseConfigBeam", false,
+                  "If true, the beam center defined in "
+                  "the configuration file will be "
+                  "used");
+  declareProperty("BeamCenterX", EMPTY_DBL(),
+                  "Beam position in X pixel "
+                  "coordinates (used only if "
+                  "UseConfigBeam is false)");
+  declareProperty("BeamCenterY", EMPTY_DBL(),
+                  "Beam position in Y pixel "
+                  "coordinates (used only if "
+                  "UseConfigBeam is false)");
   declareProperty("UseConfigTOFCuts", false,
                   "If true, the edges of the TOF distribution will be cut "
                   "according to the configuration file");
-  declareProperty("LowTOFCut", 0.0, "TOF value below which events will not be "
-                                    "loaded into the workspace at load-time");
-  declareProperty("HighTOFCut", 0.0, "TOF value above which events will not be "
-                                     "loaded into the workspace at load-time");
+  declareProperty("LowTOFCut", 0.0,
+                  "TOF value below which events will not be "
+                  "loaded into the workspace at load-time");
+  declareProperty("HighTOFCut", 0.0,
+                  "TOF value above which events will not be "
+                  "loaded into the workspace at load-time");
   declareProperty("SkipTOFCorrection", false,
                   "IF true, the EQSANS TOF correction will be skipped");
-  declareProperty("WavelengthStep", 0.1, "Wavelength steps to be used when "
-                                         "rebinning the data before performing "
-                                         "the reduction");
-  declareProperty("UseConfigMask", false, "If true, the masking information "
-                                          "found in the configuration file "
-                                          "will be used");
+  declareProperty("WavelengthStep", 0.1,
+                  "Wavelength steps to be used when "
+                  "rebinning the data before performing "
+                  "the reduction");
+  declareProperty("UseConfigMask", false,
+                  "If true, the masking information "
+                  "found in the configuration file "
+                  "will be used");
   declareProperty("UseConfig", true,
                   "If true, the best configuration file found will be used");
   declareProperty("CorrectForFlightPath", false,
@@ -281,8 +288,9 @@ void EQSANSLoad::getSourceSlitSize() {
     slit1 = static_cast<int>(ip->getStatistics().mean);
   else
     throw std::runtime_error("Could not cast (interpret) the property " +
-                             slit1Name + " as a time series property with "
-                                         "int or floating point values.");
+                             slit1Name +
+                             " as a time series property with "
+                             "int or floating point values.");
 
   const std::string slit2Name = "vBeamSlit2";
   prop = dataWS->run().getProperty(slit2Name);
@@ -295,8 +303,9 @@ void EQSANSLoad::getSourceSlitSize() {
     slit2 = static_cast<int>(ip->getStatistics().mean);
   else
     throw std::runtime_error("Could not cast (interpret) the property " +
-                             slit2Name + " as a time series property with "
-                                         "int or floating point values.");
+                             slit2Name +
+                             " as a time series property with "
+                             "int or floating point values.");
 
   const std::string slit3Name = "vBeamSlit3";
   prop = dataWS->run().getProperty(slit3Name);
@@ -309,8 +318,9 @@ void EQSANSLoad::getSourceSlitSize() {
     slit3 = static_cast<int>(ip->getStatistics().mean);
   else
     throw std::runtime_error("Could not cast (interpret) the property " +
-                             slit3Name + " as a time series property with "
-                                         "int or floating point values.");
+                             slit3Name +
+                             " as a time series property with "
+                             "int or floating point values.");
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
     m_output_message += "   Could not determine source aperture diameter\n";
@@ -378,9 +388,9 @@ void EQSANSLoad::moveToBeamCenter() {
   mvAlg->setProperty("Y", -y_offset - beam_ctr_y);
   mvAlg->setProperty("RelativePosition", true);
   mvAlg->executeAsChildAlg();
-  m_output_message += "   Beam center offset: " +
-                      Poco::NumberFormatter::format(x_offset) + ", " +
-                      Poco::NumberFormatter::format(y_offset) + " m\n";
+  m_output_message +=
+      "   Beam center offset: " + Poco::NumberFormatter::format(x_offset) +
+      ", " + Poco::NumberFormatter::format(y_offset) + " m\n";
   // m_output_message += "   Beam center in real-space: " +
   // Poco::NumberFormatter::format(-x_offset-beam_ctr_x)
   //    + ", " + Poco::NumberFormatter::format(-y_offset-beam_ctr_y) + " m\n";
@@ -389,9 +399,9 @@ void EQSANSLoad::moveToBeamCenter() {
 
   dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
-  m_output_message += "   Beam center: " +
-                      Poco::NumberFormatter::format(m_center_x) + ", " +
-                      Poco::NumberFormatter::format(m_center_y) + "\n";
+  m_output_message +=
+      "   Beam center: " + Poco::NumberFormatter::format(m_center_x) + ", " +
+      Poco::NumberFormatter::format(m_center_y) + "\n";
 }
 
 /// Read a config file
@@ -756,9 +766,9 @@ void EQSANSLoad::exec() {
     dataWS->mutableRun().addProperty("is_frame_skipping", int(frame_skipping),
                                      true);
     wl_combined_max = wl_max;
-    m_output_message += "   Wavelength range: " +
-                        Poco::NumberFormatter::format(wl_min) + " - " +
-                        Poco::NumberFormatter::format(wl_max);
+    m_output_message +=
+        "   Wavelength range: " + Poco::NumberFormatter::format(wl_min) +
+        " - " + Poco::NumberFormatter::format(wl_max);
     if (frame_skipping) {
       const double wl_min2 = tofAlg->getProperty("WavelengthMinFrame2");
       const double wl_max2 = tofAlg->getProperty("WavelengthMaxFrame2");

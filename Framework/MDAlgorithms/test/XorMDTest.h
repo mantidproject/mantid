@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_XORMDTEST_H_
 #define MANTID_MDALGORITHMS_XORMDTEST_H_
 
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/XorMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
 

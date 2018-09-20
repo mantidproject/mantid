@@ -1,16 +1,16 @@
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
-#include <qwt_plot.h>
-#include <qwt_plot_canvas.h>
-#include <QPainter>
-#include <QRect>
-#include <QShowEvent>
-#include <qwt_scale_div.h>
-#include "MantidKernel/Utils.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Utils.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include <QPainter>
+#include <QRect>
+#include <QShowEvent>
 #include <numeric>
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_scale_div.h>
 
 using namespace Mantid::Kernel;
 
@@ -152,5 +152,5 @@ void NonOrthogonalOverlay::enable() { m_enabled = true; }
 
 void NonOrthogonalOverlay::disable() { m_enabled = false; }
 
-} // namespace Mantid
 } // namespace SliceViewer
+} // namespace MantidQt

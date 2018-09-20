@@ -91,7 +91,7 @@ Mantid::Kernel::Logger g_log("MultiLayer");
 const double MAXIMUM = std::numeric_limits<double>::max();
 const double MINIMUM = std::numeric_limits<double>::min();
 constexpr int AXIS_X(0), AXIS_Y(1);
-}
+} // namespace
 
 LayerButton::LayerButton(const QString &text, QWidget *parent)
     : QPushButton(text, parent) {
@@ -350,6 +350,10 @@ void MultiLayer::confirmRemoveLayer() {
 }
 
 void MultiLayer::removeLayer() {
+  // ignore function if no layers
+  if (active_graph == nullptr)
+    return;
+
   // remove corresponding button
   foreach (LayerButton *btn, buttonsList) {
     if (btn->isChecked()) {
@@ -371,6 +375,7 @@ void MultiLayer::removeLayer() {
   active_graph->setAttribute(Qt::WA_DeleteOnClose, false);
   active_graph->close();
   delete active_graph;
+
   if (index >= graphsList.count())
     index--;
 
@@ -1398,8 +1403,8 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve *originalCurve,
 }
 
 /**
-* Mark the layer selector for deletion and set the pointer to NULL
-*/
+ * Mark the layer selector for deletion and set the pointer to NULL
+ */
 void MultiLayer::removeLayerSelectionFrame() {
   d_layers_selector->deleteLater();
   d_layers_selector = nullptr;

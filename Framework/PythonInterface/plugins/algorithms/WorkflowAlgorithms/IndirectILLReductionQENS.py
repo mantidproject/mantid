@@ -271,7 +271,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         for item in mtd[tmp_int]:
             for index in range(item.getNumberHistograms()):
                 if item.readY(index)[0] <= 0:
-                    raise RuntimeError('Negative or 0 integral in spectrum #{0} {1}'.format(index,message))
+                    self.log().warning('Negative or 0 integral in spectrum #{0} {1}'.format(index,message))
 
         DeleteWorkspace(tmp_int)
 

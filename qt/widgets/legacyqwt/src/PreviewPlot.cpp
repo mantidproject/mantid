@@ -3,8 +3,8 @@
 //------------------------------------------------------
 #include "MantidQtWidgets/LegacyQwt/PreviewPlot.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -22,7 +22,7 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("PreviewPlot");
 bool isNegative(double v) { return v <= 0.0; }
-}
+} // namespace
 
 PreviewPlot::PreviewPlot(QWidget *parent, bool init)
     : API::MantidWidget(parent),
@@ -122,6 +122,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
 
   connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
   connect(this, SIGNAL(needToHardReplot()), this, SLOT(hardReplot()));
+  connect(this, SIGNAL(workspaceRemoved(Mantid::API::MatrixWorkspace_sptr)),
+          this, SLOT(removeWorkspace(Mantid::API::MatrixWorkspace_sptr)),
+          Qt::QueuedConnection);
 }
 
 /**
@@ -562,23 +565,25 @@ void PreviewPlot::hardReplot() {
 }
 
 /**
- * Handle a workspace being deleted from ADS.
- *
- * Removes it from the plot (via removeSpectrum).
- *
+ * Handle a notifcation about a workspace being deleted from ADS.
  * @param pNf Poco notification
  */
 void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf) {
-  MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+  auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
-  // Ignore non matrix worksapces
-  if (!ws)
-    return;
+  if (ws)
+    // emit a queued signal to the queued slot
+    emit workspaceRemoved(ws);
+}
 
-  // Remove the workspace
+/**
+ * Remove the spectrum & replot when a workspace is removed.
+ *
+ * @param ws the workspace that is being removed.
+ */
+void PreviewPlot::removeWorkspace(MatrixWorkspace_sptr ws) {
+  // Remove the workspace on the main GUI thread
   removeSpectrum(ws);
-
   emit needToReplot();
 }
 

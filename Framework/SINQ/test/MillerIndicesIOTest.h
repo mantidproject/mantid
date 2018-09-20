@@ -1,10 +1,10 @@
 #ifndef MANTID_SINQ_MILLERINDICESIOTEST_H
 #define MANTID_SINQ_MILLERINDICESIOTEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
-#include <stdexcept>
 #include "boost/lexical_cast.hpp"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::Poldi;
 

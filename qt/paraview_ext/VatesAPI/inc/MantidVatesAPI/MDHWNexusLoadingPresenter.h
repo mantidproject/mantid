@@ -1,8 +1,8 @@
 #ifndef MANTID_VATES_MDHW_NEXUS_LOADING_PRESENTER
 #define MANTID_VATES_MDHW_NEXUS_LOADING_PRESENTER
 
-#include <vector>
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
+#include <vector>
 
 namespace Mantid {
 namespace VATES {
@@ -55,7 +55,7 @@ private:
   std::string m_wsTypeName;
   Mantid::API::IMDHistoWorkspace_sptr m_histoWs;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

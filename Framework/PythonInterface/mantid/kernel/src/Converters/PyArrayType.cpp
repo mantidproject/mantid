@@ -18,6 +18,6 @@ namespace Converters {
  * @return
  */
 PyTypeObject *getNDArrayType() { return &PyArray_Type; }
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid

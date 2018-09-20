@@ -26,5 +26,5 @@ void CatalogListInstruments::exec() {
       ->listInstruments(instruments);
   setProperty("InstrumentList", instruments);
 }
-}
-}
+} // namespace ICat
+} // namespace Mantid

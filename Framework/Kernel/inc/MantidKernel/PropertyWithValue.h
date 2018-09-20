@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_PROPERTYWITHVALUE_H_
 #define MANTID_KERNEL_PROPERTYWITHVALUE_H_
 
-#include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/Property.h"
 
 #include <vector>
 
@@ -84,6 +84,7 @@ public:
   std::vector<std::string> allowedValues() const override;
   bool isMultipleSelectionAllowed() override;
   virtual void replaceValidator(IValidator_sptr newValidator);
+  IValidator_sptr getValidator() const;
 
 protected:
   /// The value of the property

@@ -149,4 +149,4 @@ void IndirectTransmission::plotClicked() {
     plotSpectrum(outputWs);
 }
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

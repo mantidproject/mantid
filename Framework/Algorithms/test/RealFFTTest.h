@@ -185,7 +185,7 @@ void doTestBackwardHistogram(const int N, const double dX,
     }
   }
 }
-}
+} // namespace
 
 class RealFFTTest : public CxxTest::TestSuite {
 public:

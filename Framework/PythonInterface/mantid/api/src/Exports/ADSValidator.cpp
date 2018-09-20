@@ -1,11 +1,11 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidKernel/TypedValidator.h"
-#include <boost/python/class.hpp>
 #include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
+#include <boost/python/class.hpp>
 
+using Mantid::API::ADSValidator;
 using Mantid::Kernel::TypedValidator;
 using Mantid::PythonInterface::TypedValidatorExporter;
-using Mantid::API::ADSValidator;
 using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators

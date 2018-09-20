@@ -9,9 +9,9 @@ namespace Mantid {
 namespace Kernel {
 
 /**This method parses a given string of numbers and returns a vector of vector
-  *of numbers.
-  *@param userString - the string to parse
-  *@returns  a vector containing vectors of numbers.
+ *of numbers.
+ *@param userString - the string to parse
+ *@returns  a vector containing vectors of numbers.
  */
 std::vector<std::vector<unsigned int>>
 UserStringParser::parse(const std::string &userString) {
@@ -35,9 +35,9 @@ UserStringParser::parse(const std::string &userString) {
 }
 
 /**This method parses a given string of numbers and returns a vector of vector
-  *of numbers.
-  *@param userString - the input  string to parse
-  *@param numbers- a vector containing vectors of numbers.
+ *of numbers.
+ *@param userString - the input  string to parse
+ *@param numbers- a vector containing vectors of numbers.
  */
 void UserStringParser::parse(const std::string &userString,
                              std::vector<std::vector<unsigned int>> &numbers) {
@@ -69,19 +69,19 @@ void UserStringParser::parse(const std::string &userString,
 }
 
 /** This method checks input string contains character ch
-  * @param input - the input string
-  * @param ch - character ch to search
-  * @returns - true if the string contains character ch.
-  */
+ * @param input - the input string
+ * @param ch - character ch to search
+ * @returns - true if the string contains character ch.
+ */
 bool UserStringParser::Contains(const std::string &input, char ch) {
   std::string::size_type pos = input.find(ch);
   return (pos != std::string::npos);
 }
 
 /**This method parses a given string of numbers into comma separated tokens.
-  *@param input - the string to parse
-  *@returns  a vector containing comma separated tokens.
-  */
+ *@param input - the string to parse
+ *@returns  a vector containing comma separated tokens.
+ */
 std::vector<std::string>
 UserStringParser::separateComma(const std::string &input) {
   using tokenizer = Mantid::Kernel::StringTokenizer;
@@ -90,8 +90,8 @@ UserStringParser::separateComma(const std::string &input) {
 }
 
 /**This method parses a given string of numbers into colon separated tokens.
-  *@param input - the string to parse
-  *@returns  a vector of vector containing colon separated tokens.
+ *@param input - the string to parse
+ *@returns  a vector of vector containing colon separated tokens.
  */
 std::vector<std::vector<unsigned int>>
 UserStringParser::separateColon(const std::string &input) {
@@ -108,10 +108,10 @@ UserStringParser::separateColon(const std::string &input) {
 }
 
 /**This method parses a given string of numbers into tokens using the separator
-  *character symbol.
-  *@param input - the string to parse
-  *@param delimiters - the string used as separator
-  *@returns  a vector of vector containing colon separated tokens.
+ *character symbol.
+ *@param input - the string to parse
+ *@param delimiters - the string used as separator
+ *@returns  a vector of vector containing colon separated tokens.
  */
 std::vector<unsigned int>
 UserStringParser::separateDelimiters(const std::string &input,
@@ -129,15 +129,15 @@ UserStringParser::separateDelimiters(const std::string &input,
 }
 
 /**This method parses a given string of numbers into tokens based on the given
-  *separator
-  *returns numbers corresponding to separated tokens and separators if any
-  *@param input - the string to parse
-  *@param delimiter - character to separate
-  *@param start - a number corresponding to the string before delimiter
-  *@param end -  a number corresponding to the string after delimiter
-  *@param step - number used to increment from the start num generate the series
-  *of numbers .
-  */
+ *separator
+ *returns numbers corresponding to separated tokens and separators if any
+ *@param input - the string to parse
+ *@param delimiter - character to separate
+ *@param start - a number corresponding to the string before delimiter
+ *@param end -  a number corresponding to the string after delimiter
+ *@param step - number used to increment from the start num generate the series
+ *of numbers .
+ */
 void UserStringParser::Tokenize(const std::string &input,
                                 const std::string &delimiter,
                                 unsigned int &start, unsigned int &end,
@@ -154,11 +154,11 @@ void UserStringParser::Tokenize(const std::string &input,
 }
 
 /**This method checks the separator preceded by the step string is valid
-  * colon ':' is valid separator for step string
-  *@param input - input string to validate
-  *@param tokens - vector containing separated values.
-  *@returns true if the input is valid
-  */
+ * colon ':' is valid separator for step string
+ *@param input - input string to validate
+ *@param tokens - vector containing separated values.
+ *@returns true if the input is valid
+ */
 bool UserStringParser::isValidStepSeparator(
     const std::string &input, const std::vector<std::string> &tokens) {
   std::string step_separator;
@@ -176,12 +176,12 @@ bool UserStringParser::isValidStepSeparator(
 }
 
 /**This method checks the input string is valid format
-  *@param input - input string to validate
-  *@param tokens - vector containing separated values.
-  *@param start  - start number
-  *@param end    - end number
-  *@param step   - step used for incrementing
-  */
+ *@param input - input string to validate
+ *@param tokens - vector containing separated values.
+ *@param start  - start number
+ *@param end    - end number
+ *@param step   - step used for incrementing
+ */
 void UserStringParser::convertToNumbers(const std::string &input,
                                         const std::vector<std::string> &tokens,
                                         unsigned int &start, unsigned int &end,
@@ -213,9 +213,9 @@ void UserStringParser::convertToNumbers(const std::string &input,
   }
 }
 /**This method converts a string to unsigned int
-  *@param input - the string to parse
-  *@returns an unsigned number equivalent of the input
-  */
+ *@param input - the string to parse
+ *@returns an unsigned number equivalent of the input
+ */
 unsigned int UserStringParser::toUInt(const std::string &input) {
   try {
     return boost::lexical_cast<unsigned int>(input);
@@ -223,5 +223,5 @@ unsigned int UserStringParser::toUInt(const std::string &input) {
     throw std::runtime_error("Error when parsing the input  string " + input);
   }
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

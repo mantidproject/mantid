@@ -17,19 +17,15 @@
 #endif
 
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(conversion)
-// clang-format off
-GCC_DIAG_OFF(cast-qual)
-// clang-format on
-#include <BRepPrimAPI_MakeBox.hxx>
-#include <BRepBuilderAPI_MakeFace.hxx>
-#include <BRepPrimAPI_MakeHalfSpace.hxx>
+GNU_DIAG_OFF("conversion")
+GNU_DIAG_OFF("cast-qual")
 #include <BRepAlgoAPI_Common.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <gp_Pln.hxx>
-GCC_DIAG_ON(conversion)
-// clang-format off
-GCC_DIAG_ON(cast-qual)
-// clang-format on
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("cast-qual")
 #endif
 
 namespace Mantid {
@@ -427,16 +423,18 @@ TopoDS_Shape Plane::createShape() {
   // Find point closest to origin
   double t = distance / norm2;
   // Create Half Space
-  TopoDS_Face P = BRepBuilderAPI_MakeFace(gp_Pln(normal[0], normal[1],
-                                                 normal[2], -distance)).Face();
+  TopoDS_Face P = BRepBuilderAPI_MakeFace(
+                      gp_Pln(normal[0], normal[1], normal[2], -distance))
+                      .Face();
 
   TopoDS_Shape Result = BRepPrimAPI_MakeHalfSpace(
                             P, gp_Pnt(normal[0] * (1 + t), normal[1] * (1 + t),
-                                      normal[2] * (1 + t))).Solid();
+                                      normal[2] * (1 + t)))
+                            .Solid();
   return Result.Complemented();
 }
 #endif
 
-} // NAMESPACE MonteCarlo
+} // namespace Geometry
 
 } // NAMESPACE Mantid

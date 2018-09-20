@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDES_H_
 #define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDES_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace API {
@@ -91,7 +91,6 @@ private:
                              const WorkspaceMap &inputs,
                              const EfficiencyMap &efficiencies);
 };
-
 } // namespace Algorithms
 } // namespace Mantid
 

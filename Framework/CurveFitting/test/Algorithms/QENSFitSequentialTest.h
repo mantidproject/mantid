@@ -5,7 +5,6 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/Load.h"
@@ -19,10 +18,10 @@
 using Mantid::CurveFitting::Algorithms::QENSFitSequential;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Mantid::Kernel::make_cow;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::Kernel::make_cow;
 
 class QENSFitSequentialTest : public CxxTest::TestSuite {
 public:
@@ -130,7 +129,7 @@ private:
             AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
                 outputBaseName + "_Workspaces"));
     TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             outputBaseName + "_Result"));
 
     TS_ASSERT_EQUALS(groupWorkspace->size(), expectedGroupSize);

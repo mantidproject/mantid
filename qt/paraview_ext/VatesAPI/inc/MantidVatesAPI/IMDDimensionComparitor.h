@@ -59,7 +59,7 @@ private:
   /// imd workspace shared ptr.
   Mantid::API::IMDWorkspace_sptr m_workspace;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

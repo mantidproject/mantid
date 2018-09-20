@@ -1,17 +1,17 @@
 #ifndef MANTID_MANTIDWIDGETS_ALGORITHMSELECTORWIDGET_H_
 #define MANTID_MANTIDWIDGETS_ALGORITHMSELECTORWIDGET_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "DllOption.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidKernel/System.h"
 
 #include <QComboBox>
 #include <QPoint>
 #include <QString>
 #include <QTreeWidget>
 
-#include <vector>
 #include <Poco/NObserver.h>
+#include <vector>
 
 //------------------------------------------------------------------------------
 // Forward declaration
@@ -22,7 +22,7 @@ namespace Mantid {
 namespace API {
 struct Algorithm_descriptor;
 }
-}
+} // namespace Mantid
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -52,8 +52,8 @@ struct SelectedAlgorithm {
   */
 class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget : public QWidget {
   Q_OBJECT
-  Q_PROPERTY(bool showExecuteButton READ showExecuteButton WRITE
-                 showExecuteButton)
+  Q_PROPERTY(
+      bool showExecuteButton READ showExecuteButton WRITE showExecuteButton)
 
 public:
   AlgorithmSelectorWidget(QWidget *parent);

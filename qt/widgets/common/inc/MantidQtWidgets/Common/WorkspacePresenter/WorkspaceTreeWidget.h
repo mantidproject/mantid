@@ -2,6 +2,7 @@
 #define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
 
 #include <MantidAPI/ExperimentInfo.h>
 #include <MantidAPI/IAlgorithm_fwd.h>
@@ -14,9 +15,10 @@
 
 #include <MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
+#include <QHash>
 #include <QMap>
 #include <QMetaType>
-#include <QHash>
+#include <QMutex>
 #include <boost/shared_ptr.hpp>
 #include <map>
 
@@ -179,6 +181,9 @@ private:
   void setupLoadButtonMenu();
   void setupConnections();
 
+  MantidQt::MantidWidgets::MantidItemSortScheme
+  whichCriteria(SortCriteria criteria);
+
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
   void saveWorkspaceCollection();
@@ -190,6 +195,7 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
+  void chooseByMemorySize();
   void keyPressEvent(QKeyEvent *) override;
 
 protected slots:
@@ -273,6 +279,8 @@ private:
   QStringList m_selectedNames;
   /// Keep a map of renamed workspaces between updates
   QHash<QString, QString> m_renameMap;
+  /// A mutex to lock m_renameMap and m_selectedNames for reading/writing
+  mutable QMutex m_mutex;
 
 private slots:
   void handleUpdateTree(const TopLevelItems &);
@@ -281,6 +289,6 @@ signals:
   void signalClearView();
   void signalUpdateTree(const TopLevelItems &);
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H

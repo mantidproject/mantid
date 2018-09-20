@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAPI/AlgorithmProxy.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>

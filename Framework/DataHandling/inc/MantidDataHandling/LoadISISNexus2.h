@@ -6,11 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataHandling/DataBlockComposite.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidDataHandling/DataBlockComposite.h"
+#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/scoped_ptr.hpp>

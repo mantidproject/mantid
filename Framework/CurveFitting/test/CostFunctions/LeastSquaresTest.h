@@ -3,18 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
-#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
-#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
-#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidCurveFitting/Functions/LinearBackground.h"
-#include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
+#include "MantidCurveFitting/FuncMinimizers/BFGS_Minimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidCurveFitting/Functions/LinearBackground.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
 
 #include <gsl/gsl_blas.h>
 #include <sstream>

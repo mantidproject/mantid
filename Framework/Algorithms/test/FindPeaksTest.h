@@ -1,18 +1,17 @@
 #ifndef FINDPEAKSTEST_H_
 #define FINDPEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FindPeaks.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -25,9 +24,9 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 
 class FindPeaksTest : public CxxTest::TestSuite {
 public:
@@ -52,7 +51,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test find a single peak with given position
-    */
+   */
   void test_findSinglePeakGivenPeakPosition() {
     FrameworkManager::Instance();
 
@@ -119,7 +118,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test find peaks automaticallyclear
-    */
+   */
   void test_findMultiPeaksAuto() {
     // Load data file
     Mantid::DataHandling::LoadNexusProcessed loader;
@@ -185,7 +184,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a row in output parameter tableworkspace to a string/double
    * parameter name/value map
-    */
+   */
   void getParameterMap(TableWorkspace_sptr tablews, size_t rowindex,
                        map<string, double> &parammap) {
     parammap.clear();
@@ -223,7 +222,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create a workspace as a partial data from PG3_4866 around Vanadium peak at
    * d = 1.235
-    */
+   */
   MatrixWorkspace_sptr getSinglePeakData() {
 
     const size_t size = 83;
@@ -266,7 +265,7 @@ private:
 
 //=================================================================================================
 /** Performance test with large workspaces.
-  */
+ */
 
 class FindPeaksTestPerformance : public CxxTest::TestSuite {
 public:
@@ -276,11 +275,11 @@ public:
   static void destroySuite(FindPeaksTestPerformance *suite) { delete suite; }
 
   /** Constructor
-    */
+   */
   FindPeaksTestPerformance() {}
 
   /** Set up workspaces
-    */
+   */
   void setUp() override {
     // Load data file
     Mantid::DataHandling::LoadNexusProcessed loader;
@@ -298,7 +297,7 @@ public:
   }
 
   /** Find peaks by auto-determine peaks' positions
-    */
+   */
   void test_FindPeaksAutoPeakPositions() {
     // Find peaks (Test)
     FindPeaks finder;

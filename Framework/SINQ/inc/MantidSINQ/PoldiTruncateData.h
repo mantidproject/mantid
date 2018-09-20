@@ -1,8 +1,8 @@
 #ifndef MANTID_SINQ_POLDITRUNCATEDATA_H_
 #define MANTID_SINQ_POLDITRUNCATEDATA_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 
@@ -93,7 +93,7 @@ private:
   void exec() override;
 };
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
 #endif /* MANTID_SINQ_POLDITRUNCATEDATA_H_ */

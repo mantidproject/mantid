@@ -1,12 +1,12 @@
 #ifndef MANTID_GEOMETRY_BASICHKLFILTERS_H_
 #define MANTID_GEOMETRY_BASICHKLFILTERS_H_
 
-#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/HKLFilter.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
-#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include <strstream>
 

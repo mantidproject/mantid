@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H
 
-#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>
 
@@ -86,7 +86,7 @@ private:
   // The names of the output workspace properties
   std::vector<QString> m_outputProperties;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHM_H*/

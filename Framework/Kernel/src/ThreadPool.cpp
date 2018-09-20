@@ -12,8 +12,8 @@
 #include <Poco/Thread.h>
 
 #include <algorithm>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 // needed on windows and any place missing openmp
 #if defined(_WIN32) || !defined(_OPENMP)
 #include <Poco/Environment.h>
@@ -73,11 +73,11 @@ size_t ThreadPool::getNumPhysicalCores() {
   int physicalCores = PARALLEL_GET_MAX_THREADS;
 #endif
 
-  int maxCores(0);
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "MultiThreaded.MaxCores", maxCores);
-  if (retVal > 0 && maxCores > 0)
-    return std::min(maxCores, physicalCores);
+  auto maxCores =
+      Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
+
+  if (!maxCores.is_initialized())
+    return std::min(maxCores.get_value_or(0), physicalCores);
   else
     return physicalCores;
 }

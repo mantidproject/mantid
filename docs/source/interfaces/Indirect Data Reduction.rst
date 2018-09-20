@@ -136,7 +136,11 @@ Grouping
 The following options are available for grouping output data:
 
 Custom
-  A comma separated list can be entered to specify the groups, e.g. 1, 3-5, 6-8, 10.
+  Follows the same grouping patterns used in the :ref:`GroupDetectors <algm-GroupDetectors>` algorithm.
+  An example of the syntax is 1,2+3,4-6,7-10
+
+  This would produce spectra for: spectra 1, the sum of spectra 2 and 3, the sum of spectra 4-6 (4+5+6)
+  and individual spectra from 7 to 10 (7,8,9,10)
 
 Individual
   All detectors will remain on individual spectra.

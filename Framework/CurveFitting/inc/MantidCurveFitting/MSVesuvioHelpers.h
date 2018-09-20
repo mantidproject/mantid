@@ -57,8 +57,8 @@ struct SimulationAggregator {
 
   std::vector<Simulation> results;
 };
-}
-}
-}
+} // namespace MSVesuvioHelper
+} // namespace CurveFitting
+} // namespace Mantid
 
 #endif // MANTID_CURVEFITTING_MSVESUVIOHELPERS_H

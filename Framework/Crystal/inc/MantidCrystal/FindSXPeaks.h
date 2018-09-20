@@ -92,8 +92,9 @@ private:
   getPeakFindingStrategy(
       const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
       const API::SpectrumInfo &spectrumInfo, const double minValue,
-      const double maxValue, const FindSXPeaksHelper::XAxisUnit tofUnits =
-                                 FindSXPeaksHelper::XAxisUnit::TOF) const;
+      const double maxValue,
+      const FindSXPeaksHelper::XAxisUnit tofUnits =
+          FindSXPeaksHelper::XAxisUnit::TOF) const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy>
@@ -123,7 +124,7 @@ private:
   Mantid::DataObjects::PeaksWorkspace_sptr m_peaks;
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_FindSXPeaks_H_*/

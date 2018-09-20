@@ -1,9 +1,9 @@
 #ifndef NEUTRONATOMTEST_H_
 #define NEUTRONATOMTEST_H_
 
+#include "MantidKernel/NeutronAtom.h"
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
-#include "MantidKernel/NeutronAtom.h"
 
 using namespace Mantid::PhysicalConstants;
 

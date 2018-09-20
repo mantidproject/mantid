@@ -141,7 +141,7 @@ private:
   mutable bool m_needSplitting;
 };
 
-} // endnamespace MDAlgorithms
-} // endnamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

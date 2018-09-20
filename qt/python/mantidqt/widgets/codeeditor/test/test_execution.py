@@ -23,7 +23,7 @@ import unittest
 from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
-from mantidqt.utils.qt.testing import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
 
 
@@ -50,8 +50,7 @@ class ReceiverWithProgress(Receiver):
         self.lines_received.append(lineno)
 
 
-@requires_qapp
-class PythonCodeExecutionTest(unittest.TestCase):
+class PythonCodeExecutionTest(GuiTest):
 
     def test_default_construction_yields_empty_context(self):
         executor = PythonCodeExecution()
@@ -75,9 +74,9 @@ class PythonCodeExecutionTest(unittest.TestCase):
     def test_execute_places_output_in_globals(self):
         code = "_local=100"
         user_globals = self._verify_serial_execution_successful(code)
-        self.assertEquals(100, user_globals['_local'])
+        self.assertEqual(100, user_globals['_local'])
         user_globals = self._verify_async_execution_successful(code)
-        self.assertEquals(100, user_globals['_local'])
+        self.assertEqual(100, user_globals['_local'])
 
     def test_execute_async_calls_success_signal_on_completion(self):
         code = "x=1+2"

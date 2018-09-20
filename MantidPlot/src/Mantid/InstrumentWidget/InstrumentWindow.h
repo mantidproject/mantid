@@ -16,8 +16,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
 class InstrumentWidgetTab;
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 class InstrumentWindow : public MdiSubWindow {
   Q_OBJECT

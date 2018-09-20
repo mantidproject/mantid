@@ -3,27 +3,27 @@
 //------------------------------------------------------
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
-#include <Poco/Notification.h>
-#include <Poco/NotificationCenter.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include <QDebug>
 #include <QDropEvent>
 #include <QMimeData>
 #include <QUrl>
-#include <QDebug>
 using namespace MantidQt::MantidWidgets;
 
 /**
-* Default constructor
-* @param parent :: A widget to act as this widget's parent (default = NULL)
-* @param init :: If true then the widget will make calls to the framework
-* (default = true)
-*/
+ * Default constructor
+ * @param parent :: A widget to act as this widget's parent (default = NULL)
+ * @param init :: If true then the widget will make calls to the framework
+ * (default = true)
+ */
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
     : QComboBox(parent),
       m_addObserver(*this, &WorkspaceSelector::handleAddEvent),
@@ -50,9 +50,9 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
 }
 
 /**
-* Destructor for WorkspaceSelector
-* De-subscribes this object from the Poco NotificationCentre
-*/
+ * Destructor for WorkspaceSelector
+ * De-subscribes this object from the Poco NotificationCentre
+ */
 WorkspaceSelector::~WorkspaceSelector() {
   if (m_init) {
     Mantid::API::AnalysisDataService::Instance()
@@ -181,8 +181,8 @@ void WorkspaceSelector::handleRemEvent(
   }
 }
 
-void
-    WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr) {
+void WorkspaceSelector::handleClearEvent(
+    Mantid::API::ClearADSNotification_ptr) {
   this->clear();
   emit emptied();
 }
@@ -295,9 +295,9 @@ void WorkspaceSelector::refresh() {
 }
 
 /**
-  * Called when an item is dropped
-  * @param de :: the drop event data package
-  */
+ * Called when an item is dropped
+ * @param de :: the drop event data package
+ */
 void WorkspaceSelector::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   QString text = mimeData->text();
@@ -315,9 +315,9 @@ void WorkspaceSelector::dropEvent(QDropEvent *de) {
 }
 
 /**
-  * Called when an item is dragged onto a control
-  * @param de :: the drag event data package
-  */
+ * Called when an item is dragged onto a control
+ * @param de :: the drag event data package
+ */
 void WorkspaceSelector::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasText()) {

@@ -301,9 +301,10 @@ public:
 
   void test_convert_counts_to_frequency_for_each_item_sparse() {
     double total = 0;
+    double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       for (auto &item : m_hist) {
-        if (item.counts() > histSize - 5)
+        if (item.counts() > floor)
           total += item.frequency();
       }
     }
@@ -311,11 +312,12 @@ public:
 
   void test_convert_counts_to_frequency_once_per_histogram_sparse() {
     double total = 0;
+    double floor = static_cast<double>(histSize) - 5.0;
     for (size_t i = 0; i < nHists; i++) {
       const auto &counts = m_hist.counts();
       const auto &frequencies = m_hist.frequencies();
       for (size_t j = 0; j < histSize; ++j)
-        if (counts[j] > histSize - 5)
+        if (counts[j] > floor)
           total += frequencies[j];
     }
   }

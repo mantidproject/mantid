@@ -3,26 +3,26 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <numeric>
 
 using namespace Mantid;
 using namespace API;
 using namespace DataHandling;
-using Mantid::Kernel::UnitFactory;
 using Mantid::Geometry::Instrument;
+using Mantid::Kernel::UnitFactory;
 
 static const double MASK_FLAG =
     -1e30; // values here need to match what is in the SaveSPE.h file

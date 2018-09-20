@@ -2,9 +2,9 @@
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 
 #include <QPainter>
+#include <qwt_double_interval.h>
 #include <qwt_plot.h>
 #include <qwt_scale_div.h>
-#include <qwt_double_interval.h>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -162,5 +162,5 @@ PeakViewColor PeakView::getBackgroundPeakViewColor() const {
 PeakViewColor PeakView::getForegroundPeakViewColor() const {
   return m_foregroundColor;
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

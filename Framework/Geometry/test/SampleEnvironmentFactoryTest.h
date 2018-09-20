@@ -1,14 +1,14 @@
 #ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORYTEST_H_
 #define MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <boost/make_shared.hpp>
 
 using Mantid::Geometry::SampleEnvironmentFactory;
 using Mantid::Geometry::SampleEnvironmentSpecFileFinder;

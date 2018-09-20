@@ -1,21 +1,21 @@
 #ifndef GETEIV1TEST_H_
 #define GETEIV1TEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::MantidVecPtr;
 
 class GetEiV1Test : public CxxTest::TestSuite {
 public:

@@ -2,8 +2,8 @@
 #define MANTID_DATAOBJECTS_HISTOGRAM1D_H_
 
 #include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace DataObjects {

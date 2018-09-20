@@ -2,8 +2,8 @@
 #define MANTID_HISTOGRAMDATA_FREQUENCYVARIANCES_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VarianceVectorOf.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/VarianceVectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -50,8 +50,7 @@ public:
   using VarianceVectorOf<FrequencyVariances, HistogramE,
                          FrequencyStandardDeviations>::VarianceVectorOf;
   using VarianceVectorOf<FrequencyVariances, HistogramE,
-                         FrequencyStandardDeviations>::
-  operator=;
+                         FrequencyStandardDeviations>::operator=;
   /// Default constructor, creates a NULL object.
   FrequencyVariances() = default;
   // The copy and move constructor and assignment are not captured properly by
@@ -61,9 +60,9 @@ public:
   /// Move constructor.
   FrequencyVariances(FrequencyVariances &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  FrequencyVariances &operator=(const FrequencyVariances &)& = default;
+  FrequencyVariances &operator=(const FrequencyVariances &) & = default;
   /// Move assignment.
-  FrequencyVariances &operator=(FrequencyVariances &&)& = default;
+  FrequencyVariances &operator=(FrequencyVariances &&) & = default;
 
   FrequencyVariances(const CountVariances &counts, const BinEdges &edges);
   FrequencyVariances(CountVariances &&counts, const BinEdges &edges);

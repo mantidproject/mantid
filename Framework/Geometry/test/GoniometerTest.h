@@ -1,17 +1,17 @@
 #ifndef MANTID_TESTGONIOMETER__
 #define MANTID_TESTGONIOMETER__
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include <stdexcept>
-#include <string>
 #include "MantidKernel/Quat.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
+#include <string>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
-using Mantid::Kernel::Quat;
 using Mantid::Kernel::DblMatrix;
+using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class GoniometerTest : public CxxTest::TestSuite {
 public:

@@ -1,10 +1,10 @@
 #ifndef COMPONENT_ASSEMBLY_
 #define COMPONENT_ASSEMBLY_
+#include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include <string>
 #include <vector>
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/ICompAssembly.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)

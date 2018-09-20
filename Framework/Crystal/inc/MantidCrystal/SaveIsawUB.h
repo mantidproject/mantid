@@ -1,9 +1,9 @@
 #ifndef MANTID_CRYSTAL_SAVEISAWUB_H_
 #define MANTID_CRYSTAL_SAVEISAWUB_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -67,7 +67,7 @@ private:
   double getErrorVolume(const Geometry::OrientedLattice &lattice);
 };
 
-} // namespace Mantid
 } // namespace Crystal
+} // namespace Mantid
 
 #endif /* MANTID_CRYSTAL_LOADISAWUB_H_ */

@@ -72,8 +72,8 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping{"", "All", "Group", "2_4Grouping", "Column",
-                                    "bank"};
+  std::vector<std::string> grouping{"",       "All", "Group", "2_4Grouping",
+                                    "Column", "bank"};
   declareProperty("GroupDetectorsBy", "",
                   boost::make_shared<StringListValidator>(grouping),
                   "Only used if GroupNames is empty");
@@ -84,8 +84,9 @@ void CreateGroupingWorkspace::init() {
                   boost::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
-  declareProperty("ComponentName", "", "Specify the instrument component to "
-                                       "group into a fixed number of groups");
+  declareProperty("ComponentName", "",
+                  "Specify the instrument component to "
+                  "group into a fixed number of groups");
 
   declareProperty(make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -504,5 +505,5 @@ void CreateGroupingWorkspace::exec() {
   }
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

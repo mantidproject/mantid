@@ -1,10 +1,10 @@
 #ifndef MANTID_SINQ_POLDI2DFUNCTION_H_
 #define MANTID_SINQ_POLDI2DFUNCTION_H_
 
-#include "MantidKernel/System.h"
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 
 namespace Mantid {
@@ -65,7 +65,7 @@ private:
 
 using Poldi2DFunction_sptr = boost::shared_ptr<Poldi2DFunction>;
 
-} // namespace SINQ
+} // namespace Poldi
 } // namespace Mantid
 
 #endif /* MANTID_SINQ_POLDI2DFUNCTION_H_ */

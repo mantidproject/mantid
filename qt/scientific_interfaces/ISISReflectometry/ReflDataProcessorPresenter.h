@@ -1,10 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 
 #include "DllConfig.h"
 
@@ -175,6 +175,6 @@ private:
   std::map<int, size_t> m_numGroupSlicesMap;
   bool m_processingAsEventData;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /*MANTID_ISISREFLECTOMETRY_REFLDATAPROCESSORPRESENTER_H*/

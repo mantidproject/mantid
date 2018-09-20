@@ -49,14 +49,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTID_GEOMETRY_DLL Link {
   /**
-  * Constuctor
-  * @param entry :: Kernel::V3D point to start
-  * @param exit :: Kernel::V3D point to end track
-  * @param totalDistance :: Total distance from start of track
-  * @param obj :: A reference to the object that was intersected
-  * @param compID :: An optional component identifier for the physical object
-  * hit. (Default=NULL)
-  */
+   * Constuctor
+   * @param entry :: Kernel::V3D point to start
+   * @param exit :: Kernel::V3D point to end track
+   * @param totalDistance :: Total distance from start of track
+   * @param obj :: A reference to the object that was intersected
+   * @param compID :: An optional component identifier for the physical object
+   * hit. (Default=NULL)
+   */
   inline Link(const Kernel::V3D &entry, const Kernel::V3D &exit,
               const double totalDistance, const IObject &obj,
               const ComponentID compID = nullptr)
@@ -84,25 +84,25 @@ struct MANTID_GEOMETRY_DLL Link {
 };
 
 /**
-* Stores a point of intersection along a track. The component intersected
-* is linked using its ComponentID.
-*
-* Ordering for IntersectionPoint is special since we need that when dist is
-*close
-* that the +/- flag is taken into
-* account.
-*/
+ * Stores a point of intersection along a track. The component intersected
+ * is linked using its ComponentID.
+ *
+ * Ordering for IntersectionPoint is special since we need that when dist is
+ *close
+ * that the +/- flag is taken into
+ * account.
+ */
 struct IntersectionPoint {
   /**
-  * Constuctor
-  * @param flag :: Indicates the direction of travel of the track with respect
-  * to the object: +1 is entering, -1 is leaving.
-  * @param end :: The end point for this partial segment
-  * @param distFromStartOfTrack :: Total distance from start of track
-  * @param compID :: An optional unique ID marking the component intersected.
-  * (Default=NULL)
-  * @param obj :: A reference to the object that was intersected
-  */
+   * Constuctor
+   * @param flag :: Indicates the direction of travel of the track with respect
+   * to the object: +1 is entering, -1 is leaving.
+   * @param end :: The end point for this partial segment
+   * @param distFromStartOfTrack :: Total distance from start of track
+   * @param compID :: An optional unique ID marking the component intersected.
+   * (Default=NULL)
+   * @param obj :: A reference to the object that was intersected
+   */
   inline IntersectionPoint(const int flag, const Kernel::V3D &end,
                            const double distFromStartOfTrack,
                            const IObject &obj,
@@ -111,15 +111,15 @@ struct IntersectionPoint {
         object(&obj), componentID(compID) {}
 
   /**
-  * A IntersectionPoint is less-than another if either
-  * (a) the difference in distances is greater than the tolerance and this
-  *distance is less than the other or
-  * (b) the distance is less than the other and this point is defined as an exit
-  *point
-  *
-  * @param other :: IntersectionPoint object to compare
-  * @return True if the object is considered less than, otherwise false.
-  */
+   * A IntersectionPoint is less-than another if either
+   * (a) the difference in distances is greater than the tolerance and this
+   *distance is less than the other or
+   * (b) the distance is less than the other and this point is defined as an
+   *exit point
+   *
+   * @param other :: IntersectionPoint object to compare
+   * @return True if the object is considered less than, otherwise false.
+   */
   inline bool operator<(const IntersectionPoint &other) const {
     const double diff = fabs(distFromStart - other.distFromStart);
     return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart
@@ -137,11 +137,11 @@ struct IntersectionPoint {
 };
 
 /**
-* Defines a track as a start point and a direction. Intersections are
-* stored as ordered lists of links from the start point to the exit point.
-*
-* @author S. Ansell
-*/
+ * Defines a track as a start point and a direction. Intersections are
+ * stored as ordered lists of links from the start point to the exit point.
+ *
+ * @author S. Ansell
+ */
 class MANTID_GEOMETRY_DLL Track {
 public:
   using LType = std::list<Link>;

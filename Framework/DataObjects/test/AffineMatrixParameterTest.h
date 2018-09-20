@@ -1,9 +1,9 @@
 #ifndef AFFINE_MATRIX_PARAMETER_TEST_H
 #define AFFINE_MATRIX_PARAMETER_TEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid;

@@ -4,8 +4,8 @@
 //----------------------
 // Includes
 //----------------------
-#include "ui_MuonAnalysis.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "ui_MuonAnalysis.h"
 #include <QTableWidget>
 #include <functional>
 
@@ -147,8 +147,8 @@ private:
 
   QList<QString> m_unselectedFittings;
 };
-}
-}
-}
+} // namespace Muon
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISRESULTTABLETAB_H_

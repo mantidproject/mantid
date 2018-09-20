@@ -302,5 +302,5 @@ CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS) {
   return result;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

@@ -5,16 +5,16 @@
 
 #include "MantidSINQ/PoldiFitPeaks1D2.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidCurveFitting/Functions/FlatBackground.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Poldi::PoldiFitPeaks1D2;
 using namespace Mantid::Poldi;

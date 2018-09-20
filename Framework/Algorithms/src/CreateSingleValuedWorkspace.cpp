@@ -1,8 +1,8 @@
 #include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,5 +45,5 @@ Parallel::ExecutionMode CreateSingleValuedWorkspace::getParallelExecutionMode(
   return Parallel::ExecutionMode::Identical;
 }
 
-} // Algorithms
-} // Mantid
+} // namespace Algorithms
+} // namespace Mantid

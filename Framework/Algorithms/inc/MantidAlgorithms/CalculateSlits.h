@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CALCULATESLITS_H_
 #define MANTID_ALGORITHMS_CALCULATESLITS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {

@@ -1,17 +1,17 @@
 #ifndef MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATOR_H_
 #define MANTID_CURVEFITTING_FUNCTIONDOMAIN1DSPECTRUMCREATOR_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
 class Points;
 class BinEdges;
-}
+} // namespace HistogramData
 namespace CurveFitting {
 
 /** FunctionDomain1DSpectrumCreator :

@@ -14,9 +14,9 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::LinearGenerator;
 
 // Notice, the SaveCSV algorithm currently does not create

@@ -105,5 +105,5 @@ int SampleEnvironment::interceptSurfaces(Track &track) const {
 void SampleEnvironment::add(const IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

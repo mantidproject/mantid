@@ -1,6 +1,5 @@
 #include "MantidDataHandling/CompressEvents.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -10,8 +9,8 @@
 
 #include "tbb/parallel_for.h"
 
-#include <set>
 #include <numeric>
+#include <set>
 
 namespace Mantid {
 namespace DataHandling {

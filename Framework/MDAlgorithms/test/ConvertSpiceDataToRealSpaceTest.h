@@ -21,9 +21,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using Mantid::DataHandling::LoadInstrument;
 using Mantid::DataHandling::LoadSpiceAscii;
+using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

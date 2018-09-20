@@ -8,13 +8,13 @@
 #include "MantidTypes/Core/DateAndTime.h"
 #include <gmock/gmock.h>
 
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 #include "Kafka/private/Schema/ba57_run_info_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
-#include "Kafka/private/Schema/is84_isis_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
-GCC_DIAG_ON(conversion)
+#include "Kafka/private/Schema/is84_isis_events_generated.h"
+GNU_DIAG_ON("conversion")
 
 #include <ctime>
 
@@ -29,7 +29,7 @@ public:
       std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>;
   using IKafkaStreamSubscriber_ptr = Mantid::LiveData::IKafkaStreamSubscriber *;
 
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   // GMock cannot mock non-copyable return types so we resort to a small
   // adapter method. Users have to use EXPECT_CALL(subscribe_) instead
   MOCK_CONST_METHOD2(subscribe_, IKafkaStreamSubscriber_ptr(
@@ -50,7 +50,7 @@ public:
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
         this->subscribe_(s, offset, option));
   }
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 // -----------------------------------------------------------------------------
@@ -69,17 +69,20 @@ public:
     UNUSED_ARG(topic);
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -103,17 +106,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -135,7 +141,8 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
       builder.CreateVector(tof), builder.CreateVector(spec),
       FacilityData_ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
-                     RunState_RUNNING, protonCharge).Union());
+                     RunState_RUNNING, protonCharge)
+          .Union());
   FinishEventMessageBuffer(builder, messageFlatbuf);
 
   // Copy to provided buffer
@@ -182,10 +189,11 @@ void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(
-      builder, InfoTypes_RunStart,
-      CreateRunStart(builder, startTimestamp, runNumber,
-                     builder.CreateString(instName), nPeriods).Union());
+  auto runInfo =
+      CreateRunInfo(builder, InfoTypes_RunStart,
+                    CreateRunStart(builder, startTimestamp, runNumber,
+                                   builder.CreateString(instName), nPeriods)
+                        .Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -229,17 +237,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -281,16 +292,19 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {1})};
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -322,17 +336,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -358,21 +375,25 @@ public:
     fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName,
                                 m_nperiods);
 
+    m_runNumber++;
     UNUSED_ARG(offset);
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -384,6 +405,131 @@ private:
   std::string m_startTime = "2016-08-31T12:07:42";
   int32_t m_runNumber = 1000;
   std::string m_instName = "HRPDTEST";
+  int32_t m_nperiods = 1;
+};
+
+// -----------------------------------------------------------------------------
+// Fake run data stream with incrementing number of periods
+// -----------------------------------------------------------------------------
+class FakeRunInfoStreamSubscriberVaryingNPeriods
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(buffer);
+
+    fakeReceiveARunStartMessage(buffer, m_runNumber, m_startTime, m_instName,
+                                m_nperiods);
+
+    m_nperiods++;
+    m_runNumber++;
+    UNUSED_ARG(offset);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(topic);
+  }
+
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {
+        std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    std::unordered_map<std::string, std::vector<int64_t>> offsets;
+    return offsets;
+  }
+
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
+
+private:
+  std::string m_startTime = "2016-08-31T12:07:42";
+  int32_t m_runNumber = 1000;
+  std::string m_instName = "HRPDTEST";
+  int32_t m_nperiods = 1;
+};
+
+// -----------------------------------------------------------------------------
+// Varing period data stream with run and event messages
+// -----------------------------------------------------------------------------
+class FakeVariablePeriodSubscriber
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  explicit FakeVariablePeriodSubscriber(uint32_t startOffset)
+      : m_nextOffset(startOffset) {}
+  void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+                      std::string &topic) override {
+    assert(buffer);
+
+    // Return messages in this order:
+    // Run start (with 1 period)
+    // Event data
+    // Run start (with 2 periods)
+    // Run stop
+    // Event data
+    // Event data (data for 2nd period)
+    // Run stop
+
+    switch (m_nextOffset) {
+    case 0:
+      fakeReceiveARunStartMessage(buffer, 1000, m_startTime, m_instName,
+                                  m_nperiods);
+      break;
+    case 2:
+      fakeReceiveARunStartMessage(buffer, 1001, m_startTime, m_instName, 2);
+      break;
+    case 3:
+      fakeReceiveARunStopMessage(buffer, m_stopTime);
+      break;
+    case 5:
+      fakeReceiveAnISISEventMessage(buffer, 1);
+      break;
+    case 6:
+      fakeReceiveARunStopMessage(buffer, m_stopTime);
+      break;
+    default:
+      fakeReceiveAnISISEventMessage(buffer, 0);
+    }
+    topic = "topic_name";
+    offset = m_nextOffset;
+    partition = 0;
+    m_nextOffset++;
+  }
+
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getOffsetsForTimestamp(int64_t timestamp) override {
+    UNUSED_ARG(timestamp);
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
+  }
+
+  std::unordered_map<std::string, std::vector<int64_t>>
+  getCurrentOffsets() override {
+    return {std::pair<std::string, std::vector<int64_t>>(m_topicName, {2})};
+  }
+
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
+
+private:
+  const std::string m_topicName = "topic_name";
+  uint32_t m_nextOffset;
+  std::string m_startTime = "2016-08-31T12:07:42";
+  std::string m_stopTime = "2016-08-31T12:07:52";
+  const std::string m_instName = "HRPDTEST";
   int32_t m_nperiods = 1;
 };
 
@@ -429,19 +575,20 @@ public:
     partition = 0;
     m_nextOffset++;
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
-    // + 1 because rdkafka::offsetsForTimes returns the first offset _after_ the
-    // given timestamp
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
-                                                         {m_stopOffset + 1})};
+                                                         {m_stopOffset})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     return {std::pair<std::string, std::vector<int64_t>>(m_topicName,
                                                          {m_nextOffset - 1})};
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);
@@ -486,17 +633,20 @@ public:
     UNUSED_ARG(partition);
     UNUSED_ARG(topic);
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override {
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+
   std::unordered_map<std::string, std::vector<int64_t>>
   getCurrentOffsets() override {
     std::unordered_map<std::string, std::vector<int64_t>> offsets;
     return offsets;
   }
+
   void seek(const std::string &topic, uint32_t partition,
             int64_t offset) override {
     UNUSED_ARG(topic);

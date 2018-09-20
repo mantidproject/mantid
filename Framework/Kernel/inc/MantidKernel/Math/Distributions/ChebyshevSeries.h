@@ -37,7 +37,7 @@ namespace Kernel {
  * \f$p_n(x) = \Sigma_{i=1}^{n}c_iT_i\f$
  * The evaluation is implemented using the reccurrence relations
  *   http://mathworld.wolfram.com/ClenshawRecurrenceFormula.html
-*/
+ */
 class MANTID_KERNEL_DLL ChebyshevSeries {
 public:
   ChebyshevSeries(const size_t degree);

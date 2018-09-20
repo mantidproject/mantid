@@ -1,13 +1,13 @@
 #ifndef DELETETABLEROWSTEST_H_
 #define DELETETABLEROWSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/DeleteTableRows.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/DeleteTableRows.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

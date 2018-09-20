@@ -1,9 +1,9 @@
 #ifndef MANTID_GEOMETRY_CONVENTIONAL_CELL_H_
 #define MANTID_GEOMETRY_CONVENTIONAL_CELL_H_
 
+#include "MantidGeometry/Crystal/ReducedCell.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidGeometry/Crystal/ReducedCell.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -97,7 +97,7 @@ private:
   Kernel::DblMatrix hkl_tran;
 };
 
-} // namespace Mantid
 } // namespace Geometry
+} // namespace Mantid
 
 #endif /* MANTID_GEOMETRY_CONVENTIONAL_CELL_H_ */

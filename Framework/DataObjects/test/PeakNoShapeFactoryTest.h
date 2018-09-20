@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/PeakNoShapeFactory.h"
 #include "MantidDataObjects/NoShape.h"
+#include "MantidDataObjects/PeakNoShapeFactory.h"
 
 using namespace Mantid::DataObjects;
 

@@ -1,6 +1,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include <boost/python/class.hpp>
 #include "MantidPythonInterface/kernel/GetPointer.h"
+#include <boost/python/class.hpp>
 
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 

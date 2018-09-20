@@ -5,8 +5,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <fstream>
 #include <cmath>
+#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -167,5 +167,5 @@ void FindDetectorsOutsideLimits::exec() {
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
 }
-}
-}
+} // namespace Algorithms
+} // namespace Mantid

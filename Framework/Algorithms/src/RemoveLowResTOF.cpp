@@ -69,9 +69,10 @@ void RemoveLowResTOF::init() {
   declareProperty("ReferenceDIFC", Mantid::EMPTY_DBL(), validator,
                   "The DIFC value for the reference");
 
-  declareProperty("K", 3.22, validator, "Some arbitrary number whose default "
-                                        "is 3.22 for reasons that I don't "
-                                        "understand");
+  declareProperty("K", 3.22, validator,
+                  "Some arbitrary number whose default "
+                  "is 3.22 for reasons that I don't "
+                  "understand");
 
   declareProperty("Tmin", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). "
@@ -144,7 +145,7 @@ void RemoveLowResTOF::exec() {
 }
 
 /** Remove low resolution TOF from an EventWorkspace
-  */
+ */
 void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = getProperty("OutputWorkspace");
@@ -295,5 +296,5 @@ void RemoveLowResTOF::getTminData(const bool isEvent) {
     throw std::runtime_error("Cannot have minimum time less than zero");
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

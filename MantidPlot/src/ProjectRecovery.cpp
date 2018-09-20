@@ -7,6 +7,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
@@ -16,8 +18,10 @@
 #include "boost/range/algorithm_ext/erase.hpp"
 
 #include "Poco/DirectoryIterator.h"
+#include "Poco/Environment.h"
 #include "Poco/NObserver.h"
 #include "Poco/Path.h"
+#include "Poco/Process.h"
 
 #include <QMessageBox>
 #include <QMetaObject>
@@ -39,31 +43,20 @@ Mantid::Kernel::Logger g_log("ProjectRecovery");
 // Config helper methods
 template <typename T>
 boost::optional<T> getConfigValue(const std::string &key) {
-  T returnedValue;
-
-  int valueIsGood =
-      Mantid::Kernel::ConfigService::Instance().getValue<T>(key, returnedValue);
-
-  if (valueIsGood != 1) {
-    return boost::optional<T>{};
-  }
-
-  return boost::optional<T>{returnedValue};
+  return Mantid::Kernel::ConfigService::Instance().getValue<T>(key);
 }
 
 boost::optional<bool> getConfigBool(const std::string &key) {
-  auto returnedValue = getConfigValue<std::string>(key);
-  if (!returnedValue.is_initialized()) {
-    return boost::optional<bool>{};
-  }
-
-  return returnedValue->find("true") != std::string::npos;
+  return Mantid::Kernel::ConfigService::Instance().getValue<bool>(key);
 }
 
 /// Returns a string to the current top level recovery folder
 std::string getRecoveryFolder() {
-  static std::string recoverFolder =
-      Mantid::Kernel::ConfigService::Instance().getAppDataDir() + "/recovery/";
+  static std::string appData =
+      Mantid::Kernel::ConfigService::Instance().getAppDataDir();
+  static std::string hostname = Poco::Environment::nodeName();
+
+  static std::string recoverFolder = appData + "/recovery/" + hostname + '/';
   return recoverFolder;
 }
 
@@ -105,8 +98,7 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
   if (!recoveryPath.tryParse(recoveryFolderPath) ||
       !Poco::File(recoveryPath).exists()) {
     // Folder may not exist yet
-    g_log.debug("Project Saving: Failed to get working folder whilst deleting "
-                "checkpoints");
+    g_log.debug("Project Saving: Working folder does not exist");
     return {};
   }
 
@@ -132,13 +124,6 @@ getRecoveryFolderCheckpoints(const std::string &recoveryFolderPath) {
             });
 
   return folderPaths;
-}
-
-std::string removeInvalidFilenameChars(std::string s) {
-  // NTFS is most restrictive, so blacklist on this
-  std::string blacklistChars{":*?<>|/\"\\"};
-  boost::remove_erase_if(s, boost::is_any_of(blacklistChars));
-  return s;
 }
 
 const std::string OUTPUT_PROJ_NAME = "recovery.mantid";
@@ -178,29 +163,43 @@ ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
 /// Destructor which also stops any background threads currently in progress
 ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
 
-bool ProjectRecovery::attemptRecovery() {
+void ProjectRecovery::attemptRecovery() {
   QString recoveryMsg = QObject::tr(
       "Mantid did not close correctly and a recovery"
       " checkpoint has been found. Would you like to attempt recovery?");
 
   int userChoice = QMessageBox::information(
       m_windowPtr, QObject::tr("Project Recovery"), recoveryMsg,
-      QObject::tr("Open in script editor"), QObject::tr("No"), 0, 1);
+      QObject::tr("Yes"), QObject::tr("No"),
+      QObject::tr("Only open script in editor"), 0, 1);
 
   if (userChoice == 1) {
     // User selected no
-    return true;
+    this->startProjectSaving();
+    return;
   }
 
   const auto checkpointPaths =
       getRecoveryFolderCheckpoints(getRecoveryFolder());
   auto &mostRecentCheckpoint = checkpointPaths.back();
 
-  // TODO automated recovery
-  switch (userChoice) {
-  case 0:
-    return openInEditor(mostRecentCheckpoint);
-  default:
+  auto destFilename =
+      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
+  destFilename.append("ordered_recovery.py");
+
+  if (userChoice == 0) {
+    // We have to spin up a new thread so the GUI can continue painting whilst
+    // we exec
+    openInEditor(mostRecentCheckpoint, destFilename);
+    std::thread recoveryThread(
+        [=] { loadRecoveryCheckpoint(mostRecentCheckpoint); });
+    recoveryThread.detach();
+  } else if (userChoice == 2) {
+    openInEditor(mostRecentCheckpoint, destFilename);
+    // Restart project recovery as we stay synchronous
+    clearAllCheckpoints();
+    startProjectSaving();
+  } else {
     throw std::runtime_error("Unknown choice in ProjectRecovery");
   }
 }
@@ -320,11 +319,71 @@ void ProjectRecovery::stopProjectSaving() {
   }
 }
 
-bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
-  auto destFilename =
-      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  destFilename.append("ordered_recovery.py");
-  compileRecoveryScript(inputFolder, destFilename);
+/**
+ * Asynchronously loads a recovery checkpoint by opening
+ * a scripting window to the ordered workspace
+ * history file, then execute it. When this finishes the
+ * project loading mechanism is invoked in the main GUI thread
+ * to recreate all Qt objects / widgets
+ *
+ * @param recoveryFolder : The checkpoint folder
+ */
+void ProjectRecovery::loadRecoveryCheckpoint(const Poco::Path &recoveryFolder) {
+  ScriptingWindow *scriptWindow = m_windowPtr->getScriptWindowHandle();
+  if (!scriptWindow) {
+    throw std::runtime_error("Could not get handle to scripting window");
+  }
+
+  // Ensure the window repaints so it doesn't appear frozen before exec
+  scriptWindow->executeCurrentTab(Script::ExecutionMode::Serialised);
+  if (scriptWindow->getSynchronousErrorFlag()) {
+    // We failed to run the whole script
+    // Note: We must NOT throw from the method for excepted failures,
+    // since doing so will cause the application to terminate from a uncaught
+    // exception
+    g_log.error("Project recovery script did not finish. Your work has been "
+                "partially recovered.");
+    this->clearAllCheckpoints();
+    this->startProjectSaving();
+    return;
+  }
+  g_log.notice("Re-opening GUIs");
+
+  auto projectFile = Poco::Path(recoveryFolder).append(OUTPUT_PROJ_NAME);
+
+  bool loadCompleted = false;
+  if (!QMetaObject::invokeMethod(
+          m_windowPtr, "loadProjectRecovery", Qt::BlockingQueuedConnection,
+          Q_RETURN_ARG(bool, loadCompleted),
+          Q_ARG(const std::string, projectFile.toString()))) {
+    this->startProjectSaving();
+    throw std::runtime_error(
+        "Project Recovery: Failed to load project windows - Qt binding failed");
+  }
+
+  if (!loadCompleted) {
+    g_log.warning("Loading failed to recovery everything completely");
+    this->startProjectSaving();
+    return;
+  }
+  g_log.notice("Project Recovery finished");
+
+  // Restart project recovery when the async part finishes
+  clearAllCheckpoints();
+  startProjectSaving();
+} // namespace MantidQt
+
+/**
+ * Compiles the project recovery script from a given checkpoint
+ * folder and opens this in the script editor
+ *
+ * @param inputFolder : The folder containing the checkpoint to recover
+ * @param historyDest : Where to save the ordered history
+ * @throws If a handle to the scripting window cannot be obtained
+ */
+void ProjectRecovery::openInEditor(const Poco::Path &inputFolder,
+                                   const Poco::Path &historyDest) {
+  compileRecoveryScript(inputFolder, historyDest);
 
   // Force application window to create the script window first
   const bool forceVisible = true;
@@ -335,8 +394,8 @@ bool ProjectRecovery::openInEditor(const Poco::Path &inputFolder) {
     throw std::runtime_error("Could not get handle to scripting window");
   }
 
-  scriptWindow->open(QString::fromStdString(destFilename.toString()));
-  return true;
+  startProjectSaving();
+  scriptWindow->open(QString::fromStdString(historyDest.toString()));
 }
 
 /// Top level thread wrapper which catches all exceptions to gracefully handle
@@ -375,43 +434,29 @@ void ProjectRecovery::projectSavingThread() {
         return;
       }
     }
-
-    // "Timeout" - Save out again
-    const auto &ads = Mantid::API::AnalysisDataService::Instance();
-    if (ads.size() == 0) {
-      g_log.debug("Nothing to save");
-      continue;
-    }
-
-    g_log.debug("Project Recovery: Saving started");
-    const auto basePath = getOutputPath();
-
-    Poco::File(basePath).createDirectories();
-    auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
-
-    saveWsHistories(basePath);
-    saveOpenWindows(projectFile.toString());
-
-    // Purge any excessive folders
-    deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
-    g_log.debug("Project Recovery: Saving finished");
+    this->saveAll();
   }
 }
-
 /**
  * Saves open all open windows using the main GUI thread
  *
  * @param projectDestFile :: The full path to write to
  * @throws If saving fails in the main GUI thread
  */
-void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile) {
+void ProjectRecovery::saveOpenWindows(const std::string &projectDestFile,
+                                      bool autoSave) {
   bool saveCompleted = false;
-  if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
-                                 Qt::BlockingQueuedConnection,
-                                 Q_RETURN_ARG(bool, saveCompleted),
-                                 Q_ARG(const std::string, projectDestFile))) {
-    throw std::runtime_error(
-        "Project Recovery: Failed to save project windows - Qt binding failed");
+  if (autoSave) {
+    if (!QMetaObject::invokeMethod(m_windowPtr, "saveProjectRecovery",
+                                   Qt::BlockingQueuedConnection,
+                                   Q_RETURN_ARG(bool, saveCompleted),
+                                   Q_ARG(const std::string, projectDestFile))) {
+      throw std::runtime_error("Project Recovery: Failed to save project "
+                               "windows - Qt binding failed");
+    }
+  } else {
+    // Only use this if it is called from the python interface/error reporter
+    saveCompleted = m_windowPtr->saveProjectRecovery(projectDestFile);
   }
 
   if (!saveCompleted) {
@@ -430,7 +475,8 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   // Hold a copy to the shared pointers so they do not get deleted under us
-  const auto wsHandles = ads.getObjects();
+  std::vector<boost::shared_ptr<Mantid::API::Workspace>> wsHandles =
+      ads.getObjects(Mantid::Kernel::DataServiceHidden::Include);
 
   if (wsHandles.empty()) {
     return;
@@ -445,9 +491,8 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
   alg->setChild(true);
   alg->setLogging(false);
 
-  for (const auto &ws : wsHandles) {
-    std::string filename = removeInvalidFilenameChars(ws->getName());
-    filename.append(".py");
+  for (auto i = 0u; i < wsHandles.size(); ++i) {
+    std::string filename = std::to_string(i) + ".py";
 
     Poco::Path destFilename = historyDestFolder;
     destFilename.append(filename);
@@ -455,12 +500,40 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
     alg->initialize();
     alg->setLogging(false);
     alg->setProperty("AppendTimestamp", true);
-    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace", wsHandles[i]);
     alg->setPropertyValue("Filename", destFilename.toString());
     alg->setPropertyValue("StartTimestamp", startTime);
+    alg->setProperty("IgnoreTheseAlgs", m_algsToIgnore);
 
     alg->execute();
   }
+}
+
+/**
+ * @brief A function that brings the two seperate save methods together
+ * This won't run if it is locked by the background thread but then it saving
+ * Anyway so thats no issue.
+ */
+void ProjectRecovery::saveAll(bool autoSave) {
+  // "Timeout" - Save out again
+  const auto &ads = Mantid::API::AnalysisDataService::Instance();
+  if (ads.size() == 0) {
+    g_log.debug("Nothing to save");
+    return;
+  }
+
+  g_log.debug("Project Recovery: Saving started");
+
+  const auto basePath = getOutputPath();
+  Poco::File(basePath).createDirectories();
+
+  saveWsHistories(basePath);
+  auto projectFile = Poco::Path(basePath).append(OUTPUT_PROJ_NAME);
+  saveOpenWindows(projectFile.toString(), autoSave);
+
+  // Purge any excessive folders
+  deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
+  g_log.debug("Project Recovery: Saving finished");
 }
 
 } // namespace MantidQt

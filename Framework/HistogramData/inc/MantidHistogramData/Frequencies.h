@@ -72,9 +72,9 @@ public:
   /// Move constructor.
   Frequencies(Frequencies &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  Frequencies &operator=(const Frequencies &)& = default;
+  Frequencies &operator=(const Frequencies &) & = default;
   /// Move assignment.
-  Frequencies &operator=(Frequencies &&)& = default;
+  Frequencies &operator=(Frequencies &&) & = default;
 
   Frequencies(const Counts &counts, const BinEdges &edges);
   Frequencies(Counts &&counts, const BinEdges &edges);

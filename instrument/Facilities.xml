@@ -556,9 +556,8 @@
 	<technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
     <livedata>
-      <connection name="event" address="128.219.164.132:9000" listener="TOPAZLiveEventDataListener" />
+      <connection name="event" address="bl12-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
     </livedata>
-    <!-- Act like we're ISawEV talking to event_catcher -->
    </instrument>
 
   <instrument name="HYSPEC" shortname="HYS" beamline="14B">
@@ -778,7 +777,8 @@
 
 </facility>
 
-<facility name="SmuS" FileExtensions=".nxs,.xml">
+<!-- PSI Facility (Switzerland) -->
+<facility name="SmuS" FileExtensions=".nxs,.xml,.bin">
   <timezone>Europe/Zurich</timezone>
 
   <instrument name="GPD">
@@ -791,6 +791,17 @@
     <technique>Muon spectroscopy</technique>
   </instrument>
 
+  <instrument name="DOLLY">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+
+  <instrument name="LEM">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+
+  <instrument name="LTF">
+    <technique>Muon spectroscopy</technique>
+  </instrument>
 </facility>
 
 <!--  Reactor Orphee (France) -->
@@ -808,6 +819,14 @@
  <timezone>Europe/Berlin</timezone>
 
   <instrument name="DNS">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <technique>Neutron Diffraction</technique>
+    <technique>Single Crystal Diffraction</technique>
+  </instrument>
+
+  <instrument name="DNS-PSD">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>

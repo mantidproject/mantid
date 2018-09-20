@@ -1,15 +1,15 @@
 #ifndef MANTID_TESTDETECTOR__
 #define MANTID_TESTDETECTOR__
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 class DetectorTest : public CxxTest::TestSuite {
 public:

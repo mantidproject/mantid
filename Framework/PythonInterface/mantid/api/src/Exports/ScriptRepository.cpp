@@ -4,9 +4,9 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
-#include <boost/python/tuple.hpp>
 #include <boost/python/docstring_options.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/tuple.hpp>
 
 using namespace Mantid::API;
 using namespace boost::python;
@@ -75,7 +75,7 @@ PyObject *getDescription(ScriptRepository &self, const std::string &path) {
 }
 
 /** @endcond */
-}
+} // namespace
 
 void export_ScriptRepository() {
 

@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
-using Mantid::API::SpectrumDetectorMapping;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::SpectrumDetectorMapping;
 
 class SpectrumDetectorMappingTest : public CxxTest::TestSuite {
 public:

@@ -2,17 +2,17 @@
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
-#include <QScrollArea>
+#include <QAction>
+#include <QActionGroup>
+#include <QApplication>
 #include <QGridLayout>
-#include <QVBoxLayout>
+#include <QMenu>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
-#include <QMenu>
-#include <QAction>
+#include <QScrollArea>
 #include <QSignalMapper>
-#include <QActionGroup>
-#include <QApplication>
+#include <QVBoxLayout>
 
 #include <algorithm>
 
@@ -200,7 +200,7 @@ InnerWidget *getInnerWidget(QWidget *w) {
         "Inner widget of TiledWindow is supposed to be an InnerWidget");
   return innerWidget;
 }
-}
+} // namespace
 
 /**
  * Constructor.

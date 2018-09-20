@@ -1,9 +1,9 @@
 /******************************************************************************
  * Python module wrapper for the WorkspaceCreationHelper methods
  ******************************************************************************/
-#include <boost/python/docstring_options.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <boost/python/docstring_options.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -22,14 +22,10 @@ using namespace Mantid::DataObjects::MDEventsTestHelper;
 using namespace Mantid::PythonInterface::Policies;
 using namespace WorkspaceCreationHelper;
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads,
                                 create2DWorkspaceWithFullInstrument, 2, 4)
 
@@ -39,10 +35,8 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads,
 BOOST_PYTHON_FUNCTION_OVERLOADS(
     create2DWorkspaceWithRectangularInstrument_overloads,
     create2DWorkspaceWithRectangularInstrument, 3, 3)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 
 BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   using namespace boost::python;
@@ -68,7 +62,7 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
   //=================================== Event Workspaces
   //===================================
 
-  def("createEventWorkspace", (EventWorkspace_sptr (*)())createEventWorkspace,
+  def("createEventWorkspace", (EventWorkspace_sptr(*)())createEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
   def("createEventWorkspace2", &createEventWorkspace2,
       return_value_policy<AsType<Workspace_sptr>>());
@@ -81,15 +75,15 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper) {
           createPeaksWorkspace),
       return_value_policy<AsType<Workspace_sptr>>());
   def("createPeaksWorkspace",
-      (PeaksWorkspace_sptr (*)(const int, const bool))createPeaksWorkspace,
+      (PeaksWorkspace_sptr(*)(const int, const bool))createPeaksWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== MD Workspaces
   //===================================
 
   // Typedef for function pointer to disabiguate references
-  using Signature1_MDHisto = MDHistoWorkspace_sptr (
-      *)(double, size_t, size_t, Mantid::coord_t, double, std::string, double);
+  using Signature1_MDHisto = MDHistoWorkspace_sptr (*)(
+      double, size_t, size_t, Mantid::coord_t, double, std::string, double);
 
   def("makeFakeMDHistoWorkspace", (Signature1_MDHisto)&makeFakeMDHistoWorkspace,
       makeFakeMDHistoWorkspace_overloads()

@@ -415,5 +415,5 @@ LoadNXSPE::createCuboid(double dx, double dy, double dz) {
   return retVal;
 }
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid

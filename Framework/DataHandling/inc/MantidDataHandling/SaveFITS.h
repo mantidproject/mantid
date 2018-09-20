@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_SAVEFITS_H_
 #define MANTID_DATAHANDLING_SAVEFITS_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace DataHandling {

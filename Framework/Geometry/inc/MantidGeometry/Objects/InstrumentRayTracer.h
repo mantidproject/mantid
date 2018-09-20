@@ -3,8 +3,8 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Track.h"
 #include <boost/unordered_map.hpp>
 #include <deque>
 #include <list>
@@ -80,7 +80,7 @@ private:
   /// Mutex to lock box cache
   mutable std::mutex m_mutex;
 };
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif // MANTID_GEOMETRY_INSTRUMENTRAYTRACER_H_

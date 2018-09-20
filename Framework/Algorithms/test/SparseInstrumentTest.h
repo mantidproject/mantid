@@ -3,14 +3,14 @@
 
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
-#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>

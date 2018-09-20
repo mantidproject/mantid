@@ -1,10 +1,10 @@
 #ifndef MANTID_DATAHANDLING_LOADSASSENATEST_H_
 #define MANTID_DATAHANDLING_LOADSASSENATEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadSassena.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadSassena.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 

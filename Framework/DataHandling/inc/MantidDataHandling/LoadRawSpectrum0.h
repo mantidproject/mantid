@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRawHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -104,6 +104,6 @@ private:
   /// number of time regime
   int64_t m_noTimeRegimes;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif

@@ -1,13 +1,13 @@
 #ifndef MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 #define MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H
 
-#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QStyledItemDelegate>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
-#include <boost/scoped_ptr.hpp>
+#include "MantidQtWidgets/Common/HintingLineEdit.h"
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -37,8 +37,11 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class HintingLineEditFactory : public QStyledItemDelegate {
 public:
-  HintingLineEditFactory(HintStrategy *hintStrategy)
-      : m_strategy(hintStrategy){};
+  HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate,
+                         std::unique_ptr<HintStrategy> hintStrategy,
+                         QObject *parent = nullptr)
+      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)),
+        m_cellPainterDelegate(cellPainterDelegate){};
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override {
@@ -53,18 +56,14 @@ public:
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override {
-    QStyledItemDelegate::paint(painter, option, index);
-
-    painter->save();
-    painter->setPen(QColor(Qt::black));
-    painter->drawRect(option.rect);
-    painter->restore();
+    m_cellPainterDelegate->paint(painter, option, index);
   }
 
 protected:
-  boost::scoped_ptr<HintStrategy> m_strategy;
+  std::unique_ptr<HintStrategy> m_strategy;
+  QAbstractItemDelegate *m_cellPainterDelegate;
 };
-}
-}
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTID_MANTIDWIDGETS_HINTINGLINEEDITFACTORY_H */

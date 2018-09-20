@@ -51,7 +51,7 @@ public:
   bool modifiesSettings() override { return false; }
   bool modifiesRunningProcesses() override { return true; }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPAUSECOMMAND_H*/

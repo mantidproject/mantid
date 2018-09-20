@@ -1,9 +1,9 @@
 #ifndef ARRAY_DATA_SOURCE_H
 #define ARRAY_DATA_SOURCE_H
 
-#include <cstddef>
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
+#include <cstddef>
 
 /**
     @class ArrayDataSource

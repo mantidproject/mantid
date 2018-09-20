@@ -29,5 +29,5 @@ void EnggDiffGSASFittingWorker::doRefinements() {
   }
 }
 
-} // CustomInterfaces
-} // MantidQt
+} // namespace CustomInterfaces
+} // namespace MantidQt

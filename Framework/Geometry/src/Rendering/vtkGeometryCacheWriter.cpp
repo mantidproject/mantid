@@ -5,8 +5,8 @@
 #include "MantidKernel/Logger.h"
 
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
 #include <Poco/File.h>
@@ -17,11 +17,11 @@
 #include <fstream>
 #include <sstream>
 
+using Poco::XML::AutoPtr;
+using Poco::XML::DOMWriter;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Text;
-using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
 using Poco::XML::XMLWriter;
 
 namespace Mantid {
@@ -29,7 +29,7 @@ namespace Geometry {
 namespace {
 /// static object
 Kernel::Logger g_log("vtkGeometryCacheWriter");
-}
+} // namespace
 
 /**
  * Constructor
@@ -172,5 +172,5 @@ void vtkGeometryCacheWriter::write() {
     g_log.error("Geometry Cache file writing exception");
   }
 }
-}
-}
+} // namespace Geometry
+} // namespace Mantid

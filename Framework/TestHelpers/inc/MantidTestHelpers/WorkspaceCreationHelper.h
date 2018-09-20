@@ -20,9 +20,9 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
 #include "MantidKernel/make_unique.h"
@@ -34,8 +34,8 @@ class PeaksWorkspace;
 namespace Kernel {
 class Logger;
 class V3D;
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 namespace WorkspaceCreationHelper {
 /// Create a Fibonacci series

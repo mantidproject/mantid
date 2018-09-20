@@ -1,15 +1,15 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterFactory.h"
+#include <boost/algorithm/string.hpp>
 #include <cstring>
 #include <nexus/NeXusFile.hpp>
-#include <boost/algorithm/string.hpp>
 
 #ifdef _WIN32
 #define strcasecmp _stricmp
@@ -19,8 +19,8 @@
 
 namespace Mantid {
 namespace Geometry {
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 namespace {
 // names of common parameter types
@@ -51,7 +51,7 @@ void checkIsNotMaskingParameter(const std::string &name) {
     throw std::runtime_error("Masking data (\"masked\") cannot be stored in "
                              "ParameterMap. Use DetectorInfo instead");
 }
-}
+} // namespace
 /**
  * Default constructor
  */
@@ -59,7 +59,7 @@ ParameterMap::ParameterMap()
     : m_cacheLocMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
       m_cacheRotMap(Kernel::make_unique<
-          Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
+                    Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
@@ -79,8 +79,8 @@ ParameterMap::ParameterMap(const ParameterMap &other)
 ParameterMap::~ParameterMap() = default;
 
 /**
-* Return string to be inserted into the parameter map
-*/
+ * Return string to be inserted into the parameter map
+ */
 // Position
 const std::string &ParameterMap::pos() { return POS_PARAM_NAME; }
 
@@ -165,12 +165,12 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const {
 }
 
 /** Get the component description by name
-   *  @param compName :: The name of the component
-   *  @param name :: The name of the parameter
-   *  @return :: the description for the first parameter found and
-   *  having non-empty description,
-   *  or empty string if no description found.
-*/
+ *  @param compName :: The name of the component
+ *  @param name :: The name of the parameter
+ *  @return :: the description for the first parameter found and
+ *  having non-empty description,
+ *  or empty string if no description found.
+ */
 const std::string ParameterMap::getDescription(const std::string &compName,
                                                const std::string &name) const {
   pmap_cit it;
@@ -188,12 +188,12 @@ const std::string ParameterMap::getDescription(const std::string &compName,
   return result;
 }
 /** Get the component short description by name
-   *  @param compName :: The name of the component
-   *  @param name :: The name of the parameter
-   *  @return :: the short description for the first parameter
-   *  found and having non-empty description,
-   *  or empty string if no description found.
-*/
+ *  @param compName :: The name of the component
+ *  @param name :: The name of the parameter
+ *  @return :: the short description for the first parameter
+ *  found and having non-empty description,
+ *  or empty string if no description found.
+ */
 const std::string
 ParameterMap::getShortDescription(const std::string &compName,
                                   const std::string &name) const {
@@ -259,8 +259,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
     if (!match) {
       // output some information that helps with understanding the mismatch
       strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component "
-                   "with name: " << fullName
-                << ". Parameter name is: " << (*param).name()
+                   "with name: "
+                << fullName << ". Parameter name is: " << (*param).name()
                 << " and value: " << (*param).asString() << '\n';
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
@@ -355,15 +355,15 @@ void ParameterMap::add(const std::string &type, const IComponent *comp,
 }
 
 /** Method for adding/replacing a parameter providing shared pointer to it.
-* @param comp :: A pointer to the component that this parameter is attached to
-* @param par  :: a shared pointer to existing parameter. The ParameterMap stores
-* share pointer and increment ref count to it
-* @param pDescription :: a pointer (may be NULL) to a string, containing
-* parameter's
-* description. If provided, the contents of the string is copied to the
-* parameters
-* memory
-*/
+ * @param comp :: A pointer to the component that this parameter is attached to
+ * @param par  :: a shared pointer to existing parameter. The ParameterMap
+ * stores share pointer and increment ref count to it
+ * @param pDescription :: a pointer (may be NULL) to a string, containing
+ * parameter's
+ * description. If provided, the contents of the string is copied to the
+ * parameters
+ * memory
+ */
 void ParameterMap::add(const IComponent *comp,
                        const boost::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
@@ -409,7 +409,7 @@ void ParameterMap::add(const IComponent *comp,
  * description. If provided, the contents of the string is copied to the
  * parameters
  * memory
-  */
+ */
 void ParameterMap::addPositionCoordinate(
     const IComponent *comp, const std::string &name, const double value,
     const std::string *const pDescription) {
@@ -433,7 +433,8 @@ void ParameterMap::addPositionCoordinate(
     position.setZ(value);
   else {
     g_log.warning() << "addPositionCoordinate() called with unrecognized "
-                       "coordinate symbol: " << name;
+                       "coordinate symbol: "
+                    << name;
     // set description if one is provided
     if (pDescription) {
       param->setDescription(*pDescription);
@@ -458,7 +459,7 @@ void ParameterMap::addPositionCoordinate(
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addRotationParam(const IComponent *comp,
                                     const std::string &name, const double deg,
                                     const std::string *const pDescription) {
@@ -520,7 +521,7 @@ void ParameterMap::addRotationParam(const IComponent *comp,
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
                              const std::string &value,
                              const std::string *const pDescription) {
@@ -537,7 +538,7 @@ void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
                              double value,
                              const std::string *const pDescription) {
@@ -554,7 +555,7 @@ void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
  * description. If provided, the contents of the string is copied to the
  * parameters
  * memory
-*/
+ */
 void ParameterMap::addInt(const IComponent *comp, const std::string &name,
                           const std::string &value,
                           const std::string *const pDescription) {
@@ -603,7 +604,7 @@ void ParameterMap::addBool(const IComponent *comp, const std::string &name,
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addBool(const IComponent *comp, const std::string &name,
                            bool value, const std::string *const pDescription) {
   add(pBool(), comp, name, value, pDescription);
@@ -646,7 +647,7 @@ void ParameterMap::forceUnsafeSetMasked(const IComponent *comp, bool value) {
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addString(const IComponent *comp, const std::string &name,
                              const std::string &value,
                              const std::string *const pDescription) {
@@ -681,7 +682,7 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
                           const V3D &value,
                           const std::string *const pDescription) {
@@ -699,7 +700,7 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
  * description. If provided, the contents of the string is copied to the
  * parameter's
  * memory
-*/
+ */
 void ParameterMap::addQuat(const IComponent *comp, const std::string &name,
                            const Quat &value,
                            const std::string *const pDescription) {
@@ -813,7 +814,7 @@ boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
  * @param type :: An optional type string. If empty, any type is returned
  * @returns The iterator parameter of the given type if it exists or a NULL
  * shared pointer if not
-*/
+ */
 component_map_it ParameterMap::positionOf(const IComponent *comp,
                                           const char *name, const char *type) {
   auto result = m_map.end();
@@ -844,7 +845,7 @@ component_map_it ParameterMap::positionOf(const IComponent *comp,
  * @param type :: An optional type string. If empty, any type is returned
  * @returns The iterator parameter of the given type if it exists or a NULL
  * shared pointer if not
-*/
+ */
 component_map_cit ParameterMap::positionOf(const IComponent *comp,
                                            const char *name,
                                            const char *type) const {
@@ -871,10 +872,10 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
 }
 
 /** Look for a parameter in the given component by the type of the parameter.
-* @param comp :: Component to which parameter is related
-* @param type :: Parameter type
-* @returns The typed parameter if it exists or a NULL shared pointer if not
-*/
+ * @param comp :: Component to which parameter is related
+ * @param type :: Parameter type
+ * @returns The typed parameter if it exists or a NULL shared pointer if not
+ */
 Parameter_sptr ParameterMap::getByType(const IComponent *comp,
                                        const std::string &type) const {
   Parameter_sptr result;
@@ -896,11 +897,11 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
 }
 
 /** Looks recursively upwards in the component tree for the first instance of a
-* component with a matching type.
-* @param comp :: The component to start the search with
-* @param type :: Parameter type
-* @returns the first matching parameter.
-*/
+ * component with a matching type.
+ * @param comp :: The component to start the search with
+ * @param type :: Parameter type
+ * @returns the first matching parameter.
+ */
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp,
                                                 const std::string &type) const {
   boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
@@ -1115,15 +1116,15 @@ void ParameterMap::saveNexus(::NeXus::File *file,
 }
 
 /** Returns a list of all the parameter files loaded
-* @returns a vector of the filenames
-*/
+ * @returns a vector of the filenames
+ */
 const std::vector<std::string> &ParameterMap::getParameterFilenames() const {
   return m_parameterFileNames;
 }
 ///
 /** adds a parameter filename that has been loaded
-* @param filename the filename to add
-*/
+ * @param filename the filename to add
+ */
 void ParameterMap::addParameterFilename(const std::string &filename) {
   m_parameterFileNames.push_back(filename);
 }

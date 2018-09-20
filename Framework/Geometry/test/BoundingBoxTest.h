@@ -1,11 +1,11 @@
 #ifndef BOUNDINGBOXTEST_H_
 #define BOUNDINGBOXTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include <float.h>
 
@@ -14,8 +14,8 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 
 /**
-* BoundingBox Unit test
-*/
+ * BoundingBox Unit test
+ */
 class BoundingBoxTest : public CxxTest::TestSuite {
 public:
   void test_That_Construction_With_Six_Valid_Points_Gives_A_BoundingBox() {

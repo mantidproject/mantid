@@ -135,8 +135,8 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
   for (size_t ix = 0; ix < nXbins; ix++) {
     for (size_t iy = 0; iy < nYbins; iy++) {
       workspace->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
-      workspace->getSpectrum(wi)
-          .setDetectorID(detid_t(1000000 + iy * 1000 + ix));
+      workspace->getSpectrum(wi).setDetectorID(
+          detid_t(1000000 + iy * 1000 + ix));
       wi++;
     }
   }

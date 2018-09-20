@@ -1,8 +1,8 @@
 #ifndef _vtkScaleWorkspace_h
 #define _vtkScaleWorkspace_h
-#include "vtkPointSetAlgorithm.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
+#include "vtkPointSetAlgorithm.h"
 #include <boost/scoped_ptr.hpp>
 
 // cppcheck-suppress class_X_Y

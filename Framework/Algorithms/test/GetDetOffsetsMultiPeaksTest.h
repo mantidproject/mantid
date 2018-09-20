@@ -1,15 +1,15 @@
 #ifndef GetDetOffsetsMultiPeaksTEST_H_
 #define GetDetOffsetsMultiPeaksTEST_H_
 
-#include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -94,7 +94,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test the feature to ... ...
-    */
+   */
   void testExecWithGroup() {
     // --------- Workspace with summed spectra -------
     MatrixWorkspace_sptr WS =
@@ -150,7 +150,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test the feature to import fit windows for each spectrum from table
    * workspace
-    */
+   */
   void testExecFitWindowTable() {
     // ---- (Re-)Create the simple workspace -------
     MatrixWorkspace_sptr WS =
@@ -221,7 +221,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test the feature to import fit windows with univeral spectrum from table
    * workspace
-    */
+   */
   void testExecFitWindowTableUniversal() {
     // ---- (Re-)Create the simple workspace -------
     MatrixWorkspace_sptr WS =

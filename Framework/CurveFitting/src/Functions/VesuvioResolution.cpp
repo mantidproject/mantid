@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
-#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -21,16 +21,16 @@ const char *MASS_NAME = "Mass";
 
 const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 ///@endcond
-}
+} // namespace
 
 // Register into factory
 DECLARE_FUNCTION(VesuvioResolution)
 
 /**
-* @param ws The workspace with attached instrument
-* @param index Index of the spectrum
-* @return DetectorParams structure containing the relevant parameters
-*/
+ * @param ws The workspace with attached instrument
+ * @param index Index of the spectrum
+ * @return DetectorParams structure containing the relevant parameters
+ */
 ResolutionParams VesuvioResolution::getResolutionParameters(
     const API::MatrixWorkspace_const_sptr &ws, const size_t index) {
   const auto &spectrumInfo = ws->spectrumInfo();

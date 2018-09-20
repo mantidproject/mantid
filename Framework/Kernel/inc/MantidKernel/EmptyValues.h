@@ -43,6 +43,6 @@ DLLExport int64_t EMPTY_INT64();
 
 /// Return what we consider to be an empty double
 DLLExport double EMPTY_DBL();
-}
+} // namespace Mantid
 
 #endif // MANTID_KERNEL_EMPTYVALUES_H_

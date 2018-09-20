@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
-#include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
+#include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

@@ -1,13 +1,13 @@
 #ifndef MANTID_TESTQUAT__
 #define MANTID_TESTQUAT__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include <ostream>
-#include <float.h>
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
+#include <float.h>
+#include <ostream>
 
 using namespace Mantid::Kernel;
 

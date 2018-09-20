@@ -514,11 +514,11 @@ class SetParserTest(unittest.TestCase):
                                                                                   detector_type=DetectorType.LAB)},
                           "SET centre / lAb 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.LAB)},
-                          "SET centre / hAb 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre / hAb 23 45": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
                                                                                   detector_type=DetectorType.HAB)},
-                          "SET centre /FRONT 23 45": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre /FRONT 23 45": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
                                                       detector_type=DetectorType.HAB)},
-                          "SET centre /FRONT 23 45 55 67": {SetId.centre: position_entry(pos1=23, pos2=45,
+                          "SET centre /FRONT 23 45 55 67": {SetId.centre_HAB: position_entry(pos1=23, pos2=45,
                                                             detector_type=DetectorType.HAB)},
                           }
 

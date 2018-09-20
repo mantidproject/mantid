@@ -1,13 +1,13 @@
 #ifndef MANTID_MDALGORITHMS_GREATERTHANMDTEST_H_
 #define MANTID_MDALGORITHMS_GREATERTHANMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/GreaterThanMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;

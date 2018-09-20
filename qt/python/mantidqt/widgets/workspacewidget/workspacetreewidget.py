@@ -21,11 +21,8 @@ from __future__ import (absolute_import, unicode_literals)
 # 3rd party imports
 
 # local imports
-from mantidqt.utils.qt import import_qtlib
-
-# Constants
-PLACEHOLDER_FORMAT = 'valid range: {}-{}'
+from mantidqt.utils.qt import import_qt
 
 
-WorkspaceTreeWidget = import_qtlib('_widgetscore', 'mantidqt.widgets.workspacewidget',
-                                   'WorkspaceTreeWidgetSimple')
+WorkspaceTreeWidget = import_qt('..._common', 'mantidqt.widgets.workspacewidget',
+                                'WorkspaceTreeWidgetSimple')

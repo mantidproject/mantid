@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADSPICEASCIITEST_H_
 #define MANTID_DATAHANDLING_LOADSPICEASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSpiceAscii.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"

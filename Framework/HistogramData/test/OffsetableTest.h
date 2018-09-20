@@ -9,11 +9,11 @@
 #include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/VectorOf.h"
 
+using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::detail::FixedLengthVector;
 using Mantid::HistogramData::detail::Iterable;
 using Mantid::HistogramData::detail::Offsetable;
 using Mantid::HistogramData::detail::VectorOf;
-using Mantid::HistogramData::HistogramX;
 
 class OffsetableTester : public VectorOf<OffsetableTester, HistogramX>,
                          public Iterable<OffsetableTester>,

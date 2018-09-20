@@ -1,8 +1,8 @@
 #ifndef MANTID_VATES_COMMON_H_
 #define MANTID_VATES_COMMON_H_
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 class vtkFieldData;
 
@@ -10,7 +10,7 @@ namespace Mantid {
 namespace Geometry {
 // Forward dec
 class IMDDimension;
-}
+} // namespace Geometry
 
 namespace VATES {
 /// Vector of IMDDimension shared pointers.
@@ -40,7 +40,7 @@ std::string convertAxesTitleToLatex(const std::string &toConvert);
 
 void setAxisLabel(const std::string &metadataLabel,
                   const std::string &labelString, vtkFieldData *fieldData);
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

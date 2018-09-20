@@ -1,8 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTTOOLSTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTTOOLSTAB_H_
 
-#include "MantidKernel/System.h"
 #include "IndirectTab.h"
+#include "MantidKernel/System.h"
 #include <QSettings>
 #include <QWidget>
 
@@ -62,6 +62,6 @@ protected:
   void runPythonScript(const QString &pyInput);
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif

@@ -1,5 +1,5 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
@@ -68,7 +68,7 @@ createMultipleFileProperty(const std::string &name,
   return createMultipleFilePropertyWithAction(
       name, FileProperty::FileAction::Load, extensions);
 }
-}
+} // namespace
 
 void export_MultipleFileProperty() {
   using BaseClass = PropertyWithValue<HeldType>;

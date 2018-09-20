@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/LegacyQwt/ColorBarWidget.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
-#include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 #include "MantidQtWidgets/Common/QScienceSpinBox.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include "MantidQtWidgets/LegacyQwt/PowerScaleEngine.h"
 #include <QKeyEvent>
 #include <QToolTip>
 #include <qwt_scale_engine.h>
@@ -96,14 +96,14 @@ void ColorBarWidget::setRenderMode(bool rendering) {
 }
 
 /** Change which CheckBoxes are displayed in the widget
-*
-*	Available choices:
-*	 ADD_AUTOSCALE_CURRENT_SLICE
-*	 ADD_AUTOSCALE_ON_LOAD
-*	 ADD_AUTOSCALE_BOTH
-*	 ADD_AUTOSCALE_NONE
-* @param strategy :: select which checkboxes are shown
-*/
+ *
+ *	Available choices:
+ *	 ADD_AUTOSCALE_CURRENT_SLICE
+ *	 ADD_AUTOSCALE_ON_LOAD
+ *	 ADD_AUTOSCALE_BOTH
+ *	 ADD_AUTOSCALE_NONE
+ * @param strategy :: select which checkboxes are shown
+ */
 void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
   switch (strategy) {
   case ADD_AUTOSCALE_CURRENT_SLICE:
@@ -486,5 +486,5 @@ std::string ColorBarWidget::saveToProject() const {
 
 ColorBarWidget::~ColorBarWidget() {}
 
-} // namespace MantidQt
 } // namespace MantidWidgets
+} // namespace MantidQt

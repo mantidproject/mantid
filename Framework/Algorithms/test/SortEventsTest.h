@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_SORTEVENTSTEST_H_
 #define MANTID_ALGORITHMS_SORTEVENTSTEST_H_
 
-#include "MantidAlgorithms/SortEvents.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/SortEvents.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

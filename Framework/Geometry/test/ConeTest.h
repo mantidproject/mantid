@@ -1,11 +1,11 @@
 #ifndef MANTID_CONETEST__
 #define MANTID_CONETEST__
 
-#include <cxxtest/TestSuite.h>
-#include <cmath>
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidKernel/V3D.h"
+#include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Geometry;

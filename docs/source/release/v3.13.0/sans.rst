@@ -5,16 +5,26 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+ILL
+---
+
 * :ref:`LoadILLSANS <algm-LoadILLSANS>` is upgraded to load the modern nexus files from instruments D11, D22 and D33 at the ILL.
+* :ref:`SANSMask <algm-SANSMask>` is extended to have a `MaskedWorkspace` property, to copy the mask from.
+
+SNS
+---
+
 * EQSANS is configured for live data
 
 ISIS SANS Interface
-----------------------------
+-------------------
+.. image::  ../../images/ISIS_SANS_release313.png
+   :align: right
+   :width: 800px
 
 New
 ###
 * A string of wavelength ranges can now be specified. A reduction is then done for each wavelength range.
-* :ref:`SANSMask <algm-SANSMask>` is extended to have a `MaskedWorkspace` property, to copy the mask from.
 
 Improvements
 ############
@@ -27,6 +37,7 @@ Improvements
 * Improved error messages in the new GUI to be more obvious and clearer.
 * Updated the naming of workspace groups in a sliced reduction.
 * Updated old backend to mask by detector ID rather than spectrum number, improving reliability.
+* NXcanSAS is now saved out with a .h5 extension so it can be read into SASView.
 
 Bugfixes
 ########
@@ -37,10 +48,12 @@ Bugfixes
 * Fixed a bug where save_format was not being specified if a user file was entered for a row.
 * Use gravity now defaulting to false. 
 * MASK/TIME and TIME/MASK now both work in new backend.
+* SET Centre/HAB command is now correctly parsed into a seperate variable to SET Centre. 
 
 Features Removed
 ################
 
 * Removed SaveNist as an option from both GUI's
+* The Q range option on the beam centre tab was producing erroneous results so has been removed until it can be improved and fixed.
 
 :ref:`Release 3.13.0 <v3.13.0>`

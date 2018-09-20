@@ -31,7 +31,7 @@ void addBankID(API::MatrixWorkspace_sptr ws, const size_t bankID) {
   addLogAlg->setPropertyValue("LogType", "Number");
   addLogAlg->execute();
 }
-}
+} // namespace
 
 class EnggDiffMultiRunFittingWidgetPresenterTest : public CxxTest::TestSuite {
 public:

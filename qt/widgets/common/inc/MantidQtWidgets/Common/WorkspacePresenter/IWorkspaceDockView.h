@@ -46,7 +46,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class IWorkspaceDockView {
 public:
   enum class SortDirection { Ascending, Descending };
-  enum class SortCriteria { ByName, ByLastModified };
+  enum class SortCriteria { ByName, ByLastModified, ByMemorySize };
   enum class SaveFileType { Nexus, ASCII, ASCIIv1 };
 
   virtual ~IWorkspaceDockView(){};

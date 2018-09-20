@@ -65,5 +65,5 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
     return currentSolver;
   }
 }
-} // end MDAlgorithms Namespace
-} // end Mantid Namespace
+} // namespace MDAlgorithms
+} // namespace Mantid

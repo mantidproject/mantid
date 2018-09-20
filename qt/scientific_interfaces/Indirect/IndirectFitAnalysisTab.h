@@ -113,8 +113,14 @@ protected:
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
 
+  void run() override;
   void plotResult(const QString &plotType);
-  void fillPlotTypeComboBox(QComboBox *comboBox);
+  void plotAll(Mantid::API::WorkspaceGroup_sptr workspaces);
+  void plotParameter(Mantid::API::WorkspaceGroup_sptr workspace,
+                     const std::string &parameter);
+  void plotAll(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotParameter(Mantid::API::MatrixWorkspace_sptr workspace,
+                     const std::string &parameter);
 
   void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -181,7 +187,6 @@ private:
   void loadSettings(const QSettings &settings) override;
   virtual void setupFitTab() = 0;
   bool validate() override;
-  void run() override;
 
   void connectDataAndPlotPresenters();
   void connectSpectrumAndPlotPresenters();

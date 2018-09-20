@@ -4,10 +4,10 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <QDialog>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/LogFilterGenerator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <QDialog>
 #include <memory>
 //----------------------------------
 // Forward declarations
@@ -77,8 +77,8 @@ protected slots:
   virtual void showLogStatistics();
   virtual void showLogStatisticsOfItem(
       QTreeWidgetItem *item,
-      const Mantid::API::LogFilterGenerator::FilterType
-          filter = Mantid::API::LogFilterGenerator::FilterType::None);
+      const Mantid::API::LogFilterGenerator::FilterType filter =
+          Mantid::API::LogFilterGenerator::FilterType::None);
 
   /// Context menu popup
   virtual void popupMenu(const QPoint &pos);
@@ -133,7 +133,7 @@ protected:
   QPushButton *buttonPlot, *buttonClose;
 
   /// Number of statistic values
-  static const std::size_t NUM_STATS = 7;
+  static const std::size_t NUM_STATS = 8;
 
   /// Testboxes with stats data
   QLineEdit *statValues[NUM_STATS];

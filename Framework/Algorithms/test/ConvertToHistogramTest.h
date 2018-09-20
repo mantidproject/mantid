@@ -1,8 +1,8 @@
 #ifndef CONVERTTOHISTOGRAMTEST_H_
 #define CONVERTTOHISTOGRAMTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ConvertToHistogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -12,11 +12,11 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::MantidVecPtr;
 using Mantid::HistogramData::HistogramDx;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
 using Mantid::Kernel::make_cow;
+using Mantid::MantidVecPtr;
 
 class ConvertToHistogramTest : public CxxTest::TestSuite {
 

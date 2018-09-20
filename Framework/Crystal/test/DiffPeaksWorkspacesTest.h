@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/DiffPeaksWorkspaces.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::DiffPeaksWorkspaces;
 

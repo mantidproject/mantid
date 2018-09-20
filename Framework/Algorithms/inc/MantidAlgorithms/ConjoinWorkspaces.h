@@ -4,15 +4,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/WorkspaceJoiners.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/WorkspaceJoiners.h"
 
 // Forward declarations
 namespace Mantid {
 namespace DataObjects {
 class EventWorkspace;
 }
-}
+} // namespace Mantid
 
 namespace Mantid {
 namespace Algorithms {
@@ -91,7 +91,7 @@ private:
   bool m_overlapChecked = false;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /* MANTID_ALGORITHMS_CONJOINWORKSPACES_H_ */

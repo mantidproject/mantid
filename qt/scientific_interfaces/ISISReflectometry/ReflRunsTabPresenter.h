@@ -3,6 +3,7 @@
 
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
@@ -20,7 +21,7 @@ class ProgressableView;
 namespace DataProcessor {
 class DataProcessorPresenter;
 }
-}
+} // namespace MantidWidgets
 
 namespace CustomInterfaces {
 
@@ -31,8 +32,8 @@ class IReflSearcher;
 class ReflSearchModel;
 class ReflTransferStrategy;
 
-using MantidWidgets::ProgressableView;
 using MantidWidgets::DataProcessor::DataProcessorPresenter;
+using MantidWidgets::ProgressableView;
 
 /** @class ReflRunsTabPresenter
 
@@ -62,7 +63,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL ReflRunsTabPresenter
     : public IReflRunsTabPresenter,
-      public MantidWidgets::DataProcessor::DataProcessorMainPresenter {
+      public MantidWidgets::DataProcessor::DataProcessorMainPresenter,
+      public Mantid::API::AlgorithmObserver {
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
@@ -126,6 +128,8 @@ private:
   static const std::string MeasureTransferMethod;
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
+  /// The name to use for the live data workspace
+  Mantid::API::IAlgorithm_sptr m_monitorAlg;
 
   /// searching
   bool search();
@@ -167,7 +171,24 @@ private:
       const std::vector<TransferResults::COLUMN_MAP_TYPE> &invalidRuns);
   /// Get the data for a cell in the search results table as a string
   std::string searchModelData(const int row, const int column);
+  /// Start the live data monitor
+  void startMonitor();
+  void stopMonitor();
+  void startMonitorComplete();
+  std::string liveDataReductionAlgorithm();
+  std::string liveDataReductionOptions(const std::string &instrument);
+  Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
+
+  void handleError(const std::string &message, const std::exception &e);
+  void handleError(const std::string &message);
+
+  void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+  void errorHandle(const Mantid::API::IAlgorithm *alg,
+                   const std::string &what) override;
+  void updateViewWhenMonitorStarting();
+  void updateViewWhenMonitorStarted();
+  void updateViewWhenMonitorStopped();
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif /* MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H */

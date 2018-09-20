@@ -1,13 +1,17 @@
 #ifndef LOGINTEST_H_
 #define LOGINTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidICat/CatalogLogin.h"
 #include "ICatTestHelper.h"
+#include "MantidICat/CatalogLogin.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::ICat;
 class CatalogLoginTest : public CxxTest::TestSuite {
 public:
+  // This means the constructor isn't called when running other tests
+  static CatalogLoginTest *createSuite() { return new CatalogLoginTest(); }
+  static void destroySuite(CatalogLoginTest *suite) { delete suite; }
+
   /// Skip all unit tests if ICat server is down
   bool skipTests() override { return ICatTestHelper::skipTests(); }
 

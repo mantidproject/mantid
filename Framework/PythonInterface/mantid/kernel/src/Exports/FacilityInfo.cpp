@@ -45,9 +45,10 @@ void export_FacilityInfo() {
            arg("self"), return_value_policy<copy_const_reference>(),
            "Returns a list of instruments of this facility as defined in the "
            "Facilities.xml file")
-      .def("instruments", (std::vector<InstrumentInfo>(
-                              FacilityInfo::*)(const std::string &) const) &
-                              FacilityInfo::instruments,
+      .def("instruments",
+           (std::vector<InstrumentInfo>(FacilityInfo::*)(const std::string &)
+                const) &
+               FacilityInfo::instruments,
            (arg("self"), arg("technique")),
            "Returns a list of instruments of given technique")
       .def("instrument", &FacilityInfo::instrument,

@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/Functions/ProductLinearExp.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Functions/ProductFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -18,7 +18,7 @@ DECLARE_FUNCTION(ProductLinearExp)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 ProductLinearExp::ProductLinearExp() {
   declareParameter("A0", 1.0, "Coefficient for constant term");
   declareParameter("A1", 1.0, "Coefficient for linear term");

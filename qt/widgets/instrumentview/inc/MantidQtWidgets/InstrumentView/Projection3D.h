@@ -9,8 +9,8 @@
 #include <QGLWidget>
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -76,7 +76,7 @@ protected:
   Viewport m_viewport;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* PROJECTION3D_H_ */

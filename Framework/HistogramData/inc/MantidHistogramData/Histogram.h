@@ -90,8 +90,8 @@ public:
   // lvalue reference qualifier on the assignment operators.
   Histogram(const Histogram &) = default;
   Histogram(Histogram &&) = default;
-  Histogram &operator=(const Histogram &)& = default;
-  Histogram &operator=(Histogram &&)& = default;
+  Histogram &operator=(const Histogram &) & = default;
+  Histogram &operator=(Histogram &&) & = default;
 
   /// Returns the storage mode of the X data (BinEdges or Points).
   XMode xMode() const noexcept { return m_xMode; }
@@ -103,10 +103,10 @@ public:
   Points points() const;
   PointVariances pointVariances() const;
   PointStandardDeviations pointStandardDeviations() const;
-  template <typename... T> void setBinEdges(T &&... data) & ;
-  template <typename... T> void setPoints(T &&... data) & ;
-  template <typename... T> void setPointVariances(T &&... data) & ;
-  template <typename... T> void setPointStandardDeviations(T &&... data) & ;
+  template <typename... T> void setBinEdges(T &&... data) &;
+  template <typename... T> void setPoints(T &&... data) &;
+  template <typename... T> void setPointVariances(T &&... data) &;
+  template <typename... T> void setPointStandardDeviations(T &&... data) &;
 
   Counts counts() const;
   CountVariances countVariances() const;
@@ -114,12 +114,12 @@ public:
   Frequencies frequencies() const;
   FrequencyVariances frequencyVariances() const;
   FrequencyStandardDeviations frequencyStandardDeviations() const;
-  template <typename... T> void setCounts(T &&... data) & ;
-  template <typename... T> void setCountVariances(T &&... data) & ;
-  template <typename... T> void setCountStandardDeviations(T &&... data) & ;
-  template <typename... T> void setFrequencies(T &&... data) & ;
-  template <typename... T> void setFrequencyVariances(T &&... data) & ;
-  template <typename... T> void setFrequencyStandardDeviations(T &&... data) & ;
+  template <typename... T> void setCounts(T &&... data) &;
+  template <typename... T> void setCountVariances(T &&... data) &;
+  template <typename... T> void setCountStandardDeviations(T &&... data) &;
+  template <typename... T> void setFrequencies(T &&... data) &;
+  template <typename... T> void setFrequencyVariances(T &&... data) &;
+  template <typename... T> void setFrequencyStandardDeviations(T &&... data) &;
 
   const HistogramX &x() const { return *m_x; }
   const HistogramY &y() const { return *m_y; }
@@ -134,10 +134,10 @@ public:
   Kernel::cow_ptr<HistogramY> sharedY() const { return m_y; }
   Kernel::cow_ptr<HistogramE> sharedE() const { return m_e; }
   Kernel::cow_ptr<HistogramDx> sharedDx() const { return m_dx; }
-  void setSharedX(const Kernel::cow_ptr<HistogramX> &x) & ;
-  void setSharedY(const Kernel::cow_ptr<HistogramY> &y) & ;
-  void setSharedE(const Kernel::cow_ptr<HistogramE> &e) & ;
-  void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & ;
+  void setSharedX(const Kernel::cow_ptr<HistogramX> &x) &;
+  void setSharedY(const Kernel::cow_ptr<HistogramY> &y) &;
+  void setSharedE(const Kernel::cow_ptr<HistogramE> &e) &;
+  void setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) &;
 
   /// Returns the size of the histogram, i.e., the number of Y data points.
   size_t size() const {
@@ -192,8 +192,12 @@ public:
   void convertToCounts();
   void convertToFrequencies();
 
-  HistogramIterator begin() const;
-  HistogramIterator end() const;
+  HistogramIterator begin() const &;
+  HistogramIterator end() const &;
+  // Calling begin/end on a temporary is not allowed as the iterator
+  // reference will be immediately invalidated.
+  HistogramIterator begin() const && = delete;
+  HistogramIterator end() const && = delete;
 
 private:
   template <class TX> void initX(const TX &x);

@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
-#include "ui_Elwin.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectDataAnalysisTab.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_Elwin.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -14,9 +14,12 @@ class DLLExport Elwin : public IndirectDataAnalysisTab {
 public:
   Elwin(QWidget *parent = nullptr);
 
+protected:
+  void setRunEnabled(bool enabled) override;
+
 private:
-  void setup() override;
   void run() override;
+  void setup() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
@@ -32,6 +35,7 @@ private slots:
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
+  void runClicked();
   void saveClicked();
   void plotClicked();
 

@@ -5,9 +5,9 @@
 #include <fstream>
 #include <string>
 
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

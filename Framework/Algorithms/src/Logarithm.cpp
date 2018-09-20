@@ -15,12 +15,14 @@ Logarithm::Logarithm() : UnaryOperation(), log_Min(0), is_natural(true) {
 }
 
 void Logarithm::defineProperties() {
-  declareProperty("Filler", 0.0, "The value that will be placed into the "
-                                 "output workspace if an input value is equal "
-                                 "or less than 0. Default value is 0");
-  declareProperty("Natural", true, "Logical value which specifies if user "
-                                   "wands to calculate natural or base 10 "
-                                   "logarithm.");
+  declareProperty("Filler", 0.0,
+                  "The value that will be placed into the "
+                  "output workspace if an input value is equal "
+                  "or less than 0. Default value is 0");
+  declareProperty("Natural", true,
+                  "Logical value which specifies if user "
+                  "wands to calculate natural or base 10 "
+                  "logarithm.");
 }
 
 void Logarithm::retrieveProperties() {

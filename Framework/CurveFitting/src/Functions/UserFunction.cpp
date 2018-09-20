@@ -4,8 +4,8 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MuParserUtils.h"
-#include <boost/tokenizer.hpp>
 #include "MantidGeometry/muParser_Silent.h"
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -96,12 +96,12 @@ void UserFunction::setAttribute(const std::string &attName,
 }
 
 /** Calculate the fitting function.
-*  @param out :: A pointer to the output fitting function buffer. The buffer
-* must be large enough to receive nData double values.
-*        The fitting procedure will try to minimise Sum(out[i]^2)
-*  @param xValues :: The array of nData x-values.
-*  @param nData :: The size of the fitted data.
-*/
+ *  @param out :: A pointer to the output fitting function buffer. The buffer
+ * must be large enough to receive nData double values.
+ *        The fitting procedure will try to minimise Sum(out[i]^2)
+ *  @param xValues :: The array of nData x-values.
+ *  @param nData :: The size of the fitted data.
+ */
 void UserFunction::function1D(double *out, const double *xValues,
                               const size_t nData) const {
   for (size_t i = 0; i < nData; i++) {
@@ -111,11 +111,10 @@ void UserFunction::function1D(double *out, const double *xValues,
 }
 
 /**
-* @param domain :: the space on which the function acts
-* @param jacobian :: the set of partial derivatives of the function with respect
-* to the
-* fitting parameters
-*/
+ * @param domain :: the space on which the function acts
+ * @param jacobian :: the set of partial derivatives of the function with
+ * respect to the fitting parameters
+ */
 void UserFunction::functionDeriv(const API::FunctionDomain &domain,
                                  API::Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);

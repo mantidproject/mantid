@@ -1,5 +1,5 @@
-#include "MantidAPI/CoordTransform.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 
@@ -98,9 +98,9 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
 
 //----------------------------------------------------------------------------------------------
 /** Serialize the coordinate transform distance
-*
-* @return The coordinate transform distance in its serialized form.
-*/
+ *
+ * @return The coordinate transform distance in its serialized form.
+ */
 std::string CoordTransformDistance::toXMLString() const {
   using namespace Poco::XML;
 
@@ -153,5 +153,5 @@ std::string CoordTransformDistance::id() const {
   return "CoordTransformDistance";
 }
 
-} // namespace Mantid
 } // namespace DataObjects
+} // namespace Mantid

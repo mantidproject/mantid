@@ -30,8 +30,8 @@
 ///@cond nodoc
 
 #include "isisds_command.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 #include <cstdio>
 
 /*
@@ -161,12 +161,12 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  int timeoutinSec = 120;
-  if (!Mantid::Kernel::ConfigService::Instance().getValue("ISISDAE.Timeout",
-                                                          timeoutinSec) ||
-      timeoutinSec < 1) {
-    timeoutinSec = 120; // Default to  120 seconds if not specified
-  }
+  auto timeoutInSecConfigVal =
+      Mantid::Kernel::ConfigService::Instance().getValue<int>(
+          "ISISDAE.Timeout");
+  int timeoutinSec = timeoutInSecConfigVal.get_value_or(
+      120); // Default to  120 seconds if not specified
+
 #ifdef WIN32
   // WINDOWS
   DWORD timeout = timeoutinSec * 1000;
@@ -396,8 +396,8 @@ int isisds_recv_command_alloc(SOCKET s, char **command, void **data,
 int isisds_send_close(SOCKET s) {
   /*	shutdown((*pfh)->s, SD_SEND);   indicate no more data to send SHUT_WR
    * check for FD_READ and recv any other stuff from server
-*check for FD_CLOSE and closesocket()
-*/
+   *check for FD_CLOSE and closesocket()
+   */
   closesocket(s);
   return 0;
 }

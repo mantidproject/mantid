@@ -101,4 +101,4 @@ RowData_sptr makeRowData(const std::vector<std::string> &list,
 
   return rowData;
 }
-}
+} // namespace DataProcessorTestHelper

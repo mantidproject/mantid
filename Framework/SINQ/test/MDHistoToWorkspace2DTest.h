@@ -1,15 +1,15 @@
 #ifndef __MDHISTOTOWORKSPACE2DTEST
 #define __MDHISTOTOWORKSPACE2DTEST
 
-#include <cxxtest/TestSuite.h>
-#include "MantidSINQ/MDHistoToWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidSINQ/MDHistoToWorkspace2D.h"
+#include <cxxtest/TestSuite.h>
 #include <numeric>
 
 using namespace Mantid::API;

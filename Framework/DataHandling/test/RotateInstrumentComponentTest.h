@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/RotateInstrumentComponent.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

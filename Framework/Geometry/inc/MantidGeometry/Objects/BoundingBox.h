@@ -54,14 +54,14 @@ public:
       : m_minPoint(), m_maxPoint(), m_null(true), is_axis_aligned(true) {}
 
   /** Constructor taking six points. If inconsistent points are defined, i.e.
-  * xmin > xmax, then an error is thrown
-  * @param xmax :: Value of maximum in X. It must be greater than xmin.
-  * @param ymax :: Value of maximum in Y. It must be greater than ymin.
-  * @param zmax :: Value of maximum in Z. It must be greater than zmin.
-  * @param xmin :: Value of minimum in X. It must be less than xmax.
-  * @param ymin :: Value of minimum in Y. It must be less than ymax.
-  * @param zmin :: Value of minimum in Z. It must be less than zmax.
-  */
+   * xmin > xmax, then an error is thrown
+   * @param xmax :: Value of maximum in X. It must be greater than xmin.
+   * @param ymax :: Value of maximum in Y. It must be greater than ymin.
+   * @param zmax :: Value of maximum in Z. It must be greater than zmin.
+   * @param xmin :: Value of minimum in X. It must be less than xmax.
+   * @param ymin :: Value of minimum in Y. It must be less than ymax.
+   * @param zmin :: Value of minimum in Z. It must be less than zmax.
+   */
   BoundingBox(double xmax, double ymax, double zmax, double xmin, double ymin,
               double zmin)
       : m_minPoint(xmin, ymin, zmin), m_maxPoint(xmax, ymax, zmax),
@@ -71,15 +71,15 @@ public:
   }
 
   /**
-  * Do the given arguments form a valid bounding box, throws std::invalid
-  * argument if not
-  * @param xmax :: Value of maximum in X. It must be greater than xmin.
-  * @param ymax :: Value of maximum in Y. It must be greater than ymin.
-  * @param zmax :: Value of maximum in Z. It must be greater than zmin.
-  * @param xmin :: Value of minimum in X. It must be less than xmax.
-  * @param ymin :: Value of minimum in Y. It must be less than ymax.
-  * @param zmin :: Value of minimum in Z. It must be less than zmax.
-  */
+   * Do the given arguments form a valid bounding box, throws std::invalid
+   * argument if not
+   * @param xmax :: Value of maximum in X. It must be greater than xmin.
+   * @param ymax :: Value of maximum in Y. It must be greater than ymin.
+   * @param zmax :: Value of maximum in Z. It must be greater than zmin.
+   * @param xmin :: Value of minimum in X. It must be less than xmax.
+   * @param ymin :: Value of minimum in Y. It must be less than ymax.
+   * @param zmin :: Value of minimum in Z. It must be less than zmax.
+   */
   static void checkValid(double xmax, double ymax, double zmax, double xmin,
                          double ymin, double zmin) {
     if (xmax < xmin || ymax < ymin || zmax < zmin) {
@@ -147,7 +147,7 @@ public:
   /// Generate a random point within the box
   Kernel::V3D generatePointInside(double r1, double r2, double r3) const;
   /** returns the expanded box consisting of all 8 box points,
-    * shifted into the coordinate system with the observer centre; */
+   * shifted into the coordinate system with the observer centre; */
   void getFullBox(std::vector<Kernel::V3D> &box,
                   const Kernel::V3D &observer) const;
   /** @name Box mutation functions*/
@@ -225,7 +225,7 @@ using BoundingBox_const_sptr = boost::shared_ptr<const BoundingBox>;
 /// Print out the bounding box values to a stream.
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
                                              const BoundingBox &box);
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 
 #endif // MANTIDGEOMETRY_BOUNDINGBOX_H_

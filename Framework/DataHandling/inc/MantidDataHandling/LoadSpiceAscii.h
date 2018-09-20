@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADSPICEASCII_H_
 #define MANTID_DATAHANDLING_LOADSPICEASCII_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidKernel/System.h"
 
 #include "MantidAPI/IFileLoader.h"
 

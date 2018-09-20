@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 
-#include <boost/algorithm/string.hpp>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QStyle>
@@ -9,8 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-HintingLineEdit::HintingLineEdit(
-    QWidget *parent, const std::map<std::string, std::string> &hints)
+HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
     : QLineEdit(parent), m_hints(hints), m_dontComplete(false) {
   m_hintLabel = new QLabel(this, Qt::ToolTip);
   m_hintLabel->setMargin(1 +
@@ -72,8 +70,7 @@ void HintingLineEdit::updateHints(const QString &text) {
   // Remove any leading or trailing whitespace
   boost::trim(prefix);
 
-  // Set the current key/prefix
-  m_curKey = prefix;
+  m_currentPrefix = prefix;
 
   // Update our current list of matches
   updateMatches();
@@ -86,34 +83,29 @@ void HintingLineEdit::updateHints(const QString &text) {
 }
 
 /** Hides the list of hints
-*/
+ */
 void HintingLineEdit::hideHints() { m_hintLabel->hide(); }
 
 /** Updates the list of hints matching the user's current input */
 void HintingLineEdit::updateMatches() {
-  m_curMatch.clear();
   m_matches.clear();
-
-  for (auto it = m_hints.begin(); it != m_hints.end(); ++it) {
-    const std::string &hint = it->first;
-
-    if (hint.length() < m_curKey.length())
-      continue;
-
-    const std::string hintPrefix = hint.substr(0, m_curKey.length());
-
-    if (m_curKey == hintPrefix)
-      m_matches[hint] = it->second;
-  }
+  std::copy_if(m_hints.cbegin(), m_hints.cend(), std::back_inserter(m_matches),
+               [this](Hint const &hint) -> bool {
+                 auto &hintWord = hint.word();
+                 return hintWord.length() >= m_currentPrefix.length() &&
+                        hintWord.substr(0, m_currentPrefix.length()) ==
+                            m_currentPrefix;
+               });
+  m_match = m_matches.cbegin();
 }
 
 /** Show a tooltip with the current relevant hints */
 void HintingLineEdit::showToolTip() {
   QString hintList;
-  for (auto mIt = m_matches.begin(); mIt != m_matches.end(); ++mIt) {
-    hintList += "<b>" + QString::fromStdString(mIt->first) + "</b><br />\n";
-    if (!mIt->second.empty())
-      hintList += QString::fromStdString(mIt->second) + "<br />\n";
+  for (auto const &match : m_matches) {
+    hintList += "<b>" + QString::fromStdString(match.word()) + "</b><br />\n";
+    if (!match.description().empty())
+      hintList += QString::fromStdString(match.description()) + "<br />\n";
   }
 
   if (!hintList.trimmed().isEmpty()) {
@@ -129,12 +121,9 @@ void HintingLineEdit::showToolTip() {
 /** Insert an auto completion suggestion beneath the user's cursor and select it
  */
 void HintingLineEdit::insertSuggestion() {
-  if (m_curKey.length() < 1 || m_matches.size() < 1 || m_dontComplete)
+  if (m_currentPrefix.empty() || m_matches.empty() ||
+      m_match == m_matches.cend() || m_dontComplete)
     return;
-
-  // If we don't have a match, just use the first one in the map
-  if (m_curMatch.empty())
-    m_curMatch = m_matches.begin()->first;
 
   QString line = text();
   const int curPos = cursorPosition();
@@ -145,11 +134,12 @@ void HintingLineEdit::insertSuggestion() {
 
   // Insert a suggestion under the cursor, then select it
   line = line.left(curPos) +
-         QString::fromStdString(m_curMatch).mid((int)m_curKey.size()) +
+         QString::fromStdString((*m_match).word())
+             .mid(static_cast<int>(m_currentPrefix.size())) +
          line.mid(curPos);
 
   setText(line);
-  setSelection(curPos, (int)m_curMatch.size());
+  setSelection(curPos, static_cast<int>((*m_match).word().size()));
 }
 
 /** Remove any existing auto completion suggestion */
@@ -168,13 +158,10 @@ void HintingLineEdit::clearSuggestion() {
 void HintingLineEdit::nextSuggestion() {
   clearSuggestion();
   // Find the next suggestion in the hint map
-  auto it = m_matches.find(m_curMatch);
-  if (it != m_matches.end()) {
-    it++;
-    if (it == m_matches.end())
-      m_curMatch = m_matches.begin()->first;
-    else
-      m_curMatch = it->first;
+  if (m_match != m_matches.end()) {
+    m_match++;
+    if (m_match == m_matches.end())
+      m_match = m_matches.begin();
     insertSuggestion();
   }
 }
@@ -183,15 +170,14 @@ void HintingLineEdit::nextSuggestion() {
 void HintingLineEdit::prevSuggestion() {
   clearSuggestion();
   // Find the previous suggestion in the hint map
-  auto it = m_matches.find(m_curMatch);
-  if (it != m_matches.end()) {
-    it--;
-    if (it == m_matches.end())
-      m_curMatch = m_matches.rbegin()->first;
-    else
-      m_curMatch = it->first;
+  if (m_match != m_matches.cend()) {
+    if (m_match == m_matches.cbegin()) {
+      m_match = m_matches.cend() - 1;
+    } else {
+      m_match--;
+    }
     insertSuggestion();
   }
 }
 } // namespace MantidWidgets
-} // namepsace MantidQt
+} // namespace MantidQt

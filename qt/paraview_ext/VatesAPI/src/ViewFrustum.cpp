@@ -1,8 +1,8 @@
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidKernel/Matrix.h"
-#include <sstream>
-#include <cmath>
 #include <cfloat>
+#include <cmath>
+#include <sstream>
 
 namespace Mantid {
 namespace VATES {
@@ -124,5 +124,5 @@ std::string ViewFrustum::toExtentsAsString() const {
   result.pop_back();
   return result;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

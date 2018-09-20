@@ -1,15 +1,15 @@
 #ifndef MANTID_DATAHANDLING_DOWNLOADFILE_H_
 #define MANTID_DATAHANDLING_DOWNLOADFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
 namespace Kernel {
 // forward Declaration
 class InternetHelper;
-}
+} // namespace Kernel
 
 namespace DataHandling {
 

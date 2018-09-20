@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/AddLogDerivative.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Run.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -33,9 +33,10 @@ void AddLogDerivative::init() {
   declareProperty("Derivative", 1,
                   boost::make_shared<BoundedValidator<int>>(1, 10),
                   "How many derivatives to perform. Default 1.");
-  declareProperty("NewLogName", "", "Name of the newly created log. If not "
-                                    "specified, the string '_derivativeN' will "
-                                    "be appended to the original name");
+  declareProperty("NewLogName", "",
+                  "Name of the newly created log. If not "
+                  "specified, the string '_derivativeN' will "
+                  "be appended to the original name");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -129,10 +130,11 @@ void AddLogDerivative::exec() {
   TimeSeriesProperty<double> *tsp =
       dynamic_cast<TimeSeriesProperty<double> *>(prop);
   if (!tsp)
-    throw std::invalid_argument("Log " + LogName + " is not a numerical series "
-                                                   "(TimeSeriesProperty<double>"
-                                                   ") so we can't perform its "
-                                                   "derivative.");
+    throw std::invalid_argument("Log " + LogName +
+                                " is not a numerical series "
+                                "(TimeSeriesProperty<double>"
+                                ") so we can't perform its "
+                                "derivative.");
 
   Progress progress(this, 0.0, 1.0, Derivative);
 
@@ -145,5 +147,5 @@ void AddLogDerivative::exec() {
   g_log.notice() << "Added log named " << NewLogName << '\n';
 }
 
-} // namespace Mantid
 } // namespace Algorithms
+} // namespace Mantid

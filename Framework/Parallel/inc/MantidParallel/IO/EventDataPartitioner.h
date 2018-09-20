@@ -46,7 +46,7 @@ template <class TimeOffsetType> struct Event {
   TimeOffsetType tof;
   Types::Core::DateAndTime pulseTime;
 };
-}
+} // namespace detail
 
 template <class TimeOffsetType> class AbstractEventDataPartitioner {
 public:

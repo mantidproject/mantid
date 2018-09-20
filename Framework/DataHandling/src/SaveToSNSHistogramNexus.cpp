@@ -736,5 +736,5 @@ void SaveToSNSHistogramNexus::exec() {
     throw std::runtime_error("Nexus error while copying the file.");
 }
 
-} // namespace NeXus
+} // namespace DataHandling
 } // namespace Mantid

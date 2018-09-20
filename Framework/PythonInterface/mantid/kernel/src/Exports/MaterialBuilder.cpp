@@ -16,9 +16,10 @@ void export_MaterialBuilder() {
 
   class_<MaterialBuilder, boost::noncopyable>("MaterialBuilder")
       .def("setName", &MaterialBuilder::setName, return_self<>(),
-           (arg("self"), arg("name")), "Set the string name given to the "
-                                       "material. Defaults to the chemical "
-                                       "formula.")
+           (arg("self"), arg("name")),
+           "Set the string name given to the "
+           "material. Defaults to the chemical "
+           "formula.")
       .def("setFormula", &MaterialBuilder::setFormula, return_self<>(),
            (arg("self"), arg("formula")),
            "Set the chemical formula of the material")

@@ -3,9 +3,9 @@
 
 #include "DllOption.h"
 
-#include <qwt_plot_picker.h>
 #include <qwt_plot.h>
 #include <qwt_plot_marker.h>
+#include <qwt_plot_picker.h>
 
 #include <QPen>
 
@@ -14,10 +14,10 @@ namespace MantidWidgets {
 class PreviewPlot;
 
 /**
-* Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
-* @author Michael Whitty, RAL ISIS
-* @date 11/10/2010
-*/
+ * Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
+ * @author Michael Whitty, RAL ISIS
+ * @date 11/10/2010
+ */
 class EXPORT_OPT_MANTIDQT_LEGACYQWT RangeSelector : public QwtPlotPicker {
   Q_OBJECT
 public:
@@ -106,7 +106,7 @@ private:
       m_movCursor; ///< the cursor object to display when an item is being moved
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif

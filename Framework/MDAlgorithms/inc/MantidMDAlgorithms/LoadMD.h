@@ -4,10 +4,10 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include <boost/scoped_ptr.hpp>
+#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -142,7 +142,7 @@ private:
   bool m_requiresMDFrameCorrection;
 };
 
-} // namespace DataObjects
+} // namespace MDAlgorithms
 } // namespace Mantid
 
 #endif /* MANTID_MDALGORITHMS_LOADMD_H_ */

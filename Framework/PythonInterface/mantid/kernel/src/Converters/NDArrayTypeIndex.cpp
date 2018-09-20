@@ -33,5 +33,5 @@ DEFINE_TYPE_MAPPING(bool, NPY_BOOL, NPY_BOOLLTR)
 DEFINE_TYPE_MAPPING(double, NPY_DOUBLE, NPY_DOUBLELTR)
 DEFINE_TYPE_MAPPING(float, NPY_FLOAT, NPY_CFLOATLTR)
 }
-}
-}
+} // namespace PythonInterface
+} // namespace Mantid

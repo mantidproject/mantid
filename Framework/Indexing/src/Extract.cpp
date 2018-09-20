@@ -13,7 +13,7 @@ void checkStorageMode(const IndexInfo &indexInfo) {
     throw std::runtime_error("extract() does not support " +
                              Parallel::toString(StorageMode::Distributed));
 }
-}
+} // namespace
 
 /// Extracts IndexInfo from source IndexInfo, extracting data for all indices
 /// specified by index set.

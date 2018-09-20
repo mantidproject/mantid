@@ -2,8 +2,8 @@
 #define MANTID_API_INSTRUMENTDATASERVICE_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/DataService.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
@@ -59,6 +59,6 @@ namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::InstrumentDataServiceImpl>;
 }
-}
+} // namespace Mantid
 
 #endif /*INSTRUMENTDATASERVICE_*/

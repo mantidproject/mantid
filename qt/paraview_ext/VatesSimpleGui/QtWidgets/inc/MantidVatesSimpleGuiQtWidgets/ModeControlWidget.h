@@ -1,12 +1,12 @@
 #ifndef MODECONTROLWIDGET_H_
 #define MODECONTROLWIDGET_H_
 
-#include "ui_ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
+#include "ui_ModeControlWidget.h"
 
-#include <map>
-#include <QWidget>
 #include <QString>
+#include <QWidget>
+#include <map>
 
 namespace Mantid {
 namespace Vates {
@@ -109,8 +109,8 @@ private:
   std::map<QString, Views> mapFromStringToView; //< Holds the mapping from the a
   // string to an associated enum
 };
-}
-}
-}
+} // namespace SimpleGui
+} // namespace Vates
+} // namespace Mantid
 
 #endif // MODECONTROLWIDGET_H_

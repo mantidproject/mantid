@@ -107,7 +107,7 @@ private:
   /// peak radius value.
   double m_peakRadius;
 };
-}
-}
+} // namespace VATES
+} // namespace Mantid
 
 #endif

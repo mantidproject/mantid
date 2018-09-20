@@ -166,5 +166,5 @@ double ProxyCompositePeaksPresenter::getPeakSizeOnProjection() const {
 double ProxyCompositePeaksPresenter::getPeakSizeIntoProjection() const {
   return m_compositePresenter->getPeakSizeIntoProjection();
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

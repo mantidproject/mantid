@@ -45,6 +45,7 @@ Description          : QtiPlot's main window
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
+#include "MenuWithToolTips.h"
 #include "ProjectRecovery.h"
 #include "ProjectSaveView.h"
 #include "Script.h"
@@ -257,7 +258,7 @@ public slots:
                             int lineNumber);
   /// Runs an arbitrary lump of python code, return true/false on
   /// success/failure.
-  bool runPythonScript(const QString &code, bool async = false,
+  bool runPythonScript(const QString &code, bool asynchronous = false,
                        bool quiet = false, bool redirect = true);
 
   QList<MdiSubWindow *> windowsList() const;
@@ -1123,12 +1124,18 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
+  bool loadProjectRecovery(std::string sourceFile);
+
   // The string must be copied from the other thread in saveProjectRecovery
   /// Saves the current project as part of recovery auto saving
   bool saveProjectRecovery(std::string destination);
 
   /// Checks for and attempts project recovery if required
   void checkForProjectRecovery();
+
+  /// Make a Recovery checkpoint so you don't have to wait for it to happen
+  /// normally
+  void saveRecoveryCheckpoint();
 
 signals:
   void modified();
@@ -1482,7 +1489,8 @@ private:
   QScopedPointer<QWidget> catalogSearch;
 
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
-  QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
+  QMenu *recentProjectsMenu, *interfaceMenu;
+  MenuWithToolTips *recentFilesMenu;
 
   QMenu *help, *plot2DMenu, *analysisMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
@@ -1640,6 +1648,8 @@ private:
 
   /// Owns a thread which automatically triggers project recovery for the GUI
   MantidQt::ProjectRecovery m_projectRecovery;
+  /// True if project recovery was started when MantidPlot started
+  bool m_projectRecoveryRunOnStart{false};
 
 #ifdef SHARED_MENUBAR
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar

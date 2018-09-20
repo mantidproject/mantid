@@ -58,8 +58,8 @@ public:
   /// Lookup a handler base on a given type_info object
   static const PropertyValueHandler &retrieve(const std::type_info &typeInfo);
 };
-}
-}
-}
+} // namespace Registry
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_*/

@@ -2,10 +2,9 @@
 #define MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_
 
 // Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
-// Mantid Headers from the same project (N/A)
+// Mantid Headers from the same project
+#include "MantidCurveFitting/Functions/FunctionQDepends.h"
 // Mantid headers from other projects
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 // 3rd party library headers (N/A)
 // standard library (N/A)
@@ -42,8 +41,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 /* Class representing the inelastic portion of DiffRotDiscreteCircle
  * Contains a linear combination of Lorentzians.
  */
-class DLLExport InelasticDiffRotDiscreteCircle : public API::ParamFunction,
-                                                 public API::IFunction1D {
+class DLLExport InelasticDiffRotDiscreteCircle : public FunctionQDepends {
 public:
   /// Constructor
   InelasticDiffRotDiscreteCircle();

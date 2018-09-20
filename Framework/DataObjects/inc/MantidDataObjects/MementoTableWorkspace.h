@@ -1,5 +1,5 @@
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Column.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
 
@@ -66,5 +66,5 @@ private:
   static bool expectedColumn(Mantid::API::Column_const_sptr expected,
                              Mantid::API::Column_const_sptr candidate);
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid

@@ -5,8 +5,8 @@
 // Mantid Headers from the same project
 #include "ui_DPDFFitControl.h"
 // Mantid headers from other projects
-#include "MantidAPI/IFunction.h"
 #include "DllConfig.h"
+#include "MantidAPI/IFunction.h"
 // 3rd party library headers
 #include <QWidget>
 // System headers
@@ -18,7 +18,7 @@ namespace Mantid {
 namespace API {
 class IFunction;
 }
-}
+} // namespace Mantid
 namespace MantidQt {
 namespace API {
 class AlgorithmRunner;
@@ -26,16 +26,16 @@ class AlgorithmRunner;
 namespace MantidWidgets {
 class FunctionBrowser;
 class FitOptionsBrowser;
-}
+} // namespace MantidWidgets
 namespace CustomInterfaces {
 namespace DynamicPDF {
 class BackgroundRemover;
 class DPDFFitOptionsBrowser;
 class InputDataControl;
 class DisplayControl;
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -131,7 +131,7 @@ private:
   const std::string m_modelEvaluationName;
 
 }; // class FitControl
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_FITCONTROL_H_

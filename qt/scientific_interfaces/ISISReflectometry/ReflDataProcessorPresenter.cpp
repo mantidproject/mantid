@@ -64,7 +64,7 @@ double angle(RowData_sptr data) {
 
   return angle;
 }
-}
+} // namespace
 
 TimeSlicingInfo::TimeSlicingInfo(QString type, QString values)
     : m_type(std::move(type)), m_values(std::move(values)),
@@ -240,17 +240,17 @@ void TimeSlicingInfo::parseLogValue() {
 }
 
 /**
-* Constructor
-* @param whitelist : The set of properties we want to show as columns
-* @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A ProcessingAlgorithm
-* @param postprocessor : A PostprocessingAlgorithm
-* workspaces
-* @param group : The zero-based index of this presenter within the tab.
-* @param postprocessMap : A map containing instructions for post-processing.
-* This map links column name to properties of the post-processing algorithm
-* @param loader : The algorithm responsible for loading data
-*/
+ * Constructor
+ * @param whitelist : The set of properties we want to show as columns
+ * @param preprocessMap : A map containing instructions for pre-processing
+ * @param processor : A ProcessingAlgorithm
+ * @param postprocessor : A PostprocessingAlgorithm
+ * workspaces
+ * @param group : The zero-based index of this presenter within the tab.
+ * @param postprocessMap : A map containing instructions for post-processing.
+ * This map links column name to properties of the post-processing algorithm
+ * @param loader : The algorithm responsible for loading data
+ */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
@@ -263,8 +263,8 @@ ReflDataProcessorPresenter::ReflDataProcessorPresenter(
       m_processingAsEventData(false) {}
 
 /**
-* Destructor
-*/
+ * Destructor
+ */
 ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 
 /**
@@ -374,13 +374,13 @@ void ReflDataProcessorPresenter::process(TreeData itemsToProcess) {
 }
 
 /** Loads a group of runs. Tries loading runs as event workspaces. If any of the
-* workspaces in the group is not an event workspace, stops loading and re-loads
-* all of them as non-event workspaces. We need the workspaces to be of the same
-* type to process them together.
-*
-* @param group :: the group of runs
-* @return :: true if all runs were loaded as event workspaces. False otherwise
-*/
+ * workspaces in the group is not an event workspace, stops loading and re-loads
+ * all of them as non-event workspaces. We need the workspaces to be of the same
+ * type to process them together.
+ *
+ * @param group :: the group of runs
+ * @return :: true if all runs were loaded as event workspaces. False otherwise
+ */
 bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
 
   // Set of runs loaded successfully
@@ -510,12 +510,12 @@ void ReflDataProcessorPresenter::handleError(const int groupIndex,
 }
 
 /** Processes a group of runs
-*
-* @param groupID :: An integer number indicating the id of this group
-* @param group :: the group of event workspaces
-* @param slicing :: Info about how time slicing should be performed
-* @return :: true if errors were encountered
-*/
+ *
+ * @param groupID :: An integer number indicating the id of this group
+ * @param group :: the group of event workspaces
+ * @param slicing :: Info about how time slicing should be performed
+ * @return :: true if errors were encountered
+ */
 bool ReflDataProcessorPresenter::processGroupAsEventWS(
     int groupID, const GroupData &group, TimeSlicingInfo &slicing) {
 
@@ -593,11 +593,11 @@ void ReflDataProcessorPresenter::completedRowReductionSuccessfully(
 }
 
 /** Processes a group of non-event workspaces
-*
-* @param groupID :: An integer number indicating the id of this group
-* @param group :: the group of event workspaces
-* @return :: true if errors were encountered
-*/
+ *
+ * @param groupID :: An integer number indicating the id of this group
+ * @param group :: the group of event workspaces
+ * @return :: true if errors were encountered
+ */
 bool ReflDataProcessorPresenter::processGroupAsNonEventWS(int groupID,
                                                           GroupData &group) {
 
@@ -697,7 +697,8 @@ bool ReflDataProcessorPresenter::parseUniform(TimeSlicingInfo &slicing,
   if (mws != nullptr) {
     const auto run = mws->run();
     const auto totalDuration = run.endTime() - run.startTime();
-    double totalDurationSec = totalDuration.total_seconds();
+    double totalDurationSec =
+        static_cast<double>(totalDuration.total_seconds());
     double sliceDuration = .0;
     size_t numSlices = 0;
 
@@ -727,10 +728,10 @@ bool ReflDataProcessorPresenter::workspaceExists(
 }
 
 /** Loads an event workspace and puts it into the ADS
-*
-* @param runNo :: The run number as a string
-* @return :: True if algorithm was executed. False otherwise
-*/
+ *
+ * @param runNo :: The run number as a string
+ * @return :: True if algorithm was executed. False otherwise
+ */
 bool ReflDataProcessorPresenter::loadEventRun(const QString &runNo) {
 
   bool runFound;
@@ -749,9 +750,9 @@ bool ReflDataProcessorPresenter::loadEventRun(const QString &runNo) {
 }
 
 /** Loads a non-event workspace and puts it into the ADS
-*
-* @param runNo :: The run number as a string
-*/
+ *
+ * @param runNo :: The run number as a string
+ */
 void ReflDataProcessorPresenter::loadNonEventRun(const QString &runNo) {
 
   bool runFound; // unused but required
@@ -800,12 +801,12 @@ QString ReflDataProcessorPresenter::loadRun(const QString &run,
 }
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
-*
-* @param runName :: The input workspace name as a string
-* @param slicing :: Info about how time slicing should be performed
-* @param sliceIndex :: The index of the slice being taken
-* @return :: the suffix used for the slice name
-*/
+ *
+ * @param runName :: The input workspace name as a string
+ * @param slicing :: Info about how time slicing should be performed
+ * @param sliceIndex :: The index of the slice being taken
+ * @return :: the suffix used for the slice name
+ */
 QString ReflDataProcessorPresenter::takeSlice(const QString &runName,
                                               TimeSlicingInfo &slicing,
                                               size_t sliceIndex) {
@@ -1034,10 +1035,10 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
 }
 
 /** Add entry for the number of slices for all rows in a group
-*
-* @param groupID :: The ID of the group
-* @param numSlices :: Number of slices
-*/
+ *
+ * @param groupID :: The ID of the group
+ * @param numSlices :: Number of slices
+ */
 void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
                                                         size_t numSlices) {
   m_numGroupSlicesMap[groupID] = numSlices;
@@ -1186,5 +1187,5 @@ bool ReflDataProcessorPresenter::workspaceIsOutputOfGroup(
 
   return false;
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

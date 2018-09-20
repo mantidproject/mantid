@@ -71,7 +71,7 @@ UncertainValue MANTID_SINQ_DLL operator*(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator/(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator+(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator-(double d, const UncertainValue &v);
-}
-}
+} // namespace Poldi
+} // namespace Mantid
 
 #endif // UNCERTAINVALUE_H

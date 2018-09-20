@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "vtkDataSet.h"
 
 #include <algorithm>
@@ -54,5 +54,5 @@ operator=(const vtkDataSetToGeometry &other) {
   }
   return *this;
 }
-}
-}
+} // namespace VATES
+} // namespace Mantid

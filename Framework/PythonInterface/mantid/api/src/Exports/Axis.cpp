@@ -29,21 +29,16 @@ GET_POINTER_SPECIALIZATION(Axis)
 namespace {
 
 //------------------------------- Overload macros ---------------------------
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
-#pragma clang diagnostic ignored "-Wunused-local-typedef"
-#endif
+GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
+
 // Overloads for operator() function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2)
-GCC_DIAG_ON(conversion)
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
 /**
  * Extract the axis values as a sequence. A numpy array is used if the
  * data is numerical or a simple python list is used if the data is a string
@@ -83,7 +78,7 @@ PyObject *extractAxisValues(Axis &self) {
   }
   return array;
 }
-}
+} // namespace
 
 void export_Axis() {
   register_ptr_to_python<Axis *>();
@@ -131,10 +126,10 @@ void export_Axis() {
 // SpectraAxis
 // --------------------------------------------------------------------------------------------
 /**
-* Creates a SpectraAxis referencing a given workspace
-* @param ws A pointer to the parent workspace
-* @return pointer to the axis object
-*/
+ * Creates a SpectraAxis referencing a given workspace
+ * @param ws A pointer to the parent workspace
+ * @return pointer to the axis object
+ */
 Axis *createSpectraAxis(const MatrixWorkspace *const ws) {
   return new SpectraAxis(ws);
 }
@@ -153,10 +148,10 @@ void export_SpectraAxis() {
 // NumericAxis
 // --------------------------------------------------------------------------------------------
 /**
-* Creates a NumericAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
+ * Creates a NumericAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
 Axis *createNumericAxis(int length) { return new NumericAxis(length); }
 
 void export_NumericAxis() {
@@ -174,10 +169,10 @@ void export_NumericAxis() {
 // --------------------------------------------------------------------------------------------
 
 /**
-* Creates a BinEdgeAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
+ * Creates a BinEdgeAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
 Axis *createBinEdgeAxis(int length) { return new BinEdgeAxis(length); }
 
 void export_BinEdgeAxis() {
@@ -196,10 +191,10 @@ void export_BinEdgeAxis() {
 // --------------------------------------------------------------------------------------------
 
 /**
-* Creates a TextAxis
-* @param length The length of the new axis
-* @return pointer to the axis object
-*/
+ * Creates a TextAxis
+ * @param length The length of the new axis
+ * @return pointer to the axis object
+ */
 Axis *createTextAxis(int length) { return new TextAxis(length); }
 
 void export_TextAxis() {

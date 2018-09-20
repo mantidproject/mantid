@@ -1,13 +1,13 @@
 #include "MantidAPI/IEventList.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <vector>
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
-using Mantid::API::IEventList;
 using Mantid::API::EventType;
+using Mantid::API::IEventList;
 using Mantid::API::TOF;
 using Mantid::API::WEIGHTED;
 using Mantid::API::WEIGHTED_NOTIME;
@@ -46,8 +46,9 @@ void export_IEventList() {
       .def("integrate", &IEventList::integrate,
            args("self", "minX", "maxX", "entireRange"),
            "Integrate the events between a range of X values, or all events.")
-      .def("convertTof", (void (IEventList::*)(const double, const double)) &
-                             IEventList::convertTof,
+      .def("convertTof",
+           (void (IEventList::*)(const double, const double)) &
+               IEventList::convertTof,
            args("self", "factor", "offset"),
            "Convert the time of flight by tof'=tof*factor+offset")
       .def("scaleTof", &IEventList::scaleTof, args("self", "factor"),
@@ -60,16 +61,19 @@ void export_IEventList() {
       .def("maskTof", &IEventList::maskTof, args("self", "tofMin", "tofMax"),
            "Mask out events that have a tof between tofMin and tofMax "
            "(inclusively)")
-      .def("getTofs", (std::vector<double>(IEventList::*)(void) const) &
-                          IEventList::getTofs,
+      .def("getTofs",
+           (std::vector<double>(IEventList::*)(void) const) &
+               IEventList::getTofs,
            args("self"), return_clone_numpy(),
            "Get a vector of the TOFs of the events")
-      .def("getWeights", (std::vector<double>(IEventList::*)(void) const) &
-                             IEventList::getWeights,
+      .def("getWeights",
+           (std::vector<double>(IEventList::*)(void) const) &
+               IEventList::getWeights,
            args("self"), return_clone_numpy(),
            "Get a vector of the weights of the events")
-      .def("getWeightErrors", (std::vector<double>(IEventList::*)(void) const) &
-                                  IEventList::getWeightErrors,
+      .def("getWeightErrors",
+           (std::vector<double>(IEventList::*)(void) const) &
+               IEventList::getWeightErrors,
            args("self"), return_clone_numpy(),
            "Get a vector of the weights of the events")
       .def("getPulseTimes", &IEventList::getPulseTimes, args("self"),
@@ -78,14 +82,18 @@ void export_IEventList() {
            "The minimum tof value for the list of the events.")
       .def("getTofMax", &IEventList::getTofMax, args("self"),
            "The maximum tof value for the list of the events.")
-      .def("multiply", (void (IEventList::*)(const double, const double)) &
-                           IEventList::multiply,
-           args("self", "value", "error"), "Multiply the weights in this event "
-                                           "list by a scalar variable with an "
-                                           "error; though the error can be 0.0")
-      .def("divide", (void (IEventList::*)(const double, const double)) &
-                         IEventList::divide,
-           args("self", "value", "error"), "Divide the weights in this event "
-                                           "list by a scalar with an "
-                                           "(optional) error.");
+      .def("multiply",
+           (void (IEventList::*)(const double, const double)) &
+               IEventList::multiply,
+           args("self", "value", "error"),
+           "Multiply the weights in this event "
+           "list by a scalar variable with an "
+           "error; though the error can be 0.0")
+      .def("divide",
+           (void (IEventList::*)(const double, const double)) &
+               IEventList::divide,
+           args("self", "value", "error"),
+           "Divide the weights in this event "
+           "list by a scalar with an "
+           "(optional) error.");
 }

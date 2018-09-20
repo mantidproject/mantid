@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_
 #define MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_
 
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/ParamFunction.h"
 
 namespace Mantid {
 namespace CurveFitting {

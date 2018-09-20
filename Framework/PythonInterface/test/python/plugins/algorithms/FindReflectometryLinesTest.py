@@ -52,7 +52,7 @@ class FindReflectometryLinesTest(unittest.TestCase):
         run_algorithm("CreateWorkspace", DataX=[0, 1], DataY=[0], DataE=[0], NSpec=1, UnitX=units, VerticalAxisUnit="SpectraNumber", OutputWorkspace="in_tof")
         try:
             # This should throw, because input units are in TOF, not wavelength!
-            alg = run_algorithm('FindReflectometryLines', InputWorkspace='in_tof' , OutputWorkspace='spectrum_numbers', child=True)
+            alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace='in_tof' , OutputWorkspace='spectrum_numbers', child=True)
         except ValueError:
             self.assertTrue(True)
         else:
@@ -61,14 +61,14 @@ class FindReflectometryLinesTest(unittest.TestCase):
     def test_start_wavlength_too_low(self):
         try:
             # Negative value choosen for start wavelength, should throw!
-            alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers', StartWavelength=-1, child=True)
+            alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers', StartWavelength=-1, child=True)
         except ValueError:
             self.assertTrue(True)
         else:
             self.assertTrue(False)
 
     def test_keep_intermeidate_workspaces_off_by_default(self):
-        alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers')
+        alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers')
         keep_workspaces = alg.getPropertyValue("KeepIntermediateWorkspaces")
         # Should have requested that no intermediate workspaces have been kept, these should then have all been deleted too.
         self.assertEquals("0", keep_workspaces)
@@ -78,7 +78,7 @@ class FindReflectometryLinesTest(unittest.TestCase):
         mtd.remove('spectrum_numbers')
 
     def test_switch_intermediate_workspaces_on(self):
-        alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers', KeepIntermediateWorkspaces=True)
+        alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers', KeepIntermediateWorkspaces=True)
         self.assertTrue(mtd.doesExist('spectrum_numbers'))
         self.assertTrue(mtd.doesExist('cropped_ws'))
         self.assertTrue(mtd.doesExist('summed_ws'))
@@ -89,7 +89,7 @@ class FindReflectometryLinesTest(unittest.TestCase):
 
     def test_find_no_peaks_throws(self):
         try:
-            alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._no_peak_ws , OutputWorkspace='spectrum_numbers', child=True)
+            alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._no_peak_ws , OutputWorkspace='spectrum_numbers', child=True)
         except RuntimeError as error:
             self.assertTrue(True) #We expect the algorithm to fail if no peaks are found.
         else:
@@ -97,14 +97,14 @@ class FindReflectometryLinesTest(unittest.TestCase):
 
     def test_find_three_peaks_throws(self):
         try:
-            alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._three_peak_ws , OutputWorkspace='spectrum_numbers', child=True)
+            alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._three_peak_ws , OutputWorkspace='spectrum_numbers', child=True)
         except RuntimeError as error:
             self.assertTrue(True) #We expect the algorithm to fail if three peaks are found.
         else:
             self.assertTrue(False)
 
     def test_find_one_peaks(self):
-        alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._one_peak_ws, OutputWorkspace='spectrum_numbers')
+        alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._one_peak_ws, OutputWorkspace='spectrum_numbers')
         spectrum_workspace = mtd.retrieve('spectrum_numbers')
 
         # Should create a table with a SINGLE column (reflected spectra #) and one row.
@@ -113,7 +113,7 @@ class FindReflectometryLinesTest(unittest.TestCase):
         self.assertEquals(2, spectrum_workspace.cell(0,0)) # Match of exact spectrum that should be found
 
     def test_find_two_peaks(self):
-        alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._two_peak_ws, OutputWorkspace='spectrum_numbers')
+        alg = run_algorithm('FindReflectometryLines', Version=1, InputWorkspace=self.__class__._two_peak_ws, OutputWorkspace='spectrum_numbers')
         spectrum_workspace = mtd.retrieve('spectrum_numbers')
 
         # Should create a table with a TWO columns (reflected spectra #, transmission spectra #) and one row.

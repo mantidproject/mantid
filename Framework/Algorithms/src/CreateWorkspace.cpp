@@ -1,22 +1,22 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/HistogramBuilder.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/InvisibleProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidIndexing/GlobalSpectrumIndex.h"
-#include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/SpectrumIndexSet.h"
-#include "MantidHistogramData/HistogramBuilder.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -216,19 +216,19 @@ void CreateWorkspace::exec() {
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
     if (!commonX)
-      outputWS->mutableX(local_i)
-          .assign(dataX.begin() + xStart, dataX.begin() + xEnd);
+      outputWS->mutableX(local_i).assign(dataX.begin() + xStart,
+                                         dataX.begin() + xEnd);
 
-    outputWS->mutableY(local_i)
-        .assign(dataY.begin() + yStart, dataY.begin() + yEnd);
+    outputWS->mutableY(local_i).assign(dataY.begin() + yStart,
+                                       dataY.begin() + yEnd);
 
     if (dataE_provided)
-      outputWS->mutableE(local_i)
-          .assign(dataE.begin() + yStart, dataE.begin() + yEnd);
+      outputWS->mutableE(local_i).assign(dataE.begin() + yStart,
+                                         dataE.begin() + yEnd);
 
     if (!dX.empty())
-      outputWS->mutableDx(local_i)
-          .assign(dX.begin() + yStart, dX.begin() + yEnd);
+      outputWS->mutableDx(local_i).assign(dX.begin() + yStart,
+                                          dX.begin() + yEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -304,5 +304,5 @@ Parallel::ExecutionMode CreateWorkspace::getParallelExecutionMode(
   return Parallel::getCorrespondingExecutionMode(storageMode);
 }
 
-} // Algorithms
-} // Mantid
+} // namespace Algorithms
+} // namespace Mantid

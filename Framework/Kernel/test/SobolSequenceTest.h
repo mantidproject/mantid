@@ -1,8 +1,8 @@
 #ifndef SOBOLSEQUENCETEST_H_
 #define SOBOLSEQUENCETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/SobolSequence.h"
+#include <cxxtest/TestSuite.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 

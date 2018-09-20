@@ -2,11 +2,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 #define MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_
 
+#include "ExperimentOptionDefaults.h"
 #include "IReflSettingsView.h"
+#include "InstrumentOptionDefaults.h"
 #include "ui_ReflSettingsWidget.h"
 #include <memory>
-#include "ExperimentOptionDefaults.h"
-#include "InstrumentOptionDefaults.h"
 
 namespace MantidQt {
 
@@ -112,7 +112,7 @@ public:
   bool detectorCorrectionEnabled() const override;
   /// Creates hints for 'Stitch1DMany'
   void
-  createStitchHints(const std::map<std::string, std::string> &hints) override;
+  createStitchHints(const std::vector<MantidWidgets::Hint> &hints) override;
   void disableAll() override;
   void enableAll() override;
 
@@ -198,7 +198,7 @@ private:
   /// instead?
   QStringList m_columnProperties;
 };
-} // namespace Mantid
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_QTREFLSETTINGSVIEW_H_ */

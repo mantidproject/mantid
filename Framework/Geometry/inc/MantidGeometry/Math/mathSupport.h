@@ -3,9 +3,9 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Logger.h"
+#include <complex>
 #include <functional>
 #include <vector>
-#include <complex>
 
 namespace Mantid {
 
@@ -22,5 +22,5 @@ MANTID_GEOMETRY_DLL int solveCubic(InputIter, std::complex<double> &,
                                    std::complex<double> &);
 
 namespace mathSupport {}
-}
+} // namespace Mantid
 #endif

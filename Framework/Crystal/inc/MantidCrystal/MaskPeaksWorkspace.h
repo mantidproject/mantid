@@ -79,7 +79,7 @@ private:
   double m_tofMax; ///< The end of the box around the peak in tof
 };
 
-} // namespace Algorithm
+} // namespace Crystal
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MaskPeaksWorkspace_H_*/

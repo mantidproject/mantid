@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Matrix.h"
 
 #include <boost/lexical_cast.hpp>
 

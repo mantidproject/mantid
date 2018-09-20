@@ -6,10 +6,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "vtkFieldData.h"
-#include "vtkCharArray.h"
-#include "vtkNew.h"
 #include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
+#include "vtkCharArray.h"
+#include "vtkFieldData.h"
+#include "vtkNew.h"
 
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
 

@@ -44,7 +44,7 @@ private:
   std::string m_output_message;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSBEAMFLUXCORRECTION_H_*/

@@ -1,12 +1,12 @@
 #ifndef ADS_WORKSPACE_PROVIDER_TEST_H_
 #define ADS_WORKSPACE_PROVIDER_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;

@@ -221,7 +221,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 
 /**
  * Create one workspace to hold the real part and another to hold the imaginary
-* part.
+ * part.
  * We symmetrize the structure factor to negative times
  * Y-values are structure factor for each Q-value
  * X-values are time bins
@@ -229,9 +229,9 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
  * @param gws pointer to WorkspaceGroup being filled
  * @param setName string name of dataset
  * @param qvmod vector of Q-vectors' moduli
-* @param sorting_indexes permutation of qvmod indexes to render it in increasing
-* order of momemtum transfer
-*/
+ * @param sorting_indexes permutation of qvmod indexes to render it in
+ * increasing order of momemtum transfer
+ */
 void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                           const std::string setName,
                           const HistogramData::Points &qvmod,
@@ -433,5 +433,5 @@ void LoadSassena::exec() {
   H5Fclose(h5file);
 } // end of LoadSassena::exec()
 
-} // endof namespace DataHandling
-} // endof namespace Mantid
+} // namespace DataHandling
+} // namespace Mantid

@@ -15,11 +15,11 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Kernel {
 /** Constructor
-* @param otherPropName :: Name of the OTHER property that we will check.
-* @param when :: Criterion to evaluate
-* @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
-* (as string) to check for
-*/
+ * @param otherPropName :: Name of the OTHER property that we will check.
+ * @param when :: Criterion to evaluate
+ * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
+ * (as string) to check for
+ */
 EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
                                          const ePropertyCriterion when,
                                          const std::string &value)
@@ -29,14 +29,14 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
 }
 
 /** Multiple conditions constructor - takes two enable when property
-  * objects and returns the product of of the with the specified
-  * logic operator
-  *
-  * @param conditionOne :: First EnabledWhenProperty object to use
-  * @param conditionTwo :: Second EnabledWhenProperty object to use
-  * @param logicOperator :: The logic operator to apply across both
-  * conditions
-  */
+ * objects and returns the product of of the with the specified
+ * logic operator
+ *
+ * @param conditionOne :: First EnabledWhenProperty object to use
+ * @param conditionTwo :: Second EnabledWhenProperty object to use
+ * @param logicOperator :: The logic operator to apply across both
+ * conditions
+ */
 EnabledWhenProperty::EnabledWhenProperty(
     const EnabledWhenProperty &conditionOne,
     const EnabledWhenProperty &conditionTwo, eLogicOperator logicOperator)
@@ -48,15 +48,15 @@ EnabledWhenProperty::EnabledWhenProperty(
                           logicOperator) {}
 
 /** Multiple conditions constructor - takes two shared pointers to
-* EnabledWhenProperty objects and returns the product of them
-* with the specified logic operator.
-*
-* @param conditionOne :: First EnabledWhenProperty object to use
-* @param conditionTwo :: Second EnabledWhenProperty object to use
-* @param logicOperator :: The logic operator to apply across both
-*conditions
-*
-*/
+ * EnabledWhenProperty objects and returns the product of them
+ * with the specified logic operator.
+ *
+ * @param conditionOne :: First EnabledWhenProperty object to use
+ * @param conditionTwo :: Second EnabledWhenProperty object to use
+ * @param logicOperator :: The logic operator to apply across both
+ *conditions
+ *
+ */
 EnabledWhenProperty::EnabledWhenProperty(
     std::shared_ptr<EnabledWhenProperty> &&conditionOne,
     std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
@@ -74,13 +74,13 @@ EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &other)
       m_comparisonDetails{other.m_comparisonDetails} {}
 
 /**
-* Checks if the user specified combination of enabled criterion
-* returns a true or false value
-*
-* @param algo :: The algorithm containing the property to check
-* @return :: true if user specified combination was true, else false.
-* @throw ::  If any problems was found
-*/
+ * Checks if the user specified combination of enabled criterion
+ * returns a true or false value
+ *
+ * @param algo :: The algorithm containing the property to check
+ * @return :: true if user specified combination was true, else false.
+ * @throw ::  If any problems was found
+ */
 bool EnabledWhenProperty::checkComparison(const IPropertyManager *algo) const {
   const auto &comparison = m_comparisonDetails;
   const auto &objectOne = comparison->conditionOne;
@@ -102,12 +102,12 @@ bool EnabledWhenProperty::checkComparison(const IPropertyManager *algo) const {
 }
 
 /**
-* Does the validator fulfill the criterion based on the
-* other property values?
-* @param algo :: The pointer to the algorithm to check the property values of
-* @return :: True if the criteria are met else false
-* @throw :: Throws on any problems (e.g. property missing from algorithm)
-*/
+ * Does the validator fulfill the criterion based on the
+ * other property values?
+ * @param algo :: The pointer to the algorithm to check the property values of
+ * @return :: True if the criteria are met else false
+ * @throw :: Throws on any problems (e.g. property missing from algorithm)
+ */
 bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
 
   // Value of the other property
@@ -142,13 +142,13 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
 }
 
 /**
-  * Checks the algorithm given is in a valid state and the property
-  * exists then proceeds to try to get the value associated
-  *
-  * @param algo :: The pointer to the algorithm to process
-  * @return :: The value contained by said property
-  * @throw :: Throws if anything is wrong with the property or algorithm
-  */
+ * Checks the algorithm given is in a valid state and the property
+ * exists then proceeds to try to get the value associated
+ *
+ * @param algo :: The pointer to the algorithm to process
+ * @return :: The value contained by said property
+ * @throw :: Throws if anything is wrong with the property or algorithm
+ */
 std::string
 EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
   // Find the property
@@ -169,13 +169,13 @@ EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
 }
 
 /**
-  * Returns whether the property should be enabled or disabled based
-  * on the property conditions
-  *
-  * @param algo :: The algorithm containing the property
-  * @return :: True if enabled when conditions matched, else false
-  * @throw :: Throws on any error (e.g. missing property)
-  */
+ * Returns whether the property should be enabled or disabled based
+ * on the property conditions
+ *
+ * @param algo :: The algorithm containing the property
+ * @return :: True if enabled when conditions matched, else false
+ * @throw :: Throws on any error (e.g. missing property)
+ */
 bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
   if (m_propertyDetails) {
     return checkCriterion(algo);
@@ -188,12 +188,12 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
 }
 
 /**
-  * Always returns true as EnabledWhenProperty always sets the visibility
-  * on while altering whether the property is Enabled or disabled
-  *
-  * @param algo :: Pointer to the algorithm containing the property
-  * @return :: True always
-  */
+ * Always returns true as EnabledWhenProperty always sets the visibility
+ * on while altering whether the property is Enabled or disabled
+ *
+ * @param algo :: Pointer to the algorithm containing the property
+ * @return :: True always
+ */
 bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
   // VisisbleWhenProperty uses algo so we have to keep it to match interface
   UNUSED_ARG(algo);
@@ -204,15 +204,15 @@ bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
 void EnabledWhenProperty::modify_allowed_values(Property *const) {}
 
 /**
-* Clones the current EnabledWhenProperty object and returns
-* a pointer to the new object. The caller is responsible
-* for deleting this pointer when finished
-*
-* @return Pointer to cloned EnabledWhenProperty object
-*/
+ * Clones the current EnabledWhenProperty object and returns
+ * a pointer to the new object. The caller is responsible
+ * for deleting this pointer when finished
+ *
+ * @return Pointer to cloned EnabledWhenProperty object
+ */
 IPropertySettings *EnabledWhenProperty::clone() const {
   return new EnabledWhenProperty(*this);
 }
 
-} // namespace Mantid
 } // namespace Kernel
+} // namespace Mantid

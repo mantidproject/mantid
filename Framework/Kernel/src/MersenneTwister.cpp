@@ -111,5 +111,5 @@ void MersenneTwister::restore() {
     restart();
   }
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

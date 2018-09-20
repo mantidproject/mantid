@@ -35,10 +35,10 @@
 #ifndef TRANSPOSE3D_H_
 #define TRANSPOSE3D_H_
 
-#include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
+#include "MantidSINQ/DllConfig.h"
 
 class MANTID_SINQ_DLL SINQTranspose3D
     : public Mantid::API::Algorithm,

@@ -2,8 +2,8 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H
 
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -49,7 +49,7 @@ public:
 protected:
   DataProcessorPresenter *const m_presenter;
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOMMANDBASE_H*/

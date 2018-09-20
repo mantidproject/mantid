@@ -5,14 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
 #endif
-#include <Poco/NotificationCenter.h>
-#include <Poco/Notification.h>
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
 
 #include <mutex>
 
@@ -153,11 +153,11 @@ public:
   class AfterReplaceNotification : public DataServiceNotification {
   public:
     /** Constructor.
-      * @param name :: The name of the replaced object
-      *  @param newObj :: The pointer to the new object
-      *  Only new objects are guaranteed to exist when an observer receives the
+     * @param name :: The name of the replaced object
+     *  @param newObj :: The pointer to the new object
+     *  Only new objects are guaranteed to exist when an observer receives the
      * notification.
-    */
+     */
     AfterReplaceNotification(const std::string &name,
                              const boost::shared_ptr<T> newObj)
         : DataServiceNotification(name, newObj) {}
@@ -482,15 +482,22 @@ public:
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
-  std::vector<boost::shared_ptr<T>> getObjects() const {
+  std::vector<boost::shared_ptr<T>>
+  getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    const bool showingHidden = showingHiddenObjects();
+    const bool alwaysIncludeHidden =
+        includeHidden == DataServiceHidden::Include;
+    const bool usingAuto =
+        includeHidden == DataServiceHidden::Auto && showingHiddenObjects();
+
+    const bool showingHidden = alwaysIncludeHidden || usingAuto;
+
     std::vector<boost::shared_ptr<T>> objects;
     objects.reserve(datamap.size());
-    for (auto it = datamap.begin(); it != datamap.end(); ++it) {
-      if (showingHidden || !isHiddenDataServiceObject(it->first)) {
-        objects.push_back(it->second);
+    for (const auto &it : datamap) {
+      if (showingHidden || !isHiddenDataServiceObject(it.first)) {
+        objects.push_back(it.second);
       }
     }
     return objects;
@@ -503,14 +510,9 @@ public:
   }
 
   static bool showingHiddenObjects() {
-    int showingHiddenFlag;
-    const int success = ConfigService::Instance().getValue(
-        "MantidOptions.InvisibleWorkspaces", showingHiddenFlag);
-    if (success == 1 && showingHiddenFlag == 1) {
-      return true;
-    } else {
-      return false;
-    }
+    auto showingHiddenFlag = ConfigService::Instance().getValue<bool>(
+        "MantidOptions.InvisibleWorkspaces");
+    return showingHiddenFlag.get_value_or(false);
   }
 
   /// Sends notifications to observers. Observers can subscribe to

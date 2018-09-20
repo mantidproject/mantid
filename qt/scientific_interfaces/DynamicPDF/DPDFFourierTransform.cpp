@@ -1,17 +1,17 @@
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
 #include "DPDFFourierTransform.h"
-#include "DPDFInputDataControl.h"
 #include "DPDFFitControl.h"
+#include "DPDFInputDataControl.h"
 // Mantid headers from other projects
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
+#include "MantidQtWidgets/LegacyQwt/RangeSelector.h"
 // 3rd party library headers
 #include <QMessageBox>
 // System headers
@@ -55,7 +55,7 @@ FourierTransform::~FourierTransform() { delete m_propertyTree; }
 
 /**
  * @brief reset actions after user selects a new slice for fitting
-*/
+ */
 void FourierTransform::resetAfterSliceSelected() {
   // clear previewplot
   m_uiForm.previewPlotFourier->clear();
@@ -81,7 +81,7 @@ void FourierTransform::resetAfterSliceSelected() {
  * of the model evaluation.
  * @param modelWorkspaceName name of the workspace containing
  *  data, model evaluation, and residuals
-*/
+ */
 void FourierTransform::extractResidualsHistogram(
     const QString &modelWorkspaceName) {
   try {
@@ -119,7 +119,7 @@ void FourierTransform::extractResidualsHistogram(
 /**
  * @brief carry out the fourier transform with the
  * PDFFourierTransform algorithm
-*/
+ */
 void FourierTransform::transform() {
   try {
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(
@@ -361,6 +361,6 @@ void FourierTransform::updatePlot() {
   plotter->addSpectrum(name, QString::fromStdString(m_fourierName), 0,
                        m_colors[name]);
 }
-}
-}
-}
+} // namespace DynamicPDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

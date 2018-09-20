@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 #define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidKernel/Unit.h"
+#include <cxxtest/TestSuite.h>
 
 #include "SofQWTest.h"
 

@@ -13,7 +13,6 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidKernel/ArrayOrderedPairsValidator.h"
@@ -29,8 +28,8 @@ namespace Mantid {
 namespace CurveFitting {
 
 using namespace Kernel;
-using API::Workspace;
 using API::MatrixWorkspace;
+using API::Workspace;
 
 namespace {
 
@@ -443,5 +442,5 @@ FitMW::createOutputWorkspace(const std::string &baseName,
   return ws;
 }
 
-} // namespace Algorithm
+} // namespace CurveFitting
 } // namespace Mantid

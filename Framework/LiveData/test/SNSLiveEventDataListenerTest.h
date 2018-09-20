@@ -4,11 +4,11 @@
 /* This code is largely based on Russell Taylor's test for the
  * FakeEventDataLister class. */
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <Poco/Thread.h>
 #include "MantidKernel/CPUTimer.h"
+#include <Poco/Thread.h>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::Kernel::CPUTimer;

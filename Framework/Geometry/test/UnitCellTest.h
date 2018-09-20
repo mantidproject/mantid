@@ -1,17 +1,17 @@
 #ifndef MANTID_GEOMETRY_UNITCELLTEST_H_
 #define MANTID_GEOMETRY_UNITCELLTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
 #include <MantidKernel/Matrix.h>
+#include <MantidKernel/System.h>
+#include <MantidKernel/Timer.h>
+#include <cxxtest/TestSuite.h>
 
 #include <MantidGeometry/Crystal/UnitCell.h>
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::Matrix;
+using Mantid::Kernel::V3D;
 
 class UnitCellTest : public CxxTest::TestSuite {
 public:

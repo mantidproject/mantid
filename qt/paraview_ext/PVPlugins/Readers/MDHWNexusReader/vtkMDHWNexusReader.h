@@ -1,10 +1,10 @@
 #ifndef _vtkMDHWNexusReader_h
 #define _vtkMDHWNexusReader_h
 
-#include "vtkStructuredGridAlgorithm.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidKernel/make_unique.h"
+#include "vtkStructuredGridAlgorithm.h"
 #include <mutex>
 
 class vtkImplicitFunction;

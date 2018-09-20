@@ -67,8 +67,6 @@ private:
 private slots:
   /// Called when the user clicks the Py button
   void exportTabPython();
-  /// Called when the Run button is pressed.  Runs current tab.
-  void run();
   /// Opens a directory dialog.
   void openDirectoryDialog();
   /// Opens the Mantid Wiki web page of the current tab.
@@ -86,7 +84,8 @@ private:
 
   /// Change Observer for ConfigService (monitors user directories)
   Poco::NObserver<IndirectDataAnalysis,
-                  Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+                  Mantid::Kernel::ConfigValChangeNotification>
+      m_changeObserver;
 
   /// Map of unsigned int (TabChoice enum values) to tabs.
   std::map<unsigned int, IndirectDataAnalysisTab *> m_tabs;

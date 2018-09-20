@@ -14,7 +14,7 @@ namespace boost {
 namespace mpi {
 class environment;
 }
-}
+} // namespace boost
 
 namespace ParallelTestHelpers {
 class ParallelRunner;

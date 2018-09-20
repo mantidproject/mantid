@@ -25,9 +25,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #ifndef MANTIDQTMANTIDWIDGETS_ROW_H_
 #define MANTIDQTMANTIDWIDGETS_ROW_H_
-#include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Cell.h"
+#include "MantidQtWidgets/Common/Batch/RowLocation.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <boost/optional.hpp>
 #include <ostream>
 #include <vector>

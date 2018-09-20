@@ -18,13 +18,11 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/ScopedWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <Poco/Path.h>
 
@@ -921,10 +919,10 @@ public:
   }
 
   /**
-    * EMU00019489.nxs has a grouping entry in the file, but it is
-    * filled with zeros.
-    * Test loading grouping from this file
-    */
+   * EMU00019489.nxs has a grouping entry in the file, but it is
+   * filled with zeros.
+   * Test loading grouping from this file
+   */
   void test_loadingDetectorGrouping_zeroGrouping() {
     LoadMuonNexus1 alg;
     try {

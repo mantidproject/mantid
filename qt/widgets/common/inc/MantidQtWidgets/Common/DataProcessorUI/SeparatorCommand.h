@@ -48,7 +48,7 @@ public:
   QString shortcut() override { return QString(); }
   bool modifiesSettings() override { return false; }
 };
-}
-}
-}
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H*/

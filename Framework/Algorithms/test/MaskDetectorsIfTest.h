@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>

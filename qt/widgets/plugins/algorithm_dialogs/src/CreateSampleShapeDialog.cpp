@@ -3,19 +3,19 @@
 //--------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/CreateSampleShapeDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h"
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/MantidGLWidget.h"
+#include "MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h"
 
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
-#include <QMenu>
+#include <QCloseEvent>
+#include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
-#include <QComboBox>
+#include <QMenu>
 #include <QMessageBox>
 #include <QShortcut>
-#include <QCloseEvent>
 
 #include <iostream>
 
@@ -24,7 +24,7 @@ namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(CreateSampleShapeDialog)
 }
-}
+} // namespace MantidQt
 
 // Just to save writing this everywhere
 using namespace MantidQt::CustomDialogs;

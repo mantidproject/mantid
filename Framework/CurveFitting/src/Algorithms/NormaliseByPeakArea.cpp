@@ -8,8 +8,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramY.h"
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -35,7 +35,7 @@ using namespace Kernel;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
-*/
+ */
 NormaliseByPeakArea::NormaliseByPeakArea()
     : API::Algorithm(), m_inputWS(), m_mass(0.0), m_sumResults(true),
       m_normalisedWS(), m_yspaceWS(), m_fittedWS(), m_symmetrisedWS(),
@@ -59,7 +59,7 @@ const std::string NormaliseByPeakArea::category() const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
-*/
+ */
 void NormaliseByPeakArea::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<HistogramValidator>(false); // point data
@@ -99,7 +99,7 @@ void NormaliseByPeakArea::init() {
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
-*/
+ */
 void NormaliseByPeakArea::exec() {
   retrieveInputs();
   const auto yspaceIn = convertInputToY();
@@ -137,8 +137,8 @@ void NormaliseByPeakArea::exec() {
 }
 
 /**
-* Caches input details for the peak information
-*/
+ * Caches input details for the peak information
+ */
 void NormaliseByPeakArea::retrieveInputs() {
   m_inputWS = getProperty("InputWorkspace");
   m_mass = getProperty("Mass");
@@ -146,9 +146,9 @@ void NormaliseByPeakArea::retrieveInputs() {
 }
 
 /**
-* Creates & cache output workspaces.
-* @param yspaceIn Workspace containing TOF input values converted to Y-space
-*/
+ * Creates & cache output workspaces.
+ * @param yspaceIn Workspace containing TOF input values converted to Y-space
+ */
 void NormaliseByPeakArea::createOutputWorkspaces(
     const API::MatrixWorkspace_sptr &yspaceIn) {
   m_normalisedWS =
@@ -178,8 +178,8 @@ void NormaliseByPeakArea::createOutputWorkspaces(
 }
 
 /**
-* @param workspace Workspace whose units should be altered
-*/
+ * @param workspace Workspace whose units should be altered
+ */
 void NormaliseByPeakArea::setUnitsToMomentum(
     const API::MatrixWorkspace_sptr &workspace) {
   // Units
@@ -190,12 +190,12 @@ void NormaliseByPeakArea::setUnitsToMomentum(
 }
 
 /*
-* Returns a workspace converted to Y-space coordinates. @see ConvertToYSpace.
-* If summing is requested
-* then the output is rebinned to a common grid to allow summation onto a common
-* grid. The rebin min/max
-* is found from the converted workspace
-*/
+ * Returns a workspace converted to Y-space coordinates. @see ConvertToYSpace.
+ * If summing is requested
+ * then the output is rebinned to a common grid to allow summation onto a common
+ * grid. The rebin min/max
+ * is found from the converted workspace
+ */
 MatrixWorkspace_sptr NormaliseByPeakArea::convertInputToY() {
   auto alg = createChildAlgorithm("ConvertToYSpace", 0.0, 0.05, false);
   alg->setProperty("InputWorkspace", m_inputWS);
@@ -221,13 +221,13 @@ MatrixWorkspace_sptr NormaliseByPeakArea::convertInputToY() {
 }
 
 /**
-* Runs fit using the ComptonPeakProfile function on the given spectrum of the
-* input workspace to determine
-* the peak area for the input mass
-* @param yspace A workspace in units of Y
-* @param index Index of the spectrum to fit
-* @return The value of the peak area
-*/
+ * Runs fit using the ComptonPeakProfile function on the given spectrum of the
+ * input workspace to determine
+ * the peak area for the input mass
+ * @param yspace A workspace in units of Y
+ * @param index Index of the spectrum to fit
+ * @return The value of the peak area
+ */
 double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
                                           const size_t index) {
   auto alg = createChildAlgorithm("Fit");
@@ -276,10 +276,10 @@ double NormaliseByPeakArea::fitToMassPeak(const MatrixWorkspace_sptr &yspace,
 }
 
 /**
-* Divides the input Y & E data by the given factor
-* @param area Value to use as normalisation factor
-* @param index Index on input spectrum to normalise
-*/
+ * Divides the input Y & E data by the given factor
+ * @param area Value to use as normalisation factor
+ * @param index Index on input spectrum to normalise
+ */
 void NormaliseByPeakArea::normaliseTOFData(const double area,
                                            const size_t index) {
   m_normalisedWS->mutableY(index) = m_inputWS->y(index) / area;
@@ -287,11 +287,11 @@ void NormaliseByPeakArea::normaliseTOFData(const double area,
 }
 
 /**
-* @param accumWS Workspace used to accumulate the final data
-* @param yValues Input signal values for y-space
-* @param eValues Input errors values for y-space
-* @param index Index of the workspace. Only used when not summing.
-*/
+ * @param accumWS Workspace used to accumulate the final data
+ * @param yValues Input signal values for y-space
+ * @param eValues Input errors values for y-space
+ * @param index Index of the workspace. Only used when not summing.
+ */
 void NormaliseByPeakArea::saveToOutput(
     const API::MatrixWorkspace_sptr &accumWS,
     const Kernel::cow_ptr<HistogramData::HistogramY> &yValues,
@@ -325,8 +325,8 @@ void NormaliseByPeakArea::saveToOutput(
 }
 
 /**
-* Symmetrises the yspace data about the origin
-*/
+ * Symmetrises the yspace data about the origin
+ */
 void NormaliseByPeakArea::symmetriseYSpace() {
   // A window is defined the around the Y value of each data point & every other
   // point is

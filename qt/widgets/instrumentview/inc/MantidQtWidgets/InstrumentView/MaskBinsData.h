@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include <QMap>
 #include <QList>
+#include <QMap>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -58,7 +58,7 @@ private:
   QList<BinMask> m_masks;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /*MASKBINSDATA_H_*/

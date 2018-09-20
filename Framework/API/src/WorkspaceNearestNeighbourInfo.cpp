@@ -1,6 +1,6 @@
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
-#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/make_unique.h"
 
@@ -8,12 +8,12 @@ namespace Mantid {
 namespace API {
 
 /** Creates WorkspaceNearestNeighbourInfo.
-*
-* @param workspace :: Reference to workspace providing instrument and
-* spectrum-detector mapping
-* @param ignoreMaskedDetectors :: if true, masked detectors are ignored
-* @param nNeighbours :: number of neighbours to include
-*/
+ *
+ * @param workspace :: Reference to workspace providing instrument and
+ * spectrum-detector mapping
+ * @param ignoreMaskedDetectors :: if true, masked detectors are ignored
+ * @param nNeighbours :: number of neighbours to include
+ */
 WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
     const MatrixWorkspace &workspace, const bool ignoreMaskedDetectors,
     const int nNeighbours)
@@ -31,12 +31,12 @@ WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
 WorkspaceNearestNeighbourInfo::~WorkspaceNearestNeighbourInfo() = default;
 
 /** Queries the WorkspaceNearestNeighbours object for the selected detector.
-* NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
-*
-* @param comp :: pointer to the querying detector
-* @param radius :: distance from detector on which to filter results
-* @return map of DetectorID to distance for the nearest neighbours
-*/
+ * NOTE! getNeighbours(spectrumNumber, radius) is MUCH faster.
+ *
+ * @param comp :: pointer to the querying detector
+ * @param radius :: distance from detector on which to filter results
+ * @return map of DetectorID to distance for the nearest neighbours
+ */
 std::map<specnum_t, Kernel::V3D>
 WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
                                              const double radius) const {
@@ -53,12 +53,12 @@ WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
 }
 
 /** Queries the WorkspaceNearestNeighbours object for the selected spectrum
-* number.
-*
-* @param spec :: spectrum number of the detector you are looking at
-* @param radius :: distance from detector on which to filter results
-* @return map of DetectorID to distance for the nearest neighbours
-*/
+ * number.
+ *
+ * @param spec :: spectrum number of the detector you are looking at
+ * @param radius :: distance from detector on which to filter results
+ * @return map of DetectorID to distance for the nearest neighbours
+ */
 std::map<specnum_t, Kernel::V3D>
 WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
                                              const double radius) const {
@@ -66,11 +66,11 @@ WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
 }
 
 /** Queries the WorkspaceNearestNeighbours object for the selected spectrum
-* number.
-*
-* @param spec :: spectrum number of the detector you are looking at
-* @return map of DetectorID to distance for the nearest neighbours
-*/
+ * number.
+ *
+ * @param spec :: spectrum number of the detector you are looking at
+ * @return map of DetectorID to distance for the nearest neighbours
+ */
 std::map<specnum_t, Kernel::V3D>
 WorkspaceNearestNeighbourInfo::getNeighboursExact(specnum_t spec) const {
   return m_nearestNeighbours->neighbours(spec);

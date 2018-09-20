@@ -47,6 +47,13 @@ add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
   $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
 )
 
+#Linking errors on Ubuntu 18.04 with --enable-new-dtags 
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  string(APPEND CMAKE_MODULE_LINKER_FLAGS " -Wl,--disable-new-dtags" )
+  string(APPEND CMAKE_EXE_LINKER_FLAGS " -Wl,--disable-new-dtags" )
+  string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,--disable-new-dtags" )
+endif ()
+
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
   add_compile_options ( -Wpedantic )
@@ -89,10 +96,7 @@ if(WITH_UBSAN)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SAN_FLAGS}" )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED 11)
-
-# XCode isn't picking up the standard set above.
+# XCode isn't picking up the c++ standard by CMAKE_CXX_STANDARD
 if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_XCODE_ATTRIBUTE_OTHER_CPLUSPLUSFLAGS "${GNUFLAGS} -Woverloaded-virtual -fno-operator-names")
   set ( CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++14")

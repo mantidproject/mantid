@@ -1,8 +1,8 @@
 #ifndef MAKE_COW_TEST_H_
 #define MAKE_COW_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/make_cow.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 
@@ -15,7 +15,7 @@ public:
   MyType(const T &, const T &) : args(2) {}
   const int args;
 };
-}
+} // namespace
 
 class MakeCowTest : public CxxTest::TestSuite {
 public:

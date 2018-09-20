@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAHANDLING_EventWorkspaceCollectionTEST_H_
 #define MANTID_DATAHANDLING_EventWorkspaceCollectionTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include <cxxtest/TestSuite.h>
 
-#include <memory>
 #include <boost/make_shared.hpp>
+#include <memory>
 
-#include "MantidDataHandling/EventWorkspaceCollection.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
 
 using namespace Mantid;
@@ -33,7 +33,7 @@ makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
   return decorator;
 }
-}
+} // namespace
 
 class EventWorkspaceCollectionTest : public CxxTest::TestSuite {
 public:

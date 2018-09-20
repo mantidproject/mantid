@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Crystal/GroupTransformation.h"
-#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 
 #include <unordered_set>
 

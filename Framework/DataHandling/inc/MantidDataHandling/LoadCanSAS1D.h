@@ -11,7 +11,7 @@ namespace Poco {
 namespace XML {
 class Element;
 }
-}
+} // namespace Poco
 
 namespace Mantid {
 namespace DataHandling {
@@ -103,7 +103,7 @@ protected:
   void createSampleInformation(const Poco::XML::Element *const sasEntry,
                                Mantid::API::MatrixWorkspace_sptr wSpace) const;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 
 #endif

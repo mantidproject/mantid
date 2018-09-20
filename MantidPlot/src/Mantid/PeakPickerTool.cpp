@@ -25,7 +25,7 @@
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeakPickerTool");
-}
+} // namespace
 
 PeakPickerTool::PeakPickerTool(
     Graph *graph,
@@ -581,11 +581,11 @@ void PeakPickerTool::workspaceIndexChanged(int i) {
 }
 
 /**
-  * Slot. Called when the workspace name is changed in the FitBrowser.
-  * It doesn't allow changing the workspace name unless it is a name of
-  * the workspace group containing m_wsName
-  * @param wsName :: The new workspace name.
-  */
+ * Slot. Called when the workspace name is changed in the FitBrowser.
+ * It doesn't allow changing the workspace name unless it is a name of
+ * the workspace group containing m_wsName
+ * @param wsName :: The new workspace name.
+ */
 void PeakPickerTool::workspaceNameChanged(const QString &wsName) {
   if (wsName != m_wsName) {
     Mantid::API::Workspace_sptr ws;
@@ -971,9 +971,9 @@ void PeakPickerTool::resetRange() {
 }
 
 /**
-* Checks whether there is a parameters file attached to the plot.
-* If so, it opens up that parameters table.
-*/
+ * Checks whether there is a parameters file attached to the plot.
+ * If so, it opens up that parameters table.
+ */
 void PeakPickerTool::getParameters() {
   QString parameterWs = m_wsName + "_Parameters";
   if (Mantid::API::AnalysisDataService::Instance().doesExist(
@@ -1066,10 +1066,10 @@ bool PeakPickerTool::isMuonData() const {
   return (getMuonPointer() != nullptr);
 }
 /**
-* Tests if the peak picker tool is connected to a MuonFitPropertyBrowser and set
-* to multiple fitting
-* @returns :: True for muon multiple fit data, false otherwise
-*/
+ * Tests if the peak picker tool is connected to a MuonFitPropertyBrowser and
+ * set to multiple fitting
+ * @returns :: True for muon multiple fit data, false otherwise
+ */
 bool PeakPickerTool::isMuonMultiFitData() const {
   const auto muonBrowser = getMuonPointer();
   if (muonBrowser != nullptr) {

@@ -170,11 +170,7 @@ public:
              normal_distribution<_RT> &__x);
 };
 
-// clang-format off
-#if !defined(__clang__)
-GCC_DIAG_OFF(maybe-uninitialized)
-#endif
-// clang-format on
+GNU_DIAG_OFF("maybe-uninitialized")
 template <class _RealType>
 template <class _URNG>
 _RealType normal_distribution<_RealType>::operator()(_URNG &__g,
@@ -200,11 +196,7 @@ _RealType normal_distribution<_RealType>::operator()(_URNG &__g,
   }
   return _Up * __p.stddev() + __p.mean();
 }
-// clang-format off
-#if !defined(__clang__)
-GCC_DIAG_ON(maybe-uninitialized)
-#endif
-// clang-format on
+GNU_DIAG_ON("maybe-uninitialized")
 
 template <class _CharT, class _Traits, class _RT>
 std::basic_ostream<_CharT, _Traits> &

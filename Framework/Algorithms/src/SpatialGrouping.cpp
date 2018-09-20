@@ -3,34 +3,34 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 
 #include <map>
 
 #include <fstream>
 
-#include <algorithm>
 #include "MantidAPI/ISpectrum.h"
+#include <algorithm>
 
 namespace {
 /*
-* Comparison operator for use in std::sort when dealing with a vector of
-* std::pair<int,double> where int is DetectorID and double is distance from
-* centre point.
-* Needs to be outside of SpatialGrouping class because of the way STL handles
-* passing functions as arguments.
-* @param left :: element to compare
-* @param right :: element to compare
-* @return true if left should come before right in the order
-*/
+ * Comparison operator for use in std::sort when dealing with a vector of
+ * std::pair<int,double> where int is DetectorID and double is distance from
+ * centre point.
+ * Needs to be outside of SpatialGrouping class because of the way STL handles
+ * passing functions as arguments.
+ * @param left :: element to compare
+ * @param right :: element to compare
+ * @return true if left should come before right in the order
+ */
 static bool
 compareIDPair(const std::pair<int64_t, Mantid::Kernel::V3D> &left,
               const std::pair<int64_t, Mantid::Kernel::V3D> &right) {
   return (left.second.norm() < right.second.norm());
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,8 +38,8 @@ namespace Algorithms {
 DECLARE_ALGORITHM(SpatialGrouping)
 
 /**
-* init() method implemented from Algorithm base class
-*/
+ * init() method implemented from Algorithm base class
+ */
 void SpatialGrouping::init() {
   declareProperty(Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input),
@@ -49,17 +49,19 @@ void SpatialGrouping::init() {
                       "Filename", "", Mantid::API::FileProperty::Save, ".xml"),
                   "Name (and location) in which to save the file. Having a "
                   "suffix of ''.xml'' is recommended.");
-  declareProperty("SearchDistance", 2.5, "The number of pixel widths in which "
-                                         "to search for neighbours of the "
-                                         "detector.");
-  declareProperty("GridSize", 3, "The size of the grid that should be grouped. "
-                                 "i.e, 3 (the default) will select a group of "
-                                 "nine detectors centred in a 3 by 3 grid.");
+  declareProperty("SearchDistance", 2.5,
+                  "The number of pixel widths in which "
+                  "to search for neighbours of the "
+                  "detector.");
+  declareProperty("GridSize", 3,
+                  "The size of the grid that should be grouped. "
+                  "i.e, 3 (the default) will select a group of "
+                  "nine detectors centred in a 3 by 3 grid.");
 }
 
 /**
-* exec() method implemented from Algorithm base class
-*/
+ * exec() method implemented from Algorithm base class
+ */
 void SpatialGrouping::exec() {
   API::MatrixWorkspace_const_sptr inputWorkspace =
       getProperty("InputWorkspace");
@@ -188,16 +190,17 @@ void SpatialGrouping::exec() {
 }
 
 /**
-* This method will, using the NearestNeighbours methods, expand our view on the
-* nearby detectors from
-* the standard eight closest that are recorded in the graph.
-* @param nearest :: neighbours found in previous requests
-* @param spec :: pointer to the central detector, for calculating distances
-* @param noNeighbours :: number of neighbours that must be found (in total,
-* including those already found)
-* @param bbox :: BoundingBox object representing the search region
-* @return true if neighbours were found matching the parameters, false otherwise
-*/
+ * This method will, using the NearestNeighbours methods, expand our view on the
+ * nearby detectors from
+ * the standard eight closest that are recorded in the graph.
+ * @param nearest :: neighbours found in previous requests
+ * @param spec :: pointer to the central detector, for calculating distances
+ * @param noNeighbours :: number of neighbours that must be found (in total,
+ * including those already found)
+ * @param bbox :: BoundingBox object representing the search region
+ * @return true if neighbours were found matching the parameters, false
+ * otherwise
+ */
 bool SpatialGrouping::expandNet(
     std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec,
     const size_t noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
@@ -262,13 +265,13 @@ bool SpatialGrouping::expandNet(
 }
 
 /**
-* This method will trim the result set down to the specified number required by
-* sorting
-* the results and removing those that are the greatest distance away.
-* @param nearest :: map of values that need to be sorted, will be modified by
-* the method
-* @param noNeighbours :: number of elements that should be kept
-*/
+ * This method will trim the result set down to the specified number required by
+ * sorting
+ * the results and removing those that are the greatest distance away.
+ * @param nearest :: map of values that need to be sorted, will be modified by
+ * the method
+ * @param noNeighbours :: number of elements that should be kept
+ */
 void SpatialGrouping::sortByDistance(
     std::map<detid_t, Mantid::Kernel::V3D> &nearest,
     const size_t noNeighbours) {
@@ -287,17 +290,17 @@ void SpatialGrouping::sortByDistance(
   }
 }
 /**
-* Creates a bounding box representing the area in which to search for
-* neighbours, and a scaling vector representing the dimensions
-* of the detector
-*
-* @param det :: input detector
-*
-* @param bndbox :: reference to BoundingBox object (changed by this function)
-*
-* @param searchDist :: search distance in pixels, number of pixels to search
-* through for finding group
-*/
+ * Creates a bounding box representing the area in which to search for
+ * neighbours, and a scaling vector representing the dimensions
+ * of the detector
+ *
+ * @param det :: input detector
+ *
+ * @param bndbox :: reference to BoundingBox object (changed by this function)
+ *
+ * @param searchDist :: search distance in pixels, number of pixels to search
+ * through for finding group
+ */
 void SpatialGrouping::createBox(const Geometry::IDetector &det,
                                 Geometry::BoundingBox &bndbox,
                                 double searchDist) {
@@ -327,12 +330,12 @@ void SpatialGrouping::createBox(const Geometry::IDetector &det,
 }
 
 /**
-* Enlarges values given by a certain factor. Used to "grow" the BoundingBox
-* object.
-* @param min :: min value (changed by this function)
-* @param max :: max value (changed by this function)
-* @param factor :: factor by which to grow the values
-*/
+ * Enlarges values given by a certain factor. Used to "grow" the BoundingBox
+ * object.
+ * @param min :: min value (changed by this function)
+ * @param max :: max value (changed by this function)
+ * @param factor :: factor by which to grow the values
+ */
 void SpatialGrouping::growBox(double &min, double &max, const double factor) {
   double rng = max - min;
   double mid = (max + min) / 2.0;

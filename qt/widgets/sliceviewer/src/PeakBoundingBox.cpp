@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
-#include <stdexcept>
 #include <boost/format.hpp>
 #include <cmath>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -175,9 +175,9 @@ PeakBoundingBox PeakBoundingBox::makeSliceBox(const double &sliceDelta) const {
 }
 
 /**
-* Export extents as as string of comma separated values.
-* @return vector of extents min, max in x, y, z
-*/
+ * Export extents as as string of comma separated values.
+ * @return vector of extents min, max in x, y, z
+ */
 std::vector<double> PeakBoundingBox::toExtents() const {
   std::vector<double> extents(6);
   extents[0] = m_left();
@@ -225,5 +225,5 @@ void PeakBoundingBox::transformBox(
   m_back = Back(newTopRight.Z());
   m_slicePoint = SlicePoint(newSlicePoint.Z());
 }
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt

@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
-#include <QWidget>
 #include <QCursor>
+#include <QWidget>
 
 // Forward dec
 class QwtPlot;
@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 // Forward dec
 class InputController;
-}
+} // namespace MantidWidgets
 
 namespace SliceViewer {
 // Forward dec
@@ -104,7 +104,7 @@ private slots:
   void erasePeaks(const QRect &rect);
   void addPeakAt(int coordX, int coordY);
 };
-}
-}
+} // namespace SliceViewer
+} // namespace MantidQt
 
 #endif // MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_

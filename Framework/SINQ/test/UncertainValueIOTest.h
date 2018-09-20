@@ -1,10 +1,10 @@
 #ifndef UNCERTAINVALUEIOTEST_H
 #define UNCERTAINVALUEIOTEST_H
 
-#include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
+#include <cxxtest/TestSuite.h>
+#include <stdexcept>
 
 using namespace Mantid::Poldi;
 

@@ -40,6 +40,6 @@ bool areOnSameRow(QModelIndex const &a, QModelIndex const &b) {
   return a.parent() == b.parent() && a.row() == b.row() &&
          a.model() == b.model();
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt

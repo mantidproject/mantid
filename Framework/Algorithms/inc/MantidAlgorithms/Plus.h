@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -96,7 +96,7 @@ private:
                               const API::MatrixWorkspace_const_sptr rhs) const;
 };
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_PLUS_H_*/

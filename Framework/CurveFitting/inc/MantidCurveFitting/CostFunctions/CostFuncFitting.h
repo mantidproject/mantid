@@ -7,8 +7,8 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
 //#include "MantidKernel/Matrix.h"
-#include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
+#include "MantidCurveFitting/GSLVector.h"
 
 namespace Mantid {
 namespace CurveFitting {

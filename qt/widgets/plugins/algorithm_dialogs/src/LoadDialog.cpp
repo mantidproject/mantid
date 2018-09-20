@@ -33,7 +33,7 @@ struct HoldFlag {
   bool initial;
   bool &heldflag;
 };
-}
+} // namespace
 
 // Blocks signals sent to the load button for the duration
 // of it's lifetime.
@@ -69,8 +69,8 @@ LoadDialog::LoadDialog(QWidget *parent)
 //---------------------------------------------------------------------------
 
 /**
-* Activated when the file has been changed
-*/
+ * Activated when the file has been changed
+ */
 void LoadDialog::createDynamicWidgets() {
   HoldFlag hold(m_populating, true);
 
@@ -89,10 +89,10 @@ void LoadDialog::helpClicked() {
 }
 
 /**
-* Use property 'OutputWorkspace' as suggestion if present, otherwise derive a
-* workspace name from
-* the file (base) name
-*/
+ * Use property 'OutputWorkspace' as suggestion if present, otherwise derive a
+ * workspace name from
+ * the file (base) name
+ */
 void LoadDialog::suggestWSName() {
   if (!m_form.workspaceEdit->isEnabled())
     return;
@@ -110,10 +110,10 @@ void LoadDialog::suggestWSName() {
 }
 
 /**
-* Connect/Disconnect the signal that updates the workspace name with a suggested
-* value
-* @param on :: If true then a workspace name will be suggested
-*/
+ * Connect/Disconnect the signal that updates the workspace name with a
+ * suggested value
+ * @param on :: If true then a workspace name will be suggested
+ */
 void LoadDialog::enableNameSuggestion(const bool on) {
   if (on) {
     connect(m_form.fileWidget, SIGNAL(filesFound()), this,
@@ -192,8 +192,8 @@ void LoadDialog::initLayout() {
 }
 
 /**
-* Save the input after OK is clicked
-*/
+ * Save the input after OK is clicked
+ */
 void LoadDialog::saveInput() {
   m_form.fileWidget->saveSettings("Mantid/Algorithms/Load");
   AlgorithmDialog::saveInput();
@@ -203,9 +203,9 @@ void LoadDialog::saveInput() {
 }
 
 /**
-* Tie static widgets to their properties
-* @param readHistory :: If true then the history will be re read.
-*/
+ * Tie static widgets to their properties
+ * @param readHistory :: If true then the history will be re read.
+ */
 void LoadDialog::tieStaticWidgets(const bool readHistory) {
   // If a workspace validator asterisk exists, remove it since the underlying
   // AlgorithmDialog gets confused
@@ -220,9 +220,9 @@ void LoadDialog::tieStaticWidgets(const bool readHistory) {
 }
 
 /**
-* Clear the old widgets for a new Loader type
-* @param layout :: The layout containing the child layouts/widgets
-*/
+ * Clear the old widgets for a new Loader type
+ * @param layout :: The layout containing the child layouts/widgets
+ */
 void LoadDialog::removeOldInputWidgets(QVBoxLayout *layout) {
   // Remove the old widgets if necessary
   if (layout->count() > 2) {
@@ -243,8 +243,8 @@ void LoadDialog::removeOldInputWidgets(QVBoxLayout *layout) {
 }
 
 /**
-* Create the dynamic widgets for the concrete loader
-*/
+ * Create the dynamic widgets for the concrete loader
+ */
 void LoadDialog::createDynamicLayout() {
   // Disable the layout so that a widget cannot be interacted with while it may
   // be being deleted
@@ -316,11 +316,11 @@ void LoadDialog::createDynamicLayout() {
 }
 
 /**
-* Return a layout containing suitable widgets for the given property
-* @param prop A pointer to the algorithm property
-* @param propertyLayout A layout where the widgets are to be placed
-* @param parent The parent widget
-*/
+ * Return a layout containing suitable widgets for the given property
+ * @param prop A pointer to the algorithm property
+ * @param propertyLayout A layout where the widgets are to be placed
+ * @param parent The parent widget
+ */
 int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
                                          QVBoxLayout *propertyLayout,
                                          QWidget *parent) {
@@ -390,5 +390,5 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
 
   return inputWidget->geometry().height();
 }
-}
-}
+} // namespace CustomDialogs
+} // namespace MantidQt

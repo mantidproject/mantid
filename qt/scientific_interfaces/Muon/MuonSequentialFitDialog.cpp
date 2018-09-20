@@ -1,15 +1,15 @@
 #include "MuonSequentialFitDialog.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "MuonAnalysisFitDataPresenter.h"
 #include "MantidQtWidgets/Common/MuonFitPropertyBrowser.h"
+#include "MuonAnalysisFitDataPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -55,7 +55,7 @@ std::string removePath(const std::string &labelIn) {
   }
   return removeSubPath(labelIn);
 }
-}
+} // namespace
 const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 
 /**
@@ -607,4 +607,4 @@ void MuonSequentialFitDialog::stopFit() {
 }
 
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt

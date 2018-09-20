@@ -1,21 +1,21 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
 
+#include "../Muon/MuonAnalysisResultTableCreator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "../Muon/MuonAnalysisResultTableCreator.h"
 
-#include <cxxtest/TestSuite.h>
 #include <QMap>
 #include <QString>
 #include <QVariant>
+#include <cxxtest/TestSuite.h>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
@@ -340,13 +340,13 @@ public:
     // of its columns when they are deleted
     const auto table = []() {
       auto tab = WorkspaceFactory::Instance().createTable();
-      /*auto col = */ tab->addColumn("str", "Run");
-      /*auto col = */ tab->addColumn("double", "A0");
-      /*auto col = */ tab->addColumn("double", "A0Error");
-      /*auto col = */ tab->addColumn("double", "A1");
-      /*auto col = */ tab->addColumn("double", "A1Error");
-      /*auto col = */ tab->addColumn("double", "Cost function");
-      /*auto col = */ tab->addColumn("double", "Cost function Error");
+      tab->addColumn("str", "Run");
+      tab->addColumn("double", "A0");
+      tab->addColumn("double", "A0Error");
+      tab->addColumn("double", "A1");
+      tab->addColumn("double", "A1Error");
+      tab->addColumn("double", "Cost function");
+      tab->addColumn("double", "Cost function Error");
 
       TableRow row1 = tab->appendRow();
       TableRow row2 = tab->appendRow();
@@ -466,10 +466,18 @@ private:
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "workspace_Name");
     const std::vector<std::string> titles = {
-        "f0.A0",    "f0.A0Error",  "f1.A",               "f1.AError",
+        "f0.A0",
+        "f0.A0Error",
+        "f1.A",
+        "f1.AError",
         "f1.Omega", // no omega error as param is fixed
-        "f1.Phi",   "f1.PhiError", "f1.Sigma",           "f1.SigmaError",
-        "f1.Tau",   "f1.TauError", "Cost function value"};
+        "f1.Phi",
+        "f1.PhiError",
+        "f1.Sigma",
+        "f1.SigmaError",
+        "f1.Tau",
+        "f1.TauError",
+        "Cost function value"};
     for (const auto &log : m_logs) {
       table->addColumn("double", log.toStdString());
     }

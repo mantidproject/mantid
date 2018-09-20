@@ -1,11 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADLLB_H_
 #define MANTID_DATAHANDLING_LOADLLB_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/System.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {

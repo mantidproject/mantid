@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/Jacobian.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;

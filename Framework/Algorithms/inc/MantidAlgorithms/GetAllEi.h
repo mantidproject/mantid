@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_GETALLEI_H_
 #define MANTID_ALGORITHMS_GETALLEI_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 //#include "MantidAPI/IAlgorithm.h"
 
 namespace Mantid {
@@ -77,9 +77,9 @@ private:
 protected: // for testing, private otherwise.
   // prepare working workspace with appropriate monitor spectra for fitting
   API::MatrixWorkspace_sptr
-      // prepare matrix workspace to analyze monitor signal
-      buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
-                          size_t &wsIndex0);
+  // prepare matrix workspace to analyze monitor signal
+  buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
+                      size_t &wsIndex0);
 
   /**Return average time series log value for the appropriately filtered log*/
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,

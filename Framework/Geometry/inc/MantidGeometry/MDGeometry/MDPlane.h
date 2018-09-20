@@ -1,10 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_MDPLANE_H_
 #define MANTID_MDALGORITHMS_MDPLANE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include <vector>
+#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include <vector>
 
 namespace Mantid {
 namespace Geometry {

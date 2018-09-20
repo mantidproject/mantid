@@ -11,7 +11,6 @@ namespace IDA {
 JumpFitAddWorkspaceDialog::JumpFitAddWorkspaceDialog(QWidget *parent)
     : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.dsWorkspace->showWorkspaceGroups(false);
 
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this,
           SLOT(emitWorkspaceChanged(const QString &)));

@@ -29,13 +29,13 @@
  ***************************************************************************/
 #include "PlotWizard.h"
 #include "ApplicationWindow.h"
-#include "Table.h"
 #include "Graph3D.h"
+#include "Table.h"
 
 #include <QApplication>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QListWidget>
-#include <QComboBox>
 
 PlotWizard::PlotWizard(QWidget *parent, Qt::WFlags fl) : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Select Columns to Plot"));

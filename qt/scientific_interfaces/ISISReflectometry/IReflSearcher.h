@@ -40,6 +40,6 @@ public:
   virtual ~IReflSearcher(){};
   virtual Mantid::API::ITableWorkspace_sptr search(const std::string &text) = 0;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif

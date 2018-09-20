@@ -1,8 +1,8 @@
 #ifndef MANTID_CONFIGPROPERTYOBSERVERTEST_H_
 #define MANTID_CONFIGPROPERTYOBSERVERTEST_H_
 
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -1,13 +1,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "DllConfig.h"
 #include "EnggDiffFittingViewQtWidget.h"
 #include "EnggDiffGSASFittingViewQtWidget.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"

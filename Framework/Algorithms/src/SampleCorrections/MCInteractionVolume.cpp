@@ -25,7 +25,7 @@ double attenuation(double rho, double sigma, double length) {
   using std::exp;
   return exp(-100 * rho * sigma * length);
 }
-}
+} // namespace
 
 /**
  * Construct the volume encompassing the sample + any environment kit. The

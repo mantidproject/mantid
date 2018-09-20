@@ -2,8 +2,8 @@
 #define I_MD_DIMENSION_H
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
@@ -18,7 +18,7 @@ namespace Kernel {
 // Forward declarations
 //---------------------------------------------------------------------------
 class UnitLabel;
-}
+} // namespace Kernel
 
 namespace Geometry {
 /** The class describes one dimension of multidimensional dataset representing
@@ -125,6 +125,6 @@ using IMDDimension_const_sptr = boost::shared_ptr<const IMDDimension>;
 using VecIMDDimension_const_sptr = std::vector<IMDDimension_const_sptr>;
 /// Vector of shared pointers to IMDDimensions.
 using VecIMDDimension_sptr = std::vector<IMDDimension_sptr>;
-}
-}
+} // namespace Geometry
+} // namespace Mantid
 #endif

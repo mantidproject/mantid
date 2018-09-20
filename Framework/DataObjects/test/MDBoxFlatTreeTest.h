@@ -2,12 +2,12 @@
 #define MANTID_DATAOBJECTS_MDBOX_FLATTREE_H_
 
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
+#include <Poco/File.h>
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
 
 using Mantid::DataObjects::MDBoxFlatTree;
 

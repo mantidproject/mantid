@@ -4,14 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
-#include <stdexcept>
-#include <vector>
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>
+#include <stdexcept>
+#include <vector>
 
 using namespace Mantid::API;
 

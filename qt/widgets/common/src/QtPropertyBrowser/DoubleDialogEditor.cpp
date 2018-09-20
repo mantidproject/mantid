@@ -1,13 +1,13 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLabel>
 #include <QDialog>
-#include <QSettings>
 #include <QDoubleValidator>
 #include <QEvent>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QSettings>
 
 /**
  * Constructor.

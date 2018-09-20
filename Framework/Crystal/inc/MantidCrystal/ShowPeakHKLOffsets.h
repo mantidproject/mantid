@@ -37,8 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef SHOWPEAKHKLOFFSETS_H_
 #define SHOWPEAKHKLOFFSETS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -64,7 +64,7 @@ private:
 
   void exec() override;
 };
-}
-}
+} // namespace Crystal
+} // namespace Mantid
 
 #endif /* ShowPeakHKLOffsets_H_ */

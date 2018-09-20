@@ -1,14 +1,14 @@
 #ifndef MANTID_DATAHANDLING_MaskPeaksWorkspaceTEST_H_
 #define MANTID_DATAHANDLING_MaskPeaksWorkspaceTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/MaskPeaksWorkspace.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidDataObjects/EventList.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid;

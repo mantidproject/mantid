@@ -1,12 +1,12 @@
 #ifndef MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
 #define MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
 
-#include "MantidQtWidgets/LegacyQwt/DllOption.h"
-#include <qwt_plot.h>
-#include <QPainter>
-#include "qwt_text.h"
-#include "MantidAPI/Workspace_fwd.h"
 #include "DllOption.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidQtWidgets/LegacyQwt/DllOption.h"
+#include "qwt_text.h"
+#include <QPainter>
+#include <qwt_plot.h>
 
 namespace MantidQt {
 namespace MantidWidgets {

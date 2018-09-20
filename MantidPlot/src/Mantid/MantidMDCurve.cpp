@@ -15,7 +15,7 @@ using namespace MantidQt::API;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidMDCurve");
-}
+} // namespace
 
 /**
  *  @param wsName :: The workspace name.
@@ -194,7 +194,7 @@ void MantidMDCurve::dataReset(const QString &wsName) {
 
 /* This method saves the curve details to a string.
  * Useful for loading/saving mantid project.
-*/
+ */
 QString MantidMDCurve::saveToString() {
   QString s;
   s = "MantidMDCurve\t" + m_wsName + "\t" + QString::number(m_drawErrorBars) +

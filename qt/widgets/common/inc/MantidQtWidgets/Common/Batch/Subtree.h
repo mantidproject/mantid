@@ -37,10 +37,11 @@ template <typename RowLocationConstIterator>
 bool hasSubtreeRootShallowerThanFirstRoot(
     RowLocationConstIterator sortedRegionBegin,
     RowLocationConstIterator sortedRegionEnd) {
-  auto firstLocationAtMinimumDepth =
-      std::min_element(sortedRegionBegin, sortedRegionEnd,
-                       [](RowLocation const &lhs, RowLocation const &rhs)
-                           -> bool { return lhs.depth() < rhs.depth(); });
+  auto firstLocationAtMinimumDepth = std::min_element(
+      sortedRegionBegin, sortedRegionEnd,
+      [](RowLocation const &lhs, RowLocation const &rhs) -> bool {
+        return lhs.depth() < rhs.depth();
+      });
   return firstLocationAtMinimumDepth != sortedRegionBegin;
 }
 
@@ -89,7 +90,7 @@ bool allSubtreeRootsShareAParentAndAllSubtreeNodesAreConnected(
          !hasSubtreeRootDeeperThanFirstRoot(subtreeRootDepth, sortedRegionBegin,
                                             sortedRegionEnd);
 }
-}
-}
-}
+} // namespace Batch
+} // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTMANTIDWIDGETS_SUBTREE_H_

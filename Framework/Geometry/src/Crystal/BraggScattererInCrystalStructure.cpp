@@ -1,11 +1,11 @@
 #include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
 #include <stdexcept>
 
-#include <boost/regex.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/algorithm/string.hpp>
-#include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidKernel/ListValidator.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)

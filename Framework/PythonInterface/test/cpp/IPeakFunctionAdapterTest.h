@@ -3,9 +3,9 @@
 
 #include "FunctionAdapterTestCommon.h"
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
-#include <cxxtest/TestSuite.h>
 #include <algorithm>
 #include <array>
+#include <cxxtest/TestSuite.h>
 #include <numeric>
 
 class IPeakFunctionAdapterTest : public CxxTest::TestSuite {
@@ -54,8 +54,8 @@ public:
 
   void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
     using Mantid::API::IPeakFunction_sptr;
-    using Mantid::PythonInterface::createTestFunction;
     using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    using Mantid::PythonInterface::createTestFunction;
     IPeakFunction_sptr noDerivPeakFunction;
     TS_ASSERT_THROWS_NOTHING(
         noDerivPeakFunction =
@@ -75,8 +75,8 @@ public:
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IPeakFunction_sptr;
-    using Mantid::PythonInterface::createTestFunction;
     using Mantid::PythonInterface::FunctionAdapterTestJacobian;
+    using Mantid::PythonInterface::createTestFunction;
     IPeakFunction_sptr peakFuncWithDeriv;
     TS_ASSERT_THROWS_NOTHING(
         peakFuncWithDeriv =

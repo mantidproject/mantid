@@ -2,11 +2,11 @@
 #define MANTID_HISTOGRAMDATA_BINEDGES_H_
 
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Scalable.h"
-#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/VectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -61,9 +61,9 @@ public:
   /// Move constructor.
   BinEdges(BinEdges &&) = default;
   /// Copy assignment. Lightweight, internal data will be shared.
-  BinEdges &operator=(const BinEdges &)& = default;
+  BinEdges &operator=(const BinEdges &) & = default;
   /// Move assignment.
-  BinEdges &operator=(BinEdges &&)& = default;
+  BinEdges &operator=(BinEdges &&) & = default;
 
   explicit BinEdges(const Points &points);
 };

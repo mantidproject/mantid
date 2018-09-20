@@ -79,7 +79,7 @@ std::string exceptionToString(bool withTrace) {
   Py_XDECREF(value);
   return builder.str();
 }
-}
+} // namespace
 
 // -----------------------------------------------------------------------------
 // PythonException
@@ -104,6 +104,6 @@ PythonException::PythonException(bool withTrace)
  */
 PythonRuntimeError::PythonRuntimeError(bool withTrace)
     : std::runtime_error(exceptionToString(withTrace)) {}
-}
-}
-}
+} // namespace Environment
+} // namespace PythonInterface
+} // namespace Mantid

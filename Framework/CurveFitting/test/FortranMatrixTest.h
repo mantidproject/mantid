@@ -7,10 +7,10 @@
 #include "MantidCurveFitting/FortranMatrix.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
-using Mantid::CurveFitting::FortranMatrix;
-using Mantid::CurveFitting::GSLMatrix;
 using Mantid::CurveFitting::ComplexMatrix;
 using Mantid::CurveFitting::ComplexType;
+using Mantid::CurveFitting::FortranMatrix;
+using Mantid::CurveFitting::GSLMatrix;
 
 using DoubleFortranMatrix = FortranMatrix<GSLMatrix>;
 using ComplexFortranMatrix = FortranMatrix<ComplexMatrix>;

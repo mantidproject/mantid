@@ -18,7 +18,7 @@ class Instrument;
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
-}
+} // namespace API
 namespace DataObjects {
 class EventWorkspace;
 class Workspace2D;
@@ -152,7 +152,7 @@ template <> struct IsIndexInfo<Indexing::IndexInfo> {
 template <class UseIndexInfo>
 void initializeFromParent(const API::MatrixWorkspace &parent,
                           API::MatrixWorkspace &workspace);
-}
+} // namespace detail
 
 /** This is the create() method that all the other create() methods call.
  *  And it is also called directly.
@@ -198,9 +198,8 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
 }
 
 template <class T, class IndexArg, class HistArg,
-          typename std::enable_if<
-              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
-              nullptr>
+          typename std::enable_if<!std::is_base_of<
+              API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
@@ -208,9 +207,8 @@ std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
 }
 
 template <class T, class IndexArg, class HistArg,
-          typename std::enable_if<
-              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
-              nullptr>
+          typename std::enable_if<!std::is_base_of<
+              API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T>
 create(const boost::shared_ptr<const Geometry::Instrument> instrument,
        const IndexArg &indexArg, const HistArg &histArg) {

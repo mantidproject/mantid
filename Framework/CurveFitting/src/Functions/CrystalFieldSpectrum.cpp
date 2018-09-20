@@ -1,11 +1,11 @@
 #include "MantidCurveFitting/Functions/CrystalFieldSpectrum.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeakUtils.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidKernel/Strings.h"

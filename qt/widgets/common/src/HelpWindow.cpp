@@ -1,13 +1,13 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
-#include "MantidQtWidgets/Common/MantidHelpInterface.h"
-#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
-#include <boost/lexical_cast.hpp>
 #include <QUrl>
 #include <QWidget>
+#include <boost/lexical_cast.hpp>
 
 namespace MantidQt {
 namespace API {
@@ -29,7 +29,7 @@ void connectParent(MantidHelpInterface *gui, QWidget *parent) {
     gui->setParent(parent);
   }
 }
-}
+} // namespace
 
 using std::string;
 

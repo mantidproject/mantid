@@ -1,7 +1,7 @@
 #include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
-#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
+#include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
 namespace Mantid {
 namespace Geometry {

@@ -56,8 +56,7 @@ public:
   }
   /// See also
   const std::vector<std::string> seeAlso() const override {
-    return {"MuonProcess", "ApplyMuonDetectorGrouping",
-            "LoadAndApplyMuonDetectorGrouping"};
+    return {"MuonProcess", "ApplyMuonDetectorGrouping"};
   }
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
@@ -101,6 +100,10 @@ public:
   /// Set time properties of MuonProcess according to the given options.
   void setMuonProcessAlgorithmTimeProperties(
       IAlgorithm &alg, const Muon::AnalysisOptions &options) const;
+
+  /// Checks that the detector IDs in grouping are in the workspace
+  void checkDetectorIDsInWorkspace(API::Grouping &grouping,
+                                   API::Workspace_sptr workspace);
 
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;

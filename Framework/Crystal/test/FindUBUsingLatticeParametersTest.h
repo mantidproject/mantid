@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
+#include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidCrystal/LoadIsawUB.h"
 
 using namespace Mantid::Crystal;
 using Mantid::Geometry::OrientedLattice;

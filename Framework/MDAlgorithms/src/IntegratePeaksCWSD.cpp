@@ -598,5 +598,5 @@ void IntegratePeaksCWSD::normalizePeaksIntensities() {
   return;
 }
 
-} // namespace Mantid
 } // namespace MDAlgorithms
+} // namespace Mantid

@@ -1,10 +1,10 @@
-#include "MantidKernel/make_unique.h"
 #include "MDFEditLocalParameterDialog.h"
-#include "MultiDatasetFit.h"
 #include "MDFLocalParameterItemDelegate.h"
+#include "MantidKernel/make_unique.h"
+#include "MultiDatasetFit.h"
 
-#include <QMenu>
 #include <QClipboard>
+#include <QMenu>
 #include <QMessageBox>
 #include <limits>
 
@@ -12,7 +12,7 @@ namespace {
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
 const int valueColumn = 0;
 const int roleColumn = 1;
-}
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -379,6 +379,6 @@ bool EditLocalParameterDialog::isLogCheckboxTicked() const {
   return m_uiForm.logValueSelector->isCheckboxTicked();
 }
 
-} // MDF
-} // CustomInterfaces
-} // MantidQt
+} // namespace MDF
+} // namespace CustomInterfaces
+} // namespace MantidQt

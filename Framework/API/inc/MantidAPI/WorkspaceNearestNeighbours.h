@@ -7,15 +7,15 @@
 // Boost graphing
 #ifndef Q_MOC_RUN
 #include <boost/graph/adjacency_list.hpp>
-#include <unordered_map>
 #include <boost/shared_ptr.hpp>
+#include <unordered_map>
 #endif
 
 namespace Mantid {
 namespace Geometry {
 class Instrument;
 class IDetector;
-}
+} // namespace Geometry
 namespace API {
 class SpectrumInfo;
 /**

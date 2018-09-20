@@ -5,10 +5,10 @@
 
 #include <string>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

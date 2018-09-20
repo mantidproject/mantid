@@ -60,7 +60,7 @@ private:
   static const int DEFAULT_TIMER_ID = 1;
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_HFIRDarkCurrentSubtraction_H_*/

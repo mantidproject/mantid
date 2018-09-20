@@ -5,8 +5,8 @@
 
 #include "MantidSINQ/PoldiFitPeaks1D.h"
 
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidCurveFitting/Functions/FlatBackground.h"

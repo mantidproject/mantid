@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <string>
 

@@ -174,8 +174,9 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != this->m_inputWS) {
-    m_outputWS.reset(Mantid::DataObjects::create<DataObjects::Workspace2D>(
-                         *m_inputWS).release());
+    m_outputWS.reset(
+        Mantid::DataObjects::create<DataObjects::Workspace2D>(*m_inputWS)
+            .release());
   }
 
   // these first three properties are fully checked by validators
@@ -194,6 +195,6 @@ void DetectorEfficiencyCorUser::retrieveProperties() {
     g_log.debug() << "Using user input Ei value: " << m_Ei << "\n";
   }
 }
-}
+} // namespace Algorithms
 // namespace Algorithms
 } // namespace Mantid

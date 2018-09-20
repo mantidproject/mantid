@@ -59,7 +59,7 @@ calculateBinParameters(QString wsName, QString resName, double energyMin,
       propsTable->getColumn("SampleOutputBins")->cell<int>(0),
       propsTable->getColumn("ResolutionBins")->cell<int>(0));
 }
-}
+} // namespace
 
 using namespace Mantid::API;
 
@@ -123,15 +123,20 @@ void Iqt::setup() {
           SLOT(updateDisplayedBinParameters()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(plotTiled()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+  connect(m_uiForm.cbCalculateErrors, SIGNAL(clicked()), this,
+          SLOT(errorsClicked()));
 }
 
 void Iqt::run() {
   using namespace Mantid::API;
+
+  setRunEnabled(false);
 
   updateDisplayedBinParameters();
 
@@ -142,6 +147,8 @@ void Iqt::run() {
 
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
+  QString nIterations = m_uiForm.spIterations->cleanText();
+  bool calculateErrors = m_uiForm.cbCalculateErrors->isChecked();
 
   double energyMin = m_dblManager->value(m_properties["ELow"]);
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
@@ -153,6 +160,8 @@ void Iqt::run() {
 
   IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
   IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
+  IqtAlg->setProperty("NumberOfIterations", nIterations.toStdString());
+  IqtAlg->setProperty("CalculateErrors", calculateErrors);
 
   IqtAlg->setProperty("EnergyMin", energyMin);
   IqtAlg->setProperty("EnergyMax", energyMax);
@@ -173,6 +182,7 @@ void Iqt::run() {
 void Iqt::algorithmComplete(bool error) {
   if (error)
     return;
+  setRunEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.pbTile->setEnabled(true);
@@ -193,6 +203,12 @@ void Iqt::plotClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
   plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
+
+void Iqt::errorsClicked() {
+  m_uiForm.spIterations->setEnabled(isErrorsEnabled());
+}
+
+bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 void Iqt::plotTiled() {
   MatrixWorkspace_const_sptr outWs =
@@ -291,7 +307,7 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
 
     m_dblManager->setValue(m_properties["ELow"], -val);
   } else if (prop == m_properties["ELow"]) {
-    // If the user enters a positive value for ELow, assume they ment to add a
+    // If the user enters a positive value for ELow, assume they meant to add a
     if (val > 0) {
       val = -val;
       m_dblManager->setValue(m_properties["ELow"], val);
@@ -435,6 +451,13 @@ void Iqt::updateRS(QtProperty *prop, double val) {
   else if (prop == m_properties["EHigh"])
     xRangeSelector->setMaximum(val);
 }
+
+void Iqt::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+  m_uiForm.pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void Iqt::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

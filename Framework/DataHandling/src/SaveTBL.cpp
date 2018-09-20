@@ -36,9 +36,9 @@ void SaveTBL::init() {
 }
 
 /**
-* Finds the stitch groups that need to be on the same line
-* @param ws : a pointer to a tableworkspace
-*/
+ * Finds the stitch groups that need to be on the same line
+ * @param ws : a pointer to a tableworkspace
+ */
 void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
   size_t rowCount = ws->rowCount();
   for (size_t i = 0; i < rowCount; ++i) {
@@ -54,8 +54,8 @@ void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
 }
 
 /**
-*   Executes the algorithm.
-*/
+ *   Executes the algorithm.
+ */
 void SaveTBL::exec() {
   // Get the workspace
   ITableWorkspace_sptr ws = getProperty("InputWorkspace");
@@ -110,13 +110,13 @@ void SaveTBL::writeColumnNames(std::ofstream &file,
 }
 
 /**
-* Writes the given value to file, checking if it needs to be surrounded in
-* quotes due to a comma being included
-* @param val : the string to be written
-* @param file : the ouput file stream
-* @param endsep : boolean true to include a comma after the data
-* @param endline : boolean true to put an EOL at the end of this data value
-*/
+ * Writes the given value to file, checking if it needs to be surrounded in
+ * quotes due to a comma being included
+ * @param val : the string to be written
+ * @param file : the ouput file stream
+ * @param endsep : boolean true to include a comma after the data
+ * @param endline : boolean true to put an EOL at the end of this data value
+ */
 template <class T>
 void SaveTBL::writeVal(const T &val, std::ofstream &file, bool endsep,
                        bool endline) {

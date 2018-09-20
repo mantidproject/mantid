@@ -9,8 +9,8 @@
  *started
  * the "static" object will ensure that the FrameworkManager is started
  */
-#include "MantidKernel/RegistrationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 namespace {
 Mantid::Kernel::RegistrationHelper

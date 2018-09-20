@@ -28,5 +28,5 @@ bool FileFormatOptions::shouldIncludeQResolution() const {
 std::string const &FileFormatOptions::separator() const { return m_separator; }
 std::string const &FileFormatOptions::prefix() const { return m_prefix; }
 NamedFormat FileFormatOptions::format() const { return m_format; }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

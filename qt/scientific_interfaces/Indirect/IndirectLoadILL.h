@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 #define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADILL_H_
 
-#include "ui_IndirectLoadILL.h"
 #include "IndirectToolsTab.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "ui_IndirectLoadILL.h"
 
 #include <QComboBox>
 #include <QMap>

@@ -45,7 +45,7 @@ void encode(std::string &data) {
 
   data.swap(buffer);
 }
-}
+} // namespace
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -68,18 +68,25 @@ void SaveCanSAS1D::init() {
                       "Filename", "", API::FileProperty::Save, ".xml"),
                   "The name of the xml file to save");
 
-  std::vector<std::string> radiation_source{
-      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
-      "Reactor Neutron Source", "Synchrotron X-ray Source",
-      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
-      "neutron", "x-ray", "muon", "electron"};
+  std::vector<std::string> radiation_source{"Spallation Neutron Source",
+                                            "Pulsed Reactor Neutron Source",
+                                            "Reactor Neutron Source",
+                                            "Synchrotron X-ray Source",
+                                            "Pulsed Muon Source",
+                                            "Rotating Anode X-ray",
+                                            "Fixed Tube X-ray",
+                                            "neutron",
+                                            "x-ray",
+                                            "muon",
+                                            "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),
       "The type of radiation used.");
-  declareProperty("Append", false, "Selecting append allows the workspace to "
-                                   "be added to an existing canSAS 1-D file as "
-                                   "a new SASentry");
+  declareProperty("Append", false,
+                  "Selecting append allows the workspace to "
+                  "be added to an existing canSAS 1-D file as "
+                  "a new SASentry");
   declareProperty("Process", "", "Text to append to Process section");
   declareProperty("DetectorNames", "",
                   "Specify in a comma separated list, which detectors to store "
@@ -90,7 +97,9 @@ void SaveCanSAS1D::init() {
 
   // Collimation information
   std::vector<std::string> collimationGeometry{
-      "Cylinder", "Flat plate", "Disc",
+      "Cylinder",
+      "Flat plate",
+      "Disc",
   };
   declareProperty(
       "Geometry", "Disc",
@@ -654,8 +663,8 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
  *   SASdetector
  *     name
  *
-*  @param sasInstrument :: string for sasinstrument element in the xml
-*/
+ *  @param sasInstrument :: string for sasinstrument element in the xml
+ */
 void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument = "\n\t\t<SASinstrument>";
 
@@ -709,5 +718,5 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument += sasDet;
   sasInstrument += "\n\t\t</SASinstrument>";
 }
-}
-}
+} // namespace DataHandling
+} // namespace Mantid

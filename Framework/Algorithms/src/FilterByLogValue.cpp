@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -16,8 +16,8 @@ using namespace DataObjects;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
+using DataObjects::EventWorkspace_sptr;
 using Types::Core::DateAndTime;
 
 std::string CENTRE("Centre");

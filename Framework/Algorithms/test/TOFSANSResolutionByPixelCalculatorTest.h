@@ -1,8 +1,8 @@
 #ifndef TOFSANSRESOLUTIONBYPIXELCALCULATORTEST_H_
 #define TOFSANSRESOLUTIONBYPIXELCALCULATORTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;
 class TOFSANSResolutionByPixelCalculatorTest : public CxxTest::TestSuite {

@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <Poco/NObserver.h>
 #include <iterator>
@@ -62,12 +62,12 @@ public:
   /// Returns a formatted string detailing the contents of the group
   const std::string toString() const override;
 
-  /// The collection itself is considered to take up no space
-  size_t getMemorySize() const override { return 0; }
+  /// Return the memory size of all workspaces in this group and subgroups
+  size_t getMemorySize() const override;
   /// Sort the internal data structure according to member name
   void sortMembersByName();
   /// Adds a workspace to the group.
-  void addWorkspace(Workspace_sptr workspace);
+  void addWorkspace(const Workspace_sptr &workspace);
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container
@@ -75,13 +75,14 @@ public:
   /// Return the ith workspace
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
-  Workspace_sptr getItem(const std::string wsName) const;
+  Workspace_sptr getItem(const std::string &wsName) const;
   /// Return all workspaces in the group as one call for thread safety
   std::vector<Workspace_sptr> getAllItems() const;
   /// Remove a workspace from the group
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
+  bool isGroup() const override { return true; }
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;

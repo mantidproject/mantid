@@ -71,6 +71,6 @@ private:
   /// Overwrites Algorithm exec method
   void exec() override;
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 #endif

@@ -92,7 +92,7 @@ public:
     return quad;
   }
 };
-}
-}
+} // namespace DataObjects
+} // namespace Mantid
 
 #endif

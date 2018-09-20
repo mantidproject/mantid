@@ -1,10 +1,10 @@
 #ifndef MANTID_CRYSTAL_CLUSTERREGISTER_H_
 #define MANTID_CRYSTAL_CLUSTERREGISTER_H_
 
-#include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidKernel/System.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
 

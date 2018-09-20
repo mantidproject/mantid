@@ -6,9 +6,7 @@
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
 
-// clang-format off
-GCC_DIAG_OFF(strict-aliasing)
-// clang-format on
+GNU_DIAG_OFF("strict-aliasing")
 
 using Mantid::API::IMaskWorkspace;
 using namespace Mantid::PythonInterface::Registry;
@@ -27,14 +25,15 @@ bool isMaskedFromList(const IMaskWorkspace &self,
   }
   return self.isMasked(idSet);
 }
-}
+} // namespace
 
 void export_IMaskWorkspace() {
   class_<IMaskWorkspace, boost::noncopyable>("IMaskWorkspace", no_init)
       .def("getNumberMasked", &IMaskWorkspace::getNumberMasked, arg("self"),
            "Returns the number of masked pixels in the workspace")
-      .def("isMasked", (bool (IMaskWorkspace::*)(const Mantid::detid_t) const) &
-                           IMaskWorkspace::isMasked,
+      .def("isMasked",
+           (bool (IMaskWorkspace::*)(const Mantid::detid_t) const) &
+               IMaskWorkspace::isMasked,
            (arg("self"), arg("detector_id")),
            "Returns whether the given detector ID is masked")
       .def("isMasked", isMaskedFromList, (arg("self"), arg("detector_id_list")),

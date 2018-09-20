@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/UnwrapMonitorsInTOF.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/UnwrapMonitorsInTOF.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::UnwrapMonitorsInTOF;
 
@@ -67,7 +67,7 @@ public:
       auto expectedBinEdgeIt = expectedBinEdges.cbegin();
       for (auto it = binEdges.cbegin();
            it != binEdges.cend() ||
-               expectedBinEdgeIt != expectedBinEdges.cend();
+           expectedBinEdgeIt != expectedBinEdges.cend();
            ++it, ++expectedBinEdgeIt) {
         TS_ASSERT(std::abs(*it - *expectedBinEdgeIt) < tolerance);
       }
@@ -100,7 +100,7 @@ public:
       auto expectedBinEdgeDetectorIt = expectedBinEdgesDetector.cbegin();
       for (auto it = binEdgesDetector.cbegin();
            it != binEdgesDetector.cend() ||
-               expectedBinEdgeDetectorIt != expectedBinEdgesDetector.cend();
+           expectedBinEdgeDetectorIt != expectedBinEdgesDetector.cend();
            ++it, ++expectedBinEdgeDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedBinEdgeDetectorIt) < tolerance);
       }
@@ -108,7 +108,7 @@ public:
       auto expectedCountDetectorIt = expectedCountsDetector.cbegin();
       for (auto it = expectedCountsDetector.cbegin();
            it != expectedCountsDetector.cend() ||
-               expectedCountDetectorIt != expectedCountsDetector.cend();
+           expectedCountDetectorIt != expectedCountsDetector.cend();
            ++it, ++expectedCountDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedCountDetectorIt) < tolerance);
       }
@@ -221,7 +221,7 @@ private:
    * The monitor at workspace index 4 is at 11m
    * The monitor are worksapce index 5 is at 18m
    *
-  */
+   */
   Mantid::API::MatrixWorkspace_sptr provideTestWorkspace(bool includeMonitors) {
     const int numberOfBins = 10;
     const int numberOfHistograms = 5;

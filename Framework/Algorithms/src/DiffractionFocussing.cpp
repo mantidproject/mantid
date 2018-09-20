@@ -3,8 +3,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/Unit.h"
 
 #include <fstream>
 #include <limits>
@@ -23,10 +23,10 @@ DiffractionFocussing::DiffractionFocussing()
 }
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::FileProperty;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
+using API::WorkspaceProperty;
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -259,5 +259,5 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   return detectorGroups;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

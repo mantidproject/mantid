@@ -1,15 +1,15 @@
 #ifndef MANTID_MDALGORITHMS_SIMULATERESOLUTIONCONVOLVEDMODEL_H_
 #define MANTID_MDALGORITHMS_SIMULATERESOLUTIONCONVOLVEDMODEL_H_
 
-#include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 
 namespace Mantid {
 namespace API {
 class IFunction;
 class FunctionDomainMD;
 class FunctionValues;
-}
+} // namespace API
 
 namespace MDAlgorithms {
 

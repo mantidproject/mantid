@@ -1,12 +1,12 @@
 #ifndef LOADSPETEST_H_
 #define LOADSPETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadSPE.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadSPE.h"
 #include "MantidKernel/Unit.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 

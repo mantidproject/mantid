@@ -69,13 +69,13 @@ stresstesting.MantidStressTest
 
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-import os
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
+import platform
 from six import with_metaclass
 
 
@@ -744,7 +744,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-7
+        self.tolerance = 1e-3
         self.samples = [sample[:-4] for sample in self.samples]
 
         # Load files into Mantid
@@ -757,7 +757,8 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                    EnergyMin=self.e_min,
                                    EnergyMax=self.e_max,
                                    BinReductionFactor=self.num_bins,
-                                   DryRun=False)
+                                   DryRun=False,
+                                   NumberOfIterations=200)
 
         # Test IqtFit Sequential
         iqtfitSeq_ws, params, fit_group = IqtFitSequential(InputWorkspace=iqt_ws, Function=self.func,
@@ -765,7 +766,7 @@ class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInel
                                                            SpecMin=0, SpecMax=self.spec_max)
 
         self.result_names = [iqt_ws.name(),
-                             iqtfitSeq_ws.name()]
+                             iqtfitSeq_ws[0].name()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
@@ -818,7 +819,7 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
         return ['II.OSIRISFury.nxs',
                 'II.OSIRISFuryFitSeq.nxs']
 
@@ -846,9 +847,15 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
-        return ['II.IRISFury.nxs',
-                'II.IRISFuryFitSeq.nxs']
+        self.tolerance = 1e-3
+        ref_files = ['II.IRISFury.nxs']
+        # gsl v2 gives a slightly different result than v1
+        # we could do with a better check than this
+        if platform.linux_distribution()[0] == "Ubuntu":
+            ref_files += ['II.IRISFuryFitSeq_gslv2.nxs']
+        else:
+            ref_files += ['II.IRISFuryFitSeq_gslv1.nxs']
+        return ref_files
 
 #==============================================================================
 
@@ -862,7 +869,7 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-6
+        self.tolerance = 1e-2
         self.samples = [sample[:-4] for sample in self.samples]
 
         #load files into mantid
@@ -875,7 +882,8 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirec
                                    EnergyMin=self.e_min,
                                    EnergyMax=self.e_max,
                                    BinReductionFactor=self.num_bins,
-                                   DryRun=False)
+                                   DryRun=False,
+                                   NumberOfIterations=200)
 
         # Test IqtFitMultiple
         iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.name(),
@@ -944,7 +952,7 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
-        self.tolerance = 1e-3
+        self.tolerance = 1e-2
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
@@ -973,7 +981,7 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.endx = 0.156250
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 
@@ -994,16 +1002,16 @@ class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelastic
         LoadNexus(self.sample, OutputWorkspace=self.sample)
         LoadNexus(FileFinder.getFullPath(self.resolution), OutputWorkspace=self.resolution)
 
-        ConvolutionFitSequential(
-            InputWorkspace=self.sample,
-            Function=self.func,
-            PassWSIndexToFunction=self.passWSIndexToFunction,
-            StartX=self.startx,
-            EndX=self.endx,
-            SpecMin=self.spectra_min,
-            SpecMax=self.spectra_max,
-            PeakRadius=5,
-            OutputWorkspace=self.result_names[0])
+        convfitSeq_ws, params, fit_group = ConvolutionFitSequential(InputWorkspace=self.sample,
+                                                                    Function=self.func,
+                                                                    PassWSIndexToFunction=self.passWSIndexToFunction,
+                                                                    StartX=self.startx,
+                                                                    EndX=self.endx,
+                                                                    SpecMin=self.spectra_min,
+                                                                    SpecMax=self.spectra_max,
+                                                                    PeakRadius=5)
+
+        self.result_names = [convfitSeq_ws[0].name()]
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -1045,7 +1053,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.spectra_max = 41
         self.ties = False
 
-        self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
+        self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result_1']
 
     def get_reference_files(self):
         self.tolerance = 0.3
@@ -1072,7 +1080,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.spectra_max = 50
         self.ties = False
 
-        self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
+        self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result_1']
 
     def get_reference_files(self):
         self.tolerance = 0.2

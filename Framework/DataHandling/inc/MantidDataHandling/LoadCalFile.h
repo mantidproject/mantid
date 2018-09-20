@@ -69,7 +69,7 @@ private:
                           int detID);
 };
 
-} // namespace Mantid
 } // namespace DataHandling
+} // namespace Mantid
 
 #endif /* MANTID_DATAHANDLING_LOADCALFILE_H_ */

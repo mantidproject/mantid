@@ -7,7 +7,6 @@
 
 #include "MantidHistogramData/Histogram.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::HistogramData;
 using Mantid::API::SingleCountValidator;

@@ -2,9 +2,9 @@
 #define MANTID_ICAT_CATALOGALGORITHMHELPER_H_
 
 #include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/ICatalog.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidAPI/ICatalog.h"
 
 namespace Mantid {
 namespace ICat {
@@ -14,7 +14,7 @@ public:
   const std::string getIDSError(Poco::Net::HTTPResponse::HTTPStatus &HTTPStatus,
                                 std::istream &responseStream);
 };
-}
-}
+} // namespace ICat
+} // namespace Mantid
 
 #endif

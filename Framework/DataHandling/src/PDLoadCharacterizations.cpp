@@ -88,7 +88,7 @@ extra_columns(const std::vector<std::string> &filenames) {
 
   return columnnames;
 }
-}
+} // namespace
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -183,6 +183,7 @@ void PDLoadCharacterizations::exec() {
   this->setProperty("OutputWorkspace", wksp);
 }
 
+namespace {
 int getVersion(const std::string &filename) {
   std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
@@ -201,6 +202,24 @@ int getVersion(const std::string &filename) {
   // otherwise it is a version=0
   return 0;
 }
+
+template <typename T>
+T lexical_cast(const std::string &value, const std::string &filename,
+               const int linenum, const std::string &label = "") {
+  try {
+    return boost::lexical_cast<T>(value);
+  } catch (boost::bad_lexical_cast &e) {
+    // check for lexical cast and rethrow as parse error
+    if (label.empty())
+      throw Exception::ParseError(
+          "While converting \"" + value + "\": " + e.what(), filename, linenum);
+    else
+      throw Exception::ParseError("In " + label + " while converting \"" +
+                                      value + "\": " + e.what(),
+                                  filename, linenum);
+  }
+}
+} // anonymous namespace
 
 /**
  * This ignores the traditional interpretation of
@@ -266,16 +285,20 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
  * Parse the stream for the focus positions and instrument parameter filename.
  *
  * @param file The stream to parse.
+ * @param filename The name of the file being parsed to be included in
+ * exceptions
+ * @returns line number that file was read to
  */
-void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
+int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
+                                           const std::string filename) {
   // end early if already at the end of the file
   if (file.eof())
-    return;
+    return 0;
   // look at the first line available now
   // start of the scan indicator means there are no focused positions
   const auto peek = Strings::peekLine(file).substr(0, 2);
   if (peek == "#S" || peek == "#L")
-    return;
+    return 0;
 
   std::vector<int32_t> specIds;
   std::vector<double> l2;
@@ -284,8 +307,10 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
 
   // parse the file
   // Strings::getLine skips blank lines and lines that start with #
+  int linenum = 1; // first line of file was a keyword that this existed
   for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
+    linenum += 1;
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -297,17 +322,20 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
     boost::split(splitted, line, boost::is_any_of("\t "),
                  boost::token_compress_on);
     if (splitted[0] == L1_KEY) {
-      this->setProperty("PrimaryFlightPath",
-                        boost::lexical_cast<double>(splitted[1]));
+      this->setProperty(
+          "PrimaryFlightPath",
+          lexical_cast<double>(splitted[1], filename, linenum, "l1"));
       break;
-    } else if (splitted.size() >= 3) // specid, L2, theta
-    {
-      specIds.push_back(boost::lexical_cast<int32_t>(splitted[0]));
-      l2.push_back(boost::lexical_cast<double>(splitted[1]));
-      polar.push_back(boost::lexical_cast<double>(splitted[2]));
+    } else if (splitted.size() >= 3) { // specid, L2, theta
+      specIds.push_back(lexical_cast<int32_t>(splitted[0], filename, linenum,
+                                              "spectrum number"));
+      l2.push_back(lexical_cast<double>(splitted[1], filename, linenum, "l2"));
+      polar.push_back(
+          lexical_cast<double>(splitted[2], filename, linenum, "polar"));
       if (splitted.size() >= 4 &&
           (!splitted[3].empty())) { // azimuthal was specified
-        azi.push_back(boost::lexical_cast<double>(splitted[3]));
+        azi.push_back(
+            lexical_cast<double>(splitted[3], filename, linenum, "azimuthal"));
       } else { // just set it to zero
         azi.push_back(0.);
       }
@@ -324,6 +352,8 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
   this->setProperty("L2", l2);
   this->setProperty("Polar", polar);
   this->setProperty("Azimuthal", azi);
+
+  return linenum;
 }
 
 /**
@@ -331,18 +361,27 @@ void PDLoadCharacterizations::readFocusInfo(std::ifstream &file) {
  *
  * @param file The stream to parse.
  * @param wksp The table workspace to fill in.
+ * @param filename The name of the file being parsed to be included in
+ * exceptions
+ * @param linenum The line number that file was read to before starting this
+ * function to be included in exceptions
  */
 void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
-                                           ITableWorkspace_sptr &wksp) {
+                                           ITableWorkspace_sptr &wksp,
+                                           const std::string &filename,
+                                           int linenum) {
   // end early if already at the end of the file
   if (file.eof())
     return;
+
+  g_log.debug() << "readCharInfo(file, wksp)\n";
 
   const size_t num_of_columns = wksp->columnCount();
 
   // parse the file
   for (std::string line = Strings::getLine(file); !file.eof();
        Strings::getLine(file, line)) {
+    linenum += 1;
     line = Strings::strip(line);
     // skip empty lines and "comments"
     if (line.empty())
@@ -358,21 +397,22 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
 
     // add the row
     API::TableRow row = wksp->appendRow();
-    row << boost::lexical_cast<double>(splitted[0]);  // frequency
-    row << boost::lexical_cast<double>(splitted[1]);  // wavelength
-    row << boost::lexical_cast<int32_t>(splitted[2]); // bank
-    row << splitted[3];                               // vanadium
-    row << splitted[5];                               // vanadium_background
-    row << splitted[4];                               // container
-    row << "0";                                       // empty_environment
-    row << "0";                                       // empty_instrument
-    row << splitted[6];                               // d_min
-    row << splitted[7];                               // d_max
-    row << boost::lexical_cast<double>(splitted[8]);  // tof_min
-    row << boost::lexical_cast<double>(splitted[9]);  // tof_max
-    row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
-    row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
-
+    row << lexical_cast<double>(splitted[0], filename, linenum, "frequency");
+    row << lexical_cast<double>(splitted[1], filename, linenum, "wavelength");
+    row << lexical_cast<int32_t>(splitted[2], filename, linenum, "bank");
+    row << splitted[3]; // vanadium
+    row << splitted[5]; // vanadium_background
+    row << splitted[4]; // container
+    row << "0";         // empty_environment
+    row << "0";         // empty_instrument
+    row << splitted[6]; // d_min
+    row << splitted[7]; // d_max
+    row << lexical_cast<double>(splitted[8], filename, linenum, "tof_min");
+    row << lexical_cast<double>(splitted[9], filename, linenum, "tof_max");
+    row << lexical_cast<double>(splitted[10], filename, linenum,
+                                "wavelength_min");
+    row << lexical_cast<double>(splitted[11], filename, linenum,
+                                "wavelength_max");
     // pad all extras with empty string - the 14 required columns have
     // already been added to the row
     for (size_t i = 14; i < num_of_columns; ++i) {
@@ -387,28 +427,32 @@ void PDLoadCharacterizations::readVersion0(const std::string &filename,
   if (filename.empty())
     return;
 
+  g_log.debug() << "readVersion0(" << filename << ", wksp)\n";
+
   std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
     throw Exception::FileError("Unable to open version 0 file", filename);
   }
 
   // read the first line and decide what to do
+  int linenum = 0;
   std::string firstLine = Strings::getLine(file);
   if (firstLine.substr(0, IPARM_KEY.size()) == IPARM_KEY) {
     firstLine = Strings::strip(firstLine.substr(IPARM_KEY.size()));
     this->setProperty("IParmFilename", firstLine);
-    this->readFocusInfo(file);
+    linenum = this->readFocusInfo(file, filename);
   } else {
     // things expect the L1 to be zero if it isn't set
     this->setProperty("PrimaryFlightPath", 0.);
   }
 
   // now the rest of the file
-  this->readCharInfo(file, wksp);
+  this->readCharInfo(file, wksp, filename, linenum);
 
   file.close();
 }
 
+namespace {
 bool closeEnough(const double left, const double right) {
   // the same value
   const double diff = fabs(left - right);
@@ -422,6 +466,7 @@ bool closeEnough(const double left, const double right) {
 
 int findRow(API::ITableWorkspace_sptr &wksp,
             const std::vector<std::string> &values) {
+  // don't have a good way to mark error location in these casts
   const double frequency = boost::lexical_cast<double>(values[0]);
   const double wavelength = boost::lexical_cast<double>(values[1]);
 
@@ -438,6 +483,7 @@ int findRow(API::ITableWorkspace_sptr &wksp,
   // fall through behavior is -1
   return -1;
 }
+} // namespace
 
 void updateRow(API::ITableWorkspace_sptr &wksp, const size_t rowNum,
                const std::vector<std::string> &names,
@@ -458,6 +504,8 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   if (filename.empty())
     return;
 
+  g_log.debug() << "readVersion1(" << filename << ", wksp)\n";
+
   g_log.information() << "Opening \"" << filename << "\" as a version 1 file\n";
   std::ifstream file(filename.c_str(), std::ios_base::binary);
   if (!file.is_open()) {
@@ -476,9 +524,11 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   }
 
   // store the names of the columns in order
+  int linenum = 0;
   std::vector<std::string> columnNames;
   for (Strings::getLine(file, line); !file.eof();
        Strings::getLine(file, line)) {
+    linenum += 1;
     if (line.empty())
       continue;
     if (line.substr(0, 1) == "#")
@@ -514,20 +564,22 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
       } else {
         // add the row
         API::TableRow row = wksp->appendRow();
-        row << boost::lexical_cast<double>(valuesAsStr[0]); // frequency
-        row << boost::lexical_cast<double>(valuesAsStr[1]); // wavelength
-        row << boost::lexical_cast<int32_t>(1);             // bank
-        row << valuesAsStr[2];                              // vanadium
-        row << valuesAsStr[3]; // vanadium_background
-        row << "0";            // container
-        row << valuesAsStr[4]; // empty_environment
-        row << valuesAsStr[5]; // empty_instrument
-        row << "0";            // d_min
-        row << "0";            // d_max
-        row << 0.;             // tof_min
-        row << 0.;             // tof_max
-        row << 0.;             // wavelength_min
-        row << 0.;             // wavelength_max
+        row << lexical_cast<double>(valuesAsStr[0], filename, linenum,
+                                    "frequency");
+        row << lexical_cast<double>(valuesAsStr[1], filename, linenum,
+                                    "wavelength");
+        row << boost::lexical_cast<int32_t>(1); // bank
+        row << valuesAsStr[2];                  // vanadium
+        row << valuesAsStr[3];                  // vanadium_background
+        row << "0";                             // container
+        row << valuesAsStr[4];                  // empty_environment
+        row << valuesAsStr[5];                  // empty_instrument
+        row << "0";                             // d_min
+        row << "0";                             // d_max
+        row << 0.;                              // tof_min
+        row << 0.;                              // tof_max
+        row << 0.;                              // wavelength_min
+        row << 0.;                              // wavelength_max
         // insert all the extras
         for (size_t i = 6; i < valuesAsStr.size(); ++i) {
           row << valuesAsStr[i];
@@ -550,6 +602,8 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
   // don't bother if there isn't a filename
   if (filename.empty())
     return;
+
+  g_log.debug() << "readExpIni(" << filename << ", wksp)\n";
 
   if (wksp->rowCount() == 0)
     throw std::runtime_error("Characterizations file does not have any "

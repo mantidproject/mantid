@@ -9,7 +9,7 @@ using namespace Mantid::Algorithms;
 
 namespace {
 double roundFour(double i) { return floor(i * 10000 + 0.5) / 10000; }
-}
+} // namespace
 
 class CalculateSlitsTest : public CxxTest::TestSuite {
 public:

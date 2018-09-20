@@ -1,14 +1,14 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/Strings.h"
+#include <boost/algorithm/string.hpp>
+#include <cstdlib>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include "MantidKernel/Quat.h"
 #include <vector>
-#include <boost/algorithm/string.hpp>
-#include <cstdlib>
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::toString;
@@ -16,8 +16,8 @@ using Mantid::Kernel::Strings::toString;
 namespace Mantid {
 namespace Geometry {
 using Kernel::DblMatrix;
-using Kernel::V3D;
 using Kernel::Quat;
+using Kernel::V3D;
 
 Mantid::Kernel::Logger g_log("Goniometer");
 
@@ -76,7 +76,10 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 /// Set the new rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer.
-void Goniometer::setR(Kernel::DblMatrix rot) { R = rot; }
+void Goniometer::setR(Kernel::DblMatrix rot) {
+  R = rot;
+  initFromR = true;
+}
 
 /// Function reports if the goniometer is defined
 bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
@@ -183,7 +186,7 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
  * Q Sample
  * @param position :: Q Sample position in reciprocal space
  * @param wavelength :: wavelength
-*/
+ */
 void Goniometer::calcFromQSampleAndWavelength(
     const Mantid::Kernel::V3D &position, double wavelength) {
   V3D Q(position);
@@ -252,15 +255,20 @@ void Goniometer::makeUniversalGoniometer() {
 }
 
 /** Return Euler angles acording to a convention
-* @param convention :: the convention used to calculate Euler Angles. The
-* UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
-*/
+ * @param convention :: the convention used to calculate Euler Angles. The
+ * UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
+ */
 std::vector<double> Goniometer::getEulerAngles(std::string convention) {
   return Quat(getR()).getEulerAngles(convention);
 }
 
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR() {
+  if (initFromR) {
+    g_log.warning() << "Goniometer was initialized from a rotation matrix. No "
+                    << "recalculation from motors will be done.\n";
+    return;
+  }
   std::vector<GoniometerAxis>::iterator it;
   std::vector<double> elements;
   Quat QGlobal, QCurrent;

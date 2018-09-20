@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
 #define MANTID_ALGORITHMS_FINDPEAKS_H_
 
-#include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 
@@ -15,7 +15,7 @@ namespace HistogramData {
 class Histogram;
 class HistogramX;
 class HistogramY;
-}
+} // namespace HistogramData
 
 namespace Algorithms {
 /** This algorithm searches for peaks in a dataset.
@@ -207,12 +207,13 @@ private:
   std::unique_ptr<API::Progress> m_progress = nullptr;
 
   // Properties saved in the algo.
-  API::MatrixWorkspace_sptr m_dataWS;    ///<workspace to check for peaks
-  int m_inputPeakFWHM;                   ///<holder for the requested peak FWHM
-  Indexing::SpectrumIndexSet m_indexSet; ///<list of workspace indicies to check
-  bool m_highBackground; ///<flag for find relatively weak peak in high
+  API::MatrixWorkspace_sptr m_dataWS;    ///< workspace to check for peaks
+  int m_inputPeakFWHM;                   ///< holder for the requested peak FWHM
+  Indexing::SpectrumIndexSet m_indexSet; ///< list of workspace indicies to
+                                         ///< check
+  bool m_highBackground; ///< flag for find relatively weak peak in high
   /// background
-  bool m_rawPeaksTable; ///<flag for whether the output is the raw peak
+  bool m_rawPeaksTable; ///< flag for whether the output is the raw peak
   /// parameters or effective (centre, width, height)
   std::size_t
       m_numTableParams; //<Number of parameters in the output table workspace

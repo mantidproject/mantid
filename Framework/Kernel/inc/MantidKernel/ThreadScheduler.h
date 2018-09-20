@@ -1,12 +1,12 @@
 #ifndef THREADSCHEDULER_H_
 #define THREADSCHEDULER_H_
 
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Task.h"
-#include <vector>
 #include <deque>
 #include <map>
+#include <vector>
 
 namespace Mantid {
 

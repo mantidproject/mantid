@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidMDAlgorithms/ReplicateMD.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/ReplicateMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
@@ -94,7 +94,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
 
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
 }
-}
+} // namespace
 
 //=====================================================================================
 // Functional Tests

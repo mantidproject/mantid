@@ -1,9 +1,9 @@
 #ifndef MANTID_GPUALGORITHMS_GPUTESTERTEST_H_
 #define MANTID_GPUALGORITHMS_GPUTESTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 #include <iomanip>
 
 #include "MantidGPUAlgorithms/GPUTester.h"

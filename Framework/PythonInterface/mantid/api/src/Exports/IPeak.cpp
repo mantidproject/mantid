@@ -117,9 +117,10 @@ void export_IPeak() {
            "supplied.") // two argument
                         // overload
       .def("setQSampleFrame", setQSampleFrame1,
-           (arg("self"), arg("qsample_frame")), "Set the peak using the peak's "
-                                                "position in reciprocal space, "
-                                                "in the sample frame.")
+           (arg("self"), arg("qsample_frame")),
+           "Set the peak using the peak's "
+           "position in reciprocal space, "
+           "in the sample frame.")
       .def("setQSampleFrame", setQSampleFrame2,
            (arg("self"), arg("qsample_frame"), arg("distance")),
            "Set the peak using the peak's position in reciprocal space, in the "

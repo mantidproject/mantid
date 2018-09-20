@@ -1,11 +1,11 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "../ISISReflectometry/ReflMeasureTransferStrategy.h"
 #include "../ISISReflectometry/ReflMeasurementItemSource.h"
 #include "../ISISReflectometry/ReflTableSchema.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "ReflMockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -18,11 +18,11 @@ using namespace MantidQt::CustomInterfaces;
 class MockReflMeasurementItemSource
     : public MantidQt::CustomInterfaces::ReflMeasurementItemSource {
 public:
-  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  GNU_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::MeasurementItem(
                                  const std::string &, const std::string &));
   MOCK_CONST_METHOD0(clone, MockReflMeasurementItemSource *());
-  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class ReflMeasureTransferStrategyTest : public CxxTest::TestSuite {
@@ -166,7 +166,7 @@ public:
     EXPECT_CALL(*mockMeasurementItemSource, obtain(_, _))
         .Times(Exactly(static_cast<int>(data.size())))
         .WillOnce(
-             Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111", "title")))
+            Return(MeasurementItem("", "s1", "l1", "t1", 0.1, "111", "title")))
         .WillOnce(Return(
             MeasurementItem("m1", "s1", "l1", "t1", 0.2, "122", "title")))
         .WillOnce(Return(

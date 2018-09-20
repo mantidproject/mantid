@@ -1,8 +1,8 @@
 #ifndef MAGNETICIONTEST_H_
 #define MAGNETICIONTEST_H_
 
-#include "MantidKernel/MagneticIon.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MagneticIon.h"
 
 #include <cxxtest/TestSuite.h>
 

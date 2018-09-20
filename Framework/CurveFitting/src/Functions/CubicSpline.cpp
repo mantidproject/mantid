@@ -18,7 +18,7 @@ using namespace CurveFitting;
 namespace {
 /// static logger
 Kernel::Logger g_log("CubicSpline");
-}
+} // namespace
 
 using namespace Kernel;
 

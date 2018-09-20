@@ -153,7 +153,7 @@ template <typename SingleValueGenerator>
 void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restore() {
   m_singleValueGen.restore();
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /* MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_ */

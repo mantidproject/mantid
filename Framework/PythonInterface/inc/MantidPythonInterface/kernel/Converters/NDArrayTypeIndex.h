@@ -42,8 +42,8 @@ template <typename T> struct PYTHON_KERNEL_DLL NDArrayTypeIndex {
   static int typenum;
   static char typecode;
 };
-}
-}
-}
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_*/

@@ -48,6 +48,6 @@ private:
   LatticeView *m_view;
   LoanedMemento &m_WsMemento;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif

@@ -1,8 +1,8 @@
 #ifndef MANTID_MDALGORITHMS_CONV_TOMD_HISTOWS_H
 #define MANTID_MDALGORITHMS_CONV_TOMD_HISTOWS_H
 
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
 #include "MantidMDAlgorithms/MDTransfInterface.h"
@@ -73,7 +73,7 @@ private:
   size_t conversionChunk(size_t startSpectra) override;
 };
 
-} // endNamespace MDAlgorithms
-} // endNamespace Mantid
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

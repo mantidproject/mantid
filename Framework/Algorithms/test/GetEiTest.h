@@ -1,21 +1,21 @@
 #ifndef GETEITEST_H_
 #define GETEITEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::MantidVecPtr;
 
 namespace GetEiTestHelper {
 IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS,
@@ -78,7 +78,7 @@ createTestWorkspaceWithMonitors(const bool includePeaks = true) {
 
   return testWS;
 }
-}
+} // namespace GetEiTestHelper
 class GetEiTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

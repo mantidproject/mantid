@@ -11,7 +11,7 @@ StringContainsValidator::StringContainsValidator() {
 }
 
 /** Constructor with required sub strings
-*/
+ */
 StringContainsValidator::StringContainsValidator(
     const std::vector<std::string> &strings) {
   m_requiredStrings = strings;

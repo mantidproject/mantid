@@ -64,7 +64,7 @@ public:
   /** The same as rebin_data_chunk but retains the datapoints (pixels)
    * contributed in the image. This allows to save the image and
    *  further rebinning on basis of new MD workspace instead of the old one;
-  */
+   */
   virtual bool rebin_data_chunk_keep_pixels() = 0;
   /** returns the estimate for number of data chunks may be used to rebin the
      dataset Used by algorithms to
@@ -90,7 +90,7 @@ protected:
   /// logger -> to provide logging, for MD dataset file operations
   static Mantid::Kernel::Logger bin_log;
 }; // end IDynamicRebinning
-}
-}
+} // namespace MDAlgorithms
+} // namespace Mantid
 
 #endif

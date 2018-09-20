@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/GenerateIPythonNotebook.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NotebookBuilder.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 
@@ -24,7 +24,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GenerateIPythonNotebook)
 
 /** Initialize the algorithm's properties.
-*/
+ */
 void GenerateIPythonNotebook::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -61,7 +61,7 @@ void GenerateIPythonNotebook::init() {
 }
 
 /** Execute the algorithm.
-*/
+ */
 void GenerateIPythonNotebook::exec() {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");

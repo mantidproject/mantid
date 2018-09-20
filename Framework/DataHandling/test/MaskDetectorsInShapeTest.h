@@ -3,13 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/MaskDetectorsInShape.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/MaskDetectorsInShape.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::API;
 

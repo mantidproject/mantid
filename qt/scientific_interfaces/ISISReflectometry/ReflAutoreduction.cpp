@@ -73,5 +73,5 @@ bool ReflAutoreduction::pause(int group) {
 /** Stop autoreduction on any group for which it is running
  */
 void ReflAutoreduction::stop() { m_running = false; }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt

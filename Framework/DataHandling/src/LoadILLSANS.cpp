@@ -13,10 +13,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <Poco/Path.h>
 #include <cmath>
 #include <limits>
 #include <numeric> // std::accumulate
-#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -405,11 +405,11 @@ void LoadILLSANS::createEmptyWorkspace(const size_t numberOfHistograms,
 }
 
 /**
-* Makes up the full path of the relevant IDF dependent on resolution mode
-* @param instName : the name of the instrument (including the resolution mode
-* suffix)
-* @return : the full path to the corresponding IDF
-*/
+ * Makes up the full path of the relevant IDF dependent on resolution mode
+ * @param instName : the name of the instrument (including the resolution mode
+ * suffix)
+ * @return : the full path to the corresponding IDF
+ */
 std::string
 LoadILLSANS::getInstrumentFilePath(const std::string &instName) const {
 

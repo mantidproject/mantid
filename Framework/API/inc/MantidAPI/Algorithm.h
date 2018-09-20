@@ -6,6 +6,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IndexTypeProperty.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 
 // -- These headers will (most-likely) be used by every inheriting algorithm
@@ -131,8 +132,8 @@ public:
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
     std::string message;   ///< Message sent with notification
-    double estimatedTime;  ///<Estimated time to completion
-    int progressPrecision; ///<Digits of precision to the progress (after the
+    double estimatedTime;  ///< Estimated time to completion
+    int progressPrecision; ///< Digits of precision to the progress (after the
                            /// decimal).
   };
 
@@ -445,6 +446,13 @@ private:
   void setupSkipValidationMasterOnly();
 
   bool isCompoundProperty(const std::string &name) const;
+
+  bool hasAnADSValidator(const Mantid::Kernel::IValidator_sptr propProp) const;
+
+  void constructWorkspaceVectorForHistoryHelper(
+      std::vector<Workspace_sptr> &inputWorkspaces,
+      std::vector<Workspace_sptr> &outputWorkspaces,
+      const unsigned int direction, std::string &currentWS) const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

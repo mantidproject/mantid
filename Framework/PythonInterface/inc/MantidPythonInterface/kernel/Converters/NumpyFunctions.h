@@ -55,8 +55,8 @@ PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims,
 PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, const int ndims,
                                          Py_intptr_t *dims);
 PyArray_Descr *func_PyArray_Descr(const char *datadescr);
-}
-}
-}
-}
+} // namespace Impl
+} // namespace Converters
+} // namespace PythonInterface
+} // namespace Mantid
 #endif // NUMPY_FUNCTIONS_H

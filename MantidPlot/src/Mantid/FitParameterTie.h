@@ -1,15 +1,15 @@
 #ifndef FITPARAMETERTIE_H
 #define FITPARAMETERTIE_H
 
-#include <QString>
 #include <QList>
+#include <QString>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
 class CompositeFunction;
 }
-}
+} // namespace Mantid
 
 class QtProperty;
 

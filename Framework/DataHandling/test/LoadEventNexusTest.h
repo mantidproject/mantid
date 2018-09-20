@@ -8,13 +8,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -103,7 +103,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
                      reference->getNumberHistograms());
   }
 }
-}
+} // namespace
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -546,8 +546,9 @@ public:
                     1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
-    TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")
-                             ->monitorWorkspace());
+    TS_ASSERT_EQUALS(
+        WS,
+        ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,

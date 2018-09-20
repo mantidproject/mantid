@@ -1,11 +1,11 @@
 #ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H
 #define MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H
-#include <string>
+#include "DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <ostream>
-#include "DllConfig.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -29,6 +29,6 @@ operator==(InstrumentOptionDefaults const &lhs,
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::ostream &
 operator<<(std::ostream &os, InstrumentOptionDefaults const &defaults);
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTOPTIONDEFAULTS_H

@@ -122,7 +122,7 @@ template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
 template <typename T>
 struct RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value {};
 
-} // ends anonymous namespace
+} // namespace
 
 /**
  * Implements the RemoveConst policy.
@@ -150,8 +150,8 @@ struct RemoveConstSharedPtr {
   };
 };
 
-} // ends Policies namespace
-}
-} // ends Mantid::PythonInterface namespaces
+} // namespace Policies
+} // namespace PythonInterface
+} // namespace Mantid
 
 #endif /* MANTID_PYTHONINTERFACE_REMOVECONST_H_REMOVECONST_H_ */

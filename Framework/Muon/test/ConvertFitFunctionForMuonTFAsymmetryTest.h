@@ -1,15 +1,15 @@
 #ifndef CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
 #define CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::Muon::ConvertFitFunctionForMuonTFAsymmetry;
@@ -91,7 +91,7 @@ IFunction_sptr doFit(const IFunction_sptr &func, int iterations,
   std::string funcString = fit->getPropertyValue("Function");
   return FunctionFactory::Instance().createInitialized(funcString);
 }
-}
+} // namespace
 
 class ConvertFitFunctionForMuonTFAsymmetryTest : public CxxTest::TestSuite {
 public:

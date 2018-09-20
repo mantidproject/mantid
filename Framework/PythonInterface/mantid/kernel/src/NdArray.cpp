@@ -18,7 +18,7 @@ namespace {
 inline PyArrayObject *rawArray(const NdArray &obj) {
   return (PyArrayObject *)obj.ptr();
 }
-}
+} // namespace
 
 // -----------------------------------------------------------------------------
 // NdArray - public methods
@@ -75,9 +75,9 @@ NdArray NdArray::astype(char dtype, bool copy) const {
   return NdArray(boost::python::detail::new_reference(
       PyObject_Call(callable.ptr(), args.ptr(), kwargs.ptr())));
 }
-}
-}
-}
+} // namespace NumPy
+} // namespace PythonInterface
+} // namespace Mantid
 
 // -----------------------------------------------------------------------------
 // object_manager_traits specialisation for NdArray
@@ -118,6 +118,6 @@ PyTypeObject const *
 object_manager_traits<Mantid::PythonInterface::NumPy::NdArray>::get_pytype() {
   return getNDArrayType();
 }
-}
-}
-}
+} // namespace converter
+} // namespace python
+} // namespace boost

@@ -1,11 +1,11 @@
 #ifndef MANTID_ALGORITHMS_INVERTMASKTEST_H_
 #define MANTID_ALGORITHMS_INVERTMASKTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/InvertMask.h"
 

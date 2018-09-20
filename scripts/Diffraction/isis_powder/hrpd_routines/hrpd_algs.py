@@ -4,8 +4,7 @@ import mantid.simpleapi as mantid
 
 from isis_powder.hrpd_routines import hrpd_advanced_config
 from isis_powder.routines import common, absorb_corrections, sample_details, common_enums
-from isis_powder.routines.run_details import create_run_details_object, \
-                                             RunDetailsWrappedCommonFuncs, CustomFuncForRunDetails
+from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
@@ -71,38 +70,25 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium):
-    cal_mapping_callable = CustomFuncForRunDetails().add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.get_cal_mapping_dict,
-        run_number_string=run_number_string, inst_settings=inst_settings)
+    # Drill down to relevant section
+    run_mapping_dict = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
+    inst_mode_dict = common.cal_map_dictionary_key_helper(run_mapping_dict, key=inst_settings.mode)
+    tof_window = common.cal_map_dictionary_key_helper(dictionary=inst_mode_dict, key=inst_settings.tof_window)
 
-    mapping_dict_callable = cal_mapping_callable.add_to_func_chain(user_function=hrpd_get_inst_mode,
-                                                                   inst_settings=inst_settings)
+    empty_run = _get_run_numbers_for_key(tof_window, key="empty_run_numbers")
+    vanadium_run = _get_run_numbers_for_key(tof_window, key="vanadium_run_numbers")
 
-    tof_dict_callable = mapping_dict_callable.add_to_func_chain(user_function=hrpd_get_tof_window,
-                                                                inst_settings=inst_settings)
-
-    err_message = "this must be under 'coupled' or 'decoupled' and the time of flight window eg 10-110."
-    empty_run_callable = tof_dict_callable.add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="empty_run_numbers",
-        append_to_error_message=err_message)
-
-    vanadium_run_callable = tof_dict_callable.add_to_func_chain(
-        user_function=RunDetailsWrappedCommonFuncs.cal_dictionary_key_helper, key="vanadium_run_numbers",
-        append_to_error_message=err_message)
+    grouping_file_name = inst_settings.grouping_file_name
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium, empty_run_call=empty_run_callable,
-                                     vanadium_run_call=vanadium_run_callable)
+                                     is_vanadium_run=is_vanadium, empty_run_number=empty_run,
+                                     vanadium_string=vanadium_run, grouping_file_name=grouping_file_name)
 
 
-def hrpd_get_inst_mode(forwarded_value, inst_settings):
-    cal_mapping = forwarded_value
-    return common.cal_map_dictionary_key_helper(dictionary=cal_mapping, key=inst_settings.mode)
-
-
-def hrpd_get_tof_window(forwarded_value, inst_settings):
-    cal_mapping = forwarded_value
-    return common.cal_map_dictionary_key_helper(dictionary=cal_mapping, key=inst_settings.tof_window)
+def _get_run_numbers_for_key(tof_dict, key):
+    err_message = "this must be under 'coupled' or 'decoupled' and the time of flight window eg 10-110."
+    return common.cal_map_dictionary_key_helper(tof_dict, key=key,
+                                                append_to_error_message=err_message)
 
 
 def process_vanadium_for_focusing(bank_spectra, spline_number):

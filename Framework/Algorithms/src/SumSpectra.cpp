@@ -10,6 +10,9 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+
+#include <functional>
 
 namespace Mantid {
 namespace Algorithms {
@@ -66,12 +69,12 @@ bool validateSingleMatrixWorkspace(
 }
 
 /**
-* @param validationOutput Output map to be populated with any errors
-* @param name A string identifier for an input workspace to verify
-* @param minIndex Minimum index of range to sum
-* @param maxIndex Mmaximum index of range to sum
-* @param indices A list of indices to sum
-*/
+ * @param validationOutput Output map to be populated with any errors
+ * @param name A string identifier for an input workspace to verify
+ * @param minIndex Minimum index of range to sum
+ * @param maxIndex Mmaximum index of range to sum
+ * @param indices A list of indices to sum
+ */
 void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
                            const std::string &name, const int minIndex,
                            const int maxIndex,
@@ -98,7 +101,7 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
     ++index;
   }
 }
-}
+} // namespace
 
 /** Initialisation method.
  *
@@ -149,13 +152,20 @@ void SumSpectra::init() {
   declareProperty("RemoveSpecialValues", false,
                   "If enabled floating point special values such as NaN or Inf"
                   " are removed before the spectra are summed.");
+
+  declareProperty("MultiplyBySpectra", true,
+                  "For unnormalized data one should multiply the weighted sum "
+                  "by the number of spectra contributing to the bin.");
+  setPropertySettings(
+      "MultiplyBySpectra",
+      make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
 }
 
 /*
-* Validate the input parameters
-* @returns map with keys corresponding to properties with errors and values
-* containing the error messages.
-*/
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
 std::map<std::string, std::string> SumSpectra::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
@@ -205,6 +215,7 @@ void SumSpectra::exec() {
       << m_outSpecNum << "\n";
 
   m_calculateWeightedSum = getProperty("WeightedSum");
+  m_multiplyByNumSpec = getProperty("MultiplyBySpectra");
 
   // setup all of the outputs
   MatrixWorkspace_sptr outputWorkspace = nullptr;
@@ -253,9 +264,9 @@ void SumSpectra::exec() {
       doSimpleSum(outputWorkspace, progress, numSpectra, numMasked, numZeros);
     }
 
-    auto &YError = outSpec.mutableE();
     // take the square root of all the accumulated squared errors - Assumes
     // Gaussian errors
+    auto &YError = outSpec.mutableE();
     std::transform(YError.begin(), YError.end(), YError.begin(),
                    (double (*)(double))std::sqrt);
   }
@@ -324,10 +335,10 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
 }
 
 /**
-  * Calls an algorithm to replace special values within the workspace
-  * such as NaN or Inf to 0.
-  * @return The workspace with special floating point values set to 0
-  */
+ * Calls an algorithm to replace special values within the workspace
+ * such as NaN or Inf to 0.
+ * @return The workspace with special floating point values set to 0
+ */
 API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
   // Get a copy of the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
@@ -348,6 +359,61 @@ API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
   alg->executeAsChildAlg();
   return alg->getProperty("OutputWorkspace");
 }
+
+namespace { // anonymous namespace
+// small function that normalizes the accumulated weight in a consistent fashion
+// the weights are modified in the process
+size_t applyWeight(const size_t numSpectra, HistogramData::HistogramY &y,
+                   std::vector<double> &weights,
+                   const std::vector<size_t> &nZeros,
+                   const bool multiplyByNumSpec) {
+  // convert weight into proper normalization factor
+  if (multiplyByNumSpec) {
+    std::transform(weights.begin(), weights.end(), nZeros.begin(),
+                   weights.begin(),
+                   [numSpectra](const double weight, const size_t nzero) {
+                     if (numSpectra > nzero) {
+                       return static_cast<double>(numSpectra - nzero) / weight;
+                     } else {
+                       return 1.;
+                     }
+                   });
+  } else {
+    std::transform(weights.begin(), weights.end(), nZeros.begin(),
+                   weights.begin(),
+                   [numSpectra](const double weight, const size_t nzero) {
+                     if (numSpectra > nzero) {
+                       return 1. / weight;
+                     } else {
+                       return 1.;
+                     }
+                   });
+  }
+
+  // apply the normalization
+  y *= weights;
+
+  // the total number of bins with any zeros between all of the spectra used
+  return std::accumulate(nZeros.begin(), nZeros.end(), size_t(0));
+}
+
+// various checks on the workspace index to see if it should be included in the
+// sum if it is masked, the value of numMasked is incremented
+bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex,
+                 const bool keepMonitors, size_t &numMasked) {
+  if (spectrumInfo.hasDetectors(wsIndex)) {
+    // Skip monitors, if the property is set to do so
+    if (!keepMonitors && spectrumInfo.isMonitor(wsIndex))
+      return false;
+    // Skip masked detectors
+    if (spectrumInfo.isMasked(wsIndex)) {
+      numMasked++;
+      return false;
+    }
+  }
+  return true;
+}
+} // anonymous namespace
 
 /**
  * This function deals with the logic necessary for summing a Workspace2D.
@@ -373,23 +439,15 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
   std::vector<double> Weight;
   std::vector<size_t> nZeros;
   if (m_calculateWeightedSum) {
-    Weight.assign(YSum.size(), 0);
+    Weight.assign(YSum.size(), 0.);
     nZeros.assign(YSum.size(), 0);
   }
 
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto wsIndex : m_indices) {
-    if (spectrumInfo.hasDetectors(wsIndex)) {
-      // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && spectrumInfo.isMonitor(wsIndex))
-        continue;
-      // Skip masked detectors
-      if (spectrumInfo.isMasked(wsIndex)) {
-        numMasked++;
-        continue;
-      }
-    }
+    if (!useSpectrum(spectrumInfo, wsIndex, m_keepMonitors, numMasked))
+      continue;
     numSpectra++;
 
     const auto &YValues = localworkspace->y(wsIndex);
@@ -410,10 +468,11 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
       }
     } else {
       YSum += YValues;
-      for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
-        const auto yErrorsVal = YErrors[yIndex];
-        YErrorSum[yIndex] += yErrorsVal * yErrorsVal;
-      }
+      std::transform(YErrorSum.begin(), YErrorSum.end(), YErrors.begin(),
+                     YErrorSum.begin(),
+                     [](const double accum, const double yerrorSpec) {
+                       return accum + yerrorSpec * yerrorSpec;
+                     });
     }
 
     // Map all the detectors onto the spectrum of the output
@@ -424,12 +483,10 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
   }
 
   if (m_calculateWeightedSum) {
-    for (size_t yIndex = 0; yIndex < m_yLength; yIndex++) {
-      if (numSpectra > nZeros[yIndex])
-        YSum[yIndex] *= double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
-      if (nZeros[yIndex] != 0)
-        numZeros += nZeros[yIndex];
-    }
+    numZeros =
+        applyWeight(numSpectra, YSum, Weight, nZeros, m_multiplyByNumSpec);
+  } else {
+    numZeros = 0;
   }
 }
 
@@ -473,16 +530,8 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto wsIndex : m_indices) {
-    if (spectrumInfo.hasDetectors(wsIndex)) {
-      // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && spectrumInfo.isMonitor(wsIndex))
-        continue;
-      // Skip masked detectors
-      if (spectrumInfo.isMasked(wsIndex)) {
-        numMasked++;
-        continue;
-      }
-    }
+    if (!useSpectrum(spectrumInfo, wsIndex, m_keepMonitors, numMasked))
+      continue;
     numSpectra++;
 
     // Retrieve the spectrum into a vector
@@ -502,16 +551,17 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
         } else {
           nZeros[yIndex]++;
         }
-        FracSum[yIndex] += FracArea[yIndex];
       }
     } else {
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
         YSum[yIndex] += YValues[yIndex] * FracArea[yIndex];
         YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex] *
                              FracArea[yIndex] * FracArea[yIndex];
-        FracSum[yIndex] += FracArea[yIndex];
       }
     }
+    // accumulation of fractional weight is the same
+    std::transform(FracSum.begin(), FracSum.end(), FracArea.begin(),
+                   FracSum.begin(), std::plus<double>());
 
     // Map all the detectors onto the spectrum of the output
     outSpec.addDetectorIDs(
@@ -521,12 +571,10 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   }
 
   if (m_calculateWeightedSum) {
-    for (size_t yIndex = 0; yIndex < m_yLength; yIndex++) {
-      if (numSpectra > nZeros[yIndex])
-        YSum[yIndex] *= double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
-      if (nZeros[yIndex] != 0)
-        numZeros += nZeros[yIndex];
-    }
+    numZeros =
+        applyWeight(numSpectra, YSum, Weight, nZeros, m_multiplyByNumSpec);
+  } else {
+    numZeros = 0;
   }
 
   // Create the correct representation

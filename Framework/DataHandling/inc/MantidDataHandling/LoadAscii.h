@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADASCII_H_
 #define MANTID_DATAHANDLING_LOADASCII_H_
 
-#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/IFileLoader.h"
 
 #include <list>
 

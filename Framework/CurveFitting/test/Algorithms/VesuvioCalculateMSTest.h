@@ -5,13 +5,13 @@
 
 #include "boost/version.hpp"
 
-#include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -153,7 +153,7 @@ void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg,
   const auto &msX = multScatter->x(0);
   TS_ASSERT_DELTA(150.0, msX[checkIdx], tolerance); // based on workspace setup
 }
-}
+} // namespace
 class VesuvioCalculateMSTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

@@ -1,9 +1,9 @@
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "IndirectTransmissionCalc.h"
 #include "../General/UserInputValidator.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QTreeWidgetItem>
 

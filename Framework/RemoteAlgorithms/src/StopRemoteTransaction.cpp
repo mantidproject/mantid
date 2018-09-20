@@ -1,9 +1,9 @@
 #include "MantidRemoteAlgorithms/StopRemoteTransaction.h"
-#include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include "MantidKernel/RemoteJobManager.h"
 

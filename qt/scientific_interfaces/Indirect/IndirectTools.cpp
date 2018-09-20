@@ -1,16 +1,16 @@
+#include "IndirectTools.h"
+#include "IndirectLoadILL.h"
+#include "IndirectTransmissionCalc.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "IndirectTools.h"
-#include "IndirectTransmissionCalc.h"
-#include "IndirectLoadILL.h"
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectTools)
 }
-}
+} // namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 

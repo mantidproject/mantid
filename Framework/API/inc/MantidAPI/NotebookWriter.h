@@ -55,7 +55,7 @@ private:
 
   Json::Value m_cell_buffer;
 };
-}
-}
+} // namespace API
+} // namespace Mantid
 
 #endif // MANTID_NOTEBOOKWRITER_H

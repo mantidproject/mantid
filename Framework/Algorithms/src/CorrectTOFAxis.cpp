@@ -1,16 +1,16 @@
 #include "MantidAlgorithms/CorrectTOFAxis.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitConversion.h"
@@ -18,8 +18,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorrectTOFAxis)
@@ -395,8 +395,9 @@ void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
     outputWs->mutableRun().addProperty(SampleLog::WAVELENGTH, wavelength, true);
   }
   // In microseconds.
-  const double TOF = (l1 + l2) / std::sqrt(2 * Ei * PhysicalConstants::meV /
-                                           PhysicalConstants::NeutronMass) *
+  const double TOF = (l1 + l2) /
+                     std::sqrt(2 * Ei * PhysicalConstants::meV /
+                               PhysicalConstants::NeutronMass) *
                      1e6;
   g_log.information() << "Calculated TOF for L1+L2 distance of " << l1 + l2
                       << "m: " << TOF << '\n';

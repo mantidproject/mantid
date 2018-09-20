@@ -20,7 +20,7 @@ namespace Mantid {
 namespace API {
 class Algorithm;
 }
-}
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

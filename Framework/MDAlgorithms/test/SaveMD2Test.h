@@ -1,14 +1,14 @@
 #ifndef MANTID_MDEVENTS_SAVEMD2EWTEST_H_
 #define MANTID_MDEVENTS_SAVEMD2EWTEST_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/BinMD.h"
-#include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidMDAlgorithms/LoadMD.h"
+#include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>

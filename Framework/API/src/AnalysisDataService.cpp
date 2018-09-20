@@ -1,5 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include <iterator>
 #include <sstream>
 
 namespace Mantid {
@@ -28,12 +29,12 @@ AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
 // Public methods
 //-------------------------------------------------------------------------
 /**
-* Is the given name a valid name for an object in the ADS
-* @param name A string containing a possible name for an object in the ADS
-* @return An empty string if the name is valid or an error message stating the
-* problem
-* if the name is unacceptable.
-*/
+ * Is the given name a valid name for an object in the ADS
+ * @param name A string containing a possible name for an object in the ADS
+ * @return An empty string if the name is valid or an error message stating the
+ * problem
+ * if the name is unacceptable.
+ */
 const std::string
 AnalysisDataServiceImpl::isValid(const std::string &name) const {
   std::string error;
@@ -94,13 +95,13 @@ void AnalysisDataServiceImpl::add(
 }
 
 /**
-  * Overwridden addOrReplace member to attach the name to the workspace when a
+ * Overwridden addOrReplace member to attach the name to the workspace when a
  * workspace object is added to the service.
-  * This will overwrite one of the same name. If the workspace is group adds or
+ * This will overwrite one of the same name. If the workspace is group adds or
  * replaces its members.
-  * @param name The name of the object
-  * @param workspace The shared pointer to the workspace to store
-  */
+ * @param name The name of the object
+ * @param workspace The shared pointer to the workspace to store
+ */
 void AnalysisDataServiceImpl::addOrReplace(
     const std::string &name,
     const boost::shared_ptr<API::Workspace> &workspace) {
@@ -162,6 +163,46 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
   if (ws) {
     ws->setName("");
   }
+}
+
+/**
+ * @brief Given a list of names retrieve the corresponding workspace handles
+ * @param names A list of names of workspaces, if any does not exist then
+ * a Kernel::Exception::NotFoundError is thrown.
+ * @param unrollGroups If true flatten groups into the list of members.
+ * @return A vector of pointers to Workspaces
+ * @throws std::invalid_argument if no names are provided
+ * @throws Mantid::Kernel::Exception::NotFoundError if a workspace does not
+ * exist within the ADS
+ */
+std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
+    const std::vector<std::string> &names, bool unrollGroups) const {
+  using WorkspacesVector = std::vector<Workspace_sptr>;
+  WorkspacesVector workspaces;
+  workspaces.reserve(names.size());
+  std::transform(
+      std::begin(names), std::end(names), std::back_inserter(workspaces),
+      [this](const std::string &name) { return this->retrieve(name); });
+  assert(names.size() == workspaces.size());
+  if (unrollGroups) {
+    using IteratorDifference =
+        std::iterator_traits<WorkspacesVector::iterator>::difference_type;
+    for (size_t i = 0; i < workspaces.size(); ++i) {
+      if (auto group =
+              boost::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
+        const auto groupLength(group->size());
+        workspaces.erase(std::next(std::begin(workspaces),
+                                   static_cast<IteratorDifference>(i)));
+        for (size_t j = 0; j < groupLength; ++j) {
+          workspaces.insert(std::next(std::begin(workspaces),
+                                      static_cast<IteratorDifference>(i + j)),
+                            group->getItem(j));
+        }
+        i += groupLength;
+      }
+    }
+  }
+  return workspaces;
 }
 
 /**

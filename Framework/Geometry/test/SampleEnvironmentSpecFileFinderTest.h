@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H
 #define MANTID_GEOMETRY_SAMPLEENVIRONMENTSPECFILEFINDERTEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
+#include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

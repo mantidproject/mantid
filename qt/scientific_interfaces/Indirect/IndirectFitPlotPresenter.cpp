@@ -3,8 +3,8 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::IndirectFitPlotView;
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
+using MantidQt::CustomInterfaces::IDA::IndirectFitPlotView;
 
 std::string createPlotString(const std::string &workspaceName,
                              const std::string &spectra) {
@@ -226,13 +226,13 @@ void IndirectFitPlotPresenter::updateAvailableSpectra() {
 }
 
 void IndirectFitPlotPresenter::disableAllDataSelection() {
-  m_view->disableSpectrumSelection();
-  m_view->disableFitRangeSelection();
+  m_view->enableSpectrumSelection(false);
+  m_view->enableFitRangeSelection(false);
 }
 
 void IndirectFitPlotPresenter::enableAllDataSelection() {
-  m_view->enableSpectrumSelection();
-  m_view->enableFitRangeSelection();
+  m_view->enableSpectrumSelection(true);
+  m_view->enableFitRangeSelection(true);
 }
 
 void IndirectFitPlotPresenter::updatePlots() {
@@ -304,25 +304,28 @@ void IndirectFitPlotPresenter::updateFitRangeSelector() {
 }
 
 void IndirectFitPlotPresenter::plotCurrentPreview() {
-  const auto plotString = getPlotString(m_model->getActiveSpectrum());
-  m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  if (m_model->getWorkspace()) {
+    const auto plotString = getPlotString(m_model->getActiveSpectrum());
+    m_pythonRunner.runPythonCode(QString::fromStdString(plotString));
+  } else
+    m_view->displayMessage("Workspace not found - data may not be loaded.");
 }
 
 void IndirectFitPlotPresenter::updateGuess() {
   if (m_model->canCalculateGuess()) {
-    m_view->enablePlotGuess();
+    m_view->enablePlotGuess(true);
     updateGuess(m_view->isPlotGuessChecked());
   } else {
-    m_view->disablePlotGuess();
+    m_view->enablePlotGuess(false);
     clearGuess();
   }
 }
 
 void IndirectFitPlotPresenter::updateGuessAvailability() {
   if (m_model->canCalculateGuess())
-    m_view->enablePlotGuess();
+    m_view->enablePlotGuess(true);
   else
-    m_view->disablePlotGuess();
+    m_view->enablePlotGuess(false);
 }
 
 void IndirectFitPlotPresenter::updateGuess(bool doPlotGuess) {

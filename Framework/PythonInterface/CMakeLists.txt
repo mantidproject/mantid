@@ -9,7 +9,9 @@
 ###########################################################################
 set ( old_boost ${Boost_LIBRARIES} )
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
+
 find_package ( BoostPython REQUIRED )
+
 set ( Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
 include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )

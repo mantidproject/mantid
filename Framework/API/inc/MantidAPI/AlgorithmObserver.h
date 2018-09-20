@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/DllConfig.h"
 #include <Poco/NObserver.h>
 
 namespace Mantid {

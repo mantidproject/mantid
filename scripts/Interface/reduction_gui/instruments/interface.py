@@ -271,12 +271,6 @@ class InstrumentInterface(object):
         """
         return False
 
-    def is_cluster_enabled(self):
-        """
-            Returns true if the instrument is compatible with remote submission
-        """
-        return False
-
     def is_live_enabled(self):
         """
             Returns true if the instrument interface includes a live data button

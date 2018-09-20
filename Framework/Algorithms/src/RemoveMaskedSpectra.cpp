@@ -1,9 +1,8 @@
 #include "MantidAlgorithms/RemoveMaskedSpectra.h"
 
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
 namespace Mantid {

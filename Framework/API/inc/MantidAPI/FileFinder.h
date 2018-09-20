@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
+#include "MantidKernel/SingletonHolder.h"
 
-#include <vector>
 #include <set>
+#include <vector>
 
 namespace Mantid {
 //---------------------------------------------------------------------------
@@ -18,7 +18,7 @@ namespace Mantid {
 namespace Kernel {
 class InstrumentInfo;
 class FacilityInfo;
-}
+} // namespace Kernel
 namespace API {
 
 /**
@@ -98,14 +98,14 @@ private:
 };
 
 using FileFinder = Mantid::Kernel::SingletonHolder<FileFinderImpl>;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::FileFinderImpl>;
 }
-}
+} // namespace Mantid
 
 #endif // MANTID_API_FILEFINDER_H_

@@ -37,7 +37,7 @@ private:
   RunMap<MAX_BANKS, Mantid::API::MatrixWorkspace_sptr> m_focusedRunMap;
 };
 
-} // namespace MantidQt
 } // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODEL_H_

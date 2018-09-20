@@ -1,12 +1,12 @@
 #ifndef MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_
 #define MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 

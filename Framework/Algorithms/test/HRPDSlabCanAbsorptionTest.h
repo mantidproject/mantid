@@ -3,17 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/HRPDSlabCanAbsorption.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;

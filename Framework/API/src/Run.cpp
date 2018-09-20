@@ -25,9 +25,9 @@ namespace {
 const int ADDABLES = 12;
 /// The names of the log entries summed when adding two runs together
 const std::string ADDABLE[ADDABLES] = {
-    "tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour",
-    "monitor0_counts", "monitor1_counts", "monitor2_counts", "monitor3_counts",
-    "monitor4_counts", "monitor5_counts"};
+    "tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
+    "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
+    "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 /// Name of the stored histogram bins log when saved to NeXus
@@ -38,7 +38,7 @@ const char *OUTER_BKG_RADIUS_GROUP = "outer_bkg_radius";
 
 /// static logger object
 Kernel::Logger g_log("Run");
-}
+} // namespace
 
 Run::Run() : m_goniometer(Kernel::make_unique<Geometry::Goniometer>()) {}
 
@@ -240,8 +240,8 @@ void Run::storeHistogramBinBoundaries(const std::vector<double> &histoBins) {
   if (histoBins.front() >= histoBins.back()) {
     std::ostringstream os;
     os << "Run::storeEnergyBinBoundaries - Inconsistent start & end values "
-          "given, size=" << histoBins.size()
-       << ". Cannot interpret values as bin boundaries.";
+          "given, size="
+       << histoBins.size() << ". Cannot interpret values as bin boundaries.";
     throw std::out_of_range(os.str());
   }
   m_histoBins = histoBins;
@@ -264,13 +264,15 @@ Run::histogramBinBoundaries(const double value) const {
   if (value < m_histoBins.front()) {
     std::ostringstream os;
     os << "Run::histogramBinBoundaries- Value lower than first bin boundary. "
-          "Value= " << value << ", first boundary=" << m_histoBins.front();
+          "Value= "
+       << value << ", first boundary=" << m_histoBins.front();
     throw std::out_of_range(os.str());
   }
   if (value > m_histoBins.back()) {
     std::ostringstream os;
     os << "Run::histogramBinBoundaries- Value greater than last bin boundary. "
-          "Value= " << value << ", last boundary=" << m_histoBins.back();
+          "Value= "
+       << value << ", last boundary=" << m_histoBins.back();
     throw std::out_of_range(os.str());
   }
   const int index = VectorHelper::getBinIndex(m_histoBins, value);
@@ -465,11 +467,11 @@ void Run::calculateGoniometerMatrix() {
         !(std::isnan(minAngle) && std::isnan(maxAngle))) {
       const double lastAngle =
           getLogAsSingleValue(axisName, Kernel::Math::LastValue);
-      g_log.warning("Goniometer angle changed in " + axisName + " log from " +
-                    boost::lexical_cast<std::string>(minAngle) + " to " +
-                    boost::lexical_cast<std::string>(maxAngle) +
-                    ".  Used mean = " +
-                    boost::lexical_cast<std::string>(angle) + ".");
+      g_log.warning(
+          "Goniometer angle changed in " + axisName + " log from " +
+          boost::lexical_cast<std::string>(minAngle) + " to " +
+          boost::lexical_cast<std::string>(maxAngle) +
+          ".  Used mean = " + boost::lexical_cast<std::string>(angle) + ".");
       if (axisName == "omega") {
         g_log.warning("To set to last angle, replace omega with " +
                       boost::lexical_cast<std::string>(lastAngle) +
@@ -519,5 +521,5 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
   }
 }
 
-} // API namespace
-}
+} // namespace API
+} // namespace Mantid

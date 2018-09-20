@@ -43,7 +43,7 @@ protected:
   virtual bool throwIfElasticQConversionFails() const;
   virtual bool isFitParameter(const std::string &name) const;
   std::set<std::string> getUniqueParameterNames() const;
-  std::vector<std::string> getFitParameterNames() const;
+  virtual std::vector<std::string> getFitParameterNames() const;
   virtual std::map<std::string, std::string> getAdditionalLogStrings() const;
   virtual std::map<std::string, std::string> getAdditionalLogNumbers() const;
   virtual API::ITableWorkspace_sptr
@@ -57,16 +57,18 @@ private:
   std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
   performFit(const std::vector<API::MatrixWorkspace_sptr> &workspaces,
              const std::string &output);
-  API::MatrixWorkspace_sptr
-  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace);
-  void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
+  API::WorkspaceGroup_sptr
+  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace,
+                               const std::vector<std::size_t> &grouping);
+  void copyLogs(API::WorkspaceGroup_sptr resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
   void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
                 API::WorkspaceGroup_sptr resultGroup);
   void extractMembers(API::WorkspaceGroup_sptr resultGroupWs,
                       const std::vector<API::MatrixWorkspace_sptr> &workspaces,
                       const std::string &outputWsName);
-  void addAdditionalLogs(API::MatrixWorkspace_sptr result);
+  void addAdditionalLogs(API::WorkspaceGroup_sptr group);
+  void addAdditionalLogs(API::Workspace_sptr result);
 
   API::IAlgorithm_sptr
   extractMembersAlgorithm(API::WorkspaceGroup_sptr resultGroupWs,

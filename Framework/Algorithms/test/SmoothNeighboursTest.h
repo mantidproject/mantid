@@ -1,8 +1,8 @@
 #ifndef SMOOTHNEIGHBOURSTEST_H_
 #define SMOOTHNEIGHBOURSTEST_H_
 
-#include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/SmoothNeighbours.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -236,8 +236,8 @@ public:
   }
 
   /*
-  * Start test Radius Filter.
-  */
+   * Start test Radius Filter.
+   */
   void testRadiusThrowsIfNegativeCutoff() {
     TS_ASSERT_THROWS(RadiusFilter(-1), std::invalid_argument);
   }
@@ -258,8 +258,8 @@ public:
   }
 
   /*
-  * End test radius filter
-  */
+   * End test radius filter
+   */
 
   void testWithUnsignedNumberOfNeighbours() {
     SmoothNeighbours alg;

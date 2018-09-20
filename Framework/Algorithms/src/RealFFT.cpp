@@ -191,5 +191,5 @@ void RealFFT::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

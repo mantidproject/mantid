@@ -1,7 +1,6 @@
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -19,6 +18,7 @@
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
@@ -26,8 +26,8 @@
 #include "MantidMDAlgorithms/GSLFunctions.h"
 
 #include <cmath>
-#include <gsl/gsl_integration.h>
 #include <fstream>
+#include <gsl/gsl_integration.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -272,8 +272,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     out.open(outFile.c_str(), std::ofstream::out);
   }
   // volume of Background sphere with inner volume subtracted
-  double volumeBkg = 4.0 / 3.0 * M_PI * (std::pow(BackgroundOuterRadius, 3) -
-                                         std::pow(BackgroundOuterRadius, 3));
+  double volumeBkg =
+      4.0 / 3.0 * M_PI *
+      (std::pow(BackgroundOuterRadius, 3) - std::pow(BackgroundOuterRadius, 3));
   // volume of PeakRadius sphere
   double volumeRadius = 4.0 / 3.0 * M_PI * std::pow(PeakRadius, 3);
   //
@@ -312,8 +313,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                             std::max(BackgroundOuterRadius, PeakRadius));
     if (edge < std::max(BackgroundOuterRadius, PeakRadius)) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
-                         "of detector for peak " << i
-                      << "; radius of edge =  " << edge << '\n';
+                         "of detector for peak "
+                      << i << "; radius of edge =  " << edge << '\n';
       if (!integrateEdge) {
         if (replaceIntensity) {
           p.setIntensity(0.0);
@@ -800,5 +801,5 @@ double f_eval2(double x, void *params) {
   return yval[0];
 }
 
+} // namespace MDAlgorithms
 } // namespace Mantid
-} // namespace DataObjects

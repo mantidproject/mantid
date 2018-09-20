@@ -1,11 +1,11 @@
 #ifndef POLDIDETECTORTEST_H
 #define POLDIDETECTORTEST_H
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/TableRow.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

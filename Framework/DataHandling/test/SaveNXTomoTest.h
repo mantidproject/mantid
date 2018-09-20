@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <nexus/NeXusFile.hpp>
