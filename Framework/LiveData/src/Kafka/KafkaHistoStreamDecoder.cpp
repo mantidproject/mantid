@@ -1,14 +1,18 @@
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidLiveData/Exception.h"
 
 GCC_DIAG_OFF(conversion)
-#include "private/Schema/ai34_det_counts_generated.h"
+//#include "private/Schema/ai34_det_counts_generated.h"
+#include "private/Schema/hs00_event_histogram_generated.h"
 GCC_DIAG_ON(conversion)
 
 
@@ -40,8 +44,9 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
   , m_instrumentName(instrumentName)
   , m_histoStream()
   , m_workspace()
-  , m_indexMap()
-  , m_indexOffset(0)
+  , m_indexMap()      // REM
+  , m_indexOffset(0)  // REM
+  , m_buffer()
   , m_thread()
   , m_interrupt(false)
   , m_capturing(false)
@@ -53,10 +58,9 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
   {
     std::lock_guard<std::mutex> lock(m_workspace_mutex);
     m_workspace = createBufferWorkspace();
-    m_indexMap =
-        m_workspace->getDetectorIDToWorkspaceIndexVector(m_indexOffset);
-    g_log.warning() << "indexOffset: " << m_indexOffset << "\n";
-
+    //m_indexMap =
+    //    m_workspace->getDetectorIDToWorkspaceIndexVector(m_indexOffset);
+    //g_log.warning() << "indexOffset: " << m_indexOffset << "\n";
   }
 }
 
@@ -104,7 +108,9 @@ bool KafkaHistoStreamDecoder::hasData() const {
   g_log.warning() << "hasData" << "\n";
 
   std::lock_guard<std::mutex> lock(m_workspace_mutex);
-  return !!m_workspace;
+  // TODO: Better with a new data flag?
+  //return !!m_workspace;
+  return !m_buffer.empty();
 }
 
 /**
@@ -138,11 +144,76 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
     throw Exception::NotYet("Local buffers not initialized.");
   }
 
-  auto temp = copyBufferWorkspace(m_workspace);
-  g_log.warning() << "swap" << "\n";
-  std::swap(m_workspace, temp);
-  g_log.warning() << "return" << "\n";
-  return temp;
+  if (m_buffer.empty()) {
+    throw Exception::NotYet("No message to process yet.");
+  }
+
+  //*
+  auto histoMsg = GetEventHistogram(m_buffer.c_str());
+
+  auto shape = histoMsg->current_shape();
+  auto nbins = shape->Get(0) - 1;
+  auto nspectra = shape->Get(1);
+
+  // TODO: This is a hack, wrong spectra number provided
+  nspectra = m_workspace->getNumberHistograms();
+
+  auto metadata = histoMsg->dim_metadata();
+  auto metadimx = metadata->GetAs<DimensionMetaData>(0);
+  auto metadimy = metadata->GetAs<DimensionMetaData>(1);
+  auto xbins = metadimx->bin_boundaries_as_ArrayDouble()->value();
+
+  //g_log.warning() << metadimx->unit()->c_str() << "\n";   // microsecond
+  //g_log.warning() << metadimx->label()->c_str() << "\n";  // Time-of-flight
+  //g_log.warning() << metadimy->unit() << "\n";            // 0
+  //g_log.warning() << metadimy->label()->c_str() << "\n";  // Spectrum
+
+  HistogramData::BinEdges binedges(nbins + 1);
+  binedges.mutableRawData().assign(xbins->begin(), xbins->end());
+
+  auto ws = DataObjects::create<DataObjects::Workspace2D>(*m_workspace, nspectra, binedges);
+  ws->setIndexInfo(m_workspace->indexInfo());
+  //auto data = static_cast<const double*>(histoMsg->data());
+  auto data = histoMsg->data_as_ArrayDouble()->value();
+
+  // Set the unit on the workspace to TOF
+  //ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+  ws->getAxis(0)->setUnit("TOF");
+  ws->setYUnit("Counts");
+
+  std::vector<double> counts;
+  for (unsigned int i = 0; i < nspectra; ++i) {
+    const double* start = data->data() + (i * nbins);
+    counts.assign(start, start + nbins);
+    ws->setCounts(i, counts);
+  }
+  //ws->setCounts();
+
+  // Set all bin edges
+
+  // Set data
+
+  return ws;
+
+
+  /*
+  const auto &detectorIDs = *(histoMsg->detector_id());
+  const auto &detectionCounts = *(histoMsg->detection_count());
+
+  auto nCounts = detectionCounts.size();
+  g_log.warning() << "Pulse Image Counts: " << nCounts << "\n";
+
+  {
+    std::lock_guard<std::mutex> lock(m_workspace_mutex);
+    for (decltype(nCounts) i = 0; i < nCounts; ++i) {
+      // Actually these are spectrum numbers
+      const auto detID = detectorIDs[i];
+      const auto detCount  = detectionCounts[i];
+      const auto curCount =  m_workspace->counts(detID - 1);
+      m_workspace->setCounts(detID - 1, curCount + detCount);
+    }
+  }
+  //*/
 }
 
 /**
@@ -187,24 +258,10 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
       continue;
     }
 
-    auto histoMsg = GetPulseImage(
-        reinterpret_cast<const uint8_t *>(buffer.c_str()));
-
-    const auto &detectorIDs = *(histoMsg->detector_id());
-    const auto &detectionCounts = *(histoMsg->detection_count());
-
-    auto nCounts = detectionCounts.size();
-    g_log.warning() << "Pulse Image Counts: " << nCounts << "\n";
-
+    // Lock so we don't overwrite buffer while workspace is being extracted
     {
       std::lock_guard<std::mutex> lock(m_workspace_mutex);
-      for (decltype(nCounts) i = 0; i < nCounts; ++i) {
-        // Actually these are spectrum numbers
-        const auto detID = detectorIDs[i];
-        const auto detCount  = detectionCounts[i];
-        const auto curCount =  m_workspace->counts(detID - 1);
-        m_workspace->setCounts(detID - 1, curCount + detCount);
-      }
+      m_buffer = buffer;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -241,15 +298,10 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
  * @param parent A pointer to an existing workspace
  */
 DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::copyBufferWorkspace(
-    const DataObjects::Workspace2D_sptr &workspace) {
+    size_t NVectors, size_t XLength, size_t YLength) {
   g_log.warning() << "copyBufferWorkspace" << "\n";
 
-  API::MatrixWorkspace_sptr copy = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", workspace->getNumberHistograms(), 2, 1);
-
-  g_log.warning() << "initializeFromParent" << "\n";
-  API::WorkspaceFactory::Instance().initializeFromParent(*workspace, *copy,
-                                                         false);
+  auto copy = API::WorkspaceFactory::Instance().create(m_workspace, NVectors, XLength, YLength);
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(copy);
 }

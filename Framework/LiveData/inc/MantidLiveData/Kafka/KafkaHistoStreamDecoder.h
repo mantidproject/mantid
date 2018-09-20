@@ -80,8 +80,7 @@ private:
                                                          const int32_t *udet,
                                                          const uint32_t length);
   //*/
-  DataObjects::Workspace2D_sptr copyBufferWorkspace(
-      const DataObjects::Workspace2D_sptr &workspace);
+  DataObjects::Workspace2D_sptr copyBufferWorkspace(size_t NVectors = -1, size_t XLength = -1, size_t YLength = -1);
   DataObjects::Workspace2D_sptr createBufferWorkspace();
 //  void loadInstrument(const std::string &name,
 //                      DataObjects::Workspace2D_sptr workspace);
@@ -101,6 +100,9 @@ private:
   /// Detector ID to Workspace Index mapping
   std::vector<size_t> m_indexMap;
   detid_t m_indexOffset;
+
+
+  std::string m_buffer;
 
   /// Associated thread running the capture process
   std::thread m_thread;

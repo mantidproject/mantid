@@ -673,7 +673,7 @@ void KafkaEventStreamDecoder::initLocalCaches(
   }
   auto spDetMsg = GetSpectraDetectorMapping(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  auto nspec = spDetMsg->spectrum()->size();
+  auto nspec = spDetMsg->n_spectra();
   auto nudet = spDetMsg->detector_id()->size();
   if (nudet != nspec) {
     std::ostringstream os;

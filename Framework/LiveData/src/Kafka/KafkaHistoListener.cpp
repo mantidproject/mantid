@@ -25,8 +25,9 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
     std::string instrumentName = getProperty("InstrumentName");
-    const std::string histoTopic(instrumentName +
-                                 KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX);
+    //const std::string histoTopic(instrumentName +
+    //                             KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX);
+    const std::string histoTopic("foobar");
     m_decoder = Kernel::make_unique<KafkaHistoStreamDecoder>(
         broker, histoTopic, "SANS2D"); //instrumentName);
   } catch (std::exception &exc) {
