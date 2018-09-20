@@ -7,6 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ParameterReference.h"
 #include <map>
+#include <vector>
 
 namespace mu {
 class Parser;
