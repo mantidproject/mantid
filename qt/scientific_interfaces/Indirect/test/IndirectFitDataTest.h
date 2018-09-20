@@ -80,7 +80,7 @@ public:
 
   void test_that_true_is_returned_if_data_contains_zero_spectra() {
     auto data = getIndirectFitData(1, 3);
-    // NOT FINISHED
+    // NOT FINISHED - set number of spectra to zero
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
   }
 
@@ -94,7 +94,7 @@ public:
   void
   test_that_correct_excludeRegion_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
-    /// string is in the correct order
+    /// string is in the correct order (unordered: 5,6,9,7     ordered:5,6,7,9)
     auto data = getIndirectFitData(4, 3);
 
     data.setExcludeRegionString("1,8", 0);
@@ -118,7 +118,7 @@ public:
   }
 
   void test_that_excludeRegion_is_stored_in_correct_order() {
-    auto data = getIndirectFitData(10, 3);
+    auto data = getIndirectFitData(3, 3);
 
     data.setExcludeRegionString("6,2", 0);
     data.setExcludeRegionString("6,2,1,2,3,4,7,6", 1);
@@ -132,6 +132,19 @@ public:
     TS_ASSERT_EQUALS(data.getExcludeRegion(1), "2,6,1,2,3,4,6,7");
     TS_ASSERT_EQUALS(data.getExcludeRegion(2), "1,2,2,3,18,20,21,22,7,8");
     TS_ASSERT_EQUALS(data.excludeRegionsVector(0), regionVector);
+  }
+
+  void
+  test_that_excludeRegion_is_stored_correctly_when_there_are_many_spaces_in_input_string() {
+    auto data = getIndirectFitData(3, 3);
+
+    data.setExcludeRegionString("  6,     2", 0);
+    data.setExcludeRegionString("6,  2,1  ,2,  3,4  ,7,6", 1);
+    data.setExcludeRegionString("1,2 ,2,3,  20,  18,21,22,7, 8   ", 2);
+
+    TS_ASSERT_EQUALS(data.getExcludeRegion(0), "2,6");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(1), "2,6,1,2,3,4,6,7");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(2), "1,2,2,3,18,20,21,22,7,8");
   }
 
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
@@ -171,6 +184,23 @@ public:
       TS_ASSERT_THROWS_NOTHING(data.setSpectra(spectraPairs[i]));
     for (auto i = 0u; i < spectraStrings.size(); ++i)
       TS_ASSERT_THROWS_NOTHING(data.setSpectra(spectraStrings[i]));
+  }
+
+  void test_throws_when_you_try_setStartX_with_no_workspace() {
+    auto data = getIndirectFitData(1, 3);
+    // NOT FINISHED - delete workspace
+    TS_ASSERT_THROWS(data.setStartX(0.0, 50), std::runtime_error);
+  }
+
+  void
+  test_no_throw_when_setStartX_is_provided_a_valid_xValue_and_spectrum_number() {
+    /// A spectrum number above the workspace numberOfSpectra wouldn't be
+    /// allowed when called from the interface - hence a check isn't required
+    auto data = getIndirectFitData(10, 3);
+
+    TS_ASSERT_THROWS_NOTHING(data.setStartX(0.0, 0));
+    TS_ASSERT_THROWS_NOTHING(data.setStartX(-5.0, 0));
+    TS_ASSERT_THROWS_NOTHING(data.setStartX(5000000, 10));
   }
 };
 

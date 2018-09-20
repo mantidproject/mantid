@@ -165,6 +165,24 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
 std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
+
+std::string
+constructExcludeRegionString(const std::vector<std::size_t> &bounds) {
+  std::string excludeRegion;
+  for (auto it = bounds.begin(); it < bounds.end(); ++it) {
+    excludeRegion += std::to_string(*it);
+    excludeRegion += it == bounds.end() - 1 ? "" : ",";
+  }
+  return excludeRegion;
+}
+
+std::string orderExcludeRegionString(std::vector<std::size_t> &bounds) {
+  for (auto it = bounds.begin(); it < bounds.end() - 1; it += 2)
+    if (*it > *(it + 1))
+      std::iter_swap(it, it + 1);
+  return constructExcludeRegionString(bounds);
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -309,24 +327,6 @@ std::string IndirectFitData::validateExcludeRegionString(
     if (!bound.empty())
       bounds.emplace_back(std::stoull(bound));
   return orderExcludeRegionString(bounds);
-}
-
-std::string IndirectFitData::orderExcludeRegionString(
-    std::vector<std::size_t> &bounds) const {
-  for (auto it = bounds.begin(); it < bounds.end() - 1; it += 2)
-    if (*it > *(it + 1))
-      std::iter_swap(it, it + 1);
-  return constructExcludeRegionString(bounds);
-}
-
-std::string IndirectFitData::constructExcludeRegionString(
-    const std::vector<std::size_t> &bounds) const {
-  std::string excludeRegion;
-  for (auto it = bounds.begin(); it < bounds.end(); ++it) {
-    excludeRegion += std::to_string(*it);
-    excludeRegion += it == bounds.end() - 1 ? "" : ",";
-  }
-  return excludeRegion;
 }
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {

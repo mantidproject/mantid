@@ -193,9 +193,6 @@ public:
                               std::size_t spectrum);
   std::string
   validateExcludeRegionString(const std::string &excludeRegionString) const;
-  std::string orderExcludeRegionString(std::vector<std::size_t> &bounds) const;
-  std::string
-  constructExcludeRegionString(const std::vector<std::size_t> &bounds) const;
 
 private:
   void validateSpectra(const Spectra &spectra);
