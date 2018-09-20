@@ -6,7 +6,6 @@
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
-
 namespace {
 Mantid::Kernel::Logger g_log("KafkaHistoListener");
 }
