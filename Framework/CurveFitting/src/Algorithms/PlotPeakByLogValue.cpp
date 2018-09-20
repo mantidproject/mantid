@@ -305,8 +305,7 @@ void PlotPeakByLogValue::exec() {
         bool ignoreInvalidData = getProperty("IgnoreInvalidData");
 
         // Fit the function
-        API::IAlgorithm_sptr fit =
-            AlgorithmManager::Instance().createUnmanaged("Fit");
+		auto fit = this->createChildAlgorithm("Fit");
         fit->initialize();
         fit->setPropertyValue("EvaluationType",
                               getPropertyValue("EvaluationType"));
