@@ -64,6 +64,8 @@ public:
   void setBackgroundRangeVisible(bool visible);
   void setHWHMRangeVisible(bool visible);
 
+  void displayMessage(const std::string &message) const;
+
 public slots:
   void clearTopPreview();
   void clearBottomPreview();
