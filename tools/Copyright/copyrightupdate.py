@@ -15,10 +15,10 @@ import re
 
 #Compiled Regexes
 #old style statement, year in group 1
-regex_old_style = re.compile("^\s*Copyright\s.*?(\d{4}).*License for more details.*?$" + #required section
-                             "(.*licenses(\/){0,1}\>.*?$){0,1}" +                        #optional license link section
-                             "(.*mantid\>.*?$){0,1}" +                                   #optional change history line
-                             "(.*http://doxygen.mantidproject.org.*?$){0,1}",            #optional code doc line
+regex_old_style = re.compile("^\s*Copyright\s.*?(\d{4}).*License for more details.*?($|(?=\*\/))" + #required section
+                             "(.*licenses(\/){0,1}\>.*?($|(?=\*\/))){0,1}" +                        #optional license link section
+                             "(.*mantid\>.*?($|(?=\*\/))){0,1}" +                                   #optional change history line
+                             "(.*http://doxygen.mantidproject.org.*?($|(?=\*\/))){0,1}",            #optional code doc line
                              re.IGNORECASE | re.DOTALL | re.MULTILINE)
 #new style statement, year in group 1
 regex_new_style = re.compile("^\s*Mantid.*?(\d{4}).*SPDX - License - Identifier.*?$[\s]*",
