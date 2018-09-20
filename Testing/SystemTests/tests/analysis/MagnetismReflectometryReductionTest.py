@@ -373,6 +373,7 @@ class MRInspectionTest(stresstesting.MantidStressTest):
         # Simple test to verify that we flagged the data correctly
         return mtd["r_24949"].getRun().getProperty("is_direct_beam").value == "False"
 
+
 class MRInspectionOverwritesTest(stresstesting.MantidStressTest):
     def runTest(self):
         nxs_data = LoadEventNexus(Filename="REF_M_24949",
