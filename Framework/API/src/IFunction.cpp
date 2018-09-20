@@ -1506,7 +1506,7 @@ void IFunction::sortTies() {
     TieNode newNode{getParameterIndex(*tie), right};
     if (newNode < newNode) {
       throw std::runtime_error("Parameter is tied to itself: " +
-                                 tie->asString(this));
+                               tie->asString(this));
     }
     bool before(false), after(false);
     size_t indexBefore(0), indexAfter(0);
@@ -1522,8 +1522,8 @@ void IFunction::sortTies() {
     }
     if (before) {
       if (after) {
-        std::string message = "Circular dependency in ties:\n" +
-                                 tie->asString(this) + '\n';
+        std::string message =
+            "Circular dependency in ties:\n" + tie->asString(this) + '\n';
         message += getTie(indexBefore)->asString(this);
         if (indexAfter != indexBefore) {
           message += '\n' + getTie(indexAfter)->asString(this);
