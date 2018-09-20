@@ -19,6 +19,7 @@ public:
   ConvFit(QWidget *parent = nullptr);
 
 protected:
+  void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
@@ -28,6 +29,7 @@ private:
 
 protected slots:
   void setModelResolution(const QString &resolutionName);
+  void runClicked();
   void saveClicked();
   void plotClicked();
   void updatePlotOptions() override;

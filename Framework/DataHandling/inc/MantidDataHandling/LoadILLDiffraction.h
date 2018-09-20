@@ -128,6 +128,8 @@ private:
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
+  bool m_useCalibratedData{false}; ///< whether to use the calibrated data in
+                                   ///< the nexus (D2B only)
 };
 
 } // namespace DataHandling

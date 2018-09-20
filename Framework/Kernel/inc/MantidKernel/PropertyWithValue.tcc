@@ -426,5 +426,13 @@ const TYPE PropertyWithValue<TYPE>::getValueForAlias(const TYPE &alias) const {
   return value;
 }
 
+/**Returns the validator as a constant variable so it cannot be changed
+ * @tparam TYPE :: The type of the property value
+ * @return IValidator_sptr :: the validator
+ */
+template <typename TYPE>
+IValidator_sptr PropertyWithValue<TYPE>::getValidator() const {
+  return m_validator;
+}
 } // namespace Kernel
 } // namespace Mantid

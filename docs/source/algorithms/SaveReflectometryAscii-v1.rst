@@ -23,7 +23,7 @@ Computation of resolution values
 
 For the `Custom File Format (Empty Field)`_ and the `TXT File Format`_ file format, the option `WriteResolution` enables the computation of the resolution values from existing x-values (points):
 
-:math:`x_i \dot \frac{x_{1} - x_{0}}{x_{1}}`,
+:math:`x_i \cdot \frac{x_1 - x_0}{x_1}`,
 
 where the bin centre :math:`x_i` will be multiplied by the qutient of first and second bin centre :math:`x_{0}` and :math:`x_{1}`, respectively.
 
