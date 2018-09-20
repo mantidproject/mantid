@@ -8,7 +8,7 @@ from Muon.GUI.Common import table_utils
 
 class SelectSubplot(QtWidgets.QDialog):
     subplotSelectorSignal = QtCore.Signal(object)
-    closeEventSignal = QtCore.Signal(object)
+    closeEventSignal = QtCore.Signal()
     def __init__(self,subplots,parent=None):
         super(SelectSubplot, self).__init__()
         self.grid = QtWidgets.QGridLayout()

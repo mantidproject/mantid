@@ -6,13 +6,6 @@ from qtpy import QtGui, QtCore,QtWidgets
 from Muon.GUI.Common import table_utils
 
 
-class RemovePlotWindow(QtWidgets.QDialog):
-    def __init__(self,parent=None):
-        super(RemovePlotWindow, self).__init__()
-        self._view = RemovePlotWindowView(parent)
-
-
-
 class RemovePlotWindowView(QtWidgets.QDialog):
     applyRemoveSignal = QtCore.Signal(object)
     closeEventSignal = QtCore.Signal()
@@ -39,12 +32,11 @@ class RemovePlotWindowView(QtWidgets.QDialog):
 
         self.widgets = {}
         for index,line in enumerate(lines):
-           table_utils.setRowName(self.table, index, line.get_label())
+           table_utils.setRowName(self.table, index, line)
            tmp = {"line":line, "box":table_utils.addCheckBoxToTable(self.table,False,index) }
-           self.widgets[line.get_label()]= tmp
+           self.widgets[line]= tmp
 
         self.grid.addWidget(self.table)
-
         btn = QtWidgets.QPushButton("Remove")
         self.grid.addWidget(btn)
         self.setLayout(self.grid)
