@@ -24,7 +24,8 @@ class MantidPlotProjectRecovery(unittest.TestCase):
     def test_checkpoint_creation(self):
         CreateWorkspace(OutputWorkspace="ws", DataX=[
                         1, 2, 3], DataY=[1, 2, 3], NSpec=1)
-        path = ConfigService.getUserPropertiesDir() + '/recovery/' + platform.node()
+        path = os.path.join(
+            ConfigService.getUserPropertiesDir(), 'recovery', platform.node())
         listOfCheckpointsBefore = glob(os.path.join(path, "*", ""))
         for ii in listOfCheckpointsBefore:
             shutil.rmtree(ii)
