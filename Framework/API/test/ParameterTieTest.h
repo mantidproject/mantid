@@ -263,9 +263,37 @@ public:
     mf->tie("f2.sig", "f3.f1.hi");
     mf->tie("f3.f1.hi", "f0.b");
 
-    TS_ASSERT_THROWS_EQUALS(mf->makeOrderedTies(), std::runtime_error & e,
+    TS_ASSERT_THROWS_EQUALS(
+        mf->sortTies(), std::runtime_error & e, std::string(e.what()),
+        "Circular dependency in "
+        "ties:\nf3.f1.hi=f0.b\nf0.a=f3.f1.hi\nf0.b=f2.sig + f0.a");
+  }
+
+  void test_circular_dependency_a_a() {
+    ParameterTieTest_Linear fun;
+    fun.tie("a", "2*a");
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e,
                             std::string(e.what()),
-                            "Circular dependency in ties: f3.f1.hi=f0.b");
+                            "Parameter is tied to itself: a=2*a");
+  }
+
+  void test_circular_dependency_a_b_a() {
+    ParameterTieTest_Linear fun;
+    fun.tie("a", "2*b");
+    fun.tie("b", "a/2");
+    TS_ASSERT_THROWS_EQUALS(fun.sortTies(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Circular dependency in ties:\nb=a/2\na=2*b");
+  }
+
+  void test_circular_dependency_a_b_c_a() {
+    ParameterTieTest_Gauss fun;
+    fun.tie("cen", "2*hi");
+    fun.tie("hi", "sig/2");
+    fun.tie("sig", "cen + 1");
+    TS_ASSERT_THROWS_EQUALS(
+        fun.sortTies(), std::runtime_error & e, std::string(e.what()),
+        "Circular dependency in ties:\nsig=cen + 1\nhi=sig/2\ncen=2*hi");
   }
 
   void test_ties_order() {
@@ -288,7 +316,7 @@ public:
               1);
     TS_ASSERT(fabs(mf->getParameter("f3.f1.hi") - mf->getParameter("f2.sig")) >
               1);
-    TS_ASSERT_THROWS_NOTHING(mf->makeOrderedTies());
+    TS_ASSERT_THROWS_NOTHING(mf->sortTies());
     mf->applyTies();
     // After ordering apply correctly
     TS_ASSERT_DELTA(mf->getParameter("f0.a"), mf->getParameter("f3.f1.hi"),

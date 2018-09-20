@@ -50,7 +50,7 @@ struct TieNode {
   std::vector<size_t> right;
   // This tie must be applied before the other if the RHS of the other
   // contains this (left) parameter.
-  bool operator<(TieNode const &other) {
+  bool operator<(TieNode const &other) const {
     return std::find(other.right.begin(), other.right.end(), left) !=
            other.right.end();
   }
@@ -1490,7 +1490,7 @@ std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
 }
 
 /// Put all ties in order in which they will be applied correctly.
-void IFunction::makeOrderedTies() {
+void IFunction::sortTies() {
   m_orderedTies.clear();
   std::list<TieNode> orderedTieNodes;
   for (size_t i = 0; i < nParams(); ++i) {
@@ -1504,19 +1504,31 @@ void IFunction::makeOrderedTies() {
       right.push_back(this->getParameterIndex(p));
     }
     TieNode newNode{getParameterIndex(*tie), right};
+    if (newNode < newNode) {
+      throw std::runtime_error("Parameter is tied to itself: " +
+                                 tie->asString(this));
+    }
     bool before(false), after(false);
+    size_t indexBefore(0), indexAfter(0);
     for (auto &&node : orderedTieNodes) {
       if (newNode < node) {
         before = true;
+        indexBefore = node.left;
       }
       if (node < newNode) {
         after = true;
+        indexAfter = node.left;
       }
     }
     if (before) {
       if (after) {
-        throw std::runtime_error("Circular dependency in ties: " +
-                                 tie->asString(this));
+        std::string message = "Circular dependency in ties:\n" +
+                                 tie->asString(this) + '\n';
+        message += getTie(indexBefore)->asString(this);
+        if (indexAfter != indexBefore) {
+          message += '\n' + getTie(indexAfter)->asString(this);
+        }
+        throw std::runtime_error(message);
       }
       orderedTieNodes.push_front(newNode);
     } else {

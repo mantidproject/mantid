@@ -477,7 +477,7 @@ public:
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
   /// Put all ties in order in which they will be applied correctly.
-  void makeOrderedTies();
+  void sortTies();
   /// Write a parameter tie to a string
   std::string writeTies() const;
   //@}
