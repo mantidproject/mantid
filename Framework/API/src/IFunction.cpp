@@ -266,13 +266,9 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   }
 }
 
-bool IFunction::hasOrderedTies() const
-{
-  return !m_orderedTies.empty();
-}
+bool IFunction::hasOrderedTies() const { return !m_orderedTies.empty(); }
 
-void IFunction::applyOrderedTies()
-{
+void IFunction::applyOrderedTies() {
   for (auto &&tie : m_orderedTies) {
     tie->eval();
   }

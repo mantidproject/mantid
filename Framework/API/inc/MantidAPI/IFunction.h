@@ -627,7 +627,7 @@ private:
   /// Holds the constraints added to function
   std::vector<std::unique_ptr<IConstraint>> m_constraints;
   /// Ties ordered in order of correct application
-  std::vector<ParameterTie*> m_orderedTies;
+  std::vector<ParameterTie *> m_orderedTies;
 };
 
 /// shared pointer to the function base class

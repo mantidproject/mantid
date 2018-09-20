@@ -256,7 +256,6 @@ public:
     TS_ASSERT(!mf->isFixed(3));
   }
 
-
   void test_circular_dependency() {
     auto mf = makeFunction();
     mf->tie("f0.a", "f3.f1.hi");
@@ -279,19 +278,30 @@ public:
 
     mf->applyTies();
     // Unordered ties applied wrongly
-    TS_ASSERT(fabs(mf->getParameter("f0.a") - mf->getParameter("f3.f1.hi")) > 1);
-    TS_ASSERT(fabs(mf->getParameter("f0.b") - (mf->getParameter("f2.sig") + mf->getParameter("f0.a"))) > 1);
-    TS_ASSERT(fabs(mf->getParameter("f1.hi") - mf->getParameter("f1.cen")*2.0) < 1e-5);
-    TS_ASSERT(fabs(mf->getParameter("f2.sig") - mf->getParameter("f3.f1.hi")) > 1);
-    TS_ASSERT(fabs(mf->getParameter("f3.f1.hi") - mf->getParameter("f2.sig")) > 1);
+    TS_ASSERT(fabs(mf->getParameter("f0.a") - mf->getParameter("f3.f1.hi")) >
+              1);
+    TS_ASSERT(fabs(mf->getParameter("f0.b") - (mf->getParameter("f2.sig") +
+                                               mf->getParameter("f0.a"))) > 1);
+    TS_ASSERT(fabs(mf->getParameter("f1.hi") -
+                   mf->getParameter("f1.cen") * 2.0) < 1e-5);
+    TS_ASSERT(fabs(mf->getParameter("f2.sig") - mf->getParameter("f3.f1.hi")) >
+              1);
+    TS_ASSERT(fabs(mf->getParameter("f3.f1.hi") - mf->getParameter("f2.sig")) >
+              1);
     TS_ASSERT_THROWS_NOTHING(mf->makeOrderedTies());
     mf->applyTies();
     // After ordering apply correctly
-    TS_ASSERT_DELTA(mf->getParameter("f0.a"), mf->getParameter("f3.f1.hi"), 1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f0.b"), mf->getParameter("f2.sig") + mf->getParameter("f0.a"), 1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f1.hi"), mf->getParameter("f1.cen")*2.0, 1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f2.sig"), mf->getParameter("f3.f1.hi"), 1e-5);
-    TS_ASSERT_DELTA(mf->getParameter("f3.f1.hi"), mf->getParameter("f2.sig"), 1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f0.a"), mf->getParameter("f3.f1.hi"),
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f0.b"),
+                    mf->getParameter("f2.sig") + mf->getParameter("f0.a"),
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f1.hi"), mf->getParameter("f1.cen") * 2.0,
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f2.sig"), mf->getParameter("f3.f1.hi"),
+                    1e-5);
+    TS_ASSERT_DELTA(mf->getParameter("f3.f1.hi"), mf->getParameter("f2.sig"),
+                    1e-5);
   }
 
 private:
@@ -320,7 +330,7 @@ private:
     mf->addFunction(g1);
     mf->addFunction(g2);
     mf->addFunction(cf);
-    for(size_t i = 0; i < mf->nParams(); ++i) {
+    for (size_t i = 0; i < mf->nParams(); ++i) {
       mf->setParameter(i, double(i + 1));
     }
     return mf;
