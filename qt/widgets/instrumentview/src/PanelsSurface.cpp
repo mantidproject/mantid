@@ -70,8 +70,8 @@ retrievePanelCorners(const Mantid::Geometry::ComponentInfo &componentInfo,
 
   // Find x and y widths of detectors and treat as offsets;
   for (size_t i = 0; i < points.size() - 1; ++i) {
-    auto xdiff = abs(points[i + 1].X() - points[i].X());
-    auto ydiff = abs(points[i + 1].Y() - points[i].Y());
+    double xdiff = std::abs(points[i + 1].X() - points[i].X());
+    double ydiff = std::abs(points[i + 1].Y() - points[i].Y());
     if (xdiff != 0)
       xoff = xdiff * 0.5;
     if (ydiff != 0)

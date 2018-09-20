@@ -8,8 +8,7 @@ namespace { // anonymous namespace for helper funcitons
 void createTexture(const Mantid::Geometry::ComponentInfo &compInfo,
                    const std::vector<size_t> &children,
                    const std::vector<MantidQt::MantidWidgets::GLColor> &colors,
-                   std::vector<char> &texture, size_t texSizeX,
-                   size_t texSizeY) {
+                   std::vector<char> &texture, size_t texSizeX) {
   auto colWidth = children.size() * 3;
   for (size_t x = 0; x < colWidth; x += 3) {
     const auto &dets = compInfo.detectorsInSubtree(children[x / 3]);
@@ -32,7 +31,7 @@ void addColorsToLeftAndRightTextures(
   const auto &firstColumn = compInfo.children(children[0]);
   const auto &lastColumn = compInfo.children(children[bank.nX - 1]);
 
-  for (int i = 0; i < bank.nY; ++i) {
+  for (size_t i = 0; i < bank.nY; ++i) {
     auto col = colors[firstColumn[i]];
     auto ti = (i * nZ * 3) + (layerIndex * 3); // texture index
     leftText[ti] = static_cast<char>(col.red());
@@ -51,7 +50,7 @@ void addColorsToTopAndBottomTextures(
     const size_t layerIndex, const std::vector<size_t> &children,
     const std::vector<MantidQt::MantidWidgets::GLColor> &colors,
     std::vector<char> &topText, std::vector<char> &bottomText) {
-  for (int i = 0; i < bank.nX; ++i) {
+  for (size_t i = 0; i < bank.nX; ++i) {
     auto ti = (layerIndex * bank.nX * 3) + (i * 3);
     const auto &column = compInfo.children(children[i]);
     auto col = colors[column[0]];
@@ -117,6 +116,8 @@ BankTextureBuilder::BankTextureBuilder(
     m_detPickTextures.resize(1);
     m_textSizes.resize(1);
     break;
+  default:
+    break;
   }
 }
 
@@ -169,6 +170,8 @@ void BankTextureBuilder::buildOpenGLTextures(bool picking,
   case ComponentType::Rectangular:
     buildRectangularBankTextures(colors, picking);
     break;
+  default:
+    break;
   }
 }
 
@@ -188,6 +191,8 @@ void BankTextureBuilder::uploadTextures(bool picking,
     break;
   case ComponentType::Rectangular:
     uploadRectangularBankTextures(picking);
+    break;
+  default:
     break;
   }
 }
@@ -225,9 +230,9 @@ void BankTextureBuilder::buildGridBankFull(const std::vector<GLColor> &colors,
   // make front and back faces which lie along the z (layer) axis
   // NB. last texture in the layer is the front face
   createTexture(m_compInfo, m_compInfo.children(layers.back()), colors,
-                textures[0], res.first, res.second);
+                textures[0], res.first);
   createTexture(m_compInfo, m_compInfo.children(layers.front()), colors,
-                textures[1], res.first, res.second);
+                textures[1], res.first);
 
   auto nZ = layers.size();
   // Left face
@@ -273,7 +278,7 @@ void BankTextureBuilder::buildGridBankLayer(const std::vector<GLColor> &colors,
 
   // make front and back faces which lie along the z (layer) axis
   createTexture(m_compInfo, m_compInfo.children(layers[layer]), colors, texture,
-                res.first, res.second);
+                res.first);
 }
 
 void BankTextureBuilder::buildGridBankTextures(
@@ -302,7 +307,7 @@ void BankTextureBuilder::buildRectangularBankTextures(
   texture.resize(texSizeX * texSizeY * 3, 0); // fill with black
 
   createTexture(m_compInfo, m_compInfo.children(m_bankIndex), colors, texture,
-                texSizeX, texSizeY);
+                texSizeX);
 }
 
 void BankTextureBuilder::uploadTubeBankTextures(bool picking) {

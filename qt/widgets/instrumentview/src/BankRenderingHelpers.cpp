@@ -8,6 +8,8 @@
 #include "MantidKernel/Quat.h"
 #include "MantidQtWidgets/InstrumentView/BankTextureBuilder.h"
 
+#include <cmath>
+
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
 using MantidQt::MantidWidgets::detail::GridTextureFace;
@@ -76,7 +78,6 @@ Corners findGridCorners(const Mantid::Geometry::ComponentInfo &compInfo,
                         size_t bankIndex, GridTextureFace gridFace) {
   // Find the six faces which make up the bank cube.
   const auto &layers = compInfo.children(bankIndex);
-  size_t nZ = layers.size();
 
   auto frontBank = compInfo.quadrilateralComponent(layers.back());
   auto rearBank = compInfo.quadrilateralComponent(layers.front());
@@ -223,13 +224,16 @@ std::tuple<double, double, double> findSteps(const std::vector<V3D> &points) {
   double xstep, ystep, zstep;
   xstep = ystep = zstep = 0;
 
-  for (int i = 0; i < points.size() - 1; i++) {
-    if (abs(points[i].X() - points[i + 1].X()) > 0)
-      xstep = abs(points[i].X() - points[i + 1].X());
-    if (abs(points[i].Y() - points[i + 1].Y()) > 0)
-      ystep = abs(points[i].Y() - points[i + 1].Y());
-    if (abs(points[i].Z() - points[i + 1].Z()) > 0)
-      zstep = abs(points[i].Z() - points[i + 1].Z());
+  for (size_t i = 0; i < points.size() - 1; ++i) {
+    double xs = std::abs(points[i].X() - points[i + 1].X());
+    double ys = std::abs(points[i].Y() - points[i + 1].Y());
+    double zs = std::abs(points[i].Z() - points[i + 1].Z());
+    if (xs > 0.0)
+      xstep = xs;
+    if (ys > 0.0)
+      ystep = ys;
+    if (zs > 0.0)
+      zstep = zs;
   }
 
   return std::tuple<double, double, double>(xstep, ystep, zstep);

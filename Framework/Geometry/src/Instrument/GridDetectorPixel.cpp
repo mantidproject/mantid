@@ -27,6 +27,7 @@ GridDetectorPixel::GridDetectorPixel(const GridDetectorPixel *base,
  * @param panel :: parent GridDetector
  * @param row :: row of the pixel in the panel
  * @param col :: column of the pixel in the panel
+ * @param layer :: layer of the pixel in the panel
  */
 GridDetectorPixel::GridDetectorPixel(const std::string &name, int id,
                                      boost::shared_ptr<IObject> shape,

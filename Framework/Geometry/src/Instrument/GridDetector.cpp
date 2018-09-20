@@ -70,8 +70,8 @@ bool GridDetector::compareName(const std::string &proposedMatch) {
 }
 
 void GridDetector::init() {
-  m_xpixels = m_ypixels = m_ypixels = 0;
-  m_xsize = m_ysize = m_ysize = 0;
+  m_xpixels = m_ypixels = m_zpixels = 0;
+  m_xsize = m_ysize = m_zsize = 0;
   m_xstart = m_ystart = m_zstart = 0;
   m_xstep = m_ystep = m_zstep = 0;
   m_minDetId = m_maxDetId = 0;

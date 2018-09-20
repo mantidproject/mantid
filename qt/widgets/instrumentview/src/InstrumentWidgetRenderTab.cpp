@@ -385,7 +385,8 @@ void InstrumentWidgetRenderTab::setVisibleLayer(int layer) {
   auto surfaceType = m_instrWidget->getSurfaceType();
 
   // If in an unwrapped view the surface needs to be redrawn
-  if (renderer.isUsingLayers() && surfaceType != SurfaceType::FULL3D)
+  if (renderer.isUsingLayers() &&
+      surfaceType != InstrumentWidget::SurfaceType::FULL3D)
     m_instrWidget->resetSurface();
 
   emit rescaleColorMap();
