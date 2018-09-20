@@ -56,7 +56,7 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
 
   // Initialize buffer workspace
   {
-    std::lock_guard<std::mutex> lock(m_workspace_mutex);
+    std::lock_guard<std::mutex> lock(m_buffer_mutex);
     m_workspace = createBufferWorkspace();
     //m_indexMap =
     //    m_workspace->getDetectorIDToWorkspaceIndexVector(m_indexOffset);
@@ -107,7 +107,7 @@ void KafkaHistoStreamDecoder::stopCapture() {
 bool KafkaHistoStreamDecoder::hasData() const {
   g_log.warning() << "hasData" << "\n";
 
-  std::lock_guard<std::mutex> lock(m_workspace_mutex);
+  std::lock_guard<std::mutex> lock(m_buffer_mutex);
   // TODO: Better with a new data flag?
   //return !!m_workspace;
   return !m_buffer.empty();
@@ -138,7 +138,7 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractData() {
 API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
   g_log.warning() << "extractDataImpl" << "\n";
 
-  std::lock_guard<std::mutex> lock(m_workspace_mutex);
+  std::lock_guard<std::mutex> lock(m_buffer_mutex);
 
   if (!m_capturing) {
     throw Exception::NotYet("Local buffers not initialized.");
@@ -260,7 +260,7 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 
     // Lock so we don't overwrite buffer while workspace is being extracted
     {
-      std::lock_guard<std::mutex> lock(m_workspace_mutex);
+      std::lock_guard<std::mutex> lock(m_buffer_mutex);
       m_buffer = buffer;
     }
 

@@ -113,7 +113,7 @@ private:
 //  spec2index_map m_specToIdx; // ?
 
   /// Mutex protecting histo buffers
-  mutable std::mutex m_workspace_mutex;
+  mutable std::mutex m_buffer_mutex;
 
 
 //  /// Mutex protecting the wait flag
