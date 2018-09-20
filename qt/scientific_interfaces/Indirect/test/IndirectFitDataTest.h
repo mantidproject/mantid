@@ -91,40 +91,86 @@ public:
     }
   }
 
-  void test_that_correct_excludeRegion_is_returned() {
-    auto data = getIndirectFitData(10, 3);
+  void
+  test_that_correct_excludeRegion_is_returned_when_regions_are_in_correct_order() {
+    /// When each pair of numbers in the string are in order, then the whole
+    /// string is in the correct order
+    auto data = getIndirectFitData(4, 3);
 
-    data.setExcludeRegionString("1,8", 1);
-    data.setExcludeRegionString("1,5", 2);
-    data.setExcludeRegionString("2,6", 3);
+    data.setExcludeRegionString("1,8", 0);
+    data.setExcludeRegionString("2,5", 1);
+    data.setExcludeRegionString("1,2,5,6,3,4", 2);
 
     std::vector<double> regionVector1;
     regionVector1.emplace_back(1.0);
     regionVector1.emplace_back(8.0);
     std::vector<double> regionVector2;
-    regionVector2.emplace_back(1.0);
+    regionVector2.emplace_back(2.0);
     regionVector2.emplace_back(5.0);
-    std::vector<double> regionVector3;
-    regionVector3.emplace_back(2.0);
-    regionVector3.emplace_back(6.0);
-    TS_ASSERT_EQUALS(data.getExcludeRegion(1), "1,8");
-    TS_ASSERT_EQUALS(data.getExcludeRegion(2), "1,5");
-    TS_ASSERT_EQUALS(data.getExcludeRegion(3), "2,6");
-    TS_ASSERT_EQUALS(data.getExcludeRegion(4), "");
-    TS_ASSERT_EQUALS(data.excludeRegionsVector(1), regionVector1);
-    TS_ASSERT_EQUALS(data.excludeRegionsVector(2), regionVector2);
-    TS_ASSERT_EQUALS(data.excludeRegionsVector(3), regionVector3);
-    TS_ASSERT_EQUALS(data.excludeRegionsVector(4).empty(), true);
+
+    TS_ASSERT_EQUALS(data.getExcludeRegion(0), "1,8");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(1), "2,5");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(2), "1,2,5,6,3,4");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(3), "");
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(0), regionVector1);
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(1), regionVector2);
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(3).empty(), true);
   }
 
-  void test_that_Spectra_is_set_correctly() {
-    auto data = getIndirectFitData(1, 3);
+  void test_that_excludeRegion_is_stored_in_correct_order() {
+    auto data = getIndirectFitData(10, 3);
 
-    const Spectra spec = std::make_pair(0u, 5u);
-    data.setSpectra(spec);
-	// NOT FINISHED
-    TS_ASSERT_EQUALS(data.spectra().empty(), false);
-	//TS_ASSERT_EQUALS(data.spectra().which(), spec.type());
+    data.setExcludeRegionString("6,2", 0);
+    data.setExcludeRegionString("6,2,1,2,3,4,7,6", 1);
+    data.setExcludeRegionString("1,2,2,3,20,18,21,22,7,8", 2);
+
+    std::vector<double> regionVector;
+    regionVector.emplace_back(2.0);
+    regionVector.emplace_back(6.0);
+
+    TS_ASSERT_EQUALS(data.getExcludeRegion(0), "2,6");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(1), "2,6,1,2,3,4,6,7");
+    TS_ASSERT_EQUALS(data.getExcludeRegion(2), "1,2,2,3,18,20,21,22,7,8");
+    TS_ASSERT_EQUALS(data.excludeRegionsVector(0), regionVector);
+  }
+
+  void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
+    auto data = getIndirectFitData(10, 3);
+
+    std::vector<Spectra> spectraPairs;
+    spectraPairs.emplace_back(std::make_pair(0u, 11u));
+    spectraPairs.emplace_back(std::make_pair(0u, 1000000000000000000u));
+    spectraPairs.emplace_back(std::make_pair(10u, 10u));
+    std::vector<std::string> spectraStrings;
+    spectraStrings.emplace_back("-1");
+    spectraStrings.emplace_back("10");
+    spectraStrings.emplace_back("100000000000000000000000000000");
+    spectraStrings.emplace_back("1,5,10,20,30,60,80,100");
+    spectraStrings.emplace_back("1,2,3,4,5,6,22");
+
+    for (auto i = 0u; i < spectraPairs.size(); ++i)
+      TS_ASSERT_THROWS(data.setSpectra(spectraPairs[i]), std::runtime_error);
+    for (auto i = 0u; i < spectraStrings.size(); ++i)
+      TS_ASSERT_THROWS(data.setSpectra(spectraStrings[i]), std::runtime_error);
+  }
+
+  void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {
+    auto data = getIndirectFitData(10, 3);
+
+    std::vector<Spectra> spectraPairs;
+    spectraPairs.emplace_back(std::make_pair(0u, 9u));
+    spectraPairs.emplace_back(std::make_pair(4u, 4u));
+    spectraPairs.emplace_back(std::make_pair(7u, 4u));
+    std::vector<std::string> spectraStrings;
+    spectraStrings.emplace_back("0");
+    spectraStrings.emplace_back("9");
+    spectraStrings.emplace_back("0,9,6,4,5");
+    spectraStrings.emplace_back("1,2,3,4,5,6");
+
+    for (auto i = 0u; i < spectraPairs.size(); ++i)
+      TS_ASSERT_THROWS_NOTHING(data.setSpectra(spectraPairs[i]));
+    for (auto i = 0u; i < spectraStrings.size(); ++i)
+      TS_ASSERT_THROWS_NOTHING(data.setSpectra(spectraStrings[i]));
   }
 };
 

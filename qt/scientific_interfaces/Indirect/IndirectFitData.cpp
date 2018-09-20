@@ -242,7 +242,13 @@ IndirectFitData::excludeRegionsVector(std::size_t spectrum) const {
 }
 
 void IndirectFitData::setSpectra(const std::string &spectra) {
-  setSpectra(DiscontinuousSpectra<std::size_t>(spectra));
+  try {
+    const Spectra spec = DiscontinuousSpectra<std::size_t>(spectra);
+    setSpectra(spec);
+  } catch (std::exception &ex) {
+    throw std::runtime_error("Spectra too large for cast: " +
+                             QString(ex.what()).toStdString());
+  }
 }
 
 void IndirectFitData::setSpectra(Spectra &&spectra) {
@@ -288,9 +294,39 @@ void IndirectFitData::setEndX(double endX, std::size_t spectrum) {
     throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
 }
 
-void IndirectFitData::setExcludeRegionString(const std::string &excludeRegion,
-                                             std::size_t spectrum) {
-  m_excludeRegions[spectrum] = excludeRegion;
+void IndirectFitData::setExcludeRegionString(
+    const std::string &excludeRegionString, std::size_t spectrum) {
+  m_excludeRegions[spectrum] = validateExcludeRegionString(excludeRegionString);
+}
+
+std::string IndirectFitData::validateExcludeRegionString(
+    const std::string &excludeRegionString) const {
+  std::vector<std::string> boundStrings;
+  boost::split(boundStrings, excludeRegionString, boost::is_any_of(", "));
+
+  std::vector<std::size_t> bounds;
+  for (auto bound : boundStrings)
+    if (!bound.empty())
+      bounds.emplace_back(std::stoull(bound));
+  return orderExcludeRegionString(bounds);
+}
+
+std::string IndirectFitData::orderExcludeRegionString(
+    std::vector<std::size_t> &bounds) const {
+  for (auto it = bounds.begin(); it < bounds.end() - 1; it += 2)
+    if (*it > *(it + 1))
+      std::iter_swap(it, it + 1);
+  return constructExcludeRegionString(bounds);
+}
+
+std::string IndirectFitData::constructExcludeRegionString(
+    const std::vector<std::size_t> &bounds) const {
+  std::string excludeRegion;
+  for (auto it = bounds.begin(); it < bounds.end(); ++it) {
+    excludeRegion += std::to_string(*it);
+    excludeRegion += it == bounds.end() - 1 ? "" : ",";
+  }
+  return excludeRegion;
 }
 
 IndirectFitData &IndirectFitData::combine(const IndirectFitData &fitData) {
