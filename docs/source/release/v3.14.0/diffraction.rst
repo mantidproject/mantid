@@ -15,6 +15,7 @@ Improvements
 ############
 - Focusing in texture mode for Gem now properly saves
   .gda files.
+- Focusing on Gem now crops values that would be divided by very small or zero vanadium values
 - Removed save_angles flag for Gem , as it was set by the texture mode
 - Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files
 

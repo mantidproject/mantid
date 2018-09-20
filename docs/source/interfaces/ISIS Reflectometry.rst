@@ -466,6 +466,43 @@ then clicking `Autoprocess` will start a new autoprocessing operation, and the
 current contents of the Processing table will be cleared. You will be warned if
 this will cause unsaved changes to be lost.
 
+Live Data Monitoring
+^^^^^^^^^^^^^^^^^^^^
+
+The *Live data* section on the *Runs* tab allows you to start a monitoring
+algorithm that will periodically load live data from the instrument and reduce
+it with :ref:`ReflectometryReductionOneAuto
+<algm-ReflectometryReductionOneAuto>`. It outputs two workspaces, `TOF_live`
+for the original data and `IvsQ_binned_live` for the reduced data.
+
+Live values for `ThetaIn` and the slit gaps are checked and used each time the
+reduction runs. Other algorithm properties are taken from `Group 1` on the
+*Settings* tab. Make any changes you want to the settings and press `Start
+monitor` to begin monitoring. Note that **any changes to the settings will not
+be updated** in the live data reduction unless you stop and re-start
+monitoring.
+
+You can stop monitoring at any time using the `Stop monitor` button or by
+cancelling the algorithm from the *Algorithm progress* dialog. If you close the
+interface, monitoring will continue running in the backgroud. You can cancel
+the `MonitorLiveData` algorithm from the *Algorithm progress* dialog.
+
+If `MonitorLiveData` stops due to an error, the `Start monitor` button will be
+re-enabled so that it can be re-started from the Interface.
+
+Note that if you close and re-open the Interface, the link to any running
+monitor algorithm will be lost. You will not be able to start a new version of
+the monitor due to a clash in the output names. Stop the algorithm from the
+*Algorithm process* dialog and re-start it from the new instance of the
+Interface to re-link it.
+
+Live data monitoring has the following requirements:
+
+- EPICS support must be installed in Mantid. This is included by default on Windows but see the instructions `here <https://www.mantidproject.org/PyEpics_In_Mantid>`_ for other platforms.
+- The instrument must be on IBEX or have additional processes installed to supply the EPICS values. If it does not, you will get an error that live values could not be found for `Theta` and the slits.
+
+
+
 Event Handling tab
 ~~~~~~~~~~~~~~~~~~
 
