@@ -14,7 +14,6 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/hs00_event_histogram_generated.h"
 GCC_DIAG_ON(conversion)
 
-
 namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
@@ -22,7 +21,6 @@ Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
 
 namespace Mantid {
 namespace LiveData {
-
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -149,7 +147,7 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
 
   std::vector<double> counts;
   for (unsigned int i = 0; i < nspectra; ++i) {
-    const double* start = data->data() + (i * nbins);
+    const double *start = data->data() + (i * nbins);
     counts.assign(start, start + nbins);
     ws->setCounts(i, counts);
   }
@@ -212,8 +210,8 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
   API::MatrixWorkspace_sptr workspace;
 
   try {
-    auto alg =
-        API::AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+    auto alg = API::AlgorithmManager::Instance().createUnmanaged(
+        "LoadEmptyInstrument");
     // Do not put the workspace in the ADS
     alg->setChild(true);
     alg->initialize();
@@ -223,13 +221,12 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
     workspace = alg->getProperty("OutputWorkspace");
   } catch (std::exception &exc) {
     g_log.error() << "Error loading empty instrument '" << m_instrumentName
-                    << "': " << exc.what() << "\n";
+                  << "': " << exc.what() << "\n";
     throw;
   }
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(workspace);
 }
-
 
 } // namespace LiveData
 } // namespace Mantid

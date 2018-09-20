@@ -49,7 +49,7 @@ template<typename T> FLATBUFFERS_CONSTEXPR size_t AlignOf() {
       return alignof(T);
     #endif
   #endif
-  // clang-format on
+  // *disabled* clang-format on
 }
 
 // When we read serialized data from memory, in the case of most scalars,
@@ -483,7 +483,7 @@ class DetachedBuffer {
     return flatbuffers::GetRoot<T>(data());
   }
   #endif
-  // clang-format on
+  // *disabled* clang-format on
 
   // These may change access mode, leave these at end of public section
   FLATBUFFERS_DELETE_FUNC(DetachedBuffer(const DetachedBuffer &other))
@@ -1191,7 +1191,7 @@ class FlatBufferBuilder {
         }
       }
     #endif
-    // clang-format on
+    // *disabled* clang-format on
     return Offset<Vector<T>>(EndVector(len));
   }
 
@@ -1239,7 +1239,7 @@ class FlatBufferBuilder {
     return CreateVector(elems);
   }
   #endif
-  // clang-format on
+  // *disabled* clang-format on
 
   /// @brief Serialize values returned by a function into a FlatBuffer `vector`.
   /// This is a convenience function that takes care of iteration for you.
@@ -1322,7 +1322,7 @@ class FlatBufferBuilder {
     return EndVectorOfStructs<T>(vector_size);
   }
   #endif
-  // clang-format on
+  // *disabled* clang-format on
 
   /// @brief Serialize an array of structs into a FlatBuffer `vector`.
   /// @tparam T The data type of the struct array elements.
@@ -1691,7 +1691,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
     #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
         , upper_bound_(buf)
     #endif
-  // clang-format on
+  // *disabled* clang-format on
   {
   }
 
@@ -1705,7 +1705,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
       if (!ok)
         upper_bound_ = buf_;
     #endif
-    // clang-format on
+    // *disabled* clang-format on
     return ok;
   }
 
@@ -1717,7 +1717,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
       if (upper_bound_ < upper_bound)
         upper_bound_ =  upper_bound;
     #endif
-    // clang-format on
+    // *disabled* clang-format on
     return Check(elem_len <= (size_t)(end_ - buf_) && elem >= buf_ &&
                  elem <= end_ - elem_len);
   }
@@ -1852,7 +1852,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
     return (buf_  + size > end_) ?  0 : size;
   }
   #endif
-  // clang-format on
+  // *disabled* clang-format on
 
  private:
   const uint8_t *buf_;
@@ -1865,7 +1865,7 @@ class Verifier FLATBUFFERS_FINAL_CLASS {
   #ifdef FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
     mutable const uint8_t *upper_bound_;
   #endif
-  // clang-format on
+  // *disabled* clang-format on
 };
 
 // Convenient way to bundle a buffer and its length, to pass it around
@@ -2097,7 +2097,7 @@ typedef uint64_t hash_value_t;
           resolver_function_t;
   typedef std::function<hash_value_t (void *pointer)> rehasher_function_t;
 #endif
-// clang-format on
+// *disabled* clang-format on
 
 // Helper function to test if a field is present, using any of the field
 // enums in the generated code.
@@ -2148,7 +2148,7 @@ inline int LookupEnum(const char **names, const char *name) {
 #else
   #error Unknown compiler, please define structure alignment macros
 #endif
-// clang-format on
+// *disabled* clang-format on
 
 // Minimal reflection via code generation.
 // Besides full-fat reflection (see reflection.h) and parsing/printing by
@@ -2194,7 +2194,7 @@ inline const char * const *ElementaryTypeNames() {
   };
   return names;
 }
-// clang-format on
+// *disabled* clang-format on
 
 // Basic type info cost just 16bits per field!
 struct TypeCode {
@@ -2276,7 +2276,7 @@ volatile __attribute__((weak)) const char *flatbuffer_version_string =
 #if defined(_MSC_VER)
   #pragma warning(pop)
 #endif
-// clang-format on
+// *disabled* clang-format on
 
 #endif  // FLATBUFFERS_H_
 // clang-format on
