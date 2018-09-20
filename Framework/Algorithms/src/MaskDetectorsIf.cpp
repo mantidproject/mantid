@@ -107,13 +107,9 @@ void MaskDetectorsIf::outputToWorkspace() {
   if (outputW != m_inputW)
     outputW = m_inputW->clone();
   auto &detectorInfo = outputW->mutableDetectorInfo();
-  const size_t nspec = outputW->getNumberHistograms();
-  for (auto it = m_umap.cbegin(); it != m_umap.cend(); ++it) {
-    detectorInfo.setMasked(detectorInfo.indexOf(it->first), it->second);
-    const double p =
-        static_cast<double>(std::distance(m_umap.cbegin(), it) + 1) /
-        static_cast<double>(nspec);
-    progress(p, "Generating detector map");
+  for (const auto &selection : m_umap) {
+    detectorInfo.setMasked(detectorInfo.indexOf(selection.first),
+                           selection.second);
   }
   setProperty("OutputWorkspace", outputW);
 }
