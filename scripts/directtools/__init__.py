@@ -36,7 +36,7 @@ def _clearmath(s):
     """Return string s with special math characters removed."""
     for c in ['%', '_', '$', '&',  '\\', '^', '{', '}',]:
         s = s.replace(c, '')
-    s = s.replace(ur'\u00c5', 'A')
+    s = s.replace(u'\u00c5', 'A')
     return s
 
 
@@ -88,7 +88,7 @@ def _finalizeprofileE(axes):
     """Set axes for const E axes."""
     if axes.get_xscale() == 'linear':
         axes.set_xlim(xmin=0.)
-    axes.set_xlabel(ur'$Q$ (\u00c5$^{-1}$)')
+    axes.set_xlabel(u'$Q$ (\u00c5$^{-1}$)')
     if axes.get_yscale() == 'linear':
         axes.set_ylim(0.)
 
@@ -452,9 +452,9 @@ def plotconstQ(workspaces, Q, dQ, style='l', keepCutWorkspaces=True, xscale='lin
     :type yscale: str
     :returns: A tuple of (:class:`matplotlib.Figure`, :class:`matplotlib.Axes`, a :class:`list` of names)
     """
-    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, r'$Q$', ur'\u00c5$^{-1}$', style, keepCutWorkspaces,
+    figure, axes, cutWSList = plotcuts('Vertical', workspaces, Q, dQ, r'$Q$', u'\u00c5$^{-1}$', style, keepCutWorkspaces,
                                        xscale, yscale)
-    _profiletitle(workspaces, cutWSList, r'$Q$', ur'\u00c5$^{-1}$', figure)
+    _profiletitle(workspaces, cutWSList, r'$Q$', u'\u00c5$^{-1}$', figure)
     if len(cutWSList) > 1:
         axes.legend()
     _finalizeprofileQ(workspaces, axes)
@@ -647,7 +647,7 @@ def plotSofQW(workspace, QMin=0., QMax=None, EMin=None, EMax=None, VMin=0., VMax
     axes.set_ylim(bottom=EMin)
     if EMax is not None:
         axes.set_ylim(top=EMax)
-    axes.set_xlabel(ur'$Q$ (\u00c5$^{-1}$)')
+    axes.set_xlabel(u'$Q$ (\u00c5$^{-1}$)')
     axes.set_ylabel('Energy (meV)')
     _SofQWtitle(workspace, figure)
     return figure, axes
@@ -714,7 +714,7 @@ def wsreport(workspace):
     ei = _incidentEnergy(logs)
     wavelength = _wavelength(logs)
     if ei is not None and wavelength is not None:
-        print(ur'Ei = {:0.2f} meV    lambda = {:0.2f} \u00c5'.format(ei, wavelength))
+        print(u'Ei = {:0.2f} meV    lambda = {:0.2f} \u00c5'.format(ei, wavelength))
     T = _sampleTemperature(logs)
     if T is not None:
         if isinstance(T, collections.Iterable):

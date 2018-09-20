@@ -341,8 +341,8 @@ class DirectTest(unittest.TestCase):
         ws = CreateWorkspace(DataX=xs, DataY=ys, NSpec=1, UnitX='MomentumTransfer', StoreInADS=False)
         kwargs = {'workspaces': ws}
         figure, axes = testhelpers.assertRaisesNothing(self, directtools.plotprofiles, **kwargs)
-        self.assertEquals(axes.get_xlabel(), ur'$Q$ (\u00c5$^{-1}$)')
-        self.assertEquals(axes.get_ylabel(), r'$S(Q,E)$')
+        self.assertEquals(axes.get_xlabel(), u'$Q$ (\u00c5$^{-1}$)')
+        self.assertEquals(axes.get_ylabel(), '$S(Q,E)$')
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[0], (xs[1:] + xs[:-1])/2)
         numpy.testing.assert_equal(axes.get_lines()[0].get_data()[1], ys)
 
