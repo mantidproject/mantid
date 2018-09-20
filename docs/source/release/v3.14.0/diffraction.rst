@@ -8,15 +8,6 @@ Diffraction Changes
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
-	
-Powder Diffraction
-------------------
-Improvements
-############
-- Focusing in texture mode for Gem now properly saves
-  .gda files.
-- Removed save_angles flag for Gem , as it was set by the texture mode
-- Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files
 
 
 Improvements
@@ -30,11 +21,6 @@ Improvements
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` and :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now support outputting the unfocussed data and weighted events (with time). This allows for event filtering **after** processing the data.
 - :ref:`LoadWAND <algm-LoadWAND>` has grouping option added and loads faster
 - Mask workspace option added to :ref:`WANDPowderReduction <algm-WANDPowderReduction>`
-
-
-Bugfixes
-########
-- multiple_scattering flag is now optional for Polaris focus when absorb_correction is true
 
 
 Single Crystal Diffraction
@@ -57,6 +43,19 @@ Bugfixes
 
 Powder Diffraction
 ------------------
+
+Improvements
+############
+
+- Focusing in texture mode for Gem now properly saves .gda files.
+- Removed save_angles flag for Gem , as it was set by the texture mode.
+- Added save_all flag to Gem that is set to true by default, setting it to false disables the saving of .NXS files.
+- changed spline coefficient so that the default for long_mode on and long_mode off can be set separately.
+
+Bugfixes
+########
+
+- multiple_scattering flag is now optional for Polaris focus when absorb_correction is true.
 
 New
 ###
