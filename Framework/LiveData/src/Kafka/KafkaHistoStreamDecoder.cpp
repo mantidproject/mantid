@@ -132,13 +132,8 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
 
   auto metadata = histoMsg->dim_metadata();
   auto metadimx = metadata->GetAs<DimensionMetaData>(0);
-  //auto metadimy = metadata->GetAs<DimensionMetaData>(1);
+  auto metadimy = metadata->GetAs<DimensionMetaData>(1);
   auto xbins = metadimx->bin_boundaries_as_ArrayDouble()->value();
-
-  //g_log.warning() << metadimx->unit()->c_str() << "\n";   // microsecond
-  //g_log.warning() << metadimx->label()->c_str() << "\n";  // Time-of-flight
-  //g_log.warning() << metadimy->unit() << "\n";            // 0
-  //g_log.warning() << metadimy->label()->c_str() << "\n";  // Spectrum
 
   HistogramData::BinEdges binedges(nbins + 1);
   binedges.mutableRawData().assign(xbins->begin(), xbins->end());
@@ -148,9 +143,9 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
   ws->setIndexInfo(m_workspace->indexInfo());
   auto data = histoMsg->data_as_ArrayDouble()->value();
 
-  // Set the unit on the workspace to TOF
-  ws->getAxis(0)->setUnit("TOF");
-  ws->setYUnit("Counts");
+  // Set the units
+  ws->getAxis(0)->setUnit(metadimx->unit()->c_str());
+  ws->setYUnit(metadimy->unit()->c_str());
 
   std::vector<double> counts;
   for (unsigned int i = 0; i < nspectra; ++i) {
