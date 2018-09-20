@@ -149,7 +149,7 @@ def _label(ws, cut, width, singleWS, singleCut, singleWidth, quantity, units):
         logs = ws.run()
         run = _runNumber(logs)
         if run is not None:
-            wsLabel = wsLabel + r'\#{:06d} '.format(run)
+            wsLabel = wsLabel + r'#{:06d} '.format(run)
         T = _sampleTemperature(logs)
         if T is not None:
             T = _applyIfTimeSeries(T, numpy.mean)
