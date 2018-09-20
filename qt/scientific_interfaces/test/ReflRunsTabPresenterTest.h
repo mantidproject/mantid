@@ -415,6 +415,52 @@ public:
     verifyAndClearExpectations();
   }
 
+  void test_startMonitor() {
+    auto presenter = createMocksAndPresenter(2);
+
+    // Should get settings from default group even if another is selected
+    auto DEFAULT_GROUP = 0;
+    EXPECT_CALL(*m_mockRunsTabView, getSelectedGroup()).Times(0);
+    EXPECT_CALL(*m_mockMainPresenter, getReductionOptions(DEFAULT_GROUP))
+        .Times(1)
+        .WillOnce(Return(OptionsQMap()));
+    EXPECT_CALL(*m_mockRunsTabView, getMonitorAlgorithmRunner())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStartMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStopMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+
+    presenter.notify(IReflRunsTabPresenter::StartMonitorFlag);
+    verifyAndClearExpectations();
+  }
+
+  void test_startMonitorComplete() {
+    auto presenter = createMocksAndPresenter(2);
+
+    EXPECT_CALL(*m_mockRunsTabView, getMonitorAlgorithmRunner())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStartMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStopMonitorButtonEnabled(true))
+        .Times(Exactly(1));
+
+    presenter.notify(IReflRunsTabPresenter::StartMonitorFlag);
+    verifyAndClearExpectations();
+  }
+
+  void test_stopMonitor() {
+    auto presenter = createMocksAndPresenter(2);
+
+    EXPECT_CALL(*m_mockRunsTabView, setStartMonitorButtonEnabled(true))
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockRunsTabView, setStopMonitorButtonEnabled(false))
+        .Times(Exactly(1));
+
+    presenter.notify(IReflRunsTabPresenter::StartMonitorFlag);
+    verifyAndClearExpectations();
+  }
+
 private:
   class ReflRunsTabPresenterFriend : public ReflRunsTabPresenter {
     friend class ReflRunsTabPresenterTest;

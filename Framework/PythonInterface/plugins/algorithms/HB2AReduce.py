@@ -25,7 +25,7 @@ class HB2AReduce(PythonAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return [ "" ]
+        return []
 
     def name(self):
         return 'HB2AReduce'
@@ -36,9 +36,13 @@ class HB2AReduce(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty(name="Filename", action=FileAction.OptionalLoad,
                                                   extensions=[".dat"]), "Data files to load")
+        condition = EnabledWhenProperty("Filename", PropertyCriterion.IsDefault)
         self.declareProperty('IPTS', Property.EMPTY_INT, "IPTS number to load from")
+        self.setPropertySettings("IPTS", condition)
         self.declareProperty('Exp', Property.EMPTY_INT, "Experiment number to load from")
+        self.setPropertySettings("Exp", condition)
         self.declareProperty(IntArrayProperty("ScanNumbers", []), 'Scan numbers to load')
+        self.setPropertySettings("ScanNumbers", condition)
         self.declareProperty(FileProperty(name="Vanadium", defaultValue="", action=FileAction.OptionalLoad, extensions=[".dat", ".txt"]),
                              doc="Vanadium file, can be either the vanadium scan file or the reduced vcorr file. "
                              "If not provided the vcorr file adjacent to the data file will be used")
@@ -46,6 +50,8 @@ class HB2AReduce(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("ExcludeDetectors", []),
                              doc="Detectors to exclude. If not provided the HB2A_exp???__exclude_detectors.txt adjacent "
                              "to the data file will be used if it exist")
+        self.declareProperty('DefX', '',
+                             "By default the def_x (x-axis) from the file will be used, it can be overridden by setting it here")
         self.declareProperty('IndividualDetectors', False,
                              "If True the workspace will include each anode as a separate spectrum, useful for debugging issues")
         condition = EnabledWhenProperty("IndividualDetectors", PropertyCriterion.IsDefault)
@@ -64,10 +70,16 @@ class HB2AReduce(PythonAlgorithm):
         issues = dict()
 
         if not self.getProperty("Filename").value:
-            if ((self.getProperty("IPTS").value == Property.EMPTY_INT) or
-                (self.getProperty("Exp").value == Property.EMPTY_INT) or
-               len(self.getProperty("ScanNumbers").value) is 0):
-                issues["Filename"] = 'Must specify either Filename or IPTS AND Exp AND ScanNumbers'
+            ipts = self.getProperty("IPTS").value
+
+            if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) is 0):
+                issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
+
+            if self.getProperty("Exp").value == Property.EMPTY_INT:
+                exp_list = sorted(e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e)
+                if len(exp_list)>1:
+                    exps = ','.join(e.replace('exp','') for e in exp_list)
+                    issues["Exp"] = 'Multiple experiments found in IPTS-{}. You must set Exp to one of {}'.format(ipts, exps)
 
         return issues
 
@@ -78,6 +90,8 @@ class HB2AReduce(PythonAlgorithm):
         if not filenames:
             ipts = self.getProperty("IPTS").value
             exp = self.getProperty("Exp").value
+            if self.getProperty("Exp").value == Property.EMPTY_INT:
+                exp = int([e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e][0].replace('exp',''))
             filenames = ['/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(ipts, exp, scan)
                          for scan in self.getProperty("ScanNumbers").value]
 
@@ -119,12 +133,33 @@ class HB2AReduce(PythonAlgorithm):
         twotheta = data['2theta']
         monitor = data['monitor']
 
+        # Remove points with zero monitor count
+        monitor_mask = np.nonzero(monitor)[0]
+        if len(monitor_mask) == 0:
+            raise RuntimeError("{} has all zero monitor counts".format(filename))
+        monitor = monitor[monitor_mask]
+        counts = counts[:, monitor_mask]
+        twotheta = twotheta[monitor_mask]
+
         # Get either vcorr file or vanadium data
         vanadium_count, vanadium_monitor, vcorr = self.get_vanadium(detector_mask,
                                                                     data['m1'][0], data['colltrans'][0],
                                                                     exp, indir)
 
-        x = twotheta+self._gaps[:, np.newaxis][detector_mask]
+        def_x = self.getProperty("DefX").value
+        if not def_x:
+            def_x = metadata['def_x']
+
+        if def_x not in data.dtype.names:
+            logger.warning("Could not find {} property in datafile, using 2theta instead".format(def_x))
+            def_x = '2theta'
+
+        if def_x == '2theta':
+            x = twotheta+self._gaps[:, np.newaxis][detector_mask]
+            UnitX='Degrees'
+        else:
+            x = np.tile(data[def_x], (44,1))[detector_mask][:, monitor_mask]
+            UnitX=def_x
 
         if self.getProperty("IndividualDetectors").value:
             # Separate spectrum per anode
@@ -143,7 +178,7 @@ class HB2AReduce(PythonAlgorithm):
         createWS_alg.setProperty("DataY", y)
         createWS_alg.setProperty("DataE", e)
         createWS_alg.setProperty("NSpec", NSpec)
-        createWS_alg.setProperty("UnitX", "Degrees")
+        createWS_alg.setProperty("UnitX", UnitX)
         createWS_alg.setProperty("YUnitLabel", "Counts")
         createWS_alg.setProperty("WorkspaceTitle", str(metadata['scan_title']))
         createWS_alg.execute()
@@ -208,12 +243,14 @@ class HB2AReduce(PythonAlgorithm):
 
     def process(self, counts, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
         """Reduce data not binning"""
+        old_settings = np.seterr(all='ignore') # otherwise it will complain about divide by zero
         if vcorr is not None:
             y = counts/vcorr[:, np.newaxis]/monitor
             e = np.sqrt(counts)/vcorr[:, np.newaxis]/monitor
         else:
             y = counts/vanadium_count[:, np.newaxis]*vanadium_monitor/monitor
             e = np.sqrt(1/counts + 1/vanadium_count[:, np.newaxis] + 1/vanadium_monitor + 1/monitor)*y
+        np.seterr(**old_settings)
         return np.nan_to_num(y*scale), np.nan_to_num(e*scale)
 
     def process_binned(self, counts, x, scale, monitor, vanadium_count=None, vanadium_monitor=None, vcorr=None):
@@ -222,16 +259,15 @@ class HB2AReduce(PythonAlgorithm):
         bins = np.arange(x.min(), x.max()+binWidth, binWidth) # calculate bin boundaries
         inds = np.digitize(x, bins) # get bin indices
 
-        # because np.broadcast_to is not in numpy 1.7.1 we use stride_tricks
         if vcorr is not None:
-            vcorr=np.lib.stride_tricks.as_strided(vcorr, shape=counts.shape, strides=(vcorr.strides[0],0))
+            vcorr = np.tile(vcorr, (counts.shape[1], 1)).T
             vcorr_binned = np.bincount(inds, weights=vcorr.ravel(), minlength=len(bins))
         else:
-            vanadium_count=np.lib.stride_tricks.as_strided(vanadium_count, shape=counts.shape, strides=(vanadium_count.strides[0],0))
+            vanadium_count = np.tile(vanadium_count, (counts.shape[1], 1)).T
             vanadium_binned = np.bincount(inds, weights=vanadium_count.ravel(), minlength=len(bins))
             vanadium_monitor_binned = np.bincount(inds, minlength=len(bins))*vanadium_monitor
 
-        monitor=np.lib.stride_tricks.as_strided(monitor, shape=counts.shape, strides=(monitor.strides[0],0))
+        monitor = np.tile(monitor, (counts.shape[0], 1))
 
         counts_binned = np.bincount(inds, weights=counts.ravel(), minlength=len(bins))
         monitor_binned = np.bincount(inds, weights=monitor.ravel(), minlength=len(bins))
@@ -246,6 +282,7 @@ class HB2AReduce(PythonAlgorithm):
             e = (np.sqrt(1/counts_binned + 1/vanadium_binned + 1/vanadium_monitor + 1/monitor_binned)[1:])*y
         np.seterr(**old_settings)
         x = bins
+
         return x, np.nan_to_num(y*scale), np.nan_to_num(e*scale)
 
     def add_metadata(self, ws, metadata, data):

@@ -11,7 +11,7 @@ Description
 
 This algorithm reduces HFIR POWDER (HB-2A) data.
 
-You can either specify the filenames of data you want to reduce or provide the IPTS, exp and scan number. *e.g.* the following are equivalent:
+You can either specify the filenames of data you want to reduce or provide the IPTS, exp and scan number. If only one experiment exists in an IPTS then exp can be omitted. *e.g.* the following are equivalent:
 
 .. code-block:: python
 
@@ -42,6 +42,13 @@ Binning Data
 ############
 
 If ``BinData=True`` (default) then the data will be binned on a regular grid with a width of ``BinWidth``. The output can be scaled by an arbitrary amount by setting ``Scale``.
+
+def_x
+#####
+
+This algorithm will read the ``def_x`` value in the data file and use it as the x-axis. This value can be overridden by setting the ``DefX`` property, *e.g.* ``DefX='2theta'``.
+
+If you did a scan using a particular anode *vs* temperature then you should set ``IndividualDetectors=True`` and specify ``DefX`` if not correct in the data file. Then simply plot the spectrum you are scanning, look at the example below *Anode8 vs temperature*.
 
 Saving reduced data
 ###################
@@ -147,6 +154,29 @@ Usage
    plt.show()
 
 .. figure:: /images/HB2AReduce_5.png
+
+**Anode8 vs temperature**
+
+Because the following data file has ``def_x = sample`` then this
+algorithm will reduce the data to be counts *vs* ``sample`` (sample
+temperature). Setting ``IndividualDetectors=True`` allows you to see a
+single anode *vs* temperature.
+
+.. code-block:: python
+
+   ws=HB2AReduce('HB2A_exp0660_scan0146.dat',
+                 Vanadium='HB2A_exp0644_scan0018.dat',
+                 IndividualDetectors=True)
+
+   # Plot
+   import matplotlib.pyplot as plt
+   from mantid import plots
+   fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+   ax.plot(ws, specNum=8) # anode8
+   #fig.savefig('HB2AReduce_6.png')
+   plt.show()
+
+.. figure:: /images/HB2AReduce_6.png
 
 
 .. categories::
