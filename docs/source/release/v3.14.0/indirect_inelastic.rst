@@ -51,6 +51,8 @@ Improvements
   to be selected. Allowed values: ['Linear', 'CSpline'].
 - Added 'MaxScatterPtAttempts' spinbox to Calculate Monte Carlo Absorption. This sets the maximum number of 
   tries to be made to generate a scattering point.
+- In the Calculate Monte Carlo Absorption Tab, all of the options in the Monte Carlo section are now read from
+  an instrument parameter files once a file has been loaded.
 
 
 Data Reduction Interface
