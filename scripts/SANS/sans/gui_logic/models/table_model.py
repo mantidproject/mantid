@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import re
 
-from sans.gui_logic.sans_data_processor_gui_algorithm import create_option_column_properties
 from sans.common.constants import ALL_PERIODS
+from sans.gui_logic.models.basic_hint_strategy import BasicHintStrategy
 
 
 class TableModel(object):
@@ -94,6 +94,9 @@ class TableModel(object):
     def create_empty_row():
         row = [''] * 16
         return TableIndexModel(*row)
+
+    def get_options_hint_strategy(self):
+        return OptionsColumnModel.get_hint_strategy()
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -184,11 +187,16 @@ class OptionsColumnModel(object):
 
     @staticmethod
     def _get_permissible_properties():
-        props = {}
-        option_column_properties = create_option_column_properties()
-        for element in option_column_properties:
-            props.update({element.algorithm_property: element.property_type})
-        return props
+        return {"WavelengthMin":float, "WavelengthMax": float, "EventSlices": str}
+
+    @staticmethod
+    def get_hint_strategy():
+        return BasicHintStrategy({"WavelengthMin": 'The min value of the wavelength when converting from TOF.',
+                                  "WavelengthMax": 'The max value of the wavelength when converting from TOF.',
+                                  "EventSlices": 'The event slices to reduce.'
+                                  ' The format is the same as for the event slices'
+                                  ' box in settings, however if a comma separated list is given '
+                                  'it must be enclosed in quotes'})
 
     @staticmethod
     def _parse_string(options_column_string):

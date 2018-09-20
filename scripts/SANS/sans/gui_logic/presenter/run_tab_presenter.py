@@ -109,16 +109,17 @@ class RunTabPresenter(object):
         self.sans_logger = Logger("SANS")
         # Name of grpah to output to
         self.output_graph = 'SANS-Latest'
+
+        # Models that are being used by the presenter
+        self._state_model = None
+        self._table_model = TableModel()
+
         # Presenter needs to have a handle on the view since it delegates it
         self._view = None
         self.set_view(view)
         self._processing = False
         self.work_handler = WorkHandler()
         self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.on_processing_finished, self.on_processing_error)
-
-        # Models that are being used by the presenter
-        self._state_model = None
-        self._table_model = TableModel()
 
         # File information for the first input
         self._file_information = None
@@ -202,6 +203,9 @@ class RunTabPresenter(object):
 
             # Set the appropriate view for the diagnostic page
             self._workspace_diagnostic_presenter.set_view(self._view.diagnostic_page, self._view.instrument)
+
+            self._view.setup_layout()
+            self._view.set_hinting_line_edit_for_column(15, self._table_model.get_options_hint_strategy())
 
     def on_user_file_load(self):
         """

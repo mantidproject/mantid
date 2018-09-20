@@ -60,11 +60,6 @@ public:
 
   void subscribe(JobTreeViewSubscriber &subscriber) override;
 
-  void removeRowAt(RowLocation const &location) override;
-  void removeRows(std::vector<RowLocation> rowsToRemove) override;
-  void removeAllRows() override;
-  bool isOnlyChildOfRoot(RowLocation const &index) const override;
-
   RowLocation insertChildRowOf(RowLocation const &parent, int beforeRow,
                                std::vector<Cell> const &rowText) override;
   RowLocation insertChildRowOf(RowLocation const &parent,
@@ -72,6 +67,11 @@ public:
   RowLocation appendChildRowOf(RowLocation const &parent) override;
   RowLocation appendChildRowOf(RowLocation const &parentLocation,
                                std::vector<Cell> const &rowText) override;
+
+  void removeRowAt(RowLocation const &location) override;
+  void removeAllRows() override;
+  void removeRows(std::vector<RowLocation> rowsToRemove) override;
+  bool isOnlyChildOfRoot(RowLocation const &location) const override;
 
   void replaceRows(std::vector<RowLocation> replacementPoints,
                    std::vector<Subtree> replacements) override;

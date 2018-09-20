@@ -1926,6 +1926,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def insert_empty_row(self, row_index):
         self.data_processor_table.insertChildRowOf(self.row([]), row_index)
 
+    def set_hinting_line_edit_for_column(self, column, hint_strategy):
+        self.data_processor_table.setHintsForColumn(column, hint_strategy)
+
     def _run_python_code(self, text):
         """
         Re-emits 'runPytonScript' signal
