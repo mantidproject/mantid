@@ -113,7 +113,7 @@ calibration_params = {
     "create_cal_rebin_1_params": "100,-0.0006,19950",
     "create_cal_rebin_2_params": "1.8,0.002,2.1",
     "create_cal_cross_correlate_params": {
-        "cross_corr_reference_spectra": 20,
+        "cross_corr_reference_spectra": 5000,
         "cross_corr_ws_index_min": 11,
         "cross_corr_ws_index_max": 6450,
         "cross_corr_x_min": 1.8,
