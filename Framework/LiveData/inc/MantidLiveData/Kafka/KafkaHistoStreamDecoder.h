@@ -1,14 +1,12 @@
 #ifndef MANTID_LIVEDATA_ISISKAFKAHISTOSTREAMDECODER_H_
 #define MANTID_LIVEDATA_ISISKAFKAHISTOSTREAMDECODER_H_
 
-//#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 
 #include <atomic>
-//#include <condition_variable>
-//#include <mutex>
+#include <mutex>
 #include <thread>
 
 namespace Mantid {
@@ -20,7 +18,7 @@ namespace LiveData {
   A call to startCapture() starts the process of capturing the stream on a
   separate thread.
 
-  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -106,4 +104,3 @@ private:
 } // namespace Mantid
 
 #endif /* MANTID_LIVEDATA_ISISKAFKAHISTOSTREAMDECODER_H_ */
-

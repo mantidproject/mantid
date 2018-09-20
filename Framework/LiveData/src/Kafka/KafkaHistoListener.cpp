@@ -2,8 +2,8 @@
 
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
+#include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 
@@ -42,7 +42,8 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
 void KafkaHistoListener::start(Types::Core::DateAndTime startTime) {
   if (startTime != 0) {
     g_log.warning() << "KafkaHistoListener does not currently support starting "
-                       "from arbitrary time." << std::endl;
+                       "from arbitrary time."
+                    << std::endl;
   }
   m_decoder->startCapture(true);
 }

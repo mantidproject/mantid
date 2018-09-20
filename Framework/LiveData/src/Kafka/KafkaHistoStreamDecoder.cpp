@@ -38,17 +38,10 @@ namespace LiveData {
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &instrumentName)
-  : m_broker(broker)
-  , m_histoTopic(histoTopic)
-  , m_instrumentName(instrumentName)
-  , m_histoStream()
-  , m_workspace()
-  , m_buffer()
-  , m_thread()
-  , m_interrupt(false)
-  , m_capturing(false)
-  , m_exception()
-{
+    : m_broker(broker), m_histoTopic(histoTopic),
+      m_instrumentName(instrumentName), m_histoStream(), m_workspace(),
+      m_buffer(), m_thread(), m_interrupt(false), m_capturing(false),
+      m_exception() {
   // Initialize buffer workspace
   m_workspace = createBufferWorkspace();
 }
@@ -150,13 +143,12 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
   HistogramData::BinEdges binedges(nbins + 1);
   binedges.mutableRawData().assign(xbins->begin(), xbins->end());
 
-  auto ws = DataObjects::create<DataObjects::Workspace2D>(*m_workspace, nspectra, binedges);
+  auto ws = DataObjects::create<DataObjects::Workspace2D>(*m_workspace,
+                                                          nspectra, binedges);
   ws->setIndexInfo(m_workspace->indexInfo());
-  //auto data = static_cast<const double*>(histoMsg->data());
   auto data = histoMsg->data_as_ArrayDouble()->value();
 
   // Set the unit on the workspace to TOF
-  //ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   ws->getAxis(0)->setUnit("TOF");
   ws->setYUnit("Counts");
 
@@ -166,11 +158,6 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
     counts.assign(start, start + nbins);
     ws->setCounts(i, counts);
   }
-  //ws->setCounts();
-
-  // Set all bin edges
-
-  // Set data
 
   return ws;
 }
