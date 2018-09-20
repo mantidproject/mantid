@@ -61,6 +61,9 @@ if NOT DEFINED MANTID_DATA_STORE (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CLEANBUILD=
 set BUILDPKG=
+
+:: This seems to be the condition hit when building a release package (a master:clean build)
+:: TODO: verify with Martyn and add more comments if true (or false)
 if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set CLEANBUILD=yes
   set BUILDPKG=yes
@@ -78,6 +81,9 @@ if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
 if not "%JOB_NAME%" == "%JOB_NAME:debug=%" (
   set BUILDPKG=no
 )
+:: DEBUG ONLY, force package building
+set BUILDPKG=yes
+echo "am gonna be building a package? %BUILDPKG%"
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Setup the build directory
@@ -94,10 +100,10 @@ set BUILD_DIR_REL=build
 set BUILD_DIR=%WORKSPACE%\%BUILD_DIR_REL%
 call %~dp0setupcompiler.bat %BUILD_DIR%
 
-if "!CLEANBUILD!" == "yes" (
-  echo Removing build directory for a clean build
-  rmdir /S /Q %BUILD_DIR%
-)
+REM if "!CLEANBUILD!" == "yes" (
+REM   echo Removing build directory for a clean build
+REM   rmdir /S /Q %BUILD_DIR%
+REM )
 
 if EXIST %BUILD_DIR% (
   git clean -fdx --exclude=external --exclude=%BUILD_DIR_REL%
@@ -112,13 +118,32 @@ if EXIST %BUILD_DIR% (
   md %BUILD_DIR%
 )
 
+REM set PACKAGE_SUFFIX=thisismysuffixthankyou
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Packaging options
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set PACKAGE_OPTS=
 if "%BUILDPKG%" == "yes" (
-  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON -DCPACK_PACKAGE_SUFFIX=
+  :: If package name is provided on the Jenkins job, use the custom package name
+  :: otherwise determine the correct suffix based on the branch, the else 
+  :: captures pull requests and they have suffix unstable
+  if not "%PACKAGE_SUFFIX%" == "" (
+    echo "Using PACKAGE_SUFFIX=${PACKAGE_SUFFIX} from job parameter"
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:release=%" (
+    set PACKAGE_SUFFIX=
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:master=%" (
+    set PACKAGE_SUFFIX=nightly
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:pvnext=%" (
+    set PACKAGE_SUFFIX=mantidunstable-pvnext
+  ) else (
+    set PACKAGE_SUFFIX=unstable
+  )
+  set PACKAGE_OPTS=-DPACKAGE_DOCS=ON
 )
+
+echo SUFFIX HAPPENS TO BE %PACKAGE_SUFFIX%
+echo ---------------------------
+echo PACKAGE OPTS ARE %PACKAGE_OPTS%
 
 cd %BUILD_DIR%
 
@@ -135,11 +160,12 @@ set BUILD_CONFIG=
 if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set BUILD_CONFIG=Debug
 ) else (
-if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
-  set BUILD_CONFIG=RelWithDbg
-) else (
+  if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
+    set BUILD_CONFIG=RelWithDbg
+  ) else (
     set BUILD_CONFIG=Release
-    ))
+  )
+)
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
@@ -148,9 +174,14 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 if not "%JOB_NAME%"=="%JOB_NAME:debug=%" (
   set VATES_OPT_VAL=OFF
 ) else (
-  set VATES_OPT_VAL=ON
+:: DEBUG ONLY disable VATES for release build as it was causing an error -- will figure it out some other time
+  set VATES_OPT_VAL=OFF
 )
-call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=OFF -DUSE_PRECOMPILED_HEADERS=ON %PACKAGE_OPTS% ..
+@echo on
+
+:: TODO remove %PACKAGE_SUFFIX% from here and put back at PACKAGE_OPTS
+call cmake.exe -G "%CM_GENERATOR%" -DCMAKE_SYSTEM_VERSION=%SDK_VERSION% -DCONSOLE=OFF -DENABLE_CPACK=ON -DMAKE_VATES=%VATES_OPT_VAL% -DParaView_DIR=%PARAVIEW_DIR% -DMANTID_DATA_STORE=!MANTID_DATA_STORE! -DENABLE_WORKBENCH=ON -DPACKAGE_WORKBENCH=OFF -DUSE_PRECOMPILED_HEADERS=ON -DCPACK_PACKAGE_SUFFIX=%PACKAGE_SUFFIX% %PACKAGE_OPTS% ..
+pause
 if ERRORLEVEL 1 exit /B %ERRORLEVEL%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

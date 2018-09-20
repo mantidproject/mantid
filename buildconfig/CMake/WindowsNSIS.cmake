@@ -23,6 +23,11 @@ set( WINDOWS_DEPLOYMENT_TYPE "Release" CACHE STRING "Type of deployment used")
 set_property(CACHE WINDOWS_DEPLOYMENT_TYPE PROPERTY STRINGS Release Debug)
 mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 
+message("INSIDE WINDOWSNSIS.CMAKE CHECKING VARIABLE")
+message("yeah boi the suffix is: ${CPACK_PACKAGE_SUFFIX}")
+
+# MESSAGE(FATAL_ERRORO "Could not find FOO_EXEC.")
+# exit()
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
@@ -144,14 +149,14 @@ install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt4
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
-    RENAME mantidpython.bat )
+# install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
+    # RENAME mantidpython.bat )
 
 ###########################################################################
 # Icons for shortcuts
 ###########################################################################
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_notebook.ico DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_python.ico DESTINATION bin )
+# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_notebook.ico DESTINATION bin )
+# install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_python.ico DESTINATION bin )
 
 ###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
@@ -159,35 +164,38 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/mantid_python.ico DESTINATION
 # character through to NSIS.
 ###########################################################################
 # On install. The blank lines seem to be required or it doesn't create the shortcut
+
+if ( CPACK_PACKAGE_SUFFIX STREQUAL "release" )
+  set ( WINDOWS_ICON_SUFFIX "" )
+elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "nightly" )
+  set ( WINDOWS_ICON_SUFFIX "Nightly" )
+elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "unstable" )
+  set ( WINDOWS_ICON_SUFFIX "Unstable" )
+elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "mantidunstable-pvnext" )
+# TODO: check with Martyn for proper suffix for this one
+  set ( WINDOWS_ICON_SUFFIX "PVNext" ) 
+endif()
+
+# TODO DEBUG REMOVE
+message("The suffix for this is ${WINDOWS_ICON_SUFFIX}")
+
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
-  
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' '' '$INSTDIR\\\\bin\\\\mantid_python.ico'
-  
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\mantid_notebook.ico'
+  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot${WINDOWS_ICON_SUFFIX}.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPython.lnk\\\"
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidNotebook.lnk\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-  CreateShortCut '$DESKTOP\\\\MantidPlot.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
+  CreateShortCut '$DESKTOP\\\\MantidPlot${WINDOWS_ICON_SUFFIX}.lnk' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0
 
-  CreateShortCut '$DESKTOP\\\\MantidPython.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' '' '$INSTDIR\\\\bin\\\\mantid_python.ico'
-  
-  CreateShortCut '$DESKTOP\\\\MantidNotebook.lnk' '$INSTDIR\\\\bin\\\\mantidpython.bat' 'notebook --notebook-dir=%userprofile%' '$INSTDIR\\\\bin\\\\mantid_notebook.ico'
-  
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
   CreateDirectory \\\"$INSTDIR\\\\docs\\\"
 ")
 # On uninstall reverse stages listed above.
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-  Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
-  Delete \\\"$DESKTOP\\\\MantidPython.lnk\\\"
-  Delete \\\"$DESKTOP\\\\MantidNotebook.lnk\\\"
+  Delete \\\"$DESKTOP\\\\MantidPlot${WINDOWS_ICON_SUFFIX}.lnk\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
