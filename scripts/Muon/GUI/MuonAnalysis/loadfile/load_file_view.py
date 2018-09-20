@@ -24,6 +24,8 @@ class BrowseFileWidgetView(QtGui.QWidget):
         self._stored_edit_text = ""
         self._cached_text = ""
 
+        self.set_file_edit("No data loaded", False)
+
         self.file_path_edit.setReadOnly(True)
 
     def setup_interface_layout(self):
@@ -53,6 +55,9 @@ class BrowseFileWidgetView(QtGui.QWidget):
         # self.file_path_edit.setMinimumSize(QtCore.QSize(200, 50))
         self.file_path_edit.setToolTip("")
         self.file_path_edit.setObjectName("filePathEdit")
+
+        self.setStyleSheet("QLineEdit {background: #d7d6d5}")
+
 
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
@@ -121,9 +126,9 @@ class BrowseFileWidgetView(QtGui.QWidget):
         self._cached_text = self.get_file_edit_text()
 
     def clear(self):
-        self.set_file_edit("")
+        self.set_file_edit("No data loaded")
         self._store_edit_text = False
-        self._cached_text = ""
+        self._cached_text = "No data loaded"
 
     def reset_edit_to_cached_value(self):
         tmp = self._cached_text

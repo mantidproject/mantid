@@ -16,39 +16,39 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 
 
-def get_loaded_time_zero(workspace):
-    first_good_data = 0.0
-    if isinstance(workspace, WorkspaceGroup):
-        if workspace.getNumberOfEntries() == 0:
-            raise IndexError("Cannot find loaded time zero : Empty WorkspaceGroup")
-        if "FirstGoodData" in workspace[0].getSampleDetails().keys():
-            first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
-    else:
-        try:
-            first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
-        except Exception:
-            raise IndexError("Cannot find loaded time zero")
-    return first_good_data
-
-
-def get_first_good_data(workspace):
-    first_good_data = 0.0
-    if isinstance(workspace, WorkspaceGroup):
-        # deal with workspace groups
-        if workspace.getNumberOfEntries() == 0:
-            raise IndexError("Cannot find loaded time zero : Empty WorkspaceGroup")
-        if "FirstGoodData" in workspace[0].getSampleDetails().keys():
-            first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
-    else:
-        # deal with regular workspace
-        try:
-            if "FirstGoodData" in workspace[0].getSampleDetails().keys():
-                first_good_data = workspace.getSampleDetails().getLogData("FirstGoodData").value
-            else:
-                raise IndexError("Cannot find loaded time zero in Workspace logs")
-        except Exception:
-            raise IndexError("Cannot find loaded time zero")
-    return first_good_data
+# def get_loaded_time_zero(workspace):
+#     first_good_data = 0.0
+#     if isinstance(workspace, WorkspaceGroup):
+#         if workspace.getNumberOfEntries() == 0:
+#             raise IndexError("Cannot find loaded time zero : Empty WorkspaceGroup")
+#         if "FirstGoodData" in workspace[0].getSampleDetails().keys():
+#             first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
+#     else:
+#         try:
+#             first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
+#         except Exception:
+#             raise IndexError("Cannot find loaded time zero")
+#     return first_good_data
+#
+#
+# def get_first_good_data(workspace):
+#     first_good_data = 0.0
+#     if isinstance(workspace, WorkspaceGroup):
+#         # deal with workspace groups
+#         if workspace.getNumberOfEntries() == 0:
+#             raise IndexError("Cannot find loaded time zero : Empty WorkspaceGroup")
+#         if "FirstGoodData" in workspace[0].getSampleDetails().keys():
+#             first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
+#     else:
+#         # deal with regular workspace
+#         try:
+#             if "FirstGoodData" in workspace[0].getSampleDetails().keys():
+#                 first_good_data = workspace.getSampleDetails().getLogData("FirstGoodData").value
+#             else:
+#                 raise IndexError("Cannot find loaded time zero in Workspace logs")
+#         except Exception:
+#             raise IndexError("Cannot find loaded time zero")
+#     return first_good_data
 
 
 class LoadUtils(object):
@@ -143,20 +143,39 @@ DEFAULT_INPUTS = {
     "DeadTimeTable": "__notUsed",
     "DetectorGroupingTable": "__notUsed"}
 # List of property names to be extracted from the result of the Load algorithm
-DEFAULT_OUTPUTS = ["OutputWorkspace", "DeadTimeTable", "DetectorGroupingTable", "TimeZero", "FirstGoodData"]
+DEFAULT_OUTPUTS = ["OutputWorkspace",
+                   "DeadTimeTable",
+                   "DetectorGroupingTable",
+                   "TimeZero",
+                   "FirstGoodData",
+                   "MainFieldDirection"]
 
 
-class floatPropertyWithValue:
+class floatPropertyWithValue(object):
 
     def __init__(self, value):
-        self.value = value
+        self._value = value
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, newval):
+        self._value = newval
 
 
 DEFAULT_OUTPUT_VALUES = [MuonWorkspace(api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)),
-                         floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
-                         floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
-                         floatPropertyWithValue(0.0),
-                         floatPropertyWithValue(0.0)]
+                         None, #api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+                         0.0,
+                         0.0, "Unknown Direction"]
+
+
+# floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
+# floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
+# floatPropertyWithValue(0.0),
+# floatPropertyWithValue(0.0)]
 
 
 def is_workspace_group(workspace):
@@ -193,14 +212,17 @@ def load_workspace_from_filename(filename,
     if is_workspace_group(workspace):
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = [MuonWorkspace(ws) for ws in load_result["OutputWorkspace"].value]
+        load_result["OutputWorkspace"] = [MuonWorkspace(ws) for ws in load_result["OutputWorkspace"]]
         run = get_run_from_multi_period_data(workspace)
 
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
-        load_result["OutputWorkspace"] = MuonWorkspace(load_result["OutputWorkspace"].value)
+        load_result["OutputWorkspace"] = MuonWorkspace(load_result["OutputWorkspace"])
         run = int(workspace.getRunNumber())
+
+    load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+    load_result["DeadTimeTable"] = None
 
     filename = alg.getProperty("Filename").value
 
@@ -208,7 +230,7 @@ def load_workspace_from_filename(filename,
 
 
 def empty_loaded_data():
-    return dict(zip(DEFAULT_OUTPUTS, DEFAULT_OUTPUT_VALUES))
+    return dict(zip(DEFAULT_OUTPUTS + ["DataDeadTimeTable"], DEFAULT_OUTPUT_VALUES + [None]))
 
 
 def create_load_algorithm(filename, property_dictionary):
@@ -222,7 +244,7 @@ def create_load_algorithm(filename, property_dictionary):
 
 
 def _get_algorithm_properties(alg, property_dict):
-    return {key: alg.getProperty(key) for key in alg.keys() if key in property_dict}
+    return {key: alg.getProperty(key).value for key in alg.keys() if key in property_dict}
 
 
 def get_table_workspace_names_from_ADS():
@@ -232,6 +254,100 @@ def get_table_workspace_names_from_ADS():
     names = api.AnalysisDataService.Instance().getObjectNames()
     table_names = [name for name in names if isinstance(mtd[name], ITableWorkspace)]
     return table_names
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Saving/Loading grouping XML
+# ----------------------------------------------------------------------------------------------------------------------
+
+
+def _create_XML_subElement_for_groups(root_node, groups):
+    group_nodes = []
+    for group in groups:
+        child = ET.SubElement(root_node, 'group', name=group.name)
+        id_string = run_string_utils.run_list_to_string(group.detectors)
+        ids = ET.SubElement(child, 'ids', val=id_string)
+        child.extend(ids)
+        group_nodes += [child]
+    return group_nodes
+
+
+def _create_XML_subElement_for_pairs(root_node, pairs):
+    pair_nodes = []
+    for pair in pairs:
+        child = ET.SubElement(root_node, 'pair', name=pair.name)
+        fwd_group = ET.SubElement(child, 'forward-group', val=pair.group1)
+        bwd_group = ET.SubElement(child, 'backward-group', val=pair.group2)
+        alpha = ET.SubElement(child, 'alpha', val=str(pair.alpha))
+        child.extend(fwd_group)
+        child.extend(bwd_group)
+        child.extend(alpha)
+        pair_nodes += [child]
+    return pair_nodes
+
+
+def save_grouping_to_XML(groups, pairs, filename, save=True):
+    """
+    Save a set of muon group and pair parameters to XML format file. Fewer checks are performed
+    than with the XML loading.
+
+    :param groups: A list of MuonGroup objects to save.
+    :param pairs: A list of MuonPair objects to save.
+    :param filename: The name of the XML file to save to.
+    :param save: Whether to actually save the file.
+    :return: the XML tree (used in testing).
+    """
+    # some basic checks
+    if filename == "":
+        raise AttributeError("File must be specified for saving to XML")
+    if os.path.splitext(filename)[-1].lower() != ".xml":
+        raise AttributeError("File extension must be XML")
+    if sum([0 if isinstance(group, MuonGroup) else 1 for group in groups]) > 0:
+        raise AttributeError("groups must be MuonGroup type")
+    if sum([0 if isinstance(pair, MuonPair) else 1 for pair in pairs]) > 0:
+        raise AttributeError("pairs must be MuonPair type")
+
+    root = ET.Element("detector-grouping")
+
+    # handle groups
+    group_nodes = _create_XML_subElement_for_groups(root, groups)
+    for child in group_nodes:
+        root.extend(child)
+
+    # handle pairs
+    pair_nodes = _create_XML_subElement_for_pairs(root, pairs)
+    for child in pair_nodes:
+        root.extend(child)
+
+    tree = ET.ElementTree(root)
+    if save:
+        tree.write(filename)
+    return tree
+
+
+def load_grouping_from_XML(filename):
+    """
+    Load group/pair data from an XML file (which can be produced using the save_grouping_to_XML() function
+
+    :param filename: Full filepath to an xml file.
+    :return: (groups, pairs), lists of MuonGroup, MuonPair objects respectively.
+    """
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    group_names, group_ids = _get_groups_from_XML(root)
+    pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
+    groups, pairs = [], []
+
+    for i, group_name in enumerate(group_names):
+        groups += [MuonGroup(group_name=group_name,
+                             detector_IDs=group_ids[i])]
+    for i, pair_name in enumerate(pair_names):
+        pairs += [MuonPair(pair_name=pair_name,
+                           group1_name=pair_groups[i][0],
+                           group2_name=pair_groups[i][1],
+                           alpha=pair_alphas[i])]
+    return groups, pairs
 
 
 def _get_groups_from_XML(root):
@@ -256,72 +372,9 @@ def _get_pairs_from_XML(root):
     return names, groups, alphas
 
 
-def save_grouping_to_XML(groups, pairs, filename):
-    root = ET.Element("detector-grouping")
-
-    # doc = ET.SubElement(root, "group")
-    # ET.SubElement(doc, "field1", name="fwd").text = "some value1"
-    # ET.SubElement(doc, "field2", name="asdfasd").text = "some vlaue2"
-
-    group_nodes = []
-    for group in groups:
-        child = ET.SubElement(root, 'group', name=group.name)
-        id_string = run_string_utils.run_list_to_string(group.detectors)
-        ids = ET.SubElement(child, 'ids', val=id_string)
-        child.extend(ids)
-        group_nodes += [child]
-
-    for child in group_nodes:
-        root.extend(child)
-
-    pair_nodes = []
-    for pair in pairs:
-        child = ET.SubElement(root, 'pair', name=pair.name)
-        fwd_group = ET.SubElement(child, 'forward-group', val=pair.group1)
-        bwd_group = ET.SubElement(child, 'backward-group', val=pair.group2)
-        alpha = ET.SubElement(child, 'alpha', val=str(pair.alpha))
-        child.extend(fwd_group)
-        child.extend(bwd_group)
-        child.extend(alpha)
-        # root.extend(child)
-        pair_nodes += [child]
-
-    for child in pair_nodes:
-        root.extend(child)
-
-    tree = ET.ElementTree(root)
-    tree.write(filename)
-
-
-def load_grouping_from_XML(filename):
-    tree = ET.parse(filename)
-    root = tree.getroot()
-    print(tree)
-
-    group_names, group_ids = _get_groups_from_XML(root)
-    pair_names, pair_groups, pair_alphas = _get_pairs_from_XML(root)
-    print(group_names, group_ids)
-    print(pair_names, pair_groups, pair_alphas)
-
-    groups = []
-    pairs = []
-
-    for i, group_name in enumerate(group_names):
-        groups += [MuonGroup(group_name=group_name, detector_IDs=group_ids[i])]
-
-    for i, pair_name in enumerate(pair_names):
-        pairs += [MuonPair(pair_name=pair_name,
-                           group1_name=pair_groups[i][0],
-                           group2_name=pair_groups[i][1],
-                           alpha=pair_alphas[i])]
-
-    # for child in root:
-    #     print(child.tag, child.attrib)
-    #     for childchild in child:
-    #         print(childchild.tag, childchild.attrib)
-
-    return groups, pairs
-
+# ----------------------------------------------------------------------------------------------------------------------
+# Mantid algorithms
+# ----------------------------------------------------------------------------------------------------------------------
 
 def run_MuonPreProcess(parameter_dict):
     """
@@ -329,6 +382,9 @@ def run_MuonPreProcess(parameter_dict):
     the input dictionary of {proeprty_name:property_value} pairs.
     Returns the calculated workspace.
     """
+    print("Pre-process : ", {key: val for key, val in parameter_dict.items() if key != "InputWorkspace"})
+    if "DeadTimeTable" in parameter_dict.keys():
+        print("DTC : ", type(parameter_dict["DeadTimeTable"]), parameter_dict["DeadTimeTable"].toDict())
     alg = mantid.AlgorithmManager.create("MuonPreProcess")
     alg.initialize()
     alg.setAlwaysStoreInADS(False)
@@ -395,3 +451,18 @@ def run_AlphaCalc(parameter_dict):
     alg.setProperties(parameter_dict)
     alg.execute()
     return alg.getProperty("Alpha").value
+
+
+def run_Plus(parameter_dict):
+    """
+    Apply the AlphaCalc algorithm with the properties supplied through
+    the input dictionary of {proeprty_name:property_value} pairs.
+    Returns the calculated value of alpha.
+    """
+    alg = mantid.AlgorithmManager.create("Plus")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("OutputWorkspace", "__notUsed")
+    alg.setProperties(parameter_dict)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value

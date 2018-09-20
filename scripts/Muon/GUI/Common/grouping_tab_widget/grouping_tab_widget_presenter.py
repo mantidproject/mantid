@@ -13,11 +13,11 @@ class GroupingTabPresenter(object):
     functionality which covers both groups/pairs ; e.g. loading/saving/updating data.
     """
 
-    @staticmethod
-    def text_for_description():
-        # TODO :  implement automatic update for description.
-        text = "EMU longitudinal (?? detectors)"
-        return text
+    # @staticmethod
+    # def text_for_description():
+    #     # TODO :  implement automatic update for description.
+    #     text = "EMU longitudinal (?? detectors)"
+    #     return text
 
     def __init__(self, view, model,
                  grouping_table_widget=None,
@@ -54,6 +54,18 @@ class GroupingTabPresenter(object):
 
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
+
+    def text_for_description(self):
+        instrument = self._model.instrument
+        n_detectors = self._model.num_detectors
+        main_field = self._model._data.main_field_direction
+        text = "{} , {} detectors, main field : {} to muon polarization".format(
+            instrument, n_detectors, main_field)
+        return text
+
+    def update_description_text(self):
+        text = self.text_for_description()
+        self._view.set_description_text(text)
 
     def show(self):
         self._view.show()
@@ -104,6 +116,7 @@ class GroupingTabPresenter(object):
 
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.update_description_text()
 
         self.groupingNotifier.notify_subscribers()
 
@@ -129,6 +142,7 @@ class GroupingTabPresenter(object):
         self._model.reset_groups_and_pairs_to_default()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.update_description_text()
 
     def enable_editing(self):
         self._view.set_buttons_enabled(True)
@@ -139,6 +153,7 @@ class GroupingTabPresenter(object):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.update_description_text()
 
         self.groupingNotifier.notify_subscribers()
 
@@ -146,6 +161,7 @@ class GroupingTabPresenter(object):
         if self._model._data.is_data_loaded():
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
+            self.update_description_text()
         else:
             self.on_clear_requested()
 
@@ -160,7 +176,6 @@ class GroupingTabPresenter(object):
             self.outer = outer
 
         def update(self, observable, arg):
-            print("LoadObserver : update")
             self.outer.handle_new_data_loaded()
 
     class InstrumentObserver(Observer):

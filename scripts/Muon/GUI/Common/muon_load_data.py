@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+import Muon.GUI.Common.load_utils as load_utils
+
 
 class MuonLoadData:
     """
@@ -110,3 +112,17 @@ class MuonLoadData:
             return True
         else:
             return False
+
+    def get_data(self, **kwargs):
+        if self.contains_n(**kwargs) == 1:
+            indices = [i for i, val in enumerate(self._matches(**kwargs)) if val is True]
+            index = indices[0]
+            return {key: val[index] for key, val in self.params.items()}
+
+    def get_latest_data(self):
+        if self.num_items() > 0:
+            return {key: val[-1] for key, val in self.params.items()}
+        else:
+            ret = {key: None for key in self.params.keys()}
+            ret["workspace"] = load_utils.empty_loaded_data()
+            return ret

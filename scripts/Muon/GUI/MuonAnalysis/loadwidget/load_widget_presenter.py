@@ -48,6 +48,17 @@ class LoadWidgetPresenter(object):
             self.enable_multiple_files(True)
         else:
             self.enable_multiple_files(False)
+
+        selection = self._view.get_multiple_loading_combo_text()
+
+        if selection == "Co-Add":
+            self.load_file_widget.update_multiple_loading_behaviour("Co-Add")
+            self.load_run_widget.update_multiple_loading_behaviour("Co-Add")
+
+        if selection == "Simultaneous":
+            self.load_file_widget.update_multiple_loading_behaviour("Simultaneous")
+            self.load_run_widget.update_multiple_loading_behaviour("Simultaneous")
+
         self.clear_data_and_view()
 
     def enable_multiple_files(self, enabled=True):
@@ -96,6 +107,7 @@ class LoadWidgetPresenter(object):
         self.load_run_widget.set_current_instrument(instrument)
 
     def update_new_instrument(self, instrument):
+        print("update_new_instrument : ", instrument)
         self.clear_data_and_view()
         self.set_current_instrument(instrument)
 

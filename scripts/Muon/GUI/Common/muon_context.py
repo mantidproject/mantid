@@ -6,6 +6,7 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.muon_file_utils import format_run_for_file
+from Muon.GUI.Common.run_string_utils import run_list_to_string
 
 from collections import OrderedDict
 
@@ -20,26 +21,36 @@ class MuonContext(object):
         self._pairs = OrderedDict()
 
         self._loaded_data = MuonLoadData()
-        self._current_data = load_utils.empty_loaded_data()  # self.get_result(False)
+        self._current_data = {"workspace": load_utils.empty_loaded_data()}  # self.get_result(False)
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
 
     @property
     def current_data(self):
-        return self._current_data
+        return self._current_data["workspace"]
 
     @property
     def instrument(self):
         return self.loaded_workspace.getInstrument().getName()
 
     @property
+    def current_run(self):
+        return self._current_data["run"]
+
+    @property
     def run(self):
-        run_log = self.get_sample_log("run_number")
-        if run_log:
-            return run_log.value
-        else:
-            return 0
+        try:
+            # refer to the output of the loading widget (e.g. for co-adding)
+            runs = run_list_to_string(self.current_run)
+        except Exception:
+            # extract from sample logs
+            run_log = self.get_sample_log("run_number")
+            if run_log:
+                runs = run_log.value
+            else:
+                runs = 0
+        return runs
 
     @property
     def group_names(self):
@@ -68,10 +79,10 @@ class MuonContext(object):
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their default values
         if self._loaded_data.num_items() > 0:
-            self._current_data = self._loaded_data.params["workspace"][-1]
+            self._current_data = self._loaded_data.get_latest_data()  # self._loaded_data.params["workspace"][-1]
             self.set_groups_and_pairs_to_default()
         else:
-            self._current_data = load_utils.empty_loaded_data()
+            self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
     def is_multi_period(self):
         return isinstance(self.current_data["OutputWorkspace"], list)
@@ -95,7 +106,7 @@ class MuonContext(object):
 
     @property
     def loaded_data(self):
-        return self._current_data
+        return self._current_data["workspace"]
 
     @property
     def loaded_workspace(self):
@@ -114,12 +125,25 @@ class MuonContext(object):
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
-        self._current_data = load_utils.empty_loaded_data()
+        self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
     @property
     def period_string(self):
         # Get the period string i.e. "1+2-3+4" to be used in workspace naming.
         return "1"
+
+    @property
+    def num_detectors(self):
+        try:
+            n_det = self.loaded_workspace.detectorInfo().size()
+        except AttributeError:
+            # default to 1
+            n_det = 1
+        return n_det
+
+    @property
+    def main_field_direction(self):
+        return self.current_data["MainFieldDirection"]
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workspace naming
@@ -127,7 +151,10 @@ class MuonContext(object):
 
     def _base_run_name(self):
         """ e.g. EMU0001234 """
-        return str(self.instrument) + format_run_for_file(int(self.run))
+        if isinstance(self.run, int):
+            return str(self.instrument) + format_run_for_file(self.run)
+        else:
+            return str(self.instrument) + self.run
 
     def get_raw_data_workspace_name(self):
         return self._base_run_name() + "_raw_data"
@@ -229,6 +256,7 @@ class MuonContext(object):
 
     def _run_pre_processing(self):
         params = self._get_pre_processing_params()
+        print("params : ", self.loaded_data)
         params["InputWorkspace"] = self.loaded_workspace
         processed_data = load_utils.run_MuonPreProcess(params)
         return processed_data
@@ -236,7 +264,7 @@ class MuonContext(object):
     def _get_pre_processing_params(self):
         pre_process_params = {}
         try:
-            time_min = self.loaded_data["TimeMin"]
+            time_min = self.loaded_data["FirstGoodData"]
             pre_process_params["TimeMin"] = time_min
         except KeyError:
             pass
@@ -248,18 +276,25 @@ class MuonContext(object):
             pass
 
         try:
-            time_offset = self.loaded_data["TimeOffset"]
+            time_offset = self.loaded_data["TimeZero"]
             pre_process_params["TimeOffset"] = time_offset
         except KeyError:
             pass
 
+        # TODO : Get this working
         try:
-            dead_time_table = self.loaded_data["PreProcessDeadTimeTable"]
-            pre_process_params["DeadTimeTable"] = dead_time_table
+            dead_time_table = self.dead_time_table #self.loaded_data["DeadTimeTable"]
+            #print("DTC for pre-process : ", dead_time_table.toDict()['dead-time'])
+            if dead_time_table is not None:
+                pre_process_params["DeadTimeTable"] = dead_time_table
         except KeyError:
             pass
 
         return pre_process_params
+
+    @property
+    def dead_time_table(self):
+        return self.loaded_data["DeadTimeTable"]
 
     def _get_MuonGroupingCounts_parameters(self, group_name):
         params = {}
@@ -341,7 +376,10 @@ class MuonContext(object):
     def get_default_grouping(self, _instrument):
         parameter_name = "Default grouping file"
         workspace = self.loaded_workspace
-        grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+        try:
+            grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+        except IndexError:
+            return [], []
         instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
         filename = instrument_directory + grouping_file
         new_groups, new_pairs = load_utils.load_grouping_from_XML(filename)

@@ -4,6 +4,8 @@ import copy
 
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.muon_file_utils as file_utils
+import Muon.GUI.Common.load_utils as load_utils
+from Muon.GUI.Common.muon_workspace import MuonWorkspace
 
 
 class BrowseFileWidgetPresenter(object):
@@ -14,6 +16,7 @@ class BrowseFileWidgetPresenter(object):
 
         # Whether to allow single or multiple files to be loaded
         self._multiple_files = False
+        self._multiple_file_mode = "Single"
 
         self._use_threading = True
         self._load_thread = None
@@ -30,6 +33,9 @@ class BrowseFileWidgetPresenter(object):
 
     def create_load_thread(self):
         return thread_model.ThreadModel(self._model)
+
+    def update_multiple_loading_behaviour(self, text):
+        self._multiple_file_mode = text
 
     def get_filenames_from_user(self):
         file_filter = file_utils.filter_for_extensions(["nxs"])
@@ -62,6 +68,9 @@ class BrowseFileWidgetPresenter(object):
             self._view.warning_popup("Multiple files selected in single file mode")
             self._view.reset_edit_to_cached_value()
             return
+        if self._multiple_file_mode == "Co-Add":
+            # We don't want to allow messy appending when co-adding
+            self.clear_loaded_data()
         self.handle_loading(filenames)
 
     def handle_loading(self, filenames):
@@ -103,6 +112,10 @@ class BrowseFileWidgetPresenter(object):
     def on_loading_finished(self):
         file_list = self._model.loaded_filenames
         self.set_file_edit(file_list)
+
+        if self._multiple_files and self._multiple_file_mode == "Co-Add":
+            self.combine_loaded_runs(self._model.loaded_runs)
+
         self._view.notify_loading_finished()
         self.enable_loading()
         self._model.add_directories_to_config_service(file_list)
@@ -130,7 +143,10 @@ class BrowseFileWidgetPresenter(object):
 
     def set_file_edit(self, file_list):
         file_list = sorted(copy.copy(file_list))
-        self._view.set_file_edit(";".join(file_list), False)
+        if file_list == []:
+            self._view.set_file_edit("No data loaded", False)
+        else:
+            self._view.set_file_edit(";".join(file_list), False)
 
     # used by parent widget
     def update_view_from_model(self, file_list):
@@ -138,3 +154,45 @@ class BrowseFileWidgetPresenter(object):
 
     def set_current_instrument(self, instrument):
         pass
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Co-adding
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def flatten_run_list(self, run_list):
+        """
+        run list might be [1,2,[3,4]] where the [3,4] are co-added
+        """
+        new_list = []
+        for item in run_list:
+            if isinstance(item, int):
+                new_list += [item]
+            elif isinstance(item, list):
+                for i in item:
+                    new_list += [i]
+        return new_list
+
+
+
+    def combine_loaded_runs(self, run_list):
+        print("LoadFilePresenter ", run_list)
+        print(self._model._loaded_data_store.params)
+        running_total = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"][
+            "OutputWorkspace"].workspace
+        return_ws = self._model._loaded_data_store.get_data(run=run_list[0])["workspace"]
+        for run in run_list[1:]:
+            print(run)
+            ws = self._model._loaded_data_store.get_data(run=run)["workspace"]["OutputWorkspace"].workspace
+            print(ws)
+            running_total = load_utils.run_Plus({
+                "LHSWorkspace": running_total,
+                "RHSWorkspace": ws,
+                "AllowDifferentNumberSpectra": False}
+            )
+            # remove the single loaded filename
+            self._model._loaded_data_store.remove_data(run=run)
+        self._model._loaded_data_store.remove_data(run=run_list[0])
+        # run_string = runUtils.run_list_to_string(run_list)
+        return_ws["OutputWorkspace"] = MuonWorkspace(running_total)
+        self._model._loaded_data_store.add_data(run=self.flatten_run_list(run_list), workspace=return_ws,
+                                                filename="Co-added")

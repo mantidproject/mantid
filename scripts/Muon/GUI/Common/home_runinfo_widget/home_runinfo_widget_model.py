@@ -11,14 +11,7 @@ class HomeRunInfoWidgetModel(object):
         self._data = muon_data
 
     def get_run_number(self):
-        run = self._data.get_sample_log("run_number")
-        #print("Workspace methods : ", dir(self._data.loaded_workspace))
-        #print(self._data.loaded_workspace.getSampleDetails().keys())
-        if run:
-            return run.value
-        else:
-            return "Log not found"
-        # self._data["OutputWorkspace"].getSampleData().getLogData("run")
+        return str(self._data.run)
 
     def get_instrument_name(self):
         inst = self._data.loaded_workspace.getInstrument()

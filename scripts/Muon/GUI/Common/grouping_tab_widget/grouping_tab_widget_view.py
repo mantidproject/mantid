@@ -124,8 +124,8 @@ class GroupingTabView(QtGui.QWidget):
         default_directory = search_directories[0]
         chosen_file = QtGui.QFileDialog.getOpenFileName(self, "Select file", default_directory,
                                                         file_filter)
-        return chosen_file
+        return str(chosen_file)
 
     def show_file_save_browser_and_return_selection(self):
         chosen_file = QtGui.QFileDialog.getSaveFileName(self, "Select file")
-        return chosen_file
+        return str(chosen_file)

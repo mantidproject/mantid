@@ -11,7 +11,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     @staticmethod
     def dead_time_from_data_text(dead_times):
         mean = sum(dead_times) / len(dead_times)
-        label = "From {} to {} (ave. {})".format(min(dead_times), max(dead_times), mean)
+        label = "From {0:.3f} to {1:.3f} (ave. {2:.3f})".format(min(dead_times), max(dead_times), mean)
         return label
 
     def __init__(self, view, model):
@@ -28,6 +28,7 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         self._view.on_variable_rebin_edit_changed(self.handle_variable_rebin_changed)
 
         self._view.on_dead_time_from_data_selected(self.handle_user_selects_dead_time_from_data)
+        self._view.on_dead_time_unselected(self.handle_dead_time_unselected)
         self._view.on_dead_time_browse_clicked(self.handle_dead_time_browse_clicked)
         self._view.on_dead_time_from_file_selected(self.handle_dead_time_from_file_selected)
         self._view.on_dead_time_file_option_changed(self.handle_dead_time_from_file_changed)
@@ -74,10 +75,15 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
 
     def handle_user_selects_dead_time_from_data(self):
         dtc = self._model.get_dead_time_table_from_data()
-        # assert isinstance(dtc, TableWorkspace)
-        dead_times = dtc.toDict()['dead-time']
-        text = self.dead_time_from_data_text(dead_times)
-        self._view.set_dead_time_label(text)
+        if dtc is not None:
+            self._model.set_dead_time_from_data()
+            print(dtc)
+            dead_times = dtc.toDict()['dead-time']
+            text = self.dead_time_from_data_text(dead_times)
+            self._view.set_dead_time_label(text)
+        else:
+            self._view.set_dead_time_label("No loaded dead time")
+
 
     def handle_instrument_changed(self):
         instrument = self._view.get_instrument()
@@ -106,13 +112,35 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         names = load_utils.get_table_workspace_names_from_ADS()
         self._view.populate_dead_time_combo(names)
 
+        text = self.dead_time_from_data_text([0.0,0.0])
+        self._view.set_dead_time_label(text)
+
+    def handle_dead_time_unselected(self):
+        """
+        User has set dead time combo to 'None'.
+        """
+        self._model.set_dead_time_to_none()
+
     def handle_dead_time_from_file_changed(self):
         selection = self._view.get_dead_time_file_selection()
         if selection == "None" or selection == "":
+            print("None selected : ")
+            text = self.dead_time_from_data_text([0.0])
+            self._view.set_dead_time_label(text)
+            self._model.set_dead_time_to_none()
             return
         try:
             self._model.check_dead_time_file_selection(selection)
+            self._model.set_user_dead_time_from_ADS(selection)
+            dead_times = self._model.get_dead_time_table().toDict()['dead-time']
+            print(dead_times)
+            text = self.dead_time_from_data_text(dead_times)
+            self._view.set_dead_time_label(text)
         except ValueError as e:
+            self._model.set_dead_time_to_none()
+            self._view.set_dead_time_file_selection(0)
+            text = self.dead_time_from_data_text([0.0])
+            self._view.set_dead_time_label(text)
             self._view.warning_popup(e.args[0])
 
     class InstrumentNotifier(Observable):

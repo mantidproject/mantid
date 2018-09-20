@@ -100,3 +100,11 @@ class GroupingTabModel(object):
 
     def update_pair_alpha(self, pair_name, new_alpha):
         self._data.pairs[pair_name].alpha = new_alpha
+
+    @property
+    def num_detectors(self):
+        return self._data.num_detectors
+
+    @property
+    def instrument(self):
+        return self._data.instrument

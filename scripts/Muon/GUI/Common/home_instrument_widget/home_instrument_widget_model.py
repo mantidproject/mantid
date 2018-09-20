@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.muon_context import MuonContext
-from mantid.api import ITableWorkspace
+from mantid.api import ITableWorkspace, WorkspaceGroup
 from mantid import api
 
 
@@ -23,25 +23,25 @@ class InstrumentWidgetModel(object):
         self._data.clear()
 
     def get_file_time_zero(self):
-        return self._data.loaded_data["TimeZero"].value
+        return self._data.loaded_data["TimeZero"]
 
     def get_user_time_zero(self):
         if "UserTimeZero" in self._data.loaded_data.keys():
             time_zero = self._data.loaded_data["UserTimeZero"]
         else:
             # default to loaded value
-            time_zero = self._data.loaded_data["TimeZero"].value
+            time_zero = self._data.loaded_data["TimeZero"]
         return time_zero
 
     def get_file_first_good_data(self):
-        return self._data.loaded_data["FirstGoodData"].value
+        return self._data.loaded_data["FirstGoodData"]
 
     def get_user_first_good_data(self):
         if "UserFirstGoodData" in self._data.loaded_data.keys():
             first_good_data = self._data.loaded_data["UserFirstGoodData"]
         else:
             # Default to loaded value
-            first_good_data = self._data.loaded_data["FirstGoodData"].value
+            first_good_data = self._data.loaded_data["FirstGoodData"]
         return first_good_data
 
     def set_user_time_zero(self, time_zero):
@@ -52,9 +52,13 @@ class InstrumentWidgetModel(object):
 
     def get_dead_time_table_from_data(self):
         if self._data.is_multi_period():
-            return self._data.loaded_data["DeadTimeTable"].value[0]
+            return self._data.loaded_data["DataDeadTimeTable"][0]
         else:
-            return self._data.loaded_data["DeadTimeTable"].value
+            return self._data.loaded_data["DataDeadTimeTable"]
+
+
+    def get_dead_time_table(self):
+        return self._data.dead_time_table
 
     def load_dead_time(self):
         pass
@@ -83,3 +87,19 @@ class InstrumentWidgetModel(object):
         if rows != self._data.loaded_workspace.getNumberHistograms():
             raise ValueError("Number of histograms do not match number of rows in dead time table")
         return True
+
+    def set_dead_time_to_none(self):
+        self._data.loaded_data["DeadTimeTable"] = None
+
+    def set_dead_time_from_data(self):
+        data_dead_time = self._data.loaded_data["DataDeadTimeTable"]
+        if isinstance(data_dead_time, WorkspaceGroup):
+            self._data.loaded_data["DeadTimeTable"] = data_dead_time[0]
+        else:
+            self._data.loaded_data["DeadTimeTable"] = data_dead_time
+
+    def set_user_dead_time_from_ADS(self, name):
+        dtc = api.AnalysisDataServiceImpl.Instance().retrieve(str(name))
+        print("dtc : ", dir(dtc))
+        self._data.loaded_data["UserDeadTimeTable"] = dtc
+        self._data.loaded_data["DeadTimeTable"] = dtc

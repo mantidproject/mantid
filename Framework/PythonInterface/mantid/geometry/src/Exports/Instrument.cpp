@@ -41,6 +41,13 @@ void export_Instrument() {
           (arg("self"), arg("detector_id")),
           "Returns the :class:`~mantid.geometry.Detector` with the given ID")
 
+
+	  .def(
+		  "getDetectorIDs",
+		  &Instrument::getDetectorIDs,
+		  (arg("self"), arg("skipMonitors")),
+		  "Returns the number of detectors")
+
       .def("getReferenceFrame",
            (boost::shared_ptr<const ReferenceFrame>(Instrument::*)()) &
                Instrument::getReferenceFrame,

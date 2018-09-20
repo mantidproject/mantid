@@ -73,7 +73,7 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         correctTable.addColumn("int", "spectrum", 0)
         correctTable.addColumn("float", "dead-time", 0)
         for i in range(96):
-            correctTable.addRow([i, 0.01])
+            correctTable.addRow([i+1, 0.1])
 
     def setup_load_widget(self):
         self.load_file_view = BrowseFileWidgetView(self)

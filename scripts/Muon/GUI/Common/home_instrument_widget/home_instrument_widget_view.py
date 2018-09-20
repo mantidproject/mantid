@@ -14,6 +14,8 @@ class InstrumentWidgetView(QtGui.QWidget):
     def __init__(self, parent=None):
         super(InstrumentWidgetView, self).__init__(parent)
 
+        self.layout = QtGui.QGridLayout(self)
+
         self._button_height = 40
 
         self._button = QtGui.QMessageBox.Ok
@@ -40,12 +42,13 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_first_good_data_changed = lambda: 0
         self._on_dead_time_from_file_selected = lambda: 0
         self._on_dead_time_file_option_selected = lambda: 0
+        self._on_dead_time_unselected = lambda: 0
 
         self.timezero_edit.editingFinished.connect(
             lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
         self.firstgooddata_edit.editingFinished.connect(
             lambda: self._on_first_good_data_changed() if not self.is_first_good_data_checked() else None)
-        self.deadtime_file_edit.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
+        self.deadtime_file_selector.currentIndexChanged.connect(self.on_dead_time_file_combo_changed)
 
     def apply_to_all_hidden(self, hidden=True):
         if hidden:
@@ -96,10 +99,12 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.vertical_layout.addItem(self.horizontal_layout_2)
         self.vertical_layout.addItem(self.horizontal_layout_3)
         self.vertical_layout.addItem(self.horizontal_layout_4)
+        self.vertical_layout.addItem(self.dead_time_file_layout)
         self.vertical_layout.addItem(self.horizontal_layout_5)
         self.vertical_layout.addItem(self.horizontal_layout_6)
 
-        self.group.setLayout(self.vertical_layout)
+        self.group.setLayout(self.layout)
+        # self.group.setLayout(self.vertical_layout)
 
         self.widget_layout = QtGui.QVBoxLayout(self)
         # self.widget_layout.addItem(self.horizontal_layout)
@@ -129,7 +134,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.timezero_checkbox.setChecked(1)
         self.firstgooddata_checkbox.setChecked(1)
 
-
     def warning_popup(self, message):
         self._message_box.setText(message)
         self._message_box.open()
@@ -148,7 +152,6 @@ class InstrumentWidgetView(QtGui.QWidget):
     def setup_instrument_row(self):
         self.instrument_selector = QtGui.QComboBox(self)
         self.instrument_selector.setSizePolicy(self._fixed_aspect_ratio_size_policy(self.instrument_selector))
-        self.instrument_selector.setMinimumSize(QtCore.QSize(100, self._button_height))
         self.instrument_selector.setObjectName("instrumentSelector")
         self.instrument_selector.addItems(["None"] + allowed_instruments)
 
@@ -161,6 +164,9 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.instrument_label)
         self.horizontal_layout.addWidget(self.instrument_selector)
         self.horizontal_layout.addStretch(0)
+
+        self.layout.addWidget(self.instrument_label, 0, 0)
+        self.layout.addWidget(self.instrument_selector, 0, 1)
 
     def get_instrument(self):
         return self.instrument_selector.currentText()
@@ -178,7 +184,6 @@ class InstrumentWidgetView(QtGui.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_time_zero_row(self):
-
         self.timezero_label = QtGui.QLabel(self)
         self.timezero_label.setObjectName("timeZeroLabel")
         self.timezero_label.setText("Time Zero : ")
@@ -203,14 +208,16 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_2 = QtGui.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
-        self.horizontal_layout_2.addWidget(self.timezero_label)
-        self.horizontal_layout_2.addItem(
-            QtGui.QSpacerItem(70, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
-        self.horizontal_layout_2.addWidget(self.timezero_edit)
+        #self.horizontal_layout_2.addWidget(self.timezero_edit)
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.timezero_unit_label)
         self.horizontal_layout_2.addWidget(self.timezero_checkbox)
         self.horizontal_layout_2.addWidget(self.timezero_label_2)
+        self.horizontal_layout_2.addStretch(0)
+
+        self.layout.addWidget(self.timezero_label, 1, 0)
+        self.layout.addWidget(self.timezero_edit, 1, 1)
+        self.layout.addItem(self.horizontal_layout_2, 1, 2)
 
     def set_time_zero(self, time_zero):
         self.timezero_edit.setText("{0:.3f}".format(round(float(time_zero), 3)))
@@ -266,14 +273,16 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_3 = QtGui.QHBoxLayout()
         self.horizontal_layout_3.setObjectName("horizontalLayout3")
-        self.horizontal_layout_3.addWidget(self.firstgooddata_label)
-        self.horizontal_layout_3.addItem(
-            QtGui.QSpacerItem(15, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
-        self.horizontal_layout_3.addWidget(self.firstgooddata_edit)
+        #self.horizontal_layout_3.addWidget(self.firstgooddata_edit)
         self.horizontal_layout_3.addSpacing(10)
         self.horizontal_layout_3.addWidget(self.firstgooddata_unit_label)
         self.horizontal_layout_3.addWidget(self.firstgooddata_checkbox)
         self.horizontal_layout_3.addWidget(self.firstgooddata_label_2)
+        self.horizontal_layout_3.addStretch(0)
+
+        self.layout.addWidget(self.firstgooddata_label, 2, 0)
+        self.layout.addWidget(self.firstgooddata_edit, 2, 1)
+        self.layout.addItem(self.horizontal_layout_3, 2, 2)
 
     def on_first_good_data_changed(self, slot):
         self._on_first_good_data_changed = slot
@@ -304,36 +313,26 @@ class InstrumentWidgetView(QtGui.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_dead_time_row(self):
-
         self.deadtime_label = QtGui.QLabel(self)
         self.deadtime_label.setObjectName("deadTimeLabel")
         self.deadtime_label.setText("Dead Time : ")
 
-        horizontal_spacer = QtGui.QSpacerItem(60, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
-
         self.deadtime_selector = QtGui.QComboBox(self)
         self.deadtime_selector.setObjectName("deadTimeSelector")
-        self.deadtime_selector.addItems(["None", "From data", "From disk"])
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.deadtime_selector.sizePolicy().hasHeightForWidth())
-        self.deadtime_selector.setSizePolicy(size_policy)
-        self.deadtime_selector.setMinimumSize(QtCore.QSize(100, self._button_height))
+        self.deadtime_selector.addItems(["None", "From Loaded Data", "From Table Workspace"])
 
         self.deadtime_label_2 = QtGui.QLabel(self)
         self.deadtime_label_2.setObjectName("deadTimeFileLabel")
-        self.deadtime_label_2.setText("File : ")
+        self.deadtime_label_2.setText("Table Workspace : ")
 
         self.deadtime_label_3 = QtGui.QLabel(self)
         self.deadtime_label_3.setObjectName("deadTimeInfoLabel")
         self.deadtime_label_3.setText("")
 
-        self.deadtime_file_edit = QtGui.QComboBox(self)
-        # TODO : Have edit display "No file selected (no dead time applied)" if no file has been chosen
-        self.deadtime_file_edit.setObjectName("deadTimeFileEdit")
-        # self.deadtime_file_edit.setText("")
-        self.deadtime_file_edit.addItem("None")
+        self.deadtime_file_selector = QtGui.QComboBox(self)
+        self.deadtime_file_selector.setObjectName("deadTimeCombo")
+        self.deadtime_file_selector.addItem("None")
+        self.deadtime_file_selector.setToolTip("Select a table which is loaded into the ADS.")
 
         self.deadtime_browse_button = QtGui.QPushButton(self)
         self.deadtime_browse_button.setObjectName("deadTimeBrowseButton")
@@ -341,23 +340,31 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_4 = QtGui.QHBoxLayout()
         self.horizontal_layout_4.setObjectName("horizontalLayout3")
-        self.horizontal_layout_4.addWidget(self.deadtime_label)
-        self.horizontal_layout_4.addItem(horizontal_spacer)
-        self.horizontal_layout_4.addWidget(self.deadtime_selector)
+        #self.horizontal_layout_4.addWidget(self.deadtime_selector)
         self.horizontal_layout_4.addSpacing(10)
-        self.horizontal_layout_4.addWidget(self.deadtime_label_2)
         self.horizontal_layout_4.addWidget(self.deadtime_label_3)
-        self.horizontal_layout_4.addWidget(self.deadtime_file_edit)
-        self.horizontal_layout_4.addSpacing(10)
-        self.horizontal_layout_4.addWidget(self.deadtime_browse_button)
-        self.horizontal_layout_4.addItem(
-            QtGui.QSpacerItem(100, 40, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum))
+
+        self.dead_time_file_layout = QtGui.QHBoxLayout()
+        #self.dead_time_file_layout.addWidget(self.deadtime_file_selector)
+        self.dead_time_file_layout.addSpacing(10)
+        self.dead_time_file_layout.addWidget(self.deadtime_browse_button)
+        self.dead_time_file_layout.addStretch(0)
+
+        self.layout.addWidget(self.deadtime_label, 3, 0)
+        self.layout.addWidget(self.deadtime_selector, 3, 1)
+        self.layout.addItem(self.horizontal_layout_4, 3, 2)
+        self.layout.addWidget(self.deadtime_label_2, 4, 0)
+        self.layout.addWidget(self.deadtime_file_selector, 4, 1)
+        self.layout.addItem(self.dead_time_file_layout, 4, 2)
 
     def on_dead_time_file_option_changed(self, slot):
         self._on_dead_time_file_option_selected = slot
 
     def on_dead_time_from_data_selected(self, slot):
         self._on_dead_time_from_data_selected = slot
+
+    def on_dead_time_unselected(self, slot):
+        self._on_dead_time_unselected = slot
 
     def on_dead_time_browse_clicked(self, slot):
         self.deadtime_browse_button.clicked.connect(slot)
@@ -366,23 +373,28 @@ class InstrumentWidgetView(QtGui.QWidget):
         self._on_dead_time_from_file_selected = slot
 
     def populate_dead_time_combo(self, names):
-        self.deadtime_file_edit.clear()
-        self.deadtime_file_edit.addItem("None")
+        self.deadtime_file_selector.clear()
+        self.deadtime_file_selector.addItem("None")
         for name in names:
-            self.deadtime_file_edit.addItem(name)
+            self.deadtime_file_selector.addItem(name)
 
     def get_dead_time_file_selection(self):
-        return self.deadtime_file_edit.currentText()
+        return self.deadtime_file_selector.currentText()
+
+    def set_dead_time_file_selection(self, index):
+        self.deadtime_file_selector.setCurrentIndex(index)
 
     def dead_time_file_loader_hidden(self, hidden=True):
         if hidden:
-            self.deadtime_file_edit.hide()
+            self.deadtime_file_selector.hide()
             self.deadtime_browse_button.hide()
             self.deadtime_label_2.hide()
+            self.dead_time_data_info_hidden(hidden)
         if not hidden:
-            self.deadtime_file_edit.setVisible(True)
+            self.deadtime_file_selector.setVisible(True)
             self.deadtime_browse_button.setVisible(True)
             self.deadtime_label_2.setVisible(True)
+            self.dead_time_data_info_hidden(hidden)
 
     def dead_time_data_info_hidden(self, hidden=True):
         if hidden:
@@ -395,6 +407,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_dead_time_combo_changed(self, index):
         if index == 0:
+            self._on_dead_time_unselected()
             self.dead_time_file_loader_hidden(True)
             self.dead_time_data_info_hidden(True)
         if index == 1:
@@ -404,14 +417,15 @@ class InstrumentWidgetView(QtGui.QWidget):
         if index == 2:
             self._on_dead_time_from_file_selected()
             self.dead_time_file_loader_hidden(False)
-            self.dead_time_data_info_hidden(True)
+            self.dead_time_data_info_hidden(False)
 
     def on_dead_time_file_combo_changed(self, index):
-        if index == 0:
-            # "None" selected
-            return
-        else:
-            self._on_dead_time_file_option_selected()
+        self._on_dead_time_file_option_selected()
+        # if index == 0:
+        #     # "None" selected
+        #     return
+        # else:
+        #     self._on_dead_time_file_option_selected()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Rebin row
@@ -425,15 +439,10 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_selector = QtGui.QComboBox(self)
         self.rebin_selector.setObjectName("rebinSelector")
         self.rebin_selector.addItems(["None", "Fixed", "Variable"])
-        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.rebin_selector.sizePolicy().hasHeightForWidth())
-        self.rebin_selector.setSizePolicy(size_policy)
-        self.rebin_selector.setMinimumSize(QtCore.QSize(100, self._button_height))
 
         self.rebin_steps_label = QtGui.QLabel(self)
         self.rebin_steps_label.setText("Steps : ")
+
         self.rebin_steps_edit = QtGui.QLineEdit(self)
 
         self.rebin_variable_label = QtGui.QLabel(self)
@@ -441,7 +450,6 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_variable_edit = QtGui.QLineEdit(self)
 
         self.rebin_help_button = QtGui.QPushButton(self)
-
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
@@ -449,29 +457,29 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.rebin_help_button.setSizePolicy(size_policy)
         self.rebin_help_button.setMinimumSize(QtCore.QSize(40, 40))
         self.rebin_help_button.setMaximumSize(QtCore.QSize(40, 40))
-
         self.rebin_help_button.setObjectName("rebinHelpButton")
         self.rebin_help_button.setText("?")
 
         self.horizontal_layout_5 = QtGui.QHBoxLayout()
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
-        self.horizontal_layout_5.addWidget(self.rebin_label)
-        self.horizontal_layout_5.addItem(
-            QtGui.QSpacerItem(110, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum))
-        self.horizontal_layout_5.addWidget(self.rebin_selector)
+        #self.horizontal_layout_5.addWidget(self.rebin_selector)
         self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.rebin_steps_label)
         self.horizontal_layout_5.addWidget(self.rebin_steps_edit)
-        self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.rebin_variable_label)
         self.horizontal_layout_5.addWidget(self.rebin_variable_edit)
+        self.horizontal_layout_5.addStretch(0)
+        self.horizontal_layout_5.addSpacing(10)
+        self.horizontal_layout_5.addWidget(self.rebin_help_button)
+
         self.rebin_steps_label.hide()
         self.rebin_steps_edit.hide()
         self.rebin_variable_label.hide()
         self.rebin_variable_edit.hide()
-        self.horizontal_layout_5.addStretch(0)
-        self.horizontal_layout_5.addSpacing(10)
-        self.horizontal_layout_5.addWidget(self.rebin_help_button)
+
+        self.layout.addWidget(self.rebin_label, 5, 0)
+        self.layout.addWidget(self.rebin_selector, 5, 1)
+        self.layout.addItem(self.horizontal_layout_5, 5, 2)
 
     def rebin_fixed_hidden(self, hidden=True):
         if hidden:

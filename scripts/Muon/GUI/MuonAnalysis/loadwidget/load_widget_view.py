@@ -70,6 +70,9 @@ class LoadWidgetView(QtGui.QWidget):
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
 
+    def get_multiple_loading_combo_text(self):
+        return str(self.load_behaviour_combo.currentText())
+
     def set_connections(self):
         self.on_multiple_loading_check_changed(self.change_multiple_loading_state)
 

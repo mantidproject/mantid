@@ -15,6 +15,7 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
     def update_view_from_model(self):
         self._view.clear()
         run = self._model.get_run_number()
+        print("Run info run : ", run)
         instrument = self._model.get_instrument_name()
         self._view.add_text_line("Instrument                : " + str(instrument))
         self._view.add_text_line("Run                       : " + run)
