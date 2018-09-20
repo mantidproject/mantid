@@ -6,7 +6,6 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"

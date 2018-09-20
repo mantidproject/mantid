@@ -236,8 +236,8 @@ class DimensionSelectorWidget(QtGui.QWidget):
             else:
                 try:
                     tempvalue=float(sender.text())
+                    self.dimMin[senderIndex]=tempvalue
                     if tempvalue<self.dimMax[senderIndex]:
-                        self.dimMin[senderIndex]=tempvalue
                         color = '#ffffff'
                     else:
                         color = '#ff0000'
@@ -250,8 +250,8 @@ class DimensionSelectorWidget(QtGui.QWidget):
                 color = '#ffffff'
             else:
                 tempvalue=float(sender.text())
+                self.dimMax[senderIndex]=tempvalue
                 if tempvalue>self.dimMin[senderIndex]:
-                    self.dimMax[senderIndex]=tempvalue
                     color = '#ffffff'
                 else:
                     color = '#ff0000'

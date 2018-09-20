@@ -112,12 +112,13 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    */
   static void addItem(SvcType &self, const boost::python::object &name,
                       const boost::python::object &item) {
+    std::string namestr;
     try {
-      std::string namestr = PythonInterface::Converters::pyObjToStr(name);
-      self.add(namestr, extractCppValue(item));
+      namestr = PythonInterface::Converters::pyObjToStr(name);
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("Failed to convert name to a string");
     }
+    self.add(namestr, extractCppValue(item));
   }
 
   /**
@@ -129,12 +130,13 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    */
   static void addOrReplaceItem(SvcType &self, const boost::python::object &name,
                                const boost::python::object &item) {
+    std::string namestr;
     try {
-      std::string namestr = PythonInterface::Converters::pyObjToStr(name);
-      self.addOrReplace(namestr, extractCppValue(item));
+      namestr = PythonInterface::Converters::pyObjToStr(name);
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("Failed to convert name to a string");
     }
+    self.addOrReplace(namestr, extractCppValue(item));
   }
 
   /**
@@ -148,9 +150,9 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     if (extractWeak.check()) {
       return extractWeak().lock();
     }
-    boost::python::extract<SvcPtrType &> extractShared(pyvalue);
-    if (extractShared.check()) {
-      return extractShared();
+    boost::python::extract<SvcPtrType &> extractRefShared(pyvalue);
+    if (extractRefShared.check()) {
+      return extractRefShared();
     } else {
       throw std::invalid_argument(
           "Cannot extract pointer from Python object argument. Incorrect type");
