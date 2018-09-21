@@ -48,16 +48,12 @@ public:
   static T &Instance();
 
 private:
-  static T *instance;
-  static std::once_flag once;
 #ifndef NDEBUG
   static bool destroyed;
 #endif
 };
 
 // Static field initializers
-template <typename T> T *SingletonHolder<T>::instance = nullptr;
-template <typename T> std::once_flag SingletonHolder<T>::once;
 #ifndef NDEBUG
 template <typename T> bool SingletonHolder<T>::destroyed = false;
 #endif
@@ -82,15 +78,19 @@ template <typename T> struct CreateUsingNew {
 /// already exist
 /// Creation is done using the CreateUsingNew policy at the moment
 template <typename T> inline T &SingletonHolder<T>::Instance() {
-  std::call_once(once, []() {
-    instance = CreateUsingNew<T>::create();
+  // Initialiazing a local static is thread-safe in C++11
+  // The inline lambda call is used to create the singleton once
+  // and register an atexit function to delete it
+  static T *instance = []() {
+    auto local = CreateUsingNew<T>::create();
     deleteOnExit(SingletonDeleterFn([]() {
 #ifndef NDEBUG
       destroyed = true;
 #endif
       CreateUsingNew<T>::destroy(instance);
     }));
-  });
+    return local;
+  }();
 #ifndef NDEBUG
   assert(!destroyed);
 #endif
