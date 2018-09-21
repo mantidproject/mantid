@@ -117,6 +117,11 @@ void MultiProcessEventLoader::load(
     for (auto &c : vChilds)
       c.wait();
 
+    //check if oll childs are finished correctly
+    for (auto &c : vChilds)
+      if (c.exit_code())
+        throw std::runtime_error("Error while multiprocess loading\n");
+
     // Assemble multiprocess data from shared memory
     assembleFromShared(eventLists);
 
@@ -232,7 +237,7 @@ void MultiProcessEventLoader::fillFromFile(
 // vector representing each pixel allocated only once, so we have allocationFee
 // bytes extra overhead
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
-  unsigned allocationFee = 8 + 8 + GenerateStoragename().length();
+  auto allocationFee = 8 + 8 + GenerateStoragename().length();
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) *
       sizeof(TofEvent) +
       m_numPixels * (sizeof(EventLists) + allocationFee) +

@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/IO/EventsListsShmemStorage.cpp
 		src/IO/MultiProcessEventLoader.cpp
 		src/IO/NXEventDataLoader.cpp
+		src/IO/EventLoaderChild.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
@@ -24,7 +25,7 @@ set ( INC_FILES
 	inc/MantidParallel/IO/EventParser.h
 	inc/MantidParallel/IO/EventsListsShmemManager.h
 	inc/MantidParallel/IO/EventsListsShmemStorage.h
-        inc/MantidParallel/IO/MultiProcessEventLoader.h
+		inc/MantidParallel/IO/MultiProcessEventLoader.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
 	inc/MantidParallel/IO/PulseTimeGenerator.h
@@ -42,10 +43,8 @@ set ( TEST_FILES
 	EventDataPartitionerTest.h
 	EventLoaderTest.h
 	EventParserTest.h
-	EventsListsShmemManagerTest.h
-	EventsListsShmemStorageTest.h
 	ExecutionModeTest.h
-        MultiProcessEventLoaderTest.h
+		MultiProcessEventLoaderTest.h
 	NonblockingTest.h
 	ParallelRunnerTest.h
 	PulseTimeGeneratorTest.h
@@ -62,6 +61,7 @@ endif()
 
 # Add the target for this directory
 add_library ( Parallel ${SRC_FILES} ${INC_FILES} )
+add_dependencies(Parallel EventParallelLoader)
 # Set the name of the generated library
 set_target_properties ( Parallel PROPERTIES OUTPUT_NAME MantidParallel
   COMPILE_DEFINITIONS IN_MANTID_PARALLEL )
@@ -79,7 +79,27 @@ target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boos
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} )
 
-add_subdirectory(src/IO)
+
+#Add executable for Nexus parallel loader child process
+add_executable(EventParallelLoader ${SRC_FILES} ${INC_FILES})
+add_dependencies(EventParallelLoader Kernel)
+#set the name of generated executable
+set_target_properties(EventParallelLoader PROPERTIES OUTPUT_NAME MantidNexusParallelLoader
+		COMPILE_DEFINITIONS IN_MANTID_PARALLEL)
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+	set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+endif ()
+
+# Add to the 'Framework' group in VS
+set_property(TARGET EventParallelLoader PROPERTY FOLDER "MantidFramework")
+
+target_include_directories(EventParallelLoader SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+
+target_link_libraries(EventParallelLoader LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+		${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} Kernel)
 
 # Add the unit tests directory
 add_subdirectory ( test )
@@ -89,3 +109,4 @@ add_subdirectory ( test )
 ###########################################################################
 
 install ( TARGETS Parallel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install(TARGETS EventParallelLoader ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR})
