@@ -69,7 +69,7 @@ class LoadRunWidgetModel(object):
         pass
 
     def get_instrument(self):
-        instrument = "None"
+        instrument = None
         try:
             workspace = self.loaded_workspaces[0]["OutputWorkspace"]
             if isinstance(workspace, list):
@@ -78,6 +78,7 @@ class LoadRunWidgetModel(object):
                 instrument = workspace.workspace.getInstrument().getName()
         except IndexError:
             pass
+            #instrument = self._loaded_data_store.instrument
         return instrument
 
     def clear_loaded_data(self):

@@ -79,6 +79,9 @@ class LoadRunWidgetPresenter(object):
     def update_view_from_model(self, run_list):
         self.set_run_edit_from_list(run_list)
         instrument = self._model.get_instrument()
+        if instrument is None:
+            # if instrument cannot be extracted from loaded workspace, return to its current value
+            instrument = self._view.get_instrument_label()
         self.set_current_instrument(instrument)
 
     def update_multiple_loading_behaviour(self, text):

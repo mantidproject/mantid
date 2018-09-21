@@ -15,7 +15,6 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
     def update_view_from_model(self):
         self._view.clear()
         run = self._model.get_run_number()
-        print("Run info run : ", run)
         instrument = self._model.get_instrument_name()
         self._view.add_text_line("Instrument                : " + str(instrument))
         self._view.add_text_line("Run                       : " + run)
@@ -27,7 +26,7 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         self._view.add_text_line("Counts (MeV)              : " + str(self._model.get_counts_in_MeV()))
         self._view.add_text_line("Average Temperature (K)   : "+str(self._model.get_average_temperature()))
         self._view.add_text_line(self.create_text_line("Sample Temperature (K)   ", "sample_temp"))
-        self._view.add_text_line(self.create_text_line("Sample Magnetic Field (T)", "sample_magn_field"))
+        self._view.add_text_line(self.create_text_line("Sample Magnetic Field (G)", "sample_magn_field"))
 
     def create_text_line(self, name, log_name):
         log = self._model.get_log_value(log_name)

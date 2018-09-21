@@ -103,11 +103,11 @@ class LoadWidgetPresenter(object):
         return self._view
 
     def set_current_instrument(self, instrument):
+        self._model._loaded_data_store.instrument = instrument
         self.load_file_widget.set_current_instrument(instrument)
         self.load_run_widget.set_current_instrument(instrument)
 
     def update_new_instrument(self, instrument):
-        print("update_new_instrument : ", instrument)
         self.clear_data_and_view()
         self.set_current_instrument(instrument)
 

@@ -41,13 +41,24 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
     def show(self):
         self._view.show()
 
-    def handle_dead_time_browse_clicked(self):
-        self._view.show_file_browser_and_return_selection(filter_for_extensions(['nxs']), [''], multiple_files=False)
-
     def update_view_from_model(self):
         self.handle_loaded_first_good_data_checkState_change()
         self.handle_loaded_time_zero_checkState_change()
         self._view.set_instrument(self._model._data.instrument)
+
+    def clear_view(self):
+        self._view.set_time_zero(0.0)
+        self._view.set_first_good_data(0.0)
+        self._view.set_combo_boxes_to_default()
+        self._view.set_checkboxes_to_defualt()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Time Zero
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def handle_user_changes_time_zero(self):
+        time_zero = self._view.get_time_zero()
+        self._model.set_user_time_zero(time_zero)
 
     def handle_loaded_time_zero_checkState_change(self):
         if self._view.time_zero_state():
@@ -57,6 +68,14 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             time_zero = self._model.get_user_time_zero()
             self._view.set_time_zero(time_zero)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # First Good Data
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def handle_user_changes_first_good_data(self):
+        first_good_data = self._view.get_first_good_data()
+        self._model.set_user_first_good_data(first_good_data)
+
     def handle_loaded_first_good_data_checkState_change(self):
         if self._view.first_good_data_state():
             first_good_data = self._model.get_file_first_good_data()
@@ -65,34 +84,9 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             first_good_data = self._model.get_user_first_good_data()
             self._view.set_first_good_data(first_good_data)
 
-    def handle_user_changes_first_good_data(self):
-        first_good_data = self._view.get_first_good_data()
-        self._model.set_user_first_good_data(first_good_data)
-
-    def handle_user_changes_time_zero(self):
-        time_zero = self._view.get_time_zero()
-        self._model.set_user_time_zero(time_zero)
-
-    def handle_user_selects_dead_time_from_data(self):
-        dtc = self._model.get_dead_time_table_from_data()
-        if dtc is not None:
-            self._model.set_dead_time_from_data()
-            print(dtc)
-            dead_times = dtc.toDict()['dead-time']
-            text = self.dead_time_from_data_text(dead_times)
-            self._view.set_dead_time_label(text)
-        else:
-            self._view.set_dead_time_label("No loaded dead time")
-
-
-    def handle_instrument_changed(self):
-        instrument = self._view.get_instrument()
-        if instrument != self._model._data.instrument:
-            # only update if the view and model are not the same
-            self._model.clear_data()
-            self.clear_view()
-            self._view.warning_popup("Changing instrument will reset interface!")
-            self.instrumentNotifier.notify_subscribers(instrument)
+    # ------------------------------------------------------------------------------------------------------------------
+    # Rebin
+    # ------------------------------------------------------------------------------------------------------------------
 
     def handle_fixed_rebin_changed(self):
         fixed_bin_size = float(self._view.get_fixed_bin_text())
@@ -102,51 +96,103 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
         variable_bin_size = float(self._view.get_fixed_bin_text())
         self._model.add_variable_binning(variable_bin_size)
 
-    def clear_view(self):
-        self._view.set_time_zero(0.0)
-        self._view.set_first_good_data(0.0)
-        self._view.set_combo_boxes_to_default()
-        self._view.set_checkboxes_to_defualt()
+    # ------------------------------------------------------------------------------------------------------------------
+    # Instrument
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def handle_instrument_changed(self):
+        """
+        User changes the selected instrument.
+        """
+        instrument = self._view.get_instrument()
+        current_instrument = self._view.cached_instrument
+        if instrument != self._model._data.instrument:
+            # prompt user to continue or not
+            user_response = self._view.instrument_changed_warning()
+            if user_response == 1:
+                self._model.clear_data()
+                self.clear_view()
+                self._view.set_instrument(instrument)
+                self.instrumentNotifier.notify_subscribers(instrument)
+            else:
+                # reset the instrument selector
+                self._view.set_instrument(current_instrument)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Dead Time
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def handle_dead_time_browse_clicked(self):
+        # TODO : Implement this functionality
+        self._view.show_file_browser_and_return_selection(
+            filter_for_extensions(['nxs']), [''], multiple_files=False)
+
+    def handle_user_selects_dead_time_from_data(self):
+        """
+        User chooses to load dead time from the currently loaded workspace.
+        """
+        dtc = self._model.get_dead_time_table_from_data()
+        if dtc is not None:
+            self._model.set_dead_time_from_data()
+            dead_times = dtc.toDict()['dead-time']
+            dead_time_text = self.dead_time_from_data_text(dead_times)
+            self._view.set_dead_time_label(dead_time_text)
+        else:
+            self._view.set_dead_time_label("No loaded dead time")
+
+    def set_dead_time_text_to_default(self):
+        """
+        by default the dead time text should onl contain 0.0.
+        """
+        dead_time_text = self.dead_time_from_data_text([0.0])
+        self._view.set_dead_time_label(dead_time_text)
 
     def handle_dead_time_from_file_selected(self):
-        names = load_utils.get_table_workspace_names_from_ADS()
-        self._view.populate_dead_time_combo(names)
-
-        text = self.dead_time_from_data_text([0.0,0.0])
-        self._view.set_dead_time_label(text)
+        """
+        User has selected the dead time "from Table Workspace" option.
+        """
+        table_names = load_utils.get_table_workspace_names_from_ADS()
+        self._view.populate_dead_time_combo(table_names)
+        self.set_dead_time_text_to_default()
 
     def handle_dead_time_unselected(self):
         """
         User has set dead time combo to 'None'.
         """
+        self.set_dead_time_text_to_default()
         self._model.set_dead_time_to_none()
 
     def handle_dead_time_from_file_changed(self):
+        """
+        The user changes the selected Table Workspace to use as dead time.
+        """
         selection = self._view.get_dead_time_file_selection()
         if selection == "None" or selection == "":
-            print("None selected : ")
-            text = self.dead_time_from_data_text([0.0])
-            self._view.set_dead_time_label(text)
-            self._model.set_dead_time_to_none()
+            self.handle_dead_time_unselected()
             return
         try:
             self._model.check_dead_time_file_selection(selection)
             self._model.set_user_dead_time_from_ADS(selection)
             dead_times = self._model.get_dead_time_table().toDict()['dead-time']
-            print(dead_times)
-            text = self.dead_time_from_data_text(dead_times)
-            self._view.set_dead_time_label(text)
+            dead_time_text = self.dead_time_from_data_text(dead_times)
+            self._view.set_dead_time_label(dead_time_text)
         except ValueError as e:
-            self._model.set_dead_time_to_none()
-            self._view.set_dead_time_file_selection(0)
-            text = self.dead_time_from_data_text([0.0])
-            self._view.set_dead_time_label(text)
+            self._handle_selected_table_is_invalid()
             self._view.warning_popup(e.args[0])
+
+    def _handle_selected_table_is_invalid(self):
+        self._model.set_dead_time_to_none()
+        self._view.set_dead_time_file_selection(0)
+        self.set_dead_time_text_to_default()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Observer / Observable
+    # ------------------------------------------------------------------------------------------------------------------
 
     class InstrumentNotifier(Observable):
         def __init__(self, outer):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class
 
-        def notify_subscribers(self, arg=None):
-            Observable.notify_subscribers(self, arg)
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args)

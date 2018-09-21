@@ -29,7 +29,8 @@ class InstrumentWidgetModel(object):
         if "UserTimeZero" in self._data.loaded_data.keys():
             time_zero = self._data.loaded_data["UserTimeZero"]
         else:
-            # default to loaded value
+            # default to loaded value, keep a record of the data vaue
+            self._data.loaded_data["DataTimeZero"] = self._data.loaded_data["TimeZero"]
             time_zero = self._data.loaded_data["TimeZero"]
         return time_zero
 
@@ -41,6 +42,7 @@ class InstrumentWidgetModel(object):
             first_good_data = self._data.loaded_data["UserFirstGoodData"]
         else:
             # Default to loaded value
+            self._data.loaded_data["FirstGoodData"] = self._data.loaded_data["FirstGoodData"]
             first_good_data = self._data.loaded_data["FirstGoodData"]
         return first_good_data
 
@@ -56,20 +58,22 @@ class InstrumentWidgetModel(object):
         else:
             return self._data.loaded_data["DataDeadTimeTable"]
 
-
     def get_dead_time_table(self):
         return self._data.dead_time_table
-
-    def load_dead_time(self):
-        pass
-        # TODO : Create loader class which handles loading workspaces as well as dead times
-        # this way, we have all the loading algorithms in one place...
 
     def add_fixed_binning(self, fixed_bin_size):
         self._data.loaded_data["Rebin"] = str(fixed_bin_size)
 
     def add_variable_binning(self, rebin_params):
         self._data.loaded_data["Rebin"] = str(rebin_params)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Dead Time
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def load_dead_time(self):
+        # TODO : Create this function
+        pass
 
     def check_dead_time_file_selection(self, selection):
         try:
@@ -100,6 +104,5 @@ class InstrumentWidgetModel(object):
 
     def set_user_dead_time_from_ADS(self, name):
         dtc = api.AnalysisDataServiceImpl.Instance().retrieve(str(name))
-        print("dtc : ", dir(dtc))
         self._data.loaded_data["UserDeadTimeTable"] = dtc
         self._data.loaded_data["DeadTimeTable"] = dtc

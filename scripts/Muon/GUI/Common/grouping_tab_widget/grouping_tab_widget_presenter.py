@@ -13,12 +13,6 @@ class GroupingTabPresenter(object):
     functionality which covers both groups/pairs ; e.g. loading/saving/updating data.
     """
 
-    # @staticmethod
-    # def text_for_description():
-    #     # TODO :  implement automatic update for description.
-    #     text = "EMU longitudinal (?? detectors)"
-    #     return text
-
     def __init__(self, view, model,
                  grouping_table_widget=None,
                  pairing_table_widget=None):
@@ -55,26 +49,23 @@ class GroupingTabPresenter(object):
         self.guessAlphaObserver = GroupingTabPresenter.GuessAlphaObserver(self)
         self.pairing_table_widget.guessAlphaNotifier.add_subscriber(self.guessAlphaObserver)
 
+    def show(self):
+        self._view.show()
+
     def text_for_description(self):
+        """
+        Generate the text for the description edit at the top of the widget.
+        """
         instrument = self._model.instrument
         n_detectors = self._model.num_detectors
-        main_field = self._model._data.main_field_direction
+        main_field = self._model.main_field_direction
         text = "{} , {} detectors, main field : {} to muon polarization".format(
             instrument, n_detectors, main_field)
         return text
 
     def update_description_text(self):
-        text = self.text_for_description()
-        self._view.set_description_text(text)
-
-    def show(self):
-        self._view.show()
-
-    def group_table_changed(self):
-        self.groupingNotifier.notify_subscribers()
-
-    def pair_table_changed(self):
-        self.groupingNotifier.notify_subscribers()
+        description_text = self.text_for_description()
+        self._view.set_description_text(description_text)
 
     def add_pair_from_grouping_table(self, group_name1, group_name2):
         """
@@ -99,18 +90,18 @@ class GroupingTabPresenter(object):
         self._model.update_pair_alpha(pair_name, new_alpha)
         self.pairing_table_widget.update_view_from_model()
 
+        self.groupingNotifier.notify_subscribers()
+
     def handle_load_grouping_from_file(self):
+        # Only XML format
         file_filter = file_utils.filter_for_extensions(["xml"])
-        directory = ""
-        filename = self._view.show_file_browser_and_return_selection(file_filter, [directory])
+        filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
 
         groups, pairs = load_utils.load_grouping_from_XML(filename)
 
         self._model.clear()
-
         for group in groups:
             self._model.add_group(group)
-
         for pair in pairs:
             self._model.add_pair(pair)
 
@@ -125,7 +116,12 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.disable_editing()
         self.pairing_table_widget.disable_editing()
 
-    def calculate_all_data(self, arg):
+    def enable_editing(self):
+        self._view.set_buttons_enabled(True)
+        self.grouping_table_widget.enable_editing()
+        self.pairing_table_widget.enable_editing()
+
+    def calculate_all_data(self, _arg):
         self._model.show_all_groups_and_pairs()
 
     def handle_update_all_clicked(self):
@@ -144,11 +140,6 @@ class GroupingTabPresenter(object):
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
 
-    def enable_editing(self):
-        self._view.set_buttons_enabled(True)
-        self.grouping_table_widget.enable_editing()
-        self.pairing_table_widget.enable_editing()
-
     def on_clear_requested(self):
         self._model.clear()
         self.grouping_table_widget.update_view_from_model()
@@ -158,7 +149,7 @@ class GroupingTabPresenter(object):
         self.groupingNotifier.notify_subscribers()
 
     def handle_new_data_loaded(self):
-        if self._model._data.is_data_loaded():
+        if self._model.is_data_loaded():
             self.grouping_table_widget.update_view_from_model()
             self.pairing_table_widget.update_view_from_model()
             self.update_description_text()
@@ -170,9 +161,20 @@ class GroupingTabPresenter(object):
         if filename != "":
             load_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Observer / Observable
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def group_table_changed(self):
+        self.groupingNotifier.notify_subscribers()
+
+    def pair_table_changed(self):
+        self.groupingNotifier.notify_subscribers()
+
     class LoadObserver(Observer):
 
         def __init__(self, outer):
+            Observer.__init__(self)
             self.outer = outer
 
         def update(self, observable, arg):
@@ -181,10 +183,20 @@ class GroupingTabPresenter(object):
     class InstrumentObserver(Observer):
 
         def __init__(self, outer):
+            Observer.__init__(self)
             self.outer = outer
 
         def update(self, observable, arg):
             self.outer.on_clear_requested()
+
+    class GuessAlphaObserver(Observer):
+
+        def __init__(self, outer):
+            Observer.__init__(self)
+            self.outer = outer
+
+        def update(self, observable, arg):
+            self.outer.handle_guess_alpha(arg[0], arg[1], arg[2])
 
     class GroupingNotifier(Observable):
 
@@ -192,14 +204,5 @@ class GroupingTabPresenter(object):
             Observable.__init__(self)
             self.outer = outer  # handle to containing class
 
-        def notify_subscribers(self, arg=None):
-            Observable.notify_subscribers(self, arg)
-
-    class GuessAlphaObserver(Observer):
-
-        def __init__(self, outer):
-            # super(GuessAlphaObserver).__init__()
-            self.outer = outer
-
-        def update(self, observable, arg=["", "", ""]):
-            self.outer.handle_guess_alpha(arg[0], arg[1], arg[2])
+        def notify_subscribers(self, *args, **kwargs):
+            Observable.notify_subscribers(self, *args, **kwargs)

@@ -17,6 +17,7 @@ class InstrumentWidgetView(QtGui.QWidget):
         self.layout = QtGui.QGridLayout(self)
 
         self._button_height = 40
+        self._cached_instrument = ["None", "None"]
 
         self._button = QtGui.QMessageBox.Ok
         self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
@@ -178,6 +179,28 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_instrument_changed(self, slot):
         self.instrument_selector.currentIndexChanged.connect(slot)
+        self.instrument_selector.currentIndexChanged.connect(self.cache_instrument)
+
+    def cache_instrument(self):
+        self._cached_instrument.pop(0)
+        self._cached_instrument.append(str(self.instrument_selector.currentText()))
+
+    @property
+    def cached_instrument(self):
+        return self._cached_instrument[-1]
+
+    def instrument_changed_warning(self):
+        msg = QtGui.QMessageBox(self)
+        msg.setIcon(QtGui.QMessageBox.Warning)
+        msg.setText("Changing instrument will reset the interface, continue?")
+        msg.setWindowTitle("Changing Instrument")
+        msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+        retval = msg.exec_()
+        if retval == 1024:
+            # The "OK" code
+            return 1
+        else:
+            return 0
 
     # ------------------------------------------------------------------------------------------------------------------
     # Time zero
@@ -340,12 +363,10 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_4 = QtGui.QHBoxLayout()
         self.horizontal_layout_4.setObjectName("horizontalLayout3")
-        #self.horizontal_layout_4.addWidget(self.deadtime_selector)
         self.horizontal_layout_4.addSpacing(10)
         self.horizontal_layout_4.addWidget(self.deadtime_label_3)
 
         self.dead_time_file_layout = QtGui.QHBoxLayout()
-        #self.dead_time_file_layout.addWidget(self.deadtime_file_selector)
         self.dead_time_file_layout.addSpacing(10)
         self.dead_time_file_layout.addWidget(self.deadtime_browse_button)
         self.dead_time_file_layout.addStretch(0)
@@ -421,11 +442,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
     def on_dead_time_file_combo_changed(self, index):
         self._on_dead_time_file_option_selected()
-        # if index == 0:
-        #     # "None" selected
-        #     return
-        # else:
-        #     self._on_dead_time_file_option_selected()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Rebin row
@@ -462,7 +478,6 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_5 = QtGui.QHBoxLayout()
         self.horizontal_layout_5.setObjectName("horizontalLayout3")
-        #self.horizontal_layout_5.addWidget(self.rebin_selector)
         self.horizontal_layout_5.addSpacing(10)
         self.horizontal_layout_5.addWidget(self.rebin_steps_label)
         self.horizontal_layout_5.addWidget(self.rebin_steps_edit)

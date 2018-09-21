@@ -87,13 +87,14 @@ class GroupingTabModel(object):
         return self._data.construct_empty_pair(_pair_index)
 
     def construct_empty_pair_with_group_names(self, name1, name2):
-        pair_index = 0
-        new_pair_name = "pair_" + str(pair_index)
-        while new_pair_name in self.pair_names:
-            pair_index += 1
-            new_pair_name = "pair_" + str(pair_index)
-        return MuonPair(pair_name=new_pair_name,
-                        group1_name=name1, group2_name=name2, alpha=1.0)
+        """
+        Create a default pair with specific group names.
+        The pair name is auto-generated and alpha=1.0
+        """
+        pair = self._data.construct_empty_pair(0)
+        pair.group1 = name1
+        pair.group2 = name2
+        return pair
 
     def reset_groups_and_pairs_to_default(self):
         self._data.set_groups_and_pairs_to_default()
@@ -108,3 +109,10 @@ class GroupingTabModel(object):
     @property
     def instrument(self):
         return self._data.instrument
+
+    @property
+    def main_field_direction(self):
+        return self._data.main_field_direction
+
+    def is_data_loaded(self):
+        return self._data.is_data_loaded()

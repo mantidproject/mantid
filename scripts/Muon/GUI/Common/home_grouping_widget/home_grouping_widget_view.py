@@ -1,42 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal
-import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.run_string_utils import valid_alpha_regex
 
 
 class HomeGroupingWidgetView(QtGui.QWidget):
 
     def __init__(self, parent=None):
         super(HomeGroupingWidgetView, self).__init__(parent)
-
         self.setup_interface()
+
         self.alpha_hidden(True)
         self.periods_hidden(False)
 
         self._button = QtGui.QMessageBox.Ok
         self._message_box = QtGui.QMessageBox("Error in substitution", "ERROR !", QtGui.QMessageBox.Warning,
-                                              self._button, 0, 0)  # QtGui.QMessageBox()
-
-    def alpha_hidden(self, hidden=True):
-        if hidden:
-            self.alpha_label_2.hide()
-            self.alpha_edit.hide()
-        if not hidden:
-            self.alpha_label_2.setVisible(True)
-            self.alpha_edit.setVisible(True)
-
-    def periods_hidden(self, hidden=True):
-        if hidden:
-            self.period_label.hide()
-            self.summed_period_edit.hide()
-            self.minus_label.hide()
-            self.subtracted_period_edit.hide()
-        if not hidden:
-            self.period_label.setVisible(True)
-            self.summed_period_edit.setVisible(True)
-            self.minus_label.setVisible(True)
-            self.subtracted_period_edit.setVisible(True)
+                                              self._button, 0, 0)
 
     def setup_interface(self, show_checks=False):
         self.setObjectName("GroupingWidget")
@@ -48,9 +27,9 @@ class HomeGroupingWidgetView(QtGui.QWidget):
 
         self.pair_label = QtGui.QLabel(self)
         self.pair_label.setObjectName("pairLabel")
-        myFont = QtGui.QFont()
-        myFont.setBold(True)
-        self.pair_label.setFont(myFont)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.pair_label.setFont(font)
         self.pair_label.setText("Pair : ")
 
         self.grouppair_selector = QtGui.QComboBox(self)
@@ -65,7 +44,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.alpha_edit.setObjectName("alphaEdit")
         self.alpha_edit.setText("1.0")
 
-        reg_ex = QtCore.QRegExp("^[0-9]+([.][0-9]*)?$")
+        reg_ex = QtCore.QRegExp(valid_alpha_regex)
         alpha_validator = QtGui.QRegExpValidator(reg_ex, self.alpha_edit)
         self.alpha_edit.setValidator(alpha_validator)
 
@@ -78,7 +57,6 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.alpha_label_2)
         self.horizontal_layout.addWidget(self.alpha_edit)
 
-        # TODO : Enable only if data is multi-period
         self.period_label = QtGui.QLabel(self)
         self.period_label.setObjectName("periodLabel")
         self.period_label.setText("Data collected in n periods. Plot/analysis period(s) : ")
@@ -149,43 +127,43 @@ class HomeGroupingWidgetView(QtGui.QWidget):
         self.widget_layout.addWidget(self.group)
         self.setLayout(self.widget_layout)
 
+    def warning_popup(self, message):
+        self._message_box.setText(message)
+        self._message_box.open()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Groups and Pairs
+    # ------------------------------------------------------------------------------------------------------------------
+
     def populate_group_pair_selector(self, group_names, pair_names):
         self.grouppair_selector.clear()
 
         model = self.grouppair_selector.model()
         for name in group_names:
             item = QtGui.QStandardItem(str(name))
-            #item.setForeground(QtGui.QColor('red'))
             font = item.font()
-            #font.setPointSize(10)
             item.setFont(font)
             model.appendRow(item)
         for name in pair_names:
             item = QtGui.QStandardItem(str(name))
             item.setForeground(QtGui.QColor('red'))
             font = item.font()
-            #font.setPointSize(10)
             font.setBold(True)
             item.setFont(font)
             model.appendRow(item)
-
-        # for name in group_names:
-        #     self.grouppair_selector.addItem(name)
-        #
-        # for name in pair_names:
-        #     self.grouppair_selector.addItem(name)
-
-    def set_period_number_in_period_label(self, n_periods):
-        self.period_label.setText("Data collected in " + str(n_periods) + " periods. Plot/analysis period(s) : ")
-
-    def multi_period_widget_hidden(self, hidden=True):
-        self.periods_hidden(hidden)
 
     def get_selected_group_or_pair_name(self):
         return self.grouppair_selector.currentText()
 
     def on_grouppair_selection_changed(self, slot):
         self.grouppair_selector.currentIndexChanged.connect(slot)
+
+    def get_currently_selected_group_pair(self):
+        return self.grouppair_selector.currentText()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Alpha
+    # ------------------------------------------------------------------------------------------------------------------
 
     def on_alpha_changed(self, slot):
         self.alpha_edit.editingFinished.connect(slot)
@@ -196,14 +174,32 @@ class HomeGroupingWidgetView(QtGui.QWidget):
     def get_current_alpha(self):
         return float(self.alpha_edit.text())
 
-    def get_currently_selected_group_pair(self):
-        return self.grouppair_selector.currentText()
+    def alpha_hidden(self, hidden=True):
+        """
+        hide/show the functionality for the alpha parameter
+        """
+        if hidden:
+            self.alpha_label_2.hide()
+            self.alpha_edit.hide()
+        if not hidden:
+            self.alpha_label_2.setVisible(True)
+            self.alpha_edit.setVisible(True)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Periods
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def set_summed_periods(self, text):
+        self.summed_period_edit.setText(text)
+
+    def set_subtracted_periods(self, text):
+        self.subtracted_period_edit.setText(text)
 
     def get_summed_periods(self):
-        return self.summed_period_edit.text()
+        return str(self.summed_period_edit.text())
 
     def get_subtracted_periods(self):
-        return self.subtracted_period_edit.text()
+        return str(self.subtracted_period_edit.text())
 
     def on_summed_periods_changed(self, slot):
         self.summed_period_edit.editingFinished.connect(slot)
@@ -211,15 +207,23 @@ class HomeGroupingWidgetView(QtGui.QWidget):
     def on_subtracted_periods_changed(self, slot):
         self.subtracted_period_edit.editingFinished.connect(slot)
 
-    def warning_popup(self, message):
-        # message_box.warning(str(message))
-        # self._message_box.buttonClicked.emit()
-        # self._message_box.warning(self, message, "a", "b")
-        self._message_box.setText(message)
-        self._message_box.open()
+    def set_period_number_in_period_label(self, n_periods):
+        self.period_label.setText("Data collected in " + str(n_periods) + " periods. Plot/analysis period(s) : ")
 
-    def set_summed_periods(self, text):
-        self.summed_period_edit.setText(text)
+    def multi_period_widget_hidden(self, hidden=True):
+        self.periods_hidden(hidden)
 
-    def set_subtracted_periods(self, text):
-        self.subtracted_period_edit.setText(text)
+    def periods_hidden(self, hidden=True):
+        """
+        show/hide the multi-period data functionality.
+        """
+        if hidden:
+            self.period_label.hide()
+            self.summed_period_edit.hide()
+            self.minus_label.hide()
+            self.subtracted_period_edit.hide()
+        if not hidden:
+            self.period_label.setVisible(True)
+            self.summed_period_edit.setVisible(True)
+            self.minus_label.setVisible(True)
+            self.subtracted_period_edit.setVisible(True)

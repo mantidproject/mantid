@@ -41,29 +41,30 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         self.data = self.context._loaded_data  # MuonLoadData()
 
         self.setup_load_widget()
-        # loadWidget = DummyLabelWidget("Load dummy", self)
-        self.dockWidget = DockWidget(self, self.context)
-
-        helpWidget = DummyLabelWidget("Help dummy", self)
+        self.dock_widget = DockWidget(self, self.context)
+        self.help_widget = DummyLabelWidget("Help dummy", self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
-        # splitter.addWidget(loadWidget.widget)
         splitter.addWidget(self.load_widget_view)
-        splitter.addWidget(self.dockWidget.widget)
-        splitter.addWidget(helpWidget.widget)
+        splitter.addWidget(self.dock_widget.widget)
+        splitter.addWidget(self.help_widget.widget)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
 
-        self.dockWidget.instrument_widget.instrumentNotifier.add_subscriber(self.ui.instrumentObserver)
-        self.dockWidget.instrument_widget.instrumentNotifier.add_subscriber(
-            self.dockWidget.group_tab_presenter.instrumentObserver)
+        # Set up the observer/observable pattern
+        self.dock_widget.instrument_widget.instrumentNotifier.add_subscriber(
+            self.load_widget.instrumentObserver)
+        self.dock_widget.instrument_widget.instrumentNotifier.add_subscriber(
+            self.dock_widget.group_tab_presenter.instrumentObserver)
 
-        self.ui.loadNotifier.add_subscriber(self.dockWidget.home_tab_widget.loadObserver)
-        self.ui.loadNotifier.add_subscriber(self.dockWidget.group_tab_presenter.loadObserver)
+        self.load_widget.loadNotifier.add_subscriber(
+            self.dock_widget.home_tab_widget.loadObserver)
+        self.load_widget.loadNotifier.add_subscriber(
+            self.dock_widget.group_tab_presenter.loadObserver)
 
-        self.dockWidget.group_tab_presenter.groupingNotifier.add_subscriber(
-            self.dockWidget.home_tab_widget.groupingObserver)
+        self.dock_widget.group_tab_presenter.groupingNotifier.add_subscriber(
+            self.dock_widget.home_tab_widget.groupingObserver)
 
     def add_table_workspace(self):
         # add dead time tables
@@ -73,27 +74,33 @@ class MuonAnalysis2Gui(QtGui.QMainWindow):
         correctTable.addColumn("int", "spectrum", 0)
         correctTable.addColumn("float", "dead-time", 0)
         for i in range(96):
-            correctTable.addRow([i+1, 0.1])
+            correctTable.addRow([i + 1, 0.1])
 
     def setup_load_widget(self):
+        # set up the views
         self.load_file_view = BrowseFileWidgetView(self)
         self.load_run_view = LoadRunWidgetView(self)
-
         self.load_widget_view = LoadWidgetView(parent=self,
                                                load_file_view=self.load_file_view,
                                                load_run_view=self.load_run_view)
-        self.ui = LoadWidgetPresenter(self.load_widget_view,
-                                      LoadWidgetModel(self.data))
-        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(self.data))
-        self.ui.set_load_file_widget(self.file_widget)
-        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(self.data))
-        self.ui.set_load_run_widget(self.run_widget)
+        self.load_widget = LoadWidgetPresenter(self.load_widget_view,
+                                               LoadWidgetModel(self.data))
 
-    # cancel algs if window is closed
-    def closeEvent(self, event):
-        self.dockWidget.closeEvent(event)
-        global muonGUI
-        muonGUI = None
+        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(self.data))
+        self.run_widget = LoadRunWidgetPresenter(self.load_run_view, LoadRunWidgetModel(self.data))
+
+        self.load_widget.set_load_file_widget(self.file_widget)
+        self.load_widget.set_load_run_widget(self.run_widget)
+
+    # # cancel algs if window is closed
+    # def closeEvent(self, event):
+    #     print("MuonAnalysis closeEvent")
+    #     self.dock_widget.closeEvent(event)
+    #     self.load_widget_view.close()
+    #     self.load_run_view.close()
+    #     self.load_file_view.close()
+    #     global muonGUI
+    #     muonGUI = None
 
 
 def qapp():
@@ -128,7 +135,7 @@ def saveToProject():
 
 def loadFromProject(project):
     muonGUI = main()
-    muonGUI.dockWidget.loadFromProject(project)
+    muonGUI.dock_widget.loadFromProject(project)
     return muonGUI
 
 

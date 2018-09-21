@@ -6,10 +6,12 @@ from Muon.GUI.Common.observer_pattern import Observer
 
 class HomeTabSubWidget:
     __metaclass__ = ABCMeta
-    """Abstract base class which all sub-widgets must inherit from. This is used to
+    """
+    Abstract base class which all sub-widgets must inherit from. This is used to
     enforce a common interface so that the home tab can keep a list of sub-widgets without
     specifically naming each one. Since each sub-widget shares a common model (the context)
-    all the home tab needs to do is instruct them to update from their own model"""
+    all the home tab needs to do is instruct them to update from their own model.
+    """
 
     @abstractmethod
     def update_view_from_model(self):
@@ -19,26 +21,16 @@ class HomeTabSubWidget:
 
 class HomeTabPresenter(object):
 
-    def __init__(self, view, model,
-                 # instrument_widget=None,
-                 # grouping_widget=None,
-                 # plot_widget=None,
-                 # run_info_widget=None,
-                 subwidgets=[]
-                 ):
+    def __init__(self, view, model, subwidgets):
         self._view = view
         self._model = model
 
         self._subwidgets = subwidgets
 
-        # self._instrument_widget = instrument_widget
-        # self._grouping_widget = grouping_widget
-        # self._plot_widget = plot_widget
-        # self._run_info_widget = run_info_widget
-
         self.instrumentObserver = HomeTabPresenter.InstrumentObserver(self)
         self.loadObserver = HomeTabPresenter.LoadObserver(self)
         self.groupingObserver = HomeTabPresenter.GroupingObserver(self)
+
         self.update_all_widgets()
 
     def show(self):
@@ -46,18 +38,21 @@ class HomeTabPresenter(object):
 
     def show_all_data(self):
         if self._model.is_data_loaded():
-            self._model._data.show_raw_data()
-            self._model._data.show_all_groups()
-            self._model._data.show_all_pairs()
+            self._model.show_all_data()
 
     def update_current_data(self):
-        self._model._data.update_current_data()
+        self._model.update_current_data()
 
     def update_all_widgets(self):
-        """Update all widgets from the context"""
-
+        """
+        Update all widgets from the context
+        """
         for subwidget in self._subwidgets:
             subwidget.update_view_from_model()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Observer / Observable
+    # ------------------------------------------------------------------------------------------------------------------
 
     class InstrumentObserver(Observer):
 

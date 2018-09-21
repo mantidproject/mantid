@@ -14,9 +14,24 @@ from mantid.kernel import ConfigServiceImpl
 
 
 class MuonContext(object):
+    """
+    The MuonContext is the core class for the MuonAnalysis 2 interface. It stores all the data and parameters used
+    in the interface and serves as the model part of the MVP design pattern for every widget in the interface.
+    By sharing a common instance of this class, the interface remains synchronized by use of the observer pattern to
+    notify subcribers of changes, whi will then respond by updating their view from this commonly shared model.
+
+    The actual processing of data occurs via this class (as it should as the model).
+    """
+
+    # ADS base directory for all workspaces
     base_directory = "Muon Data"
 
     def __init__(self):
+        """
+        Currently, only a single run is loaded into the Home/Grouping tab at once. This is held in the _current_data
+        member. The load widget may load multiple runs at once, these are stored in the _loaded_data member.
+        Groups and Pairs associated to the current run are stored in _grousp and _pairs as ordered dictionaries.
+        """
         self._groups = OrderedDict()
         self._pairs = OrderedDict()
 
@@ -26,13 +41,17 @@ class MuonContext(object):
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
 
+    def is_multi_period(self):
+        return isinstance(self.current_data["OutputWorkspace"], list)
+
     @property
     def current_data(self):
         return self._current_data["workspace"]
 
     @property
     def instrument(self):
-        return self.loaded_workspace.getInstrument().getName()
+        inst = self.loaded_workspace.getInstrument().getName()
+        return inst
 
     @property
     def current_run(self):
@@ -84,26 +103,6 @@ class MuonContext(object):
         else:
             self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
-    def is_multi_period(self):
-        return isinstance(self.current_data["OutputWorkspace"], list)
-
-    def get_sample_logs(self):
-        logs = None
-        try:
-            logs = self.loaded_workspace.getSampleDetails()
-        except Exception:
-            print("Cannot find sample logs")
-        return logs
-
-    def get_sample_log(self, log_name):
-        logs = self.get_sample_logs()
-        try:
-            log = logs.getLogData(log_name)
-        except Exception:
-            print("Cannot find log : ", log_name)
-            log = None
-        return log
-
     @property
     def loaded_data(self):
         return self._current_data["workspace"]
@@ -115,17 +114,6 @@ class MuonContext(object):
             return self.current_data["OutputWorkspace"][0].workspace
         else:
             return self.current_data["OutputWorkspace"].workspace
-
-    def clear_groups(self):
-        self._groups = OrderedDict()
-
-    def clear_pairs(self):
-        self._pairs = OrderedDict()
-
-    def clear(self):
-        self.clear_groups()
-        self.clear_pairs()
-        self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
     @property
     def period_string(self):
@@ -144,6 +132,41 @@ class MuonContext(object):
     @property
     def main_field_direction(self):
         return self.current_data["MainFieldDirection"]
+
+    @property
+    def dead_time_table(self):
+        return self.loaded_data["DeadTimeTable"]
+
+    def get_sample_logs(self):
+        logs = None
+        try:
+            logs = self.loaded_workspace.getSampleDetails()
+        except Exception:
+            print("Cannot find sample logs")
+        return logs
+
+    def get_sample_log(self, log_name):
+        logs = self.get_sample_logs()
+        try:
+            log = logs.getLogData(log_name)
+        except Exception:
+            log = None
+        return log
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Clearing data
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def clear_groups(self):
+        self._groups = OrderedDict()
+
+    def clear_pairs(self):
+        self._pairs = OrderedDict()
+
+    def clear(self):
+        self.clear_groups()
+        self.clear_pairs()
+        self._current_data = {"workspace": load_utils.empty_loaded_data()}
 
     # ------------------------------------------------------------------------------------------------------------------
     # Workspace naming
@@ -207,6 +230,9 @@ class MuonContext(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _show_single_workspace(self, workspace, name):
+        """
+        workspace must be MuonWorkspace type.
+        """
         workspace.hide()
         workspace.show(name=name)
 
@@ -256,7 +282,6 @@ class MuonContext(object):
 
     def _run_pre_processing(self):
         params = self._get_pre_processing_params()
-        print("params : ", self.loaded_data)
         params["InputWorkspace"] = self.loaded_workspace
         processed_data = load_utils.run_MuonPreProcess(params)
         return processed_data
@@ -281,20 +306,14 @@ class MuonContext(object):
         except KeyError:
             pass
 
-        # TODO : Get this working
         try:
-            dead_time_table = self.dead_time_table #self.loaded_data["DeadTimeTable"]
-            #print("DTC for pre-process : ", dead_time_table.toDict()['dead-time'])
+            dead_time_table = self.dead_time_table
             if dead_time_table is not None:
                 pre_process_params["DeadTimeTable"] = dead_time_table
         except KeyError:
             pass
 
         return pre_process_params
-
-    @property
-    def dead_time_table(self):
-        return self.loaded_data["DeadTimeTable"]
 
     def _get_MuonGroupingCounts_parameters(self, group_name):
         params = {}
@@ -386,6 +405,9 @@ class MuonContext(object):
         return new_groups, new_pairs
 
     def construct_empty_group(self, _group_index):
+        """
+        Create an empty MuonGroup appropriate for adding to the current grouping table.
+        """
         group_index = 0
         new_group_name = "group_" + str(group_index)
         while new_group_name in self.group_names:
@@ -394,6 +416,9 @@ class MuonContext(object):
         return MuonGroup(group_name=new_group_name, detector_IDs=[1])
 
     def construct_empty_pair(self, _pair_index):
+        """
+        Create an empty MuonPair appropriate for adding to the current pairing table
+        """
         pair_index = 0
         new_pair_name = "pair_" + str(pair_index)
         while new_pair_name in self.pair_names:
@@ -410,28 +435,3 @@ class MuonContext(object):
             group2 = None
         return MuonPair(pair_name=new_pair_name,
                         group1_name=group1, group2_name=group2, alpha=1.0)
-
-    # ----------------------
-    # DEPRECATED
-    # ----------------------
-
-    def get_result(self, groups=True):
-        # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
-        filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020883.nxs"
-        result, _run, _filename = load_utils.load_workspace_from_filename(filename)
-
-        if groups:
-            self._groups["fwd"] = MuonGroup()
-            self._groups["bwd"] = MuonGroup()
-            self._pairs["long"] = MuonPair()
-
-        return result
-
-    def get_result_2(self):
-        filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\multi_period_data\EMU00083015.nxs"
-        # filename = "C:\Users\JUBT\Dropbox\Mantid-RAL\Testing\TrainingCourseData\muon_cupper\EMU00020884.nxs"
-        result, _run, _filename = load_utils.load_workspace_from_filename(filename)
-        self._groups["fwd2"] = MuonGroup()
-        self._groups["bwd2"] = MuonGroup()
-        self._pairs["long2"] = MuonPair()
-        return result

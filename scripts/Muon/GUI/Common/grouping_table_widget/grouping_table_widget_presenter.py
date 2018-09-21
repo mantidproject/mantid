@@ -16,11 +16,14 @@ class GroupingTablePresenter(object):
         self._view.on_remove_group_button_clicked(self.handle_remove_group_button_clicked)
 
         self._view.on_user_changes_group_name(self.validate_group_name)
-        self._view.on_user_changes_detector_IDs(self.validate_detector_IDs)
+        self._view.on_user_changes_detector_IDs(self.validate_detector_ids)
 
         self._view.on_table_data_changed(self.handle_data_change)
 
         self._dataChangedNotifier = lambda: 0
+
+    def show(self):
+        self._view.show()
 
     def on_data_changed(self, notifier):
         self._dataChangedNotifier = notifier
@@ -38,13 +41,13 @@ class GroupingTablePresenter(object):
         if self._is_edited_name_duplicated(text):
             self._view.warning_popup("Groups and pairs must have unique names")
             return False
-        if not re.match("^\w+$", text):
+        if not re.match(run_utils.valid_name_regex, text):
             self._view.warning_popup("Group names should only contain digits, characters and _")
             return False
         return True
 
-    def validate_detector_IDs(self, text):
-        if re.match("^[0-9]*([0-9]+[,-]{0,1})*[0-9]+$", text):
+    def validate_detector_ids(self, text):
+        if re.match(run_utils.run_string_regex, text):
             return True
         self._view.warning_popup("Invalid detector list.")
         return False
@@ -54,9 +57,6 @@ class GroupingTablePresenter(object):
 
     def enable_editing(self):
         self._view.enable_editing()
-
-    def show(self):
-        self._view.show()
 
     def add_group(self, group):
         """Adds a group to the model and view"""

@@ -125,6 +125,9 @@ class LoadRunWidgetView(QtGui.QWidget):
     # Instrument / run-edit
     # ------------------------------------------------------------------------------------------------------------------
 
+    def get_instrument_label(self):
+        return str(self.instrument_label.text())
+
     def set_instrument_label(self, text):
         self.instrument_label.setText(text)
 

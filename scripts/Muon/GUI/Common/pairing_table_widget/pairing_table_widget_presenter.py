@@ -94,7 +94,7 @@ class PairingTablePresenter(object):
     def handle_data_change(self):
         self.update_model_from_view()
         self.update_view_from_model()
-        # self._view.notify_data_changed()
+        self.notify_data_changed()
 
     def update_model_from_view(self):
         table = self._view.get_table_contents()
@@ -144,6 +144,10 @@ class PairingTablePresenter(object):
             self._view.warning_popup("Alpha must be > 0")
             return False
         return True
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Observer / Observable
+    # ------------------------------------------------------------------------------------------------------------------
 
     class GuessAlphaNotifier(Observable):
         def __init__(self, outer):

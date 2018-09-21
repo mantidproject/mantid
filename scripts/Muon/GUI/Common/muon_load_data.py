@@ -29,6 +29,7 @@ class MuonLoadData:
         can then be used as a keyword into any of the methods of the class. Use singular
         nouns.
         """
+        self.instrument = "Instrument"
         self.params = {"run": [], "workspace": [], "filename": []}
         self.defaults = {"run": 0, "workspace": [], "filename": ""}
         if self.params.keys() != self.defaults.keys():

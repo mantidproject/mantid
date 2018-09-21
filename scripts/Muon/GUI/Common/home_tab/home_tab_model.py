@@ -14,3 +14,11 @@ class HomeTabModel(object):
 
     def loaded_instrument(self):
         return self._data.instrument
+
+    def show_all_data(self):
+        self._data.show_raw_data()
+        self._data.show_all_groups()
+        self._data.show_all_pairs()
+
+    def update_current_data(self):
+        self._data.update_current_data()
