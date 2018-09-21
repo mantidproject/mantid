@@ -35,14 +35,31 @@ public:
     TS_ASSERT_EQUALS("Title", axes.pyobj().attr("get_title")());
   }
 
-  void testPlotWithValidDataReturnsLine2D() {
+  void testPlotGivesLineWithExpectedData() {
     Axes axes(pyAxes());
     std::vector<double> xsrc{1, 2, 3}, ysrc{1, 2, 3};
     auto line = axes.plot(xsrc, ysrc);
     auto linex = line.pyobj().attr("get_xdata")(true);
-//    for(size_t i = 0; i < xsrc.size(); ++i) {
-//      TSM_ASSERT_EQUALS("Mismatch in X data", linex[i], xsrc[i]);
-//    }
+    auto liney = line.pyobj().attr("get_ydata")(true);
+    for (size_t i = 0; i < xsrc.size(); ++i) {
+      TSM_ASSERT_EQUALS("Mismatch in X data", linex[i], xsrc[i]);
+      TSM_ASSERT_EQUALS("Mismatch in Y data", liney[i], ysrc[i]);
+    }
+  }
+
+  void testPlotWithNoFormatUsesDefault() {
+    Axes axes(pyAxes());
+    auto line = axes.plot({1, 2, 3}, {1, 2, 3});
+    TS_ASSERT_EQUALS('b', line.pyobj().attr("get_color")());
+    TS_ASSERT_EQUALS('-', line.pyobj().attr("get_linestyle")());
+  }
+
+  void testPlotUsesFormatStringIfProvided() {
+    Axes axes(pyAxes());
+    const std::string format{"ro"};
+    auto line = axes.plot({1, 2, 3}, {1, 2, 3}, format.c_str());
+    TS_ASSERT_EQUALS(format[0], line.pyobj().attr("get_color")());
+    TS_ASSERT_EQUALS(format[1], line.pyobj().attr("get_marker")());
   }
 
   // ----------------- failure tests ---------------------

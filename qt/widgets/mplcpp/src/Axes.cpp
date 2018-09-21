@@ -39,9 +39,12 @@ void Axes::setTitle(const char *label) { pyobj().attr("set_title")(label); }
  * @brief Take the data and draw a single Line2D on the axes
  * @param xdata A vector containing the X data
  * @param ydata A vector containing the Y data
+ * @param format A format string accepted by matplotlib.axes.Axes.plot. The
+ * default is 'b-'
  * @return A new Line2D object
  */
-Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata) {
+Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
+                  const char *format) {
   auto throwIfEmpty = [](const std::vector<double> &data, char vecId) {
     if (data.empty()) {
       throw std::invalid_argument(
@@ -58,8 +61,8 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata) {
       yarray{Python::NewRef(wrapNDArray(ydata))};
 
   try {
-    return Line2D{pyobj().attr("plot")(xarray, yarray)[0], std::move(xdata),
-                  std::move(ydata)};
+    return Line2D{pyobj().attr("plot")(xarray, yarray, format)[0],
+                  std::move(xdata), std::move(ydata)};
 
   } catch (Python::ErrorAlreadySet &) {
     throw PythonRuntimeError();

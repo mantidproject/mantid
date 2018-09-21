@@ -36,7 +36,8 @@ public:
 
   /// @name Plotting
   /// @{
-  Line2D plot(std::vector<double> xdata, std::vector<double> ydata);
+  Line2D plot(std::vector<double> xdata, std::vector<double> ydata,
+              const char *format = "b-");
   /// @}
 };
 
