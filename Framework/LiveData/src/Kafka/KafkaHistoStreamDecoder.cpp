@@ -137,8 +137,9 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
   HistogramData::BinEdges binedges(nbins + 1);
   binedges.mutableRawData().assign(xbins->begin(), xbins->end());
 
-  auto ws = DataObjects::create<DataObjects::Workspace2D>(*m_workspace,
-                                                          nspectra, binedges);
+  API::MatrixWorkspace_sptr ws{DataObjects::create<DataObjects::Workspace2D>(
+      *m_workspace, nspectra, binedges)};
+
   ws->setIndexInfo(m_workspace->indexInfo());
   auto data = histoMsg->data_as_ArrayDouble()->value();
 
