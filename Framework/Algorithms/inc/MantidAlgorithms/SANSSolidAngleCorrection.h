@@ -64,7 +64,7 @@ private:
   double calculateSolidAngleCorrection(int, const API::SpectrumInfo &);
 };
 
-} // namespace WorkflowAlgorithms
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SANSSOLIDANGLECORRECTION_H_*/

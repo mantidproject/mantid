@@ -53,7 +53,7 @@ void SANSSolidAngleCorrection::init() {
   declareProperty("DetectorWing", false,
                   "If true, the algorithm will assume "
                   "that the detector is curved around the sample. E.g. BIOSANS "
-                  "Wing detector.");  
+                  "Wing detector.");
 }
 
 void SANSSolidAngleCorrection::exec() {
@@ -156,34 +156,31 @@ void SANSSolidAngleCorrection::execEvent() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
+double SANSSolidAngleCorrection::calculateSolidAngleCorrection(
+    int histogramIndex, const SpectrumInfo &spectrumInfo) {
 
-  double SANSSolidAngleCorrection::calculateSolidAngleCorrection(
-    int histogramIndex, const SpectrumInfo &spectrumInfo){
+  // Compute solid angle correction factor
 
-    // Compute solid angle correction factor
+  const bool is_tube = getProperty("DetectorTubes");
+  const bool is_wing = getProperty("DetectorWing");
 
-    const bool is_tube = getProperty("DetectorTubes");
-    const bool is_wing = getProperty("DetectorWing");
-
-    const double tanTheta = tan(spectrumInfo.twoTheta(histogramIndex));
-    const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
-    double corr;
-    if (is_tube || is_wing) {
-      const double tanAlpha = tan(getYTubeAngle(spectrumInfo, histogramIndex));
-      const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
-      if (is_tube)
-        corr = alpha_term * theta_term * theta_term;
-      else { // is_wing
-        corr = alpha_term * alpha_term * alpha_term;
-      }
-    } else {
-      corr = theta_term * theta_term * theta_term;
+  const double tanTheta = tan(spectrumInfo.twoTheta(histogramIndex));
+  const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
+  double corr;
+  if (is_tube || is_wing) {
+    const double tanAlpha = tan(getYTubeAngle(spectrumInfo, histogramIndex));
+    const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
+    if (is_tube)
+      corr = alpha_term * theta_term * theta_term;
+    else { // is_wing
+      corr = alpha_term * alpha_term * alpha_term;
     }
-
-    return corr;
+  } else {
+    corr = theta_term * theta_term * theta_term;
   }
 
-} // namespace WorkflowAlgorithms
+  return corr;
+}
+
+} // namespace Algorithms
 } // namespace Mantid
-
-
