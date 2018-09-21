@@ -18,12 +18,6 @@ class subPlot(object):
          else:
             self._ws[ws].append(label)
 
-    def myprint(self):
-        print(self.name)
-        print(self._lines)
-        for ws in self._ws.keys():
-            print(self._ws[ws])
-
     @property
     def lines(self):
         return self._lines
@@ -37,7 +31,6 @@ class subPlot(object):
     #seems to work - need to add remove specNum and ws.
     def removeLine(self,name):
         lines = self._lines[name]
-        print(name, lines)
         for line in lines:
             line.remove()
             del line

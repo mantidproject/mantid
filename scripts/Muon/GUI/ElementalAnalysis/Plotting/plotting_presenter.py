@@ -9,7 +9,7 @@ class PlotPresenter(object):
         self.view.setAddConnection(self.add)
         self.view.setRmConnection(self.rm)
         self.view.plotCloseConnection(self.close)
-        self.rmWidget = None
+        self.rmWindow = None
         self.selectorWindow = None
 
     def update_canvas(self):
@@ -65,7 +65,7 @@ class PlotPresenter(object):
     def close(self):
         if  self.selectorWindow is not None:
             self.closeSelectorWindow()
-        if self.rmWidget is not None:
+        if self.rmWindow is not None:
             self.closeRmWindow()
             
 
@@ -78,18 +78,29 @@ class PlotPresenter(object):
         if len(names) == 1:
             self.createRmWindow(names[0])
         # if no selector and no remove window -> let user pick which subplot to change
-        elif self.selectorWindow is None and self.rmWidget is None:
-            self.selectorWindow = SelectSubplot(names)
+        elif self.selectorWindow is None and self.rmWindow is None:
+            print(names)
+            self.selectorWindow = self.createSelectWindow(names)
             self.selectorWindow.subplotSelectorSignal.connect(self.createRmWindow)
             self.selectorWindow.closeEventSignal.connect(self.closeSelectorWindow)
             self.selectorWindow.setMinimumSize(300,100)
             self.selectorWindow.show()
         # if the remove window is not visable
         elif self.selectorWindow is None:
-            self.rmWidget.raise_()
+            self.raiseRmWindow()
         # if the selector is not visable
         else:
-            self.selectorWindow.raise_()
+            self.raiseSelectorWindow()
+
+    def createSelectWindow(self,names):
+        return SelectSubplot(names)
+
+
+    def raiseRmWindow(self):
+        self.rmWindow.raise_()
+
+    def raiseSelectorWindow(self):
+        self.selectorWindow.raise_()
 
     def closeSelectorWindow(self):
         if self.selectorWindow is not None:
@@ -100,26 +111,26 @@ class PlotPresenter(object):
         # always close selector after making a selection
         self.closeSelectorWindow()
         # create the remove window
-        self.rmWidget = RemovePlotWindowView(lines=self.view.line_labels(subplot),subplot=subplot,parent=self)
-        self.rmWidget.applyRemoveSignal.connect(self.applyRm)
-        self.rmWidget.closeEventSignal.connect(self.closeRmWindow)
-        self.rmWidget.setMinimumSize(200,200)
-        self.rmWidget.show()
+        self.rmWindow = RemovePlotWindowView(lines=self.view.line_labels(subplot),subplot=subplot,parent=self)
+        self.rmWindow.applyRemoveSignal.connect(self.applyRm)
+        self.rmWindow.closeEventSignal.connect(self.closeRmWindow)
+        self.rmWindow.setMinimumSize(200,200)
+        self.rmWindow.show()
 
     def applyRm(self, names):
         remove_subplot = True
         # remove the lines from the subplot
         for name in names:
-            if self.rmWidget.getState(name):
-                 line = self.rmWidget.getLine(name)
-                 #self.view.get_subplot(self.rmWidget.subplot).lines.remove(line)
-                 self.view.removeLine(self.rmWidget.subplot,line)
+            if self.rmWindow.getState(name):
+                 line = self.rmWindow.getLine(name)
+                 #self.view.get_subplot(self.rmWindow.subplot).lines.remove(line)
+                 self.view.removeLine(self.rmWindow.subplot,line)
             else:
                  remove_subplot = False
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
              # add a signal to this method - so we can catch it
-             self.remove_subplot(self.rmWidget.subplot)
+             self.remove_subplot(self.rmWindow.subplot)
         self.update_canvas()
         # if no subplots then close plotting window
         if not self.get_subplots():
@@ -129,5 +140,5 @@ class PlotPresenter(object):
             self.closeRmWindow()
 
     def closeRmWindow(self):
-        self.rmWidget.close
-        self.rmWidget = None
+        self.rmWindow.close
+        self.rmWindow = None

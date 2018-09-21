@@ -7,12 +7,14 @@ from Muon.GUI.Common import table_utils
 
 
 class SelectSubplot(QtWidgets.QDialog):
+
     subplotSelectorSignal = QtCore.Signal(object)
     closeEventSignal = QtCore.Signal()
+
     def __init__(self,subplots,parent=None):
         super(SelectSubplot, self).__init__()
-        self.grid = QtWidgets.QGridLayout()
 
+        self.grid = QtWidgets.QGridLayout()
         self.combo = QtWidgets.QComboBox()
         self.combo.addItems(subplots)
         self.grid.addWidget(self.combo)
@@ -20,8 +22,9 @@ class SelectSubplot(QtWidgets.QDialog):
         btn = QtWidgets.QPushButton("ok")
         self.grid.addWidget(btn)
         self.setLayout(self.grid)
-        self.setWindowTitle("Remove Lines Subplot Selector")
+        self.setWindowTitle("Edit Lines Subplot Selector")
         btn.clicked.connect(self.buttonClick)
+
     def closeEvent(self,event):
         self.closeEventSignal.emit()
 
