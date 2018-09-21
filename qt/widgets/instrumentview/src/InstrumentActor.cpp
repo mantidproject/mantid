@@ -1073,8 +1073,7 @@ void InstrumentActor::addMaskBinsData(const std::vector<size_t> &indices) {
   }
 
   // We will be able to do this more efficiently in C++17
-  std::vector<size_t> wsIndices(wi.size());
-  std::copy(wi.begin(), wi.end(), wsIndices.begin());
+  std::vector<size_t> wsIndices(wi.cbegin(), wi.cend());
 
   if (!indices.empty()) {
     m_maskBinsData.addXRange(m_BinMinValue, m_BinMaxValue, wsIndices);
