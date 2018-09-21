@@ -30,6 +30,7 @@ import mantid.simpleapi as mantid
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
+
     def __init__(self, parent=None):
         super(ElementalAnalysisGui, self).__init__(parent)
         self.menu = self.menuBar()
@@ -341,10 +342,11 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
             if not self.plotting.get_subplots():
                 self.plotting.view.close()
 
-    def subplotRemoved(self,name):
+    def subplotRemoved(self, name):
         # need to change the state without sending signal
         # as the plot has already been removed
-        self.detectors.setStateQuietly(name,False)
+        self.detectors.setStateQuietly(name, False)
+
 
 def qapp():
     if QtGui.QApplication.instance():
