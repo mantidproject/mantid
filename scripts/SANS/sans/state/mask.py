@@ -202,6 +202,9 @@ class StateMask(StateBase):
         super(StateMask, self).__init__()
         # IDF Path
         self.idf_path = ""
+        self.phi_min = -90.0
+        self.phi_max = 90.0
+        self.use_mask_phi_mirror = True
 
     def validate(self):
         is_invalid = dict()
