@@ -108,6 +108,7 @@ set ( SRC_FILES
 	src/Divide.cpp
 	src/EQSANSResolution.cpp
 	src/EQSANSTofStructure.cpp
+	src/EQSANSUnfoldFrame.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
 	src/EstimateDivergence.cpp
@@ -439,6 +440,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/EQSANSResolution.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
+	inc/MantidAlgorithms/EQSANSUnfoldFrame.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/EstimateDivergence.h
