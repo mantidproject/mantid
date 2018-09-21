@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-from six import iteritems
 
-from qtpy import QtGui, QtCore,QtWidgets
+from qtpy import QtCore, QtWidgets
 
 from Muon.GUI.Common import table_utils
 
@@ -10,9 +9,9 @@ class RemovePlotWindowView(QtWidgets.QDialog):
     applyRemoveSignal = QtCore.Signal(object)
     closeEventSignal = QtCore.Signal()
 
-    def __init__(self,lines, subplot, parent=None):
+    def __init__(self, lines, subplot, parent=None):
         super(RemovePlotWindowView, self).__init__()
-        
+
         self._subplot = subplot
 
         self.grid = QtWidgets.QGridLayout()
@@ -31,30 +30,35 @@ class RemovePlotWindowView(QtWidgets.QDialog):
         table_utils.setTableHeaders(self.table)
 
         self.widgets = {}
-        for index,line in enumerate(lines):
-           table_utils.setRowName(self.table, index, line)
-           tmp = {"line":line, "box":table_utils.addCheckBoxToTable(self.table,False,index) }
-           self.widgets[line]= tmp
+        for index, line in enumerate(lines):
+            table_utils.setRowName(self.table, index, line)
+            tmp = {
+                "line": line,
+                "box": table_utils.addCheckBoxToTable(
+                    self.table,
+                    False,
+                    index)}
+            self.widgets[line] = tmp
 
         self.grid.addWidget(self.table)
         btn = QtWidgets.QPushButton("Remove")
         self.grid.addWidget(btn)
         self.setLayout(self.grid)
-        self.setWindowTitle("Remove Lines For "+self._subplot)
+        self.setWindowTitle("Remove Lines For " + self._subplot)
         btn.clicked.connect(self.buttonClick)
 
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         self.closeEventSignal.emit()
 
     def buttonClick(self):
         self.applyRemoveSignal.emit(self.widgets.keys())
 
-    def getState(self,name):
+    def getState(self, name):
         return self.widgets[name]["box"].checkState() == QtCore.Qt.Checked
 
-    def getLine(self,name):
-       return self.widgets[name]["line"]
+    def getLine(self, name):
+        return self.widgets[name]["line"]
 
     @property
     def subplot(self):
-         return self._subplot
+        return self._subplot

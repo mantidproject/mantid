@@ -4,6 +4,7 @@ from Muon.GUI.ElementalAnalysis.Plotting.edit_windows.select_subplot import Sele
 
 
 class PlotPresenter(object):
+
     def __init__(self, view):
         self.view = view
         self.view.setAddConnection(self.add)
@@ -59,15 +60,14 @@ class PlotPresenter(object):
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
 
-    def removeSubplotConnection(self,slot):
+    def removeSubplotConnection(self, slot):
         self.view.subplotRemovedSignal.connect(slot)
 
     def close(self):
-        if  self.selectorWindow is not None:
+        if self.selectorWindow is not None:
             self.closeSelectorWindow()
         if self.rmWindow is not None:
             self.closeRmWindow()
-            
 
     def add(self):
         print("to do")
@@ -83,17 +83,18 @@ class PlotPresenter(object):
         # if only one subplot just skip selector
         elif len(names) == 1:
             self.getRmWindow(names[0])
-        # if no selector and no remove window -> let user pick which subplot to change
+        # if no selector and no remove window -> let user pick which subplot to
+        # change
         else:
             self.selectorWindow = self.createSelectWindow(names)
             self.selectorWindow.subplotSelectorSignal.connect(self.getRmWindow)
-            self.selectorWindow.closeEventSignal.connect(self.closeSelectorWindow)
-            self.selectorWindow.setMinimumSize(300,100)
+            self.selectorWindow.closeEventSignal.connect(
+                self.closeSelectorWindow)
+            self.selectorWindow.setMinimumSize(300, 100)
             self.selectorWindow.show()
 
-    def createSelectWindow(self,names):
+    def createSelectWindow(self, names):
         return SelectSubplot(names)
-
 
     def raiseRmWindow(self):
         self.rmWindow.raise_()
@@ -106,18 +107,17 @@ class PlotPresenter(object):
             self.selectorWindow.close
             self.selectorWindow = None
 
-    def createRmWindow(self,subplot):
-        return RemovePlotWindowView(lines=self.view.line_labels(subplot),subplot=subplot,parent=self)
+    def createRmWindow(self, subplot):
+        return RemovePlotWindowView(lines=self.view.line_labels(subplot), subplot=subplot, parent=self)
 
-
-    def getRmWindow(self,subplot):
+    def getRmWindow(self, subplot):
         # always close selector after making a selection
         self.closeSelectorWindow()
         # create the remove window
         self.rmWindow = self.createRmWindow(subplot=subplot)
         self.rmWindow.applyRemoveSignal.connect(self.applyRm)
         self.rmWindow.closeEventSignal.connect(self.closeRmWindow)
-        self.rmWindow.setMinimumSize(200,200)
+        self.rmWindow.setMinimumSize(200, 200)
         self.rmWindow.show()
 
     def applyRm(self, names):
@@ -125,15 +125,15 @@ class PlotPresenter(object):
         # remove the lines from the subplot
         for name in names:
             if self.rmWindow.getState(name):
-                 line = self.rmWindow.getLine(name)
-                 #self.view.get_subplot(self.rmWindow.subplot).lines.remove(line)
-                 self.view.removeLine(self.rmWindow.subplot,line)
+                line = self.rmWindow.getLine(name)
+                # self.view.get_subplot(self.rmWindow.subplot).lines.remove(line)
+                self.view.removeLine(self.rmWindow.subplot, line)
             else:
-                 remove_subplot = False
+                remove_subplot = False
         # if all of the lines have been removed -> delete subplot
         if remove_subplot:
-             # add a signal to this method - so we can catch it
-             self.remove_subplot(self.rmWindow.subplot)
+            # add a signal to this method - so we can catch it
+            self.remove_subplot(self.rmWindow.subplot)
         self.update_canvas()
         # if no subplots then close plotting window
         if not self.get_subplots():

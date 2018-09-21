@@ -7,13 +7,14 @@ from Muon.GUI.Common.checkbox import Checkbox
 
 
 class DetectorsView(QtGui.QWidget):
+
     def __init__(self, parent=None):
         super(DetectorsView, self).__init__(parent)
 
         self.list = QtGui.QVBoxLayout()
 
         self.widgets = OrderedDict()
-        labels = ["GE1","GE2","GE3", "GE4"]
+        labels = ["GE1", "GE2", "GE3", "GE4"]
         for label in labels:
             self.widgets[label] = Checkbox(label)
 
@@ -22,7 +23,7 @@ class DetectorsView(QtGui.QWidget):
             self.list.addWidget(self.widgets[detector])
         self.setLayout(self.list)
 
-    def setStateQuietly(self,name,state):
-         self.widgets[name].blockSignals(True)
-         self.widgets[name].setChecked(state)
-         self.widgets[name].blockSignals(False)
+    def setStateQuietly(self, name, state):
+        self.widgets[name].blockSignals(True)
+        self.widgets[name].setChecked(state)
+        self.widgets[name].blockSignals(False)

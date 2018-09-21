@@ -21,6 +21,7 @@ from Muon.GUI.ElementalAnalysis.Plotting import plotting_utils as putils
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
 from Muon.GUI.ElementalAnalysis.Plotting.AxisChanger.axis_changer_view import AxisChangerView
 
+
 class PlotView(QtWidgets.QWidget):
     subplotRemovedSignal = QtCore.Signal(object)
     plotCloseSignal = QtCore.Signal()
@@ -29,7 +30,7 @@ class PlotView(QtWidgets.QWidget):
         super(PlotView, self).__init__()
         self.plots = OrderedDict({})
         self.errors_list = set()
-        self.plot_storage = {} # stores lines and info to create lines
+        self.plot_storage = {}  # stores lines and info to create lines
         self.current_grid = None
         self.gridspecs = {
             1: gridspec.GridSpec(1, 1),
@@ -64,18 +65,18 @@ class PlotView(QtWidgets.QWidget):
 
         grid = QtWidgets.QGridLayout()
 
-        self.toolbar = myToolbar(self.canvas,self)
+        self.toolbar = myToolbar(self.canvas, self)
         self.toolbar.update()
 
-        grid.addWidget(self.toolbar,0,0)
+        grid.addWidget(self.toolbar, 0, 0)
         grid.addWidget(self.canvas, 1, 0)
         grid.addLayout(button_layout, 2, 0)
         self.setLayout(grid)
 
-    def setAddConnection(self,slot):
+    def setAddConnection(self, slot):
         self.toolbar.setAddConnection(slot)
 
-    def setRmConnection(self,slot):
+    def setRmConnection(self, slot):
         self.toolbar.setRmConnection(slot)
 
     def _redo_layout(func):
@@ -186,7 +187,7 @@ class PlotView(QtWidgets.QWidget):
         self._modify_errors_list(name, state)
         # get a copy of all the workspaces
         workspaces = copy(self.plot_storage[name].ws)
-        #get the limits before replotting, so they appear unchanged.
+        # get the limits before replotting, so they appear unchanged.
         x, y = plot.get_xlim(), plot.get_ylim()
         # clear out the old container
         self.plot_storage[name].delete()
@@ -255,16 +256,16 @@ class PlotView(QtWidgets.QWidget):
             self.plot_workspace(name, workspace)
         self._set_bounds(name)
 
-    def _add_plotted_line(self, name,label, lines,workspace):
+    def _add_plotted_line(self, name, label, lines, workspace):
         """ Appends plotted lines to the related subplot list. """
-        self.plot_storage[name].addLine(label,lines,workspace)
+        self.plot_storage[name].addLine(label, lines, workspace)
 
     def plot_workspace_errors(self, name, workspace):
         """ Plots a workspace with errrors, and appends caps/bars to the subplot list. """
         subplot = self.get_subplot(name)
         line, cap_lines, bar_lines = plots.plotfunctions.errorbar(
             subplot, workspace, specNum=1)
-        # make a tmp plot to get auto generated legend name 
+        # make a tmp plot to get auto generated legend name
         tmp, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
         label = tmp.get_label()
         # remove the tmp line
@@ -274,13 +275,13 @@ class PlotView(QtWidgets.QWidget):
         all_lines = [line]
         all_lines.extend(cap_lines)
         all_lines.extend(bar_lines)
-        self._add_plotted_line(name, label, all_lines,workspace)
+        self._add_plotted_line(name, label, all_lines, workspace)
 
     def plot_workspace(self, name, workspace):
         """ Plots a workspace normally. """
         subplot = self.get_subplot(name)
         line, = plots.plotfunctions.plot(subplot, workspace, specNum=1)
-        self._add_plotted_line(name, line.get_label(),[line],workspace)
+        self._add_plotted_line(name, line.get_label(), [line], workspace)
 
     def get_subplot(self, name):
         """ Returns the subplot corresponding to a given name """
@@ -304,7 +305,7 @@ class PlotView(QtWidgets.QWidget):
         self._update_gridspec(len(self.plots))
         self.subplotRemovedSignal.emit(name)
 
-    def removeLine(self,subplot,label):
+    def removeLine(self, subplot, label):
         self.plot_storage[subplot].removeLine(label)
 
     @_redo_layout
@@ -315,10 +316,10 @@ class PlotView(QtWidgets.QWidget):
     def add_moveable_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
         pass
 
-    def closeEvent(self,event):
+    def closeEvent(self, event):
         self.plotCloseSignal.emit()
 
-    def plotCloseConnection(self,slot):
+    def plotCloseConnection(self, slot):
         self.plotCloseSignal.connect(slot)
 
     @property
