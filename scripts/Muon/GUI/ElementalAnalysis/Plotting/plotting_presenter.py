@@ -74,23 +74,22 @@ class PlotPresenter(object):
 
     def rm(self):
         names = self.view.subplot_names
+        # if the remove window is not visable
+        if self.rmWindow is not None:
+            self.raiseRmWindow()
+        # if the selector is not visable
+        elif self.selectorWindow is not None:
+            self.raiseSelectorWindow()
         # if only one subplot just skip selector
-        if len(names) == 1:
-            self.createRmWindow(names[0])
+        elif len(names) == 1:
+            self.getRmWindow(names[0])
         # if no selector and no remove window -> let user pick which subplot to change
-        elif self.selectorWindow is None and self.rmWindow is None:
-            print(names)
+        else:
             self.selectorWindow = self.createSelectWindow(names)
-            self.selectorWindow.subplotSelectorSignal.connect(self.createRmWindow)
+            self.selectorWindow.subplotSelectorSignal.connect(self.getRmWindow)
             self.selectorWindow.closeEventSignal.connect(self.closeSelectorWindow)
             self.selectorWindow.setMinimumSize(300,100)
             self.selectorWindow.show()
-        # if the remove window is not visable
-        elif self.selectorWindow is None:
-            self.raiseRmWindow()
-        # if the selector is not visable
-        else:
-            self.raiseSelectorWindow()
 
     def createSelectWindow(self,names):
         return SelectSubplot(names)
@@ -108,10 +107,14 @@ class PlotPresenter(object):
             self.selectorWindow = None
 
     def createRmWindow(self,subplot):
+        return RemovePlotWindowView(lines=self.view.line_labels(subplot),subplot=subplot,parent=self)
+
+
+    def getRmWindow(self,subplot):
         # always close selector after making a selection
         self.closeSelectorWindow()
         # create the remove window
-        self.rmWindow = RemovePlotWindowView(lines=self.view.line_labels(subplot),subplot=subplot,parent=self)
+        self.rmWindow = self.createRmWindow(subplot=subplot)
         self.rmWindow.applyRemoveSignal.connect(self.applyRm)
         self.rmWindow.closeEventSignal.connect(self.closeRmWindow)
         self.rmWindow.setMinimumSize(200,200)
