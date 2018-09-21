@@ -376,6 +376,7 @@ class IntegralEnum(object):
     """
     pass
 
+
 @string_convertible
 @serializable_enum("Unprocessed", "Processed", "Error")
 class RowState(object):
