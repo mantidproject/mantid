@@ -104,7 +104,6 @@ namespace boost {
 namespace python {
 namespace converter {
 
-using Mantid::PythonInterface::NDArray;
 using Mantid::PythonInterface::ndarrayType;
 
 /**
@@ -112,7 +111,8 @@ using Mantid::PythonInterface::ndarrayType;
  * @param obj A python object instance
  * @return True if the type matches numpy.NDArray
  */
-bool object_manager_traits<NDArray>::check(PyObject *obj) {
+bool object_manager_traits<Mantid::PythonInterface::NDArray>::check(
+    PyObject *obj) {
   return ::PyObject_IsInstance(obj, (PyObject *)ndarrayType());
 }
 
@@ -124,7 +124,7 @@ bool object_manager_traits<NDArray>::check(PyObject *obj) {
  * or a nullptr if the types don't match
  */
 python::detail::new_reference
-object_manager_traits<NDArray>::adopt(PyObject *obj) {
+object_manager_traits<Mantid::PythonInterface::NDArray>::adopt(PyObject *obj) {
   return python::detail::new_reference(
       python::pytype_check(ndarrayType(), obj));
 }
@@ -133,7 +133,8 @@ object_manager_traits<NDArray>::adopt(PyObject *obj) {
  * Return the PyTypeObject for this type
  * @return A pointer to the PyTypeObject defining the Python type
  */
-PyTypeObject const *object_manager_traits<NDArray>::get_pytype() {
+PyTypeObject const *
+object_manager_traits<Mantid::PythonInterface::NDArray>::get_pytype() {
   return ndarrayType();
 }
 } // namespace converter
