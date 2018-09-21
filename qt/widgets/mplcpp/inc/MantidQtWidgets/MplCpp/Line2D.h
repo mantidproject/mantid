@@ -33,6 +33,7 @@ class MANTID_MPLCPP_DLL Line2D : public Artist {
 public:
   Line2D(Python::Object obj, std::vector<double> xdataOwner,
          std::vector<double> ydataOwner);
+  ~Line2D();
   // not copyable
   Line2D(const Line2D &) = delete;
   Line2D &operator=(const Line2D &) = delete;

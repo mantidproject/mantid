@@ -41,7 +41,9 @@ void Axes::setTitle(const char *label) { pyobj().attr("set_title")(label); }
  * @param ydata A vector containing the Y data
  * @param format A format string accepted by matplotlib.axes.Axes.plot. The
  * default is 'b-'
- * @return A new Line2D object
+ * @return A new Line2D object that owns the xdata, ydata vectors. If the
+ * return value is not captured the line will be automatically removed from
+ * the canvas as the vector data will be destroyed.
  */
 Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
                   const char *format) {
@@ -56,6 +58,7 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
 
   // Wrap the vector data in a numpy facade to avoid a copy.
   // The vector still owns the data so it needs to be kept alive too
+  // It is transferred to the Line2D for this purpose.
   VectorToNDArray<double, WrapReadOnly> wrapNDArray;
   auto xarray{Python::NewRef(wrapNDArray(xdata))},
       yarray{Python::NewRef(wrapNDArray(ydata))};
