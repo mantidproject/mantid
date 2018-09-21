@@ -78,6 +78,7 @@ private:
   std::string m_slit1Name;
   std::string m_slit2Name;
   Mantid::API::MatrixWorkspace_sptr m_ws;
+  Mantid::API::MatrixWorkspace_const_sptr m_virtualWs;
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
   Mantid::API::MatrixWorkspace_sptr m_virtualWorkspace;
   double m_beam1;

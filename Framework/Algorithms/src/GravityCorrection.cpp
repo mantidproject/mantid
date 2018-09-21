@@ -359,128 +359,118 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
 void GravityCorrection::virtualInstrument() {
 
   const auto instrument = this->m_ws->getInstrument();
-  MatrixWorkspace_sptr ws = create<Workspace2D>(
-      instrument, this->m_ws->indexInfo().globalSize(), BinEdges(2));
+  // MatrixWorkspace_sptr ws = create<Workspace2D>(
+  //    instrument, this->m_ws->indexInfo().globalSize(), BinEdges(2));
+  MatrixWorkspace_sptr ws = this->m_ws->clone();
 
   if (instrument->isParametrized()) {
     const V3D &samplePos = instrument->getSample()->getPos();
-
-    // check if the instrument is rotated: then the up direction and horizontal
-    // directions are not zero:
-    bool rotated = false;
     const string sourceName{instrument->getSource()->getName()};
-    double sourceX =
-        this->coordinate(sourceName, this->m_horizontalDirection, instrument);
-    double sourceY =
-        this->coordinate(sourceName, this->m_upDirection, instrument);
-    if (sourceX != 0. || sourceY != 0.)
-      rotated = true;
+    const string sampleName{instrument->getSample()->getName()};
 
-    if ((samplePos.distance(V3D(0., 0., 0.)) > 1e-10) || rotated) {
+    vector<IComponent_const_sptr> comps = {
+        instrument->getComponentByName(sourceName),
+        instrument->getComponentByName(sampleName),
+        instrument->getComponentByName(this->getProperty("FirstSlitName")),
+        instrument->getComponentByName(this->getProperty("SecondSlitName"))};
+
+    // translate instrument
+    if (samplePos.distance(V3D(0., 0., 0.)) > 1e-10) {
+      // move instrument to ensure sample at position x = y = z = 0 m,
       auto &componentInfo = ws->mutableComponentInfo();
-      auto &detectorInfo = ws->mutableDetectorInfo();
-
-      const string sampleName{instrument->getSample()->getName()};
-
-      vector<IComponent_const_sptr> comps = {
-          instrument->getComponentByName(sourceName),
-          instrument->getComponentByName(sampleName),
-          instrument->getComponentByName(this->getProperty("FirstSlitName")),
-          instrument->getComponentByName(this->getProperty("SecondSlitName"))};
-
-      // translate instrument
-      if (samplePos.distance(V3D(0., 0., 0.)) > 1e-10) {
-        // move instrument to ensure sample at position x = y = z = 0 m,
-        for (vector<IComponent_const_sptr>::iterator compit = comps.begin();
-             compit != comps.end(); ++compit) {
-          const auto compID1 = (*compit)->getComponentID();
-          componentInfo.setPosition(componentInfo.indexOf(compID1),
-                                    (*compit)->getPos() - samplePos);
-        }
-        for (size_t i = 0; i < detectorInfo.size(); ++i)
-          detectorInfo.setPosition(i, detectorInfo.position(i) - samplePos);
+      for (vector<IComponent_const_sptr>::iterator compit = comps.begin();
+           compit != comps.end(); ++compit) {
+        const auto compID1 = (*compit)->getComponentID();
+        componentInfo.setPosition(componentInfo.indexOf(compID1),
+                                  (*compit)->getPos() - samplePos);
       }
+      auto &detectorInfo = ws->mutableDetectorInfo();
+      for (size_t i = 0; i < detectorInfo.size(); ++i)
+        detectorInfo.setPosition(i, detectorInfo.position(i) - samplePos);
+    }
 
-      // rotate instrument (update positions)
-      if (rotated) {
-        double tanAngle{0.}; // will hold tan(rotation angle)
-        sourceY = this->coordinate(sourceName, this->m_upDirection, instrument);
-        if (sourceY != 0.) {
-          // calculate vertical rotation angle:
-          /*         ^ y
-           *         |   /|
-           *         |  / |
-           *         | /a |
-           *         |/___|____> z
-           */
-          tanAngle = sourceY /
-                     this->coordinate(sourceName, m_beamDirection, instrument);
-          for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
-            const auto compID2 = (*compit)->getComponentID();
-            V3D position = (*compit)->getPos();
-            double coordUp = this->coordinate((*compit)->getName(),
-                                              this->m_upDirection, instrument);
-            this->setCoordinate(position, this->m_beamDirection,
-                                coordUp / tanAngle);
-            componentInfo.setPosition(componentInfo.indexOf(compID2), position);
-          }
-          for (size_t i = 0; i < detectorInfo.size(); ++i) {
-            V3D position = detectorInfo.position(i);
-            this->setCoordinate(
-                position, this->m_beamDirection,
-                this->coordinate(detectorInfo, i, this->m_upDirection) /
-                    tanAngle);
-            detectorInfo.setPosition(i, position);
-            // rotate detectors
-            V3D vvector{0., 0., 0.};
-            double vangle = atan(tanAngle);
-            this->setCoordinate(vvector, this->m_upDirection, sin(vangle));
-            this->setCoordinate(vvector, this->m_beamDirection, cos(vangle));
-            const Quat &rot = Quat(vangle, vvector);
-            detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
-          }
-        }
-        sourceX = this->coordinate(sourceName, this->m_horizontalDirection,
-                                   instrument);
-        if (sourceX != 0.) {
-          // calculate horizontal rotation angle
-          /*         ^ z
-           *         |___
-           *         |  /
-           *         |a/
-           *         |/_______> x
-           */
-          tanAngle =
-              sourceX /
-              this->coordinate(sourceName, this->m_beamDirection, instrument);
-          for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
-            const auto compID2 = (*compit)->getComponentID();
-            V3D position = (*compit)->getPos();
-            double coordHori = this->coordinate(
-                (*compit)->getName(), this->m_horizontalDirection, instrument);
-            this->setCoordinate(position, this->m_beamDirection,
-                                coordHori / tanAngle);
-            componentInfo.setPosition(componentInfo.indexOf(compID2), position);
-          }
-          for (size_t i = 0; i < detectorInfo.size(); ++i) {
-            V3D position = detectorInfo.position(i);
-            this->setCoordinate(
-                position, this->m_beamDirection,
-                this->coordinate(detectorInfo, i, this->m_horizontalDirection) /
-                    tanAngle);
-            detectorInfo.setPosition(i, position);
-            // rotate detectors
-            V3D hvector{0., 0., 0.};
-            double hangle = atan(tanAngle);
-            this->setCoordinate(hvector, this->m_horizontalDirection,
-                                sin(hangle));
-            this->setCoordinate(hvector, this->m_beamDirection, cos(hangle));
-            const Quat &rot = Quat(hangle, hvector);
-            detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
-          }
-        }
+    const double sourceY =
+        this->coordinate(sourceName, this->m_upDirection, ws->getInstrument());
+    // check if the instrument is rotated: then the up direction and horizontal
+    // directions are not zero: -> rotate instrument (update positions)
+    double tanAngle{0.}; // will hold tan(rotation angle)
+    if (sourceY != 0.) {
+      // calculate vertical rotation angle:
+      /*         ^ y
+       *         |   /|
+       *         |  / |
+       *         | /a |
+       *         |/___|____> z
+       */
+      tanAngle = sourceY / this->coordinate(sourceName, m_beamDirection,
+                                            ws->getInstrument());
+      auto &componentInfo = ws->mutableComponentInfo();
+      for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
+        const auto compID2 = (*compit)->getComponentID();
+        V3D position = (*compit)->getPos();
+        double coordUp = this->coordinate(
+            (*compit)->getName(), this->m_upDirection, ws->getInstrument());
+        this->setCoordinate(position, this->m_beamDirection,
+                            coordUp / tanAngle);
+        componentInfo.setPosition(componentInfo.indexOf(compID2), position);
+      }
+      auto &detectorInfo = ws->mutableDetectorInfo();
+      for (size_t i = 0; i < detectorInfo.size(); ++i) {
+        V3D position = detectorInfo.position(i);
+        this->setCoordinate(
+            position, this->m_beamDirection,
+            this->coordinate(detectorInfo, i, this->m_upDirection) / tanAngle);
+        detectorInfo.setPosition(i, position);
+        // rotate detectors
+        V3D vvector{0., 0., 0.};
+        double vangle = atan(tanAngle);
+        this->setCoordinate(vvector, this->m_upDirection, sin(vangle));
+        this->setCoordinate(vvector, this->m_beamDirection, cos(vangle));
+        const Quat &rot = Quat(vangle, vvector);
+        detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
       }
     }
+    const double sourceX = this->coordinate(
+        sourceName, this->m_horizontalDirection, ws->getInstrument());
+    if (sourceX != 0.) {
+      // calculate horizontal rotation angle
+      /*         ^ z
+       *         |___
+       *         |  /
+       *         |a/
+       *         |/_______> x
+       */
+      tanAngle = sourceX / this->coordinate(sourceName, this->m_beamDirection,
+                                            ws->getInstrument());
+      auto &componentInfo = ws->mutableComponentInfo();
+      for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
+        const auto compID2 = (*compit)->getComponentID();
+        V3D position = (*compit)->getPos();
+        double coordHori =
+            this->coordinate((*compit)->getName(), this->m_horizontalDirection,
+                             ws->getInstrument());
+        this->setCoordinate(position, this->m_beamDirection,
+                            coordHori / tanAngle);
+        componentInfo.setPosition(componentInfo.indexOf(compID2), position);
+      }
+      auto &detectorInfo = ws->mutableDetectorInfo();
+      for (size_t i = 0; i < detectorInfo.size(); ++i) {
+        V3D position = detectorInfo.position(i);
+        this->setCoordinate(
+            position, this->m_beamDirection,
+            this->coordinate(detectorInfo, i, this->m_horizontalDirection) /
+                tanAngle);
+        detectorInfo.setPosition(i, position);
+        // rotate detectors
+        V3D hvector{0., 0., 0.};
+        double hangle = atan(tanAngle);
+        this->setCoordinate(hvector, this->m_horizontalDirection, sin(hangle));
+        this->setCoordinate(hvector, this->m_beamDirection, cos(hangle));
+        const Quat &rot = Quat(hangle, hvector);
+        detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
+      }
+    }
+    this->m_virtualWs = ws->clone();
     this->m_virtualInstrument = ws->getInstrument();
     if (this->m_virtualInstrument->isEmptyInstrument())
       this->g_log.error("Cannot create a virtual instrument.");
@@ -570,12 +560,10 @@ void GravityCorrection::exec() {
   m_beam1 = this->coordinate(this->m_slit1Name, this->m_beamDirection);
   m_beam2 = this->coordinate(this->m_slit2Name, this->m_beamDirection);
   const auto &spectrumInfo = this->m_ws->spectrumInfo();
-
   this->m_progress->report("Setup OutputWorkspace ...");
   MatrixWorkspace_sptr outWS = this->getProperty("OutputWorkspace");
   outWS = DataObjects::create<MatrixWorkspace>(*this->m_ws);
   outWS->setTitle(this->m_ws->getTitle() + " cancelled gravitation ");
-
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (spectrumInfo.isMonitor(i)) {
       // copy monitor data into output workspace
@@ -606,15 +594,11 @@ void GravityCorrection::exec() {
     this->g_log.error(
         "Map of initial final angles and its corresponding spectrum "
         "number does not exist.");
-
   // need a mutable copy of the input workspace here.
   MatrixWorkspace_sptr clonedWS = this->m_ws->clone();
-
   // source position coordinate in beam direction (variable sample position)
-  double sourceZ =
-      this->coordinate(this->m_virtualInstrument->getSource()->getName(),
-                       this->m_beamDirection);
-
+  double sourceZ = this->coordinate(
+      this->m_virtualInstrument->getSource()->getName(), this->m_beamDirection);
   this->m_progress->report("Perform gravity correction ...");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!(this->spectrumCheck(spectrumInfo, i)))
@@ -658,8 +642,8 @@ void GravityCorrection::exec() {
       double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
-      const auto &detectorInfo = outWS->detectorInfo();
-      double detZ = this->coordinate(detectorInfo, j, m_beamDirection);
+      V3D detPos = m_virtualWs->spectrumInfo().position(j);
+      double detZ = this->coordinate(detPos, m_beamDirection);
       // possible trajectory from sample to detector, almost equals detZ
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
       double s = s1 + s2;
