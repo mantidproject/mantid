@@ -13,6 +13,8 @@ New
 Improved
 ########
 * Updated workspace nameing scheme for new backend
+* Updated file adding to prefix the instrument name
+* Updated file finding to be able to find added runs withour instrument name prefix
 
 Bug fixes
 #########
