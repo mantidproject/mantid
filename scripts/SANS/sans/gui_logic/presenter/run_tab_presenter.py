@@ -20,7 +20,7 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, get_instrument_strings_for_gui)
-from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType)
+from sans.common.enums import (BatchReductionEntry, RangeStepType, SampleShape, FitType, RowState)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
@@ -38,6 +38,8 @@ except (Exception, Warning):
     mantidplot = None
     # this should happen when this is called from outside Mantidplot and only then,
     # the result is that attempting to plot will raise an exception
+
+row_state_to_colour_mapping = {RowState.Unprocessed:'#FFFFFF', RowState.Processed:'#d0f4d0', RowState.Error:'#accbff'}
 
 
 class RunTabPresenter(object):
@@ -109,6 +111,7 @@ class RunTabPresenter(object):
         self.sans_logger = Logger("SANS")
         # Name of grpah to output to
         self.output_graph = 'SANS-Latest'
+        self.progress = 0
 
         # Models that are being used by the presenter
         self._state_model = None
@@ -325,9 +328,11 @@ class RunTabPresenter(object):
     def update_view_from_table_model(self):
         self._view.clear_table()
         self._view.hide_period_columns()
-        for row in self._table_model._table_entries:
+        for row_index, row in enumerate(self._table_model._table_entries):
             row_entry = [str(x) for x in row.to_list()]
             self._view.add_row(row_entry)
+            self._view.change_row_color(row_state_to_colour_mapping[row.row_state], row_index + 1)
+            self._view.set_row_tooltip(row.tool_tip, row_index + 1)
             if row.isMultiPeriod():
                 self._view.show_period_columns()
         self._view.remove_rows([0])
@@ -335,6 +340,8 @@ class RunTabPresenter(object):
 
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
+        self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
+        self._view.set_row_tooltip('', row)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
 
@@ -358,6 +365,9 @@ class RunTabPresenter(object):
             # 1. Set up the states and convert them into property managers
             selected_rows = self._view.get_selected_rows()
             selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
+            for row in selected_rows:
+                self._table_model.reset_row_state(row)
+            self.update_view_from_table_model()
             states, errors = self.get_states(row_index=selected_rows)
 
             for row, error in errors.items():
@@ -384,7 +394,8 @@ class RunTabPresenter(object):
             # Get the name of the graph to output to
             output_graph = self.output_graph
 
-            setattr(self._view, 'progress_bar_value', 0)
+            self.progress = 0
+            setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
             self.batch_process_runner.process_states(states,use_optimizations, output_mode, plot_results, output_graph)
 
@@ -403,16 +414,23 @@ class RunTabPresenter(object):
         self._view.display_message_box(title, text, detailed_text)
 
     def notify_progress(self, row):
-        setattr(self._view, 'progress_bar_value', row + 1)
-        self._view.change_row_color("#d0f4d0", row)
+        self.increment_progress()
+        message = ''
+        self._table_model.set_row_to_processed(row, message)
+        self.update_view_from_table_model()
 
     def on_processing_finished(self, result):
         self._view.enable_buttons()
         self._processing = False
 
     def on_processing_error(self, row, error_msg):
-        self._view.change_row_color("#accbff", row)
-        self._view.set_row_tooltip(error_msg, row)
+        self.increment_progress()
+        self._table_model.set_row_to_error(row, error_msg)
+        self.update_view_from_table_model()
+
+    def increment_progress(self):
+        self.progress = self.progress + 1
+        setattr(self._view, 'progress_bar_value', self.progress)
 
     def on_row_inserted(self, index, row):
         row_table_index = TableIndexModel(*row)
