@@ -64,16 +64,18 @@ void run_multiprocess_load(const std::string &file) {
   TS_ASSERT(wsRef);
 
   TSM_ASSERT_EQUALS("Different spectrum number in reference ws.",
-                    wsRef->getNumberHistograms(),
-                    ws->getNumberHistograms());
+                    wsRef->getNumberHistograms(), ws->getNumberHistograms());
 
   for (size_t i = 0; i < wsRef->getNumberHistograms(); ++i) {
     auto &eventList = ws->getSpectrum(i).getEvents();
     auto &eventListRef = wsRef->getSpectrum(i).getEvents();
-    TSM_ASSERT_EQUALS("Different events number in reference spectra", eventList.size(), eventListRef.size());
+    TSM_ASSERT_EQUALS("Different events number in reference spectra",
+                      eventList.size(), eventListRef.size());
     for (size_t j = 0; j < eventListRef.size(); ++j) {
-      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(), eventListRef[j].tof());
-      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(), eventListRef[j].pulseTime());
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].tof(),
+                        eventListRef[j].tof());
+      TSM_ASSERT_EQUALS("Events are not equal", eventList[j].pulseTime(),
+                        eventListRef[j].pulseTime());
     }
   }
 }

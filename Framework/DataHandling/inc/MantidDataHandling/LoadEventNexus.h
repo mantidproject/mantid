@@ -188,9 +188,9 @@ private:
   /// Execution code
   void exec() override;
 
-  LoadEventNexus::LoaderType defineLoaderType(const bool haveWeights,
-                                              const bool oldNeXusFileNames,
-                                              const std::string &classType) const;
+  LoadEventNexus::LoaderType
+  defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
+                   const std::string &classType) const;
 
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 

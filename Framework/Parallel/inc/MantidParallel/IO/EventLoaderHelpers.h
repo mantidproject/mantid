@@ -41,9 +41,8 @@ namespace IO {
 */
 namespace EventLoader {
 /// Read number of events in given banks from file.
-std::vector<size_t>
-readBankSizes(const H5::Group &group,
-              const std::vector<std::string> &bankNames);
+std::vector<size_t> readBankSizes(const H5::Group &group,
+                                  const std::vector<std::string> &bankNames);
 
 H5::DataType readDataType(const H5::Group &group,
                           const std::vector<std::string> &bankNames,

@@ -10,7 +10,7 @@ using namespace Mantid::Types;
 int main(int argc, char **argv) {
   const std::string segmentName(argv[1]);
   const std::string storageName(argv[2]);
-//  unsigned procId = std::atoi(argv[3]);
+  //  unsigned procId = std::atoi(argv[3]);
   unsigned firstEvent = std::atoi(argv[4]);
   unsigned upperEvent = std::atoi(argv[5]);
   unsigned numPixels = std::atoi(argv[6]);
@@ -29,8 +29,9 @@ int main(int argc, char **argv) {
   EventsListsShmemStorage storage(segmentName, storageName, size, 1, numPixels,
                                   false);
   try {
-    MultiProcessEventLoader::fillFromFile(storage, fileName, groupName, bankNames,
-                                          bankOffsets, firstEvent, upperEvent, precalcEvents);
+    MultiProcessEventLoader::fillFromFile(storage, fileName, groupName,
+                                          bankNames, bankOffsets, firstEvent,
+                                          upperEvent, precalcEvents);
   } catch (...) {
     return 1;
   }

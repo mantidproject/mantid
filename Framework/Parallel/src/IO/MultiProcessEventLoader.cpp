@@ -117,7 +117,7 @@ void MultiProcessEventLoader::load(
     for (auto &c : vChilds)
       c.wait();
 
-    //check if oll childs are finished correctly
+    // check if oll childs are finished correctly
     for (auto &c : vChilds)
       if (c.exit_code())
         throw std::runtime_error("Error while multiprocess loading\n");

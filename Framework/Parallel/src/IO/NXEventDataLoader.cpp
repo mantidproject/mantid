@@ -13,7 +13,7 @@ std::string readAttribute(const H5::DataSet &dataSet,
   return value;
 }
 
-} // detail
-} // IO
-} // Parallell
-} // Mantid
+} // namespace detail
+} // namespace IO
+} // namespace Parallel
+} // namespace Mantid

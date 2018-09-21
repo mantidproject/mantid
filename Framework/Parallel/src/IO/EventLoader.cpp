@@ -57,8 +57,9 @@ void load(const std::string &filename, const std::string &groupname,
   std::string executableName =
       Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable() +
           "/MantidNexusParallelLoader";
-  MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()), comcurencyNumber / 2,
-                                 comcurencyNumber / 2, executableName);
+  MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
+                                 comcurencyNumber / 2, comcurencyNumber / 2,
+                                 executableName);
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
 
