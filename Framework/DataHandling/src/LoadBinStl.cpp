@@ -1,62 +1,50 @@
+#include <fstream>
+#include <iostream>
 #include "MantidDataHandling/LoadBinStl.h"
 #include "MantidKernel/BinaryStreamReader.h"
 
 
-#include<iostream>
-#include <fstream>
 namespace Mantid {
 namespace DataHandling {
 
-
-
 void LoadBinStl::readStl(std::string filename) {
   std::ifstream myFile(filename.c_str(), std::ios::in | std::ios::binary);
-
-  char header_info[80] = "";
-  char nTri[4];
   uint32_t numberTrianglesLong;
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
-  //skip header
+  // skip header
   streamReader.moveStreamToPosition(80);
-
-  // change this after implementing uint32 into the reader
-
+  // Read the number of triangles
   streamReader >> numberTrianglesLong;
-  int next = 96;
+  uint32_t next = 96;
+  const uint32_t STEPSIZE = 50;
   // now read in all the triangles
-  for (unsigned long i = 0; i < numberTrianglesLong; i++) {
-    next = next + i*50;
-  
-
-    if (myFile) {
-
-
-      // populate each point of the triangle
-      for(i=0;i<3;i++){
-        float xVal;
-        float yVal;
-        float zVal;
-      
-        streamReader >> xVal;
-        streamReader >> yVal;
-        streamReader >> zVal;
-        Kernel::V3D vec = Kernel::V3D(double(xVal),double(yVal),double(zVal));
-        verticies.push_back(vec);
-      }
-      
-
-      
-     
-
-      // add index of new verticies to triangle
-      int newIndex = triangle.size();
-      triangle.push_back(newIndex);
-      triangle.push_back(newIndex + 1);
-      triangle.push_back(newIndex + 2);
-    }
+  for (uint32_t i = 0; i < numberTrianglesLong; i++) {
+    next = next + i * STEPSIZE;
+    readTriangle(streamReader);
   }
   myFile.close();
   return;
 }
-}//namespace datahandling
-}//namespace mantid
+
+
+void LoadBinStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
+  // read in the verticies
+  for (int i = 0; i < 3; i++) {
+    float xVal;
+    float yVal;
+    float zVal;
+    streamReader >> xVal;
+    streamReader >> yVal;
+    streamReader >> zVal;
+    Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
+    verticies.push_back(vec);
+  }
+  // add index of new verticies to triangle
+  size_t newIndex = triangle.size();
+  triangle.push_back(newIndex);
+  triangle.push_back(newIndex + 1);
+  triangle.push_back(newIndex + 2);
+}
+
+} // namespace DataHandling
+} // namespace Mantid
