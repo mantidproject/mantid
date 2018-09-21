@@ -8,11 +8,12 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 
-GCC_DIAG_OFF(conversion)
+GNU_DIAG_OFF("conversion")
 #include "private/Schema/hs00_event_histogram_generated.h"
-GCC_DIAG_ON(conversion)
+GNU_DIAG_ON("conversion")
 
 namespace {
 /// Logger
