@@ -359,12 +359,13 @@ class RunTabPresenter(object):
             selected_rows = self._view.get_selected_rows()
             selected_rows = selected_rows if selected_rows else range(self._table_model.get_number_of_rows())
             states, errors = self.get_states(row_index=selected_rows)
-            if not states:
-                raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   " has been loaded")
 
             for row, error in errors.items():
                 self.on_processing_error(row, error)
+
+            if not states:
+                self.on_processing_finished(None)
+                return
 
             # 4. Create the graph if continuous output is specified
             if mantidplot:
