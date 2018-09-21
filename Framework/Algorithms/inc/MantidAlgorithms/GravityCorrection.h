@@ -80,6 +80,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws;
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
   Mantid::API::MatrixWorkspace_sptr m_virtualWorkspace;
+  double m_beam1;
+  double m_beam2;
 
   int m_numberOfMonitors{0};
   Mantid::Kernel::V3D m_sample3D{Mantid::Kernel::V3D(

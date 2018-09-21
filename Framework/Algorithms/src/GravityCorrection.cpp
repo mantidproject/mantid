@@ -235,7 +235,8 @@ double GravityCorrection::coordinate(const SpectrumInfo &spectrumInfo, size_t i,
  * PointingAlong::Y, PointingAlong::Z)
  * @return the coordinate of the position in direction in metres
  */
-double GravityCorrection::coordinate(const V3D &pos, PointingAlong direction) const {
+double GravityCorrection::coordinate(const V3D &pos,
+                                     PointingAlong direction) const {
   double position{0.};
   switch (direction) {
   case Mantid::Geometry::X:
@@ -331,22 +332,18 @@ void GravityCorrection::slitCheck() {
  */
 double GravityCorrection::finalAngle(const double k, size_t i) {
   // calculate parabola
-  const double beam1 =
-      this->coordinate(this->m_slit1Name, this->m_beamDirection);
-  const double beam2 =
-      this->coordinate(this->m_slit2Name, this->m_beamDirection);
   // calculate slit pointing up coordinate
   const double tanAngle =
       tan(this->m_ws->spectrumInfo().signedTwoTheta(i) / 2.);
   int sign;
   tanAngle < 0. ? sign = -1 : sign = 1;
-  const double beamDiff = beam1 - beam2;
-  // potential divide by zero avoided by input validation beam1 != beam2
+  const double beamDiff = m_beam1 - m_beam2;
+  // potential divide by zero avoided by input validation m_beam1 != m_beam2
   double beamShift =
-      (k * (pow(beam1, 2.) - pow(beam2, 2.)) + (beamDiff * tanAngle)) /
+      (k * (pow(m_beam1, 2.) - pow(m_beam2, 2.)) + (beamDiff * tanAngle)) /
       (2 * k * beamDiff);
-  const double up2 = beam2 * tanAngle; // sign
-  double upShift = up2 + k * pow(beam2 - beamShift, 2.);
+  const double up2 = m_beam2 * tanAngle; // sign
+  double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
   // set sample coordinates in unit m:
   this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift); // sign
   this->setCoordinate(m_sample3D, this->m_upDirection, upShift);     // sign
@@ -502,7 +499,8 @@ void GravityCorrection::virtualInstrument() {
  * @return true if spectrum can be considered for gravity correction, false
  * otherwise
  */
-bool GravityCorrection::spectrumCheck(const SpectrumInfo &spectrumInfo, size_t i) {
+bool GravityCorrection::spectrumCheck(const SpectrumInfo &spectrumInfo,
+                                      size_t i) {
   if (spectrumInfo.isMonitor(i))
     this->g_log.debug("Found monitor spectrum, will be ignored.");
   if (!spectrumInfo.hasDetectors(i))
@@ -518,7 +516,8 @@ bool GravityCorrection::spectrumCheck(const SpectrumInfo &spectrumInfo, size_t i
  * @return spectrum number closest to the given final angle
  */
 size_t GravityCorrection::spectrumNumber(const double angle,
-                                         const SpectrumInfo &spectrumInfo, size_t i) {
+                                         const SpectrumInfo &spectrumInfo,
+                                         size_t i) {
   size_t n = i;
   // counts are dropping down due to gravitation -> move counts
   // up and n cannot be smaller than 0, only larger than
@@ -568,7 +567,8 @@ void GravityCorrection::exec() {
   this->virtualInstrument();
   this->m_progress->report("Checking slits ...");
   this->slitCheck();
-
+  m_beam1 = this->coordinate(this->m_slit1Name, this->m_beamDirection);
+  m_beam2 = this->coordinate(this->m_slit2Name, this->m_beamDirection);
   const auto &spectrumInfo = this->m_ws->spectrumInfo();
 
   this->m_progress->report("Setup OutputWorkspace ...");
@@ -610,6 +610,11 @@ void GravityCorrection::exec() {
   // need a mutable copy of the input workspace here.
   MatrixWorkspace_sptr clonedWS = this->m_ws->clone();
 
+  // source position coordinate in beam direction (variable sample position)
+  double sourceZ =
+      this->coordinate(this->m_virtualInstrument->getSource()->getName(),
+                       this->m_beamDirection);
+
   this->m_progress->report("Perform gravity correction ...");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!(this->spectrumCheck(spectrumInfo, i)))
@@ -620,6 +625,9 @@ void GravityCorrection::exec() {
     const HistogramX &tof = clonedWS->x(i); // make mutable?
     // correct tof angles, velocity, characteristic length
     size_t i_tofit{0};
+
+    const auto y = this->m_ws->y(i);
+    const auto e = this->m_ws->e(i);
     for (HistogramX::const_iterator tofit = tof.cbegin(); tofit < tof.cend();
          ++tofit) {
       // this velocity should take the real flight path into account
@@ -647,34 +655,30 @@ void GravityCorrection::exec() {
       if (i_tofit > outWS->mutableY(j).size())
         continue;
 
-      // offset due to variable sample position
-      const double offset =
-          this->coordinate(this->m_sample3D, this->m_beamDirection);
-
-      // source position coordinate in beam direction (variable sample position)
-      double sourceZ =
-          this->coordinate(this->m_virtualInstrument->getSource()->getName(),
-                           this->m_beamDirection);
-
       double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
       const auto &detectorInfo = outWS->detectorInfo();
       double detZ = this->coordinate(detectorInfo, j, m_beamDirection);
-      // possible trajectory from sample to detector
+      // possible trajectory from sample to detector, almost equals detZ
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
       double s = s1 + s2;
 
-      outWS->mutableX(j)[i_tofit] =
-          ((detZ - offset) * (*tofit)) / (s * cos(angle));
-      //*tofit; // debugging minus / cos(angle); // mu sec
+      // offset due to variable sample position
+      const double offset =
+          this->coordinate(this->m_sample3D, this->m_beamDirection);
+
+      // this value should be nearly one
+      const double one = (detZ - offset) / (s * cos(angle));
+      outWS->mutableX(j)[i_tofit] = one * *tofit; // mu sec
 
       // need to set the counts to spectrum according to finalAngle & *tofit
-      outWS->mutableY(j)[i_tofit] += this->m_ws->y(i)[i_tofit];
-      outWS->mutableE(j)[i_tofit] += this->m_ws->e(i)[i_tofit];
+      outWS->mutableY(j)[i_tofit] += y[i_tofit];
+      outWS->mutableE(j)[i_tofit] += e[i_tofit];
+      // must be always positiv
       if (this->m_ws->hasDx(i))
         outWS->mutableDx(j)[i_tofit] += this->m_ws->dx(i)[i_tofit];
-      i_tofit++;
+      ++i_tofit;
       this->m_progress->report();
     }
 

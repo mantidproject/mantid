@@ -290,7 +290,7 @@ public:
     GravityCorrection gc19;
     this->runGravityCorrection(gc19, translated, "translated");
 
-    // ws4 and ws5 must be identical
+    // Data and x axis (TOF) must be identical
     CompareWorkspaces translatedWS;
     comparer(translatedWS, "origin", "translated", "1", "0", "1");
     TS_ASSERT_THROWS_NOTHING(
