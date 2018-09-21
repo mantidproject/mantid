@@ -2,6 +2,8 @@
 #define MANTID_KERNEL_V3D_H_
 
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Tolerance.h"
 #include <cmath>
 #include <iosfwd>
 #include <vector>
@@ -58,52 +60,268 @@ public:
     return tmp;
   }
 
-  // Arithemetic operators overloaded
-  V3D operator+(const V3D &v) const;
-  V3D &operator+=(const V3D &v);
-  V3D operator-(const V3D &v) const;
-  V3D &operator-=(const V3D &v);
-  // Inner product
-  V3D operator*(const V3D &v) const;
-  V3D &operator*=(const V3D &v);
-  // Inner division
-  V3D operator/(const V3D &v) const;
-  V3D &operator/=(const V3D &v);
-  // Scale
-  V3D operator*(const double D) const;
-  V3D &operator*=(const double D);
-  V3D operator/(const double D) const;
-  V3D &operator/=(const double D);
-  // Negation
-  V3D operator-() const noexcept;
-  // Simple Comparison
-  bool operator==(const V3D &) const;
-  bool operator!=(const V3D &) const;
-  bool operator<(const V3D &) const;
-  bool operator>(const V3D &rhs) const;
+  /**
+    Addtion operator
+     @param v :: Vector to add
+     @return *this+v;
+  */
+  V3D operator+(const V3D &v) const {
+    V3D out(*this);
+    out += v;
+    return out;
+  }
+
+  /**
+    Subtraction operator
+    @param v :: Vector to sub.
+    @return *this-v;
+  */
+  V3D operator-(const V3D &v) const {
+    V3D out(*this);
+    out -= v;
+    return out;
+  }
+
+  /**
+    Inner product
+    @param v :: Vector to sub.
+    @return *this * v;
+  */
+  V3D operator*(const V3D &v) const {
+    V3D out(*this);
+    out *= v;
+    return out;
+  }
+
+  /**
+    Inner division
+    @param v :: Vector to divide
+    @return *this * v;
+  */
+  V3D operator/(const V3D &v) const {
+    V3D out(*this);
+    out /= v;
+    return out;
+  }
+
+  /**
+    Self-Addition operator
+    @param v :: Vector to add.
+    @return *this+=v;
+  */
+  V3D &operator+=(const V3D &v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
+    return *this;
+  }
+
+  /**
+    Self-Subtraction operator
+    @param v :: Vector to sub.
+    @return *this-v;
+  */
+  V3D &operator-=(const V3D &v) {
+    x -= v.x;
+    y -= v.y;
+    z -= v.z;
+    return *this;
+  }
+
+  /**
+    Self-Inner product
+    @param v :: Vector to multiply
+    @return *this*=v;
+  */
+  V3D &operator*=(const V3D &v) {
+    x *= v.x;
+    y *= v.y;
+    z *= v.z;
+    return *this;
+  }
+
+  /**
+    Self-Inner division
+    @param v :: Vector to divide
+    @return *this*=v;
+  */
+  V3D &operator/=(const V3D &v) {
+    x /= v.x;
+    y /= v.y;
+    z /= v.z;
+    return *this;
+  }
+
+  /**
+    Scalar product
+    @param D :: value to scale
+    @return this * D
+   */
+  V3D operator*(const double D) const {
+    V3D out(*this);
+    out *= D;
+    return out;
+  }
+
+  /**
+    Scalar divsion
+    @param D :: value to scale
+    @return this / D
+  */
+  V3D operator/(const double D) const {
+    V3D out(*this);
+    out /= D;
+    return out;
+  }
+
+  /**
+    Scalar product
+    @param D :: value to scale
+    @return this *= D
+  */
+  V3D &operator*=(const double D) {
+    x *= D;
+    y *= D;
+    z *= D;
+    return *this;
+  }
+
+  /**
+    Scalar division
+    @param D :: value to scale
+    @return this /= D
+    \todo ADD TOLERANCE
+  */
+  V3D &operator/=(const double D) {
+    if (D != 0.0) {
+      x /= D;
+      y /= D;
+      z /= D;
+    }
+    return *this;
+  }
+
+  /**
+    Negation
+   * @return a vector with same magnitude but in opposite direction
+   */
+  V3D operator-() const { return V3D(-x, -y, -z); }
+
+  /**
+    Equals operator with tolerance factor
+    @param v :: V3D for comparison
+    @return true if the items are equal
+  */
+  bool operator==(const V3D &v) const {
+    using namespace std;
+    return !(fabs(x - v.x) > Tolerance || fabs(y - v.y) > Tolerance ||
+             fabs(z - v.z) > Tolerance);
+  }
+
+  /** Not equals operator with tolerance factor.
+   *  @param other :: The V3D to compare against
+   *  @returns True if the vectors are different
+   */
+  bool operator!=(const V3D &other) const {
+    return !(this->operator==(other));
+  }
+
+  /**
+    compare
+    @return true if V is greater
+   */
+  bool operator<(const V3D &V) const {
+    if (x != V.x)
+      return x < V.x;
+    if (y != V.y)
+      return y < V.y;
+    return z < V.z;
+  }
+
+  /// Comparison operator greater than.
+  bool operator>(const V3D &rhs) const { return rhs < *this; }
+
+  /**
+    Sets the vector position from a triplet of doubles x,y,z
+    @param xx :: The X coordinate
+    @param yy :: The Y coordinate
+    @param zz :: The Z coordinate
+  */
+  void operator()(const double xx, const double yy, const double zz) {
+    x = xx;
+    y = yy;
+    z = zz;
+  }
 
   // Access
   // Setting x, y and z values
-  void operator()(const double xx, const double yy, const double zz);
   void spherical(const double &R, const double &theta, const double &phi);
   void spherical_rad(const double &R, const double &polar,
                      const double &azimuth);
   void azimuth_polar_SNS(const double &R, const double &azimuth,
                          const double &polar);
-  void setX(const double xx);
-  void setY(const double yy);
-  void setZ(const double zz);
+  /**
+    Set is x position
+    @param xx :: The X coordinate
+  */
+  void setX(const double xx) { x = xx; }
+
+  /**
+    Set is y position
+    @param yy :: The Y coordinate
+  */
+  void setY(const double yy) { y = yy; }
+
+  /**
+    Set is z position
+    @param zz :: The Z coordinate
+  */
+  void setZ(const double zz) { z = zz; }
 
   const double &X() const { return x; } ///< Get x
   const double &Y() const { return y; } ///< Get y
   const double &Z() const { return z; } ///< Get z
 
-  const double &operator[](const size_t Index) const;
-  double &operator[](const size_t Index);
+  /**
+    Returns the axis value based in the index provided
+    @param Index :: 0=x, 1=y, 2=z
+    @return a double value of the requested axis
+  */
+  const double &operator[](const size_t Index) const {
+    switch (Index) {
+    case 0:
+      return x;
+    case 1:
+      return y;
+    case 2:
+      return z;
+    default:
+      throw Kernel::Exception::IndexError(Index, 2,
+                                          "operator[] range error");
+    }
+  }
+
+  /**
+    Returns the axis value based in the index provided
+    @param Index :: 0=x, 1=y, 2=z
+    @return a double value of the requested axis
+  */
+  double &operator[](const size_t Index) {
+    switch (Index) {
+    case 0:
+      return x;
+    case 1:
+      return y;
+    case 2:
+      return z;
+    default:
+      throw Kernel::Exception::IndexError(Index, 2,
+                                          "operator[] range error");
+    }
+  }
 
   void getSpherical(double &R, double &theta, double &phi) const;
 
-  //      void rotate(const V3D&,const V3D&,const double);
   void rotate(const Matrix<double> &);
 
   void round();
