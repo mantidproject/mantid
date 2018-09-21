@@ -16,18 +16,17 @@ set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\images\\\\MantidPlot
 
 # Choose the proper suffix for the build.
 if ( CPACK_PACKAGE_SUFFIX STREQUAL "nightly" )
-# TODO probably needs a better name than windows icon suffix
-  set ( WINDOWS_ICON_SUFFIX "Nightly" )
+  set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "Nightly" )
 elseif ( CPACK_PACKAGE_SUFFIX STREQUAL "unstable" )
-  set ( WINDOWS_ICON_SUFFIX "Unstable" )
+  set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "Unstable" )
 else()
   # this is the release suffix, which is empty
-  set ( WINDOWS_ICON_SUFFIX "" )
+  set ( WINDOWS_CAPITALIZED_PACKAGE_SUFFIX "" )
 endif()
 
 # have the properly capitalsed name for the start menu and install folder
-set( CPACK_NSIS_DISPLAY_NAME "Mantid${WINDOWS_ICON_SUFFIX}")
-set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${WINDOWS_ICON_SUFFIX}")
+set( CPACK_NSIS_DISPLAY_NAME "Mantid${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}")
+set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}")
 
 ###########################################################################
 # Deployment type - currently only works for Release!
@@ -165,7 +164,7 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_m
 ###########################################################################
 # On install. The blank lines seem to be required or it doesn't create the shortcut
 
-set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_ICON_SUFFIX}.lnk" )
+set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
 
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\MantidPlot.exe' 0

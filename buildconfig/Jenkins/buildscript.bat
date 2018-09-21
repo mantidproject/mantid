@@ -205,7 +205,7 @@ echo Note: not running doc-test target as it currently takes too long
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Create the install kit if required
 :: Disabled while it takes 10 minutes to create & 5-10 mins to archive!
-:: If install kit needs to be built,  create the docs to check they work
+:: If the install kit needs to be built,  create the docs to check they work
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 if "%BUILDPKG%" == "yes" (
