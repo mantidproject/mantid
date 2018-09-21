@@ -7,36 +7,22 @@
 namespace Mantid {
 namespace DataHandling {
 
-Kernel::V3D LoadBinStl::makeV3(char *facet) {
-  char xChar[4] = {facet[0], facet[1], facet[2], facet[3]};
 
-  char yChar[4] = {facet[4], facet[5], facet[6], facet[7]};
-
-  char zChar[4] = {facet[8], facet[9], facet[10], facet[11]};
-
-  float xx = *((float *)xChar);
-  float yy = *((float *)yChar);
-  float zz = *((float *)zChar);
-  Kernel::V3D vec = Kernel::V3D(double(xx),double(yy),double(zz));
-  return vec;
-}
 
 void LoadBinStl::readStl(std::string filename) {
   std::ifstream myFile(filename.c_str(), std::ios::in | std::ios::binary);
 
   char header_info[80] = "";
   char nTri[4];
-  unsigned long numberTrianglesLong;
+  uint32_t numberTrianglesLong;
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
   //skip header
   streamReader.moveStreamToPosition(80);
 
   // change this after implementing uint32 into the reader
-  if (myFile) {
-    myFile.read(nTri, 4);
-    numberTrianglesLong = *((unsigned long *)nTri);
-  }
-  int next = 80;
+
+  streamReader >> numberTrianglesLong;
+  int next = 96;
   // now read in all the triangles
   for (unsigned long i = 0; i < numberTrianglesLong; i++) {
     next = next + i*50;
@@ -69,7 +55,7 @@ void LoadBinStl::readStl(std::string filename) {
       triangle.push_back(newIndex + 2);
     }
   }
-  myFile.close()
+  myFile.close();
   return;
 }
 }//namespace datahandling
