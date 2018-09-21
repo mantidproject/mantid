@@ -239,7 +239,6 @@ public:
 
     std::vector<std::string> componentNames = {"source", "some-surface-holder",
                                                "slit1", "slit2"};
-
     for (const auto &component : componentNames) {
       const auto ID =
           ws->getInstrument()->getComponentByName(component)->getComponentID();
@@ -274,8 +273,31 @@ public:
         Mantid::API::AnalysisDataService::Instance().clear())
   }
 
-  void testInstrumentTranslation() {
-    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(-5.4, -2.2, -1.7);
+  void testInstrumentTranslationInBeamDirection() {
+    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(2.9, 0., 0.);
+    auto origin =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector);
+    auto translated =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            0.0, s1 - translate, s2 - translate, 0.5, 1.0, source - translate,
+            monitor - translate, sample - translate, detector - translate);
+
+    GravityCorrection gc18;
+    this->runGravityCorrection(gc18, origin, "origin");
+
+    GravityCorrection gc19;
+    this->runGravityCorrection(gc19, translated, "translated");
+
+    // Data and x axis (TOF) must be identical
+    CompareWorkspaces translatedWS;
+    comparer(translatedWS, "origin", "translated", "1", "0", "1");
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::AnalysisDataService::Instance().clear())
+  }
+
+  void testInstrumentTranslationGeneral() {
+    Mantid::Kernel::V3D translate = Mantid::Kernel::V3D(2.9, 2.2, 1.1);
     auto origin =
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
             0.0, s1, s2, 0.5, 1.0, source, monitor, sample, detector);
@@ -380,7 +402,8 @@ public:
     const double sy{up2 + k * pow(s2 - sx, 2.)};
     const double finalAngle{atan(2. * k * sqrt(abs(sy / k)))};
 
-    //V3D detector2{cos(finalAngle) * l2.norm(), sin(finalAngle) * l2.norm(), 0.};
+    // V3D detector2{cos(finalAngle) * l2.norm(), sin(finalAngle) * l2.norm(),
+    // 0.};
 
     Mantid::API::MatrixWorkspace_sptr ws{
         WorkspaceCreationHelper::
