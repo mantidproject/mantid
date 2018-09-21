@@ -58,6 +58,7 @@ public:
   BinaryStreamReader &operator>>(float &value);
   BinaryStreamReader &operator>>(double &value);
   BinaryStreamReader &operator>>(std::string &value);
+  BinaryStreamReader &operator>>(uint32_t &value);
   /// @}
 
   ///@name 1D methods
