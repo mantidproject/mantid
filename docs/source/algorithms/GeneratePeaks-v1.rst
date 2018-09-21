@@ -1,4 +1,4 @@
-﻿.. algorithm::
+.. algorithm::
 
 .. summary::
 
@@ -116,7 +116,7 @@ Generate peaks from a TableWorkspace
 .. testcleanup:: GeneratePeakFromTable
 
   DeleteWorkspace(Workspace=outws)
-  DeleteWorkspace(Workspace="focused")
+  DeleteWorkspace(Workspace="focussed")
   DeleteWorkspace(Workspace="PeakList3")
 
 Output:

@@ -10,8 +10,8 @@ Description
 -----------
 
 Determine whether a peak intersects a surface. Similar to
-:ref:`algm-PeaksInRegion`. The vertices of the surface must be
-provided. The vertices must be provided in clockwise ordering starting
+:ref:`algm-PeaksInRegion`. The vertexes of the surface must be
+provided. The vertexes must be provided in clockwise ordering starting
 at the lower left.
 
 Usage

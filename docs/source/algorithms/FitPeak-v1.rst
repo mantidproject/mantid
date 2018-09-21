@@ -78,7 +78,7 @@ High background fit
 ===================
 
 In the 'high background fit' mode, the background will be removed first;
-then the fitting is focused on the 'pure' peak function;
+then the fitting is focussed on the 'pure' peak function;
 and a composite function is fit against the original data as the last step. 
 
 This approach is developed due to the failure of 'simple fit' mode on the cases

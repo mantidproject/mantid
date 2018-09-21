@@ -179,7 +179,7 @@ position by definition:
 
 .. math:: X_0^{(f)} = X_0^{(o)} * (1+offset)
 
-where :math:`X_0^{(f)}` is the focused peak position, and
+where :math:`X_0^{(f)}` is the focussed peak position, and
 :math:`X_0^{(o)}` is the observed peak position by fitting.
 
 As different spectrum covers different d-space range, the highest peak
