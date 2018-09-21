@@ -31,7 +31,7 @@ MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
   std::vector<std::string> res(procNum,
                                GenerateTimeBasedPrefix() +
                                    "_mantid_multiprocess_NXloader_segment_");
-  ushort i{0};
+  unsigned short i{0};
   for (auto &name : res)
     name += std::to_string(i++);
   return res;
@@ -230,13 +230,15 @@ void MultiProcessEventLoader::fillFromFile(
 }
 
 // Estimates the memory amount for shared memory segments
+// vector representing each pixel allocated only once, so we have allocationFee bytes extra overhead
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
+  unsigned allocationFee = 8 + 8 + GenerateStoragename().length();
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses)
                       * sizeof(TofEvent)
                       + m_numPixels *
-                          sizeof(EventLists)
-                      + sizeof(Chunks)};
-  return len * 10;
+                          (sizeof(EventLists) + allocationFee)
+                      + sizeof(Chunks) + allocationFee};
+  return len;
 }
 
 } // namespace IO
