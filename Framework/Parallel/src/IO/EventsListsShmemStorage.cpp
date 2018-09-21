@@ -6,6 +6,7 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
+/// Constructor
 EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
                                                  const std::string &elName,
                                                  size_t size, size_t chunksCnt,
@@ -26,12 +27,15 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
   }
 }
 
+/// Destructor
 EventsListsShmemStorage::~EventsListsShmemStorage() {
   if (destroyShared)
     ip::shared_memory_object::remove(m_segmentName.c_str());
 }
 
-void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN, std::size_t size) {
+/// Reserves memory for ToF events in given pixel and chunk
+void EventsListsShmemStorage::reserve(std::size_t chunkN, std::size_t pixelN,
+                                      std::size_t size) {
   assert(m_chunks);
   if (chunkN >= m_chunks->size())
     throw std::invalid_argument(std::string("Number of chunks is ") +

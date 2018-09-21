@@ -22,7 +22,13 @@ namespace Parallel {
 namespace IO {
 
 /** EventsListsShmemManager : Operates with event list in shared memory in
-  multiprocess environment; NOT an !!!OWNER of shared memory!!!
+ * multiprocess environment; NOT an !!!OWNER of shared memory!!!
+ * base class for EventsListsShmemStorage, that is the owner.
+ * Structure of storage:
+ *    chunk_0 |pixel_0|   chunk_1 |pixel_0| ... chunk_N |pixel_0|
+ *            |pixel_1|           |pixel_1|      ...    |pixel_1|
+ *            ... ... ... ... ... ... ... ... ... ... ... ... ...
+ *            |pixel_M|           |pixel_M|      ...    |pixel_M|
 
   @author Igor Gudich
   @date 2018
@@ -70,16 +76,12 @@ public:
   void AppendEvent(std::size_t chunkN, std::size_t listN,
                    const Types::Event::TofEvent &event);
   template<typename InIter>
-  void AppendEvent(std::size_t chunkN, std::size_t listN,
-                   InIter from, InIter to);
+  void AppendEvent(std::size_t chunkN, std::size_t listN, InIter from,
+                   InIter to);
 
-  std::size_t pixelCount() { return m_chunks && !m_chunks->empty() ? m_chunks->at(0).size() : 0; }
-
-  static void appendEventsRandomly(std::size_t nE, unsigned nP,
-                                   unsigned chunkId,
-                                   EventsListsShmemManager &mngr);
-  static void appendEventsDeterm(std::size_t nE, unsigned nP, unsigned chunkId,
-                                 EventsListsShmemManager &mngr);
+  std::size_t pixelCount() {
+    return m_chunks && !m_chunks->empty() ? m_chunks->at(0).size() : 0;
+  }
 
   MANTID_PARALLEL_DLL friend std::ostream &
   operator<<(std::ostream &os, const EventsListsShmemManager &manager);
@@ -108,6 +110,7 @@ protected:
   Chunks *m_chunks;
 };
 
+/// Appends the range of ToF events (from other container for example)
 template<typename InIter>
 void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
                                           InIter from, InIter to) {

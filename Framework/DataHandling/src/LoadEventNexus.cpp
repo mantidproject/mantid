@@ -255,9 +255,8 @@ void LoadEventNexus::init() {
   loadType.emplace_back("MPI");
 #endif
   auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
-  declareProperty(
-      "Load type", "default", loadTypeValidator, "Set type of loader"
-  );
+  declareProperty("Load type", "default", loadTypeValidator,
+                  "Set type of loader");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -553,11 +552,7 @@ LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
   return ret;
 }
 
-enum class LoadEventNexus::LoaderType {
-  MPI,
-  MULTIPROCESS,
-  DEFAULT
-};
+enum class LoadEventNexus::LoaderType { MPI, MULTIPROCESS, DEFAULT };
 
 //-----------------------------------------------------------------------------
 /**
@@ -805,9 +800,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_file->close();
     if (loaderType == LoaderType::MPI) {
       try {
-        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name, bankNames,
-                                     event_id_is_spec);
-        g_log.information() << "Used ParallelEventLoader.\n";
+        ParallelEventLoader::loadMPI(*ws, m_filename, m_top_entry_name,
+                                     bankNames, event_id_is_spec);
+        g_log.information() << "Used MPI ParallelEventLoader.\n";
         loaded = true;
         shortest_tof = 0.0;
         longest_tof = 1e10;
@@ -817,15 +812,16 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       }
     } else {
       try {
-        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name, bankNames,
-                                              event_id_is_spec);
-        g_log.information() << "Used ParallelEventLoader.\n";
+        ParallelEventLoader::loadMultiProcess(*ws, m_filename, m_top_entry_name,
+                                              bankNames, event_id_is_spec);
+        g_log.information() << "Used Multiprocess ParallelEventLoader.\n";
         loaded = true;
         shortest_tof = 0.0;
         longest_tof = 1e10;
       } catch (const std::exception &e) {
-        g_log.warning()
-            << std::string(e.what()) + "\nMultiprocess event loader failed, falling back to default loader.\n";
+        g_log.warning() << std::string(e.what()) + "\nMultiprocess event "
+                                                   "loader failed, falling "
+                                                   "back to default loader.\n";
       }
     }
 
@@ -1348,9 +1344,10 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
 
 /// The parallel loader currently has no support for a series of special cases,
 /// as indicated by the return value of this method.
-LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeights,
-                                                            const bool oldNeXusFileNames,
-                                                            const std::string &classType) const {
+LoadEventNexus::LoaderType
+LoadEventNexus::defineLoaderType(const bool haveWeights,
+                                 const bool oldNeXusFileNames,
+                                 const std::string &classType) const {
   auto propVal = getPropertyValue("Load type");
   if (propVal == "default")
     return LoaderType::DEFAULT;
@@ -1359,12 +1356,15 @@ LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeigh
   noParallelConstrictions &= !(m_ws->nPeriods() != 1);
   noParallelConstrictions &= !haveWeights;
   noParallelConstrictions &= !oldNeXusFileNames;
-  noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
-  noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
-      filter_time_stop != Types::Core::DateAndTime::maximum()));
-  noParallelConstrictions &= !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
-      !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
-      !isDefault("ChunkNumber")));
+  noParallelConstrictions &=
+      !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &=
+      !((filter_time_start != Types::Core::DateAndTime::minimum() ||
+          filter_time_stop != Types::Core::DateAndTime::maximum()));
+  noParallelConstrictions &=
+      !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+          !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
+          !isDefault("ChunkNumber")));
   noParallelConstrictions &= !(classType != "NXevent_data");
 
   if (!noParallelConstrictions)

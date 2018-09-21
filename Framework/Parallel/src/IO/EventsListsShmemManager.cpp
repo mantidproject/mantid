@@ -27,6 +27,7 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
                                                  const std::string &elName, int)
     : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {}
 
+/// Appends ToF event to given pixel in given chunk of shared storage
 void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
                                           const Types::Event::TofEvent &event) {
   assert(m_chunks);
@@ -42,27 +43,6 @@ void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
 
   auto &list = m_chunks->at(chunkN).at(listN);
   list.emplace_back(event);
-}
-
-void EventsListsShmemManager::appendEventsRandomly(
-    std::size_t nE, unsigned nP, unsigned chunkId,
-    EventsListsShmemManager &mngr) {
-  std::random_device rand_dev;
-  std::mt19937 generator(rand_dev());
-  std::uniform_int_distribution<int> distr(0, nP - 1);
-
-  for (unsigned i = 0; i < nE; ++i) {
-    mngr.AppendEvent(chunkId, distr(generator),
-                     Types::Event::TofEvent(i + 0.5));
-  }
-}
-
-void EventsListsShmemManager::appendEventsDeterm(
-    std::size_t nE, unsigned nP, unsigned chunkId,
-    EventsListsShmemManager &mngr) {
-  for (unsigned i = 0; i < nE; ++i) {
-    mngr.AppendEvent(chunkId, i % nP, Types::Event::TofEvent(i));
-  }
 }
 
 std::ostream &operator<<(std::ostream &os,

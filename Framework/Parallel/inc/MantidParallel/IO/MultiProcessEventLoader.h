@@ -276,7 +276,7 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
       }
     }
 
-    ++finished; // all consumed
+    ++finished; // all is consumed
 
     for (unsigned pixel = atomic_fetch_add(&pixNum, 1);
          pixel < storage.pixelCount(); pixel = atomic_fetch_add(&pixNum, 1))
