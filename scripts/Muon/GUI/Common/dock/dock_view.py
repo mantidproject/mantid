@@ -4,10 +4,27 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 
 
+class MuonDockWidget(QtGui.QDockWidget):
+
+    def __init__(self, name):
+        super(MuonDockWidget, self).__init__(name)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
+    def focusInEvent(self, event):
+        print("MuonDockWidget Has focus")
+        self.raise_()
+
+    def focusOutEvent(self, event):
+        print("MuonDockWidget Loses focus")
+        self.lower()
+
+
 class DockView(QtGui.QMainWindow):
 
     def __init__(self, parent=None):
         super(DockView, self).__init__(parent)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint)
         self.widgets = []
         self.docks = []
 
@@ -15,13 +32,16 @@ class DockView(QtGui.QMainWindow):
         # add widget
         self.widgets.append(widget)
         # make an empty dock for widget
-        self.docks.append(QtGui.QDockWidget(name))
+        # self.docks.append(QtGui.QDockWidget(name))
+        self.docks.append(MuonDockWidget(name))
         # add widget to dock
         self.docks[-1].setWidget(self.widgets[-1])
         # add dock to view
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self.docks[-1])
         # set layout
         self.widgets[-1].setLayout(self.widgets[-1].getLayout())
+
+        # self.wigets[-1].hasFocus.connect(self.docks[-1].raise_)
 
     def makeTabs(self):
         # convert docks into tabs

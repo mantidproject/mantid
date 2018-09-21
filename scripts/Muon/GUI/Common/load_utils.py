@@ -341,7 +341,7 @@ def load_grouping_from_XML(filename):
 
     for i, group_name in enumerate(group_names):
         groups += [MuonGroup(group_name=group_name,
-                             detector_IDs=group_ids[i])]
+                             detector_ids=group_ids[i])]
     for i, pair_name in enumerate(pair_names):
         pairs += [MuonPair(pair_name=pair_name,
                            group1_name=pair_groups[i][0],

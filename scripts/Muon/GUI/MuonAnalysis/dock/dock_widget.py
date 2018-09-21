@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
 
 from Muon.GUI.Common.dock.dock_view import DockView
 
@@ -47,6 +47,8 @@ class DockWidget(QtGui.QWidget):
 
     def __init__(self, parent=None, context=None):
         super(DockWidget, self).__init__(parent)
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+
         # declare sub-widgets for home tab
         self.instrument_widget = None
         self.group_widget = None
@@ -71,6 +73,7 @@ class DockWidget(QtGui.QWidget):
         self.context = context
 
         self.dockWidget = QtGui.QWidget()
+
 
         self.setup_home_tab()
         self.setup_grouping_tab()
@@ -149,3 +152,21 @@ class DockWidget(QtGui.QWidget):
 
     def closeEvent(self, event):
         self.dock_view.closeEvent(event)
+
+
+
+    def focusInEvent(self, event):
+        print("DockWidget Has focus")
+        self.raise_()
+
+    def focusOutEvent(self, event):
+        print("DockWidget Loses focus")
+        self.lower()
+
+from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
+
+class DetachableDockWidget(DetachableTabWidget):
+
+    def __init__(self, parent=None):
+        super(DetachableDockWidget, self).__init__(parent)
+

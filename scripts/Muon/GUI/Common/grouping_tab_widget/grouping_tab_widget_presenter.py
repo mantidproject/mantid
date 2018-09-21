@@ -121,7 +121,7 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.enable_editing()
         self.pairing_table_widget.enable_editing()
 
-    def calculate_all_data(self, _arg):
+    def calculate_all_data(self, arg):
         self._model.show_all_groups_and_pairs()
 
     def handle_update_all_clicked(self):
@@ -139,6 +139,8 @@ class GroupingTabPresenter(object):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
+
+        self.groupingNotifier.notify_subscribers()
 
     def on_clear_requested(self):
         self._model.clear()

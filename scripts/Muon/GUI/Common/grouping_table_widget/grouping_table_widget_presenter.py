@@ -112,7 +112,7 @@ class GroupingTablePresenter(object):
         self._model.clear_groups()
         for entry in table:
             detector_list = run_utils.run_string_to_list(str(entry[1]))
-            group = MuonGroup(group_name=str(entry[0]), detector_IDs=detector_list)
+            group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list)
             self._model.add_group(group)
 
     def update_view_from_model(self):

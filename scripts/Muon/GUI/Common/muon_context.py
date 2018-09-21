@@ -413,7 +413,7 @@ class MuonContext(object):
         while new_group_name in self.group_names:
             group_index += 1
             new_group_name = "group_" + str(group_index)
-        return MuonGroup(group_name=new_group_name, detector_IDs=[1])
+        return MuonGroup(group_name=new_group_name, detector_ids=[1])
 
     def construct_empty_pair(self, _pair_index):
         """
