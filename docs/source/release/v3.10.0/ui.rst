@@ -87,7 +87,7 @@ SliceViewer Improvements
 - Fixed a bug where swapping the dimensions did not draw the axis scale correctly.
 - Fixed a bug where the normalization selection was not respected.
 
-VSI Improvments
+VSI Improvements
 ###############
 - ParaView was updated to to `v5.3.0 <https://blog.kitware.com/paraview-5-3-0-release-notes/>`_.
 - The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This interface minimizes virtual indirection and allows advanced compiler optimizations such as vectorization.

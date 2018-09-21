@@ -23,7 +23,7 @@ the :ref:`algm-ConvertUnits` algorithm.
 To estimate the true number of neutrons that entered the detector the
 counts in each bin are divided by the detector efficiency of that
 detector at that energy. The efficiency iteslef is calculated from
-the forumula, tabulated within the algorithm.
+the formula, tabulated within the algorithm.
 
 The numbers of counts are then multiplied by the value of
 :math:`k_i/k_f` for each bin. In that formula :math:`k_i` is the
@@ -34,7 +34,7 @@ detector and energy bin). They're calculated, in angstrom\ :sup:`-1`, as
 | :math:`k_i = \sqrt{\frac{E_i}{2.07212466}}`
 | :math:`k_f = \sqrt{\frac{E_i - \Delta E}{2.07212466}}`
 
-where :math:`E_i` and :math:`\Delta E` are energies in meV, the inital
+where :math:`E_i` and :math:`\Delta E` are energies in meV, the initial
 neutron kinetic energy and the energy lost to the sample respectively.
 
 Note: it is not possible to use this :ref:`algorithm <algorithm>` to

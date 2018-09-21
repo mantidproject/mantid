@@ -294,7 +294,7 @@ The TF asymmetry mode can be enabled by checking the "TF Asymmetry" checkbox in 
 TF asymmetry.
 When TF Asymmetry is activated the user's function is updated by using :ref:`ConvertFitFunctionForMuonTFAsymmetry <algm-ConvertFitFunctionForMuonTFAsymmetry>`
 and populates the function browser. The ties and constraints are not preserved. The plot will also update. Running a fit will then use :ref:`CalculaterMuonAsymmetry <algm-CalculateMuonAsymmetry>`. This willupdate the normalized data.
-It is adviced that when using this feature to have no binning. 
+It is advised that when using this feature to have no binning. 
 
 When the user deactivates the  "TF Asymmetry" checkbox the user function is returned with updated values.
 
@@ -348,7 +348,7 @@ Data Table
 The data table allows the user to modify the selected data for the fitting. This includes the start and end times, which can also
 be updated by dragging the blue dashed lines in the plot. The "Groups/Pairs to fit" box provides a drop-down menu with three options (all groups, all pairs and custom). 
 Selecting custom will produce a pop-up box with tick boxes for each of the available groups and pairs. If a user wants to update the custom selection the 
-Groups/Pairs button can be pressed from the ReselectData_ section at the bottom ofthe tab (this is only enabled if a custom selection is set). Underneath displays the
+Groups/Pairs button can be pressed from the ReselectData_ section at the bottom of the tab (this is only enabled if a custom selection is set). Underneath displays the
 "Selected Groups". 
 
 The next row is the "Periods to fit" option, which is only displayed for multiple period data. This will automatically be populated with
@@ -406,7 +406,7 @@ At the bottom of the tab is the "Reselect Data" section. This includes three but
 buttons are only when the relevant options in the data table are set to custom. Pressing the button will produce a pop-up that will allow the user to modify their selection. 
 
 The "Combine Periods" button is only enabled if multiple periods are available. Pressing the button will generate a pop-up with two boxes. The top one is for adding periods 
-(as a comma seperated list or with "+") and the bottom box is for subtraction (as a comma sepearted list). Everything in the top and bottom boxes are summed seperatley 
+(as a comma separated list or with "+") and the bottom box is for subtraction (as a comma sepearted list). Everything in the top and bottom boxes are summed seperatley 
 and the results are then used in the subtraction. 
 
 .. image::  ../images/MuonAnalysisCombinePeriods.png
@@ -641,7 +641,7 @@ General
 |       |                             |                                                                     |
 |       |                             |   NOTE: This can can cause speed and stability problems once the    |
 |       |                             |   number of graphs managed by Mantidplot passes a few hundred       |
-|       |                             |   which can hapen if you run Mantid for a few days on an            |
+|       |                             |   which can happen if you run Mantid for a few days on an            |
 |       |                             |   experiment. For long term stability we suggest you select         |
 |       |                             |   **Use previous window**.                                          |
 |       |                             |                                                                     |

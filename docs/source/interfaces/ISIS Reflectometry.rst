@@ -484,7 +484,7 @@ monitoring.
 
 You can stop monitoring at any time using the `Stop monitor` button or by
 cancelling the algorithm from the *Algorithm progress* dialog. If you close the
-interface, monitoring will continue running in the backgroud. You can cancel
+interface, monitoring will continue running in the background. You can cancel
 the `MonitorLiveData` algorithm from the *Algorithm progress* dialog.
 
 If `MonitorLiveData` stops due to an error, the `Start monitor` button will be

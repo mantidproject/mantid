@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm joins the input workspaces into a single one by concatenating their spectra. The concatenation is done in the same order as in the input workspaces list. Consider using :ref:`SortXAxis <algm-SortXAxis>` afterwards, if necessary. The instrument and the units are copied from the first workspace. The sample logs are also copied from the first input, but the behaviour can be controlled by the instrument parameter file (IPF), as described in :ref:`MergeRuns <algm-MergeRuns>`. Furthermore, that behaviour can be overriden by providing input to the relevant optional properties of the algorithm. This algorithm joins Dx values, if present.
+This algorithm joins the input workspaces into a single one by concatenating their spectra. The concatenation is done in the same order as in the input workspaces list. Consider using :ref:`SortXAxis <algm-SortXAxis>` afterwards, if necessary. The instrument and the units are copied from the first workspace. The sample logs are also copied from the first input, but the behaviour can be controlled by the instrument parameter file (IPF), as described in :ref:`MergeRuns <algm-MergeRuns>`. Furthermore, that behaviour can be overridden by providing input to the relevant optional properties of the algorithm. This algorithm joins Dx values, if present.
 
 InputWorkspaces
 ---------------
@@ -24,7 +24,7 @@ This can be a mixed list of workspaces and workspace groups on AnalysisDataServi
 SampleLogAsXAxis
 ----------------
 
-If specified, this log values will constitute the x-axis of the resulting workspace. The log must exist in all the input workspaces and must be numeric (int or double), in which case the input workspaces must contain single bin only, or numeric time series, in which case the lenght of the series must match the number of points.
+If specified, this log values will constitute the x-axis of the resulting workspace. The log must exist in all the input workspaces and must be numeric (int or double), in which case the input workspaces must contain single bin only, or numeric time series, in which case the length of the series must match the number of points.
 
 ConjoinX Operation
 ------------------

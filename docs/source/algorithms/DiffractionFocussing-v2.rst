@@ -65,7 +65,7 @@ Usage
    # specify groupping file, here using CalFile format
    cal_file = "hrpd_new_072_01_corr.cal"
 
-   # For HRPD data, perform a unit convertion TOF->d-spacing, taking into account detector position offsets
+   # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets
    ws = AlignDetectors(InputWorkspace='ws',CalibrationFile=cal_file)
    # Focus the data
    ws = DiffractionFocussing(InputWorkspace='ws',GroupingFileName=cal_file)
@@ -89,14 +89,14 @@ Output:
    ws = DiffractionFocussing(InputWorkspace='ws', GroupingFileName="4detector_cal_example_file.cal" \
         , PreserveEvents=False)
 
-   print("Number of focussed spectra: " + str(ws.getNumberHistograms()))
+   print("Number of focused spectra: " + str(ws.getNumberHistograms()))
    print("What type is the workspace after focussing: " + ws.id())
 
 Output:
 
 .. testoutput:: ExEventFocussing
 
-   Number of focussed spectra: 2
+   Number of focused spectra: 2
    What type is the workspace after focussing: Workspace2D
 
 Previous Versions

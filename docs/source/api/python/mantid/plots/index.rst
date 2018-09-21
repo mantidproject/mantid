@@ -166,7 +166,7 @@ and :func:`~mantid.plots.MantidAxes.pcolorfast`:
   **axisaligned** keyword, and setting it to True
 * If the :class:`mantid.api.MatrixWorkspace` has different numbers
   of bins the above functions will automatically use the
-  **axisaligned** behavior (cannot be overriden). :func:`~mantid.plots.MantidAxes.contour`
+  **axisaligned** behavior (cannot be overridden). :func:`~mantid.plots.MantidAxes.contour`
   and the like cannot plot these type of workspaces.
 
 In addition to the ``mantid`` projection, there is also the ``mantid3d`` projection for 3d plots.
@@ -195,7 +195,7 @@ Types of functions
 **1D Plotting**
 
 * :func:`~mantid.plots.MantidAxes.plot` - Plot lines and/or markers
-* :func:`~mantid.plots.MantidAxes.errorbar` - Plot valuse with errorbars
+* :func:`~mantid.plots.MantidAxes.errorbar` - Plot values with errorbars
 * :func:`~mantid.plots.MantidAxes.scatter` - Make a scatter plot
 
 **2D Plotting**

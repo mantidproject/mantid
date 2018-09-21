@@ -68,7 +68,7 @@ the Mantid's offset, then we can convert VULCAN's offset to Mantid's as
 
 .. math:: \xi^{(m)} = \frac{L\cdot\sin\theta}{L'\cdot\sin\theta'}\cdot\frac{1}{\xi^{(m)}} - 1
 
-VULCAN uses effective DIFC and :math:`2\theta` for the effective detector to be focussed on.
+VULCAN uses effective DIFC and :math:`2\theta` for the effective detector to be focused on.
 It follows the Bragg rule for time-of-flight, i.e.,
 
 .. math:: T = DIFC \cdot d = (252.777\cdot L\cdot 2\cdot\sin\theta)\cdot d

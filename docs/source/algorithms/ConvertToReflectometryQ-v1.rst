@@ -106,7 +106,7 @@ Normalised Polygon Transformation
     Io=mtd['Io']
     D=mtd['D']
 
-    # Peform the normalisation step
+    # Perform the normalisation step
     Divide(LHSWorkspace=D,RHSWorkspace=Io,OutputWorkspace='I',AllowDifferentNumberSpectra='1',ClearRHSWorkspace='1')
     I=mtd['I'][0]
 
@@ -146,14 +146,14 @@ Before the ConvertToReflectometryQ algorithm is executed in the usage example ab
 .. figure:: /images/SignedThetaVSlam_plot.png
    :alt: plot of Signed theta vs lambda. 
     
-Patch Plot with Dumped Vertexes
+Patch Plot with Dumped Vertices
 ###############################
 
-ConvertToReflectometryQ has the functionality to produce a table of vertexes before they are
-fitted to a normalised polygon. The plotting of these vertexes results in a patch plot that can be
+ConvertToReflectometryQ has the functionality to produce a table of vertices before they are
+fitted to a normalised polygon. The plotting of these vertices results in a patch plot that can be
 achieved by running the algorithm below.
 
-**Example - Patch Plot using the Dumped vertexes from QxQy Transformation**
+**Example - Patch Plot using the Dumped vertices from QxQy Transformation**
 
 .. code-block:: python
 
@@ -183,7 +183,7 @@ achieved by running the algorithm below.
         polygon_vertexes = list()   
 
         for vertex in vertex_table:
-            #Column of vertex i.e 'Qx' in this case, is dependant on the type of transform.
+            #Column of vertex i.e 'Qx' in this case, is dependent on the type of transform.
             #'Ki' and 'Kf' are used for the K transformation.
             #'Pi+Pf' and 'Pi-Pf' are used for the P transformation.
             polygon_vertexes.append((vertex['Qx'], vertex['Qy'] ))
@@ -210,7 +210,7 @@ achieved by running the algorithm below.
 Patch plot for QxQy Transformation:
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotQ.png
-   :alt: patch plot of dumped vertexes using Q transformation
+   :alt: patch plot of dumped vertices using Q transformation
 
 Patch plots from other transformations
 ######################################
@@ -222,14 +222,14 @@ Patch plots can also be produced using the other Transformations :math:`K_i, K_f
 
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotK.PNG
-   :alt: patch plot of dumped vertexes using K transformation 
+   :alt: patch plot of dumped vertices using K transformation 
 
 
 **Patch plot for P Transformation:**
 
 
 .. figure:: /images/ConvertToReflectometryQ_PatchPlotP.PNG
-   :alt: patch plot of dumped vertexes using P transformation
+   :alt: patch plot of dumped vertices using P transformation
 
 .. categories::
 
