@@ -29,7 +29,7 @@ mtd_add_qt_library (TARGET_NAME MplCpp
     IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS
       inc
-      ../../../Framework/PythonInterface/inc
+      ../../../Framework/PythonInterface/core/inc
       ${PYTHON_INCLUDE_PATH}
       ${PYTHON_NUMPY_INCLUDE_DIR}
   LINK_LIBS

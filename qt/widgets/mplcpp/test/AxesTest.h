@@ -35,6 +35,24 @@ public:
     TS_ASSERT_EQUALS("Title", axes.pyobj().attr("get_title")());
   }
 
+  void testPlotWithValidDataReturnsLine2D() {
+    Axes axes(pyAxes());
+    std::vector<double> xsrc{1, 2, 3}, ysrc{1, 2, 3};
+    auto line = axes.plot(xsrc, ysrc);
+    auto linex = line.pyobj().attr("get_xdata")(true);
+//    for(size_t i = 0; i < xsrc.size(); ++i) {
+//      TSM_ASSERT_EQUALS("Mismatch in X data", linex[i], xsrc[i]);
+//    }
+  }
+
+  // ----------------- failure tests ---------------------
+  void testPlotThrowsWithEmptyData() {
+    Axes axes(pyAxes());
+    TS_ASSERT_THROWS(axes.plot({}, {}), std::invalid_argument);
+    TS_ASSERT_THROWS(axes.plot({1}, {}), std::invalid_argument);
+    TS_ASSERT_THROWS(axes.plot({}, {1}), std::invalid_argument);
+  }
+
 private:
   Python::Object pyAxes() {
     // An Axes requires a figure and rectangle definition

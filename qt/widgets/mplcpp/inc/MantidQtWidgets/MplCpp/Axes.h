@@ -17,7 +17,7 @@
  GNU General Public License for more details.
 */
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
-#include "MantidQtWidgets/MplCpp/Python/Object.h"
+#include "MantidQtWidgets/MplCpp/Line2D.h"
 
 namespace MantidQt {
 namespace Widgets {
@@ -36,7 +36,7 @@ public:
 
   /// @name Plotting
   /// @{
-
+  Line2D plot(std::vector<double> xdata, std::vector<double> ydata);
   /// @}
 };
 

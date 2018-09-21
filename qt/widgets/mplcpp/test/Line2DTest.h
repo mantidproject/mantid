@@ -13,13 +13,13 @@ public:
 
   // ---------------------- success tests --------------------
   void testConstructionRequiresMplLine2DObject() {
-    TS_ASSERT_THROWS_NOTHING(Line2D line{pyLine2D()});
+    TS_ASSERT_THROWS_NOTHING(Line2D line(pyLine2D(), {}, {}));
   }
 
   // ---------------------- failure tests --------------------
   void testConstructionWithNonLine2DObjectThrowsInvalidArgument() {
     auto obj{Python::NewRef(Py_BuildValue("(i)", 1))};
-    TS_ASSERT_THROWS(Line2D line{obj}, std::invalid_argument);
+    TS_ASSERT_THROWS(Line2D line(obj, {}, {}), std::invalid_argument);
   }
 
 private:

@@ -57,7 +57,7 @@ public:
       : m_instance(std::move(obj)) {
     if (PyObject_HasAttrString(pyobj().ptr(), attr) == 0) {
       throw std::invalid_argument(
-          "object has no attribute 'remove'. An Artist object was expected.");
+          std::string("object has no attribute ") + attr);
     }
   }
 

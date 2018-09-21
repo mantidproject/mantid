@@ -4,6 +4,7 @@
 #include "cxxtest/GlobalFixture.h"
 
 #include <QApplication>
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
 
 /**
@@ -16,6 +17,7 @@ class PythonInterpreter : CxxTest::GlobalFixture {
 public:
   bool setUpWorld() override {
     Py_Initialize();
+    Mantid::PythonInterface::importNumpy();
     return Py_IsInitialized();
   }
 

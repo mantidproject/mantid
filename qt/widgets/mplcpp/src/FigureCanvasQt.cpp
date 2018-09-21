@@ -25,11 +25,6 @@ Python::Object figure(bool tightLayout = true) {
  * @return A new FigureCanvasQT object
  */
 Python::Object createCanvas() {
-  if (!Py_IsInitialized()) {
-    throw std::runtime_error(
-        "Library requires an active Python interpreter.\n"
-        "Call Py_Initialize at an appropriate point in the application.");
-  }
   return backendModule().attr("FigureCanvasQTAgg")(figure());
 }
 

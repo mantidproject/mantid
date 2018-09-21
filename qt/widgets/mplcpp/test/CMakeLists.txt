@@ -17,10 +17,9 @@ target_include_directories ( MplCppQt5Test SYSTEM PRIVATE
                              ${GTEST_INCLUDE_DIR} )
 target_include_directories (MplCppQt5Test PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../inc
-  ../../../../Framework/PythonInterface/inc
 )
 target_link_libraries ( MplCppQt5Test
-  MplCppQt5 Qt5::Gui Qt5::Widgets ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+  MplCppQt5 Qt5::Gui Qt5::Widgets PythonInterfaceCore ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 
 add_dependencies( GUITests MplCppQt5Test )
 
