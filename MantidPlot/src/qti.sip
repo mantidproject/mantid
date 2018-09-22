@@ -37,10 +37,6 @@
   #endif
 %End
 
-%ModuleHeaderCode
-#include "MantidPythonInterface/core/VersionCompat.h"
-%End
-
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 %Import mantidqtpython.sip

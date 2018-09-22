@@ -410,8 +410,7 @@ include ( UseQt4 )
 include_directories ( ${PYTHON_INCLUDE_PATH} )
 
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
-set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp.in )
-set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sipqti.cpp )
+set ( SIP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp )
 set ( SIP_SRC_AUTO sip_qtipart0.cpp )
 
 
@@ -458,12 +457,6 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
                           ${SIP_SPEC}
                      DEPENDS ${SIP_INCLUDE_DIR}/sip.h src/qti.sip ${QTI_SIP_HDRS} ../qt/python/mantidqtpython/mantidqtpython_def.sip
                      COMMENT "Generating python bindings using sip"
-)
-
-add_custom_command ( OUTPUT ${SIP_SRC}
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
-                     DEPENDS ${SIP_SRC_IN}
-                     COMMENT ""
 )
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
