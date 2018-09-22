@@ -48,7 +48,7 @@ The masking procedure proceeds as follows:
 #. Repeat for the other half.
 
 Default mask
-###########
+############
 
 The default mask file is defined by the 'Workflow.MaskFile' instrument parameter.
 
@@ -107,7 +107,7 @@ Usage
 
     import numpy
     import scipy.stats
-    
+
     # Create a fake IN4 workspace.
     # We need an instrument and a template first.
     empty_IN4 = LoadEmptyInstrument(InstrumentName='IN4')
@@ -131,7 +131,7 @@ Usage
     ys *= 0.0
     ys = ws.dataY(101)
     ys *= 0.0
-    
+
     # Manually correct monitor spectrum number as LoadEmptyInstrument does
     # not know about such details.
     SetInstrumentParameter(
@@ -152,7 +152,7 @@ Usage
     # Elastic channel information is missing in the sample logs.
     # It can be given as single valued workspace, as well.
     elasticChannelWS = CreateSingleValuedWorkspace(107)
-    
+
     DirectILLCollectData(
         InputWorkspace=ws,
         OutputWorkspace='preprocessed',
@@ -160,7 +160,7 @@ Usage
         IncidentEnergyCalibration='Energy Calibration OFF', # Normally we would do this for IN4.
         OutputEPPWorkspace='epps' # Needed for the diagnostics.
     )
-    
+
     diagnostics = DirectILLDiagnostics(
         InputWorkspace='preprocessed',
         OutputWorkspace='diagnosed',
@@ -168,7 +168,7 @@ Usage
         NoisyBkgLowThreshold=0.01,
         OutputReportWorkspace='diagnostics_report'
     )
-    
+
     print(diagnostics.OutputReport)
     print('Some small-angle detectors got diagnosed as bad due to detector solid angle corrections.')
     report = mtd['diagnostics_report']

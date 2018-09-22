@@ -20,7 +20,7 @@ This algorithm is one of the workflow algorithms that helps
 :ref:`algm-AlignAndFocusPowder`.
 
 Determining Frequency and Wavelength
-##################################
+####################################
 
 The frequency is found by inspecting the logs (in order)
 ``SpeedRequest1``, ``Speed1``, and ``frequency``. Whichever one has a

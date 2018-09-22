@@ -20,7 +20,7 @@ User Interface
   appropriately rather than being too small to be usable (Windows only).
 - A new Print button has been added to the MantidPlot help window.
 
-.. figure:: ../../images/maskedbins.jpg     
+.. figure:: ../../images/maskedbins.jpg
    :class: screenshot
    :width: 500px
    :align: right
@@ -49,12 +49,12 @@ Plotting Improvements
   + This allows a wider selection of plot types: Surface, Contour, Waterfall, 1D and Tiled plotting
   + If you have more than one workspace selected, either by using ctrl or shift, or by selecting a group workspace this enables multiple workspaces to be included in the plots
   + This interface also give you much better control over the labelling of the data in the plots
-  
+
     * Log values can be used as labels, which is good for temperature or pressure ramps
     * Custom labels can be input if log data is not available
     * For Waterfall and 1D plots, the labelling appears in the legend
-    * For Surface plots the labels form the Z axis   
-    
+    * For Surface plots the labels form the Z axis
+
 - Curves where all(Y) <= 0 are now not plotted when the Y-scale is set to logarithmic.
   The previous behaviour assigned an arbitrary value of 0.1 which was confusing.
 
@@ -88,7 +88,7 @@ SliceViewer Improvements
 - Fixed a bug where the normalization selection was not respected.
 
 VSI Improvements
-###############
+################
 - ParaView was updated to to `v5.3.0 <https://blog.kitware.com/paraview-5-3-0-release-notes/>`_.
 - The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This interface minimizes virtual indirection and allows advanced compiler optimizations such as vectorization.
 - Minimize the number of times the workspace min and max values are calculated.

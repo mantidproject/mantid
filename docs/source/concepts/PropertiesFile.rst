@@ -37,7 +37,7 @@ General properties
 |                                  | algorithms that should be hidden in Mantid.      |                   |
 +----------------------------------+--------------------------------------------------+-------------------+
 | ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``            |
-|                                  | memory for reference in scripts.                   |                   |
+|                                  | memory for reference in scripts.                   |                 |
 +----------------------------------+--------------------------------------------------+-------------------+
 | ``MultiThreaded.MaxCores``       | Sets the maximum number of cores available to be | ``0``             |
 |                                  | used for threads for                             |                   |
@@ -52,7 +52,7 @@ Facility and instrument properties
 |Property                      |Description                                         |Example value        |
 +==============================+====================================================+=====================+
 | ``default.facility``         | The name of the default facility. The facility     | ``ISIS``            |
-|                              | must be defined within the facilities.xml file to   |                     |
+|                              | must be defined within the facilities.xml file to   |                    |
 |                              | be considered valid. The file is described         |                     |
 |                              | :ref:`here <Facilities file>`.                     |                     |
 +------------------------------+----------------------------------------------------+---------------------+
@@ -181,7 +181,7 @@ Network Properties
 |                                           |operations (in seconds).                           |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
-|                                           |repository, this overrides the default timeout.   |                                 |
+|                                           |repository, this overrides the default timeout.   |                                  |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
 |                                           | set mantid will use the system proxy              |                                 |
