@@ -4,7 +4,7 @@ import re
 
 from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.run_string_utils import valid_name_regex, valid_alpha_regex
-from Muon.GUI.Common.observer_pattern import Observer, Observable
+from Muon.GUI.Common.observer_pattern import Observable
 
 
 class PairingTablePresenter(object):
@@ -18,17 +18,15 @@ class PairingTablePresenter(object):
 
         self._view.on_user_changes_pair_name(self.validate_pair_name)
         self._view.on_user_changes_alpha(self.validate_alpha)
-
+        self._view.on_guess_alpha_clicked(self.handle_guess_alpha_clicked)
         self._view.on_table_data_changed(self.handle_data_change)
 
         self._dataChangedNotifier = lambda: 0
-
         self._on_alpha_clicked = lambda: 0
         self._on_guess_alpha_requested = lambda pair_name, group1, group2: 0
 
+        # notify if Guess Alpha clicked for any table entries
         self.guessAlphaNotifier = PairingTablePresenter.GuessAlphaNotifier(self)
-
-        self._view.on_guess_alpha_clicked(self.handle_guess_alpha_clicked)
 
     def show(self):
         self._view.show()
@@ -44,6 +42,45 @@ class PairingTablePresenter(object):
 
     def enable_editing(self):
         self._view.enable_editing()
+
+    def handle_guess_alpha_clicked(self, row):
+        table_row = self._view.get_table_contents()[row]
+        pair_name = table_row[0]
+        group1 = table_row[1]
+        group2 = table_row[2]
+        self.guessAlphaNotifier.notify_subscribers([pair_name, group1, group2])
+
+    def handle_data_change(self):
+        self.update_model_from_view()
+        self.update_view_from_model()
+        self.notify_data_changed()
+
+    def update_model_from_view(self):
+        table = self._view.get_table_contents()
+        self._model.clear_pairs()
+        for entry in table:
+            pair = MuonPair(pair_name=str(entry[0]),
+                            group1_name=str(entry[1]),
+                            group2_name=str(entry[2]),
+                            alpha=float(entry[3]))
+            self._model.add_pair(pair)
+
+    def update_view_from_model(self):
+        self._view.disable_updates()
+
+        self._view.clear()
+        for pair in self._model.pairs:
+            self.add_pair_to_view(pair)
+
+        self._view.enable_updates()
+
+    def update_group_selections(self):
+        groups = self._model.group_names
+        self._view.update_group_selections(groups)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Add / Remove pairs
+    # ------------------------------------------------------------------------------------------------------------------
 
     def add_pair(self, pair):
         """Add a pair to the model and view"""
@@ -83,42 +120,6 @@ class PairingTablePresenter(object):
             name = self._view.get_table_contents()[-1][0]
             self._view.remove_last_row()
             self._model.remove_pairs_by_name([name])
-
-    def handle_guess_alpha_clicked(self, row):
-        table_row = self._view.get_table_contents()[row]
-        pair_name = table_row[0]
-        group1 = table_row[1]
-        group2 = table_row[2]
-        self.guessAlphaNotifier.notify_subscribers([pair_name, group1, group2])
-
-    def handle_data_change(self):
-        self.update_model_from_view()
-        self.update_view_from_model()
-        self.notify_data_changed()
-
-    def update_model_from_view(self):
-        table = self._view.get_table_contents()
-        self._model.clear_pairs()
-        for entry in table:
-            print("ENTRY : ", entry)
-            pair = MuonPair(pair_name=str(entry[0]),
-                            group1_name=str(entry[1]),
-                            group2_name=str(entry[2]),
-                            alpha=float(entry[3]))
-            self._model.add_pair(pair)
-
-    def update_view_from_model(self):
-        self._view.disable_updates()
-
-        self._view.clear()
-        for pair in self._model.pairs:
-            self.add_pair_to_view(pair)
-
-        self._view.enable_updates()
-
-    def update_group_selections(self):
-        groups = self._model.group_names
-        self._view.update_group_selections(groups)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table entry validation

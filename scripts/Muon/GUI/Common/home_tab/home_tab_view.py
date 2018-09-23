@@ -17,6 +17,9 @@ class HomeTabView(QtGui.QWidget):
         self._plot_widget = plot_widget
         self._run_info_widget = run_info_widget
 
+        self.splitter = None
+        self.vertical_layout = None
+
         self.setup_interface()
 
     def setup_interface(self):
@@ -24,22 +27,22 @@ class HomeTabView(QtGui.QWidget):
         self.setWindowTitle("Home Tab")
         self.resize(500, 100)
 
-        self.splitter1 = QtGui.QSplitter(QtCore.Qt.Vertical)
+        self.splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
 
         self.vertical_layout = QtGui.QVBoxLayout(self)
 
-        self.splitter1.addWidget(self._instrument_widget)
-        self.splitter1.addWidget(self._grouping_widget)
-        self.splitter1.addWidget(self._plot_widget)
-        self.splitter1.addWidget(self._run_info_widget)
-        self.splitter1.setCollapsible(0, False)
-        self.splitter1.setCollapsible(1, False)
-        self.splitter1.setCollapsible(2, False)
-        self.splitter1.setCollapsible(3, False)
-        self.splitter1.setHandleWidth(2)
+        self.splitter.addWidget(self._instrument_widget)
+        self.splitter.addWidget(self._grouping_widget)
+        self.splitter.addWidget(self._plot_widget)
+        self.splitter.addWidget(self._run_info_widget)
+        self.splitter.setCollapsible(0, False)
+        self.splitter.setCollapsible(1, False)
+        self.splitter.setCollapsible(2, False)
+        self.splitter.setCollapsible(3, False)
+        self.splitter.setHandleWidth(2)
         self.setStyleSheet("QSplitter::handle {background-color: #3498DB}")
 
-        self.vertical_layout.addWidget(self.splitter1)
+        self.vertical_layout.addWidget(self.splitter)
         self.setLayout(self.vertical_layout)
 
     # for docking

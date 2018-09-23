@@ -67,6 +67,9 @@ class LoadRunWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.run_edit)
         self.horizontal_layout.addWidget(self.increment_run_button)
 
+        self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        self.horizontal_layout.setMargin(0)
+
     def set_item_sizes(self):
         button_height = self.loadCurrentRunButton.height()
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)

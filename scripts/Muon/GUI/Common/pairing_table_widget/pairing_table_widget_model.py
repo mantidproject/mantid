@@ -24,7 +24,6 @@ class PairingTableModel(object):
             del self._data.pairs[name]
 
     def construct_empty_pair(self, pair_index):
-        # return MuonPair(pair_name="pair_" + str(pair_index))
         return self._data.construct_empty_pair(pair_index)
 
     def clear(self):

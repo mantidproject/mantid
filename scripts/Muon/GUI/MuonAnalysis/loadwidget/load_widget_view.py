@@ -17,7 +17,6 @@ class LoadWidgetView(QtGui.QWidget):
     def setup_interface_layout(self):
 
         self.clear_button = QtGui.QPushButton(self)
-        #self.clear_button.setMinimumSize(QtCore.QSize(100, 25))
         self.clear_button.setObjectName("clearButton")
         self.clear_button.setToolTip("Clear the currently loaded data")
         self.clear_button.setText("Clear")
@@ -46,11 +45,17 @@ class LoadWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.multiple_loading_check)
         self.horizontal_layout.addWidget(self.load_behaviour_combo)
 
+        self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        self.horizontal_layout.setMargin(0)
+        self.tool_widget = QtGui.QWidget(self)
+        self.tool_widget.setLayout(self.horizontal_layout)
+
         # Set the layout vertically
         self.vertical_layout = QtGui.QVBoxLayout()
         self.vertical_layout.addWidget(self.load_run_widget)
         self.vertical_layout.addWidget(self.load_file_widget)
-        self.vertical_layout.addLayout(self.horizontal_layout)
+        self.vertical_layout.addWidget(self.tool_widget)
+
         self.vertical_layout.addStretch(1)
 
         self.group = QtGui.QGroupBox("Loading")

@@ -172,10 +172,12 @@ class InstrumentWidgetView(QtGui.QWidget):
     def get_instrument(self):
         return self.instrument_selector.currentText()
 
-    def set_instrument(self, instrument):
+    def set_instrument(self, instrument, block=False):
         index = self.instrument_selector.findText(instrument)
         if index != -1:
+            self.instrument_selector.blockSignals(block)
             self.instrument_selector.setCurrentIndex(index)
+            self.instrument_selector.blockSignals(False)
 
     def on_instrument_changed(self, slot):
         self.instrument_selector.currentIndexChanged.connect(slot)
@@ -231,7 +233,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_2 = QtGui.QHBoxLayout()
         self.horizontal_layout_2.setObjectName("horizontalLayout2")
-        #self.horizontal_layout_2.addWidget(self.timezero_edit)
+        # self.horizontal_layout_2.addWidget(self.timezero_edit)
         self.horizontal_layout_2.addSpacing(10)
         self.horizontal_layout_2.addWidget(self.timezero_unit_label)
         self.horizontal_layout_2.addWidget(self.timezero_checkbox)
@@ -296,7 +298,7 @@ class InstrumentWidgetView(QtGui.QWidget):
 
         self.horizontal_layout_3 = QtGui.QHBoxLayout()
         self.horizontal_layout_3.setObjectName("horizontalLayout3")
-        #self.horizontal_layout_3.addWidget(self.firstgooddata_edit)
+        # self.horizontal_layout_3.addWidget(self.firstgooddata_edit)
         self.horizontal_layout_3.addSpacing(10)
         self.horizontal_layout_3.addWidget(self.firstgooddata_unit_label)
         self.horizontal_layout_3.addWidget(self.firstgooddata_checkbox)

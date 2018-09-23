@@ -45,7 +45,7 @@ class HomeTabPresenter(object):
 
     def update_all_widgets(self):
         """
-        Update all widgets from the context
+        Update all widgets from the context.
         """
         for subwidget in self._subwidgets:
             subwidget.update_view_from_model()
@@ -57,6 +57,7 @@ class HomeTabPresenter(object):
     class InstrumentObserver(Observer):
 
         def __init__(self, outer):
+            Observer.__init__(self)
             self.outer = outer
 
         def update(self, observable, arg):
@@ -65,6 +66,7 @@ class HomeTabPresenter(object):
     class LoadObserver(Observer):
 
         def __init__(self, outer):
+            Observer.__init__(self)
             self.outer = outer
 
         def update(self, observable, arg):
@@ -75,6 +77,7 @@ class HomeTabPresenter(object):
     class GroupingObserver(Observer):
 
         def __init__(self, outer):
+            Observer.__init__(self)
             self.outer = outer
 
         def update(self, observable, arg):

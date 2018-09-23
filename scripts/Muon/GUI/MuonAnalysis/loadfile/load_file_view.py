@@ -61,8 +61,11 @@ class BrowseFileWidgetView(QtGui.QWidget):
 
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
-        self.horizontal_layout.addWidget(self.file_path_edit)
         self.horizontal_layout.addWidget(self.browse_button)
+        self.horizontal_layout.addWidget(self.file_path_edit)
+
+        self.horizontal_layout.setContentsMargins(0, 0, 0, 0)
+        self.horizontal_layout.setMargin(0)
 
         self.setLayout(self.horizontal_layout)
 

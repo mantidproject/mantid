@@ -75,13 +75,15 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
 
         self.setup_load_widget()
         self.tabs = self.setup_tabs()
-        self.dock_widget = DockWidget(self, self.context)
         self.help_widget = DummyLabelWidget("Help dummy", self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget_view)
         splitter.addWidget(self.tabs)
         splitter.addWidget(self.help_widget.widget)
+        splitter.setCollapsible(0, False)
+        splitter.setCollapsible(1, False)
+        splitter.setCollapsible(2, False)
 
         self.setCentralWidget(splitter)
         self.setWindowTitle("Muon Analysis version 2")
@@ -184,6 +186,12 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
 
         self.setCentralWidget(tabWidget)
         return tabWidget
+
+    def closeEvent(self, event):
+        self.tabs.closeEvent(event)
+        self.load_widget_view.close()
+        self.load_run_view.close()
+        self.load_file_view.close()
 
 
 class MuonAnalysis2Gui(QtGui.QMainWindow):

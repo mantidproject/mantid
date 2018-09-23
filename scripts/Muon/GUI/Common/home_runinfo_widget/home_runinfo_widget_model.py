@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-# import mantid.simpleapi as mantid
-
 from Muon.GUI.Common.muon_context import MuonContext
 
 
@@ -15,7 +13,6 @@ class HomeRunInfoWidgetModel(object):
 
     def get_instrument_name(self):
         inst = self._data.loaded_workspace.getInstrument()
-        # print(dir(inst))
         return inst.getName()
 
     def get_log_value(self, log_name):
@@ -35,16 +32,12 @@ class HomeRunInfoWidgetModel(object):
     def get_average_temperature(self):
         # TODO : This implementation does not match the one in the C++ code
         # as the C++ filters the time series logs based on the start and end times.
-        # MuonAnalysis.cpp
         # TimeSeriesProperty.cpp line 934
         temps = self._data.get_sample_log("Temp_Sample")
         try:
             temps = self._data.loaded_workspace.getRun().getProperty("Temp_Sample")
-        except:
+        except Exception:
             return "Log not found"
-        # print(temps.timeAverageValue())
-        # print(temps.times)
-        #print("dir of temps : ", dir(temps))
         if temps:
             return temps.timeAverageValue()
         else:

@@ -1,18 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtCore import pyqtSignal
 
 
 class HomePlotWidgetView(QtGui.QWidget):
 
     def __init__(self, parent=None):
         super(HomePlotWidgetView, self).__init__(parent)
-        self._button_height = 40
+        self.plot_label = None
+        self.plot_selector = None
+        self.plot_button = None
+        self.horizontal_layout = None
+        self.vertical_layout = None
+        self.group = None
+        self.widget_layout = None
 
         self.setup_interface()
-
-
 
     def setup_interface(self):
         self.setObjectName("PlotWidget")
@@ -30,14 +33,11 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.plot_button.setObjectName("PlotButton")
         self.plot_button.setText("Plot")
 
-        self.plot_selector.setMinimumHeight(self._button_height)
-        self.plot_button.setMinimumHeight(self._button_height)
-
         self.plot_label.setBuddy(self.plot_button)
         self.plot_selector.setSizePolicy(QtGui.QSizePolicy.Fixed,
-                                        QtGui.QSizePolicy.Fixed)
-        self.plot_button.setSizePolicy(QtGui.QSizePolicy.Fixed,
                                          QtGui.QSizePolicy.Fixed)
+        self.plot_button.setSizePolicy(QtGui.QSizePolicy.Fixed,
+                                       QtGui.QSizePolicy.Fixed)
 
         self.horizontal_layout = QtGui.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
@@ -56,11 +56,11 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.setStyleSheet("QGroupBox {border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex}"
                            "QGroupBox:title {"
                            'subcontrol-origin: margin;'
-                            "padding: 0 3px;"
+                           "padding: 0 3px;"
                            'subcontrol-position: top center;'
                            'padding-top: -10px;'
                            'padding-bottom: 0px;'
-                            "padding-right: 10px;"
+                           "padding-right: 10px;"
                            ' color: grey; }')
 
         self.group.setLayout(self.vertical_layout)

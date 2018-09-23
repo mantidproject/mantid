@@ -16,41 +16,6 @@ from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
 
 
-# def get_loaded_time_zero(workspace):
-#     first_good_data = 0.0
-#     if isinstance(workspace, WorkspaceGroup):
-#         if workspace.getNumberOfEntries() == 0:
-#             raise IndexError("Cannot find loaded time zero : Empty WorkspaceGroup")
-#         if "FirstGoodData" in workspace[0].getSampleDetails().keys():
-#             first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
-#     else:
-#         try:
-#             first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
-#         except Exception:
-#             raise IndexError("Cannot find loaded time zero")
-#     return first_good_data
-#
-#
-# def get_first_good_data(workspace):
-#     first_good_data = 0.0
-#     if isinstance(workspace, WorkspaceGroup):
-#         # deal with workspace groups
-#         if workspace.getNumberOfEntries() == 0:
-#             raise IndexError("Cannot find loaded time zero : Empty WorkspaceGroup")
-#         if "FirstGoodData" in workspace[0].getSampleDetails().keys():
-#             first_good_data = workspace[0].getSampleDetails().getLogData("FirstGoodData").value
-#     else:
-#         # deal with regular workspace
-#         try:
-#             if "FirstGoodData" in workspace[0].getSampleDetails().keys():
-#                 first_good_data = workspace.getSampleDetails().getLogData("FirstGoodData").value
-#             else:
-#                 raise IndexError("Cannot find loaded time zero in Workspace logs")
-#         except Exception:
-#             raise IndexError("Cannot find loaded time zero")
-#     return first_good_data
-
-
 class LoadUtils(object):
     """
     A simple class for identifing the current run
@@ -149,9 +114,19 @@ DEFAULT_OUTPUTS = ["OutputWorkspace",
                    "TimeZero",
                    "FirstGoodData",
                    "MainFieldDirection"]
+# List of default values for the DEFAULT_OUTPUTS list
+DEFAULT_OUTPUT_VALUES = [MuonWorkspace(api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)),
+                         None,  # api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
+                         0.0,
+                         0.0, "Unknown direction"]
 
 
 class floatPropertyWithValue(object):
+    """
+    Simple class to replicate the functionality of the mantid "PropertyWithValue", allowing this class
+    to take its place when, for example, using a dummy load result.
+    """
 
     def __init__(self, value):
         self._value = value
@@ -161,21 +136,8 @@ class floatPropertyWithValue(object):
         return self._value
 
     @value.setter
-    def value(self, newval):
-        self._value = newval
-
-
-DEFAULT_OUTPUT_VALUES = [MuonWorkspace(api.WorkspaceFactoryImpl.Instance().create("Workspace2D", 2, 10, 10)),
-                         None, #api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
-                         api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace"),
-                         0.0,
-                         0.0, "Unknown Direction"]
-
-
-# floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
-# floatPropertyWithValue(api.WorkspaceFactoryImpl.Instance().createTable("TableWorkspace")),
-# floatPropertyWithValue(0.0),
-# floatPropertyWithValue(0.0)]
+    def value(self, new_value):
+        self._value = new_value
 
 
 def is_workspace_group(workspace):
@@ -351,8 +313,7 @@ def load_grouping_from_XML(filename):
 
 
 def _get_groups_from_XML(root):
-    names = []
-    ids = []
+    names, ids = [], []
     for child in root:
         if child.tag == "group":
             names += [child.attrib['name']]
@@ -361,9 +322,7 @@ def _get_groups_from_XML(root):
 
 
 def _get_pairs_from_XML(root):
-    names = []
-    groups = []
-    alphas = []
+    names, groups, alphas = [], [], []
     for child in root:
         if child.tag == "pair":
             names += [child.attrib['name']]

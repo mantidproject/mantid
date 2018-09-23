@@ -110,13 +110,14 @@ class InstrumentWidgetPresenter(HomeTabSubWidget):
             # prompt user to continue or not
             user_response = self._view.instrument_changed_warning()
             if user_response == 1:
+                # User selects "Ok"
                 self._model.clear_data()
                 self.clear_view()
-                self._view.set_instrument(instrument)
+                self._view.set_instrument(instrument, block=True)
                 self.instrumentNotifier.notify_subscribers(instrument)
             else:
-                # reset the instrument selector
-                self._view.set_instrument(current_instrument)
+                # User selects "Cancel", reset the instrument selector
+                self._view.set_instrument(current_instrument, block=True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Dead Time

@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 
+
 class HomePlotWidgetPresenter(HomeTabSubWidget):
 
     def __init__(self, view, model):

@@ -411,17 +411,19 @@ class MuonContext(object):
         group_index = 0
         new_group_name = "group_" + str(group_index)
         while new_group_name in self.group_names:
+            # modify the name until it is unique
             group_index += 1
             new_group_name = "group_" + str(group_index)
         return MuonGroup(group_name=new_group_name, detector_ids=[1])
 
     def construct_empty_pair(self, _pair_index):
         """
-        Create an empty MuonPair appropriate for adding to the current pairing table
+        Create an empty MuonPair appropriate for adding to the current pairing table.
         """
         pair_index = 0
         new_pair_name = "pair_" + str(pair_index)
         while new_pair_name in self.pair_names:
+            # modify the name until it is unique
             pair_index += 1
             new_pair_name = "pair_" + str(pair_index)
         if len(self.group_names) == 1:
