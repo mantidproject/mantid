@@ -295,7 +295,7 @@ class MantidStressTest(unittest.TestCase):
 
     def validateWorkspaces(self, valNames=None, mismatchName=None):
         '''
-        Performs a check that two workspaces are equal using the CheckWorkspacesMatch
+        Performs a check that two workspaces are equal using the CompareWorkspaces
         algorithm. Loads one workspace from a nexus file if appropriate.
         Returns true if: the workspaces match
                       OR the validate method has not been overridden.
@@ -304,7 +304,7 @@ class MantidStressTest(unittest.TestCase):
         if valNames is None:
             valNames = self.validate()
 
-        checker = AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = AlgorithmManager.create("CompareWorkspaces")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", valNames[0])
         checker.setPropertyValue("Workspace2", valNames[1])
@@ -775,7 +775,7 @@ class TestManager(object):
         self._skippedTests = 0
         self._failedTests = 0
         self._lastTestRun = 0
-        
+
         self._tests = list_of_tests
 
     def generateMasterTestList(self):
@@ -1156,11 +1156,11 @@ def envAsString():
 
 #########################################################################
 # Function to keep a pool of threads active in a loop to run the tests.
-# Each threads starts a loop and gathers a first test module from the
+# Each thread starts a loop and gathers a first test module from the
 # master test list which is stored in the tests_dict shared dictionary,
 # starting with the number in the module list equal to the process id.
 #
-# Each process then checks if all the data files requird by the current
+# Each process then checks if all the data files required by the current
 # test module are available (i.e. have not been locked by another
 # thread). If all files are unlocked, the thread proceeds with that test
 # module. If not, it goes further down the list until it finds a module
@@ -1178,7 +1178,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
                     total_number_of_tests, maximum_name_length,
                     tests_done, process_number, lock, required_files_dict,
                     locked_files_dict):
-    
+
     reporter = XmlResultReporter(showSkipped=options.showskipped,
                                  total_number_of_tests=total_number_of_tests,
                                  maximum_name_length=maximum_name_length)
@@ -1186,7 +1186,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
     runner = TestRunner(executable=options.executable, exec_args=options.execargs,
                         escape_quotes=True, clean=options.clean)
 
-    # Make sure the status is 1 to begin with as it will be replaced 
+    # Make sure the status is 1 to begin with as it will be replaced
     res_array[process_number + 2*options.ncores] = 1
 
     # Begin loop: as long as there are still some test modules that

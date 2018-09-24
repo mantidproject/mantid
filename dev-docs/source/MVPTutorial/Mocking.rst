@@ -36,14 +36,14 @@ The test class is then initialised:
 
     class presenterTest(unittest.TestCase):
         def setUp(self):
-	    self.view = mock.create_autospec(view.view)
-
-	    # mock view
-	    self.view.doSomethingSignal = mock.Mock()
-	    self.view.btn_click = mock.Mock()
-	    self.view.getValue = mock.Mock(return_value=3.14)
+            self.view = mock.create_autospec(view.view)
+        
+            # mock view
+            self.view.doSomethingSignal = mock.Mock()
+            self.view.btn_click = mock.Mock()
+            self.view.getValue = mock.Mock(return_value=3.14)
        
-	    self.presenter = presenter.Presenter(self.view)
+            self.presenter = presenter.Presenter(self.view)
 
 ``create_autospec`` mocks the class contained within the brackets. We
 then need to explicitly mock the methods using ``mock.Mock``. In
