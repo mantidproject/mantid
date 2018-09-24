@@ -29,19 +29,8 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
     absorb_units = absorb_ws.getAxis(0).getUnit().unitID()
     if van_original_units != absorb_units:
         van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=absorb_units, OutputWorkspace=van_ws)
-    # This deliberately matches only to the first spectrum of absorb_ws
-    # ensure uniform binning across spectra
-    # extract the binning parameters from the first spectrum.
-    # there is probably a better way to calculate the binning parameters, but this
-    # gets the right answer.
-    xaxis = absorb_ws.readX(0)
-    params = []
-    for i, x in enumerate(xaxis):
-        params.append(x)
-        if i < len(xaxis) - 1:
-            params.append(xaxis[i + 1] - x)  # delta
-    van_ws = mantid.Rebin(InputWorkspace=van_ws, Params=params)
 
+    absorb_ws = mantid.RebinToWorkspace(WorkspaceToRebin=absorb_ws, WorkspaceToMatch=van_ws, OutputWorkspace=absorb_ws)
     van_ws = mantid.Divide(LHSWorkspace=van_ws, RHSWorkspace=absorb_ws, OutputWorkspace=van_ws)
 
     if van_original_units != absorb_units:
