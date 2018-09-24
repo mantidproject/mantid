@@ -47,6 +47,10 @@ public:
   virtual IReflSaveTabView* save() const = 0;
   virtual IExperimentView* experiment() const = 0;
   virtual ~IReflBatchView() = default;
+  virtual void giveUserCritical(const std::string &prompt,
+                                const std::string &title) = 0;
+  virtual void giveUserInfo(const std::string &prompt,
+                            const std::string &title) = 0;
 };
 }
 }

@@ -65,7 +65,11 @@ public:
   getReductionOptions() const = 0;
   /// Post-processing
   virtual std::string getStitchOptions() const = 0;
-
+  /// Dialog to print information
+  virtual void giveUserCritical(const std::string &prompt,
+                                const std::string &title) = 0;
+  virtual void giveUserInfo(const std::string &prompt,
+                            const std::string &title) = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups

@@ -78,5 +78,19 @@ std::unique_ptr<QtReflSettingsTabView> QtReflBatchView::createSettingsTab() {
 std::unique_ptr<QtReflSaveTabView> QtReflBatchView::createSaveTab() {
   return Mantid::Kernel::make_unique<QtReflSaveTabView>(this);
 }
+
+void QtReflBatchView::giveUserCritical(const std::string &prompt,
+                                       const std::string &title) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+void QtReflBatchView::giveUserInfo(const std::string &prompt,
+                                   const std::string &title) {
+  QMessageBox::information(this, QString::fromStdString(title),
+                           QString::fromStdString(prompt), QMessageBox::Ok,
+                           QMessageBox::Ok);
+}
 }
 }

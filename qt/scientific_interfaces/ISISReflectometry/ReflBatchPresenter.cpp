@@ -127,6 +127,28 @@ void ReflBatchPresenter::setInstrumentName(const std::string &instName) const {
 }
 
 /**
+Tells the view to show an critical error dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void ReflBatchPresenter::giveUserCritical(const std::string &prompt,
+                                          const std::string &title) {
+
+  m_view->giveUserCritical(prompt, title);
+}
+
+/**
+Tells the view to show an information dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void ReflBatchPresenter::giveUserInfo(const std::string &prompt,
+                                      const std::string &title) {
+
+  m_view->giveUserInfo(prompt, title);
+}
+
+/**
 Checks whether or not data is currently being processed in the Runs Tab
 * @return : Bool on whether data is being processed
 */
