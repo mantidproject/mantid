@@ -415,7 +415,7 @@ QGroupBox::title {
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save locations for the output of batch reductions are: Memory (RAM), File (Hard disk), Both (RAM and Hard disk).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
-                        <string>Memory&amp;y</string>
+                        <string>Memor&amp;y</string>
                        </property>
                        <property name="checked">
                         <bool>false</bool>

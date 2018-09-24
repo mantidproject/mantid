@@ -164,7 +164,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     """
     A method to calculate the various possible incident energies with a given chopper setup on LET.
     The window of energy transfers plotted is 85% by default.
-    efocus: The incident enrgy that all choppers are focused on
+    efocus: The incident enrgy that all choppers are focussed on
     freq1: The frequency of the resolution choppers
     freqpr: frequency of the pulse removal chopper
     instrumentpars: a list of instrument parameters [see ISISDisk.py]

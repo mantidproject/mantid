@@ -210,7 +210,7 @@ class ISISDisk:
 
     def getEi(self):
         """
-        Returns the focused incident energy in meV
+        Returns the focussed incident energy in meV
         """
         return self.Ei
 
