@@ -95,6 +95,11 @@ private:
   std::string getMinimizerString(const std::string &wsName,
                                  const std::string &wsIndex);
 
+  /// Extract specific spectra from a workspace
+  API::MatrixWorkspace_sptr
+  extractSpectraAlg(API::MatrixWorkspace_sptr workspace,
+                    const std::string &subName);
+
   /// Base name of output workspace
   std::string m_baseName;
 
