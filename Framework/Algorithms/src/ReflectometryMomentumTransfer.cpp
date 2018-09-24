@@ -140,11 +140,11 @@ void ReflectometryMomentumTransfer::init() {
                   "Chopper radius, in meters.");
   declareProperty(Prop::CHOPPER_PAIR_DIST, EMPTY_DBL(), mandatoryDouble,
                   "The gap between two choppers, in meters.");
-  declareProperty(Prop::SLIT1_NAME, "slit1", mandatoryString,
+  declareProperty(Prop::SLIT1_NAME, "", mandatoryString,
                   "Name of the first slit component.");
   declareProperty(Prop::SLIT1_SIZE_LOG, "", mandatoryString,
                   "The sample log entry for the first slit opening.");
-  declareProperty(Prop::SLIT2_NAME, "slit2", mandatoryString,
+  declareProperty(Prop::SLIT2_NAME, "", mandatoryString,
                   "Name of the second slit component.");
   declareProperty(Prop::SLIT2_SIZE_LOG, "", mandatoryString,
                   "The sample log entry for the second slit opening.");
