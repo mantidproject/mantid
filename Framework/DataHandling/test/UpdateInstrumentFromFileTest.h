@@ -8,7 +8,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"

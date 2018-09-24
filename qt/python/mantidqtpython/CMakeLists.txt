@@ -12,6 +12,7 @@ set ( SLICEVIEWER_INC ${WIDGETS_DIR}/sliceviewer/inc )
 set ( REFVIEWER_INC ${WIDGETS_DIR}/refdetectorview/inc )
 set ( HEADER_DEPENDS
   SIPVector.h
+  string.sip
   vector.sip
   ${FACTORY_INC}/MantidQtWidgets/Factory/WidgetFactory.h
 
@@ -28,6 +29,8 @@ set ( HEADER_DEPENDS
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/ManageUserDirectories.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/HintStrategy.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Hint.h
 
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/Row.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/Batch/RowLocation.h

@@ -97,8 +97,8 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   m_renderer->changeScaleType(m_scaleType);
 
   // set up the color map
-  if (!m_currentColorMapFilename.isEmpty()) {
-    loadColorMap(m_currentColorMapFilename, false);
+  if (!m_currentCMap.isEmpty()) {
+    loadColorMap(m_currentCMap, false);
   }
 
   // set up data ranges and colours
@@ -355,7 +355,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const {
   return sharedWorkspace->getInstrument();
 }
 
-const MantidColorMap &InstrumentActor::getColorMap() const {
+const ColorMap &InstrumentActor::getColorMap() const {
   return m_renderer->getColorMap();
 }
 
@@ -638,7 +638,7 @@ void InstrumentActor::draw(bool picking) const {
  */
 void InstrumentActor::loadColorMap(const QString &fname, bool reset_colors) {
   m_renderer->loadColorMap(fname);
-  m_currentColorMapFilename = fname;
+  m_currentCMap = fname;
   if (reset_colors)
     resetColors();
 }
@@ -681,7 +681,7 @@ void InstrumentActor::loadSettings() {
   m_scaleType = static_cast<GraphOptions::ScaleType>(
       settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
-  m_currentColorMapFilename = settings.value("ColormapFile", "").toString();
+  m_currentCMap = settings.value("ColormapFile", "").toString();
   // Set values from settings
   m_showGuides = settings.value("ShowGuides", false).toBool();
   settings.endGroup();
@@ -690,7 +690,7 @@ void InstrumentActor::loadSettings() {
 void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  settings.setValue("ColormapFile", m_currentColorMapFilename);
+  settings.setValue("ColormapFile", m_currentCMap);
   settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();

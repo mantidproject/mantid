@@ -50,7 +50,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb,
     : QWidget(parent), m_mantidDisplayModel(mdb), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
-      m_sortDirection(SortDirection::Ascending) {
+      m_sortDirection(SortDirection::Ascending), m_mutex(QMutex::Recursive) {
   setObjectName(
       "exploreMantid"); // this is needed for QMainWindow::restoreState()
   m_saveMenu = new QMenu(this);
@@ -277,6 +277,7 @@ void WorkspaceTreeWidget::recordWorkspaceRename(const std::string &oldName,
   QString qs_oldName = QString::fromStdString(oldName);
   QString qs_newName = QString::fromStdString(newName);
 
+  QMutexLocker renameMapLock(&m_mutex);
   // check if old_name has been recently a new name
   QList<QString> oldNames = m_renameMap.keys(qs_oldName);
   // non-empty list of oldNames become new_name
@@ -806,28 +807,30 @@ void WorkspaceTreeWidget::updateTree(const TopLevelItems &items) {
  */
 void WorkspaceTreeWidget::populateTopLevel(const TopLevelItems &topLevelItems,
                                            const QStringList &expanded) {
-  // collect names of selected workspaces
-  QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
-  m_selectedNames.clear(); // just in case
-  foreach (QTreeWidgetItem *item, selected) {
-    m_selectedNames << item->text(0);
-  }
+  {
+    QMutexLocker lock(&m_mutex);
+    // collect names of selected workspaces
+    QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
+    m_selectedNames.clear(); // just in case
+    foreach (QTreeWidgetItem *item, selected) {
+      m_selectedNames << item->text(0);
+    }
 
-  // populate the tree from scratch
-  m_tree->clear();
-  auto iend = topLevelItems.end();
-  for (auto it = topLevelItems.begin(); it != iend; ++it) {
-    auto *node = addTreeEntry(*it);
-    QString name = node->text(0);
-    if (expanded.contains(name))
-      node->setExpanded(true);
-    // see if item must be selected
-    if (shouldBeSelected(name))
-      node->setSelected(true);
+    // populate the tree from scratch
+    m_tree->clear();
+    auto iend = topLevelItems.end();
+    for (auto it = topLevelItems.begin(); it != iend; ++it) {
+      auto *node = addTreeEntry(*it);
+      QString name = node->text(0);
+      if (expanded.contains(name))
+        node->setExpanded(true);
+      // see if item must be selected
+      if (shouldBeSelected(name))
+        node->setSelected(true);
+    }
+    m_selectedNames.clear();
+    m_renameMap.clear();
   }
-  m_selectedNames.clear();
-  m_renameMap.clear();
-
   // apply any filtering
   filterWorkspaceTree(m_workspaceFilter->text());
 }
@@ -868,6 +871,7 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
  * @param name :: Name of a workspace to check.
  */
 bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
+  QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
     foreach (QString oldName, renamed) {

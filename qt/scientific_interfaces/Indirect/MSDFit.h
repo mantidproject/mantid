@@ -21,10 +21,12 @@ private:
 
 protected slots:
   void plotClicked();
+  void runClicked();
   void updatePlotOptions() override;
   void updateModelFitTypeString();
 
 protected:
+  void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

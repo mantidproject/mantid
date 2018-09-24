@@ -67,7 +67,7 @@ public:
   /// Sort the internal data structure according to member name
   void sortMembersByName();
   /// Adds a workspace to the group.
-  void addWorkspace(Workspace_sptr workspace);
+  void addWorkspace(const Workspace_sptr &workspace);
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container
@@ -75,7 +75,7 @@ public:
   /// Return the ith workspace
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
-  Workspace_sptr getItem(const std::string wsName) const;
+  Workspace_sptr getItem(const std::string &wsName) const;
   /// Return all workspaces in the group as one call for thread safety
   std::vector<Workspace_sptr> getAllItems() const;
   /// Remove a workspace from the group

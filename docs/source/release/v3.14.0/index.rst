@@ -36,6 +36,7 @@ Changes
    SANS <sans>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
+   Error Reporter <error_reporter>
 
 Full Change Listings
 --------------------

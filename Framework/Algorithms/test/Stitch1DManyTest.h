@@ -1092,13 +1092,15 @@ public:
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
-    TS_ASSERT_EQUALS(histNames.size(), 6)
+    TS_ASSERT_EQUALS(histNames.size(), 8)
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[4], "Stitch1DMany");
-    TS_ASSERT_EQUALS(histNames[5], "Stitch1DMany");
+    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[3], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[6], "Stitch1DMany");
+    TS_ASSERT_EQUALS(histNames[7], "Stitch1DMany");
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().clear();
@@ -1146,14 +1148,17 @@ public:
 
     // Test the algorithm histories
     std::vector<std::string> histNames = getHistory(stitched);
-    TS_ASSERT_EQUALS(histNames.size(), 7);
+    TS_ASSERT_EQUALS(histNames.size(), 10);
     TS_ASSERT_EQUALS(histNames[0], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[1], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[2], "CreateWorkspace");
-    TS_ASSERT_EQUALS(histNames[3], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[1], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[2], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[3], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[4], "CreateWorkspace");
     TS_ASSERT_EQUALS(histNames[5], "GroupWorkspaces");
-    TS_ASSERT_EQUALS(histNames[6], "Stitch1DMany");
+    TS_ASSERT_EQUALS(histNames[6], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[7], "CreateWorkspace");
+    TS_ASSERT_EQUALS(histNames[8], "GroupWorkspaces");
+    TS_ASSERT_EQUALS(histNames[9], "Stitch1DMany");
 
     // Clear the ADS
     AnalysisDataService::Instance().clear();

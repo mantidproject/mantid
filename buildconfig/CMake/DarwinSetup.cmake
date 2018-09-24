@@ -79,11 +79,11 @@ if ( NOT TARGET mantidpython )
   else ()
     set ( PARAVIEW_PYTHON_PATHS "" )
   endif ()
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx @ONLY )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 
   add_custom_target ( mantidpython ALL
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython
       ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
       COMMENT "Generating mantidpython" )
   #Configure install script at the same time. Doing it later causes a warning from ninja.
@@ -93,7 +93,7 @@ if ( NOT TARGET mantidpython )
     set ( PARAVIEW_PYTHON_PATHS "" )
   endif ()
 
-  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython_osx_install @ONLY )
 endif ()
 
 

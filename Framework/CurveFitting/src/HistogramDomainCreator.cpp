@@ -1,7 +1,6 @@
 #include "MantidCurveFitting/HistogramDomainCreator.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 

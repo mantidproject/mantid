@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/CropToComponent.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -199,6 +200,34 @@ public:
     if (Mantid::API::AnalysisDataService::Instance().doesExist("in")) {
       Mantid::API::AnalysisDataService::Instance().remove("in");
     }
+  }
+
+  void test_scanning_workspace() {
+
+    // Create a sample scanning workspace
+    Mantid::Algorithms::CreateSampleWorkspace creator;
+    creator.setChild(true);
+    creator.initialize();
+    creator.setProperty("NumBanks", 2);
+    creator.setProperty("NumScanPoints", 5);
+    creator.setProperty("OutputWorkspace", "__unused_for_child");
+    creator.execute();
+    Mantid::API::MatrixWorkspace_sptr workspace =
+        creator.getProperty("OutputWorkspace");
+
+    // Act
+    Mantid::Algorithms::CropToComponent crop;
+    crop.setChild(true);
+    crop.initialize();
+    crop.setRethrows(true);
+    crop.setProperty("InputWorkspace", workspace);
+    crop.setProperty("OutputWorkspace", "__cropped");
+    crop.setProperty("ComponentNames", "bank1");
+    TS_ASSERT_THROWS_NOTHING(crop.execute())
+    TS_ASSERT(crop.isExecuted())
+    Mantid::API::MatrixWorkspace_sptr cropped =
+        crop.getProperty("OutputWorkspace");
+    TS_ASSERT(cropped)
   }
 
 private:
