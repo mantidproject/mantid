@@ -148,7 +148,7 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
   ws->setYUnit(metadimy->unit()->c_str());
 
   std::vector<double> counts;
-  for (unsigned int i = 0; i < nspectra; ++i) {
+  for (size_t i = 0; i < nspectra; ++i) {
     const double *start = data->data() + (i * nbins);
     counts.assign(start, start + nbins);
     ws->setCounts(i, counts);
