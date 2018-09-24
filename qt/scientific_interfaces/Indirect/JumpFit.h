@@ -27,16 +27,8 @@ protected slots:
 
 protected:
   bool shouldEnablePlotResult() override;
-<<<<<<< HEAD
-<<<<<<< HEAD
 
   void setRunEnabled(bool enabled) override;
-=======
-  bool allowPlotResultWithOneSpectra() override { return false; }
-=======
->>>>>>> Show message box if one spectra in Multiple Input Refs #23164
-
->>>>>>> Plot Result only for workspaces with multiple spectra Refs #23164
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 
