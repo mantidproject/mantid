@@ -83,6 +83,7 @@ public:
   ReflRunsTabPresenter const &operator=(ReflRunsTabPresenter const &) = delete;
 
   ReflRunsTabPresenter(ReflRunsTabPresenter &&) = default;
+  ~ReflRunsTabPresenter();
   ReflRunsTabPresenter &operator=(ReflRunsTabPresenter &&) = default;
 
   void acceptMainPresenter(IReflBatchPresenter *mainPresenter) override;

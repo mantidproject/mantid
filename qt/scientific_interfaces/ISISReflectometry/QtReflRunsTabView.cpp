@@ -190,17 +190,6 @@ void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
 }
 
 /**
- * Set all possible tranfer methods
- * @param methods : All possible transfer methods.
- */
-void QtReflRunsTabView::setTransferMethods(
-    const std::set<std::string> &methods) {
-  for (auto method = methods.begin(); method != methods.end(); ++method) {
-    ui.comboTransferMethod->addItem((*method).c_str());
-  }
-}
-
-/**
 Set the list of available instruments to search for and updates the list of
 available instruments in the table view
 @param instruments : The list of instruments available

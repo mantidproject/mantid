@@ -464,9 +464,5 @@ void ReflRunsTabPresenter::changeInstrument() {
 }
 
 void ReflRunsTabPresenter::changeGroup() { updateWidgetEnabledState(); }
-}
-
-const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
-const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
 } // namespace CustomInterfaces
 } // namespace MantidQt
