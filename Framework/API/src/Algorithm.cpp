@@ -433,7 +433,7 @@ void Algorithm::unlockWorkspaces() {
  *  invoked for top level algorithms by the application manager.
  *  This method invokes exec() method.
  *  For Child Algorithms either the execute() method or exec() method
- *  must be EXPLICITLY invoked by  the parent algorithm.
+ *  must be EXPLICITLY invoked by the parent algorithm.
  *
  *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be
  *executed
@@ -595,7 +595,6 @@ bool Algorithm::execute() {
       if (m_alwaysStoreInADS)
         this->store();
 
-      // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
 
       // Log that execution has completed.
