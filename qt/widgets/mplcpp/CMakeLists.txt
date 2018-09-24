@@ -2,6 +2,7 @@
 set ( LIB_SRCS
   src/Artist.cpp
   src/Axes.cpp
+  src/Colors.cpp
   src/FigureCanvasQt.cpp
   src/Line2D.cpp
 )
@@ -13,6 +14,7 @@ set ( MOC_HEADERS
 set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Artist.h
   inc/MantidQtWidgets/MplCpp/Axes.h
+  inc/MantidQtWidgets/MplCpp/Colors.h
   inc/MantidQtWidgets/MplCpp/Line2D.h
 )
 

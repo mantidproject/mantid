@@ -4,6 +4,7 @@
 set ( TEST_HEADERS
   ArtistTest.h
   AxesTest.h
+  ColorsTest.h
   FigureCanvasQtTest.h
   Line2DTest.h
   SipTest.h
