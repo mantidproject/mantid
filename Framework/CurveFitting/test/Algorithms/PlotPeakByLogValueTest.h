@@ -560,8 +560,7 @@ public:
     alg.execute();
 
     {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_0_Parameters");
+      ITableWorkspace_sptr params = alg.getProperty("OutputWorkspace");
       TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
     }
 

@@ -98,7 +98,7 @@ private:
   /// Extract specific spectra from a workspace
   API::MatrixWorkspace_sptr
   extractSpectraAlg(API::MatrixWorkspace_sptr workspace,
-                    const std::string &subName);
+                    const std::string &outputName);
 
   /// Base name of output workspace
   std::string m_baseName;

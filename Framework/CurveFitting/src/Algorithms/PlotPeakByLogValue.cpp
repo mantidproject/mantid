@@ -343,13 +343,12 @@ void PlotPeakByLogValue::exec() {
           MatrixWorkspace_sptr outputWorkspace =
               fit->getProperty("OutputWorkspace");
           covarianceWorkspaces.emplace_back(extractSpectraAlg(
-              outputWorkspace, "_NormalisedCovarianceMatrices"));
+              outputWorkspace, wsBaseName + "_NormalisedCovarianceMatrix"));
           parameterWorkspaces.emplace_back(
-              extractSpectraAlg(outputWorkspace, "_Parameters"));
+              extractSpectraAlg(outputWorkspace, wsBaseName + "_Parameters"));
           fitWorkspaces.emplace_back(
-              extractSpectraAlg(outputWorkspace, "_Workspaces"));
+              extractSpectraAlg(outputWorkspace, wsBaseName + "_Workspace"));
         }
-
         g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
                       << ' ' << chi2 << '\n';
 
@@ -680,13 +679,12 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
 
 MatrixWorkspace_sptr
 PlotPeakByLogValue::extractSpectraAlg(MatrixWorkspace_sptr workspace,
-                                      const std::string &subName) {
-  auto extractCovarianceSpectra = this->createChildAlgorithm("ExtractSpectra");
-  extractCovarianceSpectra->setProperty("InputWorkspace", workspace);
-  extractCovarianceSpectra->setProperty("OutputWorkspace",
-                                        m_baseName + subName);
-  extractCovarianceSpectra->execute();
-  return extractCovarianceSpectra->getProperty("OutputWorkspace");
+                                      const std::string &outputName) {
+  auto extractSpectra = this->createChildAlgorithm("ExtractSpectra");
+  extractSpectra->setProperty("InputWorkspace", workspace);
+  extractSpectra->setProperty("OutputWorkspace", outputName);
+  extractSpectra->execute();
+  return extractSpectra->getProperty("OutputWorkspace");
 }
 
 } // namespace Algorithms
