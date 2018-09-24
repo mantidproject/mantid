@@ -79,6 +79,9 @@ public:
   /// Saves a project recovery checkpoint
   void saveAll(bool autoSave = true);
 
+  /// get Recovery Folder location
+  std::string getRecoveryFolderOutputPR();
+
 private:
   /// Captures the current object in the background thread
   std::thread createBackgroundThread();

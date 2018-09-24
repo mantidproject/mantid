@@ -715,4 +715,8 @@ void ProjectRecovery::saveAll(bool autoSave) {
   deleteExistingCheckpoints(NO_OF_CHECKPOINTS);
   g_log.debug("Project Recovery: Saving finished");
 }
+
+std::string ProjectRecovery::getRecoveryFolderOutputPR(){
+  return getRecoveryFolderOutput();
+}
 } // namespace MantidQt
