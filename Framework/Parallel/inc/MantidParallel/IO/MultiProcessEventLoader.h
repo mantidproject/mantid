@@ -163,8 +163,7 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
       part->setEventOffset(start);
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
-          TofEvent
-          event{(double) eventTimeOffset[i], part->next()};
+          TofEvent event{(double) eventTimeOffset[i], part->next()};
           storage.AppendEvent(0, eventId[i], event);
         } catch (std::exception const &ex) {
           std::rethrow_if_nested(ex);
@@ -258,10 +257,12 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
     }; // consumer have finished his work ready to transfer to shmem
 
     for (auto startPixel = pixNum.fetch_add(portion);
-         startPixel < storage.pixelCount(); startPixel = pixNum.fetch_add(portion)) {
+         startPixel < storage.pixelCount();
+         startPixel = pixNum.fetch_add(portion)) {
       for (auto pixel = startPixel;
            pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+        storage.AppendEvent(0, pixel, pixels[pixel].begin(),
+                            pixels[pixel].end());
     }
   });
 
@@ -284,10 +285,12 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
     ++finished; // all is consumed
 
     for (auto startPixel = pixNum.fetch_add(portion);
-         startPixel < storage.pixelCount(); startPixel = pixNum.fetch_add(portion)) {
+         startPixel < storage.pixelCount();
+         startPixel = pixNum.fetch_add(portion)) {
       for (auto pixel = startPixel;
            pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+        storage.AppendEvent(0, pixel, pixels[pixel].begin(),
+                            pixels[pixel].end());
     }
 
   });
