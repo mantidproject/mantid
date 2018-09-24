@@ -90,7 +90,7 @@ class BrowseFileWidgetPresenter(object):
         self._load_thread.start()
 
     def handle_load_thread_finished(self):
-        self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
+        #self._load_thread.threadWrapperTearDown(self.disable_loading, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
         self.on_loading_finished()

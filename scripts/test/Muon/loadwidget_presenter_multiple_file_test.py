@@ -32,8 +32,8 @@ class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
         def __init__(self, thread):
             self.QT_APP = QT_APP
             if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
+                self._thread = thread.thread_
+                thread._worker.signals.finished.connect(self.finished)
                 if self._thread.isRunning():
                     self.QT_APP.exec_()
 

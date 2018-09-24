@@ -33,8 +33,8 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         def __init__(self, thread):
             self.QT_APP = QT_APP
             if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
+                self._thread = thread._thread
+                thread._worker.signals.finished.connect(self.finished)
                 if self._thread.isRunning():
                     self.QT_APP.exec_()
 
@@ -221,8 +221,8 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
     class Runner:
 
         def __init__(self, thread):
-            if thread and thread.isRunning():
-                thread.finished.connect(self.finished)
+            if thread and thread._thread.isRunning():
+                thread._thread.finished.connect(self.finished)
                 QT_APP.exec_()
 
         def finished(self):

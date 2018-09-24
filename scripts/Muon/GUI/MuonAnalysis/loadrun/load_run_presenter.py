@@ -68,7 +68,7 @@ class LoadRunWidgetPresenter(object):
 
     def handle_load_thread_finished(self):
 
-        self._load_thread.threadWrapperTearDown(self.empty, self.handle_load_thread_finished)
+        #self._load_thread.threadWrapperTearDown(self.empty, self.handle_load_thread_finished)
         self._load_thread.deleteLater()
         self._load_thread = None
 
@@ -107,7 +107,7 @@ class LoadRunWidgetPresenter(object):
 
     def handle_load_thread_finished_current_run(self):
 
-        self._load_thread.threadWrapperTearDown(self.empty, self.handle_load_thread_finished_current_run)
+        #self._load_thread.threadWrapperTearDown(self.empty, self.handle_load_thread_finished_current_run)
         self._load_thread.deleteLater()
         self._load_thread = None
 
