@@ -28,13 +28,12 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog, QDialogButtonBox
 
 # local imports
-from mantidqt.utils.qt.test import requires_qapp
+from mantidqt.utils.qt.test import GuiTest
 from mantidqt.dialogs.spectraselectordialog import (get_spectra_selection, parse_selection_str,
                                                     SpectraSelectionDialog)
 
 
-@requires_qapp
-class SpectraSelectionDialogTest(unittest.TestCase):
+class SpectraSelectionDialogTest(GuiTest):
 
     _mock_get_icon = None
     _single_spec_ws = None

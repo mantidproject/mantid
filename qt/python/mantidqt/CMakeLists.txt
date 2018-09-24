@@ -1,6 +1,6 @@
 include ( SipQtTargetFunctions )
 
-set ( COMMON_INC_DIR ../../../widgets/common/inc )
+set ( COMMON_INC_DIR ../../widgets/common/inc )
 set ( HEADER_DEPENDS
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/AlgorithmDialog.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Message.h

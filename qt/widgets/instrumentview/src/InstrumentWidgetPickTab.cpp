@@ -3,11 +3,12 @@
 #include "MantidQtWidgets/InstrumentView/CollapsiblePanel.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
-#include "MantidQtWidgets/InstrumentView/OneCurvePlot.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 #include "MantidQtWidgets/InstrumentView/Projection3D.h"
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
+
+#include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -21,10 +22,6 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
-
-#include "qwt_scale_div.h"
-#include "qwt_scale_engine.h"
-#include "qwt_scale_widget.h"
 
 #include <QAction>
 #include <QActionGroup>
@@ -88,7 +85,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_selectionInfoDisplay = new QTextEdit(this);
 
   // set up the plot widget
-  m_plot = new OneCurvePlot(this);
+  m_plot = new MiniPlotQwt(this);
   m_plot->setYAxisLabelRotation(-90);
   m_plot->setXScale(0, 1);
   m_plot->setYScale(-1.2, 1.2);
@@ -1081,7 +1078,7 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
  */
 DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
                                                InstrumentWidget *instrWidget,
-                                               OneCurvePlot *plot)
+                                               MiniPlotQwt *plot)
     : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot),
       m_plotType(Single), m_enabled(true), m_tubeXUnits(DETECTOR_ID),
       m_currentPickID(std::numeric_limits<size_t>::max()) {

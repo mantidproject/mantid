@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from testhelpers import run_algorithm
 from mantid.kernel import std_vector_str
-from mantid.api import WorkspaceFactory
+from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
+from mantid.dataobjects import TableWorkspace
 import numpy
 
 class ITableWorkspaceTest(unittest.TestCase):
@@ -14,6 +15,10 @@ class ITableWorkspaceTest(unittest.TestCase):
         if self._test_ws is None:
             alg = run_algorithm('RawFileInfo', Filename='LOQ48127.raw',GetRunParameters=True, child=True)
             self.__class__._test_ws = alg.getProperty('RunParameterTable').value
+
+    def test_tableworkspace_is_constructible(self):
+        table = TableWorkspace()
+        self.assertTrue(isinstance(table, ITableWorkspace))
 
     def test_meta_information_is_correct(self):
         self.assertEquals(self._test_ws.columnCount(), 19)
@@ -225,7 +230,7 @@ class ITableWorkspaceTest(unittest.TestCase):
         from mantid.kernel import V3D
         import pickle
 
-        table = WorkspaceFactory.createTable()
+        table = TableWorkspace()
         table.addColumn(type="int",name="index")
         table.addColumn(type="str",name="value")
         table.addColumn(type="V3D",name="position")
@@ -237,8 +242,13 @@ class ITableWorkspaceTest(unittest.TestCase):
 
         p = pickle.dumps(table)
         table2 = pickle.loads(p)
-
         self.assertEqual(table.toDict(), table2.toDict())
+
+        # Can we add it to the ADS
+        name = "test_pickle_table_workspace"
+        AnalysisDataService.add(name, table2)
+        self.assertTrue(name in AnalysisDataService)
+        AnalysisDataService.remove(name)
 
 
 if __name__ == '__main__':

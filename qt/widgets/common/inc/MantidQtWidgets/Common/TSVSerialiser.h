@@ -123,6 +123,16 @@ public:
   bool selectLine(const std::string &name, const size_t i = 0);
   bool selectSection(const std::string &name, const size_t i = 0);
 
+  void storeDouble(const double val);
+  void storeInt(const int val);
+  void storeString(const std::string val);
+  void storeBool(const bool val);
+
+  double readDouble();
+  int readInt();
+  std::string readString();
+  bool readBool();
+
   int asInt(const size_t i) const;
   size_t asSize_t(const size_t i) const;
   double asDouble(const size_t i) const;

@@ -32,7 +32,7 @@ ElasticDiffSphere::ElasticDiffSphere() {
   // parameter "Height" declared in parent DeltaFunction constructor
   // declareParameter("Height", 1.0);
   declareParameter("Radius", 2.0, "Sphere radius");
-  declareAttribute("Q", API::IFunction::Attribute(1.0));
+  FunctionQDepends::declareAttributes();
 }
 
 /**

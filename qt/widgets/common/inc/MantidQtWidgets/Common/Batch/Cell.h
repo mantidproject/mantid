@@ -58,6 +58,9 @@ public:
   int borderThickness() const;
   void setBorderThickness(int borderThickness);
 
+  void setToolTip(std::string const &toolTip);
+  std::string const &toolTip() const;
+
   bool isEditable() const;
   void setEditable(bool isEditable);
   void disableEditing();
@@ -71,6 +74,7 @@ private:
   std::string m_borderColor;
   std::string m_iconFilePath;
   bool m_isEditable;
+  std::string m_toolTip;
 };
 
 EXPORT_OPT_MANTIDQT_COMMON std::ostream &operator<<(std::ostream &os,

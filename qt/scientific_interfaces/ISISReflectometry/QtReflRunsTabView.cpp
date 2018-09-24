@@ -80,6 +80,8 @@ void QtReflRunsTabView::initLayout() {
       ,
       processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+  m_monitorAlgoRunner =
+      boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(ui.tableSearchResults,
@@ -239,6 +241,24 @@ void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
 void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 
   ui.buttonSearch->setEnabled(enabled);
+}
+
+/**
+ * Sets the start-monitor button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonMonitor->setEnabled(enabled);
+}
+
+/**
+ * Sets the stop-monitor enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonStopMonitor->setEnabled(enabled);
 }
 
 /**
@@ -458,6 +478,11 @@ QtReflRunsTabView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
+boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+QtReflRunsTabView::getMonitorAlgorithmRunner() const {
+  return m_monitorAlgoRunner;
+}
+
 /**
 Get the string the user wants to search for.
 @returns The search string
@@ -485,6 +510,37 @@ int QtReflRunsTabView::getSelectedGroup() const {
  */
 void QtReflRunsTabView::groupChanged() {
   m_presenter->notify(IReflRunsTabPresenter::GroupChangedFlag);
+}
+
+void MantidQt::CustomInterfaces::QtReflRunsTabView::on_buttonMonitor_clicked() {
+  startMonitor();
+}
+
+void MantidQt::CustomInterfaces::QtReflRunsTabView::
+    on_buttonStopMonitor_clicked() {
+  stopMonitor();
+}
+
+/** Start live data monitoring
+ */
+void QtReflRunsTabView::startMonitor() {
+  m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
+  m_presenter->notify(IReflRunsTabPresenter::StartMonitorFlag);
+  connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(startMonitorComplete()), Qt::UniqueConnection);
+}
+
+/**
+This slot notifies the presenter that the monitoring algorithm finished
+*/
+void QtReflRunsTabView::startMonitorComplete() {
+  m_presenter->notify(IReflRunsTabPresenter::StartMonitorCompleteFlag);
+}
+
+/** Stop live data monitoring
+ */
+void QtReflRunsTabView::stopMonitor() {
+  m_presenter->notify(IReflRunsTabPresenter::StopMonitorFlag);
 }
 
 } // namespace CustomInterfaces
