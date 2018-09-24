@@ -36,7 +36,6 @@ class LoadRunWidgetModel(object):
         self._loaded_data_store = loaded_data_store
         self._current_run = None
 
-    # TODO : remove the need for this function
     def remove_previous_data(self):
         self._loaded_data_store.remove_last_added_data()
 
@@ -79,7 +78,8 @@ class LoadRunWidgetModel(object):
             workspace = alg.getProperty("OutputWorkspace").value
         except Exception:
             # let Load search for the file itself
-            alg.setProperty("Filename", filename.split(os.sep)[-1])
+            filename_without_directories = filename.split(os.sep)[-1]
+            alg.setProperty("Filename", filename_without_directories)
             alg.execute()
             workspace = alg.getProperty("OutputWorkspace").value
             filename = alg.getProperty("Filename").value

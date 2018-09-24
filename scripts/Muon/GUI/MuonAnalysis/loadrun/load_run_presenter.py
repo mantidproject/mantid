@@ -110,8 +110,8 @@ class LoadRunWidgetPresenter(object):
         self._model.loadData(filenames)
         try:
             self._model.execute()
-        except ValueError as e:
-            self._view.warning_popup(e.args[0])
+        except ValueError as error:
+            self._view.warning_popup(error.args[0])
         self.on_loading_finished()
 
     def on_loading_start(self):
@@ -152,7 +152,7 @@ class LoadRunWidgetPresenter(object):
 
         try:
             current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
-        except ValueError as e:
+        except ValueError as error:
             self._view.warning_popup(e.args[0])
             return
 
