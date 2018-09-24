@@ -243,7 +243,7 @@ class ChopperSystem(object):
         return self.frequency
 
     def setEi(self, Ei):
-        """Sets the (focused) incident energy"""
+        """Sets the (focussed) incident energy"""
         self.ei = Ei
 
     def getEi(self):
