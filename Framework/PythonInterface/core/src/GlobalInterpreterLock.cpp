@@ -1,4 +1,5 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 
 namespace Mantid {
 namespace PythonInterface {
@@ -12,11 +13,11 @@ namespace PythonInterface {
  * @return True if the current thread holds the GIL, false otherwise
  */
 bool GlobalInterpreterLock::locked() {
-#if PY_VERSION_HEX < 0x03000000
+#if defined(IS_PY3K)
+  return (PyGILState_Check() == 1);
+#else
   PyThreadState *ts = _PyThreadState_Current;
   return (ts && ts == PyGILState_GetThisThreadState());
-#else
-  return (PyGILState_Check() == 1);
 #endif
 }
 
