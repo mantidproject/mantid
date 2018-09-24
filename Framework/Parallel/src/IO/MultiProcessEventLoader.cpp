@@ -1,5 +1,6 @@
 #include <MantidParallel/IO/MultiProcessEventLoader.h>
-#include <boost/process/child.hpp>
+//#include <boost/process/child.hpp>
+#include <Poco/Process.h>
 #include <chrono>
 #include <iomanip>
 #include <numeric>
@@ -9,7 +10,7 @@
 #include "MantidParallel/IO/NXEventDataLoader.h"
 #include "MantidTypes/Event/TofEvent.h"
 
-namespace bp = boost::process;
+// namespace bp = boost::process;
 
 namespace Mantid {
 namespace Parallel {
@@ -73,35 +74,70 @@ void MultiProcessEventLoader::load(
 
     std::size_t evPerPr = numEvents / m_numProcesses;
 
-    std::vector<bp::child> vChilds;
+    /*  boost::process implementation can be used
+     * with proper boost version instead of Poco*/
+    /*
+        std::vector<bp::child> vChilds;
 
-    // prepare command for launching of parallel processes
+        // prepare command for launching of parallel processes
+        for (unsigned i = 1; i < m_numProcesses; ++i) {
+          std::size_t upperBound =
+              i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
+
+          std::string command;
+          command += m_binaryToLaunch + " ";
+          command += m_segmentNames[i] + " ";           // segment name
+          command += m_storageName + " ";               // storage name
+          command += std::to_string(i) + " ";           // proc id
+          command += std::to_string(evPerPr * i) + " "; // first event to load
+          command += std::to_string(upperBound) + " ";  // upper bound to load
+          command += std::to_string(m_numPixels) + " "; // pixel count
+          command += std::to_string(storageSize) + " "; // memory size
+          command += filename + " ";                    // nexus file name
+          command += groupname + " ";                   // instrument group name
+          command += m_precalculateEvents
+                         ? "1 "
+                         : "0 "; // variant of algorithm used for loading
+          for (unsigned j = 0; j < bankNames.size(); ++j) {
+            command += bankNames[j] + " ";                   // bank name
+            command += std::to_string(bankOffsets[j]) + " "; // bank size
+          }
+
+          try {
+            // launch child processes
+            vChilds.emplace_back(command.c_str());
+          } catch (std::exception const &ex) {
+            std::rethrow_if_nested(ex);
+          }
+        }
+    */
+    std::vector<Poco::ProcessHandle> vChilds;
     for (unsigned i = 1; i < m_numProcesses; ++i) {
       std::size_t upperBound =
           i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
+      std::vector<std::string> processArgs;
 
-      std::string command;
-      command += m_binaryToLaunch + " ";
-      command += m_segmentNames[i] + " ";           // segment name
-      command += m_storageName + " ";               // storage name
-      command += std::to_string(i) + " ";           // proc id
-      command += std::to_string(evPerPr * i) + " "; // first event to load
-      command += std::to_string(upperBound) + " ";  // upper bound to load
-      command += std::to_string(m_numPixels) + " "; // pixel count
-      command += std::to_string(storageSize) + " "; // memory size
-      command += filename + " ";                    // nexus file name
-      command += groupname + " ";                   // instrument group name
-      command += m_precalculateEvents
-                     ? "1 "
-                     : "0 "; // variant of algorithm used for loading
+      processArgs.push_back(m_segmentNames[i]);           // segment name
+      processArgs.push_back(m_storageName);               // storage name
+      processArgs.push_back(std::to_string(i));           // proc id
+      processArgs.push_back(std::to_string(evPerPr * i)); // first event to load
+      processArgs.push_back(std::to_string(upperBound));  // upper bound to load
+      processArgs.push_back(std::to_string(m_numPixels)); // pixel count
+      processArgs.push_back(std::to_string(storageSize)); // memory size
+      processArgs.push_back(filename);                    // nexus file name
+      processArgs.push_back(groupname); // instrument group name
+      processArgs.push_back(
+          m_precalculateEvents ? "1 "
+                               : "0 "); // variant of algorithm used for loading
       for (unsigned j = 0; j < bankNames.size(); ++j) {
-        command += bankNames[j] + " ";                   // bank name
-        command += std::to_string(bankOffsets[j]) + " "; // bank size
+        processArgs.push_back(bankNames[j]);                   // bank name
+        processArgs.push_back(std::to_string(bankOffsets[j])); // bank size
       }
 
       try {
         // launch child processes
-        vChilds.emplace_back(command.c_str());
+        vChilds.emplace_back(
+            Poco::Process::launch(m_binaryToLaunch, processArgs));
       } catch (std::exception const &ex) {
         std::rethrow_if_nested(ex);
       }
@@ -113,13 +149,22 @@ void MultiProcessEventLoader::load(
     fillFromFile(storage, filename, groupname, bankNames, bankOffsets, 0,
                  numEvents / m_numProcesses, m_precalculateEvents);
 
+    /*  boost::process implementation can be used
+     * with proper boost version instead of Poco*/
+    /*
+        // waiting for child processes
+        for (auto &c : vChilds)
+          c.wait();
+
+        // check if oll childs are finished correctly
+        for (auto &c : vChilds)
+          if (c.exit_code())
+            throw std::runtime_error("Error while multiprocess loading\n");
+    */
+
     // waiting for child processes
     for (auto &c : vChilds)
-      c.wait();
-
-    // check if oll childs are finished correctly
-    for (auto &c : vChilds)
-      if (c.exit_code())
+      if (c.wait())
         throw std::runtime_error("Error while multiprocess loading\n");
 
     // Assemble multiprocess data from shared memory
