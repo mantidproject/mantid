@@ -63,17 +63,10 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         The finished signal of a QThread is connected to the finished method below"""
         QT_APP = mock_widget.mockQapp()
 
-        def __init__(self, thread):
-            if thread:
-                self._thread = thread
-                self._thread.finished.connect(self.finished)
-                self._thread.start()
-                if self._thread.isRunning():
-                    self.QT_APP.exec_()
+        def __init__(self, thread_model):
+            if thread_model:
+                thread_model.start()
 
-        def finished(self):
-            self.QT_APP.processEvents()
-            self.QT_APP.exit(0)
 
     def setUp(self):
         self.model = testModel()

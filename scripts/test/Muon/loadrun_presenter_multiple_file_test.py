@@ -177,25 +177,23 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     # handles the parenting of the warning box correctly.
 
     def test_that_if_increment_run_fails_warning_message_is_displayed(self):
-        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
-            self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
-            self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
+        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
-            self.presenter.handle_increment_run()
-            self.Runner(self.presenter._load_thread)
+        self.presenter.handle_increment_run()
+        self.Runner(self.presenter._load_thread)
 
-            self.assertEqual(mock_warning.call_count, 1)
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_that_if_decrement_run_fails_warning_message_is_displayed(self):
-        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
 
-            self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
-            self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
+        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
-            self.presenter.handle_decrement_run()
-            self.Runner(self.presenter._load_thread)
+        self.presenter.handle_decrement_run()
+        self.Runner(self.presenter._load_thread)
 
-            self.assertEqual(mock_warning.call_count, 1)
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_that_if_increment_run_fails_with_no_threading_a_warning_message_is_displayed(self):
         self.presenter._use_threading = False

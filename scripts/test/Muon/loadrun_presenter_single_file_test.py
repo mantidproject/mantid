@@ -280,22 +280,23 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.assert_view_has_not_changed()
 
     def test_that_if_decrement_run_fails_warning_message_is_displayed(self):
-        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
-            self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
+        self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
-            self.presenter.handle_decrement_run()
-            self.Runner(self.presenter._load_thread)
+        self.presenter.handle_decrement_run()
+        self.Runner(self.presenter._load_thread)
 
-            self.assertEqual(mock_warning.call_count, 1)
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_that_if_increment_run_fails_warning_message_is_displayed(self):
-        with mock.patch("Muon.GUI.Common.message_box.warning") as mock_warning:
+        for i in range(40):
             self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
             self.presenter.handle_increment_run()
             self.Runner(self.presenter._load_thread)
 
-            self.assertEqual(mock_warning.call_count, 1)
+            if self.view.warning_popup.call_count != i + 1:
+                print("failed on ", i)
+            self.assertEqual(self.view.warning_popup.call_count, 1 + i)
 
     def test_that_if_decrement_run_fails_warning_message_is_displayed_with_no_threading(self):
         """These tests have to be constructed separately for no threading, as the thread_model forces the use

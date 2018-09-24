@@ -87,14 +87,13 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.Runner(self.presenter._load_thread)
         self.assertEqual(self.view.get_run_edit_text(), "1234")
 
-    @mock.patch("Muon.GUI.Common.message_box.warning")
-    def test_load_current_run_displays_error_message_if_fails_to_load(self, mock_warning):
+    def test_load_current_run_displays_error_message_if_fails_to_load(self):
         self.model.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
         self.presenter.handle_load_current_run()
         self.Runner(self.presenter._load_thread)
 
-        self.assertEqual(mock_warning.call_count, 1)
+        self.assertEqual(self.view.warning_popup.call_count, 1)
 
     @run_test_with_and_without_threading
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self):
