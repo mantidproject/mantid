@@ -44,7 +44,6 @@ set ( TEST_FILES
 	EventLoaderTest.h
 	EventParserTest.h
 	ExecutionModeTest.h
-		MultiProcessEventLoaderTest.h
 	NonblockingTest.h
 	ParallelRunnerTest.h
 	PulseTimeGeneratorTest.h
