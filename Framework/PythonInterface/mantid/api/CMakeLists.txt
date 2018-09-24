@@ -110,6 +110,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
   ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
+  ${HEADER_DIR}/api/DetectorInfoPythonIterator.h
 )
 
 set ( PY_FILES

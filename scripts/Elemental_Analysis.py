@@ -8,6 +8,9 @@ from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import Pe
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_model import PeriodicTableModel
 from Muon.GUI.Common import message_box
+from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
+from Muon.GUI.Common.load_widget.load_view import LoadView
+from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 
 
 class ElementalAnalysisGui(QtGui.QMainWindow):
@@ -25,7 +28,15 @@ class ElementalAnalysisGui(QtGui.QMainWindow):
         self.ptable.register_table_changed(self.table_changed)
         self.ptable.register_table_lclicked(self.table_left_clicked)
         self.ptable.register_table_rclicked(self.table_right_clicked)
-        self.setCentralWidget(self.ptable.view)
+
+        self.load_widget = LoadPresenter(
+            LoadView(), LoadModel(), CoLoadModel())
+
+        self.box = QtGui.QHBoxLayout()
+        self.box.addWidget(self.ptable.view)
+        self.box.addWidget(self.load_widget.view)
+        self.setCentralWidget(QtGui.QWidget(self))
+        self.centralWidget().setLayout(self.box)
         self.setWindowTitle("Elemental Analysis")
 
     def table_left_clicked(self, item):

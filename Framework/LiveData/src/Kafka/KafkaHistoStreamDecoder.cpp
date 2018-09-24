@@ -1,16 +1,19 @@
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Exception.h"
 
-GCC_DIAG_OFF(conversion)
-#include "private/Schema/ai34_det_counts_generated.h"
-GCC_DIAG_ON(conversion)
-
+GNU_DIAG_OFF("conversion")
+#include "private/Schema/hs00_event_histogram_generated.h"
+GNU_DIAG_ON("conversion")
 
 namespace {
 /// Logger
@@ -19,7 +22,6 @@ Mantid::Kernel::Logger g_log("KafkaHistoStreamDecoder");
 
 namespace Mantid {
 namespace LiveData {
-
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -35,29 +37,12 @@ namespace LiveData {
 KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
     const std::string &instrumentName)
-  : m_broker(broker)
-  , m_histoTopic(histoTopic)
-  , m_instrumentName(instrumentName)
-  , m_histoStream()
-  , m_workspace()
-  , m_indexMap()
-  , m_indexOffset(0)
-  , m_thread()
-  , m_interrupt(false)
-  , m_capturing(false)
-  , m_exception()
-{
-  g_log.warning() << "KafkaHistoStreamDecoder" << "\n";
-
+    : m_broker(broker), m_histoTopic(histoTopic),
+      m_instrumentName(instrumentName), m_histoStream(), m_workspace(),
+      m_buffer(), m_thread(), m_interrupt(false), m_capturing(false),
+      m_exception() {
   // Initialize buffer workspace
-  {
-    std::lock_guard<std::mutex> lock(m_workspace_mutex);
-    m_workspace = createBufferWorkspace();
-    m_indexMap =
-        m_workspace->getDetectorIDToWorkspaceIndexVector(m_indexOffset);
-    g_log.warning() << "indexOffset: " << m_indexOffset << "\n";
-
-  }
+  m_workspace = createBufferWorkspace();
 }
 
 /**
@@ -71,9 +56,9 @@ KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() { stopCapture(); }
  * call and will return after the thread has started
  */
 void KafkaHistoStreamDecoder::startCapture(bool) {
-  g_log.warning() << "startCapture" << "\n";
-
-  m_histoStream = m_broker->subscribe({m_histoTopic}, SubscribeAtOption::LATEST);
+  g_log.debug() << "Starting capture on topic: " << m_histoTopic << "\n";
+  m_histoStream =
+      m_broker->subscribe({m_histoTopic}, SubscribeAtOption::LATEST);
 
   m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
@@ -84,12 +69,12 @@ void KafkaHistoStreamDecoder::startCapture(bool) {
  * function has completed
  */
 void KafkaHistoStreamDecoder::stopCapture() {
-  g_log.warning() << "stopCapture" << "\n";
+  g_log.debug() << "Stopping capture\n";
 
   // This will interrupt the "event" loop
   m_interrupt = true;
-  // Wait until the function has completed. The background thread
-  // will exit automatically
+  // Wait until the function has completed. The background thread will exit
+  // automatically
   while (m_capturing) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   };
@@ -101,22 +86,17 @@ void KafkaHistoStreamDecoder::stopCapture() {
  * can be called, false otherwise
  */
 bool KafkaHistoStreamDecoder::hasData() const {
-  g_log.warning() << "hasData" << "\n";
-
-  std::lock_guard<std::mutex> lock(m_workspace_mutex);
-  return !!m_workspace;
+  std::lock_guard<std::mutex> lock(m_buffer_mutex);
+  return !m_buffer.empty();
 }
 
 /**
  * Check for an exception thrown by the background thread and rethrow
- * it if necessary. If no error occurred swap the current internal buffer
- * for a fresh one and return the old buffer.
+ * it if necessary.
  * @return A pointer to the data collected since the last call to this
  * method
  */
 API::Workspace_sptr KafkaHistoStreamDecoder::extractData() {
-  g_log.warning() << "extractData" << "\n";
-
   if (m_exception) {
     throw *m_exception;
   }
@@ -130,19 +110,52 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractData() {
 // -----------------------------------------------------------------------------
 
 API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
-  g_log.warning() << "extractDataImpl" << "\n";
-
-  std::lock_guard<std::mutex> lock(m_workspace_mutex);
+  std::lock_guard<std::mutex> lock(m_buffer_mutex);
 
   if (!m_capturing) {
     throw Exception::NotYet("Local buffers not initialized.");
   }
 
-  auto temp = copyBufferWorkspace(m_workspace);
-  g_log.warning() << "swap" << "\n";
-  std::swap(m_workspace, temp);
-  g_log.warning() << "return" << "\n";
-  return temp;
+  if (m_buffer.empty()) {
+    throw Exception::NotYet("No message to process yet.");
+  }
+
+  auto histoMsg = GetEventHistogram(m_buffer.c_str());
+
+  auto shape = histoMsg->current_shape();
+  auto nbins = shape->Get(0) - 1;
+  auto nspectra = static_cast<size_t>(shape->Get(1));
+
+  // TODO: This is a hack, wrong spectra number provided
+  nspectra = m_workspace->getNumberHistograms();
+
+  auto metadata = histoMsg->dim_metadata();
+  auto metadimx = metadata->GetAs<DimensionMetaData>(0);
+  auto metadimy = metadata->GetAs<DimensionMetaData>(1);
+  auto xbins = metadimx->bin_boundaries_as_ArrayDouble()->value();
+
+  // Compiler warnings if one tries to use xbins->begin()/end()
+  auto *bindata = xbins->data();
+  HistogramData::BinEdges binedges(&bindata[0], &bindata[xbins->size()]);
+
+  API::MatrixWorkspace_sptr ws{DataObjects::create<DataObjects::Workspace2D>(
+      *m_workspace, nspectra, binedges)};
+
+  ws->setIndexInfo(m_workspace->indexInfo());
+  auto data = histoMsg->data_as_ArrayDouble()->value();
+
+  // Set the units
+  ws->getAxis(0)->setUnit(metadimx->unit()->c_str());
+  ws->setYUnit(metadimy->unit()->c_str());
+
+  std::vector<double> counts;
+  for (size_t i = 0; i < nspectra; ++i) {
+    const double *start = data->data() + (i * nbins);
+    counts.assign(start, start + nbins);
+    ws->setCounts(i, counts);
+  }
+
+  return ws;
 }
 
 /**
@@ -151,8 +164,6 @@ API::Workspace_sptr KafkaHistoStreamDecoder::extractDataImpl() {
  * It catches all thrown exceptions.
  */
 void KafkaHistoStreamDecoder::captureImpl() {
-  g_log.warning() << "captureImpl" << "\n";
-
   m_capturing = true;
   try {
     captureImplExcept();
@@ -169,7 +180,7 @@ void KafkaHistoStreamDecoder::captureImpl() {
  * Exception-throwing variant of captureImpl(). Do not call this directly
  */
 void KafkaHistoStreamDecoder::captureImplExcept() {
-  g_log.warning("Event capture starting");
+  g_log.information("Event capture starting");
 
   m_interrupt = false;
   std::string buffer;
@@ -187,24 +198,10 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
       continue;
     }
 
-    auto histoMsg = GetPulseImage(
-        reinterpret_cast<const uint8_t *>(buffer.c_str()));
-
-    const auto &detectorIDs = *(histoMsg->detector_id());
-    const auto &detectionCounts = *(histoMsg->detection_count());
-
-    auto nCounts = detectionCounts.size();
-    g_log.warning() << "Pulse Image Counts: " << nCounts << "\n";
-
+    // Lock so we don't overwrite buffer while workspace is being extracted
     {
-      std::lock_guard<std::mutex> lock(m_workspace_mutex);
-      for (decltype(nCounts) i = 0; i < nCounts; ++i) {
-        // Actually these are spectrum numbers
-        const auto detID = detectorIDs[i];
-        const auto detCount  = detectionCounts[i];
-        const auto curCount =  m_workspace->counts(detID - 1);
-        m_workspace->setCounts(detID - 1, curCount + detCount);
-      }
+      std::lock_guard<std::mutex> lock(m_buffer_mutex);
+      m_buffer = buffer;
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -213,13 +210,11 @@ void KafkaHistoStreamDecoder::captureImplExcept() {
 }
 
 DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
-  g_log.warning() << "createBufferWorkspace" << "\n";
-
   API::MatrixWorkspace_sptr workspace;
 
   try {
-    auto alg =
-        API::AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+    auto alg = API::AlgorithmManager::Instance().createUnmanaged(
+        "LoadEmptyInstrument");
     // Do not put the workspace in the ADS
     alg->setChild(true);
     alg->initialize();
@@ -229,31 +224,12 @@ DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::createBufferWorkspace() {
     workspace = alg->getProperty("OutputWorkspace");
   } catch (std::exception &exc) {
     g_log.error() << "Error loading empty instrument '" << m_instrumentName
-                    << "': " << exc.what() << "\n";
+                  << "': " << exc.what() << "\n";
     throw;
   }
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(workspace);
 }
-
-/**
- * Create new buffer workspace from an existing copy
- * @param parent A pointer to an existing workspace
- */
-DataObjects::Workspace2D_sptr KafkaHistoStreamDecoder::copyBufferWorkspace(
-    const DataObjects::Workspace2D_sptr &workspace) {
-  g_log.warning() << "copyBufferWorkspace" << "\n";
-
-  API::MatrixWorkspace_sptr copy = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", workspace->getNumberHistograms(), 2, 1);
-
-  g_log.warning() << "initializeFromParent" << "\n";
-  API::WorkspaceFactory::Instance().initializeFromParent(*workspace, *copy,
-                                                         false);
-
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(copy);
-}
-
 
 } // namespace LiveData
 } // namespace Mantid

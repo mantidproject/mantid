@@ -28,9 +28,9 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
   conf->set("metadata.broker.list", brokerAddr, errorMsg);
   conf->set("session.timeout.ms", "10000", errorMsg);
   conf->set("group.id", "mantid", errorMsg);
-  conf->set("message.max.bytes", "10000000", errorMsg);
-  conf->set("fetch.message.max.bytes", "10000000", errorMsg);
-  conf->set("replica.fetch.max.bytes", "10000000", errorMsg);
+  conf->set("message.max.bytes", "25000000", errorMsg);
+  conf->set("fetch.message.max.bytes", "25000000", errorMsg);
+  conf->set("replica.fetch.max.bytes", "25000000", errorMsg);
   conf->set("enable.auto.commit", "false", errorMsg);
   conf->set("enable.auto.offset.store", "false", errorMsg);
   conf->set("offset.store.method", "none", errorMsg);

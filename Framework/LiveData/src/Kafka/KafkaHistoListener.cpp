@@ -2,10 +2,9 @@
 
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
+#include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
-
 
 namespace {
 Mantid::Kernel::Logger g_log("KafkaHistoListener");
@@ -27,8 +26,8 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
     std::string instrumentName = getProperty("InstrumentName");
     const std::string histoTopic(instrumentName +
                                  KafkaTopicSubscriber::HISTO_TOPIC_SUFFIX);
-    m_decoder = Kernel::make_unique<KafkaHistoStreamDecoder>(
-        broker, histoTopic, "SANS2D"); //instrumentName);
+    m_decoder = Kernel::make_unique<KafkaHistoStreamDecoder>(broker, histoTopic,
+                                                             instrumentName);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaHistoListener::connect - Connection Error: "
                   << exc.what() << "\n";
@@ -41,7 +40,8 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
 void KafkaHistoListener::start(Types::Core::DateAndTime startTime) {
   if (startTime != 0) {
     g_log.warning() << "KafkaHistoListener does not currently support starting "
-                       "from arbitrary time." << std::endl;
+                       "from arbitrary time."
+                    << std::endl;
   }
   m_decoder->startCapture(true);
 }

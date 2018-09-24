@@ -17,8 +17,8 @@ PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    MASK_WKSP, "MaskBinTable",
                    "Params", "ResampleX", "Dspacing", "DMin", "DMax",
                    "TMin", "TMax", "PreserveEvents",
-                   "RemovePromptPulseWidth", "CompressTolerance",
-                   "UnwrapRef", "LowResRef",
+                   "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
+                   "CompressStartTime", "UnwrapRef", "LowResRef",
                    "CropWavelengthMin", "CropWavelengthMax",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
