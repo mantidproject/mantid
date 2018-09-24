@@ -1360,11 +1360,11 @@ LoadEventNexus::defineLoaderType(const bool haveWeights,
       !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
   noParallelConstrictions &=
       !((filter_time_start != Types::Core::DateAndTime::minimum() ||
-          filter_time_stop != Types::Core::DateAndTime::maximum()));
+         filter_time_stop != Types::Core::DateAndTime::maximum()));
   noParallelConstrictions &=
       !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
-          !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
-          !isDefault("ChunkNumber")));
+         !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
+         !isDefault("ChunkNumber")));
   noParallelConstrictions &= !(classType != "NXevent_data");
 
   if (!noParallelConstrictions)

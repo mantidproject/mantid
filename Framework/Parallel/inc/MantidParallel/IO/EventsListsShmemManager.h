@@ -75,7 +75,7 @@ public:
 
   void AppendEvent(std::size_t chunkN, std::size_t listN,
                    const Types::Event::TofEvent &event);
-  template<typename InIter>
+  template <typename InIter>
   void AppendEvent(std::size_t chunkN, std::size_t listN, InIter from,
                    InIter to);
 
@@ -111,11 +111,11 @@ protected:
 };
 
 /// Appends the range of ToF events (from other container for example)
-template<typename InIter>
+template <typename InIter>
 void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
                                           InIter from, InIter to) {
   if (!m_chunks)
-    throw ("No event lists found.");
+    throw("No event lists found.");
   auto &list = m_chunks->at(chunkN).at(listN);
   list.insert(list.end(), from, to);
 }

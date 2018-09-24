@@ -91,8 +91,8 @@ std::vector<int32_t> getOffsets(const DataObjects::EventWorkspace &ws,
                                 const bool eventIDIsSpectrumNumber) {
   const auto offsets =
       eventIDIsSpectrumNumber
-      ? bankOffsetsSpectrumNumbers(ws, filename, groupName, bankNames)
-      : bankOffsets(ws, filename, groupName, bankNames);
+          ? bankOffsetsSpectrumNumbers(ws, filename, groupName, bankNames)
+          : bankOffsets(ws, filename, groupName, bankNames);
   return offsets;
 }
 

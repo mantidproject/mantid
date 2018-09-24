@@ -81,10 +81,10 @@ private:
   static std::string GenerateStoragename();
   static std::string GenerateTimeBasedPrefix();
 
-  template<typename MultiProcessEventLoader::LoadType LT =
-  LoadType::preCalcEvents>
+  template <typename MultiProcessEventLoader::LoadType LT =
+                LoadType::preCalcEvents>
   struct GroupLoader {
-    template<typename T>
+    template <typename T>
     static void loadFromGroup(EventsListsShmemStorage &storage,
                               const H5::Group &group,
                               const std::vector<std::string> &bankNames,
@@ -111,14 +111,14 @@ private:
  * memory, 'from' and 'to' represent the range in global number of events.
  * Implements the 'precalculation of events' strategy*/
 
-template<>
-template<typename T>
+template <>
+template <typename T>
 void MultiProcessEventLoader::GroupLoader<
     MultiProcessEventLoader::LoadType::preCalcEvents>::
-loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
-              const std::vector<std::string> &bankNames,
-              const std::vector<int32_t> &bankOffsets, unsigned from,
-              unsigned to) {
+    loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
+                  const std::vector<std::string> &bankNames,
+                  const std::vector<int32_t> &bankOffsets, unsigned from,
+                  unsigned to) {
   std::vector<int32_t> eventId;
   std::vector<T> eventTimeOffset;
 
@@ -163,7 +163,7 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
       part->setEventOffset(start);
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
-          TofEvent event{(double) eventTimeOffset[i], part->next()};
+          TofEvent event{(double)eventTimeOffset[i], part->next()};
           storage.AppendEvent(0, eventId[i], event);
         } catch (std::exception const &ex) {
           std::rethrow_if_nested(ex);
@@ -179,14 +179,14 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
 /**Loades the portion of data from hdf5 given group and banks list to shared
  * memory, 'from' and 'to' represent the range in global number of events.
  * Implements the 'producer-consumer' strategy*/
-template<>
-template<typename T>
+template <>
+template <typename T>
 void MultiProcessEventLoader::GroupLoader<
     MultiProcessEventLoader::LoadType::producerConsumer>::
-loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
-              const std::vector<std::string> &bankNames,
-              const std::vector<int32_t> &bankOffsets, unsigned from,
-              unsigned to) {
+    loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
+                  const std::vector<std::string> &bankNames,
+                  const std::vector<int32_t> &bankOffsets, unsigned from,
+                  unsigned to) {
 
   const std::size_t chLen{std::max<std::size_t>((to - from) / 100, 1)};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
@@ -277,7 +277,7 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
         }
         for (unsigned i = 0; i < task->eventId.size(); ++i)
           pixels.at(task->eventId[i])
-              .emplace_back((double) task->eventTimeOffset[i],
+              .emplace_back((double)task->eventTimeOffset[i],
                             task->partitioner->next());
       }
     }

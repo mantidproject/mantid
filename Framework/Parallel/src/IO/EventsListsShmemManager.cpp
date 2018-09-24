@@ -33,13 +33,13 @@ void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
   assert(m_chunks);
   if (chunkN >= m_chunks->size())
     throw std::invalid_argument(std::string("Number of chunks is ") +
-        std::to_string(m_chunks->size()) +
-        ", asked for index " + std::to_string(chunkN));
+                                std::to_string(m_chunks->size()) +
+                                ", asked for index " + std::to_string(chunkN));
 
   if (listN >= m_chunks->at(chunkN).size())
     throw std::invalid_argument(std::string("Number of pixels is ") +
-        std::to_string(m_chunks->at(chunkN).size()) +
-        ", asked for index " + std::to_string(listN));
+                                std::to_string(m_chunks->at(chunkN).size()) +
+                                ", asked for index " + std::to_string(listN));
 
   auto &list = m_chunks->at(chunkN).at(listN);
   list.emplace_back(event);

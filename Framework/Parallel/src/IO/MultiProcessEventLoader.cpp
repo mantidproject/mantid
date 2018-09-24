@@ -92,8 +92,8 @@ void MultiProcessEventLoader::load(
       command += filename + " ";                    // nexus file name
       command += groupname + " ";                   // instrument group name
       command += m_precalculateEvents
-                 ? "1 "
-                 : "0 "; // variant of algorithm used for loading
+                     ? "1 "
+                     : "0 "; // variant of algorithm used for loading
       for (unsigned j = 0; j < bankNames.size(); ++j) {
         command += bankNames[j] + " ";                   // bank name
         command += std::to_string(bankOffsets[j]) + " "; // bank size
@@ -239,9 +239,9 @@ void MultiProcessEventLoader::fillFromFile(
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
   auto allocationFee = 8 + 8 + GenerateStoragename().length();
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) *
-      sizeof(TofEvent) +
-      m_numPixels * (sizeof(EventLists) + allocationFee) +
-      sizeof(Chunks) + allocationFee};
+                      sizeof(TofEvent) +
+                  m_numPixels * (sizeof(EventLists) + allocationFee) +
+                  sizeof(Chunks) + allocationFee};
   return len;
 }
 
