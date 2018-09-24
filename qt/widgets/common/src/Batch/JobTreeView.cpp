@@ -345,6 +345,15 @@ void JobTreeView::removeRowAt(RowLocation const &location) {
   m_adaptedMainModel.removeRowFrom(indexToRemove);
 }
 
+void JobTreeView::removeAllRows() {
+  appendChildRowOf({});
+  auto firstChild = std::vector<int>{0};
+  while (!isOnlyChildOfRoot(firstChild)) {
+    removeRowAt(firstChild);
+  }
+  clearSelection();
+}
+
 RowLocation JobTreeView::insertChildRowOf(RowLocation const &parent,
                                           int beforeRow) {
   return rowLocation().atIndex(m_adaptedMainModel.insertEmptyChildRow(

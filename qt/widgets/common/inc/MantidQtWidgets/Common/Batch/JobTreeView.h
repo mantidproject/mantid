@@ -70,6 +70,7 @@ public:
                                std::vector<Cell> const &rowText) override;
 
   void removeRowAt(RowLocation const &location) override;
+  void removeAllRows() override;
   void removeRows(std::vector<RowLocation> rowsToRemove) override;
   bool isOnlyChildOfRoot(RowLocation const &location) const override;
 

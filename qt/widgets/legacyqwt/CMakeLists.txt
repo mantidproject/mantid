@@ -1,4 +1,5 @@
  set ( SRC_FILES
+  src/DraggableColorBarWidget.cpp
   src/MantidColorMap.cpp
   src/MantidQwtIMDWorkspaceData.cpp
   src/MantidQwtWorkspaceData.cpp
@@ -21,6 +22,7 @@
 )
 
 set ( MOC_FILES
+  inc/MantidQtWidgets/LegacyQwt/DraggableColorBarWidget.h
   inc/MantidQtWidgets/LegacyQwt/ColorBarWidget.h
   inc/MantidQtWidgets/LegacyQwt/MWView.h
   inc/MantidQtWidgets/LegacyQwt/RangeSelector.h

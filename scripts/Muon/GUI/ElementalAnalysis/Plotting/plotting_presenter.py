@@ -2,6 +2,10 @@ class PlotPresenter(object):
     def __init__(self, view):
         self.view = view
 
+    def update_canvas(self):
+        """ Redraws the canvas. """
+        self.view.canvas.draw()
+
     def get_subplot(self, name):
         """
         Returns the subplot with the given name.
@@ -38,45 +42,6 @@ class PlotPresenter(object):
     def remove_subplot(self, name):
         """ Removes the subplot corresponding to 'name' from the plotting window """
         self.view.remove_subplot(name)
-
-    def call_plot_method(self, name, func, *args, **kwargs):
-        """
-        Calls the function with the specified arguments and returns the result:
-        the call will be 'saved' and 'replayed' when the plots are redrawn (errors checkbox is changed).
-        """
-        return self.view.call_plot_method(name, func, *args, **kwargs)
-
-    def add_vline(self, plot_name, x_value, y_min, y_max, **kwargs):
-        """
-        Adds a vertical line to a plot.
-
-        This line will be re-added when the plots are redrawn (errors checkbox is changed).
-
-        :param plot_name: the plot on which to add the line
-        :param x_value: the x value for the axvline
-        :param y_min: 0 <= y_min <= 1. The minimum y-value of the line (multiple of the y-axis)
-        :param y_min: 0 <= y_max <= 1. The maximum y-value of the line (multiple of the y-axis)
-        :param **kwargs: any keyword arguments for the matplotlib line object
-        :returns: a matplotlib line object
-        :raise KeyError: if the subplot plot_name does not exist
-        """
-        return self.view.add_vline(plot_name, x_value, y_min, y_max, **kwargs)
-
-    def add_hline(self, plot_name, y_value, x_min, x_max, **kwargs):
-        """
-        Adds a horizontal line to a plot.
-
-        This line will be re-added when the plots are redrawn (errors checkbox is changed).
-
-        :param plot_name: the plot on which to add the line
-        :param y_value: the y value for the axvline
-        :param x_min: 0 <= x_min <= 1. The minimum x-value of the line (multiple of the x-axis)
-        :param x_min: 0 <= x_max <= 1. The maximum x-value of the line (multiple of the x-axis)
-        :param **kwargs: any keyword arguments for the matplotlib line object
-        :returns: a matplotlib line object
-        :raise KeyError: if the subplot plot_name does not exist
-        """
-        return self.view.add_hline(plot_name, y_value, x_min, x_max, **kwargs)
 
     def add_moveable_vline(self, plot_name, x_value, y_minx, y_max, **kwargs):
         pass

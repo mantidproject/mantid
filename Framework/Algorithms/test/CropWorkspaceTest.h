@@ -2,6 +2,7 @@
 #define CROPWORKSPACETEST_H_
 
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"

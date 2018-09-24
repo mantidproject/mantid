@@ -4,7 +4,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"

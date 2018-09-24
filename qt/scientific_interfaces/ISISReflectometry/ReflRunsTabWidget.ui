@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>959</width>
-    <height>346</height>
+    <width>958</width>
+    <height>409</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -277,6 +277,74 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupLiveData">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>45</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Live data</string>
+         </property>
+         <widget class="QPushButton" name="buttonMonitor">
+          <property name="geometry">
+           <rect>
+            <x>1</x>
+            <y>20</y>
+            <width>114</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Start a background process to monitor live data for this instrument</string>
+          </property>
+          <property name="text">
+           <string>Start monitor</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../MantidPlot/icons/icons.qrc">
+            <normaloff>:/play2.png</normaloff>:/play2.png</iconset>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="buttonStopMonitor">
+          <property name="geometry">
+           <rect>
+            <x>121</x>
+            <y>20</y>
+            <width>114</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Stop monitor</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../MantidPlot/icons/icons.qrc">
+            <normaloff>:/pause.png</normaloff>:/pause.png</iconset>
+          </property>
+         </widget>
+        </widget>
        </item>
       </layout>
      </widget>

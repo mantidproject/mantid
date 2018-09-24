@@ -90,7 +90,7 @@ SE log name
 
 SE log value
   The value to be taken from the "SE log name" data series (defaults to the
-  specified value in the intrument parameters file, and in the absence of such
+  specified value in the instrument parameters file, and in the absence of such
   specification, defaults to "last value")
 
 Plot Result
@@ -133,7 +133,7 @@ reduces to a Gaussian at sigma equal to zero.
 Options
 ~~~~~~~
 
-.. seealso:: Common options are detailled in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
@@ -217,7 +217,7 @@ are also available via the fit wizard.
 Options
 ~~~~~~~
 
-.. seealso:: Common options are detailled in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
 .. seealso:: Sequential fitting is available, options are detailed in the :ref:`sequential-fitting-section` section.
 
@@ -314,7 +314,7 @@ EISF. This is done by means of the
 Options
 ~~~~~~~
 
-.. seealso:: Common options are detailled in the :ref:`qens-fitting-features` section.
+.. seealso:: Common options are detailed in the :ref:`qens-fitting-features` section.
 
 -Sample
 -  A sample workspace created with either ConvFit or Quasi.

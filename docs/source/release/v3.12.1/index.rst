@@ -13,7 +13,7 @@ The main changes are:
 
 * Several fixes to the Muon Analysis GUI, including to the results table and fit menu.
 * Several issues which caused mantid to crash have been fixed.
-* Allowing the live listener funtionality to be used outside ISIS and from the python API.
+* Allowing the live listener functionality to be used outside ISIS and from the python API.
 * Fixing the header for TOPAS files.
 * Removed version 1 of ``ReflectometryReductionOne`` and ``ReflectometryReductionOneAuto``
 
@@ -65,7 +65,7 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
 | 22194 | SofQW3 segfault no longer occurs                                                        | Indexing change           | **medium**   |
 +-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
-| 22190 | OSX Muon Interface data requirments fixed                                               | GUI changes               | **low**      |
+| 22190 | OSX Muon Interface data requirements fixed                                               | GUI changes               | **low**     |
 +-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+
 | 22182 | Update mslice to fix issue with matplotlib < 1.5                                        | Update sha1               | **medium**   |
 +-------+-----------------------------------------------------------------------------------------+---------------------------+--------------+

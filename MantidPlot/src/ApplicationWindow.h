@@ -45,6 +45,7 @@ Description          : QtiPlot's main window
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
+#include "MenuWithToolTips.h"
 #include "ProjectRecovery.h"
 #include "ProjectSaveView.h"
 #include "Script.h"
@@ -1132,6 +1133,10 @@ public slots:
   /// Checks for and attempts project recovery if required
   void checkForProjectRecovery();
 
+  /// Make a Recovery checkpoint so you don't have to wait for it to happen
+  /// normally
+  void saveRecoveryCheckpoint();
+
 signals:
   void modified();
   void shutting_down();
@@ -1484,7 +1489,8 @@ private:
   QScopedPointer<QWidget> catalogSearch;
 
   QMenu *windowsMenu, *view, *graph, *fileMenu, *format, *edit;
-  QMenu *recentProjectsMenu, *recentFilesMenu, *interfaceMenu;
+  QMenu *recentProjectsMenu, *interfaceMenu;
+  MenuWithToolTips *recentFilesMenu;
 
   QMenu *help, *plot2DMenu, *analysisMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;

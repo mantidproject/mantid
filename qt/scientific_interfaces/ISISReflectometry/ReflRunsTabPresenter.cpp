@@ -79,6 +79,13 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
     m_searcher.reset(new ReflCatalogSearcher());
+
+  updateViewWhenMonitorStopped();
+}
+
+ReflRunsTabPresenter::~ReflRunsTabPresenter() {
+  if (m_monitorAlg)
+    stopObserving(m_monitorAlg);
 }
 
 /** Accept a main presenter
@@ -136,6 +143,15 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
     changeGroup();
+    break;
+  case IReflRunsTabPresenter::StartMonitorFlag:
+    startMonitor();
+    break;
+  case IReflRunsTabPresenter::StopMonitorFlag:
+    stopMonitor();
+    break;
+  case IReflRunsTabPresenter::StartMonitorCompleteFlag:
+    startMonitorComplete();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -449,4 +465,8 @@ void ReflRunsTabPresenter::changeInstrument() {
 
 void ReflRunsTabPresenter::changeGroup() { updateWidgetEnabledState(); }
 }
-}
+
+const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
+const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
+} // namespace CustomInterfaces
+} // namespace MantidQt

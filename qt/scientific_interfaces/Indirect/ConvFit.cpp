@@ -106,6 +106,7 @@ void ConvFit::setupFitTab() {
       m_dblManager->addProperty("InstrumentResolution");
 
   // Post Plot and Save
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
@@ -177,6 +178,14 @@ void ConvFit::setPlotResultEnabled(bool enabled) {
 void ConvFit::setSaveResultEnabled(bool enabled) {
   m_uiForm->pbSave->setEnabled(enabled);
 }
+
+void ConvFit::setRunEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+  m_uiForm->pbRun->setEnabled(enabled);
+  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void ConvFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

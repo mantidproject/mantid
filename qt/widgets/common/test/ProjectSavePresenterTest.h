@@ -96,8 +96,9 @@ public:
     tearDownWorkspaces(workspaces);
   }
 
-  void testConstructWithOneWorkspaceAndOneWindow() {
+  void testConstructWithOneWorkspaceAndOneWindowOneInterface() {
     auto workspaces = setUpWorkspaces({"ws1"});
+    std::vector<std::string> interfaces{"Interface_1"};
 
     WindowInfo info;
     info.name = "WindowName1Workspace";
@@ -109,8 +110,10 @@ public:
     // View should be passed what workspaces exist and what windows
     // are currently included.
     ON_CALL(m_view, getWindows()).WillByDefault(Return(windows));
+    ON_CALL(m_view, getAllPythonInterfaces()).WillByDefault(Return(interfaces));
     EXPECT_CALL(m_view, getWindows()).WillOnce(Return(windows));
     EXPECT_CALL(m_view, updateWorkspacesList(workspaces)).Times(Exactly(1));
+    EXPECT_CALL(m_view, updateInterfacesList(interfaces)).Times(Exactly(1));
     EXPECT_CALL(m_view, updateIncludedWindowsList(winInfo)).Times(Exactly(1));
 
     ProjectSavePresenter presenter(&m_view);

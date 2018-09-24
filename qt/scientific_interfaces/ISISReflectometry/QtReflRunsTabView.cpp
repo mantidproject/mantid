@@ -61,6 +61,8 @@ void QtReflRunsTabView::initLayout() {
   ui.tablePane->layout()->addWidget(m_tableView);
 
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+  m_monitorAlgoRunner =
+      boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)),
@@ -167,6 +169,35 @@ void QtReflRunsTabView::setSearchTextEntryEnabled(bool enabled) {
 void QtReflRunsTabView::setSearchButtonEnabled(bool enabled) {
 
   ui.buttonSearch->setEnabled(enabled);
+}
+
+/**
+ * Sets the start-monitor button enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStartMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonMonitor->setEnabled(enabled);
+}
+
+/**
+ * Sets the stop-monitor enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtReflRunsTabView::setStopMonitorButtonEnabled(bool enabled) {
+
+  ui.buttonStopMonitor->setEnabled(enabled);
+}
+
+/**
+ * Set all possible tranfer methods
+ * @param methods : All possible transfer methods.
+ */
+void QtReflRunsTabView::setTransferMethods(
+    const std::set<std::string> &methods) {
+  for (auto method = methods.begin(); method != methods.end(); ++method) {
+    ui.comboTransferMethod->addItem((*method).c_str());
+  }
 }
 
 /**
@@ -369,12 +400,48 @@ QtReflRunsTabView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
+boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+QtReflRunsTabView::getMonitorAlgorithmRunner() const {
+  return m_monitorAlgoRunner;
+}
+
 /**
 Get the string the user wants to search for.
 @returns The search string
 */
 std::string QtReflRunsTabView::getSearchString() const {
   return ui.textSearch->text().toStdString();
+}
+
+void MantidQt::CustomInterfaces::QtReflRunsTabView::on_buttonMonitor_clicked() {
+  startMonitor();
+}
+
+void MantidQt::CustomInterfaces::QtReflRunsTabView::
+    on_buttonStopMonitor_clicked() {
+  stopMonitor();
+}
+
+/** Start live data monitoring
+ */
+void QtReflRunsTabView::startMonitor() {
+  m_monitorAlgoRunner.get()->disconnect(); // disconnect any other connections
+  m_presenter->notify(IReflRunsTabPresenter::StartMonitorFlag);
+  connect(m_monitorAlgoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
+          SLOT(startMonitorComplete()), Qt::UniqueConnection);
+}
+
+/**
+This slot notifies the presenter that the monitoring algorithm finished
+*/
+void QtReflRunsTabView::startMonitorComplete() {
+  m_presenter->notify(IReflRunsTabPresenter::StartMonitorCompleteFlag);
+}
+
+/** Stop live data monitoring
+ */
+void QtReflRunsTabView::stopMonitor() {
+  m_presenter->notify(IReflRunsTabPresenter::StopMonitorFlag);
 }
 
 } // namespace CustomInterfaces
