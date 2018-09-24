@@ -12,7 +12,11 @@ New
 
 Improved
 ########
-* Updated workspace nameing scheme for new backend
+* Updated workspace nameing scheme for new backend.
+* Added shortcut keys to copy/paste/cut rows of data.
+* Added shortcut keys to delete or add rows.
+* Added tabbing support to table.
+* Added error notifications on a row by row basis.
 
 Bug fixes
 #########
