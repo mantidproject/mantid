@@ -109,7 +109,8 @@ class SortHKLTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
             reference_statistics = self._load_reference_statistics(space_group)
 
             self._compare_statistics(statistics, reference_statistics)
-            self._check_sorted_hkls_consistency(sorted_hkls, space_group)
+            # No need to check since intensities do no change
+            #self._check_sorted_hkls_consistency(sorted_hkls, space_group)
 
     def _run_sort_hkl(self, reflections, space_group):
         point_group_name = self._get_point_group(space_group).getName()
