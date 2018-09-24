@@ -716,7 +716,7 @@ void ProjectRecovery::saveAll(bool autoSave) {
   g_log.debug("Project Recovery: Saving finished");
 }
 
-std::string ProjectRecovery::getRecoveryFolderOutputPR(){
+std::string ProjectRecovery::getRecoveryFolderOutputPR() {
   return getRecoveryFolderOutput();
 }
 } // namespace MantidQt
