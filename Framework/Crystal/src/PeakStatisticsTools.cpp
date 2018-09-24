@@ -283,7 +283,6 @@ void PeaksStatistics::calculatePeaksStatistics(
         // Collect sum of intensities for R-value calculation
         intensitySumRValues +=
             std::accumulate(intensities.begin(), intensities.end(), 0.0);
-
       }
 
       const std::vector<Peak> &reflectionPeaks = outliersRemoved.getPeaks();
