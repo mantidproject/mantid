@@ -76,7 +76,7 @@ set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
 target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} )
+                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} rt)
 
 
 #Add executable for Nexus parallel loader child process
@@ -98,7 +98,7 @@ set_property(TARGET EventParallelLoader PROPERTY FOLDER "MantidFramework")
 target_include_directories(EventParallelLoader SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(EventParallelLoader LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-		${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} Kernel)
+		${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} Kernel rt)
 
 # Add the unit tests directory
 add_subdirectory ( test )
