@@ -60,7 +60,7 @@ endif()
 
 # Add the target for this directory
 add_library ( Parallel ${SRC_FILES} ${INC_FILES} )
-add_dependencies(Parallel EventParallelLoader)
+add_dependencies(Parallel EventParallelLoader Kernel)
 # Set the name of the generated library
 set_target_properties ( Parallel PROPERTIES OUTPUT_NAME MantidParallel
   COMPILE_DEFINITIONS IN_MANTID_PARALLEL )
@@ -76,7 +76,7 @@ set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
 target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} rt)
+                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} Kernel rt)
 
 
 #Add executable for Nexus parallel loader child process
