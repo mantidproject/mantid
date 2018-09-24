@@ -163,7 +163,8 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
       part->setEventOffset(start);
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
-          TofEvent event{(double) eventTimeOffset[i], part->next()};
+          TofEvent
+          event{(double) eventTimeOffset[i], part->next()};
           storage.AppendEvent(0, eventId[i], event);
         } catch (std::exception const &ex) {
           std::rethrow_if_nested(ex);
