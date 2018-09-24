@@ -284,10 +284,6 @@ void PeaksStatistics::calculatePeaksStatistics(
         intensitySumRValues +=
             std::accumulate(intensities.begin(), intensities.end(), 0.0);
 
-        // The original algorithm sets the intensities and sigmas to the mean.
-        double sqrtOfMeanSqrSigma = getRMS(sigmas);
-        outliersRemoved.setPeaksIntensityAndSigma(meanIntensity,
-                                                  sqrtOfMeanSqrSigma);
       }
 
       const std::vector<Peak> &reflectionPeaks = outliersRemoved.getPeaks();
