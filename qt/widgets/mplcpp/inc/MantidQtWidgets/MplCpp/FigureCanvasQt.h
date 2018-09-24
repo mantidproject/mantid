@@ -21,6 +21,8 @@
 
 #include <QWidget>
 
+#include <boost/math/special_functions/detail/bessel_j0.hpp>
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -35,14 +37,15 @@ class MANTID_MPLCPP_DLL FigureCanvasQt : public QWidget,
                                          public Python::InstanceHolder {
   Q_OBJECT
 public:
-  FigureCanvasQt(QWidget *parent = nullptr);
+  FigureCanvasQt(int subplotspec, QWidget *parent = nullptr);
+  FigureCanvasQt(Axes axes, QWidget *parent = nullptr);
 
-  /// Non-const access to the current active axes instance
+  /// Non-const access to the current active axes instance.
   inline Axes &gca() { return m_axes; }
 
-private:
+private: //members
   Axes m_axes;
-}; // namespace MplCpp
+};
 
 } // namespace MplCpp
 } // namespace Widgets

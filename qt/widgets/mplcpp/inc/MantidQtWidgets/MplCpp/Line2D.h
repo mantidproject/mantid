@@ -18,6 +18,7 @@
 */
 #include "MantidQtWidgets/MplCpp/Artist.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
+#include <vector>
 
 namespace MantidQt {
 namespace Widgets {
