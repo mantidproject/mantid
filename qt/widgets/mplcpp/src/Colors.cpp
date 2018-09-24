@@ -8,7 +8,6 @@ namespace Widgets {
 namespace MplCpp {
 
 namespace {
-
 /**
  * @return A reference to the matplotlib.colors module
  */
@@ -19,6 +18,14 @@ Python::Object colorsModule() {
 }
 } // namespace
 
+// ------------------------ NormalizeBase---------------------------------------
+/**
+ * @brief NormalizeBase::NormalizeBase
+ * @param obj An existing Normalize instance or subtype
+ */
+NormalizeBase::NormalizeBase(Python::Object obj)
+    : Python::InstanceHolder(std::move(obj), "autoscale") {}
+
 // ------------------------ Normalize ------------------------------------------
 
 /**
@@ -28,8 +35,7 @@ Python::Object colorsModule() {
  * @param vmax Maximum value of the data interval
  */
 Normalize::Normalize(double vmin, double vmax)
-    : Python::InstanceHolder(colorsModule().attr("Normalize")(vmin, vmax),
-                             "autoscale") {}
+    : NormalizeBase(colorsModule().attr("Normalize")(vmin, vmax)) {}
 
 // ------------------------ SymLogNorm -----------------------------------------
 
@@ -46,9 +52,8 @@ Normalize::Normalize(double vmin, double vmax)
  */
 SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin,
                        double vmax)
-    : Python::InstanceHolder(
-          colorsModule().attr("SymLogNorm")(linthresh, linscale, vmin, vmax),
-          "autoscale") {}
+    : NormalizeBase(
+          colorsModule().attr("SymLogNorm")(linthresh, linscale, vmin, vmax)) {}
 
 // ------------------------ PowerNorm ------------------------------------------
 
@@ -59,9 +64,8 @@ SymLogNorm::SymLogNorm(double linthresh, double linscale, double vmin,
  * @param vmin Minimum value of the data interval
  * @param vmax Maximum value of the data interval
  */
-PowerNorm::PowerNorm(double gamma, double vmin, double vmax) :
-    Python::InstanceHolder(colorsModule().attr("PowerNorm")(gamma, vmin, vmax),
-                           "autoscale") {}
+PowerNorm::PowerNorm(double gamma, double vmin, double vmax)
+    : NormalizeBase(colorsModule().attr("PowerNorm")(gamma, vmin, vmax)) {}
 
 } // namespace MplCpp
 } // namespace Widgets

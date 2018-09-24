@@ -31,12 +31,21 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
+ * @brief C++ base class for Normalize types to allow a common interface
+ * to distinguish from a general Python::InstanceHolder.
+ */
+class MANTID_MPLCPP_DLL NormalizeBase : public Python::InstanceHolder {
+public:
+  NormalizeBase(Python::Object obj);
+};
+
+/**
  * @brief The Normalize class provides a simple mapping of data in
  * the internal [vmin, vmax] to the interval [0, 1].
  * See
  * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.Normalize.html#matplotlib.colors.Normalize
  */
-class MANTID_MPLCPP_DLL Normalize : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL Normalize : public NormalizeBase {
 public:
   Normalize(double vmin, double vmax);
 };
@@ -46,7 +55,7 @@ public:
  * See
  * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.SymLogNorm.html#matplotlib.colors.SymLogNorm
  */
-class MANTID_MPLCPP_DLL SymLogNorm : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL SymLogNorm : public NormalizeBase {
 public:
   SymLogNorm(double linthresh, double linscale, double vmin, double vmax);
 };
@@ -56,11 +65,10 @@ public:
  * See
  * https://matplotlib.org/2.2.3/api/_as_gen/matplotlib.colors.PowerNorm.html#matplotlib.colors.PowerNorm
  */
-class MANTID_MPLCPP_DLL PowerNorm : public Python::InstanceHolder {
+class MANTID_MPLCPP_DLL PowerNorm : public NormalizeBase {
 public:
   PowerNorm(double gamma, double vmin, double vmax);
 };
-
 
 } // namespace MplCpp
 } // namespace Widgets

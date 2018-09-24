@@ -21,8 +21,6 @@
 
 #include <QWidget>
 
-#include <boost/math/special_functions/detail/bessel_j0.hpp>
-
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {

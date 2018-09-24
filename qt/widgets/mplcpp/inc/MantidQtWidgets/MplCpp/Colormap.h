@@ -32,6 +32,9 @@ public:
   Colormap(Python::Object obj);
 };
 
+/// Return the matplotlib.cm module
+MANTID_MPLCPP_DLL Python::Object cmModule();
+
 /// Return the named colormap if it exists
 MANTID_MPLCPP_DLL Colormap getCMap(const QString &name);
 
