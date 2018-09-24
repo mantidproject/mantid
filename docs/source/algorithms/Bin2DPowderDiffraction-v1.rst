@@ -34,7 +34,7 @@ Restrictions on the input workspace
 
 -  X-axis must have the wavelength units.
 -  Only Histograms can be handled.
--  Only :ref:`EventWorkspaces <EventWorkspace>` are suported for the moment.
+-  Only :ref:`EventWorkspaces <EventWorkspace>` are supported for the moment.
 -  The input workspace must have an instrument set.
 -  The input workspace must have a Spectrum axis as a Y-axis.
 
