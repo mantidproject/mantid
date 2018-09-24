@@ -539,24 +539,9 @@ public:
     TS_ASSERT(fits);
 
     if (fits->size() > 0) {
-      // Get the Fit algorithm history
       auto fit = fits->getItem(0);
-      const auto &wsHistory = fit->getHistory();
-      const auto &child = wsHistory.getAlgorithmHistory(0);
-      TS_ASSERT_EQUALS(child->name(), "Fit");
-      const auto &properties = child->getProperties();
-
-      // Check max iterations property
-      PropertyNameIs maxIterationsCheck("MaxIterations");
-      auto prop = std::find_if(properties.begin(), properties.end(),
-                               maxIterationsCheck);
-      TS_ASSERT_EQUALS((*prop)->value(), "50");
-
-      // Check minimizer property
-      PropertyNameIs minimizerCheck("Minimizer");
-      prop = std::find_if(properties.begin(), properties.end(), minimizerCheck);
-      TS_ASSERT_EQUALS((*prop)->value(),
-                       "Levenberg-Marquardt,AbsError=0.01,RelError=1");
+      TS_ASSERT_EQUALS(fit->history().size(), 0);
+      TS_ASSERT_EQUALS(fit->getName(), "PlotPeakResult_Workspaces_1");
     }
 
     AnalysisDataService::Instance().clear();
