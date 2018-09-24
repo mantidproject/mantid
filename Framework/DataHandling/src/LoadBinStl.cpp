@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadBinStl.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include <fstream>
 #include <iostream>
 
@@ -67,6 +68,9 @@ void LoadBinStl::readStl(std::string filename) {
     readTriangle(streamReader);
   }
   myFile.close();
+  std::unique_ptr<Geometry::MeshObject> retVal = std::unique_ptr<Geometry::MeshObject>(
+      new Geometry::MeshObject(std::move(m_triangle), std::move(m_verticies),
+                     Mantid::Kernel::Material()));
   return;
 }
 
@@ -80,13 +84,30 @@ void LoadBinStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
     streamReader >> yVal;
     streamReader >> zVal;
     Kernel::V3D vec = Kernel::V3D(double(xVal), double(yVal), double(zVal));
-    m_verticies.push_back(vec);
+    // add index of new vertex to triangle
+    m_triangle.push_back(addSTLVertex(vec,m_verticies));
   }
-  // add index of new verticies to triangle
-  size_t newIndex = m_triangle.size();
-  m_triangle.push_back(newIndex);
-  m_triangle.push_back(newIndex + 1);
-  m_triangle.push_back(newIndex + 2);
+}
+
+
+bool areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) {
+  Kernel::V3D diff = v1 - v2;
+  return diff.norm() < 1e-9; // This is 1 nanometre for a unit of a metre.
+}
+
+// Adds vertex to list if distinct and returns index to vertex added or equal
+uint16_t addSTLVertex(Kernel::V3D &vertex, std::vector<Kernel::V3D> &vertices) {
+  for (uint16_t i = 0; i < vertices.size(); ++i) {
+    if (areEqualVertices(vertex, vertices[i])) {
+      return i;
+    }
+  }
+  vertices.push_back(vertex);
+  uint16_t index = static_cast<uint16_t>(vertices.size() - 1);
+  if (index != vertices.size() - 1) {
+    throw std::runtime_error("Too many vertices in solid");
+  }
+  return index;
 }
 
 } // namespace DataHandling
