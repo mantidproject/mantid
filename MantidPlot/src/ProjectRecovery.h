@@ -2,6 +2,7 @@
 #define PROJECT_RECOVERY_H_
 
 #include "MantidKernel/ConfigService.h"
+#include "RecoveryGUIs/ProjectRecoveryPresenter.h"
 
 #include <Poco/NObserver.h>
 
@@ -139,6 +140,9 @@ private:
 
   /// Pointer to main GUI window
   ApplicationWindow *m_windowPtr;
+
+  // The presenter of the recovery guis
+  ProjectRecoveryPresenter m_recoveryGui;
 
   std::vector<std::string> m_algsToIgnore = {
       "EnggSaveGSASIIFitResultsToHDF5",

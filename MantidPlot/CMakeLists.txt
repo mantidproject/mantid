@@ -153,6 +153,10 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/src/SymbolDialog.cpp
                    src/lib/src/TextFormatButtons.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
+                   src/RecoveryGUIs/ProjectRecoveryModel.cpp
+                   src/RecoveryGUIs/ProjectRecoveryPresenter.cpp
+                   src/RecoveryGUIs/ProjectRecoveryView.cpp
+                   src/RecoveryGUIs/RecoveryFailureView.cpp
 )
 
 set ( QTIPLOT_C_SRC src/zlib123/minigzip.c )
@@ -355,6 +359,10 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/include/SymbolDialog.h
                    src/lib/include/TextFormatButtons.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
+                   src/RecoveryGUIs/ProjectRecoveryModel.h
+                   src/RecoveryGUIs/ProjectRecoveryPresenter.h
+                   src/RecoveryGUIs/ProjectRecoveryView.h
+                   src/RecoveryGUIs/RecoveryFailureView.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
