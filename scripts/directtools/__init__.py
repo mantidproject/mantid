@@ -714,7 +714,7 @@ def wsreport(workspace):
     ei = _incidentEnergy(logs)
     wavelength = _wavelength(logs)
     if ei is not None and wavelength is not None:
-        print(u'Ei = {:0.2f} meV    lambda = {:0.2f} \u00c5'.format(ei, wavelength))
+        print('Ei = {:0.2f} meV    lambda = {:0.2f} A'.format(ei, wavelength))
     T = _sampleTemperature(logs)
     if T is not None:
         if isinstance(T, collections.Iterable):
