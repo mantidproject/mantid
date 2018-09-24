@@ -1,11 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
 
-from PyQt4.QtCore import QThread
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 from PyQt4.QtCore import pyqtSignal as Signal
 from Muon.GUI.Common import message_box
-import sys
-import traceback
 
 
 class WorkerSignals(QtCore.QObject):
