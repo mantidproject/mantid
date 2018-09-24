@@ -189,7 +189,7 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
               const std::vector<int32_t> &bankOffsets, unsigned from,
               unsigned to) {
 
-  const std::size_t chLen{(from - to) / 100};
+  const std::size_t chLen{std::max<std::size_t>((to - from) / 100, 1)};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
 
   struct Task {
@@ -203,10 +203,11 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
   };
 
   std::vector<std::vector<TofEvent>> pixels(storage.pixelCount());
-  std::atomic<int> pixNum{0};
+  std::atomic<std::size_t> pixNum{0};
   std::queue<std::unique_ptr<Task>> queue;
   std::mutex guard;
   std::atomic<int> finished{0};
+  std::size_t portion{std::max<std::size_t>(pixels.size() / 16, 1)};
 
   std::thread producer([&]() {
     std::size_t eventCounter{0};
@@ -256,9 +257,12 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
     while (finished != 2) {
     }; // consumer have finished his work ready to transfer to shmem
 
-    for (unsigned pixel = atomic_fetch_add(&pixNum, 1);
-         pixel < storage.pixelCount(); pixel = atomic_fetch_add(&pixNum, 1))
-      storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+    for (auto startPixel = pixNum.fetch_add(portion);
+         startPixel < storage.pixelCount(); startPixel = pixNum.fetch_add(portion)) {
+      for (auto pixel = startPixel;
+           pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
+        storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+    }
   });
 
   std::thread consumer([&]() {
@@ -279,9 +283,12 @@ loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
 
     ++finished; // all is consumed
 
-    for (unsigned pixel = atomic_fetch_add(&pixNum, 1);
-         pixel < storage.pixelCount(); pixel = atomic_fetch_add(&pixNum, 1))
-      storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+    for (auto startPixel = pixNum.fetch_add(portion);
+         startPixel < storage.pixelCount(); startPixel = pixNum.fetch_add(portion)) {
+      for (auto pixel = startPixel;
+           pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
+        storage.AppendEvent(0, pixel, pixels[pixel].begin(), pixels[pixel].end());
+    }
 
   });
 
