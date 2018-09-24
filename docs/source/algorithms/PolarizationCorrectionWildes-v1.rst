@@ -40,7 +40,7 @@ Flipper configurations
    Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+}`. In this case the intensity of the missing flipper configuration (01 or 10) can be solved from the other intensities. Workspaces in the input group should be in the following order: both flippers off, one flipper on, both flippers on.
 
 :literal:`'00, 11'`
-   Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+} = 0`. In this case the intensities of the missing flipper configurations (01 and 11) can be solved from the other intensities. Workspaces in the input group should be in the following order: both flippers off, both flippers on.
+   Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+} = 0`. In this case the intensities of the missing flipper configurations (01 and 10) can be solved from the other intensities. Workspaces in the input group should be in the following order: both flippers off, both flippers on.
 
 :literal:`'0, 1'`
    Polarization corrections when no analyzer has been used. Workspaces in the input group should be in the following order: polarizer flipper off, polarizer flipper on.

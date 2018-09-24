@@ -476,13 +476,6 @@ bpl::dict toDict(const ITableWorkspace &self) {
   return result;
 }
 
-/** Constructor function for ITableWorkspaces */
-ITableWorkspace_sptr makeTableWorkspace() {
-  const auto ws = WorkspaceFactory::Instance().createTable();
-  Mantid::API::AnalysisDataService::Instance().add(ws->getName(), ws);
-  return ws;
-}
-
 class ITableWorkspacePickleSuite : public boost::python::pickle_suite {
 public:
   static dict getstate(const ITableWorkspace &ws) {
@@ -580,7 +573,6 @@ void export_ITableWorkspace() {
   class_<ITableWorkspace, bases<Workspace>, boost::noncopyable>(
       "ITableWorkspace", iTableWorkspace_docstring.c_str(), no_init)
       .def_pickle(ITableWorkspacePickleSuite())
-      .def("__init__", make_constructor(&makeTableWorkspace))
       .def("addColumn", &addColumnSimple,
            (arg("self"), arg("type"), arg("name")),
            "Add a named column with the given type. Recognized types are: "

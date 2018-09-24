@@ -47,19 +47,38 @@ public:
   void test_getFileDialogFilter() {
     std::vector<std::string> exts({"*.h5", "*.nxs"});
 
-    const auto result1 = MantidQt::API::FileDialogHandler::getFilter(
-        std::vector<std::string>(), std::string(""));
+    const auto result1 =
+        MantidQt::API::FileDialogHandler::getFilter(std::vector<std::string>());
     TS_ASSERT_EQUALS(std::string("All Files (*)"), result1.toStdString());
 
-    const auto result2 =
-        MantidQt::API::FileDialogHandler::getFilter(exts, std::string(""));
-    TS_ASSERT_EQUALS(std::string("*.h5 (**.h5);;*.nxs (**.nxs);;All Files (*)"),
+    const auto result2 = MantidQt::API::FileDialogHandler::getFilter(exts);
+    TS_ASSERT_EQUALS(std::string("Data Files ( *.h5 *.nxs );;*.h5 "
+                                 "(**.h5);;*.nxs (**.nxs);;All Files (*)"),
                      result2.toStdString());
+  }
+
+  void test_formatExtension() {
+    const std::string bare_ext = "ext";
+    const std::string no_star = ".ext";
+    const std::string no_dot = "*ext";
+    const std::string valid = "*.ext";
+    const QString expected("*.ext");
+
+    const auto result1 =
+        MantidQt::API::FileDialogHandler::formatExtension(bare_ext);
+    TS_ASSERT_EQUALS(expected, result1);
+
+    const auto result2 =
+        MantidQt::API::FileDialogHandler::formatExtension(no_star);
+    TS_ASSERT_EQUALS(expected, result2);
 
     const auto result3 =
-        MantidQt::API::FileDialogHandler::getFilter(exts, std::string("*.nxs"));
-    TS_ASSERT_EQUALS(std::string("*.nxs (**.nxs);;*.h5 (**.h5);;All Files (*)"),
-                     result3.toStdString());
+        MantidQt::API::FileDialogHandler::formatExtension(no_dot);
+    TS_ASSERT_EQUALS(expected, result3);
+
+    const auto result4 =
+        MantidQt::API::FileDialogHandler::formatExtension(valid);
+    TS_ASSERT_EQUALS(expected, result4);
   }
 };
 

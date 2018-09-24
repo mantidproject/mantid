@@ -14,7 +14,7 @@ NeXus file. It is initially for use only at the SNS, as it is needed for
 the currently upgrade program. But there is nothing preventing it being
 used elsewhere.
 
-The algorithm takes the geometry information in the IDF togther with the
+The algorithm takes the geometry information in the IDF together with the
 log values in a given NeXus file and calculates the resolved positions
 of all the detectors and then writes this into the NeXus file specified.
 
