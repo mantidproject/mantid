@@ -726,7 +726,7 @@
               </property>
               <property name="text">
                <string>If characterization file is given, the correction run numbers are given by the file. 
-The corrections can be overriden and disabled though.</string>
+The corrections can be overridden and disabled though.</string>
               </property>
              </widget>
             </item>
@@ -737,7 +737,7 @@ The corrections can be overriden and disabled though.</string>
             <item row="0" column="3">
              <widget class="QCheckBox" name="disablebkgdcorr_chkbox">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable emptry/background correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disable empty/background correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="statusTip">
                <string>Select to set the detector distance offset.</string>

@@ -508,8 +508,8 @@ def set_state_from_property_manager(instance, property_manager):
     """
     Set the State object from the information stored on a property manager object. This is the deserialization step.
 
-    :param instance: the instance which is to be set with a values of the propery manager
-    :param property_manager: the property manager withe the stored setting
+    :param instance: the instance which is to be set with a values of the property manager
+    :param property_manager: the property manager with the stored setting
     """
     def _set_element(inst, k_element, v_element):
         if k_element != STATE_NAME and k_element != STATE_MODULE:

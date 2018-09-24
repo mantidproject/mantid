@@ -258,7 +258,7 @@ class VesuvioTOFFitRoutineIteration(object):
 
 class VesuvioMSHelper(object):
     """
-    A helper class for storing and manipulating the multiple scattering paramaters of
+    A helper class for storing and manipulating the multiple scattering parameters of
     the Vesuvio TOF Fit Routine.
 
     Attributes:

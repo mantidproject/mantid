@@ -42,7 +42,7 @@ def CalibrateMerlin(RunNumber):
     ExpectedPositions = [35.0, 512.0,
                          989.0]  # Expected positions of the edges and peak in pixels (initial values of fit parameters)
 
-    # Set what we want to calibrate (e.g whole intrument or one door )
+    # Set what we want to calibrate (e.g whole instrument or one door )
     CalibratedComponent = 'MERLIN'  # Calibrate door 2
 
     # Get calibration raw file and integrate it
@@ -86,7 +86,7 @@ def CalibrateMerlin(RunNumber):
     # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMerlinResult.nxs', "Result of Running TubeCalibDemoMerlin_Simple.py")
     # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
-    # == Reset dafault instrument ==
+    # == Reset default instrument ==
     mantid.config['default.instrument'] = previousDefaultInstrument
 
     # ==== End of CalibrateMerlin() ====

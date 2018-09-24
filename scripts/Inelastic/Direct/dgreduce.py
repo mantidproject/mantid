@@ -76,7 +76,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                ,diag_remove_zero=False,norm_method='current')
 
 
-    type help() for the list of all available keywords. All availible keywords are provided in InstName_Parameters.xml file
+    type help() for the list of all available keywords. All available keywords are provided in InstName_Parameters.xml file
 
 
     Some samples are:

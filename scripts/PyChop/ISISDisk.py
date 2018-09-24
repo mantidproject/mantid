@@ -59,7 +59,7 @@ class ISISDisk:
             self.samp_det = 3.5    # sample to detector distance in m
             self.chop_samp = 1.5   # final chopper to sample distance
             self.source_rep = 10   # rep rate of source
-            self.tmod = 3500       # maximimum emmision window from moderator in us
+            self.tmod = 3500       # maximum emission window from moderator in us
             self.frac_ei = 0.90    # fraction of Ei to plot energy loss lines
             self.Chop2Phase = 5    # Phase delay time in usec for chopper 2 (T0/frame overlap chopper)
         elif 'MERLIN' in instname:
@@ -210,7 +210,7 @@ class ISISDisk:
 
     def getEi(self):
         """
-        Returns the focussed incident energy in meV
+        Returns the focused incident energy in meV
         """
         return self.Ei
 
