@@ -1616,7 +1616,7 @@ public:
                           const std::vector<MantidQt::MantidWidgets::Batch::Cell> &rowText);
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
-
+    void removeAllRows();
     void replaceRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> replacementPoints,
                      std::vector<std::vector<MantidQt::MantidWidgets::Batch::Row>> replacementLocations);
     void appendSubtreesAt(const MantidQt::MantidWidgets::Batch::RowLocation& parent,
@@ -1659,6 +1659,10 @@ public:
 
   const std::string &contentText() const;
   void setContentText(const std::string& contentText);
+
+  const std::string &toolTip() const;
+  void setToolTip(const std::string &toolTip);
+
 
   const std::string & borderColor() const;
   void setBorderColor(const std::string& borderColor);

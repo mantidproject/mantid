@@ -15,7 +15,7 @@ characterization information and a collection of output parameters for
 the focus positions to be used in :ref:`algm-EditInstrumentGeometry`. If
 a section is missing then those parameters will be empty. This includes an empty
 table (zero rows) if that information is missing. The resulting TableWorkspace
-is intented to be used by :ref:`algm-PDDetermineCharacterizations`
+is intended to be used by :ref:`algm-PDDetermineCharacterizations`
 
 This algorithm is one of the workflow algorithms that helps
 :ref:`algm-SNSPowderReduction`.

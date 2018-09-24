@@ -15,7 +15,7 @@ digraph SingleCrystalDiffuseReduction {
 
   subgraph decisions {
     $decision_style
-    Background [label="Subtracting backgroud?"]
+    Background [label="Subtracting background?"]
     isLastRunNumber [label="Is last Sample Run Number?"]
     moreSymmetry [label="Is last symmetries to use?"]
   }

@@ -47,8 +47,8 @@ The masking procedure proceeds as follows:
 #. Mark all spectra from the middle of the range to the threshold spectrum as masked.
 #. Repeat for the other half.
 
-Defaul mask
-###########
+Default mask
+############
 
 The default mask file is defined by the 'Workflow.MaskFile' instrument parameter.
 

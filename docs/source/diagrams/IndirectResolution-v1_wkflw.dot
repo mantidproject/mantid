@@ -2,7 +2,7 @@ digraph IndirectResolution {
   label="IndirectResolution Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     ScaleFactorIsOne [label="ScaleFactor is 1?"]
   }

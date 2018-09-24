@@ -74,7 +74,7 @@ BSplines and Fitting
 
 Fitting with a BSpline is different to interpolation as it requires your number of breakpoints to be less than your number
 of data points. The reason being, the BSplines will attempt to fit close to the data points but might only pass through
-some of the data points. It is not necessarily going to pass through all data points, only passing through breakpoints is gauranteed.
+some of the data points. It is not necessarily going to pass through all data points, only passing through breakpoints is guaranteed.
 
 An example of a fit using BSplines of order 3 can be seen in the image below, our breakpoints have been highlighted in green.
 The original dataset is in black, while the calculated fit using a least-squares fit with 4 breakpoints is in red.
