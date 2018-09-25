@@ -1,3 +1,5 @@
+#ifndef MANTID_CUSTOMINTERFACES_EXPERIMENT_H_
+#define MANTID_CUSTOMINTERFACES_EXPERIMENT_H_
 /**
 Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -67,3 +69,4 @@ private:
 };
 }
 }
+#endif // MANTID_CUSTOMINTERFACES_EXPERIMENT_H_

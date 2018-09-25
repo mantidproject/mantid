@@ -8,7 +8,10 @@ set ( REDUCTION_SRC_FILES
     Slicing.cpp
     ParseReflectometryStrings.cpp
 
+    DetectorCorrections.cpp
     Experiment.cpp
+    Instrument.cpp
+    MonitorCorrections.cpp
     PolarizationCorrections.cpp
     RangeInLambda.cpp
     PerThetaDefaults.cpp
@@ -30,7 +33,10 @@ set ( REDUCTION_INC_FILES
     ValidatePerThetaDefaults.h
 
     AnalysisMode.h
+    DetectorCorrections.h
     Experiment.h
+    Instrument.h
+    MonitorCorrections.h
     PolarizationCorrections.h
     RangeInLambda.h
     ReductionType.h
