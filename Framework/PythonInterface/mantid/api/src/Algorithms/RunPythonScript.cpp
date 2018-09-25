@@ -3,8 +3,8 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
-#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 
 #include <boost/python/call_method.hpp>
@@ -169,7 +169,7 @@ RunPythonScript::executeScript(const std::string &script) const {
   using namespace boost::python;
 
   // Execution
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   auto locals = doExecuteScript(script);
   return extractOutputWorkspace(locals);
 }
@@ -192,7 +192,7 @@ RunPythonScript::doExecuteScript(const std::string &script) const {
   try {
     boost::python::exec(script.c_str(), globals, locals);
   } catch (boost::python::error_already_set &) {
-    throw Environment::PythonException();
+    throw PythonException();
   }
   return locals;
 }

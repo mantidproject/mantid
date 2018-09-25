@@ -111,7 +111,7 @@ Properties of the workspace :ref:`Run <Run>` object are loaded as follows:
 
 In the Nexus column, names of groups in capitals are in ``raw_data_1/isis_vms_compat`` and the other groups are in ``raw_data_1``.
 
-(data) indicates that the number is got from the histogram data in an appropiate manner.
+(data) indicates that the number is got from the histogram data in an appropriate manner.
 
 ``IRPB`` and ``RRPB`` point to the same data. In ``IRPB``, the data is seen as 32-bit integer 
 and in RRPB it is seen as 32-bit floating point (same 32 bits).

@@ -1,12 +1,20 @@
-#ifndef PYTHONINTERFACE_KERNEL_NDARRAY_H_
-#define PYTHONINTERFACE_KERNEL_NDARRAY_H_
-#include "MantidPythonInterface/kernel/DllConfig.h"
+#ifndef PYTHONINTERFACE_CORE_NDARRAY_H_
+#define PYTHONINTERFACE_CORE_NDARRAY_H_
+#include "MantidPythonInterface/core/DllConfig.h"
 
 #include <boost/python/object.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
-namespace NumPy {
+
+// It is important that the numpy/arrayobject header
+// does not appear in any of our headers as it
+// contains some static definitions that cannot be
+// allowed to be defined in other translation units
+
+MANTID_PYTHONINTERFACE_CORE_DLL void importNumpy();
+
+MANTID_PYTHONINTERFACE_CORE_DLL PyTypeObject *ndarrayType();
 
 /**
  * Thin object wrapper around a numpy array. This is intended to take the place
@@ -15,21 +23,20 @@ namespace NumPy {
  *
  * Only minimal functionality has been ported here.
  */
-class PYTHON_KERNEL_DLL NdArray : public boost::python::object {
+class MANTID_PYTHONINTERFACE_CORE_DLL NDArray : public boost::python::object {
 public:
   static bool check(const boost::python::object &obj);
 
-  NdArray(const boost::python::object &obj);
-  BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS(NdArray, boost::python::object);
+  NDArray(const boost::python::object &obj);
+  BOOST_PYTHON_FORWARD_OBJECT_CONSTRUCTORS(NDArray, boost::python::object);
 
   Py_intptr_t const *get_shape() const;
   int get_nd() const;
   void *get_data() const;
 
-  NdArray astype(char dtype, bool copy = true) const;
+  NDArray astype(char dtype, bool copy = true) const;
 };
 
-} // end namespace NumPy
 } // end namespace PythonInterface
 } // end namespace Mantid
 
@@ -40,8 +47,8 @@ namespace converter {
  * Register ndarray as a type that manages a PyObject* internally.
  */
 template <>
-struct PYTHON_KERNEL_DLL
-    object_manager_traits<Mantid::PythonInterface::NumPy::NdArray> {
+struct MANTID_PYTHONINTERFACE_CORE_DLL
+    object_manager_traits<Mantid::PythonInterface::NDArray> {
   BOOST_STATIC_CONSTANT(bool, is_specialized = true);
   static bool check(PyObject *obj);
   static python::detail::new_reference adopt(PyObject *obj);
@@ -51,4 +58,4 @@ struct PYTHON_KERNEL_DLL
 } // end namespace python
 } // end namespace boost
 
-#endif // PYTHONINTERFACE_KERNEL_NDARRAY_H_
+#endif // PYTHONINTERFACE_CORE_NDARRAY_H_

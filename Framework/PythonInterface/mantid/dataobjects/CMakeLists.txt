@@ -67,6 +67,7 @@ set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonInterfaceCore
             PythonAPIModule
             PythonGeometryModule
             PythonKernelModule
