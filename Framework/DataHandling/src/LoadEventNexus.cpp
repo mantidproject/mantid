@@ -250,12 +250,12 @@ void LoadEventNexus::init() {
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
 
-  std::vector<std::string> loadType{"default", "multiprocess"};
+  std::vector<std::string> loadType{"Default", "Multiprocess"};
 #ifdef MPI_EXPERIMENTAL
   loadType.emplace_back("MPI");
 #endif
   auto loadTypeValidator = boost::make_shared<StringListValidator>(loadType);
-  declareProperty("Load type", "default", loadTypeValidator,
+  declareProperty("LoadType", "Default", loadTypeValidator,
                   "Set type of loader");
 }
 
