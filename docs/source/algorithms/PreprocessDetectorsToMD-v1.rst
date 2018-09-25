@@ -11,9 +11,9 @@ Description
 
 The algorithm calculates expensive part of the transformation from real to reciprocal space, calculating namely, 
 detector positions, sample-detector distances, angular detectors positions, etc. These values can be slow to calculate 
-for composite detectors and other algorithms can substantially benifit from using preprocessed values. 
+for composite detectors and other algorithms can substantially benefit from using preprocessed values. 
 
-The algorithm places processed values into a table workspace with the following colums:
+The algorithm places processed values into a table workspace with the following columns:
 
 +---------------+--------+------------------------------------------------------+
 | Column Name : |  Type  |  Description:                                        |
@@ -41,7 +41,7 @@ In addition to the preprocessed detectors intofmation, the following log entries
 -  **L1** -- Source-sample distance.
 -  **ActualDetectorsNum** -- total number of existing preprocessed detectors (number of rows in the table above).
 -  **InstrumentName** -- the name of the source instrument.
--  **FakeDetectors** -- if detectors posisions were not actually preprocessed but fake detectros were used instread 
+-  **FakeDetectors** -- if detectors posisions were not actually preprocessed but fake detectros were used instead 
     (InstrumentName==*FakeInstrument* in this case).
 
     

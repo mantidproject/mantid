@@ -4,13 +4,12 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <boost/python/wrapper.hpp>
-#include <stdexcept>
 
 namespace Mantid {
 namespace PythonInterface {
-namespace Environment {
+
 /**
 This namespace contains helper functions for classes that are overridden in
 Python
@@ -38,11 +37,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// Checks whether the given object's type dictionary contains the named
 /// attribute.
-bool DLLExport typeHasAttribute(PyObject *obj, const char *attr);
+bool MANTID_PYTHONINTERFACE_CORE_DLL typeHasAttribute(PyObject *obj,
+                                                      const char *attr);
 /// An overload for the above taking a wrapper reference
-bool DLLExport typeHasAttribute(
+bool MANTID_PYTHONINTERFACE_CORE_DLL typeHasAttribute(
     const boost::python::detail::wrapper_base &wrapper, const char *attr);
-} // namespace Environment
+
 } // namespace PythonInterface
 } // namespace Mantid
 

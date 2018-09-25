@@ -12,7 +12,7 @@ Description
 This is a hybrid between :ref:`algm-IntegratePeaksMD` and :ref:`algm-IntegratePeaksUsingClusters`. Each peak region is treated as a separate image and rebinned accordingly. The background threshold is automatically determined around each peak, by averaging over all pixels in that region. 
 The NumberOfBins and BackgroundOuterRadius are global to all Peaks. The actual background threshold is calculated independently for each peak based on NumberOfBins, BackgroundOuterRadius and the signal values in that region. This algorithm is in general faster than :ref:`algm-IntegratePeaksUsingClusters` and has a better ability to distinguish peaks from the background because each peak is treated independently.
 
-Integrates arbitary shaped single crystal peaks defined on an
+Integrates arbitrary shaped single crystal peaks defined on an
 :ref:`MDHistoWorkspace <MDHistoWorkspace>` using connected component
 analysis to determine regions of interest around each peak of the
 :ref:`PeaksWorkspace <PeaksWorkspace>`. The output is an integrated
@@ -21,7 +21,7 @@ labels assigned to each cluster for diagnostic and visualisation
 purposes.
 
 **The algorithm makes no assmptions about Peak shape or size** and can
-therfore be used where integration over defined shapes
+therefore be used where integration over defined shapes
 :ref:`algm-IntegratePeaksMD` and
 :ref:`algm-IntegrateEllipsoids`, for example, will not
 work.

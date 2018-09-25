@@ -12,7 +12,7 @@ Description
 This algorithm saves the first spectrum of a workspace in ASCII format in order to be processed by software, e.g. Motofit.
 It is possible to provide a group of workspaces as input.
 In this case, each filename contains the corresponding workspace name.
-The choice of the file extension (`.mft`, `.txt`, `.dat`) defines the file format and appends the `Filename` with the correponding extension except for the `custom` field, which represents a custom format where the `Filename` can be choosen freely.
+The choice of the file extension (`.mft`, `.txt`, `.dat`) defines the file format and appends the `Filename` with the corresponding extension except for the `custom` field, which represents a custom format where the `Filename` can be chosen freely.
 In case of histogrammed input data, the resulting file will contain the bin centre for the x-values representing the quantity `q`.
 It is especially useful for saving reflectometry reduction data.
 A file can be loaded back into Mantid by :ref:`algm-LoadAscii`, which will not have an instrument defined and `Sample Logs` are missing.
