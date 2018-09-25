@@ -132,8 +132,13 @@ std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
     boost::trim(line);
     if (line.size() < 5 || line.substr(0, 5) != "solid") {
       //attempt to load stl binary instead
-      std::unique_ptr<LoadBinStl> binaryStlReader = Kernel::make_unique<LoadBinStl>();
-      return binaryStlReader->LoadBinStl::readStl(filename);
+      std::unique_ptr<LoadBinStl> binaryStlReader = Kernel::make_unique<LoadBinStl>(filename);
+      if (binaryStlReader->isBinarySTL()){
+        return binaryStlReader->LoadBinStl::readStl();
+      }else{
+        throw std::runtime_error("Expected start of solid");
+      }
+      
     } else {
       name = line.substr(6, std::string::npos);
     }
