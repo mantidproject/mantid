@@ -17,22 +17,22 @@ namespace Parallel {
 namespace IO {
 
 /// Constructor
-MultiProcessEventLoader::MultiProcessEventLoader(unsigned int numPixels,
-                                                 unsigned int numProcesses,
-                                                 unsigned int numThreads,
+MultiProcessEventLoader::MultiProcessEventLoader(uint32_t numPixels,
+                                                 uint32_t numProcesses,
+                                                 uint32_t numThreads,
                                                  const std::string &binary,
                                                  bool precalc)
     : m_precalculateEvents(precalc), m_numPixels(numPixels),
       m_numProcesses(numProcesses), m_numThreads(numThreads),
       m_binaryToLaunch(binary),
-      m_segmentNames(GenerateSegmentsName(numProcesses)),
-      m_storageName(GenerateStoragename()) {}
+      m_segmentNames(generateSegmentsName(numProcesses)),
+      m_storageName(generateStoragename()) {}
 
 /// Generates "unique" shared memory segment name
 std::vector<std::string>
-MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
+MultiProcessEventLoader::generateSegmentsName(uint32_t procNum) {
   std::vector<std::string> res(procNum,
-                               GenerateTimeBasedPrefix() +
+                               generateTimeBasedPrefix() +
                                    "_mantid_multiprocess_NXloader_segment_");
   unsigned short i{0};
   for (auto &name : res)
@@ -41,12 +41,12 @@ MultiProcessEventLoader::GenerateSegmentsName(unsigned procNum) {
 }
 
 /// Generates "unique" shared memory storage structure name
-std::string MultiProcessEventLoader::GenerateStoragename() {
-  return GenerateTimeBasedPrefix() + "_mantid_multiprocess_NXloader_storage";
+std::string MultiProcessEventLoader::generateStoragename() {
+  return generateTimeBasedPrefix() + "_mantid_multiprocess_NXloader_storage";
 }
 
 /// Generates "unique" prefix for shared memory stuff
-std::string MultiProcessEventLoader::GenerateTimeBasedPrefix() {
+std::string MultiProcessEventLoader::generateTimeBasedPrefix() {
   auto now = std::chrono::system_clock::now();
   auto in_time_t = std::chrono::system_clock::to_time_t(now);
 
@@ -225,7 +225,7 @@ void MultiProcessEventLoader::assembleFromShared(
 void MultiProcessEventLoader::fillFromFile(
     EventsListsShmemStorage &storage, const std::string &filename,
     const std::string &groupname, const std::vector<std::string> &bankNames,
-    const std::vector<int32_t> &bankOffsets, unsigned from, unsigned to,
+    const std::vector<int32_t> &bankOffsets, const uint32_t from, const uint32_t to,
     bool precalc) {
   H5::H5File file(filename.c_str(), H5F_ACC_RDONLY);
   auto instrument = file.openGroup(groupname);
@@ -282,7 +282,7 @@ void MultiProcessEventLoader::fillFromFile(
 // vector representing each pixel allocated only once, so we have allocationFee
 // bytes extra overhead
 size_t MultiProcessEventLoader::estimateShmemAmount(size_t eventCount) const {
-  auto allocationFee = 8 + 8 + GenerateStoragename().length();
+  auto allocationFee = 8 + 8 + generateStoragename().length();
   std::size_t len{(eventCount / m_numProcesses + eventCount % m_numProcesses) *
                       sizeof(TofEvent) +
                   m_numPixels * (sizeof(EventLists) + allocationFee) +

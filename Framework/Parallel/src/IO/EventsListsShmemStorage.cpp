@@ -14,10 +14,10 @@ EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName,
                                                  bool destroy)
     : EventsListsShmemManager(segmentName, elName, 0), destroyShared(destroy) {
   try {
-    m_segment = std::make_shared<ip::managed_shared_memory>(
+    m_segment = std::make_unique<ip::managed_shared_memory>(
         ip::create_only, m_segmentName.c_str(), size);
     m_allocatorInstance =
-        std::make_shared<VoidAllocator>(m_segment->get_segment_manager());
+        std::make_unique<VoidAllocator>(m_segment->get_segment_manager());
     m_chunks = m_segment->construct<Chunks>(m_chunksName.c_str())(
         chunksCnt, EventLists(pixelsCount, EventList(alloc()), alloc()),
         alloc());

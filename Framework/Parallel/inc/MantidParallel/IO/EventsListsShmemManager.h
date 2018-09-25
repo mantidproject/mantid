@@ -23,12 +23,21 @@ namespace IO {
 
 /** EventsListsShmemManager : Operates with event list in shared memory in
  * multiprocess environment; NOT an !!!OWNER of shared memory!!!
- * base class for EventsListsShmemStorage, that is the owner.
- * Structure of storage:
+ * Initially the plan had been to crteate all shared memory segments in
+ * main process in RAII style, but in the modern linux implementation you
+ * can't create more than 1 NAMED shared memory segment in single process,
+ * but we should use NAMED shared memory to fit other OS needs,
+ * so in currenti mplementation all segments are created by child processes
+ * and destroyed by parent. This may be fixed in the future, then this class,
+ * may be used for operating on segments from child processes.
+ * EventsListsShmemManager base class for EventsListsShmemStorage,
+ * that is the owner. Structure of storage:
  *    chunk_0 |pixel_0|   chunk_1 |pixel_0| ... chunk_N |pixel_0|
  *            |pixel_1|           |pixel_1|      ...    |pixel_1|
  *            ... ... ... ... ... ... ... ... ... ... ... ... ...
  *            |pixel_M|           |pixel_M|      ...    |pixel_M|
+ *
+ * Every chunk can partially store events for every pixel.
 
   @author Igor Gudich
   @date 2018
@@ -71,12 +80,12 @@ public:
   EventsListsShmemManager(const std::string &segmentName,
                           const std::string &elName);
 
-  virtual ~EventsListsShmemManager();
+  virtual ~EventsListsShmemManager() = default;
 
-  void AppendEvent(std::size_t chunkN, std::size_t listN,
+  void appendEvent(std::size_t chunkN, std::size_t listN,
                    const Types::Event::TofEvent &event);
   template <typename InIter>
-  void AppendEvent(std::size_t chunkN, std::size_t listN, InIter from,
+  void appendEvent(std::size_t chunkN, std::size_t listN, InIter from,
                    InIter to);
 
   std::size_t pixelCount() {
@@ -98,13 +107,13 @@ protected:
   const std::string m_segmentName;
 
   /// Allocator to mange shared memory
-  std::shared_ptr<VoidAllocator> m_allocatorInstance;
+  std::unique_ptr<VoidAllocator> m_allocatorInstance;
 
   /// Event list shared storage name
   const std::string m_chunksName;
 
   /// Memory segment to store data
-  std::shared_ptr<ip::managed_shared_memory> m_segment;
+  std::unique_ptr<ip::managed_shared_memory> m_segment;
 
   /// Event list shared storage
   Chunks *m_chunks;
@@ -112,7 +121,7 @@ protected:
 
 /// Appends the range of ToF events (from other container for example)
 template <typename InIter>
-void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
+void EventsListsShmemManager::appendEvent(std::size_t chunkN, std::size_t listN,
                                           InIter from, InIter to) {
   if (!m_chunks)
     throw("No event lists found.");

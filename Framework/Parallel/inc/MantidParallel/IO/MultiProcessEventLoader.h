@@ -26,7 +26,7 @@ namespace IO {
  * The issue with shared memory: shared memory allocator is not smart enough,
  * so the dynamic allocation leads to memory fragmentation and unreasonable
  * memory consumption. For this reason we need to know the size of the data,
- * before loading to the shared memory. 2 strategies avaliable for doing this:
+ * before loading to the shared memory. 2 strategies available for doing this:
  * 1. Load data from bank -> precalculate number events for each pixel
  *      -> sort by pixels directly in shared memory: LoadType::precalcEvents.
  * 2. Load data from bank -> sort by pixels in local memory
@@ -58,8 +58,8 @@ namespace IO {
 */
 class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
-  MultiProcessEventLoader(unsigned int numPixels, unsigned int numProcesses,
-                          unsigned int numThreads, const std::string &binary,
+  MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses,
+                          uint32_t numThreads, const std::string &binary,
                           bool precalc = true);
   void
   load(const std::string &filename, const std::string &groupname,
@@ -72,14 +72,14 @@ public:
                            const std::string &groupname,
                            const std::vector<std::string> &bankNames,
                            const std::vector<int32_t> &bankOffsets,
-                           unsigned from, unsigned to, bool precalc);
+                           uint32_t from, uint32_t to, bool precalc);
 
   enum struct LoadType { preCalcEvents, producerConsumer };
 
 private:
-  static std::vector<std::string> GenerateSegmentsName(unsigned procNum);
-  static std::string GenerateStoragename();
-  static std::string GenerateTimeBasedPrefix();
+  static std::vector<std::string> generateSegmentsName(uint32_t procNum);
+  static std::string generateStoragename();
+  static std::string generateTimeBasedPrefix();
 
   template <typename MultiProcessEventLoader::LoadType LT =
                 LoadType::preCalcEvents>
@@ -89,7 +89,7 @@ private:
                               const H5::Group &group,
                               const std::vector<std::string> &bankNames,
                               const std::vector<int32_t> &bankOffsets,
-                              unsigned from, unsigned to);
+                              uint32_t from, uint32_t to);
   };
 
   void assembleFromShared(
@@ -99,9 +99,9 @@ private:
 
 private:
   bool m_precalculateEvents;
-  unsigned m_numPixels;
-  unsigned m_numProcesses;
-  unsigned m_numThreads;
+  uint32_t m_numPixels;
+  uint32_t m_numProcesses;
+  uint32_t m_numThreads;
   std::string m_binaryToLaunch;
   std::vector<std::string> m_segmentNames;
   std::string m_storageName;
@@ -117,8 +117,8 @@ void MultiProcessEventLoader::GroupLoader<
     MultiProcessEventLoader::LoadType::preCalcEvents>::
     loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
                   const std::vector<std::string> &bankNames,
-                  const std::vector<int32_t> &bankOffsets, unsigned from,
-                  unsigned to) {
+                  const std::vector<int32_t> &bankOffsets, const uint32_t from,
+                  const uint32_t to) {
   std::vector<int32_t> eventId;
   std::vector<T> eventTimeOffset;
 
@@ -164,7 +164,7 @@ void MultiProcessEventLoader::GroupLoader<
       for (unsigned i = 0; i < eventId.size(); ++i) {
         try {
           TofEvent event{(double)eventTimeOffset[i], part->next()};
-          storage.AppendEvent(0, eventId[i], event);
+          storage.appendEvent(0, eventId[i], event);
         } catch (std::exception const &ex) {
           std::rethrow_if_nested(ex);
         }
@@ -185,10 +185,11 @@ void MultiProcessEventLoader::GroupLoader<
     MultiProcessEventLoader::LoadType::producerConsumer>::
     loadFromGroup(EventsListsShmemStorage &storage, const H5::Group &instrument,
                   const std::vector<std::string> &bankNames,
-                  const std::vector<int32_t> &bankOffsets, unsigned from,
-                  unsigned to) {
-
-  const std::size_t chLen{std::max<std::size_t>((to - from) / 100, 1)};
+                  const std::vector<int32_t> &bankOffsets, const uint32_t from,
+                  const uint32_t to) {
+  constexpr std::size_t chunksPerBank{100};
+  const std::size_t chLen{
+      std::max<std::size_t>((to - from) / chunksPerBank, 1)};
   auto bankSizes = EventLoader::readBankSizes(instrument, bankNames);
 
   struct Task {
@@ -204,7 +205,7 @@ void MultiProcessEventLoader::GroupLoader<
   std::vector<std::vector<TofEvent>> pixels(storage.pixelCount());
   std::atomic<std::size_t> pixNum{0};
   std::queue<std::unique_ptr<Task>> queue;
-  std::mutex guard;
+  std::mutex mutex;
   std::atomic<int> finished{0};
   std::size_t portion{std::max<std::size_t>(pixels.size() / 16, 1)};
 
@@ -228,7 +229,7 @@ void MultiProcessEventLoader::GroupLoader<
           if (cur + chLen >= finish)
             cnt = finish - cur;
 
-          std::unique_ptr<Task> task(new Task(instrument, bankNames));
+          auto task{std::make_unique<Task>(instrument, bankNames)};
           task->partitioner = task->loader.setBankIndex(bankIdx);
           task->partitioner->setEventOffset(cur);
           task->eventTimeOffset.resize(cnt);
@@ -240,7 +241,7 @@ void MultiProcessEventLoader::GroupLoader<
                                                bankOffsets[bankIdx]);
 
           {
-            std::lock_guard<std::mutex> lock(guard);
+            std::lock_guard<std::mutex> lock(mutex);
             queue.push(std::move(task));
           }
           cur += cnt;
@@ -261,17 +262,17 @@ void MultiProcessEventLoader::GroupLoader<
          startPixel = pixNum.fetch_add(portion)) {
       for (auto pixel = startPixel;
            pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.AppendEvent(0, pixel, pixels[pixel].begin(),
+        storage.appendEvent(0, pixel, pixels[pixel].begin(),
                             pixels[pixel].end());
     }
   });
 
   std::thread consumer([&]() {
-    while (finished < 1) { // producer whant to produce smth
+    while (finished < 1) { // producer wants to produce smth
       while (!queue.empty()) {
         std::unique_ptr<Task> task;
         {
-          std::lock_guard<std::mutex> lock(guard);
+          std::lock_guard<std::mutex> lock(mutex);
           task = std::move(queue.front());
           queue.pop();
         }
@@ -289,7 +290,7 @@ void MultiProcessEventLoader::GroupLoader<
          startPixel = pixNum.fetch_add(portion)) {
       for (auto pixel = startPixel;
            pixel < std::min(startPixel + portion, pixels.size()); ++pixel)
-        storage.AppendEvent(0, pixel, pixels[pixel].begin(),
+        storage.appendEvent(0, pixel, pixels[pixel].begin(),
                             pixels[pixel].end());
     }
 

@@ -12,23 +12,22 @@ namespace IO {
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
                                                  const std::string &elName)
     : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {
-  m_segment = std::make_shared<ip::managed_shared_memory>(
+  m_segment = std::make_unique<ip::managed_shared_memory>(
       ip::open_only, m_segmentName.c_str());
   m_allocatorInstance =
-      std::make_shared<VoidAllocator>(m_segment->get_segment_manager());
+      std::make_unique<VoidAllocator>(m_segment->get_segment_manager());
   m_chunks = m_segment->find<Chunks>(m_chunksName.c_str()).first;
   if (!m_chunks)
     throw std::invalid_argument("No event lists found.");
 }
 
-EventsListsShmemManager::~EventsListsShmemManager() {}
 
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
                                                  const std::string &elName, int)
     : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {}
 
 /// Appends ToF event to given pixel in given chunk of shared storage
-void EventsListsShmemManager::AppendEvent(std::size_t chunkN, std::size_t listN,
+void EventsListsShmemManager::appendEvent(std::size_t chunkN, std::size_t listN,
                                           const Types::Event::TofEvent &event) {
   assert(m_chunks);
   if (chunkN >= m_chunks->size())

@@ -53,12 +53,12 @@ void load(const std::string &filename, const std::string &groupname,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
-  auto comcurencyNumber = std::thread::hardware_concurrency();
+  auto concurencyNumber = std::thread::hardware_concurrency();
   std::string executableName =
       Mantid::Kernel::ConfigService::Instance().getDirectoryOfExecutable() +
       "/MantidNexusParallelLoader";
   MultiProcessEventLoader loader(static_cast<unsigned>(eventLists.size()),
-                                 comcurencyNumber / 2, comcurencyNumber / 2,
+                                 concurencyNumber / 2, concurencyNumber / 2,
                                  executableName);
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }

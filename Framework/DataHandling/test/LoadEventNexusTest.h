@@ -35,7 +35,7 @@ void run_multiprocess_load(const std::string &file) {
   Mantid::API::FrameworkManager::Instance();
   LoadEventNexus ld;
   ld.initialize();
-  ld.setPropertyValue("Load type", "multiprocess");
+  ld.setPropertyValue("Loadtype", "multiprocess");
   std::string outws_name = "multiprocess";
   ld.setPropertyValue("Filename", file);
   ld.setPropertyValue("OutputWorkspace", outws_name);
@@ -50,7 +50,7 @@ void run_multiprocess_load(const std::string &file) {
 
   LoadEventNexus ldRef;
   ldRef.initialize();
-  ldRef.setPropertyValue("Load type", "default");
+  ldRef.setPropertyValue("Loadtype", "default");
   outws_name = "reference";
   ldRef.setPropertyValue("Filename", file);
   ldRef.setPropertyValue("OutputWorkspace", outws_name);
