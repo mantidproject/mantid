@@ -325,7 +325,7 @@ void GravityCorrection::slitCheck() {
 }
 
 /**
- * @brief GravityCorrection::finalAngle
+ * @brief GravityCorrection::finalAngle calculates the sample hit position
  * @param k :: characteristic length of the parabola in 1/m
  * @param i :: spectrum number
  * @return final angle in radians
@@ -344,9 +344,6 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
       (2 * k * beamDiff);
   const double up2 = m_beam2 * tanAngle; // sign
   double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
-  // set sample coordinates in unit m:
-  this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift);
-  this->setCoordinate(m_sample3D, this->m_upDirection, upShift);
   // calculate final angle
   return sign * atan(2. * k * sqrt(abs(upShift / k)));
 }
@@ -593,9 +590,6 @@ void GravityCorrection::exec() {
         "number does not exist.");
   // need a mutable copy of the input workspace here.
   MatrixWorkspace_sptr clonedWS = this->m_ws->clone();
-  // source position coordinate in beam direction (variable sample position)
-  double sourceZ = this->coordinate(
-      this->m_virtualInstrument->getSource()->getName(), this->m_beamDirection);
   this->m_progress->report("Perform gravity correction ...");
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!(this->spectrumCheck(spectrumInfo, i)))
@@ -636,31 +630,27 @@ void GravityCorrection::exec() {
       if (i_tofit > outWS->mutableY(j).size())
         continue;
 
-      double s1 = this->parabolaArcLength(-2 * k * sourceZ) / (2 * k);
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
-      const std::set<detid_t> dets = this->m_ws->getSpectrum(j).getDetectorIDs();
+      const std::set<detid_t> dets =
+          this->m_ws->getSpectrum(j).getDetectorIDs();
 
       V3D detPos;
       if (dets.size() == 1)
-        detPos = this->m_virtualInstrument->getDetector(*dets.cbegin())->getPos();
+        detPos =
+            this->m_virtualInstrument->getDetector(*dets.cbegin())->getPos();
       else if (dets.size() > 1) {
         g_log.information("Found grouped detectors ... skip for the moment");
-      }
-      else
+      } else
         continue;
 
       double detZ = this->coordinate(detPos, m_beamDirection);
       // possible trajectory from sample to detector, almost equals detZ
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
-      double s = s1 + s2;
-
-      // offset due to variable sample position
-      const double offset =
-          this->coordinate(this->m_sample3D, this->m_beamDirection);
 
       // this value should be close to one
-      const double cOne = (detZ - offset) / (s * cos(angle));
+      //const double cOne = (detZ - offset) / (s * cos(angle));
+      const double cOne = detZ / (s2 * cos(angle));
       outWS->mutableX(j)[i_tofit] = cOne * *tofit; // mu sec
 
       // need to set the counts to spectrum according to finalAngle & *tofit

@@ -81,10 +81,7 @@ private:
   Mantid::Geometry::Instrument_const_sptr m_virtualInstrument;
   double m_beam1;
   double m_beam2;
-
   int m_numberOfMonitors{0};
-  Mantid::Kernel::V3D m_sample3D{Mantid::Kernel::V3D(
-      0.0, 0.0, 0.0)}; /// sample coordinates wavelength dependent
 
   std::map<double, size_t> m_finalAngles;
   std::map<double, size_t>::key_compare m_smallerThan =

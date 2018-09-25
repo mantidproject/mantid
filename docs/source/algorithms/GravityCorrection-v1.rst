@@ -133,9 +133,9 @@ The corrected neutron flight path is given by
 
 When neglecting gravitation :math:`g = 0 \frac{\mbox{m}}{\mbox{s}^2}`, the corrected time-of-flight values are given by
 
-.. math:: \boxed{t = \frac{x_{d} - x_0}{v_i \mbox{cos}(\theta_f)}},
+.. math:: \boxed{t = \frac{x_{d}}{s_{2} \mbox{cos}(\theta_f)} \cdot t_{0}},
 
-taking the sample centre shift into account and where :math:`x_{d}` describes the detector :math:`x` position. Correspondingly, the corrected neutron count will be for detector position
+where :math:`x_{d}` describes the detector :math:`x` position, :math:`s_{2}` is the parabola flight path from sample to detector and :math:`t_{0}` is the initial, uncorrected neutron travel time. Correspondingly, the corrected neutron count will be for detector position
 
 .. math:: x_{d} = v_i \mbox{cos}({\theta_f}) t
 
