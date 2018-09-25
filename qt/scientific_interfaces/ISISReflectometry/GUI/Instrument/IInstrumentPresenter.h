@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H
 
 #include <string>
 #include "../../IReflBatchPresenter.h"
@@ -7,10 +7,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IExperimentPresenter
+/** @class IInstrumentPresenter
 
-IExperimentPresenter is an interface which defines the functions that need
-to be implemented by a concrete 'Experiment' presenter
+IInstrumentPresenter is an interface which defines the functions that need
+to be implemented by a concrete 'Instrument' presenter
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -33,10 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IExperimentPresenter {
+class IInstrumentPresenter {
 public:
-  virtual ~IExperimentPresenter() = default;
+  virtual ~IInstrumentPresenter() = default;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H */
+#endif /* MANTID_ISISREFLECTOMETRY_IINSTRUMENTPRESENTER_H */

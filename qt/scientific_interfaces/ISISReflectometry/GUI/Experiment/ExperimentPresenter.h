@@ -37,7 +37,7 @@ using ExperimentValidationResult =
 
 /** @class ExperimentPresenter
 
-ExperimentPresenter is a presenter class for the widget 'Event' in the
+ExperimentPresenter is a presenter class for the widget 'Experiment' in the
 ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

@@ -154,6 +154,8 @@ void ExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.CApEdit, "Ap", alg);
   registerSettingWidget(*m_ui.CPpEdit, "Pp", alg);
   registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
+  registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
+  registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
 }
 
 void ExperimentView::summationTypeChanged(int reductionTypeIndex) {

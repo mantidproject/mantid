@@ -1,16 +1,19 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H
+#ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
+#define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
 
-#include <string>
-#include "../../IReflBatchPresenter.h"
+#include "../../DllConfig.h"
+#include "IReflBatchPresenter.h"
+#include "IInstrumentView.h"
+#include "IInstrumentPresenter.h"
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IExperimentPresenter
+/** @class InstrumentPresenter
 
-IExperimentPresenter is an interface which defines the functions that need
-to be implemented by a concrete 'Experiment' presenter
+InstrumentPresenter is a presenter class for the widget 'Instrument' in the
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -33,10 +36,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IExperimentPresenter {
+class MANTIDQT_ISISREFLECTOMETRY_DLL InstrumentPresenter
+    : public InstrumentViewSubscriber,
+      public IInstrumentPresenter {
 public:
-  virtual ~IExperimentPresenter() = default;
+  InstrumentPresenter(IInstrumentView *view);
+  void notifySettingsChanged() override;
+
+private:
+  IInstrumentView *m_view;
 };
-} // namespace CustomInterfaces
-} // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IEXPERIMENTPRESENTER_H */
+}
+}
+#endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
