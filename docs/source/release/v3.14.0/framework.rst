@@ -39,7 +39,7 @@ Algorithms
 New Algorithms
 ##############
 
-
+- :ref:`MatchSpectra <algm-MatchSpectra>` is an algorithm that calculates factors to match all spectra to a reference spectrum.
 
 Improvements
 ############
