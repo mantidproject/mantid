@@ -66,6 +66,10 @@ class MultiFileEditor(PluginWidget):
 
         self.editor_actions = [self.run_action, self.abort_action]
 
+    def execute_current(self):
+        '''This is used by MainWindow to execute a file after opening it'''
+        return self.editors.execute_current()
+
     # ----------- Plugin API --------------------
 
     def app_closing(self):

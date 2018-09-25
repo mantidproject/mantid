@@ -27,7 +27,7 @@ MDHistoWorkspaces
 MDEventWorkspaces
 #################
 
-This algorithm operates similary to calling Plus on two
+This algorithm operates similarly to calling Plus on two
 :ref:`EventWorkspaces <EventWorkspace>`: it combines the events from the
 two workspaces together to form one large workspace.
 

@@ -23,8 +23,10 @@ protected slots:
   void updatePlotOptions() override;
   void updateModelFitTypeString();
   void plotClicked();
+  void runClicked();
 
 protected:
+  void setRunEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
   void setSaveResultEnabled(bool enabled) override;
 

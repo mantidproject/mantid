@@ -13,6 +13,9 @@ UI & Usability Changes
 
 Project Recovery
 ----------------
+New
+###
+-Project recovery can now make a recovery checkpoint on command using mantidplot.app.saveRecoveryCheckpoint() in either the interpreter or script windows in python
 
 Changes
 #######
@@ -23,14 +26,21 @@ Changes
 Bugfixes
 ########
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
-- Project recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
+- Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces as well)
+- Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 
 MantidPlot
 ----------
+
+Changes
+#######
+
+- All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
 
 BugFixes
 ########
 
 - Fixed issue where an open set of data from ITableWorkspace wouldn't update if the data was changed via python
+- Fixed an issue where MantidPlot would crash when renaming workspaces.
 
 :ref:`Release 3.14.0 <v3.14.0>`

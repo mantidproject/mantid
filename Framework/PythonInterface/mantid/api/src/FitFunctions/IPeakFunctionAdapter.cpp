@@ -1,12 +1,11 @@
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/core/CallMethod.h"
 
 //-----------------------------------------------------------------------------
 // IPeakFunction definition
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::callMethodNoCheck;
 using namespace boost::python;
 
 /**

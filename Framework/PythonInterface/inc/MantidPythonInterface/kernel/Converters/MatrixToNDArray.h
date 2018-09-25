@@ -23,8 +23,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include <boost/python/detail/prefix.hpp>
 
 namespace Mantid {

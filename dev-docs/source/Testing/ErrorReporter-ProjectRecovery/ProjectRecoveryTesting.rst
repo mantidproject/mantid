@@ -12,7 +12,7 @@ Project Recovery test
 *Preparation*
 
 - Before running these tests, set project recovery to run every 2 seconds. The instructions for this
-  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`_.
+  are on the `Project Recovery concepts page <http://docs.mantidproject.org/nightly/concepts/ProjectRecovery.html>`__.
 - Get the ISIS sample dataset from the `Downloads page <http://download.mantidproject.org/>`_.
 - `TOPAZ_3132_event.nxs` - availabe in ``/Testing/Data/SystemTest/``, get this by building the `SystemTestData` target. It should be in ``ExternalData/Testing/Data/SystemTest/``
 - The files `INTER000*` are in the ISIS sample data
@@ -80,7 +80,7 @@ Project Recovery test
 
 .. code-block:: python
 
-   testing_directory=<path-to-test>
+   testing_directory=<path-to-test>   # <path-to-test> is the location of a directory for saving workspaces for comparison later
    CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='0Rebinned')
    for i in range(100):
        RenameWorkspace(InputWorkspace='%sRebinned'%str(i), OutputWorkspace='%sRebinned'%str(i+1))
@@ -158,33 +158,6 @@ Project Recovery test
 
 - Compare the contents of ``/test_binary_operators_r.csv`` and ``/test_binary_operators.csv``, they should be the same
 - Compare the contents of ``/method_test_r.csv`` and ``/method_test_r.csv``, they should be the same
-
---------
-
-4. Multiple instances of Mantid
-
-- Open up MantidPlot, ensure that only one instance is running
-- Right-click in the Results Log and set `Log level` to `Debug`
-- The Results Log should be printing `Nothing to save`
-- Run the following script:
-
-.. code-block:: python
-
-  CreateWorkspace(DataX=range(12), DataY=range(12), DataE=range(12), NSpec=4, OutputWorkspace='NewWorkspace')
-
-- The Results Log should now be printing `Project Recovery: Saving started` and `Project Recovery: Saving finished` on alternate lines
-- Now start a second instance of Mantid - note on OSX this has to be done from the command line, as OSX will not allow two instances of an executable to be run using the `open` command
-- Set `Log level` to `Debug`
-- Watch the `Results log` for 30 seconds (or longer than your interval for project recovery saving, see the `Preparation` section)
-- No message about saving should be printed
-- Now, crash the first instance of Mantid with `Segfault` from the algorithm window
-- Start a new instance of Mantid
-- This should also have no messages about saving
-- Close both instances of Mantid gracefully
-- Start a new instance of Mantid
-- You should be presented with the Project Recovery dialog
-- Choose `Yes`
-- This should repopulate your workspace window
 
 --------
 
@@ -278,8 +251,10 @@ Project Recovery test
   RenameWorkspace(InputWorkspace='NewWorkspace', OutputWorkspace='Rename2')  
 
 - Save the workspace as a `.nxs` file
-- Delete the workspace
+- Close Mantid normally
+- Re-open Mantid
 - Re-open the workspace from the saved `.nxs` file
+- Wait for saving
 - Crash Mantid with `Segfault` from the algorithm window
 - Reopen Mantid
 - Choose `Only open in script editor`

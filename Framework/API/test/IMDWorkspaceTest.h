@@ -6,7 +6,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidTestHelpers/FakeObjects.h"

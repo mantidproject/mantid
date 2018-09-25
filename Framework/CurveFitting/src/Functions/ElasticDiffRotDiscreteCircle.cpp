@@ -31,8 +31,8 @@ ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in
   // constructor of base class DeltaFunction
   this->declareParameter("Radius", 1.0, "Circle radius [Angstroms] ");
-  this->declareAttribute("Q", API::IFunction::Attribute(0.5));
   this->declareAttribute("N", API::IFunction::Attribute(3));
+  FunctionQDepends::declareAttributes();
 }
 
 /**

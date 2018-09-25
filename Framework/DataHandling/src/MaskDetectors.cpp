@@ -57,12 +57,11 @@ void MaskDetectors::init() {
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
-                  "An ArrayProperty containing a list of spectra to mask");
-  declareProperty(
-      make_unique<ArrayProperty<detid_t>>("DetectorList"),
-      "An ArrayProperty containing a list of detector ID's to mask");
+                  "A list of spectra to mask");
+  declareProperty(make_unique<ArrayProperty<detid_t>>("DetectorList"),
+                  "A list of detector ID's to mask");
   declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
-                  "An ArrayProperty containing the workspace indices to mask");
+                  "A list of the workspace indices to mask");
   declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
                                                    Direction::Input,
                                                    PropertyMode::Optional),
@@ -95,9 +94,8 @@ void MaskDetectors::init() {
       "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
-  declareProperty(
-      make_unique<ArrayProperty<std::string>>("ComponentList"),
-      "An ArrayProperty containing a list of component names to mask");
+  declareProperty(make_unique<ArrayProperty<std::string>>("ComponentList"),
+                  "A list names of components to mask");
 }
 
 /*

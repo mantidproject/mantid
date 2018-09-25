@@ -1,3 +1,5 @@
+.. _ModelExerciseSolution:
+
 =======================
 Model Exercise Solution
 =======================

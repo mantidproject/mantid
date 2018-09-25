@@ -43,7 +43,7 @@ Usage
   print("Clearing all parameters")
   ClearInstrumentParameters(ws)
 
-  #Check the parmaeters have been cleared correctly
+  #Check the parameters have been cleared correctly
   #Obtain instrument and banks again, to make sure they contain the updated parameters
   instrument = ws.getInstrument()
   bank1 = instrument.getComponentByName("bank1")
