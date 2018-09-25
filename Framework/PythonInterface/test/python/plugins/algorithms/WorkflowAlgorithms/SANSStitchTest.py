@@ -184,6 +184,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormSample', single_spectra_input)
         alg.setProperty('LABNormSample', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('ShiftFactor', in_shift_factor)
         alg.setProperty('ScaleFactor', in_scale_factor)
         alg.execute()
@@ -224,6 +225,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormSample', single_spectra_input)
         alg.setProperty('LABNormSample', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         # This would throw at the point of fitting in NaNs or infs where present
         alg.execute()
 
@@ -257,6 +259,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormCan', single_spectra_input)
         alg.setProperty('LABNormCan', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('ShiftFactor', 0.0)
         alg.setProperty('ScaleFactor', 1.0)
         alg.execute()
@@ -303,6 +306,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormSample', flat_norm)
         alg.setProperty('LABNormSample', flat_norm)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
         out_shift_factor = alg.getProperty('OutShiftFactor').value
@@ -353,6 +357,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormSample', flat_norm)
         alg.setProperty('LABNormSample', flat_norm)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('FitMin', 1)
         alg.setProperty('FitMax', 9)
         alg.execute()
@@ -404,6 +409,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('LABNormSample', flat_norm)
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
 
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
@@ -447,6 +453,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('LABNormSample', flat_norm)
         alg.setProperty('ShiftFactor', -5.0)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
 
         alg.execute()
         out_ws = alg.getProperty('OutputWorkspace').value
@@ -489,6 +496,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormCan', single_spectra_input)
         alg.setProperty('LABNormCan', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('ShiftFactor', 0.0)
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('MergeMask', True)
@@ -537,6 +545,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormCan', single_spectra_input)
         alg.setProperty('LABNormCan', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('ShiftFactor', 0.0)
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('MergeMask', True)
@@ -587,6 +596,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormCan', single_spectra_input)
         alg.setProperty('LABNormCan', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('ShiftFactor', 0.0)
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('MergeMask', True)
@@ -636,6 +646,7 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('HABNormCan', single_spectra_input)
         alg.setProperty('LABNormCan', single_spectra_input)
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
         alg.setProperty('ShiftFactor', 0.0)
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('MergeMask', True)
@@ -686,6 +697,7 @@ class SANSStitchTest(unittest.TestCase):
             alg.setProperty('HABNormCan', single_spectra_input)
             alg.setProperty('LABNormCan', single_spectra_input)
             alg.setProperty('OutputWorkspace', 'dummy_name')
+            alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
             alg.setProperty('ShiftFactor', 0.0)
             alg.setProperty('ScaleFactor', 1.0)
             alg.setProperty('MergeMask', True)
@@ -701,6 +713,56 @@ class SANSStitchTest(unittest.TestCase):
             expected_y_array = [0.5] * 5 + [1.5] * 4
             
             np.testing.assert_equal(y_array, expected_y_array)
+
+    def test_that_output_HAB_workspace_is_equal_to_scaled_input_HAB(self):
+        create_alg = AlgorithmManager.create('CreateWorkspace')
+        create_alg.setChild(True)
+        create_alg.initialize()
+        create_alg.setProperty('DataX', range(0, 10))
+        create_alg.setProperty('DataY', [1] * 9)
+        create_alg.setProperty('NSpec', 1)
+        create_alg.setProperty('UnitX', 'MomentumTransfer')
+        create_alg.setPropertyValue('OutputWorkspace', 'out_ws')
+        create_alg.execute()
+        single_spectra_input = create_alg.getProperty('OutputWorkspace').value
+        create_alg.setProperty('DataY', [2] * 9)
+        create_alg.execute()
+        single_spectra_input_HAB = create_alg.getProperty('OutputWorkspace').value
+        create_alg.setProperty('DataY', [0.5] * 9)
+        create_alg.execute()
+        smaller_single_spectra_input = create_alg.getProperty('OutputWorkspace').value
+
+        alg = AlgorithmManager.create('SANSStitch')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Mode', 'None')
+        alg.setProperty('HABCountsSample', single_spectra_input_HAB)
+        alg.setProperty('LABCountsSample', single_spectra_input)
+        alg.setProperty('HABNormSample', single_spectra_input)
+        alg.setProperty('LABNormSample', single_spectra_input)
+        alg.setProperty('ProcessCan', True)
+        alg.setProperty('HABCountsCan', smaller_single_spectra_input)
+        alg.setProperty('LABCountsCan', smaller_single_spectra_input)
+        alg.setProperty('HABNormCan', single_spectra_input)
+        alg.setProperty('LABNormCan', single_spectra_input)
+        alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
+        alg.setProperty('ShiftFactor', 0.0)
+        alg.setProperty('ScaleFactor', 1.0)
+        alg.setProperty('MergeMask', False)
+        alg.setProperty('MergeMin', 5)
+        alg.setProperty('MergeMax', 5)
+        alg.execute()
+        out_ws = alg.getProperty('OutputWorkspace').value
+        out_ws_HAB = alg.getProperty('OutputWorkspaceHAB').value
+
+        self.assertTrue(isinstance(out_ws_HAB, MatrixWorkspace))
+
+        y_array = out_ws_HAB.readY(0)
+
+        expected_y_array = [1.5] * 9
+
+        np.testing.assert_equal(y_array, expected_y_array)
    
 
     def test_that_can_merge_2D_reduction_when_fitting_set_to_none(self):
@@ -751,6 +813,8 @@ class SANSStitchTest(unittest.TestCase):
         alg.setProperty('ScaleFactor', 1.0)
         alg.setProperty('Mode', 'None')
         alg.setProperty('OutputWorkspace', 'dummy_name')
+        alg.setProperty('OutputWorkspaceHAB', 'dummy_name_hab')
+
         errors = alg.validateInputs()
         self.assertEqual(0, len(errors))
 

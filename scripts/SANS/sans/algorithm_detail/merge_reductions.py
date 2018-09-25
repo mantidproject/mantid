@@ -64,7 +64,8 @@ class ISIS1DMerger(Merger):
                           "ScaleFactor": scale_factor,
                           "ShiftFactor": shift_factor,
                           "MergeMask": merge_mask,
-                          "OutputWorkspace": "dummy"}
+                          "OutputWorkspace": "dummy",
+                          "OutputWorkspaceHAB": "dummy_HAB"}
 
         if can_count_primary is not None and can_norm_primary is not None \
                 and can_count_secondary is not None and can_norm_secondary is not None:
