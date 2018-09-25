@@ -45,7 +45,7 @@ public:
 
   void reset();
 
-  void changeScaleType(int type);
+  void changeScaleType(ColorMap::ScaleType type);
 
   void changeNthPower(double nth_power);
 

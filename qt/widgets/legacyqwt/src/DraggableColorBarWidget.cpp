@@ -113,14 +113,14 @@ void DraggableColorBarWidget::setupColorBarScaling(
   double minValue = m_minValueBox->displayText().toDouble();
   double maxValue = m_maxValueBox->displayText().toDouble();
 
-  GraphOptions::ScaleType type = colorMap.getScaleType();
-  if (type == GraphOptions::Linear) {
+  auto type = colorMap.getScaleType();
+  if (type == MantidColorMap::ScaleType::Linear) {
     QwtLinearScaleEngine linScaler;
     m_scaleWidget->setScaleDiv(
         linScaler.transformation(),
         linScaler.divideScale(minValue, maxValue, 20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), colorMap);
-  } else if (type == GraphOptions::Power) {
+  } else if (type == MantidColorMap::ScaleType::Power) {
     PowerScaleEngine powerScaler;
     m_scaleWidget->setScaleDiv(
         powerScaler.transformation(),
@@ -146,8 +146,9 @@ void DraggableColorBarWidget::setupColorBarScaling(
     m_scaleWidget->setColorMap(QwtDoubleInterval(logmin, maxValue), colorMap);
   }
   m_scaleOptions->blockSignals(true);
-  m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
-  if (m_scaleOptions->findData(type) == 2) {
+  m_scaleOptions->setCurrentIndex(
+      m_scaleOptions->findData(static_cast<int>(type)));
+  if (m_scaleOptions->findData(static_cast<int>(type)) == 2) {
     m_dspnN->setEnabled(true);
   } else {
     m_dspnN->setEnabled(false);
