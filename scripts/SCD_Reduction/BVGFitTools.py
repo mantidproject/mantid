@@ -89,7 +89,6 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
     useForceParams = peak.getIntensity() < forceCutoff or peak.getRow() <= dEdge or peak.getRow(
     ) >= nPixels[0] - dEdge or peak.getCol() <= dEdge or peak.getCol() >= nPixels[1] - dEdge
 
-
     sigX0Params, sigY0, sigP0Params, doPeakConvolution = getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params)
 
     if strongPeakParams is not None and useForceParams:  # We will force parameters on this fit
@@ -99,10 +98,7 @@ def get3DPeak(peak, peaks_ws, box, padeCoefficients, qMask, nTheta=150, nPhi=150
         tmp = strongPeakParams[:, :2] - phthPeak
         distSq = tmp[:, 0]**2 + tmp[:, 1]**2
         nnIDX = np.argmin(distSq)
-        #logger.information('Using [ph, th] = [{:2.2f},{:2.2f}] for [{:2.2f},{:2.2f}]'.format(strongPeakParams[nnIDX,0],
-        #                                                                                     strongPeakParams[nnIDX,1],
-        #                                                                                     phthPeak[0],
-        #                                                                                     phthPeak[1]))
+
         params, h, t, p = doBVGFit(box, nTheta=nTheta, nPhi=nPhi, fracBoxToHistogram=fracBoxToHistogram,
                                    goodIDX=goodIDX, forceParams=strongPeakParams[nnIDX],
                                    doPeakConvolution=doPeakConvolution, sigX0Params=sigX0Params,
@@ -180,29 +176,37 @@ def coshPeakWidthModel(x,A,x0,b,BG):
     y = (x-x0)/b
     return A*(np.exp(y)+np.exp(-y)) + BG
 
+
 def getBVGGuesses(peaks_ws, sigX0Params, sigY0, sigP0Params):
-    # If we're not given initial guesses for the BVG, then we try to find instrument defaults.  If those are not
-    # available we use default values.
+    """
+    If we're not given initial guesses for the BVG, then we try to find instrument defaults.  If those are not
+    available we use default values.  If initial guesses are given, this function will return the initial guess,
+    allowing the function to be transparently added to workflows.
+    """
+
     if sigX0Params is None:
         if peaks_ws.getInstrument().hasParameter("sigSC0Params"):
             sigX0Params = np.array(peaks_ws.getInstrument().getStringParameter("sigSC0Params")[0].split(),dtype=float)
         else:
             sigX0Params=[0.00413132, 1.54103839, 1.0, -0.00266634]
-    
+
     if sigY0 is None:
         if peaks_ws.getInstrument().hasParameter("sigAZ0"):
             sigY0 = peaks_ws.getInstrument().getNumberParameter("sigAZ0")[0]
         else:
             sigY0=0.0025
+
     if sigP0Params is None:
         if peaks_ws.getInstrument().hasParameter("sigP0Params"):
             sigP0Params = np.array(peaks_ws.getInstrument().getStringParameter("sigP0Params")[0].split(),dtype=float)
         else:
             sigP0Params = [0.1460775, 1.85816592, 0.26850086, -0.00725352]
+
     if peaks_ws.getInstrument().hasParameter("fitConvolutedPeak"):
         doPeakConvolution = peaks_ws.getInstrument().getBoolParameter("fitConvolvedPeak")[0]
     else:
         doPeakConvolution = False
+
     return sigX0Params, sigY0, sigP0Params, doPeakConvolution
 
 
@@ -238,23 +242,25 @@ def fitScaling(n_events, box, YTOF, YBVG, goodIDX=None, neigh_length_m=3):
                 max(fitMaxIDX[1] - dP, 0):min(fitMaxIDX[1] + dP, goodIDX.shape[1]),
                 max(fitMaxIDX[2] - dP, 0):min(fitMaxIDX[2] + dP, goodIDX.shape[2])] = True
     goodIDX = np.logical_and(goodIDX, conv_n_events > 0)
-    plt.figure(19); plt.clf()
-    plt.imshow(n_events[:,:,n_events.shape[2]//2])
-    plt.figure(20); plt.clf()
-    plt.imshow(goodIDX[:,:,n_events.shape[2]//2])
-    TOF = 1./np.sqrt(QX*QX+QY*QY+QZ*QZ)
-    plt.figure(21); plt.clf()
-    plt.imshow(TOF[:,:,n_events.shape[2]//2])
+
+    #Remove these - debugging plots
+    #plt.figure(19); plt.clf()
+    #plt.imshow(n_events[:,:,n_events.shape[2]//2])
+    #plt.figure(20); plt.clf()
+    #plt.imshow(goodIDX[:,:,n_events.shape[2]//2])
+    #TOF = 1./np.sqrt(QX*QX+QY*QY+QZ*QZ)
+    #plt.figure(21); plt.clf()
+    #plt.imshow(TOF[:,:,n_events.shape[2]//2])
     # A1 = slope, A0 = offset
+
     scaleLinear = Polynomial(n=1)
     scaleLinear.constrain("A1>0")
     scaleX = YJOINT[goodIDX]
     scaleY = n_events[goodIDX]
     # , dataE=np.sqrt(scaleY))
-    scaleWS = CreateWorkspace(
-        OutputWorkspace='scaleWS', dataX=scaleX, dataY=scaleY)
-    fitResultsScaling = Fit(Function=scaleLinear, InputWorkspace=scaleWS,
-                            Output='scalefit', CostFunction='Unweighted least squares')
+    CreateWorkspace(OutputWorkspace='__scaleWS', dataX=scaleX, dataY=scaleY)
+    fitResultsScaling = Fit(Function=scaleLinear, InputWorkspace='__scaleWS',
+                            Output='__scalefit', CostFunction='Unweighted least squares')
     A0 = fitResultsScaling[3].row(0)['Value']
     A1 = fitResultsScaling[3].row(1)['Value']
     YRET = A1 * YJOINT + A0
@@ -552,12 +558,11 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setAttributeValue('nY', h.shape[1])
         m.setConstraints(boundsDict)
         # Do the fit
-        #bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
-        #), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
-        bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
+
+        CreateWorkspace(OutputWorkspace='__bvgWS', DataX=pos.ravel(
         ), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
 
-        fitResults = Fit(Function=m, InputWorkspace='bvgWS', Output='bvgfit',
+        fitResults = Fit(Function=m, InputWorkspace='__bvgWS', Output='__bvgfit',
                          Minimizer='Levenberg-MarquardtMD')
     elif forceParams is not None:
         p0 = np.zeros(7)
@@ -621,20 +626,20 @@ def doBVGFit(box, nTheta=200, nPhi=200, zBG=1.96, fracBoxToHistogram=1.0, goodID
         m.setConstraints(boundsDict)
         # Do the fit
         #plt.figure(18); plt.clf(); plt.imshow(m.function2D(pos)); plt.title('BVG Initial guess')
-        bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
+        CreateWorkspace(OutputWorkspace='__bvgWS', DataX=pos.ravel(), DataY=H.ravel(), DataE=np.sqrt(H.ravel()))
         fitFun = m
-        fitResults = Fit(Function=fitFun, InputWorkspace=bvgWS,
-                         Output='bvgfit', Minimizer='Levenberg-MarquardtMD')
+        fitResults = Fit(Function=fitFun, InputWorkspace='__bvgWS',
+                         Output='__bvgfit', Minimizer='Levenberg-MarquardtMD')
     # Recover the result
     m = BivariateGaussian.BivariateGaussian()
     m.init()
-    m['A'] = mtd['bvgfit_Parameters'].row(0)['Value']
-    m['MuX'] = mtd['bvgfit_Parameters'].row(1)['Value']
-    m['MuY'] = mtd['bvgfit_Parameters'].row(2)['Value']
-    m['SigX'] = mtd['bvgfit_Parameters'].row(3)['Value']
-    m['SigY'] = mtd['bvgfit_Parameters'].row(4)['Value']
-    m['SigP'] = mtd['bvgfit_Parameters'].row(5)['Value']
-    m['Bg'] = mtd['bvgfit_Parameters'].row(6)['Value']
+    m['A'] = mtd['__bvgfit_Parameters'].row(0)['Value']
+    m['MuX'] = mtd['__bvgfit_Parameters'].row(1)['Value']
+    m['MuY'] = mtd['__bvgfit_Parameters'].row(2)['Value']
+    m['SigX'] = mtd['__bvgfit_Parameters'].row(3)['Value']
+    m['SigY'] = mtd['__bvgfit_Parameters'].row(4)['Value']
+    m['SigP'] = mtd['__bvgfit_Parameters'].row(5)['Value']
+    m['Bg'] = mtd['__bvgfit_Parameters'].row(6)['Value']
 
     m.setAttributeValue('nX', h.shape[0])
     m.setAttributeValue('nY', h.shape[1])
