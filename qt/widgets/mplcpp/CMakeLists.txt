@@ -6,6 +6,7 @@ set ( LIB_SRCS
   src/Colormap.cpp
   src/FigureCanvasQt.cpp
   src/Line2D.cpp
+  src/ScalarMappable.cpp
 )
 
 set ( MOC_HEADERS
@@ -18,6 +19,7 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Colors.h
   inc/MantidQtWidgets/MplCpp/Colormap.h
   inc/MantidQtWidgets/MplCpp/Line2D.h
+  inc/MantidQtWidgets/MplCpp/ScalarMappable.h
 )
 
 find_package ( BoostPython REQUIRED )
