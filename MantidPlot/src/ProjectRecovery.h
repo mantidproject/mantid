@@ -2,7 +2,7 @@
 #define PROJECT_RECOVERY_H_
 
 #include "MantidKernel/ConfigService.h"
-#include "RecoveryGUIs/ProjectRecoveryPresenter.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 
 #include <Poco/NObserver.h>
 
@@ -16,7 +16,6 @@
 // Forward declarations
 class ApplicationWindow;
 class Folder;
-
 namespace Poco {
 class Path;
 }

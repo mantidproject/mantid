@@ -5,6 +5,7 @@
 #include "Process.h"
 #include "ProjectSerialiser.h"
 #include "ScriptingWindow.h"
+#include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -248,50 +249,17 @@ namespace MantidQt {
 ProjectRecovery::ProjectRecovery(ApplicationWindow *windowHandle)
     : m_backgroundSavingThread(), m_stopBackgroundThread(true),
       m_configKeyObserver(*this, &ProjectRecovery::configKeyChanged),
-      m_windowPtr(windowHandle), m_recoveryGui(std::make_shared<ProjectRecovery>(this)) {}
+      m_windowPtr(windowHandle),
+      m_recoveryGui(this) {}
 
 /// Destructor which also stops any background threads currently in progress
 ProjectRecovery::~ProjectRecovery() { stopProjectSaving(); }
 
 void ProjectRecovery::attemptRecovery() {
-  QString recoveryMsg = QObject::tr(
-      "Mantid did not close correctly and a recovery"
-      " checkpoint has been found. Would you like to attempt recovery?");
+  bool failed = m_recoveryGui.startRecoveryView();
 
-  int userChoice = QMessageBox::information(
-      m_windowPtr, QObject::tr("Project Recovery"), recoveryMsg,
-      QObject::tr("Yes"), QObject::tr("No"),
-      QObject::tr("Only open script in editor"), 0, 1);
-
-  if (userChoice == 1) {
-    // User selected no
-    clearAllUnusedCheckpoints();
-    this->startProjectSaving();
-    return;
-  }
-
-  auto beforeRecoveryFolder = getRecoveryFolderLoad();
-  auto checkpointPaths = getRecoveryFolderCheckpoints(beforeRecoveryFolder);
-  auto mostRecentCheckpoint = checkpointPaths.back();
-
-  auto destFilename =
-      Poco::Path(Mantid::Kernel::ConfigService::Instance().getAppDataDir());
-  destFilename.append("ordered_recovery.py");
-
-  if (userChoice == 0) {
-    // We have to spin up a new thread so the GUI can continue painting whilst
-    // we exec
-    openInEditor(mostRecentCheckpoint, destFilename);
-    std::thread recoveryThread(
-        [=] { loadRecoveryCheckpoint(mostRecentCheckpoint); });
-    recoveryThread.detach();
-  } else if (userChoice == 2) {
-    openInEditor(mostRecentCheckpoint, destFilename);
-    // Restart project recovery as we stay synchronous
-    clearAllCheckpoints(beforeRecoveryFolder);
-    startProjectSaving();
-  } else {
-    throw std::runtime_error("Unknown choice in ProjectRecovery");
+  if (failed) {
+    m_recoveryGui.startRecoveryFailure();
   }
 }
 

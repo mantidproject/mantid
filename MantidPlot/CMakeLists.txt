@@ -625,6 +625,8 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
 					   src/Mantid/SampleLogDialogBase.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
+                       src/ProjectRecoveryGUIs/ProjectRecoveryView.h
+                       src/ProjectRecoveryGUIs/RecoveryFailureView.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
