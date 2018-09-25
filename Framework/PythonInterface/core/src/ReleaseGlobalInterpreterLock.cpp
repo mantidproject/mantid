@@ -1,8 +1,7 @@
-#include "MantidPythonInterface/kernel/Environment/ReleaseGlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 
 namespace Mantid {
 namespace PythonInterface {
-namespace Environment {
 
 /**
  * Ensures this thread releases the Python GIL also save trace information
@@ -27,6 +26,5 @@ ReleaseGlobalInterpreterLock::~ReleaseGlobalInterpreterLock() {
   Py_XDECREF(m_tracearg);
 }
 
-} // namespace Environment
 } // namespace PythonInterface
 } // namespace Mantid

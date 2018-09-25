@@ -1,16 +1,13 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+#include "MantidPythonInterface/core/Converters/NDArrayTypeIndex.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
-#include "MantidTypes/Core/DateAndTime.h"
 #include <numpy/arrayobject.h>
-
-#include <boost/python/type_id.hpp>
-#include <stdexcept>
 
 namespace Mantid {
 namespace PythonInterface {
