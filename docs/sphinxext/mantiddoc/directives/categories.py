@@ -126,7 +126,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
     Subcategories can be given using the "\\" separator, e.g. Algorithms\\Transforms
 
     If the argument list is empty then the the file is assumed to be an algorithm file
-    and the lists is pulled from the algoritm object
+    and the lists is pulled from the algorithm object
     """
 
     required_arguments = 0
@@ -146,7 +146,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
     def skip(self):
         """
-        Return error mesage if the directive should be skipped.
+        Return error message if the directive should be skipped.
         If there are no arguments, it calls the base class skip() method
         else it returns and empty string.
 

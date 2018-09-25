@@ -23,9 +23,9 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
+#include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
-#include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>
@@ -62,9 +62,7 @@ struct VectorRefToNumpyImpl {
                                        ConversionPolicy>()(cvector);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T>
@@ -110,9 +108,7 @@ template <typename VectorType> struct VectorToNumpyImpl {
                                        Converters::Clone>()(cvector);
   }
 
-  inline PyTypeObject const *get_pytype() const {
-    return Converters::getNDArrayType();
-  }
+  inline PyTypeObject const *get_pytype() const { return ndarrayType(); }
 };
 
 template <typename T>

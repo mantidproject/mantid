@@ -10,6 +10,7 @@
 #include <QRegExpValidator>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace {
 Mantid::Kernel::Logger g_log("AbsorptionCorrections");
@@ -71,6 +72,8 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Change of input
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(getBeamDefaults(const QString &)));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(getMonteCarloDefaults(const QString &)));
 
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -398,6 +401,65 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
     const auto beamHeightValue = beamHeight.toDouble();
 
     m_uiForm.spBeamHeight->setValue(beamHeightValue);
+  }
+}
+
+void AbsorptionCorrections::getMonteCarloDefaults(const QString &dataName) {
+  auto sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
+
+  if (sampleWs) {
+    auto instrument = sampleWs->getInstrument();
+    setWavelengthsValue(instrument, "Workflow.absorption-wavelengths");
+    setEventsValue(instrument, "Workflow.absorption-events");
+    setInterpolationValue(instrument, "Workflow.absorption-interpolation");
+    setMaxAttemptsValue(instrument, "Workflow.absorption-attempts");
+  } else
+    displayInvalidWorkspaceTypeError(dataName.toStdString(), g_log);
+}
+
+void AbsorptionCorrections::setWavelengthsValue(
+    Instrument_const_sptr instrument,
+    const std::string &wavelengthsParamName) const {
+  if (instrument->hasParameter(wavelengthsParamName)) {
+    const auto wavelengths = QString::fromStdString(
+        instrument->getStringParameter(wavelengthsParamName)[0]);
+    const auto wavelengthsValue = wavelengths.toInt();
+    m_uiForm.spNumberWavelengths->setValue(wavelengthsValue);
+  }
+}
+
+void AbsorptionCorrections::setEventsValue(
+    Instrument_const_sptr instrument,
+    const std::string &eventsParamName) const {
+  if (instrument->hasParameter(eventsParamName)) {
+    const auto events = QString::fromStdString(
+        instrument->getStringParameter(eventsParamName)[0]);
+    const auto eventsValue = events.toInt();
+    m_uiForm.spNumberEvents->setValue(eventsValue);
+  }
+}
+
+void AbsorptionCorrections::setInterpolationValue(
+    Instrument_const_sptr instrument,
+    const std::string &interpolationParamName) const {
+  if (instrument->hasParameter(interpolationParamName)) {
+    const auto interpolation = QString::fromStdString(
+        instrument->getStringParameter(interpolationParamName)[0]);
+    const auto interpolationValue = interpolation.toStdString();
+    m_uiForm.cbInterpolation->setCurrentIndex(
+        interpolationValue == "CSpline" ? 1 : 0);
+  }
+}
+
+void AbsorptionCorrections::setMaxAttemptsValue(
+    Instrument_const_sptr instrument,
+    const std::string &maxAttemptsParamName) const {
+  if (instrument->hasParameter(maxAttemptsParamName)) {
+    const auto maxScatterAttempts = QString::fromStdString(
+        instrument->getStringParameter(maxAttemptsParamName)[0]);
+    const auto maxScatterAttemptsValue = maxScatterAttempts.toInt();
+    m_uiForm.spMaxScatterPtAttempts->setValue(maxScatterAttemptsValue);
   }
 }
 

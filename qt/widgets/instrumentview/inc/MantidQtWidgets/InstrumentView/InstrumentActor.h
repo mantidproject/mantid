@@ -1,14 +1,16 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
+#include "ColorMap.h"
 #include "DllOption.h"
 #include "GLColor.h"
+
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
 #include "MaskBinsData.h"
+
 #include <boost/weak_ptr.hpp>
 #include <vector>
 
@@ -92,7 +94,7 @@ public:
   void clearMasks();
 
   /// Get the color map.
-  const MantidColorMap &getColorMap() const;
+  const ColorMap &getColorMap() const;
   /// Load a new color map from a file
   void loadColorMap(const QString &, bool reset_colors = true);
   /// Change the colormap scale type.
@@ -100,7 +102,7 @@ public:
   /// Change the colormap power scale exponent.
   void changeNthPower(double);
   /// Get the file name of the current color map.
-  QString getCurrentColorMap() const { return m_currentColorMapFilename; }
+  QString getCurrentColorMap() const { return m_currentCMap; }
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool);
   /// extracts a mask workspace from the visualised workspace
@@ -227,7 +229,7 @@ private:
   mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// A helper object that keeps bin masking data.
   mutable MaskBinsData m_maskBinsData;
-  QString m_currentColorMapFilename;
+  QString m_currentCMap;
   /// integrated spectra
   std::vector<double> m_specIntegrs;
   /// The workspace data and bin range limits

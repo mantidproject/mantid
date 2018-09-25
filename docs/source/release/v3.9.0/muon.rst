@@ -19,7 +19,7 @@ Muon Analysis
 - Fixed a bug where fitting data from "load current run" failed when the remote directory was not in Mantid's data search path. Now the remote directory for the relevant instrument is automatically added to this path when "load current run" is used.
 - Fixed a bug where stale plot guesses would be left on the graph in some situations.
 - Fixed a bug with load current run that meant it would be actually loading old data due to caching. Data from current run files is no longer cached behind the scenes.
-- The default Plot Policy has been changed to **Use Previous Window**.  This avoids the speed and stability issues that could occur with **Create New Window** once hundreds of graph windows had accumulated over several days of an experiement.
+- The default Plot Policy has been changed to **Use Previous Window**.  This avoids the speed and stability issues that could occur with **Create New Window** once hundreds of graph windows had accumulated over several days of an experiment.
 - Fixed a bug for the time averaging within the muon analysis. Now uses the time average function. 
 
 

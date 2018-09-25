@@ -11,7 +11,7 @@ Description
 
 This algorithm subtracts a dark run from a workspace. *InputWorkspace* and *DarkRun* have to
 be of type Workspace2D and need to contain the same spectra.
-The user can choose to either subtract spectra which are assoicated with detecors 
+The user can choose to either subtract spectra which are associated with detecors 
 (*ApplyToDetectors*) and/or monitors (*ApplyToMonitors*). In the case of monitors, the user can 
 select specific monitors (*SelectedMonitors*) according to their detecotor IDs.
 

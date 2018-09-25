@@ -245,7 +245,7 @@ Add as many peaks as needed. To activate the peak picker tool, click on one of
 the functions in the browser and then left-click on the graph near the peak's
 center while holding the Shift key. This will move the picker tool associated
 with the highlighted function to the desired location. To set the peak width,
-click and drag while holding Crtl. You can then tune the heigth by clicking on
+click and drag while holding Crtl. You can then tune the height by clicking on
 the appropriate point in the graph while holding Shift. Repeat the same steps
 with the rest of the functions in the browser and hit **Fit** to fit the peaks.
 

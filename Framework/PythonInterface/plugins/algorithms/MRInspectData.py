@@ -58,6 +58,8 @@ class MRInspectData(PythonAlgorithm):
                              "Pixel range defining the background")
         self.declareProperty("EventThreshold", 10000,
                              "Minimum number of events needed to call a data set a valid direct beam")
+        self.declareProperty("DirectPixelOverwrite", Property.EMPTY_DBL, doc="DIRPIX overwrite value")
+        self.declareProperty("DAngle0Overwrite", Property.EMPTY_DBL, doc="DANGLE0 overwrite value (degrees)")
 
     def PyExec(self):
         nxs_data = self.getProperty("Workspace").value
@@ -74,7 +76,9 @@ class MRInspectData(PythonAlgorithm):
                              low_res_roi=self.getProperty("LowResPeakROI").value,
                              force_bck_roi=self.getProperty("ForceBckROI").value,
                              bck_roi=self.getProperty("BckROI").value,
-                             event_threshold=self.getProperty("EventThreshold").value)
+                             event_threshold=self.getProperty("EventThreshold").value,
+                             dirpix_overwrite=self.getProperty("DirectPixelOverwrite").value,
+                             dangle0_overwrite=self.getProperty("DAngle0Overwrite").value)
 
         # Store information in logs
         mantid.simpleapi.AddSampleLog(Workspace=nxs_data, LogName='calculated_scatt_angle',
@@ -146,7 +150,8 @@ class DataInfo(object):
     def __init__(self, ws, cross_section='', use_roi=True, update_peak_range=False, use_roi_bck=False,
                  use_tight_bck=False, bck_offset=3, force_peak_roi=False, peak_roi=[0,0],
                  force_low_res_roi=False, low_res_roi=[0,0],
-                 force_bck_roi=False, bck_roi=[0,0], event_threshold=10000):
+                 force_bck_roi=False, bck_roi=[0,0], event_threshold=10000,
+                 dirpix_overwrite=None, dangle0_overwrite=None):
         self.cross_section = cross_section
         self.run_number = ws.getRunNumber()
         self.is_direct_beam = False
@@ -156,6 +161,8 @@ class DataInfo(object):
         self.low_res_range = [0,0]
         self.background = [0,0]
         self.n_events_cutoff = event_threshold
+        self.dangle0_overwrite = dangle0_overwrite
+        self.dirpix_overwrite = dirpix_overwrite
 
         # ROI information
         self.roi_peak = [0,0]
@@ -406,7 +413,11 @@ class DataInfo(object):
         self.background = [int(max(0, bck_range[0])), int(min(bck_range[1], NY_PIXELS))]
 
         # Computed scattering angle
-        self.calculated_scattering_angle = 180.0 / math.pi * mantid.simpleapi.MRGetTheta(ws, SpecularPixel=self.peak_position)
+        self.calculated_scattering_angle = mantid.simpleapi.MRGetTheta(ws,
+                                                                       SpecularPixel=self.peak_position,
+                                                                       DirectPixelOverwrite=self.dirpix_overwrite,
+                                                                       DAngle0Overwrite=self.dangle0_overwrite)
+        self.calculated_scattering_angle *= 180.0 / math.pi
 
         # Determine whether we have a direct beam
         self.is_direct_beam = self.check_direct_beam(ws, self.peak_position)

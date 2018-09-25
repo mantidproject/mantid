@@ -1,10 +1,9 @@
 #include "MantidAlgorithms/ReflectometryMomentumTransfer.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -53,7 +52,6 @@ constexpr double inRad(const double a) noexcept { return a / 180. * M_PI; }
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
