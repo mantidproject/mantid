@@ -655,7 +655,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
 
     if workspaceNumber is None:
         tofWS = CreateWorkspace(
-            OutputWorkspace='tofWS', DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
+            OutputWorkspace='__tofWS', DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
     else:
         tofWS = CreateWorkspace(OutputWorkspace='tofWS%i' % workspaceNumber,
                                 DataX=tPoints, DataY=yPoints, DataE=np.sqrt(yPoints))
@@ -911,7 +911,7 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         bg['A'+str(fitOrder-i)] = bgx0[i]
     bg.constrain('-1.0 < A%i < 1.0' % fitOrder)
     fitFun = f + bg
-    fitResults = Fit(Function=fitFun, InputWorkspace='tofWS',
+    fitResults = Fit(Function=fitFun, InputWorkspace='__tofWS',
                      Output=outputWSName)
     return fitResults, fICC
 
@@ -1000,7 +1000,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                                                          constraintScheme=constraintScheme,
                                                          peakMaskSize=peakMaskSize, iccFitDict=iccFitDict)
                 # --IN PRINCIPLE!!! WE CALCULATE THIS BEFORE GETTING HERE
-                tofWS = mtd['tofWS']
+                tofWS = mtd['__tofWS']
 
                 fitResults, fICC = doICCFit(
                     tofWS, energy, flightPath, padeCoefficients, fitOrder=bgPolyOrder, constraintScheme=constraintScheme,
@@ -1009,7 +1009,7 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
 
                 r = mtd['fit_Workspace']
                 param = mtd['fit_Parameters']
-                tofWS = mtd['tofWS']
+                tofWS = mtd['__tofWS']
 
                 iii = fICC.numParams() - 1
                 fitBG = [param.row(int(iii+bgIDX+1))['Value']

@@ -65,6 +65,35 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         self.declareProperty("DQMax", defaultValue=0.15, doc="Largest total side length (in Angstrom) to consider for profile fitting.")
         self.declareProperty("PeakNumber", defaultValue=-1,  doc="Which Peak to fit.  Leave negative for all.")
 
+    def getBVGInitialGuesses(self, peaks_ws, strongPeakParams_ws, minNumberPeaks=30):
+        """
+        Returns initial guesses for the BVG fit if strongPeakParams_ws contains more than
+        minNumberPeaks entries.  If not, we return all None, which will fall back to the
+        instrument defaults.
+        """
+
+        if strongPeakParams_ws.rowCount() > minNumberPeaks:
+            # First, along the scattering direction
+            theta = np.abs(strongPeakParams_ws.column('Theta'))
+            sigma_theta = np.abs(strongPeakParams_ws.column('SigTheta'))
+
+            CreateWorkspace(DataX=theta, DataY=sigma_theta, OutputWorkspace='__ws_bvg0_scat')
+            Fit(Function='name=UserFunction,Formula=A*(exp(((x-x0)/b))+exp( -((x-x0)/b)))+BG,A=0.0025,x0=1.54,b=1,BG=-1.26408e-15',
+                InputWorkspace='__ws_bvg0_scat', Output='__fitSigX0', StartX=np.min(theta), EndX=np.max(theta))
+            sigX0Params = mtd['__fitSigX0_Parameters'].column(1)[:-1]
+            # Second, along the azimuthal.  This is just a constant.
+            sigY0 = np.median(strongPeakParams_ws.column('SigPhi'))
+            # Finally, the interaction term.  This we just get from the instrument file.
+            try:
+                sigP0Params = peaks_ws.getInstrument().getStringParameter("sigP0Params")
+                sigP0Params = np.array(str(sigP0Params).strip('[]\'').split(),dtype=float)
+            except:
+                logger.warning('Cannot find sigP0Params.  Will use defaults.')
+                sigP0Params = [0.1460775, 1.85816592, 0.26850086, -0.00725352]
+            return sigX0Params, sigY0, sigP0Params
+        else:
+            return None, None, None
+
     def PyExec(self):
         import ICCFitTools as ICCFT
         import BVGFitTools as BVGFT
@@ -132,7 +161,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         # Strong peak profiles - we set up the workspace and determine which peaks we'll fit.
         strongPeakKeys =  ['Phi', 'Theta', 'Scale3d', 'FitPhi', 'FitTheta', 'SigTheta', 'SigPhi', 'SigP', 'PeakNumber']
         strongPeakDatatypes = ['float']*len(strongPeakKeys)
-        strongPeakParams_ws = CreateEmptyTableWorkspace()
+        strongPeakParams_ws = CreateEmptyTableWorkspace(OutputWorkspace='__StrongPeakParameters')
         for key, datatype in zip(strongPeakKeys,strongPeakDatatypes):
             strongPeakParams_ws.addColumn(datatype, key)
 
@@ -158,9 +187,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             canFitProfileIDX = np.where(~needsForcedProfile)[0]
             numPeaksCanFit = len(canFitProfileIDX)
 
-            # We can populate the strongPeakParams_ws now
+            # We can populate the strongPeakParams_ws now and use that for initial BVG guesses
             for row in strongPeakParams:
                 strongPeakParams_ws.addRow(row)
+
         else:
             generateStrongPeakParams = True
             #Figure out which peaks to fit without forcing a profile and set those to be fit first
@@ -178,8 +208,10 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
             peaksToFit = np.append(canFitProfileIDX, needsForcedProfileIDX) #Will fit in this order
             peaksToFit = peaksToFit[runNumbers[peaksToFit]==sampleRun]
 
-            #Initialize our strong peaks dictionary
+            # Initialize our strong peaks dictionary.  Set BVG Params to be None so that we fall back on
+            # instrument defaults until we have fit >=100 peaks.
             strongPeakParams = np.empty([numPeaksCanFit, 9])
+            sigX0Params, sigY0, sigP0Params = None, None, None
 
         if peakNumberToFit>-1:
             peaksToFit = [peakNumberToFit]
@@ -197,6 +229,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
         peaks_ws_out = peaks_ws.clone()
         np.warnings.filterwarnings('ignore') # There can be a lot of warnings for bad solutions that get rejected.
         progress = Progress(self, 0.0, 1.0, len(peaksToFit))
+        sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
         for fitNumber, peakNumber in enumerate(peaksToFit):#range(peaks_ws.getNumberPeaks()):
             peak = peaks_ws_out.getPeak(peakNumber)
@@ -208,6 +241,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                     strongPeakParamsToSend = None
                 else:
                     strongPeakParamsToSend = strongPeakParams
+
                 # Will allow forced weak and edge peaks to be fit using a neighboring peak profile
                 Y3D, goodIDX, pp_lambda, params = BVGFT.get3DPeak(peak, peaks_ws, box, padeCoefficients,qMask,
                                                                   nTheta=nTheta, nPhi=nPhi, plotResults=False,
@@ -218,7 +252,8 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                                                                   pplmin_frac=pplmin_frac, pplmax_frac=pplmax_frac,
                                                                   forceCutoff=forceCutoff, edgeCutoff=edgeCutoff,
                                                                   peakMaskSize=peakMaskSize,
-                                                                  iccFitDict=iccFitDict)
+                                                                  iccFitDict=iccFitDict, sigX0Params=sigX0Params,
+                                                                  sigY0=sigY0, sigP0Params=sigP0Params)
 
                 # First we get the peak intensity
                 peakIDX = Y3D/Y3D.max() > fracStop
@@ -255,7 +290,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 peak.setIntensity(intensity)
                 peak.setSigmaIntensity(sigma)
 
-                if generateStrongPeakParams and ~needsForcedProfile[peakNumber]:
+                if generateStrongPeakParams and ~needsForcedProfile[peakNumber] and params['SigX']<0.1 and params['SigY']<0.1:
                         qPeak = peak.getQLabFrame()
                         strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
                         strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
@@ -267,6 +302,7 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                         strongPeakParams[fitNumber, 7] = params['SigP']
                         strongPeakParams[fitNumber, 8] = peakNumber
                         strongPeakParams_ws.addRow(strongPeakParams[fitNumber])
+                        sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
             except KeyboardInterrupt:
                 np.warnings.filterwarnings('default') # Re-enable on exit
