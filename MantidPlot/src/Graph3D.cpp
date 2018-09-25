@@ -2922,7 +2922,7 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
   QString func = QString::fromStdString(formula);
   if (func.endsWith("(Y)", Qt::CaseSensitive))
     type = SurfaceFunctionType::Plot3D;
-  else if (func.contains("(Z)", Qt::CaseSensitive) > nullptr)
+  else if (func.contains("(Z)", Qt::CaseSensitive))
     type = SurfaceFunctionType::XYZ;
   else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
            func.endsWith(">", Qt::CaseInsensitive))
