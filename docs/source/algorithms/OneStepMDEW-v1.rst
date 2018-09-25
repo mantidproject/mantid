@@ -22,7 +22,7 @@ with Lorentz correction, and default size/splitting behavior parameters.
 Usage
 -----
 
-Used internaly. See examples of :ref:`algm-LoadEventNexus` and  :ref:`algm-ConvertToDiffractionMDWorkspace` algorithms
+Used internally. See examples of :ref:`algm-LoadEventNexus` and  :ref:`algm-ConvertToDiffractionMDWorkspace` algorithms
 for the details of the usage of these algorithms
 
 

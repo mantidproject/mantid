@@ -84,7 +84,7 @@ Improved
 - The duration reported by a running algorithm now includes time spent for validation of properties and inputs. This fixes a discrepancy between observed and reported timings if validation is expensive, e.g., when checking if a file exists. More detailed timing information is now available when setting the log level to ``debug``.
 - The status of a fit in the fit window is now at the top of the of the dialog instead of the bottom.
 - Condition to check if a property is enabled when serializing.
-- Workspace locking no longer prevents simple read operations required to display the workspace conext menu in Mantidplot.
+- Workspace locking no longer prevents simple read operations required to display the workspace context menu in Mantidplot.
 - TableWorkspaces can now be converted to a Python dictionary by calling the ``table.toDict()`` function.
 - ``MultiFileProperty`` now accepts complex summation ranges for run numbers, such as ``111-113+115`` and ``111-115+123-132``.
 

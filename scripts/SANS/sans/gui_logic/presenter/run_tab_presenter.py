@@ -341,6 +341,7 @@ class RunTabPresenter(object):
     def on_data_changed(self, row, column, new_value, old_value):
         self._table_model.update_table_entry(row, column, new_value)
         self._view.change_row_color(row_state_to_colour_mapping[RowState.Unprocessed], row)
+        self._view.set_row_tooltip('', row)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
 
@@ -368,12 +369,13 @@ class RunTabPresenter(object):
                 self._table_model.reset_row_state(row)
             self.update_view_from_table_model()
             states, errors = self.get_states(row_index=selected_rows)
-            if not states:
-                raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                                   " has been loaded")
 
             for row, error in errors.items():
                 self.on_processing_error(row, error)
+
+            if not states:
+                self.on_processing_finished(None)
+                return
 
             # 4. Create the graph if continuous output is specified
             if mantidplot:
@@ -391,6 +393,7 @@ class RunTabPresenter(object):
 
             # Get the name of the graph to output to
             output_graph = self.output_graph
+
             self.progress = 0
             setattr(self._view, 'progress_bar_value', self.progress)
             setattr(self._view, 'progress_bar_maximum', len(states))
@@ -418,6 +421,7 @@ class RunTabPresenter(object):
             message = 'scale={}, shift={}'.format(out_scale_factors, out_shift_factors)
         else:
             message = ''
+
         self._table_model.set_row_to_processed(row, message)
         self.update_view_from_table_model()
 

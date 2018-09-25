@@ -86,7 +86,7 @@ Dynamic Rebinning (4)
 The slice viewer allows you to interactively rebin the currently viewed
 slice to a regular grid. This will also result in the generation of a
 new rebinned workspace in Mantid. The icon labeled 4a has to be pressed
-first to alow rebinning. 4c automatically rebins the current view.
+first to allow rebinning. 4c automatically rebins the current view.
 The upper image below is before rebinning, the lower image is after rebinning.
 
 .. figure:: /images/RebinOff.png 
@@ -185,7 +185,7 @@ Example 3
    MantidPlot, which produces a PeaksWorkspace.
 #. Load the PeaksWorkspace into the VSI, by right-clicking the workspace
    and selecting *Show Vates Simple Interface*. You should now see peak
-   positions as cross-hairs overlayed over the original MDWorkspace
+   positions as cross-hairs overlaid over the original MDWorkspace
    data.
 
 .. figure:: /images/MBC_VSI_Example3.png

@@ -62,6 +62,7 @@ void IqtFit::setupFitTab() {
   // Set available background options
   setBackgroundOptions({"None", "FlatBackground"});
 
+  connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm->pbPlot, SIGNAL(clicked()), this, SLOT(plotResult()));
   connect(m_uiForm->pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
 
@@ -134,6 +135,14 @@ void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 void IqtFit::plotResult() {
   IndirectFitAnalysisTab::plotResult(m_uiForm->cbPlotType->currentText());
 }
+
+void IqtFit::setRunEnabled(bool enabled) {
+  m_uiForm->pvFitPlotView->enableFitSingleSpectrum(enabled);
+  m_uiForm->pbRun->setEnabled(enabled);
+  m_uiForm->pbRun->setText(!enabled ? "Running..." : "Run");
+}
+
+void IqtFit::runClicked() { runTab(); }
 
 } // namespace IDA
 } // namespace CustomInterfaces

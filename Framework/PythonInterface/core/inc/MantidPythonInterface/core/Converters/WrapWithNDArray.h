@@ -1,8 +1,8 @@
-#ifndef MANTID_PYTHONINTERFACE_NUMPYWRAPMODE_H_
-#define MANTID_PYTHONINTERFACE_NUMPYWRAPMODE_H_
+#ifndef MANTID_PYTHONINTERFACE_WRAPWITHNDARRAY_H_
+#define MANTID_PYTHONINTERFACE_WRAPWITHNDARRAY_H_
 /**
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -113,4 +113,4 @@ struct WrapReadWrite {
 } // namespace PythonInterface
 } // namespace Mantid
 
-#endif
+#endif // MANTID_PYTHONINTERFACE_WRAPWITHNDARRAY_H_

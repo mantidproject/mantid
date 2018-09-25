@@ -46,7 +46,7 @@ recorded best background and peak parameters as the starting values.
 Criteria To Validate Peaks Found
 ################################
 
-FindPeaks finds peaks by fitting a Guassian with background to a certain
+FindPeaks finds peaks by fitting a Gaussian with background to a certain
 range in the input histogram. :ref:`algm-Fit` may not give a correct
 result even if chi^2 is used as criteria alone. Thus some other criteria
 are provided as options to validate the result
@@ -72,11 +72,11 @@ If FindPeaksBackground fails, then it is necessary to estimate a rough peak rang
 observed data.
 
 #. Assume the local background (within the given fitting window) is close to linear;
-#. Take the first 3 and last 3 data points to calcualte the linear background;
-#. Remove background (rougly) and calcualte peak's height, width, and centre;
+#. Take the first 3 and last 3 data points to calculate the linear background;
+#. Remove background (roughly) and calculate peak's height, width, and centre;
 #. If the peak centre (starting value) uses observed value, then set peakcentre to that value.  Otherwise, set it to given value;
 #. Get the bin indexes of xmin, xmax and peakcentre;
-#. Calcualte peak range, i.e., left and right boundary;
+#. Calculate peak range, i.e., left and right boundary;
 #. If any peak boundary exceeds or too close to the boundary, there will be 2 methods to solve this issue;
 
    #. If peak centre is restricted to given value, then the peak range will be from 1/6 to 5/6 of the given data points;

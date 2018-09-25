@@ -12,7 +12,7 @@ Description
 Algorithm *LoadSampleLogsToCSVFile* exports a specified set of sample logs
 , which are stored in a MatrixWorkspace, to a CSV file.
 The header for the sample log csv file can also 
-be created by this algorithm in a seperate *header* file. 
+be created by this algorithm in a separate *header* file. 
 
 CSV File format
 ###############

@@ -725,6 +725,9 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.Processed)
         self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, 'scale=[1.0], shift=[0.0]')
 
+        self.assertEqual(presenter.progress, 1)
+        self.assertEqual(presenter._view.progress_bar_value, 1)
+
     def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
         view = mock.MagicMock()
@@ -732,7 +735,6 @@ class RunTabPresenterTest(unittest.TestCase):
         test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
                       'test_file', '', '1.0', '']
         presenter.on_row_inserted(0, test_row_0)
-
 
         presenter.notify_progress(0, [], [])
 

@@ -28,7 +28,7 @@ in the position given in the data file.
 
    Since zero time channel is not specified, the algorithm can roll the TOF data to get elastic peak at the right position.
    For this the **ElasticChannel** - channel number where the elastic peak is observed without correction - should be specified.
-   For comissioning period, the algorithm ignores the elastic channel number given in the data file.
+   For commissioning period, the algorithm ignores the elastic channel number given in the data file.
 
 **Normalization**
 
@@ -58,7 +58,7 @@ Alternatively, the text file with the coil currents table may be provided (optio
 |      x       |    7     |   0   | -2.1  | -0.97 |  2.21 |          
 +--------------+----------+-------+-------+-------+-------+
 
-First row must contain the listed column headers, other rows contain coil currents for each polarisation. Rows with different currents for one polarisation are alowed. Columns are separated by tab symbols.
+First row must contain the listed column headers, other rows contain coil currents for each polarisation. Rows with different currents for one polarisation are allowed. Columns are separated by tab symbols.
 
 This algorithm only supports DNS instrument in its configuration with one detector bank (polarisation analysis).
 

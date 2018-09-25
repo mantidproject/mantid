@@ -18,7 +18,7 @@ usually means it must be run after :ref:`algm-LoadInstrument` or
 
 The association is one to many, i.e. a spectrum can have one or many
 detectors contributing to it. Alternatively the same spectrum can
-contribute to different spectra (for example in DAE2 (Data Aquisition
+contribute to different spectra (for example in DAE2 (Data Acquisition
 Electronic) when a spectra containing electronically focussed data is
 created simultaneously with individual spectra).
 

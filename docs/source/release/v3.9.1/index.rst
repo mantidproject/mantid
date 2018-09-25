@@ -58,7 +58,7 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18833 | HKL axes now respect the non-orthogonal checkbox                                  | Add check if button is in a checked state   | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-| 18857 | Diffraction reduction in diffonly mode does not crash fro OSIRIS                  | Only run OSIRIS-specific reduction          | **low**      |
+| 18857 | Diffraction reduction in diffonly mode does not crash for OSIRIS                  | Only run OSIRIS-specific reduction          | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18865 | Correct behaviour when no transmission run is provided                            | Add check if runs are provided              | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+

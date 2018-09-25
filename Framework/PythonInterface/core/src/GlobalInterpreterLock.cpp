@@ -1,12 +1,25 @@
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/VersionCompat.h"
 
 namespace Mantid {
 namespace PythonInterface {
-namespace Environment {
 
 //------------------------------------------------------------------------------
 // GlobalInterpreterLock Static helpers
 //------------------------------------------------------------------------------
+
+/**
+ * Check if the current thread has the lock
+ * @return True if the current thread holds the GIL, false otherwise
+ */
+bool GlobalInterpreterLock::locked() {
+#if defined(IS_PY3K)
+  return (PyGILState_Check() == 1);
+#else
+  PyThreadState *ts = _PyThreadState_Current;
+  return (ts && ts == PyGILState_GetThisThreadState());
+#endif
+}
 
 /**
  * @return A handle to the Python threadstate before the acquire() call.
@@ -39,6 +52,6 @@ GlobalInterpreterLock::GlobalInterpreterLock() : m_state(this->acquire()) {}
  * this object was created.
  */
 GlobalInterpreterLock::~GlobalInterpreterLock() { this->release(m_state); }
-} // namespace Environment
+
 } // namespace PythonInterface
 } // namespace Mantid
