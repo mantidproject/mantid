@@ -861,7 +861,6 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
     x0 = getInitialGuess(tofWS, paramNames, energy,
                          flightPath, padeCoefficients)
     [fICC.setParameter(iii, v) for iii, v in enumerate(x0[:fICC.numParams()])]
-    print(fICC)
     x = tofWS.readX(0)
     y = tofWS.readY(0)
     bgx0 = np.polyfit(x[np.r_[0:15, -15:0]], y[np.r_[0:15, -15:0]], fitOrder)
@@ -882,7 +881,6 @@ def doICCFit(tofWS, energy, flightPath, padeCoefficients, constraintScheme=None,
         HatWidth0 = [0., 5.]
         Scale0 = [0., np.inf]
         KConv0 = [100, 140]
-        print(B0)
         # Now we see what instrument specific parameters we have
         if iccFitDict is not None:
             #TODO This is only a temporary fix to not fix iccB - need to update parameters files
