@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Common/Hint.h"
 #include <map>
 #include <vector>
-#include "IReflSettingsTabPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

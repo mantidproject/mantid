@@ -10,10 +10,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class IReflMainWindowView;
-class IReflRunsTabPresenter;
-class IEventPresenter;
-class IReflSettingsTabPresenter;
-class IReflSaveTabPresenter;
 
 /** @class ReflMainWindowPresenter
 

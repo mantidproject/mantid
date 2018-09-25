@@ -2,7 +2,6 @@
 #include "IReflMainWindowView.h"
 #include "IReflRunsTabPresenter.h"
 #include "GUI/Event/IEventPresenter.h"
-#include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
