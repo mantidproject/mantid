@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
+#include "MantidDataHandling/LoadBinStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -129,14 +130,16 @@ std::unique_ptr<MeshObject> readSTLMeshObject(std::ifstream &file) {
 }
 
 std::unique_ptr<Geometry::MeshObject> readSTLSolid(std::ifstream &file,
-                                                   std::string &name) {
+                                                   std::string &name,std::string filename) {
   // Read Solid name
   // We expect line after trimming to be "solid "+name.
   std::string line;
   if (getline(file, line)) {
     boost::trim(line);
     if (line.size() < 5 || line.substr(0, 5) != "solid") {
-      throw std::runtime_error("Expected start of solid");
+      //attempt to load stl binary instead
+      std::unique_ptr<LoadBinStl> binaryStlReader = Kernel::make_unique<LoadBinStl>();
+      return binaryStlReader->LoadBinStl::readStl(filename);
     } else {
       name = line.substr(6, std::string::npos);
     }
@@ -314,7 +317,7 @@ void LoadSampleShape::exec() {
     shape = readOFFshape(file);
   } else /* stl */ {
     std::string solidName = "";
-    shape = readSTLSolid(file, solidName);
+    shape = readSTLSolid(file, solidName, filename);
   }
 
   // Put shape into sample.

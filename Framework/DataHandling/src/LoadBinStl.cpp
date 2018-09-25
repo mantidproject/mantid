@@ -4,60 +4,54 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include <fstream>
 #include <iostream>
+#include <Poco/File.h>
+
 
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::API::WorkspaceProperty;
-using Mantid::Kernel::Direction;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadBinStl)
 
-//----------------------------------------------------------------------------------------------
 
-/// Algorithms name for identification. @see Algorithm::name
-const std::string LoadBinStl::name() const { return "LoadBinStl"; }
 
-/// Algorithm's version for identification. @see Algorithm::version
-int LoadBinStl::version() const { return 1; }
-
-/// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadBinStl::category() const {
-  return "DataHandling\\LoadBinStl";
-}
-
-/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string LoadBinStl::summary() const {
-  return "Load mesh from binary stl file for diffraction";
-}
-
-//----------------------------------------------------------------------------------------------
-/** Initialize the algorithm's properties.
- */
-void LoadBinStl::init() {
-  const std::vector<std::string> exts{".stl"};
-  declareProperty(Kernel::make_unique<Mantid::API::FileProperty>(
-                      "Filename", "", Mantid::API::FileProperty::Load, exts),
-                  "The path name of the file containing the shape");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Execute the algorithm.
- */
-void LoadBinStl::exec() {
-  auto filename = getProperty("Filename");
-  readStl(filename);  
-}
-
-void LoadBinStl::readStl(std::string filename) {
-  std::ifstream myFile(filename.c_str(), std::ios::in | std::ios::binary);
+bool LoadBinStl::isBinarySTL(){
+  //each triangle is 50 bytes
+  const uint32_t SIZE_OF_TRIANGLE = 50;
+  Poco::File stlFile = Poco::File(m_filename);
+  uint32_t fileSize = stlFile.getSize();
+  if (fileSize<84) {
+    //File is smaller than header plus number of triangles, cannot be binary format stl
+    return false;
+  }
   uint32_t numberTrianglesLong;
+  std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
   Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
+  numberTrianglesLong = getNumberTriangles(streamReader);
+  myFile.close();
+  if (!fileSize == (84 + (numberTrianglesLong * SIZE_OF_TRIANGLE))){
+    //File is not the Header plus the number of triangles it claims to be long, invalid binary Stl
+    return false;
+  }
+  //if both conditions pass, file is likely binary stl
+  return true;
+}
+
+
+uint32_t getNumberTriangles(Kernel::BinaryStreamReader streamReader){
+  uint32_t numberTrianglesLong;
   // skip header
   streamReader.moveStreamToPosition(80);
   // Read the number of triangles
   streamReader >> numberTrianglesLong;
+  return numberTrianglesLong;
+}
+
+
+std::unique_ptr<Geometry::MeshObject> LoadBinStl::readStl() {
+  std::ifstream myFile(m_filename.c_str(), std::ios::in | std::ios::binary);
+  uint32_t numberTrianglesLong;
+  Kernel::BinaryStreamReader streamReader = Kernel::BinaryStreamReader(myFile);
+  numberTrianglesLong = getNumberTriangles(streamReader);
   uint32_t next = 96;
   const uint32_t STEPSIZE = 50;
   // now read in all the triangles
@@ -71,7 +65,7 @@ void LoadBinStl::readStl(std::string filename) {
   std::unique_ptr<Geometry::MeshObject> retVal = std::unique_ptr<Geometry::MeshObject>(
       new Geometry::MeshObject(std::move(m_triangle), std::move(m_verticies),
                      Mantid::Kernel::Material()));
-  return;
+  return retVal;
 }
 
 void LoadBinStl::readTriangle(Kernel::BinaryStreamReader streamReader) {
