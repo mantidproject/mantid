@@ -78,9 +78,9 @@ target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boos
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} Kernel)
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
 	target_link_libraries(Parallel LINK_PRIVATE rt)
-endif (UNIX)
+endif ()
 
 
 #Add executable for Nexus parallel loader child process
@@ -104,9 +104,9 @@ target_include_directories(EventParallelLoader SYSTEM PRIVATE ${HDF5_INCLUDE_DIR
 target_link_libraries(EventParallelLoader LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 		${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} Kernel)
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
 	target_link_libraries(EventParallelLoader LINK_PRIVATE rt)
-endif (UNIX)
+endif ()
 
 # Add the unit tests directory
 add_subdirectory ( test )
