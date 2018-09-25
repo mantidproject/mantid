@@ -50,7 +50,7 @@ public:
    * (3) SpecialWorkspace2D
    */
   static void setUpWS(bool event, const std::string &name = "testSpace",
-               bool asMaskWorkspace = false, int numspec = 9) {
+                      bool asMaskWorkspace = false, int numspec = 9) {
     // 1. Instrument
     int num_banks = numspec / 9;
     if (num_banks < 1)
