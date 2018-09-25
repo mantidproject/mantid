@@ -115,7 +115,8 @@ The strong peaks library can be generated in two ways.  First, it can be provide
 The **StrongPeakParamsFile** should be a .pkl file which contains a Numpy array containing the parameters used for strong peaks.
 Alternatively, if no file is provided, the algorithm will go through and fit strong peaks first, building the strong peaks library
 as it goes.  After fitting all of the strong peaks, defined as peaks with spherical intensities above **IntensityCutoff** and further 
-than **EdgeCutoff** pixels from the edge, it will fit weak peaks using those profiles. 
+than **EdgeCutoff** pixels from the edge, it will fit weak peaks using those profiles. For initial guesses, the algorithm will fit
+the first 30 peaks using the instrument default parameters.  After that, it will use already fit peaks to determine initial guesses.
 
 Integrating the Model
 #####################
