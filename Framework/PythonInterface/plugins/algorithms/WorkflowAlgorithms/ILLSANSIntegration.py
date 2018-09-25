@@ -71,10 +71,6 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('OutputBinning'), doc='The Q binning of the output')
         self.setPropertySettings('OutputBinning', output_iq)
 
-        self.declareProperty(name='NPixelDivision', defaultValue=1, validator=IntBoundedValidator(lower=1),
-                             doc='Choose to split each pixel to N x N subpixels.')
-        self.setPropertySettings('NPixelDivision', output_iq)
-
         self.declareProperty(name='NumberOfWedges', defaultValue=0, validator=IntBoundedValidator(lower=0),
                              doc='Number of wedges to integrate separately.')
         self.setPropertySettings('NumberOfWedges', output_iq)
@@ -103,7 +99,6 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         self.setPropertySettings('ErrorWeighting', output_iq)
 
         self.setPropertyGroup('OutputBinning', 'I(Q) Options')
-        self.setPropertyGroup('NPixelDivision', 'I(Q) Options')
         self.setPropertyGroup('NumberOfWedges', 'I(Q) Options')
         self.setPropertyGroup('WedgeWorkspace', 'I(Q) Options')
         self.setPropertyGroup('WedgeAngle', 'I(Q) Options')
@@ -132,9 +127,6 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         self._output_type = self.getPropertyValue('OutputType')
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-        run = mtd[self._input_ws].getRun()
-        if not run.hasProperty('qmin') or not run.hasProperty('qmax'):
-            CalculateQMinMax(self._input_ws)
         if self._output_type == 'I(Q)':
             self._integrate_iq()
         elif self._output_type == 'I(QxQy)':
@@ -221,20 +213,6 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
         run = mtd[self._input_ws].getRun()
-        n_pixel_division = self.getProperty('NPixelDivision').value
-
-        pixel_width = 0.005
-        pixel_height = 0.005
-        if n_pixel_division > 1:
-            if not run.hasProperty('pixel_width'):
-                self.log().warning('Pixel splitting is requested, but no pixel width information is available. Assuming 5mm.')
-            else:
-                pixel_width = run.getLogData('pixel_width').value
-            if not run.hasProperty('pixel_height'):
-                self.log().warning('Pixel splitting is requested, but no pixel height information is available. Assuming 5mm.')
-            else:
-                pixel_height = run.getLogData('pixel_height').value
-
         q_min = run.getLogData('qmin').value
         q_max = run.getLogData('qmax').value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
@@ -248,7 +226,7 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
         error_weighting = self.getProperty('ErrorWeighting').value
         Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws, NumberOfWedges=n_wedges,
                     WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset, AsymmetricWedges=asymm_wedges,
-                    ErrorWeighting=error_weighting, OutputBinning=q_binning, PixelSizeX=pixel_width, PixelSizeY=pixel_height)
+                    ErrorWeighting=error_weighting, OutputBinning=q_binning)
         if self._resolution == 'MildnerCarpenter':
             x = mtd[self._output_ws].readX(0)
             mid_x = (x[1:] + x[:-1]) / 2

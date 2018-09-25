@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CALCULATEQMINMAX_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -43,6 +44,8 @@ private:
   void init() override;
   void exec() override;
   double calculateQ(double, double) const;
+  void calculateQMinMax(API::MatrixWorkspace_sptr, const std::vector<size_t> &,
+                        const std::string &);
 };
 
 } // namespace Algorithms

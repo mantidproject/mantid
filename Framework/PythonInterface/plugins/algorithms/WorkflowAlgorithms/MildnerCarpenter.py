@@ -1,4 +1,4 @@
-# Contains parametrized formulae for SASN Q resolution based on papers by Mildner, Carpenter.
+# Contains parametrized formulae for SANS Q resolution based on papers by Mildner, Carpenter.
 import math
 import numpy
 
@@ -96,3 +96,4 @@ class MonochromaticScalarQCylindric(_MildnerCarpenterBase):
         sin_2theta = 2 * sin * math.sqrt(1 - sin ** 2)
         r = self._l2 * sin_2theta / math.sqrt(1 - sin_2theta ** 2)
         return math.sqrt(self._coeff * (self._delta_theta + self._delta_pixel + self._coeff_r2 * r ** 2))
+    
