@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAlgorithms/SofQW.h"

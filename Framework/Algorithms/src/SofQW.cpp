@@ -4,7 +4,6 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"

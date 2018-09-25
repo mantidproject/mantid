@@ -34,7 +34,7 @@ void CopyDetectorMapping::exec() {
   bool indexBySpecNumber = getProperty("IndexBySpectrumNumber");
 
   // Copy detector mapping
-  SpectrumDetectorMapping detMap(wsToMatch.get(), indexBySpecNumber);
+  SpectrumDetectorMapping detMap(wsToMatch, indexBySpecNumber);
   wsToRemap->updateSpectraUsing(detMap);
 
   setProperty("WorkspaceToRemap", wsToRemap);

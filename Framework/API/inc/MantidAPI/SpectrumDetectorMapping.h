@@ -8,28 +8,22 @@
 #endif
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace API {
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
-class MatrixWorkspace;
 
 /** A minimal class to hold the mapping between the spectrum number and its
-   related
-    detector ID numbers for a dataset.
+    related detector ID numbers for a dataset.
     Normally, this mapping is contained within the collection of ISpectrum
-   objects held
-    by the workspace. This class can be useful when you want to pass just this
-   information
-    and not the entire workspace, or you want to store some mapping that related
-   to spectra
-    that are not yet, or no longer, contained in the workspace.
+    objects held by the workspace. This class can be useful when you want to
+    pass just this information and not the entire workspace, or you want to
+    store some mapping that related to spectra that are not yet, or no longer,
+    contained in the workspace.
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -53,7 +47,7 @@ class MANTID_API_DLL SpectrumDetectorMapping {
   using sdmap = std::unordered_map<specnum_t, std::set<detid_t>>;
 
 public:
-  explicit SpectrumDetectorMapping(const MatrixWorkspace *const workspace,
+  explicit SpectrumDetectorMapping(MatrixWorkspace_const_sptr &workspace,
                                    bool useSpecNoIndex = true);
   SpectrumDetectorMapping(
       const std::vector<specnum_t> &spectrumNumbers,
