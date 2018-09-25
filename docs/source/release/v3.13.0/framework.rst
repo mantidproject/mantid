@@ -17,7 +17,7 @@ Stability
 ---------
 
 - We have introduced a Project Recovery mechanism for Mantidplot in order to be able to recover the lost state of the interface in the event of a crash or unexpected shutdown.  There are more details in the UI section of the release notes.
-- The error reporter can now catches hard crashes to desktop, allowing us to get more information on causes of hangs or crashes in Mantid.  Since the last release error reports sent to us led directly to the identification of and fixes for 3 seperate bugs in Mantid.
+- The error reporter can now catches hard crashes to desktop, allowing us to get more information on causes of hangs or crashes in Mantid.  Since the last release error reports sent to us led directly to the identification of and fixes for 3 separate bugs in Mantid.
 - Mantid now handles poor network stability  better when reading live data from the ISIS DAE.  Mantid will now timeout after a couple of minutes of loss of network connectivity and remains responsive during this time.  
   You can alter the duration of this timeout by adding a line to the mantid.user.properties file like:
   ```
