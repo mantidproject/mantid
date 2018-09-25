@@ -2,15 +2,16 @@ from __future__ import (absolute_import, division, print_function)
 
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 from Muon.GUI.Common.observer_pattern import Observable
-
+from Muon.GUI.Common.run_string_utils import run_string_to_list
 
 class HomeGroupingWidgetPresenter(HomeTabSubWidget):
 
     @staticmethod
     def string_to_list(text):
-        if text == "":
-            return []
-        return [int(i) for i in text.split(",")]
+        # if text == "":
+        #     return []
+        # return [int(i) for i in text.split(",")]
+        return run_string_to_list(text)
 
     def __init__(self, view, model):
         self._view = view

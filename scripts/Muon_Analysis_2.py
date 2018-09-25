@@ -57,6 +57,10 @@ from Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter import GroupingTabPresenter
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_view import GroupingTabView
 
+from Muon.GUI.Common.help_widget.help_widget_model import HelpWidgetModel
+from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
+from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
+
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 muonGUI = None
@@ -75,12 +79,12 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
 
         self.setup_load_widget()
         self.tabs = self.setup_tabs()
-        self.help_widget = DummyLabelWidget("Help dummy", self)
+        self.setup_help_widget() # self.help_widget = DummyLabelWidget("Help dummy", self)
 
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         splitter.addWidget(self.load_widget_view)
         splitter.addWidget(self.tabs)
-        splitter.addWidget(self.help_widget.widget)
+        splitter.addWidget(self.help_widget)
         splitter.setCollapsible(0, False)
         splitter.setCollapsible(1, False)
         splitter.setCollapsible(2, False)
@@ -169,6 +173,11 @@ class MuonAnalysis3Gui(QtGui.QMainWindow):
                                                         self.group_tab_model,
                                                         self.grouping_table_widget,
                                                         self.pairing_table_widget)
+
+    def setup_help_widget(self):
+        self.help_widget_model = HelpWidgetModel()
+        self.help_widget = HelpWidgetView()
+        self.help_widget_presenter = HelpWidgetPresenter(self.help_widget, self.help_widget_model)
 
     def setup_tabs(self):
         self.setup_home_tab()

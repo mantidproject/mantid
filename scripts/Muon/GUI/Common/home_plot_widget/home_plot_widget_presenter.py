@@ -9,8 +9,13 @@ class HomePlotWidgetPresenter(HomeTabSubWidget):
         self._view = view
         self._model = model
 
+        self._view.on_plot_button_clicked(self.handle_plot_button_clicked)
+
     def show(self):
         self._view.show()
 
     def update_view_from_model(self):
         pass
+
+    def handle_plot_button_clicked(self):
+        self._view.warning_popup("Plotting not currently implemented!")

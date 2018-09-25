@@ -55,13 +55,13 @@ class PairingTableView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.remove_pair_button.sizePolicy().hasHeightForWidth())
 
         self.add_pair_button.setSizePolicy(size_policy)
-        self.add_pair_button.setMinimumSize(QtCore.QSize(40, 40))
         self.add_pair_button.setObjectName("addGroupButton")
+        self.add_pair_button.setToolTip("Add a pair to the end of the table")
         self.add_pair_button.setText("+")
 
         self.remove_pair_button.setSizePolicy(size_policy)
-        self.remove_pair_button.setMinimumSize(QtCore.QSize(40, 40))
         self.remove_pair_button.setObjectName("removeGroupButton")
+        self.remove_pair_button.setToolTip("Remove selected/last pair(s) from the table")
         self.remove_pair_button.setText("-")
 
         self.horizontal_layout = QtGui.QHBoxLayout()
@@ -92,6 +92,16 @@ class PairingTableView(QtGui.QWidget):
         vertical_headers.setMovable(False)
         vertical_headers.setResizeMode(QtGui.QHeaderView.ResizeToContents)
         vertical_headers.setVisible(True)
+
+        self.pairing_table.horizontalHeaderItem(0).setToolTip("The name of the pair :"
+                                                              "\n    - The name must be unique across all groups/pairs"
+                                                              "\n    - The name can only use digits, characters and _")
+        self.pairing_table.horizontalHeaderItem(1).setToolTip("Group 1 of the pair, selected from the grouping table")
+        self.pairing_table.horizontalHeaderItem(2).setToolTip("Group 2 of the pair, selected from the grouping table")
+        self.pairing_table.horizontalHeaderItem(3).setToolTip("The value of Alpha for the pair asymmetry:"
+                                                              "\n   - The number must be >= 0.0")
+        self.pairing_table.horizontalHeaderItem(4).setToolTip("Replace the current value of Alpha with one estimated"
+                                                              " from the data.")
 
     def num_rows(self):
         return self.pairing_table.rowCount()
@@ -159,12 +169,14 @@ class PairingTableView(QtGui.QWidget):
     def _group_selection_cell_widget(self):
         # The widget for the group selection columns
         selector = QtGui.QComboBox(self)
+        selector.setToolTip("Select a group from the grouping table")
         selector.addItems(self._group_selections)
         return selector
 
     def _guess_alpha_button(self):
         # The widget for the guess alpha column
         guess_alpha = QtGui.QPushButton(self)
+        guess_alpha.setToolTip("Estimate the alpha value for this pair")
         guess_alpha.setText("Guess")
         return guess_alpha
 

@@ -1,9 +1,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtGui, QtCore
+import Muon.GUI.Common.message_box as message_box
 
 
 class HomePlotWidgetView(QtGui.QWidget):
+
+    @staticmethod
+    def warning_popup(message):
+        message_box.warning(str(message))
 
     def __init__(self, parent=None):
         super(HomePlotWidgetView, self).__init__(parent)
@@ -47,7 +52,9 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.horizontal_layout.addWidget(self.plot_button)
         self.horizontal_layout.addSpacing(50)
 
-        self.vertical_layout = QtGui.QVBoxLayout(self)
+
+
+        self.vertical_layout = QtGui.QVBoxLayout()
         self.vertical_layout.setObjectName("verticalLayout")
         self.vertical_layout.addItem(self.horizontal_layout)
 
@@ -66,10 +73,13 @@ class HomePlotWidgetView(QtGui.QWidget):
         self.group.setLayout(self.vertical_layout)
 
         self.widget_layout = QtGui.QVBoxLayout(self)
-        self.widget_layout.addItem(self.horizontal_layout)
         self.widget_layout.addWidget(self.group)
+
         self.setLayout(self.widget_layout)
 
     # for docking
     def getLayout(self):
         return self.widget_layout
+
+    def on_plot_button_clicked(self, slot):
+        self.plot_button.clicked.connect(slot)

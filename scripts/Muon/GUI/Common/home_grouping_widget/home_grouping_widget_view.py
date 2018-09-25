@@ -146,7 +146,7 @@ class HomeGroupingWidgetView(QtGui.QWidget):
             model.appendRow(item)
         for name in pair_names:
             item = QtGui.QStandardItem(str(name))
-            item.setForeground(QtGui.QColor('red'))
+            #item.setForeground(QtGui.QColor('red'))
             font = item.font()
             font.setBold(True)
             item.setFont(font)

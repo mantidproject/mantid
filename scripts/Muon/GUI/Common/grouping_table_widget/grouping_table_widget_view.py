@@ -50,13 +50,13 @@ class GroupingTableView(QtGui.QWidget):
         size_policy.setHeightForWidth(self.remove_group_button.sizePolicy().hasHeightForWidth())
 
         self.add_group_button.setSizePolicy(size_policy)
-        self.add_group_button.setMinimumSize(QtCore.QSize(40, 40))
         self.add_group_button.setObjectName("addGroupButton")
+        self.add_group_button.setToolTip("Add a group to the end of the table")
         self.add_group_button.setText("+")
 
         self.remove_group_button.setSizePolicy(size_policy)
-        self.remove_group_button.setMinimumSize(QtCore.QSize(40, 40))
         self.remove_group_button.setObjectName("removeGroupButton")
+        self.remove_group_button.setToolTip("Remove selected/last group(s) from the table")
         self.remove_group_button.setText("-")
 
         self.horizontal_layout = QtGui.QHBoxLayout()
@@ -86,6 +86,16 @@ class GroupingTableView(QtGui.QWidget):
         vertical_headers.setResizeMode(QtGui.QHeaderView.ResizeToContents)
         vertical_headers.setVisible(True)
 
+        self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
+                                                               "\n    - The name must be unique across all groups/pairs"
+                                                               "\n    - The name can only use digits, characters and _")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("The sorted list of detectors :"
+                                                               "\n  - The list can only contain integers."
+                                                               "\n  - , is used to separate detectors or ranges."
+                                                               "\n  - \"-\" denotes a range, i,e \"1-5\" is the same as"
+                                                               " \"1,2,3,4,5\" ")
+        self.grouping_table.horizontalHeaderItem(2).setToolTip("The number of detectors in the group.")
+
     def num_rows(self):
         return self.grouping_table.rowCount()
 
@@ -112,12 +122,14 @@ class GroupingTableView(QtGui.QWidget):
                 group_name_widget = table_utils.ValidatedTableItem(self._validate_group_name_entry)
                 group_name_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 0, group_name_widget)
+                self.grouping_table.item(row_position, 0).setToolTip(entry)
                 continue
             if i == 1:
                 # column 1 : detector IDs
                 detector_widget = table_utils.ValidatedTableItem(self._validate_detector_ID_entry)
                 detector_widget.setText(entry)
                 self.grouping_table.setItem(row_position, 1, detector_widget)
+                self.grouping_table.item(row_position, 1).setToolTip(entry)
                 continue
             if i == 2:
                 # column 2 : number of detectors
