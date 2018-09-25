@@ -547,11 +547,12 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_histogram_fit() {
+  void test_parameters_are_correct_for_a_histogram_fit() {
     createHistogramWorkspace("InputWS", 10, -10.0, 10.0);
 
     PlotPeakByLogValue alg;
     alg.initialize();
+    alg.setAlwaysStoreInADS(false);
     alg.setProperty("EvaluationType", "Histogram");
     alg.setPropertyValue("Input", "InputWS,v1:3");
     alg.setPropertyValue("OutputWorkspace", "out");
@@ -559,22 +560,10 @@ public:
     alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
     alg.execute();
 
-    {
-      ITableWorkspace_sptr params = alg.getProperty("OutputWorkspace");
-      TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
-    }
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_1_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 1.1, 1e-15);
-    }
-
-    {
-      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "InputWS_2_Parameters");
-      TS_ASSERT_DELTA(params->Double(0, 1), 0.6, 1e-15);
-    }
+    ITableWorkspace_sptr params = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
+    TS_ASSERT_DELTA(params->Double(1, 1), 1.1, 1e-15);
+    TS_ASSERT_DELTA(params->Double(2, 1), 0.6, 1e-15);
 
     AnalysisDataService::Instance().clear();
   }

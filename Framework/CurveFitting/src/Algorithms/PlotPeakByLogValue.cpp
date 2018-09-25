@@ -220,9 +220,9 @@ void PlotPeakByLogValue::exec() {
 
   setProperty("OutputWorkspace", result);
 
-  std::vector<MatrixWorkspace_sptr> covarianceWorkspaces;
   std::vector<MatrixWorkspace_sptr> fitWorkspaces;
-  std::vector<MatrixWorkspace_sptr> parameterWorkspaces;
+  std::vector<ITableWorkspace_sptr> parameterWorkspaces;
+  std::vector<ITableWorkspace_sptr> covarianceWorkspaces;
 
   double dProg = 1. / static_cast<double>(wsNames.size());
   double Prog = 0.;
@@ -340,18 +340,18 @@ void PlotPeakByLogValue::exec() {
         chi2 = fit->getProperty("OutputChi2overDoF");
 
         if (createFitOutput) {
-          MatrixWorkspace_sptr outputWorkspace =
+          MatrixWorkspace_sptr outputFitWorkspace =
               fit->getProperty("OutputWorkspace");
-          covarianceWorkspaces.emplace_back(extractSpectraAlg(
-              outputWorkspace, wsBaseName + "_NormalisedCovarianceMatrix"));
-          parameterWorkspaces.emplace_back(
-              extractSpectraAlg(outputWorkspace, wsBaseName + "_Parameters"));
-          fitWorkspaces.emplace_back(
-              extractSpectraAlg(outputWorkspace, wsBaseName + "_Workspace"));
+          ITableWorkspace_sptr outputParamWorkspace =
+              fit->getProperty("OutputParameters");
+          ITableWorkspace_sptr outputCovarianceWorkspace =
+              fit->getProperty("OutputNormalisedCovarianceMatrix");
+          fitWorkspaces.emplace_back(outputFitWorkspace);
+          parameterWorkspaces.emplace_back(outputParamWorkspace);
+          covarianceWorkspaces.emplace_back(outputCovarianceWorkspace);
         }
         g_log.debug() << "Fit result " << fit->getPropertyValue("OutputStatus")
                       << ' ' << chi2 << '\n';
-
       } catch (...) {
         g_log.error("Error in Fit ChildAlgorithm");
         throw;
@@ -380,7 +380,6 @@ void PlotPeakByLogValue::exec() {
           ifun->setParameter(i, initialParams[i]);
         }
       }
-
     } // for(;j < jend;++j)
   }
 
@@ -675,16 +674,6 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
   }
 
   return format;
-}
-
-MatrixWorkspace_sptr
-PlotPeakByLogValue::extractSpectraAlg(MatrixWorkspace_sptr workspace,
-                                      const std::string &outputName) {
-  auto extractSpectra = this->createChildAlgorithm("ExtractSpectra");
-  extractSpectra->setProperty("InputWorkspace", workspace);
-  extractSpectra->setProperty("OutputWorkspace", outputName);
-  extractSpectra->execute();
-  return extractSpectra->getProperty("OutputWorkspace");
 }
 
 } // namespace Algorithms
