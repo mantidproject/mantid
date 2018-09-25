@@ -9,7 +9,6 @@
 #include "ReflBatchPresenter.h"
 #include "ReflRunsPresenterFactory.h"
 #include "ReflSavePresenterFactory.h"
-#include "ReflSettingsPresenterFactory.h"
 #include <memory>
 
 namespace MantidQt {
@@ -21,13 +20,11 @@ public:
       EventPresenterFactory eventPresenterFactory,
       ExperimentPresenterFactory experimentPresenterFactory,
       InstrumentPresenterFactory instrumentPresenterFactory,
-      SettingsPresenterFactory settingsPresenterFactory,
       SavePresenterFactory savePresenterFactory)
       : m_runsPresenterFactory(std::move(runsPresenterFactory)),
         m_eventPresenterFactory(std::move(eventPresenterFactory)),
         m_experimentPresenterFactory(std::move(experimentPresenterFactory)),
         m_instrumentPresenterFactory(std::move(instrumentPresenterFactory)),
-        m_settingsPresenterFactory(std::move(settingsPresenterFactory)),
         m_savePresenterFactory(std::move(savePresenterFactory)) {}
 
   std::unique_ptr<IReflBatchPresenter> make(IReflBatchView *view) {
@@ -37,13 +34,12 @@ public:
         m_experimentPresenterFactory.make(view->experiment());
     auto instrumentPresenter =
         m_instrumentPresenterFactory.make(view->instrument());
-    auto settingsPresenter = m_settingsPresenterFactory.make(view->settings());
     auto savePresenter = m_savePresenterFactory.make(view->save());
 
     return std::make_unique<ReflBatchPresenter>(
         view, std::move(runsPresenter), std::move(eventPresenter),
         std::move(experimentPresenter), std::move(instrumentPresenter),
-        std::move(settingsPresenter), std::move(savePresenter));
+        std::move(savePresenter));
   }
 
 private:
@@ -51,7 +47,6 @@ private:
   EventPresenterFactory m_eventPresenterFactory;
   ExperimentPresenterFactory m_experimentPresenterFactory;
   InstrumentPresenterFactory m_instrumentPresenterFactory;
-  SettingsPresenterFactory m_settingsPresenterFactory;
   SavePresenterFactory m_savePresenterFactory;
 };
 }

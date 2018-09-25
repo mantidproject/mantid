@@ -59,7 +59,6 @@ void QtReflMainWindowView::initLayout() {
       searcher);
 
   auto makeEventPresenter = EventPresenterFactory();
-  auto makeSettingsPresenter = SettingsPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
@@ -67,7 +66,7 @@ void QtReflMainWindowView::initLayout() {
   auto makeReflBatchPresenter = ReflBatchPresenterFactory(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
       std::move(makeExperimentPresenter), std::move(makeInstrumentPresenter),
-      std::move(makeSettingsPresenter), std::move(makeSaveSettingsPresenter));
+      std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
   m_presenter =

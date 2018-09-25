@@ -13,7 +13,6 @@ class IReflBatchView;
 class IReflRunsTabPresenter;
 class IEventPresenter;
 class IInstrumentPresenter;
-class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
 /** @class ReflBatchPresenter
@@ -52,7 +51,6 @@ public:
       std::unique_ptr<IEventPresenter> eventPresenter,
       std::unique_ptr<IExperimentPresenter> experimentPresenter,
       std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-      std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
       std::unique_ptr<IReflSaveTabPresenter> savePresenter);
 
   /// Returns values passed for 'Transmission run(s)'
@@ -97,7 +95,6 @@ private:
   /// The presenter of tab 'Event Handling'
   std::unique_ptr<IEventPresenter> m_eventPresenter;
   /// The presenter of tab 'Settings'
-  std::unique_ptr<IReflSettingsTabPresenter> m_settingsPresenter;
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   /// The presenter of tab 'Save ASCII'

@@ -9,7 +9,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "QtReflRunsTabView.h"
 #include "QtReflSaveTabView.h"
-#include "QtReflSettingsTabView.h"
 #include "ui_ReflBatchWidget.h"
 #include <memory>
 
@@ -48,7 +47,6 @@ public:
 
   IReflRunsTabView *runs() const override;
   IEventView *eventHandling() const override;
-  IReflSettingsTabView *settings() const override;
   IReflSaveTabView *save() const override;
   IExperimentView* experiment() const override;
   IInstrumentView *instrument() const override;
@@ -59,14 +57,12 @@ private:
 
   std::unique_ptr<QtReflRunsTabView> createRunsTab();
   std::unique_ptr<EventView> createEventTab();
-  std::unique_ptr<QtReflSettingsTabView> createSettingsTab();
   std::unique_ptr<QtReflSaveTabView> createSaveTab();
 
   Ui::ReflBatchWidget m_ui;
   IReflBatchPresenter *m_notifyee;
   std::unique_ptr<QtReflRunsTabView> m_runs;
   std::unique_ptr<EventView> m_eventHandling;
-  std::unique_ptr<QtReflSettingsTabView> m_settings;
   std::unique_ptr<QtReflSaveTabView> m_save;
   std::unique_ptr<ExperimentView> m_experiment;
   std::unique_ptr<InstrumentView> m_instrument;

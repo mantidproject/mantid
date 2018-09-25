@@ -4,7 +4,6 @@
 #include "IReflBatchView.h"
 #include "IReflRunsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
-#include "IReflSettingsTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -17,7 +16,8 @@ namespace CustomInterfaces {
 * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
 * @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
 * presenter
-* @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
+* @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
+* presenter
 * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflBatchPresenter::ReflBatchPresenter(
@@ -25,11 +25,9 @@ ReflBatchPresenter::ReflBatchPresenter(
     std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
     std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
-    std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
     std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
-      m_settingsPresenter(std::move(settingsPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)),
       m_savePresenter(std::move(savePresenter)) {
@@ -37,7 +35,6 @@ ReflBatchPresenter::ReflBatchPresenter(
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
   m_savePresenter->acceptMainPresenter(this);
-  m_settingsPresenter->acceptMainPresenter(this);
   m_eventPresenter->acceptMainPresenter(this);
 
   // Trigger the setting of the current instrument name in settings tab
@@ -58,14 +55,14 @@ void ReflBatchPresenter::completedRowReductionSuccessfully(
 
 void ReflBatchPresenter::notifyReductionPaused() {
   m_savePresenter->onAnyReductionPaused();
-  m_settingsPresenter->onReductionPaused();
   m_eventPresenter->onReductionPaused();
+  // m_instrumentPresenter->onReductionPaused();
 }
 
 void ReflBatchPresenter::notifyReductionResumed() {
   m_savePresenter->onAnyReductionResumed();
-  m_settingsPresenter->onReductionResumed();
   m_eventPresenter->onReductionResumed();
+  // m_instrumentPresenter->onReductionResumed();
 }
 
 void ReflBatchPresenter::settingsChanged() {
@@ -79,7 +76,7 @@ void ReflBatchPresenter::settingsChanged() {
 * @return :: Global options for 'CreateTransmissionWorkspaceAuto'
 */
 OptionsQMap ReflBatchPresenter::getTransmissionOptions() const {
-  return m_settingsPresenter->getTransmissionOptions();
+  return OptionsQMap(); // TODO m_settingsPresenter->getTransmissionOptions();
 }
 
 /** Returns global processing options
@@ -89,7 +86,7 @@ OptionsQMap ReflBatchPresenter::getTransmissionOptions() const {
 * @return :: Global processing options
 */
 OptionsQMap ReflBatchPresenter::getReductionOptions() const {
-  return m_settingsPresenter->getReductionOptions();
+  return OptionsQMap(); // TODO m_settingsPresenter->getReductionOptions();
 }
 
 /** Returns global post-processing options
@@ -99,7 +96,7 @@ OptionsQMap ReflBatchPresenter::getReductionOptions() const {
 * @return :: Global post-processing options
 */
 std::string ReflBatchPresenter::getStitchOptions() const {
-  return m_settingsPresenter->getStitchOptions();
+  return std::string(); // TODO m_settingsPresenter->getStitchOptions();
 }
 
 /** Returns default values specified for 'Transmission run(s)' for the
@@ -110,23 +107,25 @@ std::string ReflBatchPresenter::getStitchOptions() const {
 * @param angle :: the run angle to look up transmission runs for
 * @return :: Values passed for 'Transmission run(s)'
 */
-OptionsQMap ReflBatchPresenter::getOptionsForAngle(const double angle) const {
-  return m_settingsPresenter->getOptionsForAngle(angle);
+OptionsQMap
+ReflBatchPresenter::getOptionsForAngle(const double /*angle*/) const {
+  return OptionsQMap(); // TODO m_settingsPresenter->getOptionsForAngle(angle);
 }
 
 /** Returns whether there are per-angle transmission runs specified
  * @return :: true if there are per-angle transmission runs
  * */
 bool ReflBatchPresenter::hasPerAngleOptions() const {
-  return m_settingsPresenter->hasPerAngleOptions();
+  return false; // TODO m_settingsPresenter->hasPerAngleOptions();
 }
 
 /**
 Tells the setting tab presenter what to set its current instrument name to
 * @param instName : The name of the instrument to be set
 */
-void ReflBatchPresenter::setInstrumentName(const std::string &instName) const {
-  m_settingsPresenter->setInstrumentName(instName);
+void ReflBatchPresenter::setInstrumentName(
+    const std::string & /*instName*/) const {
+  return; // TODO m_settingsPresenter->setInstrumentName(instName);
 }
 
 /**
