@@ -26,35 +26,35 @@ public:
     ON_CALL(view, jobs()).WillByDefault(::testing::ReturnRef(jobsView));
   }
 
-  UnslicedRow basicRow() {
-    return UnslicedRow(std::vector<std::string>({"101", "102"}), 1.2,
-                       {"A", "B"}, boost::none, boost::none, {},
-                       ReductionWorkspaces({}, {"", ""}, "", "", "", ""));
+  Row basicRow() {
+    return Row(std::vector<std::string>({"101", "102"}), 1.2, {"A", "B"},
+               boost::none, boost::none, {},
+               ReductionWorkspaces({}, {"", ""}, "", "", "", ""));
   }
 
-  UnslicedReductionJobs twoEmptyGroupsModel() {
-    auto reductionJobs = UnslicedReductionJobs();
-    reductionJobs.appendGroup(UnslicedGroup("Group 1"));
-    reductionJobs.appendGroup(UnslicedGroup("Group 2"));
+  Jobs twoEmptyGroupsModel() {
+    auto reductionJobs = Jobs();
+    reductionJobs.appendGroup(Group("Group 1"));
+    reductionJobs.appendGroup(Group("Group 2"));
     return reductionJobs;
   }
 
-  UnslicedReductionJobs twoGroupsWithARowModel() {
-    auto reductionJobs = UnslicedReductionJobs();
-    auto group1 = UnslicedGroup("Group 1");
+  Jobs twoGroupsWithARowModel() {
+    auto reductionJobs = Jobs();
+    auto group1 = Group("Group 1");
     group1.appendRow(basicRow());
     reductionJobs.appendGroup(std::move(group1));
 
-    auto group2 = UnslicedGroup("Group 2");
+    auto group2 = Group("Group 2");
     group2.appendRow(basicRow());
     reductionJobs.appendGroup(std::move(group2));
 
     return reductionJobs;
   }
 
-  UnslicedReductionJobs oneGroupWithTwoRowsModel() {
-    auto reductionJobs = UnslicedReductionJobs();
-    auto group1 = UnslicedGroup("Group 1");
+  Jobs oneGroupWithTwoRowsModel() {
+    auto reductionJobs = Jobs();
+    auto group1 = Group("Group 1");
     group1.appendRow(basicRow());
     group1.appendRow(basicRow());
     reductionJobs.appendGroup(std::move(group1));
@@ -81,9 +81,8 @@ public:
     ON_CALL(mockJobs, selectedRowLocations()).WillByDefault(Return(locations));
   }
 
-  UnslicedReductionJobs const &
-  unslicedJobsFromPresenter(RunsTablePresenter &presenter) {
-    return boost::get<UnslicedReductionJobs>(presenter.reductionJobs());
+  Jobs const &jobsFromPresenter(RunsTablePresenter &presenter) {
+    return boost::get<Jobs>(presenter.reductionJobs());
   }
 
   template <typename... Args>
@@ -93,14 +92,11 @@ public:
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view) {
-    static auto slicing = Slicing();
-    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
-                              UnslicedReductionJobs());
+    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(), Jobs());
   }
 
   RunsTablePresenter makePresenter(IRunsTableView &view, Jobs jobs) {
-    static auto slicing = Slicing();
-    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(slicing),
+    return RunsTablePresenter(&view, {}, 0.01, WorkspaceNamesFactory(),
                               std::move(jobs));
   }
 

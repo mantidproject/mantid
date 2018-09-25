@@ -43,7 +43,7 @@ public:
     auto presenter = makePresenter(m_view, twoEmptyGroupsModel());
     presenter.notifyDeleteGroupRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(1, groups.size());
     TS_ASSERT_EQUALS("Group 2", groups[0].name());
 
@@ -56,7 +56,7 @@ public:
     auto presenter = makePresenter(m_view, twoEmptyGroupsModel());
     presenter.notifyDeleteGroupRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(0, groups.size());
 
     verifyAndClearExpectations();

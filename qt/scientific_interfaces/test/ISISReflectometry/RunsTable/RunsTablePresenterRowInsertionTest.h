@@ -47,7 +47,7 @@ public:
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertRowRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(1, groups[0].rows().size());
     verifyAndClearExpectations();
@@ -77,7 +77,7 @@ public:
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertRowRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(1, groups[0].rows().size());
     TS_ASSERT_EQUALS(1, groups[1].rows().size());
 

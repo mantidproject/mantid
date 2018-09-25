@@ -65,7 +65,7 @@ public:
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(3, groups.size());
     TS_ASSERT_EQUALS("Group2", groups[1].name());
@@ -96,7 +96,7 @@ public:
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
 
     TS_ASSERT_EQUALS(3, groups.size());
     TS_ASSERT_EQUALS("", groups[2].name());
@@ -113,7 +113,7 @@ public:
     auto presenter = makePresenter(m_view, std::move(reductionJobs));
     presenter.notifyInsertGroupRequested();
 
-    auto &groups = unslicedJobsFromPresenter(presenter).groups();
+    auto &groups = jobsFromPresenter(presenter).groups();
     TS_ASSERT_EQUALS(3, groups.size());
     TS_ASSERT_EQUALS("Group3", groups[2].name());
 
