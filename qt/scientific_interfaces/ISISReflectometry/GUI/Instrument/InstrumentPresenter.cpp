@@ -1,7 +1,4 @@
 #include "InstrumentPresenter.h"
-#include "../../Reduction/ValidatePerThetaDefaults.h"
-#include "../../Reduction/ParseReflectometryStrings.h"
-#include "PerThetaDefaultsTableValidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

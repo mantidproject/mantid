@@ -36,10 +36,18 @@ void QtReflBatchView::initLayout() {
 
   m_experiment = Mantid::Kernel::make_unique<ExperimentView>(createReductionAlg(), this);
   m_ui.batchTabs->addTab(m_experiment.get(), "Experiment Settings");
+
+  m_instrument =
+      Mantid::Kernel::make_unique<InstrumentView>(createReductionAlg(), this);
+  m_ui.batchTabs->addTab(m_instrument.get(), "Instrument Settings");
 }
 
 IExperimentView* QtReflBatchView::experiment() const {
   return m_experiment.get();
+}
+
+IInstrumentView *QtReflBatchView::instrument() const {
+  return m_instrument.get();
 }
 
 IReflRunsTabView *QtReflBatchView::runs() const { return m_runs.get(); }

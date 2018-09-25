@@ -12,6 +12,7 @@ namespace CustomInterfaces {
 class IReflBatchView;
 class IReflRunsTabPresenter;
 class IEventPresenter;
+class IInstrumentPresenter;
 class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
@@ -45,12 +46,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL ReflBatchPresenter
     : public IReflBatchPresenter {
 public:
   /// Constructor
-  ReflBatchPresenter(IReflBatchView *view,
-                     std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
-                     std::unique_ptr<IEventPresenter> eventPresenter,
-                     std::unique_ptr<IExperimentPresenter> experimentPresenter,
-                     std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
-                     std::unique_ptr<IReflSaveTabPresenter> savePresenter);
+  ReflBatchPresenter(
+      IReflBatchView *view,
+      std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
+      std::unique_ptr<IEventPresenter> eventPresenter,
+      std::unique_ptr<IExperimentPresenter> experimentPresenter,
+      std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
+      std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
+      std::unique_ptr<IReflSaveTabPresenter> savePresenter);
 
   /// Returns values passed for 'Transmission run(s)'
   MantidWidgets::DataProcessor::OptionsQMap
@@ -96,6 +99,7 @@ private:
   /// The presenter of tab 'Settings'
   std::unique_ptr<IReflSettingsTabPresenter> m_settingsPresenter;
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
+  std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   /// The presenter of tab 'Save ASCII'
   std::unique_ptr<IReflSaveTabPresenter> m_savePresenter;
 };

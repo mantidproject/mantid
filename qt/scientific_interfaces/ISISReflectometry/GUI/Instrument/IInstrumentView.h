@@ -2,6 +2,8 @@
 #define MANTID_ISISREFLECTOMETRY_IINSTRUMENTVIEW_H
 
 #include "DllConfig.h"
+#include "InstrumentParameters.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

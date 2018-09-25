@@ -1,16 +1,17 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTREFLBATCHVIEW_H
 
-#include "IReflBatchView.h"
-#include "IReflBatchPresenter.h"
-#include "ui_ReflBatchWidget.h"
-#include <memory>
-#include "QtReflSaveTabView.h"
 #include "GUI/Event/EventView.h"
 #include "GUI/Experiment/ExperimentView.h"
-#include "QtReflSettingsTabView.h"
-#include "QtReflRunsTabView.h"
+#include "GUI/Instrument/InstrumentView.h"
+#include "IReflBatchPresenter.h"
+#include "IReflBatchView.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "QtReflRunsTabView.h"
+#include "QtReflSaveTabView.h"
+#include "QtReflSettingsTabView.h"
+#include "ui_ReflBatchWidget.h"
+#include <memory>
 
 #include <QCloseEvent>
 
@@ -50,6 +51,7 @@ public:
   IReflSettingsTabView *settings() const override;
   IReflSaveTabView *save() const override;
   IExperimentView* experiment() const override;
+  IInstrumentView *instrument() const override;
 
 private:
   void initLayout();
@@ -67,6 +69,7 @@ private:
   std::unique_ptr<QtReflSettingsTabView> m_settings;
   std::unique_ptr<QtReflSaveTabView> m_save;
   std::unique_ptr<ExperimentView> m_experiment;
+  std::unique_ptr<InstrumentView> m_instrument;
 };
 }
 }

@@ -2,12 +2,11 @@
 #define MANTID_CUSTOMINTERFACES_INSTRUMENTVIEW_H_
 
 #include "DllConfig.h"
-#include "ui_InstrumentWidget.h"
 #include "IInstrumentView.h"
-#include "MantidQtWidgets/Common/HintingLineEdit.h"
-#include <memory>
+#include "ui_InstrumentWidget.h"
 #include <QCheckBox>
-#include <QShortcut>
+#include <QLineEdit>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,6 +46,9 @@ public:
   void disableAll() override;
   void enableAll() override;
 
+public slots:
+  void onSettingsChanged();
+
 private:
   QString messageFor(
       std::vector<MissingInstrumentParameterValue> const &missingValues) const;
@@ -66,7 +68,7 @@ private:
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
-  void connectSettingsChange(QTableWidget &edit);
+  void connectSettingsChange(QSpinBox &edit);
   void connectSettingsChange(QDoubleSpinBox &edit);
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);
@@ -75,17 +77,6 @@ private:
   void setText(QLineEdit &lineEdit, boost::optional<int> value);
   void setText(QLineEdit &lineEdit, boost::optional<double> value);
   void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
-  std::string textFromCell(QTableWidgetItem const* maybeNullItem) const;
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               double value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               boost::optional<double> value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               boost::optional<std::string> value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               std::string const &value);
-//  void setText(QTableWidget &table, std::string const &propertyName,
-//               const QString &value);
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;

@@ -1,12 +1,13 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
 
-#include <string>
-#include "IReflRunsTabView.h"
-#include "IReflSettingsTabView.h"
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
+#include "GUI/Instrument/IInstrumentView.h"
+#include "IReflRunsTabView.h"
 #include "IReflSaveTabView.h"
+#include "IReflSettingsTabView.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,6 +47,7 @@ public:
   virtual IReflSettingsTabView* settings() const = 0;
   virtual IReflSaveTabView* save() const = 0;
   virtual IExperimentView* experiment() const = 0;
+  virtual IInstrumentView *instrument() const = 0;
   virtual ~IReflBatchView() = default;
 };
 }

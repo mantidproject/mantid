@@ -1,9 +1,10 @@
 #include "ReflBatchPresenter.h"
+#include "GUI/Event/IEventPresenter.h"
+#include "GUI/Instrument/IInstrumentPresenter.h"
 #include "IReflBatchView.h"
 #include "IReflRunsTabPresenter.h"
-#include "GUI/Event/IEventPresenter.h"
-#include "IReflSettingsTabPresenter.h"
 #include "IReflSaveTabPresenter.h"
+#include "IReflSettingsTabPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 using namespace MantidQt::MantidWidgets::DataProcessor;
@@ -23,12 +24,14 @@ ReflBatchPresenter::ReflBatchPresenter(
     IReflBatchView *view, std::unique_ptr<IReflRunsTabPresenter> runsPresenter,
     std::unique_ptr<IEventPresenter> eventPresenter,
     std::unique_ptr<IExperimentPresenter> experimentPresenter,
+    std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
     std::unique_ptr<IReflSettingsTabPresenter> settingsPresenter,
     std::unique_ptr<IReflSaveTabPresenter> savePresenter)
     : m_view(view), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)),
       m_settingsPresenter(std::move(settingsPresenter)),
       m_experimentPresenter(std::move(experimentPresenter)),
+      m_instrumentPresenter(std::move(instrumentPresenter)),
       m_savePresenter(std::move(savePresenter)) {
 
   // Tell the tab presenters that this is going to be the main presenter

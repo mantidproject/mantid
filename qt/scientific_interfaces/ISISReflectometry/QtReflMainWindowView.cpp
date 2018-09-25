@@ -62,11 +62,12 @@ void QtReflMainWindowView::initLayout() {
   auto makeSettingsPresenter = SettingsPresenterFactory();
   auto makeSaveSettingsPresenter = SavePresenterFactory();
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
+  auto makeInstrumentPresenter = InstrumentPresenterFactory();
 
   auto makeReflBatchPresenter = ReflBatchPresenterFactory(
       std::move(makeRunsPresenter), std::move(makeEventPresenter),
-      std::move(makeExperimentPresenter), std::move(makeSettingsPresenter),
-      std::move(makeSaveSettingsPresenter));
+      std::move(makeExperimentPresenter), std::move(makeInstrumentPresenter),
+      std::move(makeSettingsPresenter), std::move(makeSaveSettingsPresenter));
 
   // Create the presenter
   m_presenter =

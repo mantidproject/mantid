@@ -6,9 +6,11 @@ set ( INSTRUMENT_SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INSTRUMENT_INC_FILES
+  InstrumentPresenter.h
+  IInstrumentPresenter.h
+  IInstrumentView.h
   InstrumentView.h
   InstrumentPresenter.h
-  IInstrumentView.h
 )
 
 set ( INSTRUMENT_MOC_FILES
