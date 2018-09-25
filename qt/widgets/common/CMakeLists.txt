@@ -685,12 +685,10 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     USE_QTWEBKIT
   INCLUDE_DIRS
     inc
-    ${PYTHON_INCLUDE_PATH}
   LINK_LIBS
     ${TARGET_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtHelp
-    Qt4::QtOpenGL
     Qt4::QtNetwork
     Qt4::QtWebKit
     Qt4::Qscintilla

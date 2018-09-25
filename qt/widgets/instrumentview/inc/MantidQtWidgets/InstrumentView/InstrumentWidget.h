@@ -118,7 +118,7 @@ public:
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);
   void selectComponent(const QString &name);
-  void setScaleType(GraphOptions::ScaleType type);
+  void setScaleType(ColorMap::ScaleType type);
   void setExponent(double nth_power);
   void setViewType(const QString &type);
   const InstrumentActor &getInstrumentActor() const {

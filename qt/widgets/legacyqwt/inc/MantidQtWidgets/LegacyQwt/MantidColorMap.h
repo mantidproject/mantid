@@ -22,17 +22,20 @@
 class EXPORT_OPT_MANTIDQT_LEGACYQWT MantidColorMap : public QwtColorMap {
 
 public:
+  /// Define the possible scale types
+  enum class ScaleType { Linear = 0, Log10, Power };
+
   static QString chooseColorMap(const QString &previousFile, QWidget *parent);
   static QString exists(const QString &filename);
 
 public:
   MantidColorMap();
   explicit MantidColorMap(const QString &filename,
-                          GraphOptions::ScaleType type);
+                          MantidColorMap::ScaleType type);
   ~MantidColorMap() override;
   QwtColorMap *copy() const override;
 
-  void changeScaleType(GraphOptions::ScaleType type);
+  void changeScaleType(ScaleType type);
 
   void setNthPower(double nth_power) { m_nth_power = nth_power; };
 
@@ -44,6 +47,7 @@ public:
 
   void setupDefaultMap();
 
+  QRgb rgb(double vmin, double vmax, double value) const;
   QRgb rgb(const QwtDoubleInterval &interval, double value) const override;
 
   double normalize(const QwtDoubleInterval &interval, double value) const;
@@ -57,7 +61,7 @@ public:
    * Retrieve the scale type
    * @returns the current scale type
    */
-  GraphOptions::ScaleType getScaleType() const { return m_scale_type; }
+  ScaleType getScaleType() const { return m_scale_type; }
 
   /**
    * Retrieve the map name
@@ -87,7 +91,7 @@ public:
 
 private:
   /// The scale choice
-  mutable GraphOptions::ScaleType m_scale_type;
+  mutable ScaleType m_scale_type;
 
   /// An array of shared pointers to objects that define how the color should be
   /// painted on

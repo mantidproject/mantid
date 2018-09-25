@@ -260,7 +260,7 @@ private:
   /// Flag to show the guide and other components. Loaded and saved in settings.
   bool m_showGuides;
   /// Color map scale type: linear or log
-  GraphOptions::ScaleType m_scaleType;
+  ColorMap::ScaleType m_scaleType;
   /// Position to refer to when detector not found
   const Mantid::Kernel::V3D m_defaultPos;
   /// Flag which stores whether or not a 3D GridBank is present

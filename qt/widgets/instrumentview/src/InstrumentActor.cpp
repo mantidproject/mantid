@@ -679,7 +679,7 @@ const std::vector<Mantid::detid_t> &InstrumentActor::getAllDetIDs() const {
  * @param type :: 0 - linear, 1 - log10.
  */
 void InstrumentActor::changeScaleType(int type) {
-  m_renderer->changeScaleType(type);
+  m_renderer->changeScaleType(ColorMap::ScaleType(type));
   resetColors();
 }
 
@@ -691,8 +691,7 @@ void InstrumentActor::changeNthPower(double nth_power) {
 void InstrumentActor::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
-  m_scaleType = static_cast<GraphOptions::ScaleType>(
-      settings.value("ScaleType", 0).toInt());
+  m_scaleType = ColorMap::ScaleType(settings.value("ScaleType", 0).toInt());
   // Load Colormap. If the file is invalid the default stored colour map is used
   m_currentCMap = settings.value("ColormapFile", "").toString();
   // Set values from settings
@@ -704,7 +703,8 @@ void InstrumentActor::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWidget");
   settings.setValue("ColormapFile", m_currentCMap);
-  settings.setValue("ScaleType", (int)m_renderer->getColorMap().getScaleType());
+  settings.setValue("ScaleType",
+                    static_cast<int>(m_renderer->getColorMap().getScaleType()));
   settings.setValue("ShowGuides", m_showGuides);
   settings.endGroup();
 }

@@ -644,8 +644,8 @@ void InstrumentWidget::selectComponent(const QString &name) {
  * Set the scale type programmatically
  * @param type :: The scale choice
  */
-void InstrumentWidget::setScaleType(GraphOptions::ScaleType type) {
-  emit scaleTypeChanged(type);
+void InstrumentWidget::setScaleType(ColorMap::ScaleType type) {
+  emit scaleTypeChanged(static_cast<int>(type));
 }
 
 /**

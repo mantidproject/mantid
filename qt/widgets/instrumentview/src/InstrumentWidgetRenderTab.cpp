@@ -502,12 +502,12 @@ void InstrumentWidgetRenderTab::setRange(double minValue, double maxValue,
     m_colorMapWidget->blockSignals(false);
 }
 
-GraphOptions::ScaleType InstrumentWidgetRenderTab::getScaleType() const {
-  return (GraphOptions::ScaleType)m_colorMapWidget->getScaleType();
+ColorMap::ScaleType InstrumentWidgetRenderTab::getScaleType() const {
+  return (ColorMap::ScaleType)m_colorMapWidget->getScaleType();
 }
 
-void InstrumentWidgetRenderTab::setScaleType(GraphOptions::ScaleType type) {
-  m_colorMapWidget->setScaleType(type);
+void InstrumentWidgetRenderTab::setScaleType(ColorMap::ScaleType type) {
+  m_colorMapWidget->setScaleType(static_cast<int>(type));
 }
 
 void InstrumentWidgetRenderTab::setAxis(const QString &axisNameArg) {
@@ -752,7 +752,7 @@ void InstrumentWidgetRenderTab::colorMapChanged() {
 }
 
 void InstrumentWidgetRenderTab::scaleTypeChanged(int type) {
-  setScaleType((GraphOptions::ScaleType)type);
+  setScaleType(static_cast<ColorMap::ScaleType>(type));
 }
 
 void InstrumentWidgetRenderTab::nthPowerChanged(double nth_power) {

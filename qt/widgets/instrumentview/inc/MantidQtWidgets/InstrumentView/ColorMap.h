@@ -11,15 +11,18 @@
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/MantidColormap.h"
+#endif
 
 namespace MantidQt {
 namespace MantidWidgets {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 using ColorMap = MantidColorMap;
-#else
-#error No type defined for ColorMap for Qt >=5!
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+using ColorMap = MantidQt::Widgets::MplCpp::MantidColormap;
 #endif
-
-} // namespace MantidWidgets
+}
 } // namespace MantidQt
 
 #endif // MANTIDQT_WIDGETS_INSTRUMENTVIEW_COLORMAP_H

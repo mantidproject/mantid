@@ -330,11 +330,11 @@ void InstrumentRenderer::reset() {
 }
 
 void InstrumentRenderer::resetColors() {
-  QwtDoubleInterval qwtInterval(m_actor.minValue(), m_actor.maxValue());
   auto sharedWorkspace = m_actor.getWorkspace();
   const auto &compInfo = m_actor.componentInfo();
   const auto &detInfo = m_actor.detectorInfo();
-  auto color = m_colorMap.rgb(qwtInterval, 0);
+  const double vmin(m_actor.minValue()), vmax(m_actor.maxValue());
+  auto color = m_colorMap.rgb(vmin, vmax, 0);
   m_colors.assign(compInfo.size(),
                   GLColor(qRed(color), qGreen(color), qBlue(color), 1));
   auto invalidColor = GLColor(80, 80, 80, 1);
@@ -352,10 +352,10 @@ void InstrumentRenderer::resetColors() {
     else {
       auto integratedValue = m_actor.getIntegratedCounts(det);
       if (integratedValue > -1) {
-        auto color = m_colorMap.rgb(qwtInterval, integratedValue);
-        m_colors[det] = GLColor(
-            qRed(color), qGreen(color), qBlue(color),
-            static_cast<int>(255 * (integratedValue / m_actor.maxValue())));
+        auto color = m_colorMap.rgb(vmin, vmax, integratedValue);
+        m_colors[det] =
+            GLColor(qRed(color), qGreen(color), qBlue(color),
+                    static_cast<int>(255 * (integratedValue / vmax)));
       } else
         m_colors[det] = invalidColor;
     }
@@ -374,8 +374,8 @@ void InstrumentRenderer::resetPickColors() {
   }
 }
 
-void InstrumentRenderer::changeScaleType(int type) {
-  m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(type));
+void InstrumentRenderer::changeScaleType(ColorMap::ScaleType type) {
+  m_colorMap.changeScaleType(type);
 }
 
 void InstrumentRenderer::changeNthPower(double nth_power) {
