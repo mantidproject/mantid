@@ -16,7 +16,7 @@ in the form of <prefix>_<sha1>.nxs or <sha1>.nxs.
 This algorithm delete all such files from the default
 cache directory or the user-defined cache directory, if supplied.
 
-The name matching is done using regex (40 charaters of numbers plus
+The name matching is done using regex (40 characters of numbers plus
 a-f letters).
 Therefore if a user created a file in the designated directory
 that happens to have the same pattern, it will be deleted.

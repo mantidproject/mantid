@@ -68,7 +68,7 @@ FindPeaks uses a more complicated approach to fit peaks if '''HighBackground''' 
 Simple fit
 ==========
 In the 'simple fit' mode, the algorithm will make a composite function including
-peak and background function and fit it agains the observed data. 
+peak and background function and fit it against the observed data. 
 
 It works well with good starting values of the peak and background function,
 especially when the peak is significant with low background. 
@@ -79,7 +79,7 @@ High background fit
 
 In the 'high background fit' mode, the background will be removed first;
 then the fitting is focussed on the 'pure' peak function;
-and a composite function is fit agains the original data as the last step. 
+and a composite function is fit against the original data as the last step. 
 
 This approach is developed due to the failure of 'simple fit' mode on the cases
 that background level is much higher than the peak height.  
@@ -91,13 +91,13 @@ Starting values of the peak function
 ====================================
 
 * Peak height is estimated by the maximum value, with background removed, inside the peak range;
-* Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the vlaue specified by user accordin to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positons are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.  
+* Peak position can be set up either to the X value of the maximum Y value in the peak range, or to the value specified by user accordin to user's selection.  For example, in the case of calibrating the offsets of detectors of powder diffractometers, the peak positions are unknown.  Then it is better to use the X value with the maximum Y value as the starting peak centre.  While in the case of striping vanadium peaks, all peaks' centres should be exactly same as the theortical values.  
 
 
 Criteria To Validate Peaks Found
 ================================
 
-FindPeaks finds peaks by fitting a Guassian with background to a certain
+FindPeaks finds peaks by fitting a Gaussian with background to a certain
 range in the input histogram. :ref:`algm-Fit` may not give a correct
 result even if chi^2 is used as criteria alone. Thus some other criteria
 are provided as options to validate the result
