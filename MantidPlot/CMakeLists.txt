@@ -153,10 +153,10 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/lib/src/SymbolDialog.cpp
                    src/lib/src/TextFormatButtons.cpp
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.cpp
-                   src/RecoveryGUIs/ProjectRecoveryModel.cpp
-                   src/RecoveryGUIs/ProjectRecoveryPresenter.cpp
-                   src/RecoveryGUIs/ProjectRecoveryView.cpp
-                   src/RecoveryGUIs/RecoveryFailureView.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryModel.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.cpp
+                   src/ProjectRecoveryGUIs/ProjectRecoveryView.cpp
+                   src/ProjectRecoveryGUIs/RecoveryFailureView.cpp
 )
 
 set ( QTIPLOT_C_SRC src/zlib123/minigzip.c )
@@ -359,10 +359,10 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/include/SymbolDialog.h
                    src/lib/include/TextFormatButtons.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
-                   src/RecoveryGUIs/ProjectRecoveryModel.h
-                   src/RecoveryGUIs/ProjectRecoveryPresenter.h
-                   src/RecoveryGUIs/ProjectRecoveryView.h
-                   src/RecoveryGUIs/RecoveryFailureView.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryModel.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryPresenter.h
+                   src/ProjectRecoveryGUIs/ProjectRecoveryView.h
+                   src/ProjectRecoveryGUIs/RecoveryFailureView.h
 )
 
 set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
@@ -644,6 +644,8 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
                src/Mantid/MantidSampleMaterialDialog.ui
+               src/ProjectRecoveryGUIs/ProjectRecoveryWidget.ui
+               src/ProjectRecoveryGUIs/RecoveryFailure.ui
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
