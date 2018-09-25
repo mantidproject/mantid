@@ -14,15 +14,18 @@ set ( TEST_FILES
 
 set (CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
 
-mtd_add_qt_test_executable (TARGET_NAME MplCppTest
+mtd_add_qt_test_executable (TARGET_NAME MantidQtWidgetsMplCppTest
   QT_VERSION 5
-  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_LIST_DIR}/../inc
+  SRC
+    ${TEST_FILES}
   LINK_LIBS
     PythonInterfaceCore
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
-    MplCpp
+    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES
     GUITests
 )

@@ -25,8 +25,7 @@ set (NOMOC_HEADERS
 find_package ( BoostPython REQUIRED )
 
 # Target
-mtd_add_qt_library (TARGET_NAME MplCpp
-  OUTPUT_NAME MantidQtWidgetsMplCpp
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsMplCpp
   QT_VERSION 5
   SRC ${LIB_SRCS}
   MOC ${MOC_HEADERS}
