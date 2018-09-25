@@ -345,8 +345,8 @@ double GravityCorrection::finalAngle(const double k, size_t i) {
   const double up2 = m_beam2 * tanAngle; // sign
   double upShift = up2 + k * pow(m_beam2 - beamShift, 2.);
   // set sample coordinates in unit m:
-  this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift); // sign
-  this->setCoordinate(m_sample3D, this->m_upDirection, upShift);     // sign
+  this->setCoordinate(m_sample3D, this->m_beamDirection, beamShift);
+  this->setCoordinate(m_sample3D, this->m_upDirection, upShift);
   // calculate final angle
   return sign * atan(2. * k * sqrt(abs(upShift / k)));
 }
@@ -388,12 +388,12 @@ void GravityCorrection::virtualInstrument() {
         detectorInfo.setPosition(i, detectorInfo.position(i) - samplePos);
     }
 
-    const double sourceY =
-        this->coordinate(sourceName, this->m_upDirection, ws->getInstrument());
+    const double sampleY =
+        this->coordinate(sampleName, this->m_upDirection, ws->getInstrument());
     // check if the instrument is rotated: then the up direction and horizontal
     // directions are not zero: -> rotate instrument (update positions)
     double tanAngle{0.}; // will hold tan(rotation angle)
-    if (sourceY != 0.) {
+    if (sampleY != 0.) {
       // calculate vertical rotation angle:
       /*         ^ y
        *         |   /|
@@ -401,7 +401,7 @@ void GravityCorrection::virtualInstrument() {
        *         | /a |
        *         |/___|____> z
        */
-      tanAngle = sourceY / this->coordinate(sourceName, m_beamDirection,
+      tanAngle = sampleY / this->coordinate(sourceName, m_beamDirection,
                                             ws->getInstrument());
       auto &componentInfo = ws->mutableComponentInfo();
       for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
@@ -429,9 +429,9 @@ void GravityCorrection::virtualInstrument() {
         detectorInfo.setRotation(i, detectorInfo.rotation(i) * rot);
       }
     }
-    const double sourceX = this->coordinate(
-        sourceName, this->m_horizontalDirection, ws->getInstrument());
-    if (sourceX != 0.) {
+    const double sampleX = this->coordinate(
+        sampleName, this->m_horizontalDirection, ws->getInstrument());
+    if (sampleX != 0.) {
       // calculate horizontal rotation angle
       /*         ^ z
        *         |___
@@ -439,7 +439,7 @@ void GravityCorrection::virtualInstrument() {
        *         |a/
        *         |/_______> x
        */
-      tanAngle = sourceX / this->coordinate(sourceName, this->m_beamDirection,
+      tanAngle = sampleX / this->coordinate(sampleName, this->m_beamDirection,
                                             ws->getInstrument());
       auto &componentInfo = ws->mutableComponentInfo();
       for (auto compit = comps.begin(); compit != comps.end(); ++compit) {
@@ -522,7 +522,6 @@ size_t GravityCorrection::spectrumNumber(const double angle,
     double signedNextAngle = spectrumInfo.signedTwoTheta(it->second) / 2;
     tol = 0.5 * (signedNextAngle - signedCurrentAngle);
   }
-  tol = 0.; // crazy
   while (this->m_smallerThan((*it++).first + tol, angle) &&
          (it != this->m_finalAngles.end()))
     n = it->second;
@@ -641,14 +640,16 @@ void GravityCorrection::exec() {
       // straight path from virtual sample (0, 0, 0) to updated detector
       // position:
       const std::set<detid_t> dets = this->m_ws->getSpectrum(j).getDetectorIDs();
+
       V3D detPos;
       if (dets.size() == 1)
-        detPos = this->m_virtualInstrument->getDetector(*dets.cbegin())->getRelativePos();
+        detPos = this->m_virtualInstrument->getDetector(*dets.cbegin())->getPos();
       else if (dets.size() > 1) {
         g_log.information("Found grouped detectors ... skip for the moment");
       }
       else
         continue;
+
       double detZ = this->coordinate(detPos, m_beamDirection);
       // possible trajectory from sample to detector, almost equals detZ
       double s2 = this->parabolaArcLength(2 * k * detZ) / (2 * k);
@@ -658,9 +659,9 @@ void GravityCorrection::exec() {
       const double offset =
           this->coordinate(this->m_sample3D, this->m_beamDirection);
 
-      // this value should be nearly one
-      const double one = (detZ - offset) / (s * cos(angle));
-      outWS->mutableX(j)[i_tofit] = one * *tofit; // mu sec
+      // this value should be close to one
+      const double cOne = (detZ - offset) / (s * cos(angle));
+      outWS->mutableX(j)[i_tofit] = cOne * *tofit; // mu sec
 
       // need to set the counts to spectrum according to finalAngle & *tofit
       outWS->mutableY(j)[i_tofit] += y[i_tofit];

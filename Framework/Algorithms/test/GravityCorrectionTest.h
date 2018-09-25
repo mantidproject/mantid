@@ -334,8 +334,7 @@ public:
     Mantid::API::MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = lAlg->getProperty("OutputWorkspace"))
     GravityCorrection gc00;
-    auto corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace",
-                                                "slit2", "slit3");
+    auto corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace");
     // no loss of counts
     double totalCounts{0.}, totalCountsCorrected{0.};
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
