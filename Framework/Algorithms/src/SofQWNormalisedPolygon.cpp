@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAlgorithms/SofQW.h"
