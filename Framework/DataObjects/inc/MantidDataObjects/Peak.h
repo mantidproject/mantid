@@ -105,7 +105,7 @@ public:
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
-  void setIntHKL(const Mantid::Kernel::V3D &HKL) override;
+  void setIntHKL(const Mantid::Kernel::V3D HKL) override;
   void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
@@ -154,7 +154,7 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setIntMNP(const Mantid::Kernel::V3D modulatedStructure) override;
+  void setIntMNP(const Mantid::Kernel::V3D MNP) override;
   Mantid::Kernel::V3D getIntMNP() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
@@ -251,12 +251,10 @@ private:
 
   // keep peak number
   int m_peakNumber;
-  Mantid::Kernel::V3D m_modulatedStructure;
+  Mantid::Kernel::V3D m_IntHKL;
+  Mantid::Kernel::V3D m_IntMNP;
 
   /// integer HKL of the peak
-  int m_intH;
-  int m_intK;
-  int m_intL;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

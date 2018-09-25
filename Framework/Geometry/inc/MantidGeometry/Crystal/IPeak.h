@@ -45,7 +45,7 @@ public:
   virtual void setL(double m_L) = 0;
   virtual void setHKL(double H, double K, double L) = 0;
   virtual void setHKL(const Mantid::Kernel::V3D &HKL) = 0;
-  virtual void setIntHKL(const Mantid::Kernel::V3D &HKL) = 0;
+  virtual void setIntHKL(const Mantid::Kernel::V3D HKL) = 0;
   virtual Mantid::Kernel::V3D getDetectorPosition() const = 0;
   virtual Mantid::Kernel::V3D getDetectorPositionNoCheck() const = 0;
 
@@ -85,7 +85,7 @@ public:
   virtual void setPeakNumber(int m_PeakNumber) = 0;
 
   virtual Mantid::Kernel::V3D getIntMNP() const = 0;
-  virtual void setIntMNP(const Mantid::Kernel::V3D m_modStru) = 0;
+  virtual void setIntMNP(const Mantid::Kernel::V3D MNP) = 0;
 
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(
