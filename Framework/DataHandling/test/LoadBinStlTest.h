@@ -1,3 +1,6 @@
+#ifndef LOAD_BINSTL_TEST_H_
+#define LOAD_BINSTL_TEST_H_
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
@@ -39,8 +42,8 @@ void test_cube() {
     TS_ASSERT_EQUALS(cube->numberOfTriangles(), 12);
     TS_ASSERT_DELTA(cube->volume(), 3000, 0.001);
   }
-  //test removed because currently no cylinderBin.stl
-  void xtest_cylinder() {
+
+  void test_cylinder() {
     std::string path = FileFinder::Instance().getFullPath("cylinderBin.stl");
     std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
     auto cylinder = Loader->readStl();
@@ -59,16 +62,19 @@ void test_cube() {
     TS_ASSERT_EQUALS(tube->numberOfTriangles(), 2160);
     TS_ASSERT_DELTA(tube->volume(), 7068, 1);
   }  
-
+  //check that isBinaryStl returns false if the file contains an incomplete vertex
   void test_fail_invalid_vertex() {
     std::string path = FileFinder::Instance().getFullPath("invalid_vertexBin.stl");
     std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
     TS_ASSERT(!(Loader->isBinarySTL()));
   }
-
+  //check that isBinaryStl returns false if the file contains an incomplete triangle
   void test_fail_invalid_triangle() {
     std::string path = FileFinder::Instance().getFullPath("invalid_triangleBin.stl");
     std::unique_ptr<LoadBinStl> Loader = std::make_unique<LoadBinStl>(path);
     TS_ASSERT(!(Loader->isBinarySTL()));
   }
 };
+//add tests for isBinaryStl e.g. attempting to load an ascii .stl
+
+#endif /* LOAD_BINSTL_TEST_H_ */
