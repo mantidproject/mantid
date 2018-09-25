@@ -65,11 +65,6 @@ public:
   getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
-  /// Dialogs to show the user warnings/info
-  void giveUserCritical(const std::string &prompt,
-                        const std::string &title) override;
-  void giveUserInfo(const std::string &prompt,
-                    const std::string &title) override;
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) const override;
 

@@ -51,10 +51,12 @@ void QtReflMainWindowView::initLayout() {
   auto defaultInstrumentIndex = 0;
   // TODO: Look this up properly by comparing the default instrument to the values in the list;
   auto searcher = boost::shared_ptr<IReflSearcher>();
+  auto messageHandler = this;
 
   auto makeRunsPresenter = RunsPresenterFactory(
       std::move(makeRunsTablePresenter), std::move(makeWorkspaceNames),
-      thetaTolerance, instruments, defaultInstrumentIndex, searcher);
+      thetaTolerance, instruments, defaultInstrumentIndex, messageHandler,
+      searcher);
 
   auto makeEventPresenter = EventPresenterFactory();
   auto makeSettingsPresenter = SettingsPresenterFactory();
@@ -112,6 +114,20 @@ void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
   } else {
     event->ignore();
   }
+}
+
+void QtReflMainWindowView::giveUserCritical(const std::string &prompt,
+                                            const std::string &title) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+void QtReflMainWindowView::giveUserInfo(const std::string &prompt,
+                                        const std::string &title) {
+  QMessageBox::information(this, QString::fromStdString(title),
+                           QString::fromStdString(prompt), QMessageBox::Ok,
+                           QMessageBox::Ok);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

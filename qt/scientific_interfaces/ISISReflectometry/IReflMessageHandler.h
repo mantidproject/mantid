@@ -1,22 +1,13 @@
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H
+#ifndef MANTID_ISISREFLECTOMETRY_IREFLMESSAGEHANDLER_H
+#define MANTID_ISISREFLECTOMETRY_IREFLMESSAGEHANDLER_H
 
 #include <string>
-#include "IReflRunsTabView.h"
-#include "IReflSettingsTabView.h"
-#include "GUI/Event/IEventView.h"
-#include "GUI/Experiment/IExperimentView.h"
-#include "IReflSaveTabView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+/** @class IReflMessageHandler
 
-/** @class IReflBatchView
-
-IReflBatchView is the interface defining the functions that the main
-window view needs to implement. It is empty and not necessary at the moment, but
-can be used in the future if widgets common to all tabs are added, for instance,
-the help button.
+IReflMessageHandler is an interface for passing messages to the user
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -39,15 +30,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflBatchView {
+class IReflMessageHandler {
 public:
-  virtual IReflRunsTabView* runs() const = 0;
-  virtual IEventView* eventHandling() const = 0;
-  virtual IReflSettingsTabView* settings() const = 0;
-  virtual IReflSaveTabView* save() const = 0;
-  virtual IExperimentView* experiment() const = 0;
-  virtual ~IReflBatchView() = default;
+  virtual ~IReflMessageHandler(){};
+  virtual void giveUserCritical(const std::string &prompt,
+                                const std::string &title) = 0;
+  virtual void giveUserInfo(const std::string &prompt,
+                            const std::string &title) = 0;
 };
-}
-}
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLBATCHVIEW_H */
+} // namespace CustomInterfaces
+} // namespace MantidQt
+#endif

@@ -52,6 +52,7 @@ set ( INC_FILES
     IReflBatchPresenter.h
     IReflMainWindowView.h
     IReflBatchView.h
+    IReflMessageHandler.h
     IReflRunsTabPresenter.h
     IReflRunsTabView.h
     IReflSaveTabPresenter.h

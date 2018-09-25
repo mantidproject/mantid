@@ -1,11 +1,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 #define MANTID_ISISREFLECTOMETRY_QTREFLMAINWINDOWVIEW_H
 
-#include "IReflMainWindowView.h"
-#include "MantidQtWidgets/Common/UserSubWindow.h"
-#include "ui_ReflMainWindowWidget.h"
 #include "IReflMainWindowPresenter.h"
+#include "IReflMainWindowView.h"
+#include "IReflMessageHandler.h"
+#include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ReflMainWindowPresenter.h"
+#include "ui_ReflMainWindowWidget.h"
 
 #include <QCloseEvent>
 
@@ -39,7 +40,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
-                             public IReflMainWindowView {
+                             public IReflMainWindowView,
+                             public IReflMessageHandler {
   Q_OBJECT
 public:
   explicit QtReflMainWindowView(QWidget *parent = nullptr);
@@ -55,6 +57,11 @@ public:
 
   IReflBatchView* newBatch() override;
   void removeBatch(int batchIndex) override;
+
+  void giveUserCritical(const std::string &prompt,
+                        const std::string &title) override;
+  void giveUserInfo(const std::string &prompt,
+                    const std::string &title) override;
 
 public slots:
   void helpPressed();

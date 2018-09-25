@@ -27,6 +27,7 @@ namespace CustomInterfaces {
 
 // Forward decs
 class IReflRunsTabView;
+class IReflMessageHandler;
 class IReflSearcher;
 class ReflSearchModel;
 
@@ -76,6 +77,7 @@ public:
                        double thetaTolerance,
                        std::vector<std::string> const &instruments,
                        int defaultInstrumentIndex,
+                       IReflMessageHandler *messageHandler,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
 
@@ -113,6 +115,8 @@ private:
   std::unique_ptr<RunsTablePresenter> m_tablePresenter;
   /// The main presenter
   IReflBatchPresenter *m_mainPresenter;
+  /// The message reporting implementation
+  IReflMessageHandler *m_messageHandler;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
   /// Whether the instrument has been changed before a search was made with it

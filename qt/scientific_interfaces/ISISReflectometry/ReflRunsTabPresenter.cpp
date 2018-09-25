@@ -1,5 +1,6 @@
 #include "ReflRunsTabPresenter.h"
 #include "IReflMainWindowPresenter.h"
+#include "IReflMessageHandler.h"
 #include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
@@ -63,12 +64,13 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
     RunsTablePresenterFactory makeRunsTablePresenter,
     WorkspaceNamesFactory workspaceNamesFactory, double thetaTolerance,
     std::vector<std::string> const &instruments, int defaultInstrumentIndex,
+    IReflMessageHandler *messageHandler,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_makeRunsTablePresenter(makeRunsTablePresenter),
       m_workspaceNamesFactory(workspaceNamesFactory), m_mainPresenter(nullptr),
-      m_searcher(searcher), m_instrumentChanged(false),
-      m_thetaTolerance(thetaTolerance) {
+      m_messageHandler(messageHandler), m_searcher(searcher),
+      m_instrumentChanged(false), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -467,12 +469,12 @@ void ReflRunsTabPresenter::changeGroup() { updateWidgetEnabledState(); }
 
 void ReflRunsTabPresenter::handleError(const std::string &message,
                                        const std::exception &e) {
-  m_mainPresenter->giveUserCritical(message + ": " + std::string(e.what()),
-                                    "Error");
+  m_messageHandler->giveUserCritical(message + ": " + std::string(e.what()),
+                                     "Error");
 }
 
 void ReflRunsTabPresenter::handleError(const std::string &message) {
-  m_mainPresenter->giveUserCritical(message, "Error");
+  m_messageHandler->giveUserCritical(message, "Error");
 }
 
 std::string ReflRunsTabPresenter::liveDataReductionAlgorithm() {

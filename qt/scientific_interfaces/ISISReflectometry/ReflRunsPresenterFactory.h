@@ -20,18 +20,20 @@ public:
                        double thetaTolerance,
                        std::vector<std::string> instruments,
                        int defaultInstrumentIndex,
+                       IReflMessageHandler *messageHandler,
                        boost::shared_ptr<IReflSearcher> searcher)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)),
         m_workspaceNamesFactory(std::move(workspaceNamesFactory)),
         m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)),
         m_defaultInstrumentIndex(std::move(defaultInstrumentIndex)),
-        m_searcher(std::move(searcher)) {}
+        m_messageHandler(messageHandler), m_searcher(std::move(searcher)) {}
 
   std::unique_ptr<IReflRunsTabPresenter> make(IReflRunsTabView *view) {
     return std::make_unique<ReflRunsTabPresenter>(
         view, view, m_runsTablePresenterFactory, m_workspaceNamesFactory,
-        m_thetaTolerance, m_instruments, m_defaultInstrumentIndex, m_searcher);
+        m_thetaTolerance, m_instruments, m_defaultInstrumentIndex,
+        m_messageHandler, m_searcher);
   }
 
 private:
@@ -40,6 +42,7 @@ private:
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
   int m_defaultInstrumentIndex;
+  IReflMessageHandler *m_messageHandler;
   boost::shared_ptr<IReflSearcher> m_searcher;
 };
 }

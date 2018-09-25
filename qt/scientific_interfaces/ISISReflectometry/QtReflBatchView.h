@@ -50,10 +50,6 @@ public:
   IReflSettingsTabView *settings() const override;
   IReflSaveTabView *save() const override;
   IExperimentView* experiment() const override;
-  void giveUserCritical(const std::string &prompt,
-                        const std::string &title) override;
-  void giveUserInfo(const std::string &prompt,
-                    const std::string &title) override;
 
 private:
   void initLayout();
