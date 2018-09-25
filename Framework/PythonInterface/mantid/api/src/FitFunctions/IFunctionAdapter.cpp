@@ -1,6 +1,6 @@
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
-#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
+#include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -12,9 +12,9 @@
 namespace Mantid {
 namespace PythonInterface {
 using API::IFunction;
-using PythonInterface::Environment::UndefinedAttributeError;
-using PythonInterface::Environment::callMethod;
-using PythonInterface::Environment::callMethodNoCheck;
+using PythonInterface::UndefinedAttributeError;
+using PythonInterface::callMethod;
+using PythonInterface::callMethodNoCheck;
 using namespace boost::python;
 
 namespace {
@@ -74,11 +74,11 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
 IFunctionAdapter::IFunctionAdapter(PyObject *self, std::string functionMethod,
                                    std::string derivMethod)
     : m_self(self), m_functionName(std::move(functionMethod)),
-      m_derivName(derivMethod), m_derivOveridden(Environment::typeHasAttribute(
-                                    self, m_derivName.c_str())) {
-  if (!Environment::typeHasAttribute(self, "init"))
+      m_derivName(derivMethod),
+      m_derivOveridden(typeHasAttribute(self, m_derivName.c_str())) {
+  if (!typeHasAttribute(self, "init"))
     throw std::runtime_error("Function does not define an init method.");
-  if (!Environment::typeHasAttribute(self, m_functionName.c_str()))
+  if (!typeHasAttribute(self, m_functionName.c_str()))
     throw std::runtime_error("Function does not define a " + m_functionName +
                              " method.");
 }
@@ -249,7 +249,7 @@ void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
   using namespace Converters;
   // GIL must be held while numpy wrappers are destroyed as they access Python
   // state information
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
 
   Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
   PyObject *xvals =
@@ -267,7 +267,7 @@ void IFunctionAdapter::evaluateFunction(double *out, const double *xValues,
   Py_DECREF(xvals);
   if (PyErr_Occurred()) {
     Py_XDECREF(result);
-    throw Environment::PythonException();
+    throw PythonException();
   }
   if (PyArray_Check(result)) {
     auto nparray = reinterpret_cast<PyArrayObject *>(result);
@@ -307,7 +307,7 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
   using namespace Converters;
   // GIL must be held while numpy wrappers are destroyed as they access Python
   // state information
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
 
   Py_intptr_t dims[1] = {static_cast<Py_intptr_t>(nData)};
   PyObject *xvals =
@@ -322,7 +322,7 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out,
   PyObject_CallMethod(getSelf(), const_cast<char *>(m_derivName.c_str()),
                       const_cast<char *>("(OO)"), xvals, jacobian);
   if (PyErr_Occurred())
-    throw Environment::PythonRuntimeError();
+    throw PythonRuntimeError();
 }
 } // namespace PythonInterface
 } // namespace Mantid

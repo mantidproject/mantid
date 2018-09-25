@@ -33,7 +33,7 @@ Note that even for real input data the reconstructed image can be complex, which
 imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
 changed by setting the input property *ComplexImage* to *False*. Note that the algorithm will fail to converge
 if the image is complex (i.e. the data does not satisfy Friedel's law) and this option is set to *False*. 
-For this reason, it is recomended to use the default when no prior knowledge is available. 
+For this reason, it is recommended to use the default when no prior knowledge is available. 
 
 The entropy is defined on the image :math:`\{x_j\}` as:
 
@@ -45,7 +45,7 @@ or
 .. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
 
 where :math:`A` is a constant and the formula which is used depends on the input property *PositiveImage*: when it is
-set to *False* the first equation will be applied, whereas the latter expresion will be used if this property
+set to *False* the first equation will be applied, whereas the latter expression will be used if this property
 is set to *True*. The sensitive of the reconstructed image to reconstructed
 image will vary depending on the data. In general a smaller value would preduce a
 sharper image. See section 4.7 in Ref. [1] for recommended strategy to selected :math:`A`.

@@ -58,8 +58,7 @@ getSaveFileName(QWidget *parent = nullptr,
 
 /**
  * For file dialogs. This will add the selected extension if an extension
- * doesn't
- * already exist.
+ * doesn't already exist.
  */
 DLLExport QString addExtension(const QString &filename,
                                const QString &selectedFilter);
@@ -69,11 +68,16 @@ DLLExport QString getFilter(const Mantid::Kernel::Property *baseProp);
 /** For file dialogs
  *
  * @param exts :: vector of extensions
- * @param defaultExt :: default extension to use
  * @return a string that filters files by extenstions
  */
-DLLExport QString getFilter(const std::vector<std::string> &exts,
-                            const std::string &defaultExt);
+DLLExport QString getFilter(const std::vector<std::string> &exts);
+
+/** Format extension into expected form (*.ext)
+ *
+ * @param extension :: extension to be formatted
+ * @return a QString of the expected form
+ */
+DLLExport QString formatExtension(const std::string &extension);
 
 DLLExport QString getCaption(const std::string &dialogName,
                              const Mantid::Kernel::Property *prop);

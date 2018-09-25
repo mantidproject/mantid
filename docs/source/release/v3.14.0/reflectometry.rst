@@ -44,6 +44,11 @@ Liquids Reflectometer
 
 - Default x-direction pixel range for the scaling factor calculation is now set to the full width of the detector as opposed to a restricted guess.
 
+Magnetism Reflectometer
+-----------------------
+
+- Added option to overwrite :literal:`DIRPIX` and :literal:`DANGLE0`.
+
 ISIS Reflectometry Interface
 ----------------------------
 

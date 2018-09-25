@@ -2,7 +2,7 @@ digraph SofQWMoments {
   label="SofQWMoments Flowchart"
   $global_style
 
-  subgraph descision {
+  subgraph decision {
     $decision_style
     NoScaleFactor [label="ScaleFactor is 1?"]
     Save [label="Save?"]

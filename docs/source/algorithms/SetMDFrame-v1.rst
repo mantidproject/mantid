@@ -28,7 +28,7 @@ a Numpy-style array selection.
 Usage
 -----
 
-**Example - Sample useage of SetMDFrame**
+**Example - Sample usage of SetMDFrame**
 
 .. testcode:: SetMDFrameExample
 
