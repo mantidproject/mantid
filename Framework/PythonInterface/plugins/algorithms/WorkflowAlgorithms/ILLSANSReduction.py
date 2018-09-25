@@ -324,7 +324,7 @@ class ILLSANSReduction(DataProcessorAlgorithm):
                                                      NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
 
         if mtd[ws].getInstrument().getName() == 'D33':
-            CalculateQMinMax(Workspace=ws, ComponentNames=['back_detector'])
+            CalculateQMinMax(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
         else:
             CalculateQMinMax(Workspace=ws)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])

@@ -147,7 +147,7 @@ void CalculateQMinMax::exec() {
         dets.emplace_back(det);
       }
       if (!dets.empty()) {
-        detIDs.resize(dets.size());
+        detIDs.reserve(dets.size());
         for (const auto &det : dets) {
           detIDs.emplace_back(det->getID());
         }

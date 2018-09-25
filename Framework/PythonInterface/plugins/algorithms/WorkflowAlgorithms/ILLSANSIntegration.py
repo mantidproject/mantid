@@ -196,7 +196,9 @@ class ILLSANSIntegration(DataProcessorAlgorithm):
             else:
                 self._deltaQ = MonochromaticScalarQCartesian(wavelength, delta_wavelength, x1, y1, x2, y2, x3, y3, l1, l2)
         else:
-            r1 = float(source_aperture) * 0.001
+            pos1 = source_aperture.find('(') + 1
+            pos3 = source_aperture.find(')')
+            r1 = float(source_aperture[pos1:pos3]) * 0.001
             r2 = run.getLogData('Beam.sample_ap_x_or_diam').value * 0.001
             if is_tof:
                 raise RuntimeError('TOF resolution is not supported yet')
