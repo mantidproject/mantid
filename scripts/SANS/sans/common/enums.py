@@ -283,7 +283,7 @@ class FitType(object):
 #  SampleShape
 # --------------------------
 @string_convertible
-@serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
+@serializable_enum("Cylinder", "FlatPlate", "Disc")
 class SampleShape(object):
     """
     Defines the sample shape types
@@ -371,6 +371,15 @@ class FindDirectionEnum(object):
 @string_convertible
 @serializable_enum("Horizontal", "Vertical", "Time")
 class IntegralEnum(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
+
+
+@string_convertible
+@serializable_enum("Unprocessed", "Processed", "Error")
+class RowState(object):
     """
     Defines the entries of a batch reduction file.
     """

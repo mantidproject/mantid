@@ -112,7 +112,10 @@ public:
                                   bool skipError = false) const;
 
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(const HistogramData::BinEdges &x);
+  void setAllX(const HistogramData::BinEdges &x) override;
+
+  // Update all X values to fit around all events
+  void resetAllXToSingleBin() override;
 
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;

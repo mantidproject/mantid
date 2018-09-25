@@ -12,7 +12,9 @@
 		<parameter name="l2" type="string">
 			<value val="2.0" />
 		</parameter>
-
+		<parameter name="components-for-backgrounds" type="string">
+			<value val="top_bank/box_1, top_bank/box_2, top_bank/box_3, top_bank/box_4, top_bank/box_5, top_bank/box_6, top_bank/box_7, top_bank/box_8, top_bank/box_9, top_bank/box_10, top_bank/box_11, middle_bank/box_1, middle_bank/box_2, middle_bank/box_3, middle_bank/box_4, middle_bank/box_5, middle_bank/box_6, middle_bank/box_7, middle_bank/box_8, middle_bank/box_9, bottom_bank/box_1, bottom_bank/box_2, bottom_bank/box_3, bottom_bank/box_4, bottom_bank/box_5, bottom_bank/box_6, bottom_bank/box_7, bottom_bank/box_8, bottom_bank/box_9, bottom_bank/box_10, bottom_bank/box_11, rosace/sector_0, rosace/sector_1, rosace/sector_2, rosace/sector_3, rosace/sector_4, rosace/sector_5, rosace/sector_6, rosace/sector_7" />
+		</parameter>
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
 			<value val="397" />

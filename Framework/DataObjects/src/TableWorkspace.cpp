@@ -86,6 +86,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
     ss << e.what() << '\n';
     throw std::invalid_argument(ss.str());
   }
+  modified();
   return c;
 }
 
@@ -153,6 +154,7 @@ void TableWorkspace::removeColumn(const std::string &name) {
     }
     m_columns.erase(ci);
   }
+  modified();
 }
 
 /** @param index :: Points where to insert the new row.
@@ -164,6 +166,7 @@ size_t TableWorkspace::insertRow(size_t index) {
   for (auto &column : m_columns)
     insertInColumn(column.get(), index);
   ++m_rowCount;
+  modified();
   return index;
 }
 
@@ -178,6 +181,7 @@ void TableWorkspace::removeRow(size_t index) {
   for (auto &column : m_columns)
     removeFromColumn(column.get(), index);
   --m_rowCount;
+  modified();
 }
 
 std::vector<std::string> TableWorkspace::getColumnNames() const {
@@ -196,6 +200,7 @@ void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
     ss << "Column with name " << column->name() << " already exists.\n";
     throw std::invalid_argument(ss.str());
   } else {
+    modified();
     m_columns.push_back(column);
   }
 }
@@ -272,6 +277,7 @@ void TableWorkspace::sort(std::vector<std::pair<std::string, bool>> &criteria) {
   for (size_t i = 0; i < nCols; ++i) {
     getColumn(i)->sortValues(indexVec);
   }
+  modified();
 }
 
 /// Clone the workspace keeping only selected columns.

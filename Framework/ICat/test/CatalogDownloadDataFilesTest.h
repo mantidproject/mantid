@@ -3,6 +3,7 @@
 
 #include "ICatTestHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogGetDataFiles.h"
@@ -18,34 +19,21 @@
 using namespace Mantid;
 using namespace Mantid::ICat;
 using namespace Mantid::API;
+
 class CatalogDownloadDataFilesTest : public CxxTest::TestSuite {
 public:
-  /** Ping the  download.mantidproject.org and
-   * skip all tests if internet/server is down.
-   */
-  bool skipTests() override {
-#ifdef _WIN32
-    // I don't know how to get exit status from windows.
-    return false;
-#else
-    // Ping once, with a 1 second wait.
-    std::string cmdstring = "ping download.mantidproject.org -c 1 -w 1";
-
-    int status;
-    status = system(cmdstring.c_str());
-    if (status == -1) {
-      // Some kind of system() failure
-    } else
-      // Get the exit code
-      status = WEXITSTATUS(status);
-
-    if (status != 0) {
-      std::cout << "Skipping test since '" << cmdstring << "' FAILED!\n";
-      return true;
-    }
-    return false;
-#endif
+  // This means the constructor isn't called when running other tests
+  static CatalogDownloadDataFilesTest *createSuite() {
+    return new CatalogDownloadDataFilesTest();
   }
+  static void destroySuite(CatalogDownloadDataFilesTest *suite) {
+    delete suite;
+  }
+
+  /// Skip all unit tests if ICat server is down
+  bool skipTests() override { return ICatTestHelper::skipTests(); }
+
+  CatalogDownloadDataFilesTest() { FrameworkManager::Instance(); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(downloadobj.initialize());

@@ -105,6 +105,14 @@ public:
     return *this;
   }
 
+  bool operator==(const FixedLengthVector<T> &rhs) const {
+    return this->rawData() == rhs.rawData();
+  }
+
+  bool operator!=(const FixedLengthVector<T> &rhs) const {
+    return !(*this == rhs);
+  }
+
   bool empty() const { return m_data.empty(); }
   size_t size() const { return m_data.size(); }
 

@@ -7,7 +7,7 @@ digraph PDToGUDRUN {
     InputWorkspace
   }
 
-  subgraph algoritms {
+  subgraph algorithms {
     $algorithm_style
     loadChar          [label="PDLoadCharacterizations v1"]
     loadEvent         [label="LoadEventAndCompress v1"]

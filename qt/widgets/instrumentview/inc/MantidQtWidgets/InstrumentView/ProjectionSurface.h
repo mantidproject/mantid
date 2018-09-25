@@ -5,7 +5,6 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
-#include "MantidQtWidgets/Common/WidgetDllOption.h"
 
 #include "InstrumentActor.h"
 #include "PeakOverlay.h"

@@ -43,6 +43,9 @@ class DockWidget(QtGui.QWidget):
 
         self.dockWidget.setLayout(QHbox)
 
+    def loadFromProject(self, project):
+        self.label.updateLabel(project)
+
     def handleButton(self, message):
         self.label.updateLabel(message)
 

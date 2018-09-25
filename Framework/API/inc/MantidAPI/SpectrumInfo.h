@@ -22,7 +22,7 @@ class Instrument;
 class ParameterMap;
 } // namespace Geometry
 namespace API {
-
+class SpectrumInfoIterator;
 class ExperimentInfo;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
@@ -98,6 +98,9 @@ public:
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   double l1() const;
+
+  SpectrumInfoIterator begin() const;
+  SpectrumInfoIterator end() const;
 
   friend class ExperimentInfo;
 

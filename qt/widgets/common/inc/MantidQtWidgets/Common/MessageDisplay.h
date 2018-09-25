@@ -42,7 +42,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MessageDisplay : public QWidget,
 public:
   // Configurable interface
   void readSettings(const QSettings &storage) override;
-  void writeSettings(QSettings *storage) override;
+  void writeSettings(QSettings &storage) const override;
 
 public:
   /// Default constructor with optional parent

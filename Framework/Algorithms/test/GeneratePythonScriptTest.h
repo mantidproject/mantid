@@ -4,13 +4,18 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidAlgorithms/GeneratePythonScript.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/Power.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/make_unique.h"
@@ -23,6 +28,8 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 class NonExistingAlgorithm : public Algorithm {
 
@@ -115,6 +122,9 @@ public:
     file.close();
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
+
+    // Clean the ADS
+    Mantid::API::AnalysisDataService::Instance().clear();
   }
 
   void create_test_workspace(const std::string &wsName) {
@@ -161,6 +171,21 @@ public:
         API::AlgorithmHistory(pAlg.get())));
 
     pAlg.reset(nullptr);
+  }
+
+  MatrixWorkspace_sptr createSimpleWorkspace(const std::vector<double> xData,
+                                             const std::vector<double> yData,
+                                             const std::vector<double> eData,
+                                             const int nSpec = 1) {
+    Workspace2D_sptr outputWorkspace = create<DataObjects::Workspace2D>(
+        nSpec, Mantid::HistogramData::Histogram(
+                   Mantid::HistogramData::Points(xData.size())));
+    for (int i = 0; i < nSpec; ++i) {
+      outputWorkspace->mutableY(i) = yData;
+      outputWorkspace->mutableE(i) = eData;
+      outputWorkspace->mutableX(i) = xData;
+    }
+    return outputWorkspace;
   }
 };
 
