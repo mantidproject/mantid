@@ -34,6 +34,7 @@
 %UnitCode
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+GNU_DIAG_OFF("cast-align")
 GNU_DIAG_OFF("conversion")
 GNU_DIAG_OFF("suggest-override")
 %End
