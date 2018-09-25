@@ -415,6 +415,7 @@ set ( TEST_FILES
 	LoadAscii2Test.h
 	LoadAsciiTest.h
 	LoadBBYTest.h
+	LoadBinStlTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
