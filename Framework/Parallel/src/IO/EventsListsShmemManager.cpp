@@ -21,7 +21,6 @@ EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
     throw std::invalid_argument("No event lists found.");
 }
 
-
 EventsListsShmemManager::EventsListsShmemManager(const std::string &segmentName,
                                                  const std::string &elName, int)
     : m_segmentName(segmentName), m_chunksName(elName), m_chunks(nullptr) {}

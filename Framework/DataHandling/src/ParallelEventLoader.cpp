@@ -111,7 +111,8 @@ void ParallelEventLoader::loadMPI(DataObjects::EventWorkspace &ws,
                                   std::move(eventLists));
 }
 
-/// Load events from given banks into given EventWorkspace using boost::interprocess.
+/// Load events from given banks into given EventWorkspace using
+/// boost::interprocess.
 void ParallelEventLoader::loadMultiProcess(
     DataObjects::EventWorkspace &ws, const std::string &filename,
     const std::string &groupName, const std::vector<std::string> &bankNames,
