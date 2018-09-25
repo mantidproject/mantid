@@ -15,7 +15,7 @@ http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd and
 creates output workspace. CANSAS has a Wiki page at
 http://www.smallangles.net/wgwiki/index.php/canSAS_Working_Groups
 
-If the file contains mulitple SASentry elements a workspace group will
+If the file contains multiple SASentry elements a workspace group will
 be created and each SASentry will be one workspace in the group. Loading
 multiple SASdata elements is not supported.
 

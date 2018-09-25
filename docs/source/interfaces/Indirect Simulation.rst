@@ -35,7 +35,7 @@ MolDyn
 The MolDyn interface is used to import simulation data created using nMOLDYN (by
 using the :ref:`MolDyn <algm-MolDyn>` algorithm), tab operates on either *.dat*
 or *.cdl* files for nMOLDYN 3 or a directory containing the files extracted from
-the *.tar* archive crated by nMOLDYN 4.
+the *.tar* archive created by nMOLDYN 4.
 
 Options
 ~~~~~~~

@@ -19,7 +19,7 @@ Inputs
 The inputs required by algorithm *ConvertHB3AExperimentInfo* are the experiment number, scan numbers
 and selected Pt. numbers.
 By these parameters, the algorithm can determine the names of the data files and generate a list of
-detectors for downstream algorithm to create virutal instrument.
+detectors for downstream algorithm to create virtual instrument.
 
 
 OutputWorkspaces

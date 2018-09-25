@@ -290,9 +290,10 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
 
     if binning != "":
         aux_hist = Rebin(ws_event, binning, False)
-        Rebin(ws_monitor, binning, False, OutputWorkspace=name)
+        Rebin(InputWorkspace=ws_monitor, Params=binning, PreserveEvents=False, OutputWorkspace=name)
     else:
-        aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
+        aux_hist = RebinToWorkspace(WorkspaceToRebin=ws_event, WorkspaceToMatch=ws_monitor,
+                                    PreserveEvents=False)
         ws_monitor.clone(OutputWorkspace=name)
 
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)

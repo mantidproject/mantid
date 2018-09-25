@@ -21,16 +21,15 @@
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
-#include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/WrapperHelpers.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/class.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
-namespace Environment {
 
 /// Defines an exception for an undefined attribute
 struct UndefinedAttributeError {
@@ -79,7 +78,7 @@ ReturnType callMethodImpl(PyObject *obj, const char *methodName,
 template <typename ReturnType, typename... Args>
 ReturnType callMethodNoCheck(PyObject *obj, const char *methodName,
                              const Args &... args) {
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   return detail::callMethodImpl<ReturnType, Args...>(obj, methodName, args...);
 }
 
@@ -97,14 +96,13 @@ template <typename ReturnType, typename... Args>
 ReturnType callMethod(PyObject *obj, const char *methodName,
                       const Args &... args) {
   GlobalInterpreterLock gil;
-  if (Environment::typeHasAttribute(obj, methodName)) {
+  if (typeHasAttribute(obj, methodName)) {
     return detail::callMethodImpl<ReturnType, Args...>(obj, methodName,
                                                        args...);
   } else {
     throw UndefinedAttributeError();
   }
 }
-} // namespace Environment
 } // namespace PythonInterface
 } // namespace Mantid
 

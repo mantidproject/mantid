@@ -41,7 +41,7 @@ MLZ & TOFTOF
 
 - A workflow gui for TOFTOF data reduction (#17075).
   The gui is accessible through the ``Interfaces / Direct / DGS Reduction`` menu.
-  The first time the user is presented with a choice of facilites and instruments -
+  The first time the user is presented with a choice of facilities and instruments -
   choose MLZ / TOFTOF. The choice can be changed later from (any) reduction gui by
   ``Tools / Change instrument ...``.
 

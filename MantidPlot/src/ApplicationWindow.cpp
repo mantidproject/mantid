@@ -183,6 +183,8 @@
 #include <boost/regex.hpp>
 #include <boost/scoped_ptr.hpp>
 
+#include <Poco/Path.h>
+
 // Mantid
 #include "Mantid/FirstTimeSetup.h"
 #include "Mantid/ManageCustomMenus.h"
@@ -9813,6 +9815,8 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // Stop background saving thread, so it doesn't try to use a destroyed
     // resource
     m_projectRecovery.stopProjectSaving();
+    m_projectRecovery.clearAllCheckpoints(
+        Poco::Path(m_projectRecovery.getRecoveryFolderOutputPR()));
   }
 
   // Close the remaining MDI windows. The Python API is required to be active
