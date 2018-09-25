@@ -23,15 +23,51 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #ifndef MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H
 #define MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "Map.h"
+#include "Reduction/Group.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
+
+namespace { // unnamed
+std::vector<MantidQt::MantidWidgets::Batch::Cell>
+cellsFromGroup(Group const &group,
+               MantidQt::MantidWidgets::Batch::Cell const &deadCell) {
+  auto cells = std::vector<MantidQt::MantidWidgets::Batch::Cell>(9, deadCell);
+  cells[0] = MantidQt::MantidWidgets::Batch::Cell(group.name());
+  return cells;
+}
+
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
+  return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
+      {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
+       MantidQt::MantidWidgets::Batch::Cell(std::to_string(row.theta())),
+       MantidQt::MantidWidgets::Batch::Cell(
+           row.transmissionWorkspaceNames().first),
+       MantidQt::MantidWidgets::Batch::Cell(
+           row.transmissionWorkspaceNames().second),
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
+           map(row.qRange(),
+               [](RangeInQ const &range) -> double { return range.min(); }))),
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
+           map(row.qRange(),
+               [](RangeInQ const &range) -> double { return range.max(); }))),
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
+           map(row.qRange(),
+               [](RangeInQ const &range) -> double { return range.step(); }))),
+       MantidQt::MantidWidgets::Batch::Cell(
+           optionalToString(row.scaleFactor())),
+       MantidQt::MantidWidgets::Batch::Cell(
+           MantidWidgets::optionsToString(row.reductionOptions()))});
+}
+} // unnamed
 
 class JobsViewUpdater {
 public:
   explicit JobsViewUpdater(MantidQt::MantidWidgets::Batch::IJobTreeView &view)
       : m_view(view) {}
 
-  template <typename Group>
   void groupAppended(int groupIndex, Group const &group) {
     m_view.appendChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation(),
                             cellsFromGroup(group, m_view.deadCell()));
@@ -42,14 +78,12 @@ public:
             cellsFromRow(row.get()));
   }
 
-  template <typename Row>
   void rowAppended(int groupIndex, int, Row const &row) {
     m_view.appendChildRowOf(
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),
         cellsFromRow(row));
   }
 
-  template <typename Row>
   void rowModified(int groupIndex, int rowIndex, Row const &row) {
     m_view.setCellsAt(
         MantidQt::MantidWidgets::Batch::RowLocation({groupIndex, rowIndex}),

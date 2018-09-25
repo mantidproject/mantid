@@ -30,9 +30,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include <boost/optional.hpp>
 #include "RangeInQ.h"
 #include "ReductionWorkspaces.h"
-#include "SlicedReductionWorkspaces.h"
 #include "ReductionOptionsMap.h"
-#include "Slicing.h"
 #include "WorkspaceNamesFactory.h"
 #include "../DllConfig.h"
 
@@ -41,16 +39,13 @@ namespace CustomInterfaces {
 
 
 // Immutability here makes update notification easier.
-template <typename ReducedWorkspaceNames>
 class MANTIDQT_ISISREFLECTOMETRY_DLL Row {
 public:
-  using WorkspaceNames = ReducedWorkspaceNames;
-
   Row(std::vector<std::string> number, double theta,
       std::pair<std::string, std::string> tranmissionRuns,
       boost::optional<RangeInQ> qRange, boost::optional<double> scaleFactor,
       ReductionOptionsMap reductionOptions,
-      ReducedWorkspaceNames reducedWorkspaceNames);
+      ReductionWorkspaces reducedWorkspaceNames);
 
   std::vector<std::string> const &runNumbers() const;
   std::pair<std::string, std::string> const &transmissionWorkspaceNames() const;
@@ -58,7 +53,7 @@ public:
   boost::optional<RangeInQ> const &qRange() const;
   boost::optional<double> scaleFactor() const;
   ReductionOptionsMap const &reductionOptions() const;
-  ReducedWorkspaceNames const &reducedWorkspaceNames() const;
+  ReductionWorkspaces const &reducedWorkspaceNames() const;
 
   template <typename WorkspaceNamesFactory>
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers,
@@ -70,51 +65,35 @@ private:
   boost::optional<RangeInQ> m_qRange;
   boost::optional<double> m_scaleFactor;
   std::pair<std::string, std::string> m_transmissionRuns;
-  ReducedWorkspaceNames m_reducedWorkspaceNames;
+  ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
 };
 
-template <typename ReducedWorkspaceNames>
-std::ostream &operator<<(std::ostream &os,
-                         Row<ReducedWorkspaceNames> const &row) {
-  auto runNumbers = boost::join(row.runNumbers(), "+");
-  os << "Row (runs: " << runNumbers << ", theta: " << row.theta() << ")";
-  return os;
-}
+// std::ostream &operator<<(std::ostream &os, Row const &row) {
+//  auto runNumbers = boost::join(row.runNumbers(), "+");
+//  os << "Row (runs: " << runNumbers << ", theta: " << row.theta() << ")";
+//  return os;
+//}
 
-template <typename ReducedWorkspaceNames>
-// cppcheck-suppress syntaxError
 template <typename WorkspaceNamesFactory>
-Row<ReducedWorkspaceNames> Row<ReducedWorkspaceNames>::withExtraRunNumbers(
+Row Row::withExtraRunNumbers(
     std::vector<std::string> const &extraRunNumbers,
     WorkspaceNamesFactory const &workspaceNamesFactory) const {
   auto newRunNumbers = std::vector<std::string>();
   newRunNumbers.reserve(m_runNumbers.size() + extraRunNumbers.size());
   boost::range::set_union(m_runNumbers, extraRunNumbers,
                           std::back_inserter(newRunNumbers));
-  auto wsNames = workspaceNamesFactory.template makeNames<WorkspaceNames>(
+  auto wsNames = workspaceNamesFactory.template makeNames(
       newRunNumbers, transmissionWorkspaceNames());
   return Row(newRunNumbers, theta(), transmissionWorkspaceNames(), qRange(),
              scaleFactor(), reductionOptions(), wsNames);
 }
 
-template <typename WorkspaceNames, typename WorkspaceNamesFactory>
-Row<WorkspaceNames>
-mergedRow(Row<WorkspaceNames> const &rowA, Row<WorkspaceNames> const &rowB,
-          WorkspaceNamesFactory const &workspaceNamesFactory) {
+template <typename WorkspaceNamesFactory>
+Row mergedRow(Row const &rowA, Row const &rowB,
+              WorkspaceNamesFactory const &workspaceNamesFactory) {
   return rowA.withExtraRunNumbers(rowB.runNumbers(), workspaceNamesFactory);
 }
-
-using SlicedRow = Row<SlicedReductionWorkspaces>;
-using UnslicedRow = Row<ReductionWorkspaces>;
-using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
-
-boost::optional<UnslicedRow>
-unslice(boost::optional<SlicedRow> const &row,
-        WorkspaceNamesFactory const &workspaceNamesFactory);
-boost::optional<SlicedRow>
-slice(boost::optional<UnslicedRow> const &row,
-      WorkspaceNamesFactory const &workspaceNamesFactory);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACE_RUN_H_

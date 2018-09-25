@@ -67,12 +67,11 @@ std::pair<std::string, std::string> transmissionWorkspaceNames(
 std::string transmissionWorkspacesCombined(
     std::pair<std::string, std::string> const &transmissionRuns);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces workspaceNamesForUnsliced(
-    std::vector<std::string> const &summedRunNumbers,
-    std::pair<std::string, std::string> const &transmissionRuns);
+MANTIDQT_ISISREFLECTOMETRY_DLL ReductionWorkspaces
+workspaceNames(std::vector<std::string> const &summedRunNumbers,
+               std::pair<std::string, std::string> const &transmissionRuns);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL std::string
-postprocessedWorkspaceNameForUnsliced(
+MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceName(
     std::vector<std::vector<std::string> const *> const &summedRunNumbers);
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -34,27 +34,24 @@ private:
   int m_baseColumn;
 };
 
-template <typename Row>
 boost::optional<std::vector<std::string>>
-RowValidator<Row>::parseRunNumbers(std::vector<std::string> const &cellText) {
+RowValidator::parseRunNumbers(std::vector<std::string> const &cellText) {
   auto runNumbers = ::MantidQt::CustomInterfaces::parseRunNumbers(cellText[0]);
   if (!runNumbers.is_initialized())
     m_invalidColumns.emplace_back(0);
   return runNumbers;
 }
 
-template <typename Row>
 boost::optional<double>
-RowValidator<Row>::parseTheta(std::vector<std::string> const &cellText) {
+RowValidator::parseTheta(std::vector<std::string> const &cellText) {
   auto theta = ::MantidQt::CustomInterfaces::parseTheta(cellText[1]);
   if (!theta.is_initialized())
     m_invalidColumns.emplace_back(1);
   return theta;
 }
 
-template <typename Row>
-boost::optional<TransmissionRunPair> RowValidator<Row>::parseTransmissionRuns(
-    std::vector<std::string> const &cellText) {
+boost::optional<TransmissionRunPair>
+RowValidator::parseTransmissionRuns(std::vector<std::string> const &cellText) {
   auto transmissionRunsOrError =
       ::MantidQt::CustomInterfaces::parseTransmissionRuns(cellText[2],
                                                           cellText[3]);
@@ -63,9 +60,8 @@ boost::optional<TransmissionRunPair> RowValidator<Row>::parseTransmissionRuns(
       transmissionRunsOrError);
 }
 
-template <typename Row>
 boost::optional<boost::optional<RangeInQ>>
-RowValidator<Row>::parseQRange(std::vector<std::string> const &cellText) {
+RowValidator::parseQRange(std::vector<std::string> const &cellText) {
   auto qRangeOrError = ::MantidQt::CustomInterfaces::parseQRange(
       cellText[4], cellText[5], cellText[6]);
   return boost::apply_visitor(
@@ -73,9 +69,8 @@ RowValidator<Row>::parseQRange(std::vector<std::string> const &cellText) {
       qRangeOrError);
 }
 
-template <typename Row>
 boost::optional<boost::optional<double>>
-RowValidator<Row>::parseScaleFactor(std::vector<std::string> const &cellText) {
+RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
       ::MantidQt::CustomInterfaces::parseScaleFactor(cellText[7]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
@@ -83,23 +78,18 @@ RowValidator<Row>::parseScaleFactor(std::vector<std::string> const &cellText) {
   return optionalScaleFactorOrNoneIfError;
 }
 
-template <typename Row>
 boost::optional<std::map<std::string, std::string>>
-RowValidator<Row>::parseOptions(std::vector<std::string> const &cellText) {
+RowValidator::parseOptions(std::vector<std::string> const &cellText) {
   auto options = ::MantidQt::CustomInterfaces::parseOptions(cellText[8]);
   if (!options.is_initialized())
     m_invalidColumns.emplace_back(8);
   return options;
 }
 
-template <typename Row>
-// cppcheck-suppress syntaxError
 template <typename WorkspaceNamesFactory>
-ValidationResult<RowVariant, std::vector<int>> RowValidator<Row>::
+ValidationResult<Row, std::vector<int>> RowValidator::
 operator()(std::vector<std::string> const &cellText,
            WorkspaceNamesFactory const &workspaceNames) {
-  using RowVariant = boost::variant<SlicedRow, UnslicedRow>;
-
   auto maybeRunNumbers = parseRunNumbers(cellText);
   auto maybeTheta = parseTheta(cellText);
   auto maybeTransmissionRuns = parseTransmissionRuns(cellText);
@@ -114,71 +104,35 @@ operator()(std::vector<std::string> const &cellText,
         maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange,
         maybeScaleFactor, maybeOptions, wsNames);
     if (maybeRow.is_initialized())
-      return RowValidationResult<RowVariant>(maybeRow.get());
+      return RowValidationResult(maybeRow.get());
     else
-      return RowValidationResult<RowVariant>(m_invalidColumns);
+      return RowValidationResult(m_invalidColumns);
   } else {
-    return RowValidationResult<RowVariant>(m_invalidColumns);
+    return RowValidationResult(m_invalidColumns);
   }
 }
 
-class ValidateRowVisitor : public boost::static_visitor<
-                               ValidationResult<RowVariant, std::vector<int>>> {
-public:
-  ValidateRowVisitor(std::vector<std::string> const &cells,
-                     WorkspaceNamesFactory const &workspaceNamesFactory)
-      : m_cells(cells), m_workspaceNamesFactory(workspaceNamesFactory) {}
-
-  RowValidationResult<RowVariant>
-  operator()(ReductionJobs<SlicedGroup> const &) const {
-    auto validate = RowValidator<SlicedRow>();
-    return validate(
-        m_cells,
-        [this](std::vector<std::string> const &runNumbers,
-               std::pair<std::string, std::string> const &transmissionRuns)
-            -> boost::optional<SlicedReductionWorkspaces> {
-          return m_workspaceNamesFactory.makeNames<SlicedReductionWorkspaces>(
-              runNumbers, transmissionRuns);
-        });
-  }
-
-  RowValidationResult<RowVariant>
-  operator()(ReductionJobs<UnslicedGroup> const &) const {
-    auto validate = RowValidator<UnslicedRow>();
-    return validate(
-        m_cells,
-        [this](std::vector<std::string> const &runNumbers,
-               std::pair<std::string, std::string> const &transmissionRuns)
-            -> boost::optional<ReductionWorkspaces> {
-          return m_workspaceNamesFactory.makeNames<ReductionWorkspaces>(
-              runNumbers, transmissionRuns);
-        });
-  }
-
-private:
-  std::vector<std::string> const &m_cells;
-  WorkspaceNamesFactory const &m_workspaceNamesFactory;
-};
-
-RowValidationResult<RowVariant>
-validateRow(Jobs const &jobs,
-            WorkspaceNamesFactory const &workspaceNamesFactory,
+RowValidationResult
+validateRow(Jobs const &, WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cells) {
-  return boost::apply_visitor(ValidateRowVisitor(cells, workspaceNamesFactory),
-                              jobs);
+  auto validate = RowValidator();
+  RowValidationResult result = validate(
+      cells, [&workspaceNamesFactory](
+                 std::vector<std::string> const &runNumbers,
+                 std::pair<std::string, std::string> const &transmissionRuns)
+                 -> boost::optional<ReductionWorkspaces> {
+                   return workspaceNamesFactory.makeNames(runNumbers,
+                                                          transmissionRuns);
+                 });
+  return result;
 }
 
-boost::optional<RowVariant>
+boost::optional<Row>
 validateRowFromRunAndTheta(Jobs const &jobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta) {
-  return boost::apply_visitor(
-             ValidateRowVisitor({run, theta, "", "", "", "", "", "", ""},
-                                workspaceNamesFactory),
-             jobs).validElseNone();
+  std::vector<std::string> cells = {run, theta, "", "", "", "", "", "", ""};
+  return validateRow(jobs, workspaceNamesFactory, cells).validElseNone();
 }
-
-template class RowValidator<UnslicedRow>;
-template class RowValidator<SlicedRow>;
 } // namespace CustomInterfaces
 } // namespace MantidQt

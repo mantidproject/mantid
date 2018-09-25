@@ -1,7 +1,6 @@
 #include "QtReflMainWindowView.h"
 #include "MantidKernel/make_unique.h"
 #include "QtReflBatchView.h"
-#include "Reduction/Slicing.h"
 
 #include <QMessageBox>
 #include <QToolButton>
@@ -45,9 +44,8 @@ void QtReflMainWindowView::initLayout() {
   auto instruments = std::vector<std::string>(
       {{"INTER", "SURF", "CRISP", "POLREF", "OFFSPEC"}});
 
-  auto defaultSlicing = Slicing();
   auto thetaTolerance = 0.01;
-  auto makeWorkspaceNames = WorkspaceNamesFactory(defaultSlicing);
+  auto makeWorkspaceNames = WorkspaceNamesFactory();
   auto makeRunsTablePresenter = RunsTablePresenterFactory(
       instruments, thetaTolerance, makeWorkspaceNames);
   auto defaultInstrumentIndex = 0;

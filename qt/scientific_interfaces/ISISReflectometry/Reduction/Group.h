@@ -32,9 +32,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL Group {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Group {
 public:
-  using RowType = Row;
   Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
@@ -61,10 +60,9 @@ private:
   std::vector<boost::optional<Row>> m_rows;
 };
 
-template <typename Row, typename WorkspaceNamesFactory,
-          typename ModificationListener>
-void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
-                   int groupIndex, double thetaTolerance,
+template <typename WorkspaceNamesFactory, typename ModificationListener>
+void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex,
+                   double thetaTolerance,
                    WorkspaceNamesFactory const &workspaceNamesFactory,
                    ModificationListener &listener) {
   for (auto const &maybeRow : fromHere.rows()) {
@@ -88,25 +86,16 @@ void mergeRowsInto(Group<Row> &intoHere, Group<Row> const &fromHere,
   }
 }
 
-template <typename Row>
-std::ostream &operator<<(std::ostream &os, Group<Row> const &group) {
-  os << "  Group (name: " << group.name() << ")\n";
-  for (auto &&row : group.rows()) {
-    if (row.is_initialized())
-      os << "    " << row.get() << '\n';
-    else
-      os << "    Row (invalid)\n";
-  }
-  return os;
-}
-
-using SlicedGroup = Group<SlicedRow>;
-using UnslicedGroup = Group<UnslicedRow>;
-
-UnslicedGroup unslice(SlicedGroup const &slicedGroup,
-                      WorkspaceNamesFactory const &workspaceNamesFactory);
-SlicedGroup slice(UnslicedGroup const &unslicedGroup,
-                  WorkspaceNamesFactory const &WorkspaceNamesFactory);
+// std::ostream &operator<<(std::ostream &os, Group const &group) {
+//  os << "  Group (name: " << group.name() << ")\n";
+//  for (auto &&row : group.rows()) {
+//    if (row.is_initialized())
+//      os << "    " << row.get() << '\n';
+//    else
+//      os << "    Row (invalid)\n";
+//  }
+//  return os;
+//}
 } // namespace CustomInterfaces
 } // namespace MantidQt
 #endif // MANTID_CUSTOMINTERFACES_GROUP_H_

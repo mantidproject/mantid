@@ -35,10 +35,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename Group> class MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Jobs {
 public:
-  ReductionJobs();
-  ReductionJobs(std::vector<Group> groups);
+  Jobs();
+  Jobs(std::vector<Group> groups);
   Group &appendGroup(Group group);
   Group &insertGroup(Group group, int beforeIndex);
   bool hasGroupWithName(std::string const &groupName) const;
@@ -53,17 +53,11 @@ private:
   std::vector<Group> m_groups;
 };
 
-using SlicedReductionJobs = ReductionJobs<SlicedGroup>;
-
-using UnslicedReductionJobs = ReductionJobs<UnslicedGroup>;
-
-using Jobs = boost::variant<UnslicedReductionJobs, SlicedReductionJobs>;
-
 void appendEmptyRow(Jobs &jobs, int groupIndex);
 void insertEmptyRow(Jobs &jobs, int groupIndex, int beforeRow);
 void removeRow(Jobs &jobs, int groupIndex, int rowIndex);
 void updateRow(Jobs &jobs, int groupIndex, int rowIndex,
-               boost::optional<RowVariant> const &newValue);
+               boost::optional<Row> const &newValue);
 
 void appendEmptyGroup(Jobs &jobs);
 void insertEmptyGroup(Jobs &jobs, int beforeGroup);
@@ -73,14 +67,12 @@ bool setGroupName(Jobs &jobs, int groupIndex, std::string const &newValue);
 std::string groupName(Jobs const &jobs, int groupIndex);
 void prettyPrintModel(Jobs const &jobs);
 
-void mergeRowIntoGroup(Jobs &jobs, RowVariant const &row, double thetaTolerance,
+void mergeRowIntoGroup(Jobs &jobs, Row const &row, double thetaTolerance,
                        std::string const &groupName,
                        WorkspaceNamesFactory const &workspaceNamesFactory);
 
-template <typename Group, typename WorkspaceNamesFactory,
-          typename ModificationListener>
-void mergeJobsInto(ReductionJobs<Group> &intoHere,
-                   ReductionJobs<Group> const &fromHere, double thetaTolerance,
+template <typename WorkspaceNamesFactory, typename ModificationListener>
+void mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
                    WorkspaceNamesFactory const &workspaceNamesFactory,
                    ModificationListener &listener) {
   for (auto const &group : fromHere.groups()) {
@@ -97,54 +89,6 @@ void mergeJobsInto(ReductionJobs<Group> &intoHere,
     }
   }
 }
-
-template <typename WorkspaceNamesFactory, typename ModificationListener>
-class MergeJobsMultivisitor : public boost::static_visitor<bool> {
-public:
-  MergeJobsMultivisitor(double thetaTolerance,
-                        WorkspaceNamesFactory const &workspaceNamesFactory,
-                        ModificationListener &listener)
-      : m_thetaTolerance(thetaTolerance),
-        m_workspaceNamesFactory(workspaceNamesFactory), m_listener(listener){};
-
-  template <typename Group>
-  bool operator()(ReductionJobs<Group> &intoHere,
-                  ReductionJobs<Group> const &fromHere) const {
-    mergeJobsInto(intoHere, fromHere, m_thetaTolerance, m_workspaceNamesFactory,
-                  m_listener);
-    return true;
-  }
-
-  template <typename ErrorGroupA, typename ErrorGroupB>
-  bool operator()(ReductionJobs<ErrorGroupA> &,
-                  ReductionJobs<ErrorGroupB> const &) const {
-    return false;
-  }
-
-private:
-  double m_thetaTolerance;
-  WorkspaceNamesFactory const &m_workspaceNamesFactory;
-  ModificationListener &m_listener;
-};
-
-template <typename WorkspaceNamesFactory, typename ModificationListener>
-bool mergeJobsInto(Jobs &intoHere, Jobs const &fromHere, double thetaTolerance,
-                   WorkspaceNamesFactory const &workspaceNamesFactory,
-                   ModificationListener &listener) {
-  return boost::apply_visitor(
-      MergeJobsMultivisitor<WorkspaceNamesFactory, ModificationListener>(
-          thetaTolerance, workspaceNamesFactory, listener),
-      intoHere, fromHere);
-}
-
-Jobs newJobsWithSlicingFrom(Jobs const &takeSlicingFromHere);
-
-UnslicedReductionJobs
-unsliced(SlicedReductionJobs const &slicedJobs,
-         WorkspaceNamesFactory const &workspaceNamesFactory);
-
-SlicedReductionJobs sliced(UnslicedReductionJobs const &unslicedJobs,
-                           WorkspaceNamesFactory const &workspaceNamesFactory);
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

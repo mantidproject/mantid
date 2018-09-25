@@ -3,7 +3,6 @@ set ( REDUCTION_SRC_FILES
     RangeInQ.cpp
     ReductionWorkspaces.cpp
     Row.cpp
-    SlicedReductionWorkspaces.cpp
     ReductionJobs.cpp
     ValidateRow.cpp
     Slicing.cpp
@@ -24,7 +23,6 @@ set ( REDUCTION_INC_FILES
     ReductionJobs.h
     ReductionWorkspaces.h
     Row.h
-    SlicedReductionWorkspaces.h
     Slicing.h
     ValidateRow.h
     WorkspaceNamesFactory.h

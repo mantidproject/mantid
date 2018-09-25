@@ -26,8 +26,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #include "IRunsTableView.h"
 #include "JobsViewUpdater.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
-#include "MantidQtWidgets/Common/ParseKeyValueString.h"
-#include "Map.h"
 #include "Reduction/Group.h"
 #include "Reduction/ReductionJobs.h"
 #include <memory>
@@ -124,40 +122,6 @@ private:
   JobsViewUpdater m_jobViewUpdater;
   WorkspaceNamesFactory m_workspaceNameFactory;
 };
-
-template <typename Row>
-std::vector<MantidQt::MantidWidgets::Batch::Cell>
-cellsFromGroup(Group<Row> const &group,
-               MantidQt::MantidWidgets::Batch::Cell const &deadCell) {
-  auto cells = std::vector<MantidQt::MantidWidgets::Batch::Cell>(9, deadCell);
-  cells[0] = MantidQt::MantidWidgets::Batch::Cell(group.name());
-  return cells;
-}
-
-template <typename WorkspaceNames>
-std::vector<MantidQt::MantidWidgets::Batch::Cell>
-cellsFromRow(Row<WorkspaceNames> const &row) {
-  return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
-      {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
-       MantidQt::MantidWidgets::Batch::Cell(std::to_string(row.theta())),
-       MantidQt::MantidWidgets::Batch::Cell(
-           row.transmissionWorkspaceNames().first),
-       MantidQt::MantidWidgets::Batch::Cell(
-           row.transmissionWorkspaceNames().second),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
-           map(row.qRange(),
-               [](RangeInQ const &range) -> double { return range.min(); }))),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
-           map(row.qRange(),
-               [](RangeInQ const &range) -> double { return range.max(); }))),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(
-           map(row.qRange(),
-               [](RangeInQ const &range) -> double { return range.step(); }))),
-       MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.scaleFactor())),
-       MantidQt::MantidWidgets::Batch::Cell(
-           MantidWidgets::optionsToString(row.reductionOptions()))});
-}
 }
 }
 #endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_

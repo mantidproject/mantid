@@ -407,7 +407,7 @@ void ReflRunsTabPresenter::transfer(const std::set<int> &rowsToTransfer,
                                     const TransferMatch) {
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
-    auto jobs = newJobsWithSlicingFrom(tablePresenter()->reductionJobs());
+    auto jobs = tablePresenter()->reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
       auto &result = (*m_searchModel)[rowIndex];

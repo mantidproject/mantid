@@ -13,8 +13,7 @@ RunsTablePresenterFactory::RunsTablePresenterFactory(
 std::unique_ptr<RunsTablePresenter> RunsTablePresenterFactory::
 operator()(IRunsTableView *view) const {
   return Mantid::Kernel::make_unique<RunsTablePresenter>(
-      view, m_instruments, m_thetaTolerance, m_workspaceNamesFactory,
-      UnslicedReductionJobs());
+      view, m_instruments, m_thetaTolerance, m_workspaceNamesFactory, Jobs());
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

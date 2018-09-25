@@ -32,10 +32,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
 namespace CustomInterfaces {
 
-template <typename Row> class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
+class MANTIDQT_ISISREFLECTOMETRY_DLL RowValidator {
 public:
   template <typename WorkspaceNamesFactory>
-  ValidationResult<RowVariant, std::vector<int>>
+  ValidationResult<Row, std::vector<int>>
   operator()(std::vector<std::string> const &cellText,
              WorkspaceNamesFactory const &workspaceNames);
 
@@ -55,15 +55,14 @@ private:
   std::vector<int> m_invalidColumns;
 };
 
-template <typename Row>
 using RowValidationResult = ValidationResult<Row, std::vector<int>>;
 
-RowValidationResult<RowVariant>
+RowValidationResult
 validateRow(Jobs const &jobs,
             WorkspaceNamesFactory const &workspaceNamesFactory,
             std::vector<std::string> const &cellText);
 
-boost::optional<RowVariant>
+boost::optional<Row>
 validateRowFromRunAndTheta(Jobs const &jobs,
                            WorkspaceNamesFactory const &workspaceNamesFactory,
                            std::string const &run, std::string const &theta);
