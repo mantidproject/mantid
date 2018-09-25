@@ -12,7 +12,7 @@ Description
 This algorithm is a facade over :ref:`algm-ReflectometryReductionOne` (see :ref:`algm-ReflectometryReductionOne`
 for more information on the wrapped algorithm). It optionally corrects the detector position and then pulls numeric
 parameters out of the instrument parameter file where possible. These automatically applied defaults
-can be overriden by providing your own values. In addition, it outputs a rebinned workspace in Q, and it optionally
+can be overridden by providing your own values. In addition, it outputs a rebinned workspace in Q, and it optionally
 performs polarization analysis if the input workspace is a workspace group.
 
 First, if :literal:`ThetaIn` is given the algorithm will try to correct the detector position. For this, it uses
@@ -27,7 +27,7 @@ is inferred from other properties, depending on the value of :literal:`AnalysisM
 Note that ProcessingInstructions are workspace indices, not detector IDs. The first few workspaces may correspond
 to monitors, rather than detectors of interest. For the syntax of this property, see :ref:`algm-GroupDetectors`.
 
-:literal:`theta` is calcualted using :literal:`SpecularReflectionCalculateTheta`. This is passed through to :literal:`ReflectometryReductionOne` and :literal:`2 * theta` is passed through to :literal:`CalculateResolution`. :literal:`theta` can be overridden by setting :literal:`ThetaIn` or :literal:`ThetaLogName` (:literal:`ThetaIn` takes precedence if both are given). If :literal:`CorrectDetectors` is also true, then the algorithm corrects the positions of the detectors of interest to :literal:`2 * theta` using :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
+:literal:`theta` is calculated using :literal:`SpecularReflectionCalculateTheta`. This is passed through to :literal:`ReflectometryReductionOne` and :literal:`2 * theta` is passed through to :literal:`CalculateResolution`. :literal:`theta` can be overridden by setting :literal:`ThetaIn` or :literal:`ThetaLogName` (:literal:`ThetaIn` takes precedence if both are given). If :literal:`CorrectDetectors` is also true, then the algorithm corrects the positions of the detectors of interest to :literal:`2 * theta` using :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
 
 Next, the algorithm will try to populate input properties which have not been set. Specifically, it will search for
 :literal:`LambdaMin`, :literal:`LambdaMax`, :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundMin`, :literal:`MonitorBackgroundMax`,

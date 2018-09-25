@@ -27,11 +27,16 @@ Changes
 Bugfixes
 ########
 - Workspaces with a '#' in their name will no longer cause issues in the loading of a recovered project
-- Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces aswell)
+- Project Recovery will actually recover fully cases where multiple workspaces were passed as a list to an algorithm (Fixes a known bug with GroupWorkspaces as well)
 - Project Recovery will now run normally when you select no or the recovery fails when recovering from a ungraceful exit.
 
 MantidPlot
 ----------
+
+Changes
+#######
+
+- All File Browser dialog boxes will now (by default) display all valid file extensions as the first file filter.
 
 BugFixes
 ########

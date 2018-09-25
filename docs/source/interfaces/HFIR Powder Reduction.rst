@@ -43,7 +43,7 @@ Use cases for tabs
   
    - Strip vanadium peak with unit 'Degrees' because of the binning (range and step size) must be respected;
    - Peaks' position should be calculated and indicated auotmatically;
-   - *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
+   - *Mantid::StripPeaks()* will be called instead of *StripVadadiumPeaks()* because
      the later one only works in d-spacing;
       
 6. **Advanced Setup**
@@ -112,7 +112,7 @@ Here is the suggested workflow to reduce multiple scans and possibly merge them.
 1. Set up *Exp No* and range of scan numbers;
 2. Push button *Load All* to load and reduce all runs specified in previous step to single-spectrum diffraction pattern;
 3. Plot all reduced scans in default;
-4. Optinally plot all data in 2D fill plot;
+4. Optionally plot all data in 2D fill plot;
 5. User can delete some scans from the reduced scans via GUI or input text edit (not implemented yet);
 6. Push button *Merge* to merge the scans;
 7. Push button *Save All* to save all individual scans to files;
@@ -159,7 +159,7 @@ Raw data correction files
      - XY is either IN or OUT. 
      - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__Ge_113_IN_vcorr.txt*
 
-2. **Excluded detectors**:  Some detectors might be exluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
+2. **Excluded detectors**:  Some detectors might be excluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
  
    - File name: *HB2A_exp0IJK__exclude_detectors.txt*
   

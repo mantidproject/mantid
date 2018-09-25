@@ -56,7 +56,7 @@ if it detects that only the frequency has changed.
 
 If the instrument is LET (or MERLIN with the G chopper), the time-distance plot 
 is enabled, and an additional option to change the phase of chopper 2 is 
-available. This chopper has a wide openning and can be used to suppress low 
+available. This chopper has a wide opening and can be used to suppress low 
 energy reps. The time delay which is specified in the chopper 2 phase edit box 
 is the time-of-flight in microseconds relative to the moderator pulse when the 
 chopper first opens.

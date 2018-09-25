@@ -96,12 +96,12 @@ If you wish to place comments in the reST file that will not be rendered anywher
 Algorithms
 ----------
 
-The algorithm documentation has a slightly more rigid structure and is described in more detail `here <AlgorithmDocumentation.html>`__ and `here <AlgorithmUsageExamples.html>`__.
+The algorithm documentation has a slightly more rigid structure and is described in more detail :ref:`here <AlgorithmDocumentation>` and :ref:`here <AlgorithmUsageExamples>`.
 
 Interfaces
 ----------
 
-For documenting custom interfaces, it is recommended that you consult `this <InterfaceDocumentation.html>`__  page, which explains how to document them, and which directives may be used in more detail. 
+For documenting custom interfaces, it is recommended that you consult :ref:`this <InterfaceDocumentation>`  page, which explains how to document them, and which directives may be used in more detail. 
 
 How to define titles, sections etc.
 -----------------------------------
@@ -251,6 +251,6 @@ For multi-configuration generators such as Visual Studio or XCode you will need 
 Building the HTML Development Documentation
 ===========================================
 
-The developer documentation is written as `.rst` files in the mantid source folder under ``dev-docs/``, the html files can be built using the `dev-docs-html` target. This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
+The developer documentation is written as ``.rst`` files in the mantid source folder under ``dev-docs/``, the html files can be built using the `dev-docs-html` target. This will build all the development documentation into the mantid build folder under ``dev-docs/html/``.
 
 In Visual Studio, this can be found in the "Documentation" folder in the solution explorer for the Mantid solution. Simply right click `dev-docs-html` and select build.

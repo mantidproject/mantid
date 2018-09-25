@@ -9,8 +9,8 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
@@ -34,9 +34,9 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::Property;
 using Mantid::PythonInterface::AlgorithmIDProxy;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using Mantid::PythonInterface::isNone;
-namespace Environment = Mantid::PythonInterface::Environment;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IAlgorithm)
@@ -127,7 +127,7 @@ PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
 object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &prop : properties) {
@@ -148,7 +148,7 @@ object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
 object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &prop : properties) {
@@ -165,7 +165,7 @@ object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
 object getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &p : properties) {
@@ -184,7 +184,7 @@ object getOutputProperties(IAlgorithm &self) {
 object getInOutProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
-  Environment::GlobalInterpreterLock gil;
+  GlobalInterpreterLock gil;
   list names;
   ToPyString toPyStr;
   for (const auto &p : properties) {

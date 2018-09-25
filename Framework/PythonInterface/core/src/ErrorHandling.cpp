@@ -1,12 +1,12 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
+#include "MantidPythonInterface/core/ErrorHandling.h"
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>
-#include <frameobject.h> //Python
+#include <frameobject.h>
 
 #include <sstream>
 #include <stdexcept>
@@ -15,7 +15,7 @@ using boost::python::extract;
 
 namespace Mantid {
 namespace PythonInterface {
-namespace Environment {
+
 namespace {
 
 /**
@@ -104,6 +104,6 @@ PythonException::PythonException(bool withTrace)
  */
 PythonRuntimeError::PythonRuntimeError(bool withTrace)
     : std::runtime_error(exceptionToString(withTrace)) {}
-} // namespace Environment
+
 } // namespace PythonInterface
 } // namespace Mantid

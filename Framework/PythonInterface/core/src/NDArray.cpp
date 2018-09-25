@@ -1,62 +1,80 @@
-#include "MantidPythonInterface/kernel/NdArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
+#include "MantidPythonInterface/core/NDArray.h"
 
 #include <boost/python/detail/prefix.hpp> // Safe include of Python.h
 #include <boost/python/tuple.hpp>
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL CORE_ARRAY_API
 #include <numpy/arrayobject.h>
 
-using Mantid::PythonInterface::Converters::getNDArrayType;
 using namespace boost::python;
 
 namespace Mantid {
 namespace PythonInterface {
-namespace NumPy {
 
-namespace {
-inline PyArrayObject *rawArray(const NdArray &obj) {
-  return (PyArrayObject *)obj.ptr();
+/**
+ * Initialize the numpy array api for this DLL.
+ * @throws runtime_error if Python is not initialized
+ */
+void importNumpy() {
+  if (!Py_IsInitialized()) {
+    throw std::runtime_error(
+        "Library requires an active Python interpreter.\n"
+        "Call Py_Initialize at an appropriate point in the application.");
+  }
+
+  if (_import_array() < 0) {
+    PyErr_Print();
+    PyErr_SetString(PyExc_ImportError,
+                    "numpy.core.multiarray failed to import");
+  }
 }
-} // namespace
+
+/**
+ * @brief Return the type object for a numpy.NDArray
+ * @return PyTypeObject* to the Python C-type of nump.NDArray
+ */
+PyTypeObject *ndarrayType() { return &PyArray_Type; }
 
 // -----------------------------------------------------------------------------
-// NdArray - public methods
+// NDArray
 // -----------------------------------------------------------------------------
 
 /**
  * Check if a python object points to an array type object
  * @param obj A pointer to an arbitrary python object
- * @returns True if the underlying object is an ndarray, false otherwise
+ * @returns True if the underlying object is an NDArray, false otherwise
  */
-bool NdArray::check(const object &obj) { return PyArray_Check(obj.ptr()); }
+bool NDArray::check(const object &obj) { return PyArray_Check(obj.ptr()); }
 
 /**
  * Construction from a plain object. Assumes the array is actually a
  * a numpy array
  * @param obj A wrapper around a Python object pointing to a numpy array
  */
-NdArray::NdArray(const object &obj)
+NDArray::NDArray(const object &obj)
     : object(detail::borrowed_reference(obj.ptr())) {}
 
 /**
  * @return Return the shape of the array
  */
-Py_intptr_t const *NdArray::get_shape() const {
-  return PyArray_DIMS(rawArray(*this));
+Py_intptr_t const *NDArray::get_shape() const {
+  return PyArray_DIMS(reinterpret_cast<PyArrayObject *>(this->ptr()));
 }
 
 /**
  * @return Return the number of dimensions of the array
  */
-int NdArray::get_nd() const { return PyArray_NDIM(rawArray(*this)); }
+int NDArray::get_nd() const {
+  return PyArray_NDIM(reinterpret_cast<PyArrayObject *>(this->ptr()));
+}
 
 /**
  * This returns char so stride math works properly on it. It's pretty much
  * expected that the user will have to reinterpret_cast it.
  * @return The array's raw data pointer
  */
-void *NdArray::get_data() const { return PyArray_DATA(rawArray(*this)); }
+void *NDArray::get_data() const {
+  return PyArray_DATA(reinterpret_cast<PyArrayObject *>(this->ptr()));
+}
 
 /**
  * Casts (and copies if necessary) the array to the given data type
@@ -66,34 +84,36 @@ void *NdArray::get_data() const { return PyArray_DATA(rawArray(*this)); }
  * the returned array will only be copied if necessary
  * @return A numpy array with values of the requested type
  */
-NdArray NdArray::astype(char dtype, bool copy) const {
+NDArray NDArray::astype(char dtype, bool copy) const {
   auto callable = object(handle<>(
       PyObject_GetAttrString(this->ptr(), const_cast<char *>("astype"))));
   auto args = tuple();
   auto kwargs = object(handle<>(Py_BuildValue(
       const_cast<char *>("{s:c,s:i}"), "dtype", dtype, "copy", copy ? 1 : 0)));
-  return NdArray(boost::python::detail::new_reference(
+  return NDArray(boost::python::detail::new_reference(
       PyObject_Call(callable.ptr(), args.ptr(), kwargs.ptr())));
 }
-} // namespace NumPy
+
 } // namespace PythonInterface
 } // namespace Mantid
 
 // -----------------------------------------------------------------------------
-// object_manager_traits specialisation for NdArray
+// object_manager_traits specialisation for NDArray
 // -----------------------------------------------------------------------------
 namespace boost {
 namespace python {
 namespace converter {
 
+using Mantid::PythonInterface::ndarrayType;
+
 /**
  * Check if the given object is an instance of the array type
  * @param obj A python object instance
- * @return True if the type matches numpy.ndarray
+ * @return True if the type matches numpy.NDArray
  */
-bool object_manager_traits<Mantid::PythonInterface::NumPy::NdArray>::check(
+bool object_manager_traits<Mantid::PythonInterface::NDArray>::check(
     PyObject *obj) {
-  return ::PyObject_IsInstance(obj, (PyObject *)getNDArrayType());
+  return ::PyObject_IsInstance(obj, (PyObject *)ndarrayType());
 }
 
 /**
@@ -104,10 +124,9 @@ bool object_manager_traits<Mantid::PythonInterface::NumPy::NdArray>::check(
  * or a nullptr if the types don't match
  */
 python::detail::new_reference
-object_manager_traits<Mantid::PythonInterface::NumPy::NdArray>::adopt(
-    PyObject *obj) {
+object_manager_traits<Mantid::PythonInterface::NDArray>::adopt(PyObject *obj) {
   return python::detail::new_reference(
-      python::pytype_check(getNDArrayType(), obj));
+      python::pytype_check(ndarrayType(), obj));
 }
 
 /**
@@ -115,8 +134,8 @@ object_manager_traits<Mantid::PythonInterface::NumPy::NdArray>::adopt(
  * @return A pointer to the PyTypeObject defining the Python type
  */
 PyTypeObject const *
-object_manager_traits<Mantid::PythonInterface::NumPy::NdArray>::get_pytype() {
-  return getNDArrayType();
+object_manager_traits<Mantid::PythonInterface::NDArray>::get_pytype() {
+  return ndarrayType();
 }
 } // namespace converter
 } // namespace python
