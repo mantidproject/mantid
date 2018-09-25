@@ -1,34 +1,22 @@
 #ifndef MANTID_DATAHANDLING_LOADBINSTL_H_
 #define MANTID_DATAHANDLING_LOADBINSTL_H_
-#include "MantidAPI/IFileLoader.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
 #include <MantidKernel/V3D.h>
 
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport LoadBinStl : public API::IFileLoader<Kernel::FileDescriptor> {
+class DLLExport LoadBinStl  {
 public:
-  /// Algorithm's name
-  const std::string name() const override;
-  /// Algorithm's version
-  int version() const override;
-  /// Algorithm's category for identification
-  const std::string category() const override;
-
-  const std::string summary() const override;
-
-  /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::FileDescriptor &descriptor) const {return 0;};
-  /// Returns a value indicating whether or not loader wants to load multiple
-  /// files into a single workspace
-  bool loadMutipleAsOne() { return false; }
-
+  LoadBinStl(std::string filename):m_filename(filename){}
+  std::unique_ptr<Geometry::MeshObject> readStl();
+  bool isBinarySTL();
 private:
-  void init() override;
-  void exec() override;
-  void readStl(std::string filename);
+  uint32_t getNumberTriangles(Kernel::BinaryStreamReader);
   void readTriangle(Kernel::BinaryStreamReader);
+  std::string m_filename;
+
   std::vector<uint16_t> m_triangle;
   std::vector<Kernel::V3D> m_verticies;
 };
