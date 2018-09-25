@@ -1,9 +1,4 @@
-// Python header must go first
-// clang-format off
-#include "MantidQtWidgets/Common/PythonThreading.h"
-// clang-format on
-#include "MantidQtWidgets/Common/DropEventHelper.h"
-
+#include "MantidUI.h"
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
@@ -12,13 +7,13 @@
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
 #include "MantidSurfaceContourPlotGenerator.h"
 #include "MantidTable.h"
-#include "MantidUI.h"
 #include "ProjectSerialiser.h"
 
 #include "../Folder.h"
@@ -39,6 +34,11 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitConversion.h"
+
+#pragma push_macro("slots")
+#undef slots
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#pragma pop_macro("slots")
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
@@ -102,6 +102,7 @@ using namespace std;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Core::time_duration;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
@@ -429,7 +430,7 @@ void MantidUI::shutdown() {
 
   // If any python objects need to be cleared away then the GIL needs to be
   // held.
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().shutdown();
@@ -2209,7 +2210,7 @@ void MantidUI::clearAllMemory(const bool prompt) {
   // If any python objects need to be cleared away then the GIL needs to be
   // held. This doesn't feel like
   // it is in the right place but it will do no harm
-  ScopedPythonGIL lock;
+  GlobalInterpreterLock lock;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().clear();

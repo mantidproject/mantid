@@ -20,9 +20,6 @@ namespace Algorithms {
    <LI>OutputWorkspace - The name of the output workspace</LI>
    </UL>
 
-   @author Martyn Gigg, Tessella Support Services plc
-   @date 19/01/2009
-
    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
 
@@ -69,14 +66,20 @@ protected:
       const override;
 
 private:
+  bool m_preserveEvents{true};
+  bool m_isEvents{true};
+
   /// Initialisation code
   void init() override;
   /// Execution code
   void exec() override;
 
-  /// Create the rebin paraeters
-  std::vector<double>
-  createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch);
+  bool needToRebin(const API::MatrixWorkspace_sptr &left,
+                   const API::MatrixWorkspace_sptr &rght);
+  void rebin(API::MatrixWorkspace_sptr &toRebin,
+             API::MatrixWorkspace_sptr &toMatch);
+  void histogram(API::MatrixWorkspace_sptr &toRebin,
+                 API::MatrixWorkspace_sptr &toMatch);
 };
 } // namespace Algorithms
 } // namespace Mantid

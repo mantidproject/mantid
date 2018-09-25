@@ -27,7 +27,7 @@ If Mantid has crashed, then on the subsequent reboot you will be presented with 
 
 You can choose to attempt a full recovery, to open a recovery script or not to attempt a recovery. Full recovery will attempt to recover all workspaces present at the time of the crash as well as additional dialogs like plots or data windows. Script mode will attempt to construct a script that contains the history of all workspaces at the time of the crash.
 
-If full project recovery runs succesfully the scripting window will remain open in MantidPlot. It is safe to close this after a recovery.
+If full project recovery runs successfully the scripting window will remain open in MantidPlot. It is safe to close this after a recovery.
 
 **NB** This is an early version of project recovery. We think that it is a lot better than nothing, but we know it won't always work. Known caveats are listed below. Moreover, we would sincerely appreciate feedback and input from users. Contact us at `mantid-help@mantidproject.org <mailto:mantid-help@mantidproject.org>`__.
 

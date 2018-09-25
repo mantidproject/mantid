@@ -25,7 +25,7 @@ class HB2AReduce(PythonAlgorithm):
         return 'Diffraction\\Reduction'
 
     def seeAlso(self):
-        return [ "" ]
+        return []
 
     def name(self):
         return 'HB2AReduce'

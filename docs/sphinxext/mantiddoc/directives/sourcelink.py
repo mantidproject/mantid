@@ -208,7 +208,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             suggested_path = "os_agnostic_path_to_file_from_Code/Mantid"
             if not valid_ext_list:
                 raise SourceLinkError("No file possibilities for " + file_name + " have been found\n" +
-                                      "Please specify a better one using the :filename: opiton or use the " +
+                                      "Please specify a better one using the :filename: option or use the " +
                                       str(list(self.file_types.keys())) + " options\n" +
                                       "e.g. \n" +
                                       ".. sourcelink:\n" +

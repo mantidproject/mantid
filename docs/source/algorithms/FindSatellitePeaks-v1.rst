@@ -28,7 +28,7 @@ and satellite are computed in the HKL frame. Peaks are then grouped according
 to euclidean distance using using the properties `NumOfQs` and
 `ClusterThreshold`. If `NumOfQs` is specified then each offset will be grouped
 into exactly `k` clusters. If `ClusterThreshold` is specified then offsets will
-be grouped into clusters seperated by no more than a cophenetic distance below
+be grouped into clusters separated by no more than a cophenetic distance below
 this threshold.  The centroid of each cluster calculated for each group and is
 used as the offset to predict the location of fractional peaks everywhere in
 the :ref:`MDWorkspace <MDWorkspace>`.
@@ -42,7 +42,7 @@ the :ref:`MDWorkspace <MDWorkspace>`.
    vary slightly. This algorithm calculates the `q` vectors for all peaks passed
    as starting points into distinct sets of `q` vectors. The centroid of each
    cluster is then taken as the "true" value of `q` and is used to predict the
-   postion of all other fractional peaks with this `q`.
+   position of all other fractional peaks with this `q`.
    
 
 For each predicted fractional peak, the local centroid (the radius of which is
@@ -64,7 +64,7 @@ discarded if there I/sigma value is less than the parameter `IOverSigma`.
    satellite peak (orange). The area to search for the centroid is controlled by
    the `PeakRadius` parameter. All centroids are integrated a filtered by
    intensity and :math:`\frac{I}{\sigma}`. If the experimental satellite has
-   zero intesity or is below the :math:`\frac{I}{\sigma}` threshold then it is
+   zero intensity or is below the :math:`\frac{I}{\sigma}` threshold then it is
    discarded.
 
 
@@ -90,7 +90,7 @@ For more information on superspace crystallography see:
 Related Algorithms
 ------------------
 - :ref:`PredictFractionalPeaks <algm-PredictFractionalPeaks-v1>` predicts the
-  postion of fractional peaks given a :ref:`PeaksWorkspace <PeaksWorkspace>` of
+  position of fractional peaks given a :ref:`PeaksWorkspace <PeaksWorkspace>` of
   nuclear peaks and a set of HKL offsets.
 
 - :ref:`CentroidPeaksMD <algm-CentroidPeaksMD-v2>` is used to find the local 

@@ -33,7 +33,6 @@ set ( SRC_FILES
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
-	src/PythonThreading.cpp
 	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
 	src/RepoModel.cpp
@@ -302,8 +301,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/PlotAxis.h
 	inc/MantidQtWidgets/Common/PluginLibraries.h
 	inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
-	inc/MantidQtWidgets/Common/PythonSystemHeader.h
-	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
 	inc/MantidQtWidgets/Common/QStringUtils.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
@@ -471,7 +468,6 @@ set ( TARGET_LIBRARIES
   ${CORE_MANTIDLIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${PYTHON_LIBRARIES}
 )
 
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
