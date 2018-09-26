@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm performs `Le Bail Fit <Le Bail Fit>`__ to powder
+This algorithm performs `Le Bail Fit <http://www.mantidproject.org/Le_Bail_Fit>`__ to powder
 diffraction data, and also supports pattern calculation. This algorithm
 will refine a specified set of the powder instrumental profile
 parameters with a previous refined background model.
@@ -61,7 +61,7 @@ Supported functionalities
 Further Information
 ###################
 
-See `Le Bail Fit <Le Bail Fit>`__.
+See `Le Bail Fit <http://www.mantidproject.org/Le_Bail_Fit>`__.
 
 .. categories::
 

@@ -16,7 +16,7 @@ The assumption is that all the peaks in the diffraction patter can be described 
 A specific peak parameter will have its values plotted by an analytical function among all the peaks. 
 
 It serves as the first step to fit/refine instrumental parameters that
-will be introduced in `Le Bail Fit <Le Bail Fit>`__. The second step is
+will be introduced in `Le Bail Fit <http://www.mantidproject.org/Le_Bail_Fit>`__. The second step is
 realized by algorithm RefinePowderInstrumentParameters.
 
 Peak Fitting Algorithms
