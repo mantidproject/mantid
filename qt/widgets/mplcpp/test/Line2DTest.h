@@ -18,15 +18,15 @@ public:
 
   // ---------------------- failure tests --------------------
   void testConstructionWithNonLine2DObjectThrowsInvalidArgument() {
-    auto obj{Python::NewRef(Py_BuildValue("(i)", 1))};
+    Python::Object obj{Python::NewRef(Py_BuildValue("(i)", 1))};
     TS_ASSERT_THROWS(Line2D line(obj, {}, {}), std::invalid_argument);
   }
 
 private:
   Python::Object pyLine2D() {
     // A Line2D requires x and y data sequences
-    const auto data{Python::NewRef(Py_BuildValue("(f, f)", 0., 1.))};
-    const auto linesModule{
+    const Python::Object data{Python::NewRef(Py_BuildValue("(f, f)", 0., 1.))};
+    const Python::Object linesModule{
         Python::NewRef(PyImport_ImportModule("matplotlib.lines"))};
     return linesModule.attr("Line2D")(data, data);
   }

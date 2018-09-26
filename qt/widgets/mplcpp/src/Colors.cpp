@@ -12,7 +12,7 @@ namespace {
  * @return A reference to the matplotlib.colors module
  */
 Python::Object colorsModule() {
-  static auto colorsModule{
+  static Python::Object colorsModule{
       Python::NewRef(PyImport_ImportModule("matplotlib.colors"))};
   return colorsModule;
 }

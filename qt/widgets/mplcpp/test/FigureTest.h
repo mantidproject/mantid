@@ -25,12 +25,12 @@ public:
 
   void testAddAxes() {
     Figure fig{false};
-    TS_ASSERT_THROWS_NOTHING(auto axes{fig.addAxes(0.1, 0.1, 0.9, 0.9)});
+    TS_ASSERT_THROWS_NOTHING(fig.addAxes(0.1, 0.1, 0.9, 0.9));
   }
 
   void testSubPlot() {
     Figure fig{false};
-    TS_ASSERT_THROWS_NOTHING(auto axes{fig.addSubPlot(111)});
+    TS_ASSERT_THROWS_NOTHING(fig.addSubPlot(111));
   }
 };
 

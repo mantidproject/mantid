@@ -60,7 +60,7 @@ Line2D Axes::plot(std::vector<double> xdata, std::vector<double> ydata,
   // The vector still owns the data so it needs to be kept alive too
   // It is transferred to the Line2D for this purpose.
   VectorToNDArray<double, WrapReadOnly> wrapNDArray;
-  auto xarray{Python::NewRef(wrapNDArray(xdata))},
+  Python::Object xarray{Python::NewRef(wrapNDArray(xdata))},
       yarray{Python::NewRef(wrapNDArray(ydata))};
 
   try {
