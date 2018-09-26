@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -37,7 +38,7 @@ public:
   virtual ~XmlHandler();
 
   std::map<std::string, std::string>
-  get_metadata(const std::string &tag_to_ignore = "Detector");
+  get_metadata(const std::vector<std::string> &tags_to_ignore);
   std::string get_text_from_tag(const std::string &);
   std::map<std::string, std::string>
   get_attributes_from_tag(const std::string &);
