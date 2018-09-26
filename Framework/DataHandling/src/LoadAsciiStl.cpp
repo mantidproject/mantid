@@ -20,8 +20,6 @@ std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl(){
   std::ifstream file(m_filename.c_str());
   std::string line;
   getline(file, line);
-  name = line.substr(6, std::string::npos);
-  getline(file, line);
   Kernel::V3D t1, t2, t3;
   while (readSTLTriangle(file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
