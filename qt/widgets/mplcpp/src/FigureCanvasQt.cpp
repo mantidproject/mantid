@@ -1,5 +1,6 @@
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/Python/Sip.h"
 
 #include <QVBoxLayout>
@@ -9,23 +10,10 @@ namespace Widgets {
 namespace MplCpp {
 
 /**
- * @return A new Figure instance
- */
-Python::Object figure(bool tightLayout = true) {
-  auto fig = Python::NewRef(PyImport_ImportModule("matplotlib.figure"))
-                 .attr("Figure")();
-  if (tightLayout) {
-    auto kwargs = Python::NewRef(Py_BuildValue("{s:f}", "pad", 0.5));
-    fig.attr("set_tight_layout")(kwargs);
-  }
-  return fig;
-}
-
-/**
  * @return A new FigureCanvasQT object
  */
 Python::Object createPyCanvas() {
-  return backendModule().attr("FigureCanvasQTAgg")(figure());
+  return backendModule().attr("FigureCanvasQTAgg")(Figure(true).pyobj());
 }
 
 /**

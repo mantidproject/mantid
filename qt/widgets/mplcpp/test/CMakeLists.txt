@@ -6,6 +6,7 @@ set ( TEST_FILES
   AxesTest.h
   ColorsTest.h
   ColormapTest.h
+  FigureTest.h
   FigureCanvasQtTest.h
   Line2DTest.h
   ScalarMappableTest.h

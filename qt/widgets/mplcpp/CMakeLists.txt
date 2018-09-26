@@ -4,6 +4,7 @@ set ( LIB_SRCS
   src/Axes.cpp
   src/Colors.cpp
   src/Colormap.cpp
+  src/Figure.cpp
   src/FigureCanvasQt.cpp
   src/Line2D.cpp
   src/ScalarMappable.cpp
@@ -18,6 +19,7 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Axes.h
   inc/MantidQtWidgets/MplCpp/Colors.h
   inc/MantidQtWidgets/MplCpp/Colormap.h
+  inc/MantidQtWidgets/MplCpp/Figure.h
   inc/MantidQtWidgets/MplCpp/Line2D.h
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
 )

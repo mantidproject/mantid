@@ -50,14 +50,20 @@ public:
   /**
    * Construct an InstanceHolder with an existing Python object.
    * @param obj An existing Python instance
+   */
+  explicit InstanceHolder(Object obj) : m_instance(std::move(obj)) {}
+
+  /**
+   * Construct an InstanceHolder with an existing Python object. The provided
+   * object is checked to ensure it has the named attr
+   * @param obj An existing Python instance
    * @param attr The name of an attribute that must exist on the wrapped
    * object
    */
-  explicit InstanceHolder(Object obj, const char *attr)
-      : m_instance(std::move(obj)) {
+  InstanceHolder(Object obj, const char *attr) : m_instance(std::move(obj)) {
     if (PyObject_HasAttrString(pyobj().ptr(), attr) == 0) {
-      throw std::invalid_argument(
-          std::string("object has no attribute ") + attr);
+      throw std::invalid_argument(std::string("object has no attribute ") +
+                                  attr);
     }
   }
 
