@@ -7,6 +7,7 @@ set ( TEST_FILES
   ColormapTest.h
   FigureTest.h
   Line2DTest.h
+  MantidColormapTest.h
   ScalarMappableTest.h
 )
 

@@ -3,14 +3,17 @@ set ( LIB_SRCS
   src/Artist.cpp
   src/Axes.cpp
   src/Colors.cpp
+  src/Colorbar.cpp
   src/Colormap.cpp
   src/Figure.cpp
   src/FigureCanvasQt.cpp
   src/Line2D.cpp
+  src/MantidColorMap.cpp
   src/ScalarMappable.cpp
 )
 
 set ( MOC_HEADERS
+  inc/MantidQtWidgets/MplCpp/Colorbar.h
   inc/MantidQtWidgets/MplCpp/FigureCanvasQt.h
 )
 
@@ -21,6 +24,7 @@ set (NOMOC_HEADERS
   inc/MantidQtWidgets/MplCpp/Colormap.h
   inc/MantidQtWidgets/MplCpp/Figure.h
   inc/MantidQtWidgets/MplCpp/Line2D.h
+  inc/MantidQtWidgets/MplCpp/MantidColorMap.h
   inc/MantidQtWidgets/MplCpp/ScalarMappable.h
 )
 

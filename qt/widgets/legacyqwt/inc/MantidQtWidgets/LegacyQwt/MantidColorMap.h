@@ -26,6 +26,7 @@ public:
   enum class ScaleType { Linear = 0, Log10, Power };
 
   static QString chooseColorMap(const QString &previousFile, QWidget *parent);
+  static QString defaultColorMap();
   static QString exists(const QString &filename);
 
 public:

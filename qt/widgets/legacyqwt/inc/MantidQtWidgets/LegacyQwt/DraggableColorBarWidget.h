@@ -35,7 +35,7 @@ public:
   void setMaxValue(double);
   QString getMinValue() const;
   QString getMaxValue() const;
-  QString getNth_power() const;
+  QString getNthPower() const;
   void setMinPositiveValue(double);
   int getScaleType() const;
   void setScaleType(int);

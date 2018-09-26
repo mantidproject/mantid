@@ -55,6 +55,11 @@ QString MantidColorMap::chooseColorMap(const QString &previousFile,
 }
 
 /**
+ * @return An empty string to indicate to load the internal map
+ */
+QString MantidColorMap::defaultColorMap() { return ""; }
+
+/**
  * Does the given colormap exist
  * @param filename A filename to check
  * @return The full file path if it exists

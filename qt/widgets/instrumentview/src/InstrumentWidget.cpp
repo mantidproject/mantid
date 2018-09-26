@@ -49,6 +49,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSettings>
@@ -1222,7 +1223,7 @@ void InstrumentWidget::createTabs(QSettings &settings) {
  * configuration.
  */
 QString InstrumentWidget::getSettingsGroupName() const {
-  return QString::fromAscii(InstrumentWidgetSettingsGroup);
+  return QString::fromLatin1(InstrumentWidgetSettingsGroup);
 }
 
 /**
@@ -1230,7 +1231,7 @@ QString InstrumentWidget::getSettingsGroupName() const {
  * configuration.
  */
 QString InstrumentWidget::getInstrumentSettingsGroupName() const {
-  return QString::fromAscii(InstrumentWidgetSettingsGroup) + "/" +
+  return QString::fromLatin1(InstrumentWidgetSettingsGroup) + "/" +
          QString::fromStdString(getInstrumentActor().getInstrumentName());
 }
 

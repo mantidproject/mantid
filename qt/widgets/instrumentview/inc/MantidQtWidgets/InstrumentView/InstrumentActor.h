@@ -7,15 +7,17 @@
 #ifndef INSTRUMENTACTOR_H_
 #define INSTRUMENTACTOR_H_
 
-#include "ColorMap.h"
-#include "DllOption.h"
-#include "GLColor.h"
+#include "MantidQtWidgets/InstrumentView/ColorMap.h"
+#include "MantidQtWidgets/InstrumentView/DllOption.h"
+#include "MantidQtWidgets/InstrumentView/GLColor.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MaskBinsData.h"
+
+#include <QObject>
 
 #include <boost/weak_ptr.hpp>
 #include <vector>
