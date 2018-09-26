@@ -69,36 +69,6 @@ void ReflBatchPresenter::settingsChanged() {
   m_runsPresenter->settingsChanged();
 }
 
-/** Returns global options for 'CreateTransmissionWorkspaceAuto'
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*options
-* @return :: Global options for 'CreateTransmissionWorkspaceAuto'
-*/
-OptionsQMap ReflBatchPresenter::getTransmissionOptions() const {
-  return OptionsQMap(); // TODO m_settingsPresenter->getTransmissionOptions();
-}
-
-/** Returns global processing options
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*options
-* @return :: Global processing options
-*/
-OptionsQMap ReflBatchPresenter::getReductionOptions() const {
-  return OptionsQMap(); // TODO m_settingsPresenter->getReductionOptions();
-}
-
-/** Returns global post-processing options
-*
-* @param group :: Index of the group in 'Settings' tab from which to get the
-*options
-* @return :: Global post-processing options
-*/
-std::string ReflBatchPresenter::getStitchOptions() const {
-  return std::string(); // TODO m_settingsPresenter->getStitchOptions();
-}
-
 /** Returns default values specified for 'Transmission run(s)' for the
 * given angle
 *

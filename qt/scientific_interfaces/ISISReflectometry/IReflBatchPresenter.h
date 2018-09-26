@@ -57,14 +57,6 @@ public:
   getOptionsForAngle(const double angle) const = 0;
   /// Whether there are per-angle transmission runs specified
   virtual bool hasPerAngleOptions() const = 0;
-  /// Pre-processing
-  virtual MantidWidgets::DataProcessor::OptionsQMap
-  getTransmissionOptions() const = 0;
-  /// Processing
-  virtual MantidWidgets::DataProcessor::OptionsQMap
-  getReductionOptions() const = 0;
-  /// Post-processing
-  virtual std::string getStitchOptions() const = 0;
   /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
   /// Data processing check for all groups

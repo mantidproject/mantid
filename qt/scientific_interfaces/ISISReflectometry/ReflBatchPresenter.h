@@ -58,14 +58,6 @@ public:
   getOptionsForAngle(const double angle) const override;
   /// Whether there are per-angle transmission runs specified
   bool hasPerAngleOptions() const override;
-  /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  MantidWidgets::DataProcessor::OptionsQMap
-  getTransmissionOptions() const override;
-  /// Returns global options for 'ReflectometryReductionOneAuto'
-  MantidWidgets::DataProcessor::OptionsQMap
-  getReductionOptions() const override;
-  /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const override;
   /// Set the instrument name
   void setInstrumentName(const std::string &instName) const override;
 
