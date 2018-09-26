@@ -2,7 +2,6 @@
 #define MANTID_DATAHANDLING_LOADBINSTL_H_
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/BinaryStreamReader.h"
-#include "MantidKernel/V3D.h"
 #include "MantidDataHandling/LoadStl.h"
 namespace Mantid {
 namespace DataHandling {

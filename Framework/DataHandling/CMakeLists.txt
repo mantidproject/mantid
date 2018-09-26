@@ -37,6 +37,7 @@
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
+	src/LoadAsciiStl.cpp
 	src/LoadBBY.cpp
 	src/LoadBankFromDiskTask.cpp
 	src/LoadBinStl.cpp
@@ -137,7 +138,7 @@
 	src/RotateInstrumentComponent.cpp
 	src/RotateSource.cpp
 	src/SNSDataArchive.cpp
-        src/SaveANSTOAscii.cpp
+    src/SaveANSTOAscii.cpp
 	src/SaveAscii.cpp
 	src/SaveAscii2.cpp
 	src/SaveBankScatteringAngles.cpp
@@ -229,6 +230,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
 	inc/MantidDataHandling/LoadAscii2.h
+	inc/MantidDataHandling/LoadAsciiStl.h
 	inc/MantidDataHandling/LoadBBY.h
 	inc/MantidDataHandling/LoadBankFromDiskTask.h
 	inc/MantidDataHandling/LoadBinStl.h

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadBinStl.h"
+#include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include "MantidAPI/FileProperty.h"
@@ -323,7 +324,8 @@ void LoadSampleShape::exec() {
     shape = readOFFshape(file);
   } else /* stl */ {
     std::string solidName = "";
-    shape = readSTLSolid(file, solidName, filename);
+    //shape = readSTLSolid(file, solidName, filename);
+
   }
 
   // Put shape into sample.

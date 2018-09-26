@@ -1,7 +1,7 @@
 #include "MantidDataHandling/LoadStl.h"
 #include <Poco/File.h>
-#include <fstream>
-#include <iostream>
+
+
 namespace Mantid {
 namespace DataHandling {
 
