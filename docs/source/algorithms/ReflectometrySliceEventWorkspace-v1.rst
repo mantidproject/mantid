@@ -19,6 +19,11 @@ The sliced workspaces are then rebinned to histogram data and combined with the 
 Usage
 -------
 
+**Example: slice by time interval**
+
+.. testcode:: ExSliceByTime
+
+    from __future__ import print_function
     input_ws = CreateSampleWorkspace("Event",BankPixelWidth=1,BinWidth=20000)
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:00:00", Value=100)
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:10:00", Value=100)
@@ -26,15 +31,44 @@ Usage
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:30:00", Value=80)
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:40:00", Value=15)
     AddTimeSeriesLog(input_ws, Name="proton_charge", Time="2010-01-01T00:50:00", Value=100)
-    CreateSampleWorkspace(OutputWorkspace='monitor_ws', NumBanks=0, NumMonitors=3, BankPixelWidth=1, NumEvents=10000, Random=True)
+    monitor_ws = CreateSampleWorkspace(NumBanks=0, NumMonitors=3, BankPixelWidth=1, NumEvents=10000)
 
-    output = ReflectometrySliceEventWorkspace(InputWorkspace='input_ws', MonitorWorkspace='monitor_ws',OutputWorkspace='sliced',
-    TimeInterval=600, StartTime='1800', StopTime='3300')
+    output = ReflectometrySliceEventWorkspace(InputWorkspace=input_ws, MonitorWorkspace=monitor_ws,
+                                              TimeInterval=600, StartTime='1800', StopTime='3300')
 
-    print output.getNumberOfEntries(),'slices'
-    print output[0].getNumberHistograms(),'spectra'
+    print(str(output.getNumberOfEntries()) + ' slices')
+    print(str(output[0].getNumberHistograms()) + ' spectra')
+    print('Y values for first bin:')
+    for i in range(output.getNumberOfEntries()):
+        print('Slice '  + str(i))
+        for j in range(output[i].getNumberHistograms()):
+            print(output[i].dataY(j)[0])
 
-.. seealso :: Algorithm :ref:`algm-GenerateEventsFilter`, :ref:`algm-FilterEvents` and :ref:`algm-ReflectometryReductionOneAuto`
+Output:
+
+.. testoutput:: ExSliceByTime
+
+    3 slices
+    5 spectra
+    Y values for first bin:
+    Slice 0
+    0.173684210526
+    0.173684210526
+    0.173684210526
+    4.0
+    4.0
+    Slice 1
+    0.0726315789474
+    0.0726315789474
+    0.0726315789474
+    4.0
+    4.0
+    Slice 2
+    0.0631578947368
+    0.0631578947368
+    0.0631578947368
+    1.0
+    1.0
 
 .. categories::
 

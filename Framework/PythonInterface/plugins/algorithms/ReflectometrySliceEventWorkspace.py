@@ -14,6 +14,9 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
     def summary(self):
         return "Split an input workspace into multiple slices according to time or log values"
 
+    def seeAlso(self):
+        return [ "GenerateEventsFilter","FilterEvents" ,"ReflectometryReductionOneAuto"]
+
     def PyInit(self):
         # Add properties from child algorithm
         self._filter_properties = [
