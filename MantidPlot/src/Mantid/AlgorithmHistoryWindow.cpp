@@ -449,7 +449,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(
 
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(
     AlgorithmHistory_const_sptr algHistory) {
-  // getting the selcted algorithm at pos from History vector
+  // getting the selected algorithm at pos from History vector
   double duration = algHistory->executionDuration();
   Mantid::Types::Core::DateAndTime date = algHistory->executionDate();
   if (m_execSumGrpBox)

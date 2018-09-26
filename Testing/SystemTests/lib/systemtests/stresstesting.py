@@ -614,7 +614,7 @@ class TestRunner(object):
 
 
 #########################################################################
-# Encapsulate the script for runnning a single test
+# Encapsulate the script for running a single test
 #########################################################################
 class TestScript(object):
 
@@ -1124,7 +1124,7 @@ class MantidFrameworkConfig:
 
         # datasearch
         if self.__datasearch:
-            # turn on for 'all' facilties, 'on' is only for default facility
+            # turn on for 'all' facilities, 'on' is only for default facility
             config["datasearch.searcharchive"] = 'all'
             config['network.default.timeout'] = '5'
 
@@ -1253,7 +1253,7 @@ def testThreadsLoop(testDir, saveDir, dataDir, options, tests_dict,
             except KeyboardInterrupt:
                 mgr.markSkipped("KeyboardInterrupt", tests_done.value)
 
-            # Update the test results in the array shared accross cores
+            # Update the test results in the array shared across cores
             res_array[process_number] += mgr._skippedTests
             res_array[process_number + options.ncores] += mgr._failedTests
             res_array[process_number + 2*options.ncores] = min(int(reporter.reportStatus()),\

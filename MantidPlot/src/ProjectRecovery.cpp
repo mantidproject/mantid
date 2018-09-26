@@ -510,9 +510,9 @@ void ProjectRecovery::saveWsHistories(const Poco::Path &historyDestFolder) {
 }
 
 /**
- * @brief A function that brings the two seperate save methods together
+ * @brief A function that brings the two separate save methods together
  * This won't run if it is locked by the background thread but then it saving
- * Anyway so thats no issue.
+ * Anyway so that's no issue.
  */
 void ProjectRecovery::saveAll(bool autoSave) {
   // "Timeout" - Save out again

@@ -68,6 +68,7 @@ private:
 
   ApplicationWindow *m_app;
   Graph *m_graph;
-  int m_alignment; // 0 = horzontal, 1 = vertical, anything else sets this to 0;
+  int m_alignment; // 0 = horizontal, 1 = vertical, anything else sets this to
+                   // 0;
 };
 #endif /* GRIDDETAILS_H_ */

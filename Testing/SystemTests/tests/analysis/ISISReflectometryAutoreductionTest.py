@@ -373,7 +373,7 @@ def MakeTuples(rlist):
 
 
 def SortRuns(tupsort):
-    # sort tuples of runs into groups beloning to one sample title
+    # sort tuples of runs into groups belonging to one sample title
     row = 0
     complete_list = []
     for _key, group in itertools.groupby(

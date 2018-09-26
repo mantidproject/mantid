@@ -728,7 +728,7 @@ void TiledWindow::addToSelection(Tile *tile, bool append) {
 }
 
 /**
- * Add a range of tiles to the selection. One of the ends of tha range
+ * Add a range of tiles to the selection. One of the ends of the range
  * is given by an already selected tile with the lowest flat index (see
  * calcFlatIndex).
  * The other end is the tile in the argument.
@@ -912,7 +912,7 @@ void TiledWindow::removeSelectionTo(TiledWindow::RemoveDestination to) {
   foreach (Tile *tile, m_selection) {
     MdiSubWindow *widget = removeTile(tile);
     if (widget == nullptr) {
-      throw std::logic_error("TiledWindow: Empty tile is found in slection.");
+      throw std::logic_error("TiledWindow: Empty tile is found in selection.");
     }
     sendWidgetTo(widget, to);
   }
